@@ -243,9 +243,10 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
               throw new RuntimeException("Unable to compose image");
   
             // Add the flavor, either from the operation configuration or from the composer
-            if (targetImageFlavor != null)
+            if (targetImageFlavor != null) {
               composedImage.setFlavor(MediaPackageElementFlavor.parseFlavor(targetImageFlavor));
-            logger.debug("Preview image has flavor '{}'", composedImage.getFlavor());
+              logger.debug("Preview image has flavor '{}'", composedImage.getFlavor());
+            }
   
             // Set the mimetype
             if (profile.getMimeType() != null)

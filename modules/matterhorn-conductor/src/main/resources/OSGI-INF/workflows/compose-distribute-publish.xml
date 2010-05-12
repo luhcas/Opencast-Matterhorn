@@ -268,8 +268,22 @@
       exception-handler-workflow="error"
       description="Encode presentation (screen) to segment preview image">
       <configurations>
+        <configuration key="source-flavor">presenter/source</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">slide/source</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">engage-slides.http</configuration>
+      </configurations>
+    </operation>
+    <operation
+      id="segmentpreviews"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encode presentation (screen) to segment preview image">
+      <configurations>
         <configuration key="source-flavor">presentation/source</configuration>
         <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">slide/source</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">engage-slides.http</configuration>
       </configurations>
