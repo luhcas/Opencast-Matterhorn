@@ -148,7 +148,7 @@ public class PipelineFactory {
             if (e.getMessage().equalsIgnoreCase("No medium found")) {
               logger.error("No VGA signal detected. Unable to start capture.");
             } else {
-              logger.error("Unexpected jv4linfo exception: {}.", e.getMessage());
+              logger.error("Unexpected jv4linfo exception: {} for {}.", e.getMessage(), srcLoc);
             }
             return null;
           }
