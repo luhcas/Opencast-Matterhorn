@@ -29,7 +29,6 @@ UploadListener.fileSelectedAjax = function(filename,jobId) {
 
 UploadListener.uploadStarted = function() {
   Upload.log('upload started');
-  Upload.showProgressStage();
   if (!UploadListener.appletPresent) {
     UploadListener.updateInterval = window.setInterval('UploadListener.getProgress()', 1000);
   }

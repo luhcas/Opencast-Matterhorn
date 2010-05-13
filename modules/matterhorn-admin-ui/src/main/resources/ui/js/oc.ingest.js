@@ -18,10 +18,38 @@ ocIngest.createMediaPackage = function() {
     success    : function(data, status) {
       Upload.log("MediaPackage created");
       ocIngest.mediaPackage = data;
-      var uploadFrame = document.getElementById("filechooser-ajax");
-      uploadFrame.contentWindow.document.uploadForm.flavor.value = $('#flavor').val();
-      uploadFrame.contentWindow.document.uploadForm.mediaPackage.value = ocUtils.xmlToString(data);
-      uploadFrame.contentWindow.document.uploadForm.submit();
+      if ( (Upload.retryId != '') && ($('.use-file:checked').val() == 'previous-file') ) {
+        ocIngest.copyPreviousMediaFile();
+      } else {
+        var uploadFrame = document.getElementById("filechooser-ajax");
+        uploadFrame.contentWindow.document.uploadForm.flavor.value = $('#flavor').val();
+        uploadFrame.contentWindow.document.uploadForm.mediaPackage.value = ocUtils.xmlToString(data);
+        UploadListener.uploadStarted();
+        uploadFrame.contentWindow.document.uploadForm.submit();
+      }
+    }
+  });
+}
+
+ocIngest.copyPreviousMediaFile = function() {
+  alert("adding previous file");
+  var flavor = $('#previous-file-flavor').val();
+  var url = $('#previous-file-url').val();
+  $.ajax({
+    url        : '../ingest/rest/addTrack',
+    type       : 'POST',
+    dataType   : 'xml',
+    data       : {
+      mediaPackage: ocUtils.xmlToString(ocIngest.mediaPackage),
+      flavor: flavor,
+      url: url
+    },
+    error      : function(XHR,status,e){
+      Upload.showFailedScreen('Could not add DublinCore catalog to MediaPackage.');
+    },
+    success    : function(data, status) {
+      ocIngest.mediaPackage = data;
+      ocIngest.addCatalog(ocUtils.xmlToString(ocIngest.mediaPackage), ocIngest.createDublinCoreCatalog(ocIngest.metadata));
     }
   });
 }

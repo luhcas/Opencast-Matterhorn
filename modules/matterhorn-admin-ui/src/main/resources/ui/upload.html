@@ -187,8 +187,10 @@
                 <li id="retry-file" class="ui-helper-clearfix" style="display:none;">
                   <label class="fl-label"><span id="i18n_upload.content">File</span>:</label>
                   <div style="display:table-cell;">
-                    <input type="radio" name="use-file" id="use-file-previous" checked="true">Use previously uploaded/captured file:&nbsp;<a id="previous-file-link"></a><br>
-                    <input type="radio" name="use-file" id="use-file-replace">Upload replacement file
+                    <input type="hidden" id="previous-file-url" value="">
+                    <input type="hidden" id="previous-file-flavor" value="">
+                    <input type="radio" name="use-file" class="use-file" value="previous-file" id="use-file-previous" checked="true">Use previously uploaded/captured file:&nbsp;<a id="previous-file-link"></a><br>
+                    <input type="radio" name="use-file" class="use-file" value="replace-file" id="use-file-replace">Upload replacement file
                   </div>
                 </li>
                 <!-- li class="ui-helper-clearfix" id="regular-file-selection">
@@ -204,7 +206,7 @@
                     <iframe name="filechooserAjax" id="filechooser-ajax" frameborder="0" scrolling="no" src="../ingest/rest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
                     </iframe>
                     <span class="helpIcon" title="Click for help">&nbsp;</span>
-                    <select name="flavor" id="flavor" class="requiredField" style="float:left;margin:3px;">
+                    <select name="flavor" id="flavor" class="requiredField" style="float:left;margin-right:3px;">
                       <option value="">Choose one:</option>
                       <option value="presenter/source">Presenter</option>
                       <option value="presentation/source">Presentation</option>

@@ -16,16 +16,16 @@ Upload.init = function() {
   // Event: Retry: use already uploaded file clicked
   $('#use-file-previous').click(function() {
     if ($(this).val()) {
-    //$('#regular-file-selection').fadeIn();
-    $('#regular-file-chooser').fadeOut('fast');
+      //$('#regular-file-selection').fadeIn();
+      $('#regular-file-chooser').fadeOut('fast');
     }
   });
 
   // Event: Retry: use replacement file clicked
   $('#use-file-replace').click(function() {
     if ($(this).val()) {
-    //$('#regular-file-selection').toggle();
-    $('#regular-file-chooser').fadeIn('fast');
+      //$('#regular-file-selection').toggle();
+      $('#regular-file-chooser').fadeIn('fast');
     }
   });
 
@@ -68,8 +68,8 @@ Upload.init = function() {
           }
         }
       });
-      UploadListener.uploadStarted();
       ocIngest.metadata = Upload.metadata;
+      Upload.showProgressStage();
       ocIngest.createMediaPackage();
     } else {
       $('#container-missingFields').show('fast');
@@ -130,59 +130,85 @@ Upload.init = function() {
   // test if we upload a new recording or want to retry a workflow
   Upload.retryId = Upload.getURLParam("retry");
   if (Upload.retryId != "") {
-    // display current file element / hide file chooser
-    $('#retry-file').css('display', 'block');
-    $('#regular-file-selection').css('display', 'none');
-    $('#regular-file-chooser').css('display', 'none');
-    $('#i18n_page_title').text("Edit Recording for Retry");
-    // get failed Workflow
-    $.ajax({
-      method: 'GET',
-      url: '../workflow/rest/instance/'+ Upload.retryId +'.xml',
-      dataType: 'xml',
-      success: function(data) {
-        var catalogUrl = $(data.documentElement).find("mediapackage > metadata > catalog[type='dublincore/episode'] > url").text();
-        Upload.loadDublinCore(catalogUrl);
-        $(data.documentElement).find("mediapackage > media > track").each(function(index, elm) {
-          if ($(elm).attr('type').split(/\//)[1] == 'source') {
-            var filename = $(elm).find('url').text();
-            $('#previous-file-link').attr('href', filename);
-            filename = filename.split(/\//);
-            filename = filename[filename.length-1];
-            $('#previous-file-link').text(filename);
+    Upload.initRetry();
+  }
+}
+
+Upload.initRetry = function() {
+  // display current file element / hide file chooser
+  $('#retry-file').css('display', 'block');
+  $('#regular-file-selection').css('display', 'none');
+  $('#regular-file-chooser').css('display', 'none');
+  $('#i18n_page_title').text("Edit Recording for Retry");
+  // get failed Workflow
+  $.ajax({
+    method: 'GET',
+    url: '../workflow/rest/instance/'+ Upload.retryId +'.xml',
+    dataType: 'xml',
+    success: function(data) {
+      var catalogUrl = $(data.documentElement).find("mediapackage > metadata > catalog[type='dublincore/episode'] > url").text();
+      Upload.loadDublinCore(catalogUrl);
+      // previous file
+      $(data.documentElement).find("mediapackage > media > track").each(function(index, elm) {
+        if ($(elm).attr('type').split(/\//)[1] == 'source') {
+          var filename = $(elm).find('url').text();
+          $('#previous-file-flavor').val($(elm).attr('type'));
+          $('#previous-file-link').attr('href', filename);
+          $('#previous-file-url').val(filename);
+          filename = filename.split(/\//);
+          filename = filename[filename.length-1];
+          $('#previous-file-link').text(filename);
+        }
+      });
+      // previous workflow definition
+      var defId = $(data.documentElement).find('template').text();
+      $('#workflow-selector').val(defId);
+      Upload.workflowSelected(defId, function() {
+        $(data.documentElement).find("> configurations > configuration").each(function(index, elm) {
+          if ($(elm).attr('key')) {
+            $('#'+ $(elm).attr('key')).val($(elm).text());
           }
         });
-      }
-    });
-  }
+      });
+    }
+  });
 }
 
 Upload.loadDublinCore = function(url) {
   $.ajax({
-      method: 'GET',
-      url: url,
-      dataType: 'xml',
-      success: function(data) {
-        var url = $(data.documentElement).children().each(function(index, elm) {
-          var tagName = elm.tagName.split(/:/)[1];
-          //alert(tagName);
-          $('#'+tagName).val($(elm).text());
-        });
-      }
-    });
+    method: 'GET',
+    url: url,
+    dataType: 'xml',
+    success: function(data) {
+      var url = $(data.documentElement).children().each(function(index, elm) {
+        var tagName = elm.tagName.split(/:/)[1];
+        //alert(tagName);
+        $('#'+tagName).val($(elm).text());
+      });
+    }
+  });
 }
 
 /** invoked when a workflow is selected. display configuration panel for
  *  the selected workflow if defined.
  *  
  */
-Upload.workflowSelected = function(workflow) {
+Upload.workflowSelected = function(workflow, callback) {
   $('#workflow-config-container').load(
     '../workflow/rest/configurationPanel?definitionId=' + workflow,
     function() {
       $('#workflow-config-container').show('fast');
+      if (callback) {
+        callback();
+      }
     }
     );
+}
+
+Upload.populateWorkflowConfig = function(data) {
+  $(data).each( function(elm) {
+    alert($(elm).text());
+  });
 }
 
 /** collect data from workflow configuration panel
@@ -202,7 +228,7 @@ Upload.collectWorkflowConfig = function() {
 Upload.checkRequiredFields = function(submit) {
   var missing = false;
   var wrongtype = false;
-  $('.requiredField').each( function() {
+  $('.requiredField:visible').each( function() {
     if (!$(this).val()) {
       $('#notification-' + $(this).attr('id')).show();
       if ((submit) || ($('#container-missingFields').is(':visible'))) {
