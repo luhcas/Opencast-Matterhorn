@@ -1,0 +1,26 @@
+import sys
+
+!mkdir -p /oc_perf
+!sudo mount -t tmpfs -o size=512M,mode=0777 tmpfs /oc_perf
+
+datafiles = !ls performance_tests
+for file in datafiles:
+	datafile = open(file,"r")
+	props=dict()
+	for line in datafile:
+		props[line.split(":")[0].replace('"',"")]=line.split(":")[1].replace('"',"")
+	
+	!mkdir /oc_perf/$props["capture.recording.id"]
+	
+	#change pax logging to be over to the new dir
+
+	!curl --digest -u admin:opencast -H "X-Requested-Auth: Digest" --data @$datafile http://atomopencast:8080/capture/rest/startCapture
+
+	#start dstat in the new dir and block for 700 seconds
+	!dstat -cdm --thermal --load --output /oc_perf/$props["capture.recording.id"]/dstat.log 1 700
+	#copy over the recordings into our tmp dir
+	!cp /opencast/cache/captures/$props["capture.recording.id"] /oc_perf
+
+!mkdir oc_perf
+!cp -R /oc_perf/* ./oc_perf/
+!sudo umount /oc_perf
