@@ -760,7 +760,7 @@ function setDuration(value) {
  */
 function checkDuration(){
   if(this.fields.recurDurationHour && this.fields.recurDurationMin &&
-     (this.fields.recurDurationHour.val() !== '0' || this.fields.recurDurationMin.val() !== '0')){
+     (this.fields.recurDurationHour.val() != '0' || this.fields.recurDurationMin.val() != '0')){
     return true;
   }
   return false;

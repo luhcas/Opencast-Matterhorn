@@ -6,8 +6,8 @@ module( "FormField", {
     doc.append('<input type="checkbox" id="input2" value="input2" />');
     doc.append('<input type="checkbox" id="input3" value="input3" />');
     doc.append('<select id="attendees"><option value="agent1">agent1</option></select>');
-    doc.append('<input type="text" id="durationHour" value="1" />');
-    doc.append('<input type="text" id="durationMin" value="5" />');
+    doc.append('<input type="text" id="recurDurationHour" value="1" />');
+    doc.append('<input type="text" id="recurDurationMin" value="5" />');
   },
   teardown: function(){
     $(document.body).empty();
@@ -59,12 +59,12 @@ test("FormField agent get/set/disp/check", function(){
 
 test("FormField duration get/set/disp/check", function(){
      var field = new FormField();
-     field.setFormFields(['durationHour','durationMin']);
+     field.setFormFields(['recurDurationHour','recurDurationMin']);
      field.setFormFieldOpts({getValue: getDuration, setValue: setDuration, checkValue: checkDuration, dispValue: getDurationDisplay});
      field.setValue('3660000');
+     same(field.fields.recurDurationHour.val(), '1', "Run duration hour setValue");
+     same(field.fields.recurDurationMin.val(), '1', "Run duration min setValue");
      ok(field.checkValue(), "Run duration checkValue");
-     same(field.fields.durationHour.val(), '1', "Run duration hour setValue");
-     same(field.fields.durationMin.val(), '1', "Run duration min setValue");
      same(field.getValue(), 3660000 , "Run duration getValue");
      same(field.dispValue(), '1 hours, 1 minutes', "Run duration dispValue");
 });
