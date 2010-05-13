@@ -212,5 +212,16 @@ public class CaptureRestService {
       return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
   }
+  
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  @Path("configuration")
+  public Response getConfiguration() {
+    try {
+      return Response.ok(service.getDefaultAgentPropertiesAsString()).build();
+    } catch (Exception e) {
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    }
+  }
 
 }

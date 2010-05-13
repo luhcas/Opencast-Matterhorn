@@ -762,6 +762,20 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       return null;
     }
   }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.CaptureAgent#getDefaultAgentPropertiesAsString()
+   */
+  public String getDefaultAgentPropertiesAsString() {
+    Properties p = configService.getAllProperties();
+    String result = "";
+    for (Object k : p.keySet()) {
+      String key = (String) k;
+      result = result + key + "=" + p.getProperty(key) + "\n";
+    }
+    return result;
+  }
 
   /**
    * {@inheritDoc}

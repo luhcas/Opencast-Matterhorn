@@ -8,10 +8,22 @@
 </head>
 <body>
 	<script type="text/javascript" language="javascript">
-	var start = "<a href='http://" + window.location.hostname + ":8080/capture/rest/startCapture'>Start Capture</a><br>";
+	function stopCapture() {
+		document.location = "http://" + window.location.hostname + ":8080/capture/rest/stopCapture";
+	}
+	
+	var start = "http://" + window.location.hostname + ":8080/capture/rest/startCapture"
 	var end = "<a href='http://" + window.location.hostname + ":8080/capture/rest/stopCapture'>Stop Capture</a>";
-	document.write(start);
-	document.write(end);
+	
+	var client = new XMLHttpRequest();
+	client.open("GET", "http://" + window.location.hostname + ":8080/capture/rest/configuration", false);
+	client.send();
+	var form = "<form name='form' action=" + start + " method='POST'><textarea name=config rows='20' cols='100'>" + client.responseText + "</textarea><br>" +
+		"<input type='submit' value='Start Capture'>" +
+		"<input type='button' value='Stop Capture' onClick='stopCapture()'></form>";
+	
+	document.write(form);
 	</script>
 </body>
-</html>	
+</html>
+

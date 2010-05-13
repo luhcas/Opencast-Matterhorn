@@ -97,5 +97,11 @@ public interface CaptureAgent {
    * @return The agent's capabilities, or null in the case of an error.
    */
   Properties getAgentCapabilities();
+  
+  /**
+   * Returns a pretty-printed version of the agents default properties
+   * @return The agent's default properties
+   */
+  String getDefaultAgentPropertiesAsString();
 }
 
