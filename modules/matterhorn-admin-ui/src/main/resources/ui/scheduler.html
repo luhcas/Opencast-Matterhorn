@@ -68,7 +68,7 @@
           <h2><span id="i18n_page_title"></span></h2>
           <div style="width:160px; text-align: left; margin-left: auto; margin-right: auto; padding-bottom: 20px;">
             <input type="radio" id="singleRecording" name="recordingType" checked="checked"><label for="singleRecording"> Single Recording</label><br />
-            <input type="radio" id="multipleRecordings" name="recordingType" disabled="disabled"><label for="multipleRecordings"> Group of Recordings</label>
+            <input type="radio" id="multipleRecordings" name="recordingType"><label for="multipleRecordings"> Group of Recordings</label>
           </div>
         </div>
         
@@ -578,9 +578,9 @@
                       <span class="fl-icon icon-help" id="help_duration" title="Click for help"></span>
                     </li>
                     <li class="required" style="clear: both;">
-                      <label class="fl-label"  id="label-attendees"><span id="i18n_agent_label"></span>:</label>
+                      <label class="fl-label"  id="label-recurAgent"><span id="i18n_agent_label"></span>:</label>
                       <div>
-                        <select id="attendees" name="attendees">
+                        <select id="recurAgent" name="recurAgent">
                           <option value="">Choose one:</option>
                         </select>
                         <span class="fl-icon icon-help"  id="help_agent" title="Click for help"></span>
@@ -589,7 +589,7 @@
                     <li class="required">
                       <label class="fl-label" id="label-input"><span id="i18n_input_label"></span>:</label>
                       <div class="form-radio-group" style="float: left; width: 300px;">
-                        <div id="input-list"></div>
+                        <div id="recur-input-list"></div>
                         <span class="fl-icon icon-help" id="help_input" title="Click for help" style="vertical-align: middle; margin-left: .8em;"></span>
                       </div>
                     </li>

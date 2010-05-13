@@ -33,14 +33,32 @@ function init() {
   document.title = i18n.window.prefix + " " + i18n.window.schedule;
   $('#i18n_page_title').text(i18n.page.title.sched);
   
+  $('.required > label').prepend('<span style="color: red;">*</span>');
+  
+  /*
+   * Setup event handlers on various interface elements.
+   */
   var d = new Date();
+  //set single/multiple recording event handler
+  if(!SchedulerForm.formFields){
+    SchedulerUI.selectRecordingType('single'); //Initialize as a single recording.
+  }
+  $('#singleRecording').click(function(){ SchedulerUI.selectRecordingType('single'); });
+  $('#multipleRecordings').click(function(){ SchedulerUI.selectRecordingType('multiple'); });
+  
+  //Single recording specific elements
   d.setHours(d.getHours() + 1); //increment an hour.
   $('#startTimeHour').val(d.getHours());
   $('#startDate').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
   $('#startDate').datepicker('setDate', d);
   $('#endDate').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
+  $('#attendees').change(SchedulerUI.handleAgentChange);
   
-  $('.required > label').prepend('<span style="color: red;">*</span>');
+  //multiple recording specific elements
+  $('#recurStart').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
+  $('#recurEnd').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
+  $('#schedule_repeat').change(function(){ SchedulerUI.showDaySelect(this.options[this.selectedIndex].value); });
+  $('#recurAgent').change(SchedulerUI.handleAgentChange);
   
   $('.folder-head').click(
     function() {
@@ -49,13 +67,6 @@ function init() {
       $(this).next().toggle('fast');
       return false;
     });
-  
-  //set single/multiple recording event handler
-  if(!SchedulerForm.formFields){
-    SchedulerUI.selectRecordingType('single'); //Initialize as a single recording.
-  }
-  $('#singleRecording').click(function(){ SchedulerUI.selectRecordingType('single'); });
-  $('#multipleRecordings').click(function(){ SchedulerUI.selectRecordingType('multiple'); });
   
   $('.icon-help').click(
     function(event) {
@@ -74,10 +85,7 @@ function init() {
   $('#submitButton').click(SchedulerUI.submitForm);
   $('#cancelButton').click(SchedulerUI.cancelForm);
   
-  $('#attendees').change(SchedulerUI.handleAgentChange);
-  
-  $('#schedule_repeat').change(function(){ SchedulerUI.showDaySelect(this.options[this.selectedIndex].value); });
-  
+  //Load agents and event information if this is the edit page.
   SchedulerUI.loadKnownAgents();
   
   var eventID = SchedulerUI.getURLParams('eventID');
@@ -359,14 +367,13 @@ SchedulerUI.selectRecordingType = function(recType){
       'abstract':             new FormField('description'),
       'channel-id':           new FormField('distMatterhornMM', true, {label:'label-distribution',errorField:'missing-distribution'}),
       'license':              new FormField('license'),
-      'recurrence.start':     new FormField(['recurStart'], true, { getValue:getRecurStartDate, setValue:setRecurStart, checkValue:checkRecurStart, dispValue:getRecurStartDisplay, label:'label-recurstart', errorField:'missing-recurstart' }),
+      'recurrence.start':     new FormField(['recurStart'], true, { getValue:getRecurStart, setValue:setRecurStart, checkValue:checkRecurStart, dispValue:getRecurStartDisplay, label:'label-recurstart', errorField:'missing-recurstart' }),
       'recurrence.duration':  new FormField(['recurDurationHour', 'recurDurationMin'], true, { getValue:getDuration, setValue:setDuration, checkValue:checkDuration, dispValue:getDurationDisplay, label:'label-recurduration', errorField:'missing-recurduration' }), //returns a date incremented by duration.
       'recurrence.end':       new FormField(['recurEnd'], true, {getValue:getRecurEnd, setValue:setRecurEnd, checkValue:checkRecurEnd, dispValue:getRecurEndDisplay}),
-      'attendees':            new FormField('attendees', true, { getValue:getAgent, setValue:setAgent, checkValue:checkAgent }),
-      'device':               new FormField('attendees')
+      'attendees':            new FormField('recurAgent', true, { getValue:getAgent, setValue:setAgent, checkValue:checkAgent }),
+      'device':               new FormField('recurAgent')
     };
   }else{
-    //hide recurring_recording panel, show single.
     $('#recurring_recording').hide();
     $('#single_recording').show();
     fields = {
@@ -381,7 +388,7 @@ SchedulerUI.selectRecordingType = function(recType){
       'channel-id':       new FormField('distMatterhornMM', true, {label:'label-distribution',errorField:'missing-distribution'}),
       'license':          new FormField('license'),
       'time.start':       new FormField(['startDate', 'startTimeHour', 'startTimeMin'], true, { getValue:getStartDate, setValue:setStartDate, checkValue:checkStartDate, dispValue:getStartDateDisplay, label:'label-startdate', errorField:'missing-startdate' }),
-      'time.end':         new FormField(['durationHour', 'durationMin'], true, { getValue:getDuration, setValue:setDuration, checkValue:checkDuration, dispValue:getDurationDisplay, label:'label-duration', errorField:'missing-duration' }), //returns a date incremented by duration.
+      'time.end':         new FormField(['durationHour', 'durationMin'], true, { getValue:getEndTime, setValue:setEndTime, checkValue:checkEndTime, dispValue:getEndTimeDisplay, label:'label-duration', errorField:'missing-duration' }), //returns a date incremented by duration.
       'attendees':        new FormField('attendees', true, { getValue:getAgent, setValue:setAgent, checkValue:checkAgent }),
       'device':           new FormField('attendees')
     };
@@ -708,8 +715,8 @@ function checkAgent() {
  */
 function getDuration() {
   if(this.checkValue()){
-    duration = this.fields.durationHour.val() * 3600; // seconds per hour
-    duration += this.fields.durationMin.val() * 60; // seconds per min
+    duration = this.fields.recurDurationHour.val() * 3600; // seconds per hour
+    duration += this.fields.recurDurationMin.val() * 60; // seconds per min
     this.value = (duration * 1000);
   }
   return this.value;
@@ -738,12 +745,12 @@ function setDuration(value) {
   if(val == "NaN") {
     throw "Could not parse duration.";
   }
-  if(this.fields.durationHour && this.fields.durationMin){
+  if(this.fields.recurDurationHour && this.fields.recurDurationMin){
     val = val/1000; //milliseconds -> seconds
     var hour  = Math.floor(val/3600);
     var min   = Math.floor((val/60) % 60);
-    this.fields.durationHour.val(hour);
-    this.fields.durationMin.val(min);
+    this.fields.recurDurationHour.val(hour);
+    this.fields.recurDurationMin.val(min);
   }
 }
 
@@ -752,8 +759,8 @@ function setDuration(value) {
  *  @return {boolean} True if the duration is valid, otherwise false.
  */
 function checkDuration(){
-  if(this.fields.durationHour && this.fields.durationMin &&
-     (this.fields.durationHour.val() !== '0' || this.fields.durationMin.val() !== '0')){
+  if(this.fields.recurDurationHour && this.fields.recurDurationMin &&
+     (this.fields.recurDurationHour.val() !== '0' || this.fields.recurDurationMin.val() !== '0')){
     return true;
   }
   return false;
@@ -1002,4 +1009,80 @@ function getRecurDisp(){
     }
   }
   return "Weekly on " + dlist.toString();
+}
+
+function getEndTime(){
+  if(this.checkValue()){
+    duration = this.fields.durationHour.val() * 3600; // seconds per hour
+    duration += this.fields.durationMin.val() * 60; // seconds per min
+    var sdate = SchedulerForm.formFields['time.start'].getValue()
+    if(sdate && sdate.constructor == Date){
+      this.value = sdate.getTime() + (duration * 1000);
+    }
+  }
+  return this.value;
+}
+
+function setEndTime(value){
+  if(typeof value == 'string'){
+    value = { duration: value };
+  }
+  var val = parseInt(value.duration);
+  if(val == "NaN") {
+    throw "Could not parse duration.";
+  }
+  if(this.fields.durationHour && this.fields.durationMin){
+    val = val/1000; //milliseconds -> seconds
+    var hour  = Math.floor(val/3600);
+    var min   = Math.floor((val/60) % 60);
+    this.fields.durationHour.val(hour);
+    this.fields.durationMin.val(min);
+  }
+}
+
+function checkEndTime(){
+  if(this.fields.durationHour && this.fields.durationMin &&
+     (this.fields.durationHour.val() !== '0' || this.fields.durationMin.val() !== '0')){
+    return true;
+  }
+  return false;
+}
+
+function getEndTimeDisplay(){
+  var dur = this.getValue() / 1000;
+  var hours = Math.floor(dur / 3600);
+  var min   = Math.floor( ( dur /60 ) % 60 );
+  return hours + ' hours, ' + min + ' minutes';
+}
+
+function getRecurStart(){
+  
+}
+
+function getRecurStartDisplay(){
+  
+}
+
+function setRecurStart(){
+  
+}
+
+function checkRecurStart(){
+  
+}
+
+function getRecurEnd(){
+
+}
+
+function getRecurEndDisplay(){
+
+}
+
+function setRecurEnd(){
+
+}
+
+function checkRecurEnd(){
+
 }
