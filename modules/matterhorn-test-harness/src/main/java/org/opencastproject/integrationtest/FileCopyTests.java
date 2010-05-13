@@ -38,7 +38,8 @@ public class FileCopyTests {
         options.addOption(new Option("s", "source", true, "source directory"));
         options.addOption(new Option("d", "dest", true, "destination directory"));
         options.addOption(new Option("n", "number", true, "number of concurrent copies to make"));
-
+        options.addOption(new Option("m", "message", true, "optional message describing test"));
+        
         CommandLineParser parser = new PosixParser();
         CommandLine line = null;
         try {
@@ -81,6 +82,11 @@ public class FileCopyTests {
             System.out.println("missing required parameter -n or --number");
             System.exit(1);
         }
+        
+        if (line.hasOption("message")) {
+            String message = line.getOptionValue("message");
+            System.out.println(message);
+        }
 
         File[] sourceFiles = sourceDir.listFiles();
         numCopies = sourceFiles.length < numCopies ? sourceFiles.length : numCopies;
@@ -100,9 +106,12 @@ public class FileCopyTests {
                         startGate.await();
                         InputStream in = null;
                         OutputStream out = null;
+                        int counter = 0;
                         try {
+                            String threadName = Thread.currentThread().getName().trim();
+                            char lastThreadNameChar = threadName.charAt(threadName.length() - 1);
                             System.out.println("copying " + inputFile.getCanonicalPath() + " of size " + inputFile.length()/1000000 + " MB to " + outputFile.getCanonicalPath() + " in thread "
-                                    + Thread.currentThread().getName());
+                                    + threadName);
                             in = new FileInputStream(inputFile);
                             out = new FileOutputStream(outputFile);
                             while (true) {
@@ -111,6 +120,8 @@ public class FileCopyTests {
                                     break;
                                 }
                                 out.write(buffer, 0, amountRead);
+                                counter++;
+                                if ((counter % 10) == 0) System.out.print(lastThreadNameChar);
                             }
                         }
                         finally {
@@ -133,7 +144,7 @@ public class FileCopyTests {
                     }
                     finally {
                         endGate.countDown();
-                        System.out.println("File copy completed in thread " + Thread.currentThread().getName());
+                        System.out.println("\nFile copy completed in thread " + Thread.currentThread().getName());
                     }
                 }
             };
@@ -148,7 +159,7 @@ public class FileCopyTests {
             e.printStackTrace();
         }
         long end = System.nanoTime();
-        System.out.println("Copied " + numCopies + " in " + (float) (end - start) / 1000000000 + " seconds");
+        System.out.println("Copied " + numCopies + " files in " + (float) (end - start) / 1000000000 + " seconds");
         System.exit(0);
     }
 
