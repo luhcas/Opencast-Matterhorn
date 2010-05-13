@@ -19,10 +19,9 @@ import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.MediaPackageMetadata;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.receipt.api.Receipt;
 import org.opencastproject.receipt.api.Receipt.Status;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
@@ -39,65 +38,95 @@ import org.junit.Test;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class InspectWorkflowOperationHandlerTest {
   private InspectWorkflowOperationHandler operationHandler;
-  //private DublinCoreCatalogService dcService = null;
+  // private DublinCoreCatalogService dcService = null;
   private Workspace workspace = null;
   private MediaInspectionService inspectionService = null;
 
-  private URI uriTrack;
   private URI uriMP;
-  private Track newTrack;
+  private URI uriMPUpdated;
   private MediaPackage mp;
+  private MediaPackage mpUpdatedDC;
+  private Track newTrack;
   private Receipt receipt;
+
+  private MediaPackageMetadataService metadataService;
+  private MediaPackageMetadata metadata;
+  private static final Date DATE = new Date(1);
+  private static final String LANGUAGE = "language";
+  private static final String LICENSE = "license";
+  private static final String SERIES = "series";
+  private static final String SERIES_TITLE = "series title";
+  private static final String TITLE = "title";
 
   @Before
   public void setup() throws Exception {
     MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     
-    uriTrack = InspectWorkflowOperationHandler.class.getResource("/av.mov").toURI();
-    uriMP = InspectWorkflowOperationHandler.class.getResource("/manifest.xml").toURI();
+    // test resources
+    uriMP = InspectWorkflowOperationHandler.class.getResource("/inspect_mediapackage.xml").toURI();
+    uriMPUpdated = InspectWorkflowOperationHandler.class.getResource("/inspect_mediapackage_updated.xml").toURI();
     mp = builder.loadFromXml(uriMP.toURL().openStream());
-    newTrack = mp.getTracks()[0];
-    
+    mpUpdatedDC = builder.loadFromXml(uriMPUpdated.toURL().openStream());
+    newTrack = (Track)mpUpdatedDC.getTracks()[0];
+
     // set up service
     operationHandler = new InspectWorkflowOperationHandler();
-    
-    // mock the receipt
+
+    // set up mock metadata and metadata service providing it
+    metadata = EasyMock.createNiceMock(MediaPackageMetadata.class);
+    EasyMock.expect(metadata.getDate()).andReturn(DATE);
+    EasyMock.expect(metadata.getLanguage()).andReturn(LANGUAGE);
+    EasyMock.expect(metadata.getLicense()).andReturn(LICENSE);
+    EasyMock.expect(metadata.getSeriesIdentifier()).andReturn(SERIES);
+    EasyMock.expect(metadata.getSeriesTitle()).andReturn(SERIES_TITLE);
+    EasyMock.expect(metadata.getTitle()).andReturn(TITLE);
+    EasyMock.replay(metadata);
+
+    metadataService = EasyMock.createNiceMock(MediaPackageMetadataService.class);
+    EasyMock.expect(metadataService.getMetadata((MediaPackage) EasyMock.anyObject())).andReturn(metadata);
+    EasyMock.replay(metadataService);
+
+    operationHandler.addMetadataService(metadataService);
+
+    // set up mock receipt and inspect service providing it
     receipt = EasyMock.createNiceMock(Receipt.class);
     EasyMock.expect(receipt.getElement()).andReturn(newTrack);
     EasyMock.expect(receipt.getId()).andReturn("123");
     EasyMock.expect(receipt.getStatus()).andReturn(Status.FINISHED);
     EasyMock.replay(receipt);
-    
-    // set up mock inspect
+
     inspectionService = EasyMock.createNiceMock(MediaInspectionService.class);
-    EasyMock.expect(inspectionService.enrich((Track)EasyMock.anyObject(), EasyMock.anyBoolean(), EasyMock.anyBoolean())).andReturn(receipt);
+    EasyMock.expect(
+            inspectionService.enrich((Track) EasyMock.anyObject(), EasyMock.anyBoolean(), EasyMock.anyBoolean()))
+            .andReturn(receipt);
     EasyMock.replay(inspectionService);
+
     operationHandler.setInspectionService(inspectionService);
-    
+
     // set up mock workspace
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.replay(workspace);
     operationHandler.setWorkspace(workspace);
-    
-    // set up mock dcService
-    // DublinCoreCatalogService dcService = EasyMock.createNiceMock(DublinCoreCatalogService.class);
-    // EasyMock.replay(dcService);
-    // operationHandler.setDublincoreService(dcService);
+
+    //TODO: problem requested is dublicorecatalogservice impl
+    // set up mock dublin core and dcService providing it
+//    dc = EasyMock.createNiceMock(DublinCoreCatalog.class);
+//    EasyMock.expect(dc.hasValue(DublinCore.PROPERTY_EXTENT)).andReturn(false);
+//    EasyMock.expect(dc.hasValue(DublinCore.PROPERTY_CREATED)).andReturn(false);
+//    
+//    CatalogService<DublinCoreCatalog> dcService = EasyMock.createNiceMock(CatalogService.class);
+//    EasyMock.expect(dcService.load((Catalog)EasyMock.anyObject())).andReturn(dc);
+//    EasyMock.replay(dcService);
+//    operationHandler.setDublincoreService((DublinCoreCatalogService)dcService);
   }
 
   @Test
   public void testInspectOperation() throws Exception {
-    // Set up a mediapackage to publish
-    MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-    MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-    Track presentationTrack = (Track) elementBuilder.elementFromURI(uriTrack, Track.TYPE,
-            MediaPackageElements.PRESENTATION_SOURCE);
-    mp.add(presentationTrack);
-
     // Add the mediapackage to a workflow instance
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl();
     workflowInstance.setId("workflow-inspect-test");
@@ -111,10 +140,22 @@ public class InspectWorkflowOperationHandlerTest {
 
     // Run the media package through the operation handler, ensuring that metadata gets added
     WorkflowOperationResult result = operationHandler.start(workflowInstance);
-    for (Track t : result.getMediaPackage().getTracks()) {
-      Assert.assertNotNull(t.getChecksum());
-      Assert.assertNotNull(t.getMimeType());
-      Assert.assertNotNull(t.getDuration());
-    }
+    MediaPackage mpNew = result.getMediaPackage();
+    Track trackNew = mpNew.getTracks()[0];
+    
+    // check mediapackage metadata
+    Assert.assertEquals(DATE, mpNew.getDate());
+    Assert.assertEquals(LANGUAGE, mpNew.getLanguage());
+    Assert.assertEquals(LICENSE, mpNew.getLicense());
+    Assert.assertEquals(SERIES, mpNew.getSeries());
+    Assert.assertEquals(SERIES_TITLE, mpNew.getSeriesTitle());
+    Assert.assertEquals(TITLE, mpNew.getTitle());
+    
+    // check track metadata
+    Assert.assertNotNull(trackNew.getChecksum());
+    Assert.assertNotNull(trackNew.getMimeType());
+    Assert.assertNotNull(trackNew.getDuration());
+    Assert.assertNotNull(trackNew.getStreams());
+    
   }
 }

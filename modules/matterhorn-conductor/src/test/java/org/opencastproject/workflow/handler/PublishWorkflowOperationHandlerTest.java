@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PublishWorkflowOperationHandlerTest {
+  
   @Test
   public void testPublishOperation() throws Exception {
     // Set up a mediapackage to publish
