@@ -8,7 +8,7 @@ capture.device.vga.codec=theoraenc
 capture.device.vga.outputfile=vga.mp4
 capture.device.vga.codec.bitrate=1073741824
 capture.device.Podium.codec=theoraenc
-capture.device.Podium.outputfile:Podium.mp4
+capture.device.Podium.outputfile=Podium.mp4
 capture.device.Podium.codec.bitrate=1073741824
 capture.device.Podium.container=oggmux
 capture.ingest.endpoint.url=

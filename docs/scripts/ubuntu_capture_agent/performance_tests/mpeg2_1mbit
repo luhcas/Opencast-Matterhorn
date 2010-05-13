@@ -8,7 +8,7 @@ capture.device.vga.codec=ffenc_mpeg2video
 capture.device.vga.outputfile=vga.mpg
 capture.device.vga.codec.bitrate=1073741824
 capture.device.Podium.codec=ffenc_mpeg2video
-capture.device.Podium.outputfile:Podium.mpg
+capture.device.Podium.outputfile=Podium.mpg
 capture.device.Podium.codec.bitrate=1073741824
 capture.device.Podium.container=mpegtsmux
 capture.ingest.endpoint.url=

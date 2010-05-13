@@ -8,7 +8,7 @@ capture.device.vga.codec=x264enc
 capture.device.vga.codec.bitrate=1048576
 capture.device.vga.outputfile=vga.mp4
 capture.device.Podium.codec=x264enc
-capture.device.Podium.outputfile:Podium.mp4
+capture.device.Podium.outputfile=Podium.mp4
 capture.device.Podium.codec.bitrate=1048576
 capture.device.Podium.container=ffmux_mp4
 capture.ingest.endpoint.url=
