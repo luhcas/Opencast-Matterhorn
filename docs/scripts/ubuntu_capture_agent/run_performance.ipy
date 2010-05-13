@@ -1,19 +1,38 @@
 import sys
 
-!mkdir -p /oc_perf
+!sudo mkdir -p /oc_perf
 !sudo mount -t tmpfs -o size=512M,mode=0777 tmpfs /oc_perf
 
 datafiles = !ls performance_tests
 for file in datafiles:
-	datafile = open(file,"r")
+	#find out if felix is running and if so whack it
+	lines = !ps aux | grep DM2
+	if len(lines.grep("DM2")) > 0:
+		pid = lines.grep("DM2").fields(1)[0]
+		!kill -9 $pid
+
+	datafile = open("performance_tests/"+file,"r")
 	props=dict()
 	for line in datafile:
-		props[line.split(":")[0].replace('"',"")]=line.split(":")[1].replace('"',"")
+		props[line.split("=")[0]]=line.split("=")[1]
 	
 	!mkdir /oc_perf/$props["capture.recording.id"]
 	
 	#change pax logging to be over to the new dir
+	!cd /home/matterhorn/capture-agent/felix-framework-2.0.4/conf/services/
+	!del org.ops4j.pax.logging.properties
+	!svn up
+	!sed -i "s/\$${opencast.logdir}\/opencast.log/\/oc_prefs\/test\/opencast.log/g" org.ops4j.pax.logging.properties
+	!/home/matterhorn/capture-agent/felix-framework-2.0.4/bin/start_matterhorn.sh 2> /dev/null &
 
+	#start felix up
+	running=!curl --digest -u admin:opencast -I -H "X-Requested-Auth: Digest" http://atomopencast:8080/state/rest/GetState
+	while (len(running.grep("200 OK")) < 1 ):
+		import time
+		time.sleep(1)
+		running=!curl --digest -u admin:opencast -I -H "X-Requested-Auth: Digest" http://atomopencast:8080/state/rest/GetState
+
+	
 	!curl --digest -u admin:opencast -H "X-Requested-Auth: Digest" --data @$datafile http://atomopencast:8080/capture/rest/startCapture
 
 	#start dstat in the new dir and block for 700 seconds
