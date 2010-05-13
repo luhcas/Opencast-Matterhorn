@@ -98,7 +98,7 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     echo "KERNEL==\"video[0-9]*\", ATTR{name}==\"$sysName\", GROUP=\"video\", SYMLINK+=\"$symlinkName\"" >> $rules
 
     # Prompt for the flavor for this device
-    if [[ $[${#flavors[@]} -eq 0 ]]; then
+    if [[ ${#flavors[@]} -eq 0 ]]; then
 	flavor=0
     else
 	echo "Please choose the flavor assigned to ${cleanName[$i]}: "
@@ -225,12 +225,32 @@ if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
 	fi
     done
     echo
+
+    # Prompt for the flavor for this device
+    if [[ ${#flavors[@]} -eq 0 ]]; then
+	flavor=0
+    else
+	echo "Please choose the flavor assigned to ${cleanName[$i]}: "
+	for (( j = 0; j < ${#flavors[@]}; j++ )); do
+	    echo -e "\t$j) ${flavors[$j]}"
+	done
+	echo -e "\t$j) User-defined"
+	read -p "Selection: " flavor
+	
+	until [[ -n "$(echo $flavor | grep -o '^[0-9][0-9]*$')" && $flavor -ge 0 && $flavor -le ${#flavors[@]} ]]; do 
+	    read -p "Please choose one of the numbers in the list: " flavor
+	done
+    fi
     
-    read -p "Please enter the flavor assigned to ${cleanName[$i]}: " flavor
-    # Grep matches anything that has two fields consisting of exclusively alphanumeric characters or underscores, separated by a single slash '/'
-    while [[ -z $(echo $flavor | grep '^[^/][^/]*/[^/][^/]*$') ]]; do
-	read -p "Invalid syntax. The flavors follow the pattern <prefix>/<suffix>: " flavor
-    done
+    if [[ $flavor -eq ${#flavors[@]} ]]; then
+        # Grep matches anything that has two fields consisting of any characters but slashes, separated by a single slash '/'
+	read -p "Please enter the flavor for ${cleanName[$i]}: " flavor
+	while [[ -z $(echo $flavor | grep '^[^/ ][^/ ]*/[^/ ][^/ ]*$') ]]; do
+	    read -p "Invalid syntax. The flavors follow the pattern <prefix>/<suffix>: " flavor
+	done
+    else
+	flavor=${flavors[$flavor]}
+    fi
     echo
     
     echo "capture.device.${cleanName[$i]}.src=$audioDevice" >> $CAPTURE_PROPS

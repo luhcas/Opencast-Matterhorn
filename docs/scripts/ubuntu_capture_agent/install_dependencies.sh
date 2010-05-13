@@ -10,12 +10,56 @@ if [[ ! $INSTALL_RUN ]]; then
     exit 1
 fi
 
-# Create a backup of the sources.list file and create its own (preserves any existing sources.list.backup)
-mv -n $SRC_LIST $SRC_LIST.$BKP_SUFFIX
-echo "deb http://us.archive.ubuntu.com/ubuntu/ karmic main restricted universe multiverse" >> $SRC_LIST
-echo "deb http://us.archive.ubuntu.com/ubuntu/ karmic-updates main restricted universe multiverse" >> $SRC_LIST
-echo "deb http://security.ubuntu.com/ubuntu karmic-security main restricted universe multiverse" >> $SRC_LIST
-apt-get -qq update
+# Prompt the user to modify the default repositories
+while [[ true ]]; do
+    echo
+    read -p "Do you wish to use a custom software mirror instead of the Ubuntu defaults (y|N)? " answer
+    while [[ -z "$(echo ${answer:-N} | grep -i '^[yn]')" ]]; do
+	read -p "Please answer (y)es or (N)o: " answer
+    done
+    
+    # If 'yes', prompt a menu to modify any of the parameters
+    if [[ -n "$(echo ${answer:-N} | grep -i "^y")" ]]; then
+	while [[ true ]]; do
+	    echo
+	    echo "Please choose which mirror you want to modify:"
+	    echo -e "\t0)\t Archive Mirror \t(current value: ${mirrors[0]:-$DEFAULT_MIRROR})"
+	    echo -e "\t1)\t Security Mirror \t(current value: ${mirrors[1]:-$DEFAULT_SECURITY})"
+	    echo -e "\t2)\t Partner Mirror \t(current value: ${mirrors[2]:-$DEFAULT_PARTNER})"
+	    read -p "Selection (leave blank to continue installation): " answer
+	    
+	    while [[ -n "$answer" && -z "$(echo "$answer" | grep "^[012]$")" ]]; do
+		read -p "Please choose a value from the list: " answer
+	    done
+	    
+	    if [[ -n "$answer" ]]; then
+		read -p "Please enter the mirror URL: " mirrors[$answer]
+	    else
+		break;
+	    fi
+	done
+    fi
+    
+    # Create a backup of the sources.list file and create its own (preserves any existing sources.list.backup)
+    mv -n $SRC_LIST $SRC_LIST.$BKP_SUFFIX
+    
+    # Applies configuration changes
+    DIST_NAME=$(cat /etc/lsb-release | grep "^DISTRIB_CODENAME" | cut -d "=" -f 2)
+    echo "deb ${mirrors[0]:-$DEFAULT_MIRROR} ${DIST_NAME} main restricted universe multiverse" > $SRC_LIST
+    echo "deb ${mirrors[0]:-$DEFAULT_MIRROR} ${DIST_NAME}-updates main restricted universe multiverse" >> $SRC_LIST
+    echo "deb ${mirrors[1]:-$DEFAULT_SECURITY} ${DIST_NAME}-security main restricted universe multiverse" >> $SRC_LIST
+    echo "deb ${mirrors[2]:-$DEFAULT_PARTNER} ${DIST_NAME} partner" >> $SRC_LIST
+    
+    apt-get -qq update 2> /dev/null
+    
+    if [[ $? -eq 0 ]]; then
+	break
+    else
+	echo
+	echo "Error. Couldn't update properly from the current Ubuntu mirrors. Reverting..."
+	unset mirrors
+    fi
+done
 
 # Auto set selections when installing postfix and jdk packages
 # The <<EOF tag indicates an input with several lines, ending with an EOF line (this is bash syntax)
@@ -108,9 +152,9 @@ fi
 cd $WORKING_DIR
 
 # Setup ntdp
+echo 
 read -p "Which NTP server would you like to use (default: ntp.ubuntu.com)? " server
-escaped_server=$(echo ${server:-$DEFAULT_NTP_SERVER} | sed 's/\([\/\.]\)/\\\1/g')
-sed -i "s/^server\ .*/server ${escaped_server}/" $NTP_CONF
+sed -i "s#^server .*#server ${server:-DEFAULT_NTP_SERVER}#" $NTP_CONF
 echo "NTP server set to ${server:-$DEFAULT_NTP_SERVER}"
 echo "Consider editing the file $NTP_CONF for manually changing the default NTP server or adding more servers to the list"
 echo

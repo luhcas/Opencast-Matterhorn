@@ -23,45 +23,38 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
 	echo "Error. The list of available vga2usb drivers could not be retrieved. Aborting..."
 	exit 1
     fi
-    
-    # Gets the first $DRIVER_NR lines -- the first $DRIVER_NR links to driver files
-    drivers=( $(grep -m $DRIVER_NR "vga2usb" $FILE_NAME | sed 's#^.*<a\s*href="\(.*\)".*>.*</a>.*$#\1#') )
 
+    # Kernel base is the first three numbers in the kernel version, which are the most relevant
+    kernel_base=$(uname -r | grep -o "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]")
+    architecture=$(uname -m)
 
-##### FIXME: Default choice detection temporarily disabled. We need to make it more "intelligent" to allow small kernel differences#################
-    # Determine which vga2usb driver to load for this kernel
-    #EPIPHAN=""
-    #KERNEL=`uname -r`
-    #ARCH=`uname -m`
-    #EPIPHAN_DEFAULT=
-  
-
-  
-    # If current kernel matches common driver, suggest it
-    #for ((i = 0; i < ${#kernels[@]}; i++ )); do
-#	test="$(echo ${kernel[$i]} | grep $EPIPHAN_HW)"
-#	if [ "$test" != "" ]; then
- #           EPIPHAN_DEFAULT=$i
-#	fi
- #   done
-####################################################################################################################################################
+    # Gets the complete list of drivers in the page compatible with the current kernel -- it makes no sense presenting others which are not compatible
+    # First tries to filter by architecture type
+    drivers=( $(grep "vga2usb" $FILE_NAME | sed 's#^.*<a\s*href="\(.*\)".*>.*</a>.*$#\1#' | grep "$kernel_base" | grep $architecture ))
+    # If there's not match, be less strict and not filter by architecture
+    if [[ ${#drivers[@]} -eq 0 ]]; then
+	drivers=( $(grep "vga2usb" $FILE_NAME | sed 's#^.*<a\s*href="\(.*\)".*>.*</a>.*$#\1#' | grep "$kernel_base" ))
+    fi
 
     # Let user choose driver
-    echo "System information: `uname -mors`"
-    echo "Here is a list of the most recent Epiphan VGA2USB drivers:"
-    for ((i = 0; i < ${#drivers[@]}; i++ )); do
-	echo -e "\t($i)\t${drivers[$i]}"
-    done
-    echo -e "\t($i)\tNot listed here"
-    (( i+=1 ))
-    echo -e "\t($i)\tDo not need driver"
-
-    # Prompts for an option
-    read -p "Choose an option from the list: " opt
-
     # Main loop: if some error happens, the user will be prompted again for another option
     while [[ true ]]; do
-
+	echo
+	echo "System information: $(uname -mor)"
+	echo
+	
+	echo "These are the options available for your system:"
+	for ((i = 0; i < ${#drivers[@]}; i++ )); do
+	    echo -e "\t$i)\t${drivers[$i]}"
+	done
+	echo -e "\t$i)\tNot listed here"
+	(( i+=1 ))
+	echo -e "\t$i)\tDo not need driver"
+	
+        # Prompts for an option
+	echo
+	read -p "Choose an option: " opt
+	
 	until [[ -n "$(echo "${opt:-$EPIPHAN_DEFAULT}" | grep -o '^[0-9][0-9]*$')" && $opt -ge 0 && $opt -lt $(( ${#drivers[@]} + 2 )) ]]; do 
 	    read -p "Invalid value. Please enter a value from the list: " opt
 	done
@@ -72,7 +65,11 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
  	    if [[ $opt -eq ${#drivers[@]} ]]; then
 	        # Ask the user for the driver url
 		echo "You might want to check $EPIPHAN_URL to see a complete list of the available drivers."
-		read -p "Please input the URL of the driver you would like to load: " DRIVER_URL
+		unset DRIVER_URL
+		while [[ -z "$DRIVER_URL" ]]; do
+		    read -p "Please input the URL of the driver you would like to load: " DRIVER_URL
+		done
+		# Keeps whatever it is after the last / --the file name
   	        EPIPHAN=${DRIVER_URL##*/}
 	    else
 		# Download the driver from the epiphan page
@@ -99,8 +96,9 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
 		    rm $EPIPHAN
   		else
 		    echo "Done."
-		    # Exit the loop
+		    ## Loop Exit ##
 		    break;
+                    ###############
 		fi
 		cd $WORKING_DIR
   	    else
@@ -120,9 +118,6 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
 		break
 	    fi
 	fi
-		
-	echo
-	read -p "Please try another option: " opt
     done
     
     cd $WORKING_DIR

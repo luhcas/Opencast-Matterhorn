@@ -8,25 +8,28 @@
 
 # General variables
 
-MAX_PASSWD_ATTEMPTS=3                                    # Maximum number of attempts to stablish the matterhorn user password
-CA_SUBDIR=capture-agent                                  # Name for the directory where the matterhorn-related files will be stored
+MAX_PASSWD_ATTEMPTS=3                                       # Maximum number of attempts to stablish the matterhorn user password
+CA_SUBDIR=capture-agent                                     # Name for the directory where the matterhorn-related files will be stored
 
-export USERNAME=matterhorn                               # Default name for the matterhorn user
+export USERNAME=matterhorn                                  # Default name for the matterhorn user 
 
-export START_PATH=$PWD                                   # Path from where this script is run initially
-export WORKING_DIR=/tmp/cainstallscript                  # Directory where this script will be run
+export START_PATH=$PWD                                      # Path from where this script is run initially
+export WORKING_DIR=/tmp/cainstallscript                     # Directory where this script will be run
 export TRUNK_URL=http://opencast.jira.com/svn/MH/trunk
-export TRUNK_SUBDIR=matterhorn-trunk                     # Subdir under the selected user $HOME directory
-export OC_DIR=/opencast                                  # Opencast configuration directory
-export DEV_RULES=/etc/udev/rules.d/matterhorn.rules      # File containing the rules to be applied by udev to the configured devices -- not a pun!
-export CONFIG_SCRIPT=device_config.sh                    # File name for the bash script under HOME containing the device configuration routine
-export DEFAULT_CORE_URL=http://localhost:8080            # Default value for the core url
-export VGA2USB_DIR=epiphan_driver                        # Subdirectory under HOME where the epiphan driver will be downloaded to
-export SRC_LIST=/etc/apt/sources.list                    # Location of the file 'sources.list'
-export BKP_SUFFIX=backup                                 # Suffix to be appended to the backup file for sources.list
-export STARTUP_SCRIPT=/etc/init/matterhorn.conf          # Path of the script which is set up to configure and run felix upon startup
+export TRUNK_SUBDIR=matterhorn-trunk                        # Subdir under the selected user $HOME directory
+export OC_DIR=/opencast                                     # Opencast configuration directory
+export DEV_RULES=/etc/udev/rules.d/matterhorn.rules         # File containing the rules to be applied by udev to the configured devices -- not a pun!
+export CONFIG_SCRIPT=device_config.sh                       # File name for the bash script under HOME containing the device configuration routine
+export DEFAULT_CORE_URL=http://localhost:8080               # Default value for the core url
+export VGA2USB_DIR=epiphan_driver                           # Subdirectory under HOME where the epiphan driver will be downloaded to
+export SRC_LIST=/etc/apt/sources.list                       # Location of the file 'sources.list'
+export BKP_SUFFIX=backup                                    # Suffix to be appended to the backup file for sources.list
+export STARTUP_SCRIPT=/etc/init/matterhorn.conf             # Path of the script which is set up to configure and run felix upon startup
+export DEFAULT_MIRROR=http://archive.ubuntu.com/ubuntu      # URL of the default Ubuntu mirror where the packages will be downloaded from
+export DEFAULT_SECURITY=http://security.ubuntu.com/ubuntu   # URL of the default Ubuntu 'security' mirror
+export DEFAULT_PARTNER=http://archive.canonical.com/ubuntu  # URL of the default Ubuntu 'partner' mirror
 
-export INSTALL_RUN=true                                  # The subsidiary scripts will check for this variable to check they are being run from here
+export INSTALL_RUN=true                                     # The subsidiary scripts will check for this variable to check they are being run from here
 
 
 # Third-party dependencies variables
