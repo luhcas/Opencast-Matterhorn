@@ -32,7 +32,7 @@ echo "make -C $CA_DIR/$VGA2USB_DRV reload" >> $STARTUP_SCRIPT
 # Set up the video devices
 echo "$CA_DIR/$CONFIG_SCRIPT" >> $STARTUP_SCRIPT
 # Starts matterhorn
-echo "su matterhorn -c \"exec /bin/bash ${FELIX_HOME}/bin/start_matterhorn.sh\" &" >> $STARTUP_SCRIPT
+echo "su matterhorn -c \"exec /bin/bash -i ${FELIX_HOME}/bin/start_matterhorn.sh\" &" >> $STARTUP_SCRIPT
 echo "end script" >> $STARTUP_SCRIPT
 
 
