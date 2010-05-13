@@ -15,16 +15,17 @@
  */
 package org.opencastproject.deliver.itunesu;
 
-
 import org.opencastproject.deliver.actions.DeliveryAction;
 
+import org.opencastproject.deliver.schedule.FailedException;
+import org.opencastproject.deliver.schedule.RetryException;
 
 /**
  * DeliveryAction to upload iTunes media.
  */
 public class ITunesDeliveryAction extends DeliveryAction {
 
-  /** handle of uploaded track. */
+  /** URL for accessing uploaded track. */
   private String trackURL;
 
   /**
@@ -62,14 +63,49 @@ public class ITunesDeliveryAction extends DeliveryAction {
     /** Web service API instance */
     ITunesWSAPI api = new ITunesWSAPI(getDestination());
 
-    String handle = api.uploadFile(getMediaPath());
+    String url = "";
 
-    status("Media uploaded");
-    succeed("Media delivered: " + getMediaPath() + " - " + handle);
-    
+    try {
+      url = api.uploadFile(getMediaPath());
+    } catch (RetryException e) {
+      status(e.getMessage());
+      throw e;
+    } catch (FailedException e) {
+      status(e.getMessage());
+      throw e;
+    }
+
+    // add metadata
+    String title = getTitle();
+    String creator = getCreator();
+    String comments = getAbstract();
+    String [] tags = getTags();
+
+    // attach tags to abstract
+    comments += "\n\n";
+    for (String tag : tags) {
+      comments += tag + ' ';
+    }
+
+    String trackHandle = url.substring(url.lastIndexOf('.') + 1);
+
+    try {
+      String xmlResponse = 
+          api.mergeTrack(trackHandle, title, creator, comments);
+      if (xmlResponse.indexOf("error") > 0) {
+        throw new Exception();
+      }
+    } catch (Exception e) {
+      status("Error in media metadata: " + e.getMessage());
+      api.deleteTrack(trackHandle);
+      throw new FailedException(e);
+    }
+
     // skip "xxx.edu."
     int index = api.getSiteURL().length() + 1;
-    // set the handle as the URL
-    setTrackURL(handle.substring(index + 1));
+    setTrackURL(url.substring(index + 1));
+
+    status("Media uploaded");
+    succeed("Media delivered: " + getMediaPath() + " - " + url);
   }
 }

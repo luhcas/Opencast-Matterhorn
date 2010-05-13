@@ -92,6 +92,11 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
+            <Private-Package>
+              org.opencastproject.deliver.actions,
+              org.opencastproject.deliver.schedule,
+              org.opencastproject.deliver.store
+            </Private-Package>
             <Import-Package>
               *;resolution:=optional
             </Import-Package>
@@ -100,14 +105,12 @@
               org.opencastproject.deliver.itunesu.*
             </Export-Package>
             <Embed-Dependency>
+              matterhorn-distribution-service-common,
               flexjson;inline=true
             </Embed-Dependency>
             <Service-Component>
               OSGI-INF/distribution-service-itunesu.xml
             </Service-Component>
-			      <JPA-PersistenceUnits>
-			        ITunesUDistributionPersistenceUnit
-			      </JPA-PersistenceUnits>
           </instructions>
         </configuration>
       </plugin>

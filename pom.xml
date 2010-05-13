@@ -801,7 +801,7 @@
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-simple</artifactId>
-        <version>1.5.6</version>
+        <version>1.5.8</version>
       </dependency>
 
       <!-- apache commons syncing -->
@@ -1257,6 +1257,7 @@
       </releases>
     </pluginRepository>
     <!-- these are here as a backup in case the matterhorn nexus is down -->
+    <!--
     <pluginRepository>
       <id>ops4j.releases</id>
       <url>http://repository.ops4j.org/maven2</url>
@@ -1279,6 +1280,7 @@
       <name>Sonatype Public Repo</name>
       <url>http://repository.sonatype.org/content/groups/public/</url>
     </pluginRepository>
+    -->
   </pluginRepositories>
 
   <repositories>

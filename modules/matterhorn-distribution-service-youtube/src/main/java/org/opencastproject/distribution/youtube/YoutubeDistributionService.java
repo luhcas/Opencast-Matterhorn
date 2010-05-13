@@ -17,8 +17,6 @@ package org.opencastproject.distribution.youtube;
 
 import org.opencastproject.deliver.schedule.Schedule;
 import org.opencastproject.deliver.schedule.Task;
-import org.opencastproject.deliver.schedule.TaskSerializer;
-import org.opencastproject.deliver.store.JPAStore;
 import org.opencastproject.deliver.youtube.YouTubeConfiguration;
 import org.opencastproject.deliver.youtube.YouTubeDeliveryAction;
 import org.opencastproject.deliver.youtube.YouTubeRemoveAction;
@@ -35,10 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Map;
-
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.spi.PersistenceProvider;
 
 
 /**
@@ -68,31 +62,7 @@ public class YoutubeDistributionService implements DistributionService {
 
   /** context strategy for the distribution service */
   YoutubeDistributionContextStrategy contextStrategy;
-
-  /** The JPA provider */
-  protected PersistenceProvider persistenceProvider;
-
-  /**
-   * @param persistenceProvider the persistenceProvider to set
-   */
-  public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
-    this.persistenceProvider = persistenceProvider;
-  }
   
-  @SuppressWarnings("unchecked")
-  protected Map persistenceProperties;
-
-  /**
-   * @param persistenceProperties the persistenceProperties to set
-   */
-  @SuppressWarnings("unchecked")
-  public void setPersistenceProperties(Map persistenceProperties) {
-    this.persistenceProperties = persistenceProperties;
-  }
-
-  /** The factory used to generate the entity manager */
-  protected EntityManagerFactory emf = null;
-
   /**
    * Called when service activates. Defined in OSGi resource file.
    */
@@ -117,14 +87,19 @@ public class YoutubeDistributionService implements DistributionService {
     // default destination
     destination = cc.getBundleContext().getProperty("youtube.playlist"); // "B8B47104C2C1663B"
 
-    // create JPA instances
-    emf = persistenceProvider.createEntityManagerFactory("YoutubeDistributionPersistenceUnit", 
-                                                         persistenceProperties);
-    // create the scheduler using memory store
-    // schedule = new Schedule();
+    // create the scheduler using file system store
+    String directory_name = cc.getBundleContext().getProperty("youtube.task");
+    if (directory_name == null || directory_name.equals("")) {
+      directory_name = "/tmp/youtube";
+    }
+    logger.info("Task file directory: {}" + directory_name);
+    File data_directory = new File(directory_name);
+    data_directory.mkdirs();
+    schedule = new Schedule(data_directory);
+
     // create the scheduler using JPA store
-    schedule = new Schedule(new JPAStore<Task>(new TaskSerializer(), emf, "YOUTUBE_ACTIVE"),
-                            new JPAStore<Task>(new TaskSerializer(), emf, "YOUTUBE_COMPLETED"));
+    // schedule = new Schedule(new JPAStore<Task>(new TaskSerializer(), emf, "YOUTUBE_ACTIVE"),
+    //                         new JPAStore<Task>(new TaskSerializer(), emf, "YOUTUBE_COMPLETED"));
   }
 
   /**
@@ -134,7 +109,7 @@ public class YoutubeDistributionService implements DistributionService {
     // shutdown the scheduler
     schedule.shutdown();
     // destroy JPA entity manager factory
-    emf.close();
+    // emf.close();
   }
 
   /**
@@ -146,7 +121,7 @@ public class YoutubeDistributionService implements DistributionService {
    */  
   private String getTaskID(String mediaPackage, String track) {
     // use "YOUTUBE" + media package identifier + track identifier as task identifier
-    return "YOUTUBE_" + mediaPackage + "_" + track;
+    return "YOUTUBE-" + mediaPackage.replaceAll("\\.", "-") + "-" + track;
   }
 
   /**

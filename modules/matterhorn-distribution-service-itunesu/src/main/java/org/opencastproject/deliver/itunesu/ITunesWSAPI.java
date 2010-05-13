@@ -34,6 +34,7 @@ import java.security.NoSuchAlgorithmException;
 import org.opencastproject.deliver.schedule.FailedException;
 import org.opencastproject.deliver.schedule.RetryException;
 
+
 /**
  * This is a helper of iTunes U Web service.
  *
@@ -59,7 +60,7 @@ public class ITunesWSAPI {
   private final static String SHOW_TREE = "ShowTree";
 
   /** number of retries before getting an upload URL */
-  private final int NUM_RETRY = 6;
+  private final int NUM_RETRY = 5;
 
   /** Helper instance */
   private HTTPHelper helper;
@@ -108,8 +109,13 @@ public class ITunesWSAPI {
     try {
       helper = new HTTPHelper(uploadURLString);
       handle = helper.uploadFile(fileName);
+      if (handle.equals("!")) {
+        // no more error message from iTunes U service to interpret
+        throw new FailedException("Media file not accepted by iTunes U site!");
+      }
     } catch (IOException e) {
-      e.printStackTrace();
+      // cannot upload file
+      throw new FailedException(e);
     }
 
     return handle;
@@ -227,7 +233,7 @@ public class ITunesWSAPI {
    * Updates a feed group. Creates a Web service document that specifies the UpdateGroup
    * command and uploads to the upload URL.
    *
-   * @param handle handle of the group
+   * @param handle handle of the track
    * @return response from the Web service
    */
   public String updateFeedGroup(String handle) {
@@ -274,6 +280,90 @@ public class ITunesWSAPI {
   }
 
   /**
+   * Adds a track. Creates a Web service document that specifies the AddTrack
+   * command.
+   *
+   * @param handle handle of the track
+   * @param name name of the track
+   * @param durationMilliseconds duration of the track
+   * @param albumName name of the album
+   * @param artistName name of the artist
+   * @return response from the Web service
+   */
+  public String addTrack(String handle, String name, int durationMilliseconds, String albumName, String artistName) {
+    StringBuffer buffer = new StringBuffer();
+
+    // construct the XML request
+    buffer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    buffer.append("<ITunesUDocument>");
+    // buffer.append("<Version>1.1.4</Version>");
+    buffer.append("<AddTrack>");
+    buffer.append("<ParentHandle>" + destination + "</ParentHandle>");
+    buffer.append("<ParentPath></ParentPath>");
+    buffer.append("<Track>");
+    buffer.append("<Name>" + name + "</Name>");
+    // buffer.append("<Handle>" + handle +"</Handle>");
+    buffer.append("<DiscNumber>1</DiscNumber>");
+    buffer.append("<DurationMilliseconds>" + durationMilliseconds + "</DurationMilliseconds>");
+    buffer.append("<AlbumName>" + albumName + "</AlbumName>");
+    buffer.append("<ArtistName>" + artistName + "</ArtistName>");
+    buffer.append("<DownloadURL>http://jcr-connect.at.northwestern.edu/documents/MaleSample2.mp3</DownloadURL>");
+    buffer.append("</Track>");
+    buffer.append("</AddTrack>");
+    buffer.append("</ITunesUDocument>");
+
+    String wsDocument = buffer.toString();
+
+    return uploadWSDocument(wsDocument);
+  }
+
+  /**
+   * Escapes a string for XML.
+   *
+   * @param s the original string
+   * @return escaped string
+   */
+  private String escapeString(String s)
+  {
+    return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+  }
+
+  /**
+   * Merges a track. Creates a Web service document that specifies the MergeTrack
+   * command, which updates the metadata of the track.
+   *
+   * @param handle handle of the track
+   * @param title title of the track
+   * @param creator creator of the media
+   * @param comment comment
+   * @return response from the Web service
+   */
+  public String mergeTrack(String handle, String title, String creator, String comment) {
+    StringBuffer buffer = new StringBuffer();
+
+    // construct the XML request
+    buffer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+    buffer.append("<ITunesUDocument>");
+    buffer.append("<MergeTrack>");
+    buffer.append("<TrackHandle>" + handle + "</TrackHandle>");
+    buffer.append("<Track>");
+    buffer.append("<Title>" + escapeString(title) + "</Title>");
+    buffer.append("<DiscNumber>1</DiscNumber>");
+    buffer.append("<ArtistName>" + escapeString(creator) + "</ArtistName>");
+    // keep the metadata in the media file but leave this open as an option
+    // buffer.append("<AlbumName>albumname value</AlbumName>");
+    buffer.append("<Comment>" + escapeString(comment) + "</Comment>");
+    // buffer.append("<TrackNumber>" + "1" + "</TrackNumber>");
+    buffer.append("</Track>");
+    buffer.append("</MergeTrack>");
+    buffer.append("</ITunesUDocument>");
+
+    String wsDocument = buffer.toString();
+
+    return uploadWSDocument(wsDocument);
+  }
+
+  /**
    * Uploads a Web service document to iTunes U.
    *
    * @param wsDocument string content of the Web service document
@@ -305,6 +395,13 @@ public class ITunesWSAPI {
       response = helper.uploadFile(temp.getAbsolutePath());      
     } catch (Exception e) {
       throw new FailedException(e);
+    }
+
+    Pattern pattern = Pattern.compile("<error>([^<]+)</error>");
+    Matcher matcher = pattern.matcher(response);
+
+    if (matcher.find()) {
+      throw new FailedException(matcher.group(1));
     }
 
     return response;

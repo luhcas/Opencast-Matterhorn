@@ -3,14 +3,22 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
   <artifactId>matterhorn-distribution-service-common</artifactId>
-  <packaging>bundle</packaging>
+  
+  <!--
+  Note that this is not an OSGI bundle.
+  
+  The youtube and itunes distribution code were not designed for multiclassloader environments, so we must embed this
+  jar in those osgi bundles.
+  
+  To keep this jar from being distributed to the load directory during the build, we do not extend the base pom, and
+  hence must specify the dependency versions and maven plugin configurations explicitly.
+  
+  TODO: Once the deployment 
+  -->
+  
+  <packaging>jar</packaging>
   <name>matterhorn-distribution-service-common</name>
   <version>0.8-SNAPSHOT</version>
-  <parent>
-    <groupId>org.opencastproject</groupId>
-    <artifactId>base</artifactId>
-    <version>0.8-SNAPSHOT</version>
-  </parent>
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
@@ -25,43 +33,48 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
+      <version>1.4</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
+      <version>1.3.0</version>
     </dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
+      <version>1.1.A</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_core</artifactId>
+      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_compendium</artifactId>
+      <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.eclipse.persistence</groupId>
-      <artifactId>javax.persistence</artifactId>
+      <version>1.5.8</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
+      <version>1.5.8</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
+      <version>4.5</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -79,27 +92,76 @@
     </dependency>
 
   </dependencies>
+
   <build>
     <plugins>
+      <!-- Require Java 5 or higher for building -->
       <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <version>2.0.1</version>
-        <extensions>true</extensions>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Import-Package>
-              *;resolution:=optional
-            </Import-Package>
-            <Embed-Dependency>
-              flexjson;inline=true
-            </Embed-Dependency>
-            <Export-Package>
-              org.opencastproject.deliver.*
-            </Export-Package>
-          </instructions>
+          <source>1.6</source>
+          <target>1.6</target>
+          <encoding>UTF-8</encoding>
         </configuration>
+      </plugin>
+      <!-- Attach sources for all builds -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.1.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>jar-no-fork</goal>
+              <goal>test-jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- Run tests and display test output in the console -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <systemPropertyVariables>
+            <M2_REPO>${settings.localRepository}</M2_REPO>
+          </systemPropertyVariables>
+          <useFile>false</useFile>
+        </configuration>
+      </plugin>
+      <!-- Ensure that the source code matches the Matterhorn style rules -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.3</version>
+        <!--
+          must use version 2.3 because of the xml schema for our config file
+        -->
+        <configuration>
+          <configLocation>checkstyle.xml</configLocation>
+          <logViolationsToConsole>true</logViolationsToConsole>
+          <headerLocation>header.txt</headerLocation>
+          <excludes>**/package-info.java</excludes>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.opencastproject</groupId>
+            <artifactId>matterhorn-build-tools</artifactId>
+            <version>0.8-SNAPSHOT</version>
+            <scope>compile</scope>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

@@ -107,7 +107,41 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
    */
   @Override
   public void retract(MediaPackage mediaPackage) throws DistributionException {
-    throw new UnsupportedOperationException();
+    //throw new UnsupportedOperationException();
+    MediaPackageElement mediaPackageElement = null;
+  
+    for (MediaPackageElement element : mediaPackage.getElements()) {
+      switch (element.getElementType()) {
+      case Track:
+        mediaPackageElement = element;
+        break;
+      case Catalog:
+        continue;
+      case Attachment:
+        continue;
+      default:
+        throw new IllegalStateException("Someone is trying to distribute strange things here");
+      }
+    }
+
+    if (mediaPackageElement == null) {
+      throw new DistributionException("Media package does not contain tracks");
+    }
+
+    try {
+      File sourceFile = workspace.get(mediaPackageElement.getURI());
+      File destination = getDistributionFile(mediaPackageElement);
+
+      // delete the file
+      if (FileSupport.delete(destination)) {
+        logger.info("Succeeded retracting {} ...", destination);
+      }
+      else {
+        logger.info("Failed retracting {} ...", destination);
+      }
+    } catch (Exception e) {
+      throw new DistributionException(e);
+    }    
   }
 
 }

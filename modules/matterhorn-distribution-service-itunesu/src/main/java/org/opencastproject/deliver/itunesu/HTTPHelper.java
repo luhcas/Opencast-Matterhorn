@@ -17,7 +17,6 @@ package org.opencastproject.deliver.itunesu;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 
 import java.io.IOException;
 import java.io.File;
@@ -116,6 +115,38 @@ public class HTTPHelper
   }
 
   /**
+   * Throws exception if status code is not 200.
+   */
+  private void checkStatusCode()
+  {
+    int statusCode = 0;
+    String errorMessage = "";
+
+    try {    
+      statusCode = connection.getResponseCode();
+      errorMessage = connection.getResponseMessage();
+    } catch (IOException e) {
+      throw new RuntimeException("Error in HTTP connection!");      
+    }
+ 
+    if (statusCode != HttpURLConnection.HTTP_OK) {
+      switch (statusCode) {
+      case HttpURLConnection.HTTP_CLIENT_TIMEOUT:
+        errorMessage = "Request Time-Out";
+        break;
+      case HttpURLConnection.HTTP_INTERNAL_ERROR:
+        errorMessage = "Internal Server Error";
+        break;
+      case HttpURLConnection.HTTP_UNAVAILABLE:
+        errorMessage = "Service Unavailable";
+        break;
+      }
+
+      throw new RuntimeException(errorMessage);
+    }
+  }
+
+  /**
    * Writes the request string to the connection and returns the response.
    *
    * @param request the encoded string
@@ -130,11 +161,14 @@ public class HTTPHelper
     outputStream.flush();
     outputStream.close();
 
-    // Clean up.
-    connection.disconnect();
-
     String response = readResponse();
     
+    // exception handling
+    checkStatusCode();
+
+    // clean
+    connection.disconnect();
+
     return response;
   }
 
@@ -171,7 +205,7 @@ public class HTTPHelper
 
     // content type
     stringBuffer.append("Content-Type: ");
-    String type = URLConnection.guessContentTypeFromName(fileName);
+    String type = connection.guessContentTypeFromName(fileName);
     if (type == null) {
       // default content type
       type = "application/octet-stream";
@@ -196,7 +230,6 @@ public class HTTPHelper
       }
     }
     outputStream.flush();
-    buf = null;
 
     // reset the string buffer
     stringBuffer.setLength(0);
@@ -212,10 +245,13 @@ public class HTTPHelper
 
     outputStream.close();
 
+    String response = readResponse();
+
+    // exception handling
+    checkStatusCode();
+
     // clean
     connection.disconnect();
-
-    String response = readResponse();
 
     return response;
   }

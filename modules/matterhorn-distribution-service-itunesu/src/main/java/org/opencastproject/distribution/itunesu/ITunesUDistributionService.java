@@ -20,8 +20,8 @@ import org.opencastproject.deliver.itunesu.ITunesDeliveryAction;
 import org.opencastproject.deliver.itunesu.ITunesRemoveAction;
 import org.opencastproject.deliver.schedule.Schedule;
 import org.opencastproject.deliver.schedule.Task;
-import org.opencastproject.deliver.schedule.TaskSerializer;
-import org.opencastproject.deliver.store.JPAStore;
+// import org.opencastproject.deliver.schedule.TaskSerializer;
+// import org.opencastproject.deliver.store.JPAStore;
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -35,11 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Map;
-
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.spi.PersistenceProvider;
-
 
 /**
  * Distributes media to a iTunes U group.
@@ -60,30 +55,6 @@ public class ITunesUDistributionService implements DistributionService {
   /** context strategy for the distribution service */
   ITunesUDistributionContextStrategy contextStrategy;
 
-  /** The JPA provider */
-  protected PersistenceProvider persistenceProvider;
-
-  /**
-   * @param persistenceProvider the persistenceProvider to set
-   */
-  public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
-    this.persistenceProvider = persistenceProvider;
-  }
-  
-  @SuppressWarnings("unchecked")
-  protected Map persistenceProperties;
-
-  /**
-   * @param persistenceProperties the persistenceProperties to set
-   */
-  @SuppressWarnings("unchecked")
-  public void setPersistenceProperties(Map persistenceProperties) {
-    this.persistenceProperties = persistenceProperties;
-  }
-
-  /** The factory used to generate the entity manager */
-  protected EntityManagerFactory emf = null;
-
   /**
    * Called when service activates. Defined in OSGi resource file.
    */
@@ -103,14 +74,19 @@ public class ITunesUDistributionService implements DistributionService {
     config.setAdministratorCredential(administratorCredential);
     config.setSharedSecret(sharedSecret);
 
-    // create JPA instances
-    emf = persistenceProvider.createEntityManagerFactory("ITunesUDistributionPersistenceUnit", 
-                                                         persistenceProperties);
-    // create the scheduler using memory store
-    // schedule = new Schedule();
+    // create the scheduler using file system store
+    String directory_name = cc.getBundleContext().getProperty("itunesu.task");
+    if (directory_name == null || directory_name.equals("")) {
+      directory_name = "/tmp/itunesu";
+    }
+    logger.info("Task file directory: {}" + directory_name);
+    File data_directory = new File(directory_name);
+    data_directory.mkdirs();
+    schedule = new Schedule(data_directory);
+
     // create the scheduler using JPA store
-    schedule = new Schedule(new JPAStore<Task>(new TaskSerializer(), emf, "ITUNESU_ACTIVE"),
-                            new JPAStore<Task>(new TaskSerializer(), emf, "ITUNESU_COMPLETED"));
+    // schedule = new Schedule(new JPAStore<Task>(new TaskSerializer(), emf, "ITUNESU_ACTIVE"),
+    //                         new JPAStore<Task>(new TaskSerializer(), emf, "ITUNESU_COMPLETED"));
   }
 
   /**
@@ -120,7 +96,7 @@ public class ITunesUDistributionService implements DistributionService {
     // shutdown the scheduler
     schedule.shutdown();
     // destroy JPA entity manager factory
-    emf.close();
+    // emf.close();
   }
 
   /**
@@ -132,7 +108,7 @@ public class ITunesUDistributionService implements DistributionService {
    */  
   private String getTaskID(String mediaPackage, String track) {
     // use "ITUNESU" + media package identifier + track identifier as task identifier
-    return "ITUNESU_" + mediaPackage + "_" + track;
+    return "ITUNESU-" + mediaPackage.replaceAll("\\.", "-") + "-" + track;
   }
 
   /**
@@ -219,6 +195,7 @@ public class ITunesUDistributionService implements DistributionService {
       act.setName(name);
       act.setTitle(sourceFile.getName());
       // CHNAGE ME: set metadata elements here
+      act.setCreator("Opencast Project");
       act.setTags(new String [] {"whatever"});
       act.setAbstract("Opencast Distribution Service - iTunes U");
       act.setMediaPath(sourceFile.getAbsolutePath());
