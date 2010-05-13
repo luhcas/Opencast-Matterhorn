@@ -71,6 +71,9 @@ sudo ubuntu-vm-builder vmw6 karmic --arch 'i386' --mem '512' --cpus 1 \
 #change the vm to use nat networking instead of bridged
 sed -i 's/bridged/nat/g' ubuntu-vmw6/opencast.vmx
 
+#change matterhorn_setup.sh to use the correct svn repo path
+sed -i "s/OC_URL=.*$/OC_URL=$MATTERHORN_SVN/ matterhorn_setup.sh
+
 #mount the vm image
 mkdir mnt
 sudo vmware-mount ubuntu-vmw6/disk0.vmdk 1 mnt
