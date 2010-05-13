@@ -56,9 +56,19 @@ function init() {
   
   //multiple recording specific elements
   $('#recurStart').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
+  $('#recurStart').datepicker('setDate', d);
   $('#recurEnd').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
-  $('#schedule_repeat').change(function(){ SchedulerUI.showDaySelect(this.options[this.selectedIndex].value); });
+  //$('#schedule_repeat').change(function(){ SchedulerUI.showDaySelect(this.options[this.selectedIndex].value); });
   $('#recurAgent').change(SchedulerUI.handleAgentChange);
+  
+  var agent_list;
+  if($('#singleRecording')[0].checked){
+    SchedulerUI.agentList = '#attendees';
+    SchedulerUI.inputList = '#input-list';
+  }else{
+    SchedulerUI.agentList = '#recurAgent';
+    SchedulerUI.inputList = '#recur-input-list';
+  }
   
   $('.folder-head').click(
     function() {
@@ -120,10 +130,18 @@ SchedulerUI.submitForm = function() {
   var eventXML = null;
   eventXML = SchedulerForm.serialize();
   if(eventXML){
-    if(SchedulerUI.getURLParams('edit')){
-      $.post( SCHEDULER_URL + '/event', {event: eventXML}, SchedulerUI.eventSubmitComplete );
+    if($('#singleRecording')[0].checked){
+      if(SchedulerUI.getURLParams('edit')){
+        $.post( SCHEDULER_URL + '/event', {event: eventXML}, SchedulerUI.eventSubmitComplete );
+      }else{
+        $.ajax({ type: "PUT", url: SCHEDULER_URL + '/event', data: {event: eventXML}, success: SchedulerUI.eventSubmitComplete });
+      }
     }else{
-      $.ajax({ type: "PUT", url: SCHEDULER_URL + '/event', data: {event: eventXML}, success: SchedulerUI.eventSubmitComplete });
+      if(SchedulerUI.getURLParams('edit')){
+        $.post( SCHEDULER_URL + '/recurrence', {recurringEvent: eventXML}, SchedulerUI.eventSubmitComplete );
+      }else{
+        $.ajax({ type: "PUT", url: SCHEDULER_URL + '/recurrence', data: {recurringEvent: eventXML}, success: SchedulerUI.eventSubmitComplete });
+      }
     }
   }
   return true;
@@ -179,7 +197,7 @@ SchedulerUI.loadKnownAgents = function() {
 SchedulerUI.handleAgentList = function(data) {
   $.each($('name', data),
     function(i, agent) {
-      $('#attendees').append($('<option></option>').val($(agent).text()).html($(agent).text())); 
+      $(SchedulerUI.agentList).append($('<option></option>').val($(agent).text()).html($(agent).text())); 
     });
   var eventID = SchedulerUI.getURLParams('eventID');
   if(eventID && SchedulerUI.getURLParams('edit')) {
@@ -262,7 +280,7 @@ SchedulerUI.handleDelete = function(){
 
 SchedulerUI.handleAgentChange = function(elm){
   var agent = elm.target.value;
-  $('#input-list').empty();
+  $(SchedulerUI.inputList).empty();
   $.get('/capture-admin/rest/agents/' + agent + '/capabilities',
         function(d){
           var capabilities = [];
@@ -290,7 +308,7 @@ SchedulerUI.handleAgentChange = function(elm){
 
 SchedulerUI.displayCapabilities = function(capa){
   $.each(capa, function(i, v){
-    $('#input-list').append('<input type="checkbox" id="' + v + '" value="' + v + '" checked="checked"><label for="' + v +'">' + v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() + '</label>');
+    $(SchedulerUI.inputList).append('<input type="checkbox" id="' + v + '" value="' + v + '" checked="checked"><label for="' + v +'">' + v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() + '</label>');
   });
   SchedulerForm.formFields.resources = new FormField(capa, false, {getValue: getInputs, setValue: setInputs, checkValue: checkInputs});
 }
@@ -327,7 +345,7 @@ SchedulerUI.padstring = function(str, pad, padlen){
   return str;
 }
       
-
+/*
 SchedulerUI.showDaySelect = function(selection){
   if(selection == 'weekly'){
     $('#day-select').removeClass('hidden');
@@ -338,7 +356,7 @@ SchedulerUI.showDaySelect = function(selection){
     $('#repeat-enddate').addClass('hidden');
     delete SchedulerForm.formFields.recurrence;
   }
-}
+}*/
 
 SchedulerUI.selectRecordingType = function(recType){
   /**
@@ -352,6 +370,8 @@ SchedulerUI.selectRecordingType = function(recType){
     //show recurring_recording panel, hide single.
     $('#recurring_recording').show();
     $('#single_recording').hide();
+    SchedulerUI.agentList = '#recurAgent';
+    SchedulerUI.inputList = '#recur-input-list';
     //series is required
     //repeats
     //rrule days
@@ -371,14 +391,17 @@ SchedulerUI.selectRecordingType = function(recType){
       'recurrence.duration':  new FormField(['recurDurationHour', 'recurDurationMin'], true, { getValue:getDuration, setValue:setDuration, checkValue:checkDuration, dispValue:getDurationDisplay, label:'label-recurduration', errorField:'missing-recurduration' }), //returns a date incremented by duration.
       'recurrence.end':       new FormField(['recurEnd'], true, {getValue:getRecurEnd, setValue:setRecurEnd, checkValue:checkRecurEnd, dispValue:getRecurEndDisplay}),
       'attendees':            new FormField('recurAgent', true, { getValue:getRecurAgent, setValue:setRecurAgent, checkValue:checkRecurAgent }),
-      'device':               new FormField('recurAgent')
+      'device':               new FormField('recurAgent'),
+      'recurrence':           new FormField(['schedule_repeat', 'repeat_sun', 'repeat_mon', 'repeat_tue', 'repeat_wed', 'repeat_thu', 'repeat_fri', 'repeat_sat', 'recurEnd'], true, {getValue: getRecurValue, setValue: setRecurValue, checkValue: checkRecurValue, dispValue: getRecurDisp})
     };
     SchedulerForm.rootEl = 'RecurringEvent';
   }else{
     $('#recurring_recording').hide();
     $('#single_recording').show();
+    SchedulerUI.agentList = '#attendees';
+    SchedulerUI.inputList = '#input-list';
     fields = {
-      'eventid': new FormField('eventID'),
+      'eventid':          new FormField('eventID'),
       'title':            new FormField('title', true),
       'creator':          new FormField('creator'),
       'contributor':      new FormField('contributor'),
@@ -397,7 +420,8 @@ SchedulerUI.selectRecordingType = function(recType){
   }
   //Form Manager, handles saving, loading, de/serialization, and validation
   SchedulerForm.setFormFields(fields);
-  
+  //load agents
+  SchedulerUI.loadKnownAgents();
 }
 
 /* ======================== SchedulerForm ======================== */
