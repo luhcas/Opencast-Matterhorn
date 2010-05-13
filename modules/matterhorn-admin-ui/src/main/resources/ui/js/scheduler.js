@@ -39,10 +39,6 @@ function init() {
    * Setup event handlers on various interface elements.
    */
   var d = new Date();
-  //set single/multiple recording event handler
-  if(!SchedulerForm.formFields){
-    SchedulerUI.selectRecordingType('single'); //Initialize as a single recording.
-  }
   $('#singleRecording').click(function(){ SchedulerUI.selectRecordingType('single'); });
   $('#multipleRecordings').click(function(){ SchedulerUI.selectRecordingType('multiple'); });
   
@@ -65,9 +61,11 @@ function init() {
   if($('#singleRecording')[0].checked){
     SchedulerUI.agentList = '#attendees';
     SchedulerUI.inputList = '#input-list';
+    $('#singleRecording').click();
   }else{
     SchedulerUI.agentList = '#recurAgent';
     SchedulerUI.inputList = '#recur-input-list';
+    $('#multipleRecordings').click();
   }
   
   $('.folder-head').click(
@@ -94,9 +92,6 @@ function init() {
   
   $('#submitButton').click(SchedulerUI.submitForm);
   $('#cancelButton').click(SchedulerUI.cancelForm);
-  
-  //Load agents and event information if this is the edit page.
-  SchedulerUI.loadKnownAgents();
   
   var eventID = SchedulerUI.getURLParams('eventID');
   if(eventID && SchedulerUI.getURLParams('edit')){
@@ -186,6 +181,8 @@ SchedulerUI.showNotificationBox = function() {
  *  Calls handleAgentList to populate the dropdown.
  */
 SchedulerUI.loadKnownAgents = function() {
+  $(SchedulerUI.agentList).empty();
+  $(SchedulerUI.agentList).append($('<option></option>').val('').html('Choose one:'));
   $.get(CAPTURE_ADMIN_URL + '/agents', SchedulerUI.handleAgentList, 'xml');
 };
 
@@ -372,6 +369,7 @@ SchedulerUI.selectRecordingType = function(recType){
     $('#single_recording').hide();
     SchedulerUI.agentList = '#recurAgent';
     SchedulerUI.inputList = '#recur-input-list';
+    $(SchedulerUI.inputList).empty();
     //series is required
     //repeats
     //rrule days
@@ -400,6 +398,7 @@ SchedulerUI.selectRecordingType = function(recType){
     $('#single_recording').show();
     SchedulerUI.agentList = '#attendees';
     SchedulerUI.inputList = '#input-list';
+    $(SchedulerUI.inputList).empty();
     fields = {
       'eventid':          new FormField('eventID'),
       'title':            new FormField('title', true),
