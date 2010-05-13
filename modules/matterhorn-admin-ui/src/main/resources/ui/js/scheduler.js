@@ -332,7 +332,7 @@ SchedulerUI.showDaySelect = function(selection){
   if(selection == 'weekly'){
     $('#day-select').removeClass('hidden');
     $('#repeat-enddate').removeClass('hidden');
-    SchedulerForm.formFields.recurrence = new FormField(['schedule_repeat', 'repeat_sun', 'repeat_mon', 'repeat_tue', 'repeat_wed', 'repeat_thu', 'repeat_fri', 'repeat_sat', 'endDate'], false, {getValue: getRecurValue, setValue: setRecurValue, checkValue: checkRecurValue, dispValue: getRecurDisp});
+    SchedulerForm.formFields.recurrence = new FormField(['schedule_repeat', 'repeat_sun', 'repeat_mon', 'repeat_tue', 'repeat_wed', 'repeat_thu', 'repeat_fri', 'repeat_sat', 'recurEnd'], false, {getValue: getRecurValue, setValue: setRecurValue, checkValue: checkRecurValue, dispValue: getRecurDisp});
   }else{
     $('#day-select').addClass('hidden');
     $('#repeat-enddate').addClass('hidden');
@@ -357,7 +357,7 @@ SchedulerUI.selectRecordingType = function(recType){
     //rrule days
     //rrule start and end date
     fields = {
-      'eventid':              new FormField('eventID'),
+      'recurringeventid':     new FormField('eventID'),
       'title':                new FormField('title', true),
       'creator':              new FormField('creator'),
       'contributor':          new FormField('contributor'),
@@ -370,14 +370,15 @@ SchedulerUI.selectRecordingType = function(recType){
       'recurrence.start':     new FormField(['recurStart'], true, { getValue:getRecurStart, setValue:setRecurStart, checkValue:checkRecurStart, dispValue:getRecurStartDisplay, label:'label-recurstart', errorField:'missing-recurstart' }),
       'recurrence.duration':  new FormField(['recurDurationHour', 'recurDurationMin'], true, { getValue:getDuration, setValue:setDuration, checkValue:checkDuration, dispValue:getDurationDisplay, label:'label-recurduration', errorField:'missing-recurduration' }), //returns a date incremented by duration.
       'recurrence.end':       new FormField(['recurEnd'], true, {getValue:getRecurEnd, setValue:setRecurEnd, checkValue:checkRecurEnd, dispValue:getRecurEndDisplay}),
-      'attendees':            new FormField('recurAgent', true, { getValue:getAgent, setValue:setAgent, checkValue:checkAgent }),
+      'attendees':            new FormField('recurAgent', true, { getValue:getRecurAgent, setValue:setRecurAgent, checkValue:checkRecurAgent }),
       'device':               new FormField('recurAgent')
     };
+    SchedulerForm.rootEl = 'RecurringEvent';
   }else{
     $('#recurring_recording').hide();
     $('#single_recording').show();
     fields = {
-      'recurringeventid': new FormField('eventID'),
+      'eventid': new FormField('eventID'),
       'title':            new FormField('title', true),
       'creator':          new FormField('creator'),
       'contributor':      new FormField('contributor'),
@@ -392,6 +393,7 @@ SchedulerUI.selectRecordingType = function(recType){
       'attendees':        new FormField('attendees', true, { getValue:getAgent, setValue:setAgent, checkValue:checkAgent }),
       'device':           new FormField('attendees')
     };
+    SchedulerForm.rootEl = 'Event';
   }
   //Form Manager, handles saving, loading, de/serialization, and validation
   SchedulerForm.setFormFields(fields);
@@ -433,7 +435,7 @@ SchedulerForm.serialize = function() {
     var mdlist = doc.createElement('metadata_list');
     for(var e in this.formFields) {
       if(e == 'eventid' || e == 'recurringeventid' || e == 'recurrence') {
-        el = doc.createElement('eventid');
+        el = doc.createElement(e);
         el.appendChild(doc.createTextNode(this.formFields[e].getValue()));
         doc.documentElement.appendChild(el);
       } else {
@@ -467,6 +469,7 @@ SchedulerForm.validate = function() {
   $('#missingFields-container').hide();
   for(var el in this.formFields) {
     var e = this.formFields[el];
+    AdminUI.log(e);
     if(e.required){
       if(!e.checkValue()){
         error = true;
@@ -876,7 +879,7 @@ function checkStartDate(){
     date &&
     this.fields.startTimeHour &&
     this.fields.startTimeMin) {
-      var startdatetime = new Date(date.getFullYear(), 
+    var startdatetime = new Date(date.getFullYear(), 
                                  date.getMonth(), 
                                  date.getDate(), 
                                  this.fields.startTimeHour.val(),
@@ -891,7 +894,7 @@ function checkStartDate(){
 function getRecurValue(){
   if(this.checkValue()){
     if(this.fields.schedule_repeat.val() == 'weekly'){
-      var rrule = "RRULE:FREQ=WEEKLY;UNTIL=" + SchedulerUI.toICalDate(this.fields.endDate.datepicker('getDate')) + ";BYDAY=";
+      var rrule = "FREQ=WEEKLY;UNTIL=" + SchedulerUI.toICalDate(this.fields.recurEnd.datepicker('getDate')) + ";BYDAY=";
       var days = [];
       if(this.fields.repeat_sun[0].checked){
         days.push("SU");
@@ -914,7 +917,10 @@ function getRecurValue(){
       if(this.fields.repeat_sat[0].checked){
         days.push("SA");
       }
-      this.value = rrule + days.toString();
+      var date  = new Date(SchedulerForm.formFields['recurrence.start'].getValue());
+      var hour  = date.getUTCHours();
+      var min   = date.getUTCMinutes();
+      this.value = rrule + days.toString() + ";BYHOUR=" + hour + ";BYMINUTE=" + min;
     }
   }
   return this.value;
@@ -926,7 +932,7 @@ function setRecurValue(value){
   }
   if(value.rrule.indexOf('FREQ=WEEKLY') != -1){
     this.fields.schedule_repeat.val('weekly');
-    var days = value.rrule.split('BYDAY=')
+    var days = value.rrule.split('BYDAY=');
     if(days[1].length > 0){
       days = days[1].split(',');
       this.fields.repeat_sun[0].checked = this.fields.repeat_mon[0].checked = this.fields.repeat_tue[0].checked = this.fields.repeat_wed[0].checked = this.fields.repeat_thu[0].checked = this.fields.repeat_fri[0].checked = this.fields.repeat_sat[0].checked = false;
@@ -968,7 +974,7 @@ function checkRecurValue(){
        this.fields.repeat_thu[0].checked ||
        this.fields.repeat_fri[0].checked ||
        this.fields.repeat_sat[0].checked ){
-      if(this.fields.endDate.datepicker('getDate')){ //Todo, check enddate is after start date.
+      if(this.fields.recurEnd.datepicker('getDate')){ //Todo, check enddate is after start date.
         return true;
       }
     }
@@ -1015,10 +1021,7 @@ function getEndTime(){
   if(this.checkValue()){
     duration = this.fields.durationHour.val() * 3600; // seconds per hour
     duration += this.fields.durationMin.val() * 60; // seconds per min
-    var sdate = SchedulerForm.formFields['time.start'].getValue()
-    if(sdate && sdate.constructor == Date){
-      this.value = sdate.getTime() + (duration * 1000);
-    }
+    this.value = SchedulerForm.formFields['time.start'].getValue() + (duration * 1000);
   }
   return this.value;
 }
@@ -1056,33 +1059,106 @@ function getEndTimeDisplay(){
 }
 
 function getRecurStart(){
-  
+  if(this.checkValue()){
+    var date = this.fields.recurStart.datepicker('getDate');
+    if(date && date.constructor == Date){
+      this.value = date.getTime();
+    }
+  }
+  return this.value;
 }
 
 function getRecurStartDisplay(){
-  
+  return (new Date(this.getValue())).toLocaleString();
 }
 
-function setRecurStart(){
-  
+function setRecurStart(value){
+  var val = parseInt(value);
+  if(val == 'NaN'){
+    this.fields.recurStart.datepicker('setDate', new Date(val));
+  }
 }
 
 function checkRecurStart(){
-  
+  if(this.fields.recurStart.datepicker){
+    return true;
+  }
+  return false;
 }
 
 function getRecurEnd(){
-
+  if(this.checkValue()){
+    var date = this.fields.recurEnd.datepicker('getDate');
+    if(date && date.constructor == Date){
+      this.value = date.getTime();
+    }
+  }
+  return this.value;
 }
 
 function getRecurEndDisplay(){
-
+  return (new Date(this.getValue())).toLocaleString();
 }
 
 function setRecurEnd(){
-
+  var val = parseInt(value);
+  if(val == 'NaN'){
+    this.fields.recurEnd.datepicker('setDate', new Date(val));
+  }
 }
 
 function checkRecurEnd(){
+  if(this.fields.recurEnd.datepicker){
+    return true;
+  }
+  return false;
+}
 
+/**
+ * Overrides getValue for FormFields for agent field
+ * @return {String} agent id
+ */
+function getRecurAgent() {
+  if(this.fields.recurAgent) {
+    this.value = this.fields.recurAgent.val();
+  }
+  return this.value;
+}
+
+/**
+ * Overrides setValue for FormFields for agent field
+ * @param {String} agent id
+ */
+function setRecurAgent(value) {
+  if(typeof value == 'string'){
+    value = { attendees: value };
+  }
+  var opts = this.fields.recurAgent.children();
+  var agentId = value.attendees;
+  if(opts.length > 0) {
+    var found = false;
+    for(var i = 0; i < opts.length; i++) {
+      if(opts[i].value == agentId) {
+        found = true;
+        opts[i].selected = true;
+        break;
+      }
+    }
+    if(!found){ //Couldn't find the previsouly selected agent, add to list and notifiy user.
+      this.fields.recurAgent.append($('<option selected="selected">' + agentId + '</option>').val(agentId));
+      $('#attendees').change();
+    }
+    this.fields.recurAgent.val(agentId);
+  }
+}
+
+/**
+ * Overrides getValue for FormFields for agent field
+ * @return {Boolean} true if an agent is selected
+ */
+function checkRecurAgent() {
+  if(this.getValue()) {
+    return true;
+  }
+  return false;
 }

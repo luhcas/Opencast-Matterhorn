@@ -409,7 +409,7 @@
                           <option value="weekly"><span id="i18n_sched_weekly">Weekly</span></option>
                         </select>
                       </li>
-                      <li class="required hidden" id="day-select">
+                      <li class="required" id="day-select">
                         <label class="fl-label form-box-label" for="repeat-days"><span id="i18n_sched_days">Days</span>:</label>
                         <table>
                           <thead>
@@ -441,7 +441,7 @@
                         <input type="text" size="10" name="recurStart" id="recurStart" style="margin-right:5px;">
                         <span class="fl-icon icon-help" id="help_recurstart" title="Click for help"></span>
                       </li>
-                      <li class="required hidden" id="recurrence-end">
+                      <li class="required">
                         <label class="fl-label form-box-label" id="label-recurend"><span id="i18n_recurend_label">End Date</span>:</label>
                         <input type="text" size="10" name="recurEnd" id="recurEnd" style="margin-right:5px;">
                         <span class="fl-icon icon-help" id="help_recurend" title="Click for help"></span>
@@ -578,7 +578,7 @@
                       <span class="fl-icon icon-help" id="help_duration" title="Click for help"></span>
                     </li>
                     <li class="required" style="clear: both;">
-                      <label class="fl-label"  id="label-recurAgent"><span id="i18n_agent_label"></span>:</label>
+                      <label class="fl-label"  id="label-recurAgent"><span id="i18n_agent_label">Agent</span>:</label>
                       <div>
                         <select id="recurAgent" name="recurAgent">
                           <option value="">Choose one:</option>
@@ -587,7 +587,7 @@
                       </div>
                     </li>
                     <li class="required">
-                      <label class="fl-label" id="label-input"><span id="i18n_input_label"></span>:</label>
+                      <label class="fl-label" id="label-input"><span id="i18n_input_label">Inputs</span>:</label>
                       <div class="form-radio-group" style="float: left; width: 300px;">
                         <div id="recur-input-list"></div>
                         <span class="fl-icon icon-help" id="help_input" title="Click for help" style="vertical-align: middle; margin-left: .8em;"></span>
