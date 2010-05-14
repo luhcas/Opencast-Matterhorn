@@ -5,11 +5,11 @@
   <artifactId>matterhorn-analysis-videosegmenter</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-analysis-videosegmenter</name>
-  <version>0.8-SNAPSHOT</version>
+  <version>0.9-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.8-SNAPSHOT</version>
+    <version>0.9-SNAPSHOT</version>
   </parent>
   <dependencies>
   
@@ -18,25 +18,25 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-analysis-api</artifactId>
-      <version>0.8-SNAPSHOT</version>
+      <version>0.9-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-composer-service-api</artifactId>
-      <version>0.8-SNAPSHOT</version>
+      <version>0.9-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-workspace-api</artifactId>
-      <version>0.8-SNAPSHOT</version>
+      <version>0.9-SNAPSHOT</version>
     </dependency>
 
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-working-file-repository-service-api</artifactId>
-      <version>0.8-SNAPSHOT</version>
+      <version>0.9-SNAPSHOT</version>
     </dependency>
 
     <!--  Thirdparty dependencies -->

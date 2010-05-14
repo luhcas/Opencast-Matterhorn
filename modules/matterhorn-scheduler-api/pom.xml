@@ -5,11 +5,11 @@
   <artifactId>matterhorn-scheduler-api</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-scheduler-api</name>
-  <version>0.8-SNAPSHOT</version>
+  <version>0.9-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.8-SNAPSHOT</version>
+    <version>0.9-SNAPSHOT</version>
   </parent>
   <dependencies>
   </dependencies>

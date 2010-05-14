@@ -5,11 +5,11 @@
   <artifactId>matterhorn-workflow-ui</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-workflow-ui</name>
-  <version>0.8-SNAPSHOT</version>
+  <version>0.9-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.8-SNAPSHOT</version>
+    <version>0.9-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
@@ -23,7 +23,7 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-util</artifactId>
-      <version>0.8-SNAPSHOT</version>
+      <version>0.9-SNAPSHOT</version>
       <type>bundle</type>
     </dependency>
   </dependencies>

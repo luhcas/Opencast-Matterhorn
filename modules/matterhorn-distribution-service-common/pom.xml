@@ -18,17 +18,17 @@
   
   <packaging>jar</packaging>
   <name>matterhorn-distribution-service-common</name>
-  <version>0.8-SNAPSHOT</version>
+  <version>0.9-SNAPSHOT</version>
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-distribution-service-api</artifactId>
-      <version>0.8-SNAPSHOT</version>
+      <version>0.9-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-workspace-api</artifactId>
-      <version>0.8-SNAPSHOT</version>
+      <version>0.9-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -151,7 +151,7 @@
           <dependency>
             <groupId>org.opencastproject</groupId>
             <artifactId>matterhorn-build-tools</artifactId>
-            <version>0.8-SNAPSHOT</version>
+            <version>0.9-SNAPSHOT</version>
             <scope>compile</scope>
           </dependency>
         </dependencies>
