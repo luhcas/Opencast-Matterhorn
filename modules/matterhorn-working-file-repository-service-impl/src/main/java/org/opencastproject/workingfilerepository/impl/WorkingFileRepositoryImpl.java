@@ -64,7 +64,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     }
     if(cc == null || cc.getBundleContext().getProperty("workingFileRepoPath") == null) {
-      rootDirectory = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workingfilerepo";
+      rootDirectory = cc.getBundleContext().getProperty("org.opencastproject.storage.dir") + File.separator + "workingfilerepo";
     } else {
       rootDirectory = cc.getBundleContext().getProperty("workingFileRepoPath");
     }

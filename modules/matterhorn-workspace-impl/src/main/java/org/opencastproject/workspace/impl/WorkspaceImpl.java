@@ -98,7 +98,7 @@ public class WorkspaceImpl implements Workspace {
     // FIXME: there may not be any local mappings.
     String repoRoot;
     if (cc == null || cc.getBundleContext().getProperty("workingFileRepoPath") == null) {
-      repoRoot = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator
+      repoRoot = cc.getBundleContext().getProperty("org.opencastproject.storage.dir") + File.separator
               + "workingfilerepo";
     } else {
       repoRoot = cc.getBundleContext().getProperty("workingFileRepoPath");
