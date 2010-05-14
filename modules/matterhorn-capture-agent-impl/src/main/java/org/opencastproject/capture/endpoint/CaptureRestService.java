@@ -140,6 +140,7 @@ public class CaptureRestService {
   @Produces(MediaType.TEXT_PLAIN)
   @Path("startCapture")
   public Response startCapture(@FormParam("config") String config) {
+    logger.debug("Capture configuration received: \n{}", config);
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }

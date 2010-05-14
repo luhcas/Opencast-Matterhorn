@@ -69,6 +69,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Dictionary;
@@ -770,10 +771,18 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   public String getDefaultAgentPropertiesAsString() {
     Properties p = configService.getAllProperties();
     String result = "";
+    String[] l = new String[p.size()];
+    int i = 0;
     for (Object k : p.keySet()) {
       String key = (String) k;
-      result = result + key + "=" + p.getProperty(key) + "\n";
+      String newline =  key + "=" + p.getProperty(key) + "\n";
+      l[i++] = newline;
     }
+    Arrays.sort(l);
+    for (String s : l) {
+      result = result + s;
+    }
+    
     return result;
   }
 
