@@ -180,7 +180,7 @@ public class AdminuiRestService {
         } else {
           out.add(item);
         }
-        logger.info("Recording state: " + state.name() + " MediaPackage: " + mediapackage.getTitle() + " - " + joinStringArray(mediapackage.getCreators()) + " - " + mediapackage.getSeriesTitle());
+        logger.info("Recording state: " + state.name() + " MediaPackage: " + mediapackage.getTitle() + " - " + joinStringArray(mediapackage.getCreators()) + " - " + mediapackage.getSeries());
       }
     } else {
       logger.warn("WorkflowService not present, returning empty list");
