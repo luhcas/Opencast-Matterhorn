@@ -163,6 +163,8 @@
         <module>modules/matterhorn-analysis-rest</module>
         <module>modules/matterhorn-analysis-dictionary</module>
         <module>modules/matterhorn-analysis-videosegmenter</module>
+        <module>modules/matterhorn-capture-admin-service-api</module>
+        <module>modules/matterhorn-capture-admin-service-impl</module>
         <module>modules/matterhorn-composer-service-api</module>
         <module>modules/matterhorn-composer-service-impl</module>
         <module>modules/matterhorn-conductor</module>
