@@ -150,13 +150,11 @@ public class AdminuiRestService {
         RecordingDataView item = new RecordingDataViewImpl();
         item.setId(workflows[i].getId());
         item.setTitle(mediapackage.getTitle());
-        //item.setPresenter(formatMultipleString(mediapackage.getContributors()));
-        item.setPresenter(formatMultipleString(mediapackage.getCreators()));
+        item.setPresenter(joinStringArray(mediapackage.getCreators()));
         item.setSeriesTitle(mediapackage.getSeries());
         item.setSeriesId(mediapackage.getSeries());
         Date date = mediapackage.getDate();
         if (date != null) {
-          //item.setStartTime(sdf.format(date));
           item.setStartTime(Long.toString(date.getTime()));
         }
         item.setCaptureAgent(null); //FIXME get capture agent from where...?
@@ -168,11 +166,6 @@ public class AdminuiRestService {
           sb.append(operation.getState().toString() + ": " + operation.getId() + ";");
         }
         item.setProcessingStatus(sb.toString());
-        /*if (operation != null) {
-        item.setProcessingStatus(operation.getState().toString() + " : " + operation.getName());
-        } else {
-        logger.warn("Could not get any WorkflowOperationInstance from WorkflowInstance.");
-        }*/
         // TODO get distribution status #openquestion is there a way to find out if a workflowOperation does distribution?
 
         // get Title and ActionTitle/ActionPanelURL from HoldOperation
@@ -187,7 +180,7 @@ public class AdminuiRestService {
         } else {
           out.add(item);
         }
-        logger.info("Recording:" + item.getTitle() + " " + item.getPresenter() + " " + item.getSeriesTitle());
+        logger.info("Recording state: " + state.name() + " MediaPackage: " + mediapackage.getTitle() + " - " + joinStringArray(mediapackage.getCreators()) + " - " + mediapackage.getSeriesTitle());
       }
     } else {
       logger.warn("WorkflowService not present, returning empty list");
@@ -196,12 +189,12 @@ public class AdminuiRestService {
   }
 
   /**
-   * Formats an array of values to a single string for display
+   * Joins String array
    * 
    * @param values The array of values to concatenate
    * @return A formated string containing each of the values
    */
-  private String formatMultipleString(String[] values) {
+  private String joinStringArray(String[] values) {
     if (values == null || values.length == 0) {
       return "";
     }
