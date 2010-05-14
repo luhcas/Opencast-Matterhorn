@@ -182,8 +182,22 @@ Upload.loadDublinCore = function(url) {
     success: function(data) {
       var url = $(data.documentElement).children().each(function(index, elm) {
         var tagName = elm.tagName.split(/:/)[1];
-        //alert(tagName);
-        $('#'+tagName).val($(elm).text());
+        if ($('#'+tagName).val() != '') {   // multi value? --> clone the field
+          var toClone = $('#'+tagName);
+          var clone = $(toClone).clone(true);
+          $(clone).removeAttr('id').val('');
+          $(toClone).parent().children('.additionalFieldsContainer').append(clone);   // .insertBefore() yields exception
+          var remove = document.createElement("span");
+          $(remove).addClass("deleteIcon");
+          $(remove).bind('click',function() {
+            $(this).prev().remove();
+            $(this).remove();
+          });
+          $(toClone).parent().children('.additionalFieldsContainer').append(remove);
+          $(clone).val($(elm).text());
+        } else {
+          $('#'+tagName).val($(elm).text());
+        }
       });
     }
   });

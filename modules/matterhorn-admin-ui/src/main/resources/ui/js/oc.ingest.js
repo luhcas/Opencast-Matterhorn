@@ -32,7 +32,7 @@ ocIngest.createMediaPackage = function() {
 }
 
 ocIngest.copyPreviousMediaFile = function() {
-  alert("adding previous file");
+  //alert("adding previous file");
   var flavor = $('#previous-file-flavor').val();
   var url = $('#previous-file-url').val();
   $.ajax({
