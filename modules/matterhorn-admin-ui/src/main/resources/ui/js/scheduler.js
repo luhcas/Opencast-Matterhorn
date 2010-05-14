@@ -313,7 +313,7 @@ SchedulerUI.displayCapabilities = function(capa){
 SchedulerUI.handleAgentTZ = function(tz){
   var localTZ = -(new Date()).getTimezoneOffset(); //offsets in minutes
   Agent.tzDiff = 0;
-  AdminUI.log(tz, localTZ, tz != localTZ);
+  //AdminUI.log(tz, localTZ, tz != localTZ);
   if(tz && tz != localTZ){
     //Display note of agent TZ difference, all times local to capture agent.
     //update time picker to agent time
@@ -492,7 +492,7 @@ SchedulerForm.validate = function() {
   $('#missingFields-container').hide();
   for(var el in this.formFields) {
     var e = this.formFields[el];
-    AdminUI.log(e);
+    //AdminUI.log(e);
     if(e.required){
       if(!e.checkValue()){
         error = true;
