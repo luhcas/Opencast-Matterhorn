@@ -39,9 +39,8 @@ import java.net.URLEncoder;
 import java.util.Dictionary;
 
 /**
- * A very simple (read: inadequate) implementation that stores all files under a root directory
- * using the media package ID as a subdirectory and the media package element ID as the
- * file name.
+ * A very simple (read: inadequate) implementation that stores all files under a root directory using the media package
+ * ID as a subdirectory and the media package element ID as the file name.
  */
 public class WorkingFileRepositoryImpl implements WorkingFileRepository, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryImpl.class);
@@ -55,24 +54,25 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     this.rootDirectory = rootDirectory;
     this.serverUrl = serverUrl;
   }
-  
+
   public void activate(ComponentContext cc) {
-    if(rootDirectory != null) return; // If the root directory was set by the constructor, respect that setting
-    if(cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
+    if (rootDirectory != null)
+      return; // If the root directory was set by the constructor, respect that setting
+    if (cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
       serverUrl = UrlSupport.DEFAULT_BASE_URL;
     } else {
       serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     }
-    if(cc == null || cc.getBundleContext().getProperty("workingFileRepoPath") == null) {
-      rootDirectory = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "workingfilerepo";
+    if (cc == null || cc.getBundleContext().getProperty("workingFileRepoPath") == null) {
+      rootDirectory = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator
+              + "workingfilerepo";
     } else {
       rootDirectory = cc.getBundleContext().getProperty("workingFileRepoPath");
     }
     createRootDirectory();
-    
-    logger.info(getDiskSpace());
-}
 
+    logger.info(getDiskSpace());
+  }
 
   public void delete(String mediaPackageID, String mediaPackageElementID) {
     checkId(mediaPackageID);
@@ -83,20 +83,19 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       return;
     }
     logger.debug("Attempting to delete file {}", f.getAbsolutePath());
-    if(f.canWrite()) {
+    if (f.canWrite()) {
       f.delete();
     } else {
-      throw new SecurityException("Can not delete file in mediaPackage/mediaElement: " +
-              mediaPackageID + "/" + mediaPackageElementID);
+      throw new SecurityException("Can not delete file in mediaPackage/mediaElement: " + mediaPackageID + "/"
+              + mediaPackageElementID);
     }
     File d = getDirectory(mediaPackageID, mediaPackageElementID);
     logger.debug("Attempting to delete directory {}", d.getAbsolutePath());
-    if(d.canWrite()){
+    if (d.canWrite()) {
       d.delete();
-    }
-    else{
-      throw new SecurityException("Can not delete directory at mediaPackage/mediaElement " +
-              mediaPackageID + "/" + mediaPackageElementID);
+    } else {
+      throw new SecurityException("Can not delete directory at mediaPackage/mediaElement " + mediaPackageID + "/"
+              + mediaPackageElementID);
     }
   }
 
@@ -125,11 +124,12 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       return null;
     }
     try {
-      if(f.getName().equals(mediaPackageElementID)) {
-        return new URI(serverUrl + "/files/" + mediaPackageID + "/" + mediaPackageElementID);
+      if (f.getName().equals(mediaPackageElementID)) {
+        return new URI(serverUrl + "/files/mp/" + mediaPackageID + "/" + mediaPackageElementID);
       } else {
         try {
-          return new URI(serverUrl + "/files/" + mediaPackageID + "/" + mediaPackageElementID + "/" + URLEncoder.encode(f.getName(), "UTF-8"));
+          return new URI(serverUrl + "/files/mp/" + mediaPackageID + "/" + mediaPackageElementID + "/"
+                  + URLEncoder.encode(f.getName(), "UTF-8"));
         } catch (UnsupportedEncodingException e) {
           throw new RuntimeException(e);
         }
@@ -139,7 +139,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     }
   }
 
-  public URI put(String mediaPackageID, String mediaPackageElementID, InputStream in){
+  public URI put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
     return put(mediaPackageID, mediaPackageElementID, mediaPackageElementID, in);
   }
 
@@ -148,21 +148,23 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     checkId(mediaPackageElementID);
     File f = null;
     try {
-      f = new File(rootDirectory + File.separator + mediaPackageID + File.separator + 
-              mediaPackageElementID + File.separator + URLEncoder.encode(filename, "UTF-8"));
+      File dir = getDirectory(mediaPackageID, mediaPackageElementID);
+      if( ! dir.exists()) {
+        try {
+          logger.debug("Attempting to create a new directory at {}",dir.getAbsolutePath());
+          FileUtils.forceMkdir(dir);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      }
+      f = new File(dir, URLEncoder.encode(filename, "UTF-8"));
     } catch (UnsupportedEncodingException e1) {
       throw new RuntimeException(e1);
     }
     logger.debug("Attempting to write a file to {}", f.getAbsolutePath());
     FileOutputStream out = null;
     try {
-      if( ! f.exists()) {
-        logger.debug("Attempting to create a new file at {}", f.getAbsolutePath());
-        File mediaPackageElementDirectory = getDirectory(mediaPackageID, mediaPackageElementID);
-        if( ! mediaPackageElementDirectory.exists()) {
-          logger.debug("Attempting to create a new directory at {}", mediaPackageElementDirectory.getAbsolutePath());
-          FileUtils.forceMkdir(mediaPackageElementDirectory);
-        }
+      if (!f.exists()) {
         f.createNewFile();
       } else {
         logger.debug("Attempting to overwrite the file at {}", f.getAbsolutePath());
@@ -179,8 +181,9 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   }
 
   private void checkId(String id) {
-    if(id == null) throw new NullPointerException("IDs can not be null");
-    if(id.indexOf("..") > -1 || id.indexOf(File.separator) > -1) {
+    if (id == null)
+      throw new NullPointerException("IDs can not be null");
+    if (id.indexOf("..") > -1 || id.indexOf(File.separator) > -1) {
       throw new IllegalArgumentException("Invalid media package / element ID");
     }
   }
@@ -189,15 +192,19 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     File directory = getDirectory(mediaPackageID, mediaPackageElementID);
     String[] files = directory.list();
     if (files == null) {
-      logger.debug("Element directory {} does not exist", directory); 
+      logger.debug("Element directory {} does not exist", directory);
       return null;
-    } else if (files.length != 1) {
-      logger.error("Integrity error: Element directory {} is empty or contains more than one element", 
-              mediaPackageID + "/" + mediaPackageElementID);
-      throw new RuntimeException("Directory " + mediaPackageID + "/" + mediaPackageElementID +
-              "does not contain exactly one element");
+    } else if (files.length == 0) {
+      logger.debug("There are no files in the element directory {}", directory.getAbsolutePath());
+      return null;
+    } else if (files.length == 1) {
+      return new File(directory, files[0]);
+    } else {
+      logger.error("Integrity error: Element directory {} contains more than one element", mediaPackageID + "/"
+              + mediaPackageElementID);
+      throw new RuntimeException("Directory " + mediaPackageID + "/" + mediaPackageElementID
+              + "does not contain exactly one element");
     }
-    return new File(directory, files[0]);
   }
 
   private File getFileFromCollection(String collectionId, String fileName) {
@@ -205,13 +212,14 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     return new File(directory, fileName);
   }
 
-  private File getDirectory(String mediaPackageID, String mediaPackageElementID){
-    return new File(rootDirectory + File.separator + mediaPackageID + File.separator + mediaPackageElementID);
+  private File getDirectory(String mediaPackageID, String mediaPackageElementID) {
+    return new File(rootDirectory + File.separator + "mp" + File.separator + mediaPackageID
+            + File.separator + mediaPackageElementID);
   }
 
-  private File getDirectory(String collectionId){
+  private File getDirectory(String collectionId) {
     File collectionDir = new File(rootDirectory + File.separator + collectionId);
-    if( ! collectionDir.exists()) {
+    if (!collectionDir.exists()) {
       try {
         FileUtils.forceMkdir(collectionDir);
         logger.info("created collection directory " + collectionId);
@@ -225,14 +233,14 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   @SuppressWarnings("unchecked")
   public void updated(Dictionary props) throws ConfigurationException {
     logger.info("updating properties on {}", this);
-    String newRootDirectory = (String)props.get("root");
-    if(newRootDirectory != null) {
+    String newRootDirectory = (String) props.get("root");
+    if (newRootDirectory != null) {
       logger.info("setting root directory to {}", newRootDirectory);
       rootDirectory = newRootDirectory;
       createRootDirectory();
     }
-    String newServerUrl = (String)props.get("org.opencastproject.server.url");
-    if(newServerUrl != null) {
+    String newServerUrl = (String) props.get("org.opencastproject.server.url");
+    if (newServerUrl != null) {
       logger.info("setting serverUrl to {}", newServerUrl);
       serverUrl = newServerUrl;
     }
@@ -240,10 +248,10 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
 
   private void createRootDirectory() {
     File f = new File(rootDirectory);
-    if( ! f.exists()) {
+    if (!f.exists()) {
       try {
         FileUtils.forceMkdir(f);
-      } catch(Exception e) {
+      } catch (Exception e) {
         throw new RuntimeException(e);
       }
     }
@@ -251,26 +259,31 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#getCollectionSize(java.lang.String)
    */
   @Override
   public long getCollectionSize(String id) {
     File collectionDir = getDirectory(id);
-    if( ! collectionDir.exists() || ! collectionDir.canRead()) throw new IllegalArgumentException("can not find collection " + id);
+    if (!collectionDir.exists() || !collectionDir.canRead())
+      throw new IllegalArgumentException("can not find collection " + id);
     File[] files = collectionDir.listFiles();
-    if(files == null) throw new IllegalArgumentException("collection " + id + " is not a directory");
+    if (files == null)
+      throw new IllegalArgumentException("collection " + id + " is not a directory");
     return files.length;
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#getFromCollection(java.lang.String, java.lang.String)
+   * 
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#getFromCollection(java.lang.String,
+   *      java.lang.String)
    */
   @Override
   public InputStream getFromCollection(String collectionId, String fileName) {
     checkId(collectionId);
     File f = getFileFromCollection(collectionId, fileName);
-    if (f == null || ! f.exists() || ! f.isFile()) {
+    if (f == null || !f.exists() || !f.isFile()) {
       logger.warn("Tried to read from non existing object {}/{}", collectionId, fileName);
       return null;
     }
@@ -284,7 +297,9 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#putInCollection(java.lang.String, java.lang.String, java.io.InputStream)
+   * 
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#putInCollection(java.lang.String,
+   *      java.lang.String, java.io.InputStream)
    */
   @Override
   public URI putInCollection(String collectionId, String fileName, InputStream in) throws URISyntaxException {
@@ -292,17 +307,18 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     checkId(fileName);
     File f = null;
     try {
-      f = new File(rootDirectory + File.separator + collectionId + File.separator +  URLEncoder.encode(fileName, "UTF-8"));
+      f = new File(rootDirectory + File.separator + collectionId + File.separator
+              + URLEncoder.encode(fileName, "UTF-8"));
     } catch (UnsupportedEncodingException e1) {
       throw new RuntimeException(e1);
     }
     logger.debug("Attempting to write a file to {}", f.getAbsolutePath());
     FileOutputStream out = null;
     try {
-      if( ! f.exists()) {
+      if (!f.exists()) {
         logger.debug("Attempting to create a new file at {}", f.getAbsolutePath());
         File collectionDirectory = getDirectory(collectionId);
-        if( ! collectionDirectory.exists()) {
+        if (!collectionDirectory.exists()) {
           logger.debug("Attempting to create a new directory at {}", collectionDirectory.getAbsolutePath());
           FileUtils.forceMkdir(collectionDirectory);
         }
@@ -312,7 +328,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       }
       out = new FileOutputStream(f);
       IOUtils.copy(in, out);
-      return new URI(serverUrl + "/files/" + collectionId + "/" + fileName);
+      return new URI(serverUrl + "/files/collection/" + collectionId + "/" + URLEncoder.encode(fileName, "UTF-8"));
 
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -324,12 +340,27 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#copyTo(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+   * 
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#copyTo(java.lang.String, java.lang.String,
+   *      java.lang.String, java.lang.String)
    */
   @Override
   public URI copyTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement) {
     File source = getFileFromCollection(fromCollection, fromFileName);
+    File destDir = getDirectory(toMediaPackage, toMediaPackageElement);
+    if (!destDir.exists()) {
+      // we needed to create the directory, but couldn't
+      try {
+        FileUtils.forceMkdir(destDir);
+      } catch (IOException e) {
+        throw new IllegalStateException("could not create mediapackage/element directory '" + destDir.getAbsolutePath()
+                + "' : " + e);
+      }
+    }
     File dest = getFile(toMediaPackage, toMediaPackageElement);
+    if(dest == null) {
+      dest = new File(getDirectory(toMediaPackage, toMediaPackageElement), source.getName());
+    }
     try {
       FileUtils.copyFile(source, dest);
     } catch (IOException e) {
@@ -340,12 +371,27 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#moveTo(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+   * 
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#moveTo(java.lang.String, java.lang.String,
+   *      java.lang.String, java.lang.String)
    */
   @Override
   public URI moveTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement) {
     File source = getFileFromCollection(fromCollection, fromFileName);
+    File destDir = getDirectory(toMediaPackage, toMediaPackageElement);
+    if (!destDir.exists()) {
+      // we needed to create the directory, but couldn't
+      try {
+        FileUtils.forceMkdir(destDir);
+      } catch (IOException e) {
+        throw new IllegalStateException("could not create mediapackage/element directory '" + destDir.getAbsolutePath()
+                + "' : " + e);
+      }
+    }
     File dest = getFile(toMediaPackage, toMediaPackageElement);
+    if(dest == null) {
+      dest = new File(getDirectory(toMediaPackage, toMediaPackageElement), source.getName());
+    }
     try {
       FileUtils.moveFile(source, dest);
     } catch (IOException e) {
@@ -356,14 +402,17 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#removeFromCollection(java.lang.String, java.lang.String)
+   * 
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#removeFromCollection(java.lang.String,
+   *      java.lang.String)
    */
   @Override
   public void removeFromCollection(String collectionId, String fileName) {
     File f = getFileFromCollection(collectionId, fileName);
-    if(f.exists() && f.isFile() && f.canWrite()) {
+    if (f.exists() && f.isFile() && f.canWrite()) {
       boolean success = f.delete();
-      if(!success) throw new IllegalStateException("can not delete " + f);
+      if (!success)
+        throw new IllegalStateException("can not delete " + f);
     } else {
       throw new IllegalStateException("file " + f + " either does not exist, is not a file, or is not writable");
     }
@@ -371,42 +420,39 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#getCollectionContents(java.lang.String)
    */
   @Override
   public URI[] getCollectionContents(String collectionId) {
     File collectionDir = getDirectory(collectionId);
-    
+
     File[] files = collectionDir.listFiles();
     URI[] uris = new URI[files.length];
-    for(int i=0; i<files.length; i++) {
+    for (int i = 0; i < files.length; i++) {
       try {
-        uris[i] = new URI(serverUrl + "/files/" + collectionId + "/" + files[i].getName());
+        uris[i] = new URI(serverUrl + "/files/collection/" + collectionId + "/" + files[i].getName());
       } catch (URISyntaxException e) {
         logger.warn(e.getMessage(), e);
       }
     }
     return uris;
   }
-  
+
   public long getTotalSpace() {
-    String temp = "getSpace";
-    //if (rootDirectory == null) 
     File f = new File(rootDirectory);
     return f.getTotalSpace();
   }
-  
+
   public long getUsableSpace() {
-    String temp = "getSpace";
-    //if (rootDirectory == null) 
     File f = new File(rootDirectory);
     return f.getUsableSpace();
   }
-  
+
   public String getDiskSpace() {
     int usable = Math.round(getUsableSpace() / 1024 / 1024 / 1024);
     int total = Math.round(getTotalSpace() / 1024 / 1024 / 1024);
-    long percent = Math.round(100.0 * getUsableSpace()/(1+getTotalSpace()));
-    return "Usable space "+usable+" Gb out of "+total+" Gb ("+percent+"%)";
+    long percent = Math.round(100.0 * getUsableSpace() / (1 + getTotalSpace()));
+    return "Usable space " + usable + " Gb out of " + total + " Gb (" + percent + "%)";
   }
 }

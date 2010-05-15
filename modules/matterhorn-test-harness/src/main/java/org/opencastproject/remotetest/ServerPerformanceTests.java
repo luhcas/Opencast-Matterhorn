@@ -16,6 +16,7 @@
 package org.opencastproject.remotetest;
 
 import org.opencastproject.remotetest.server.perf.ConcurrentVideosegmenterTest;
+import org.opencastproject.remotetest.server.perf.ConcurrentWorkflowTest;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -26,7 +27,8 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-  ConcurrentVideosegmenterTest.class
+  ConcurrentVideosegmenterTest.class,
+  ConcurrentWorkflowTest.class
 })
 public class ServerPerformanceTests {
 

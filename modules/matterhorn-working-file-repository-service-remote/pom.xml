@@ -2,25 +2,30 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>matterhorn-working-file-repository-service-impl</artifactId>
+  <artifactId>matterhorn-working-file-repository-service-remote</artifactId>
   <packaging>bundle</packaging>
-  <name>matterhorn-working-file-repository-service-impl</name>
-  <version>0.9-SNAPSHOT</version>
+  <name>matterhorn-working-file-repository-service-remote</name>
+  <version>0.8-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>0.8-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-working-file-repository-service-api</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-util</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>0.8-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-security-api</artifactId>
+      <version>0.8-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -41,10 +46,6 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-fileupload</groupId>
-      <artifactId>commons-fileupload</artifactId>
     </dependency>
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
@@ -76,11 +77,10 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.workingfilerepository.impl </Export-Package>
+            <Export-Package> org.opencastproject.workingfilerepository.remote </Export-Package>
             <Embed-Dependency>json-simple;inline=true</Embed-Dependency>
             <Service-Component>
-              OSGI-INF/working-file-repo.xml,
-              OSGI-INF/working-file-repo-rest.xml
+              OSGI-INF/working-file-repo-remote.xml
             </Service-Component>
           </instructions>
         </configuration>

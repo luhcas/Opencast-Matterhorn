@@ -89,9 +89,9 @@ public class WorkspaceImpl implements Workspace {
     filesystemMappings = new HashMap<String, String>();
     String filesUrl;
     if (cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
-      filesUrl = UrlSupport.DEFAULT_BASE_URL + "/files";
+      filesUrl = UrlSupport.DEFAULT_BASE_URL + "/files/mp";
     } else {
-      filesUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url") + "/files";
+      filesUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url") + "/files/mp";
     }
 
     // Find the working file repository's root directory
@@ -99,7 +99,7 @@ public class WorkspaceImpl implements Workspace {
     String repoRoot;
     if (cc == null || cc.getBundleContext().getProperty("workingFileRepoPath") == null) {
       repoRoot = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator
-              + "workingfilerepo";
+              + "workingfilerepo" + File.separator + "mp";
     } else {
       repoRoot = cc.getBundleContext().getProperty("workingFileRepoPath");
     }

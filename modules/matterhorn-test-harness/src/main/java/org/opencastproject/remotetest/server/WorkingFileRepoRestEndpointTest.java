@@ -64,16 +64,16 @@ public class WorkingFileRepoRestEndpointTest {
     String fileName = "our_logo.gif"; // Used to simulate a file upload
     MultipartEntity postEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
     postEntity.addPart("file", new InputStreamBody(in, fileName));
-    HttpPost post = new HttpPost(BASE_URL + "/files/" + mediapackageId + "/" + elementId);
+    HttpPost post = new HttpPost(BASE_URL + "/files/mp/" + mediapackageId + "/" + elementId);
     post.setEntity(postEntity);
     HttpResponse response = client.execute(post);
     HttpEntity responseEntity  = response.getEntity();
     String stringResponse = EntityUtils.toString(responseEntity);
-    String expectedResponse = "File stored at " + BASE_URL + "/files/" + mediapackageId + "/" + elementId + "/" + fileName;
+    String expectedResponse = BASE_URL + "/files/mp/" + mediapackageId + "/" + elementId + "/" + fileName;
     Assert.assertEquals(expectedResponse, stringResponse);
 
     // Get the file back from the repository
-    HttpGet get = new HttpGet(BASE_URL + "/files/" + mediapackageId + "/" + elementId);
+    HttpGet get = new HttpGet(BASE_URL + "/files/mp/" + mediapackageId + "/" + elementId);
     HttpResponse getResponse = client.execute(get);
     byte[] bytesFromGet = IOUtils.toByteArray(getResponse.getEntity().getContent());
     

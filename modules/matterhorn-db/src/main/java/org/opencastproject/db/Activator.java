@@ -60,6 +60,7 @@ public class Activator implements BundleActivator {
   @Override
   public void start(BundleContext bundleContext) throws Exception {
     // Register the Datasource, defaulting to an embedded H2 database if DB configurations are not specified
+    String vendor = getConfigProperty(bundleContext.getProperty("dbVendor"), "HSQL");
     String jdbcDriver = getConfigProperty(bundleContext.getProperty("jdbcDriver"), "org.h2.Driver");
     String jdbcUrl = getConfigProperty(bundleContext.getProperty("jdbcUrl"), "jdbc:h2:" + rootDir + ";LOCK_MODE=1;MVCC=TRUE");
     String jdbcUser = getConfigProperty(bundleContext.getProperty("jdbcUser"), "sa");
@@ -78,6 +79,7 @@ public class Activator implements BundleActivator {
     if("true".equalsIgnoreCase(bundleContext.getProperty("ddl-generation"))) {
       props.put("eclipselink.ddl-generation", "create-tables");
       props.put("eclipselink.ddl-generation.output-mode", "database");
+      props.put("eclipselink.target-database", vendor);
     }
     propertiesRegistration = bundleContext.registerService(Map.class.getName(), props, props);
   }

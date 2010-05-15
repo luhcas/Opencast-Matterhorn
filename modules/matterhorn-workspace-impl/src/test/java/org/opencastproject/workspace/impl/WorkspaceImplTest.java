@@ -100,7 +100,7 @@ public class WorkspaceImplTest {
     IOUtils.closeQuietly(in);
     
     // Ensure that the file was put into the working file repository
-    File repoFile = new File(repoRoot + File.separator + "foo" + File.separator + "bar" + File.separator + "header.gif");
+    File repoFile = new File(repoRoot + File.separator + "mp" + File.separator + "foo" + File.separator + "bar" + File.separator + "header.gif");
     Assert.assertTrue(repoFile.exists());
 
     // Ensure that the file was not cached in the workspace (since there is a configured filesystem mapping)
@@ -124,11 +124,11 @@ public class WorkspaceImplTest {
     IOUtils.closeQuietly(in);
     
     // Ensure that the file was put into the working file repository
-    File repoFile = new File(repoRoot + File.separator + "foo" + File.separator + "bar" + File.separator + "header.gif");
+    File repoFile = new File(repoRoot + File.separator + "mp" + File.separator + "foo" + File.separator + "bar" + File.separator + "header.gif");
     Assert.assertTrue(repoFile.exists());
 
     // Ensure that the file was cached in the workspace (since there is no configured filesystem mapping)
-    File file = new File(workspaceRoot, "httplocalhost8080filesfoobarheader.gif");
+    File file = new File(workspaceRoot, "httplocalhost8080filesmpfoobarheader.gif");
     Assert.assertTrue(file.exists());
   }
   
