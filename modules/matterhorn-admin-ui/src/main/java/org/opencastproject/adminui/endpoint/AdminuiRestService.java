@@ -45,7 +45,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.ws.rs.GET;
@@ -247,8 +246,22 @@ public class AdminuiRestService {
       logger.warn("scheduler service not present, unable to retreive number of upcoming events");
     }
 
-    // get statistics from capture admin if present
-    if (captureAdminService != null) {
+    // get capturing statistics from scheduler if present
+    if (schedulerService != null) {
+      int capturing = 0;
+      SchedulerEvent[] events = schedulerService.getCapturingEvents();
+      Date current = new Date(System.currentTimeMillis());
+      for (SchedulerEvent event : events) {
+        if ( (current.after(event.getStartdate())) && (current.before(event.getEnddate())) ) {   // ..just to be sure
+          capturing++;
+        }
+      }
+      out.put("capturing", new Integer(capturing));
+      total += capturing;
+    } else {
+      logger.warn("scheduler service not present, unable to retreive number of capturing events");
+    }
+    /*if (captureAdminService != null) {
       Map<String, Recording> recordings = new HashMap<String, Recording>(captureAdminService.getKnownRecordings());
       Iterator<String> i = recordings.keySet().iterator();
       int capturing = 0;
@@ -263,7 +276,8 @@ public class AdminuiRestService {
       total += capturing;
     } else {
       logger.warn("CaptureAdmin service not present, unable to retrieve capture statistics");
-    }
+    }*/
+
 
     // get statistics from workflowService if present
     if (workflowService != null) {
