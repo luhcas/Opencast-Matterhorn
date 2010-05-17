@@ -385,9 +385,9 @@ SchedulerUI.selectRecordingType = function(recType){
       'abstract':             new FormField('description'),
       'channel-id':           new FormField('distMatterhornMM', true, {label:'label-distribution',errorField:'missing-distribution'}),
       'license':              new FormField('license'),
-      'recurrence.start':     new FormField(['recurStart'], true, { getValue:getRecurStart, setValue:setRecurStart, checkValue:checkRecurStart, dispValue:getRecurStartDisplay, label:'label-recurstart', errorField:'missing-recurstart' }),
+      'recurrence.start':     new FormField(['recurStart', 'recurEnd'], true, { getValue:getRecurStart, setValue:setRecurStart, checkValue:checkRecurStart, dispValue:getRecurStartDisplay, label:'label-recurstart', errorField:'missing-recurstart' }),
       'recurrence.duration':  new FormField(['recurDurationHour', 'recurDurationMin'], true, { getValue:getDuration, setValue:setDuration, checkValue:checkDuration, dispValue:getDurationDisplay, label:'label-recurduration', errorField:'missing-recurduration' }), //returns a date incremented by duration.
-      'recurrence.end':       new FormField(['recurEnd'], true, {getValue:getRecurEnd, setValue:setRecurEnd, checkValue:checkRecurEnd, dispValue:getRecurEndDisplay}),
+      'recurrence.end':       new FormField(['recurEnd', 'recurStart'], true, {getValue:getRecurEnd, setValue:setRecurEnd, checkValue:checkRecurEnd, dispValue:getRecurEndDisplay}),
       'attendees':            new FormField('recurAgent', true, { getValue:getRecurAgent, setValue:setRecurAgent, checkValue:checkRecurAgent }),
       'device':               new FormField('recurAgent'),
       'recurrence':           new FormField(['schedule_repeat', 'repeat_sun', 'repeat_mon', 'repeat_tue', 'repeat_wed', 'repeat_thu', 'repeat_fri', 'repeat_sat', 'recurEnd'], true, {getValue: getRecurValue, setValue: setRecurValue, checkValue: checkRecurValue, dispValue: getRecurDisp})
@@ -1106,7 +1106,8 @@ function setRecurStart(value){
 }
 
 function checkRecurStart(){
-  if(this.fields.recurStart.datepicker){
+  if(this.fields.recurStart.datepicker && this.fields.recurEnd.datepicker &&
+     this.fields.recurStart.datepicker('getDate') < this.fields.recurEnd.datepicker('getDate')){
     return true;
   }
   return false;
@@ -1126,7 +1127,7 @@ function getRecurEndDisplay(){
   return (new Date(this.getValue())).toLocaleString();
 }
 
-function setRecurEnd(){
+function setRecurEnd(value){
   var val = parseInt(value);
   if(val == 'NaN'){
     this.fields.recurEnd.datepicker('setDate', new Date(val));
@@ -1134,7 +1135,8 @@ function setRecurEnd(){
 }
 
 function checkRecurEnd(){
-  if(this.fields.recurEnd.datepicker){
+  if(this.fields.recurEnd.datepicker && this.fields.recurStart.datepicker &&
+     this.fields.recurEnd.datepicker('getDate') > this.fields.recurStart.datepicker('getDate')){
     return true;
   }
   return false;
