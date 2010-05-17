@@ -55,6 +55,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
+import org.opencastproject.workflow.api.WorkflowQuery;
 
 /**
  * REST endpoint for the Admin UI proxy service
@@ -227,7 +228,6 @@ public class AdminuiRestService {
    * @return statistic about number and state of recordings in the system
    */
   public HashMap<String, Integer> getRecordingsStatistic() {
-    String logMessage = "got statistics from: ";
     HashMap<String, Integer> out = new HashMap<String, Integer>();
     Integer total = new Integer(0);
 
@@ -242,7 +242,6 @@ public class AdminuiRestService {
         }
       }
       out.put("upcoming", new Integer(upcoming));
-      logMessage += "scheduler-service";
       total += events.length;
     } else {
       logger.warn("scheduler service not present, unable to retreive number of upcoming events");
@@ -262,14 +261,14 @@ public class AdminuiRestService {
       }
       out.put("capturing", new Integer(capturing));
       total += capturing;
-      logMessage += " capture-admin-service";
     } else {
       logger.warn("CaptureAdmin service not present, unable to retrieve capture statistics");
     }
 
     // get statistics from workflowService if present
     if (workflowService != null) {
-      WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery()).getItems();
+      WorkflowQuery q = workflowService.newWorkflowQuery().withStartPage(0).withCount(100000);
+      WorkflowInstance[] workflows = workflowService.getWorkflowInstances(q).getItems();
       int i = 0, processing = 0, inactive = 0, finished = 0, errors = 0, paused = 0;
       for (; i < workflows.length; i++) {
         switch (workflows[i].getState()) {
@@ -291,6 +290,7 @@ public class AdminuiRestService {
             break;
           case SUCCEEDED:
             finished++;
+            break;
         }
       }
       out.put("processing", Integer.valueOf(processing));
@@ -299,12 +299,10 @@ public class AdminuiRestService {
       out.put("finished", Integer.valueOf(finished));
       out.put("hold", Integer.valueOf(paused));
       total += i;
-      logMessage += " workflow-service";
     } else {
       logger.warn("workflow service not present, unable to retrieve workflow statistics");
     }
     out.put("total", total);
-    //logger.info(logMessage);
     return out;
   }
 
