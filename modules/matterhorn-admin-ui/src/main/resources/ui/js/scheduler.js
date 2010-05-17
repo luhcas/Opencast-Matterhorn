@@ -1007,10 +1007,10 @@ function checkRecurValue(){
 }
 
 function getRecurDisp(){
-  var rrule = this.getValue();
-  var days = rrule.split('BYDAY=');
-  if(days[1].length > 0){
-    days = days[1].split(',');
+  var rrule = this.getValue().split(';');
+  var found = (function(){ var index = -1; $.each(rrule, function(i, v){ if(v.indexOf('BYDAY=') != -1){ index = i; return true; }}); return index;})();
+  if(found != -1){
+    days = rrule[found].replace('BYDAY=', '').split(',');
     var dlist = [];
     for(d in days){
       switch(days[d]){
@@ -1037,6 +1037,8 @@ function getRecurDisp(){
           break;
       }
     }
+  }else{
+    return "No weekly recurrence found.";
   }
   return "Weekly on " + dlist.toString();
 }
