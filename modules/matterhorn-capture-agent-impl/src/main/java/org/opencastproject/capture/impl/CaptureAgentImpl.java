@@ -373,7 +373,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @return true if the stop was scheduled, false otherwise.
    */
   private boolean scheduleStop(String recordingID) {
-    String maxLength = configService.getItem(CaptureParameters.CAPTURE_MAX_LENGTH);
+    String maxLength = pendingRecordings.get(recordingID).getProperty(CaptureParameters.CAPTURE_MAX_LENGTH);
     long length = 0L;
     if (maxLength != null) {
       //Try and parse the value found, falling back to the agent's hardcoded max on error
@@ -442,16 +442,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
 
     logger.info("Recording \"{}\" succesfully stopped", theRec.getID());
-
-    //If the recording time was not scheduled (ie, it's unscheduled)
-    if (theRec.getProperty(CaptureParameters.RECORDING_END) == null)  {
-      if (scheduler.scheduleIngest(theRec.getID())) {
-        logger.info("Ingest scheduled for recording {}.", theRec.getID());
-      } else {
-        logger.warn("Ingest scheduling failed for recording {}!", theRec.getID());
-        setRecordingState(theRec.getID(), RecordingState.UPLOAD_ERROR);
-      }
-    }
 
     return true;
   }
