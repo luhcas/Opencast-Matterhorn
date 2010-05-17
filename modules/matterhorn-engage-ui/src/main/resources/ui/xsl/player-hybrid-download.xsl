@@ -13,9 +13,9 @@
 		   <table class="segments" cellspacing="0" cellpadding="0">
 		     <tr>
 		      <xsl:choose>
-        <xsl:when test="ns2:search-results/ns2:result/ns2:segments/ns2:mediaSegments">
-           <xsl:for-each select="ns2:search-results/ns2:result/ns2:segments/ns2:mediaSegments">
-           <xsl:if test="(../../ns2:mediapackage/@duration) > ./@time">
+        <xsl:when test="ns2:search-results/result/segments/mediaSegments">
+           <xsl:for-each select="ns2:search-results/result/segments/mediaSegments">
+           <xsl:if test="(../../mediapackage/@duration) > ./@time">
            <td 
              class="segment-holder" 
              style="width: 15px;" 
@@ -24,7 +24,7 @@
              <xsl:attribute name="onmouseover">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
              <xsl:attribute name="onmouseout">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
              <xsl:attribute name="onclick">Opencast.Watch.seekSegment(<xsl:value-of select="floor(./@time div 1000)" />)</xsl:attribute>
-             <xsl:attribute name="style">width: <xsl:value-of select="./@duration div (../../ns2:mediapackage/@duration) * 100" />%;</xsl:attribute>
+             <xsl:attribute name="style">width: <xsl:value-of select="./@duration div (../../mediapackage/@duration) * 100" />%;</xsl:attribute>
            </td>
            </xsl:if>
            </xsl:for-each>
@@ -53,7 +53,7 @@
 		<div id="oc-segments" style="display: none">
 		<table class="oc-segment-table">
                   <tr>
-              <xsl:for-each select="ns2:search-results/ns2:result/ns2:segments/ns2:mediaSegments">
+              <xsl:for-each select="ns2:search-results/result/segments/mediaSegments">
                 <td class="oc-segment-td">
                   <xsl:attribute name="onmouseover">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
                   <xsl:attribute name="onmouseout">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
@@ -62,7 +62,7 @@
                       select="floor(./@time div 1000)" />)</xsl:attribute>
                     <img height="83">
                       <xsl:attribute name="src"><xsl:value-of
-                        select="./ns2:previews/ns2:preview[@type='presentation']" /></xsl:attribute>
+                        select="./previews/preview[@type='presentation']" /></xsl:attribute>
                     </img>
                   </a>
                 </td>
@@ -73,83 +73,96 @@
     </div>
 	
 		<xsl:for-each
-      select="ns2:search-results/ns2:result/ns2:mediapackage/media/track">
+      select="ns2:search-results/result/mediapackage/media/track">
 
-      <xsl:if test="@type='presenter/source'">
-        <xsl:for-each select="tags/tag">
-          <xsl:if test=".='engage'">
-             <xsl:if test="../tag='streaming'">
-              <div id="oc-video-presenter-source-streaming" style="display: none">
-                <xsl:value-of select="../../url" />
-             </div>
-            </xsl:if>
-            <xsl:if test="../tag!='streaming'">
-              <div id="oc-video-presenter-source" style="display: none">
-                <xsl:value-of select="../../url" />
-             </div>
-            </xsl:if>
+      <xsl:if test="@type='presenter/delivery'">
+        <xsl:if test="./mimetype='video/x-flv'">
+          <xsl:if test="substring(url, 1, 4)='http'">
+           <div id="oc-video-presenter-delivery-x-flv-http" style="display: none">
+              <xsl:value-of select="url" />
+            </div>
           </xsl:if>
-        </xsl:for-each>
-      </xsl:if>
-
-      <xsl:if test="@type='presentation/source'">
-        <xsl:for-each select="tags/tag">
-          <xsl:if test=".='engage'">
-            <xsl:if test="../tag='streaming'">
-              <div id="oc-video-presentation-source-streaming" style="display: none">
-                <xsl:value-of select="../../url" />
-              </div>
-             </xsl:if>
-             <xsl:if test="../tag!='streaming'">
-              <div id="oc-video-presentation-source" style="display: none">
-                <xsl:value-of select="../../url" />
-              </div>
-            </xsl:if>
-          </xsl:if>
-        </xsl:for-each>
-      </xsl:if>
-      
-       <xsl:if test="@type='presenter/delivery'">
-        <xsl:for-each select="tags/tag">
-          <xsl:if test=".='engage'">
-             <xsl:if test="../tag='streaming'">
-              <div id="oc-video-presenter-source-streaming" style="display: none">
-                <xsl:value-of select="../../url" />
-             </div>
-            </xsl:if>
-            <xsl:if test="../tag!='streaming'">
-              <div id="oc-video-presenter-source" style="display: none">
-                <xsl:value-of select="../../url" />
-             </div>
-            </xsl:if>
-          </xsl:if>
-        </xsl:for-each>
+        </xsl:if>
       </xsl:if>
 
       <xsl:if test="@type='presentation/delivery'">
-        <xsl:for-each select="tags/tag">
-          <xsl:if test=".='engage'">
-            <xsl:if test="../tag='streaming'">
-              <div id="oc-video-presentation-source-streaming" style="display: none">
-                <xsl:value-of select="../../url" />
-              </div>
-             </xsl:if>
-             <xsl:if test="../tag!='streaming'">
-              <div id="oc-video-presentation-source" style="display: none">
-                <xsl:value-of select="../../url" />
-              </div>
-            </xsl:if>
+        <xsl:if test="./mimetype='video/x-flv'">
+          <xsl:if test="substring(url, 1, 4)='http'">
+           <div id="oc-video-presentation-delivery-x-flv-http" style="display: none">
+              <xsl:value-of select="url" />
+            </div>
           </xsl:if>
-        </xsl:for-each>
+        </xsl:if>
       </xsl:if>
-      
-      
+
+      <xsl:if test="@type='presenter/delivery'">
+        <xsl:if test="./mimetype='video/x-flv'">
+          <xsl:if test="substring(url, 1, 4)='rtmp'">
+           <div id="oc-video-presenter-delivery-x-flv-rtmp" style="display: none">
+              <xsl:value-of select="url" />
+            </div>
+          </xsl:if>
+        </xsl:if>
+      </xsl:if>
+
+      <xsl:if test="@type='presentation/delivery'">
+        <xsl:if test="./mimetype='video/x-flv'">
+          <xsl:if test="substring(url, 1, 4)='rtmp'">
+           <div id="oc-video-presentation-delivery-x-flv-rtmp" style="display: none">
+              <xsl:value-of select="url" />
+            </div>
+          </xsl:if>
+        </xsl:if>
+      </xsl:if>
+
+
+
+      <xsl:if test="@type='presenter/source'">
+        <xsl:if test="./mimetype='video/x-flv'">
+          <xsl:if test="substring(url, 1, 4)='http'">
+           <div id="oc-video-presenter-source-x-flv-http" style="display: none">
+              <xsl:value-of select="url" />
+            </div>
+          </xsl:if>
+        </xsl:if>
+      </xsl:if>
+
+      <xsl:if test="@type='presentation/source'">
+        <xsl:if test="./mimetype='video/x-flv'">
+          <xsl:if test="substring(url, 1, 4)='http'">
+           <div id="oc-video-presentation-source-x-flv-http" style="display: none">
+              <xsl:value-of select="url" />
+            </div>
+          </xsl:if>
+        </xsl:if>
+      </xsl:if>
+
+      <xsl:if test="@type='presenter/source'">
+        <xsl:if test="./mimetype='video/x-flv'">
+          <xsl:if test="substring(url, 1, 4)='rtmp'">
+           <div id="oc-video-presenter-source-x-flv-rtmp" style="display: none">
+              <xsl:value-of select="url" />
+            </div>
+          </xsl:if>
+        </xsl:if>
+      </xsl:if>
+
+      <xsl:if test="@type='presentation/source'">
+        <xsl:if test="./mimetype='video/x-flv'">
+          <xsl:if test="substring(url, 1, 4)='rtmp'">
+           <div id="oc-video-presentation-source-x-flv-rtmp" style="display: none">
+              <xsl:value-of select="url" />
+            </div>
+          </xsl:if>
+        </xsl:if>
+      </xsl:if>
+
     </xsl:for-each>
 
 		<div id="oc-title" style="display: none">
 			<xsl:choose>
-				<xsl:when test="ns2:search-results/ns2:result/ns2:dcTitle">
-					<xsl:value-of select="ns2:search-results/ns2:result/ns2:dcTitle" />
+				<xsl:when test="ns2:search-results/result/dcTitle">
+					<xsl:value-of select="ns2:search-results/result/dcTitle" />
 				</xsl:when>
 				<xsl:otherwise>
 					No Title
@@ -159,8 +172,8 @@
 
 		<div id="oc-creator" style="display: none">
 			<xsl:choose>
-				<xsl:when test="ns2:search-results/ns2:result/ns2:dcCreator">
-					<xsl:value-of select="ns2:search-results/ns2:result/ns2:dcCreator" />
+				<xsl:when test="ns2:search-results/result/dcCreator">
+					<xsl:value-of select="ns2:search-results/result/dcCreator" />
 				</xsl:when>
 				<xsl:otherwise>
 					No Creator
@@ -170,8 +183,8 @@
 		
 		<div id="oc-date" style="display: none">
       <xsl:choose>
-        <xsl:when test="ns2:search-results/ns2:result/ns2:dcCreated">
-          <xsl:value-of select="ns2:search-results/ns2:result/ns2:dcCreated" />
+        <xsl:when test="ns2:search-results/result/dcCreated">
+          <xsl:value-of select="ns2:search-results/result/dcCreated" />
         </xsl:when>
         <xsl:otherwise>
         </xsl:otherwise>
@@ -180,8 +193,8 @@
 
 		<div id="oc-abstract" style="display: none">
 			<xsl:choose>
-				<xsl:when test="ns2:search-results/ns2:result/ns2:dcAbstract">
-					<xsl:value-of select="ns2:search-results/ns2:result/ns2:dcAbstract" />
+				<xsl:when test="ns2:search-results/result/dcAbstract">
+					<xsl:value-of select="ns2:search-results/result/dcAbstract" />
 				</xsl:when>
 				<xsl:otherwise>
 					No Abstract

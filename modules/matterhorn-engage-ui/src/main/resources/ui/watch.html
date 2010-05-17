@@ -51,7 +51,7 @@
     
     <div id="oc_search">    
      <form action="index.html">
-        <input id="searchField" class="oc_search-Field" type="text" name="q" value="" />
+        <input id="oc_searchField" class="oc_search-Field" type="text" name="q" value="search Matterhorn" />
          <input id="oc_btn-search" type="submit" name="search" alt="search" title="search" value="Search"></input>
       </form>
     </div>
@@ -119,6 +119,10 @@
      
     <div id="data"></div>
     
+    <div id="oc_bookmarksPoints"></div>
+    
+    
+    
     <div >
       <div id="oc_tabs" class="oc_tabs-input">
         <input id="oc_btn-slides" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Hide Slides" value="Hide Slides" alt="Hide Slides" title="Hide Slides"></input>
@@ -137,8 +141,32 @@
       </div>
       
       <div id="oc_bookmarks" class="oc_DisplayNone fl-fix">
-        <input id="oc_addBookmark" class="oc_addBookmark"  type="text" value="Add a bookmark..."></input>
-        <input id="oc_btn-addBookmark" type="submit" name="Add Bookmark" alt="Add Bookmark" title="Add Bookmark" value="+"> </input>
+      
+        <div id="oc_bookmarks-container-left">
+        
+          <input id="oc_addBookmark" class="oc_addBookmark"  type="text" value="Add a bookmark..."></input>
+          <input id="oc_btn-addBookmark" type="submit" name="Add Bookmark" alt="Add Bookmark" title="Add Bookmark" value="+"> </input>
+          <input id="oc_btn-removeBookmark" class="oc_btn-removeBookmark" type="submit" name="Remove Bookmark" alt="Remove Bookmark" title="Remove Bookmark" value="-"> </input>
+          
+          <div>
+            <select id="oc_bookmarkSelect" size="5">
+              <option value="00:01:00" title="00:01:20 Alica Valls: Funny joke..." class="oc_option-publicBookmark">00:01:20 Alica Valls: Funny joke...</option>
+              <option value="00:02:43" title="00:02:43 Markus Ketterl: Thats good!" class="oc_option-publicBookmark">00:02:43 Markus Ketterl: Thats good!</option>
+            </select>
+          </div>
+        
+        </div>
+        
+        
+        
+        <div id="oc_bookmarks-container-right">
+          <input id="oc_myBookmarks-checkbox" type="checkbox" checked="true" alt="My Bookmarks"></input>
+          <input class="oc_bookmarks-myBookmark-label" type="text" value="My Bookmarks" disabled></input>
+          <br>
+          <input id="oc_publicBookmarks-checkbox" type="checkbox" checked="true" alt="Public Bookmarks"></input>
+          <input class="oc_bookmarks-publicBookmark-label" type="text" value="Public Bookmarks" disabled></input>
+        </div>
+      
       </div>
       
       <div id="oc_embed" class="oc_DisplayNone fl-fix">
@@ -152,8 +180,6 @@
       </div>
       
     </div>
- 
-    
     
     <div>
       
@@ -197,7 +223,7 @@
         <input id="oc_btn-transcript" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleTranscript()" name="Transcript" value="Transcript" alt="Transcript" title="Transcript"></input>
         
         <div id="oc_tabs-search">
-          <input class="oc_search-Field" type="text"></input>
+          <input id="oc_lecturer-search-field" class="oc_search-Field" type="text" value="search this lecturer"></input>
         </div>
         
         <div class="clear"></div>
@@ -211,71 +237,6 @@
      
     
     </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <!--  
-    <div id="oc_slidetext-sections" class="oc_DisplayNone fl-fix">slide text</div>
-    <div id="oc_notes-sections" class="oc_DisplayNone fl-fix">
-      <textarea name="wysiwyg" id="wysiwyg" rows="5" cols="103"></textarea>
-    
-    
-    
-    </div>
-    
-    
-    <div id="oc_embed-sections" class="oc_DisplayNone fl-fix">
-      <input id="oc_embed-720x545" class="oc_embed-720x545" type="submit" name="720 x 545" alt="720 x 545" title="720 x 545" value="720x545" onclick="Opencast.Player.embedIFrame(720,545);"> </input>
-      <input id="oc_embed-640x500" class="oc_embed-640x500" type="submit" name="640 x 500" alt="640 x 500" title="640 x 500" value="640x500" onclick="Opencast.Player.embedIFrame(640,500);"> </input>
-      <input id="oc_embed-560x455" class="oc_embed-560x455" type="submit" name="560 x 455" alt="560 x 455" title="560 x 455" value="560x455" onclick="Opencast.Player.embedIFrame(560,455);"> </input>
-      <input id="oc_embed-480x410" class="oc_embed-480x410" type="submit" name="480 x 410" alt="480 x 410" title="480 x 410" value="480x410" onclick="Opencast.Player.embedIFrame(480,410);"> </input>
-      
-      <div class="clear"></div>
-      
-      Choose your embed size. Copy the text and paste it in your html page. 
-      
-      <textarea id="oc_embed-textarea" class="oc_embed-textarea" rows="3" cols="2"></textarea>
-    </div>
-    
-    <div id="oc_bookmark-sections" class="oc_DisplayNone fl-fix">bookmark</div>
-    
-    <div id="oc_description-sections" class="oc_DisplayNone fl-fix">description</div>
-  </div>  
-  
-   <div id="oc_shortcuts-sections" class="oc_DisplayNone fl-fix">
-        <div id=oc_shortcuts class="oc_shortcuts" >
-          Press Control + Alt + I   = Toggle the keyboard shortcuts information between show or hide.<br>
-          Press Control + Alt + P   = Toggle the video between pause or play.<br>
-          Press Control + Alt + S   = Stop the video.<br>
-          Press Control + Alt + M   = Toggle between mute or unmute the video.<br>
-          Press Control + Alt + U   = Volume up<br>
-          Press Control + Alt + D   = Volume down<br>
-          Press Control + Alt 0 - 9 = Seek the time slider<br>
-          Press Control + Alt + C   = Toggle between captions on or off.<br>
-          Press Control + Alt + F   = Forward the video.<br>
-          Press Control + Alt + R   = Rewind the video.<br>
-          Press Control + Alt + T   = the current time for the screen reader<br>
-          Press on Mac cmd +        = to zoom in the player<br>
-          Press on Mac cmd -        = to minimize the player<br>
-          Press on Windows strg +   = to zoom in the player<br>
-          Press on Windows strg -   = to minimize the player<br>
-        </div>
-      </div> 
-  
-             -->
-  
   </body>
   
 </html>

@@ -422,7 +422,7 @@ Opencast.Initialize = (function ()
         
         // to calculate the embed flash height
         var iFrameHeight = document.documentElement.clientHeight;
-        var otherDivHeight = 88;
+        var otherDivHeight = 138;
         var flashHeight = iFrameHeight - otherDivHeight;
         $("#oc_flash-player").css('height',flashHeight + 'px'); 
         

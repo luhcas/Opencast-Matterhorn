@@ -4,57 +4,57 @@
 <xsl:stylesheet version="1.0"
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:ns2="http://search.opencastproject.org/">
 	<xsl:template match="/">
-		<xsl:for-each select="ns2:search-results/ns2:result">
+		<xsl:for-each select="ns2:search-results/result">
 			<div class="oc-search-result-item">
 				<div class="table-row">
 					<div class="left-container13">
 						<img height="54">
 							<xsl:attribute name="src"><xsl:value-of
-								select="ns2:cover" /></xsl:attribute>
+								select="cover" /></xsl:attribute>
 						</img>
 					</div>
 					<div class="left-container23">
 
 						<xsl:choose>
-							<xsl:when test="ns2:mediapackage/media/track/tags/tag[.='engage']">
+							<xsl:when test="mediapackage/media/track/mimetype[.='video/x-flv']">
 								<b>
 									<a>
 										<xsl:attribute name="href">watch.html?id=<xsl:value-of
-											select="ns2:mediapackage/@id" /></xsl:attribute>
-										<xsl:value-of select='substring(ns2:dcTitle, 0, 60)' />
-										<xsl:if test='string-length(ns2:dcTitle)>60'>
+											select="mediapackage/@id" /></xsl:attribute>
+										<xsl:value-of select='substring(dcTitle, 0, 60)' />
+										<xsl:if test='string-length(dcTitle)>60'>
 											...
 										</xsl:if>
 									</a>
 								</b>
 
-								<xsl:if test="ns2:dcCreator!=''">
+								<xsl:if test="dcCreator!=''">
 									by
-									<xsl:value-of select="ns2:dcCreator" />
+									<xsl:value-of select="dcCreator" />
 								</xsl:if>
 
 								<br />
 								<i>
-									<xsl:value-of select="ns2:dcCreated" />
+									<xsl:value-of select="dcCreated" />
 								</i>
 								<br />
-								<xsl:value-of select='substring(ns2:dcAbstract, 0, 170)' />
-								<xsl:if test='string-length(ns2:dcAbstract)>170'>
+								<xsl:value-of select='substring(dcAbstract, 0, 170)' />
+								<xsl:if test='string-length(dcAbstract)>170'>
 									...
 								</xsl:if>
 							</xsl:when>
 
 							<xsl:otherwise>
 								<b>
-									<xsl:value-of select='substring(ns2:dcTitle, 0, 60)' />
-									<xsl:if test='string-length(ns2:dcTitle)>60'>
+									<xsl:value-of select='substring(dcTitle, 0, 60)' />
+									<xsl:if test='string-length(dcTitle)>60'>
 										...
 									</xsl:if>
 								</b>
 
 								<xsl:if test="ns2:dcCreator!=''">
 									by
-									<xsl:value-of select="ns2:dcCreator" />
+									<xsl:value-of select="dcCreator" />
 								</xsl:if>
 								<br />
 							  <b>The Matterhorn Media Player cannot play this media file.</b>
@@ -62,16 +62,16 @@
                  Alternate media files that may be playable on other players may be listed in this
                 <a>
                   <xsl:attribute name="href">../../search/rest/episode?id=<xsl:value-of
-                    select="ns2:mediapackage/@id" /></xsl:attribute>
+                    select="mediapackage/@id" /></xsl:attribute>
                   XML file
                 </a>.
 							</xsl:otherwise>
 						</xsl:choose>
 					</div>
 					<div class="right-container13">
-						<xsl:value-of select="ns2:dcRightsHolder" />
+						<xsl:value-of select="dcRightsHolder" />
 						<br />
-						<xsl:value-of select="ns2:dcContributor" />
+						<xsl:value-of select="dcContributor" />
 					</div>
 				</div>
 			</div>

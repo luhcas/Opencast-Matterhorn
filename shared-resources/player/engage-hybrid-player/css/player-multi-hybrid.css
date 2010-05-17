@@ -61,7 +61,7 @@ body
   background-image:         url(../icons/magnifier.png);
   background-repeat:        no-repeat;
   padding-left:             20px;
-  width:                    100px !important;
+  width:                    140px !important;
  }
 
 #oc_btn-search
@@ -304,12 +304,108 @@ body
     float:                  left;
 }
 
+#oc_bookmarksPoints
+{
+  display:                  none;
+  height:                   10px;
+  margin-bottom:            5px;
+}
+
+#oc_bookmarks-container-left
+{
+  width:                    75%;
+  float:                    left;
+  text-align:               left;
+}
+
+#oc_bookmarks-container-right
+{
+  width:                    23%;
+  float:                    right;
+  text-align:               left;
+  margin-top:               30px;
+  margin-left:              5px;
+}
+
+#oc_bookmarks-container-right input
+{
+  background-color:         transparent;
+  color:                    #000000;
+  margin-bottom:            2px;
+}
+
+#oc_bookmarks-container-right input[disabled]
+{
+  color:                    #000000;
+  cursor:                   default;
+}
+
+.oc_bookmarks-myBookmark-label
+{
+  background-color:         #90ee90 !important;
+  padding-left:             5px;
+}
+
+.oc_bookmarks-publicBookmark-label
+{
+  background-color:         #87cefa !important;
+  padding-left:             5px;
+}
+
 .oc_addBookmark
 {
   border:                   1px solid #000000;
   background-color:         #ffffff;
   color:                    #000000;
   width:                    400px !important;
+  margin-left:              30px;
+}
+
+
+#oc_bookmarkSelect
+{
+  width:                    100%;
+  border:                   0px solid #999999;
+  background-color:         transparent;
+  margin-top:               5px;
+}
+
+
+option
+{
+  margin:2px;
+}
+
+.oc_option-myBookmark 
+{
+  background-color:         #90ee90;
+  display:                  block;
+  visibility:               visible;
+}
+
+.oc_option-publicBookmark 
+{
+  background-color:         #87cefa;
+  display:                  block;
+  visibility:               visible;
+}
+
+option:hover 
+{
+  color :                   #ffffff;
+}
+
+#oc_bookmarks-scrollArea
+{
+  margin-top:               5px;
+  height:                   80px;
+  width:                    100%;
+  overflow:                 auto;
+}
+
+#oc_btn-removeBookmark
+{
+  display:                  none;
 }
 
 .oc_tabTableRight

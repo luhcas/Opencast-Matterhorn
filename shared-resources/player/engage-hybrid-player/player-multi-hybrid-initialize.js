@@ -16,7 +16,10 @@ Opencast.Initialize = (function ()
     myHeight = 0,
     VOLUME = 'volume',
     VIDEOSIZE = 'videosize',
-    divId = '';
+    divId = '',
+    OPTIONMYCLASSNAME      = "oc_option-myBookmark",
+    clickMatterhornSearchField = false,
+    clickLecturerSearchField = false;
     
     function setDivId(id)
     {
@@ -232,6 +235,14 @@ Opencast.Initialize = (function ()
         $("#oc_btn-slides").attr('role', 'button');
         $("#oc_btn-slides").attr('aria-pressed', 'false'); 
         
+        $("#oc_myBookmarks-checkbox").attr('role', 'checkbox');
+        $("#oc_myBookmarks-checkbox").attr('aria-checked', 'true'); 
+        $("#oc_myBookmarks-checkbox").attr('aria-describedby', 'My Bookmarks'); 
+        
+        $("#oc_publicBookmarks-checkbox").attr('role', 'checkbox');
+        $("#oc_publicBookmarks-checkbox").attr('aria-checked', 'true');
+        $("#oc_publicBookmarks-checkbox").attr('aria-describedby', 'Public Bookmarks'); 
+        
         // Handler for .click()
         $('#oc_btn-skip-backward').click(function () 
         {
@@ -257,7 +268,93 @@ Opencast.Initialize = (function ()
         {
             Opencast.Player.showEditTime();
         });
-       
+        $('#oc_btn-addBookmark').click(function () 
+        {
+        	var value = $('#oc_current-time').attr('value');
+        	var text = $('#oc_addBookmark').attr('value');
+        	var name = 'Stefan Altevogt'; 
+        	Opencast.Player.addBookmark(value, name, text);
+        });
+        $('#oc_btn-removeBookmark').click(function () 
+        {
+        	Opencast.Player.removeBookmark();	
+        });
+        
+        $('#oc_bookmarkSelect').click(function () 
+        {
+        	var className = '';
+        	$('#oc_bookmarkSelect option:selected').each(function() 
+            {
+        		className = $(this).attr('class');
+            });
+        	
+        	Opencast.Player.playBookmark($('#oc_bookmarkSelect').val()); 
+        	
+        	if(className == OPTIONMYCLASSNAME)
+        	{
+        		
+        		$('#oc_btn-removeBookmark').css('display', 'inline' ); 
+        	}
+        	else
+        	{
+        		$('#oc_btn-removeBookmark').css('display', 'none' ); 
+        		
+        	}
+        });
+      
+        $('#oc_myBookmarks-checkbox').click(function () 
+        {
+           if ($("#oc_myBookmarks-checkbox").attr('aria-checked') === 'true')
+           {
+        	   
+        	   $("#oc_myBookmarks-checkbox").attr('aria-checked', 'false');
+        	   $('.oc_option-myBookmark').css('display', 'none' ); 
+        	   $('.oc_option-myBookmark').css('visibility', 'hidden' ); 
+        	   $('#oc_btn-removeBookmark').css('display', 'none' );
+        	   $('.oc_boomarkPoint').css('display', 'none' );
+        	   
+        	   
+           }
+           else
+           {
+        	   $("#oc_myBookmarks-checkbox").attr('aria-checked', 'true');
+        	   $('.oc_option-myBookmark').css('display', 'block' ); 
+        	   $('.oc_option-myBookmark').css('visibility', 'visible' ); 
+        	   $('.oc_boomarkPoint').css('display', 'inline' );
+           }
+        });
+        $('#oc_publicBookmarks-checkbox').click(function () 
+        {
+            if ($("#oc_publicBookmarks-checkbox").attr('aria-checked') === 'true')
+            {
+                $("#oc_publicBookmarks-checkbox").attr('aria-checked', 'false');
+                $('.oc_option-publicBookmark').css('display', 'none' );
+                $('.oc_option-publicBookmark').css('visibility', 'hidden' ); 
+            }
+            else
+            {
+               $("#oc_publicBookmarks-checkbox").attr('aria-checked', 'true');
+               $('.oc_option-publicBookmark').css('display', 'block' );
+               $('.oc_option-publicBookmark').css('visibility', 'visible' ); 
+            }
+        });
+        $('#oc_searchField').click(function () 
+        {
+        	if (clickMatterhornSearchField === false)
+        	{
+        		$("#oc_searchField").attr('value', '');
+        		clickMatterhornSearchField = true;
+        	}
+        });
+        $('#oc_lecturer-search-field').click(function () 
+        {
+            if (clickLecturerSearchField === false)
+            {
+                $("#oc_lecturer-search-field").attr('value', '');
+                clickLecturerSearchField = true;
+            }
+        });
+        
         // Handler for .mouseover()
         $('#oc_btn-skip-backward').mouseover(function () 
         {
@@ -381,6 +478,17 @@ Opencast.Initialize = (function ()
                 Opencast.Player.editTime();
             }
         })
+        // Handler keypress
+        $('#oc_addBookmark').keypress(function (event) 
+        {
+            if (event.keyCode === 13) 
+            {
+            	var value = $('#oc_current-time').attr('value');
+            	var text = $('#oc_addBookmark').attr('value');
+            	var name = 'Stefan Altevogt'; 
+            	Opencast.Player.addBookmark(value, name, text);
+            }
+        })
         
         // Handler keydown
         $('#oc_btn-rewind').keydown(function (event) 
@@ -451,6 +559,36 @@ Opencast.Initialize = (function ()
     	        Opencast.Player.stopFastForward();
     	    }
         });
+        
+        
+        
+        
+        var content = '';
+        
+        content = content +'<li class="oc_bookmarks-list-myBookmarks">';
+        content = content + '<div class="oc_bookmarks-list-myBookmarks-div-left" type="text">Funny joke! He said: Lorem ipsum dolor sit amet...</div>';
+        content = content + '<div class="oc_bookmarks-list-myBookmarks-div-right" type="text">00:15:20 Alicia Valls</div>';
+        content = content + '</li>';
+        
+        content = content + '<li class="oc_bookmarks-list-publicBookmarks">';
+        content = content + '<div class="oc_bookmarks-list-publicBookmarks-div-left" type="text">Multicelled organisms definition</div>';
+        content = content + '<div class="oc_bookmarks-list-publicBookmarks-div-right" type="text">00:20:02 Justin Ratcliffe</div>';
+        content = content + '</li>';
+        
+        content = content +'<li class="oc_bookmarks-list-myBookmarks">';
+        content = content + '<div class="oc_bookmarks-list-myBookmarks-div-left" type="text">Funny joke! He said: Lorem ipsum dolor sit amet...</div>';
+        content = content + '<div class="oc_bookmarks-list-myBookmarks-div-right" type="text">00:15:20 Alicia Valls</div>';
+        content = content + '</li>';
+        
+        content = content + '<li class="oc_bookmarks-list-publicBookmarks">';
+        content = content + '<div class="oc_bookmarks-list-publicBookmarks-div-left" type="text">Multicelled organisms definition</div>';
+        content = content + '<div class="oc_bookmarks-list-publicBookmarks-div-right" type="text">00:20:02 Justin Ratcliffe</div>';
+        content = content + '</li>';
+        
+        
+        
+        $('#oc_bookmarks-list').prepend(content);
+       
     });
     
     /*
@@ -488,6 +626,8 @@ Opencast.Initialize = (function ()
                 }
             }
         }
+        Opencast.Player.setBrowserWidth(myWidth);
+        
     }
     
     function doTest()

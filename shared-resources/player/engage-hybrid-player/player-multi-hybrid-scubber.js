@@ -96,3 +96,4 @@ Opencast.Scrubber = (function ()
         init: init
     };
 }());
+

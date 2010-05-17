@@ -55,6 +55,8 @@ public class EngageUITest {
     while ((lastLine = expectedReader.readLine()) != null)
       expected += lastLine;
 
+    expected = expected.replaceAll("\n", "").replaceAll("\\s+", " ");
+
     Source xmlSource = new StreamSource(xmlFile);
     Source xsltSource = new StreamSource(xsltFile);
 
@@ -63,7 +65,7 @@ public class EngageUITest {
 
     Transformer trans = transFact.newTransformer(xsltSource);
     trans.transform(xmlSource, result);
-    String actual = actualStream.toString();
+    String actual = actualStream.toString().replaceAll("\n", "").replaceAll("\\s+", " ");
 
     expectedStream.close();
     expectedReader.close();

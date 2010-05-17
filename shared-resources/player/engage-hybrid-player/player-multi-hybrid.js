@@ -47,6 +47,7 @@ Opencast.Player = (function () {
     AUDIOPLAYER            = "Audioplayer",
     ADVANCEDPLAYER         = "advancedPlayer",
     EMBEDPLAYER            = "embedPlayer",
+    OPTIONMYCLASSNAME      = "oc_option-myBookmark",
     currentPlayPauseState  = PAUSING,
     showSections           = true,
     mouseOverBool          = false,
@@ -55,12 +56,14 @@ Opencast.Player = (function () {
     duration               = 0,
     mediaWith              = 0;
     mediaHeight            = 0;
+    browserWidth           = 0;
     FLASH_PLAYERTYPE       = "",
     FLASH_PLAYERSTATE      = "",
     FLASH_VIEWSTATE        = "",
     FLASH_MUTE             = "",
     intval                 = "",
     displayMode            = "",
+    optionClassName        = "",
     seekState              = PAUSING;
    
    
@@ -221,7 +224,36 @@ Opencast.Player = (function () {
     function setDisplayMode(mode)
     {
     	displayMode = mode;
-    }   
+    }  
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the optionClassName.
+        @param Sring className
+     */
+    function setOptionClassName(className)
+    {
+    	optionClassName = className;
+    } 
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the browserWidth.
+        @param Number witdh
+     */
+    function setBrowserWidth(witdh)
+    {
+    	browserWidth = witdh;
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Get browserWidth.
+     */
+    function getBrowserWidth()
+    {
+	    return browserWidth;
+    }
         
     /**
         @memberOf Opencast.Player
@@ -457,6 +489,7 @@ Opencast.Player = (function () {
             value: BOOKMARKSHIDE
         });
         $("#oc_btn-bookmarks").attr('aria-pressed', 'true');
+        $("#oc_bookmarksPoints").css('display', 'block');
     }
 
     /**
@@ -472,6 +505,8 @@ Opencast.Player = (function () {
             value: BOOKMARKS
         });
         $("#oc_btn-bookmarks").attr('aria-pressed', 'false');
+        $("#oc_bookmarksPoints").css('display', 'none');
+        
     }
     
     /**
@@ -659,7 +694,6 @@ Opencast.Player = (function () {
         if ($("#oc_btn-description").attr("title") === DESCRIPTION)
         {
             showDescription();
-            hideBookmarks();
             hideNotes(); 
             hideShortcuts();
             //setShowSections(true);
@@ -718,6 +752,63 @@ Opencast.Player = (function () {
         iFrameText = '<iframe src="' + embedUrl + '" style="border:0px #FFFFFF none;" name="Opencast Matterhorn - Media Player" scrolling="no" frameborder="1" marginheight="0px" marginwidth="0px" width="' + width + '" height="' + height + '"></iframe>';
         $('#oc_embed-textarea').val(iFrameText);
     }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Add a bookmark
+     */
+    function addBookmark(value, name, text)
+    {
+    	var option = '<option value="'+value+'" class="oc_option-myBookmark" title="'+value+' '+name+': '+text+'">'+value+' '+name+': '+text+'</option>'
+    	
+    	$('#oc_bookmarkSelect').prepend( option );
+    	if ($("#oc_myBookmarks-checkbox").attr('aria-checked') === 'false')
+        {
+            $("#oc_myBookmarks-checkbox").attr('aria-checked', 'true');
+  	        $('#oc_myBookmarks-checkbox').attr('checked', 'true'); 
+  	        $('option.oc_option-myBookmark').css('display', 'block' );
+  	        $('.oc_option-myBookmark').css('visibility', 'visible' ); 
+        }
+    	
+    	//
+    	var posLeft = 0;
+    	var windowWidth = getBrowserWidth();
+    	var playhead = getPlayhead(value);
+    	var duration = getDuration();
+    	
+    	var posLeft = ( playhead * 100 ) / duration;
+    	
+  
+    	var btn = '<input class="oc_boomarkPoint" onClick="Opencast.Player.playBookmark(this.name)" style="left:'+posLeft+'%; width: 5px; height: 10px; margin-left: 5px; position: absolute; background-color: #90ee90 !important;" name="'+value+'" alt="'+value+' '+name+': '+text+'" title="'+value+' '+name+': '+text+'"></input>';
+    	$('#oc_bookmarksPoints').append( btn );
+    }
+    
+    function removeBookmark()
+    {
+    	$('#oc_bookmarkSelect option:selected').remove();
+    	$('#oc_btn-removeBookmark').css('display', 'none' ); 
+    	
+    }
+    
+    function playBookmark(playheadString)
+    {
+    	var newPlayhead = getPlayhead(playheadString);
+    	Videodisplay.seek(newPlayhead);
+    }
+    
+    function getPlayhead(playheadString)
+    {
+        var playheadArray = playheadString.split(':');
+    	
+    	var playheadHour = parseInt(playheadArray[0], 10);
+        var playheadMinutes = parseInt(playheadArray[1], 10);
+        var playheadSeconds = parseInt(playheadArray[2], 10);
+        
+        return (playheadHour * 60 * 60) + (playheadMinutes * 60) + (playheadSeconds);
+    	
+    	
+    }
+    
     
     /**
      * 
@@ -1335,6 +1426,7 @@ Opencast.Player = (function () {
         embedIFrame : embedIFrame,
         setMediaURL : setMediaURL,
         setCaptionsURL : setCaptionsURL,
+        setBrowserWidth : setBrowserWidth,
         lowSound : lowSound,
         noneSound : noneSound,
         highSound : highSound,
@@ -1367,6 +1459,10 @@ Opencast.Player = (function () {
         showEditTime : showEditTime,
         hideEditTime : hideEditTime,
         editTime : editTime,
+        addBookmark : addBookmark,
+        removeBookmark : removeBookmark,
+        setOptionClassName : setOptionClassName,
+        playBookmark : playBookmark,
         setDuration : setDuration,
         setPlayhead : setPlayhead,
         setProgress : setProgress,
