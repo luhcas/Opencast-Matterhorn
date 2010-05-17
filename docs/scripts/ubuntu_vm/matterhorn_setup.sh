@@ -238,7 +238,7 @@ else
   
   # Install opencaps?
   if [ $opencaps = "y" ] || [ $opencaps = "Y" ]; then
-    if [ $opencapsminimal = "n" ] || [ $opencaps = "N" ]; then
+    if [ $opencapsminimal = "n" ] || [ $opencapsminimal = "N" ]; then
       /home/opencast/opencaps.sh
     else
       /home/opencast/opencaps_matterhorn_only.sh

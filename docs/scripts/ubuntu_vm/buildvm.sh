@@ -65,14 +65,14 @@ sudo ubuntu-vm-builder vmw6 karmic --arch 'i386' --mem '512' --cpus 1 \
 --addpkg libtiff4-dev --addpkg ssh --addpkg maven2 --addpkg subversion \
 --addpkg wget --addpkg curl --addpkg update-motd --addpkg ntp \
 --addpkg expect-dev --addpkg expect --addpkg vim --addpkg nano \
---addpkg gstreamer0.10-plugins* --addpkg gstreamer0.10-ffmpeg \
+--addpkg gstreamer0.10-plugins* --addpkg gstreamer0.10-ffmpeg --addpkg gstreamer-tools \
 --addpkg acpid --exec $HOME/postinstall.sh
 
 #change the vm to use nat networking instead of bridged
 sed -i 's/bridged/nat/g' ubuntu-vmw6/opencast.vmx
 
 #change matterhorn_setup.sh to use the correct svn repo path
-sed -i "s/OC_URL=.*$/OC_URL=$MATTERHORN_SVN/ matterhorn_setup.sh
+sed -i "s/OC_URL=.*$/OC_URL=$MATTERHORN_SVN/i" matterhorn_setup.sh
 
 #mount the vm image
 mkdir mnt
