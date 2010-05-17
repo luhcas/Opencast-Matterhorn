@@ -83,6 +83,9 @@
                 <li id="missing-title" class="missing-fields-item">
                   <span class="fl-icon inline-icon icon-bullet"></span>Please enter a <a href="javascript:$('#title')[0].focus();">title</a> for the recording.
                 </li>
+                <li id="missing-series" class="missing-fields-item">
+                  <span class="fl-icon inline-icon icon-bullet"></span>Please enter a <a href="javascript:$('#series')[0].focus();">series</a> for the recording.
+                </li>
                 <li id="missing-distribution" class="missing-fields-item">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose at least one <a href="javascript:document.getElementById('distITunesU').focus();">distribution channel</a>.
                 </li>
@@ -129,7 +132,7 @@
                     <input type="text" class="form-field" name="title" id="title">
                     <span class="fl-icon icon-help" id="help_title" title="Click for help"></span>
                   </li>
-                  <li>
+                  <li id="series_container">
                     <label class="fl-label" for="series"  id="label-series"><span id="i18n_series_label"></span>:</label>
                     <input type="text" class="form-field" name="series" id="series">
                     <span class="fl-icon icon-help"  id="help_series" title="Click for help"></span>

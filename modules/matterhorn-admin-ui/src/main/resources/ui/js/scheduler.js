@@ -370,7 +370,7 @@ SchedulerUI.selectRecordingType = function(recType){
     SchedulerUI.agentList = '#recurAgent';
     SchedulerUI.inputList = '#recur-input-list';
     $(SchedulerUI.inputList).empty();
-    //series is required
+    $('#series_container > label').prepend('<span id="series_required" style="color: red;">*</span>'); //series is required, indicate as such.
     //repeats
     //rrule days
     //rrule start and end date
@@ -399,6 +399,7 @@ SchedulerUI.selectRecordingType = function(recType){
     SchedulerUI.agentList = '#attendees';
     SchedulerUI.inputList = '#input-list';
     $(SchedulerUI.inputList).empty();
+    $('#series_required').remove(); //Remove series required indicator.
     fields = {
       'eventid':          new FormField('eventID'),
       'title':            new FormField('title', true),
