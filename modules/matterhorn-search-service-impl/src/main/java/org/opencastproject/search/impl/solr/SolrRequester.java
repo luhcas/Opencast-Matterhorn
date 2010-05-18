@@ -402,7 +402,14 @@ public class SolrRequester {
    */
   public SearchResult getByQuery(SearchQuery q) throws SolrServerException {
     StringBuilder sb = new StringBuilder();
+    
+    if (q.getQuery() != null) {
+      sb.append(q.getQuery());
+    }
+    
     if(q.getId() != null) {
+      if (sb.length() > 0)
+        sb.append(" AND ");
       sb.append("(");
       sb.append(SolrFields.ID);
       sb.append(":");
@@ -452,7 +459,7 @@ public class SolrRequester {
       }
       sb.append(") ");
     }
-
+    
     if (sb.length() == 0)
       sb.append("*:*");
     
