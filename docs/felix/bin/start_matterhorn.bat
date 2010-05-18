@@ -9,8 +9,11 @@ REM # Make sure the following two path entries do *not* contain spaces
 REM # SET FELIX_HOME=C:\Libraries\felix-framework-2.0.0
 REM # SET M2_REPO=C:\Users\johndoe\.m2\repository
 REM # SET OPENCAST_LOGDIR=%FELIX_HOME%\logs
+
+REM # To enable the debugger on the vm, enable all of the following options
 SET DEBUG_PORT=8000
 SET DEBUG_SUSPEND=n
+REM SET DEBUG_OPTS=-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=%DEBUG_PORT%,server=y,suspend=%DEBUG_SUSPEND%
 
 REM ##
 REM # Only change the lines below if you know what you are doing
@@ -22,13 +25,11 @@ SET PAX_CONFMAN_OPTS=-Dbundles.configuration.location=%FELIX_HOME%\conf
 SET PAX_LOGGING_OPTS=-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN -Dopencast.logdir=%OPENCAST_LOGDIR%
 SET UTIL_LOGGING_OPTS=-Djava.util.logging.config.file=%FELIX_HOME%\conf\services\java.util.logging.properties
 SET FELIX_CACHE=%FELIX_HOME%\felix-cache
+SET GRAPHICS_OPTS="-Djava.awt.headless=true -Dawt.toolkit=sun.awt.HeadlessToolkit"
 
 REM # Clear felix cache dir
 del /F /Q %FELIX_CACHE%
 
-REM # Create the debug config
-SET DEBUG_OPTS=-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=%DEBUG_PORT%,server=y,suspend=%DEBUG_SUSPEND%
-
 REM # Finally start felix
-java %DEBUG_OPTS% %MAVEN_ARG% %FELIX_FILEINSTALL_OPTS% %PAX_CONFMAN_OPTS% %PAX_LOGGING_OPTS% %UTIL_LOGGING_OPTS% -jar %FELIX_HOME%\bin\felix.jar %FELIX_CACHE%  
+java %DEBUG_OPTS% %GRAPHICS_OPTS% %MAVEN_ARG% %FELIX_FILEINSTALL_OPTS% %PAX_CONFMAN_OPTS% %PAX_LOGGING_OPTS% %UTIL_LOGGING_OPTS% -jar %FELIX_HOME%\bin\felix.jar %FELIX_CACHE%  
 ENDLOCAL
