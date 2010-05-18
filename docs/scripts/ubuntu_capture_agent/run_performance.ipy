@@ -19,11 +19,12 @@ for file in datafiles:
 	!mkdir /oc_perf/$props["capture.recording.id"]
 	
 	#change pax logging to be over to the new dir
-	!cd /home/matterhorn/capture-agent/felix-framework-2.0.4/conf/services/
+	!cd /home/matterhorn/capture-agent/felix-framework-2.0.5/conf/services/
 	!del org.ops4j.pax.logging.properties
 	!svn up
 	!sed -i "s/\$${opencast.logdir}\/opencast.log/\/oc_prefs\/test\/opencast.log/g" org.ops4j.pax.logging.properties
-	!/home/matterhorn/capture-agent/felix-framework-2.0.4/bin/start_matterhorn.sh 2> /dev/null &
+	!sed -i "s/log4j.logger.org.opencastproject.*/log4j.logger.org.opencastproject.capture.pipeline=DEBUG/g" org.ops4j.pax.logging.properties
+	!/home/matterhorn/capture-agent/felix-framework-2.0.5/bin/start_matterhorn.sh 2> /dev/null &
 
 	#start felix up
 	running=!curl --digest -u admin:opencast -I -H "X-Requested-Auth: Digest" http://atomopencast:8080/state/rest/GetState
