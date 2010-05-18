@@ -44,9 +44,7 @@ public class Activator implements BundleActivator {
   protected ServiceRegistration datasourceRegistration;
   protected ComboPooledDataSource pooledDataSource;
 
-  public Activator() {
-    this(System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator + "db");
-  }
+  public Activator() {}
   
   public Activator(String rootDir) {
     this.rootDir = rootDir;
@@ -59,6 +57,9 @@ public class Activator implements BundleActivator {
   @SuppressWarnings("unchecked")
   @Override
   public void start(BundleContext bundleContext) throws Exception {
+    // Use the configured storage directory
+    rootDir = bundleContext.getProperty("org.opencastproject.storage.dir") + File.separator + "db";
+    
     // Register the Datasource, defaulting to an embedded H2 database if DB configurations are not specified
     String vendor = getConfigProperty(bundleContext.getProperty("dbVendor"), "HSQL");
     String jdbcDriver = getConfigProperty(bundleContext.getProperty("jdbcDriver"), "org.h2.Driver");

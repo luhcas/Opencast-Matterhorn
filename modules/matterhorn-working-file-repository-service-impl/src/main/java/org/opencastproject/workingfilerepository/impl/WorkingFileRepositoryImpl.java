@@ -63,11 +63,11 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     } else {
       serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     }
-    if (cc == null || cc.getBundleContext().getProperty("workingFileRepoPath") == null) {
+    if (cc == null || cc.getBundleContext().getProperty("org.opencastproject.file.repo.path") == null) {
       rootDirectory = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator
               + "workingfilerepo";
     } else {
-      rootDirectory = cc.getBundleContext().getProperty("workingFileRepoPath");
+      rootDirectory = cc.getBundleContext().getProperty("org.opencastproject.file.repo.path");
     }
     createRootDirectory();
 
@@ -75,8 +75,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   }
 
   public void delete(String mediaPackageID, String mediaPackageElementID) {
-    checkId(mediaPackageID);
-    checkId(mediaPackageElementID);
+    checkPathSafe(mediaPackageID);
+    checkPathSafe(mediaPackageElementID);
     File f = getFile(mediaPackageID, mediaPackageElementID);
     if (f == null) {
       logger.info("Unable to delete non existing object {}/{}", mediaPackageID, mediaPackageElementID);
@@ -89,7 +89,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       throw new SecurityException("Can not delete file in mediaPackage/mediaElement: " + mediaPackageID + "/"
               + mediaPackageElementID);
     }
-    File d = getDirectory(mediaPackageID, mediaPackageElementID);
+    File d = getElementDirectory(mediaPackageID, mediaPackageElementID);
     logger.debug("Attempting to delete directory {}", d.getAbsolutePath());
     if (d.canWrite()) {
       d.delete();
@@ -100,8 +100,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   }
 
   public InputStream get(String mediaPackageID, String mediaPackageElementID) {
-    checkId(mediaPackageID);
-    checkId(mediaPackageElementID);
+    checkPathSafe(mediaPackageID);
+    checkPathSafe(mediaPackageElementID);
     File f = getFile(mediaPackageID, mediaPackageElementID);
     if (f == null) {
       logger.warn("Tried to read from non existing object {}/{}", mediaPackageID, mediaPackageElementID);
@@ -144,11 +144,11 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   }
 
   public URI put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in) {
-    checkId(mediaPackageID);
-    checkId(mediaPackageElementID);
+    checkPathSafe(mediaPackageID);
+    checkPathSafe(mediaPackageElementID);
     File f = null;
     try {
-      File dir = getDirectory(mediaPackageID, mediaPackageElementID);
+      File dir = getElementDirectory(mediaPackageID, mediaPackageElementID);
       if( ! dir.exists()) {
         try {
           logger.debug("Attempting to create a new directory at {}",dir.getAbsolutePath());
@@ -180,16 +180,16 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     }
   }
 
-  private void checkId(String id) {
+  private void checkPathSafe(String id) {
     if (id == null)
       throw new NullPointerException("IDs can not be null");
     if (id.indexOf("..") > -1 || id.indexOf(File.separator) > -1) {
-      throw new IllegalArgumentException("Invalid media package / element ID");
+      throw new IllegalArgumentException("Invalid media package, element ID, or file name");
     }
   }
 
   private File getFile(String mediaPackageID, String mediaPackageElementID) {
-    File directory = getDirectory(mediaPackageID, mediaPackageElementID);
+    File directory = getElementDirectory(mediaPackageID, mediaPackageElementID);
     String[] files = directory.list();
     if (files == null) {
       logger.debug("Element directory {} does not exist", directory);
@@ -208,16 +208,16 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   }
 
   private File getFileFromCollection(String collectionId, String fileName) {
-    File directory = getDirectory(collectionId);
+    File directory = getCollectionDirectory(collectionId);
     return new File(directory, fileName);
   }
 
-  private File getDirectory(String mediaPackageID, String mediaPackageElementID) {
+  private File getElementDirectory(String mediaPackageID, String mediaPackageElementID) {
     return new File(rootDirectory + File.separator + "mp" + File.separator + mediaPackageID
             + File.separator + mediaPackageElementID);
   }
 
-  private File getDirectory(String collectionId) {
+  private File getCollectionDirectory(String collectionId) {
     File collectionDir = new File(rootDirectory + File.separator + collectionId);
     if (!collectionDir.exists()) {
       try {
@@ -264,7 +264,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
    */
   @Override
   public long getCollectionSize(String id) {
-    File collectionDir = getDirectory(id);
+    File collectionDir = getCollectionDirectory(id);
     if (!collectionDir.exists() || !collectionDir.canRead())
       throw new IllegalArgumentException("can not find collection " + id);
     File[] files = collectionDir.listFiles();
@@ -281,7 +281,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
    */
   @Override
   public InputStream getFromCollection(String collectionId, String fileName) {
-    checkId(collectionId);
+    checkPathSafe(collectionId);
     File f = getFileFromCollection(collectionId, fileName);
     if (f == null || !f.exists() || !f.isFile()) {
       logger.warn("Tried to read from non existing object {}/{}", collectionId, fileName);
@@ -303,8 +303,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
    */
   @Override
   public URI putInCollection(String collectionId, String fileName, InputStream in) throws URISyntaxException {
-    checkId(collectionId);
-    checkId(fileName);
+    checkPathSafe(collectionId);
+    checkPathSafe(fileName);
     File f = null;
     try {
       f = new File(rootDirectory + File.separator + collectionId + File.separator
@@ -317,7 +317,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     try {
       if (!f.exists()) {
         logger.debug("Attempting to create a new file at {}", f.getAbsolutePath());
-        File collectionDirectory = getDirectory(collectionId);
+        File collectionDirectory = getCollectionDirectory(collectionId);
         if (!collectionDirectory.exists()) {
           logger.debug("Attempting to create a new directory at {}", collectionDirectory.getAbsolutePath());
           FileUtils.forceMkdir(collectionDirectory);
@@ -347,7 +347,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   @Override
   public URI copyTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement) {
     File source = getFileFromCollection(fromCollection, fromFileName);
-    File destDir = getDirectory(toMediaPackage, toMediaPackageElement);
+    File destDir = getElementDirectory(toMediaPackage, toMediaPackageElement);
     if (!destDir.exists()) {
       // we needed to create the directory, but couldn't
       try {
@@ -359,7 +359,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     }
     File dest = getFile(toMediaPackage, toMediaPackageElement);
     if(dest == null) {
-      dest = new File(getDirectory(toMediaPackage, toMediaPackageElement), source.getName());
+      dest = new File(getElementDirectory(toMediaPackage, toMediaPackageElement), source.getName());
     }
     try {
       FileUtils.copyFile(source, dest);
@@ -378,7 +378,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   @Override
   public URI moveTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement) {
     File source = getFileFromCollection(fromCollection, fromFileName);
-    File destDir = getDirectory(toMediaPackage, toMediaPackageElement);
+    File destDir = getElementDirectory(toMediaPackage, toMediaPackageElement);
     if (!destDir.exists()) {
       // we needed to create the directory, but couldn't
       try {
@@ -390,7 +390,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     }
     File dest = getFile(toMediaPackage, toMediaPackageElement);
     if(dest == null) {
-      dest = new File(getDirectory(toMediaPackage, toMediaPackageElement), source.getName());
+      dest = new File(getElementDirectory(toMediaPackage, toMediaPackageElement), source.getName());
     }
     try {
       FileUtils.moveFile(source, dest);
@@ -425,7 +425,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
    */
   @Override
   public URI[] getCollectionContents(String collectionId) {
-    File collectionDir = getDirectory(collectionId);
+    File collectionDir = getCollectionDirectory(collectionId);
 
     File[] files = collectionDir.listFiles();
     URI[] uris = new URI[files.length];

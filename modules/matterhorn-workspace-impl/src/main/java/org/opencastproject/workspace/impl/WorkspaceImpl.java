@@ -16,7 +16,6 @@
 package org.opencastproject.workspace.impl;
 
 import org.opencastproject.security.api.TrustedHttpClient;
-import org.opencastproject.util.IoSupport;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.NotFoundException;
@@ -55,7 +54,7 @@ import java.util.Map.Entry;
  * TODO Implement cache invalidation using the caching headers, if provided, from the remote server.
  */
 public class WorkspaceImpl implements Workspace {
-  public static final String WORKSPACE_ROOTDIR = "workspace.rootdir";
+  public static final String WORKSPACE_ROOTDIR_KEY = "org.opencastproject.workspace.rootdir";
   private static final Logger logger = LoggerFactory.getLogger(WorkspaceImpl.class);
 
   protected WorkingFileRepository repo;
@@ -66,23 +65,18 @@ public class WorkspaceImpl implements Workspace {
   protected long garbageCollectionPeriodInSeconds = -1;
   protected Timer garbageFileCollector;
 
-  public WorkspaceImpl() {
-    this(null);
-  }
+  public WorkspaceImpl() {}
 
   public WorkspaceImpl(String rootDirectory) {
-    if (rootDirectory == null) {
-      rootDirectory = IoSupport.getSystemTmpDir() + "opencast" + File.separator + "workspace";
-    }
     this.rootDirectory = rootDirectory;
   }
 
   public void activate(ComponentContext cc) {
     // NOTE: warning - the test calls activate() with a NULL cc
-    if (cc != null && cc.getBundleContext().getProperty(WORKSPACE_ROOTDIR) != null) {
+    if (cc != null && cc.getBundleContext().getProperty(WORKSPACE_ROOTDIR_KEY) != null) {
       // use rootDir from CONFIG
-      this.rootDirectory = cc.getBundleContext().getProperty(WORKSPACE_ROOTDIR);
-      logger.info("CONFIG " + WORKSPACE_ROOTDIR + ": " + this.rootDirectory);
+      this.rootDirectory = cc.getBundleContext().getProperty(WORKSPACE_ROOTDIR_KEY);
+      logger.info("CONFIG " + WORKSPACE_ROOTDIR_KEY + ": " + this.rootDirectory);
     }
     createRootDirectory();
 
@@ -95,16 +89,13 @@ public class WorkspaceImpl implements Workspace {
     }
 
     // Find the working file repository's root directory
-    // FIXME: there may not be any local mappings.
+    // Note: we only map mediapackage elements, not collections.  FIXME?
     String repoRoot;
-    if (cc == null || cc.getBundleContext().getProperty("workingFileRepoPath") == null) {
-      repoRoot = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator
-              + "workingfilerepo" + File.separator + "mp";
-    } else {
-      repoRoot = cc.getBundleContext().getProperty("workingFileRepoPath");
+    if (cc != null && cc.getBundleContext().getProperty("org.opencastproject.file.repo.path") != null) {
+      repoRoot = cc.getBundleContext().getProperty("org.opencastproject.file.repo.path");
+      logger.info("Workspace filesystem mapping " + filesUrl + " => " + repoRoot + "/mp");
+      filesystemMappings.put(filesUrl, repoRoot + "/mp");
     }
-    logger.info("Workspace filesystem mapping " + filesUrl + " => " + repoRoot);
-    filesystemMappings.put(filesUrl, repoRoot);
 
     // Set up the garbage file collection timer
     if (cc != null && cc.getBundleContext().getProperty("org.opencastproject.workspace.gc.period") != null) {
