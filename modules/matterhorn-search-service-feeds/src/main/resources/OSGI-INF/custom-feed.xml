@@ -4,7 +4,7 @@
   <property name="service.description" value="Latest Episodes Feed" />
   <property name="feed.uri" value="custom" />
   <property name="feed.selector" value="custom" />
-  <property name="feed.query" value="dc_title:*{0}" />
+  <property name="feed.query" value="dc_title:{0}" />
   <property name="feed.name" value="Special episodes" />
   <property name="feed.description" value="Special collection of episodes" />
   <property name="feed.copyright" value="All rights reserved by The Opencast Project" />

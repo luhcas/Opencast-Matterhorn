@@ -152,8 +152,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
     }
 
     // Depending on the input type of the profile and the configured flavors and
-    // tags,
-    // make sure we have the required tracks:
+    // tags, make sure we have the required tracks:
     AudioVisualElementSelector avSelector = new AudioVisualElementSelector();
     avSelector.setVideoFlavor(sourceVideoFlavor);
     avSelector.setAudioFlavor(sourceAudioFlavor);      
@@ -169,6 +168,17 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
         avSelector.setRequireAudioTrack(true);
         break;
     }
+
+    // Depending on the operation configuration, see if video should be required
+    boolean fixedVideo = sourceVideoFlavor != null && !sourceVideoFlavor.contains("*");
+    if (fixedVideo)
+      avSelector.setRequireVideoTrack(true);
+
+    // Depending on the operation configuration, see if audio should be required
+    boolean fixedAudio = sourceAudioFlavor != null && !sourceAudioFlavor.contains("*");
+    if (fixedAudio)
+      avSelector.setRequireAudioTrack(true);
+
     Collection<Track> tracks = avSelector.select(mediaPackage);
 
     String sourceVideoTrackId = null;
