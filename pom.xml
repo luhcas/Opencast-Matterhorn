@@ -191,6 +191,7 @@
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-search-service-api</module>
         <module>modules/matterhorn-search-service-impl</module>
+        <module>modules/matterhorn-search-service-feeds</module>
         <module>modules/matterhorn-security-api</module>
         <module>modules/matterhorn-security-impl</module>
         <module>modules/matterhorn-util</module>
