@@ -69,18 +69,35 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
 	echo
 	continue
     fi
-    
+
+    # Take the system name of this device and substitute all the non-alphanumeric characters to underscores
+    defaultName=${devName[$i]//[^a-zA-Z0-9]/_}
+
+    # Check this name is not repeated
+    suffix=0
+    for (( t = 0; t < $i; t++ )); do
+	if [[ -n "$(echo "${cleanName[$t]}" | grep "^$defaultName")" ]]; then
+	    (( suffix += 1 ))
+	fi
+    done    
+    if [[ $suffix -gt 0 ]]; then
+	defaultName=${defaultName}_$suffix
+    fi
+
     # Ask for a user-defined cleanName --the name this device will have in the config files 
-    read -p "Please enter the matterhorn name for the ${devName[$i]}: " cleanName[$i]
+    echo "The friendly name (e.g. \"screen\", or \"professor\") will be displayed in the user interfaces for controlling this device."
+    echo "It can't contain spaces or punctuation."
+    read -p "Please enter the device name for the \"${devName[$i]}\" ($defaultName): " cleanName[$i]
     while [[ true ]]; do
 	# Check the name doesn't contain parentheses or whitespaces
-	while [[ -z "$(echo ${cleanName[$i]} | grep -v '[()/ ]')" ]]; do
+	while [[ -z "$(echo ${cleanName[$i]:-$defaultName} | grep -v '[()/ ]')" ]]; do
 	    read -p "Please enter a non-empty name without parentheses, slashes or whitespaces: " cleanName[$i]
 	done
+	: ${cleanName[$i]:=$defaultName}
 	# Check the name is not repeated
 	for (( t = 0; t < $i; t++ )); do
 	    if [[ -n "$(echo ${cleanName[$i]} | grep -i "^${cleanName[$t]}$")" ]]; then
-		read -p "The name ${cleanName[$t]} is already in use for the device ${device[$t]}. Please choose another: " cleanName[$i]
+		read -p "The name ${cleanName[$t]} is already in use for the device ${device[$t]}. Please choose another ($defaultName): " cleanName[$i]
 		break;
 	    fi
 	done
@@ -147,7 +164,7 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
 	if [[ $? -ne 0 ]]; then
 	    echo "Error. Standard ${standards[$std]} not set. Please try to set it manually"
 	else
-	    echo "v4l2-ctl -s $std -d ${device[$i]}" >> $CONFIG_SCRIPT
+	    echo "v4l2-ctl -s $std -d /dev/${symlinkName}" >> $CONFIG_SCRIPT
 	    echo "Standard ${standards[$std]} set for the device ${devName[$i]}"
 	fi
 	echo
@@ -171,7 +188,7 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
 	done
 
 	v4l2-ctl -d ${device[$i]} -i $chosen_input > /dev/null
-	echo "v4l2-ctl -d ${device[$i]} -i $chosen_input" >> $CONFIG_SCRIPT
+	echo "v4l2-ctl -d /dev/${symlinkName} -i $chosen_input" >> $CONFIG_SCRIPT
 	echo "Using input $chosen_input with the ${devName[$i]}."
 	echo
     fi
@@ -195,7 +212,7 @@ mv $CONFIG_SCRIPT $CA_DIR
 audioLine=$(arecord -l| grep Analog -m 1)
 audioDevice="hw:$(echo $audioLine | cut -d ':' -f 1 | cut -d ' ' -f 2)"
 # The syntax is cumbersome, but it just keeps the fields surrounded by "[" and "]" and outputs them in the form "first (second)"
-audioDevName=$(echo $audioLine | sed 's/^[^[]*\[\([^]]*\)\][^[]*\[\([^]]*\)\]$/\1 (\2)/')
+audioDevName=$(echo $audioLine | sed 's/^[^[]*\[\([^]]*\)\][^[]*\[\([^]]*\)\]$/\1 \2/')
 
 # Ask the user whether or not they want to configure this device
 read -p "Audio device ${audioDevName} has been found. Do you want to configure it for matterhorn (Y/n)? " response
@@ -205,14 +222,29 @@ done
 
 if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
 
+    defaultName=${audioDevName//[^a-zA-Z0-9]/_}
+    # Check this name is not repeated
+    suffix=0
+    for (( t = 0; t < $i; t++ )); do
+	if [[ -n "$(echo "${cleanName[$t]}" | grep "^$defaultName")" ]]; then
+	    (( suffix += 1 ))
+	fi
+    done    
+    if [[ $suffix -gt 0 ]]; then
+	defaultName=${defaultName}_$suffix
+    fi
+
     # Ask for a user-defined cleanName --the name this device will have in the config files 
     echo
-    read -p "Please enter the matterhorn name for the ${audioDevName}: " cleanName[$i]
+    echo "The friendly name (e.g. \"screen\", or \"professor\") will be displayed in the user interfaces for controlling this device."
+    echo "It can't contain spaces or punctuation."
+    read -p "Please enter the device name for the \"${audioDevName}\" ($defaultName): " cleanName[$i]
     while [[ true ]]; do
 	# Check the name doesn't contain parentheses or whitespaces
-	while [[ -z "$(echo ${cleanName[$i]} | grep -v '[()/ ]')" ]]; do
+	while [[ -z "$(echo ${cleanName[$i]:-$defaultName} | grep -v '[()/ ]')" ]]; do
 	    read -p "Please enter a non-empty name without parentheses, slashes or whitespaces: " cleanName[$i]
 	done
+	: ${cleanName:=$defaultName}
 	# Check the name is not repeated
 	for (( t = 0; t < $i; t++ )); do
 	    if [[ -n "$(echo ${cleanName[$i]} | grep -i "^${cleanName[$t]}$")" ]]; then

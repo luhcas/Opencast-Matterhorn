@@ -17,10 +17,10 @@ export START_PATH=$PWD                                      # Path from where th
 export WORKING_DIR=/tmp/cainstallscript                     # Directory where this script will be run
 export TRUNK_URL=http://opencast.jira.com/svn/MH/trunk
 export TRUNK_SUBDIR=matterhorn-trunk                        # Subdir under the selected user $HOME directory
-export OC_DIR=/opencast                                     # Opencast configuration directory
+export OC_DIR=/opt/matterhorn                               # Storage directory for the CA
 export DEV_RULES=/etc/udev/rules.d/matterhorn.rules         # File containing the rules to be applied by udev to the configured devices -- not a pun!
 export CONFIG_SCRIPT=device_config.sh                       # File name for the bash script under HOME containing the device configuration routine
-export DEFAULT_CORE_URL=http://localhost:8080               # Default value for the core url
+export DEFAULT_INGEST_URL=http://localhost:8080             # Default value for the core url
 export VGA2USB_DIR=epiphan_driver                           # Subdirectory under HOME where the epiphan driver will be downloaded to
 export SRC_LIST=/etc/apt/sources.list                       # Location of the file 'sources.list'
 export BKP_SUFFIX=backup                                    # Suffix to be appended to the backup file for sources.list
@@ -33,7 +33,7 @@ export INSTALL_RUN=true                                     # The subsidiary scr
 
 
 # Third-party dependencies variables
-export PKG_LIST=( alsa-utils v4l-conf ivtv-utils curl maven2 sun-java6-jdk subversion wget openssh-server gcc gstreamer0.10-plugins* gstreamer0.10-ffmpeg ntp acpid )
+export PKG_LIST="alsa-utils v4l-conf ivtv-utils curl maven2 sun-java6-jdk subversion wget openssh-server gcc gstreamer0.10-plugins* gstreamer0.10-ffmpeg ntp acpid"
 
 export FLAVORS="presenter/source presentation/source audience/source indefinite/source"
                                                                          # Lists of flavors the user can choose from to assign to a certain device
@@ -41,8 +41,8 @@ export FLAVORS="presenter/source presentation/source audience/source indefinite/
 export EPIPHAN_URL=http://www.epiphan.com/downloads/linux                # URL to download the epiphan driver
                                                                          # List of required packages
 export FELIX_FILENAME=org.apache.felix.main.distribution-2.0.4.tar.gz
-export FELIX_URL=http://apache.mirror.iweb.ca/felix/$FELIX_FILENAME
-export FELIX_SUFFIX=felix-framework-2.0.4                                # Subdir under the user home where FELIX_HOME is
+export FELIX_URL=http://archive.apache.org/dist/felix/$FELIX_FILENAME
+export FELIX_SUBDIR=felix-framework-2.0.4                                # Subdir under the user home where FELIX_HOME is
 export FELIX_GENCONF_SUFFIX=conf/config.properties                       # Path under FELIX_HOME where the general matterhorn configuration
 export FELIX_PROPS_SUFFIX=conf/services/org.opencastproject.capture.impl.ConfigurationManager.properties
                                                                          # Path under FELIX_HOME where the capture agent properties are
@@ -145,7 +145,6 @@ if [[ "$?" -ne 0 ]]; then
     exit 1
 fi
 
-echo "${#FLAVORS[@]}"
 # Setup properties of the devices
 ${SETUP_DEVICES}
 if [[ "$?" -ne 0 ]]; then

@@ -28,7 +28,7 @@ echo "expect fork" >> $STARTUP_SCRIPT
 ################################
 echo "script" >> $STARTUP_SCRIPT
 # Reload the epiphan drivers
-echo "make -C $CA_DIR/$VGA2USB_DRV reload" >> $STARTUP_SCRIPT
+echo "make -C $CA_DIR/$VGA2USB_DIR reload" >> $STARTUP_SCRIPT
 # Set up the video devices
 echo "$CA_DIR/$CONFIG_SCRIPT" >> $STARTUP_SCRIPT
 # Starts matterhorn

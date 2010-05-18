@@ -18,13 +18,18 @@ if [[ "$directory" != "" ]]; then
 fi
 echo
 
+# Create the directories
 mkdir -p $OC_DIR/cache
 mkdir -p $OC_DIR/config
 mkdir -p $OC_DIR/volatile
 mkdir -p $OC_DIR/cache/captures
 
+# Establish their permissions
 chown -R $USERNAME:$USERNAME $OC_DIR
-chmod -R 700 $OC_DIR
+chmod -R 770 $OC_DIR
+
+# Write the directory name to the agent's config file
+sed -i "s#^org\.opencastproject\.storage\.dir=.*\$#org.opencastproject.storage.dir=$OC_DIR#" $GEN_PROPS
 
 # Define capture agent name by using the hostname
 unset agentName
@@ -33,13 +38,13 @@ read -p "Please enter the agent name: ($hostname) " name
 while [[ -z $(echo "${agentName:-$hostname}" | grep '^[a-zA-Z0-9_\-][a-zA-Z0-9_\-]*$') ]]; do
     read - p "Please use only alphanumeric characters, hyphen(-) and underscore(_): ($hostname) " agentName
 done 
-sed -i "s/capture\.agent\.name.*/capture\.agent\.name=${agentName:-$hostname}/g" $CAPTURE_PROPS
+sed -i "s/capture\.agent\.name=/capture\.agent\.name=${agentName:-$hostname}/g" $CAPTURE_PROPS
 echo
 
-# Prompt for core hostname. Default to localhost:8080
-read -p "Please enter Matterhorn Core hostname ($DEFAULT_CORE_URL): " core
-#core=$(echo ${core:-$DEFAULT_CORE_URL} | sed 's/\([\/\.]\)/\\\1/g')
-sed -i "s#\(org\.opencastproject\.server\.url=\).*\$#\1$core#" $GEN_PROPS
+# Prompt for the URL where the ingestion service lives. Default to localhost:8080
+read -p "Please enter the URL to the root of the machine hosting the ingestion service ($DEFAULT_INGEST_URL): " core
+#sed -i "s#^capture\.ingest\.endpoint\.url=\(http://\)\?[^/]*\(.*\)\$#capture.ingest.endpoint.url=$core\2#" $CAPTURE_PROPS
+sed -i "s#\(org\.opencastproject\.server\.url=\).*\$#org.opencastproject.server.url=$core#" $GEN_PROPS
 
 # Set up maven and felix enviroment variables in the user session
 echo -n "Setting up maven and felix enviroment for $USERNAME... "
@@ -63,7 +68,7 @@ fi
 chown $USERNAME:$USERNAME $HOME/.bashrc
 
 # Change permissions and owner of the $CA_DIR folder
-chmod -R 700 $CA_DIR
+chmod -R 770 $CA_DIR
 chown -R $USERNAME:$USERNAME $CA_DIR
 
 echo "Done"
@@ -81,7 +86,7 @@ sed -i "s#^CA_DIR=[^\ ]*\?\(.*\)\$#CA_DIR=$CA_DIR\1#" "$CLEANUP"
 sed -i "s#^STARTUP_SCRIPT=[^\ ]*\?\(.*\)\$#STARTUP_SCRIPT=$STARTUP_SCRIPT\1#" "$CLEANUP"
 
 # Write the uninstalled package list to the cleanup.sh template
-sed -i "s/^PKG_LIST=([^)]*)\(.*\)$/PKG_LIST=( `echo -n ${PKG_LIST[@]}` )\1/" $CLEANUP
+sed -i "s/^PKG_LIST=[^ ]*\(.*\)$/PKG_LIST=\"$PKG_LIST\"\1/" $CLEANUP
 
 echo "Done"
 
@@ -90,7 +95,7 @@ echo
 while [[ true ]]; do
     read -p "Please enter the location to store the cleanup script ($START_PATH): " location
     if [[ -d "${location:=$START_PATH}" ]]; then
-        if [[ ! -e $location/$CLEANUP ]]; then
+        if [[ ! -e "$location/$CLEANUP" ]]; then
             break;
         fi
         read -p "File $location/$CLEANUP already exists. Do you wish to overwrite it (y/N)? " response
@@ -98,7 +103,12 @@ while [[ true ]]; do
             break;
         fi
     else
-        echo "Invalid location. $location is not a directory."
+        echo -n "Invalid location. $location "
+	if [[ -e "$location" ]]; then
+	    echo "is not a directory"
+	else 
+	    echo "does not exist"
+	fi
     fi
 done
 

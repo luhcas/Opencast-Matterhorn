@@ -40,6 +40,8 @@ while [[ true ]]; do
 	done
     fi
     
+    echo -n "Updating package repositories... "
+
     # Create a backup of the sources.list file and create its own (preserves any existing sources.list.backup)
     mv -n $SRC_LIST $SRC_LIST.$BKP_SUFFIX
     
@@ -55,11 +57,12 @@ while [[ true ]]; do
     if [[ $? -eq 0 ]]; then
 	break
     else
-	echo
-	echo "Error. Couldn't update properly from the current Ubuntu mirrors. Reverting..."
+	echo "Error"
+	echo "Couldn't update properly from the current Ubuntu mirrors. Reverting..."
 	unset mirrors
     fi
 done
+echo "Done"
 
 # Auto set selections when installing postfix and jdk packages
 # The <<EOF tag indicates an input with several lines, ending with an EOF line (this is bash syntax)
@@ -75,16 +78,26 @@ sun-java5-jdk shared/accepted-sun-dlj-v1-1 boolean true
 ?sun-java6-jdk shared/accepted-sun-dlj-v1-1 boolean true
 EOF
 
+
+echo -n "Installing third party packages from Ubuntu repository, this may take some time... "
+
+pkgs=( "$PKG_LIST" )
 # Check which required packages are already installed
-for (( i = 0; i < ${#PKG_LIST[@]}; i++ )); do
-    if [[ -z $(dpkg -l | grep "\<${PKG_LIST[$i]}\>") ]]; then
-	noinst[${#noinst[@]}]=${PKG_LIST[$i]}
+for (( i = 0; i < ${#pkgs[@]}; i++ )); do
+    if [[ -z $(dpkg -l | grep "\<${pkgs[$i]}\>") ]]; then
+	noinst[${#noinst[@]}]=${pkgs[$i]}
     fi
 done
 
 # Install the required 3rd party packages
-echo -n "Installing third party packages from Ubuntu repository... "
-apt-get -y --force-yes install ${noinst[@]} > /dev/null
+apt-get -y --force-yes install ${noinst[@]} &> /dev/null
+
+if [[ $? -ne 0 ]]; then
+    echo "Error!"
+    echo "Failed to download the necessary packages. Aborting..."
+    exit 1
+fi
+
 echo "Done"
 
 # Set up java-6-sun as the default alternative

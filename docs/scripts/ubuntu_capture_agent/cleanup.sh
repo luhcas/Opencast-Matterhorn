@@ -11,7 +11,7 @@ OC_DIR=                                                  # Location of matterhor
 CA_DIR=                                                  # The directory where the capture agent files live
 STARTUP_SCRIPT=                                          # Path to the matterhorn startup script
 RULES_FILE=                                              # Path to the file specifying rules for the installed devices
-PKG_LIST=( )                                             # List of packages to be uninstalled
+PKG_LIST=                                                # List of packages to be uninstalled
 
 # Checks if this script is being run with root privileges, exiting if it doesn't
 if [[ `id -u` -ne 0 ]]; then
@@ -33,7 +33,7 @@ fi
 rmmod vga2usb 2> /dev/null
 
 # Remove dependencies installed by the scripts
-apt-get purge ${PKG_LIST[@]} &> /dev/null
+apt-get purge $PKG_LIST &> /dev/null
 apt-get autoremove &> /dev/null
 
 # Restore appropriate sources.list

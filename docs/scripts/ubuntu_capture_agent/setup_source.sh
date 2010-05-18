@@ -30,7 +30,7 @@ if [[ -n "$(echo "${keep:-Y}" | grep -i '^n')" ]]; then
     done
     
     if [[ $(echo "${answer:-Y}" | grep -i '^[n]') ]]; then
-	read -p "Enter the complete download address (default: trunk): " address
+	read -p "Enter the complete download address ($TRUNK_URL): " address
     fi
     
     echo -n "Downloading matterhorn source from repository... "
