@@ -276,6 +276,11 @@ Recordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
   $('#holdActionPanel-container').fadeIn('fast');
 }
 
+Recordings.adjustHoldActionPanelHeight = function() {
+  var height = $("#holdActionPanel-iframe").contents().find("html").height();
+  $('#holdActionPanel-iframe').height(height+10);
+}
+
 Recordings.continueWorkflow = function() {
   var workflowId = $('#holdWorkflowId').val();
   $.ajax({

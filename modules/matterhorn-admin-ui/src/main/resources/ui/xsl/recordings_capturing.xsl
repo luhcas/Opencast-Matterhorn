@@ -58,10 +58,10 @@
   <xsl:template match="ns1:recording">
     <tr>
       <td>
-        <!--<a>
-          <xsl:attribute name="href">/admin/viewevent.html?workflow=<xsl:value-of select="id" /></xsl:attribute>-->
+        <a>
+          <xsl:attribute name="href">/admin/viewevent.html?workflow=<xsl:value-of select="id" /></xsl:attribute>
           <xsl:value-of select="title" />
-        <!--</a>-->
+        </a>
       </td>
       <td>
         <xsl:value-of select="presenter" />

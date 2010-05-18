@@ -7,7 +7,7 @@ ocIngest.metadata = null;
 
 ocIngest.createMediaPackage = function() {
   Upload.log("creating MediaPackage")
-  Upload.setProgress('0%','creating MediaPackge',' ', ' ');
+  Upload.setProgress('0%','creating MediaPackage',' ', ' ');
   $.ajax({
     url        : '../ingest/rest/createMediaPackage',
     type       : 'GET',
