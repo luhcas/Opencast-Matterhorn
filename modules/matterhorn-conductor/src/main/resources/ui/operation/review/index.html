@@ -2,28 +2,50 @@
   <head>
     <title>Hold for review</title>
     <link rel="stylesheet" type="text/css" href="../../../infusion-1.1.2/fss/css/fss-reset.css">
+    <link rel="stylesheet" type="text/css" href="../../../infusion-1.1.2/fss/css/fss-layout.css">
     <link rel="stylesheet" type="text/css" href="../../../css/admin.css">
-    <script type="text/javascript" src="../../../admin/jquery/jquery-1.4.min.js"></script>
+    <style type="text/css">
+      #player-container {clear:both; border:none; width:90%; height:300;}
+      #edit-link {float:right;margin-top:3px; margin-bottom:5px; margin-right:50px;}
+    </style>
+    <script type="text/javascript" src="../../../admin/jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript">
       $(document).ready(function() {
+        parent.Recordings.adjustHoldActionPanelHeight();
         var id = parent.document.getElementById("holdWorkflowId").value;
+        // load preview player
         $.ajax({
           url : '../../../workflow/rest/instance/' + id + '.xml',
           dataType : 'xml',    // or XML..
-          success : function(data) {    // get neccessary data to call the preview player 
-            var elms = data.documentElement.getElementsByTagName('track');
-            for (i in elms) {
-              var tags = elms[i].getElementsByTagName('tag');
-              if (tags.length > 0) {
-                for (j in tags) {
-                  if (tags[j].firstChild.data.match(/preview/)) {
-                    var videoUrl = elms[i].getElementsByTagName("url")[0].firstChild.data;
-                    var url = '../../../engage/ui/preview.html?videoUrl=' + videoUrl;
-                    //alert('videoUrl = ' + videoUrl);
-                    window.location.href = url;
+          success : function(data) {    
+            // load metadata
+            var catalogUrl = $(data.documentElement).find("mediapackage > metadata > catalog[type='dublincore/episode'] > url").text();
+            //alert(catalogUrl);
+            $.ajax({
+              url : catalogUrl,
+              dataType: 'xml',
+              success: function(data) {
+                $(data.documentElement).children().each(function(index, elm) {
+                  var tagName = elm.tagName.split(/:/)[1];
+                  //alert(tagName);
+                  var text = $('#meta-'+tagName).text();
+                  if (text != '') {   // multi value? --> clone the field
+                    $('#meta-'+tagName).text(text + ', ' + $(elm).text());
+                  } else {
+                    $('#meta-'+tagName).text($(elm).text());
                   }
-                }
+                });
               }
+            });
+            // get neccessary data to call the preview player
+            var previewTag = $(data.documentElement).find("mediapackage > media > track > tags > tag:contains('preview')").first();
+            if (previewTag != null) {
+              var videoUrl = $(previewTag).parent().parent().find('url').text();
+              //alert("videoUrl: " + videoUrl);
+              var url = '../../../engage/ui/preview.html?videoUrl=' + videoUrl;
+              $('#player-container').attr('src', url);
+            } else {
+              alert('No preview encoded track found in MediaPackage');
             }
           }
         });
@@ -31,7 +53,40 @@
     </script>
   </head>
   <body>
-    loading...
+    <!-- control buttons in the upper right -->
+    <a href="#" id="edit-link">Edit before continuing</a>
+    <center>
+      <iframe id="player-container"></iframe>
+    </center>
+    <div id="metadata-container">
+      <ul class="no-bullets formField-list fl-controls-right">
+        <!-- field: Title -->
+        <li class="ui-helper-clearfix">
+          <label class="fl-label"><span id="i18n_title_label">Title</span>:</label>
+          <span id="meta-title"></span>
+        </li>
+        <!-- field: Presenter -->
+        <li class="ui-helper-clearfix">
+          <label class="fl-label"><span id="i18n_presenter_label">Presenter(s)</span>:</label>
+          <span id="meta-creator"></span>
+        </li>
+        <!-- field: Series -->
+        <li class="ui-helper-clearfix">
+          <label class="fl-label"><span id="i18n_dept_label">Series</span>:</label>
+          <span id="meta-isPartOf"></span>
+        </li>
+        <!-- field: Description -->
+        <li class="ui-helper-clearfix">
+          <label class="fl-label"><span id="i18n_dept_label">Description</span>:</label>
+          <span id="meta-description"></span>
+        </li>
+        <!-- field: Distribution channels -->
+        <li class="ui-helper-clearfix">
+          <label class="fl-label"><span id="i18n_dept_label">Distribution channels</span>:</label>
+          <span id="meta-dist"></span>
+        </li>
+      </ul>
+    </div>
   </body>
 </html>
 
