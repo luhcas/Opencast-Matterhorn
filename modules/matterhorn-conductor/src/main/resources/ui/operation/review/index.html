@@ -13,7 +13,7 @@
       $(document).ready(function() {
         parent.Recordings.adjustHoldActionPanelHeight();
         var id = parent.document.getElementById("holdWorkflowId").value;
-        // load preview player
+        // load preview player and metadata
         $.ajax({
           url : '../../../workflow/rest/instance/' + id + '.xml',
           dataType : 'xml',    // or XML..
@@ -47,6 +47,23 @@
             } else {
               alert('No preview encoded track found in MediaPackage');
             }
+            // show links to source media
+            var singleFile = true;
+            $(data.documentElement).find("mediapackage > media > track").each(function(index, elm) {
+              if (($(elm).attr('type').split(/\//)[1] == 'source') && ($(elm).find("tags > tag:contains('preview')").empty())) {
+                var link = document.createElement('a');
+                var url = $(elm).find('url').text();
+                $(link).attr('href', url);
+                var filename = url.split(/\//);
+                $(link).text(filename[filename.length-1]);
+                if (singleFile) {
+                  singleFile = false;
+                } else {
+                  $('#files').append($(document.createElement('span')).text(', '));
+                }
+                $('#files').append(link);
+              }
+            });
           }
         });
       });
@@ -60,6 +77,11 @@
     </center>
     <div id="metadata-container">
       <ul class="no-bullets formField-list fl-controls-right">
+        <!-- field: File -->
+        <li class="ui-helper-clearfix">
+          <label class="fl-label"><span id="i18n_files_label">File(s)</span>:</label>
+          <div id="files"></div>
+        </li>
         <!-- field: Title -->
         <li class="ui-helper-clearfix">
           <label class="fl-label"><span id="i18n_title_label">Title</span>:</label>
