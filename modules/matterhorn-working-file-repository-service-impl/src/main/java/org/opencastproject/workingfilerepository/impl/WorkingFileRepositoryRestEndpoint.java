@@ -269,6 +269,8 @@ public class WorkingFileRepositoryRestEndpoint {
           @PathParam("mediaPackageElementID") String mediaPackageElementID) {
     checkService();
     URI url = repo.getURI(mediaPackageID, mediaPackageElementID);
+    if (url == null)
+      return Response.noContent().build();
     String fileName = url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
     String contentType = mimeMap.getContentType(fileName);
     return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type",
