@@ -1,48 +1,50 @@
 import sys
 
+!sudo rm -rf oc_perf
 !sudo mkdir -p /oc_perf
 !sudo mount -t tmpfs -o size=512M,mode=0777 tmpfs /oc_perf
 
 datafiles = !ls performance_tests
 for file in datafiles:
-	#find out if felix is running and if so whack it
-	lines = !ps aux | grep DM2
-	if len(lines.grep("DM2")) > 0:
-		pid = lines.grep("DM2").fields(1)[0]
-		!kill -9 $pid
+        #find out if felix is running and if so whack it
+        lines = !ps aux | grep DM2
+        if len(lines.grep("DM2")) > 0:
+                pid = lines.grep("DM2").fields(1)[0]
+                !kill -9 $pid
 
-	datafile = open("performance_tests/"+file,"r")
-	props=dict()
-	for line in datafile:
-		props[line.split("=")[0]]=line.replace("\r","").split("=")[1]
-	
-	!mkdir /oc_perf/$props["capture.recording.id"]
-	
-	#change pax logging to be over to the new dir
-	cd /home/matterhorn/capture-agent/felix-framework-2.0.5/conf/services/
-	rm -f org.ops4j.pax.logging.properties
-	!svn up
-	!sed -i "s/\$${opencast.logdir}\/opencast.log/\/oc_prefs\/test\/opencast.log/g" org.ops4j.pax.logging.properties
-	!sed -i "s/log4j.logger.org.opencastproject.*/log4j.logger.org.opencastproject.capture.pipeline=DEBUG/g" org.ops4j.pax.logging.properties
-	!/home/matterhorn/capture-agent/felix-framework-2.0.5/bin/start_matterhorn.sh 2> /dev/null &
-	cd ../../../matterhorn-trunk/docs/scripts/ubuntu_capture_agent/
+        datafile = open("performance_tests/"+file,"r")
+        props=dict()
+        for line in datafile:
+                props[line.split("=")[0]]=line.replace("\r","").split("=")[1]
 
-	#start felix up
-	running=!curl --digest -u admin:opencast -I -H "X-Requested-Auth: Digest" http://atomopencast:8080/state/rest/GetState
-	while (len(running.grep("200 OK")) < 1 ):
-		import time
-		time.sleep(1)
-		running=!curl --digest -u admin:opencast -I -H "X-Requested-Auth: Digest" http://atomopencast:8080/state/rest/GetState
+        !mkdir /oc_perf/$props["capture.recording.id"]
 
-	data_file="performance_tests/" + file
-	!curl --digest -u admin:opencast -H "X-Requested-Auth: Digest" --data config=@$data_file http://atomopencast:8080/capture/rest/startCapture
+        #change pax logging to be over to the new dir
+        cd /home/matterhorn/capture-agent/felix-framework-2.0.4/conf/services/
+        rm -f org.ops4j.pax.logging.properties
+        !svn up
+        !sed -i "s/\$${opencast.logdir}\/opencast.log/\/oc_prefs\/test\/opencast.log/g" org.ops4j.pax.logging.properties
+        !sed -i "s/log4j.logger.org.opencastproject.*/log4j.logger.org.opencastproject.capture.pipeline=DEBUG/g" org.ops4j.pax.logging.properties
+        !/home/matterhorn/capture-agent/felix-framework-2.0.4/bin/start_matterhorn.sh 2> /dev/null &
+        cd ../../../matterhorn-trunk/docs/scripts/ubuntu_capture_agent/
 
-	#start dstat in the new dir and block for 60 seconds
-	dstat_output="/oc_perf/" + props["capture.recording.id"].strip("\n") + "/dstat.log" 
-	!sudo dstat -cdm --thermal --load --output $dstat_output 1 60
-	#copy over the recordings into our tmp dir
-	!sudo cp /opencast/cache/captures/$props["capture.recording.id"] /oc_perf/
+        #start felix up
+        running=!curl --digest -u admin:opencast -I -H "X-Requested-Auth: Digest" http://atomopencast:8080/state/rest/GetState
+        while (len(running.grep("200 OK")) < 1 ):
+                import time
+                time.sleep(1)
+                running=!curl --digest -u admin:opencast -I -H "X-Requested-Auth: Digest" http://atomopencast:8080/state/rest/GetState;
+        time.sleep(3) # just in case startCapture endpoint not up yet, but soon will be
+        data_file="performance_tests/" + file
+        !curl --digest -u admin:opencast -H "X-Requested-Auth: Digest" --data config=@$data_file http://atomopencast:8080/capture/rest/startCapture
 
-!mkdir oc_perf
+        #start dstat in the new dir and block for 60 seconds
+        dstat_output="/oc_perf/" + props["capture.recording.id"].strip("\n") + "/dstat.log"
+        !sudo dstat -cdm --thermal --load --output $dstat_output 1 60
+        #copy over the recordings into our tmp dir
+        #!sudo cp -r /opencast/cache/captures/$props["capture.recording.id"] /oc_perf/
+        !sudo cp /home/matterhorn/capture-agent/felix-framework-2.0.4/logs/opencast.log /oc_perf/$props["capture.recording.id"]/opencast.log
+
+!mkdir -p oc_perf
 !cp -R /oc_perf/* ./oc_perf/
 !sudo umount /oc_perf
