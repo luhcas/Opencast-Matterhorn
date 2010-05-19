@@ -42,7 +42,7 @@ UploadListener.getProgress = function() {
       type       : 'GET',
       dataType   : 'json',
       error      : function(XHR,status,e){
-        log('failed to get progress information from ' + '../ingest/rest/getProgress/' + UploadListener.jobId);
+        Upload.log('failed to get progress information from ' + '../ingest/rest/getProgress/' + UploadListener.jobId);
       },
       success    : function(data, status) {
         UploadListener.updateRequested = false;
@@ -66,8 +66,8 @@ UploadListener.uploadProgress = function(total, transfered) {
     totalMB = total / MEGABYTE;
     totalMB = totalMB.toFixed(2);
   }
-  Upload.log("transfered: " + transfered + " of " + total + " bytes, " + percentage + "%");
-  Upload.setProgress(percentage,percentage,'Total: '+totalMB+' bytes',megaBytes+' MB send');
+  Upload.log("transfered: " + transfered + " of " + total + " MB, " + percentage + "%");
+  Upload.setProgress(percentage,percentage,'Total: '+totalMB+' MB',megaBytes+' MB send');
 }
 
 UploadListener.uploadComplete = function() {
