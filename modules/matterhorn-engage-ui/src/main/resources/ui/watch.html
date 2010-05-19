@@ -14,6 +14,7 @@
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/opencast-reset.css" />
     <link rel="stylesheet" type="text/css" href="shared_css/shared.css">
     <link rel="stylesheet" type="text/css" href="jquery/plugins/jwysiwyg/jquery.wysiwyg.css"  />
+    <link rel="stylesheet" type="text/css" href="shared_css/shared.css">
         
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
@@ -27,20 +28,29 @@
     <script type="text/javascript" src="engage-hybrid-player/aria/js/ariaSlider.js"></script>     
     <script type="text/javascript" src="jquery/plugins/jwysiwyg/jquery.wysiwyg.js"></script>
     <script type="text/javascript" src="js/engage-ui.js"></script>
-    <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-initialize.js"></script>  
+    <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-initialize.js"></script>
+    <script type="text/javascript" src="shared_js/version.js"></script>  
    
     <script type="text/javascript" src="js/watch.js"></script>
     
   </head>
 
   <body>
+  <div id="pageHeader">
+      <div id="currentVersion"></div>
+      <div id="newestVersion" style="text-align: right; float: right;"></div>
+  </div>
     
   <noscript>
     <p style="color:red;">JavaScript is turned off in your web browser. So this site wouldn't work properly! <br />
       <strong>Please turn JavaScript on to use this site, then refresh the page.</strong>
     </p>
   </noscript>
-     
+  <div style="margin-top: .5em width: 60%;">
+        <a href="../../welcome.html" style="color:#F6921E;text-decoration: none; font: 13px/1.231 arial,helvetica,clean,sans-serif;">
+          <h1><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn">&nbsp;&nbsp;Opencast Matterhorn</h1>
+        </a>
+  </div>   
   <div id="oc_title-bar">
     
     <div id="oc_title"></div>
@@ -221,7 +231,7 @@
         <input id="oc_btn-transcript" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleTranscript()" name="Transcript" value="Transcript" alt="Transcript" title="Transcript"></input>
         
         <div id="oc_tabs-search">
-          <input id="oc_lecturer-search-field" class="oc_search-Field" type="text" value="search this lecturer"></input>
+          <input id="oc_lecturer-search-field" class="oc_search-Field" type="text" value="search this lecture"></input>
         </div>
         
         <div class="clear"></div>
