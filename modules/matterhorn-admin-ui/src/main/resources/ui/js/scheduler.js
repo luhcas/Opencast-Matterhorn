@@ -385,9 +385,9 @@ SchedulerUI.selectRecordingType = function(recType){
       'abstract':             new FormField('description'),
       'channel-id':           new FormField('distMatterhornMM', true, {label:'label-distribution',errorField:'missing-distribution'}),
       'license':              new FormField('license'),
-      'recurrence.start':     new FormField(['recurStart', 'recurEnd'], true, { getValue:getRecurStart, setValue:setRecurStart, checkValue:checkRecurStart, dispValue:getRecurStartDisplay, label:'label-recurstart', errorField:'missing-recurstart' }),
-      'recurrence.duration':  new FormField(['recurDurationHour', 'recurDurationMin'], true, { getValue:getDuration, setValue:setDuration, checkValue:checkDuration, dispValue:getDurationDisplay, label:'label-recurduration', errorField:'missing-recurduration' }), //returns a date incremented by duration.
-      'recurrence.end':       new FormField(['recurEnd', 'recurStart'], true, {getValue:getRecurEnd, setValue:setRecurEnd, checkValue:checkRecurEnd, dispValue:getRecurEndDisplay}),
+      'recurrence.start':     new FormField(['recurStart', 'recurStartTimeHour', 'recurStartTimeMin'], true, { getValue:getRecurStart, setValue:setRecurStart, checkValue:checkRecurStart, dispValue:getRecurStartDisplay, label:'label-recurstart', errorField:'missing-recurstart' }),
+      'recurrence.duration':  new FormField(['recurDurationHour', 'recurDurationMin'], true, { getValue:getDuration, setValue:setDuration, checkValue:checkDuration, dispValue:getDurationDisplay, label:'label-recurduration', errorField:'missing-duration' }), //returns a date incremented by duration.
+      'recurrence.end':       new FormField(['recurEnd', 'recurStart'], true, {getValue:getRecurEnd, setValue:setRecurEnd, checkValue:checkRecurEnd, dispValue:getRecurEndDisplay, label:'label-recurend', errorField:'error-recurstart-end' }),
       'attendees':            new FormField('recurAgent', true, { getValue:getRecurAgent, setValue:setRecurAgent, checkValue:checkRecurAgent }),
       'device':               new FormField('recurAgent'),
       'recurrence':           new FormField(['schedule_repeat', 'repeat_sun', 'repeat_mon', 'repeat_tue', 'repeat_wed', 'repeat_thu', 'repeat_fri', 'repeat_sat', 'recurEnd'], true, {getValue: getRecurValue, setValue: setRecurValue, checkValue: checkRecurValue, dispValue: getRecurDisp})
@@ -1088,7 +1088,12 @@ function getRecurStart(){
   if(this.checkValue()){
     var date = this.fields.recurStart.datepicker('getDate');
     if(date && date.constructor == Date){
-      this.value = date.getTime();
+      var start = date / 1000; // Get date in milliseconds, convert to seconds.
+      start += this.fields.recurStartTimeHour.val() * 3600; // convert hour to seconds, add to date.
+      start += this.fields.recurStartTimeMin.val() * 60; //convert minutes to seconds, add to date.
+      start -= Agent.tzDiff * 60; //Agent TZ offset
+      start = start * 1000; //back to milliseconds
+      this.value = start;
     }
   }
   return this.value;
@@ -1099,16 +1104,44 @@ function getRecurStartDisplay(){
 }
 
 function setRecurStart(value){
-  var val = parseInt(value);
-  if(val == 'NaN'){
-    this.fields.recurStart.datepicker('setDate', new Date(val));
+  if(typeof value == 'string'){
+    value = { startdate: value };
+  }
+  var date = parseInt(value.startdate);
+  if(date != 'NaN') {
+    date = new Date(date + (Agent.tzDiff * 60 * 1000));
+  } else {
+    throw 'Could not parse date.';
+  }
+  if(this.fields.recurStart && this.fields.recurStartTimeHour && this.fields.recurStartTimeMin){
+    this.fields.recurStartTimeHour.val(date.getHours());
+    this.fields.recurStartTimeMin.val(date.getMinutes());
+    
+    //datepicker modifies the date object removing the time.
+    this.fields.recurStart.datepicker('setDate', date);
   }
 }
 
 function checkRecurStart(){
-  if(this.fields.recurStart.datepicker && this.fields.recurEnd.datepicker &&
-     this.fields.recurStart.datepicker('getDate') < this.fields.recurEnd.datepicker('getDate')){
-    return true;
+  if(this.fields.recurStart.datepicker){
+    var date = this.fields.recurStart.datepicker('getDate');
+    var now = (new Date()).getTime();
+    AdminUI.log(now);
+    now += Agent.tzDiff  * 60 * 1000; //Offset by the difference between local and client.
+    now = new Date(now);
+    AdminUI.log(date, now);
+    if(date &&
+       this.fields.recurStartTimeHour &&
+       this.fields.recurStartTimeMin) {
+      var startdatetime = new Date(date.getFullYear(), 
+                                   date.getMonth(), 
+                                   date.getDate(), 
+                                   this.fields.recurStartTimeHour.val(),
+                                   this.fields.recurStartTimeMin.val());
+      if(startdatetime.getTime() >= now.getTime()) {
+        return true;
+      }
+    }
   }
   return false;
 }
