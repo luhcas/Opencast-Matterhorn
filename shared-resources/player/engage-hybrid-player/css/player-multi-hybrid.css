@@ -81,22 +81,29 @@ body
   margin-left:              5px;
   margin-right:             5px;
 }
+#oc_seek-slider
+{
+  
+  margin:            0 10% 10px 10%;
+}
 
 #oc_flash-player
 {
   text-align:               center;
   height:                   100%;
-  margin-bottom:            10px;
+  margin:            0 10% 10px 10%;
 }
 
 #oc_video-player-controls
 {
   height:                   36px;
-  width:                    100%;
+  /*width:                    100%;*/
   background-image:         url("../img/icons.png");
   background-position:      0 0px;
-  margin-top:               5px;
   margin-bottom:            5px;
+  margin-top:               5px;
+  margin-left:              10%;
+  margin-right:             10%;
 }
 
 #oc_video-time
