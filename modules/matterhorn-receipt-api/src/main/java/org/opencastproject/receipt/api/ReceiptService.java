@@ -18,6 +18,7 @@ package org.opencastproject.receipt.api;
 import org.opencastproject.receipt.api.Receipt.Status;
 
 import java.io.InputStream;
+import java.util.Map;
 
 /**
  * Manages {@link Receipt}s for asynchronous services.
@@ -75,4 +76,12 @@ public interface ReceiptService {
    * @return
    */
   long count(String type, Status status, String host);
+  
+  /**
+   * Get the receipt counts for a receipt type and statuses.
+   * @param type The type of receipts
+   * @param statuses The status of the receipts
+   * @return
+   */
+  Map<String, Long> getHostsCount(String type, Status[] statuses);
 }

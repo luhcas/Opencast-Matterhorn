@@ -8,7 +8,10 @@ import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.receipt.api.Receipt;
 import org.opencastproject.receipt.api.Receipt.Status;
+import org.opencastproject.receipt.impl.ReceiptServiceImpl;
 import org.opencastproject.security.TrustedHttpClientImpl;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -26,8 +29,10 @@ import javax.ws.rs.WebApplicationException;
  */
 @Ignore
 public class ComposerRemoteServiceTest {
-  ComposerServiceRemoteImpl service;
-  
+  private ComposerServiceRemoteImpl service;
+  private ComboPooledDataSource pooledDataSource = null;
+  private ReceiptServiceImpl receiptService = null;
+ 
   @Before
   public void setUp() throws Exception {
     service = new ComposerServiceRemoteImpl("http://localhost:8080");

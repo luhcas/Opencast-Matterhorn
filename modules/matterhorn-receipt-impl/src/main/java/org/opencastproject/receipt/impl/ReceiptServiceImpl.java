@@ -18,14 +18,15 @@ package org.opencastproject.receipt.impl;
 import org.opencastproject.receipt.api.Receipt;
 import org.opencastproject.receipt.api.ReceiptService;
 import org.opencastproject.receipt.api.Receipt.Status;
+import org.opencastproject.util.UrlSupport;
 
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -71,11 +72,10 @@ public class ReceiptServiceImpl implements ReceiptService {
   
   public void activate(ComponentContext cc) {
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.receipt", persistenceProperties);
-    try {
-      hostName = InetAddress.getLocalHost().getHostName();
-    } catch (UnknownHostException e) {
-      logger.warn("unable to determine the host name... using 'localhost'");
-      hostName = "localhost";
+    if(cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
+      hostName = UrlSupport.DEFAULT_BASE_URL;
+    } else {
+      hostName = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     }
   }
 
@@ -146,6 +146,28 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.receipt.api.ReceiptService#getHostsCount(java.lang.String, org.opencastproject.receipt.api.Receipt.Status[])
+   */
+  @Override
+  public Map<String, Long> getHostsCount(String type, Status[] statuses) {
+    EntityManager em = emf.createEntityManager();
+    try {
+      Query query = em.createQuery("SELECT r.host, COUNT(r) FROM Receipt r where r.status in :statuses and r.type = :type group by r.host");
+      query.setParameter("statuses", Arrays.asList(statuses));
+      query.setParameter("type", type);
+      Map<String, Long> map = new HashMap<String, Long>();
+      for(Object result : query.getResultList()) {
+        Object[] oa = (Object[]) result;
+        map.put((String)oa[0], (Long)oa[1]);
+      }
+      return map;
+    } finally {
+      em.close();
+    }
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.receipt.api.ReceiptService#createReceipt(java.lang.String)

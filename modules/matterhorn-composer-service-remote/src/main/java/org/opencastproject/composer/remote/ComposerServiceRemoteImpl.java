@@ -28,6 +28,7 @@ import org.opencastproject.receipt.api.ReceiptService;
 import org.opencastproject.receipt.api.Receipt.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -47,9 +48,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Proxies a remote composer service for use as a JVM-local service.
+ * Proxies a set of remote composer services for use as a JVM-local service.  Remote services are selected at random.
  */
 public class ComposerServiceRemoteImpl implements ComposerService {
   private static final Logger logger = LoggerFactory.getLogger(ComposerServiceRemoteImpl.class);
@@ -60,12 +62,12 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   protected ResponseHandler<EncodingProfileList> encodingProfileListResponseHandler = new EncodingProfileListResponseHandler();
   protected ResponseHandler<Receipt> receiptResponseHandler = new ReceiptResponseHandler();
 
-  protected String remoteHost;
+  protected List<String> remoteHosts;
   protected TrustedHttpClient trustedHttpClient;
   protected ReceiptService receiptService;
 
-  public void setRemoteHost(String remoteHost) {
-    this.remoteHost = remoteHost;
+  public void setRemoteHosts(List<String> remoteHosts) {
+    this.remoteHosts = remoteHosts;
   }
 
   public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
@@ -77,16 +79,50 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   }
 
   public ComposerServiceRemoteImpl() {
+    this.remoteHosts = new ArrayList<String>();
   }
 
   public ComposerServiceRemoteImpl(String remoteHost) {
-    this.remoteHost = remoteHost;
+    this();
+    remoteHosts.add(remoteHost);
   }
 
   public void activate(ComponentContext cc) {
-    this.remoteHost = cc.getBundleContext().getProperty(REMOTE_COMPOSER);
+    String hostList = cc.getBundleContext().getProperty(REMOTE_COMPOSER);
+    if(hostList == null) {
+      throw new IllegalStateException("remote composers must be configured");
+    }
+    for(String host : StringUtils.split(hostList, ",")) {
+      remoteHosts.add(host.trim());
+    }
+    
   }
 
+  /**
+   * Selects a remote composer service from the configured {@link #remoteHosts}.
+   * 
+   */
+  protected String selectRemoteHost() {
+    Map<String, Long> runningComposerJobs = receiptService.getHostsCount(RECEIPT_TYPE, new Status[] {Status.QUEUED, Status.RUNNING});
+    long lightestLoad = Long.MAX_VALUE;
+    String lightestHost = null;
+    for(String host:remoteHosts) {
+      Long load = runningComposerJobs.get(host);
+      if(load == null) {
+        // this host has never created a receipt, so it either has an empty queue, or it's not operational.
+        // we can't do anything here about a non-functioning service
+        logger.debug("Remote host '{}' selected, since it has {} running/queued jobs", host, new Long(0));
+        return host;
+      }
+      if(load < lightestLoad) {
+        lightestLoad = load;
+        lightestHost = host;
+      }
+    }
+    logger.debug("Remote host '{}' selected, since it has {} running/queued jobs", lightestHost, lightestLoad);
+    return lightestHost;
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.receipt.api.Receipt.Status)
@@ -111,7 +147,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
     if(host != null) {
       queryStringParams.add(new BasicNameValuePair("host", host));
     }
-    String url = remoteHost + "/composer/rest/count?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
+    String url = selectRemoteHost() + "/composer/rest/count?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
     HttpGet get = new HttpGet(url);
     try {
       return trustedHttpClient.execute(get, longResponseHandler);
@@ -164,7 +200,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public Receipt encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
           String profileId, boolean block) throws EncoderException, MediaPackageException {
-    String url = remoteHost + "/composer/rest/encode";
+    String url = selectRemoteHost() + "/composer/rest/encode";
     HttpPost post = new HttpPost(url);
     Receipt r;
     try {
@@ -196,7 +232,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public EncodingProfile getProfile(String profileId) {
-    String url = remoteHost + "/composer/rest/profile/" + profileId + ".xml";
+    String url = selectRemoteHost() + "/composer/rest/profile/" + profileId + ".xml";
     HttpGet get = new HttpGet(url);
     try {
       return trustedHttpClient.execute(get, encodingProfileResponseHandler);
@@ -212,7 +248,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public Receipt getReceipt(String id) {
-    String url = remoteHost + "/composer/rest/receipt/" + id + ".xml";
+    String url = selectRemoteHost() + "/composer/rest/receipt/" + id + ".xml";
     HttpGet get = new HttpGet(url);
     try {
       return trustedHttpClient.execute(get, receiptResponseHandler);
@@ -242,7 +278,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public Receipt image(MediaPackage mediaPackage, String sourceVideoTrackId, String profileId, long time, boolean block)
           throws EncoderException, MediaPackageException {
-    String url = remoteHost + "/composer/rest/image";
+    String url = selectRemoteHost() + "/composer/rest/image";
     HttpPost post = new HttpPost(url);
     Receipt r;
     try {
@@ -272,7 +308,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public EncodingProfile[] listProfiles() {
-    String url = remoteHost + "/composer/rest/profiles.xml";
+    String url = selectRemoteHost() + "/composer/rest/profiles.xml";
     HttpGet get = new HttpGet(url);
     try {
       EncodingProfileList profileList = trustedHttpClient.execute(get, encodingProfileListResponseHandler);
