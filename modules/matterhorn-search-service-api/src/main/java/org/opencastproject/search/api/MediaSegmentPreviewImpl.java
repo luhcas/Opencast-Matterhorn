@@ -33,8 +33,8 @@ import javax.xml.bind.annotation.XmlValue;
 public class MediaSegmentPreviewImpl implements MediaSegmentPreview {
 
   /** The preview type **/
-  @XmlAttribute(name = "type")
-  private String type = null;
+  @XmlAttribute(name = "ref")
+  private String reference = null;
 
   /** The preview url */
   @XmlValue
@@ -51,22 +51,22 @@ public class MediaSegmentPreviewImpl implements MediaSegmentPreview {
    * 
    * @param url
    *          url to the preview image
-   * @param type
-   *          preview image type
+   * @param reference
+   *          reference to the source track
    */
-  public MediaSegmentPreviewImpl(String url, String type) {
+  public MediaSegmentPreviewImpl(String url, String reference) {
     this.url = url;
-    this.type = type;
+    this.reference = reference;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.search.api.MediaSegmentPreview#getType()
+   * @see org.opencastproject.search.api.MediaSegmentPreview#getReference()
    */
   @Override
-  public String getType() {
-    return type;
+  public String getReference() {
+    return reference;
   }
 
   /**

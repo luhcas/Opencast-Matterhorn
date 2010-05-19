@@ -16,8 +16,7 @@
 package org.opencastproject.search.api;
 
 /**
- * This object models a preview url for time segments, which consist of a url
- * and a url type.
+ * This object models a preview url for time segments, which consist of a url and a url type.
  */
 public interface MediaSegmentPreview {
 
@@ -29,12 +28,10 @@ public interface MediaSegmentPreview {
   String getUrl();
 
   /**
-   * Returns the type of preview, which will usually be set to the type of the
-   * original track, e. g. <code>presentation</code> if the original track
-   * flavor was <code>presentation/source</code>.
+   * Returns the reference to the source track that was used to produce the segment.
    * 
-   * @return the preview type
+   * @return the reference to the source track
    */
-  String getType();
+  String getReference();
 
 }

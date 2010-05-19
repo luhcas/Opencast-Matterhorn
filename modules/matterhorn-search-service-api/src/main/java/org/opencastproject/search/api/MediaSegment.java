@@ -75,9 +75,9 @@ public interface MediaSegment {
    * 
    * @param url
    *          url to the preview image
-   * @param flavor
-   *          flavor of the preview's source track
+   * @param reference
+   *          reference of the preview's source track
    */
-  void addPreview(String url, String flavor);
+  void addPreview(String url, String reference);
 
 }

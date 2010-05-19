@@ -16,7 +16,6 @@
 
 package org.opencastproject.search.api;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,47 +31,48 @@ import javax.xml.bind.annotation.XmlType;
  * Part of a search result that models a video segment.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="segment", namespace="http://search.opencastproject.org/")
-@XmlRootElement(name="segment", namespace="http://search.opencastproject.org/")
+@XmlType(name = "segment", namespace = "http://search.opencastproject.org/")
+@XmlRootElement(name = "segment", namespace = "http://search.opencastproject.org/")
 public class MediaSegmentImpl implements MediaSegment, Comparable<MediaSegmentImpl> {
 
   /** The segment number **/
-  @XmlAttribute(name="index")
+  @XmlAttribute(name = "index")
   private int number = -1;
 
   /** The segment time point **/
-  @XmlAttribute(name="time")
+  @XmlAttribute(name = "time")
   private long time = -1;
 
   /** The segment duration **/
-  @XmlAttribute(name="duration")
+  @XmlAttribute(name = "duration")
   private long duration = -1;
 
   /** The segment text **/
-  @XmlElement(name="text")
+  @XmlElement(name = "text")
   private String text = null;
 
   /** The segment image **/
-  @XmlElement(name="image")
+  @XmlElement(name = "image")
   private String imageUrl = null;
 
   /** The segment relevance **/
-  @XmlAttribute(name="relevance")
+  @XmlAttribute(name = "relevance")
   private int relevance = -1;
 
   /** The 'segment is a hit' flag **/
-  @XmlAttribute(name="hit")
+  @XmlAttribute(name = "hit")
   private boolean hit = false;
-  
+
   /** The preview urls */
-  @XmlElementWrapper(name="previews")
+  @XmlElementWrapper(name = "previews")
   @XmlElement(name = "preview")
   private List<MediaSegmentPreviewImpl> previewUrls = new ArrayList<MediaSegmentPreviewImpl>();
 
   /**
    * A no-arg constructor, which is needed for JAXB serialization.
    */
-  public MediaSegmentImpl() {}
+  public MediaSegmentImpl() {
+  }
 
   /**
    * Creates a new segment that is located at position <code>sequenceId</code> within the sequence of segments.
@@ -209,15 +209,17 @@ public class MediaSegmentImpl implements MediaSegment, Comparable<MediaSegmentIm
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.MediaSegment#addPreview(java.lang.String, java.lang.String)
    */
   @Override
-  public void addPreview(String url, String flavor) {
-    previewUrls.add(new MediaSegmentPreviewImpl(url, flavor));
+  public void addPreview(String url, String reference) {
+    previewUrls.add(new MediaSegmentPreviewImpl(url, reference));
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Comparable#compareTo(java.lang.Object)
    */
   @Override

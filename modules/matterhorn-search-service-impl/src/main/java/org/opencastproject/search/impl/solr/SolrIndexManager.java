@@ -20,7 +20,6 @@ import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReference;
@@ -630,27 +629,20 @@ public class SolrIndexManager {
           
           // Look for preview images. Their characteristics are that they are
           // attached as attachments with a flavor of preview/<something>.
-          String timeInMillis = Long.toString(timepoint.getTimeInMilliseconds());
-          for (Attachment t : mediaPackage.getAttachments()) {
-            MediaPackageElementFlavor flavor = t.getFlavor();
-            if (flavor == null || !flavor.getType().equals(MediaPackageElements.SLIDE_PREVIEW_FLAVOR.getType()))
-              continue;
-
-            // Found one!
-            MediaPackageReference ref = t.getReference();
-            if (ref != null && timeInMillis.equals(ref.getProperty("time"))) {
-              if (t.getFlavor() == null)
-                throw new IllegalStateException("Can't process a slide preview without a flavor");
+          String time = timepoint.toString();
+          for (Attachment slide : mediaPackage.getAttachments(MediaPackageElements.SLIDE_PREVIEW_FLAVOR)) {
+            MediaPackageReference ref = slide.getReference();
+            if (ref != null && time.equals(ref.getProperty("time"))) {
               hintField.append("preview");
               hintField.append(".");
-              hintField.append(t.getFlavor().getSubtype());
+              hintField.append(ref.getIdentifier());
               hintField.append("=");
-              hintField.append(t.getURI().toString());
+              hintField.append(slide.getURI().toString());
               hintField.append("\n");
             }
           }
           
-          log_.trace("Adding segment: " + timepoint.getTimeInMilliseconds());
+          log_.trace("Adding segment: " + timepoint.toString());
           // add freetext annotation to solr document
            Iterator<TextAnnotation> freeIter =
            contentSegment.textAnnotations();

@@ -152,6 +152,7 @@ public class SearchResultItemImpl implements SearchResultItem {
 
   /** Media segment list **/
   @XmlElementWrapper(name = "segments")
+  @XmlElement(name = "segment")
   private SortedSet<MediaSegmentImpl> mediaSegments = null;
 
   /**

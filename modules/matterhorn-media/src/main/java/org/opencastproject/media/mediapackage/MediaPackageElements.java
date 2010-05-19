@@ -53,7 +53,7 @@ public interface MediaPackageElements {
   MediaPackageElementFlavor COVER_FLAVOR = new MediaPackageElementFlavor("cover", "source", "Cover art");
 
   /** Slide preview attachment flavor */
-  MediaPackageElementFlavor SLIDE_PREVIEW_FLAVOR = new MediaPackageElementFlavor("preview", "source", "Slide previw image");
+  MediaPackageElementFlavor SLIDE_PREVIEW_FLAVOR = new MediaPackageElementFlavor("slide", "source", "Slide previw image");
 
   /** The flavor produced by video segmentation */
   MediaPackageElementFlavor SEGMENTS_FLAVOR = new MediaPackageElementFlavor("mpeg-7", "segments");
