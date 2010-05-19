@@ -16,6 +16,7 @@
 package org.opencastproject.workspace.impl;
 
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.NotFoundException;
@@ -73,11 +74,20 @@ public class WorkspaceImpl implements Workspace {
 
   public void activate(ComponentContext cc) {
     // NOTE: warning - the test calls activate() with a NULL cc
-    if (cc != null && cc.getBundleContext().getProperty(WORKSPACE_ROOTDIR_KEY) != null) {
-      // use rootDir from CONFIG
-      this.rootDirectory = cc.getBundleContext().getProperty(WORKSPACE_ROOTDIR_KEY);
-      logger.info("CONFIG " + WORKSPACE_ROOTDIR_KEY + ": " + this.rootDirectory);
+    if (this.rootDirectory == null) {
+      if (cc != null && cc.getBundleContext().getProperty(WORKSPACE_ROOTDIR_KEY) != null) {
+        // use rootDir from CONFIG
+        this.rootDirectory = cc.getBundleContext().getProperty(WORKSPACE_ROOTDIR_KEY);
+        logger.info("CONFIG " + WORKSPACE_ROOTDIR_KEY + ": " + this.rootDirectory);
+      } else if (cc != null && cc.getBundleContext().getProperty("org.opencastproject.storage.dir") != null) {
+        // create rootDir by adding "workspace" to the default data directory
+        this.rootDirectory = PathSupport.concat(cc.getBundleContext().getProperty("org.opencastproject.storage.dir"), "workspace");
+        logger.warn("CONFIG " + WORKSPACE_ROOTDIR_KEY + " is missing: falling back to " + this.rootDirectory);
+      } else {
+        throw new IllegalStateException("Configuration '" + WORKSPACE_ROOTDIR_KEY + "' is missing");
+      }
     }
+
     createRootDirectory();
 
     filesystemMappings = new HashMap<String, String>();
