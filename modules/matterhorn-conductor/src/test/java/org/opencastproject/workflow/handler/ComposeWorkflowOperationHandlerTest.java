@@ -126,7 +126,51 @@ public class ComposeWorkflowOperationHandlerTest {
     Assert.assertEquals(SOURCE_TRACK_ID, trackEncoded.getReference().getIdentifier());
   }
 
-  
+  @Test
+  public void testComposeWOHMissingData() throws Exception {
+    // set up mock profile
+    profile = EasyMock.createNiceMock(EncodingProfile.class);
+    EasyMock.expect(profile.getIdentifier()).andReturn(PROFILE_ID);
+    EasyMock.expect(profile.getApplicableMediaType()).andReturn(MediaType.Stream);
+    EasyMock.expect(profile.getOutputType()).andReturn(MediaType.Stream);
+    EasyMock.expect(profile.getMimeType()).andReturn(MimeTypes.MPEG4.asString()).times(2);
+    profileList = new EncodingProfile[] { profile };
+    EasyMock.replay(profile);
+
+    // set up mock receipt
+    receipt = EasyMock.createNiceMock(Receipt.class);
+    EasyMock.expect(receipt.getElement()).andReturn(encodedTracks[0]);
+    EasyMock.replay(receipt);
+
+    // set up mock composer service
+    composerService = EasyMock.createNiceMock(ComposerService.class);
+    EasyMock.expect(composerService.listProfiles()).andReturn(profileList);
+    EasyMock.expect(
+            composerService.encode((MediaPackage) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(
+            receipt);
+    EasyMock.replay(composerService);
+    operationHandler.setComposerService(composerService);
+
+    Map<String, String> configurations = new HashMap<String, String>();
+    try {
+      // no source flavour
+      getWorkflowOperationResult(mp, configurations);
+      Assert.fail("Since neither source audio nor source video flavour is specified exception should be thrown");
+    } catch (WorkflowOperationException e) {
+      // expecting exception
+    }
+
+    try {
+      // no source flavour
+      configurations.put("source-video-flavor", "presentation/source");
+      getWorkflowOperationResult(mp, configurations);
+      Assert.fail("Since encoding profile is not specified exception should be thrown");
+    } catch (WorkflowOperationException e) {
+      // expecting exception
+    }
+
+  }
 
   private WorkflowOperationResult getWorkflowOperationResult(MediaPackage mp, Map<String, String> configurations)
           throws WorkflowOperationException {
