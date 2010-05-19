@@ -271,6 +271,8 @@
         <configuration key="source-flavor">presenter/source</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">slide/source</configuration>
+        <configuration key="reference-flavor">presenter/delivery</configuration>
+        <configuration key="reference-tags">engage</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">engage-slides.http</configuration>
       </configurations>
@@ -284,6 +286,8 @@
         <configuration key="source-flavor">presentation/source</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">slide/source</configuration>
+        <configuration key="reference-flavor">presentation/delivery</configuration>
+        <configuration key="reference-tags">engage</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">engage-slides.http</configuration>
       </configurations>

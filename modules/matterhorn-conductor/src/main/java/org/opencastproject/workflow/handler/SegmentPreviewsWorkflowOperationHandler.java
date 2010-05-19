@@ -21,6 +21,7 @@ import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
@@ -70,12 +71,15 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
   static {
     CONFIG_OPTIONS = new TreeMap<String, String>();
     CONFIG_OPTIONS.put("source-flavor", "The \"flavor\" of the track to use as a video source input");
-    CONFIG_OPTIONS.put("source-tags", "The required tags that must exist on the track for the track to be used as a video source");
+    CONFIG_OPTIONS.put("source-tags",
+            "The required tags that must exist on the track for the track to be used as a video source");
     CONFIG_OPTIONS.put("encoding-profile", "The encoding profile to use for generating the image");
+    CONFIG_OPTIONS.put("reference-flavor", "The \"flavor\" of the track to used as the reference");
+    CONFIG_OPTIONS.put("reference-tags", "The \"tags\" of the track to used as the reference");
     CONFIG_OPTIONS.put("target-flavor", "The flavor to apply to the extracted images");
     CONFIG_OPTIONS.put("target-tags", "The tags to apply to the extracted images");
   }
-  
+
   /** The composer service */
   private ComposerService composerService = null;
 
@@ -84,6 +88,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
    */
   @Override
@@ -100,7 +105,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
   protected void setComposerService(ComposerService composerService) {
     this.composerService = composerService;
   }
-  
+
   protected void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
     this.trustedHttpClient = trustedHttpClient;
   }
@@ -156,6 +161,8 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
     String targetImageTags = StringUtils.trimToNull(operation.getConfiguration("target-tags"));
     String targetImageFlavor = StringUtils.trimToNull(operation.getConfiguration("target-flavor"));
     String encodingProfileName = StringUtils.trimToNull(operation.getConfiguration("encoding-profile"));
+    String referenceFlavor = StringUtils.trimToNull(operation.getConfiguration("reference-flavor"));
+    String referenceTags = StringUtils.trimToNull(operation.getConfiguration("reference-tags"));
 
     // Find the encoding profile
     EncodingProfile profile = composerService.getProfile(encodingProfileName);
@@ -194,8 +201,18 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
               new Object[] { mediaPackage, sourceTags, sourceVideoFlavor });
       return mediaPackage;
     } else {
+
+      // Determine the tagset for the reference
+      Set<String> referenceTagSet = null;
+      if (StringUtils.trimToNull(referenceTags) != null) {
+        referenceTagSet = new HashSet<String>();
+        referenceTagSet.addAll(Arrays.asList(referenceTags.split("\\W")));
+      }
+
+      // Determine the reference master
+
       for (Track t : videoTracks) {
-        
+
         // Try to load the segments catalog
         MediaPackageReference trackReference = new MediaPackageReferenceImpl(t);
         Catalog[] segmentCatalogs = mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS_FLAVOR, trackReference);
@@ -204,7 +221,9 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
           mpeg7 = new Mpeg7CatalogImpl(segmentCatalogs[0]);
           mpeg7.setTrustedHttpClient(trustedHttpClient);
           if (segmentCatalogs.length > 1)
-            logger.warn("More than one segments catalog found for track {}. Resuming with the first one ({})", t, mpeg7);
+            logger
+                    .warn("More than one segments catalog found for track {}. Resuming with the first one ({})", t,
+                            mpeg7);
         } else {
           logger.debug("No segments catalog found for track {}", t);
           continue;
@@ -215,7 +234,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
           logger.info("Segments catalog {} contains no video content", mpeg7);
           continue;
         }
-        
+
         Video videoContent = mpeg7.videoContent().next();
         TemporalDecomposition<? extends ContentSegment> decomposition = videoContent.getTemporalDecomposition();
 
@@ -224,7 +243,10 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
           logger.info("Segments catalog {} contains no video content", mpeg7);
           continue;
         }
-          
+
+        // Is a derived track with the configured reference flavor available?
+        MediaPackageElement referenceMaster = getReferenceMaster(mediaPackage, t, referenceFlavor, referenceTagSet);
+
         // Create the preview images according to the mpeg7 segments
         if (t.hasVideo() && mpeg7 != null) {
 
@@ -235,23 +257,24 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
             MediaTimePoint tp = segment.getMediaTime().getMediaTimePoint();
 
             // Choose a time
-            long time = tp.getTimeInMilliseconds()/1000;
-  
-            Receipt receipt = composerService.image(mediaPackage, t.getIdentifier(), profile.getIdentifier(), time, true);
+            long time = tp.getTimeInMilliseconds() / 1000;
+
+            Receipt receipt = composerService.image(mediaPackage, t.getIdentifier(), profile.getIdentifier(), time,
+                    true);
             Attachment composedImage = (Attachment) receipt.getElement();
             if (composedImage == null)
               throw new RuntimeException("Unable to compose image");
-  
+
             // Add the flavor, either from the operation configuration or from the composer
             if (targetImageFlavor != null) {
               composedImage.setFlavor(MediaPackageElementFlavor.parseFlavor(targetImageFlavor));
               logger.debug("Preview image has flavor '{}'", composedImage.getFlavor());
             }
-  
+
             // Set the mimetype
             if (profile.getMimeType() != null)
               composedImage.setMimeType(MimeTypes.parseMimeType(profile.getMimeType()));
-  
+
             // Add tags
             if (targetImageTags != null) {
               for (String tag : targetImageTags.split("\\W")) {
@@ -262,10 +285,10 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
             }
 
             // Refer to the original track including a timestamp
-            MediaPackageReferenceImpl ref = new MediaPackageReferenceImpl(t);
+            MediaPackageReferenceImpl ref = new MediaPackageReferenceImpl(referenceMaster);
             ref.setProperty("time", tp.toString());
             composedImage.setReference(ref);
-            
+
             // store new image in the mediaPackage
             mediaPackage.add(composedImage);
           }
@@ -274,6 +297,47 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
     }
 
     return mediaPackage;
+  }
+
+  /**
+   * Returns the track that is used as the reference for the segment previews. It is either identified by flavor and tag
+   * set and being derived from <code>t</code> or <code>t</code> itself.
+   * 
+   * @param mediaPackage
+   *          the media package
+   * @param t
+   *          the source track for the images
+   * @param referenceFlavor
+   *          the required flavor
+   * @param referenceTagSet
+   *          the required tagset
+   * @return the reference master
+   */
+  private MediaPackageElement getReferenceMaster(MediaPackage mediaPackage, Track t, String referenceFlavor,
+          Set<String> referenceTagSet) {
+    MediaPackageElement referenceMaster = t;
+    if (referenceFlavor != null) {
+      MediaPackageElementFlavor flavor = MediaPackageElementFlavor.parseFlavor(referenceFlavor);
+      // Find a track with the given flavor that is (indirectly) derived from t?
+      locateReferenceMaster: for (Track e : mediaPackage.getTracks(flavor)) {
+        MediaPackageReference ref = e.getReference();
+        while (ref != null && mediaPackage.getElementByReference(ref) != null) {
+          MediaPackageElement tr = mediaPackage.getElementByReference(ref);
+          if (tr.equals(t)) {
+            boolean matches = true;
+            for (String tag : referenceTagSet) {
+              if (!e.containsTag(tag))
+                matches = false;
+            }
+            if (matches) {
+              referenceMaster = e;
+              break locateReferenceMaster;
+            }
+          }
+        }
+      }
+    }
+    return referenceMaster;
   }
 
 }

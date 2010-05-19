@@ -30,8 +30,11 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -100,36 +103,60 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
         keep.addAll(Arrays.asList(mp.getCatalogsByTag(tag)));
       }
 
-      // Remove what we don't want to publish (i. e. what is not tagged accordingly)
+      // Mark everything that is set for removal
+      List<MediaPackageElement> removals = new ArrayList<MediaPackageElement>();
       for (MediaPackageElement element : mp.getElements()) {
         if(!keep.contains(element)) {
-          mp.remove(element);
+          removals.add(element);
         }
       }
 
       // Fix references and flavors
       for (MediaPackageElement element : mp.getElements()) {
+        if (removals.contains(element))
+          continue;
+        
+        // Is the element referencing anything?
         MediaPackageReference reference = element.getReference();
-        if (reference != null && !reference.getType().equals(MediaPackageReference.TYPE_MEDIAPACKAGE) && mp.getElementByReference(reference) == null) {
+        if (reference != null) {
+          Map<String, String> referenceProperties = reference.getProperties();
+          MediaPackageElement referencedElement = mp.getElementByReference(reference);
           
-          // Follow the references until we find a flavor
-          MediaPackageElement parent = null;
-          while ((parent = current.getElementByReference(reference)) != null) {
-            if (parent.getFlavor() != null && element.getFlavor() == null) {
-              element.setFlavor(parent.getFlavor());
+          // if we are distributing the referenced element, everything is fine. Otherwhise...
+          if (referencedElement != null && removals.contains(referencedElement)) {
+
+            // Follow the references until we find a flavor
+            MediaPackageElement parent = null;
+            while ((parent = current.getElementByReference(reference)) != null) {
+              if (parent.getFlavor() != null && element.getFlavor() == null) {
+                element.setFlavor(parent.getFlavor());
+              }
+              if (parent.getReference() == null)
+                break;
+              reference = parent.getReference();
             }
-            if (parent.getReference() == null)
-              break;
-            reference = parent.getReference();
+            
+            // Done. Let's cut the path but keep references to the mediapackage itself
+            if (reference != null && reference.getType().equals(MediaPackageReference.TYPE_MEDIAPACKAGE))
+              element.setReference(reference);
+            else if (reference != null && (referenceProperties == null || referenceProperties.size() == 0))
+              element.clearReference();
+            else {
+              // Ok, there is more to that reference than just pointing at an element. Let's keep the original,
+              // you never know.
+              removals.remove(referencedElement);
+              referencedElement.setURI(null);
+              referencedElement.setChecksum(null);
+            }
           }
-          
-          // Done. Let's cut the path but keep references to the mediapackage itself
-          if (reference != null && reference.getType().equals(MediaPackageReference.TYPE_MEDIAPACKAGE))
-            element.setReference(reference);
-          else
-            element.clearReference();
         }
       }
+      
+      // Remove everything we don't want to add to publish
+      for (MediaPackageElement element : removals) {
+        mp.remove(element);
+      }
+
       // adding media package to the search index
       searchService.add(mp);
       logger.debug("Publish operation complete");

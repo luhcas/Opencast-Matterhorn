@@ -19,6 +19,8 @@ import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageReference;
+import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -30,6 +32,8 @@ import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * An abstract class for implementing distribution services that copy files to filesystems, obtaining URLs for the
@@ -70,6 +74,7 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
    */
   public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException {
     try {
+      Map<MediaPackageElement, MediaPackageElement> mappings = new HashMap<MediaPackageElement, MediaPackageElement>();
       Arrays.sort(elementIds);
       for (MediaPackageElement element : mediaPackage.getElements()) {
         if (Arrays.binarySearch(elementIds, element.getIdentifier()) >= 0) {
@@ -87,13 +92,50 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
           clone.setURI(getDistributionUri(element));
           clone.setIdentifier(null);
           clone.clearTags();
-          mediaPackage.addDerived(clone, element);
+
+          MediaPackageReference ref = element.getReference();
+          if (ref != null && mediaPackage.getElementByReference(ref) != null) {
+            clone.setReference(ref);
+            mediaPackage.add(clone);
+          } else {
+            mediaPackage.addDerived(clone, element);
+          }
+
+          mappings.put(element, clone);
         }
       }
+
+      alignReferences(mediaPackage, mappings);
+
     } catch (Exception e) {
       throw new DistributionException(e);
     }
     return mediaPackage;
+  }
+
+  /**
+   * Try to align the references. Replace references to undistribued elements with those to distributed ones.
+   * 
+   * @param mediaPackage
+   *          the media package
+   * @param mappings
+   *          mappings of original to distributed elements
+   */
+  private void alignReferences(MediaPackage mediaPackage, Map<MediaPackageElement, MediaPackageElement> mappings) {
+    for (MediaPackageElement clone : mappings.values()) {
+      MediaPackageReference ref = clone.getReference();
+      if (ref != null && mediaPackage.getElementByReference(ref) != null) {
+        MediaPackageElement oldReference = mediaPackage.getElementByReference(ref);
+        MediaPackageElement newReference = mappings.get(oldReference);
+        if (newReference != null) {
+          MediaPackageReference newRef = new MediaPackageReferenceImpl(newReference);
+          for (Map.Entry<String, String> entry : ref.getProperties().entrySet()) {
+            newRef.setProperty(entry.getKey(), entry.getValue());
+          }
+          clone.setReference(newRef);
+        }
+      }
+    }
   }
 
   public void setWorkspace(Workspace workspace) {
@@ -107,9 +149,9 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
    */
   @Override
   public void retract(MediaPackage mediaPackage) throws DistributionException {
-    //throw new UnsupportedOperationException();
+    // throw new UnsupportedOperationException();
     MediaPackageElement mediaPackageElement = null;
-  
+
     for (MediaPackageElement element : mediaPackage.getElements()) {
       switch (element.getElementType()) {
       case Track:
@@ -129,19 +171,17 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
     }
 
     try {
-      File sourceFile = workspace.get(mediaPackageElement.getURI());
       File destination = getDistributionFile(mediaPackageElement);
 
       // delete the file
       if (FileSupport.delete(destination)) {
         logger.info("Succeeded retracting {} ...", destination);
-      }
-      else {
+      } else {
         logger.info("Failed retracting {} ...", destination);
       }
     } catch (Exception e) {
       throw new DistributionException(e);
-    }    
+    }
   }
 
 }
