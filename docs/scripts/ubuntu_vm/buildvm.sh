@@ -72,7 +72,7 @@ echo "change the vm to use nat networking instead of bridged"
 sed -i 's/bridged/nat/g' ubuntu-vmw6/opencast.vmx
 
 echo "change matterhorn_setup.sh to use the correct svn repo path"
-sed -i "s/OC_URL=.*$/OC_URL=$MATTERHORN_SVN/i" matterhorn_setup.sh
+sed -i "s'OC_URL=.*$'OC_URL=$MATTERHORN_SVN'" matterhorn_setup.sh
 
 #mount the vm image
 mkdir mnt
