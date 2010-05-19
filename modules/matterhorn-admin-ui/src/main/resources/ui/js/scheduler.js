@@ -387,10 +387,10 @@ SchedulerUI.selectRecordingType = function(recType){
       'license':              new FormField('license'),
       'recurrence.start':     new FormField(['recurStart', 'recurStartTimeHour', 'recurStartTimeMin'], true, { getValue:getRecurStart, setValue:setRecurStart, checkValue:checkRecurStart, dispValue:getRecurStartDisplay, label:'label-recurstart', errorField:'missing-recurstart' }),
       'recurrence.duration':  new FormField(['recurDurationHour', 'recurDurationMin'], true, { getValue:getDuration, setValue:setDuration, checkValue:checkDuration, dispValue:getDurationDisplay, label:'label-recurduration', errorField:'missing-duration' }), //returns a date incremented by duration.
-      'recurrence.end':       new FormField(['recurEnd', 'recurStart'], true, {getValue:getRecurEnd, setValue:setRecurEnd, checkValue:checkRecurEnd, dispValue:getRecurEndDisplay, label:'label-recurend', errorField:'error-recurstart-end' }),
+      'recurrence.end':       new FormField(['recurEnd', 'recurStart', 'recurStartTimeHour', 'recurStartTimeMin'], true, {getValue:getRecurEnd, setValue:setRecurEnd, checkValue:checkRecurEnd, dispValue:getRecurEndDisplay, label:'label-recurend', errorField:'error-recurstart-end' }),
       'attendees':            new FormField('recurAgent', true, { getValue:getRecurAgent, setValue:setRecurAgent, checkValue:checkRecurAgent }),
       'device':               new FormField('recurAgent'),
-      'recurrence':           new FormField(['schedule_repeat', 'repeat_sun', 'repeat_mon', 'repeat_tue', 'repeat_wed', 'repeat_thu', 'repeat_fri', 'repeat_sat', 'recurEnd'], true, {getValue: getRecurValue, setValue: setRecurValue, checkValue: checkRecurValue, dispValue: getRecurDisp})
+      'recurrence':           new FormField(['schedule_repeat', 'repeat_sun', 'repeat_mon', 'repeat_tue', 'repeat_wed', 'repeat_thu', 'repeat_fri', 'repeat_sat'], true, {getValue: getRecurValue, setValue: setRecurValue, checkValue: checkRecurValue, dispValue: getRecurDisp})
     };
     SchedulerForm.rootEl = 'RecurringEvent';
   }else{
@@ -918,7 +918,8 @@ function checkStartDate(){
 function getRecurValue(){
   if(this.checkValue()){
     if(this.fields.schedule_repeat.val() == 'weekly'){
-      var rrule = "FREQ=WEEKLY;UNTIL=" + SchedulerUI.toICalDate(this.fields.recurEnd.datepicker('getDate')) + ";BYDAY=";
+      var enddate = new Date(SchedulerForm.formFields['recurrence.end'].getValue());
+      var rrule = "FREQ=WEEKLY;UNTIL=" + SchedulerUI.toICalDate(enddate) + ";BYDAY=";
       var days = [];
       if(this.fields.repeat_sun[0].checked){
         days.push("SU");
@@ -998,7 +999,9 @@ function checkRecurValue(){
        this.fields.repeat_thu[0].checked ||
        this.fields.repeat_fri[0].checked ||
        this.fields.repeat_sat[0].checked ){
-      if(this.fields.recurEnd.datepicker('getDate')){ //Todo, check enddate is after start date.
+      if(SchedulerForm.formFields['recurrence.start'].checkValue() &&
+         SchedulerForm.formFields['recurrence.duration'].checkValue() &&
+         SchedulerForm.formFields['recurrence.end'].checkValue()){
         return true;
       }
     }
@@ -1150,7 +1153,13 @@ function getRecurEnd(){
   if(this.checkValue()){
     var date = this.fields.recurEnd.datepicker('getDate');
     if(date && date.constructor == Date){
-      this.value = date.getTime();
+      var end = date.getTime() / 1000; // Get date in milliseconds, convert to seconds.
+      end += this.fields.recurStartTimeHour.val() * 3600; // convert hour to seconds, add to date.
+      end += this.fields.recurStartTimeMin.val() * 60; //convert minutes to seconds, add to date.
+      end -= Agent.tzDiff * 60; //Agent TZ offset
+      end = end * 1000; //back to milliseconds
+      end += SchedulerForm.formFields['recurrence.duration'].getValue(); //Add to duration start time for end time.
+      this.value = end;
     }
   }
   return this.value;
@@ -1168,7 +1177,8 @@ function setRecurEnd(value){
 }
 
 function checkRecurEnd(){
-  if(this.fields.recurEnd.datepicker && this.fields.recurStart.datepicker &&
+  if(this.fields.recurEnd.datepicker && this.fields.recurStart.datepicker && SchedulerForm.formFields['recurrence.duration'].checkValue() &&
+     this.fields.recurStartTimeHour && this.fields.recurStartTimeMin &&
      this.fields.recurEnd.datepicker('getDate') > this.fields.recurStart.datepicker('getDate')){
     return true;
   }
