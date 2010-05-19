@@ -1,10 +1,10 @@
 #!/bin/sh -e
 # Startup script for Red5
 
-export RED5_HOME=/opt/matterhorn/red5/
+export RED5_HOME=/opt/matterhorn/red5
 
 red5_start="$RED5_HOME/red5.sh"
-red5_stop="$RED5_HOME/red5_shutdown.sh"
+red5_stop="$RED5_HOME/red5-shutdown.sh"
 
 start() {
         echo -n "Starting Red5: "

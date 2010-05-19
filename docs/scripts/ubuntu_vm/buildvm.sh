@@ -68,10 +68,10 @@ sudo ubuntu-vm-builder vmw6 karmic --arch 'i386' --mem '512' --cpus 1 \
 --addpkg gstreamer0.10-plugins* --addpkg gstreamer0.10-ffmpeg --addpkg gstreamer-tools \
 --addpkg acpid --exec $HOME/postinstall.sh
 
-#change the vm to use nat networking instead of bridged
+echo "change the vm to use nat networking instead of bridged"
 sed -i 's/bridged/nat/g' ubuntu-vmw6/opencast.vmx
 
-#change matterhorn_setup.sh to use the correct svn repo path
+echo "change matterhorn_setup.sh to use the correct svn repo path"
 sed -i "s/OC_URL=.*$/OC_URL=$MATTERHORN_SVN/i" matterhorn_setup.sh
 
 #mount the vm image
@@ -170,6 +170,7 @@ fi
 sudo cp -r matterhorn_trunk mnt/opt/matterhorn/
 
 sudo cp -rf matterhorn_trunk/docs/felix/conf/* mnt/opt/matterhorn/felix/conf/
+sudo sed -i "s/conf\/security.xml/\/opt\/matterhorn\/felix\/conf\/security.xml/" mnt/opt/matterhorn/felix/conf/config.properties
 
 export OC_REV=`svn info matterhorn_trunk | awk /Revision/ | cut -d " " -f 2`
 
@@ -186,6 +187,23 @@ cd ..
 
 #copy the maven repo across
 sudo cp -r $M2 mnt/home/opencast/.m2
+
+echo "===================================="
+echo "=====Building red5 streaming app===="
+echo "===================================="
+
+if [ -e matterhorn-engage-streaming ]; then
+  cd matterhorn-engage-streaming
+  svn up
+  cd ..
+else
+  svn checkout http://opencast.jira.com/svn/MH/contrib/matterhorn-engage-streaming
+fi
+
+cd matterhorn-engage-streaming
+ant
+cp dist/*.war ../mnt/opt/matterhorn/red5/webapps/
+cd ..
 
 echo "=========================="
 echo "========Final Setup======="
@@ -214,6 +232,7 @@ sudo chmod -R 777 mnt/opt/matterhorn
 #write environment variables to login file
 echo "export OC=/opt/matterhorn" >> mnt/home/opencast/.bashrc
 echo "export FELIX_HOME=/opt/matterhorn/felix" >> mnt/home/opencast/.bashrc
+echo "export RED5_HOME=/opt/matterhorn/red5" >> mnt/home/opencast/.bashrc
 echo "export M2_REPO=/home/opencast/.m2/repository" >> mnt/home/opencast/.bashrc
 echo "export OC_URL=http://opencast.jira.com/svn/MH/trunk/" >> mnt/home/opencast/.bashrc
 echo "export FELIX_URL=http://apache.mirror.iweb.ca/felix/felix-framework-2.0.1.tar.gz" >> mnt/home/opencast/.bashrc

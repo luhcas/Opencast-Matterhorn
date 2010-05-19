@@ -101,6 +101,7 @@ start_mh ()
 
   export OC=/opt/matterhorn
   export FELIX_HOME=/opt/matterhorn/felix
+  export RED5_HOME=/opt/matterhorn/red5
   export M2_REPO=/home/opencast/.m2/repository
   export OC_URL=http://opencast.jira.com/svn/MH/trunk/
   export FELIX_URL=http://apache.mirror.iweb.ca/felix/felix-framework-2.0.1.tar.gz

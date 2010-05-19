@@ -3,11 +3,11 @@
 cd /opt/matterhorn/matterhorn_trunk
 
 # update from svn
-if [ -n $1 ]
+if [ -z $1 ]
 then
-  svn update -r $1
-else
   svn update
+else
+  svn update -r $1
 fi
 
 #stop felix
@@ -31,6 +31,7 @@ cd /home/opencast
 # update felix config (url)
 MY_IP=`ifconfig | grep "inet addr:" | grep -v 127.0.0.1 | awk '{print $2}' | cut -d':' -f2`
 sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" /opt/matterhorn/felix/conf/config.properties
+sed -i "s/conf\/security.xml/\/opt\/matterhorn\/felix\/conf\/security.xml/" /opt/matterhorn/felix/conf/config.properties
 # update capture properties
 sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" /opencast/config/capture.properties
 
