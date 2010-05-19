@@ -43,7 +43,6 @@ import org.opencastproject.receipt.api.Receipt.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
-import org.opencastproject.util.PathSupport;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -436,11 +435,13 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     ContentSegment contentSegment = video.getTemporalDecomposition().createSegment("segment-" + segmentCount);
     ImageComparator icomp = new ImageComparator(CHANGES_THRESHOLD);
     
-    // TODO: Turn off to improve performance
-    icomp.setStatistics(true);
-    icomp.saveImagesTo(new File(PathSupport.concat(new String[] {
-      System.getProperty("java.io.tmpdir"), "videosegments", video.getMediaLocator().getMediaURI().toString().replaceAll("\\W", "-")
-    })));
+//    icomp.setStatistics(true);
+//    String imagesPath = PathSupport.concat(new String[] {
+//      System.getProperty("java.io.tmpdir"),
+//      "videosegments",
+//      video.getMediaLocator().getMediaURI().toString().replaceAll("\\W", "-")
+//    });
+//    icomp.saveImagesTo(new File(imagesPath));
 
     Buffer buf = dsh.getBuffer();
     while (t < durationInSeconds && buf != null && !buf.isEOM()) {
@@ -515,7 +516,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
         lastStableImage = bufferedImage;
         currentSceneStabilityCount++;
         sceneChangeImminent = false;
-        logger.debug("Found new scene at {} s", startOfSegment);
+        logger.info("Found new scene at {} s", startOfSegment);
       } 
   
       // Did we find a new scene by looking ahead?
