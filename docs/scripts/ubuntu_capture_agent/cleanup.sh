@@ -20,45 +20,64 @@ if [[ `id -u` -ne 0 ]]; then
 fi
 
 # Double check to make sure they aren't losing any vital information
-read -p "Are you sure you want to remove the Matterhorn Capture Agent and user $USER from your system? (no) " response
-while [[ -z $(echo "$response" | grep -i 'yes') && -z $(echo "${response:-no}" | grep -i 'no') ]]; do
-    read -p "Please write yes or no: (no) " response
+read -p "Are you sure you want to remove the Matterhorn Capture Agent and user $USER from your system [yes/NO]? " response
+while [[ -z $(echo "$response" | grep -i '^yes$') && -z $(echo "${response:-no}" | grep -i '^no$') ]]; do
+    read -p "Please write yes or no [no]: " response
 done
 
-if [[ $(echo "${response:-no}" | grep -i '^[nN]') ]]; then
+if [[ $(echo "${response:-no}" | grep -i '^no$') ]]; then
   exit 0
 fi
 
 # Remove vga2usb driver
+echo -n "Removing the vga2usb driver... "
 rmmod vga2usb 2> /dev/null
+echo "Done"
 
 # Remove dependencies installed by the scripts
+echo -n "Removing the packages installed by matterhorn (this may take a long time)... "
 apt-get purge $PKG_LIST &> /dev/null
+echo -n "Removing 'orphan' libraries... "
 apt-get autoremove &> /dev/null
+echo -n "Cleaning... "
+apt-get autoclean &> /dev/null
+echo "Done"
 
 # Restore appropriate sources.list
+echo -n "Restoring the sources.list backup... "
 mv $SRC_LIST.$SRC_LIST_BKP $SRC_LIST &> /dev/null
 apt-get update
+echo "Done"
 
 # Remove the configuration that starts matterhorn on boot
+echo -n "Deleting the startup script... "
 rm -f $STARTUP_SCRIPT
+echo "Done"
 
 # Remove the udev rules that manage the devices
+echo -n "Deleting the device rules... "
 rm -f $RULES_FILE
+echo "Done"
 
 # Remove the capture storage directory
+echo -n "Deleting the matterhorn storage directory... "
 rm -rf $OC_DIR
+echo "Done"
 
 # Remove the jv4linfo library
+echo -n "Deleting the jv4linfo library... "
 rm -f /usr/lib/libjv4linfo.so
+echo "Done"
 
 # Remove the CA_DIR directory
+echo -n "Deleting the capture agent directory under ${USER}'s home... "
 rm -rf $CA_DIR
+echo "Done"
 
 # Remove the user and their home directory
-read -p "Do you want to remove the matterhorn user (y/N)? " response
+read -p "Do you want to remove the matterhorn user [y/N]? " response
 until [[ $(echo ${response:-no} | grep -i '^[yn]') ]]; do
-    read -p "Please answer (y)es or (N)o: " response
+    read -p "Please answer [y]es or [N]o: " response
 done
 
 if [[ $(echo ${response:-no} | grep -i '^y') ]]; then
@@ -73,10 +92,10 @@ kill -9 $(ps U matterhorn 2> /dev/null | grep java | cut -d ' ' -f 2) 2> /dev/nu
 echo -e "\n\nDone uninstalling Matterhorn Capture Agent.\n\n" 
 
 # Prompts the user to reboot or not
-read -p "Some matterhorn settings won't be completely removed until the system reboots. Do you wish to do it now (Y/n)? " response
+read -p "Some matterhorn settings won't be completely removed until the system reboots. Do you wish to do it now [Y/n]? " response
 
 while [[ -z "$(echo ${response:-Y} | grep -i '^[yn]')" ]]; do
-    read -p "Please enter (Y)es or (n)o: " response
+    read -p "Please enter [Y]es or [n]o: " response
 done
 
 if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
@@ -87,3 +106,6 @@ else
     read -n 1 -s -p "Hit any key to exit..."
     clear
 fi
+
+# Autodestruction in 5, 4, 3, 2, 1...
+rm -f $0

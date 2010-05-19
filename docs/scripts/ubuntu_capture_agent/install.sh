@@ -35,6 +35,7 @@ export INSTALL_RUN=true                                     # The subsidiary scr
 # Third-party dependencies variables
 export PKG_LIST="alsa-utils v4l-conf ivtv-utils curl maven2 sun-java6-jdk subversion wget openssh-server gcc gstreamer0.10-plugins* gstreamer0.10-ffmpeg ntp acpid"
 
+export DEFAULT_FLAVOR=0                                                  # 0-based index default option for the device flavor
 export FLAVORS="presenter/source presentation/source audience/source indefinite/source"
                                                                          # Lists of flavors the user can choose from to assign to a certain device
 
@@ -176,10 +177,10 @@ ${SETUP_BOOT}
 
 echo -e "\n\n\nCapture Agent succesfully installed\n\n\n"
 
-read -p "It is recommended to reboot the system after installation. Do you wish to do it now (Y/n)? " response
+read -p "It is recommended to reboot the system after installation. Do you wish to do it now [Y/n]? " response
 
 while [[ -z "$(echo ${response:-Y} | grep -i '^[yn]')" ]]; do
-    read -p "Please enter (Y)es or (n)o: " response
+    read -p "Please enter [Y]es or [n]o: " response
 done
 
 if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then

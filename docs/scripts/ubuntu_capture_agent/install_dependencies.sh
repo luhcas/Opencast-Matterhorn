@@ -13,9 +13,9 @@ fi
 # Prompt the user to modify the default repositories
 while [[ true ]]; do
     echo
-    read -p "Do you wish to use a custom software mirror instead of the Ubuntu defaults (y|N)? " answer
+    read -p "Do you wish to use a custom software mirror instead of the Ubuntu defaults [y/N]? " answer
     while [[ -z "$(echo ${answer:-N} | grep -i '^[yn]')" ]]; do
-	read -p "Please answer (y)es or (N)o: " answer
+	read -p "Please answer [y]es or [N]o: " answer
     done
     
     # If 'yes', prompt a menu to modify any of the parameters
@@ -81,10 +81,10 @@ EOF
 
 echo -n "Installing third party packages from Ubuntu repository, this may take some time... "
 
-pkgs=( "$PKG_LIST" )
+pkgs=( $PKG_LIST )
 # Check which required packages are already installed
 for (( i = 0; i < ${#pkgs[@]}; i++ )); do
-    if [[ -z $(dpkg -l | grep "\<${pkgs[$i]}\>") ]]; then
+    if [[ -z "$(dpkg -l | grep " ${pkgs[$i]} ")" ]]; then
 	noinst[${#noinst[@]}]=${pkgs[$i]}
     fi
 done
@@ -127,7 +127,10 @@ while [[ true ]]; do
     fi
     # Else, ask for the actions to take
     echo
-    read -p "Error retrieving the Felix files from the web. Retry (Y/n)?" answer
+    read -p "Error retrieving the Felix files from the web. Retry [Y/n]?" answer
+    while [[ -z "$(echo ${answer:-N} | grep -i '^[yn]')" ]]; do
+	read -p "Please answer [y]es or [N]o: " answer
+    done
     if [[ -n "$(echo ${answer:-Y} | grep -i "^n")" ]]; then
 	echo "You must download Felix manually and install it under $CA_DIR, in order for matterhorn to work"
 	break;
@@ -166,7 +169,7 @@ cd $WORKING_DIR
 
 # Setup ntdp
 echo 
-read -p "Which NTP server would you like to use (default: ntp.ubuntu.com)? " server
+read -p "Which NTP server would you like to use [ntp.ubuntu.com]? " server
 sed -i "s#^server .*#server ${server:-DEFAULT_NTP_SERVER}#" $NTP_CONF
 echo "NTP server set to ${server:-$DEFAULT_NTP_SERVER}"
 echo "Consider editing the file $NTP_CONF for manually changing the default NTP server or adding more servers to the list"

@@ -11,7 +11,7 @@ if [[ ! $INSTALL_RUN ]]; then
 fi
 
 # Prompt for user name
-read -p "Input desired opencast username ($USERNAME): " input
+read -p "Input desired opencast username [$USERNAME]: " input
 if [[ -n "$input" ]]; then
     USERNAME=$input
 fi
@@ -20,13 +20,13 @@ fi
 useradd -m -s /bin/bash $USERNAME
 var=$?
 if [[ $var -eq 0 ]]; then
-    echo "Enter $USERNAME's new password"
+    # Ask for the user password
     for i in $(seq 1 $MAX_PASSWD_ATTEMPTS); do
 	passwd $USERNAME
-	if [ $? -eq 0 ]; then
+	if [[ $? -eq 0 ]]; then
 	    echo "$USERNAME password updated succesfully"
 	    break
-	elif [ $i -eq $MAX_PASSWD_ATTEMPTS ]; then
+	elif [[ $i -eq $MAX_PASSWD_ATTEMPTS ]]; then
 	    echo "Error. Too many password attempts. Aborting."
 	    return 1
 	fi
@@ -41,7 +41,7 @@ usermod -aG admin,video,audio $USERNAME
 
 # Exports the username, its home and the directory where the capture agent files will be stored
 export USERNAME=$USERNAME
-export HOME=`grep "^${USERNAME}:" /etc/passwd | cut -d: -f 6`
+export HOME=$(grep "^${USERNAME}:" /etc/passwd | cut -d: -f 6)
 if [[ -z "$HOME" ]]; then
     echo "Error: the specified user doesn't exist or doesn't have a HOME folder"
     exit 1

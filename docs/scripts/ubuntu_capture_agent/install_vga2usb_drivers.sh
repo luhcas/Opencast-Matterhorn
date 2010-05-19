@@ -55,7 +55,7 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
 	echo
 	read -p "Choose an option: " opt
 	
-	until [[ -n "$(echo "${opt:-$EPIPHAN_DEFAULT}" | grep -o '^[0-9][0-9]*$')" && $opt -ge 0 && $opt -lt $(( ${#drivers[@]} + 2 )) ]]; do 
+	until [[ -n "$(echo "$opt" | grep -o '^[0-9][0-9]*$')" && $opt -ge 0 && $opt -lt $(( ${#drivers[@]} + 2 )) ]]; do 
 	    read -p "Invalid value. Please enter a value from the list: " opt
 	done
 	
@@ -65,6 +65,8 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
  	    if [[ $opt -eq ${#drivers[@]} ]]; then
 	        # Ask the user for the driver url
 		echo "You might want to check $EPIPHAN_URL to see a complete list of the available drivers."
+		echo "If you cannot find a driver that works with your kernel configuration please email Epiphan Systems inc. (info@epiphan.com)"
+		echo " and include the output from the command \"uname -a\" (in this machine this output is $(uname -a)"
 		unset DRIVER_URL
 		while [[ -z "$DRIVER_URL" ]]; do
 		    read -p "Please input the URL of the driver you would like to load: " DRIVER_URL
@@ -109,9 +111,9 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
 	else
 	    # Skip driver installation
 	    echo "Skipping the vga2usb driver installation. Please note that if no driver is present, the vga2usb card(s) will not be detected."
-	    read -p "Are you sure you want to proceed (y|N)? " answer
+	    read -p "Are you sure you want to proceed [y/N]? " answer
 	    while [[ -z "$(echo ${answer:-N} | grep -i '^[yn]')" ]]; do
-		read -p "Please enter (y)es or (N)o: " answer
+		read -p "Please enter [y]es or [N]o: " answer
 		break;
 	    done
 	    if [[ -n "$(echo ${answer:-N} | grep -i '^y')" ]]; then

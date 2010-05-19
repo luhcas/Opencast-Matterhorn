@@ -43,6 +43,12 @@ for (( i = 0; i < ${#devlist[@]}; i++ )); do
     done
 done
 
+# Audio device
+#audioLine=$(arecord -l| grep Analog -m 1)
+#device[${#device[@]}]="hw:$(echo $audioLine | cut -d ':' -f 1 | cut -d ' ' -f 2)"
+# The syntax is cumbersome, but it just keeps the fields surrounded by "[" and "]" and outputs them in the form "first (second)"
+#devName[${#devName[@]}]=$(echo $audioLine | sed 's/^[^[]*\[\([^]]*\)\][^[]*\[\([^]]*\)\]$/\1 \2/')
+
 sed -i "/capture.device/d" $CAPTURE_PROPS
 
 config=$CONFIG_SCRIPT
@@ -59,9 +65,9 @@ unset cleanName
 for (( i = 0; i < ${#device[@]}; i++ )); do
 
     # Ask the user whether or not they want to configure this device
-    read -p "Device ${devName[$i]} (${device[$i]}) has been found. Do you want to configure it for matterhorn (Y/n)? " response
+    read -p "Device \"${devName[$i]}\" (${device[$i]}) has been found. Do you want to configure it for matterhorn [Y/n]? " response
     while [[ -z "$(echo ${response:-Y} | grep -i '^[yn]')" ]]; do
-	read -p "Please enter (Y)es or (n)o: " response
+	read -p "Please enter [Y]es or [n]o: " response
     done
     echo 
 
@@ -76,37 +82,42 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     # Check this name is not repeated
     suffix=0
     for (( t = 0; t < $i; t++ )); do
-	if [[ -n "$(echo "${cleanName[$t]}" | grep "^$defaultName")" ]]; then
+	if [[ -n "$(echo "^$defaultName" | grep -i "${cleanName[$t]}")" ]]; then
 	    (( suffix += 1 ))
 	fi
     done    
     if [[ $suffix -gt 0 ]]; then
 	defaultName=${defaultName}_$suffix
     fi
-
+    
     # Ask for a user-defined cleanName --the name this device will have in the config files 
     echo "The friendly name (e.g. \"screen\", or \"professor\") will be displayed in the user interfaces for controlling this device."
     echo "It can't contain spaces or punctuation."
-    read -p "Please enter the device name for the \"${devName[$i]}\" ($defaultName): " cleanName[$i]
+    read -p "Please enter the device name for the \"${devName[$i]}\" [$defaultName]: " cleanName[$i]
     while [[ true ]]; do
 	# Check the name doesn't contain parentheses or whitespaces
 	while [[ -z "$(echo ${cleanName[$i]:-$defaultName} | grep -v '[()/ ]')" ]]; do
-	    read -p "Please enter a non-empty name without parentheses, slashes or whitespaces: " cleanName[$i]
+	    read -p "Please enter a non-empty name without parentheses, slashes or whitespaces [$defaultName]: " cleanName[$i]
 	done
 	: ${cleanName[$i]:=$defaultName}
 	# Check the name is not repeated
-	for (( t = 0; t < $i; t++ )); do
-	    if [[ -n "$(echo ${cleanName[$i]} | grep -i "^${cleanName[$t]}$")" ]]; then
-		read -p "The name ${cleanName[$t]} is already in use for the device ${device[$t]}. Please choose another ($defaultName): " cleanName[$i]
-		break;
+        # Already made sure that the defaultName is not repeated
+	if [[ "${cleanName[$i]}" != "$defaultName" ]]; then
+	    for (( t = 0; t < $i; t++ )); do
+		if [[ -n "$(echo ${cleanName[$i]} | grep -i "^${cleanName[$t]}$")" ]]; then
+		    read -p "The name ${cleanName[$t]} is already in use for the device ${device[$t]}. Please choose another [$defaultName]: " cleanName[$i]
+		    break
+		fi
+	    done
+	    if [[ $t -eq $i ]]; then
+		break
 	    fi
-	done
-	if [[ $t -eq $i ]]; then
-	    break;
+	else
+	    break
 	fi
     done
     echo
-
+    
     # Set up the symbolic link name for this device
     symlinkName=$(echo ${cleanName[$i]} | tr "[:upper:]" "[:lower:]")
 
@@ -123,19 +134,22 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
 	    echo -e "\t$j) ${flavors[$j]}"
 	done
 	echo -e "\t$j) User-defined"
-	read -p "Selection: " flavor
+	read -p "Selection [$DEFAULT_FLAVOR]: " flavor
 	
+	: ${flavor:=$DEFAULT_FLAVOR}
 	until [[ -n "$(echo $flavor | grep -o '^[0-9][0-9]*$')" && $flavor -ge 0 && $flavor -le ${#flavors[@]} ]]; do 
-	    read -p "Please choose one of the numbers in the list: " flavor
+	    read -p "Please choose one of the numbers in the list [$DEFAULT_FLAVOR]: " flavor
+	    : ${flavor:=DEFAULT_FLAVOR}
 	done
     fi
     
     if [[ $flavor -eq ${#flavors[@]} ]]; then
         # Grep matches anything that has two fields consisting of any characters but slashes, separated by a single slash '/'
-	read -p "Please enter the flavor for ${cleanName[$i]}: " flavor
-	while [[ -z $(echo $flavor | grep '^[^/ ][^/ ]*/[^/ ][^/ ]*$') ]]; do
-	    read -p "Invalid syntax. The flavors follow the pattern <prefix>/<suffix>: " flavor
+	read -p "Please enter the flavor for ${cleanName[$i]} [${flavors[$DEFAULT_FLAVOR]}]: " flavor
+	while [[ -z $(echo ${flavor:-${flavors[$DEFAULT_FLAVOR]}} | grep '^[^/ ][^/ ]*/[^/ ][^/ ]*$') ]]; do
+	    read -p "Invalid syntax. The flavors follow the pattern <prefix>/<suffix> [${flavor[$DEFAULT_FLAVOR]}]: " flavor
 	done
+	: ${flavor:=${flavors[$DEFAULT_FLAVOR]}}
     else
 	flavor=${flavors[$flavor]}
     fi
@@ -215,9 +229,9 @@ audioDevice="hw:$(echo $audioLine | cut -d ':' -f 1 | cut -d ' ' -f 2)"
 audioDevName=$(echo $audioLine | sed 's/^[^[]*\[\([^]]*\)\][^[]*\[\([^]]*\)\]$/\1 \2/')
 
 # Ask the user whether or not they want to configure this device
-read -p "Audio device ${audioDevName} has been found. Do you want to configure it for matterhorn (Y/n)? " response
+read -p "Audio device \"${audioDevName}\" has been found. Do you want to configure it for matterhorn [Y/n]? " response
 while [[ -z "$(echo ${response:-Y} | grep -i '^[yn]')" ]]; do
-    read -p "Please enter (Y)es or (n)o: " response
+    read -p "Please enter [Y]es or [n]o: " response
 done
 
 if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
@@ -226,7 +240,7 @@ if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
     # Check this name is not repeated
     suffix=0
     for (( t = 0; t < $i; t++ )); do
-	if [[ -n "$(echo "${cleanName[$t]}" | grep "^$defaultName")" ]]; then
+	if [[ -n "$(echo "^$defaultName" | grep -i "${cleanName[$t]}")" ]]; then
 	    (( suffix += 1 ))
 	fi
     done    
@@ -238,22 +252,26 @@ if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
     echo
     echo "The friendly name (e.g. \"screen\", or \"professor\") will be displayed in the user interfaces for controlling this device."
     echo "It can't contain spaces or punctuation."
-    read -p "Please enter the device name for the \"${audioDevName}\" ($defaultName): " cleanName[$i]
+    read -p "Please enter the device name for the \"${audioDevName}\" [$defaultName]: " cleanName[$i]
     while [[ true ]]; do
 	# Check the name doesn't contain parentheses or whitespaces
 	while [[ -z "$(echo ${cleanName[$i]:-$defaultName} | grep -v '[()/ ]')" ]]; do
-	    read -p "Please enter a non-empty name without parentheses, slashes or whitespaces: " cleanName[$i]
+	    read -p "Please enter a non-empty name without parentheses, slashes or whitespaces [$defaultName]: " cleanName[$i]
 	done
 	: ${cleanName:=$defaultName}
 	# Check the name is not repeated
-	for (( t = 0; t < $i; t++ )); do
-	    if [[ -n "$(echo ${cleanName[$i]} | grep -i "^${cleanName[$t]}$")" ]]; then
-		read -p "The name ${cleanName[$t]} is already in use for the device ${device[$t]}. Please choose another: " cleanName[$i]
-		break;
+	if [[ "$cleanName" != "$defaultName" ]]; then
+	    for (( t = 0; t < $i; t++ )); do
+		if [[ -n "$(echo ${cleanName[$i]} | grep -i "^${cleanName[$t]}$")" ]]; then
+		    read -p "The name ${cleanName[$t]} is already in use for the device ${device[$t]}. Please choose another [$defaultName]: " cleanName[$i]
+		    break
+		fi
+	    done
+	    if [[ $t -eq $i ]]; then
+		break
 	    fi
-	done
-	if [[ $t -eq $i ]]; then
-	    break;
+	else
+	    break
 	fi
     done
     echo
@@ -267,19 +285,22 @@ if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
 	    echo -e "\t$j) ${flavors[$j]}"
 	done
 	echo -e "\t$j) User-defined"
-	read -p "Selection: " flavor
+	read -p "Selection [$DEFAULT_FLAVOR]: " flavor
 	
+	: ${flavor:=$DEFAULT_FLAVOR}
 	until [[ -n "$(echo $flavor | grep -o '^[0-9][0-9]*$')" && $flavor -ge 0 && $flavor -le ${#flavors[@]} ]]; do 
 	    read -p "Please choose one of the numbers in the list: " flavor
+	    : ${flavor:=$DEFAULT_FLAVOR}
 	done
     fi
     
     if [[ $flavor -eq ${#flavors[@]} ]]; then
         # Grep matches anything that has two fields consisting of any characters but slashes, separated by a single slash '/'
-	read -p "Please enter the flavor for ${cleanName[$i]}: " flavor
-	while [[ -z $(echo $flavor | grep '^[^/ ][^/ ]*/[^/ ][^/ ]*$') ]]; do
-	    read -p "Invalid syntax. The flavors follow the pattern <prefix>/<suffix>: " flavor
+	read -p "Please enter the flavor for ${cleanName[$i]} [${flavors[$DEFAULT_FLAVOR]}]: " flavor
+	while [[ -z $(echo ${flavor:-${flavors[$DEFAULT_FLAVOR]}} | grep '^[^/ ][^/ ]*/[^/ ][^/ ]*$') ]]; do
+	    read -p "Invalid syntax. The flavors follow the pattern <prefix>/<suffix> [${flavors[$DEFAULT_FLAVOR]}]: " flavor
 	done
+	: ${flavor:=${flavors[$DEFAULT_FLAVOR]}}
     else
 	flavor=${flavors[$flavor]}
     fi
