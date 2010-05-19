@@ -157,7 +157,7 @@ public class IngestRestServiceTest {
     // Check on the job status
     Response progressResponse = restService.getProgress(job.getId());
     Assert.assertEquals(Status.OK.getStatusCode(), progressResponse.getStatus());
-    Assert.assertTrue(progressResponse.getEntity().toString().startsWith("{total:"));
+    Assert.assertTrue(progressResponse.getEntity().toString().startsWith("{\"total\":"));
     
     // Check on a job that doesn't exist
     Response invalidResponse = restService.getProgress("This ID does not exist");

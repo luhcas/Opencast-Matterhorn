@@ -69,6 +69,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.json.simple.JSONObject;
 
 /**
  * Creates and augments Matterhorn MediaPackages using the api. Stores media into the Working File Repository.
@@ -112,8 +113,7 @@ public class IngestRestService {
 
   public void activate(ComponentContext context) {
     try {
-      emf = persistenceProvider
-              .createEntityManagerFactory("org.opencastproject.ingest.endpoint", persistenceProperties);
+      emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.ingest.endpoint", persistenceProperties);
     } catch (Exception e) {
       logger.error("Unable to initialize JPA EntityManager: " + e.getMessage());
     }
@@ -192,8 +192,7 @@ public class IngestRestService {
           @FormParam("mediaPackage") String mpx) {
     try {
       MediaPackage mp = builder.loadFromXml(mpx);
-      MediaPackage resultingMediaPackage = ingestService.addCatalog(new URI(url), MediaPackageElementFlavor
-              .parseFlavor(flavor), mp);
+      MediaPackage resultingMediaPackage = ingestService.addCatalog(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
       return Response.ok(resultingMediaPackage).build();
     } catch (Exception e) {
       logger.warn(e.getMessage(), e);
@@ -259,21 +258,22 @@ public class IngestRestService {
             in = item.openStream();
             isDone = true;
           }
-          if (isDone)
+          if (isDone) {
             break;
+          }
         }
         switch (type) {
-        case Attachment:
-          mp = ingestService.addAttachment(in, fileName, flavor, mp);
-          break;
-        case Catalog:
-          mp = ingestService.addCatalog(in, fileName, flavor, mp);
-          break;
-        case Track:
-          mp = ingestService.addTrack(in, fileName, flavor, mp);
-          break;
-        default:
-          throw new IllegalStateException("Type must be one of track, catalog, or attachment");
+          case Attachment:
+            mp = ingestService.addAttachment(in, fileName, flavor, mp);
+            break;
+          case Catalog:
+            mp = ingestService.addCatalog(in, fileName, flavor, mp);
+            break;
+          case Track:
+            mp = ingestService.addTrack(in, fileName, flavor, mp);
+            break;
+          default:
+            throw new IllegalStateException("Type must be one of track, catalog, or attachment");
         }
         // ingestService.ingest(mp);
         return Response.ok(mp.toXml()).build();
@@ -592,8 +592,7 @@ public class IngestRestService {
       // mp
       // yields
       // Exception
-      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc), "dublinCore.xml", MediaPackageElementFlavor
-              .parseFlavor("dublincore/episode"), mediaPackage);
+      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc), "dublinCore.xml", MediaPackageElementFlavor.parseFlavor("dublincore/episode"), mediaPackage);
       return Response.ok(mediaPackage).build();
     } catch (Exception e) {
       logger.error(e.getMessage());
@@ -631,9 +630,13 @@ public class IngestRestService {
         logger.warn("UploadJob not found for Id: " + jobId);
         return Response.status(Status.NOT_FOUND).build();
       }
-      String json = "{total:" + Long.toString(job.getBytesTotal()) + ", received:"
-              + Long.toString(job.getBytesReceived()) + "}";
-      return Response.ok(json).build();
+      /* String json = "{total:" + Long.toString(job.getBytesTotal()) + ", received:"
+      + Long.toString(job.getBytesReceived()) + "}";
+      return Response.ok(json).build();*/
+      JSONObject out = new JSONObject();
+      out.put("total", Long.toString(job.getBytesTotal()));
+      out.put("received", Long.toString(job.getBytesReceived()));
+      return Response.ok(out.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
     } catch (Exception ex) {
       logger.error(ex.getMessage());
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
@@ -651,20 +654,18 @@ public class IngestRestService {
     }
     return docs;
   }
-
   protected String docs;
   private String[] notes = {
-          "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
-          "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
-          "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
+    "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+    "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>",};
 
   // CHECKSTYLE:OFF
   private String generateDocs() {
     DocRestData data = new DocRestData("ingestservice", "Ingest Service", "/ingest/rest", notes);
 
     // abstract
-    data
-            .setAbstract("This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments.");
+    data.setAbstract("This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments.");
 
     // createMediaPackage
     RestEndpoint endpoint = new RestEndpoint("createMediaPackage", RestEndpoint.Method.GET, "/createMediaPackage",
@@ -796,8 +797,7 @@ public class IngestRestService {
     endpoint = new RestEndpoint("discardMediaPackage", RestEndpoint.Method.POST, "/discardMediaPackage",
             "Discard a media package");
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint
-            .addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null, "Given media package to be destroyed"));
+    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null, "Given media package to be destroyed"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
     endpoint.setTestForm(RestTestForm.auto());
@@ -954,7 +954,7 @@ public class IngestRestService {
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
-    
+
     // TODO: v v v --- check the documentation and implementation of the existing methods --- v v v
 
     // // addTrackMonitored (InputStream)
