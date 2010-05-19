@@ -1,6 +1,6 @@
 capture.recording.id=mpeg2_1mbit
 media.zip=mpeg2_1mbit.zip
-capture.max.length=600
+capture.max.length=60
 capture.device.audio.outputfile=audio.mp2
 capture.device.audio.codec=twolame
 capture.device.audio.codec.bitrate=192
@@ -12,7 +12,7 @@ capture.device.Podium.outputfile=Podium.mpg
 capture.device.Podium.codec.bitrate=1073741824
 capture.device.Podium.container=mpegtsmux
 capture.ingest.endpoint.url=
-capture.device.names=Podiumvgaaudio
+capture.device.names=Podium,vga,audio
 capture.device.audio.src=hw:0
 capture.device.audio.flavor=presenter/source
 capture.device.vga.src=/dev/vga

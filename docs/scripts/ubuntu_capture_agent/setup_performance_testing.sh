@@ -6,5 +6,6 @@
 
 # Note: Not integral to capture agent setup
 
-sudo apt-get install dstat curl ipython python-setuptools
+sudo apt-get install dstat python-setuptools
+sudo easy_install ipython
 

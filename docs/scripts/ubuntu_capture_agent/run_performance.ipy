@@ -25,7 +25,7 @@ for file in datafiles:
 	!sed -i "s/\$${opencast.logdir}\/opencast.log/\/oc_prefs\/test\/opencast.log/g" org.ops4j.pax.logging.properties
 	!sed -i "s/log4j.logger.org.opencastproject.*/log4j.logger.org.opencastproject.capture.pipeline=DEBUG/g" org.ops4j.pax.logging.properties
 	!/home/matterhorn/capture-agent/felix-framework-2.0.5/bin/start_matterhorn.sh 2> /dev/null &
-  cd ../../../matterhorn-trunk/docs/scripts/ubuntu_capture_agent/
+	cd ../../../matterhorn-trunk/docs/scripts/ubuntu_capture_agent/
 
 	#start felix up
 	running=!curl --digest -u admin:opencast -I -H "X-Requested-Auth: Digest" http://atomopencast:8080/state/rest/GetState
@@ -37,11 +37,11 @@ for file in datafiles:
 	data_file="performance_tests/" + file
 	!curl --digest -u admin:opencast -H "X-Requested-Auth: Digest" --data config=@$data_file http://atomopencast:8080/capture/rest/startCapture
 
-	#start dstat in the new dir and block for 700 seconds
+	#start dstat in the new dir and block for 60 seconds
 	dstat_output="/oc_perf/" + props["capture.recording.id"].strip("\n") + "/dstat.log" 
-	!sudo dstat -cdm --thermal --load --output $dstat_output 1 30
+	!sudo dstat -cdm --thermal --load --output $dstat_output 1 60
 	#copy over the recordings into our tmp dir
-	!cp /opencast/cache/captures/$props["capture.recording.id"] /oc_perf
+	!sudo cp /opencast/cache/captures/$props["capture.recording.id"] /oc_perf/
 
 !mkdir oc_perf
 !cp -R /oc_perf/* ./oc_perf/

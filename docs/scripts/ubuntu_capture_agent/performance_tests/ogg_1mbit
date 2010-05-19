@@ -1,6 +1,6 @@
 capture.recording.id=ogg_1mbit
 media.zip=ogg_1mbit.zip
-capture.max.length=600
+capture.max.length=60
 capture.device.audio.outputfile=audio.ogg
 capture.device.audio.codec=vorbisenc
 capture.device.audio.codec.bitrate=196608
@@ -12,7 +12,7 @@ capture.device.Podium.outputfile=Podium.mp4
 capture.device.Podium.codec.bitrate=1073741824
 capture.device.Podium.container=oggmux
 capture.ingest.endpoint.url=
-capture.device.names=Podiumvgaaudio
+capture.device.names=Podium,vga,audio
 capture.device.audio.src=hw:0
 capture.device.audio.flavor=presenter/source
 capture.device.vga.src=/dev/vga

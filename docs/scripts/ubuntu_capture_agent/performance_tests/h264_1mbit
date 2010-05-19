@@ -1,6 +1,6 @@
 capture.recording.id=h264_1mbit
 media.zip=h264_1mbit.zip
-capture.max.length=600
+capture.max.length=60
 capture.device.audio.outputfile=audio.mp3
 capture.device.audio.codec=lame
 capture.device.audio.codec.bitrate=192
@@ -12,7 +12,7 @@ capture.device.Podium.outputfile=Podium.mp4
 capture.device.Podium.codec.bitrate=1048576
 capture.device.Podium.container=ffmux_mp4
 capture.ingest.endpoint.url=
-capture.device.names=Podiumvgaaudio
+capture.device.names=Podium,vga,audio
 capture.device.audio.src=hw:0
 capture.device.audio.flavor=presenter/source
 capture.device.vga.src=/dev/vga
