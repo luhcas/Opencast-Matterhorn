@@ -7,11 +7,11 @@
     <style type="text/css">
       #player-container {clear:both; border:none; width:90%; height:300;}
       #edit-link {float:right;margin-top:3px; margin-bottom:5px; margin-right:50px;}
+      .hidden-initialy {display:none;}
     </style>
     <script type="text/javascript" src="../../../admin/jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript">
       $(document).ready(function() {
-        parent.Recordings.adjustHoldActionPanelHeight();
         var id = parent.document.getElementById("holdWorkflowId").value;
         // load preview player and metadata
         $.ajax({
@@ -28,13 +28,17 @@
                 $(data.documentElement).children().each(function(index, elm) {
                   var tagName = elm.tagName.split(/:/)[1];
                   //alert(tagName);
-                  var text = $('#meta-'+tagName).text();
-                  if (text != '') {   // multi value? --> clone the field
-                    $('#meta-'+tagName).text(text + ', ' + $(elm).text());
-                  } else {
-                    $('#meta-'+tagName).text($(elm).text());
+                  if ($(elm).text() != '') {
+                    $('#container-'+tagName).css('display','block');
+                    var text = $('#meta-'+tagName).text();
+                    if (text != '') {   // multi value? --> append value
+                      $('#meta-'+tagName).text(text + ', ' + $(elm).text());
+                    } else {
+                      $('#meta-'+tagName).text($(elm).text());
+                    }
                   }
                 });
+                parent.Recordings.adjustHoldActionPanelHeight();
               }
             });
             // get neccessary data to call the preview player
@@ -55,7 +59,7 @@
                 var url = $(elm).find('url').text();
                 $(link).attr('href', url);
                 var filename = url.split(/\//);
-                $(link).text(filename[filename.length-1]);
+                $(link).text(filename[filename.length-1]).attr('title', 'Download ' + filename[filename.length-1] + ' for editing');
                 if (singleFile) {
                   singleFile = false;
                 } else {
@@ -83,27 +87,27 @@
           <div id="files"></div>
         </li>
         <!-- field: Title -->
-        <li class="ui-helper-clearfix">
+        <li id="container-title" class="ui-helper-clearfix" style="display:none;">
           <label class="fl-label"><span id="i18n_title_label">Title</span>:</label>
           <span id="meta-title"></span>
         </li>
         <!-- field: Presenter -->
-        <li class="ui-helper-clearfix">
+        <li id="container-creator" class="ui-helper-clearfix" style="display:none;">
           <label class="fl-label"><span id="i18n_presenter_label">Presenter(s)</span>:</label>
           <span id="meta-creator"></span>
         </li>
         <!-- field: Series -->
-        <li class="ui-helper-clearfix">
+        <li id="container-isPartOf" class="ui-helper-clearfix" style="display:none;">
           <label class="fl-label"><span id="i18n_dept_label">Series</span>:</label>
           <span id="meta-isPartOf"></span>
         </li>
         <!-- field: Description -->
-        <li class="ui-helper-clearfix">
+        <li id="container-description" class="ui-helper-clearfix" style="display:none;">
           <label class="fl-label"><span id="i18n_dept_label">Description</span>:</label>
           <span id="meta-description"></span>
         </li>
         <!-- field: Distribution channels -->
-        <li class="ui-helper-clearfix">
+        <li id="container-dist" class="ui-helper-clearfix" style="display:none;">
           <label class="fl-label"><span id="i18n_dept_label">Distribution channels</span>:</label>
           <span id="meta-dist"></span>
         </li>

@@ -49,6 +49,7 @@
       <configurations>
         <configuration key="source-video-flavor">presenter/source</configuration>
         <configuration key="source-audio-flavor">*/source</configuration>
+        <configuration key="target-flavor">presenter/preview</configuration>
         <configuration key="target-tags">preview</configuration>
         <configuration key="encoding-profile">flash-preview.http</configuration>
       </configurations>
@@ -62,6 +63,7 @@
       <configurations>
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="source-audio-flavor">*/source</configuration>
+        <configuration key="target-flavor">presentation/preview</configuration>
         <configuration key="target-tags">preview</configuration>
         <configuration key="encoding-profile">flash-preview.http</configuration>
       </configurations>
@@ -72,7 +74,7 @@
       id="review"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Wait for a user to review the media">
+      description="Waiting for user to review recording">
       <configurations>
         <configuration key="source-tag">preview</configuration>
       </configurations>

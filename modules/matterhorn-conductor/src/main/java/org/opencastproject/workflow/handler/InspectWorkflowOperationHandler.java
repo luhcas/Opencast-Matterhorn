@@ -47,6 +47,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import org.apache.commons.io.FilenameUtils;
 
 /**
  * Workflow operation used to inspect all tracks of a media package.
