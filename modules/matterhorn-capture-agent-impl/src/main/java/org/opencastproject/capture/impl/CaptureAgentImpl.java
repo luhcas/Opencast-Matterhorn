@@ -344,12 +344,12 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     int wait;
     String waitProp = newRec.getProperty(CaptureParameters.CAPTURE_START_WAIT);
     if (waitProp != null)
-      wait = Integer.parseInt(newRec.getProperty(CaptureParameters.CAPTURE_START_WAIT));
+      wait = Integer.parseInt(waitProp);
     else
       wait = 5; // Default taken from gstreamer docs
     pipe.play();
     if (pipe.getState(wait * GST_SECOND) != State.PLAYING) {
-      logger.error("Unable to start pipeline after 5 seconds.  Aborting!");
+      logger.error("Unable to start pipeline after {} seconds.  Aborting!", wait);
       return null;
     }
     logger.info("{} started.", pipe.getName());
