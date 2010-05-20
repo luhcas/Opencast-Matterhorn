@@ -45,6 +45,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.ws.rs.GET;
@@ -247,7 +248,7 @@ public class AdminuiRestService {
     }
 
     // get capturing statistics from scheduler if present
-    if (schedulerService != null) {
+    /*if (schedulerService != null) {
       int capturing = 0;
       SchedulerEvent[] events = schedulerService.getCapturingEvents();
       Date current = new Date(System.currentTimeMillis());
@@ -260,8 +261,8 @@ public class AdminuiRestService {
       total += capturing;
     } else {
       logger.warn("scheduler service not present, unable to retreive number of capturing events");
-    }
-    /*if (captureAdminService != null) {
+    }*/
+    if (captureAdminService != null) {
       Map<String, Recording> recordings = new HashMap<String, Recording>(captureAdminService.getKnownRecordings());
       Iterator<String> i = recordings.keySet().iterator();
       int capturing = 0;
@@ -276,7 +277,7 @@ public class AdminuiRestService {
       total += capturing;
     } else {
       logger.warn("CaptureAdmin service not present, unable to retrieve capture statistics");
-    }*/
+    }
 
 
     // get statistics from workflowService if present
