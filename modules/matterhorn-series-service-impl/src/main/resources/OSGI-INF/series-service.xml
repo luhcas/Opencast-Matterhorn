@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.series.api.SeriesService"
+  immediate="true" activate="activate" deactivate="deactivate">
+  <implementation
+    class="org.opencastproject.series.impl.SeriesServiceImpl" />
+  <property name="service.description" value="Series Service" />
+  <service>
+    <provide interface="org.opencastproject.series.api.SeriesService" />
+  </service>
+  <reference name="persistence" interface="javax.persistence.spi.PersistenceProvider"
+    cardinality="1..1" policy="static" bind="setPersistenceProvider" />    
+  <reference name="props" interface="java.util.Map"
+    cardinality="1..1" policy="static" target="(type=persistence)" bind="setPersistenceProperties" />  
+</component>
