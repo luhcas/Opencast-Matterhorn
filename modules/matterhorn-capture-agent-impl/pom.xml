@@ -47,6 +47,12 @@
       <type>bundle</type>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-static</artifactId>
+      <version>0.9-SNAPSHOT</version>
+      <type>bundle</type>
+    </dependency>
+    <dependency>
       <groupId>org.opencastproject.samples</groupId>
       <artifactId>audio</artifactId>
       <version>1.0</version>
@@ -197,6 +203,7 @@
               org.opencastproject.media.mediapackage.*,
               org.opencastproject.metadata.dublincore,
               org.opencastproject.http,
+              org.opencastproject.fsresources,
               *;resolution:=optional
             </Import-Package>
             <Private-Package>
@@ -224,6 +231,7 @@
               OSGI-INF/scheduler-service.xml,
               OSGI-INF/configuration-service.xml,
               OSGI-INF/capture-ui.xml,
+              OSGI-INF/capture-files.xml,
               OSGI-INF/confidence-monitor-service-rest.xml
             </Service-Component>
           </instructions>

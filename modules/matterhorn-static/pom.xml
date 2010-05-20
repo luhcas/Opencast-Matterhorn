@@ -53,6 +53,9 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
+            <Export-Package>
+              org.opencastproject.fsresources
+            </Export-Package>
             <Service-Component>
               OSGI-INF/static.xml
             </Service-Component>

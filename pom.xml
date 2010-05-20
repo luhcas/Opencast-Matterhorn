@@ -224,7 +224,7 @@
       <modules>
         <module>modules/matterhorn-build-tools</module>
         <module>modules/matterhorn-runtime-tools</module>
-				<module>modules/matterhorn-runtime-info-ui</module>
+        <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-dublincore</module>
         <module>modules/matterhorn-util</module>
@@ -236,6 +236,7 @@
         <module>modules/matterhorn-capture-agent-impl</module>
         <module>modules/matterhorn-security-api</module>
         <module>modules/matterhorn-security-impl</module>
+        <module>modules/matterhorn-static</module>
         <module>modules/matterhorn-webconsole</module>
       </modules>
     </profile>
