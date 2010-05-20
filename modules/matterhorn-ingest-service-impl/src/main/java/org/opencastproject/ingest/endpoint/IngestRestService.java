@@ -592,7 +592,7 @@ public class IngestRestService {
       // mp
       // yields
       // Exception
-      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc), "dublinCore.xml", MediaPackageElementFlavor.parseFlavor("dublincore/episode"), mediaPackage);
+      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc), "dublincore.xml", MediaPackageElements.DUBLINCORE_EPISODE, mediaPackage);
       return Response.ok(mediaPackage).build();
     } catch (Exception e) {
       logger.error(e.getMessage());

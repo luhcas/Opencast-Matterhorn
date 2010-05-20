@@ -37,6 +37,7 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -175,7 +176,7 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
       InputStream in = new ByteArrayInputStream(out.toByteArray());
       String mpId = mediaPackage.getIdentifier().toString();
       String elementId = dublinCore.getIdentifier();
-      workspace.put(mpId, elementId, "dublincore.xml", in);
+      workspace.put(mpId, elementId, FilenameUtils.getName(dcCatalogs[0].getURI().getPath()), in);
       dcCatalogs[0].setURI(workspace.getURI(mpId, elementId));
     }
   }
