@@ -209,7 +209,7 @@ public class OpencapsRestService {
     item.put("id", cmi.getWorkflowId());
     Date date = cmi.getMediaPackage().getDate();
     if(date != null) {
-      item.put("timestamp", date);
+      item.put("timestamp", date.getTime());
     }
     item.put("episode", cmi.getMediaPackage().getIdentifier().toString());
     item.put("title", cmi.getTitle());
