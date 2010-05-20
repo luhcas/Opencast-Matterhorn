@@ -209,7 +209,7 @@ public class RecurringEvent extends AbstractEvent{
       DateList dates = recur.getDates(seed, period, Value.DATE_TIME);
       logger.debug("DateList: {}", dates);
       for (Object date : dates) {
-        //Dates in the DateList do not have times. Add the start time to the date so we know what time to start as well as what day.
+        //Dates in the DateList do not have times. Add the start time to the date so we know what time to start as well as what day. 
         Date d = (Date) date;
         generatedDates.add(d);
       }

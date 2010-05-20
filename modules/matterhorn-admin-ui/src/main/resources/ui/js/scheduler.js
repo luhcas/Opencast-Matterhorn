@@ -314,7 +314,7 @@ SchedulerUI.handleAgentTZ = function(tz){
   var localTZ = -(new Date()).getTimezoneOffset(); //offsets in minutes
   Agent.tzDiff = 0;
   //AdminUI.log(tz, localTZ, tz != localTZ);
-  if(tz && tz != localTZ){
+  if(tz != localTZ){
     //Display note of agent TZ difference, all times local to capture agent.
     //update time picker to agent time
     Agent.tzDiff = tz - localTZ;
@@ -918,8 +918,8 @@ function checkStartDate(){
 function getRecurValue(){
   if(this.checkValue()){
     if(this.fields.schedule_repeat.val() == 'weekly'){
-      var enddate = new Date(SchedulerForm.formFields['recurrence.end'].getValue());
-      var rrule = "FREQ=WEEKLY;UNTIL=" + SchedulerUI.toICalDate(enddate) + ";BYDAY=";
+      //var enddate = new Date(SchedulerForm.formFields['recurrence.end'].getValue());
+      var rrule = "FREQ=WEEKLY;BYDAY=";
       var days = [];
       if(this.fields.repeat_sun[0].checked){
         days.push("SU");
