@@ -16,6 +16,8 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageMetadata;
+import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -34,6 +36,7 @@ import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
+import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -53,6 +56,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.concurrent.Executor;
@@ -78,6 +83,12 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /** The collection of workflow definitions */
   protected Map<String, WorkflowDefinition> workflowDefinitions = new HashMap<String, WorkflowDefinition>();
+
+  /** The metadata services */
+  private SortedSet<MediaPackageMetadataService> metadataServices;
+
+  /** The file repository */
+  protected WorkingFileRepository repo;
 
   /**
    * A tuple of a workflow operation handler and the name of the operation it handles
@@ -135,16 +146,41 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   
   /** The data access object responsible for storing and retrieving workflow instances */
   protected WorkflowServiceImplDao dao;
-  
-//  /** A collection of the running workflow threads */
-//  protected Map<String, Thread> threadMap = new ConcurrentHashMap<String, Thread>();
 
+  /**
+   * Constructs a new workflow service impl, with a priority-sorted map of metadata services
+   */
+  public WorkflowServiceImpl() {
+    metadataServices = new TreeSet<MediaPackageMetadataService>(new Comparator<MediaPackageMetadataService>() {
+      @Override
+      public int compare(MediaPackageMetadataService o1, MediaPackageMetadataService o2) {
+        return o1.getPriority() - o2.getPriority();
+      }
+    });
+  }
+  
   /**
    * Sets the DAO implementation to use in this service.
    * @param dao The dao to use for persistence
    */
   public void setDao(WorkflowServiceImplDao dao) {
     this.dao = dao;
+  }
+
+  /**
+   * Sets the file repository.
+   * @param repo
+   */
+  public void setRepository(WorkingFileRepository repo) {
+    this.repo = repo;
+  }
+
+  public void addMetadataService(MediaPackageMetadataService service) {
+    metadataServices.add(service);
+  }
+
+  public void removeMetadataService(MediaPackageMetadataService service) {
+    metadataServices.remove(service);
   }
 
   /**
@@ -326,6 +362,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     if(workflowDefinition == null) throw new IllegalArgumentException("workflow definition must not be null");
     if(mediaPackage == null) throw new IllegalArgumentException("mediapackage must not be null");
     if(parentWorkflowId != null && getWorkflowById(parentWorkflowId) == null) throw new IllegalArgumentException("Parent workflow " + parentWorkflowId + " not found");
+
     String id = UUID.randomUUID().toString();
     logger.info("Starting a new workflow instance with ID={}", id);
     
@@ -334,6 +371,10 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
     
     WorkflowInstance configuredInstance = updateConfiguration(workflowInstance, properties);
+    
+    // Before we persist this, extract the metadata
+    populateMediaPackageMetadata(configuredInstance.getMediaPackage());
+    
     dao.update(configuredInstance);
     run(configuredInstance);
     return configuredInstance;
@@ -653,5 +694,42 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     // If there is still no definition defined, we can not continue
     if(def == null) throw new IllegalStateException("Unable to determine the default workflow definition");
     return def;
+  }
+
+  /**
+   * Reads the available metadata from the dublin core catalog (if there is
+   * one).
+   * 
+   * @param mp
+   *          the media package
+   */
+  protected void populateMediaPackageMetadata(MediaPackage mp) {
+    if(metadataServices.size() == 0) {
+      logger.warn("No metadata services are registered, so no mediapackage metadata can be extracted from catalogs");
+      return;
+    }
+    for(MediaPackageMetadataService metadataService : metadataServices) {
+      MediaPackageMetadata metadata = metadataService.getMetadata(mp);
+      if(metadata != null) {
+        if(mp.getDate().getTime() == 0) {
+          mp.setDate(metadata.getDate());
+        }
+        if(mp.getLanguage() == null || mp.getLanguage().isEmpty()) {
+          mp.setLanguage(metadata.getLanguage());
+        }
+        if(mp.getLicense() == null || mp.getLicense().isEmpty()) {
+          mp.setLicense(metadata.getLicense());
+        }
+        if(mp.getSeries() == null || mp.getSeries().isEmpty()) {
+          mp.setSeries(metadata.getSeriesIdentifier());
+        }
+        if(mp.getSeriesTitle() == null || mp.getSeriesTitle().isEmpty()) {
+          mp.setSeriesTitle(metadata.getSeriesTitle());
+        }
+        if(mp.getTitle() == null || mp.getTitle().isEmpty()) {
+          mp.setTitle(metadata.getTitle());
+        }
+      }
+    }
   }
 }

@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.workflow.handler.InspectWorkflowOperationHandler" immediate="true" activate="activate">
+<component name="org.opencastproject.workflow.handler.InspectWorkflowOperationHandler" immediate="true"
+  activate="activate">
   <implementation class="org.opencastproject.workflow.handler.InspectWorkflowOperationHandler" />
   <property name="service.description" value="Compose Workflow Operation Handler" />
   <property name="workflow.operation" value="inspect" />
   <service>
     <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
   </service>
-  <reference cardinality="1..1" interface="org.opencastproject.inspection.api.MediaInspectionService"
-  name="InspectionService" policy="static" bind="setInspectionService"/>
+  <reference cardinality="1..1" interface="org.opencastproject.inspection.api.MediaInspectionService" name="InspectionService"
+    policy="static" bind="setInspectionService" />
   <reference name="dc" interface="org.opencastproject.metadata.dublincore.DublinCoreCatalogService"
     cardinality="1..1" policy="static" bind="setDublincoreService" />
-  <reference cardinality="1..1" interface="org.opencastproject.workspace.api.Workspace"
-  name="Workspace" policy="static" bind="setWorkspace"/>
-  <reference name="metadata" interface="org.opencastproject.metadata.api.MediaPackageMetadataService"
-    cardinality="0..n" bind="addMetadataService" unbind="removeMetadataService" />
+  <reference cardinality="1..1" interface="org.opencastproject.workspace.api.Workspace" name="Workspace"
+    policy="static" bind="setWorkspace" />
 </component>

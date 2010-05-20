@@ -12,8 +12,7 @@
 		<catalog type="dublincore/episode" id="c20cd01f-f50b-416f-a3fb-4502fcfae1b7">
 			<mimetype>text/xml</mimetype>
 			<tags />
-			<url>/dublinCore.xml
-			</url>
+			<url>dublinCore.xml</url>
 		</catalog>
 	</metadata>
 	<attachments />

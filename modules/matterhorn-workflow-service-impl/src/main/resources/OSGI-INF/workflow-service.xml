@@ -8,4 +8,6 @@
   </service>
   <reference name="dao" interface="org.opencastproject.workflow.impl.WorkflowServiceImplDao"
     cardinality="1..1" policy="static" bind="setDao" />
+  <reference name="metadata" interface="org.opencastproject.metadata.api.MediaPackageMetadataService"
+    cardinality="0..n" bind="addMetadataService" unbind="removeMetadataService" />
 </component>

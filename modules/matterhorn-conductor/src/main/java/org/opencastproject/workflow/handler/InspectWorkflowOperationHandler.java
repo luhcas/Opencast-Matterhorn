@@ -19,11 +19,9 @@ import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.MediaPackageMetadata;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
@@ -45,12 +43,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 /**
  * Workflow operation used to inspect all tracks of a media package.
@@ -70,24 +65,16 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
   /** The inspection service */
   private MediaInspectionService inspectionService = null;
 
-  /** The local workspace */
-  private Workspace workspace = null;
-
   /** The dublin core catalog service */
   private DublinCoreCatalogService dcService;
 
-  /** The metadata services */
-  private SortedSet<MediaPackageMetadataService> metadataServices;
-
-  public InspectWorkflowOperationHandler () {
-    metadataServices = new TreeSet<MediaPackageMetadataService>(new Comparator<MediaPackageMetadataService>() {
-      @Override
-      public int compare(MediaPackageMetadataService o1, MediaPackageMetadataService o2) {
-        return o1.getPriority() - o2.getPriority();
-      }
-    });
+  /** The local workspace */
+  private Workspace workspace;
+  
+  public void setDublincoreService(DublinCoreCatalogService dcService) {
+    this.dcService = dcService;
   }
-
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
@@ -126,8 +113,6 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
   public WorkflowOperationResult start(WorkflowInstance workflowInstance)
           throws WorkflowOperationException {
     MediaPackage mediaPackage = (MediaPackage)workflowInstance.getMediaPackage().clone();
-    // Populate the mediapackage with any metadata found in its catalogs
-    populateMediaPackageMetadata(mediaPackage);
     // Inspect the tracks
     for (Track track : mediaPackage.getTracks()) {
       
@@ -144,25 +129,25 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
       } catch (UnsupportedElementException e) {
         logger.error("Error adding {} to media package", inspectedTrack, e);
       }
-      
-      // Update dublin core with metadata
-      try {
-        updateDublinCore(mediaPackage);
-      } catch (Exception e) {
-        logger.warn("Unable to update dublin core data: {}", e.getMessage(), e);
-      }
     }
+    // Update dublin core with metadata
+    try {
+      updateDublinCore(mediaPackage);
+    } catch (Exception e) {
+      logger.warn("Unable to update dublin core data: {}", e.getMessage(), e);
+      throw new WorkflowOperationException(e.getMessage());
+    }
+    
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
-
   }
-  
+
   /**
    * Updates those dublin core fields that can be gathered from the technical metadata.
    * 
    * @param mediaPackage 
    *            the media package
    */
-  private void updateDublinCore(MediaPackage mediaPackage) throws Exception {
+  protected void updateDublinCore(MediaPackage mediaPackage) throws Exception {
     // Complete episode dublin core catalog (if available)
     Catalog dcCatalogs[] = mediaPackage.getCatalogs(MediaPackageElements.DUBLINCORE_EPISODE, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
     if (dcCatalogs.length > 0) {
@@ -190,60 +175,8 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
       InputStream in = new ByteArrayInputStream(out.toByteArray());
       String mpId = mediaPackage.getIdentifier().toString();
       String elementId = dublinCore.getIdentifier();
-      workspace.delete(mpId, elementId);
       workspace.put(mpId, elementId, "dublincore.xml", in);
       dcCatalogs[0].setURI(workspace.getURI(mpId, elementId));
     }
   }
-
-  /**
-   * Reads the available metadata from the dublin core catalog (if there is
-   * one).
-   * 
-   * @param mp
-   *          the media package
-   */
-  private void populateMediaPackageMetadata(MediaPackage mp) {
-    if(metadataServices.size() == 0) {
-      logger.debug("No metadata services are registered with the ingest service, so no mediapackage metadata can be extracted from catalogs");
-      return;
-    }
-    for(MediaPackageMetadataService metadataService : metadataServices) {
-      MediaPackageMetadata metadata = metadataService.getMetadata(mp);
-      if(metadata != null) {
-        if(mp.getDate().getTime() == 0) {
-          mp.setDate(metadata.getDate());
-        }
-        if(mp.getLanguage() == null || mp.getLanguage().isEmpty()) {
-          mp.setLanguage(metadata.getLanguage());
-        }
-        if(mp.getLicense() == null || mp.getLicense().isEmpty()) {
-          mp.setLicense(metadata.getLicense());
-        }
-        if(mp.getSeries() == null || mp.getSeries().isEmpty()) {
-          mp.setSeries(metadata.getSeriesIdentifier());
-        }
-        if(mp.getSeriesTitle() == null || mp.getSeriesTitle().isEmpty()) {
-          mp.setSeriesTitle(metadata.getSeriesTitle());
-        }
-        if(mp.getTitle() == null || mp.getTitle().isEmpty()) {
-          mp.setTitle(metadata.getTitle());
-        }
-      }
-    }
-  }
-  
-  public void setDublincoreService(DublinCoreCatalogService dcService) {
-    this.dcService = dcService;
-  }
-  
-  public void addMetadataService(MediaPackageMetadataService service) {
-    metadataServices.add(service);
-  }
-
-  public void removeMetadataService(MediaPackageMetadataService service) {
-    metadataServices.remove(service);
-  }
-  
-
 }

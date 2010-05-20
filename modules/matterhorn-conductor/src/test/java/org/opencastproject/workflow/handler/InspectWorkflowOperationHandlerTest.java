@@ -23,7 +23,6 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageMetadata;
 import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
@@ -64,11 +63,11 @@ public class InspectWorkflowOperationHandlerTest {
   // mock services and objects
   private Workspace workspace = null;
   private MediaInspectionService inspectionService = null;
-  private MediaPackageMetadataService metadataService;
-  private MediaPackageMetadata metadata;
+  private DublinCoreCatalogService dcService = null;
+  private MediaPackageMetadata metadata = null;
   
   // constant metadata values
-  private static final Date DATE = new Date(1);
+  private static final Date DATE = new Date();
   private static final String LANGUAGE = "language";
   private static final String LICENSE = "license";
   private static final String SERIES = "series";
@@ -100,10 +99,24 @@ public class InspectWorkflowOperationHandlerTest {
     EasyMock.expect(metadata.getSeriesTitle()).andReturn(SERIES_TITLE);
     EasyMock.expect(metadata.getTitle()).andReturn(TITLE);
     EasyMock.replay(metadata);
-    metadataService = EasyMock.createNiceMock(MediaPackageMetadataService.class);
-    EasyMock.expect(metadataService.getMetadata((MediaPackage) EasyMock.anyObject())).andReturn(metadata);
-    EasyMock.replay(metadataService);
-    operationHandler.addMetadataService(metadataService);
+
+    
+    // set up mock dublin core and dcService providing it
+    DublinCoreCatalog dc = EasyMock.createStrictMock(DublinCoreCatalog.class);
+    EasyMock.expect(dc.hasValue(DublinCore.PROPERTY_EXTENT)).andReturn(false);
+    dc.set((EName) EasyMock.anyObject(), (DublinCoreValue) EasyMock.anyObject());
+    EasyMock.expect(dc.hasValue(DublinCore.PROPERTY_CREATED)).andReturn(false);
+    dc.set((EName) EasyMock.anyObject(), (DublinCoreValue) EasyMock.anyObject());
+    dc.toXml((ByteArrayOutputStream) EasyMock.anyObject(), EasyMock.anyBoolean());
+    EasyMock.expect(dc.getIdentifier()).andReturn("123");
+    EasyMock.replay(dc);
+
+    dcService = org.easymock.classextension.EasyMock.createNiceMock(DublinCoreCatalogService.class);
+    org.easymock.classextension.EasyMock.expect(dcService.getMetadata((MediaPackage) EasyMock.anyObject())).andReturn(metadata);
+    org.easymock.classextension.EasyMock.expect(
+           dcService.load((Catalog) org.easymock.classextension.EasyMock.anyObject())).andReturn(dc);
+    org.easymock.classextension.EasyMock.replay(dcService);
+    operationHandler.setDublincoreService(dcService);
 
     // set up mock receipt and inspect service providing it
     receipt = EasyMock.createNiceMock(Receipt.class);
@@ -118,23 +131,17 @@ public class InspectWorkflowOperationHandlerTest {
     EasyMock.replay(inspectionService);
     operationHandler.setInspectionService(inspectionService);
 
-  }
+    // set up mock workspace
+    workspace = EasyMock.createNiceMock(Workspace.class);
+    workspace.delete((String) EasyMock.anyObject(), (String) EasyMock.anyObject());
+    URI newURI = new URI(NEW_DC_URL);
+    EasyMock.expect(
+            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andReturn(newURI);
+    EasyMock.expect(workspace.getURI((String) EasyMock.anyObject(), (String) EasyMock.anyObject())).andReturn(newURI);
+    EasyMock.replay(workspace);
+    operationHandler.setWorkspace(workspace);
 
-  @Test
-  public void testInspectOperationMediaPackageMetadata() throws Exception {
-    for (Catalog c : mp.getCatalogs()) {
-      mp.remove(c);
-    } 
-    WorkflowOperationResult result = getWorkflowOperationResult(mp);
-    MediaPackage mpNew = result.getMediaPackage();
-
-    // check mediapackage metadata
-    Assert.assertEquals(DATE, mpNew.getDate());
-    Assert.assertEquals(LANGUAGE, mpNew.getLanguage());
-    Assert.assertEquals(LICENSE, mpNew.getLicense());
-    Assert.assertEquals(SERIES, mpNew.getSeries());
-    Assert.assertEquals(SERIES_TITLE, mpNew.getSeriesTitle());
-    Assert.assertEquals(TITLE, mpNew.getTitle());
   }
 
   @Test
@@ -154,37 +161,8 @@ public class InspectWorkflowOperationHandlerTest {
 
   @Test
   public void testInspectOperationDCMetadata() throws Exception {
-    // set up mock workspace
-    workspace = EasyMock.createNiceMock(Workspace.class);
-    workspace.delete((String) EasyMock.anyObject(), (String) EasyMock.anyObject());
-    URI newURI = new URI(NEW_DC_URL);
-    EasyMock.expect(
-            workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
-                    (InputStream) EasyMock.anyObject())).andReturn(newURI);
-    EasyMock.expect(workspace.getURI((String) EasyMock.anyObject(), (String) EasyMock.anyObject())).andReturn(newURI);
-    EasyMock.replay(workspace);
-    operationHandler.setWorkspace(workspace);
-
-    // set up mock dublin core and dcService providing it
-    DublinCoreCatalog dc = EasyMock.createStrictMock(DublinCoreCatalog.class);
-    EasyMock.expect(dc.hasValue(DublinCore.PROPERTY_EXTENT)).andReturn(false);
-    dc.set((EName) EasyMock.anyObject(), (DublinCoreValue) EasyMock.anyObject());
-    EasyMock.expect(dc.hasValue(DublinCore.PROPERTY_CREATED)).andReturn(false);
-    dc.set((EName) EasyMock.anyObject(), (DublinCoreValue) EasyMock.anyObject());
-    dc.toXml((ByteArrayOutputStream) EasyMock.anyObject(), EasyMock.anyBoolean());
-    EasyMock.expect(dc.getIdentifier()).andReturn("123");
-    EasyMock.replay(dc);
-    DublinCoreCatalogService dcService = org.easymock.classextension.EasyMock
-            .createStrictMock(DublinCoreCatalogService.class);
-    org.easymock.classextension.EasyMock.expect(
-            dcService.load((Catalog) org.easymock.classextension.EasyMock.anyObject())).andReturn(dc);
-    org.easymock.classextension.EasyMock.replay(dcService);
-    operationHandler.setDublincoreService((DublinCoreCatalogService) dcService);
-    
     WorkflowOperationResult result = getWorkflowOperationResult(mp);
-    
     Catalog cat = result.getMediaPackage().getCatalogs()[0];
-    
     // dublincore check: also checked with strict mock calls
     Assert.assertEquals(NEW_DC_URL, cat.getURI().toString());
   }
