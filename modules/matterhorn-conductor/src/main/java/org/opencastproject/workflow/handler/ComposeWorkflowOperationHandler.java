@@ -207,16 +207,17 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
       }
     }
 
+    Track audioTrack = mediaPackage.getTrack(sourceAudioTrackId);
+    Track videoTrack = mediaPackage.getTrack(sourceVideoTrackId);
+
     // If muxing (audio + video from two different files) is happening, then we need to make sure that those files
     // contain the relevant streams only. Therefore, we encode to audio-only and video-only first.
     if (sourceAudioTrackId != null && sourceVideoTrackId != null) {
-      Track audioTrack = mediaPackage.getTrack(sourceAudioTrackId);
       if (audioTrack.hasVideo()) {
         Track strippedTrack = getStrippedTrack(mediaPackage, audioTrack, AUDIO_ONLY_PROFILE);
         mediaPackage.add(strippedTrack);
         sourceAudioTrackId = strippedTrack.getIdentifier();
       }
-      Track videoTrack = mediaPackage.getTrack(sourceVideoTrackId);
       if (videoTrack.hasAudio()) {
         Track strippedTrack = getStrippedTrack(mediaPackage, videoTrack, VIDEO_ONLY_PROFILE);
         mediaPackage.add(strippedTrack);
@@ -242,22 +243,17 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
     // store new tracks to mediaPackage
     // FIXME derived media comes from multiple sources, so how do we choose
-    // which is the "parent" of the derived
-    // media?
+    // which is the "parent" of the derived media?
     String parentId = sourceVideoTrackId == null ? sourceAudioTrackId : sourceVideoTrackId;
     mediaPackage.addDerived(composedTrack, mediaPackage.getElementById(parentId));
 
-    // Add the flavor
-    MediaPackageElementFlavor targetFlavor = null;
-    if (targetTrackFlavor != null) {
-      targetFlavor = MediaPackageElementFlavor.parseFlavor(targetTrackFlavor);
-    } else {
-      if (sourceVideoFlavor != null)
-        targetFlavor = MediaPackageElementFlavor.parseFlavor(sourceVideoFlavor);
-      else if (sourceAudioFlavor != null)
-        targetFlavor = MediaPackageElementFlavor.parseFlavor(sourceAudioFlavor);
-    }
-    composedTrack.setFlavor(targetFlavor);
+    // Set the flavor
+    if (targetTrackFlavor != null)
+      composedTrack.setFlavor(MediaPackageElementFlavor.parseFlavor(targetTrackFlavor));
+    else if (videoTrack != null)
+      composedTrack.setFlavor(videoTrack.getFlavor());
+    else if (audioTrack != null)
+      composedTrack.setFlavor(audioTrack.getFlavor());
 
     // Add the tags
     if (targetTrackTags != null) {
