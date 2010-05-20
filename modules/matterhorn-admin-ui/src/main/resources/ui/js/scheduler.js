@@ -44,6 +44,8 @@ function init() {
   
   //Single recording specific elements
   d.setHours(d.getHours() + 1); //increment an hour.
+  d.setMinutes(0);
+
   $('#startTimeHour').val(d.getHours());
   $('#startDate').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
   $('#startDate').datepicker('setDate', d);
@@ -52,7 +54,6 @@ function init() {
   
   //multiple recording specific elements
   $('#recurStart').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
-  $('#recurStart').datepicker('setDate', d);
   $('#recurEnd').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
   //$('#schedule_repeat').change(function(){ SchedulerUI.showDaySelect(this.options[this.selectedIndex].value); });
   $('#recurAgent').change(SchedulerUI.handleAgentChange);
@@ -362,7 +363,7 @@ SchedulerUI.selectRecordingType = function(recType){
    *  @see https://wiki.opencastproject.org/confluence/display/open/Scheduler+Service
    */
   var fields = {};
-
+  
   if(recType == 'multiple'){ // Multiple recordings have some differnt fields and different behaviors
     //show recurring_recording panel, hide single.
     $('#recurring_recording').show();
@@ -417,9 +418,21 @@ SchedulerUI.selectRecordingType = function(recType){
       'device':           new FormField('attendees')
     };
     SchedulerForm.rootEl = 'Event';
+    SchedulerForm.formFields['time.start'].setValue(d.getTime().toString());
   }
   //Form Manager, handles saving, loading, de/serialization, and validation
   SchedulerForm.setFormFields(fields);
+  
+  var d = new Date()
+  d.setHours(d.getHours() + 1); //increment an hour.
+  d.setMinutes(0);
+  
+  if('multiple'){
+    SchedulerForm.formFields['recurrence.start'].setValue(d.getTime().toString());
+  }else{
+    SchedulerForm.formFields['time.start'].setValue(d.getTime().toString());
+  }
+  
   //load agents
   SchedulerUI.loadKnownAgents();
 }
