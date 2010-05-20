@@ -21,10 +21,12 @@ import net.luniks.linux.jv4linfo.JV4LInfo;
 import net.luniks.linux.jv4linfo.JV4LInfoException;
 import net.luniks.linux.jv4linfo.V4LInfo;
 
+import org.gstreamer.Bus;
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Gst;
+import org.gstreamer.GstObject;
 import org.gstreamer.Pad;
 import org.gstreamer.PadDirection;
 import org.gstreamer.Pipeline;
@@ -262,7 +264,7 @@ public class PipelineFactory {
     String bitrate = captureDevice.properties.getProperty("bitrate");
     Element dec, enc, muxer;
     Element filesrc = ElementFactory.make("filesrc", null);
-    Element queue = ElementFactory.make("queue", null);
+    Element queue = ElementFactory.make("queue", "hauppage");
     Element mpegpsdemux = ElementFactory.make("mpegpsdemux", null);
     final Element mpegvideoparse = ElementFactory.make("mpegvideoparse", null);
     
@@ -325,6 +327,11 @@ public class PipelineFactory {
       return false;
     }
 
+    if (logger.isTraceEnabled()) {
+      BufferThread t = new BufferThread(queue);
+      t.start();
+    }
+
     return true;
   }
 
@@ -350,7 +357,7 @@ public class PipelineFactory {
     // Create elements, add them to pipeline, then link them 
     Element enc, muxer;
     Element v4lsrc = ElementFactory.make("v4lsrc", null);
-    Element queue = ElementFactory.make("queue", null);
+    Element queue = ElementFactory.make("queue", "epiphan");
     Element videoscale = ElementFactory.make("videoscale", null);
     Element videorate = ElementFactory.make("videorate", null);
     Element filter = ElementFactory.make("capsfilter", null);
@@ -409,6 +416,11 @@ public class PipelineFactory {
       return false;
     }
 
+    if (logger.isTraceEnabled()) {
+      BufferThread t = new BufferThread(queue);
+      t.start();
+    }
+
     return true;
   }
 
@@ -431,7 +443,7 @@ public class PipelineFactory {
     Element enc, mux;
 
     Element alsasrc = ElementFactory.make("alsasrc", null);
-    Element queue = ElementFactory.make("queue", null);
+    Element queue = ElementFactory.make("queue", "alsa");
     if (codec != null) {
       logger.debug("{} encoder set to: {}", captureDevice.getName(), codec);
       enc = ElementFactory.make(codec, null);
@@ -476,6 +488,11 @@ public class PipelineFactory {
       return false;
     }
 
+    if (logger.isTraceEnabled()) {
+      BufferThread t = new BufferThread(queue);
+      t.start();
+    }
+
     return true;
   }
 
@@ -500,7 +517,7 @@ public class PipelineFactory {
     String bitrate = captureDevice.properties.getProperty("bitrate");
     Element enc, muxer;
     Element v4l2src = ElementFactory.make("v4l2src", null);
-    Element queue = ElementFactory.make("queue", null);
+    Element queue = ElementFactory.make("queue", "bluecherry");
     if (codec != null) {
       logger.debug("{} encoder set to: {}", captureDevice.getName(), codec);
       enc = ElementFactory.make(codec, null);
@@ -543,6 +560,12 @@ public class PipelineFactory {
       logger.error(error);
       return false;
     }
+
+    if (logger.isTraceEnabled()) {
+      BufferThread t = new BufferThread(queue);
+      t.start();
+    }
+
     return true;
   }
 
@@ -569,6 +592,7 @@ public class PipelineFactory {
       logger.error(formatPipelineError(captureDevice, filesrc, filesink));
       return false;
     }
+
     return true;
   }
   
@@ -585,7 +609,7 @@ public class PipelineFactory {
     String error = null;
     String codec =  captureDevice.properties.getProperty("codec");
     String bitrate = captureDevice.properties.getProperty("bitrate");
-    Element queue = ElementFactory.make("queue", null);
+    Element queue = ElementFactory.make("queue", "dv");
     Element src = ElementFactory.make("dv1394src", null);
     Element dec = ElementFactory.make("capsfilter", null);
     Element enc = ElementFactory.make("capsfilter", null);
@@ -613,8 +637,50 @@ public class PipelineFactory {
       logger.error(error);
       return false;
     }
+
+    if (logger.isTraceEnabled()) {
+      BufferThread t = new BufferThread(queue);
+      t.start();
+    }
     
     return true;
   }
   
+}
+
+class BufferThread extends Thread {
+
+  private static final Logger log = LoggerFactory.getLogger(BufferThread.class);
+ 
+  Element queue = null;
+  boolean run = true;
+
+  public BufferThread(Element e) {
+    log.info("Buffer monitoring thread started for device " + e.getName());
+    queue = e;
+    
+    queue.getBus().connect(new Bus.EOS() {
+      /**
+       * {@inheritDoc}
+       * @see org.gstreamer.Bus.EOS#endOfStream(org.gstreamer.GstObject)
+       */
+      public void endOfStream(GstObject arg0) {
+        shutdown();
+      }
+    });
+
+  }
+
+  public void run() {
+    while (run) {
+      log.trace(queue.getName() + "," + queue.get("current-level-buffers") + "," + queue.get("current-level-bytes") + "," + queue.get("current-level-time"));
+      try {
+        this.sleep(1000);
+      } catch (InterruptedException e) {}
+    }
+  }
+
+  public void shutdown() {
+    run = false;
+  }
 }
