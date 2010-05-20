@@ -64,6 +64,10 @@ public class Series {
     return seriesId;
   }
   
+  public void setSeriesId (String seriesId) {
+    this.seriesId = seriesId;
+  }
+  
   public String generateSeriesId() {
     return seriesId = UUID.randomUUID().toString();
   }
