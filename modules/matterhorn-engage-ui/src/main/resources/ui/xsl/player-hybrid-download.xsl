@@ -13,8 +13,8 @@
 		   <table class="segments" cellspacing="0" cellpadding="0">
 		     <tr>
 		      <xsl:choose>
-        <xsl:when test="ns2:search-results/result/segments/mediaSegments">
-           <xsl:for-each select="ns2:search-results/result/segments/mediaSegments">
+        <xsl:when test="ns2:search-results/result/segments/segment">
+           <xsl:for-each select="ns2:search-results/result/segments/segment">
            <xsl:if test="(../../mediapackage/@duration) > ./@time">
            <td 
              class="segment-holder" 
@@ -53,7 +53,7 @@
 		<div id="oc-segments" style="display: none">
 		<table class="oc-segment-table">
                   <tr>
-              <xsl:for-each select="ns2:search-results/result/segments/mediaSegments">
+              <xsl:for-each select="ns2:search-results/result/segments/segment">
                 <td class="oc-segment-td">
                   <xsl:attribute name="onmouseover">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
                   <xsl:attribute name="onmouseout">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
@@ -62,14 +62,13 @@
                       select="floor(./@time div 1000)" />)</xsl:attribute>
                     <img height="83">
                       <xsl:attribute name="src"><xsl:value-of
-                        select="./previews/preview[@type='presentation']" /></xsl:attribute>
+                        select="./previews/preview" /></xsl:attribute>
                     </img>
                   </a>
                 </td>
               </xsl:for-each>
               </tr>
             </table>
-      
     </div>
 	
 		<xsl:for-each

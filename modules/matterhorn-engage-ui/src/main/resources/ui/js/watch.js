@@ -63,10 +63,10 @@ Opencast.Watch = (function ()
 
             if(mediaUrlOne === null)
               mediaUrlOne = $('#oc-video-presenter-delivery-x-flv-http').html();
-            
+
             if(mediaUrlOne === null)
               mediaUrlOne = $('#oc-video-presenter-source-x-flv-rtmp').html();
-            
+
             if(mediaUrlOne === null)
               mediaUrlOne = $('#oc-video-presenter-source-x-flv-http').html();
 
@@ -79,11 +79,15 @@ Opencast.Watch = (function ()
             if(mediaUrlTwo === null)
               mediaUrlTwo = $('#oc-video-presentation-source-x-flv-http').html();
 
+            if(mediaUrlOne === null) {
+              mediaUrlOne = mediaUrlTwo;
+              mediaUrlTwo = null;
+            }
+
             mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
             mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
-            
-        	Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
 
+            Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
 
             if (mediaUrlOne !== '' && mediaUrlTwo !== '')
             {
