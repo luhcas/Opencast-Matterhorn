@@ -36,17 +36,17 @@ echo "Done"
 
 # Remove dependencies installed by the scripts
 echo -n "Removing the packages installed by matterhorn (this may take a long time)... "
-apt-get purge $PKG_LIST &> /dev/null
+apt-get -y purge $PKG_LIST &> /dev/null
 echo -n "Removing 'orphan' libraries... "
-apt-get autoremove &> /dev/null
+apt-get -y autoremove &> /dev/null
 echo -n "Cleaning... "
-apt-get autoclean &> /dev/null
+apt-get -y autoclean &> /dev/null
 echo "Done"
 
 # Restore appropriate sources.list
 echo -n "Restoring the sources.list backup... "
 mv $SRC_LIST.$SRC_LIST_BKP $SRC_LIST &> /dev/null
-apt-get update
+apt-get -y update
 echo "Done"
 
 # Remove the configuration that starts matterhorn on boot
@@ -107,5 +107,5 @@ else
     clear
 fi
 
-# Autodestruction in 5, 4, 3, 2, 1...
+# Self-destruction in 5, 4, 3, 2, 1...
 rm -f $0
