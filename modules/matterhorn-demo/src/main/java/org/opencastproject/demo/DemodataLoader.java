@@ -226,7 +226,7 @@ public class DemodataLoader {
         MultipartEntity postEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
         URI elementUrl = element.getURI();
         String filename = FilenameUtils.getName(elementUrl.toString());
-        URI uploadedElementUrl = new URI(host + "/files/" + mediapackageId.compact() + "/" + element.getIdentifier());
+        URI uploadedElementUrl = new URI(host + "/files/mp/" + mediapackageId.compact() + "/" + element.getIdentifier());
         postEntity.addPart("file", new InputStreamBody(element.getURI().toURL().openStream(), filename));
         HttpPost post = new HttpPost(uploadedElementUrl);
         post.setEntity(postEntity);
