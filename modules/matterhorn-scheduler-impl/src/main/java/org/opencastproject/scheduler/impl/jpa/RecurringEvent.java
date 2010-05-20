@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.fortuna.ical4j.model.DateList;
+import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Recur;
 import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.parameter.Value;
@@ -200,14 +201,16 @@ public class RecurringEvent extends AbstractEvent{
         logger.error("No end date specified for recurring event {}. "+rEventId);
         return;
       }
-      DateList dates = recur.getDates(new net.fortuna.ical4j.model.Date(start), 
-                     new net.fortuna.ical4j.model.Date(end), Value.DATE_TIME);
+      
+      DateTime seed = new DateTime(start.getTime());
+      seed.setUtc(true);
+      DateTime period = new DateTime(end.getTime());
+      period.setUtc(true);
+      DateList dates = recur.getDates(seed, period, Value.DATE_TIME);
       logger.debug("DateList: {}", dates);
       for (Object date : dates) {
         //Dates in the DateList do not have times. Add the start time to the date so we know what time to start as well as what day.
         Date d = (Date) date;
-        d.setHours(start.getHours());
-        d.setMinutes(start.getMinutes());
         generatedDates.add(d);
       }
     } catch (ParseException e) {
