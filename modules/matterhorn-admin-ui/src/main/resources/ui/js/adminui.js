@@ -14,7 +14,11 @@ AdminUI.internationalize = function(obj, prefix){
 }
 
 AdminUI.log = function(){
-  if(typeof console != 'undefined'){
-    console.log.apply(this, arguments);
+  if(window.console){
+    try{
+      window.console && console.log.apply(console,Array.prototype.slice.call(arguments));
+    }catch(e){
+      console.log(e);
+    }
   }
 }
