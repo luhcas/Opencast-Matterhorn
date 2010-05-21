@@ -49,9 +49,9 @@ public class WorkspaceImplTest {
   
   @After
   public void tearDown() throws Exception {
+    workspace.deactivate();
     FileUtils.deleteDirectory(new File(workspaceRoot));
     FileUtils.deleteDirectory(new File(repoRoot));
-    workspace.deactivate();
   }
 
   @Test
@@ -163,5 +163,9 @@ public class WorkspaceImplTest {
       workspace.get(uri);
       Assert.fail("The file at " + uri + " should have been deleted");
     } catch(NotFoundException e) {}
+
+    workspace.deactivateGarbageFileCollectionTimer();
+    Thread.sleep((workspace.garbageCollectionPeriodInSeconds + 1) * 1000);
   }
+
 }

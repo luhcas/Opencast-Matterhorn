@@ -66,7 +66,8 @@ public class WorkspaceImpl implements Workspace {
   protected long garbageCollectionPeriodInSeconds = -1;
   protected Timer garbageFileCollector;
 
-  public WorkspaceImpl() {}
+  public WorkspaceImpl() {
+  }
 
   public WorkspaceImpl(String rootDirectory) {
     this.rootDirectory = rootDirectory;
@@ -81,7 +82,8 @@ public class WorkspaceImpl implements Workspace {
         logger.info("CONFIG " + WORKSPACE_ROOTDIR_KEY + ": " + this.rootDirectory);
       } else if (cc != null && cc.getBundleContext().getProperty("org.opencastproject.storage.dir") != null) {
         // create rootDir by adding "workspace" to the default data directory
-        this.rootDirectory = PathSupport.concat(cc.getBundleContext().getProperty("org.opencastproject.storage.dir"), "workspace");
+        this.rootDirectory = PathSupport.concat(cc.getBundleContext().getProperty("org.opencastproject.storage.dir"),
+                "workspace");
         logger.warn("CONFIG " + WORKSPACE_ROOTDIR_KEY + " is missing: falling back to " + this.rootDirectory);
       } else {
         throw new IllegalStateException("Configuration '" + WORKSPACE_ROOTDIR_KEY + "' is missing");
@@ -99,7 +101,7 @@ public class WorkspaceImpl implements Workspace {
     }
 
     // Find the working file repository's root directory
-    // Note: we only map mediapackage elements, not collections.  FIXME?
+    // Note: we only map mediapackage elements, not collections. FIXME?
     String repoRoot;
     if (cc != null && cc.getBundleContext().getProperty("org.opencastproject.file.repo.path") != null) {
       repoRoot = cc.getBundleContext().getProperty("org.opencastproject.file.repo.path");
@@ -136,7 +138,6 @@ public class WorkspaceImpl implements Workspace {
 
   /**
    * Activate the garbage collection timer
-   * @param cc The component context
    */
   protected void activateGarbageFileCollectionTimer() {
     if (garbageCollectionPeriodInSeconds > 0 && maxAgeInSeconds > 0) {
@@ -147,10 +148,20 @@ public class WorkspaceImpl implements Workspace {
     }
   }
 
-  public void deactivate() {
-    if(garbageFileCollector != null) {
+  /**
+   * Deactivate the garbage collection timer.
+   */
+  protected void deactivateGarbageFileCollectionTimer() {
+    if (garbageFileCollector != null) {
       garbageFileCollector.cancel();
     }
+  }
+
+  /**
+   * Callback from OSGi on service deactivation.
+   */
+  public void deactivate() {
+    deactivateGarbageFileCollectionTimer();
   }
 
   /**
@@ -322,6 +333,7 @@ public class WorkspaceImpl implements Workspace {
   }
 
   class GarbageCollectionTimer extends TimerTask {
+
     /**
      * {@inheritDoc}
      * 
@@ -348,5 +360,7 @@ public class WorkspaceImpl implements Workspace {
         }
       }
     }
+
   }
+
 }
