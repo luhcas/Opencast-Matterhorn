@@ -39,4 +39,5 @@ fi
 
 echo "***********************************************************" > /dev/console
 
+sed -i "s/Matterhorn console is at .*/Matterhorn console is at http:\/\/$MY_IP:8080/" /etc/motd.tail
 exit 0
