@@ -271,7 +271,9 @@ Recordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
   $('#holdStateHeadRow-series').html($($(parentRow).children().get(2)).html());
   $('#holdStateHeadRow-date').html($($(parentRow).children().get(3)).html());
   $('#holdStateHeadRow-status').html($($(parentRow).children().get(4)).html());
-  $('#holdActionPanel-container').offset($(parentRow).offset());
+  var offset = $(parentRow).offset();
+  $('#holdActionPanel-container').css('top', offset.top);
+  $('#holdActionPanel-container').css('left', offset.left);
   $('#holdActionPanel-container').width($(parentRow).outerWidth()-2);
   $('#holdActionPanel-container').fadeIn('fast');
 }
