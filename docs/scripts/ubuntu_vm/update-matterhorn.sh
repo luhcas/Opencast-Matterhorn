@@ -36,4 +36,4 @@ sed -i "s/conf\/security.xml/\/opt\/matterhorn\/felix\/conf\/security.xml/" /opt
 sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" /opencast/config/capture.properties
 
 # restart felix
-/home/opencast/startup.sh
+sudo /home/opencast/startup.sh

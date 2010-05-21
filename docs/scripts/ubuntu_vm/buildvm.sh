@@ -192,6 +192,8 @@ echo "===================================="
 echo "=====Building red5 streaming app===="
 echo "===================================="
 
+
+export RED5_HOME="`pwd`/red5-0.9.1"
 if [ -e matterhorn-engage-streaming ]; then
   cd matterhorn-engage-streaming
   svn up
@@ -202,7 +204,8 @@ fi
 
 cd matterhorn-engage-streaming
 ant
-cp dist/*.war ../mnt/opt/matterhorn/red5/webapps/
+sudo cp dist/*.war ../mnt/opt/matterhorn/red5/webapps/
+sudo chown 1000:1000 ../mnt/opt/matterhorn/red5/webapps/*.war
 cd ..
 
 echo "=========================="
