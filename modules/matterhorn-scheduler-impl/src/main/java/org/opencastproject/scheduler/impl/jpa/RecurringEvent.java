@@ -175,6 +175,13 @@ public class RecurringEvent extends AbstractEvent{
       event.setEntityManagerFactory(emf);
       event.setPositionInRecurrence(i);
       event.setRecurringEventId(getRecurringEventId());
+      String title = "Episode"; 
+      try {
+        if (getValue("title")!= null) title = getValue("title");
+      } catch (IncompleteDataException e) {
+        logger.warn("Could not get default title for series");
+      }
+      event.getMetadata().add(new Metadata("title", title+" "+(i+1)));
       logger.debug("Recur event: {}", event);
       generatedEvents.add(event);
     }
