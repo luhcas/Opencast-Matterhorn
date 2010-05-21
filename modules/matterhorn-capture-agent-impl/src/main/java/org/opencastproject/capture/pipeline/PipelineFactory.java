@@ -158,21 +158,7 @@ public class PipelineFactory {
       }
 
       // devices will store the CaptureDevice list arbitrary order
-      CaptureDevice capdev = new CaptureDevice(srcLoc, devName, name, outputLoc);
-      String codecProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_CODEC;
-      String containerProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_CONTAINER;
-      String bitrateProperty = codecProperty + CaptureParameters.CAPTURE_DEVICE_BITRATE;
-      String codec = properties.getProperty(codecProperty);
-      String container = properties.getProperty(containerProperty);
-      String bitrate = properties.getProperty(bitrateProperty);
-
-      if (codec != null)
-        capdev.properties.setProperty("codec", codec);
-      if (bitrate != null)
-        capdev.properties.setProperty("bitrate", bitrate);
-      if (container != null)
-        capdev.properties.setProperty("container", container);
-
+      CaptureDevice capdev = createCaptureDev(srcLoc, devName, name, outputLoc);
       if (!devices.add(capdev))
         logger.error("Unable to add device: {}.", capdev);
     }
@@ -201,6 +187,38 @@ public class PipelineFactory {
     }
     
     return pipeline;
+  }
+
+  private static CaptureDevice createCaptureDev(String srcLoc, DeviceName devName, String name, String outputLoc) {
+    CaptureDevice capdev = new CaptureDevice(srcLoc, devName, name, outputLoc);
+    String codecProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_CODEC;
+    String containerProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_CONTAINER;
+    String bitrateProperty = codecProperty + CaptureParameters.CAPTURE_DEVICE_BITRATE;
+    String bufferProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_BUFFER;
+    String bufferCountProperty = bufferProperty + CaptureParameters.CAPTURE_DEVICE_BUFFER_MAX_BUFFERS;
+    String bufferByteProperty = bufferProperty + CaptureParameters.CAPTURE_DEVICE_BUFFER_MAX_BYTES;
+    String bufferTimeProperty = bufferProperty + CaptureParameters.CAPTURE_DEVICE_BUFFER_MAX_TIME;
+    String codec = properties.getProperty(codecProperty);
+    String container = properties.getProperty(containerProperty);
+    String bitrate = properties.getProperty(bitrateProperty);
+    String bufferCount = properties.getProperty(bufferCountProperty);
+    String bufferBytes = properties.getProperty(bufferByteProperty);
+    String bufferTime = properties.getProperty(bufferTimeProperty);
+
+    if (codec != null)
+      capdev.properties.setProperty("codec", codec);
+    if (bitrate != null)
+      capdev.properties.setProperty("bitrate", bitrate);
+    if (container != null)
+      capdev.properties.setProperty("container", container);
+    if (bufferCount != null)
+      capdev.properties.setProperty("bufferCount", bufferCount);
+    if (bufferBytes != null)
+      capdev.properties.setProperty("bufferBytes", bufferBytes);
+    if (bufferTime != null)
+      capdev.properties.setProperty("bufferTime", bufferTime);
+
+    return capdev;
   }
 
   /**
@@ -262,9 +280,20 @@ public class PipelineFactory {
     String codec =  captureDevice.properties.getProperty("codec");
     String container = captureDevice.properties.getProperty("container");
     String bitrate = captureDevice.properties.getProperty("bitrate");
+    String bufferCount = captureDevice.properties.getProperty("bufferCount");
+    String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
+    String bufferTime = captureDevice.properties.getProperty("bufferTime");
+
     Element dec, enc, muxer;
     Element filesrc = ElementFactory.make("filesrc", null);
     Element queue = ElementFactory.make("queue", "hauppage");
+    if (bufferCount != null)
+      queue.set("max-size-buffers", bufferCount);
+    if (bufferBytes != null)
+      queue.set("max-size-bytes", bufferBytes);
+    if (bufferTime != null)
+      queue.set("max-size-time", bufferTime);
+
     Element mpegpsdemux = ElementFactory.make("mpegpsdemux", null);
     final Element mpegvideoparse = ElementFactory.make("mpegvideoparse", null);
     
@@ -354,10 +383,21 @@ public class PipelineFactory {
     String codec = captureDevice.properties.getProperty("codec");
     String container = captureDevice.properties.getProperty("container");
     String bitrate = captureDevice.properties.getProperty("bitrate");
+    String bufferCount = captureDevice.properties.getProperty("bufferCount");
+    String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
+    String bufferTime = captureDevice.properties.getProperty("bufferTime");
+
     // Create elements, add them to pipeline, then link them 
     Element enc, muxer;
     Element v4lsrc = ElementFactory.make("v4lsrc", null);
     Element queue = ElementFactory.make("queue", "epiphan");
+    if (bufferCount != null)
+      queue.set("max-size-buffers", bufferCount);
+    if (bufferBytes != null)
+      queue.set("max-size-bytes", bufferBytes);
+    if (bufferTime != null)
+      queue.set("max-size-time", bufferTime);
+
     Element videoscale = ElementFactory.make("videoscale", null);
     Element videorate = ElementFactory.make("videorate", null);
     Element filter = ElementFactory.make("capsfilter", null);
@@ -440,10 +480,21 @@ public class PipelineFactory {
     String codec = captureDevice.properties.getProperty("codec");
     String container = captureDevice.properties.getProperty("container");
     String bitrate = captureDevice.properties.getProperty("bitrate");
+    String bufferCount = captureDevice.properties.getProperty("bufferCount");
+    String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
+    String bufferTime = captureDevice.properties.getProperty("bufferTime");
+
     Element enc, mux;
 
     Element alsasrc = ElementFactory.make("alsasrc", null);
     Element queue = ElementFactory.make("queue", "alsa");
+    if (bufferCount != null)
+      queue.set("max-size-buffers", bufferCount);
+    if (bufferBytes != null)
+      queue.set("max-size-bytes", bufferBytes);
+    if (bufferTime != null)
+      queue.set("max-size-time", bufferTime);
+
     if (codec != null) {
       logger.debug("{} encoder set to: {}", captureDevice.getName(), codec);
       enc = ElementFactory.make(codec, null);
@@ -515,9 +566,20 @@ public class PipelineFactory {
     String codec = captureDevice.properties.getProperty("codec");
     String container = captureDevice.properties.getProperty("container");
     String bitrate = captureDevice.properties.getProperty("bitrate");
+    String bufferCount = captureDevice.properties.getProperty("bufferCount");
+    String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
+    String bufferTime = captureDevice.properties.getProperty("bufferTime");
+
     Element enc, muxer;
     Element v4l2src = ElementFactory.make("v4l2src", null);
     Element queue = ElementFactory.make("queue", "bluecherry");
+    if (bufferCount != null)
+      queue.set("max-size-buffers", bufferCount);
+    if (bufferBytes != null)
+      queue.set("max-size-bytes", bufferBytes);
+    if (bufferTime != null)
+      queue.set("max-size-time", bufferTime);
+
     if (codec != null) {
       logger.debug("{} encoder set to: {}", captureDevice.getName(), codec);
       enc = ElementFactory.make(codec, null);
@@ -609,7 +671,18 @@ public class PipelineFactory {
     String error = null;
     String codec =  captureDevice.properties.getProperty("codec");
     String bitrate = captureDevice.properties.getProperty("bitrate");
+    String bufferCount = captureDevice.properties.getProperty("bufferCount");
+    String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
+    String bufferTime = captureDevice.properties.getProperty("bufferTime");
+
     Element queue = ElementFactory.make("queue", "dv");
+    if (bufferCount != null)
+      queue.set("max-size-buffers", bufferCount);
+    if (bufferBytes != null)
+      queue.set("max-size-bytes", bufferBytes);
+    if (bufferTime != null)
+      queue.set("max-size-time", bufferTime);
+
     Element src = ElementFactory.make("dv1394src", null);
     Element dec = ElementFactory.make("capsfilter", null);
     Element enc = ElementFactory.make("capsfilter", null);

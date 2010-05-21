@@ -149,6 +149,18 @@ public interface CaptureParameters {
   
   /** Property appended to CAPTURE_DEVICE_CODEC to specify that codec's bitrate */
   String CAPTURE_DEVICE_BITRATE = ".bitrate";
+
+  /** Property prefixing properties involving the capture buffers */
+  String CAPTURE_DEVICE_BUFFER = ".buffer";
+
+  /** Property appended to CAPTURE_DEVICE_BUFFER specifying the maximum number of buffers in the queue */
+  String CAPTURE_DEVICE_BUFFER_MAX_BUFFERS = ".size";
+
+  /** Property appended to CAPTURE_DEVICE_BUFFER specifying the maximum number of bytes in the queue */
+  String CAPTURE_DEVICE_BUFFER_MAX_BYTES = ".bytes";
+
+  /** Property appended to CAPTURE_DEVICE_BUFFER specifying the maximum length of time to store buffers in the queue */
+  String CAPTURE_DEVICE_BUFFER_MAX_TIME = ".time";
   
   /** Time interval between confidence updates (in seconds) */
   String CAPTURE_DEVICE_CONFIDENCE_INTERVAL = ".confidence.interval";
