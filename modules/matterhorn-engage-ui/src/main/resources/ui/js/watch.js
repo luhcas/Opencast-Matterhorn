@@ -53,6 +53,8 @@ Opencast.Watch = (function ()
             $('#oc_description').html($('#oc-abstract').html());
             
             $('#oc_segment-table').html($('#oc-segments').html());
+            
+            $('#oc-segments').html("");
            
             
            
@@ -148,7 +150,7 @@ Opencast.Watch = (function ()
             {
                 Opencast.Player.stopFastForward();
             });
-            
+            Opencast.segments.initialize();
        });
     }
   

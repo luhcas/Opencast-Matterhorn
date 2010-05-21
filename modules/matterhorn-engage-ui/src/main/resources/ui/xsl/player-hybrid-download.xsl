@@ -50,27 +50,39 @@
 		</div>
 		
 		
-		<div id="oc-segments" style="display: none">
-		<table class="oc-segment-table">
-                  <tr>
-              <xsl:for-each select="ns2:search-results/result/segments/segment">
-                <td class="oc-segment-td">
-                  <xsl:attribute name="onmouseover">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
-                  <xsl:attribute name="onmouseout">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
-                  <a>
-                    <xsl:attribute name="href">javascript:Opencast.Watch.seekSegment(<xsl:value-of
-                      select="floor(./@time div 1000)" />)</xsl:attribute>
-                    <img height="83">
-                      <xsl:attribute name="src"><xsl:value-of
-                        select="./previews/preview" /></xsl:attribute>
-                    </img>
-                  </a>
-                </td>
-              </xsl:for-each>
-              </tr>
-            </table>
+		<div id="oc-segments">
+		<div id="slider">
+    <img class="scrollButtons left"
+  src="img/leftarrow.png"/>
+
+<div style="overflow: hidden;" class="scroll">
+
+<div class="scrollContainer">
+
+ <xsl:for-each select="ns2:search-results/result/segments/segment">
+   <div style="float: left; position: relative;" class="panel">
+   <xsl:attribute name="id">panel_<xsl:value-of select="position()" /></xsl:attribute>
+    <div class="inside">
+     <xsl:attribute name="onmouseover">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
+     <xsl:attribute name="onmouseout">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
+     <a>
+       <xsl:attribute name="href">javascript:Opencast.Watch.seekSegment(<xsl:value-of
+         select="floor(./@time div 1000)" />)</xsl:attribute>
+       <img width="111">
+         <xsl:attribute name="src"><xsl:value-of
+           select="./previews/preview" /></xsl:attribute>
+       </img>
+     </a>
+     </div>
+   </div>
+ </xsl:for-each>
+
+</div>
+
+</div>
+<img class="scrollButtons right" src="img/rightarrow.png"/>
     </div>
-	
+    </div>
 		<xsl:for-each
       select="ns2:search-results/result/mediapackage/media/track">
 

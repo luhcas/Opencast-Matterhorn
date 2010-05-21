@@ -1,0 +1,51 @@
+
+#slider {
+    width: 80%;
+    margin: 0 auto;
+    position: relative;
+    border: 1px solid #ccc;
+	  height: 85px;
+}
+
+.scroll {
+	overflow: hidden;
+	width: 100%;
+  margin: 0 auto;
+  position: relative;
+  height: 85px;
+}
+
+.scrollContainer {
+	position: relative;
+}
+
+.scrollContainer div.panel {
+    padding: 1px;
+}
+
+.inside {
+	padding: 0px;
+	border: none;
+}
+
+.inside img {
+	display: block;
+	border: none;
+	margin: 0 0 0 0;
+	height: 83px;
+}
+
+
+.scrollButtons {
+    position: absolute;
+    top: 17px;
+    cursor: pointer;
+}
+
+.scrollButtons.left {
+    left: -52px;
+}
+
+.scrollButtons.right {
+    right: -52px;
+}

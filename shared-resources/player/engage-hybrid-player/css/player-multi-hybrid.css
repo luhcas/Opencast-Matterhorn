@@ -552,11 +552,6 @@ option:hover
   border-style:none;
 }
 
-.oc-segments 
-{ 
-  position:relative; 
-}
-
 .oc-segments-holder
 {
   overflow-x:scroll;
