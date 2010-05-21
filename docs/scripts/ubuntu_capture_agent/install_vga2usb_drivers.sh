@@ -90,6 +90,8 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
   		cd $CA_DIR/$VGA2USB_DIR
   		tar jxf $EPIPHAN
   		sed -i '/sudo \/sbin\/insmod/s|$| num_frame_buffers=2|' Makefile
+  		# First "make" necessary according with MH-3810
+		make &> /dev/null
   		make load &> /dev/null
   		if [[ $? -ne 0 ]]; then
     		    echo "Error!"

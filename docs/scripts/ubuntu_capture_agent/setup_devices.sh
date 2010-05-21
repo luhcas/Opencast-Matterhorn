@@ -258,9 +258,9 @@ if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
 	while [[ -z "$(echo ${cleanName[$i]:-$defaultName} | grep -v '[()/ ]')" ]]; do
 	    read -p "Please enter a non-empty name without parentheses, slashes or whitespaces [$defaultName]: " cleanName[$i]
 	done
-	: ${cleanName:=$defaultName}
+	: ${cleanName[$i]:=$defaultName}
 	# Check the name is not repeated
-	if [[ "$cleanName" != "$defaultName" ]]; then
+	if [[ "${cleanName[$i]}" != "$defaultName" ]]; then
 	    for (( t = 0; t < $i; t++ )); do
 		if [[ -n "$(echo ${cleanName[$i]} | grep -i "^${cleanName[$t]}$")" ]]; then
 		    read -p "The name ${cleanName[$t]} is already in use for the device ${device[$t]}. Please choose another [$defaultName]: " cleanName[$i]
