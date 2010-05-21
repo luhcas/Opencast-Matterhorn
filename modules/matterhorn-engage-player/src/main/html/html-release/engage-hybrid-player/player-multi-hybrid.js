@@ -31,12 +31,14 @@ Opencast.Player = (function () {
     NOTESHIDE              = "Hide Notes",
     SLIDETEXT              = "Slide Text",
     SLIDETEXTHIDE          = "Hide Slide Text",
+    TRANSCRIPT             = "Transcript",
+    TRANSCRIPTHIDE         = "Hide Transcript",
     SHORTCUTS              = "Shortcuts",
     SHORTCUTSHIDE          = "Hide Shortcuts",
     EMBED                  = "Embed",
     EMBEDHIDE              = "Hide Embed",
-    BOOKMARK               = "Bookmark",
-    BOOKMARKHIDE           = "Hide Bookmark",
+    BOOKMARKS              = "Bookmarks",
+    BOOKMARKSHIDE          = "Hide Bookmarks",
     DESCRIPTION            = "Description",
     DESCRIPTIONHIDE        = "Hide Description",
     MULTIPLAYER            = "Multiplayer",
@@ -45,6 +47,7 @@ Opencast.Player = (function () {
     AUDIOPLAYER            = "Audioplayer",
     ADVANCEDPLAYER         = "advancedPlayer",
     EMBEDPLAYER            = "embedPlayer",
+    OPTIONMYCLASSNAME      = "oc_option-myBookmark",
     currentPlayPauseState  = PAUSING,
     showSections           = true,
     mouseOverBool          = false,
@@ -53,12 +56,14 @@ Opencast.Player = (function () {
     duration               = 0,
     mediaWith              = 0;
     mediaHeight            = 0;
+    browserWidth           = 0;
     FLASH_PLAYERTYPE       = "",
     FLASH_PLAYERSTATE      = "",
     FLASH_VIEWSTATE        = "",
     FLASH_MUTE             = "",
     intval                 = "",
     displayMode            = "",
+    optionClassName        = "",
     seekState              = PAUSING;
    
    
@@ -219,7 +224,36 @@ Opencast.Player = (function () {
     function setDisplayMode(mode)
     {
     	displayMode = mode;
-    }   
+    }  
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the optionClassName.
+        @param Sring className
+     */
+    function setOptionClassName(className)
+    {
+    	optionClassName = className;
+    } 
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the browserWidth.
+        @param Number witdh
+     */
+    function setBrowserWidth(witdh)
+    {
+    	browserWidth = witdh;
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Get browserWidth.
+     */
+    function getBrowserWidth()
+    {
+	    return browserWidth;
+    }
         
     /**
         @memberOf Opencast.Player
@@ -263,7 +297,7 @@ Opencast.Player = (function () {
      */
     function showSlides()
     {
-        $("#oc_slides-sections").attr("className", "oc_slidesDisplayBlock");
+        $("#oc_slides").attr("className", "oc_DisplayBlock");
         $("#oc_btn-slides").attr({ 
             alt: SLIDESHIDE,
             title: SLIDESHIDE,
@@ -278,7 +312,7 @@ Opencast.Player = (function () {
      */
     function hideSlides()
     {
-        $("#oc_slides-sections").attr("className", "oc_DisplayNone");
+        $("#oc_slides").attr("className", "oc_DisplayNone");
         $("#oc_btn-slides").attr({ 
             alt: SLIDES,
             title: SLIDES,
@@ -293,7 +327,7 @@ Opencast.Player = (function () {
      */
     function showNotes()
     {
-        $("#oc_notes-sections").attr("className", "oc_notesDisplayBlock");
+        $("#oc_notes").attr("className", "oc_DisplayBlockTableLeft");
         $("#oc_btn-notes").attr({ 
             alt: NOTESHIDE,
             title: NOTESHIDE,
@@ -308,7 +342,7 @@ Opencast.Player = (function () {
      */
     function hideNotes()
     {
-        $("#oc_notes-sections").attr("className", "oc_DisplayNone");
+        $("#oc_notes").attr("className", "oc_DisplayNone");
         $("#oc_btn-notes").attr({ 
             alt: NOTES,
             title: NOTES,
@@ -319,11 +353,11 @@ Opencast.Player = (function () {
 
     /**
         @memberOf Opencast.Player
-        @description Show the search
+        @description Show the slide text
      */
     function showSlideText()
     {
-        $("#oc_slidetext-sections").attr("className", "oc_slideTextDisplayBlock");
+        $("#oc_slidetext").attr("className", "oc_DisplayBlockTableRight");
         $("#oc_btn-slidetext").attr({ 
             alt: SLIDETEXTHIDE,
             title: SLIDETEXTHIDE,
@@ -334,11 +368,11 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description Hide the search
+        @description Hide the slide text
      */
     function hideSlideText()
     {
-        $("#oc_slidetext-sections").attr("className", "oc_DisplayNone");
+        $("#oc_slidetext").attr("className", "oc_DisplayNone");
         $("#oc_btn-slidetext").attr({ 
             alt: SLIDETEXT,
             title: SLIDETEXT,
@@ -346,6 +380,40 @@ Opencast.Player = (function () {
         });
         $("#oc_btn-slidetext").attr('aria-pressed', 'false');
     }
+    
+    
+    
+    /**
+        @memberOf Opencast.Player
+        @description Show the transcript
+     */
+    function showTranscript()
+    {
+        $("#oc_transcript").attr("className", "oc_DisplayBlockTableRight");
+        $("#oc_btn-transcript").attr({ 
+            alt: TRANSCRIPTHIDE,
+            title: TRANSCRIPTHIDE,
+            value: TRANSCRIPTHIDE
+        });
+        $("#oc_btn-transcript").attr('aria-pressed', 'true');
+    }
+
+    /**
+        @memberOf Opencast.Player
+        @description Hide the transcript
+     */
+    function hideTranscript()
+    {
+        $("#oc_transcript").attr("className", "oc_DisplayNone");
+        $("#oc_btn-transcript").attr({ 
+            alt: TRANSCRIPT,
+            title: TRANSCRIPT,
+            value: TRANSCRIPT
+        });
+        $("#oc_btn-transcript").attr('aria-pressed', 'false');
+    }
+    
+    
 
     /**
         @memberOf Opencast.Player
@@ -353,7 +421,7 @@ Opencast.Player = (function () {
      */
     function showShortcuts()
     {
-        $("#oc_shortcuts-sections").attr("className", "oc_shortcutsDisplayBlock");
+        $("#oc_shortcuts").attr("className", "oc_DisplayBlockTableLeft");
         $("#oc_btn-shortcuts").attr({ 
             alt: SHORTCUTSHIDE,
             title: SHORTCUTSHIDE,
@@ -369,7 +437,7 @@ Opencast.Player = (function () {
      */
     function hideShortcuts()
     {
-        $("#oc_shortcuts-sections").attr("className", "oc_DisplayNone");
+        $("#oc_shortcuts").attr("className", "oc_DisplayNone");
         $("#oc_btn-shortcuts").attr({ 
             alt: SHORTCUTS,
             title: SHORTCUTS,
@@ -384,7 +452,7 @@ Opencast.Player = (function () {
      */
     function showEmbed()
     {
-        $("#oc_embed-sections").attr("className", "oc_embedDisplayBlock");
+        $("#oc_embed").attr("className", "oc_DisplayBlock");
         $("#oc_btn-embed").attr({ 
             alt: EMBEDHIDE,
             title: EMBEDHIDE,
@@ -399,7 +467,7 @@ Opencast.Player = (function () {
      */
     function hideEmbed()
     {
-        $("#oc_embed-sections").attr("className", "oc_DisplayNone");
+        $("#oc_embed").attr("className", "oc_DisplayNone");
         $("#oc_btn-embed").attr({ 
             alt: EMBED,
             title: EMBED,
@@ -410,32 +478,35 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description Show the bookmark
+        @description Show the bookmarks
      */
-    function showBookmark()
+    function showBookmarks()
     {
-        $("#oc_bookmark-sections").attr("className", "oc_bookmarkDisplayBlock");
-        $("#oc_btn-bookmark").attr({ 
-            alt: BOOKMARKHIDE,
-            title: BOOKMARKHIDE,
-            value: BOOKMARKHIDE
+        $("#oc_bookmarks").attr("className", "oc_DisplayBlock");
+        $("#oc_btn-bookmarks").attr({ 
+            alt: BOOKMARKSHIDE,
+            title: BOOKMARKSHIDE,
+            value: BOOKMARKSHIDE
         });
-        $("#oc_btn-bookmark").attr('aria-pressed', 'true');
+        $("#oc_btn-bookmarks").attr('aria-pressed', 'true');
+        $("#oc_bookmarksPoints").css('display', 'block');
     }
 
     /**
        @memberOf Opencast.Player
-       @description Hide the bookmark
+       @description Hide the bookmarks
      */
-    function hideBookmark()
+    function hideBookmarks()
     {
-        $("#oc_bookmark-sections").attr("className", "oc_DisplayNone");
-        $("#oc_btn-bookmark").attr({ 
-            alt: BOOKMARK,
-            title: BOOKMARK,
-            value: BOOKMARK
+        $("#oc_bookmarks").attr("className", "oc_DisplayNone");
+        $("#oc_btn-bookmarks").attr({ 
+            alt: BOOKMARKS,
+            title: BOOKMARKS,
+            value: BOOKMARKS
         });
-        $("#oc_btn-bookmark").attr('aria-pressed', 'false');
+        $("#oc_btn-bookmarks").attr('aria-pressed', 'false');
+        $("#oc_bookmarksPoints").css('display', 'none');
+        
     }
     
     /**
@@ -444,7 +515,7 @@ Opencast.Player = (function () {
      */
     function showDescription()
     {
-        $("#oc_description-sections").attr("className", "oc_descriptionDisplayBlock");
+        $("#oc_description").attr("className", "oc_DisplayBlockTableLeft");
         $("#oc_btn-description").attr({ 
             alt: DESCRIPTIONHIDE,
             title: DESCRIPTIONHIDE,
@@ -459,7 +530,7 @@ Opencast.Player = (function () {
      */
     function hideDescription()
     {
-        $("#oc_description-sections").attr("className", "oc_DisplayNone");
+        $("#oc_description").attr("className", "oc_DisplayNone");
         $("#oc_btn-description").attr({ 
             alt: DESCRIPTION,
             title: DESCRIPTION,
@@ -479,12 +550,8 @@ Opencast.Player = (function () {
         if ($("#oc_btn-slides").attr("title") === SLIDES)
         {
             showSlides();
-            hideNotes();
-            hideSlideText();
-            hideShortcuts();
             hideEmbed();
-            hideBookmark();
-            hideDescription();
+            hideBookmarks();
             setShowSections(true);
         }
         else
@@ -504,20 +571,16 @@ Opencast.Player = (function () {
         if ($("#oc_btn-notes").attr("title") === NOTES)
         {
             showNotes(); 
-            hideSlides();
-            hideSlideText();
             hideShortcuts();
-            hideEmbed();
-            hideBookmark();
             hideDescription();
-            setShowSections(true);
+            //setShowSections(true);
         }
         else
         {
             hideNotes();
-            setShowSections(false);
+            //setShowSections(false);
         }
-        Opencast.Initialize.doTest();
+        //Opencast.Initialize.doTest();
     }
 
     /**
@@ -529,20 +592,35 @@ Opencast.Player = (function () {
         if ($("#oc_btn-slidetext").attr("title") === SLIDETEXT)
         {
             showSlideText();
-            hideNotes(); 
-            hideSlides();
-            hideShortcuts();
-            hideEmbed();
-            hideBookmark();
-            hideDescription();
-            setShowSections(true);
+            hideTranscript();
+            //setShowSections(true);
         }
         else
         {
             hideSlideText();
-            setShowSections(false);
+            //setShowSections(false);
         }
-        Opencast.Initialize.doTest();
+        //Opencast.Initialize.doTest();
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Toggle the Transcript
+     */
+    function doToggleTranscript()
+    {
+        if ($("#oc_btn-transcript").attr("title") === TRANSCRIPT)
+        {
+            showTranscript();
+            hideSlideText(); 
+            //setShowSections(true);
+        }
+        else
+        {
+            hideTranscript();
+            //setShowSections(false);
+        }
+        //Opencast.Initialize.doTest();
     }
 
     /**
@@ -555,19 +633,15 @@ Opencast.Player = (function () {
         {
             showShortcuts();
             hideNotes(); 
-            hideSlides();
-            hideSlideText();
-            hideEmbed();
-            hideBookmark();
             hideDescription();
-            setShowSections(true);
+            //setShowSections(true);
         }
         else
         {
             hideShortcuts();
-            setShowSections(false);
+            //setShowSections(false);
         }
-        Opencast.Initialize.doTest();
+        //Opencast.Initialize.doTest();
     }
 
     /**
@@ -579,12 +653,8 @@ Opencast.Player = (function () {
         if ($("#oc_btn-embed").attr("title") === EMBED)
         {
             showEmbed();
-            hideNotes(); 
             hideSlides();
-            hideSlideText();
-            hideShortcuts();
-            hideBookmark();
-            hideDescription();
+            hideBookmarks();
             setShowSections(true);
         }
         else
@@ -597,24 +667,22 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description Toggle the bookmark
+        @description Toggle the bookmarks
      */
-    function doToggleBookmark()
+    function doToggleBookmarks()
     {
-        if ($("#oc_btn-bookmark").attr("title") === BOOKMARK)
+        
+    	if ($("#oc_btn-bookmarks").attr("title") === BOOKMARKS)
         {
-            showBookmark();
+           
+    		showBookmarks();
             hideEmbed();
-            hideNotes(); 
             hideSlides();
-            hideSlideText();
-            hideShortcuts();
-            hideDescription();
             setShowSections(true);
         }
         else
         {
-            hideBookmark();
+            hideBookmarks();
             setShowSections(false);
         }
         Opencast.Initialize.doTest();
@@ -626,20 +694,16 @@ Opencast.Player = (function () {
         if ($("#oc_btn-description").attr("title") === DESCRIPTION)
         {
             showDescription();
-            hideBookmark();
-            hideEmbed();
             hideNotes(); 
-            hideSlides();
-            hideSlideText();
             hideShortcuts();
-            setShowSections(true);
+            //setShowSections(true);
         }
         else
         {
             hideDescription();
-            setShowSections(false);
+            //setShowSections(false);
         }
-        Opencast.Initialize.doTest();
+        //Opencast.Initialize.doTest();
     }
     
     /**
@@ -688,6 +752,63 @@ Opencast.Player = (function () {
         iFrameText = '<iframe src="' + embedUrl + '" style="border:0px #FFFFFF none;" name="Opencast Matterhorn - Media Player" scrolling="no" frameborder="1" marginheight="0px" marginwidth="0px" width="' + width + '" height="' + height + '"></iframe>';
         $('#oc_embed-textarea').val(iFrameText);
     }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Add a bookmark
+     */
+    function addBookmark(value, name, text)
+    {
+    	var option = '<option value="'+value+'" class="oc_option-myBookmark" title="'+value+' '+name+': '+text+'">'+value+' '+name+': '+text+'</option>'
+    	
+    	$('#oc_bookmarkSelect').prepend( option );
+    	if ($("#oc_myBookmarks-checkbox").attr('aria-checked') === 'false')
+        {
+            $("#oc_myBookmarks-checkbox").attr('aria-checked', 'true');
+  	        $('#oc_myBookmarks-checkbox').attr('checked', 'true'); 
+  	        $('option.oc_option-myBookmark').css('display', 'block' );
+  	        $('.oc_option-myBookmark').css('visibility', 'visible' ); 
+        }
+    	
+    	//
+    	var posLeft = 0;
+    	var windowWidth = getBrowserWidth();
+    	var playhead = getPlayhead(value);
+    	var duration = getDuration();
+    	
+    	var posLeft = ( playhead * 100 ) / duration;
+    	
+  
+    	var btn = '<input class="oc_boomarkPoint" onClick="Opencast.Player.playBookmark(this.name)" style="left:'+posLeft+'%; width: 5px; height: 10px; margin-left: 5px; position: absolute; background-color: #90ee90 !important;" name="'+value+'" alt="'+value+' '+name+': '+text+'" title="'+value+' '+name+': '+text+'"></input>';
+    	$('#oc_bookmarksPoints').append( btn );
+    }
+    
+    function removeBookmark()
+    {
+    	$('#oc_bookmarkSelect option:selected').remove();
+    	$('#oc_btn-removeBookmark').css('display', 'none' ); 
+    	
+    }
+    
+    function playBookmark(playheadString)
+    {
+    	var newPlayhead = getPlayhead(playheadString);
+    	Videodisplay.seek(newPlayhead);
+    }
+    
+    function getPlayhead(playheadString)
+    {
+        var playheadArray = playheadString.split(':');
+    	
+    	var playheadHour = parseInt(playheadArray[0], 10);
+        var playheadMinutes = parseInt(playheadArray[1], 10);
+        var playheadSeconds = parseInt(playheadArray[2], 10);
+        
+        return (playheadHour * 60 * 60) + (playheadMinutes * 60) + (playheadSeconds);
+    	
+    	
+    }
+    
     
     /**
      * 
@@ -1295,15 +1416,17 @@ Opencast.Player = (function () {
         doToggleSlides : doToggleSlides,
         doToggleNotes : doToggleNotes,
         doToggleSlideText : doToggleSlideText,
+        doToggleTranscript : doToggleTranscript,
         doToggleShortcuts : doToggleShortcuts,
         doToggleEmbed : doToggleEmbed,
-        doToggleBookmark : doToggleBookmark,
+        doToggleBookmarks : doToggleBookmarks,
         doToggleDescription : doToggleDescription,
         removeOldAlert : removeOldAlert,
         addAlert : addAlert,
         embedIFrame : embedIFrame,
         setMediaURL : setMediaURL,
         setCaptionsURL : setCaptionsURL,
+        setBrowserWidth : setBrowserWidth,
         lowSound : lowSound,
         noneSound : noneSound,
         highSound : highSound,
@@ -1336,6 +1459,10 @@ Opencast.Player = (function () {
         showEditTime : showEditTime,
         hideEditTime : hideEditTime,
         editTime : editTime,
+        addBookmark : addBookmark,
+        removeBookmark : removeBookmark,
+        setOptionClassName : setOptionClassName,
+        playBookmark : playBookmark,
         setDuration : setDuration,
         setPlayhead : setPlayhead,
         setProgress : setProgress,

@@ -18,10 +18,10 @@ body {}
 pre,code,kbd,samp,tt {font-family:monospace;*font-size:108%;line-height:100%;}
 
 html{color:#000;background:#FFF;}
-body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}
+body,div,dl,dt,dd,ol,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,textarea,p,blockquote,th,td{margin:0;padding:0;}
 fieldset,img{border:0;}
 address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}
-li{list-style:none;}
+
 caption,th{text-align:left;}
 h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:normal;}
 q:before,q:after{content:'';}
@@ -67,18 +67,15 @@ blockquote,ul,ol,dl {
     /*giving blockquotes and lists room to breath*/
     margin:1em;
 }
-ol,ul,dl {
+ol,dl {
     /*bringing lists on to the page with breathing room */
     margin-left:2em;
 }
-ol li {
+ol {
     /*giving OL's LIs generated numbers*/
     list-style: decimal outside;    
 }
-ul li {
-    /*giving UL's LIs generated disc markers*/
-    list-style: disc outside;
-}
+
 dl dd {
     /*giving UL's LIs generated numbers*/
     margin-left:1em;

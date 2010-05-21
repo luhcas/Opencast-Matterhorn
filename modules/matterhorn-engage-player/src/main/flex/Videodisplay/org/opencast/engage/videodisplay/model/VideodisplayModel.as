@@ -121,6 +121,8 @@ package org.opencast.engage.videodisplay.model
         // mediaPlayer
         public var mediaPlayer:MediaPlayer;
         
+        
+        
         // MediaContainer
         public var mediaContainer:MediaContainer;
         

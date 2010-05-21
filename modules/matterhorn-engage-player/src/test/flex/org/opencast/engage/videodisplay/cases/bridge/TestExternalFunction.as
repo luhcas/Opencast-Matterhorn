@@ -49,9 +49,8 @@ package org.opencast.engage.videodisplay.cases.bridge
             Assert.assertEquals( "externalFunction ", ExternalFunction.SETVOLUME == 'Opencast.Player.setVolume', true );
             Assert.assertEquals( "externalFunction ", ExternalFunction.SETPLAYPAUSESTATE == 'Opencast.Player.setPlayPauseState', true );
             Assert.assertEquals( "externalFunction ", ExternalFunction.SETCAPTIONS == 'Opencast.Player.setCaptions', true );
-            Assert.assertEquals( "externalFunction ", ExternalFunction.SETVOLUMESLIDER == 'Opencast.Player.setVolumeSlider', true);
-            Assert.assertEquals( "externalFunction ", ExternalFunction.SETPLAYERVOLUME == 'Opencast.Player.setPlayerVolume', true)
-            Assert.assertEquals( "externalFunction ", ExternalFunction.MUTE == 'Opencast.Player.doToggleMute', true );
+            Assert.assertEquals( "externalFunction ", ExternalFunction.MUTE == 'Opencast.Player.setDoMute', true );
+            Assert.assertEquals( "externalFunction ", ExternalFunction.SETCAPTIONSBUTTON == 'Opencast.Player.setCaptionsButton', true );
             Assert.assertEquals( "externalFunction ", ExternalFunction.HEARTIMEINFO == 'Opencast.Player.hearTimeInfo', true );
             Assert.assertEquals( "externalFunction ", ExternalFunction.TOGGLEINFO == 'Opencast.Player.toggleInfo', true );
             Assert.assertEquals( "externalFunction ", ExternalFunction.OPENCASTVOLUME == 'Opencast.Player.setOpencastVolume', true );
@@ -59,13 +58,6 @@ package org.opencast.engage.videodisplay.cases.bridge
             Assert.assertEquals( "externalFunction ", ExternalFunction.DOSETVOLUME == 'Opencast.Player.doSetVolume', true );
             Assert.assertEquals( "externalFunction ", ExternalFunction.SETPLAYERVOLUME == 'Opencast.Player.setPlayerVolume', true );
             Assert.assertEquals( "externalFunction ", ExternalFunction.ONPLAYERREADY == 'Opencast.Watch.onPlayerReady', true );
-            Assert.assertEquals( "externalFunction ", ExternalFunction.LOWSOUND == 'Opencast.Player.lowSound' , true);
-            Assert.assertEquals( "externalFunction ", ExternalFunction.NONESOUND == 'Opencast.Player.noneSound', true);
-            Assert.assertEquals( "externalFunction ", ExternalFunction.HIGHSOUND == 'Opencast.Player.highSound', true);
-            Assert.assertEquals( "externalFunction ", ExternalFunction.MUTESOUND == 'Opencast.Player.muteSound', true);
-            Assert.assertEquals( "externalFunction ", ExternalFunction.SETCCICONON == 'Opencast.Player.setCCIconOn', true);
-            Assert.assertEquals( "externalFunction ", ExternalFunction.SETCCICONOFF == 'Opencast.Player.setCCIconOff', true);
         }
-
     }
 }

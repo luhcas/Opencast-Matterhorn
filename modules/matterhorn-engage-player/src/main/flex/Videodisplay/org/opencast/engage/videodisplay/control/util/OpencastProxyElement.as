@@ -20,9 +20,6 @@ package org.opencast.engage.videodisplay.control.util
 			var blockedTraits:Vector.<String> = new Vector.<String>();
 			blockedTraits.push(MediaTraitType.AUDIO);
 			super.blockedTraits =  blockedTraits;
-			
-			
-			
 		}
 		
 		override public function set proxiedElement(value:MediaElement):void
@@ -37,39 +34,24 @@ package org.opencast.engage.videodisplay.control.util
 				{
 
          			audioTrait.muted = true;
-
-      			}
-
-      			else
+                }
+                else
 				{
-
-         		// Wait for the trait to become available.
-
-         		proxiedElement.addEventListener(MediaElementEvent.TRAIT_ADD, onTraitAdd);
-
-      			}
-
-   			}
-
-		}
+                    // Wait for the trait to become available.
+                    proxiedElement.addEventListener(MediaElementEvent.TRAIT_ADD, onTraitAdd);
+                }
+            }
+        }
 		
 		private function onTraitAdd(event:MediaElementEvent):void
 		{
 			if (event.traitType == MediaTraitType.AUDIO)
 		   	{
-
-				
-				
-      			proxiedElement.removeEventListener(MediaElementEvent.TRAIT_ADD,  onTraitAdd);
-
-
-      			var audioTrait:AudioTrait =  proxiedElement.getTrait(MediaTraitType.AUDIO) as AudioTrait;
+                proxiedElement.removeEventListener(MediaElementEvent.TRAIT_ADD,  onTraitAdd);
+                var audioTrait:AudioTrait =  proxiedElement.getTrait(MediaTraitType.AUDIO) as AudioTrait;
 				audioTrait.volume = 0;
       			audioTrait.muted = true;
-				
-			
-   			}
-
-		}
+			}
+        }
 	}
 }

@@ -58,11 +58,15 @@ body
   border:                   1px solid #000000;
   background-color:         #E3E3D7;
   color:                    #000000;
-}
+  background-image:         url(../icons/magnifier.png);
+  background-repeat:        no-repeat;
+  padding-left:             20px;
+  width:                    140px !important;
+ }
 
 #oc_btn-search
 {
-  width:                    100px;
+  width:                    70px;
 }
 
 .clear
@@ -236,8 +240,6 @@ body
   margin-top:               -3px;
 }
 
-
-
 .oc-slider-volume-Rail 
 {
   width:                    55px;
@@ -279,12 +281,7 @@ body
   width:                    12%;
 }
 
-#oc_tabs
-{
-  width:                    100%;
-}
-
-#oc_tabs-input
+.oc_tabs
 {
   float:                    left;
 }
@@ -294,11 +291,127 @@ body
   float:                    right;
 }
 
-#oc_tabs input
+.oc_btn-tabs
 {
-  width:                    100px;
+  width:                    115px;
   margin-right:             5px;
   margin-top:               2px;
+}
+
+.oc_tabTableLeft
+{
+    width:                  50%;
+    float:                  left;
+}
+
+#oc_bookmarksPoints
+{
+  display:                  none;
+  height:                   10px;
+  margin-bottom:            5px;
+}
+
+#oc_bookmarks-container-left
+{
+  width:                    75%;
+  float:                    left;
+  text-align:               left;
+}
+
+#oc_bookmarks-container-right
+{
+  width:                    23%;
+  float:                    right;
+  text-align:               left;
+  margin-top:               30px;
+  margin-left:              5px;
+}
+
+#oc_bookmarks-container-right input
+{
+  background-color:         transparent;
+  color:                    #000000;
+  margin-bottom:            2px;
+}
+
+#oc_bookmarks-container-right input[disabled]
+{
+  color:                    #000000;
+  cursor:                   default;
+}
+
+.oc_bookmarks-myBookmark-label
+{
+  background-color:         #90ee90 !important;
+  padding-left:             5px;
+}
+
+.oc_bookmarks-publicBookmark-label
+{
+  background-color:         #87cefa !important;
+  padding-left:             5px;
+}
+
+.oc_addBookmark
+{
+  border:                   1px solid #000000;
+  background-color:         #ffffff;
+  color:                    #000000;
+  width:                    400px !important;
+  margin-left:              30px;
+}
+
+
+#oc_bookmarkSelect
+{
+  width:                    100%;
+  border:                   0px solid #999999;
+  background-color:         transparent;
+  margin-top:               5px;
+}
+
+
+option
+{
+  margin:2px;
+}
+
+.oc_option-myBookmark 
+{
+  background-color:         #90ee90;
+  display:                  block;
+  visibility:               visible;
+}
+
+.oc_option-publicBookmark 
+{
+  background-color:         #87cefa;
+  display:                  block;
+  visibility:               visible;
+}
+
+option:hover 
+{
+  color :                   #ffffff;
+}
+
+#oc_bookmarks-scrollArea
+{
+  margin-top:               5px;
+  height:                   80px;
+  width:                    100%;
+  overflow:                 auto;
+}
+
+#oc_btn-removeBookmark
+{
+  display:                  none;
+}
+
+.oc_tabTableRight
+{
+    width:                  50%;
+    float:                  right;
 }
 
 #oc_video-size-dropdown
@@ -377,61 +490,36 @@ body
   overflow:                 hidden;
 }
 
-.oc_slidesDisplayBlock
+.oc_DisplayBlock
 {
   display:                  block;
   text-align:               center;
-  margin:                   5px;
+  padding:                  5px;
   overflow:                 auto; 
+  border:                   1px solid #000000;
+  background-color:         #E3E3D7;
+  margin-bottom:            5px;
 }
 
-.oc_notesDisplayBlock
+.oc_DisplayBlockTableLeft
 {
   display:                  block;
-  text-align:               center;
-  margin:                   10px;
-  overflow:                 auto; 
-  zoom:                     1;
-}
-
-.oc_slideTextDisplayBlock
-{
-  text-align:               center;
-  margin:                   10px;
-  overflow:                 auto; 
-  zoom:                     1;
-}
-
-.oc_shortcutsDisplayBlock
-{
   text-align:               left;
-  margin:                   10px;
+  padding:                  5px;
   overflow:                 auto; 
-  zoom:                     1;
+  border:                   1px solid #000000;
+  background-color:         #E3E3D7;
+  margin-right:             5px;
 }
 
-.oc_embedDisplayBlock
+.oc_DisplayBlockTableRight
 {
-  text-align:               center;
-  margin:                   10px;
+  display:                  block;
+  text-align:               left;
+  padding:                  5px;
   overflow:                 auto; 
-  zoom:                     1;
-}
-
-.oc_bookmarkDisplayBlock
-{
-  text-align:               center;
-  margin:                   10px;
-  overflow:                 auto; 
-  zoom:                     1;
-}
-
-.oc_descriptionDisplayBlock
-{
-  text-align:               center;
-  margin:                   10px;
-  overflow:                 auto; 
-  zoom:                     1;
+  border:                   1px solid #000000;
+  background-color:         #E3E3D7;
 }
 
 .oc_embed-textarea
@@ -446,23 +534,12 @@ body
   display:                  none;
 }
 
-.oc_btn-tabs
-{
-  width:                    40px;
-  margin-top:               4px;
-  margin-right:               10px;
-}
-
-
-
-
-
-
 .oc-segment-table 
 { 
   border-style:none;
   border:0px;
   margin:0px;
+  background: #ffffff;
 }
 
 .oc-segment-td 
@@ -528,7 +605,7 @@ body
   margin-left:              -6px;
   position:                 relative; 
   border:                   0px;
-  top:                      -20px; 
+  top:                      -15px; 
   z-index:                  2;
 }
 
@@ -542,7 +619,7 @@ body
   margin-left:              -6px;
   position:                 relative; 
   border:                   0px;
-  top:                      -21px; 
+  top:                      -16px; 
   z-index:                  3;
 }
 
@@ -631,7 +708,7 @@ body
   margin-top:0;
   padding-right:0px;
   position:relative;
-  top: -7px;
+  top: -12px;
 }
 
 .progress-text 

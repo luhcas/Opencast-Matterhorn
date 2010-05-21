@@ -41,6 +41,15 @@ package org.opencast.engage.videodisplay.control.command
          * */
         public function execute( event:ResizeVideodisplayEvent ):void
         {
+             if( model.mediaContainer != null)
+             {
+             	 model.mediaContainer.height = Application.application.height;
+                 model.mediaContainer.width = Application.application.width;
+                 
+             }
+            
+            
+            
             /**
              * Application max width: 1194px, max Font Size ?, 1194/33 = 36px ( 36 > 20 ) = 20px
              * Application min widht: 231px, min Font Size ?, 231/33 = 7px

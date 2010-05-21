@@ -16,6 +16,7 @@
 
 package org.opencast.engage.videodisplay.cases.model
 {
+    import com.adobe.strobe.players.MediaPlayerWrapper;
     import mx.collections.ArrayCollection;
 
     import org.flexunit.Assert;

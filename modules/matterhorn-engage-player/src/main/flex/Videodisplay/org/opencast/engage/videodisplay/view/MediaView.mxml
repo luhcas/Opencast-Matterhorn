@@ -26,7 +26,37 @@
     left="5"
     right="5"
     >
+    <mx:Script>
+        <![CDATA[
+        	import org.opencast.engage.videodisplay.model.VideodisplayModel;
+            import org.swizframework.Swiz;
+           
+            [Autowire]
+            [Bindable]
+            public var model:VideodisplayModel;
 
+            
+
+        ]]>
+    </mx:Script>
+    
+    <mx:HBox
+    	width="100%"
+    	height="100%"
+    	horizontalAlign="center"
+    	verticalAlign="middle"
+    	>
+    	
+        <mx:SWFLoader 
+	        source="@Embed(source='../../../../../style/oc_logo_loader.swf')" 
+	        scaleContent="true" 
+	        autoLoad="true"
+	        visible="{ model.loader }"
+	        includeInLayout="{ model.loader }"
+	        />
+        
+    </mx:HBox>
+    
     <view:MediaContainerView
         id = "mediaContainerView"
         width = "100%"

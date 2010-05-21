@@ -199,18 +199,6 @@
         toolTip = "Pause"
         />
         
-       
-    <mx:SWFLoader 
-    	source="@Embed(source='../../../../../style/oc_logo_loader.swf')" 
-        scaleContent="true" 
-        autoLoad="true"
-        verticalCenter = "0"
-        horizontalCenter = "0"
-        visible="{ model.loader }"
-        includeInLayout="{ model.loader }"
-        />
-       
-    
     <mx:VBox
     	width="100%"
     	height="100%"
@@ -251,13 +239,8 @@
             color="#ffffff"
             />
             
-            
-             <mx:Label 
-            text="font: { model.fontSizeCaptions.toString() }"
-            color="#ffffff"
-            />
-            
-             <mx:Label 
+           
+        <mx:Label 
             text="progress: { model.progress.toString() }"
             color="#ffffff"
             />

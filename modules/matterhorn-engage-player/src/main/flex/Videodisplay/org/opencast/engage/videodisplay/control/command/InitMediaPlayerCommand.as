@@ -19,6 +19,7 @@ package org.opencast.engage.videodisplay.control.command
     
     import flash.external.ExternalInterface;
     
+    import mx.controls.Alert;
     import mx.core.Application;
     
     import org.opencast.engage.videodisplay.control.event.DisplayCaptionEvent;
@@ -129,6 +130,90 @@ package org.opencast.engage.videodisplay.control.command
             }
             else if( event.mediaURLOne != '' && event.mediaURLTwo != '')
             {
+            	/*
+            	
+	            model.mediaContainer.height = Application.application.height;
+	            model.mediaContainer.width = Application.application.width;
+	            model.mediaContainer.layoutMetadata.scaleMode = ScaleMode.NONE;
+	            
+	
+	            var parallelElement:ParallelElement = new ParallelElement();
+	            model.layoutMetadataParallelElement = new LayoutMetadata();
+	            model.layoutMetadataParallelElement.horizontalAlign = HorizontalAlign.CENTER;
+	            model.layoutMetadataParallelElement.verticalAlign = VerticalAlign.BOTTOM;
+	            model.layoutMetadataParallelElement.left = 0;
+	            model.layoutMetadataParallelElement.right = 0;
+	            model.layoutMetadataParallelElement.top = 0;
+	            model.layoutMetadataParallelElement.bottom = 0;
+	            parallelElement.addMetadata(LayoutMetadata.LAYOUT_NAMESPACE, model.layoutMetadataParallelElement);
+	             
+	            var mediaElementOne:MediaElement = new VideoElement(new URLResource(event.mediaURLOne));
+	            model.layoutMetadataOne = new LayoutMetadata();
+	            model.layoutMetadataOne.left = 0;
+	            
+	            model.layoutMetadataOne.percentWidth = 50;
+	            model.layoutMetadataOne.percentHeight = 100;
+	            model.layoutMetadataOne.verticalAlign = VerticalAlign.MIDDLE;
+	            model.layoutMetadataOne.scaleMode = ScaleMode.LETTERBOX;
+	            mediaElementOne.addMetadata(LayoutMetadata.LAYOUT_NAMESPACE, model.layoutMetadataOne);
+	            parallelElement.addChild(mediaElementOne);
+	             
+	            var mediaElementTwo:MediaElement = new VideoElement(new URLResource(event.mediaURLTwo));
+	            model.layoutMetadataTwo = new LayoutMetadata();
+	            model.layoutMetadataTwo.right = 0;
+	             
+	            model.layoutMetadataTwo.percentWidth = 50;
+	            model.layoutMetadataTwo.percentHeight = 100;
+	            model.layoutMetadataTwo.verticalAlign = VerticalAlign.MIDDLE;
+	            model.layoutMetadataTwo.scaleMode = ScaleMode.LETTERBOX;
+	            mediaElementTwo.addMetadata(LayoutMetadata.LAYOUT_NAMESPACE, model.layoutMetadataTwo);
+	            
+	            var opencastProxyElementTwo:OpencastProxyElement  = new OpencastProxyElement(mediaElementTwo);
+                parallelElement.addChild(opencastProxyElementTwo);
+            
+                setMediaElement( parallelElement );
+                */
+               
+                /*
+                var parallelElement:ParallelElement = new ParallelElement();
+				model.layoutMetadataParallelElement = new LayoutMetadata();
+				model.layoutMetadataParallelElement.horizontalAlign = HorizontalAlign.CENTER;
+				model.layoutMetadataParallelElement.verticalAlign = VerticalAlign.MIDDLE;
+				model.layoutMetadataParallelElement.percentWidth = 100;
+                model.layoutMetadataParallelElement.percentHeight = 100;
+				parallelElement.addMetadata(LayoutMetadata.LAYOUT_NAMESPACE, model.layoutMetadataParallelElement);
+				
+				var mediaElement1:MediaElement = new VideoElement(new URLResource(event.mediaURLOne));
+				model.layoutMetadataOne = new LayoutMetadata();
+				model.layoutMetadataOne.left = 0;
+				model.layoutMetadataOne.percentWidth = 50;
+				model.layoutMetadataOne.percentHeight = 100;
+				
+				
+				model.layoutMetadataOne.scaleMode = ScaleMode.LETTERBOX;
+				mediaElement1.addMetadata(LayoutMetadata.LAYOUT_NAMESPACE, model.layoutMetadataOne);
+				parallelElement.addChild(mediaElement1);
+				
+				var mediaElement2:MediaElement = new VideoElement(new URLResource(event.mediaURLTwo));
+				model.layoutMetadataTwo = new LayoutMetadata();
+				model.layoutMetadataTwo.right = 0;
+				model.layoutMetadataTwo.percentWidth = 50;
+				model.layoutMetadataTwo.percentHeight = 100;
+				
+				
+				model.layoutMetadataTwo.scaleMode = ScaleMode.LETTERBOX;
+				mediaElement2.addMetadata(LayoutMetadata.LAYOUT_NAMESPACE, model.layoutMetadataTwo);
+				
+				var opencastProxyElementTwo:OpencastProxyElement  = new OpencastProxyElement(mediaElement2);
+                parallelElement.addChild(opencastProxyElementTwo);
+				
+				
+				setMediaElement( parallelElement );
+               */
+               
+               
+                
+                
                 var parallelElement:ParallelElement = new ParallelElement();
                 model.layoutMetadataParallelElement = new LayoutMetadata();
                 model.layoutMetadataParallelElement.horizontalAlign = HorizontalAlign.CENTER;
@@ -142,20 +227,20 @@ package org.opencast.engage.videodisplay.control.command
                 
                 var mediaElementOne:MediaElement = new VideoElement(new URLResource(event.mediaURLOne));
                 model.layoutMetadataOne = new LayoutMetadata();
-                model.layoutMetadataOne.percentWidth = 100;
+                model.layoutMetadataOne.percentWidth = 50;
                 model.layoutMetadataOne.percentHeight = 100;
                 model.layoutMetadataOne.scaleMode = ScaleMode.LETTERBOX;
                 model.layoutMetadataOne.verticalAlign = VerticalAlign.BOTTOM;
-                model.layoutMetadataOne.horizontalAlign = HorizontalAlign.CENTER;
+               
                 mediaElementOne.addMetadata(LayoutMetadata.LAYOUT_NAMESPACE, model.layoutMetadataOne);
 
                 var mediaElementTwo:MediaElement = new VideoElement(new URLResource(event.mediaURLTwo));
                 model.layoutMetadataTwo = new LayoutMetadata();
-                model.layoutMetadataTwo.percentWidth = 100;
+                model.layoutMetadataTwo.percentWidth = 50;
                 model.layoutMetadataTwo.percentHeight = 100;
                 model.layoutMetadataTwo.scaleMode = ScaleMode.LETTERBOX;
                 model.layoutMetadataTwo.verticalAlign = VerticalAlign.BOTTOM;
-                model.layoutMetadataTwo.horizontalAlign = HorizontalAlign.CENTER;
+              
                 mediaElementTwo.addMetadata(LayoutMetadata.LAYOUT_NAMESPACE, model.layoutMetadataTwo);
                 
                 parallelElement.addChild(mediaElementTwo);
@@ -163,6 +248,8 @@ package org.opencast.engage.videodisplay.control.command
                 parallelElement.addChild(opencastProxyElementOne);
                            
                 setMediaElement( parallelElement );
+                
+               
 	        
 	        }
             else
@@ -373,6 +460,7 @@ package org.opencast.engage.videodisplay.control.command
 	            {
 	                model.currentPlayerState = PlayerState.PAUSING;
 	                ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PLAYING );
+	               
 	            }
 	            
 	            model.currentPlayhead = event.time;

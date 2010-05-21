@@ -345,3 +345,9 @@ input:hover
 {
   background-color:         #FA6E23;
 }
+
+
+.oc_boomarkPoint
+{
+    display: inline;
+}
