@@ -46,20 +46,36 @@ Opencast.Watch = (function ()
             // set the abstract
             $('#abstract').html($('#oc-abstract').html());
 
-            
-            
             // set the media URLs
-            var mediaUrlOne = $('#oc-video-presenter-source').html();
-            var mediaUrlTwo = $('#oc-video-presentation-source').html();
+            var mediaUrlOne = $('#oc-video-presenter-delivery-x-flv-rtmp').html();
+            var mediaUrlTwo = $('#oc-video-presentation-delivery-x-flv-rtmp').html();
 
-            // legacy support for any engage tagged track
-            var engageUrl = $('#oc-video-engage').html();
             if(mediaUrlOne === null)
-              mediaUrlOne = engageUrl;
+              mediaUrlOne = $('#oc-video-presenter-delivery-x-flv-http').html();
+
+            if(mediaUrlOne === null)
+              mediaUrlOne = $('#oc-video-presenter-source-x-flv-rtmp').html();
+
+            if(mediaUrlOne === null)
+              mediaUrlOne = $('#oc-video-presenter-source-x-flv-http').html();
+
+            if(mediaUrlTwo === null)
+              mediaUrlTwo = $('#oc-video-presentation-delivery-x-flv-http').html();
+
+            if(mediaUrlTwo === null)
+              mediaUrlTwo = $('#oc-video-presentation-source-x-flv-rtmp').html();
+
+            if(mediaUrlTwo === null)
+              mediaUrlTwo = $('#oc-video-presentation-source-x-flv-http').html();
+
+            if(mediaUrlOne === null) {
+              mediaUrlOne = mediaUrlTwo;
+              mediaUrlTwo = null;
+            }
 
             mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
             mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
-            
+
             Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
             //
             if (mediaUrlOne !== '' && mediaUrlTwo !== '')

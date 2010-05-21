@@ -12,7 +12,7 @@
 		        <td class="progress-segment" width="100%">
 		   <table class="segments" cellspacing="0" cellpadding="0">
 		     <tr>
-		       <xsl:for-each select="ns2:search-results/result/segments/mediaSegments">
+		       <xsl:for-each select="ns2:search-results/result/segments/segment">
 		       <xsl:if test="(../../mediapackage/@duration) > ./@time">
 		       <td 
 		         class="segment-holder" 
