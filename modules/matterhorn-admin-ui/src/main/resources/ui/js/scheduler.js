@@ -363,6 +363,9 @@ SchedulerUI.selectRecordingType = function(recType){
    */
   var fields = {};
   
+  $('.error').removeClass('error');
+  $('#missingFields-container').hide();
+  
   if(recType == 'multiple'){ // Multiple recordings have some differnt fields and different behaviors
     //show recurring_recording panel, hide single.
     $('#recurring_recording').show();
@@ -502,6 +505,8 @@ SchedulerForm.serialize = function() {
 SchedulerForm.validate = function() {
   var error = false;
   $('#missingFields-container').hide();
+  //Hide the errors that are just for multiple, so they don't show up if you're making a single recording.
+  $('.multiple-error').each( function(i,v){ if(!$(v).hasClass('single-error')){ $(v).hide(); } });
   for(var el in this.formFields) {
     var e = this.formFields[el];
     if(e.required){
