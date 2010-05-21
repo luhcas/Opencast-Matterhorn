@@ -6,6 +6,28 @@ CONF_DIR=/opt/matterhorn/felix/conf
 MOTD_FILE=/etc/motd.tail
 MY_OS=`uname -sr`
 
+# if "a" is entered by user, we will install ALL tools
+inst_all=N
+
+ask_user()
+{
+  if [ "$inst_all" != "a" ]; then
+    echo "Install $1? [Y/n/a] "
+    read resp
+    inst_all=$resp
+
+    # default is "Y".  i.e. anything other than nN means Yes
+    if [ "$resp" != "n" ] && [ "$resp" != "N" ]; then
+      eval "$2=Y"
+    else
+      eval "$2=\"$resp\""
+    fi
+  else
+    eval "$2=Y"
+  fi
+}
+
+
 show_stat()
 {
 cat >&1 <<END
@@ -36,30 +58,69 @@ END
 install_3p ()
 {
   echo "Installing 3rd party tools.  This process will take several minutes..."
+  ask_user "curl" inst_curl
+  ask_user "ntp" inst_ntp
+  ask_user "openssh" inst_openssh
+  ask_user "build-essentials" inst_build
+  ask_user "patch" inst_patch
+  ask_user "byacc" inst_byacc
+  ask_user "libcv" inst_libcv
+  ask_user "opencv" inst_opencv
+  ask_user "libzen" inst_libzen
+  ask_user "ocr support" inst_ocr
 
   cd $INST_DIR
-  sudo apt-get -y --force-yes install curl ntp
-  sudo apt-get -y --force-yes install openssh-server openssh-client
-  sudo apt-get -y --force-yes install build-essential zlib1g-dev patch byacc
 
-  #opencv
-  sudo apt-get -y --force-yes install libcv1 libcv-dev opencv-doc
+  if [ $inst_curl = "y" ] || [ $inst_curl = "Y" ]; then
+    sudo apt-get -y --force-yes install curl
+  fi
 
-  #install media info
-  wget http://downloads.sourceforge.net/zenlib/libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
-  sudo dpkg -i libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
-  rm -f libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
+  if [ $inst_ntp = "y" ] || [ $inst_ntp = "Y" ]; then
+    sudo apt-get -y --force-yes install ntp
+  fi
 
-  #ocr support
-  echo "ocr support"
-  sudo apt-get -y --force-yes install libpng12-dev libjpeg62-dev libtiff4-dev
-  sudo apt-get -y --force-yes install tesserat-ocr
-  cd /usr/share/tesseract-ocr
-  #install english language file
-  sudo curl http://tesseract-ocr.googlecode.com/files/tesseract-2.00.eng.tar.gz | sudo tar xz
-  cd tessdata
-  sudo chmod 755 *
-  
+  if [ $inst_openssh = "y" ] || [ $inst_openssh = "Y" ]; then
+    sudo apt-get -y --force-yes install openssh-server openssh-client
+  fi
+
+  if [ $inst_build = "y" ] || [ $inst_build = "Y" ]; then
+    sudo apt-get -y --force-yes install build-essential zlib1g-dev
+  fi
+
+  if [ $inst_patch = "y" ] || [ $inst_patch = "Y" ]; then
+    sudo apt-get -y --force-yes install patch
+  fi
+
+  if [ $inst_byacc = "y" ] || [ $inst_byacc = "Y" ]; then
+    sudo apt-get -y --force-yes install byacc
+  fi
+
+  if [ $inst_libcv = "y" ] || [ $inst_libcv = "Y" ]; then
+    sudo apt-get -y --force-yes install libcv1 libcv-dev
+  fi
+
+  if [ $inst_opencv = "y" ] || [ $inst_opencv = "Y" ]; then
+    sudo apt-get -y --force-yes install opencv-doc
+  fi
+
+  if [ $inst_libzen = "y" ] || [ $inst_libzen = "Y" ]; then
+    #install media info
+    wget http://downloads.sourceforge.net/zenlib/libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
+    sudo dpkg -i libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
+    rm -f libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
+  fi
+
+  if [ $inst_ocr = "y" ] || [ $inst_ocr = "Y" ]; then
+    #ocr support
+    echo "ocr support"
+    sudo apt-get -y --force-yes install libpng12-dev libjpeg62-dev libtiff4-dev
+    sudo apt-get -y --force-yes install tesserat-ocr
+    cd /usr/share/tesseract-ocr
+    #install english language file
+    sudo curl http://tesseract-ocr.googlecode.com/files/tesseract-2.00.eng.tar.gz | sudo tar xz
+    cd tessdata
+    sudo chmod 755 *
+  fi
 }
 
 install_ffmpeg ()
