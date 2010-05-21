@@ -314,7 +314,6 @@ SchedulerUI.displayCapabilities = function(capa){
 SchedulerUI.handleAgentTZ = function(tz){
   var localTZ = -(new Date()).getTimezoneOffset(); //offsets in minutes
   Agent.tzDiff = 0;
-  //AdminUI.log(tz, localTZ, tz != localTZ);
   if(tz != localTZ){
     //Display note of agent TZ difference, all times local to capture agent.
     //update time picker to agent time
@@ -418,7 +417,6 @@ SchedulerUI.selectRecordingType = function(recType){
       'device':           new FormField('attendees')
     };
     SchedulerForm.rootEl = 'Event';
-    SchedulerForm.formFields['time.start'].setValue(d.getTime().toString());
   }
   //Form Manager, handles saving, loading, de/serialization, and validation
   SchedulerForm.setFormFields(fields);
@@ -427,7 +425,7 @@ SchedulerUI.selectRecordingType = function(recType){
   d.setHours(d.getHours() + 1); //increment an hour.
   d.setMinutes(0);
   
-  if('multiple'){
+  if(recType == 'multiple'){
     SchedulerForm.formFields['recurrence.start'].setValue(d.getTime().toString());
   }else{
     SchedulerForm.formFields['time.start'].setValue(d.getTime().toString());
@@ -506,7 +504,6 @@ SchedulerForm.validate = function() {
   $('#missingFields-container').hide();
   for(var el in this.formFields) {
     var e = this.formFields[el];
-    //AdminUI.log(e);
     if(e.required){
       if(!e.checkValue()){
         error = true;
@@ -1142,10 +1139,8 @@ function checkRecurStart(){
   if(this.fields.recurStart.datepicker){
     var date = this.fields.recurStart.datepicker('getDate');
     var now = (new Date()).getTime();
-    AdminUI.log(now);
     now += Agent.tzDiff  * 60 * 1000; //Offset by the difference between local and client.
     now = new Date(now);
-    AdminUI.log(date, now);
     if(date &&
        this.fields.recurStartTimeHour &&
        this.fields.recurStartTimeMin) {
