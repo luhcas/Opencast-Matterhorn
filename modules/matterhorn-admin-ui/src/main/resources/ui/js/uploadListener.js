@@ -25,6 +25,7 @@ UploadListener.fileSelectedAjax = function(filename,jobId) {
   UploadListener.jobId = jobId;
   $('#track').val(filename);
   var uploadForm = document.getElementById("filechooser-ajax").contentWindow.document.uploadForm;
+  Upload.checkRequiredFields();
 }
 
 UploadListener.uploadStarted = function() {

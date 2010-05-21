@@ -103,7 +103,7 @@
                 </span>
               </li>
               <li id="notification-flavor" class="missing-fields-item">
-                <span class="fl-icon inline-icon icon-bullet"></span>Please select the <a href="javascript:document.getElementById('flavor').focus();">media file content</a> - the type of content the media file contains.
+                <!--span class="fl-icon inline-icon icon-bullet" --></span>Please select the <a href="javascript:document.getElementById('flavor').focus();">media file content</a> - the type of content the media file contains.
               </li>
               <li id="notification-track" class="missing-fields-item">
                 <!-- <span class="fl-icon inline-icon icon-bullet"></span> -->
@@ -184,6 +184,7 @@
           <div id="container-additionalData" class="container fl-widget">
             <div id="heading-additionalData" class="fl-widget-titlebar titlebar"><span id="i18n_upload_title">File Upload</span></div>
             <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
+              <input type="hidden" name="track" id="track" class="requiredField" value="">
               <ul class="no-bullets formField-list fl-controls-right">
                 <li id="retry-file" class="ui-helper-clearfix" style="display:none;">
                   <label class="fl-label"><span id="i18n_upload.content">File</span>:</label>
@@ -214,7 +215,7 @@
                       <option value="indefinite/source">Other/Mixed/Unknown</option>
                     </select>
                     <span class="helpIcon" title="Click for help">&nbsp;</span>
-                  </div><input type="hidden" name="track" id="track" class="requiredField" value="">
+                  </div>
                 </li>
               </ul>
             </div>

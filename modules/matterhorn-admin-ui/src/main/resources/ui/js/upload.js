@@ -242,8 +242,9 @@ Upload.collectWorkflowConfig = function() {
 Upload.checkRequiredFields = function(submit) {
   var missing = false;
   var wrongtype = false;
-  $('.requiredField:visible').each( function() {
+  $('.requiredField:visible, .requiredField[type|=hidden]').each( function() {
     if (!$(this).val()) {
+      //alert(($this).attr(id) + " = " + $(this).value());
       $('#notification-' + $(this).attr('id')).show();
       if ((submit) || ($('#container-missingFields').is(':visible'))) {
         $(this).prev('.fl-label').css('color','red');
