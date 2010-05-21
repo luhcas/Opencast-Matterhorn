@@ -6,6 +6,11 @@
     <link href="style.css" rel="stylesheet" type="text/css" />
    </head>	
 <body onload='document.f.j_username.focus();'>
+<script type="text/javascript">
+if (window.location.search.substring(1) == "error") {
+	alert(fail);
+}
+</script>
 <div id="wrapper">
 
 <div id="headergraphic"><a href="http://www.opencastproject.org"><img border="0" width="128" vspace="5" hspace="20" height="30" alt="Opencast" src="images/opencast_logo.gif"></a></div>
@@ -16,6 +21,10 @@
 &nbsp
 </div>
 <div id=col2>
+<div style="border: 1px solid rgb(204, 204, 204); font-size: 0.9em; text-align: center;color:red; margin-left: auto; margin-right: auto; margin-bottom: 0.5em; padding: 0.5em;" xmlns="http://www.w3.org/1999/xhtml">
+	<img style="vertical-align: bottom;" src="shared_img/icons/information.png" alt="Information" title="Information">
+      The username or password you entered is incorrect.
+ </div>
 <h3>Login with Username and Password</h3><form name='f' action='/j_spring_security_check' method='POST'>
  <table>
     <tr><td>User:</td><td><input type='text' name='j_username' value=''></td></tr>
