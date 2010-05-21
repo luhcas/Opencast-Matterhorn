@@ -213,7 +213,6 @@
         <module>modules/matterhorn-admin-ui</module>
         <module>modules/matterhorn-inbox</module>
         <module>modules/matterhorn-webconsole</module>
-        <module>modules/matterhorn-runtime-info-ui</module>
       </modules>
     </profile>
     <profile>
