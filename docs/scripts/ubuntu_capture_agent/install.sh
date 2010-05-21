@@ -86,6 +86,8 @@ if [[ `id -u` -ne 0 ]]; then
 fi
 
 # Change the working directory to a temp directory under /tmp
+# Deletes it first, in case it existed previously (MH-3797)
+rm -rf $WORKING_DIR
 mkdir -p $WORKING_DIR
 cd $WORKING_DIR
 
@@ -103,8 +105,6 @@ fi
 # Using C-like syntax in case file names have whitespaces
 for (( i = 0; i < ${#SCRIPTS[@]}; i++ )); do
     f=${SCRIPTS[$i]}
-    # If the script file doesn't exist...
-    if [[ ! -e $f ]]; then
 	# Check if the script is in the directory where the install.sh script was launched
 	if [[ -e $START_PATH/$f ]]; then
 	    # ... and copies it to the working directory
@@ -118,7 +118,6 @@ for (( i = 0; i < ${#SCRIPTS[@]}; i++ )); do
 		exit 2
 	    fi
 	fi  
-    fi
     chmod +x $f
 done
 
