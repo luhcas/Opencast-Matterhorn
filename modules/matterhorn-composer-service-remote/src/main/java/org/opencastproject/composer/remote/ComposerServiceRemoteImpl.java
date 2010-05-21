@@ -28,11 +28,12 @@ import org.opencastproject.receipt.api.ReceiptService;
 import org.opencastproject.receipt.api.Receipt.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.collections.MapIterator;
+import org.apache.commons.collections.bidimap.TreeBidiMap;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -46,12 +47,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Proxies a set of remote composer services for use as a JVM-local service.  Remote services are selected at random.
+ * Proxies a set of remote composer services for use as a JVM-local service. Remote services are selected at random.
  */
 public class ComposerServiceRemoteImpl implements ComposerService {
   private static final Logger logger = LoggerFactory.getLogger(ComposerServiceRemoteImpl.class);
@@ -62,13 +65,8 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   protected ResponseHandler<EncodingProfileList> encodingProfileListResponseHandler = new EncodingProfileListResponseHandler();
   protected ResponseHandler<Receipt> receiptResponseHandler = new ReceiptResponseHandler();
 
-  protected List<String> remoteHosts;
   protected TrustedHttpClient trustedHttpClient;
   protected ReceiptService receiptService;
-
-  public void setRemoteHosts(List<String> remoteHosts) {
-    this.remoteHosts = remoteHosts;
-  }
 
   public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
     this.trustedHttpClient = trustedHttpClient;
@@ -78,58 +76,51 @@ public class ComposerServiceRemoteImpl implements ComposerService {
     this.receiptService = receiptService;
   }
 
-  public ComposerServiceRemoteImpl() {
-    this.remoteHosts = new ArrayList<String>();
-  }
-
-  public ComposerServiceRemoteImpl(String remoteHost) {
-    this();
-    remoteHosts.add(remoteHost);
-  }
-
   public void activate(ComponentContext cc) {
-    String hostList = cc.getBundleContext().getProperty(REMOTE_COMPOSER);
-    if(hostList == null) {
-      throw new IllegalStateException("remote composers must be configured");
+  }
+
+  class HostAndLoad implements Comparable<HostAndLoad> {
+    String host;
+    Long load;
+
+    public int compareTo(HostAndLoad o) {
+      return (int) (load - o.load);
     }
-    for(String host : StringUtils.split(hostList, ",")) {
-      remoteHosts.add(host.trim());
-    }
-    
   }
 
   /**
-   * Selects a remote composer service from the configured {@link #remoteHosts}.
-   * 
+   * Finds the remote composer services, ordered by their load (lightest to heaviest).
    */
-  protected String selectRemoteHost() {
-    Map<String, Long> runningComposerJobs = receiptService.getHostsCount(RECEIPT_TYPE, new Status[] {Status.QUEUED, Status.RUNNING});
-    long lightestLoad = Long.MAX_VALUE;
-    String lightestHost = null;
-    for(String host:remoteHosts) {
-      Long load = runningComposerJobs.get(host);
-      if(load == null) {
-        // this host has never created a receipt, so it either has an empty queue, or it's not operational.
-        // we can't do anything here about a non-functioning service
-        logger.debug("Remote host '{}' selected, since it has {} running/queued jobs", host, new Long(0));
-        return host;
-      }
-      if(load < lightestLoad) {
-        lightestLoad = load;
-        lightestHost = host;
+  protected List<String> getRemoteHosts() {
+    Map<String, Long> runningComposerJobs = receiptService.getHostsCount(RECEIPT_TYPE, new Status[] { Status.QUEUED,
+            Status.RUNNING });
+    List<String> hosts = receiptService.getHosts(RECEIPT_TYPE);
+    TreeBidiMap bidiMap = new TreeBidiMap(runningComposerJobs);
+
+    LinkedList<String> sortedRemoteHosts = new LinkedList<String>();
+    MapIterator iter = bidiMap.inverseOrderedBidiMap().orderedMapIterator();
+    while (iter.hasNext()) {
+      iter.next();
+      sortedRemoteHosts.add((String) iter.getValue());
+    }
+    // If some of the hosts have no jobs, they are not in the list yet. Add them at the front of the list.
+    for (String host : hosts) {
+      if (!sortedRemoteHosts.contains(host)) {
+        sortedRemoteHosts.add(0, host);
       }
     }
-    logger.debug("Remote host '{}' selected, since it has {} running/queued jobs", lightestHost, lightestLoad);
-    return lightestHost;
+    return sortedRemoteHosts;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.receipt.api.Receipt.Status)
    */
   @Override
   public long countJobs(Status status) {
-    if (status == null) throw new IllegalArgumentException("status must not be null");
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
     return countJobs(status, null);
   }
 
@@ -141,19 +132,29 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public long countJobs(Status status, String host) {
-    if (status == null) throw new IllegalArgumentException("status must not be null");
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
     List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
     queryStringParams.add(new BasicNameValuePair("status", status.toString().toLowerCase()));
-    if(host != null) {
+    if (host != null) {
       queryStringParams.add(new BasicNameValuePair("host", host));
     }
-    String url = selectRemoteHost() + "/composer/rest/count?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
-    HttpGet get = new HttpGet(url);
-    try {
-      return trustedHttpClient.execute(get, longResponseHandler);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    List<String> remoteHosts = getRemoteHosts();
+    for (String remoteHost : remoteHosts) {
+      String url = remoteHost + "/composer/rest/count?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
+      HttpGet get = new HttpGet(url);
+      try {
+        HttpResponse response = trustedHttpClient.execute(get);
+        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+          return longResponseHandler.handleResponse(response);
+        }
+      } catch (Exception e) {
+        logger.info(e.getMessage(), e);
+        continue;
+      }
     }
+    throw new RuntimeException("Unable to execute method, none of the " + remoteHosts.size()
+            + " remote hosts are available");
   }
 
   /**
@@ -200,25 +201,37 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public Receipt encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
           String profileId, boolean block) throws EncoderException, MediaPackageException {
-    String url = selectRemoteHost() + "/composer/rest/encode";
-    HttpPost post = new HttpPost(url);
-    Receipt r;
-    try {
-      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-      params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
-      params.add(new BasicNameValuePair("videoSourceTrackId", sourceVideoTrackId));
-      params.add(new BasicNameValuePair("audioSourceTrackId", sourceAudioTrackId));
-      params.add(new BasicNameValuePair("profileId", profileId));
-      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
-      post.setEntity(entity);
-      HttpResponse response = trustedHttpClient.execute(post);
-      
-      String content = EntityUtils.toString(response.getEntity());
-      r = receiptService.parseReceipt(content);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    Receipt r = null;
+    List<String> remoteHosts = getRemoteHosts();
+    for (String remoteHost : remoteHosts) {
+      String url = remoteHost + "/composer/rest/encode";
+      HttpPost post = new HttpPost(url);
+      try {
+        List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+        params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
+        params.add(new BasicNameValuePair("videoSourceTrackId", sourceVideoTrackId));
+        params.add(new BasicNameValuePair("audioSourceTrackId", sourceAudioTrackId));
+        params.add(new BasicNameValuePair("profileId", profileId));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+        post.setEntity(entity);
+        HttpResponse response = trustedHttpClient.execute(post);
+        if(response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+          continue;
+        }
+        String content = EntityUtils.toString(response.getEntity());
+        r = receiptService.parseReceipt(content);
+        break;
+      } catch (Exception e) {
+        logger.info(e.getMessage(), e);
+        continue;
+      }
     }
-    
+
+    if(r == null) {
+      throw new RuntimeException("Unable to execute method, none of the " + remoteHosts.size()
+              + " remote hosts are available");
+    }
+
     if (block) {
       r = poll(r.getId());
     }
@@ -232,13 +245,22 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public EncodingProfile getProfile(String profileId) {
-    String url = selectRemoteHost() + "/composer/rest/profile/" + profileId + ".xml";
-    HttpGet get = new HttpGet(url);
-    try {
-      return trustedHttpClient.execute(get, encodingProfileResponseHandler);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    List<String> remoteHosts = getRemoteHosts();
+    for (String remoteHost : remoteHosts) {
+      String url = remoteHost + "/composer/rest/profile/" + profileId + ".xml";
+      HttpGet get = new HttpGet(url);
+      try {
+        HttpResponse response = trustedHttpClient.execute(get);
+        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+          return encodingProfileResponseHandler.handleResponse(response);
+        }
+      } catch (Exception e) {
+        logger.info(e.getMessage(), e);
+        continue;
+      }
     }
+    throw new RuntimeException("Unable to execute method, none of the " + remoteHosts.size()
+            + " remote hosts are available");
   }
 
   /**
@@ -248,13 +270,23 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public Receipt getReceipt(String id) {
-    String url = selectRemoteHost() + "/composer/rest/receipt/" + id + ".xml";
-    HttpGet get = new HttpGet(url);
-    try {
-      return trustedHttpClient.execute(get, receiptResponseHandler);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    List<String> remoteHosts = getRemoteHosts();
+    for (String remoteHost : remoteHosts) {
+      String url = remoteHost + "/composer/rest/receipt/" + id + ".xml";
+      HttpGet get = new HttpGet(url);
+      try {
+        HttpResponse response = trustedHttpClient.execute(get);
+        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+          return receiptResponseHandler.handleResponse(response);
+        }
+        return receiptResponseHandler.handleResponse(response);
+      } catch (Exception e) {
+        logger.info(e.getMessage(), e);
+        continue;
+      }
     }
+    throw new RuntimeException("Unable to execute method, none of the " + remoteHosts.size()
+            + " remote hosts are available");
   }
 
   /**
@@ -278,23 +310,42 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public Receipt image(MediaPackage mediaPackage, String sourceVideoTrackId, String profileId, long time, boolean block)
           throws EncoderException, MediaPackageException {
-    String url = selectRemoteHost() + "/composer/rest/image";
-    HttpPost post = new HttpPost(url);
-    Receipt r;
+    List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+    params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
+    params.add(new BasicNameValuePair("sourceTrackId", sourceVideoTrackId));
+    params.add(new BasicNameValuePair("profileId", profileId));
+    params.add(new BasicNameValuePair("time", Long.toString(time)));
+    UrlEncodedFormEntity entity;
     try {
-      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-      params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
-      params.add(new BasicNameValuePair("sourceTrackId", sourceVideoTrackId));
-      params.add(new BasicNameValuePair("profileId", profileId));
-      params.add(new BasicNameValuePair("time", Long.toString(time)));
-      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
-      post.setEntity(entity);
-      HttpResponse response = trustedHttpClient.execute(post);
-      r = receiptService.parseReceipt(response.getEntity().getContent());
-    } catch (Exception e) {
+      entity = new UrlEncodedFormEntity(params);
+    } catch (UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }
-    
+
+    Receipt r = null;
+
+    List<String> remoteHosts = getRemoteHosts();
+    for (String remoteHost : remoteHosts) {
+      String url = remoteHost + "/composer/rest/image";
+      HttpPost post = new HttpPost(url);
+      try {
+        post.setEntity(entity);
+        HttpResponse response = trustedHttpClient.execute(post);
+        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+          r = receiptService.parseReceipt(response.getEntity().getContent());
+          break;
+        }
+      } catch (Exception e) {
+        logger.info(e.getMessage(), e);
+        continue;
+      }
+    }
+
+    if(r == null) {
+      throw new RuntimeException("Unable to execute method, none of the " + remoteHosts.size()
+              + " remote hosts are available");
+    }
+
     if (block) {
       r = poll(r.getId());
     }
@@ -308,15 +359,25 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public EncodingProfile[] listProfiles() {
-    String url = selectRemoteHost() + "/composer/rest/profiles.xml";
-    HttpGet get = new HttpGet(url);
-    try {
-      EncodingProfileList profileList = trustedHttpClient.execute(get, encodingProfileListResponseHandler);
-      List<EncodingProfileImpl> list = profileList.getProfiles();
-      return list.toArray(new EncodingProfile[list.size()]);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    List<String> remoteHosts = getRemoteHosts();
+    for (String remoteHost : remoteHosts) {
+      
+      String url = remoteHost + "/composer/rest/profiles.xml";
+      HttpGet get = new HttpGet(url);
+      try {
+        HttpResponse response = trustedHttpClient.execute(get);
+        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+          EncodingProfileList profileList = trustedHttpClient.execute(get, encodingProfileListResponseHandler);
+          List<EncodingProfileImpl> list = profileList.getProfiles();
+          return list.toArray(new EncodingProfile[list.size()]);
+        }
+      } catch(Exception e) {
+        logger.info(e.getMessage(), e);
+        continue;
+      }
     }
+    throw new RuntimeException("Unable to execute method, none of the " + remoteHosts.size()
+            + " remote hosts are available");
   }
 
   /**
@@ -341,12 +402,6 @@ public class ComposerServiceRemoteImpl implements ComposerService {
 
   class LongResponseHandler implements ResponseHandler<Long> {
     public Long handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
-      StatusLine statusLine = response.getStatusLine();
-      if(statusLine.getStatusCode() == 404) {
-        return null;
-      } else if (statusLine.getStatusCode() >= 300) {
-        throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
-      }
       HttpEntity entity = response.getEntity();
       return entity == null ? null : Long.valueOf(EntityUtils.toString(entity));
     }
@@ -354,14 +409,8 @@ public class ComposerServiceRemoteImpl implements ComposerService {
 
   class EncodingProfileResponseHandler implements ResponseHandler<EncodingProfile> {
     public EncodingProfile handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
-      StatusLine statusLine = response.getStatusLine();
-      if(statusLine.getStatusCode() == 404) {
-        return null;
-      } else if (statusLine.getStatusCode() >= 300) {
-        throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
-      }
       HttpEntity entity = response.getEntity();
-      if(entity == null) {
+      if (entity == null) {
         return null;
       } else {
         try {
@@ -375,14 +424,8 @@ public class ComposerServiceRemoteImpl implements ComposerService {
 
   class EncodingProfileListResponseHandler implements ResponseHandler<EncodingProfileList> {
     public EncodingProfileList handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
-      StatusLine statusLine = response.getStatusLine();
-      if(statusLine.getStatusCode() == 404) {
-        return null;
-      } else if (statusLine.getStatusCode() >= 300) {
-        throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
-      }
       HttpEntity entity = response.getEntity();
-      if(entity == null) {
+      if (entity == null) {
         return null;
       } else {
         try {
@@ -396,12 +439,6 @@ public class ComposerServiceRemoteImpl implements ComposerService {
 
   class ReceiptResponseHandler implements ResponseHandler<Receipt> {
     public Receipt handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
-      StatusLine statusLine = response.getStatusLine();
-      if(statusLine.getStatusCode() == 404) {
-        return null;
-      } else if (statusLine.getStatusCode() >= 300) {
-        throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
-      }
       HttpEntity entity = response.getEntity();
       try {
         return entity == null ? null : receiptService.parseReceipt(entity.getContent());

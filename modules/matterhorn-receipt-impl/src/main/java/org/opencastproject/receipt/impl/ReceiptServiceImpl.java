@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -230,6 +231,68 @@ public class ReceiptServiceImpl implements ReceiptService {
       if (tx.isActive())
         tx.rollback();
       throw e;
+    } finally {
+      em.close();
+    }
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.receipt.api.ReceiptService#registerService(java.lang.String, java.lang.String)
+   */
+  @Override
+  public void registerService(String receiptType, String baseUrl) {
+    ReceiptHandler rh = new ReceiptHandler(baseUrl, receiptType);
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    try {
+      tx.begin();
+      em.persist(rh);
+      tx.commit();
+    } catch(RollbackException e) {
+      tx.rollback();
+      throw e;
+    } finally {
+      em.close();
+    }
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.receipt.api.ReceiptService#unRegisterService(java.lang.String, java.lang.String)
+   */
+  @Override
+  public void unRegisterService(String receiptType, String baseUrl) {
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    try {
+      tx.begin();
+      Query q = em.createQuery("DELETE from ReceiptHandler rh where rh.host = :host and rh.receiptType = :receiptType");
+      q.setParameter("host", baseUrl);
+      q.setParameter("receiptType", receiptType);
+      q.executeUpdate();
+      tx.commit();
+    } catch(RollbackException e) {
+      if (tx.isActive())
+        tx.rollback();
+      throw e;
+    } finally {
+      em.close();
+    }
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.receipt.api.ReceiptService#getHosts(java.lang.String)
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<String> getHosts(String receiptType) {
+    EntityManager em = emf.createEntityManager();
+    try {
+      Query query = em.createQuery("SELECT DISTINCT rh.host FROM ReceiptHandler rh where rh.receiptType = :receiptType");
+      query.setParameter("receiptType", receiptType);
+      return query.getResultList();
     } finally {
       em.close();
     }

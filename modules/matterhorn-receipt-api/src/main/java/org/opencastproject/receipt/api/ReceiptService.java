@@ -18,6 +18,7 @@ package org.opencastproject.receipt.api;
 import org.opencastproject.receipt.api.Receipt.Status;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,6 +26,30 @@ import java.util.Map;
  */
 public interface ReceiptService {
 
+  /**
+   * Registers a host that can handle a specific receipt type
+   * 
+   * @param receiptType
+   * @param baseUrl
+   */
+  void registerService(String receiptType, String baseUrl);
+
+  /**
+   * Registers a host
+   * 
+   * @param receiptType
+   * @param baseUrl
+   */
+  void unRegisterService(String receiptType, String baseUrl);
+
+  /**
+   * Get all of the hosts that can handle a specific receipt type
+   * 
+   * @param receiptType
+   * @return
+   */
+  List<String> getHosts(String receiptType);
+  
   /**
    * Parses an xml string representing a Receipt
    * 

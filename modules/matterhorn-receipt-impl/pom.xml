@@ -98,9 +98,10 @@
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Import-Package> *;resolution:=optional </Import-Package>
-            <Export-Package>org.opencastproject.receipt.impl</Export-Package>
+            <Export-Package>org.opencastproject.receipt.impl, org.opencastproject.receipt.command</Export-Package>
             <Service-Component>
-              OSGI-INF/receipt.xml
+              OSGI-INF/receipt.xml,
+              OSGI-INF/maintenance_shell.xml
             </Service-Component>
             <JPA-PersistenceUnits>org.opencastproject.receipt</JPA-PersistenceUnits>
           </instructions>

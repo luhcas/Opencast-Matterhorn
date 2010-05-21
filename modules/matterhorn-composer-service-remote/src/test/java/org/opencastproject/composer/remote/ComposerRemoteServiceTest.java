@@ -35,7 +35,7 @@ public class ComposerRemoteServiceTest {
  
   @Before
   public void setUp() throws Exception {
-    service = new ComposerServiceRemoteImpl("http://localhost:8080");
+    service = new ComposerServiceRemoteImpl();
     service.setTrustedHttpClient(new TrustedHttpClientImpl("matterhorn_system_account", "CHANGE_ME"));
   }
 

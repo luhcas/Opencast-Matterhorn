@@ -4,5 +4,6 @@
                  http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
   <persistence-unit name="org.opencastproject.receipt" transaction-type="RESOURCE_LOCAL">
     <class>org.opencastproject.receipt.impl.ReceiptImpl</class>
+    <class>org.opencastproject.receipt.impl.ReceiptHandler</class>
   </persistence-unit>
 </persistence>

@@ -32,6 +32,7 @@ import org.junit.Test;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ReceiptTest {
@@ -155,4 +156,24 @@ public class ReceiptTest {
     Assert.assertEquals(1L, type1Counts.get(HOST_2).longValue());
   }
 
+  @Test
+  public void testHandlerRegistration() throws Exception {
+    String url = "http://type1handler:8080";
+    String receiptType = "type1";
+    // we should start with no handlers
+    List<String> hosts = receiptService.getHosts(receiptType);
+    Assert.assertEquals(0, hosts.size());
+
+    // register a handler
+    receiptService.registerService(receiptType, url);
+    hosts = receiptService.getHosts("type1");
+    Assert.assertEquals(1, hosts.size());
+    Assert.assertEquals("http://type1handler:8080", hosts.get(0));
+    
+    // unregister
+    receiptService.unRegisterService(receiptType, url);
+    hosts = receiptService.getHosts("type1");
+    Assert.assertEquals(0, hosts.size());
+  }
+  
 }

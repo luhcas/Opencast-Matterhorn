@@ -3,10 +3,12 @@
   xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
   name="org.opencastproject.composer.impl.ComposerServiceImpl"
   immediate="true"
-  activate="activate">
+  activate="activate"
+  deactivate="deactivate">
     <implementation class="org.opencastproject.composer.impl.ComposerServiceImpl" />
     <property name="service.description" value="Composer (Encoder) Local Service" />
     <service>
+      <provide interface="org.opencastproject.receipt.api.Maintainable" />
       <provide interface="org.opencastproject.composer.api.ComposerService" />
     </service>
     <reference name="inspection-service" interface="org.opencastproject.inspection.api.MediaInspectionService"

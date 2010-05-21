@@ -75,11 +75,9 @@ public class LoadBalancingTest {
 
   @Test
   public void testRemoteHostSelection() throws Exception {
-    List<String> remoteHosts = new ArrayList<String>();
-    remoteHosts.add(HOST_1);
-    remoteHosts.add(HOST_2);
-    remoteHosts.add(HOST_3);
-    service.setRemoteHosts(remoteHosts);
+    receiptService.registerService(ComposerService.RECEIPT_TYPE, HOST_1);
+    receiptService.registerService(ComposerService.RECEIPT_TYPE, HOST_2);
+    receiptService.registerService(ComposerService.RECEIPT_TYPE, HOST_3);
     
     // Add some receipts for each of these hosts
     ReceiptImpl localRunning = (ReceiptImpl)receiptService.createReceipt(ComposerService.RECEIPT_TYPE);
@@ -119,13 +117,13 @@ public class LoadBalancingTest {
 
     // Host 1 has 1 running and one queued receipt.  Host 2 has 1 running and 1 finished receipt.
     // Host 3 has no running or queued receipts. so host 3 is the 'lightest'
-    Assert.assertEquals(HOST_3, service.selectRemoteHost());
+    Assert.assertEquals(HOST_3, service.getRemoteHosts().get(0));
     
     // Now let's load host 3 with some running and queued receipts
     ReceiptImpl host3Running1 = (ReceiptImpl)receiptService.createReceipt(ComposerService.RECEIPT_TYPE);
-    remoteFinished.setHost(HOST_3);
-    remoteFinished.setStatus(Status.RUNNING);
-    receiptService.updateReceipt(remoteFinished);
+    host3Running1.setHost(HOST_3);
+    host3Running1.setStatus(Status.RUNNING);
+    receiptService.updateReceipt(host3Running1);
 
     ReceiptImpl host3Running2 = (ReceiptImpl)receiptService.createReceipt(ComposerService.RECEIPT_TYPE);
     host3Running2.setHost(HOST_3);
@@ -138,6 +136,6 @@ public class LoadBalancingTest {
     receiptService.updateReceipt(host3Queued);
     
     // Now that host3 is loaded, host 2 is the lightest, since it has only 1 running and no queued receipts
-    Assert.assertEquals(HOST_2, service.selectRemoteHost());
+    Assert.assertEquals(HOST_2, service.getRemoteHosts().get(0));
   }
 }

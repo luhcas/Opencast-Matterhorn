@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.receipt.command.MaintenanceCommand" immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.receipt.command.MaintenanceCommand" />
+  <property name="service.description" value="Maintenance Command (m:set id true|false, m:list)" />
+  <property name="osgi.command.scope" value="m" />
+  <property name="osgi.command.function">
+    set
+    list
+  </property>
+  <service>
+    <provide interface="org.opencastproject.receipt.command.MaintenanceCommand" />
+  </service>
+  <reference name="maint" interface="org.opencastproject.receipt.api.Maintainable"
+    cardinality="0..n" policy="dynamic" bind="addMaintainable" unbind="removeMaintainable" />
+</component>

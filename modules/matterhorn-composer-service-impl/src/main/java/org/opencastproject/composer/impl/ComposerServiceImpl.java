@@ -28,14 +28,18 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.identifier.IdBuilder;
 import org.opencastproject.media.mediapackage.identifier.IdBuilderFactory;
+import org.opencastproject.receipt.api.Maintainable;
+import org.opencastproject.receipt.api.MaintenanceException;
 import org.opencastproject.receipt.api.Receipt;
 import org.opencastproject.receipt.api.ReceiptService;
 import org.opencastproject.receipt.api.Receipt.Status;
 import org.opencastproject.util.ConfigurationException;
+import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.IOUtils;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +60,7 @@ import java.util.concurrent.Future;
 /**
  * Default implementation of the composer service api.
  */
-public class ComposerServiceImpl implements ComposerService {
+public class ComposerServiceImpl implements ComposerService, Maintainable {
 
   /** The logging instance */
   private static final Logger logger = LoggerFactory.getLogger(ComposerServiceImpl.class);
@@ -78,6 +82,12 @@ public class ComposerServiceImpl implements ComposerService {
 
   /** Thread pool */
   ExecutorService executor = null;
+
+  /** In maintenance mode, this service will not accept new encoding jobs */
+  boolean maintenanceMode = false;
+  
+  /** The server's base URL */
+  protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
   
   private Map<String, Object> encoderEngineConfig = new ConcurrentHashMap<String, Object>();
   public static final String CONFIG_FFMPEG_PATH = "composer.ffmpegpath";
@@ -113,8 +123,7 @@ public class ComposerServiceImpl implements ComposerService {
   /**
    * Activator that will make sure the encoding profiles are loaded.
    */
-  @SuppressWarnings("unchecked")
-  protected void activate(Map map) {
+  protected void activate(ComponentContext cc) {
     // set up threading
     try {
       profileManager = new EncodingProfileManager();
@@ -126,7 +135,7 @@ public class ComposerServiceImpl implements ComposerService {
     }
 
     // Configure ffmpeg
-    String path = (String) map.get(CONFIG_FFMPEG_PATH);
+    String path = (String) cc.getProperties().get(CONFIG_FFMPEG_PATH);
     if (path == null) {
       // DEFAULT - https://issues.opencastproject.org/jira/browse/MH-2158
       logger.info("DEFAULT " + CONFIG_FFMPEG_PATH + ": " + FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
@@ -135,6 +144,14 @@ public class ComposerServiceImpl implements ComposerService {
       encoderEngineConfig.put(FFmpegEncoderEngine.CONFIG_FFMPEG_BINARY, path);
       logger.info("CONFIG " + CONFIG_FFMPEG_PATH + ": " + path);
     }
+    
+    serverUrl = (String)cc.getBundleContext().getProperty("org.opencastproject.server.url");
+    // Register as a handler
+    receiptService.registerService(RECEIPT_TYPE, serverUrl);
+  }
+
+  protected void deactivate() {
+    receiptService.unRegisterService(RECEIPT_TYPE, serverUrl);
   }
 
   /**
@@ -184,7 +201,7 @@ public class ComposerServiceImpl implements ComposerService {
   @Override
   public Receipt encode(final MediaPackage mp, final String sourceVideoTrackId, final String sourceAudioTrackId,
           final String profileId, final boolean block) throws EncoderException, MediaPackageException {
-
+    if(maintenanceMode) throw new MaintenanceException();
     final String targetTrackId = idBuilder.createNew().toString();
     final Receipt composerReceipt = receiptService.createReceipt(RECEIPT_TYPE);
 
@@ -338,6 +355,8 @@ public class ComposerServiceImpl implements ComposerService {
    */
   public Receipt image(final MediaPackage mediaPackage, final String sourceVideoTrackId, final String profileId,
           final long time, boolean block) throws EncoderException, MediaPackageException {
+    if(maintenanceMode) throw new MaintenanceException();
+
     final String targetAttachmentId = "attachment-" + (mediaPackage.getAttachments().length + 1);
 
     // Create the engine
@@ -456,5 +475,23 @@ public class ComposerServiceImpl implements ComposerService {
   @Override
   public long countJobs(Status status, String host) {
     return receiptService.count(RECEIPT_TYPE, status, host);
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.receipt.api.Maintainable#isInMaintenanceMode()
+   */
+  @Override
+  public boolean isInMaintenanceMode() {
+    return maintenanceMode;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.receipt.api.Maintainable#setMaintenanceMode(boolean)
+   */
+  @Override
+  public void setMaintenanceMode(boolean maintenanceMode) {
+    this.maintenanceMode = maintenanceMode;
   }
 }
