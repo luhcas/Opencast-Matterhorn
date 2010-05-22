@@ -42,8 +42,12 @@ AudioBar.setValue = function(){
   
 }
 
-log = function(){
-  if(typeof console != 'undefined'){
-    console.log.apply(this, arguments);
+window.log = function(){
+  if(window.console){
+    try{
+      window.console && console.log.apply(console,Array.prototype.slice.call(arguments));
+    }catch(e){
+      console.log(e);
+    }
   }
 }

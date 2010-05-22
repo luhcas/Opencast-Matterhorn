@@ -935,31 +935,37 @@ function getRecurValue(){
     if(this.fields.schedule_repeat.val() == 'weekly'){
       //var enddate = new Date(SchedulerForm.formFields['recurrence.end'].getValue());
       var rrule = "FREQ=WEEKLY;BYDAY=";
+      var dotw = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
       var days = [];
-      if(this.fields.repeat_sun[0].checked){
-        days.push("SU");
-      }
-      if(this.fields.repeat_mon[0].checked){
-        days.push("MO");
-      }
-      if(this.fields.repeat_tue[0].checked){
-        days.push("TU");
-      }
-      if(this.fields.repeat_wed[0].checked){
-        days.push("WE");
-      }
-      if(this.fields.repeat_thu[0].checked){
-        days.push("TH");
-      }
-      if(this.fields.repeat_fri[0].checked){
-        days.push("FR");
-      }
-      if(this.fields.repeat_sat[0].checked){
-        days.push("SA");
-      }
       var date  = new Date(SchedulerForm.formFields['recurrence.start'].getValue());
       var hour  = date.getUTCHours();
       var min   = date.getUTCMinutes();
+      var dayOffset = 0;
+      if(date.getDay() != date.getUTCDay()){
+        dayOffset = date.getDay() < date.getUTCDay() ? 1 : -1;
+      }
+      AdminUI.log(dayOffset);
+      if(this.fields.repeat_sun[0].checked){
+        days.push(dotw[(0 + dayOffset) % 7]);
+      }
+      if(this.fields.repeat_mon[0].checked){
+        days.push(dotw[(1 + dayOffset) % 7]);
+      }
+      if(this.fields.repeat_tue[0].checked){
+        days.push(dotw[(2 + dayOffset) % 7]);
+      }
+      if(this.fields.repeat_wed[0].checked){
+        days.push(dotw[(3 + dayOffset) % 7]);
+      }
+      if(this.fields.repeat_thu[0].checked){
+        days.push(dotw[(4 + dayOffset) % 7]);
+      }
+      if(this.fields.repeat_fri[0].checked){
+        days.push(dotw[(5 + dayOffset) % 7]);
+      }
+      if(this.fields.repeat_sat[0].checked){
+        days.push(dotw[(6 + dayOffset) % 7]);
+      }
       this.value = rrule + days.toString() + ";BYHOUR=" + hour + ";BYMINUTE=" + min;
     }
   }
@@ -967,6 +973,7 @@ function getRecurValue(){
 }
 
 function setRecurValue(value){
+  //to do, handle day offset.
   if(typeof value == 'string'){
     value = { rrule: value };
   }
@@ -1025,6 +1032,7 @@ function checkRecurValue(){
 }
 
 function getRecurDisp(){
+  //todo, get local days not UTC.
   var rrule = this.getValue().split(';');
   var found = (function(){ var index = -1; $.each(rrule, function(i, v){ if(v.indexOf('BYDAY=') != -1){ index = i; return true; }}); return index;})();
   if(found != -1){
