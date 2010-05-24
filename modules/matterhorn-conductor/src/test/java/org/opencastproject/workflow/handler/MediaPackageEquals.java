@@ -7,8 +7,6 @@ import org.opencastproject.media.mediapackage.Track;
 
 import org.easymock.IArgumentMatcher;
 
-import java.util.HashSet;
-
 public class MediaPackageEquals implements IArgumentMatcher {
   private MediaPackage expected;
 
