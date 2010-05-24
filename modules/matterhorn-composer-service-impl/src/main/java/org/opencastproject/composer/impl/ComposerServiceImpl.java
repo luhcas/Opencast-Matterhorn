@@ -91,7 +91,9 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
   
   private Map<String, Object> encoderEngineConfig = new ConcurrentHashMap<String, Object>();
   public static final String CONFIG_FFMPEG_PATH = "composer.ffmpegpath";
-
+  public static final String CONFIG_THREADS = "composer.threads";
+  public static final int DEFAULT_THREADS = 2;
+  
   /**
    * Sets the media inspection service
    * 
@@ -125,9 +127,21 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
    */
   protected void activate(ComponentContext cc) {
     // set up threading
+    int threads = -1;
+    String configredThreads = (String) cc.getBundleContext().getProperty(CONFIG_THREADS);
+    // try to parse the value as a number.  If it fails to parse, there is a config problem so we throw an exception.
+    if (configredThreads == null) {
+      threads = DEFAULT_THREADS;
+    } else {
+      threads = Integer.parseInt(configredThreads);
+    }
+    if(threads < 1) {
+      throw new IllegalStateException("The composer needs one or more threads to function.");
+    }
+    setExecutorThreads(threads);
+    
     try {
       profileManager = new EncodingProfileManager();
-      executor = Executors.newFixedThreadPool(4);
     } catch (ConfigurationException e) {
       throw new RuntimeException(e);
     } catch (IOException e) {
@@ -135,7 +149,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
     }
 
     // Configure ffmpeg
-    String path = (String) cc.getProperties().get(CONFIG_FFMPEG_PATH);
+    String path = (String) cc.getBundleContext().getProperty(CONFIG_FFMPEG_PATH);
     if (path == null) {
       // DEFAULT - https://issues.opencastproject.org/jira/browse/MH-2158
       logger.info("DEFAULT " + CONFIG_FFMPEG_PATH + ": " + FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
@@ -148,6 +162,12 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
     serverUrl = (String)cc.getBundleContext().getProperty("org.opencastproject.server.url");
     // Register as a handler
     receiptService.registerService(RECEIPT_TYPE, serverUrl);
+  }
+
+  /** Separating this from the activate method so it's easier to test */
+  void setExecutorThreads(int threads) {
+    executor = Executors.newFixedThreadPool(threads);
+    logger.info("Thread pool size = {}", threads);
   }
 
   protected void deactivate() {

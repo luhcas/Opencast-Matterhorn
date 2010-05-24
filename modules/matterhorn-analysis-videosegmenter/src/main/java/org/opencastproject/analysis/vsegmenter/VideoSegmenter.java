@@ -47,6 +47,7 @@ import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,6 +124,12 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   /** The expected mimetype of the resulting preview encoding */
   public static final MimeType MJPEG_MIMETYPE = MimeTypes.MJPEG;
 
+  /** The configuration key for setting the number of worker threads */
+  public static final String CONFIG_THREADS = "videosegmenter.threads";
+  
+  /** The default worker thread pool size to use if no configuration is specified  */
+  public static final int DEFAULT_THREADS = 2;
+
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(VideoSegmenter.class);
 
@@ -150,9 +157,30 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   public VideoSegmenter() {
     super(MediaPackageElements.SEGMENTS_FLAVOR);
     super.requireVideo(true);
-    executor = Executors.newFixedThreadPool(4);
   }
 
+  protected void activate(ComponentContext cc) {
+    // set up threading
+    int threads = -1;
+    String configredThreads = (String) cc.getBundleContext().getProperty(CONFIG_THREADS);
+    // try to parse the value as a number.  If it fails to parse, there is a config problem so we throw an exception.
+    if (configredThreads == null) {
+      threads = DEFAULT_THREADS;
+    } else {
+      threads = Integer.parseInt(configredThreads);
+    }
+    if(threads < 1) {
+      throw new IllegalStateException("The composer needs one or more threads to function.");
+    }
+    setExecutorThreads(threads);
+  }
+
+  /** Separating this from the activate method so it's easier to test */
+  void setExecutorThreads(int threads) {
+    executor = Executors.newFixedThreadPool(threads);
+    logger.info("Thread pool size = {}", threads);
+  }
+  
   /**
    * Sets the composer service.
    * 

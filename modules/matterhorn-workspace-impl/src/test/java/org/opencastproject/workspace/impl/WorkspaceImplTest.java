@@ -154,6 +154,9 @@ public class WorkspaceImplTest {
     // Put a file in the workspace
     ByteArrayInputStream in = new ByteArrayInputStream("sample".getBytes());
     URI uri = workspace.put("mediapackage", "element", "sample.txt", in);
+    
+    EasyMock.verify(repo);
+    
     File file = workspace.get(uri);
     Assert.assertNotNull(file);
     Assert.assertTrue(file.exists());

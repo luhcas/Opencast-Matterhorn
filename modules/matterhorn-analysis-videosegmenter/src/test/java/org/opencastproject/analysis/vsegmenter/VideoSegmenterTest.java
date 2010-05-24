@@ -129,6 +129,7 @@ public class VideoSegmenterTest {
     EasyMock.replay(receiptService);
 
     vsegmenter = new VideoSegmenter();
+    vsegmenter.setExecutorThreads(1);
     vsegmenter.setFileRepository(fileRepo);
     vsegmenter.setWorkspace(workspace);
     vsegmenter.setReceiptService(receiptService);
