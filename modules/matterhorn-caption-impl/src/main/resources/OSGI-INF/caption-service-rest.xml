@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.caption.endpoint.CaptionServiceRestEndpoint" immediate="true">
+  <implementation class="org.opencastproject.caption.endpoint.CaptionServiceRestEndpoint" />
+  <property name="service.description" value="Caption REST Endpoint" />
+  <property name="opencast.rest.url" value="/caption/rest" />
+  <service>
+    <provide interface="org.opencastproject.caption.endpoint.CaptionServiceRestEndpoint" />
+  </service>
+  <reference name="service-impl" interface="org.opencastproject.caption.api.CaptionService"
+    cardinality="0..1" policy="dynamic" bind="setCaptionService" unbind="unsetCaptionService" />
+</component>

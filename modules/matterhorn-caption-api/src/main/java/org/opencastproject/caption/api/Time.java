@@ -16,25 +16,32 @@
 package org.opencastproject.caption.api;
 
 /**
- * A single caption at a point in time.
+ * Time representation of single caption (start time, end time, duration,...)
+ * 
  */
-public interface Caption {
-  
-  /**
-   * Get the start time of the caption.
-   * @return caption start time
-   */
-  Time getStartTime();
+public interface Time {
 
   /**
-   * Get the end time of the caption.
-   * @return caption end time
+   * Get hours of a caption.
+   * @return hours
    */
-  Time getStopTime();
+  int getHours();
 
   /**
-   * Get the caption text.
-   * @return caption text
+   * Get minutes of a caption.
+   * @return minutes
    */
-  String getCaption();
+  int getMinutes();
+
+  /**
+   * Get seconds of a caption.
+   * @return seconds
+   */
+  int getSeconds();
+
+  /**
+   * Get milliseconds of a caption.
+   * @return milliseconds
+   */
+  int getMiliseconds();
 }

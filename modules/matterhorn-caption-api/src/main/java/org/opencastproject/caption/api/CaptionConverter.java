@@ -15,13 +15,40 @@
  */
 package org.opencastproject.caption.api;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-
 /**
- * Converts captions from one format to another.
+ * Imports captions to {@link CaptionCollection} and exports from {@link CaptionCollection} to String presentation.
  */
 public interface CaptionConverter {
-  OutputStream convert(Caption[] in);
-  Caption[] convert(InputStream is);
+  /**
+   * Parse captions to the CaptionCollection. If exception is encountered during input parsing
+   * IllegalCaptionFormatException is thrown.
+   * 
+   * @param in
+   *          String representation of captions
+   * @return CaptionCollection parsed captions
+   * @throws IllegalCaptionFormatException
+   *           if exception occurred while parsing captions
+   */
+  CaptionCollection importCaption(String in) throws IllegalCaptionFormatException;
+
+  /**
+   * Export caption collection to string representation.
+   * 
+   * @param {@link CaptionCollection} to be exported
+   * @return string representation of the collection
+   */
+  String exportCaption(CaptionCollection captionCollection);
+
+  // FIXME -> are they needed
+  String getName();
+
+  String getAbout();
+
+  String getVersion();
+
+  String getFileExtension();
+
+  String getIdPattern();
+
+  boolean allowsTextStyles();
 }

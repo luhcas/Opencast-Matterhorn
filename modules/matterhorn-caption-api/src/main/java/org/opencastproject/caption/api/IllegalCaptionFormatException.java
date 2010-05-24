@@ -16,25 +16,14 @@
 package org.opencastproject.caption.api;
 
 /**
- * A single caption at a point in time.
+ * Indicates that exception occurred while parsing captions in specific format.
+ *
  */
-public interface Caption {
+public class IllegalCaptionFormatException extends Exception {
+
+  private static final long serialVersionUID = 1713563947093397459L;
   
-  /**
-   * Get the start time of the caption.
-   * @return caption start time
-   */
-  Time getStartTime();
-
-  /**
-   * Get the end time of the caption.
-   * @return caption end time
-   */
-  Time getStopTime();
-
-  /**
-   * Get the caption text.
-   * @return caption text
-   */
-  String getCaption();
+  public IllegalCaptionFormatException(String exception){
+    super("Illegal caption format: " + exception);
+  }
 }

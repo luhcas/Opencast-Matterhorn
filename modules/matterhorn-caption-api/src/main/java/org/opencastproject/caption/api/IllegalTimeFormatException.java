@@ -16,25 +16,14 @@
 package org.opencastproject.caption.api;
 
 /**
- * A single caption at a point in time.
+ * Indicates that unexpected time format was encountered for specific caption format.
+ *
  */
-public interface Caption {
-  
-  /**
-   * Get the start time of the caption.
-   * @return caption start time
-   */
-  Time getStartTime();
+public class IllegalTimeFormatException extends Exception {
 
-  /**
-   * Get the end time of the caption.
-   * @return caption end time
-   */
-  Time getStopTime();
+  private static final long serialVersionUID = -7364407512766273943L;
 
-  /**
-   * Get the caption text.
-   * @return caption text
-   */
-  String getCaption();
+  public IllegalTimeFormatException(String error){
+    super("Illegal time format: " + error);
+  }
 }

@@ -15,8 +15,6 @@
  */
 package org.opencastproject.caption.api;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * Provides captioning support. This service makes use of {@link CaptionConverter} instances that need to be registered
@@ -28,8 +26,8 @@ public interface CaptionService {
    * Converts the captions from the input format to the output format. If support for either of these two formats is
    * missing, an {@link UnsupportedCaptionFormatException} is thrown.
    * 
-   * @param is
-   *          input stream
+   * @param input
+   *          input string
    * @param inputType
    *          caption format of the input
    * @param outputType
@@ -38,6 +36,22 @@ public interface CaptionService {
    * @throws UnsupportedCaptionFormatException
    *           if support for either input or output format is missing
    */
-  OutputStream convert(InputStream is, String inputType, String outputType) throws UnsupportedCaptionFormatException;
+  String convert(String input, String inputFormat, String outputFormat) throws UnsupportedCaptionFormatException,
+          IllegalCaptionFormatException;
 
+  /**
+   * Converts the captions from the input format to the output format. Input format is determined based on the captions'
+   * format. If format cannot be determined or support for output formats is missing, an
+   * {@link UnsupportedCaptionFormatException} is thrown.
+   * 
+   * @param input
+   *          input string
+   * @param outputType
+   *          caption format to output
+   * @return converted captions
+   * @throws UnsupportedCaptionFormatException
+   *           if input format cannot be determined or support for output format is missing
+   */
+  String convert(String input, String outputFormat) throws UnsupportedCaptionFormatException,
+          IllegalCaptionFormatException;
 }

@@ -15,26 +15,34 @@
  */
 package org.opencastproject.caption.api;
 
+import java.util.Iterator;
+
+
 /**
- * A single caption at a point in time.
+ * Represents collection of all captions.
+ * 
  */
-public interface Caption {
+public interface CaptionCollection {
+
+  /**
+   * Returns collection name.
+   * @return collection name
+   */
+  // FIXME needed?
+  String getCollectionName();
   
   /**
-   * Get the start time of the caption.
-   * @return caption start time
+   * Add single caption to the end of the collection.
+   * @param caption
    */
-  Time getStartTime();
-
+  void addCaption(Caption caption);
+  
+  // void setGlobalTextStyles(HashMap<String, String> globalTextStyles);
+  // void setTxtStylesGlobalAtt(key, value)
+  
   /**
-   * Get the end time of the caption.
-   * @return caption end time
+   * Get iterator over caption collection.
+   * @param iterator over captions
    */
-  Time getStopTime();
-
-  /**
-   * Get the caption text.
-   * @return caption text
-   */
-  String getCaption();
+  Iterator<Caption> getCollectionIterator();
 }
