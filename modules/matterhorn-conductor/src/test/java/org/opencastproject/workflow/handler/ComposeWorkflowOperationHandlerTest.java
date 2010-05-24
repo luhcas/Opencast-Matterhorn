@@ -47,6 +47,7 @@ public class ComposeWorkflowOperationHandlerTest {
 
   // local resources
   private MediaPackage mp;
+  private MediaPackage mpMuxing;
   private MediaPackage mpEncode;
   private Receipt receipt;
   private Track[] encodedTracks;
@@ -59,9 +60,9 @@ public class ComposeWorkflowOperationHandlerTest {
   // constant metadata values
   private static final String PROFILE_ID = "flash.http";
   private static final String SOURCE_TRACK_ID = "compose-workflow-operation-test-source-track-id";
-  //private static final String SOURCE_VIDEO_ID = "compose-workflow-operation-test-source-video-id";
-  //private static final String SOURCE_AUDIO_ID = "compose-workflow-operation-test-source-audio-id";
   private static final String ENCODED_TRACK_ID = "compose-workflow-operation-test-encode-track-id";
+  private static final String ENCODED_VIDEO_ID = "compose-workflow-operation-test-encode-muxing-videotrack-id";
+  private static final String ENCODED_AUDIO_ID = "compose-workflow-operation-test-encode-muxing-audiotrack-id";
 
   @Before
   public void setup() throws Exception {
@@ -69,8 +70,10 @@ public class ComposeWorkflowOperationHandlerTest {
 
     // test resources
     URI uriMP = InspectWorkflowOperationHandler.class.getResource("/compose_mediapackage.xml").toURI();
+    URI uriMPMuxing = InspectWorkflowOperationHandler.class.getResource("/compose_muxing_mediapackage.xml").toURI();
     URI uriMPEncode = InspectWorkflowOperationHandler.class.getResource("/compose_encode_mediapackage.xml").toURI();
     mp = builder.loadFromXml(uriMP.toURL().openStream());
+    mpMuxing = builder.loadFromXml(uriMPMuxing.toURL().openStream());
     mpEncode = builder.loadFromXml(uriMPEncode.toURL().openStream());
     encodedTracks = mpEncode.getTracks();
 
@@ -80,7 +83,7 @@ public class ComposeWorkflowOperationHandlerTest {
   }
 
   @Test
-  public void testComposeWOHEncodedTrack() throws Exception {
+  public void testComposeEncodedTrack() throws Exception {
     // set up mock profile
     profile = EasyMock.createNiceMock(EncodingProfile.class);
     EasyMock.expect(profile.getIdentifier()).andReturn(PROFILE_ID);
@@ -127,7 +130,64 @@ public class ComposeWorkflowOperationHandlerTest {
   }
 
   @Test
-  public void testComposeWOHMissingData() throws Exception {
+  public void testComposeMuxingTracks() throws Exception {
+    // set up mock profile
+    profile = EasyMock.createNiceMock(EncodingProfile.class);
+    EasyMock.expect(profile.getIdentifier()).andReturn(PROFILE_ID);
+    EasyMock.expect(profile.getApplicableMediaType()).andReturn(MediaType.AudioVisual);
+    EasyMock.expect(profile.getOutputType()).andReturn(MediaType.Stream);
+    EasyMock.expect(profile.getMimeType()).andReturn(MimeTypes.MPEG4.asString()).times(2);
+    profileList = new EncodingProfile[] { profile };
+    EasyMock.replay(profile);
+
+    // set up mock receipt
+    receipt = EasyMock.createNiceMock(Receipt.class);
+    EasyMock.expect(receipt.getElement()).andReturn(encodedTracks[1]);
+    EasyMock.expect(receipt.getElement()).andReturn(encodedTracks[2]);
+    EasyMock.expect(receipt.getElement()).andReturn(encodedTracks[0]);
+    EasyMock.replay(receipt);
+
+    // set up mock composer service
+    composerService = EasyMock.createNiceMock(ComposerService.class);
+    EasyMock.expect(composerService.listProfiles()).andReturn(profileList);
+    EasyMock.expect(
+            composerService.encode((MediaPackage) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(
+            receipt).times(2);
+    // test the stripped tracks are used for encoding
+    EasyMock.expect(
+            composerService.encode((MediaPackage) EasyMock.anyObject(), (String) EasyMock.matches(ENCODED_VIDEO_ID),
+                    (String) EasyMock.matches(ENCODED_AUDIO_ID), (String) EasyMock.anyObject(), EasyMock.anyBoolean()))
+            .andReturn(receipt);
+    EasyMock.replay(composerService);
+    operationHandler.setComposerService(composerService);
+
+    // operation configuration
+    String targetTags = "engage,rss";
+    Map<String, String> configurations = new HashMap<String, String>();
+    configurations.put("source-video-flavor", "presentation/source");
+    configurations.put("source-audio-flavor", "presenter/source");
+    configurations.put("target-tags", targetTags);
+    configurations.put("target-flavor", "presenter/delivery");
+    configurations.put("encoding-profile", "flash.http");
+
+    // run the operation handler
+    WorkflowOperationResult result = getWorkflowOperationResult(mpMuxing, configurations);
+
+    // check track metadata
+    MediaPackage mpNew = result.getMediaPackage();
+    Track trackVideo = mpNew.getTrack(ENCODED_VIDEO_ID);
+    Track trackAudio = mpNew.getTrack(ENCODED_AUDIO_ID);
+    Assert.assertEquals(5, mpNew.getTracks().length);
+    Assert.assertTrue(trackVideo.hasVideo());
+    Assert.assertFalse(trackVideo.hasAudio());
+    Assert.assertFalse(trackAudio.hasVideo());
+    Assert.assertTrue(trackAudio.hasAudio());
+
+  }
+
+  @Test
+  public void testComposeMissingData() throws Exception {
     // set up mock profile
     profile = EasyMock.createNiceMock(EncodingProfile.class);
     EasyMock.expect(profile.getIdentifier()).andReturn(PROFILE_ID);
