@@ -321,8 +321,9 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
       // Find a track with the given flavor that is (indirectly) derived from t?
       locateReferenceMaster: for (Track e : mediaPackage.getTracks(flavor)) {
         MediaPackageReference ref = e.getReference();
-        while (ref != null && mediaPackage.getElementByReference(ref) != null) {
+        while (ref != null) {
           MediaPackageElement tr = mediaPackage.getElementByReference(ref);
+          if(tr == null) break locateReferenceMaster;
           if (tr.equals(t)) {
             boolean matches = true;
             for (String tag : referenceTagSet) {
@@ -334,6 +335,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
               break locateReferenceMaster;
             }
           }
+          ref = tr.getReference();
         }
       }
     }

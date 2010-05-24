@@ -343,7 +343,7 @@ public class StaticResourceServlet extends HttpServlet {
    * @return Exception which occurred during processing
    */
   protected IOException copyRange(InputStream istream, ServletOutputStream ostream, long start, long end) {
-    logger.debug("Serving bytes:{}={}", start, end);
+    logger.debug("Serving bytes:{}-{}", start, end);
     try {
       istream.skip(start);
     } catch (IOException e) {

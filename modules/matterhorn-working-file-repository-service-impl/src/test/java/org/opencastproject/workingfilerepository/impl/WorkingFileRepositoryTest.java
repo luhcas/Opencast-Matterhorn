@@ -2,14 +2,18 @@ package org.opencastproject.workingfilerepository.impl;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 public class WorkingFileRepositoryTest {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryTest.class);
@@ -22,16 +26,20 @@ public class WorkingFileRepositoryTest {
   @Before
   public void setup() throws Exception {
     repo.activate(null);
-    // Load an image file via the classpath to test whether we can put it into the repository
+    // Put an image file into the repository using the mediapackage / element storage
     InputStream in = getClass().getClassLoader().getResourceAsStream("opencast_header.gif");
-    logger.info("Working with input stream " + in);
     repo.put(mediaPackageID, mediaPackageElementID, in);
     try {in.close();} catch (IOException e) {logger.error(e.getMessage());}
 
+    // Put an image file into the repository into a collection
     in = getClass().getClassLoader().getResourceAsStream("opencast_header.gif");
-    logger.info("Working with input stream " + in);
     repo.putInCollection(collectionId, filename, in);
     try {in.close();} catch (IOException e) {logger.error(e.getMessage());}
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+    FileUtils.forceDelete(new File("target/working-file-repo-root"));
   }
   
   @Test
@@ -89,5 +97,21 @@ public class WorkingFileRepositoryTest {
   @Test
   public void testCollectionSize() throws Exception {
     Assert.assertEquals(1, repo.getCollectionSize(collectionId));
+  }
+  
+  @Test
+  public void testCopy() throws Exception {
+    byte[] bytesFromCollection = IOUtils.toByteArray(repo.getFromCollection(collectionId, filename));
+    repo.copyTo(collectionId, filename, "copied-mediapackage", "copied-element");
+    byte[] bytesFromCopy = IOUtils.toByteArray(repo.get("copied-mediapackage", "copied-element"));
+    Assert.assertTrue(Arrays.equals(bytesFromCollection, bytesFromCopy));
+  }
+
+  @Test
+  public void testMove() throws Exception {
+    byte[] bytesFromCollection = IOUtils.toByteArray(repo.getFromCollection(collectionId, filename));
+    repo.moveTo(collectionId, filename, "moved-mediapackage", "moved-element");
+    byte[] bytesFromMove = IOUtils.toByteArray(repo.get("moved-mediapackage", "moved-element"));
+    Assert.assertTrue(Arrays.equals(bytesFromCollection, bytesFromMove));
   }
 }
