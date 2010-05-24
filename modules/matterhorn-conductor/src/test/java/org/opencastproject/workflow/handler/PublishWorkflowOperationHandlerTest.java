@@ -16,21 +16,16 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
-import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
-import org.opencastproject.workflow.handler.PublishWorkflowOperationHandler;
 
 import org.easymock.EasyMock;
-import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.net.URI;
@@ -38,38 +33,61 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PublishWorkflowOperationHandlerTest {
-  
+
+  private PublishWorkflowOperationHandler operationHandler;
+
+  // local resources
+  private MediaPackage mp;
+  private MediaPackage mpSearch;
+  private WorkflowInstanceImpl workflowInstance;
+
+  @Before
+  public void setup() throws Exception {
+    MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
+
+    // test resources
+    URI uriMP = InspectWorkflowOperationHandler.class.getResource("/publish_mediapackage.xml").toURI();
+    URI uriMPSearch = InspectWorkflowOperationHandler.class.getResource("/publish_search_mediapackage.xml").toURI();
+    mp = builder.loadFromXml(uriMP.toURL().openStream());
+    mpSearch = builder.loadFromXml(uriMPSearch.toURL().openStream());
+
+    // set up service
+    operationHandler = new PublishWorkflowOperationHandler();
+
+  }
+
   @Test
+  // publish operation handler returns unchanged media package
+  // the actual test is done on the media package that is passed to the SearchService
+  // test is done in MediaPackageEquals class, all elements are tested also adding correct referenced flavour
   public void testPublishOperation() throws Exception {
-    // Set up a mediapackage to publish
-    MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-    MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-    Track presentationTrack = (Track)elementBuilder.elementFromURI(new URI("http://foo.bar"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
-    Track presenterTrack = (Track)elementBuilder.elementFromURI(new URI("http://foo.bar"), Track.TYPE, MediaPackageElements.PRESENTER_SOURCE);
-    mp.add(presentationTrack);
-    mp.add(presenterTrack);
-    
     // Add the mediapackage to a workflow instance
-    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl();
+    workflowInstance = new WorkflowInstanceImpl();
     workflowInstance.setId("workflow-1");
     workflowInstance.setState(WorkflowState.RUNNING);
     workflowInstance.setMediaPackage(mp);
     WorkflowOperationInstanceImpl operationInstance = new WorkflowOperationInstanceImpl();
+    operationInstance.setConfiguration("source-tags", "publish");
     List<WorkflowOperationInstance> operationsList = new ArrayList<WorkflowOperationInstance>();
     operationsList.add(operationInstance);
     workflowInstance.setOperations(operationsList);
     workflowInstance.next(); // Simulate starting the workflow
-    
-    // Set up the operation handler using mock collaborators
-    PublishWorkflowOperationHandler operationHandler = new PublishWorkflowOperationHandler();
-    SearchService searchService = EasyMock.createNiceMock(SearchService.class);
+
+    // mock Search service, ensuring the correct media package is distributed to search service
+    SearchService searchService = EasyMock.createStrictMock(SearchService.class);
+    searchService.add(eqMediaPackage(mpSearch));
     EasyMock.replay(searchService);
     operationHandler.setSearchService(searchService);
-    
+
     // Run the media package through the operation handler, ensuring that the flavors are retained
-    WorkflowOperationResult result = operationHandler.start(workflowInstance);
-    for(Track t : result.getMediaPackage().getTracks()) {
-      Assert.assertNotNull(t.getFlavor());
-    }
+    operationHandler.start(workflowInstance);
+
   }
+
+  // register custom matcher for media packages to EasyMock
+  private static <T extends MediaPackage> T eqMediaPackage(T in) {
+    EasyMock.reportMatcher(new MediaPackageEquals(in));
+    return null;
+  }
+
 }
