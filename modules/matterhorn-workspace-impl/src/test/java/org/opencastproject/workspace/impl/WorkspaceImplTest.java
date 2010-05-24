@@ -16,7 +16,7 @@
 package org.opencastproject.workspace.impl;
 
 import org.opencastproject.security.api.TrustedHttpClient;
-import org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryImpl;
+import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.NotFoundException;
 
 import junit.framework.Assert;
@@ -88,10 +88,13 @@ public class WorkspaceImplTest {
   @Test
   public void testPutCachingWithFilesystemMapping() throws Exception {
     // First, mock up the collaborating working file repository
-    WorkingFileRepositoryImpl repo = new WorkingFileRepositoryImpl(repoRoot, "http://localhost:8080");
+    WorkingFileRepository repo = EasyMock.createMock(WorkingFileRepository.class);
+    EasyMock.expect(repo.put((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (InputStream)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files/mp/foo/bar/header.gif"));
+    EasyMock.replay(repo);
+
     workspace.setRepository(repo);
     workspace.filesystemMappings.clear();
-    workspace.filesystemMappings.put("http://localhost:8080/files", repoRoot);
+    workspace.filesystemMappings.put("http://localhost:8080/files/mp", repoRoot);
 
     // Put a stream into the workspace (and hence, the repository)
     InputStream in = getClass().getResourceAsStream("/opencast_header.gif");
@@ -100,8 +103,7 @@ public class WorkspaceImplTest {
     IOUtils.closeQuietly(in);
     
     // Ensure that the file was put into the working file repository
-    File repoFile = new File(repoRoot + File.separator + "mp" + File.separator + "foo" + File.separator + "bar" + File.separator + "header.gif");
-    Assert.assertTrue(repoFile.exists());
+    EasyMock.verify(repo);
 
     // Ensure that the file was not cached in the workspace (since there is a configured filesystem mapping)
     File file = new File(workspaceRoot, "httplocalhost8080filesfoobarheader.gif");
@@ -113,7 +115,9 @@ public class WorkspaceImplTest {
   @Test
   public void testPutCachingWithoutFilesystemMapping() throws Exception {
     // First, mock up the collaborating working file repository
-    WorkingFileRepositoryImpl repo = new WorkingFileRepositoryImpl(repoRoot, "http://localhost:8080");
+    WorkingFileRepository repo = EasyMock.createMock(WorkingFileRepository.class);
+    EasyMock.expect(repo.put((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (InputStream)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files/mp/foo/bar/header.gif"));
+    EasyMock.replay(repo);
     workspace.setRepository(repo);
     workspace.filesystemMappings.clear();
 
@@ -124,8 +128,7 @@ public class WorkspaceImplTest {
     IOUtils.closeQuietly(in);
     
     // Ensure that the file was put into the working file repository
-    File repoFile = new File(repoRoot + File.separator + "mp" + File.separator + "foo" + File.separator + "bar" + File.separator + "header.gif");
-    Assert.assertTrue(repoFile.exists());
+    EasyMock.verify(repo);
 
     // Ensure that the file was cached in the workspace (since there is no configured filesystem mapping)
     File file = new File(workspaceRoot, "httplocalhost8080filesmpfoobarheader.gif");
@@ -135,10 +138,15 @@ public class WorkspaceImplTest {
   @Test
   public void testGarbageCollection() throws Exception {
     // First, mock up the collaborating working file repository
-    WorkingFileRepositoryImpl repo = new WorkingFileRepositoryImpl(repoRoot, "http://localhost:8080");
+    WorkingFileRepository repo = EasyMock.createMock(WorkingFileRepository.class);
+    EasyMock.expect(repo.put((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject(),
+            (InputStream)EasyMock.anyObject())).andReturn(
+                    new URI("http://localhost:8080/files/mp/mediapackage/element/sample.txt"));
+    EasyMock.replay(repo);
     workspace.setRepository(repo);
     TrustedHttpClient httpClient = EasyMock.createNiceMock(TrustedHttpClient.class);
-    EasyMock.expect(httpClient.execute((HttpUriRequest)EasyMock.anyObject())).andThrow(new RuntimeException()); // Simulate not finding the file
+    // Simulate not finding the file
+    EasyMock.expect(httpClient.execute((HttpUriRequest)EasyMock.anyObject())).andThrow(new RuntimeException());
     EasyMock.replay(httpClient);
     workspace.trustedHttpClient = httpClient;
     workspace.filesystemMappings.clear();
