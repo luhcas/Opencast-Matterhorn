@@ -43,6 +43,7 @@ Monitor.selectDevice = function(index){
 Monitor.videoDevice = function(index){
 	if(Monitor.selectedVideoDevice != index){
 		Monitor.selectedVideoDevice = index;
+		Monitor.updateImg();
 		clearInterval(Monitor.intervalImgId);
 	}
 	Monitor.intervalImgId = setInterval(Monitor.updateImg, 30000); //30 Second refresh on image.
@@ -51,6 +52,7 @@ Monitor.videoDevice = function(index){
 Monitor.audioDevice = function(index){
 	if(Monitor.selectedAudioDevice != index){
 		Monitor.selectedAudioDevice = index;
+		Monitor.updateAudio();
 		clearInterval(Monitor.intervalAudioId);
 	}
 	Monitor.intervalAudioId = setInterval(Monitor.updateAudio, 5000); //5 Second refresh on audio
@@ -59,7 +61,9 @@ Monitor.audioDevice = function(index){
 Monitor.updateImg = function(){
 	log('update image');
   var imgGrab = CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/" + Monitor.devices[Monitor.selectedVideoDevice].name;
-  $("#snapshot").attr('src', imgGrab);
+  var img = new Image();
+  img.src = imgGrab;
+  $("#image_preview").empty().append(img);
 }
 
 Monitor.updateAudio = function(){
