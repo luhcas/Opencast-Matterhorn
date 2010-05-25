@@ -5,7 +5,7 @@ echo "============================"
 echo "==Installing Apache, PHP, and MySql=="
 echo "============================"
 sudo apt-get -y update
-sudo apt-get -y install apache2 php5 mysql-server php5-mysql #user enters mysql password for root
+sudo apt-get -y install apache2 php5 curl libcurl3 libcurl3-dev php5-curl mysql-server php5-mysql #user enters mysql password for root
 sudo /etc/init.d/apache2 restart
 
 # opencaps
