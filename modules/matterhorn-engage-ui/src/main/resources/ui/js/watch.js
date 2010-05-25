@@ -69,7 +69,7 @@ Opencast.Watch = (function ()
 
           if(mediaUrlTwo === null)
             mediaUrlTwo = $('#oc-video-presentation-delivery-x-flv-http').html();
-
+           
           if(mediaUrlTwo === null)
             mediaUrlTwo = $('#oc-video-presentation-source-x-flv-rtmp').html();
 

@@ -12,14 +12,18 @@ Opencast.engage = (function () {
    * @description Gets the url to the search service;
    * @return the search service endpoint url
    */
-  function getSearchServiceEpisodeIdURL() {
-      var restEndpoint = "../../search/rest/episode?id=";
-    //var restEndpoint = "episode.xml?id="; // Activate for testing purposes
-	  //var restEndpoint = "xml/episode.xml?id="; // Activate for testing purposes
-      return restEndpoint;
-  }
+  function getSearchServiceEpisodeIdURL() 
+  {
 
-  /**
+      var restEndpoint = "../../search/rest/episode?id=";
+      //var restEndpoint = "episode.xml?id="; // Activate for testing purposes
+	  //var restEndpoint = "xml/episode.xml?id="; // Activate for testing purposes
+
+      return restEndpoint;
+
+   }
+  
+   /**
      * @memberOf Opencast.engage
      * @description Gets the current media package id
      * @return The current media package id
