@@ -39,7 +39,7 @@ public class OcropusTextFrameTest {
   protected OcropusTextFrame textFrame = null;
   
   /** The text without punctuation */
-  protected String text = "Land and Vegetation Key players on the";
+  protected String text = "Land and Vegetation Key players on the Climate Scene";
   
   /** Number of words on the frame */
   protected int wordsOnFrame = 9;
