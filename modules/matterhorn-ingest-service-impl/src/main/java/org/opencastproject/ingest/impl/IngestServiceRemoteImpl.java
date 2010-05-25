@@ -161,6 +161,19 @@ public class IngestServiceRemoteImpl implements IngestService {
   }
 
   @Override
+  public WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID, Map<String,String> wfConfig)
+          throws MediaPackageException, FileNotFoundException, IOException, Exception {
+    logger.info("Adding and ingesting a zipped media package on a remote server: " + remoteHost);
+    MultipartEntity mpEntity = new MultipartEntity();
+    String remoteHostMethod = remoteHost + "/ingest/rest/addZippedMediaPackage/" + workflowDefinitionID;
+    for (String key : wfConfig.keySet()) {
+      mpEntity.addPart(key, new StringBody(wfConfig.get(key)));
+    }
+    mpEntity.addPart("mp", new InputStreamBody(ZippedMediaPackage, "ZippedMediaPackage.zip"));
+    return ingestMediaPackage(remoteHostMethod, mpEntity);
+  }
+
+  @Override
   public MediaPackage createMediaPackage() throws MediaPackageException, ConfigurationException, HandleException {
     logger.info("Creating a new media package on a remote server: " + remoteHost);
     String remoteHostMethod = remoteHost + "/ingest/rest/createMediaPackage";

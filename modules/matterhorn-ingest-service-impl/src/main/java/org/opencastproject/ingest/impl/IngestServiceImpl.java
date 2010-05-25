@@ -79,7 +79,11 @@ public class IngestServiceImpl implements IngestService {
    * @see org.opencastproject.ingest.api.IngestService#addZippedMediaPackage(java.io.InputStream)
    */
   public WorkflowInstance addZippedMediaPackage(InputStream zipStream) throws Exception {
-    return addZippedMediaPackage(zipStream, null);
+    return addZippedMediaPackage(zipStream, null, null);
+  }
+
+  public WorkflowInstance addZippedMediaPackage(InputStream zipStream, String wd) throws Exception {
+    return addZippedMediaPackage(zipStream, wd, null);
   }
 
   /**
@@ -87,7 +91,7 @@ public class IngestServiceImpl implements IngestService {
    * 
    * @see org.opencastproject.ingest.api.IngestService#addZippedMediaPackage(java.io.InputStream, java.lang.String)
    */
-  public WorkflowInstance addZippedMediaPackage(InputStream zipStream, String wd) throws Exception {
+  public WorkflowInstance addZippedMediaPackage(InputStream zipStream, String wd, Map<String,String> workflowConfig) throws Exception {
     // locally unpack the mediaPackage
     String tempPath = tempFolder + UUID.randomUUID().toString();
     // save inputStream to file
@@ -155,7 +159,7 @@ public class IngestServiceImpl implements IngestService {
     if(wd == null) {
       return ingest(mp);
     } else {
-      return ingest(mp, wd);
+      return ingest(mp, wd, workflowConfig);    // workflowConfig == null is handled by ingest(mp, wd, props)
     }
   }
 

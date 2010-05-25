@@ -359,12 +359,14 @@ public class IngestRestService {
   public Response addZippedMediaPackage(@Context HttpServletRequest request, @PathParam("wdID") String wdID) {
     logger.debug("addZippedMediaPackage(InputStream, ID) called.");
     try {
-      InputStream mp = null;
+      Map<String,String> workflowConfig = new HashMap<String,String>();
       if (ServletFileUpload.isMultipartContent(request)) {
         for (FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
           FileItemStream item = iter.next();
-          if (!item.isFormField()) {
-            WorkflowInstance workflow = ingestService.addZippedMediaPackage(item.openStream(), wdID);
+          if (item.isFormField()) {
+            workflowConfig.put(item.getFieldName(), IOUtils.toString(item.openStream()));
+          } else {
+            WorkflowInstance workflow = ingestService.addZippedMediaPackage(item.openStream(), wdID, workflowConfig);
             return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
           }
         }

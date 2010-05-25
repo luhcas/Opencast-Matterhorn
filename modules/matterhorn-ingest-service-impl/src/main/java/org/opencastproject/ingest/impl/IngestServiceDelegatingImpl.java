@@ -141,6 +141,12 @@ public class IngestServiceDelegatingImpl implements IngestService {
   }
 
   @Override
+  public WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID, Map<String,String> wfConfig)
+          throws MediaPackageException, FileNotFoundException, IOException, Exception {
+    return delegate.addZippedMediaPackage(ZippedMediaPackage, workflowDefinitionID, wfConfig);
+  }
+
+  @Override
   public MediaPackage createMediaPackage() throws MediaPackageException, ConfigurationException, HandleException {
     return delegate.createMediaPackage();
   }
