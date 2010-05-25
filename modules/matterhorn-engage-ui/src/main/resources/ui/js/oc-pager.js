@@ -7,18 +7,10 @@ var Opencast = Opencast || {};
  * @namespace the global Opencast namespace pager
  */
 Opencast.pager = ( function() {
-  /**
-   * @memberOf Opencast.pager
-   * @description Function is called when the document is ready
-   */
-  $(document).ready( function() {
-    //testGetCurrentPage();
-    //renderPager();
-  });
 
   /**
    * @memberOf Opencast.pager
-   * @description Function renders the pager
+   * @description Renders the pager
    */
   function renderPager() {
     // constants
@@ -153,6 +145,7 @@ Opencast.pager = ( function() {
   /**
    * @memberOf Opencast.pager
    * @description Gets the current search query
+   * @return The current search query
    */
   function getCurrentSearchQuery() {
     var value = getGETParameter("q");
@@ -162,6 +155,7 @@ Opencast.pager = ( function() {
   /**
    * @memberOf Opencast.pager
    * @description Gets the max page ID
+   * @return The maximum number of pages
    */
   function getMaxPageID() {
     

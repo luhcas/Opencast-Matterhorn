@@ -4,27 +4,25 @@
 var Opencast = Opencast || {};
 
 /**
- * @namespace the global Opencast namespace pager
+ * @namespace the global Opencast namespace segments
  */
 Opencast.segments = ( function() {
 
   var totalPanels;
-  
-  
+
   /**
    * @memberOf Opencast.segments
-   * @description Function initializes segments view
+   * @description Initializes the segments view
    */
-  //direction true = right, false = left
   function initialize() {
-    
+
     totalPanels     = $(".scrollContainer").children().size();
-    
+
     var $panels       = $('#slider .scrollContainer > div');
     var $container      = $('#slider .scrollContainer');
 
     $panels.css({'float' : 'left','position' : 'relative'});
-      
+
     $("#slider").data("currentlyMoving", false);
 
     $container
@@ -37,12 +35,12 @@ Opencast.segments = ( function() {
     $(".right").click(function(){ change(true); }); 
     $(".left").click(function(){ change(false); });
   }
-  
+
   /**
    * @memberOf Opencast.segments
    * @description Function initializes segments view
+   * @param boolean direction true = right, false = left
    */
-  //direction true = right, false = left
   function change(direction) {
     var leftValue    = parseFloat($(".scrollContainer").css("left"), 10)
     var scrollContainerWidth    = parseFloat( $(".scrollContainer").css("width"), 10);

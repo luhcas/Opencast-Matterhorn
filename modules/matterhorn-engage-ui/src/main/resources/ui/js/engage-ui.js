@@ -10,35 +10,35 @@ Opencast.engage = (function () {
   /**
    * @memberOf Opencast.engage
    * @description Gets the url to the search service;
+   * @return the search service endpoint url
    */
   function getSearchServiceEpisodeIdURL() {
-
       var restEndpoint = "../../search/rest/episode?id=";
     //var restEndpoint = "episode.xml?id="; // Activate for testing purposes
 	  //var restEndpoint = "xml/episode.xml?id="; // Activate for testing purposes
       return restEndpoint;
-
   }
-  
-  
-    /**
+
+  /**
      * @memberOf Opencast.engage
      * @description Gets the current media package id
+     * @return The current media package id
      */
     function getMediaPackageId() {
       var value = getGETParameter("id");
       return value;
     }
-    
+
     /**
      * @memberOf Opencast.engage
      * @description Gets the current video url
+     * @return The video url
      */
     function getVideoUrl() {
       var value = getGETParameter("videoUrl");
       return value;
     }
-    
+
     /**
      * @memberOf Opencast.engage
      * @description Get the value of the GET parameter with the passed "name"
@@ -55,7 +55,7 @@ Opencast.engage = (function () {
       else
         return results[1];
     }
-    
+
     return {
       getMediaPackageId : getMediaPackageId,
       getVideoUrl : getVideoUrl,
