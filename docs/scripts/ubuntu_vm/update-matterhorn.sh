@@ -31,6 +31,8 @@ cd /home/opencast
 # update felix config (url)
 MY_IP=`ifconfig | grep "inet addr:" | grep -v 127.0.0.1 | awk '{print $2}' | cut -d':' -f2`
 sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" /opt/matterhorn/felix/conf/config.properties
+sed -i "s/rtmp:\/\/localhost\/matterhorn-engage/rtmp:\/\/$MY_IP\/matterhorn-engage/" /opt/matterhorn/felix/conf/config.properties
+sed -i 's/\${org.opencastproject.storage.dir}\/streams/\/opt\/matterhorn\/red5\/webapps\/matterhorn\/streams/' /opt/matterhorn/felix/conf/config.properties
 sed -i "s/conf\/security.xml/\/opt\/matterhorn\/felix\/conf\/security.xml/" /opt/matterhorn/felix/conf/config.properties
 # update capture properties
 sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" /opencast/config/capture.properties

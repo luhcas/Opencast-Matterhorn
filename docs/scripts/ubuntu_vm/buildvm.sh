@@ -52,7 +52,7 @@ echo "deb http://security.ubuntu.com/ubuntu karmic-security main restricted univ
 
 #build the ubuntu vm
 sudo ubuntu-vm-builder vmw6 karmic --arch 'i386' --mem '512' --cpus 1 \
---rootsize '8192' --swapsize '1024' --kernel-flavour='virtual' \
+--rootsize '12288' --swapsize '1024' --kernel-flavour='virtual' \
 --hostname 'opencast' --mirror $UBUNTU_MIRROR \
 --components 'main,universe,multiverse' \
 --name 'opencast' --user 'opencast' \

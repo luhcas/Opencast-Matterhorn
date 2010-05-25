@@ -42,7 +42,7 @@ fi
 #
 # Clear the matterhorn work directory
 #
-rm -rf $MATTERHORN_WORK_DIR
+# rm -rf $MATTERHORN_WORK_DIR
 
 #
 # Create the directories under /var/lib/matterhorn

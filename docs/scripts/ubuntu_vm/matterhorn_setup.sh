@@ -263,6 +263,8 @@ else
 
   # update felix config (url)
   sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" $CONF_DIR/config.properties
+  sed -i "s/rtmp:\/\/localhost\/matterhorn-engage/rtmp:\/\/$MY_IP\/matterhorn-engage/" $CONF_DIR/config.properties
+  sed -i 's/\${org.opencastproject.storage.dir}\/streams/\/opt\/matterhorn\/red5\/webapps\/matterhorn\/streams/' $CONF_DIR/config.properties
 
   # update capture properties
   # sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" /opencast/config/capture.properties
