@@ -413,8 +413,6 @@ Opencast.Player = (function () {
         $("#oc_btn-transcript").attr('aria-pressed', 'false');
     }
     
-    
-
     /**
         @memberOf Opencast.Player
         @description Show the shortcuts
@@ -538,8 +536,6 @@ Opencast.Player = (function () {
         });
         $("#oc_btn-description").attr('aria-pressed', 'false');
     }
-    
-    
     
     /**
         @memberOf Opencast.Player
@@ -671,11 +667,9 @@ Opencast.Player = (function () {
      */
     function doToggleBookmarks()
     {
-        
-    	if ($("#oc_btn-bookmarks").attr("title") === BOOKMARKS)
+        if ($("#oc_btn-bookmarks").attr("title") === BOOKMARKS)
         {
-           
-    		showBookmarks();
+            showBookmarks();
             hideEmbed();
             hideSlides();
             setShowSections(true);
@@ -688,7 +682,10 @@ Opencast.Player = (function () {
         Opencast.Initialize.doTest();
     }
     
-    
+    /**
+        @memberOf Opencast.Player
+        @description Toggle the description
+     */
     function doToggleDescription()
     {
         if ($("#oc_btn-description").attr("title") === DESCRIPTION)
@@ -741,7 +738,6 @@ Opencast.Player = (function () {
         @memberOf Opencast.Player
         @description Set the embed Player.
         @param String width, String height
-
      */
     function embedIFrame(width, height)
     {
@@ -756,6 +752,7 @@ Opencast.Player = (function () {
     /**
         @memberOf Opencast.Player
         @description Add a bookmark
+        @param String value, String name, String text
      */
     function addBookmark(value, name, text)
     {
@@ -783,19 +780,32 @@ Opencast.Player = (function () {
     	$('#oc_bookmarksPoints').append( btn );
     }
     
+    /**
+        @memberOf Opencast.Player
+        @description remove a bookmark
+     */
     function removeBookmark()
     {
     	$('#oc_bookmarkSelect option:selected').remove();
     	$('#oc_btn-removeBookmark').css('display', 'none' ); 
-    	
     }
     
+    /**
+        @memberOf Opencast.Player
+        @description play a bookmark
+        @param String playheadString
+     */
     function playBookmark(playheadString)
     {
     	var newPlayhead = getPlayhead(playheadString);
     	Videodisplay.seek(newPlayhead);
     }
     
+    /**
+        @memberOf Opencast.Player
+        @description get the playhead
+        @param String playheadString
+     */
     function getPlayhead(playheadString)
     {
         var playheadArray = playheadString.split(':');
@@ -805,8 +815,6 @@ Opencast.Player = (function () {
         var playheadSeconds = parseInt(playheadArray[2], 10);
         
         return (playheadHour * 60 * 60) + (playheadMinutes * 60) + (playheadSeconds);
-    	
-    	
     }
     
     
@@ -1023,7 +1031,6 @@ Opencast.Player = (function () {
         $("#oc_btn-volume").attr('aria-pressed', 'true');
     }
     
-    
     /**
         @memberOf Opencast.Player
         @description Set the cc icon
@@ -1076,7 +1083,7 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description 
+        @description Show the single video display
      */
     function videoSizeControlSingleDisplay()
     {
@@ -1085,7 +1092,7 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description 
+        @description Show the audio display
      */
     function videoSizeControlAudioDisplay()
     {
@@ -1098,7 +1105,7 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description 
+        @description Show only the presenter video display
      */
     function videoSizeControlMultiOnlyLeftDisplay()
     {
@@ -1108,7 +1115,7 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description 
+        @description Show only the presentation video display
      */
     function videoSizeControlMultiOnlyRightDisplay()
     {
@@ -1118,7 +1125,7 @@ Opencast.Player = (function () {
 
     /**
         @memberOf Opencast.Player
-        @description 
+        @description Resize the presentation video
      */
     function videoSizeControlMultiBigRightDisplay()
     {
@@ -1128,7 +1135,7 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description 
+        @description Resize the presenter video
      */
     function videoSizeControlMultiBigLeftDisplay()
     {
@@ -1138,7 +1145,7 @@ Opencast.Player = (function () {
 
     /**
         @memberOf Opencast.Player
-        @description 
+        @description Show presenter and presentation video
      */
     function videoSizeControlMultiDisplay()
     {
@@ -1200,7 +1207,7 @@ Opencast.Player = (function () {
     /**
         @memberOf Opencast.Player
         @description Set the current time of the video.
-        @param String text, String playerId 
+        @param String text 
      */
     function setCurrentTime(text) 
     {
@@ -1212,7 +1219,7 @@ Opencast.Player = (function () {
     /**
         @memberOf Opencast.Player
         @description Set the total time of the video.
-        @param String text, String playerId 
+        @param String text
      */
     function setTotalTime(text) 
     {
@@ -1299,7 +1306,7 @@ Opencast.Player = (function () {
     /**
         @memberOf Opencast.Player
         @description Set the slider max time and set the duration.
-        @param Number time, String playerId 
+        @param Number time 
      */
     function setDuration(time) 
     {
@@ -1309,7 +1316,7 @@ Opencast.Player = (function () {
     /**
         @memberOf Opencast.Player
         @description Set the new position of the seek slider.
-        @param Number newPosition, String playerId 
+        @param Number newPosition
      */
     function setPlayhead(newPosition) 
     {
@@ -1400,7 +1407,7 @@ Opencast.Player = (function () {
     /**
         @memberOf Opencast.Player
         @description addAlert in html code.
-        @param Html text 
+        @param String alertMessage 
      */
     function currentTime(alertMessage) 
     {

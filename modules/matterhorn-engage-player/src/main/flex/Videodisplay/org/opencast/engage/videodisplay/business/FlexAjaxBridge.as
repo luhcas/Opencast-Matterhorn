@@ -1,3 +1,18 @@
+/**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
 package org.opencast.engage.videodisplay.business
 {
     import bridge.ExternalFunction;
@@ -106,6 +121,8 @@ package org.opencast.engage.videodisplay.business
          * seek
          *
          * When the learner seek the video
+         * 
+         * @param Number time
          * */
         public function seek( time:Number ):Number
         {
@@ -129,6 +146,8 @@ package org.opencast.engage.videodisplay.business
          * setVolumeSlider
          *
          * Set the volume slider
+         * 
+         * @param Number newVolume
          * */
         public function setVolumePlayer( newVolume:Number ):void
         {
@@ -149,6 +168,8 @@ package org.opencast.engage.videodisplay.business
          * setCaptionsURL
          *
          * Set captions URL and load the file.
+         * 
+         * @param String captionsURL
          */
         public function setCaptionsURL( captionsURL:String ):void
         {
@@ -157,7 +178,7 @@ package org.opencast.engage.videodisplay.business
                 var pos:int = model.url.lastIndexOf( "/" );
                 var fileType:String = model.url.substring( pos +1 );
                 
-                if( fileType == 'matterhorn.mp4' )
+                if( fileType == 'matterhorn.mp4' || 'matterhorn25fps.flv')
                 {
                     model.captionsURL = captionsURL;
                     Swiz.dispatchEvent( new LoadDFXPXMLEvent( model.captionsURL ) );
@@ -169,23 +190,24 @@ package org.opencast.engage.videodisplay.business
          * setMediaURL
          *
          * Set media URL and init the player.
+         * 
+         * @param String mediaURLOne, String mediaURLTwo
          */
         public function setMediaURL( mediaURLOne:String, mediaURLTwo:String ):void
         {
             Swiz.dispatchEvent( new InitMediaPlayerEvent( mediaURLOne, mediaURLTwo ) );
             model.url = mediaURLOne;
-            
         }
         
         /**
          * videoSizeControl
          *
          * When the learner press the video size control button.
+         * 
+         * @param Number sizeLeft, Number sizeRight
          */
-        
         public function videoSizeControl( sizeLeft:Number, sizeRight:Number ):void
         {
-			
 			if( sizeLeft == 0 && sizeRight == 100 || sizeLeft == 100 && sizeRight == 0 )
 			{
 			    model.layoutMetadataParallelElement.layoutMode = LayoutMode.NONE;
@@ -193,7 +215,6 @@ package org.opencast.engage.videodisplay.business
 			else
 			{
 		        model.layoutMetadataParallelElement.layoutMode = LayoutMode.HORIZONTAL;
-			    
 			}
 			model.layoutMetadataOne.percentWidth = sizeLeft;
             model.layoutMetadataTwo.percentWidth = sizeRight;
@@ -219,11 +240,10 @@ package org.opencast.engage.videodisplay.business
           return model.mediaContainer.measuredHeight;
         }
         
-        
         /**
          * reportKeyDown
          *
-         *
+         * @eventType event:KeyboardEvent
          */
         public function reportKeyUp( event:KeyboardEvent ):void
         {
@@ -237,6 +257,8 @@ package org.opencast.engage.videodisplay.business
          * passCharCode
          *
          * When the learner press any key for the mediaplayer
+         * 
+         * @param int charCode
          */
         public function passCharCode( charCode:int ):void
         {
@@ -381,12 +403,11 @@ package org.opencast.engage.videodisplay.business
         /**
          * onBridgeReady
          *
-         * 
+         * When the birdge ist ready
          */
         public function onBridgeReady():void
         {
             ExternalInterface.call( ExternalFunction.ONPLAYERREADY );
         }
-        
-     }
+    }
 }

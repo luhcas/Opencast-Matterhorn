@@ -7,6 +7,7 @@ package org.opencast.engage.videodisplay.control.util
 	
 	public class OpencastMediaPlayer
 	{
+		 
 		 // mediaPlayerOne
         private var mediaPlayerOne:MediaPlayer;
         
@@ -53,7 +54,7 @@ package org.opencast.engage.videodisplay.control.util
 			
         }
         
-	    public function setMedia(valueOne:MediaElement, valueTwo:MediaElement)
+	    public function setMedia(valueOne:MediaElement, valueTwo:MediaElement):void
         {
             mediaPlayerOne.media = valueOne;
             mediaPlayerTwo.media = valueTwo;
@@ -117,11 +118,11 @@ package org.opencast.engage.videodisplay.control.util
         
         // Player One
         
-        private function playerOneOnStateChange(event:MediaPlayerStateChangeEvent)void
+        private function playerOneOnStateChange(event:MediaPlayerStateChangeEvent):void
         {
         }
         
-        private function playerOneOnDurationChange(event:TimeEvent)void
+        private function playerOneOnDurationChange(event:TimeEvent):void
         {
         }
         
@@ -172,11 +173,11 @@ package org.opencast.engage.videodisplay.control.util
         
         // Player Two
         
-        private function playerTwoOnStateChange(event:MediaPlayerStateChangeEvent)void
+        private function playerTwoOnStateChange(event:MediaPlayerStateChangeEvent):void
         {
         }
         
-        private function playerTwoOnDurationChange(event:TimeEvent)void
+        private function playerTwoOnDurationChange(event:TimeEvent):void
         {
         }
         

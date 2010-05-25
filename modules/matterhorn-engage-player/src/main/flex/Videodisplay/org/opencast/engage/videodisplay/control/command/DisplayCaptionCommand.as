@@ -45,7 +45,6 @@ package org.opencast.engage.videodisplay.control.command
          * */
         public function execute( event:DisplayCaptionEvent ):void
         {
-
             var time:Number = event.position * 1000;
             var tmpCaption:CaptionVO = new CaptionVO();
             var lastPos:int = 0;

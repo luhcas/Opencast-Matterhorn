@@ -19,7 +19,11 @@ body
 {
   font-family:              Verdana;
 }   
- 
+
+table
+{
+  border-spacing:           0;
+} 
 #oc_title-bar
 {
   min-width:                760px;
@@ -78,8 +82,9 @@ body
 {
   min-width:                756px;
   height:                   510px;
-  margin-left:              5px;
-  margin-right:             5px;
+  margin-left:              10%;
+  margin-right:             10%;
+  position:                 relative; 
 }
 
 #oc_flash-player
@@ -547,11 +552,6 @@ option:hover
   border-style:none;
 }
 
-.oc-segments 
-{ 
-  position:relative; 
-}
-
 .oc-segments-holder
 {
   overflow-x:scroll;
@@ -790,5 +790,3 @@ option:hover
   border-left-width:1px;
   width: 100%;
 }
-
- 

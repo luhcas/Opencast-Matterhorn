@@ -44,7 +44,13 @@ package org.opencast.engage.videodisplay.control.responder
         {
         }
 
-        /** result */
+        /** 
+        * result 
+        * 
+        * Convert the xml file
+        * 
+        * @param Object data
+        */
         public function result( data:Object ):void
         {
             model.captionSets = new ArrayCollection();
@@ -108,6 +114,8 @@ package org.opencast.engage.videodisplay.control.responder
          *  stringToNumber
          *
          * Convert the string to a number.
+         * 
+         * @param String timestamp
          */
         public function stringToNumber( timestamp:String ):Number
         {

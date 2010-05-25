@@ -229,22 +229,6 @@
             bottom="10"
             >
              
-        <mx:Label 
-            text="Total: { model.bytesTotal.toString() }"
-            color="#ffffff"
-            />
-            
-        <mx:Label 
-            text="Laoded: { model.bytesLoaded.toString() }"
-            color="#ffffff"
-            />
-            
-           
-        <mx:Label 
-            text="progress: { model.progress.toString() }"
-            color="#ffffff"
-            />
-        
             <view:CaptionsView 
                 id = "captionsView"
                 width = "100%"

@@ -49,7 +49,6 @@ package org.opencast.engage.videodisplay.control.command
     import org.osmf.metadata.MetadataWatcher;
     import org.swizframework.Swiz;
     
-
     public class InitMediaPlayerCommand
     {
         [Autowire]
@@ -79,8 +78,7 @@ package org.opencast.engage.videodisplay.control.command
          * */
         public function execute( event:InitMediaPlayerEvent ):void
         {
-			
-			 _time = new TimeCode();   
+			_time = new TimeCode();   
 			 
 			model.currentPlayerState = PlayerState.PLAYING;
             ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PAUSING );
@@ -97,7 +95,6 @@ package org.opencast.engage.videodisplay.control.command
             model.mediaPlayer.addEventListener( LoadEvent.BYTES_LOADED_CHANGE, onBytesLoadedChange);
 
             model.mediaPlayer.addEventListener( BufferEvent.BUFFERING_CHANGE, onBufferingChange);         
-
 
             // Single Video/Audio
             if( event.mediaURLOne != '' && event.mediaURLTwo == '' )
@@ -248,10 +245,7 @@ package org.opencast.engage.videodisplay.control.command
                 parallelElement.addChild(opencastProxyElementOne);
                            
                 setMediaElement( parallelElement );
-                
-               
-	        
-	        }
+            }
             else
             {
                 errorMessage( "Error", "TRACK COULD NOT BE FOUND" );
@@ -297,12 +291,12 @@ package org.opencast.engage.videodisplay.control.command
         /**
          * onDurationChange
          *
+         * When the duration is change
+         * 
          * @eventType event:TimeEvent
-         *
          * */
         private function onDurationChange(event:TimeEvent):void
 		{
-			
 			// Store new duration as current duration in the videodisplay model
             model.currentDuration = event.time;
             model.currentDurationString = _time.getTC( event.time );
@@ -367,7 +361,6 @@ package org.opencast.engage.videodisplay.control.command
          * When the player is mute or unmute
          * 
          * @eventType event:AudioEvent
-         *
          * */
         private function muteChange( event:AudioEvent ):void
         {
@@ -382,8 +375,7 @@ package org.opencast.engage.videodisplay.control.command
            			model.ccBoolean = true;
                     ExternalInterface.call( ExternalFunction.SETCCICONON, '' );
            		}
-           		
-           	}
+            }
            	else
            	{
            		ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, model.mediaPlayer.volume * 100 );	
@@ -417,9 +409,10 @@ package org.opencast.engage.videodisplay.control.command
         
         /**
          * onCurrentTimeChange
+         * 
+         * When the current time is change
          *
          * @eventType event:TimeEvent
-         *
          * */
         private function onCurrentTimeChange( event:TimeEvent ):void
         {
@@ -501,7 +494,6 @@ package org.opencast.engage.videodisplay.control.command
          * Set the error Message and switch the stage.
          * 
          * @param String:name, String:message
-         * 
          * */
         private function errorMessage( name:String, message:String ):void
         {
@@ -517,7 +509,6 @@ package org.opencast.engage.videodisplay.control.command
          * Save the total bytes of the video
          * 
          * @eventType event:LoadEvent
-         *
          * */
         private function onBytesTotalChange( event:LoadEvent ):void
 		{
@@ -527,7 +518,7 @@ package org.opencast.engage.videodisplay.control.command
 		/**
          * onBytesLoadedChange
          *
-         * Set the progress bar.
+         * When the loaded bytes change
          * 
          * @eventType event:LoadEvent
          *

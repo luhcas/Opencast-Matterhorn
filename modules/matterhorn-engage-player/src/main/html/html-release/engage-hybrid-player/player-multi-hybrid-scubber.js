@@ -51,25 +51,26 @@ Opencast.Scrubber = (function ()
 
         $("#scubber-channel").click(function (e)
         {
-           var x = e.pageX - this.offsetLeft;
-        x = Math.max(4, x - 8);
-        var sc_x = $("#scrubber").position().left;
+           var x = e.pageX - $("#scubber-channel").offset().left;
 
-        if (x < (sc_x - 8) || (sc_x + 8) < x)
-        {
-            $("#draggable").css("left", x);
-            $("#scrubber").css("left", x);
-            $("#play-progress").css("width", x);
+            x = Math.max(4, x - 8);
+            var sc_x = $("#scrubber").position().left;
 
-            var newPosition = Math.round((x / $("#scubber-channel").width()) * Opencast.Player.getDuration());
-            Videodisplay.seek(newPosition);
-        }
+            if (x < (sc_x - 8) || (sc_x + 8) < x)
+            {
+                $("#draggable").css("left", x);
+                $("#scrubber").css("left", x);
+                $("#play-progress").css("width", x);
+
+                var newPosition = Math.round((x / $("#scubber-channel").width()) * Opencast.Player.getDuration());
+                Videodisplay.seek(newPosition);
+            }
 
         }); 
         
         $("#segment-holder-empty").click(function (e)
         {
-            var x = e.pageX - this.offsetLeft;
+            var x = e.pageX - $("#segment-holder-empty").offset().left;
             x = Math.max(4, x - 8);
             var sc_x = $("#scrubber").position().left;
 
@@ -92,6 +93,7 @@ Opencast.Scrubber = (function ()
         }); 
     }
     
+
     return {
         init: init
     };

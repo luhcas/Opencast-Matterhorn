@@ -35,6 +35,7 @@ package org.opencast.engage.videodisplay.control.util
          *
          * Get the time, like HH:MM:SS.
          *
+         * @param Number seconds
          * */
         public function getTC( seconds:Number ):String
         {
@@ -83,6 +84,8 @@ package org.opencast.engage.videodisplay.control.util
          * showHours
          *
          * set the _showHours
+         * 
+         * @param Boolean show
          * */
         public function showHours( show:Boolean ):void
         {

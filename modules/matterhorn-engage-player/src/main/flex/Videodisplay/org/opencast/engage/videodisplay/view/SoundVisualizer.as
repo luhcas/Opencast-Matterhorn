@@ -26,10 +26,17 @@ package org.opencast.engage.videodisplay.view
 
     public class SoundVisualizer extends Sprite
     {
+        /** Constructor */
         public function SoundVisualizer()
         {
             addEventListener( Event.ENTER_FRAME, onEnterFrame );
         }
+        
+        /**
+         * onEnterFrame
+         * 
+         * @eventType event:Event
+         */
         private function onEnterFrame( event:Event ):void
         {
         	
@@ -71,7 +78,12 @@ package org.opencast.engage.videodisplay.view
             g.endFill();
 
         }
-
+        
+        /**
+         * onPlaybackComplete
+         * 
+         * @eventType event:Event
+         */
         private function onPlaybackComplete( event:Event ):void
         {
             removeEventListener( Event.ENTER_FRAME, onEnterFrame );
