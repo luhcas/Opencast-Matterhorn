@@ -21,18 +21,26 @@ Opencast.Initialize = (function ()
     clickMatterhornSearchField = false,
     clickLecturerSearchField = false;
     
+    /**
+        @memberOf Opencast.Initialize
+        @description set the id of the div.
+     */
     function setDivId(id)
     {
     	divId = id;
     }
     
+    /**
+        @memberOf Opencast.Initialize
+        @description get the id of the div.
+     */
     function getDivId()
     {
     	return divId;
     }
     
     /**
-        @memberOf Opencast.Player
+        @memberOf Opencast.Initialize
         @description Keylistener.
      */
     function keyboardListener() {
@@ -58,7 +66,11 @@ Opencast.Initialize = (function ()
     var timeout         = 200;
     var closetimer		= 0;
     var ddmenuitem      = 0;
-
+    
+    /**
+        @memberOf Opencast.Initialize
+        @description close the drop dowan menue.
+     */
     function dropdown_close()
     {
         if (ddmenuitem)
@@ -66,12 +78,20 @@ Opencast.Initialize = (function ()
             ddmenuitem.css('visibility', 'hidden');
         }
     }
-
+    
+    /**
+        @memberOf Opencast.Initialize
+        @description new timer.
+     */
     function dropdown_timer()
     {
         closetimer = window.setTimeout(dropdown_close, timeout);
     }
-
+    
+    /**
+        @memberOf Opencast.Initialize
+        @description cancel the timer.
+     */
     function dropdown_canceltimer()
     {
         if (closetimer)
@@ -81,6 +101,10 @@ Opencast.Initialize = (function ()
         }
     }
     
+    /**
+        @memberOf Opencast.Initialize
+        @description open the drop down menue.
+     */
     function dropdown_open()
     {
         dropdown_canceltimer();
@@ -102,6 +126,10 @@ Opencast.Initialize = (function ()
 	    setDivId('');
     }
     
+    /**
+        @memberOf Opencast.Initialize
+        @description open the drop down meneue video.
+     */
     function dropdownVideo_open()
     {
     	setDivId(VIDEOSIZE);
