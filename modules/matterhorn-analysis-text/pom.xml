@@ -111,12 +111,8 @@
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Export-Package>
-              org.opencastproject.analysis.text,
-              org.opencastproject.analysis.text.endpoint
+              org.opencastproject.analysis.text
             </Export-Package>
-            <Embed-Dependency>
-              jmf;inline=true
-            </Embed-Dependency>
             <Import-Package>
               *;resolution:=optional
             </Import-Package>

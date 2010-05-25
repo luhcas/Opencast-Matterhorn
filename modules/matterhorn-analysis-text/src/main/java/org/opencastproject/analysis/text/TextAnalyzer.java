@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.analysis.ocr;
+package org.opencastproject.analysis.text;
 
 import org.opencastproject.analysis.api.MediaAnalysisException;
 import org.opencastproject.analysis.api.MediaAnalysisServiceSupport;
