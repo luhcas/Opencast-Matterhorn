@@ -21,6 +21,7 @@ import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.ConfigurationManager;
 import org.opencastproject.security.api.TrustedHttpClient;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -53,17 +54,30 @@ public class AgentStateJob implements Job {
    * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-    config = (ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE);
-    state = (StateService) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE);
-    client = (TrustedHttpClient) ctx.getMergedJobDataMap().get(JobParameters.TRUSTED_CLIENT);
+    setConfigManager((ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE));
+    setStateService((StateService) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE));
+    setTrustedClient((TrustedHttpClient) ctx.getMergedJobDataMap().get(JobParameters.TRUSTED_CLIENT));
+    
     sendAgentState();
     sendRecordingState();
+  }
+
+  public void setConfigManager(ConfigurationManager cfg) {
+    config = cfg;
+  }
+
+  public void setStateService(StateService st) {
+    state = st;
+  }
+
+  public void setTrustedClient(TrustedHttpClient cl) {
+    client = cl;
   }
 
   /**
    * Sends an agent state update to the capture-admin state service.
    */
-  private void sendAgentState() {
+  protected void sendAgentState() {
 
     logger.debug("Sending agent {}'s state", state.getAgentName());
     
@@ -95,7 +109,7 @@ public class AgentStateJob implements Job {
   /**
    * Sends an update for each of the recordings currently being tracked in the system.
    */
-  private void sendRecordingState() {
+  protected void sendRecordingState() {
 
     //Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL);
@@ -135,7 +149,10 @@ public class AgentStateJob implements Job {
 
     try {
       remoteServer.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
-      client.execute(remoteServer);
+      HttpResponse resp = client.execute(remoteServer);
+      if (resp.getStatusLine().getStatusCode() != 200) {
+        logger.info("State push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
+      }
     } catch (Exception e) {
       logger.error("Unable to push update to remote server: {}.", e.getMessage());
     }

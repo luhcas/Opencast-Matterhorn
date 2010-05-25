@@ -129,7 +129,7 @@ public class CaptureAgentImplTest {
     
     // the appropriate files exists, so the capture can be stopped. The agent's state should return to idle
     // and a stopped capture file should exists.
-    Assert.assertTrue(agent.stopCapture(recordingID));
+    Assert.assertTrue(agent.stopCapture(recordingID, true));
     Assert.assertEquals(AgentState.IDLE, agent.getAgentState());
     File captureStopped = new File(outputdir.getAbsolutePath(), CaptureParameters.CAPTURE_STOPPED_FILE_NAME);
     Assert.assertTrue(captureStopped.exists());

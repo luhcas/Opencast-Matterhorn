@@ -63,19 +63,21 @@ public interface CaptureAgent {
   /**
    * Stops the capture.  Returns true on success.
    * Error conditions occur if gstreamer has an unexpected error, or there is no recording currently in progress.  In this case it will return false.
+   * @param immediateIngest True to cause the agent to immediately ingest the capture, false to wait until the normal stop time to ingest.
    * @return True if the capture stopped successfully, false if the recordingID parameter was not the recording currently being captured, or there was an error.
    */
-  boolean stopCapture();
+  boolean stopCapture(boolean immediateIngest);
 
   /**
    * Stops the capture
    * This version takes in a recording ID and only stops the recording if that ID matches the current recording's ID.
    * This is used to prevent accidental stops of recordings.
    * @param recordingID The ID of the recording you wish to stop
+   * @param immediateIngest True to cause the agent to immediately ingest the capture, false to wait until the normal stop time to ingest.
    * @return True if the capture stopped successfully, false if the recordingID parameter was not the recording currently being captured, or there was an error.
    * @see org.opencastproject.capture.api.CaptureAgent#stopCapture()
    */
-  boolean stopCapture(String recordingID);
+  boolean stopCapture(String recordingID, boolean immediateIngest);
 
   /**
    * Gets the agent's name.

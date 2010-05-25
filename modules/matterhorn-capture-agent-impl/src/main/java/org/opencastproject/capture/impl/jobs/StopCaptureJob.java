@@ -53,7 +53,7 @@ public class StopCaptureJob implements Job {
       String recordingID = ctx.getMergedJobDataMap().getString(CaptureParameters.RECORDING_ID);
 
       //This needs to specify which job to stop - otherwise we could end up stopping something else if the expected job failed earlier.
-      ca.stopCapture(recordingID);
+      ca.stopCapture(recordingID, false);
 
       String postfix = ctx.getMergedJobDataMap().getString(JobParameters.JOB_POSTFIX);
       // Create job and trigger

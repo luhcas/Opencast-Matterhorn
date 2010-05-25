@@ -104,6 +104,9 @@ public interface CaptureParameters {
   /** The retry interval for attempting ingest */
   String INGEST_RETRY_INTERVAL = "capture.ingest.retry.interval";
 
+  /** The key for the workflow definition, if any, in the capture properties attached to the iCal event */
+  String INGEST_WORKFLOW_DEFINITION = "org.opencastproject.workflow.definition";
+
   /**
    * Settings which control the capture hardware and outputs
    */

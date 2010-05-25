@@ -65,7 +65,7 @@ public class CaptureAgentShellCommands {
    * Tells the capture agent to stop capturing.
    */
   public void stop() {
-    agent.stopCapture(recordingId);
+    agent.stopCapture(recordingId, true);
     System.out.println("Recording " + recordingId +  " stopped");
   }
 

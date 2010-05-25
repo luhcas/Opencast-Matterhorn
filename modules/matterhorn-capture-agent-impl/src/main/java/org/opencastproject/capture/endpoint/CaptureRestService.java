@@ -184,7 +184,7 @@ public class CaptureRestService {
 
     boolean out;
     try {
-      out = service.stopCapture();
+      out = service.stopCapture(true);
       if (out)
         return Response.ok("Stop Capture OK. OUT: " + out).build();
       else
@@ -204,7 +204,7 @@ public class CaptureRestService {
 
     boolean out;
     try {
-      out = service.stopCapture(recordingID);
+      out = service.stopCapture(recordingID, true);
       if (out)
         return Response.ok("Stopped Capture").build();
       else

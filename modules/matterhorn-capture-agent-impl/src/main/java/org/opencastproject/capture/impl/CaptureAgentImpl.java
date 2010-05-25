@@ -255,7 +255,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     setRecordingState(recordingID, RecordingState.CAPTURING);
     if (newRec.getProperty(CaptureParameters.RECORDING_END) == null) {
       if (!scheduleStop(newRec.getID())) {
-        stopCapture(newRec.getID());
+        stopCapture(newRec.getID(), false);
         resetOnFailure(newRec.getID());
       }
     }
@@ -337,7 +337,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
        */
       public void errorMessage(GstObject arg0, int arg1, String arg2) {
         logger.error(arg0.getName() + ": " + arg2);
-        stopCapture();
+        stopCapture(false);
       }
     });
     
@@ -400,10 +400,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.CaptureAgent#stopCapture()
+   * @see org.opencastproject.capture.api.CaptureAgent#stopCapture(boolean)
    */
   @Override
-  public boolean stopCapture() {
+  public boolean stopCapture(boolean immediateIngest) {
 
     logger.debug("stopCapture() called.");
     // If pipe is null and no mock capture is on
@@ -415,7 +415,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       // We must stop the capture as soon as possible, then check whatever needed
       pipe.sendEvent(new EOSEvent());
       pipe = null;
-      
+
       // Checks there is a currentRecID defined --should always be
       if (currentRecID == null) { 
         logger.warn("There is no currentRecID assigned, but the Pipeline was not null!");
@@ -444,18 +444,27 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
     logger.info("Recording \"{}\" succesfully stopped", theRec.getID());
 
+    if (immediateIngest) {
+      if (scheduler.scheduleIngest(theRec.getID())) {
+        logger.info("Ingest scheduled for recording {}.", theRec.getID());
+      } else {
+        logger.warn("Ingest scheduling failed for recording {}!", theRec.getID());
+        setRecordingState(theRec.getID(), RecordingState.UPLOAD_ERROR);
+      }
+    }
+
     return true;
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.CaptureAgent#stopCapture()
+   * @see org.opencastproject.capture.api.CaptureAgent#stopCapture(java.lang.String, boolean)
    */
   @Override
-  public boolean stopCapture(String recordingID) {
+  public boolean stopCapture(String recordingID, boolean immediateIngest) {
     if (currentRecID != null) {
       if (recordingID.equals(currentRecID)) {
-        return stopCapture();
+        return stopCapture(immediateIngest);
       }
     }
     return false;
@@ -825,7 +834,12 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   public void deactivate() {
     try {
       if (agentScheduler != null) {
-          agentScheduler.shutdown(true);
+        for (String groupname : agentScheduler.getJobGroupNames()) {
+          for (String jobname : agentScheduler.getJobNames(groupname)) {
+            agentScheduler.deleteJob(jobname, groupname);
+          }
+        }
+        agentScheduler.shutdown(true);
       }
     } catch (SchedulerException e) {
       logger.warn("Finalize for scheduler did not execute cleanly: {}.", e.getMessage());

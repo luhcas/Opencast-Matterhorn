@@ -90,6 +90,10 @@ public class StartCaptureJob implements Job {
 
       // Actually does the service
       String recordingID = ca.startCapture(mp, props);
+      if (recordingID == null) {
+        logger.error("Capture agent returned null when trying to start capture!");
+        return;
+      }
 
       // Stores the recordingID so that it can be passed from one job to the other
       trigger.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);

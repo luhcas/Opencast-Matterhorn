@@ -738,6 +738,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       for (String jobname : jobs) {
         if (jobname.equals("StopCapture-" + recordingID)) {
           scheduler.deleteJob(jobname, JobParameters.OTHER_TYPE);
+        } else if (jobname.equals("SerializeJob-" + recordingID)) {
+          scheduler.deleteJob(jobname, JobParameters.OTHER_TYPE);
         }
       }
     } catch (SchedulerException e) {
@@ -914,6 +916,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   public void shutdown() {
     try {
       if (scheduler != null) {
+        for (String groupname : scheduler.getJobGroupNames()) {
+          for (String jobname : scheduler.getJobNames(groupname)) {
+            scheduler.deleteJob(jobname, groupname);
+          }
+        }
         scheduler.shutdown(true);
       }
     } catch (SchedulerException e) {

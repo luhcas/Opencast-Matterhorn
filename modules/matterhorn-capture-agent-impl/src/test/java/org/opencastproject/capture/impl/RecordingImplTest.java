@@ -82,6 +82,7 @@ public class RecordingImplTest {
     Assert.assertEquals("MyTestRecording", rec.getID());
     Assert.assertEquals("MyTestRecording", rec.getProperty(CaptureParameters.RECORDING_ID));
     Assert.assertEquals("MyTestRecording", rec.getProperties().getProperty(CaptureParameters.RECORDING_ID));
+    configManager.setItem(CaptureParameters.RECORDING_ID, null);
   }
 
   @Test
@@ -96,6 +97,7 @@ public class RecordingImplTest {
     Assert.assertEquals("MyTestRecording", rec.getID());
     Assert.assertEquals("MyTestRecording", rec.getProperty(CaptureParameters.RECORDING_ID));
     Assert.assertEquals("MyTestRecording", rec.getProperties().getProperty(CaptureParameters.RECORDING_ID));
+    configManager.setItem(CaptureParameters.RECORDING_ROOT_URL, null);
   }
 
   @Test
@@ -112,6 +114,8 @@ public class RecordingImplTest {
     Assert.assertEquals(recordingID, rec.getID());
     Assert.assertEquals(recordingID, rec.getProperty(CaptureParameters.RECORDING_ID));
     Assert.assertEquals(recordingID, rec.getProperties().getProperty(CaptureParameters.RECORDING_ID));
+    configManager.setItem(CaptureParameters.RECORDING_ID, null);
+    configManager.setItem(CaptureParameters.RECORDING_ROOT_URL, null);
   }
 }
 
