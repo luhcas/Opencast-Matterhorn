@@ -47,6 +47,7 @@ import org.gstreamer.Bus;
 import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
 import org.gstreamer.State;
+import org.gstreamer.event.EOSEvent;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.command.CommandProcessor;
@@ -412,7 +413,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         return false;
     } else {
       // We must stop the capture as soon as possible, then check whatever needed
-      pipe.stop();
+      pipe.sendEvent(new EOSEvent());
       pipe = null;
       
       // Checks there is a currentRecID defined --should always be
