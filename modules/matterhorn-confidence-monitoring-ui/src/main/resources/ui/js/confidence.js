@@ -60,10 +60,8 @@ Monitor.audioDevice = function(index){
 
 Monitor.updateImg = function(){
 	log('update image');
-  var imgGrab = CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/" + Monitor.devices[Monitor.selectedVideoDevice].name;
-  var img = new Image();
-  img.src = imgGrab;
-  $("#image_preview").empty().append(img);
+  var imgGrab = CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/" + Monitor.devices[Monitor.selectedVideoDevice].name + "?" + Math.random();
+  $("#snapshot").attr('src', imgGrab);
 }
 
 Monitor.updateAudio = function(){
