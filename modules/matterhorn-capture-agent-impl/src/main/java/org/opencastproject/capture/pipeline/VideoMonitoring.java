@@ -21,6 +21,7 @@ import org.opencastproject.capture.api.CaptureParameters;
 import com.sun.jna.Pointer;
 
 import org.gstreamer.Buffer;
+import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
@@ -61,7 +62,7 @@ public class VideoMonitoring {
   public static boolean addVideoMonitor(Pipeline pipeline, Element src, Element sink, final long interval, final String location,
           final String device) {
           
-      Element tee, queue0, queue1, decodebin, jpegenc;
+      Element tee, queue0, queue1, decodebin, videorate, capsfilter, jpegenc;
       final Element ffmpegcolorspace;
       AppSink appsink;
       
@@ -71,13 +72,16 @@ public class VideoMonitoring {
       queue1 = ElementFactory.make("queue", null);
       decodebin = ElementFactory.make("decodebin", null);
       ffmpegcolorspace = ElementFactory.make("ffmpegcolorspace", null);
+      videorate = ElementFactory.make("videorate", null);
+      capsfilter = ElementFactory.make("capsfilter", null);
       jpegenc = ElementFactory.make("jpegenc", null);
       appsink = (AppSink) ElementFactory.make("appsink", null);
       
       tee.set("silent", "false");
+      capsfilter.setCaps(Caps.fromString("video/x-raw-yuv, framerate=1/"+interval));
       appsink.set("emit-signals", "true");
       
-      pipeline.addMany(tee, queue0, queue1, decodebin, ffmpegcolorspace, jpegenc, appsink);
+      pipeline.addMany(tee, queue0, queue1, decodebin, ffmpegcolorspace, videorate, capsfilter, jpegenc, appsink);
       src.unlink(sink);
       
       decodebin.connect(new Element.PAD_ADDED() {
@@ -110,8 +114,16 @@ public class VideoMonitoring {
       Pad p = new Pad(null, PadDirection.SRC);
       decodebin.addPad(p);
       
-      if (!ffmpegcolorspace.link(jpegenc)) {
-        logger.error("Could not link {} with {}", ffmpegcolorspace.toString(), jpegenc.toString());
+      if (!ffmpegcolorspace.link(videorate)) {
+        logger.error("Could not link {} with {}", ffmpegcolorspace.toString(), videorate.toString());
+        return false;
+      }
+      if (!videorate.link(capsfilter)) {
+        logger.error("Could not link {} with {}", videorate.toString(), capsfilter.toString());
+        return false;
+      }
+      if (!capsfilter.link(jpegenc)) {
+        logger.error("Could not link {} with {}", capsfilter.toString(), jpegenc.toString());
         return false;
       }
       if (!jpegenc.link(appsink)) {
