@@ -339,8 +339,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * 
    * @see org.opencastproject.workflow.api.WorkflowService#unregisterWorkflowDefinition(org.opencastproject.workflow.api.WorkflowDefinition)
    */
-  public void unregisterWorkflowDefinition(String workflowTitle) {
-    workflowDefinitions.remove(workflowTitle);
+  public void unregisterWorkflowDefinition(String workflowDefinitionId) {
+    workflowDefinitions.remove(workflowDefinitionId);
   }
 
   /**

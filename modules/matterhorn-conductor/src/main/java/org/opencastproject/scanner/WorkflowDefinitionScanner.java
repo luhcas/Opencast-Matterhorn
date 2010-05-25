@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Loads, unloads, and reloads {@link WorkflowDefinition}s from "*workflow.xml" files in any of fileinstall's watch
@@ -35,6 +37,9 @@ import java.io.InputStream;
 public class WorkflowDefinitionScanner implements ArtifactInstaller {
   private static final Logger logger = LoggerFactory.getLogger(WorkflowDefinitionScanner.class);
   
+  /** An internal collection of workflows that we have installed */
+  protected Map<File, WorkflowDefinition> installedWorkflows = new HashMap<File, WorkflowDefinition>();
+
   protected WorkflowService workflowService;
   public void setWorkflowService(WorkflowService workflowService) {
     this.workflowService = workflowService;
@@ -51,6 +56,7 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
       stream = new FileInputStream(artifact);
       WorkflowDefinition def = WorkflowBuilder.getInstance().parseWorkflowDefinition(stream);
       workflowService.registerWorkflowDefinition(def);
+      installedWorkflows.put(artifact, def);
     } finally {
       IOUtils.closeQuietly(stream);
     }
@@ -61,15 +67,10 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
    * @see org.apache.felix.fileinstall.ArtifactInstaller#uninstall(java.io.File)
    */
   public void uninstall(File artifact) throws Exception {
-    logger.info("Uninstalling workflow from file {}", artifact.getAbsolutePath());
-    InputStream stream = null;
-    try {
-      stream = new FileInputStream(artifact);
-      WorkflowDefinition def = WorkflowBuilder.getInstance().parseWorkflowDefinition(stream);
-      workflowService.unregisterWorkflowDefinition(def.getId());
-    } finally {
-      IOUtils.closeQuietly(stream);
-    }
+    // Since the artifact is gone, we can't open it to read its ID.  So we look in the local map.
+    WorkflowDefinition def = installedWorkflows.get(artifact);
+    logger.info("Uninstalling workflow '{}' from file {}", def.getId(), artifact.getAbsolutePath());
+    workflowService.unregisterWorkflowDefinition(def.getId());
   }
 
   /**

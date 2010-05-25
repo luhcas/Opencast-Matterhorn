@@ -182,11 +182,11 @@ public interface WorkflowService {
   void registerWorkflowDefinition(WorkflowDefinition definition);
 
   /**
-   * Removes the {@link WorkflowDefinition} specified by this title from the list of available
+   * Removes the {@link WorkflowDefinition} specified by this ID from the list of available
    * {@link WorkflowDefinition}s.
    * 
-   * @param title
-   *          The title of the {@link WorkflowDefinition} to unregister
+   * @param workflowDefinitionId
+   *          The identifier of the {@link WorkflowDefinition} to unregister
    */
-  void unregisterWorkflowDefinition(String title);
+  void unregisterWorkflowDefinition(String workflowDefinitionId);
 }
