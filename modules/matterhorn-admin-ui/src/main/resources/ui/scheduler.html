@@ -26,6 +26,7 @@
     <script type="text/javascript" src="js/scheduler.js"></script>
     <script type="text/javascript" src="shared_js/version.js"></script>
     <script type="text/javascript" src="js/adminui.js"></script>
+    <script type="text/javascript" src="js/oc.workflow.js"></script>
     <script type="text/javascript">
       $(document).ready(init);
     </script>
@@ -181,36 +182,6 @@
                     <label class="fl-label" for="description" id="label-description"><span id="i18n_desc_label"></span>:</label>
                     <textarea name="description" id="description" class="form-field" rows="5" cols="10"></textarea>
                     <span class="fl-icon icon-help"  id="help_description" title="Click for help"></span>
-                  </li>
-                </ul>
-              </form>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Distribution and Licensing -->
-        <div class="fl-container-800">
-          <div class="fl-widget">
-            <div class="fl-widget-titlebar form-box-title"><b id="i18n_distribution"></b></div>
-            <div class="fl-widget-content form-box-container">
-              <form action="">
-                <ul class="fl-controls-right form-list">
-                  <li class="required">
-                    <label class="fl-label form-box-label" id="label-distribution"><span id="i18n_dist_label"></span>:</label>
-                    <div style="float: left;">
-                      <ul class="form-box-group">
-                        <li class="column1">
-                          <input type="checkbox" id="distMatterhornMM" value="Matterhorn Media Module" checked="checked" disabled="disabled">
-                          <label for="distMatterhornMM" id="i18n_dist_mmm"></label>
-                        </li>
-                      </ul>
-                    </div>
-                    <span class="fl-icon icon-help" id="help_distribution" title="Click for help"></span>
-                  </li>
-                  <li style="clear:both">
-                    <label class="fl-label" for="license"  id="label-license"><span id="i18n_license_label"></span>:</label>
-                    <input type="text" name="license" id="license" class="form-field">
-                    <span class="fl-icon icon-help" id="help_license" title="Click for help"></span>
                   </li>
                 </ul>
               </form>
@@ -606,7 +577,24 @@
             </div>
           </div>
         </div>
-        
+
+        <!-- Processing Instructions -->
+        <div class="fl-container-800">
+          <div class="fl-widget">
+            <div class="fl-widget-titlebar form-box-title"><b id="i18n_process_title">Processing</b></div>
+            <div class="fl-widget-content form-box-container">
+              <ul class="fl-controls-right form-list">
+                <li class="ui-helper-clearfix">
+                  <label class="fl-label"><span class="color-red">* </span><span id="i18n_process_instr">Processing instructions</span>:</label>
+                  <select id="workflow-selector" style="float:left;margin:3px;"></select>
+                  <span class="helpIcon" title="Click for help">&nbsp;</span>
+                </li>
+              </ul>
+              <div id="workflow-config-container"></div>
+            </div>
+          </div>
+        </div>
+
         <div class="fl-container-800">
           <div class="fl-widget">
             <div class="fl-widget-content fl-fix">

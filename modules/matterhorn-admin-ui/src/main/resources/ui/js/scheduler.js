@@ -27,7 +27,10 @@ Agent.tzDiff          = 0;
 
 function init() {
   //Do internationalization of text
-  jQuery.i18n.properties({name:'scheduler',path:'i18n/'});
+  jQuery.i18n.properties({
+    name:'scheduler',
+    path:'i18n/'
+  });
   AdminUI.internationalize(i18n, 'i18n');
   //Handle special cases like the window title.
   document.title = i18n.window.prefix + " " + i18n.window.schedule;
@@ -39,22 +42,42 @@ function init() {
    * Setup event handlers on various interface elements.
    */
   var d = new Date();
-  $('#singleRecording').click(function(){ SchedulerUI.selectRecordingType('single'); });
-  $('#multipleRecordings').click(function(){ SchedulerUI.selectRecordingType('multiple'); });
+  $('#singleRecording').click(function(){
+    SchedulerUI.selectRecordingType('single');
+  });
+  $('#multipleRecordings').click(function(){
+    SchedulerUI.selectRecordingType('multiple');
+  });
   
   //Single recording specific elements
   d.setHours(d.getHours() + 1); //increment an hour.
   d.setMinutes(0);
 
   $('#startTimeHour').val(d.getHours());
-  $('#startDate').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
+  $('#startDate').datepicker({
+    showOn: 'both',
+    buttonImage: 'shared_img/icons/calendar.gif',
+    buttonImageOnly: true
+  });
   $('#startDate').datepicker('setDate', d);
-  $('#endDate').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
+  $('#endDate').datepicker({
+    showOn: 'both',
+    buttonImage: 'shared_img/icons/calendar.gif',
+    buttonImageOnly: true
+  });
   $('#attendees').change(SchedulerUI.handleAgentChange);
   
   //multiple recording specific elements
-  $('#recurStart').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
-  $('#recurEnd').datepicker({showOn: 'both', buttonImage: 'shared_img/icons/calendar.gif', buttonImageOnly: true});
+  $('#recurStart').datepicker({
+    showOn: 'both',
+    buttonImage: 'shared_img/icons/calendar.gif',
+    buttonImageOnly: true
+  });
+  $('#recurEnd').datepicker({
+    showOn: 'both',
+    buttonImage: 'shared_img/icons/calendar.gif',
+    buttonImageOnly: true
+  });
   //$('#schedule_repeat').change(function(){ SchedulerUI.showDaySelect(this.options[this.selectedIndex].value); });
   $('#recurAgent').change(SchedulerUI.handleAgentChange);
   
@@ -106,6 +129,8 @@ function init() {
         $.get(CAPTURE_ADMIN_URL + '/agents/' + $('#attendees option:selected').val(), SchedulerUI.checkAgentStatus);
       });
   }
+
+  ocWorkflow.init($('#workflow-selector'), $('#workflow-config-container'));
 }
 
 /* ======================== SchedulerUI ======================== */
@@ -128,15 +153,33 @@ SchedulerUI.submitForm = function() {
   if(eventXML){
     if($('#singleRecording')[0].checked){
       if(SchedulerUI.getURLParams('edit')){
-        $.post( SCHEDULER_URL + '/event', {event: eventXML}, SchedulerUI.eventSubmitComplete );
+        $.post( SCHEDULER_URL + '/event', {
+          event: eventXML
+        }, SchedulerUI.eventSubmitComplete );
       }else{
-        $.ajax({ type: "PUT", url: SCHEDULER_URL + '/event', data: {event: eventXML}, success: SchedulerUI.eventSubmitComplete });
+        $.ajax({
+          type: "PUT",
+          url: SCHEDULER_URL + '/event',
+          data: {
+            event: eventXML
+          },
+          success: SchedulerUI.eventSubmitComplete
+        });
       }
     }else{
       if(SchedulerUI.getURLParams('edit')){
-        $.post( SCHEDULER_URL + '/recurrence', {recurringEvent: eventXML}, SchedulerUI.eventSubmitComplete );
+        $.post( SCHEDULER_URL + '/recurrence', {
+          recurringEvent: eventXML
+        }, SchedulerUI.eventSubmitComplete );
       }else{
-        $.ajax({ type: "PUT", url: SCHEDULER_URL + '/recurrence', data: {recurringEvent: eventXML}, success: SchedulerUI.eventSubmitComplete });
+        $.ajax({
+          type: "PUT",
+          url: SCHEDULER_URL + '/recurrence',
+          data: {
+            recurringEvent: eventXML
+          },
+          success: SchedulerUI.eventSubmitComplete
+        });
       }
     }
   }
@@ -280,35 +323,39 @@ SchedulerUI.handleAgentChange = function(elm){
   var agent = elm.target.value;
   $(SchedulerUI.inputList).empty();
   $.get('/capture-admin/rest/agents/' + agent + '/capabilities',
-        function(d){
-          var capabilities = [];
-          $.each($('entry', d), function(a, i){
-            var s = $(i).attr('key');
-            if(s.indexOf('.src') != -1){
-              var name = s.split('.');
-              capabilities.push(name[2]);
-            } else if(s == 'capture.device.timezone.offset') {
-              var agent_tz = parseInt($(i).text());
-              if(agent_tz !== 'NaN'){
-                SchedulerUI.handleAgentTZ(agent_tz);
-              }
-            }
-          });
-          if(capabilities.length){
-            SchedulerUI.displayCapabilities(capabilities);
-          }else{
-            Agent.tzDiff = 0; //No agent timezone could be found, assume local time.
-            $('#input-list').append('Agent defaults will be used.');
-            //SchedulerForm.formFields.resources = new FormField('agentDefaults', false, {getValue: getInputs, setValue: setInputs, checkValue: checkInputs});
+    function(d){
+      var capabilities = [];
+      $.each($('entry', d), function(a, i){
+        var s = $(i).attr('key');
+        if(s.indexOf('.src') != -1){
+          var name = s.split('.');
+          capabilities.push(name[2]);
+        } else if(s == 'capture.device.timezone.offset') {
+          var agent_tz = parseInt($(i).text());
+          if(agent_tz !== 'NaN'){
+            SchedulerUI.handleAgentTZ(agent_tz);
           }
-        });
+        }
+      });
+      if(capabilities.length){
+        SchedulerUI.displayCapabilities(capabilities);
+      }else{
+        Agent.tzDiff = 0; //No agent timezone could be found, assume local time.
+        $('#input-list').append('Agent defaults will be used.');
+      //SchedulerForm.formFields.resources = new FormField('agentDefaults', false, {getValue: getInputs, setValue: setInputs, checkValue: checkInputs});
+      }
+    });
 }
 
 SchedulerUI.displayCapabilities = function(capa){
   $.each(capa, function(i, v){
     $(SchedulerUI.inputList).append('<input type="checkbox" id="' + v + '" value="' + v + '" checked="checked"><label for="' + v +'">' + v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() + '</label>');
   });
-  SchedulerForm.formFields.resources = new FormField(capa, false, {getValue: getInputs, setValue: setInputs, checkValue: checkInputs});
+  SchedulerForm.formFields.resources = new FormField(capa, false, {
+    getValue: getInputs,
+    setValue: setInputs,
+    checkValue: checkInputs
+  });
 }
 
 SchedulerUI.handleAgentTZ = function(tz){
@@ -386,14 +433,47 @@ SchedulerUI.selectRecordingType = function(recType){
       'subject':              new FormField('subject'),
       'language':             new FormField('language'),
       'abstract':             new FormField('description'),
-      'channel-id':           new FormField('distMatterhornMM', true, {label:'label-distribution',errorField:'missing-distribution'}),
+//      'channel-id':           new FormField('distMatterhornMM', true, {
+//        label:'label-distribution',
+//        errorField:'missing-distribution'
+//      }),
       'license':              new FormField('license'),
-      'recurrence.start':     new FormField(['recurStart', 'recurStartTimeHour', 'recurStartTimeMin'], true, { getValue:getRecurStart, setValue:setRecurStart, checkValue:checkRecurStart, dispValue:getRecurStartDisplay, label:'label-recurstart', errorField:'missing-recurstart' }),
-      'recurrence.duration':  new FormField(['recurDurationHour', 'recurDurationMin'], true, { getValue:getDuration, setValue:setDuration, checkValue:checkDuration, dispValue:getDurationDisplay, label:'label-recurduration', errorField:'missing-duration' }), //returns a date incremented by duration.
-      'recurrence.end':       new FormField(['recurEnd', 'recurStart', 'recurStartTimeHour', 'recurStartTimeMin'], true, {getValue:getRecurEnd, setValue:setRecurEnd, checkValue:checkRecurEnd, dispValue:getRecurEndDisplay, label:'label-recurend', errorField:'error-recurstart-end' }),
-      'attendees':            new FormField('recurAgent', true, { getValue:getRecurAgent, setValue:setRecurAgent, checkValue:checkRecurAgent }),
+      'recurrence.start':     new FormField(['recurStart', 'recurStartTimeHour', 'recurStartTimeMin'], true, {
+        getValue:getRecurStart,
+        setValue:setRecurStart,
+        checkValue:checkRecurStart,
+        dispValue:getRecurStartDisplay,
+        label:'label-recurstart',
+        errorField:'missing-recurstart'
+      }),
+      'recurrence.duration':  new FormField(['recurDurationHour', 'recurDurationMin'], true, {
+        getValue:getDuration,
+        setValue:setDuration,
+        checkValue:checkDuration,
+        dispValue:getDurationDisplay,
+        label:'label-recurduration',
+        errorField:'missing-duration'
+      }), //returns a date incremented by duration.
+      'recurrence.end':       new FormField(['recurEnd', 'recurStart', 'recurStartTimeHour', 'recurStartTimeMin'], true, {
+        getValue:getRecurEnd,
+        setValue:setRecurEnd,
+        checkValue:checkRecurEnd,
+        dispValue:getRecurEndDisplay,
+        label:'label-recurend',
+        errorField:'error-recurstart-end'
+      }),
+      'attendees':            new FormField('recurAgent', true, {
+        getValue:getRecurAgent,
+        setValue:setRecurAgent,
+        checkValue:checkRecurAgent
+      }),
       'device':               new FormField('recurAgent'),
-      'recurrence':           new FormField(['schedule_repeat', 'repeat_sun', 'repeat_mon', 'repeat_tue', 'repeat_wed', 'repeat_thu', 'repeat_fri', 'repeat_sat'], true, {getValue: getRecurValue, setValue: setRecurValue, checkValue: checkRecurValue, dispValue: getRecurDisp})
+      'recurrence':           new FormField(['schedule_repeat', 'repeat_sun', 'repeat_mon', 'repeat_tue', 'repeat_wed', 'repeat_thu', 'repeat_fri', 'repeat_sat'], true, {
+        getValue: getRecurValue,
+        setValue: setRecurValue,
+        checkValue: checkRecurValue,
+        dispValue: getRecurDisp
+      })
     };
     SchedulerForm.rootEl = 'RecurringEvent';
   }else{
@@ -412,11 +492,32 @@ SchedulerUI.selectRecordingType = function(recType){
       'subject':          new FormField('subject'),
       'language':         new FormField('language'),
       'abstract':         new FormField('description'),
-      'channel-id':       new FormField('distMatterhornMM', true, {label:'label-distribution',errorField:'missing-distribution'}),
+//      'channel-id':       new FormField('distMatterhornMM', true, {
+//        label:'label-distribution',
+//        errorField:'missing-distribution'
+//      }),
       'license':          new FormField('license'),
-      'time.start':       new FormField(['startDate', 'startTimeHour', 'startTimeMin'], true, { getValue:getStartDate, setValue:setStartDate, checkValue:checkStartDate, dispValue:getStartDateDisplay, label:'label-startdate', errorField:'missing-startdate' }),
-      'time.end':         new FormField(['durationHour', 'durationMin'], true, { getValue:getEndTime, setValue:setEndTime, checkValue:checkEndTime, dispValue:getEndTimeDisplay, label:'label-duration', errorField:'missing-duration' }), //returns a date incremented by duration.
-      'attendees':        new FormField('attendees', true, { getValue:getAgent, setValue:setAgent, checkValue:checkAgent }),
+      'time.start':       new FormField(['startDate', 'startTimeHour', 'startTimeMin'], true, {
+        getValue:getStartDate,
+        setValue:setStartDate,
+        checkValue:checkStartDate,
+        dispValue:getStartDateDisplay,
+        label:'label-startdate',
+        errorField:'missing-startdate'
+      }),
+      'time.end':         new FormField(['durationHour', 'durationMin'], true, {
+        getValue:getEndTime,
+        setValue:setEndTime,
+        checkValue:checkEndTime,
+        dispValue:getEndTimeDisplay,
+        label:'label-duration',
+        errorField:'missing-duration'
+      }), //returns a date incremented by duration.
+      'attendees':        new FormField('attendees', true, {
+        getValue:getAgent,
+        setValue:setAgent,
+        checkValue:checkAgent
+      }),
       'device':           new FormField('attendees')
     };
     SchedulerForm.rootEl = 'Event';
@@ -477,16 +578,14 @@ SchedulerForm.serialize = function() {
         el.appendChild(doc.createTextNode(this.formFields[e].getValue()));
         doc.documentElement.appendChild(el);
       } else {
-        metadata = doc.createElement('metadata');
-        key = doc.createElement('key');
-        value = doc.createElement('value');
-        key.appendChild(doc.createTextNode(e));
-        value.appendChild(doc.createTextNode(this.formFields[e].getValue()));
-        metadata.appendChild(key);
-        metadata.appendChild(value);
-        mdlist.appendChild(metadata);
+        mdlist.appendChild(SchedulerForm.createMetadataElement(doc, e, this.formFields[e].getValue()));
       }
     }
+    var wfConfig = ocWorkflow.getConfiguration($('#workflow-config-container'));
+    for (var i in wfConfig) {
+      mdlist.appendChild(SchedulerForm.createMetadataElement(doc, 'org.opencastproject.workflow.config.'+i, wfConfig[i]));
+    }
+    mdlist.appendChild(SchedulerForm.createMetadataElement(doc, 'org.opencastproject.workflow.definition', $('#workflow-selector').val()));
     doc.documentElement.appendChild(mdlist);
     if(typeof XMLSerializer != 'undefined') {
       return (new XMLSerializer()).serializeToString(doc);
@@ -498,6 +597,17 @@ SchedulerForm.serialize = function() {
   }
 };
 
+SchedulerForm.createMetadataElement = function(doc, key, value) {
+  var metadata = doc.createElement('metadata');
+  var keyElm = doc.createElement('key');
+  var valueElm = doc.createElement('value');
+  keyElm.appendChild(doc.createTextNode(key));
+  valueElm.appendChild(doc.createTextNode(value));
+  metadata.appendChild(keyElm);
+  metadata.appendChild(valueElm);
+  return metadata;
+}
+
 /**
  *  Validate the form values.
  *  @return {boolean} True if form is valid.
@@ -506,11 +616,16 @@ SchedulerForm.validate = function() {
   var error = false;
   $('#missingFields-container').hide();
   //Hide the errors that are just for multiple, so they don't show up if you're making a single recording.
-  $('.multiple-error').each( function(i,v){ if(!$(v).hasClass('single-error')){ $(v).hide(); } });
+  $('.multiple-error').each( function(i,v){
+    if(!$(v).hasClass('single-error')){
+      $(v).hide();
+    }
+  });
   for(var el in this.formFields) {
     var e = this.formFields[el];
     if(e.required){
       if(!e.checkValue()){
+        alert(el + " wrong!");
         error = true;
         $('#' + e.errorField).show();
         $('#' + e.label).addClass('error');
@@ -719,7 +834,9 @@ function getAgent() {
  */
 function setAgent(value) {
   if(typeof value == 'string'){
-    value = { attendees: value };
+    value = {
+      attendees: value
+    };
   }
   var opts = this.fields.attendees.children();
   var agentId = value.attendees;
@@ -781,7 +898,9 @@ function getDurationDisplay() {
  */
 function setDuration(value) {
   if(typeof value == 'string'){
-    value = { duration: value };
+    value = {
+      duration: value
+    };
   }
   var val = parseInt(value.duration);
   if(val == "NaN") {
@@ -802,7 +921,7 @@ function setDuration(value) {
  */
 function checkDuration(){
   if(this.fields.recurDurationHour && this.fields.recurDurationMin &&
-     (this.fields.recurDurationHour.val() != '0' || this.fields.recurDurationMin.val() != '0')){
+    (this.fields.recurDurationHour.val() != '0' || this.fields.recurDurationMin.val() != '0')){
     return true;
   }
   return false;
@@ -830,7 +949,9 @@ function getInputs(){
  */
 function setInputs(value){
   if(typeof value == 'string'){
-    value = { resources: value };
+    value = {
+      resources: value
+    };
   }
   for(var el in this.fields){
     var e = this.fields[el];
@@ -886,7 +1007,9 @@ function getStartDateDisplay(){
  */
 function setStartDate(value){
   if(typeof value == 'string'){
-    value = { startdate: value };
+    value = {
+      startdate: value
+    };
   }
   var date = parseInt(value.startdate);
   if(date != 'NaN') {
@@ -919,10 +1042,10 @@ function checkStartDate(){
     this.fields.startTimeHour &&
     this.fields.startTimeMin) {
     var startdatetime = new Date(date.getFullYear(), 
-                                 date.getMonth(), 
-                                 date.getDate(), 
-                                 this.fields.startTimeHour.val(),
-                                 this.fields.startTimeMin.val());
+      date.getMonth(),
+      date.getDate(),
+      this.fields.startTimeHour.val(),
+      this.fields.startTimeMin.val());
     if(startdatetime.getTime() >= now.getTime()) {
       return true;
     }
@@ -975,7 +1098,9 @@ function getRecurValue(){
 function setRecurValue(value){
   //to do, handle day offset.
   if(typeof value == 'string'){
-    value = { rrule: value };
+    value = {
+      rrule: value
+    };
   }
   if(value.rrule.indexOf('FREQ=WEEKLY') != -1){
     this.fields.schedule_repeat.val('weekly');
@@ -1015,15 +1140,15 @@ function setRecurValue(value){
 function checkRecurValue(){
   if(this.fields.schedule_repeat.val() != 'norepeat'){
     if(this.fields.repeat_sun[0].checked ||
-       this.fields.repeat_mon[0].checked ||
-       this.fields.repeat_tue[0].checked ||
-       this.fields.repeat_wed[0].checked ||
-       this.fields.repeat_thu[0].checked ||
-       this.fields.repeat_fri[0].checked ||
-       this.fields.repeat_sat[0].checked ){
+      this.fields.repeat_mon[0].checked ||
+      this.fields.repeat_tue[0].checked ||
+      this.fields.repeat_wed[0].checked ||
+      this.fields.repeat_thu[0].checked ||
+      this.fields.repeat_fri[0].checked ||
+      this.fields.repeat_sat[0].checked ){
       if(SchedulerForm.formFields['recurrence.start'].checkValue() &&
-         SchedulerForm.formFields['recurrence.duration'].checkValue() &&
-         SchedulerForm.formFields['recurrence.end'].checkValue()){
+        SchedulerForm.formFields['recurrence.duration'].checkValue() &&
+        SchedulerForm.formFields['recurrence.end'].checkValue()){
         return true;
       }
     }
@@ -1034,7 +1159,16 @@ function checkRecurValue(){
 function getRecurDisp(){
   //todo, get local days not UTC.
   var rrule = this.getValue().split(';');
-  var found = (function(){ var index = -1; $.each(rrule, function(i, v){ if(v.indexOf('BYDAY=') != -1){ index = i; return true; }}); return index;})();
+  var found = (function(){
+    var index = -1;
+    $.each(rrule, function(i, v){
+      if(v.indexOf('BYDAY=') != -1){
+        index = i;
+        return true;
+      }
+    });
+    return index;
+  })();
   if(found != -1){
     days = rrule[found].replace('BYDAY=', '').split(',');
     var dlist = [];
@@ -1080,7 +1214,9 @@ function getEndTime(){
 
 function setEndTime(value){
   if(typeof value == 'string'){
-    value = { duration: value };
+    value = {
+      duration: value
+    };
   }
   var val = parseInt(value.duration);
   if(val == "NaN") {
@@ -1097,7 +1233,7 @@ function setEndTime(value){
 
 function checkEndTime(){
   if(this.fields.durationHour && this.fields.durationMin &&
-     (this.fields.durationHour.val() !== '0' || this.fields.durationMin.val() !== '0')){
+    (this.fields.durationHour.val() !== '0' || this.fields.durationMin.val() !== '0')){
     return true;
   }
   return false;
@@ -1131,7 +1267,9 @@ function getRecurStartDisplay(){
 
 function setRecurStart(value){
   if(typeof value == 'string'){
-    value = { startdate: value };
+    value = {
+      startdate: value
+    };
   }
   var date = parseInt(value.startdate);
   if(date != 'NaN') {
@@ -1155,13 +1293,13 @@ function checkRecurStart(){
     now += Agent.tzDiff  * 60 * 1000; //Offset by the difference between local and client.
     now = new Date(now);
     if(date &&
-       this.fields.recurStartTimeHour &&
-       this.fields.recurStartTimeMin) {
+      this.fields.recurStartTimeHour &&
+      this.fields.recurStartTimeMin) {
       var startdatetime = new Date(date.getFullYear(), 
-                                   date.getMonth(), 
-                                   date.getDate(), 
-                                   this.fields.recurStartTimeHour.val(),
-                                   this.fields.recurStartTimeMin.val());
+        date.getMonth(),
+        date.getDate(),
+        this.fields.recurStartTimeHour.val(),
+        this.fields.recurStartTimeMin.val());
       if(startdatetime.getTime() >= now.getTime()) {
         return true;
       }
@@ -1199,8 +1337,8 @@ function setRecurEnd(value){
 
 function checkRecurEnd(){
   if(this.fields.recurEnd.datepicker && this.fields.recurStart.datepicker && SchedulerForm.formFields['recurrence.duration'].checkValue() &&
-     this.fields.recurStartTimeHour && this.fields.recurStartTimeMin &&
-     this.fields.recurEnd.datepicker('getDate') > this.fields.recurStart.datepicker('getDate')){
+    this.fields.recurStartTimeHour && this.fields.recurStartTimeMin &&
+    this.fields.recurEnd.datepicker('getDate') > this.fields.recurStart.datepicker('getDate')){
     return true;
   }
   return false;
@@ -1223,7 +1361,9 @@ function getRecurAgent() {
  */
 function setRecurAgent(value) {
   if(typeof value == 'string'){
-    value = { attendees: value };
+    value = {
+      attendees: value
+    };
   }
   var opts = this.fields.recurAgent.children();
   var agentId = value.attendees;

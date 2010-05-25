@@ -102,30 +102,31 @@ Upload.init = function() {
   });
 
   // Event: workflow selected
-  $('#workflow-selector').change( function() {
-    Upload.workflowSelected($(this).val());
-  })
+//  $('#workflow-selector').change( function() {
+//    Upload.workflowSelected($(this).val());
+//  })
 
   // get workflow definitions
-  $.ajax({
-    method: 'GET',
-    url: '../workflow/rest/definitions.json',
-    dataType: 'json',
-    success: function(data) {
-      for (i in data.workflow_definitions) {
-        if (data.workflow_definitions[i].id != 'error') {
-          var option = document.createElement("option");
-          option.setAttribute("value", data.workflow_definitions[i].id);
-          option.innerHTML = data.workflow_definitions[i].title;
-          if (data.workflow_definitions[i].id == "full") {
-            option.setAttribute("selected", "true");
-          }
-          $('#workflow-selector').append(option);
-        }
-      }
-      Upload.workflowSelected($('#workflow-selector').val());
-    }
-  });
+//  $.ajax({
+//    method: 'GET',
+//    url: '../workflow/rest/definitions.json',
+//    dataType: 'json',
+//    success: function(data) {
+//      for (i in data.workflow_definitions) {
+//        if (data.workflow_definitions[i].id != 'error') {
+//          var option = document.createElement("option");
+//          option.setAttribute("value", data.workflow_definitions[i].id);
+//          option.innerHTML = data.workflow_definitions[i].title;
+//          if (data.workflow_definitions[i].id == "full") {
+//            option.setAttribute("selected", "true");
+//          }
+//          $('#workflow-selector').append(option);
+//        }
+//      }
+//      Upload.workflowSelected($('#workflow-selector').val());
+//    }
+//  });
+  ocWorkflow.init($('#workflow-selector'), $('#workflow-config-container'));
 
   // test if we upload a new recording or want to retry a workflow
   Upload.retryId = Upload.getURLParam("retry");
@@ -207,17 +208,17 @@ Upload.loadDublinCore = function(url) {
  *  the selected workflow if defined.
  *  
  */
-Upload.workflowSelected = function(workflow, callback) {
-  $('#workflow-config-container').load(
-    '../workflow/rest/configurationPanel?definitionId=' + workflow,
-    function() {
-      $('#workflow-config-container').show('fast');
-      if (callback) {
-        callback();
-      }
-    }
-    );
-}
+//Upload.workflowSelected = function(workflow, callback) {
+//  $('#workflow-config-container').load(
+//    '../workflow/rest/configurationPanel?definitionId=' + workflow,
+//    function() {
+//      $('#workflow-config-container').show('fast');
+//      if (callback) {
+//        callback();
+//      }
+//    }
+//    );
+//}
 
 Upload.populateWorkflowConfig = function(data) {
   $(data).each( function(elm) {
