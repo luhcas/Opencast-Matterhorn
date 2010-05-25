@@ -59,7 +59,7 @@ Monitor.audioDevice = function(index){
 Monitor.updateImg = function(){
 	log('update image');
   var imgGrab = CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/" + Monitor.devices[Monitor.selectedVideoDevice].name;
-  $("#image_preview").replaceWith('<img src="' + imgGrab + '"></img>');
+  $("#snapshot").attr('src', imgGrab);
 }
 
 Monitor.updateAudio = function(){
