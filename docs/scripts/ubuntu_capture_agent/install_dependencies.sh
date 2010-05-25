@@ -90,7 +90,7 @@ for (( i = 0; i < ${#pkgs[@]}; i++ )); do
 done
 
 # Install the required 3rd party packages
-apt-get -y --force-yes install ${noinst[@]} &> /dev/null
+apt-get -y --force-yes install ${noinst[@]} > /dev/null
 
 if [[ $? -ne 0 ]]; then
     echo "Error!"

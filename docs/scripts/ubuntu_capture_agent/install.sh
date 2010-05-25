@@ -16,7 +16,9 @@ export USERNAME=matterhorn                                  # Default name for t
 export START_PATH=$PWD                                      # Path from where this script is run initially
 export WORKING_DIR=/tmp/cainstallscript                     # Directory where this script will be run
 export TRUNK_URL=http://opencast.jira.com/svn/MH/trunk
-export TRUNK_SUBDIR=matterhorn-trunk                        # Subdir under the selected user $HOME directory
+export BRANCHES_URL=http://opencast.jira.com/svn/MH/branches
+export SRC_DEFAULT=trunk                                    # Default location from where the source code is fetched
+export SRC_SUBDIR=matterhorn-source                         # Subdir under the selected user $HOME directory
 export OC_DIR=/opt/matterhorn                               # Storage directory for the CA
 export DEV_RULES=/etc/udev/rules.d/matterhorn.rules         # File containing the rules to be applied by udev to the configured devices -- not a pun!
 export CONFIG_SCRIPT=device_config.sh                       # File name for the bash script under HOME containing the device configuration routine
@@ -33,7 +35,7 @@ export INSTALL_RUN=true                                     # The subsidiary scr
 
 
 # Third-party dependencies variables
-export PKG_LIST="alsa-utils v4l-conf ivtv-utils curl maven2 sun-java6-jdk subversion wget openssh-server gcc gstreamer0.10-plugins* gstreamer0.10-ffmpeg ntp acpid"
+export PKG_LIST="alsa-utils v4l-conf ivtv-utils curl maven2 sun-java6-jdk subversion wget openssh-server gcc gstreamer0.10-alsa gstreamer0.10-plugins-bad gstreamer0.10-plugins-bad-multiverse gstreamer0.10-plugins-base gstreamer0.10-plugins-good gstreamer0.10-plugins-ugly gstreamer0.10-plugins-ugly-multiverse gstreamer0.10-ffmpeg ntp acpid"
 
 export DEFAULT_FLAVOR=0                                                  # 0-based index default option for the device flavor
 export FLAVORS="presenter/source presentation/source audience/source indefinite/source"
@@ -163,7 +165,7 @@ fi
 echo -e "\n\nProceeding to build the capture agent source. This may take a long time. Press any key to continue...\n\n"
 read -n 1 -s
 
-cd $TRUNK
+cd $SOURCE
 su matterhorn -c "mvn clean install -Pcapture -DdeployTo=\${FELIX_HOME}/load"
 if [[ "$?" -ne 0 ]]; then
     echo -e "\nError building the matterhorn code. Contact matterhorn@opencastproject.org for assistance."

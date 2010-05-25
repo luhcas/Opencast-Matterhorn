@@ -49,7 +49,7 @@ fi
 
 # Export some other env. variables depending on the locations just created
 export CA_DIR=$HOME/$CA_SUBDIR
-export TRUNK=$CA_DIR/$TRUNK_SUBDIR
+export SOURCE=$CA_DIR/$SRC_SUBDIR
 export FELIX_HOME=$CA_DIR/$FELIX_SUBDIR
 export CAPTURE_PROPS=${FELIX_HOME}/${FELIX_PROPS_SUFFIX}
 export GEN_PROPS=${FELIX_HOME}/${FELIX_GENCONF_SUFFIX}

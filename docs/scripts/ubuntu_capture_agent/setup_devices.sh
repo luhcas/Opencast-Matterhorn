@@ -82,7 +82,7 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     # Check this name is not repeated
     suffix=0
     for (( t = 0; t < $i; t++ )); do
-	if [[ -n "$(echo "^$defaultName" | grep -i "${cleanName[$t]}")" ]]; then
+	if [[ -n "$(echo "${cleanName[$t]}" | grep -i "^$defaultName\(_[0-9][0-9]*\)\?")" ]]; then
 	    (( suffix += 1 ))
 	fi
     done    
@@ -240,7 +240,7 @@ if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
     # Check this name is not repeated
     suffix=0
     for (( t = 0; t < $i; t++ )); do
-	if [[ -n "$(echo "^$defaultName" | grep -i "${cleanName[$t]}")" ]]; then
+	if [[ -n "$(echo "${cleanName[$t]}" | grep -i "^$defaultName\(_[0-9][0-9]*\)\?")" ]]; then
 	    (( suffix += 1 ))
 	fi
     done    
