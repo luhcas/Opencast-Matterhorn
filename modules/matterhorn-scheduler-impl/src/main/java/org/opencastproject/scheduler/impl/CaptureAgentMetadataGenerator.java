@@ -61,6 +61,13 @@ public class CaptureAgentMetadataGenerator {
     
     Hashtable<String, String> caMetadata =  mapper.convert(event.getMetadata());
     
+    // pass through all workflow metadata to capture agent 
+    for (String key : event.getMetadata().keySet()) {
+      if (key.startsWith("org.opencastproject.workflow.")) {
+        caMetadata.put(key, event.getMetadata().get(key));
+      }
+    }
+    
     Properties caCatalog = new Properties();
     
     String [] res = event.getResources();
