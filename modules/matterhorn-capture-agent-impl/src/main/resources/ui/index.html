@@ -11,6 +11,10 @@
 	function stopCapture() {
 		document.location = "http://" + window.location.hostname + ":8080/capture/rest/stopCapture";
 	}
+	var getState = new XMLHttpRequest();
+	getState.open("GET", "http://" + window.location.hostname + ":8080/state/rest/GetState", false);
+	getState.send();
+	document.write("<p><code>Agent State: " + getState.responseText + "</code></p>");
 	
 	var start = "http://" + window.location.hostname + ":8080/capture/rest/startCapture"
 	var end = "<a href='http://" + window.location.hostname + ":8080/capture/rest/stopCapture'>Stop Capture</a>";
