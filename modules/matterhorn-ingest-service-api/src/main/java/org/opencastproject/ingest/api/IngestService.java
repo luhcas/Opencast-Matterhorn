@@ -66,6 +66,24 @@ public interface IngestService {
           throws MediaPackageException, FileNotFoundException, IOException, Exception;
 
   /**
+   * Add an existing compressed MediaPackage to the repository.
+   *
+   * @param ZippedMediaPackage
+   *          A zipped file containing manifest, tracks, catalogs and attachments
+   * @param workflowDefinitionID
+   *          workflow to be used with this media package
+   * @param wfConfig
+   *          configuration parameters for the workflow
+   * @return Workflow instance.
+   * @throws MediaPackageException
+   * @throws FileNotFoundException
+   * @throws IOException
+   * @throws Exception
+   */
+  WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID, Map<String,String> wfConfig)
+          throws MediaPackageException, FileNotFoundException, IOException, Exception;
+
+  /**
    * Create a new MediaPackage in the repository.
    * 
    * @return The created MediaPackage
