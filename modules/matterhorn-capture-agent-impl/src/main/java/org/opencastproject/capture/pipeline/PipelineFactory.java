@@ -488,6 +488,7 @@ public class PipelineFactory {
 
     Element alsasrc = ElementFactory.make("alsasrc", null);
     Element queue = ElementFactory.make("queue", "alsa");
+    Element audioconvert = ElementFactory.make("audioconvert", null);
     if (bufferCount != null)
       queue.set("max-size-buffers", bufferCount);
     if (bufferBytes != null)
@@ -522,11 +523,13 @@ public class PipelineFactory {
       enc.set("bitrate", bitrate);
     }
 
-    pipeline.addMany(alsasrc, queue, enc, mux, filesink);
+    pipeline.addMany(alsasrc, queue, audioconvert, enc, mux, filesink);
 
     if (!alsasrc.link(queue))
       error = formatPipelineError(captureDevice, alsasrc, queue);
-    else if (!AudioMonitoring.addAudioMonitor(pipeline, queue, enc, interval, monitoringLength, captureDevice.getFriendlyName()))
+    else if (!queue.link(audioconvert))
+      error = formatPipelineError(captureDevice, queue, audioconvert);
+    else if (!AudioMonitoring.addAudioMonitor(pipeline, audioconvert, enc, interval, monitoringLength, captureDevice.getFriendlyName()))
       error = formatPipelineError(captureDevice, queue, enc);
     else if (!enc.link(mux))
       error = formatPipelineError(captureDevice, enc, mux);
