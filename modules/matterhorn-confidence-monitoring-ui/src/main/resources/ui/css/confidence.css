@@ -116,8 +116,8 @@ body {
 }
 
 .audio_meter {
-  height: 400px;
+  height: 480px;
   width: 40px;
   display: inline-block;
-  background-image: url('img/meter.png');
+  background-image: url('../img/meter.gif');
 }

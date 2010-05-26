@@ -9,7 +9,7 @@ Monitor.devices = [];
 
 Monitor.loadDevices = function(){
   //load the devices
-  $.get(CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/devices", function(data){
+  $.get('devices.xml' /*CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/devices"*/, function(data){
     //do stuff to make a device array.
     var devices = $('ns1\\:agent-device', data).toArray();
     log(devices);
@@ -20,14 +20,17 @@ Monitor.loadDevices = function(){
    	  var devName = $('name', devices[d]).text();
    	  var devType = $('type', devices[d]).text();
    	  var i = Monitor.devices.push({name: devName, type: devType});
+   	  i--;
    	  if(devType == 'video'){
-   	    $('#video_devices').append('<li class="tab" onclick="Monitor.tabClick(' + (i -1) + ', this)">' + devName + '</li>');
-   	    if(!Monitor.selectedVideoDevice){
+   	    $('#video_devices').append('<li id="video' + i + '" class="tab" onclick="Monitor.tabClick(' + i + ', this)">' + devName + '</li>');
+   	    if(Monitor.selectedVideoDevice === null){
+   	      $('#video'+i).addClass('selected');
    	      Monitor.selectDevice(i);
    	    }
       }else{
-        $('#audio_devices').append('<li class="tab" onclick="Monitor.tabClick(' + (i - 1) + ', this)">' + devName + '</li>');
-        if(!Monitor.selectedAudioDevice){
+        $('#audio_devices').append('<li id="audio' + i + '" class="tab" onclick="Monitor.tabClick(' + i + ', this)">' + devName + '</li>');
+        if(Monitor.selectedAudioDevice === null){
+          $('#audio'+i).addClass('selected');
    	      Monitor.selectDevice(i);
    	    }
       }
