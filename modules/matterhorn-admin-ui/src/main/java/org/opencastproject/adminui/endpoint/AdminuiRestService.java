@@ -338,6 +338,12 @@ public class AdminuiRestService {
         item.setPresenter(events[i].getCreator());
         item.setSeriesTitle(events[i].getSeriesID());    // actually it's the series title
         // FIXME Add the series ID too
+        /*
+        if(events[i].getPositionInRecurrence()){
+          item.isRecurringEvent(true);
+        }else{
+          item.isRecurringEvent(false);
+        }*/
         item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
         item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
         item.setCaptureAgent(events[i].getDevice());

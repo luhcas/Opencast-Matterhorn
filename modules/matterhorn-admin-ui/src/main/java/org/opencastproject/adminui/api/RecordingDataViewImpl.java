@@ -44,6 +44,9 @@ public class RecordingDataViewImpl implements RecordingDataView {
 
   @XmlElement(name="seriestitle")
   private String seriesTitle;
+  
+  @XmlElement(name="recurs")
+  private Boolean recurs;
 
   @XmlElement(name="startTime")
   private String startTime;
@@ -148,7 +151,17 @@ public class RecordingDataViewImpl implements RecordingDataView {
   public void setSeriesTitle(String seriesTitle) {
     this.seriesTitle = seriesTitle;
   }
-
+  
+  /*
+  public Boolean isRecurringEvent() {
+    return recurs;
+  }
+  
+  public void isRecurringEvent(Boolean recurs) {
+    this.recurs = recurs;
+  }
+  */
+  
   public String getStartTime() {
     return startTime;
   }

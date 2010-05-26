@@ -85,6 +85,18 @@ public interface RecordingDataView {
    * @param seriesTitle
    */
   void setSeriesId(String seriesId);
+  
+  /**
+   * returns whether an event is a part of a recurrence or not
+   * @return Boolean
+   */
+  //Boolean isRecurringEvent();
+  
+  /**
+   * sets whether an event is part of a recurrence or not
+   * @param Boolean
+   */
+  //void isRecurringEvent(Boolean recurs);
 
   /**
    * returns date and time the recording was captured as *nix timestamp

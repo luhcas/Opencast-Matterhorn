@@ -35,10 +35,13 @@
   <xsl:template match="ns1:recording">
     <tr class="highlightable">
       <td>
+        <xsl:value-of select="title" />
+        <!--
         <a title="Edit Recording">
           <xsl:attribute name="href">/admin/scheduler.html?eventID=<xsl:value-of select="id" />&amp;edit</xsl:attribute>
           <xsl:value-of select="title" />
         </a>
+        -->
       </td>
       <td>
         <xsl:value-of select="presenter" />
