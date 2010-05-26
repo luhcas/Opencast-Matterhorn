@@ -165,6 +165,20 @@
 			<version>1.1.5</version>
 			<scope>test</scope>
 		</dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.fileinstall</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>org.osgi.core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>org.osgi.compendium</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -176,8 +190,11 @@
 				<configuration>
 					<instructions>
 						<Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-						<Export-Package> org.opencastproject.ingest.impl,
-							org.opencastproject.ingest.endpoint </Export-Package>
+						<Export-Package>
+              org.opencastproject.ingest.impl,
+							org.opencastproject.ingest.endpoint,
+              org.opencastproject.ingest.scanner
+            </Export-Package>
 						<Private-Package>
 							META-INF.services;-split-package:=merge-first,
 							de.schlichtherle.*;-split-package:=merge-first
@@ -195,7 +212,8 @@
 							OSGI-INF/ingest-service-delegating.xml,
 							OSGI-INF/ingest-service-local.xml,
 							OSGI-INF/ingest-service-remote.xml,
-							OSGI-INF/ingest-service-rest.xml
+							OSGI-INF/ingest-service-rest.xml,
+              OSGI-INF/mediapackage-scanner.xml
             </Service-Component>
 						<JPA-PersistenceUnits>
 							org.opencastproject.ingest.endpoint
