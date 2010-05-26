@@ -49,11 +49,16 @@ public class MediapackageScanner implements ArtifactInstaller {
     try {
       in = new FileInputStream(artifact);
       ingestService.addZippedMediaPackage(in);
-      FileUtils.forceDelete(artifact);
     } catch(IOException e) {
       logger.warn("Unable to ingest mediapackage {}, {}", artifact.getAbsolutePath(), e);
+      return;
     } finally {
       IOUtils.closeQuietly(in);
+    }
+    try {
+      FileUtils.forceDelete(artifact);
+    } catch(IOException e) {
+      logger.warn("Unable to delete mediapackage {}, {}", artifact.getAbsolutePath(), e);
     }
   }
 
