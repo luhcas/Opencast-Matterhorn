@@ -170,7 +170,7 @@ cd $WORKING_DIR
 # Setup ntdp
 echo 
 read -p "Which NTP server would you like to use [ntp.ubuntu.com]? " server
-sed -i "s#^server .*#server ${server:-DEFAULT_NTP_SERVER}#" $NTP_CONF
+sed -i "s#^server .*#server ${server:-$DEFAULT_NTP_SERVER}#" $NTP_CONF
 echo "NTP server set to ${server:-$DEFAULT_NTP_SERVER}"
 echo "Consider editing the file $NTP_CONF for manually changing the default NTP server or adding more servers to the list"
 echo
