@@ -26,10 +26,10 @@ if [[ -n "$(echo "${keep:-Y}" | grep -i '^n')" ]]; then
     while [[ true ]]; do
 	read -p "Where would you like to download the source from [$SRC_DEFAULT]? " response
 
-	if [[ "${response:$SRC_DEFAULT}" == "trunk" ]]; then
+	if [[ "${response:-$SRC_DEFAULT}" == "trunk" ]]; then
 	    address=$TRUNK_URL
 	else
-	    address=$BRANCHES_URL/$response
+	    address=$BRANCHES_URL/${response:-$SRC_DEFAULT}
 	fi
 
 	echo -n "Downloading matterhorn source from $address... "
