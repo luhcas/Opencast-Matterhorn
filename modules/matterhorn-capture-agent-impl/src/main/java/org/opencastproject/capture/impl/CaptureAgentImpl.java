@@ -42,7 +42,9 @@ import org.opencastproject.util.ZipUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.FileEntity;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.gstreamer.Bus;
 import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
@@ -66,10 +68,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -81,6 +83,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -600,7 +603,14 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * Sends a file to the REST ingestion service.
    * 
    * @param recID
-   *      The ID for the recording to be ingested
+   *      The ID for the recording to be ingested.
+   * @return The status code for the http post, or one of a number of error values.
+   *      The error values are as follows:
+   *        -1:  Unable to ingest because the recording id does not exist
+   *        -2:  Invalid ingest url
+   *        -3:  Invalid ingest url
+   *        -4:  Invalid ingest url
+   *        -5:  Unable to open media package
    */
   public int ingest(String recID) {
     logger.info("Ingesting recording: {}", recID);
@@ -613,7 +623,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
     URL url = null;
     try {
-      logger.debug("Ingest URL is " + recording.getProperty(CaptureParameters.INGEST_ENDPOINT_URL));
       url = new URL(recording.getProperty(CaptureParameters.INGEST_ENDPOINT_URL));
     } catch (NullPointerException e) {
       logger.warn("Nullpointer while parsing ingest target URL.");
@@ -625,22 +634,51 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
     if (url == null) {
       logger.warn("Unable to ingest media because the ingest target URL is null.");
-      return -1;
+      return -4;
     }
-
-    HttpPost postMethod = new HttpPost(url.toString());
-    int retValue = -1;
 
     File fileDesc = new File(recording.getDir(), CaptureParameters.ZIP_NAME);
 
     // Sets the file as the body of the request
-    FileEntity myFileEntity = new FileEntity(fileDesc, URLConnection.getFileNameMap().getContentTypeFor(fileDesc.getName()));
+    MultipartEntity entities = new MultipartEntity();
+    if (recording.getProperty(CaptureParameters.INGEST_WORKFLOW_DEFINITION) != null) {
+      try {
+        url = new URL(url.toString() + "/" + recording.getProperty(CaptureParameters.INGEST_WORKFLOW_DEFINITION));
+      } catch (MalformedURLException e1) {
+        logger.warn("Malformed URL for ingest target with workflow definition.");
+        return -3;
+      }
+
+      Set<Object> keys = recording.getProperties().keySet();
+      for (Object o : keys) {
+        String key = (String) o;
+        if (key.contains("org.opencastproject.workflow.config.")) {
+          try {
+            String configKey = key.replaceFirst("org\\.opencastproject\\.workflow\\.config\\.", "");
+            entities.addPart(configKey, new StringBody(recording.getProperty(key)));
+          } catch (UnsupportedEncodingException e) {
+            logger.warn("Unable to attach property {} to POST.  Exception message: {}.", key, e.getMessage());
+          }
+        }
+      }
+    }
+
+    try {
+      entities.addPart(fileDesc.getName(), new InputStreamBody(new FileInputStream(fileDesc), fileDesc.getName()));
+    } catch (FileNotFoundException ex) {
+      logger.error("Could not find zipped mediapackge" + fileDesc.getAbsolutePath());
+      return -5;
+    }
+
+    logger.debug("Ingest URL is " + url.toString());
+    HttpPost postMethod = new HttpPost(url.toString());
+    int retValue = -1;
 
     logger.debug("Sending the file " + fileDesc.getAbsolutePath() + " with a size of "+ fileDesc.length());
 
     setRecordingState(recID, RecordingState.UPLOADING);
 
-    postMethod.setEntity(myFileEntity);
+    postMethod.setEntity(entities);
 
     // Send the file
     HttpResponse response = client.execute(postMethod);
