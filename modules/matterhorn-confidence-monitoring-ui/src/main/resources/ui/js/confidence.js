@@ -9,7 +9,7 @@ Monitor.devices = [];
 
 Monitor.loadDevices = function(){
   //load the devices
-  $.get('devices.xml' /*CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/devices"*/, function(data){
+  $.get(CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/devices", function(data){
     //do stuff to make a device array.
     var devices = $('ns1\\:agent-device', data).toArray();
     log(devices);
