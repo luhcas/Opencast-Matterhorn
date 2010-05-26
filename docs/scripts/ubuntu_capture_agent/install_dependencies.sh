@@ -121,9 +121,11 @@ while [[ true ]]; do
     if [[ $? -eq 0 ]]; then
 	echo -n "Uncompressing... "
 	tar xzf ${FELIX_FILENAME}
-	mkdir -p ${FELIX_HOME}/load
-	echo "Done"
-	break
+	if [[ $? -eq 0 ]]; then
+	    mkdir -p ${FELIX_HOME}/load
+	    echo "Done"
+	    break
+	fi
     fi
     # Else, ask for the actions to take
     echo

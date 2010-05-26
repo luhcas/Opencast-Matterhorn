@@ -54,3 +54,6 @@ export FELIX_HOME=$CA_DIR/$FELIX_SUBDIR
 export CAPTURE_PROPS=${FELIX_HOME}/${FELIX_PROPS_SUFFIX}
 export GEN_PROPS=${FELIX_HOME}/${FELIX_GENCONF_SUFFIX}
 export M2_REPO=$HOME/$M2_SUFFIX
+
+# Create the directory where all the capture-agent-related files will be stored
+mkdir -p $CA_DIR

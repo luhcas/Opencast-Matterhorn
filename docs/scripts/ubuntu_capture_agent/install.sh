@@ -17,7 +17,7 @@ export START_PATH=$PWD                                      # Path from where th
 export WORKING_DIR=/tmp/cainstallscript                     # Directory where this script will be run
 export TRUNK_URL=http://opencast.jira.com/svn/MH/trunk
 export BRANCHES_URL=http://opencast.jira.com/svn/MH/branches
-export SRC_DEFAULT=trunk                                    # Default location from where the source code is fetched
+export SRC_DEFAULT=0.8.x                                    # Default location from where the source code is fetched
 export SRC_SUBDIR=matterhorn-source                         # Subdir under the selected user $HOME directory
 export OC_DIR=/opt/matterhorn                               # Storage directory for the CA
 export DEV_RULES=/etc/udev/rules.d/matterhorn.rules         # File containing the rules to be applied by udev to the configured devices -- not a pun!
@@ -123,20 +123,20 @@ for (( i = 0; i < ${#SCRIPTS[@]}; i++ )); do
     chmod +x $f
 done
 
-# Choose/create the matterhorn user (WARNING: The initial perdiod (.) MUST be there so that the script can export several variables
+# Choose/create the matterhorn user (WARNING: The initial perdiod (.) MUST be there so that the script can export several variables)
 . ${SETUP_USER}
+
+# Install the 3rd party dependencies (WARNING: The initial perdiod (.) MUST be there so that the script can export several variables)
+. ${INSTALL_DEPENDENCIES}
+if [[ "$?" -ne 0 ]]; then
+    echo "Error installing the 3rd party dependencies."
+    exit 1
+fi
 
 # Install the vga2usb driver
 ${INSTALL_VGA2USB}
 if [[ "$?" -ne 0 ]]; then
     echo "Error installing the vga2usb driver."
-    exit 1
-fi
-
-# Install the 3rd party dependencies (WARNING: The initial perdiod (.) MUST be there so that the script can export several variables
-. ${INSTALL_DEPENDENCIES}
-if [[ "$?" -ne 0 ]]; then
-    echo "Error installing the 3rd party dependencies."
     exit 1
 fi
 
