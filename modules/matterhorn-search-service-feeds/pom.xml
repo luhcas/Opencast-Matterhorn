@@ -18,6 +18,24 @@
       <version>0.9-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.fileinstall</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>org.osgi.core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>org.osgi.compendium</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
     </dependency>
@@ -55,13 +73,10 @@
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Import-Package>
-              org.opencastproject.feed.impl
+              org.opencastproject.feed.impl, *
             </Import-Package>
             <Service-Component>
-              OSGI-INF/aggregation-feed.xml,
-              OSGI-INF/custom-feed.xml,
-              OSGI-INF/latest-feed.xml,
-              OSGI-INF/series-feed.xml
+              OSGI-INF/feed-scanner.xml
             </Service-Component>
           </instructions>
         </configuration>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.feed.scanner.FeedRegistrationScanner" immediate="true">
+  <implementation class="org.opencastproject.feed.scanner.FeedRegistrationScanner" />
+  <property name="service.description" value="Feed Definition Scanner" />
+  <service>
+    <provide interface="org.apache.felix.fileinstall.ArtifactUrlTransformer" />
+  </service>
+</component>

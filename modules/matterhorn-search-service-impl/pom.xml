@@ -182,7 +182,6 @@
               solr-core;inline=true,
               solr-dataimporthandler;inline=true,
               solr-solrj;inline=true,
-              solr-lucene-contrib;inline=true,
               solr-lucene-core;inline=true,
               solr-lucene-highlighter;inline=true,
               solr-lucene-queries;inline=true,

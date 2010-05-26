@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.feed.impl.CustomFeedService" immediate="true" activate="activate" deactivate="deactivate">
+<component name="org.opencastproject.feed.impl.CustomFeedService-search" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.feed.impl.CustomFeedService" />
-  <property name="service.description" value="Latest Episodes Feed" />
+  <property name="service.description" value="Episode Search Feed" />
   <property name="feed.uri" value="search" />
   <property name="feed.selector" value="search" />
   <property name="feed.query" value="*:{0}" />
