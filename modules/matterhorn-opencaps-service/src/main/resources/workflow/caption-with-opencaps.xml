@@ -23,7 +23,7 @@
       <configurations>
         <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">*/source</configuration>
-        <configuration key="target-tags">captions</configuration>
+        <configuration key="target-tags">captioning</configuration>
         <configuration key="encoding-profile">mov-low.http</configuration>
       </configurations>
     </operation>
