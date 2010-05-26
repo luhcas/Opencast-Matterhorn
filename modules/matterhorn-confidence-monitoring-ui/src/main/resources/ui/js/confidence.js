@@ -14,13 +14,31 @@ Monitor.loadDevices = function(){
     var devices = $('ns1\\:agent-device', data).toArray();
     log(devices);
     Monitor.devices = [];
+    $('#video_devices').empty();
+    $('#audio_devices').empty();
     for(d in devices){
    	  var devName = $('name', devices[d]).text();
    	  var devType = $('type', devices[d]).text();
    	  var i = Monitor.devices.push({name: devName, type: devType});
-      $('#device_tab').append('<li onclick="Monitor.selectDevice(' + (i - 1) + ')">' + devName + '</li>');
+   	  if(devType == 'video'){
+   	    $('#video_devices').append('<li class="tab" onclick="Monitor.tabClick(' + (i -1) + ', this)">' + devName + '</li>');
+   	    if(!Monitor.selectedVideoDevice){
+   	      Monitor.selectDevice(i);
+   	    }
+      }else{
+        $('#audio_devices').append('<li class="tab" onclick="Monitor.tabClick(' + (i - 1) + ', this)">' + devName + '</li>');
+        if(!Monitor.selectedAudioDevice){
+   	      Monitor.selectDevice(i);
+   	    }
+      }
     }
 	});
+}
+
+Monitor.tabClick = function(index, tab){
+  $(tab).siblings().removeClass('selected');
+  $(tab).addClass('selected');
+  Monitor.selectDevice(index);
 }
 
 Monitor.selectDevice = function(index){

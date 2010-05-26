@@ -4,43 +4,45 @@
     <title id="i18n_window_title"></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <!-- styles -->
-    <style>
-      #audio_preview {
-        height: 400px;
-      }
-      .meter_mask {
-        vertical-align: top;
-        width: 40px;
-        height: 0px;
-      }
-      .audio_meter {
-        height: 400px;
-        width: 40px;
-        display: inline-block;
-        background-image: url('img/meter.png');
-      }
-    </style>
+    <link rel="stylesheet" type="text/css" href="css/confidence.css">
     <!-- scripts -->
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+    <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="js/confidence.js"></script>
   </head>
   <body>
-    <!-- fl-centered doesn't work in winXP-IE8 -->
-    <div>
-      <div id="page_tabs">
+    <div id="pageHeader">
+      <div id="currentVersion"></div>
+      <div id="newestVersion" style="text-align: right; float: right;"></div>
+    </div>
+    <div id="container">
+      <div id="page_tab">
         <ul>
-          <li><a href="/confidence/index.html" alt="Confidence Monitoring">Monitor</a></li>
+          <li class="tab"><a href="/admin/recordings.html?show=upcoming" alt="Recordings">Recordings</a></li>
+          <li class="selected tab"style="border-right: 1px solid black" class="selected"><a href="/admin/agent_status.html" alt="Capture Agents">Capture Agents</a></li>
         </ul>
       </div>
-      <div>
-        <div>
-          <ul id="device_tab"></ul>
+      <div id="content_area">      
+        <div id="video_preview">
+          <div>
+            <ul id="video_devices" class="device_tab">
+              <li class="tab">Video</li>
+              <li class="tab selected" style="border-right: 1px solid black">Audio</li>
+            </ul>
+          </div>
+          <div id="preview_area">
+            <img height="480" width="720" src="img/plug.png" id="snapshot"></img>
+          </div>
         </div>
-        <div>
-          <div id="image_preview"><img src="img/plug.png" id="snapshot"></img></div>
-          <div id="audio_preview">
-            <div id="left_channel" class="audio_meter"><img id="left_mask" class="meter_mask" src="img/mask.png"></img></div>
-            <div id="right_channel" class="audio_meter" style="display: none;"><img id="right_mask" class="meter_mask" src="img/mask.png"></img></div>
+        <div id="audio_preview">
+          <div>
+            <ul id="audio_devices" class="device_tab">
+              <li class="tab">Audio 1</li>
+              <li class="tab selected">Audio 2</li>
+            </ul>
+          </div>
+          <div id="preview_area">
+              <div id="left_channel" class="audio_meter"><img id="left_mask" class="meter_mask" src="img/mask.png"></img></div>
+              <!-- <div id="right_channel" class="audio_meter" style="display: none;"><img id="right_mask" class="meter_mask" src="img/mask.png"></img></div> -->
           </div>
         </div>
       </div>
