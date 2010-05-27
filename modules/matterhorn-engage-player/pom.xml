@@ -135,7 +135,7 @@
 			</build>
 		</profile>
 
-<!-- mvn -P shared-resources , copies only files needed for engage-ui  -->
+<!-- mvn -P shared-resources , copies only files needed for matterhorn-engage-ui  -->
 		<profile>
 			<id>shared-resources</id>
 			<build>
@@ -212,8 +212,8 @@
 							<report>asdoc-report</report>
 						</reports>
 						<configuration>
-							<windowTitle>Opencast Matterhorn Media Player API Doc</windowTitle>
-							<footer>Opencast Matterhorn </footer>
+							<windowTitle>Opencast Matterhorn Videodisplay API Doc</windowTitle>
+							<footer>Opencast Matterhorn</footer>
 							<configFile>
                     ${basedir}/asdoc-config.xml
                     </configFile>
@@ -240,7 +240,7 @@
 					<reportSet>
 						<reports>
 							<!-- include the desired reports -->
-							<!--<report>jslint</report>-->
+							<report>jslint</report>
 							<report>jsdoc</report>
 						</reports>
 					</reportSet>
