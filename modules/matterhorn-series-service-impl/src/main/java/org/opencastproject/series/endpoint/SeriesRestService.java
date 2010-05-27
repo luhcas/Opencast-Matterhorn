@@ -131,7 +131,7 @@ public class SeriesRestService {
   @PUT
   @Produces(MediaType.TEXT_XML)
   @Path("series")
-  public Response addSeries (@FormParam("event") SeriesJaxbImpl s) {
+  public Response addSeries (@FormParam("series") SeriesJaxbImpl s) {
     logger.debug("addseries: {}", s);
     
     if (s == null) {
