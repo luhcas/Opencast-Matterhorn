@@ -224,7 +224,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   @Override
   public String startCapture(MediaPackage mediaPackage, Properties properties) {
-    logger.info("START");
     logger.debug("startCapture(mediaPackage, properties): {} {}", mediaPackage, properties);
     if (currentRecID != null || !agentState.equals(AgentState.IDLE)) {
       logger.warn("Unable to start capture, a different capture is still in progress in {}.",
@@ -238,7 +237,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     } else {
       setAgentState(AgentState.CAPTURING);
     }
-    logger.info("END");
     properties = configService.merge(properties, false);
     
     RecordingImpl newRec = createRecording(mediaPackage, properties);
