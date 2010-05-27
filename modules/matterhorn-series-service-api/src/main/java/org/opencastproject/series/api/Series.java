@@ -19,6 +19,7 @@ package org.opencastproject.series.api;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -66,10 +67,32 @@ public class Series {
   
   public void setSeriesId (String seriesId) {
     this.seriesId = seriesId;
+    addToMetadata("identifier", seriesId);
+    
+  }
+  
+  public void addToMetadata (String key, String value) {
+    boolean updated = false;
+    if (getMetadata() == null) {
+      LinkedList<SeriesMetadata> metadata = new LinkedList<SeriesMetadata>();
+      metadata.add(new SeriesMetadata(key, value));
+      return;
+    }
+    for (SeriesMetadata m : getMetadata()) {
+      if (m.getKey().equals(key)) {
+        m.setValue(value);
+        updated = true;
+        break;
+      }
+    }
+    if (! updated) {
+      metadata.add(new SeriesMetadata(key, value));
+    }
   }
   
   public String generateSeriesId() {
-    return seriesId = UUID.randomUUID().toString();
+    setSeriesId(UUID.randomUUID().toString());
+    return getSeriesId();
   }
   
   public  List<SeriesMetadata> getMetadata () {
@@ -84,12 +107,6 @@ public class Series {
   public DublinCore getDublinCore () {
       if (dublinCore == null) dublinCore = buildDublinCore();
       return dublinCore;
-  }
-  
-  private DublinCoreCatalog buildDublinCore () {
-    DublinCoreCatalog dc = DublinCoreCatalogImpl.newInstance();
-    
-    return dc;
   }
   
   public boolean valid () {
@@ -143,7 +160,7 @@ public class Series {
     return dateFormater.format(date);
   }
   
-  private DublinCoreCatalog generateDublinCore () {
+  private DublinCoreCatalog buildDublinCore () {
     DublinCoreCatalog dc = DublinCoreCatalogImpl.newInstance();
     
     dc.add(DublinCoreCatalog.PROPERTY_IDENTIFIER, new DublinCoreValue(getSeriesId()));
