@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang.StringUtils;
 import org.opencastproject.feedback.api.Annotation;
 import org.opencastproject.feedback.api.FeedbackService;
+import org.opencastproject.feedback.api.Session;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -64,7 +65,7 @@ public class FeedbackRestService {
   }
 
   /**
-   * The method tha will be called, if the service will be activated
+   * The method that is called, when the service is activated
    * 
    * @param cc
    *          The ComponentContext of this service
@@ -114,8 +115,18 @@ public class FeedbackRestService {
 
   @GET
   @Produces(MediaType.TEXT_XML)
+  @Path("session")
+  public Response add(@QueryParam("sessionId") String sessionId, @QueryParam("userId") String userId) {
+
+    Session s = feedbackService.getUserSession(userId);
+
+    return Response.ok(s).build();
+  }
+
+  @GET
+  @Produces(MediaType.TEXT_XML)
   @Path("add")
-  public Response add(@QueryParam("id") String mediapackageId, @QueryParam("session") int sessionId,
+  public Response add(@QueryParam("id") String mediapackageId, @QueryParam("session") String sessionId,
           @QueryParam("in") int inpoint, @QueryParam("out") int outpoint, @QueryParam("key") String key,
           @QueryParam("value") String value) {
 

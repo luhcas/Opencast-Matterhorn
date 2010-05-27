@@ -43,6 +43,7 @@ import org.opencastproject.feedback.api.Annotation;
 @Table(name = "MH_ANNOTATION_IMPL")
 @NamedQueries( {
         @NamedQuery(name = "findAnnotations", query = "SELECT a FROM AnnotationImpl a"),
+        @NamedQuery(name = "findLastAnnotationsOfSession", query = "SELECT a FROM AnnotationImpl a  WHERE a.sessionId = :sessionId ORDER BY a.created DESC"),
         @NamedQuery(name = "findAnnotationsByKey", query = "SELECT a FROM AnnotationImpl a WHERE a.key = :key"),
         @NamedQuery(name = "findAnnotationsByIntervall", query = "SELECT a FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end"),
         @NamedQuery(name = "findAnnotationsByKeyAndIntervall", query = "SELECT a FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end AND a.key = :key"),
@@ -66,7 +67,7 @@ public class AnnotationImpl implements Annotation {
 
   @Column(name = "sessionId")
   @XmlElement(name = "session-id")
-  private int sessionId;
+  private String sessionId;
 
   @Column(name = "inpoint")
   @XmlElement(name = "inpoint")
@@ -112,11 +113,11 @@ public class AnnotationImpl implements Annotation {
     this.mediapackageId = mediapackageId;
   }
 
-  public int getSessionId() {
+  public String getSessionId() {
     return sessionId;
   }
 
-  public void setSessionId(int sessionId) {
+  public void setSessionId(String sessionId) {
     this.sessionId = sessionId;
   }
 

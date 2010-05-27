@@ -30,7 +30,9 @@ import javax.persistence.spi.PersistenceProvider;
 import org.opencastproject.feedback.api.Annotation;
 import org.opencastproject.feedback.api.AnnotationList;
 import org.opencastproject.feedback.api.FeedbackService;
+import org.opencastproject.feedback.api.Session;
 import org.opencastproject.feedback.endpoint.AnnotationListImpl;
+import org.opencastproject.feedback.endpoint.SessionImpl;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,12 +110,45 @@ public class FeedbackServiceImpl implements FeedbackService {
     emf.close();
   }
 
-  public Annotation addAnnotation(Annotation a) {
+  public Session getUserSession(String userId){
+    Session s = new SessionImpl();
+    s.setUserId(userId);
 
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
+      em.persist(s);
+      tx.commit();
+      return s;
+    } finally {
+      if (tx.isActive()) {
+        tx.rollback();
+      }
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public Annotation addAnnotation(Annotation a) {
+    EntityTransaction tx = em.getTransaction();
+    try {
+      tx.begin();
+    Query q = em.createNamedQuery("findLastAnnotationsOfSession");
+    q.setMaxResults(1);
+    q.setParameter("sessionId", a.getSessionId());
+    Collection<Annotation> annotations = q.getResultList();
+    
+    if(annotations.size()>=1) {
+      Annotation last = annotations.iterator().next();
+      if(last.getMediapackageId().equals(a.getMediapackageId()) && last.getKey().equals(a.getKey()) && last.getOutpoint() == a.getInpoint()){
+        last.setOutpoint(a.getOutpoint());
+        a = last;
+      } else {
+        em.persist(a);
+      }
+      
+    } else {
       em.persist(a);
+    }
       tx.commit();
       return a;
     } finally {

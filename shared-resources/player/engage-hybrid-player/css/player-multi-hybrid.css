@@ -554,7 +554,7 @@ option:hover
 
 .oc-segments-holder
 {
-  overflow-x:scroll;
+  overflow-x:hidden;
   overflow-y:hidden;
   border:1px;
   border-style:solid;

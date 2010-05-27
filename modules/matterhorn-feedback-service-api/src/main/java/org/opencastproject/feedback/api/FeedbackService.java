@@ -21,6 +21,16 @@ package org.opencastproject.feedback.api;
 public interface FeedbackService {
 
   /**
+   * Takes the unique userId (may be null). Returns a generated unique sessionId
+   * and a generated unique userId, if the userId is null.
+   * 
+   * @param userId
+   *          The userId that will be associated with that sessionId
+   * @return the unique sessionId
+   */
+  Session getUserSession(String userId);
+
+  /**
    * Adds a new annotation to the database and returns the event with an updated annotation-id, to make sure the
    * annotation-id stays unique
    * 

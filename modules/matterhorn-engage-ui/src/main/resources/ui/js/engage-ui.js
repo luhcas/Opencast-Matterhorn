@@ -23,6 +23,19 @@ Opencast.engage = (function () {
 
    }
   
+  function getCookie(name) {
+    var start = document.cookie.indexOf( name + "=" );
+    var len = start + name.length + 1;
+    if ( ( !start ) && ( name != document.cookie.substring( 0, name.length ) ) ) {
+      return null;
+    }
+    if ( start == -1 ) return null;
+    
+    var end = document.cookie.indexOf( ';', len );
+    if ( end == -1 ) end = document.cookie.length;
+    return unescape( document.cookie.substring( len, end ) );
+  }
+  
    /**
      * @memberOf Opencast.engage
      * @description Gets the current media package id
@@ -61,6 +74,7 @@ Opencast.engage = (function () {
     }
 
     return {
+      getCookie : getCookie,
       getMediaPackageId : getMediaPackageId,
       getVideoUrl : getVideoUrl,
       getSearchServiceEpisodeIdURL :  getSearchServiceEpisodeIdURL

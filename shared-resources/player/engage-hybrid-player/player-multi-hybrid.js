@@ -1314,12 +1314,55 @@ Opencast.Player = (function () {
     }
     
     /**
+    @memberOf Opencast.Player
+    @description Set the mediaPackageId
+    @param String mediaPackageId 
+     */
+    function setMediaPackageId(id) 
+    {
+      mediaPackageId = id;
+    }
+
+    /**
+    @memberOf Opencast.Player
+    @description Set the mediaPackageId
+    @param String mediaPackageId 
+     */
+    function setSessionId(id) 
+    {
+      sessionId = id;
+    }
+
+    var mediaPackageId;
+    var sessionId;
+
+    var inPosition = 0;
+    var outPosition = 0;
+    var INTERVAL_LENGTH = 5;
+    
+    /**
         @memberOf Opencast.Player
         @description Set the new position of the seek slider.
         @param Number newPosition
      */
     function setPlayhead(newPosition) 
     {
+        var fullPosition = Math.round(newPosition);
+
+        
+
+        if(inPosition <= fullPosition && fullPosition <= inPosition + INTERVAL_LENGTH){
+          outPosition = fullPosition;
+          if(inPosition + INTERVAL_LENGTH === outPosition){
+            addFootprint();
+            inPosition = outPosition;
+          }
+        } else {
+          addFootprint();
+          inPosition = fullPosition;
+          outPosition = fullPosition;
+        }
+
         if (getDragging() === false)
         {
             var newPos = Math.round((newPosition / getDuration()) *  $("#scubber-channel").width());
@@ -1327,6 +1370,23 @@ Opencast.Player = (function () {
             $("#scrubber").css("left", newPos);
             $("#play-progress").css("width", newPos);
         }
+    }
+    
+    function addFootprint(){
+      $.ajax({
+        type: 'GET',
+        contentType: 'text/xml',
+        url:"../../feedback/rest/add",
+        data: "id=" + mediaPackageId + "&session=" + sessionId + "&in=" + inPosition + "&out=" + outPosition + "&key=FOOTPRINT",
+        dataType: 'xml',
+        success: function(xml) {
+          // Do nothing, the FOOTPRINT has been saved
+        },
+        error: function(a, b, c) {
+          // Some error while adding the FOOTPRINT
+        }
+        
+     }); 
     }
     
     /**
@@ -1463,6 +1523,8 @@ Opencast.Player = (function () {
         setPlayPauseState : setPlayPauseState,
         setCurrentTime : setCurrentTime,
         setTotalTime : setTotalTime,
+        setMediaPackageId : setMediaPackageId,
+        setSessionId : setSessionId,
         showEditTime : showEditTime,
         hideEditTime : hideEditTime,
         editTime : editTime,

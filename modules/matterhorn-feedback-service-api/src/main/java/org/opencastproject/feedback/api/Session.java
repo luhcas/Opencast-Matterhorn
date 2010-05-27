@@ -15,45 +15,17 @@
  */
 package org.opencastproject.feedback.api;
 
-import java.util.Date;
-
-
 /**
- * A class that represents an annotation
+ * A class that represents a session
  * 
  */
-public interface Annotation {
-
-  int getAnnotationId();
-
-  void setAnnotationId(int annotationId);
-
-  String getMediapackageId();
-
-  void setMediapackageId(String mediapackageId);
+public interface Session {
 
   String getSessionId();
 
   void setSessionId(String sessionId);
 
-  int getInpoint();
+  String getUserId();
 
-  void setInpoint(int inpoint);
-
-  int getOutpoint();
-
-  void setOutpoint(int outpoint);
-
-  String getKey();
-
-  void setKey(String key);
-
-  String getValue();
-
-  void setValue(String value);
-
-  Date getCreated();
-
-  void setCreated(Date created);
-
+  void setUserId(String userId);
 }

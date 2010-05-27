@@ -29,6 +29,9 @@ Opencast.Watch = (function ()
 
         var restEndpoint = Opencast.engage.getSearchServiceEpisodeIdURL() + mediaPackageId;
 
+        Opencast.Player.setSessionId(Opencast.engage.getCookie("JSESSIONID"));
+        Opencast.Player.setMediaPackageId(mediaPackageId);
+
         $('#data').xslt(restEndpoint, "xsl/player-hybrid-download.xsl", function () 
         {
           // some code to run after the mapping
