@@ -15,6 +15,7 @@
  */
 package org.opencastproject.util;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +94,8 @@ public class XProperties extends Properties {
       return p.matcher(value).replaceAll(System.getProperty(subkey));
     } else if (this.getProperty(subkey) != null) {
       return p.matcher(value).replaceAll(this.getProperty(subkey));
-    } else if (this.context != null && this.context.getProperty(subkey) != null) {
+    } else if (this.context != null && this.context.getBundle().getState() == Bundle.ACTIVE &&
+            this.context.getProperty(subkey) != null) {
       return p.matcher(value).replaceAll(this.context.getProperty(subkey));
     } else if (System.getenv(subkey) != null) {
       return p.matcher(value).replaceAll(System.getenv(subkey));
@@ -139,5 +141,6 @@ public class XProperties extends Properties {
    * @param ctx The {@code BundleContext} for this instance.
    */
   public void setBundleContext(BundleContext ctx) {
-    context = ctx;  }
+    context = ctx;
+  }
 }
