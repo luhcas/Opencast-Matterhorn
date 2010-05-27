@@ -69,11 +69,14 @@ public class SeriesServiceImpl implements SeriesService {
       tx.begin();
       em.persist(s);
       tx.commit();
-    } finally {
+    } catch (Exception e) {
+      logger.warn("Problem to add series {}", s.getSeriesId());
+      return false;
+    }
+    finally {
       em.close();
     } 
-    // TODO Auto-generated method stub
-    return false;
+    return true;
   }
 
   protected Series makeIdUnique (Series series) {
@@ -196,15 +199,30 @@ public class SeriesServiceImpl implements SeriesService {
     logger.info("SeriesService activated.");
     if (cc == null) {
       logger.warn("Could not activate because of missing ComponentContext");
-      return;
     }
-    this.componentContext = cc;
+    else this.componentContext = cc;
     
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.series.api", persistenceProperties);
   }
   
-  public void destroy() {
+  public void deactivate() {
     emf.close();
   }   
+  
+  public Map<String, Object> getPersistenceProperties() {
+    return persistenceProperties;
+  }
+
+  public void setPersistenceProperties(Map<String, Object> persistenceProperties) {
+    this.persistenceProperties = persistenceProperties;
+  }
+  
+  public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
+    this.persistenceProvider = persistenceProvider;
+  }
+  
+  public PersistenceProvider getPersistenceProvider() {
+    return persistenceProvider;
+  }
 
 }
