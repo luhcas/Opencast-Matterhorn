@@ -55,32 +55,15 @@ Recordings.init = function() {
   })
 
   // register custom table cell value parser for Date/Time column
-  // deactivated (for the moment?)
   $.tablesorter.addParser({
     id: 'date',
     is: function(){
       return false;
     },
     format: function(s) {
-      var elm = document.createElement('div');
-      elm.innerHTML = s;
-      return $(elm).children('.time-raw').text();
+      return s; // FIXME don't need a parser here anymore it seems'
     },
     type: 'numeric'
-  });
-  
-  $.tablesorter.addParser({
-    id: 'lastname',
-    is: function(){return false;},
-    format: function(s) {
-      var ln = s.split(' ');
-      if(ln.length != 0){
-        return ln[ln.length - 1];
-      }else{
-        return "";
-      }
-    },
-    type: 'text'
   });
 
   // request and display statistics
@@ -190,32 +173,38 @@ Recordings.displayRecordings = function(state, reload) {
     });
     if ($('.date-column').length > 0) {
       // if date date/time column is present
-      $('.date-start').each( function() {     // format date/time to locale string
-        var ts = $(this).children('.time-raw').text();
-        var time = document.createElement('span');
-        if (ts != '') {
-          $(time).css('color','black').text(Recordings.makeLocaleDateString(ts));
+      $('.td-TimeDate').each( function() {     // format date/time
+        var startTime = $(this).children(".date-start").text();
+        var endTime = $(this).children(".date-end").text();
+        //alert(startTime + " - " + endTime);
+        if (startTime) {
+          var sd = new Date();
+          sd.setTime(startTime);
+          startTime = sd.getDate() + '/' + (sd.getMonth()+1) + '/' + sd.getFullYear() + ' ' + sd.getHours() + ':' + Recordings.ensureTwoDigits(sd.getMinutes());
         } else {
-          $(time).css('color','gray').text('NA');  // display a gray 'NA' if no timestamp available
+          startTime = "NA";
         }
-        $(this).append(time);
+        if (endTime) {
+          var ed = new Date();
+          ed.setTime(endTime);
+          endTime = ' - ' + ed.getHours() + ':' + Recordings.ensureTwoDigits(ed.getMinutes());
+        } else {
+          endTime = "";
+        }
+        $(this).append($(document.createElement('span')).text(startTime + endTime));
       });
       $('#recordingsTable').tablesorter({   // init tablesorter with custom parser for the date column
         cssAsc: 'sortable-asc',
         cssDesc: 'sortable-desc',
         sortList: [[3,0]],
         headers: {
-          1: {sorter: 'lastname'},
           3: {sorter: 'date'}
         }
       });
     } else {  // if no date/time column is present, init tablesorter the default way
       $('#recordingsTable').tablesorter({
         cssAsc: 'sortable-asc',
-        cssDesc: 'sortable-desc',
-        headers: {
-          1: {sorter: 'lastname'}
-        }
+        cssDesc: 'sortable-desc'
       });
     }
 
@@ -226,6 +215,14 @@ Recordings.displayRecordings = function(state, reload) {
       $(this).css('text-decoration', 'none')
     });
   });
+}
+
+Recordings.ensureTwoDigits = function(number) {
+  if (number < 10) {
+    return '0' + number;
+  } else {
+    return number;
+  }
 }
 
 /** convert timestamp to locale date string
@@ -262,11 +259,16 @@ Recordings.getURLParam = function(name) {
     return results[1];
 }
 
+/** Displays Hold Operation UI
+ * @param URL of the hold action UI
+ * @param wfId Id of the hold operations workflow
+ * @param callerElm HTML element that invoked the UI (so that information from the recordings table row can be gathered
+ */
 Recordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
   $('#holdActionPanel-container iframe').attr('src', URL);
   $('#holdWorkflowId').val(wfId);
   var parentRow = $(callerElm).parent().parent();
-  $('#holdStateHeadRow-title').html($($(parentRow).children().get(0)).html());        // not putting any more time into doing this iteratively
+  $('#holdStateHeadRow-title').html($($(parentRow).children().get(0)).html());     
   $('#holdStateHeadRow-presenter').html($($(parentRow).children().get(1)).html());
   $('#holdStateHeadRow-series').html($($(parentRow).children().get(2)).html());
   $('#holdStateHeadRow-date').html($($(parentRow).children().get(3)).html());
@@ -278,11 +280,17 @@ Recordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
   $('#holdActionPanel-container').fadeIn('fast');
 }
 
+/** Adjusts the height of the panel holding the Hold Operation UI
+ *
+ */
 Recordings.adjustHoldActionPanelHeight = function() {
   var height = $("#holdActionPanel-iframe").contents().find("html").height();
   $('#holdActionPanel-iframe').height(height+10);
 }
 
+/** Calls workflow endpoint to end hold operation and continue the workflow
+ *
+ */
 Recordings.continueWorkflow = function() {
   var workflowId = $('#holdWorkflowId').val();
   $.ajax({
@@ -298,6 +306,9 @@ Recordings.continueWorkflow = function() {
   });
 }
 
+/** Show the recording editor
+ *
+ */
 Recordings.retryRecording = function(workflowId) {
   location.href = "upload.html?retry=" + workflowId;
 }
