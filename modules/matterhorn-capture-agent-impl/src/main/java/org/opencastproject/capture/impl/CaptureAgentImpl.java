@@ -129,6 +129,9 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
   /** Indicates the ID of the recording currently being recorded. **/
   private String currentRecID = null;
+  
+  /** Is confidence monitoring enabled? */
+  private boolean confidence = false;
 
     /**
    * Sets the configuration service form which this capture agent should draw its configuration data.
@@ -197,8 +200,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   @Override
   public String startCapture(Properties properties) {
-    logger.debug("startCapture(properties): {}", properties);
-
     // Creates default MediaPackage
     MediaPackage pack;
     try {
@@ -223,7 +224,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   @Override
   public String startCapture(MediaPackage mediaPackage, Properties properties) {
-
+    logger.info("START");
     logger.debug("startCapture(mediaPackage, properties): {} {}", mediaPackage, properties);
     if (currentRecID != null || !agentState.equals(AgentState.IDLE)) {
       logger.warn("Unable to start capture, a different capture is still in progress in {}.",
@@ -237,9 +238,9 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     } else {
       setAgentState(AgentState.CAPTURING);
     }
-
+    logger.info("END");
     properties = configService.merge(properties, false);
-
+    
     RecordingImpl newRec = createRecording(mediaPackage, properties);
     if (newRec == null) {
       //TODO:  What if we don't have a recording ID already (eg, an unscheduled capture)
@@ -714,19 +715,21 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @see org.opencastproject.capture.admin.api.AgentState
    */
   protected void setAgentState(String state) {
-    if (state.equalsIgnoreCase(AgentState.CAPTURING) && confidencePipe != null) {
-      confidencePipe.stop();
-      while (confidencePipe.isPlaying());
-      confidencePipe = null;
-      logger.info("Confidence monitoring shutting down.");
-    } else if (state.equalsIgnoreCase(AgentState.IDLE)){
-      try {
-        while (configService.getAllProperties().size() == 0);
-        confidencePipe = PipelineFactory.create(configService.getAllProperties(), true);
-        confidencePipe.play();
-        logger.info("Confidence monitoring beginning.");
-      } catch (Exception e) {
-        logger.warn("Confidence monitoring not started: {}", e.getMessage());
+    if (confidence) {
+      if (state.equalsIgnoreCase(AgentState.CAPTURING) && confidencePipe != null) {
+        confidencePipe.stop();
+        while (confidencePipe.isPlaying());
+        confidencePipe = null;
+        logger.info("Confidence monitoring has been shut down.");
+      } else if (state.equalsIgnoreCase(AgentState.IDLE)){
+        try {
+          while (configService.getAllProperties().size() == 0);
+          confidencePipe = PipelineFactory.create(configService.getAllProperties(), true);
+          confidencePipe.play();
+          logger.info("Confidence monitoring beginning.");
+        } catch (Exception e) {
+          logger.warn("Confidence monitoring not started: {}", e.getMessage());
+        }
       }
     }
       
@@ -851,6 +854,13 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   public void activate(ComponentContext ctx) {
     logger.info("Starting CaptureAgentImpl.");
+    confidence = Boolean.valueOf(configService.getItem(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE));
+    if (confidence)
+      logger.info("Confidence monitoring enabled.");
+    else
+      logger.info("Confidence monitoring disabled.");
+
+
 
     if (ctx != null) {
       //Setup the shell commands

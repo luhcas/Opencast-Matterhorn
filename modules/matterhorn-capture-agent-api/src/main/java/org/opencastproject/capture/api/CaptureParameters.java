@@ -193,6 +193,9 @@ public interface CaptureParameters {
    * Settings that control the capture agent confidence monitoring
    */
   
+  /** Flag to turn confidence monitoring on off (boolean) */
+  String CAPTURE_CONFIDENCE_ENABLE = "capture.confidence.enable";
+  
   /** Directory which contains confidence monitoring images */
   String CAPTURE_CONFIDENCE_VIDEO_LOCATION = "capture.confidence.video.location";
   

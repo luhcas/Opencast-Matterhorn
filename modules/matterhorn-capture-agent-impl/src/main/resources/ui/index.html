@@ -6,8 +6,25 @@
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="js/state.js"></script>
 </head>
-<body>
+<script type="text/javascript" language="javascript">
+var stateURL = "http://" + window.location.hostname + ":8080/state/rest/GetState";
+function refreshState(url, target) {
+  req = new XMLHttpRequest();
+  req.onreadystatechange = function() {getResponse(target);};
+  req.open("GET", url, true);
+  req.send();
+  setTimeout("refreshState(page)", 10000);
+}
+function getResponse(target)
+</script>
+<body onload="refreshState>
+  
+  <p><code>Agent State: <span id="state"></span></code></p>
+  
+  
 	<script type="text/javascript" language="javascript">
+
+	
 	function stopCapture() {
 		document.location = "http://" + window.location.hostname + ":8080/capture/rest/stopCapture";
 	}

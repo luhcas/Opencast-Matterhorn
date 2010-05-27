@@ -284,6 +284,7 @@ public class PipelineFactory {
     String bufferCount = captureDevice.properties.getProperty("bufferCount");
     String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
     String bufferTime = captureDevice.properties.getProperty("bufferTime");
+    boolean confidence = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE));
 
     Element dec, enc, muxer;
     Element filesrc = ElementFactory.make("filesrc", null);
@@ -335,10 +336,14 @@ public class PipelineFactory {
       }
     });
     Pad newpad = new Pad(null, PadDirection.SRC);
-
-    if (!VideoMonitoring.addVideoMonitor(pipeline, filesrc, queue, interval, imageloc, device))
-      error = formatPipelineError(captureDevice, filesrc, queue);
-    else if (!queue.link(mpegpsdemux))
+    if (confidence) {
+      if (!VideoMonitoring.addVideoMonitor(pipeline, filesrc, queue, interval, imageloc, device))
+        error = formatPipelineError(captureDevice, filesrc, queue);
+    } else {
+      if (!filesrc.link(queue))
+        error = formatPipelineError(captureDevice, filesrc, queue);
+    }
+    if (!queue.link(mpegpsdemux))
       error = formatPipelineError(captureDevice, queue, mpegpsdemux);
     else if (!mpegpsdemux.addPad(newpad))
       error = formatPipelineError(captureDevice, mpegpsdemux, mpegvideoparse);
@@ -387,6 +392,8 @@ public class PipelineFactory {
     String bufferCount = captureDevice.properties.getProperty("bufferCount");
     String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
     String bufferTime = captureDevice.properties.getProperty("bufferTime");
+    boolean confidence = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE));
+
 
     // Create elements, add them to pipeline, then link them 
     Element enc, muxer;
@@ -442,9 +449,14 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, videoscale, videorate);
     else if (!videorate.link(filter))
       error = formatPipelineError(captureDevice, videorate, filter);
-    else if (!VideoMonitoring.addVideoMonitor(pipeline, filter, ffmpegcolorspace, interval, imageloc, device))
-      error = formatPipelineError(captureDevice, filter, ffmpegcolorspace);
-    else if (!ffmpegcolorspace.link(enc))
+    if (confidence) {
+      if (!VideoMonitoring.addVideoMonitor(pipeline, filter, ffmpegcolorspace, interval, imageloc, device))
+        error = formatPipelineError(captureDevice, filter, ffmpegcolorspace);
+    } else {
+      if (!filter.link(ffmpegcolorspace))
+        error = formatPipelineError(captureDevice, filter, ffmpegcolorspace);
+    }
+    if (!ffmpegcolorspace.link(enc))
       error = formatPipelineError(captureDevice, ffmpegcolorspace, enc);
     else if (!enc.link(muxer))
       error = formatPipelineError(captureDevice, enc, muxer);
@@ -484,6 +496,7 @@ public class PipelineFactory {
     String bufferCount = captureDevice.properties.getProperty("bufferCount");
     String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
     String bufferTime = captureDevice.properties.getProperty("bufferTime");
+    boolean confidence = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE));
 
     Element enc, mux;
 
@@ -530,9 +543,14 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, alsasrc, queue);
     else if (!queue.link(audioconvert))
       error = formatPipelineError(captureDevice, queue, audioconvert);
-    else if (!AudioMonitoring.addAudioMonitor(pipeline, audioconvert, enc, interval, monitoringLength, captureDevice.getFriendlyName()))
-      error = formatPipelineError(captureDevice, queue, enc);
-    else if (!enc.link(mux))
+    if (confidence) {
+      if (!AudioMonitoring.addAudioMonitor(pipeline, audioconvert, enc, interval, monitoringLength, captureDevice.getFriendlyName()))
+        error = formatPipelineError(captureDevice, audioconvert, enc);
+    } else {
+      if (!audioconvert.link(enc))
+        error = formatPipelineError(captureDevice, audioconvert, enc);
+    }
+    if (!enc.link(mux))
       error = formatPipelineError(captureDevice, enc, mux);
     else if (!mux.link(filesink))
       error = formatPipelineError(captureDevice, mux, filesink);
@@ -573,6 +591,8 @@ public class PipelineFactory {
     String bufferCount = captureDevice.properties.getProperty("bufferCount");
     String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
     String bufferTime = captureDevice.properties.getProperty("bufferTime");
+    boolean confidence = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE));
+
 
     Element enc, muxer;
     Element v4l2src = ElementFactory.make("v4l2src", null);
@@ -614,9 +634,14 @@ public class PipelineFactory {
 
     if (!v4l2src.link(queue))
       error = formatPipelineError(captureDevice, v4l2src, queue);
-    else if (!VideoMonitoring.addVideoMonitor(pipeline, queue, enc, interval, imageloc, device))
-      error = formatPipelineError(captureDevice, queue, enc);
-    else if (!enc.link(muxer))
+    if (confidence) {
+      if (!VideoMonitoring.addVideoMonitor(pipeline, queue, enc, interval, imageloc, device))
+        error = formatPipelineError(captureDevice, queue, enc);
+    } else {
+      if (!queue.link(enc))
+        error = formatPipelineError(captureDevice, queue, enc);
+    }
+    if (!enc.link(muxer))
       error = formatPipelineError(captureDevice, enc, muxer);
     else if (!muxer.link(filesink))
       error = formatPipelineError(captureDevice, muxer, filesink);
