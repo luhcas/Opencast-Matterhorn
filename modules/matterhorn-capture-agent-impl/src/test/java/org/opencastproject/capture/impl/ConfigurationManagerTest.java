@@ -17,6 +17,7 @@ package org.opencastproject.capture.impl;
 
 
 import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.util.XProperties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -24,10 +25,12 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -194,5 +197,53 @@ public class ConfigurationManagerTest {
     configManager.updated(sourceProps);
 
     Assert.assertNull(configManager.getCapabilities());
+  }
+
+  @Test @Ignore
+  public void testFileWrite() throws IOException, ConfigurationException {
+    XProperties sourceProps = new XProperties();
+    InputStream is = getClass().getClassLoader().getResourceAsStream("config/capture.properties");
+    if (is == null) {
+      Assert.fail();
+    }
+    sourceProps.load(is);
+    IOUtils.closeQuietly(is);
+
+    //Add in two missing props
+    sourceProps.put("anything", "nothing");
+    sourceProps.put("org.opencastproject.storage.dir", "${java.io.tmpdir}/configman-test");
+    sourceProps.put("M2_REPO", "${java.io.tmpdir}/configman-test");
+    sourceProps.put("org.opencastproject.server.url", "http://localhost:8080");
+
+    configManager.updated(sourceProps);
+    configManager.writeConfigFileToDisk();
+
+    XProperties testProps = new XProperties();
+    InputStream testInput = new FileInputStream(configManager.getItem(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
+    if (is == null) {
+      Assert.fail();
+    }
+    testProps.load(testInput);
+    IOUtils.closeQuietly(testInput);
+
+    if (!testProps.equals(sourceProps)) {
+      for (Object e : sourceProps.keySet()) {
+        String key = (String) e;
+        if (testProps.getProperty(key) != null && !testProps.getProperty(key).equals(sourceProps.getProperty(key))) {
+          System.out.println("testProps differs: " + key + " => " + sourceProps.getProperty(key) + " != " + testProps.getProperty(key));
+        } else if (testProps.getProperty(key) == null) {
+          System.out.println("testProps missing: " + key);
+        }
+      }
+
+      for (Object e : testProps.keySet()) {
+        String key = (String) e;
+        if (sourceProps.getProperty(key) == null){
+          System.out.println("sourceProps missing: " + key);
+        }
+      }
+
+      Assert.fail();
+    }
   }
 }

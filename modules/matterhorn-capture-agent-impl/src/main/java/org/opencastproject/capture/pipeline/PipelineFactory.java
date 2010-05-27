@@ -26,7 +26,8 @@ import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Gst;
-import org.gstreamer.GstObject;
+import org.gstreamer.Message;
+import org.gstreamer.MessageType;
 import org.gstreamer.Pad;
 import org.gstreamer.PadDirection;
 import org.gstreamer.Pipeline;
@@ -89,7 +90,7 @@ public class PipelineFactory {
       // Get properties from 
       String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
       String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
-      if (outputDirectory == null) {
+      if (outputDirectory == null && confidence == false) {
         logger.warn("Output directory is null, this may not work because we may not be able to write to the current output dir!");
       }
       if (!properties.containsKey(outputProperty)) {
@@ -356,7 +357,7 @@ public class PipelineFactory {
       return false;
     }
 
-    if (logger.isTraceEnabled()) {
+    if (true || logger.isTraceEnabled()) {
       BufferThread t = new BufferThread(queue);
       t.start();
     }
@@ -456,7 +457,7 @@ public class PipelineFactory {
       return false;
     }
 
-    if (logger.isTraceEnabled()) {
+    if (true || logger.isTraceEnabled()) {
       BufferThread t = new BufferThread(queue);
       t.start();
     }
@@ -542,7 +543,7 @@ public class PipelineFactory {
       return false;
     }
 
-    if (logger.isTraceEnabled()) {
+    if (true || logger.isTraceEnabled()) {
       BufferThread t = new BufferThread(queue);
       t.start();
     }
@@ -626,7 +627,7 @@ public class PipelineFactory {
       return false;
     }
 
-    if (logger.isTraceEnabled()) {
+    if (true || logger.isTraceEnabled()) {
       BufferThread t = new BufferThread(queue);
       t.start();
     }
@@ -714,7 +715,7 @@ public class PipelineFactory {
       return false;
     }
 
-    if (logger.isTraceEnabled()) {
+    if (true || logger.isTraceEnabled()) {
       BufferThread t = new BufferThread(queue);
       t.start();
     }
@@ -735,13 +736,13 @@ class BufferThread extends Thread {
     log.info("Buffer monitoring thread started for device " + e.getName());
     queue = e;
     
-    queue.getBus().connect(new Bus.EOS() {
-      /**
-       * {@inheritDoc}
-       * @see org.gstreamer.Bus.EOS#endOfStream(org.gstreamer.GstObject)
-       */
-      public void endOfStream(GstObject arg0) {
-        shutdown();
+    queue.getBus().connect(new Bus.MESSAGE() {
+      @Override
+      public void busMessage(Bus arg0, Message arg1) {
+        if (arg1.getType().equals(MessageType.EOS)) {
+          log.info("Shutting down buffer monitor thread for {}.", queue.getName());
+          shutdown();
+        }
       }
     });
 

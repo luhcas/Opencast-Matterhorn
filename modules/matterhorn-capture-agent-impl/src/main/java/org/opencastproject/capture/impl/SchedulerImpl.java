@@ -406,17 +406,28 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    */
   private void checkSchedules() throws SchedulerException {
     if (scheduler != null) {
-      log.debug("Currently scheduled jobs for capture schedule:");
-      for (String name : scheduler.getJobNames(JobParameters.CAPTURE_TYPE)) {
-        log.debug("{}.", name);  
+      String [] jobnames = scheduler.getJobNames(JobParameters.CAPTURE_TYPE);
+      log.debug("Currently scheduled jobs for capture schedule: {}", jobnames.length);
+      if (log.isTraceEnabled()) {
+        for (String name : jobnames) {
+          log.trace("{}.", name);  
+        }
       }
-      log.debug("Currently scheduled jobs for poll schedule:");
-      for (String name : scheduler.getJobNames(JobParameters.RECURRING_TYPE)) {
-        log.debug("{}.", name);
+
+      jobnames = scheduler.getJobNames(JobParameters.RECURRING_TYPE);
+      log.debug("Currently scheduled jobs for poll schedule: {}", jobnames.length);
+      if (log.isTraceEnabled()) {
+        for (String name : jobnames) {
+          log.trace("{}.", name);
+        }
       }
-      log.debug("Currently scheduled jobs for other schedule:");
-      for (String name : scheduler.getJobNames(JobParameters.OTHER_TYPE)) {
-        log.debug("{}.", name);
+
+      jobnames = scheduler.getJobNames(JobParameters.OTHER_TYPE);
+      log.debug("Currently scheduled jobs for other schedule: {}", jobnames.length);
+      if (log.isTraceEnabled()) {
+        for (String name : jobnames) {
+          log.trace("{}.", name);
+        }
       }
     }
   }
