@@ -357,7 +357,7 @@ public class PipelineFactory {
       return false;
     }
 
-    if (true || logger.isTraceEnabled()) {
+    if (logger.isTraceEnabled()) {
       BufferThread t = new BufferThread(queue);
       t.start();
     }
@@ -457,7 +457,7 @@ public class PipelineFactory {
       return false;
     }
 
-    if (true || logger.isTraceEnabled()) {
+    if (logger.isTraceEnabled()) {
       BufferThread t = new BufferThread(queue);
       t.start();
     }
@@ -543,7 +543,7 @@ public class PipelineFactory {
       return false;
     }
 
-    if (true || logger.isTraceEnabled()) {
+    if (logger.isTraceEnabled()) {
       BufferThread t = new BufferThread(queue);
       t.start();
     }
@@ -627,7 +627,7 @@ public class PipelineFactory {
       return false;
     }
 
-    if (true || logger.isTraceEnabled()) {
+    if (logger.isTraceEnabled()) {
       BufferThread t = new BufferThread(queue);
       t.start();
     }
@@ -715,7 +715,7 @@ public class PipelineFactory {
       return false;
     }
 
-    if (true || logger.isTraceEnabled()) {
+    if (logger.isTraceEnabled()) {
       BufferThread t = new BufferThread(queue);
       t.start();
     }
