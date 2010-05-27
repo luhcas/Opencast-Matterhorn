@@ -139,7 +139,7 @@ public class AdminuiRestService {
     RecordingDataViewList out = new RecordingDataViewListImpl();
     if (workflowService != null) {
       logger.info("getting recordings from workflowService");
-      WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery().withState(state)).getItems();
+      WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery().withState(state).withCount(100000)).getItems();
       // next line is for debuging: return all workflowInstaces
       //WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery()).getItems();
       for (int i = 0; i < workflows.length; i++) {
@@ -151,8 +151,10 @@ public class AdminuiRestService {
         item.setSeriesTitle(mediapackage.getSeries());
         item.setSeriesId(mediapackage.getSeries());
         Date date = mediapackage.getDate();
+        long duration = mediapackage.getDuration();
         if (date != null) {
           item.setStartTime(Long.toString(date.getTime()));
+          item.setEndTime(Long.toString(date.getTime() + duration));
         }
         item.setCaptureAgent(null); //FIXME get capture agent from where...?
         WorkflowOperationInstance operation = null;
@@ -177,7 +179,7 @@ public class AdminuiRestService {
         } else {
           out.add(item);
         }
-        logger.info("Recording state: " + state.name() + " MediaPackage: " + mediapackage.getTitle() + " - " + joinStringArray(mediapackage.getCreators()) + " - " + mediapackage.getSeries());
+        // logger.info("Recording state: " + state.name() + " MediaPackage: " + mediapackage.getTitle() + " - " + joinStringArray(mediapackage.getCreators()) + " - " + mediapackage.getSeries());
       }
     } else {
       logger.warn("WorkflowService not present, returning empty list");
