@@ -1347,28 +1347,28 @@ Opencast.Player = (function () {
      */
     function setPlayhead(newPosition) 
     {
-        var fullPosition = Math.round(newPosition);
-
+      if (getDragging() === false)
+      {
         
-
-        if(inPosition <= fullPosition && fullPosition <= inPosition + INTERVAL_LENGTH){
+        var fullPosition = Math.round(newPosition);
+        var interval = inPosition + INTERVAL_LENGTH
+        if(inPosition <= fullPosition && fullPosition <= interval){
           outPosition = fullPosition;
-          if(inPosition + INTERVAL_LENGTH === outPosition){
+          if(interval === outPosition){
             addFootprint();
             inPosition = outPosition;
           }
         } else {
           addFootprint();
-          inPosition = fullPosition;
           outPosition = fullPosition;
+          inPosition = fullPosition;
         }
 
-        if (getDragging() === false)
-        {
-            var newPos = Math.round((newPosition / getDuration()) *  $("#scubber-channel").width());
-            $("#draggable").css("left", newPos);
-            $("#scrubber").css("left", newPos);
-            $("#play-progress").css("width", newPos);
+        
+        var newPos = Math.round((newPosition / getDuration()) *  $("#scubber-channel").width());
+        $("#draggable").css("left", newPos);
+        $("#scrubber").css("left", newPos);
+        $("#play-progress").css("width", newPos);
         }
     }
     
@@ -1391,7 +1391,7 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description Set the with of the progress bar.
+        @description Set the width of the progress bar.
         @param Number value
      */
     function setProgress(value) 

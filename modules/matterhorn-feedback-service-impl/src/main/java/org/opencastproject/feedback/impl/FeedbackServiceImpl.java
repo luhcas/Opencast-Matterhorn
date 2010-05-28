@@ -110,6 +110,14 @@ public class FeedbackServiceImpl implements FeedbackService {
     emf.close();
   }
 
+  
+  public int getViews(String mediapackageId){
+    Query q = em.createNamedQuery("countSessionsOfMediapackage");
+    q.setParameter("mediapackageId", mediapackageId);
+    return ((Long) q.getSingleResult()).intValue();
+  }
+  
+  
   public Session getUserSession(String userId){
     Session s = new SessionImpl();
     s.setUserId(userId);

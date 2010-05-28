@@ -43,6 +43,7 @@ import org.opencastproject.feedback.api.Annotation;
 @Table(name = "MH_ANNOTATION_IMPL")
 @NamedQueries( {
         @NamedQuery(name = "findAnnotations", query = "SELECT a FROM AnnotationImpl a"),
+        @NamedQuery(name = "countSessionsOfMediapackage", query = "SELECT COUNT(distinct a.sessionId) FROM AnnotationImpl a WHERE a.mediapackageId = :mediapackageId"),
         @NamedQuery(name = "findLastAnnotationsOfSession", query = "SELECT a FROM AnnotationImpl a  WHERE a.sessionId = :sessionId ORDER BY a.created DESC"),
         @NamedQuery(name = "findAnnotationsByKey", query = "SELECT a FROM AnnotationImpl a WHERE a.key = :key"),
         @NamedQuery(name = "findAnnotationsByIntervall", query = "SELECT a FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end"),

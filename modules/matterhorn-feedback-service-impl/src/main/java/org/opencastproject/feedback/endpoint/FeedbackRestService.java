@@ -27,6 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.opencastproject.feedback.api.Annotation;
 import org.opencastproject.feedback.api.FeedbackService;
 import org.opencastproject.feedback.api.Session;
+import org.opencastproject.feedback.api.Stats;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -110,14 +111,23 @@ public class FeedbackRestService {
       return Response.ok(feedbackService.getAnnotationsByDay(day, offset, limit)).build();
     else
       return Response.ok(feedbackService.getAnnotations(offset, limit)).build();
+  }
 
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("stats")
+  public Response add(@QueryParam("id") String mediapackageId) {
+    Stats s = new StatsImpl();
+    s.setMediapackageId(mediapackageId);
+    s.setViews(feedbackService.getViews(mediapackageId));
+
+    return Response.ok(s).build();
   }
 
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("session")
   public Response add(@QueryParam("sessionId") String sessionId, @QueryParam("userId") String userId) {
-
     Session s = feedbackService.getUserSession(userId);
 
     return Response.ok(s).build();

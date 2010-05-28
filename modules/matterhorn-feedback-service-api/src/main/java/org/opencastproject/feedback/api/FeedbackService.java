@@ -21,6 +21,15 @@ package org.opencastproject.feedback.api;
 public interface FeedbackService {
 
   /**
+   * Delivers the views of a mediapackage
+   * 
+   * @param mediapackageId
+   *          the mediapackeId
+   * @return the views
+   */
+  int getViews(String mediapackageId);
+  
+  /**
    * Takes the unique userId (may be null). Returns a generated unique sessionId
    * and a generated unique userId, if the userId is null.
    * 

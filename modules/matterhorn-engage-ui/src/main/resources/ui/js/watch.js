@@ -147,6 +147,20 @@ Opencast.Watch = (function ()
             Opencast.Player.stopFastForward();
           });
           Opencast.segments.initialize();
+          
+          $.ajax({
+            type: 'GET',
+            contentType: 'text/xml',
+            url:"../../feedback/rest/stats",
+            data: "id=" + mediaPackageId,
+            dataType: 'xml',
+            success: function(xml) {
+            $('#oc_description').html("Views: "+$(xml).find("views").text());
+            },
+            error: function(a, b, c) {
+              // Some error while trying to get the views
+            }
+          }); 
        });
     }
   
