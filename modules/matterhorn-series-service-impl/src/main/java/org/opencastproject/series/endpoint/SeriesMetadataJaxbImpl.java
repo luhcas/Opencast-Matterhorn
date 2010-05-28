@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.opencastproject.series.api.SeriesMetadata;
+import org.opencastproject.series.impl.SeriesMetadataImpl;
 
 /**
  * TODO: Comment me!
@@ -44,8 +45,8 @@ public class SeriesMetadataJaxbImpl {
   }
 
   @Transient
-  public SeriesMetadata getSeriesMetadata() {
-    return new SeriesMetadata(key,value);
+  public SeriesMetadataImpl getSeriesMetadata() {
+    return new SeriesMetadataImpl(key,value);
   }
   
   public static SeriesMetadataJaxbImpl valueOf(String xmlString) throws Exception {

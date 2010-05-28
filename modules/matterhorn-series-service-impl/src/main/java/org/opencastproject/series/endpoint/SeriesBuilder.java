@@ -16,10 +16,14 @@
 package org.opencastproject.series.endpoint;
 
 import org.apache.commons.io.IOUtils;
+import org.opencastproject.series.api.Series;
 
 import java.io.InputStream;
+import java.io.StringWriter;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -29,7 +33,6 @@ public class SeriesBuilder {
   private static SeriesBuilder instance = null;
   
   protected JAXBContext jaxbContext = null;
-  protected JAXBContext jaxbContextJPA = null;
   
   /**
    *  Set up the JAXBContext.
@@ -72,8 +75,16 @@ public class SeriesBuilder {
   }
   
   public SeriesMetadataJaxbImpl parseSeriesMetadataJaxbImpl(InputStream in) throws Exception {
-    Unmarshaller unmarshaller = jaxbContextJPA.createUnmarshaller();
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
                                   SeriesMetadataJaxbImpl.class).getValue();
+  }   
+  
+  public String marshallSeries (Series s) throws Exception {
+    SeriesJaxbImpl jaxbSeries = new SeriesJaxbImpl(s);
+    Marshaller marshaller = jaxbContext.createMarshaller();
+    StringWriter writer = new StringWriter();
+    marshaller.marshal(jaxbSeries, writer);
+    return writer.toString();
   }   
 }

@@ -28,6 +28,8 @@ import javax.persistence.spi.PersistenceProvider;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesService;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * TODO: Comment me!
  *
  */
-public class SeriesServiceImpl implements SeriesService {
+public class SeriesServiceImpl implements SeriesService, ManagedService {
 
   /** 
    * Properties that are updated by ManagedService updated method
@@ -55,9 +57,13 @@ public class SeriesServiceImpl implements SeriesService {
   protected Map<String, Object> persistenceProperties;
   protected EntityManagerFactory emf = null;
   
+  public SeriesServiceImpl () {
+    logger.info("Series Service instantiated");
+  }
+  
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.series.api.SeriesService#addSeries(org.opencastproject.series.api.Series)
+   * @see org.opencastproject.series.api.SeriesService#addSeries(org.opencastproject.series.impl.SeriesImpl)
    */
   @Override
   public boolean addSeries(Series s) {
@@ -83,10 +89,10 @@ public class SeriesServiceImpl implements SeriesService {
     EntityManager em = emf.createEntityManager();
     if (series.getSeriesId() == null) series.generateSeriesId();
     try {
-      Series found = em.find(Series.class, series.getSeriesId());
+      Series found = em.find(SeriesImpl.class, series.getSeriesId());
       while (found != null) {
         series.generateSeriesId();
-        found = em.find(Series.class, series.getSeriesId());
+        found = em.find(SeriesImpl.class, series.getSeriesId());
       }
     } finally {
       em.close();
@@ -134,7 +140,7 @@ public class SeriesServiceImpl implements SeriesService {
     EntityManager em = emf.createEntityManager();
     Series s = null;
     try {
-       s = em.find(Series.class, seriesID);
+       s = em.find(SeriesImpl.class, seriesID);
     } finally {
       em.close();
     }
@@ -147,7 +153,7 @@ public class SeriesServiceImpl implements SeriesService {
    */
   @Override
   public String newSeriesID() {
-    Series s = new Series();
+    Series s = new SeriesImpl();
     return s.generateSeriesId();
   }
 
@@ -162,7 +168,7 @@ public class SeriesServiceImpl implements SeriesService {
     EntityManager em = emf.createEntityManager();
     try {
       em.getTransaction().begin();
-      s = em.find(Series.class, seriesID);
+      s = em.find(SeriesImpl.class, seriesID);
       if (s == null) return false; // Event not in database
       em.remove(s);
       em.getTransaction().commit();
@@ -174,14 +180,14 @@ public class SeriesServiceImpl implements SeriesService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.series.api.SeriesService#updateSeries(org.opencastproject.series.api.Series)
+   * @see org.opencastproject.series.api.SeriesService#updateSeries(org.opencastproject.series.impl.SeriesImpl)
    */
   @Override
   public boolean updateSeries(Series s) {
     EntityManager em = emf.createEntityManager();
     try {
       em.getTransaction().begin();
-      Series storedSeries = em.find(Series.class, s.getSeriesId()); 
+      SeriesImpl storedSeries = em.find(SeriesImpl.class, s.getSeriesId()); 
       if (storedSeries == null) return false; //nothing found to update
       storedSeries.setMetadata(s.getMetadata());
       em.merge(storedSeries);
@@ -202,10 +208,10 @@ public class SeriesServiceImpl implements SeriesService {
     }
     else this.componentContext = cc;
     
-    emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.series.api", persistenceProperties);
+    emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.series.impl", persistenceProperties);
   }
   
-  public void deactivate() {
+  public void deactivate(ComponentContext cc) {
     emf.close();
   }   
   
@@ -223,6 +229,18 @@ public class SeriesServiceImpl implements SeriesService {
   
   public PersistenceProvider getPersistenceProvider() {
     return persistenceProvider;
+  }
+
+  @Override
+  public void updated(Dictionary properties) throws ConfigurationException {
+    this.properties = properties;
+    
+  }
+
+  @Override
+  public List<Series> searchSeries(String pattern) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }

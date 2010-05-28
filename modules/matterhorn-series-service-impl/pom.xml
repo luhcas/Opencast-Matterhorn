@@ -136,7 +136,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.scheduler.* </Export-Package>
+            <Export-Package> org.opencastproject.series.* </Export-Package>
             <Import-Package>
               org.opencastproject.http,
               org.opencastproject.metadata.dublincore,

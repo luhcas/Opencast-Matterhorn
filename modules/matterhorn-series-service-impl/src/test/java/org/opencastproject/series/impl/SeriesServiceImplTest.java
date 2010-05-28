@@ -65,32 +65,32 @@ public class SeriesServiceImplTest {
     
     service.activate(null);
     
-    series = new Series();
+    series = new SeriesImpl();
     
     LinkedList<SeriesMetadata> metadata = new LinkedList<SeriesMetadata>();
     
-    metadata.add(new SeriesMetadata("title", "demo title"));
-    metadata.add(new SeriesMetadata("license", "demo"));
-    metadata.add(new SeriesMetadata("valid", ""+System.currentTimeMillis()));
-    metadata.add(new SeriesMetadata("publisher", "demo"));
-    metadata.add(new SeriesMetadata("creator", "demo"));
-    metadata.add(new SeriesMetadata("subject", "demo"));
-    metadata.add(new SeriesMetadata("temporal", "demo"));
-    metadata.add(new SeriesMetadata("audience", "demo"));
-    metadata.add(new SeriesMetadata("spatial", "demo"));
-    metadata.add(new SeriesMetadata("rightsHolder", "demo"));
-    metadata.add(new SeriesMetadata("extent", "3600000"));
-    metadata.add(new SeriesMetadata("created", ""+System.currentTimeMillis()));
-    metadata.add(new SeriesMetadata("language", "demo"));
-    metadata.add(new SeriesMetadata("identifier", "demo"));
-    metadata.add(new SeriesMetadata("isReplacedBy", "demo"));
-    metadata.add(new SeriesMetadata("type", "demo"));
-    metadata.add(new SeriesMetadata("available", ""+System.currentTimeMillis()));
-    metadata.add(new SeriesMetadata("modified", ""+System.currentTimeMillis()));
-    metadata.add(new SeriesMetadata("replaces", "demo"));
-    metadata.add(new SeriesMetadata("contributor", "demo"));
-    metadata.add(new SeriesMetadata("description", "demo"));
-    metadata.add(new SeriesMetadata("issued", ""+System.currentTimeMillis()));
+    metadata.add(new SeriesMetadataImpl("title", "demo title"));
+    metadata.add(new SeriesMetadataImpl("license", "demo"));
+    metadata.add(new SeriesMetadataImpl("valid", ""+System.currentTimeMillis()));
+    metadata.add(new SeriesMetadataImpl("publisher", "demo"));
+    metadata.add(new SeriesMetadataImpl("creator", "demo"));
+    metadata.add(new SeriesMetadataImpl("subject", "demo"));
+    metadata.add(new SeriesMetadataImpl("temporal", "demo"));
+    metadata.add(new SeriesMetadataImpl("audience", "demo"));
+    metadata.add(new SeriesMetadataImpl("spatial", "demo"));
+    metadata.add(new SeriesMetadataImpl("rightsHolder", "demo"));
+    metadata.add(new SeriesMetadataImpl("extent", "3600000"));
+    metadata.add(new SeriesMetadataImpl("created", ""+System.currentTimeMillis()));
+    metadata.add(new SeriesMetadataImpl("language", "demo"));
+    metadata.add(new SeriesMetadataImpl("identifier", "demo"));
+    metadata.add(new SeriesMetadataImpl("isReplacedBy", "demo"));
+    metadata.add(new SeriesMetadataImpl("type", "demo"));
+    metadata.add(new SeriesMetadataImpl("available", ""+System.currentTimeMillis()));
+    metadata.add(new SeriesMetadataImpl("modified", ""+System.currentTimeMillis()));
+    metadata.add(new SeriesMetadataImpl("replaces", "demo"));
+    metadata.add(new SeriesMetadataImpl("contributor", "demo"));
+    metadata.add(new SeriesMetadataImpl("description", "demo"));
+    metadata.add(new SeriesMetadataImpl("issued", ""+System.currentTimeMillis()));
     
     series.setMetadata(metadata);
     
@@ -99,7 +99,7 @@ public class SeriesServiceImplTest {
   
   @After
   public void teardown () {
-    service.deactivate();
+    service.deactivate(null);
     service = null;
     
     

@@ -29,6 +29,7 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
+import org.opencastproject.series.impl.SeriesImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +76,7 @@ public class SeriesJaxbImpl {
    */
   @XmlTransient
   public Series getSeries() {
-    Series s = new Series();
+    Series s = new SeriesImpl();
     if(seriesId != ""){
       s.setSeriesId(seriesId);
     }else{
