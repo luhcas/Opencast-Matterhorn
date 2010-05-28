@@ -112,7 +112,7 @@ sudo chmod 755 mnt/home/opencast/opencaps_matterhorn_only.sh
 
 sudo ln -s /opt/matterhorn/matterhorn_trunk/docs/felix/bin/start_matterhorn.sh mnt/home/opencast/startup.sh
 sudo ln -s /opt/matterhorn/matterhorn_trunk/docs/felix/bin/shutdown_matterhorn.sh mnt/home/opencast/shutdown.sh
-sudo ln -s /opt/matterhorn/matterhorn_trunk/docs/felix/bin/update-matterhorn.sh mnt/home/opencast/update-matterhorn.sh
+sudo ln -s /opt/matterhorn/matterhorn_trunk/docs/felix/bin/update_matterhorn.sh mnt/home/opencast/update_matterhorn.sh
 
 sudo mkdir mnt/opt/matterhorn
 
