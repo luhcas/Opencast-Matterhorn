@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.receipt.api;
+package org.opencastproject.remote.api;
 
 /**
  * A service that can be placed into maintenance mode.

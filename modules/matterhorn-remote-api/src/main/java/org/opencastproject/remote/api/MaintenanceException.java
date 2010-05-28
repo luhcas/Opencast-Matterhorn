@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.receipt.api;
+package org.opencastproject.remote.api;
 
 /**
  * Thrown when a method is called, but the service is in maintenance mode.
