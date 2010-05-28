@@ -12,7 +12,6 @@
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/player-multi-hybrid-icons.css" />
     <link rel="stylesheet" type="text/css" href="shared_css/jquery-ui-1.8.1.custom.css" />
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/opencast-reset.css" />
-    <link rel="stylesheet" type="text/css" href="shared_css/shared.css">
     <link rel="stylesheet" type="text/css" href="jquery/plugins/jwysiwyg/jquery.wysiwyg.css"  />
     <link rel="stylesheet" type="text/css" href="css/oc.segments.css">
 
@@ -36,36 +35,30 @@
   </head>
 
   <body>
-  <div id="pageHeader">
-      <div id="currentVersion"></div>
-      <div id="newestVersion" style="text-align: right; float: right;"></div>
-  </div>
-    
   <noscript>
     <p style="color:red;">JavaScript is turned off in your web browser. So this site wouldn't work properly! <br />
       <strong>Please turn JavaScript on to use this site, then refresh the page.</strong>
     </p>
   </noscript>
-  <div style="margin-top: .5em width: 60%;">
-        <a href="../../welcome.html" style="color:#F6921E;text-decoration: none; font: 13px/1.231 arial,helvetica,clean,sans-serif;">
-          <h1><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn">&nbsp;&nbsp;Opencast Matterhorn</h1>
-        </a>
-  </div>   
-  <div id="oc_title-bar">
-    
-    <div id="oc_title"></div>
-    
-    <div id="oc_title_from"></div>
-    
-    <div id="oc_search">    
-     <form action="index.html">
-        <input id="oc_searchField" class="oc_search-Field" type="text" name="q" value="search Matterhorn" />
-         <input id="oc_btn-search" type="submit" name="search" alt="search" title="search" value="Search"></input>
-      </form>
-    </div>
+  <div id="oc_title-bar" style="padding-top:5px;">
+    	<div id="oc_title-bar-container">
+    	<div id="oc_title-bar-logo">
+			<a href="index.html"><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn" style="float:left;"></a>
+		</div>
+		<div id="oc_title-bar-heading">
+			<span id="oc_title"></span>
+			<span id="oc_title_from"></span>
+		</div>
+		<div id="oc_search">    
+			<form action="index.html">
+				<input id="oc_searchField" class="oc_search-Field" type="text" name="q" value="search Matterhorn" />
+				<input id="oc_btn-search" type="submit" name="search" alt="search" title="search" value="Search"></input>
+			</form>
+		</div>
+		</div>  
   </div>
     
-  <div id="oc_body">
+  <div id="oc_body" style="padding-top:5px;">
       
     <div id="oc_flash-player">
       <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-flash.js"></script> 
@@ -206,21 +199,21 @@
         </div>
         
         <div id=oc_shortcuts class="oc_DisplayNone fl-fix" >
-          Press Control + Alt + I   = Toggle the keyboard shortcuts information between show or hide.<br>
-          Press Control + Alt + P   = Toggle the video between pause or play.<br>
-          Press Control + Alt + S   = Stop the video.<br>
-          Press Control + Alt + M   = Toggle between mute or unmute the video.<br>
-          Press Control + Alt + U   = Volume up<br>
-          Press Control + Alt + D   = Volume down<br>
-          Press Control + Alt 0 - 9 = Seek the time slider<br>
+          Press Control + Alt + I    = Toggle the keyboard shortcuts information between show or hide.<br>
+          Press Control + Alt + P    = Toggle the video between pause or play.<br>
+          Press Control + Alt + S    = Stop the video.<br>
+          Press Control + Alt + M    = Toggle between mute or unmute the video.<br>
+          Press Control + Alt + U    = Volume up<br>
+          Press Control + Alt + D    = Volume down<br>
+          Press Control + Alt 0 - 9  = Seek the time slider<br>
           Press Control + Alt + C   = Toggle between captions on or off.<br>
-          Press Control + Alt + F   = Forward the video.<br>
-          Press Control + Alt + R   = Rewind the video.<br>
-          Press Control + Alt + T   = the current time for the screen reader<br>
-          Press on Mac cmd +        = to zoom in the player<br>
-          Press on Mac cmd -        = to minimize the player<br>
-          Press on Windows strg +   = to zoom in the player<br>
-          Press on Windows strg -   = to minimize the player<br>
+          Press Control + Alt + F    = Forward the video.<br>
+          Press Control + Alt + R    = Rewind the video.<br>
+          Press Control + Alt + T    = the current time for the screen reader<br>
+          Press on Mac cmd +         = to zoom in the player<br>
+          Press on Mac cmd -         = to minimize the player<br>
+          Press on Windows Control + = to zoom in the player<br>
+          Press on Windows Control - = to minimize the player<br>
         </div>
         
       </div>
