@@ -6,13 +6,17 @@ else
   FELIX="/opt/matterhorn/felix"
 fi
 
-
 if [ -n "${M2_REPO:-x}" ]; then
   M2_REPO=$M2_REPO
 else
   M2_REPO="/home/opencast/.m2/repository"
 fi
 
+if [ -n "${JAVA_HOME:-x}" ]; then
+  JAVA_HOME=$JAVA_HOME
+else
+  JAVA_HOME="/usr/lib/jvm/java-6-sun"
+fi
 
 MATTERHORN_HOME=/opt/matterhorn
 MATTERHORN_CONF=/opt/matterhorn/felix/conf
