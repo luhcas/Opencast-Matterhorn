@@ -18,10 +18,18 @@ package org.opencastproject.series.endpoint;
 
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.series.api.Series;
+import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.api.SeriesService;
+import org.opencastproject.series.impl.SeriesImpl;
+import org.opencastproject.series.impl.SeriesMetadataImpl;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Param.Type;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,6 +117,23 @@ public class SeriesRestService {
   }
   
   @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("search/{pattern}")
+  public Response searchSeries(@PathParam("pattern") String pattern) {
+    logger.debug("Searching all Series that match the pattern {}", pattern);
+    try {
+      List<Series> list = service.searchSeries(pattern);
+      if (list == null) return Response.status(Status.BAD_REQUEST).build();
+      String jsonList = null;
+      //TODO convert result to JSON
+      return Response.ok(jsonList).build();  
+    } catch (Exception e) {
+      logger.warn("search for series failed. Pattern: {}", pattern);
+      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+    }
+  }  
+  
+  @GET
   @Produces(MediaType.TEXT_XML)
   @Path("series/{seriesID}/dublincore")
   public Response getDublinCoreForSeries(@PathParam("seriesID") String seriesID) {
@@ -119,6 +144,21 @@ public class SeriesRestService {
       return Response.ok(dc).build();
     } catch (Exception e) {
       logger.warn("Series Lookup failed: {}", seriesID);
+      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+    }
+  } 
+  
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("new/id")
+  public Response newSeriesId() {
+    logger.debug("create ne Series Id");
+    try {
+      String id = service.newSeriesID();
+      if (id == null) return Response.status(Status.SERVICE_UNAVAILABLE).build();
+      return Response.ok(id).build();
+    } catch (Exception e) {
+      logger.warn("could not create new seriesID");
       return Response.status(Status.SERVICE_UNAVAILABLE).build();
     }
   }  
@@ -196,7 +236,7 @@ public class SeriesRestService {
    */
   @POST
   @Produces(MediaType.TEXT_XML)
-  @Path("all/series")
+  @Path("all")
   public Response getAllSeries () {
     logger.debug("getting all series.");
     List<Series> series = service.getAllSeries();
@@ -231,12 +271,118 @@ public class SeriesRestService {
    * @return The HTML with the documentation
    */
   protected String generateDocs() {
-    DocRestData data = new DocRestData("Scheduler", "Scheduler Service", "/scheduler/rest", notes);
+    DocRestData data = new DocRestData("Series", "Series Service", "/series/rest", notes);
 
     // abstract
     data.setAbstract("This service creates, edits and retrieves and helps manage sereies that capture metadata."); 
 
+    // add Series 
+    RestEndpoint addEndpoint = new RestEndpoint("addSeries", RestEndpoint.Method.PUT, "/series", "Stores a new series in the database. Returns true if the series was stored");
+    addEndpoint.addFormat(new Format("boolean", null, null));
+    addEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, boolean returned"));
+    addEndpoint.addRequiredParam(new Param("series", Type.TEXT, generateSeries(), "The series that should be stored."));
+    addEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, addEndpoint);
+    
+    // update Series 
+    RestEndpoint updateEndpoint = new RestEndpoint("updateSeries", RestEndpoint.Method.POST, "/series", "Updates an existing series in the database. The series-id has to be stored in the database already. Will return true, if the event was found and could be updated.");
+    updateEndpoint.addFormat(new Format("boolean", null, null));
+    updateEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, boolean returned"));
+    updateEndpoint.addRequiredParam(new Param("series", Type.TEXT, generateSeries(), "The series that should be updated."));
+    updateEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, updateEndpoint);        
+    
+    // remove Series
+    RestEndpoint removeEndpoint = new RestEndpoint("deleteSeries", RestEndpoint.Method.DELETE, "/series/{seriesID}", "Removes the specified series from the database. Returns true if the series could be removed.");
+    removeEndpoint.addFormat(new Format("boolean", null, null));
+    removeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, boolean returned"));
+    removeEndpoint.addPathParam(new Param("seriesID", Type.STRING, "seriesID", "The unique ID of the series."));
+    removeEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, removeEndpoint);
+    
+    // get Series
+    RestEndpoint getEndpoint = new RestEndpoint("getSeries", RestEndpoint.Method.GET, "/series/{seriesID}", "Get a specific Series.");
+    getEndpoint.addFormat(new Format("xml", null, null));
+    getEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, Series XML returned"));
+    getEndpoint.addPathParam(new Param("seriesID", Type.STRING, "UUID of the Series", "The unique ID of the Series."));
+    getEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, getEndpoint);
+    
+    // get all series
+    RestEndpoint getAllEndpoint = new RestEndpoint("getAllSeries", RestEndpoint.Method.GET, "/all", "returns all series");
+    getAllEndpoint.addFormat(new Format("xml", null, null));
+    getAllEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, List of Series as XML returned"));
+    getAllEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, getAllEndpoint);
+   
+    // get new seriesID
+    RestEndpoint newIdEndpoint = new RestEndpoint("newSeriesId", RestEndpoint.Method.GET, "/new/id", "returns a new UUID for a new series");
+    newIdEndpoint.addFormat(new Format("text", null, null));
+    newIdEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, UUID for a new seriesID"));
+    newIdEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, newIdEndpoint);
+    
+    // get Dublin Core for Series
+    RestEndpoint dcEndpoint = new RestEndpoint("getDublinCoreForSeries", RestEndpoint.Method.GET, "/series/{seriesID}/dublincore", "Get the DublinCore metdata for a specific Series.");
+    dcEndpoint.addFormat(new Format("xml", null, null));
+    dcEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, DublinCore returned"));
+    dcEndpoint.addPathParam(new Param("seriesID", Type.STRING, "UUID of the Series", "The unique ID of the Series."));
+    dcEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, dcEndpoint);    
+    
+    // search Series
+    RestEndpoint searchEndpoint = new RestEndpoint("getSeries", RestEndpoint.Method.GET, "/search/{pattern}", "Get all Series that match this pattern in their Metadata.");
+    searchEndpoint.addFormat(new Format("JSON", null, null));
+    searchEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, JSON Object with UUID of the series and a String describing the series"));
+    searchEndpoint.addPathParam(new Param("pattern", Type.STRING, "lecturer", "a part of a metadat value"));
+    searchEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, searchEndpoint);
+    
     return DocUtil.generate(data);
+  }
+  
+  protected String generateSeries ()  {
+    try {
+    SeriesBuilder builder = SeriesBuilder.getInstance();
+      
+      Series series = new SeriesImpl();
+      
+      LinkedList<SeriesMetadata> metadata = new LinkedList<SeriesMetadata>();
+      
+      metadata.add(new SeriesMetadataImpl("title", "demo title"));
+      metadata.add(new SeriesMetadataImpl("license", "demo"));
+      metadata.add(new SeriesMetadataImpl("valid", ""+System.currentTimeMillis()));
+      metadata.add(new SeriesMetadataImpl("publisher", "demo"));
+      metadata.add(new SeriesMetadataImpl("creator", "demo"));
+      metadata.add(new SeriesMetadataImpl("subject", "demo"));
+      metadata.add(new SeriesMetadataImpl("temporal", "demo"));
+      metadata.add(new SeriesMetadataImpl("audience", "demo"));
+      metadata.add(new SeriesMetadataImpl("spatial", "demo"));
+      metadata.add(new SeriesMetadataImpl("rightsHolder", "demo"));
+      metadata.add(new SeriesMetadataImpl("extent", "3600000"));
+      metadata.add(new SeriesMetadataImpl("created", ""+System.currentTimeMillis()));
+      metadata.add(new SeriesMetadataImpl("language", "demo"));
+      metadata.add(new SeriesMetadataImpl("identifier", "demo"));
+      metadata.add(new SeriesMetadataImpl("isReplacedBy", "demo"));
+      metadata.add(new SeriesMetadataImpl("type", "demo"));
+      metadata.add(new SeriesMetadataImpl("available", ""+System.currentTimeMillis()));
+      metadata.add(new SeriesMetadataImpl("modified", ""+System.currentTimeMillis()));
+      metadata.add(new SeriesMetadataImpl("replaces", "demo"));
+      metadata.add(new SeriesMetadataImpl("contributor", "demo"));
+      metadata.add(new SeriesMetadataImpl("description", "demo"));
+      metadata.add(new SeriesMetadataImpl("issued", ""+System.currentTimeMillis()));
+      
+      series.generateSeriesId();
+      
+      series.setMetadata(metadata);
+      
+      String result = builder.marshallSeries(series);
+      logger.info("Series: "+result);
+      return result;
+    } catch (Exception e1) {
+      logger.warn("Could not marshall example series: {}", e1.getMessage());
+      return null;
+    }
   }
   
 }
