@@ -287,14 +287,14 @@ else
   fi
 
   # Install 3P tools?
-  if [ $p3resp = "y" ] || [ $p3resp = "Y" ]; then
+  if [ $p3resp != "n" ] || [ $p3resp != "N" ]; then
     install_3p
   else
     echo "3rd party tools will NOT be installed."
   fi
 
   # Install ffmpeg?
-  if [ $ffresp = "y" ] || [ $ffresp = "Y" ]; then
+  if [ $ffresp != "n" ] || [ $ffresp != "N" ]; then
     install_ffmpeg
   else
     echo "ffmpeg will NOT be installed."
