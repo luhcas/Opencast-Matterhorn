@@ -16,16 +16,17 @@ Upload.init = function() {
   // Event: Retry: use already uploaded file clicked
   $('#use-file-previous').click(function() {
     if ($(this).val()) {
-      //$('#regular-file-selection').fadeIn();
       $('#regular-file-chooser').fadeOut('fast');
+      $('#track').val($('#previous-file-link').attr('href'));
+      Upload.checkRequiredFields(false);
     }
   });
 
   // Event: Retry: use replacement file clicked
   $('#use-file-replace').click(function() {
     if ($(this).val()) {
-      //$('#regular-file-selection').toggle();
       $('#regular-file-chooser').fadeIn('fast');
+      $('#track').val($('#filechooser-ajax'));
     }
   });
 
@@ -140,7 +141,7 @@ Upload.initRetry = function() {
   $('#retry-file').css('display', 'block');
   $('#regular-file-selection').css('display', 'none');
   $('#regular-file-chooser').css('display', 'none');
-  $('#i18n_page_title').text("Edit Recording for Retry");
+  $('#i18n_page_title').text("Edit Recording");
   // get failed Workflow
   $.ajax({
     method: 'GET',
@@ -155,6 +156,7 @@ Upload.initRetry = function() {
           var filename = $(elm).find('url').text();
           $('#previous-file-flavor').val($(elm).attr('type'));
           $('#previous-file-link').attr('href', filename);
+          $('#track').val(filename);
           $('#previous-file-url').val(filename);
           filename = filename.split(/\//);
           filename = filename[filename.length-1];
@@ -164,7 +166,7 @@ Upload.initRetry = function() {
       // previous workflow definition
       var defId = $(data.documentElement).find('template').text();
       $('#workflow-selector').val(defId);
-      Upload.workflowSelected(defId, function() {
+      ocWorkflow.definitionSelected(defId, $('#workflow-config-container'), function() {
         $(data.documentElement).find("> configurations > configuration").each(function(index, elm) {
           if ($(elm).attr('key')) {
             $('#'+ $(elm).attr('key')).val($(elm).text());
@@ -204,21 +206,6 @@ Upload.loadDublinCore = function(url) {
   });
 }
 
-/** invoked when a workflow is selected. display configuration panel for
- *  the selected workflow if defined.
- *  
- */
-//Upload.workflowSelected = function(workflow, callback) {
-//  $('#workflow-config-container').load(
-//    '../workflow/rest/configurationPanel?definitionId=' + workflow,
-//    function() {
-//      $('#workflow-config-container').show('fast');
-//      if (callback) {
-//        callback();
-//      }
-//    }
-//    );
-//}
 
 Upload.populateWorkflowConfig = function(data) {
   $(data).each( function(elm) {
@@ -245,7 +232,7 @@ Upload.checkRequiredFields = function(submit) {
   var wrongtype = false;
   $('.requiredField:visible, .requiredField[type|=hidden]').each( function() {
     if (!$(this).val()) {
-      //alert(($this).attr(id) + " = " + $(this).value());
+      //alert($(this).attr(id) + " = " + $(this).value());
       $('#notification-' + $(this).attr('id')).show();
       if ((submit) || ($('#container-missingFields').is(':visible'))) {
         $(this).prev('.fl-label').css('color','red');
