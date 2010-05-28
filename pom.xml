@@ -46,8 +46,8 @@
         <module>modules/matterhorn-security-api</module>
         <module>modules/matterhorn-security-impl</module>
         <module>modules/matterhorn-util</module>
-        <module>modules/matterhorn-receipt-api</module>
-        <module>modules/matterhorn-receipt-impl</module>
+        <module>modules/matterhorn-remote-api</module>
+        <module>modules/matterhorn-remote-impl</module>
         <module>modules/matterhorn-working-file-repository-service-api</module>
         <module>modules/matterhorn-working-file-repository-service-remote</module>
         <module>modules/matterhorn-workspace-api</module>
@@ -92,8 +92,8 @@
         <module>modules/matterhorn-security-api</module>
         <module>modules/matterhorn-security-impl</module>
         <module>modules/matterhorn-util</module>
-        <module>modules/matterhorn-receipt-api</module>
-        <module>modules/matterhorn-receipt-impl</module>
+        <module>modules/matterhorn-remote-api</module>
+        <module>modules/matterhorn-remote-impl</module>
         <module>modules/matterhorn-workflow-service-api</module>
         <module>modules/matterhorn-workflow-service-impl</module>
         <module>modules/matterhorn-workflow-ui</module>
@@ -197,8 +197,8 @@
         <module>modules/matterhorn-security-api</module>
         <module>modules/matterhorn-security-impl</module>
         <module>modules/matterhorn-util</module>
-        <module>modules/matterhorn-receipt-api</module>
-        <module>modules/matterhorn-receipt-impl</module>
+        <module>modules/matterhorn-remote-api</module>
+        <module>modules/matterhorn-remote-impl</module>
         <module>modules/matterhorn-workflow-service-api</module>
         <module>modules/matterhorn-workflow-service-impl</module>
         <module>modules/matterhorn-workflow-ui</module>

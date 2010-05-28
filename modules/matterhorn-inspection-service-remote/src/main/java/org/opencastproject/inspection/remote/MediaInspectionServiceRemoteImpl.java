@@ -17,9 +17,9 @@ package org.opencastproject.inspection.remote;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.receipt.api.Receipt;
-import org.opencastproject.receipt.api.ReceiptService;
-import org.opencastproject.receipt.api.Receipt.Status;
+import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.ReceiptService;
+import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 
 import org.apache.http.HttpEntity;

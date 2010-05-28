@@ -17,8 +17,8 @@ package org.opencastproject.composer.api;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.receipt.api.Receipt;
-import org.opencastproject.receipt.api.Receipt.Status;
+import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Receipt.Status;
 
 /**
  * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this encoding job.

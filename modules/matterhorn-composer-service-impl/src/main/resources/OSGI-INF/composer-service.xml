@@ -8,13 +8,13 @@
     <implementation class="org.opencastproject.composer.impl.ComposerServiceImpl" />
     <property name="service.description" value="Composer (Encoder) Local Service" />
     <service>
-      <provide interface="org.opencastproject.receipt.api.Maintainable" />
+      <provide interface="org.opencastproject.remote.api.Maintainable" />
       <provide interface="org.opencastproject.composer.api.ComposerService" />
     </service>
     <reference name="inspection-service" interface="org.opencastproject.inspection.api.MediaInspectionService"
       cardinality="1..1" policy="static" bind="setMediaInspectionService" />
     <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
       cardinality="1..1" policy="static" bind="setWorkspace" />
-    <reference name="receiptService" interface="org.opencastproject.receipt.api.ReceiptService"
+    <reference name="receiptService" interface="org.opencastproject.remote.api.ReceiptService"
       cardinality="1..1" policy="static" bind="setReceiptService" />
 </scr:component>

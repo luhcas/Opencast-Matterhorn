@@ -34,7 +34,7 @@ import org.opencastproject.metadata.mpeg7.MediaTimePoint;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.Video;
-import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;

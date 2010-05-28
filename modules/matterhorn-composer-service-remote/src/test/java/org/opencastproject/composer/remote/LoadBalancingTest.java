@@ -16,9 +16,9 @@
 package org.opencastproject.composer.remote;
 
 import org.opencastproject.composer.api.ComposerService;
-import org.opencastproject.receipt.api.Receipt.Status;
-import org.opencastproject.receipt.impl.ReceiptImpl;
-import org.opencastproject.receipt.impl.ReceiptServiceImpl;
+import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.remote.impl.ReceiptImpl;
+import org.opencastproject.remote.impl.ReceiptServiceImpl;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 

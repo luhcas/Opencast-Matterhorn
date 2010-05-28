@@ -13,6 +13,6 @@
     interface="org.opencastproject.workspace.api.Workspace" cardinality="1..1"
     policy="static" bind="setWorkspace" />
   <reference name="receiptService"
-    interface="org.opencastproject.receipt.api.ReceiptService"
+    interface="org.opencastproject.remote.api.ReceiptService"
     cardinality="1..1" policy="static" bind="setReceiptService" />
 </scr:component>

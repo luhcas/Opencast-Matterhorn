@@ -16,8 +16,8 @@
 package org.opencastproject.analysis.dictionary;
 
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
-import org.opencastproject.receipt.api.Receipt;
-import org.opencastproject.receipt.api.ReceiptService;
+import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.ReceiptService;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.workspace.api.Workspace;
 

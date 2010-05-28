@@ -18,7 +18,7 @@ package org.opencastproject.analysis.api;
 
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.remote.api.Receipt;
 
 /**
  * Api for media analysis implementations, aimed at extracting metadata information from audio and audiovisual tracks.

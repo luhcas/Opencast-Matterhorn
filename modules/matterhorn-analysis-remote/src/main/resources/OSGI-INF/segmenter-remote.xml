@@ -12,6 +12,6 @@
   </service>
   <reference name="trustedHttpClient" interface="org.opencastproject.security.api.TrustedHttpClient"
     cardinality="1..1" policy="static" bind="setTrustedHttpClient" />
-  <reference name="receiptService" interface="org.opencastproject.receipt.api.ReceiptService"
+  <reference name="receiptService" interface="org.opencastproject.remote.api.ReceiptService"
     cardinality="1..1" policy="static" bind="setReceiptService" />
 </scr:component>

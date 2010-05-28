@@ -50,6 +50,9 @@ public class XProperties extends Properties {
   /** The {@code BundleContext} for this properties object */
   private BundleContext context = null;
 
+  /** The {@link Bundle} that loaded this object */
+  private Bundle bundle = null;
+  
   /**
    * {@inheritDoc}
    * See the class description for more details.
@@ -94,7 +97,7 @@ public class XProperties extends Properties {
       return p.matcher(value).replaceAll(System.getProperty(subkey));
     } else if (this.getProperty(subkey) != null) {
       return p.matcher(value).replaceAll(this.getProperty(subkey));
-    } else if (this.context != null && this.context.getBundle().getState() == Bundle.ACTIVE &&
+    } else if (this.context != null && this.bundle != null && this.bundle.getState() == Bundle.ACTIVE &&
             this.context.getProperty(subkey) != null) {
       return p.matcher(value).replaceAll(this.context.getProperty(subkey));
     } else if (System.getenv(subkey) != null) {
@@ -142,5 +145,8 @@ public class XProperties extends Properties {
    */
   public void setBundleContext(BundleContext ctx) {
     context = ctx;
+    if(ctx != null) {
+      bundle = ctx.getBundle();
+    }
   }
 }

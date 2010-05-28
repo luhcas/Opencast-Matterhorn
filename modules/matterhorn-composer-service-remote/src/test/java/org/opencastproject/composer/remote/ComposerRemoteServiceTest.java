@@ -6,9 +6,9 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.receipt.api.Receipt;
-import org.opencastproject.receipt.api.Receipt.Status;
-import org.opencastproject.receipt.impl.ReceiptServiceImpl;
+import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.remote.impl.ReceiptServiceImpl;
 import org.opencastproject.security.TrustedHttpClientImpl;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;

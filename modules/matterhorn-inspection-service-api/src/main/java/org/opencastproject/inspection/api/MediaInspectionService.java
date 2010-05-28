@@ -16,7 +16,7 @@
 package org.opencastproject.inspection.api;
 
 import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.receipt.api.Receipt;
+import org.opencastproject.remote.api.Receipt;
 
 import java.net.URI;
 

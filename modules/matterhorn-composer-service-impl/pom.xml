@@ -91,7 +91,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-receipt-impl</artifactId>
+      <artifactId>matterhorn-remote-impl</artifactId>
       <version>0.9-SNAPSHOT</version>
       <scope>test</scope>
     </dependency>

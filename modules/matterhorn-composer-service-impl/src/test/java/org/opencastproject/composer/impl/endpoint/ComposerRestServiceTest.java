@@ -21,8 +21,8 @@ import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageImpl;
-import org.opencastproject.receipt.api.Receipt;
-import org.opencastproject.receipt.impl.ReceiptImpl;
+import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.impl.ReceiptImpl;
 
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -56,7 +56,7 @@ public class ComposerRestServiceTest {
     audioTrackId = "audio1";
     videoTrackId = "video1";
     profileId = "profile1";
-    receipt = new ReceiptImpl("123", org.opencastproject.receipt.api.Receipt.Status.QUEUED, ComposerService.RECEIPT_TYPE, "encoding_farm_server_456", null);
+    receipt = new ReceiptImpl("123", org.opencastproject.remote.api.Receipt.Status.QUEUED, ComposerService.RECEIPT_TYPE, "encoding_farm_server_456", null);
     profile = new EncodingProfileImpl();
     profile.setIdentifier(profileId);
     List<EncodingProfileImpl> list = new ArrayList<EncodingProfileImpl>();

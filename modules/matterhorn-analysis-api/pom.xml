@@ -24,7 +24,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-receipt-api</artifactId>
+      <artifactId>matterhorn-remote-api</artifactId>
       <version>0.9-SNAPSHOT</version>
     </dependency>
     <dependency>

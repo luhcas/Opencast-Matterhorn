@@ -23,9 +23,9 @@ import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.receipt.api.Receipt;
-import org.opencastproject.receipt.api.ReceiptService;
-import org.opencastproject.receipt.api.Receipt.Status;
+import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.ReceiptService;
+import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 
 import org.apache.commons.collections.MapIterator;
@@ -115,7 +115,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.receipt.api.Receipt.Status)
+   * @see org.opencastproject.composer.api.ComposerService#countJobs(orgorg.opencastproject.remote.Receipt.Status)
    */
   @Override
   public long countJobs(Status status) {

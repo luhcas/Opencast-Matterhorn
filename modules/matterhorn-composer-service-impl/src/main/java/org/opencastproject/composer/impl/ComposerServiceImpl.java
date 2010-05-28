@@ -28,11 +28,11 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.identifier.IdBuilder;
 import org.opencastproject.media.mediapackage.identifier.IdBuilderFactory;
-import org.opencastproject.receipt.api.Maintainable;
-import org.opencastproject.receipt.api.MaintenanceException;
-import org.opencastproject.receipt.api.Receipt;
-import org.opencastproject.receipt.api.ReceiptService;
-import org.opencastproject.receipt.api.Receipt.Status;
+import org.opencastproject.remote.api.Maintainable;
+import org.opencastproject.remote.api.MaintenanceException;
+import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.ReceiptService;
+import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.NotFoundException;
@@ -499,7 +499,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.receipt.api.Maintainable#isInMaintenanceMode()
+   * @see org.opencastproject.remote.api.Maintainable#isInMaintenanceMode()
    */
   @Override
   public boolean isInMaintenanceMode() {
@@ -508,7 +508,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.receipt.api.Maintainable#setMaintenanceMode(boolean)
+   * @see org.opencastproject.remote.api.Maintainable#setMaintenanceMode(boolean)
    */
   @Override
   public void setMaintenanceMode(boolean maintenanceMode) {
