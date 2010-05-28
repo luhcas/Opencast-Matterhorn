@@ -23,7 +23,7 @@
     horizontalGap="0"
     width="70%"
     height="90%"
-    backgroundColor="0xFFFFFF"
+    backgroundColor="0x000000"
     backgroundAlpha="0.0"
     rollOver="{this.NavigationVisible = true}"
     rollOut="{this.NavigationVisible = false}"
