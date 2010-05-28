@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.api;
+package org.opencastproject.receipt.api;
 
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 

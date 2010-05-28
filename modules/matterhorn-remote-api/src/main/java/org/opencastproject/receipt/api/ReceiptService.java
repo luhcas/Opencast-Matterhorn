@@ -13,9 +13,9 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.api;
+package org.opencastproject.receipt.api;
 
-import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.receipt.api.Receipt.Status;
 
 import java.io.InputStream;
 import java.util.List;
