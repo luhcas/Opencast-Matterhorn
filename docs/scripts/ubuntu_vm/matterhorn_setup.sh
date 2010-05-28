@@ -250,7 +250,7 @@ else
   echo "**** Do you want to install 3rd party tools? [Y/n]"
   read p3resp
 
-  echo "**** Do you want to install ffmpeg? [y/N]"
+  echo "**** Do you want to install ffmpeg? [Y/n]"
   read ffresp
 
 #  echo "**** Do you want to install OpenCaps? [y/N]"
@@ -287,14 +287,14 @@ else
   fi
 
   # Install 3P tools?
-  if [ $p3resp != "n" ] || [ $p3resp != "N" ]; then
+  if [ $p3resp != "n" ] && [ $p3resp != "N" ]; then
     install_3p
   else
     echo "3rd party tools will NOT be installed."
   fi
 
   # Install ffmpeg?
-  if [ $ffresp != "n" ] || [ $ffresp != "N" ]; then
+  if [ $ffresp != "n" ] && [ $ffresp != "N" ]; then
     install_ffmpeg
   else
     echo "ffmpeg will NOT be installed."
