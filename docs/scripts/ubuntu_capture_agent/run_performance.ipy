@@ -6,6 +6,7 @@ import sys
 
 datafiles = !ls performance_tests
 for file in datafiles:
+	pushd .
         #find out if felix is running and if so whack it
         lines = !ps aux | grep DM2
         if len(lines.grep("DM2")) > 0:
@@ -43,7 +44,8 @@ for file in datafiles:
         !sudo dstat -cdm --thermal --load --output $dstat_output 1 60
         #copy over the recordings into our tmp dir
         #!sudo cp -r /opencast/cache/captures/$props["capture.recording.id"] /oc_perf/
-        !sudo cp /home/matterhorn/capture-agent/felix-framework-2.0.4/logs/opencast.log /oc_perf/$props["capture.recording.id"]/opencast.log
+        #!sudo cp /home/matterhorn/capture-agent/felix-framework-2.0.4/logs/opencast.log /oc_perf/$props["capture.recording.id"]/opencast.log
+	popd
 
 !mkdir -p oc_perf
 !cp -R /oc_perf/* ./oc_perf/

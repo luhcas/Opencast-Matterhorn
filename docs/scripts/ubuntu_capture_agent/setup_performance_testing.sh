@@ -6,6 +6,6 @@
 
 # Note: Not integral to capture agent setup
 
-sudo apt-get install dstat python-setuptools
+sudo apt-get install dstat python-setuptools gnuplot
 sudo easy_install ipython
 
