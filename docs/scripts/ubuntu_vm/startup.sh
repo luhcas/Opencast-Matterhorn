@@ -72,7 +72,9 @@ JAVA_OPTS="-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128m -Djava.io.tmp
 DEBUG_OPTS="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
 PAX_LOGGING_OPTS="-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN -Dopencast.logdir=$MATTERHORN_LOG"
 UTIL_LOGGING_OPTS="-Djava.util.logging.config.file=$FELIX_HOME/conf/services/java.util.logging.properties"
+GRAPHICS_OPTS="-Djava.awt.headless=true -Dawt.toolkit=sun.awt.HeadlessToolkit"
+
 
 # Start felix
-nohup java $JAVA_OPTS $MAVEN_ARG $DEBUG_OPTS $FELIX_FILEINSTALL_OPTS $PAX_CONFMAN_OPTS $CXF_OPTS $PAX_LOGGING_OPTS $UTIL_LOGGING_OPTS -jar $FELIX_HOME/bin/felix.jar $MATTERHORN_CACHE_DIR >> $MATTERHORN_LOG_FILE &
+nohup java $JAVA_OPTS $MAVEN_ARG $DEBUG_OPTS $GRAPHICS_OPTS $FELIX_FILEINSTALL_OPTS $PAX_CONFMAN_OPTS $CXF_OPTS $PAX_LOGGING_OPTS $UTIL_LOGGING_OPTS -jar $FELIX_HOME/bin/felix.jar $MATTERHORN_CACHE_DIR >> $MATTERHORN_LOG_FILE &
 
