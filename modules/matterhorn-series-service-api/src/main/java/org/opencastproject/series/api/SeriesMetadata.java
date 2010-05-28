@@ -16,66 +16,24 @@
 
 package org.opencastproject.series.api;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+public interface SeriesMetadata {
 
+  public abstract long getId();
 
-@Entity(name="SeriesMetadata")
-@Table(name="SeriesMetadata")
-public class SeriesMetadata {
-  @Id
-  @GeneratedValue
-  protected long id;
-  
-  @Column(name="key")
-  protected String key;
-  @Column(name="value")
-  protected String value;
-  
-  public SeriesMetadata () {
-    super();
-  }
-  
-  public SeriesMetadata (String key, String value) {
-    this.key = key;
-    this.value = value;
-  }
-  
-  public long getId() {
-    return id;
-  }
-  public void setId(long id) {
-    this.id = id;
-  }
-  public String getKey() {
-    return key;
-  }
-  public void setKey(String key) {
-    this.key = key;
-  }
-  public String getValue() {
-    return value;
-  }
-  public void setValue(String value) {
-    this.value = value;
-  }  
-  
-  public String toString () {
-    return "("+id+") "+key+":"+value;
-  }
-  
-  public boolean equals (Object o) {
-    if (o == null) return false;
-    if (! (o instanceof SeriesMetadata)) return false;
-    SeriesMetadata m = (SeriesMetadata) o;
-    if (m.getKey().equals(getKey()) && m.getValue().equals(getValue())) return true;
-    return false;
-  }
-  
-  public int hashCode () {
-    return getKey().hashCode();
-  } 
+  public abstract void setId(long id);
+
+  public abstract String getKey();
+
+  public abstract void setKey(String key);
+
+  public abstract String getValue();
+
+  public abstract void setValue(String value);
+
+  public abstract String toString();
+
+  public abstract boolean equals(Object o);
+
+  public abstract int hashCode();
+
 }

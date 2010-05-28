@@ -70,6 +70,13 @@ public interface SeriesService {
    * @return A dublin Core Element
    */
   public DublinCore getDublinCore (String seriesID);
+
+  /**
+   * Searches for all series' that fit into a certain pattern
+   * @param pattern a part the value of a metadata field
+   * @return a List of all series that match that pattern
+   */
+  public List<Series> searchSeries(String pattern);
   
 }
 
