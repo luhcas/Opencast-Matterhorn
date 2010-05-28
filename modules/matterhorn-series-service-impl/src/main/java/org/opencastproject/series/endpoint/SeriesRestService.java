@@ -34,6 +34,9 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -125,6 +128,7 @@ public class SeriesRestService {
       List<Series> list = service.searchSeries(pattern);
       if (list == null) return Response.status(Status.BAD_REQUEST).build();
       String jsonList = null;
+      jsonList = JSONValue.toJSONString(list);
       //TODO convert result to JSON
       return Response.ok(jsonList).build();  
     } catch (Exception e) {
@@ -149,14 +153,16 @@ public class SeriesRestService {
   } 
   
   @GET
-  @Produces(MediaType.TEXT_XML)
+  @Produces(MediaType.APPLICATION_JSON)
   @Path("new/id")
   public Response newSeriesId() {
     logger.debug("create ne Series Id");
     try {
       String id = service.newSeriesID();
       if (id == null) return Response.status(Status.SERVICE_UNAVAILABLE).build();
-      return Response.ok(id).build();
+      JSONObject j = new JSONObject();
+      j.put("id", id);
+      return Response.ok(j.toString()).build();
     } catch (Exception e) {
       logger.warn("could not create new seriesID");
       return Response.status(Status.SERVICE_UNAVAILABLE).build();
@@ -169,7 +175,7 @@ public class SeriesRestService {
    * @return true, if the Series could be stored
    */
   @PUT
-  @Produces(MediaType.TEXT_XML)
+  @Produces(MediaType.APPLICATION_JSON)
   @Path("series")
   public Response addSeries (@FormParam("series") SeriesJaxbImpl s) {
     logger.debug("addseries: {}", s);
@@ -185,7 +191,10 @@ public class SeriesRestService {
     }   
     boolean result = service.addSeries(series);
     logger.info("Adding event {} to scheduler",series.getSeriesId());
-    return Response.ok(result).build();
+    JSONObject j = new JSONObject();
+    j.put("success", result);
+    j.put("id", series.getSeriesId());
+    return Response.ok(j.toString()).build();
   }  
   
   /**
@@ -234,7 +243,7 @@ public class SeriesRestService {
    * @param filter exact id to search for pattern to search for pattern to search for A short description of the content of the lecture begin of the period of valid events end of the period of valid events pattern to search for ID of the series which will be filtered ID of the channel that will be filtered pattern to search for pattern to search for pattern to search for title|creator|series|time-asc|time-desc|contributor|channel|location|device">
    * @return List of SchedulerEvents as XML 
    */
-  @POST
+  @GET
   @Produces(MediaType.TEXT_XML)
   @Path("all")
   public Response getAllSeries () {
@@ -245,7 +254,8 @@ public class SeriesRestService {
     for (Series s : series) {
       list.add(new SeriesJaxbImpl(s));
     }
-    return Response.ok((new GenericEntity<List<SeriesJaxbImpl>> (list){})).build();
+    SeriesListJaxbImpl container = new SeriesListJaxbImpl(list);
+    return Response.ok((new GenericEntity<SeriesListJaxbImpl> (container){})).build();
   }         
   
   /**

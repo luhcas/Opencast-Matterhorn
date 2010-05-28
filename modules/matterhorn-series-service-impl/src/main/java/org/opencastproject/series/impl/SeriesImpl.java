@@ -48,6 +48,7 @@ import org.slf4j.LoggerFactory;
  * Data type for a Series that stores the metadata that belongs to the series
  *
  */
+ 
 @Entity
 @Table(name="Series")
 public class SeriesImpl implements Series {

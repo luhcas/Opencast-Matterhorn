@@ -45,8 +45,8 @@ public class SeriesJaxbImpl {
   
   @XmlID
   String seriesId;
-  @XmlElementWrapper(name="metadata")
-  @XmlElement(name="metdata")
+  @XmlElementWrapper(name="metadata_list")
+  @XmlElement(name="metadata")
   LinkedList <SeriesMetadataJaxbImpl> metadata;  
   
   /**

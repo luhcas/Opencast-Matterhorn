@@ -65,7 +65,12 @@
       <artifactId>easymock</artifactId>
       <version>2.5.1</version>
       <scope>test</scope>
-    </dependency>    
+    </dependency>
+    <dependency>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1</version>
+    </dependency>
 <!--    <dependency>-->
 <!--      <groupId>com.h2database</groupId>-->
 <!--      <artifactId>h2</artifactId>-->
@@ -143,10 +148,12 @@
               *;resolution:=optional
             </Import-Package>
             <Private-Package>
-              net.fortuna.ical4j.*
+              net.fortuna.ical4j.*,
+              org.json.*
             </Private-Package>
             <Embed-Dependency>
               ical4j;inline=true
+              json_simple;inline=true
             </Embed-Dependency>
             <Service-Component>
               OSGI-INF/series-service.xml,

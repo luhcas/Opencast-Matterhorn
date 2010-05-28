@@ -107,10 +107,11 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   @Override
   public List<Series> getAllSeries() {
     EntityManager em = emf.createEntityManager();
-    Query query = em.createQuery("SELECT e FROM Series e");
+    Query query = em.createQuery("SELECT e FROM SeriesImpl e");
     List<Series> series = null;
     try {
       series = (List<Series>) query.getResultList();
+      logger.debug("Got all series: {}", series);
     } finally {
       em.close();
     }
@@ -134,7 +135,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   public Series getSeries(String seriesID) {
     logger.debug("loading series with the ID {}", seriesID);
     if (seriesID == null || emf == null) {
-      logger.warn("could not find event {}. Null Pointer exeption");
+      logger.warn("could not find series {}. Null Pointer exeption");
       return null;
     }
     EntityManager em = emf.createEntityManager();
@@ -163,13 +164,13 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    */
   @Override
   public boolean removeSeries(String seriesID) {
-    logger.debug("Removing event with the ID {}", seriesID);
+    logger.debug("Removing series with the ID {}", seriesID);
     Series s;
     EntityManager em = emf.createEntityManager();
     try {
       em.getTransaction().begin();
       s = em.find(SeriesImpl.class, seriesID);
-      if (s == null) return false; // Event not in database
+      if (s == null) return false; // series not in database
       em.remove(s);
       em.getTransaction().commit();
     } finally {
