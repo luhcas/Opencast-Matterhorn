@@ -247,7 +247,7 @@ else
   echo "**** Do you want to change the timezone on this VM? [y/N]"
   read changetz
 
-  echo "**** Do you want to install 3rd party tools? [y/N]"
+  echo "**** Do you want to install 3rd party tools? [Y/n]"
   read p3resp
 
   echo "**** Do you want to install ffmpeg? [y/N]"
