@@ -71,46 +71,46 @@ install_3p ()
 
   cd $INST_DIR
 
-  if [ $inst_curl = "y" ] || [ $inst_curl = "Y" ]; then
+  if [ "$inst_curl" = "y" ] || [ "$inst_curl" = "Y" ]; then
     sudo apt-get -y --force-yes install curl
   fi
 
-  if [ $inst_ntp = "y" ] || [ $inst_ntp = "Y" ]; then
+  if [ "$inst_ntp" = "y" ] || [ "$inst_ntp" = "Y" ]; then
     sudo apt-get -y --force-yes install ntp
   fi
 
-  if [ $inst_openssh = "y" ] || [ $inst_openssh = "Y" ]; then
+  if [ "$inst_openssh" = "y" ] || [ "$inst_openssh" = "Y" ]; then
     sudo apt-get -y --force-yes install openssh-server openssh-client
   fi
 
-  if [ $inst_build = "y" ] || [ $inst_build = "Y" ]; then
+  if [ "$inst_build" = "y" ] || [ "$inst_build" = "Y" ]; then
     sudo apt-get -y --force-yes install build-essential zlib1g-dev
   fi
 
-  if [ $inst_patch = "y" ] || [ $inst_patch = "Y" ]; then
+  if [ "$inst_patch" = "y" ] || [ "$inst_patch" = "Y" ]; then
     sudo apt-get -y --force-yes install patch
   fi
 
-  if [ $inst_byacc = "y" ] || [ $inst_byacc = "Y" ]; then
+  if [ "$inst_byacc" = "y" ] || [ "$inst_byacc" = "Y" ]; then
     sudo apt-get -y --force-yes install byacc
   fi
 
-  if [ $inst_libcv = "y" ] || [ $inst_libcv = "Y" ]; then
+  if [ "$inst_libcv" = "y" ] || [ "$inst_libcv" = "Y" ]; then
     sudo apt-get -y --force-yes install libcv1 libcv-dev
   fi
 
-  if [ $inst_opencv = "y" ] || [ $inst_opencv = "Y" ]; then
+  if [ "$inst_opencv" = "y" ] || [ "$inst_opencv" = "Y" ]; then
     sudo apt-get -y --force-yes install opencv-doc
   fi
 
-  if [ $inst_libzen = "y" ] || [ $inst_libzen = "Y" ]; then
+  if [ "$inst_libzen" = "y" ] || [ "$inst_libzen" = "Y" ]; then
     #install media info
     wget http://downloads.sourceforge.net/zenlib/libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
     sudo dpkg -i libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
     rm -f libzen0_0.4.8-1_i386.Ubuntu_9.04.deb
   fi
 
-  if [ $inst_ocr = "y" ] || [ $inst_ocr = "Y" ]; then
+  if [ "$inst_ocr" = "y" ] || [ "$inst_ocr" = "Y" ]; then
     #ocr support
     echo "ocr support"
     sudo apt-get -y --force-yes install libpng12-dev libjpeg62-dev libtiff4-dev
@@ -255,7 +255,7 @@ else
 
 #  echo "**** Do you want to install OpenCaps? [y/N]"
 #  read opencaps
-#  if [ $opencaps = "y" ] || [ $opencaps = "Y" ]; then
+#  if [ "$opencaps" = "y" ] || [ "$opencaps" = "Y" ]; then
 #    echo "**** Install OpenCaps as Matterhorn plugin only? [Y/n]"
 #    read opencapsminimal
 #  fi
@@ -270,7 +270,7 @@ else
   # sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" /opencast/config/capture.properties
 
   # Reconfigure Keyboard?
-  if [ $kbresp = "y" ] || [ $kbresp = "Y" ]; then
+  if [ "$kbresp" = "y" ] || [ "$kbresp" = "Y" ]; then
     sudo dpkg-reconfigure console-setup
   else
     echo "Keeping default keybord configuration."
@@ -280,29 +280,29 @@ else
   sudo apt-get -y --force-yes install wget subversion git-core
 
   # Change Timezone?
-  if [ $changetz = "y" ] || [ $changetz = "Y" ]; then
+  if [ "$changetz" = "y" ] || [ "$changetz" = "Y" ]; then
     tzselect
   else
     echo "Timezone will NOT be changed."
   fi
 
   # Install 3P tools?
-  if [ $p3resp != "n" ] && [ $p3resp != "N" ]; then
+  if [ "$p3resp" != "n" ] && [ "$p3resp" != "N" ]; then
     install_3p
   else
     echo "3rd party tools will NOT be installed."
   fi
 
   # Install ffmpeg?
-  if [ $ffresp != "n" ] && [ $ffresp != "N" ]; then
+  if [ "$ffresp" != "n" ] && [ "$ffresp" != "N" ]; then
     install_ffmpeg
   else
     echo "ffmpeg will NOT be installed."
   fi
   
   # Install opencaps?
-  if [ $opencaps = "y" ] || [ $opencaps = "Y" ]; then
-    if [ $opencapsminimal = "n" ] || [ $opencapsminimal = "N" ]; then
+  if [ "$opencaps" = "y" ] || [ "$opencaps" = "Y" ]; then
+    if [ "$opencapsminimal" = "n" ] || [ "$opencapsminimal" = "N" ]; then
       /home/opencast/opencaps.sh
     else
       /home/opencast/opencaps_matterhorn_only.sh
