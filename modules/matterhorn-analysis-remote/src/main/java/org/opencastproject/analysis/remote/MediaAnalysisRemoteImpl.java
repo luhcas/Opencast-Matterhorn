@@ -22,11 +22,13 @@ import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.ReceiptService;
+import org.opencastproject.remote.api.RemoteServiceUtil;
 import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
@@ -55,10 +57,7 @@ import javax.xml.transform.stream.StreamResult;
 public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport implements MediaAnalysisService {
   private static final Logger logger = LoggerFactory.getLogger(MediaAnalysisRemoteImpl.class);
 
-  public static final String REMOTE_SERVICE_KEY = "remote.analysis";
-
   protected ResponseHandler<Receipt> receiptResponseHandler = new ReceiptResponseHandler();
-  protected String remoteHost;
   protected String analysisType;
   
   protected ReceiptService receiptService;
@@ -68,16 +67,11 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
     this.trustedHttpClient = trustedHttpClient;
   }
 
-  public void setRemoteHost(String remoteHost) {
-    this.remoteHost = remoteHost;
-  }
-
   public void setReceiptService(ReceiptService receiptService) {
     this.receiptService = receiptService;
   }
 
   public void activate(ComponentContext cc) {
-    this.remoteHost = cc.getBundleContext().getProperty(REMOTE_SERVICE_KEY);
     this.analysisType = (String)cc.getProperties().get("analysis.type");
     super.resultingFlavor = MediaPackageElementFlavor.parseFlavor((String)cc.getProperties().get("resulting.flavor"));
     Object requiredFlavorsObj = cc.getProperties().get("required.flavors");
@@ -98,8 +92,7 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
 
   @Override
   public Receipt analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException {
-    logger.info("Analyzing a MediaPackageElement(" + element.getIdentifier() + ") on a remote server: " + remoteHost);
-    String remoteHostMethod = remoteHost + "/analysis/rest/" + analysisType;
+    List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, analysisType);
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     UrlEncodedFormEntity entity;
     try {
@@ -108,9 +101,32 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    HttpPost post = new HttpPost(remoteHostMethod);
-    post.setEntity(entity);
-    Receipt receipt = trustedHttpClient.execute(post, receiptResponseHandler);
+    Receipt receipt = null;
+    for(String remoteHost : remoteHosts) {
+      logger.info("Analyzing a MediaPackageElement(" + element.getIdentifier() + ") on a remote server: " + remoteHost);
+      String remoteHostMethod = remoteHost + "/analysis/rest/" + analysisType;
+      HttpPost post = new HttpPost(remoteHostMethod);
+      post.setEntity(entity);
+      HttpResponse response = trustedHttpClient.execute(post);
+      StatusLine statusLine = response.getStatusLine();
+      if(statusLine.getStatusCode() != HttpStatus.SC_OK) {
+        logger.warn("{} returned http status '{}'", remoteHostMethod, statusLine.getStatusCode());
+        continue;
+      }
+      try {
+        receipt = receiptResponseHandler.handleResponse(response);
+        if(receipt == null) {
+          logger.warn("Unable to parse receipt, trying next remote server");
+          continue;
+        }
+      } catch (Exception e) {
+        logger.warn("{} returned an invalid response, {}", remoteHostMethod, e);
+        continue;
+      }
+    }
+    if(receipt == null) {
+      throw new MediaAnalysisException("Unable to analyze element '" + element + "' on any of " + remoteHosts.size() + " remote hosts");
+    }
     if(block) {
       receipt = poll(receipt.getId());
     }
@@ -156,24 +172,30 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
 
   @Override
   public Receipt getReceipt(String id) {
-    logger.info("Returning a Receipt(" + id + ") from a remote server: " + remoteHost);
-    String url = remoteHost + "/analyze/rest/" + analysisType + "/" + id + ".xml";
-    HttpGet get = new HttpGet(url);
-    try {
-      return trustedHttpClient.execute(get, receiptResponseHandler);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, analysisType);
+    for(String remoteHost : remoteHosts) {
+      logger.info("Returning a Receipt(" + id + ") from a remote server: " + remoteHost);
+      String url = remoteHost + "/analyze/rest/" + analysisType + "/" + id + ".xml";
+      HttpGet get = new HttpGet(url);
+      HttpResponse response = trustedHttpClient.execute(get);
+      StatusLine statusLine = response.getStatusLine();
+      if(statusLine.getStatusCode() != HttpStatus.SC_OK) {
+        logger.warn("Unable to get receipt '{}' from {}", id, url);
+        continue;
+      }
+      try {
+        Receipt receipt = receiptResponseHandler.handleResponse(response);
+        if(receipt != null) return receipt;
+      } catch (Exception e) {
+        logger.warn(e.getMessage(), e);
+        continue;
+      }
     }
+    throw new MediaAnalysisException("Unable to get receipt '" + id + "' from any of " + remoteHosts.size() + " remote hosts");
   }
 
   class ReceiptResponseHandler implements ResponseHandler<Receipt> {
     public Receipt handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
-      StatusLine statusLine = response.getStatusLine();
-      if (statusLine.getStatusCode() == 404) {
-        return null;
-      } else if (statusLine.getStatusCode() >= 300) {
-        throw new HttpResponseException(statusLine.getStatusCode(), statusLine.getReasonPhrase());
-      }
       HttpEntity entity = response.getEntity();
       try {
         return entity == null ? null : receiptService.parseReceipt(entity.getContent());
@@ -181,6 +203,15 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
         throw new RuntimeException(e);
       }
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.analysis.api.MediaAnalysisService#getAnalysisType()
+   */
+  @Override
+  public String getAnalysisType() {
+    return analysisType;
   }
 
 }

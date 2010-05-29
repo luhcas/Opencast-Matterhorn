@@ -29,6 +29,15 @@ import org.junit.Ignore;
 public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
 
   /**
+   * {@inheritDoc}
+   * @see org.opencastproject.analysis.api.MediaAnalysisService#getAnalysisType()
+   */
+  @Override
+  public String getAnalysisType() {
+    return "video.segmenter";
+  }
+  
+  /**
    * Creates a new test implementation object.
    * 
    * @param resultingFlavor

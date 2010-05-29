@@ -24,6 +24,7 @@ import org.opencastproject.analysis.vsegmenter.jmf.PlayerListener;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
@@ -37,6 +38,7 @@ import org.opencastproject.metadata.mpeg7.MediaRelTimeImpl;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.metadata.mpeg7.Video;
+import org.opencastproject.remote.api.Maintainable;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.ReceiptService;
 import org.opencastproject.remote.api.Receipt.Status;
@@ -98,7 +100,7 @@ import javax.xml.transform.stream.StreamResult;
  * ffmpeg -i &lt;inputfile&gt; -deinterlace -r 1 -vcodec mjpeg -qscale 1 -an &lt;outputfile&gt;
  * </pre>
  */
-public class VideoSegmenter extends MediaAnalysisServiceSupport {
+public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maintainable {
 
   /** Receipt type */
   public static final String RECEIPT_TYPE = "org.opencastproject.analysis.vsegmenter";
@@ -131,26 +133,32 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   public static final int DEFAULT_THREADS = 2;
 
   /** The logging facility */
-  private static final Logger logger = LoggerFactory.getLogger(VideoSegmenter.class);
+  protected static final Logger logger = LoggerFactory.getLogger(VideoSegmenter.class);
 
   /** Reference to the receipt service */
-  private ReceiptService receiptService;
+  protected ReceiptService receiptService;
 
   /** The repository to store the mpeg7 catalogs */
-  private WorkingFileRepository repository;
+  protected WorkingFileRepository repository;
 
   /** The workspace to ue when retrieving remote media files */
-  private Workspace workspace;
+  protected Workspace workspace;
 
   /** The composer service */
-  private ComposerService composer;
+  protected ComposerService composer;
 
   /** The http client to use for retrieving protected mpeg7 files */
   protected TrustedHttpClient trustedHttpClient;
 
   /** The executor service used to queue and run jobs */
-  private ExecutorService executor;
+  protected ExecutorService executor;
+  
+  /** Whether this service is in maintenance mode */
+  protected boolean maintenanceMode = false;
 
+  /** The base URL for this server */
+  protected String serverUrl = null;
+  
   /**
    * Creates a new video segmenter.
    */
@@ -173,8 +181,19 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
       throw new IllegalStateException("The composer needs one or more threads to function.");
     }
     setExecutorThreads(threads);
+    
+    // Get this server's URL
+    serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
+    if(serverUrl == null) throw new IllegalStateException("property 'org.opencastproject.server.url' must be configured");
+
+    // Register as a handler for RECEIPT_TYPE receipts
+    receiptService.registerService(RECEIPT_TYPE, serverUrl);
   }
 
+  public void deactivate() {
+    receiptService.unRegisterService(RECEIPT_TYPE, serverUrl);
+  }
+  
   /** Separating this from the activate method so it's easier to test */
   void setExecutorThreads(int threads) {
     executor = Executors.newFixedThreadPool(threads);
@@ -639,10 +658,12 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   protected Track prepare(Track track) throws EncoderException, MediaPackageException {
     MediaPackage mediaPackage = track.getMediaPackage();
 
+    if (MJPEG_MIMETYPE.equals(track.getMimeType()))
+      return track;
+
     if (mediaPackage == null) {
-      if (MJPEG_MIMETYPE.equals(track.getMimeType()))
-        return track;
-      throw new IllegalStateException();
+      mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
+      mediaPackage.add(track);
     }
 
     MediaPackageReference original = new MediaPackageReferenceImpl(track);
@@ -669,4 +690,30 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     return composedTrack;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.remote.api.Maintainable#isInMaintenanceMode()
+   */
+  @Override
+  public boolean isInMaintenanceMode() {
+    return maintenanceMode;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.remote.api.Maintainable#setMaintenanceMode(boolean)
+   */
+  @Override
+  public void setMaintenanceMode(boolean maintenanceMode) {
+    this.maintenanceMode = maintenanceMode;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.analysis.api.MediaAnalysisService#getAnalysisType()
+   */
+  @Override
+  public String getAnalysisType() {
+    return RECEIPT_TYPE;
+  }
 }

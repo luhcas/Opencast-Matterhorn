@@ -19,6 +19,7 @@ import org.opencastproject.analysis.api.MediaAnalysisService;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.remote.api.Maintainable;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
@@ -44,6 +45,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -67,21 +69,19 @@ public class MediaAnalysisRestEndpoint {
   protected MediaAnalysisService getMediaAnalysiService(String analysisType) {
     ServiceReference[] refs = null;
     try {
-      refs = componentContext.getBundleContext().getAllServiceReferences(MediaAnalysisService.class.getName(),
-              "(analysis.type=" + analysisType + ")");
+      refs = componentContext.getBundleContext().getAllServiceReferences(MediaAnalysisService.class.getName(), null);
     } catch (InvalidSyntaxException e) {
-      throw new IllegalArgumentException("Unable to find a media analysis service with analysis.type property = "
-              + analysisType);
+      throw new IllegalArgumentException("Unable to locate media analysis services");
     }
-    switch (refs.length) {
-    case 0:
-      throw new IllegalArgumentException("Unable to find a media analysis service with analysis.type property = "
-              + analysisType);
-    case 1:
-      return (MediaAnalysisService) componentContext.getBundleContext().getService(refs[0]);
-    default:
-      throw new IllegalStateException("more than one analysis service is registered with analysis.type=" + analysisType);
+    if(refs == null || refs.length == 0) {
+      throw new IllegalArgumentException("No media analysis services located");
     }
+    for(ServiceReference ref : refs) {
+      MediaAnalysisService service = (MediaAnalysisService)componentContext.getBundleContext().getService(ref);
+      if(analysisType.equals(service.getAnalysisType())) return service;
+    }
+    throw new IllegalArgumentException("Unable to find a media analysis service with analysis.type property = "
+            + analysisType);
   }
 
   @POST
@@ -90,6 +90,12 @@ public class MediaAnalysisRestEndpoint {
   public Response analyze(@PathParam("analysisType") String analysisType, @FormParam("track") String trackAsXml) {
     try {
       MediaAnalysisService service = getMediaAnalysiService(analysisType);
+      if(service instanceof Maintainable) {
+        if(((Maintainable)service).isInMaintenanceMode()) {
+          return Response.status(Status.SERVICE_UNAVAILABLE).build();
+        }
+        
+      }
       DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
       Document doc = docBuilder.parse(IOUtils.toInputStream(trackAsXml));
       MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
@@ -130,7 +136,7 @@ public class MediaAnalysisRestEndpoint {
             "Submit a track for analysis");
     analyzeEndpoint.addStatus(org.opencastproject.util.doc.Status
             .OK("The receipt to use when polling for the resulting mpeg7 catalog"));
-    analyzeEndpoint.addPathParam(new Param("analysisType", Type.STRING, "video.segmenter",
+    analyzeEndpoint.addPathParam(new Param("analysisType", Type.STRING, "org.opencastproject.analysis.vsegmenter",
             "The 'analysis.type' property that uniquely identifies the desired analysis service"));
     analyzeEndpoint.addRequiredParam(new Param("track", Type.TEXT, "",
             "The track to analyze.  For video segmentation, this must be a motion jpeg file."));
@@ -142,7 +148,7 @@ public class MediaAnalysisRestEndpoint {
             "Retrieve a receipt for an analysis task");
     receiptEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Results in an xml document containing the "
             + "status of the analysis job, and the catalog produced by this analysis job if it the task is finished"));
-    receiptEndpoint.addPathParam(new Param("analysisType", Type.STRING, "video.segmenter",
+    receiptEndpoint.addPathParam(new Param("analysisType", Type.STRING, "org.opencastproject.analysis.vsegmenter",
             "The 'analysis.type' property that uniquely identifies the desired analysis service"));
     receiptEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "the receipt id"));
     receiptEndpoint.addFormat(new Format("xml", null, null));
