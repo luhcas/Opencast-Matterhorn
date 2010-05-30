@@ -42,19 +42,28 @@ Opencast.Watch = (function ()
           $('#oc_title').html($('#oc-title').html());
 
           // set date
-          if (!($('#oc-creator').html() === ""))
-            $('#oc_title_from').html(" by " + $('#oc-creator').html());
+          var timeDate = $('#oc-date').html();
+          var sd = new Date();
+          sd.setTime(timeDate);
+          sd.setFullYear(parseInt(timeDate.substring(0,4)));
+          sd.setMonth(parseInt(timeDate.substring(5,7))-1);
+          sd.setDate(parseInt(timeDate.substring(8,10)));
+          sd.setHours(parseInt(timeDate.substring(11,13)));
+          sd.setMinutes(parseInt(timeDate.substring(14,16)));
+          sd.setSeconds(parseInt(timeDate.substring(17,19)));
 
-          if ($('#oc-date').html() === "")
-            $('#oc_title_from').html(" by " + $('#oc-creator').html());
-          else 
-            $('#oc_title_from').html(" by " + $('#oc-creator').html() + " (" + $('#oc-date').html() + ")");
+          var creator = $('#oc-creator').html();
+
+          if(!creator === "")
+            $('#oc_title_from').html(" by " + creator);
+
+          $('#oc_title_from').append(" (" + sd.toLocaleString() + ")");
 
           // set the abstract
           $('#oc_description').html($('#oc-abstract').html());
-          
+
           $('#oc_segment-table').html($('#oc-segments').html());
-          
+
           $('#oc-segments').html("");
 
           // set the media URLs
@@ -155,7 +164,7 @@ Opencast.Watch = (function ()
             data: "id=" + mediaPackageId,
             dataType: 'xml',
             success: function(xml) {
-            $('#oc_description').html("Views: "+$(xml).find("views").text());
+            $('#oc_description').append("Views: "+$(xml).find("views").text());
             },
             error: function(a, b, c) {
               // Some error while trying to get the views

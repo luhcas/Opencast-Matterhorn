@@ -57,6 +57,23 @@
           var fromIndex = Math.min(parseInt($('#oc-episodes-offset').html()) + 1, toIndex);
           
           $('#title').html("Results "+ fromIndex + "-"+ toIndex + " of "+ total + keywordString);
+
+          $('.timeDate').each( function() {
+            var timeDate = $(this).text();
+            if (timeDate) {
+              var sd = new Date();
+              sd.setTime(timeDate);
+              sd.setFullYear(parseInt(timeDate.substring(0,4)));
+              sd.setMonth(parseInt(timeDate.substring(5,7))-1);
+              sd.setDate(parseInt(timeDate.substring(8,10)));
+              sd.setHours(parseInt(timeDate.substring(11,13)));
+              sd.setMinutes(parseInt(timeDate.substring(14,16)));
+              sd.setSeconds(parseInt(timeDate.substring(17,19)));
+             $(this).html(sd.toLocaleString());
+            } else {
+              $(this).html("n.a.");
+            }
+          });
         });
 
         if(searchQuery != null && searchQuery != ""){

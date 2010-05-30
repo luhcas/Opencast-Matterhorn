@@ -34,9 +34,9 @@
 								</xsl:if>
 
 								<br />
-								<i>
-									<xsl:value-of select="dcCreated" />
-								</i>
+								<div class="timeDate">
+									<xsl:value-of select="dcCreated"/>
+								</div>
 								<br />
 								<xsl:value-of select='substring(dcAbstract, 0, 170)' />
 								<xsl:if test='string-length(dcAbstract)>170'>
