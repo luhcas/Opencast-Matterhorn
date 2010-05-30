@@ -19,22 +19,25 @@ package org.opencastproject.caption.api;
  * A single caption at a point in time.
  */
 public interface Caption {
-  
+
   /**
    * Get the start time of the caption.
+   * 
    * @return caption start time
    */
   Time getStartTime();
 
   /**
    * Get the end time of the caption.
+   * 
    * @return caption end time
    */
   Time getStopTime();
 
   /**
    * Get the caption text.
+   * 
    * @return caption text
    */
-  String getCaption();
+  String[] getCaption();
 }

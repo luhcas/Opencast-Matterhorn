@@ -29,7 +29,8 @@ import java.util.Iterator;
 import java.util.Scanner;
 
 /**
- * Converter engine for SubRip srt caption format.
+ * Converter engine for SubRip srt caption format. It does not support advanced SubRip format (SubRip format with
+ * annotations). Advanced format will be parsed but all annotations will be stripped off.
  * 
  */
 public class SubRipCaptionConverter implements CaptionConverter {
@@ -37,63 +38,68 @@ public class SubRipCaptionConverter implements CaptionConverter {
   private final String LINE_ENDING = "\r\n";
 
   private final String NAME = "SubRip - Srt";
-  private final String ABOUT = "";
-  private final String VERSION = "";
   private final String EXTENSION = "srt";
   private final String PATTERN = "([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}) (-->) ([0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})";
 
   /**
    * {@inheritDoc}
-   * @throws IllegalCaptionFormatException 
    * 
-   * @see org.opencastproject.caption.api.CaptionFormat#importCaption(java.lang.String)
+   * @throws IllegalCaptionFormatException
+   * 
+   * @see org.opencastproject.caption.api.CaptionConverter#importCaption(java.lang.String)
    */
   @Override
   public CaptionCollection importCaption(String in) throws IllegalCaptionFormatException {
 
-    // replace windows style ending (though by specification windows style endings are used)
-    in.replaceAll("\r\n", "\n");
-
-    // initialize collection -> TODO export add, getcollection
     CaptionCollection collection = new CaptionCollectionImpl();
 
     // initialize scanner object
-    // accepts stream as well -> define charset?
     Scanner scanner = new Scanner(in);
-    scanner.useDelimiter("\n\n");
+    scanner.useDelimiter("[\n(\r\n)]{2}");
 
     while (scanner.hasNext()) {
       String captionString = scanner.next();
+      // convert line endings to \n
+      captionString = captionString.replace("\r\n", "\n");
 
       // split to number, time and caption
       String[] captionParts = captionString.split("\n", 3);
       // check for table length
-      if (captionParts.length != 3){
+      if (captionParts.length != 3) {
         throw new IllegalCaptionFormatException("Invalid caption for SubRip format: " + captionString);
       }
-      
+
       // get time part
       String[] timePart = captionParts[1].split("-->");
 
+      // parse time
+      Time inTime;
+      Time outTime;
       try {
-        Time inTime = TimeUtil.importSrt(timePart[0].trim());
-        Time outTime = TimeUtil.importSrt(timePart[1].trim());
-        // create caption object and add to caption collection
-        Caption caption = new CaptionImpl(inTime, outTime, captionParts[2].trim());
-        collection.addCaption(caption);
+        inTime = TimeUtil.importSrt(timePart[0].trim());
+        outTime = TimeUtil.importSrt(timePart[1].trim());
       } catch (IllegalTimeFormatException e) {
         throw new IllegalCaptionFormatException(e.getMessage());
       }
 
+      // get text captions -- is it possible to get null?
+      String[] captionLines = createCaptionLines(captionParts[2]);
+      if (captionLines == null) {
+        throw new IllegalCaptionFormatException("Caption does not contain any caption text: " + captionString);
+      }
+
+      // create caption object and add to caption collection
+      Caption caption = new CaptionImpl(inTime, outTime, captionLines);
+      collection.addCaption(caption);
     }
 
     return collection;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.caption.api.CaptionFormat#exportCaption(org.opencastproject.caption.api.CaptionCollection)
+   * @see org.opencastproject.caption.api.CaptionConverter#exportCaption(org.opencastproject.caption.api.CaptionCollection)
    */
   @Override
   public String exportCaption(CaptionCollection captionCollection) {
@@ -104,23 +110,55 @@ public class SubRipCaptionConverter implements CaptionConverter {
     Iterator<Caption> iter = captionCollection.getCollectionIterator();
     // initialize counter
     int counter = 1;
-    
-    while(iter.hasNext()) {
+
+    while (iter.hasNext()) {
       Caption caption = iter.next();
-      // FIXME line endings in caption string
       String captionString = String.format("%2$d%1$s%3$s --> %4$s%1$s%5$s%1$s%1$s", LINE_ENDING, counter, TimeUtil
-              .exportToSrt(caption.getStartTime()), TimeUtil.exportToSrt(caption.getStopTime()), caption.getCaption());
+              .exportToSrt(caption.getStartTime()), TimeUtil.exportToSrt(caption.getStopTime()),
+              createCaptionText(caption.getCaption()));
       buffer.append(captionString);
       counter++;
     }
 
     return buffer.toString();
   }
-  
+
+  /**
+   * Helper function that creates caption text String from array of lines.
+   * 
+   * @param captionLines
+   * @return
+   */
+  private String createCaptionText(String[] captionLines) {
+    StringBuilder builder = new StringBuilder(captionLines[0]);
+    for (int i = 1; i < captionLines.length; i++) {
+      builder.append(LINE_ENDING);
+      builder.append(captionLines[i]);
+    }
+    return builder.toString();
+  }
+
+  /**
+   * Helper function that splits text into lines and remove any style annotation
+   * 
+   * @param captionText
+   * @return
+   */
+  private String[] createCaptionLines(String captionText) {
+    String[] captionLines = captionText.split("\n");
+    if (captionLines.length == 0) {
+      return null;
+    }
+    for (int i = 0; i < captionLines.length; i++) {
+      captionLines[i] = captionLines[i].replaceAll("(<\\s*.\\s*>)|(</\\s*.\\s*>)", "").trim();
+    }
+    return captionLines;
+  }
+
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.caption.api.CaptionFormat#getName()
+   * @see org.opencastproject.caption.api.CaptionConverter#getName()
    */
   @Override
   public String getName() {
@@ -130,27 +168,7 @@ public class SubRipCaptionConverter implements CaptionConverter {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.caption.api.CaptionFormat#getVersion()
-   */
-  @Override
-  public String getVersion() {
-    return VERSION;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.caption.api.CaptionFormat#getAbout()
-   */
-  @Override
-  public String getAbout() {
-    return ABOUT;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.caption.api.CaptionFormat#getFileExtension()
+   * @see org.opencastproject.caption.api.CaptionConverter#getFileExtension()
    */
   @Override
   public String getFileExtension() {
@@ -160,17 +178,17 @@ public class SubRipCaptionConverter implements CaptionConverter {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.caption.api.CaptionFormat#getIdPattern()
+   * @see org.opencastproject.caption.api.CaptionConverter#getIdPattern()
    */
   @Override
   public String getIdPattern() {
     return PATTERN;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.caption.api.CaptionFormat#allowsTextStyles()
+   * @see org.opencastproject.caption.api.CaptionConverter#allowsTextStyles()
    */
   @Override
   public boolean allowsTextStyles() {

@@ -40,6 +40,8 @@ public class DFXPConverterTest {
   private DFXPCaptionConverter DFXPConverter;
   // sample
   private String dfxpSample;
+  // expected output
+  private String expectedOutput = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
 
   @Before
   public void setup() throws IOException {
@@ -56,15 +58,17 @@ public class DFXPConverterTest {
       Assert.assertTrue(Pattern.compile(DFXPConverter.getIdPattern()).matcher(dfxpSample).find());
       // verify conversion parsing and exporting without exception
       CaptionCollection collection = DFXPConverter.importCaption(dfxpSample);
-      String srt = DFXPConverter.exportCaption(collection);
-      Assert.assertTrue(srt.startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"));
+      String dfxp = DFXPConverter.exportCaption(collection);
+      Assert.assertTrue(dfxp.startsWith(expectedOutput));
     } catch (Exception e) {
+      e.printStackTrace();
       Assert.fail(e.getMessage());
     }
   }
 
   /**
    * Loading sample from {@link InputStream} as String.
+   * 
    * @param is
    * @return
    * @throws IOException

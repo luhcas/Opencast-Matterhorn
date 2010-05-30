@@ -14,7 +14,8 @@ Only one line this time.
 
 4
 00:00:59,002 --> 00:01:02,023
-4. line
+4. line - advanced srt
+this <i>should not be</ i> here.
 
 5
 00:01:02,233 --> 00:01:04,793

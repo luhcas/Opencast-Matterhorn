@@ -40,15 +40,31 @@ public interface CaptionConverter {
   String exportCaption(CaptionCollection captionCollection);
 
   // FIXME -> are they needed
+  /**
+   * Returns the name of the format which is handled by this converter.
+   * 
+   * @return format name
+   */
   String getName();
 
-  String getAbout();
-
-  String getVersion();
-
+  /**
+   * Returns file extension of format which is handled by this converter.
+   * 
+   * @return file extension
+   */
   String getFileExtension();
 
+  /**
+   * Returns unique pattern by which format is recognized.
+   * 
+   * @return regex pattern
+   */
   String getIdPattern();
 
+  /**
+   * Whether or not text styles are allowed (will be parsed or will be ignored).
+   * 
+   * @return true/false depending on whether text styles will be parsed
+   */
   boolean allowsTextStyles();
 }

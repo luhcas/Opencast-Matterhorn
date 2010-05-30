@@ -43,6 +43,12 @@ public class CaptionServiceImplTest {
   private CaptionService service;
   // DFXP captions sample
   private String dfxpSample;
+  // expected srt output
+  private String expectedOutput = 
+      "1\r\n"
+    + "00:00:00,000 --> 00:00:05,000\r\n"
+    + "Alex Cross\r\n"
+    + "This is my 1st caption";
 
   @Before
   public void setup() throws IOException {
@@ -62,18 +68,18 @@ public class CaptionServiceImplTest {
       @Override
       protected CaptionConverter getCaptionConverter(String formatName) {
         return captionConverters.get(formatName);
-      }      
+      }
     };
 
     // loading sample
-    dfxpSample = parseInputStream(CaptionServiceImplTest.class.getResourceAsStream("/sample.dfxp.xml"));  
+    dfxpSample = parseInputStream(CaptionServiceImplTest.class.getResourceAsStream("/sample.dfxp.xml"));
   }
 
   @Test
   public void testCoversionWithSpecifiedInputParameter() {
     try {
       String result = service.convert(dfxpSample, "DFXP", "SubRip");
-      Assert.assertTrue(result.startsWith("1"));
+      Assert.assertTrue(result.startsWith(expectedOutput));
     } catch (UnsupportedCaptionFormatException e) {
       Assert.fail(e.getMessage());
     } catch (IllegalCaptionFormatException e) {
@@ -85,16 +91,17 @@ public class CaptionServiceImplTest {
   public void testConversionWithAutoFind() {
     try {
       String result = service.convert(dfxpSample, "SubRip");
-      Assert.assertTrue(result.startsWith("1"));
+      Assert.assertTrue(result.startsWith(expectedOutput));
     } catch (UnsupportedCaptionFormatException e) {
       Assert.fail(e.getMessage());
     } catch (IllegalCaptionFormatException e) {
       Assert.fail(e.getMessage());
     }
   }
-  
+
   /**
    * Loading sample from {@link InputStream}.
+   * 
    * @param is
    * @return
    * @throws IOException

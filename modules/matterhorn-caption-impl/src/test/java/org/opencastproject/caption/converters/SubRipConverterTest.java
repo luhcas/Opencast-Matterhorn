@@ -41,6 +41,12 @@ public class SubRipConverterTest {
   private SubRipCaptionConverter format;
   // srt sample
   private String srtSample;
+  // expected output
+  private String expectedOutput =
+      "1\r\n" +
+  		"00:00:49,520 --> 00:00:52,961\r\n" +
+  		"This is caption testing.\r\n" +
+  		"1. line.";
   
   @Before
   public void setup() throws IOException{
@@ -51,14 +57,14 @@ public class SubRipConverterTest {
   }
   
   @Test
-  public void testImport(){
+  public void testImportAndExport(){
     // verify pattern matching
     Assert.assertTrue(Pattern.compile(format.getIdPattern()).matcher(srtSample).find());
     try {
       // verify parsing and exporting without exceptions
       CaptionCollection collection = format.importCaption(srtSample);
       String srt = format.exportCaption(collection);
-      Assert.assertTrue(srt.startsWith("1"));
+      Assert.assertTrue(srt.startsWith(expectedOutput));
     } catch (IllegalCaptionFormatException e) {
       Assert.fail(e.getMessage());
     }
