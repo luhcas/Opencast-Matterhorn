@@ -110,44 +110,56 @@ public class WorkflowRestService {
     // abstract
     data.setAbstract("This service lists available workflows and starts, stops, suspends and resumes workflow instances.");
     // Workflow Definitions
-    RestEndpoint defsEndpoint = new RestEndpoint("defs", RestEndpoint.Method.GET, "/definitions.{format}", "Returns all available workflow definitions");
+    RestEndpoint defsEndpoint = new RestEndpoint("defs", RestEndpoint.Method.GET, "/definitions.{format}", "List all available workflow definitions");
     defsEndpoint.addFormat(new Format("xml", null, null));
     defsEndpoint.addFormat(new Format("json", null, null));
-    defsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
-    defsEndpoint.addPathParam(new Param("format", Type.STRING, "xml", "The format of the results, xml or json"));
+    defsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Valid request, results returned"));
+    defsEndpoint.addPathParam(new Param("format", Type.STRING, "xml", "The format of the results: xml or json"));
     defsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, defsEndpoint);
     
     // Workflow Instances
-    RestEndpoint instancesEndpoint = new RestEndpoint("instances", RestEndpoint.Method.GET, "/instances.{format}", "Returns workflow instances matching the query parameters");
+    RestEndpoint instancesEndpoint = new RestEndpoint("instances", RestEndpoint.Method.GET, "/instances.{format}", "List all workflow instances matching the query parameters");
     instancesEndpoint.addFormat(new Format("xml", null, null));
     instancesEndpoint.addFormat(new Format("json", null, null));
-    instancesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
-    instancesEndpoint.addPathParam(new Param("format", Type.STRING, "xml", "The format of the results, xml or json"));
-    instancesEndpoint.addOptionalParam(new Param("state", Type.STRING, "succeeded", "Limit the resulting workflow instances to those currently in this state"));
-    instancesEndpoint.addOptionalParam(new Param("q", Type.STRING, "climate", "Limit the resulting workflow instances to those with this string somewhere in its metadata catalogs"));
-    instancesEndpoint.addOptionalParam(new Param("count", Type.STRING, "20", "The number of results to return per page (max is 100)"));
-    instancesEndpoint.addOptionalParam(new Param("startPage", Type.STRING, "1", "The page of results to display"));
+    instancesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Valid request, results returned"));
+    instancesEndpoint.addPathParam(new Param("format", Type.STRING, "xml", "The format of the results: xml or json"));
+    instancesEndpoint.addOptionalParam(new Param("state", Type.STRING, "succeeded", "Filter results by state"));
+    instancesEndpoint.addOptionalParam(new Param("q", Type.STRING, "climate", "Filter results by string in metadata catalog"));
+    instancesEndpoint.addOptionalParam(new Param("series", Type.STRING, null, "Filter results by series ID"));
+    instancesEndpoint.addOptionalParam(new Param("mp", Type.STRING, null, "Filter results by media package ID"));
+    instancesEndpoint.addOptionalParam(new Param("op", Type.STRING, "inspect", "Filter results by current operation"));
+    instancesEndpoint.addOptionalParam(new Param("count", Type.STRING, "20", "Results per page (max 100)"));
+    instancesEndpoint.addOptionalParam(new Param("startPage", Type.STRING, "1", "Page offset"));
     instancesEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, instancesEndpoint);
 
     // Workflow Instance
-    RestEndpoint instanceEndpoint = new RestEndpoint("instance", RestEndpoint.Method.GET, "/instance/{id}.{format}", "Returns a single workflow instance");
+    RestEndpoint instanceEndpoint = new RestEndpoint("instance", RestEndpoint.Method.GET, "/instance/{id}.{format}", "Get a specific workflow instance");
     instanceEndpoint.addFormat(new Format("xml", null, null));
     instanceEndpoint.addFormat(new Format("json", null, null));
-    instanceEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
+    instanceEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Valid request, results returned"));
     instanceEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A workflow instance with this ID was not found"));
     instanceEndpoint.addPathParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
-    instanceEndpoint.addPathParam(new Param("format", Type.STRING, "xml", "The format of the results, xml or json"));
+    instanceEndpoint.addPathParam(new Param("format", Type.STRING, "xml", "The format of the results: xml or json"));
     instanceEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, instanceEndpoint);
 
     // Operation Handlers
-    RestEndpoint handlersEndpoint = new RestEndpoint("handlers", RestEndpoint.Method.GET, "/handlers.json", "Returns the registered workflow operation handlers");
+    RestEndpoint handlersEndpoint = new RestEndpoint("handlers", RestEndpoint.Method.GET, "/handlers.json", "List all registered workflow operation handlers (implementations)");
     handlersEndpoint.addFormat(new Format("json", null, null));
-    handlersEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
+    handlersEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Valid request, results returned"));
     handlersEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, handlersEndpoint);
+    
+    // Workflow Configuration Panel
+    RestEndpoint configPanelEndpoint = new RestEndpoint("configuration_panel", RestEndpoint.Method.GET, "/configurationPanel", "Get configuration panel for a specific workflow");
+    configPanelEndpoint.addFormat(new Format("html", null, null));
+    configPanelEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Valid request, results returned"));
+    configPanelEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A workflow definition with this ID was not found"));
+    configPanelEndpoint.addOptionalParam(new Param("definitionId", Type.STRING, "full-review", "ID of workflow definition"));
+    configPanelEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, configPanelEndpoint);
     
     // Start a new Workflow Instance
     RestEndpoint startEndpoint = new RestEndpoint("start", RestEndpoint.Method.POST, "/start", "Start a new workflow instance");
@@ -155,33 +167,33 @@ public class WorkflowRestService {
     startEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, workflow running or queued"));
     startEndpoint.addRequiredParam(new Param("mediapackage", Type.TEXT, generateMediaPackage(), "The media package upon which to perform the workflow"));
     startEndpoint.addRequiredParam(new Param("definition", Type.TEXT, generateWorkflowDefinition(), "The workflow definition"));
-    startEndpoint.addOptionalParam(new Param("parent", Type.STRING, "", "An optional parent workflow instance"));
-    startEndpoint.addRequiredParam(new Param("properties", Type.TEXT, "encode=true\nflash.http=true\nyouTube=true\nitunes=false", "The properties to set for this workflow instance"));
+    startEndpoint.addOptionalParam(new Param("parent", Type.STRING, null, "An optional parent workflow instance"));
+    startEndpoint.addRequiredParam(new Param("properties", Type.TEXT, "dvd.format=pal", "Configuration properties for this workflow instance"));
     startEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, startEndpoint);
 
     // Stop a Workflow Instance
     RestEndpoint stopEndpoint = new RestEndpoint("stop", RestEndpoint.Method.POST, "/stop", "Stop a running workflow instance");
-    stopEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, workflow stopped"));
+    stopEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Workflow stopped"));
     stopEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A workflow instance with this ID was not found"));
     stopEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
     stopEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, stopEndpoint);
 
     // Suspend a Workflow Instance
-    RestEndpoint suspendEndpoint = new RestEndpoint("suspend", RestEndpoint.Method.POST, "/suspend", "Suspends a running workflow instance");
-    suspendEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, workflow suspended"));
+    RestEndpoint suspendEndpoint = new RestEndpoint("suspend", RestEndpoint.Method.POST, "/suspend", "Suspend a running workflow instance");
+    suspendEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Workflow suspended"));
     suspendEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A workflow instance with this ID was not found"));
     suspendEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
     suspendEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, suspendEndpoint);
 
     // Resume a Workflow Instance
-    RestEndpoint resumeEndpoint = new RestEndpoint("resume", RestEndpoint.Method.POST, "/resume", "Resumes a suspended workflow instance");
-    resumeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, suspended workflow has now resumed"));
-    resumeEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A suspended workflow instance with this ID was not found"));
+    RestEndpoint resumeEndpoint = new RestEndpoint("resume", RestEndpoint.Method.POST, "/resume", "Resume a suspended workflow instance");
+    resumeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Suspended workflow has now resumed"));
+    resumeEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A workflow instance with this ID was not found"));
     resumeEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
-    resumeEndpoint.addRequiredParam(new Param("properties", Type.TEXT, "key=value", "The properties to set for this workflow instance"));
+    resumeEndpoint.addRequiredParam(new Param("properties", Type.TEXT, "dvd.format=ntsc", "The properties to set for this workflow instance"));
     resumeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, resumeEndpoint);
 
