@@ -1,6 +1,6 @@
 capture.recording.id=h264_1mbit
 media.zip=h264_1mbit.zip
-capture.max.length=60
+capture.max.length=600
 capture.device.AUDIO.outputfile=AUDIO.mp3
 capture.device.AUDIO.codec=lame
 capture.device.AUDIO.codec.bitrate=192

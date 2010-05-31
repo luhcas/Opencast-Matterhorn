@@ -4,6 +4,9 @@ for run in runs:
 	pushd .
 	cd $run
 	pwd
+
+	!rm -rf graph.gp
+	!rm -rf graph2
 	
 	graph=!cat dstat.log
 	
@@ -29,7 +32,7 @@ for run in runs:
 	
 	plot_cmds=[]
 	for item in headers:
-		plot='"graph2" u 1:' + str(len(plot_cmds)+1) + ' w l t "' + item + '"'
+		plot='"graph2" u 1:' + str(len(plot_cmds)+2) + ' w l t "' + item + '"'
 		plot_cmds.append(plot)
 	
 	overall_cmd = "plot "

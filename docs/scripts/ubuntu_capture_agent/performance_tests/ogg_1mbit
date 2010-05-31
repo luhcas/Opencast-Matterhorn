@@ -1,6 +1,6 @@
 capture.recording.id=ogg_1mbit
 media.zip=ogg_1mbit.zip
-capture.max.length=60
+capture.max.length=600
 capture.device.AUDIO.outputfile=AUDIO.ogg
 capture.device.AUDIO.codec=vorbisenc
 capture.device.AUDIO.codec.bitrate=196608
