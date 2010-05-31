@@ -330,6 +330,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
        */
       public void endOfStream(GstObject arg0) {
         logger.debug("Pipeline received EOS.");
+        pipe.setState(State.NULL);
+        pipe = null;
       }
     });
     bus.connect(new Bus.ERROR() {
@@ -415,8 +417,16 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         return false;
     } else {
       // We must stop the capture as soon as possible, then check whatever needed
-      pipe.sendEvent(new EOSEvent());
-      pipe = null;
+      if (!pipe.sendEvent(new EOSEvent())) {
+        logger.warn("Unable to send EOS event to pipeline.");
+        setAgentState(AgentState.IDLE);
+        return false;
+      }
+      while (pipe != null) {
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {}
+      }
 
       // Checks there is a currentRecID defined --should always be
       if (currentRecID == null) { 
@@ -714,6 +724,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   protected void setAgentState(String state) {
     if (confidence) {
+      Bus bus = confidencePipe.getBus();
       if (state.equalsIgnoreCase(AgentState.CAPTURING) && confidencePipe != null) {
         confidencePipe.stop();
         while (confidencePipe.isPlaying());
@@ -723,6 +734,14 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         try {
           while (configService.getAllProperties().size() == 0);
           confidencePipe = PipelineFactory.create(configService.getAllProperties(), true);
+          bus.connect(new Bus.EOS() {
+            
+            @Override
+            public void endOfStream(GstObject source) {
+              // TODO Auto-generated method stub
+              
+            }
+          });
           confidencePipe.play();
           logger.info("Confidence monitoring beginning.");
         } catch (Exception e) {
