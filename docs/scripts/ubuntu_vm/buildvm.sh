@@ -13,6 +13,7 @@ fi
 echo "Using ubuntu mirror at: $UBUNTU_MIRROR"
 
 export M2=`pwd`/m2/
+export JAVA_HOME=`mvn --version | grep "Java home" | awk '{print $3}'`
 
 #todo: overwrite parameters with passed in values
 #for each param in $# evaluate $i as an item
