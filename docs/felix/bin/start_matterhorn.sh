@@ -1,22 +1,24 @@
 #!/bin/bash
 
-if [ -n "${FELIX_HOME:-x}" ]; then
-  FELIX=$FELIX_HOME
-else
+
+#commented out if clauses because teh currently do not work for when started wit sudo 
+#if [ -n "${FELIX_HOME:-x}" ]; then
+#  FELIX=$FELIX_HOME
+#else
   FELIX="/opt/matterhorn/felix"
-fi
+#fi
 
-if [ -n "${M2_REPO:-x}" ]; then
-  M2_REPO=$M2_REPO
-else
+#if [ -n "${M2_REPO:-x}" ]; then
+#  M2_REPO=$M2_REPO
+#else
   M2_REPO="/home/opencast/.m2/repository"
-fi
+#fi
 
-if [ -n "${JAVA_HOME:-x}" ]; then
-  JAVA_HOME=$JAVA_HOME
-else
+#if [ -n "${JAVA_HOME:-x}" ]; then
+#  JAVA_HOME=$JAVA_HOME
+#else
   JAVA_HOME="/usr/lib/jvm/java-6-sun"
-fi
+#fi
 
 MATTERHORN_HOME=/opt/matterhorn
 MATTERHORN_CONF=/opt/matterhorn/felix/conf
