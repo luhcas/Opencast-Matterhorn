@@ -48,7 +48,7 @@ public class StateRestEndpointTest {
   
   @Test
   public void testGetStateGet() throws Exception {
-    HttpGet request = new HttpGet(BASE_URL + "/state/rest/GetState");
+    HttpGet request = new HttpGet(BASE_URL + "/state/rest/state");
     HttpResponse response = client.execute(request);
     
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
@@ -70,7 +70,7 @@ public class StateRestEndpointTest {
   
   @Test
   public void testGetRecordingsNoneGet() throws Exception {
-    HttpGet request = new HttpGet(BASE_URL + "/state/rest/GetRecordings");
+    HttpGet request = new HttpGet(BASE_URL + "/state/rest/recordings");
     HttpResponse response = client.execute(request);
     
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
@@ -88,7 +88,7 @@ public class StateRestEndpointTest {
     
     recordingId = createRecording();
     
-    HttpGet request = new HttpGet(BASE_URL + "/state/rest/GetRecordings");
+    HttpGet request = new HttpGet(BASE_URL + "/state/rest/recordings");
     HttpResponse response = client.execute(request);
     
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());

@@ -31,6 +31,7 @@ import org.osgi.service.cm.ConfigurationException;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -214,9 +215,15 @@ public class ConfigurationManagerTest {
     sourceProps.put("org.opencastproject.storage.dir", "${java.io.tmpdir}/configman-test");
     sourceProps.put("M2_REPO", "${java.io.tmpdir}/configman-test");
     sourceProps.put("org.opencastproject.server.url", "http://localhost:8080");
+    File tempfile = File.createTempFile("temp", "file", new File(sourceProps.getProperty("org.opencastproject.storage.dir")));
 
     configManager.updated(sourceProps);
     configManager.writeConfigFileToDisk();
+
+    FileOutputStream out = new FileOutputStream(tempfile);
+    sourceProps.store(out, "");
+    is = new FileInputStream(tempfile);
+    sourceProps.load(is);
 
     XProperties testProps = new XProperties();
     InputStream testInput = new FileInputStream(configManager.getItem(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));

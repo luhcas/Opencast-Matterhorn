@@ -58,7 +58,7 @@ public class StateRestService {
 
   @GET
   @Produces(MediaType.TEXT_PLAIN)
-  @Path("GetState")
+  @Path("state")
   public String getState() {
     if (service != null) {
       return this.service.getAgentState();
@@ -69,7 +69,7 @@ public class StateRestService {
 
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("GetRecordings")
+  @Path("recordings")
   public List<RecordingStateUpdate> getRecordings() {
     LinkedList<RecordingStateUpdate> update = new LinkedList<RecordingStateUpdate>();
     if (service != null) {
@@ -102,8 +102,8 @@ public class StateRestService {
     DocRestData data = new DocRestData("stateservice", "State Service", "/status", notes);
     
     // getState
-    RestEndpoint endpoint = new RestEndpoint("getState", RestEndpoint.Method.GET,
-        "/GetState",
+    RestEndpoint endpoint = new RestEndpoint("state", RestEndpoint.Method.GET,
+        "/state",
         "Return the state of the capture agent");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addStatus(Status.OK(null));
@@ -111,8 +111,8 @@ public class StateRestService {
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
     
     // getRecordings
-    endpoint = new RestEndpoint("getRecordings", RestEndpoint.Method.GET,
-        "/GetRecordings",
+    endpoint = new RestEndpoint("recordings", RestEndpoint.Method.GET,
+        "/recordings",
         "Return a list of the capture agent's recordings");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addStatus(Status.OK(null));
