@@ -209,15 +209,17 @@
                     <iframe name="filechooserAjax" id="filechooser-ajax" frameborder="0" scrolling="no" src="../ingest/rest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
                     </iframe>
                     <span class="helpIcon" title="Click for help">&nbsp;</span>
-                    <select name="flavor" id="flavor" class="requiredField" style="float:left;margin-right:3px;">
-                      <option value="">Choose one:</option>
-                      <option value="presenter/source">Presenter</option>
-                      <option value="presentation/source">Presentation</option>
-                      <option value="indefinite/source">Other/Mixed/Unknown</option>
-                    </select>
-                    <span class="helpIcon" title="Click for help">&nbsp;</span>
                   </div>
                 </li>
+                <li class="ui-helper-clearfix" id="regular-file-chooser-flavor">
+                  <label class="fl-label"><span class="color-red">* </span><span id="i18n_upload_flavor">Media File Content</span>:</label>
+                  <select name="flavor" id="flavor" class="requiredField" style="float:left;margin-right:3px;">
+                    <option value="">Choose one:</option>
+                    <option value="presenter/source">Presenter</option>
+                    <option value="presentation/source">Presentation</option>
+                    <option value="indefinite/source">Other/Mixed/Unknown</option>
+                  </select>
+                  <span class="helpIcon" title="Click for help">&nbsp;</span>
               </ul>
             </div>
           </div>

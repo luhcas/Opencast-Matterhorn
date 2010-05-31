@@ -17,6 +17,7 @@ Upload.init = function() {
   $('#use-file-previous').click(function() {
     if ($(this).val()) {
       $('#regular-file-chooser').fadeOut('fast');
+      $('#regular-file-chooser-flavor').fadeOut('fast');
       $('#track').val($('#previous-file-link').attr('href'));
       Upload.checkRequiredFields(false);
     }
@@ -26,6 +27,7 @@ Upload.init = function() {
   $('#use-file-replace').click(function() {
     if ($(this).val()) {
       $('#regular-file-chooser').fadeIn('fast');
+      $('#regular-file-chooser-flavor').fadeIn('fast');
       $('#track').val($('#filechooser-ajax'));
     }
   });
