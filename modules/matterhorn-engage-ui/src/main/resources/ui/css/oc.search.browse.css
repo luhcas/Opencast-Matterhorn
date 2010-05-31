@@ -28,6 +28,7 @@ body
 
 .oc-search-result-header{
   position:relative;
+  display: inline-block;
 }
 
 .oc-sort-controls {
