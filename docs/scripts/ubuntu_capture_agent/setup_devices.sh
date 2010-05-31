@@ -15,6 +15,8 @@ supportedDevices[2]="Epiphan VGA2USB"
 supportedDevices[3]="Hauppauge HVR-1600"
 supportedDevices[4]="Hauppauge WinTV PVR-150"
 supportedDevices[5]="Hauppauge WinTV-HVR1300 DVB-T/H"
+supportedDevices[6]="WinTV PVR USB2 Model Category 2"
+
 
 # ls the dev directory, then grep for video devices with *only* one number
 for line in `ls /dev/video* | grep '/dev/video[0-9][0-9]*$'`; do
@@ -29,11 +31,10 @@ read -n 1 -s
 # Read each line in the file. Using this C-like structure because the traditional 'for var in $list' does not get well with whitespaces in the names
 #FIXME: Some Hauppages, as they create two devices in the kernel, appear duplicated. They should only appear once.
 for (( i = 0; i < ${#devlist[@]}; i++ )); do
+    # The following line filters the first occurrence in the v4l-info output containing 'card' or 'name'
+    # Then, it filters whatever string enclosed in double quotes, which in such lines correspond to the device name
+    testLine=$(v4l-info ${devlist[$i]} 2> /dev/null | grep -e name -e card -m 1 | cut -d '"' -f 2)
     for (( j = 0; j < ${#supportedDevices[@]}; j++ )); do
-	# The following line filters the first occurrence in the v4l-info output containing 'card' or 'name'
-	# Then, it filters whatever string enclosed in double quotes, which in such lines correspond to the device name
-	# Finally, it gets rid of the quotes
-	testLine=$(v4l-info ${devlist[$i]} 2> /dev/null | grep -e name -e card -m 1 | grep -o '".*"' | grep -o "${supportedDevices[$j]}")
 	# Add the matches to an array. This construction avoids 'gaps' --unset positions
 	# Note both arrays devices and devNames will have the same size!
 	if [[ "$testLine" == "${supportedDevices[$j]}" ]]; then
@@ -82,7 +83,7 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     # Check this name is not repeated
     suffix=0
     for (( t = 0; t < $i; t++ )); do
-	if [[ -n "$(echo "${cleanName[$t]}" | grep -i "^$defaultName\(_[0-9][0-9]*\)\?")" ]]; then
+	if [[ -n "$(echo "${cleanName[$t]}" | grep -i "^$defaultName\(_[0-9][0-9]*\)\?$")" ]]; then
 	    (( suffix += 1 ))
 	fi
     done    
@@ -225,7 +226,7 @@ mv $CONFIG_SCRIPT $CA_DIR
 # Audio device
 audioLine=$(arecord -l| grep Analog -m 1)
 audioDevice="hw:$(echo $audioLine | cut -d ':' -f 1 | cut -d ' ' -f 2)"
-# The syntax is cumbersome, but it just keeps the fields surrounded by "[" and "]" and outputs them in the form "first (second)"
+# The syntax is cumbersome, but it just keeps the fields surrounded by "[" and "]" and outputs them in the form "first second"
 audioDevName=$(echo $audioLine | sed 's/^[^[]*\[\([^]]*\)\][^[]*\[\([^]]*\)\]$/\1 \2/')
 
 # Ask the user whether or not they want to configure this device

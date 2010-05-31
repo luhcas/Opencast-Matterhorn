@@ -30,7 +30,7 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
 
     # Gets the complete list of drivers in the page compatible with the current kernel -- it makes no sense presenting others which are not compatible
     # First tries to filter by architecture type
-    drivers=( $(grep "vga2usb" $FILE_NAME | sed 's#^.*<a\s*href="\(.*\)".*>.*</a>.*$#\1#' | grep "$kernel_base" | grep $architecture ))
+    drivers=( $(grep "vga2usb" $FILE_NAME | sed 's#^.*<a\s*href="\(.*\)".*>.*</a>.*$#\1#' | grep "$kernel_base" | grep -i $architecture ))
     # If there's not match, be less strict and not filter by architecture
     if [[ ${#drivers[@]} -eq 0 ]]; then
 	drivers=( $(grep "vga2usb" $FILE_NAME | sed 's#^.*<a\s*href="\(.*\)".*>.*</a>.*$#\1#' | grep "$kernel_base" ))
@@ -90,7 +90,7 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
   		cd $CA_DIR/$VGA2USB_DIR
   		tar jxf $EPIPHAN
   		sed -i '/sudo \/sbin\/insmod/s|$| num_frame_buffers=2|' Makefile
-  		# First "make" necessary according with MH-3810
+  		# First "make" is necessary according with MH-3810
 		make &> /dev/null
   		make load &> /dev/null
   		if [[ $? -ne 0 ]]; then

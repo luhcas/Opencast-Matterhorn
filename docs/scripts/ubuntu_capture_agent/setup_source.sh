@@ -13,6 +13,7 @@ fi
 # Detect if the matterhorn source has been already checked out
 url=$(svn info $SOURCE 2> /dev/null | grep URL: | cut -d ' ' -f 2) 
 if [[ -n "$url" ]]; then
+    echo
     read -p "The source $url has been already checked out. Do you wish to keep it [Y/n]? " keep
     while [[ -z "$(echo "${keep:-Y}" | grep -i '^[yn]')" ]]; do
 	read -p "Please answer [Y]es or [n]o: " keep
@@ -24,22 +25,29 @@ fi
 if [[ -n "$(echo "${keep:-Y}" | grep -i '^n')" ]]; then
     # Get the necessary matterhorn source code (the whole trunk, as specified in MH-3211)
     while [[ true ]]; do
-	read -p "Where would you like to download the source from [$SRC_DEFAULT]? " response
+	echo
+	read -p "Enter the branch or tag you would like to download [$SRC_DEFAULT]: " response
+	: ${response:=$SRC_DEFAULT}
 
-	if [[ "${response:-$SRC_DEFAULT}" == "trunk" ]]; then
-	    address=$TRUNK_URL
+	if [[ "$response" == "$TRUNK_EXT" ]]; then
+	    address=$SVN_URL/$TRUNK_EXT
 	else
-	    address=$BRANCHES_URL/${response:-$SRC_DEFAULT}
+	    # Check the branches first
+	    address=$SVN_URL/$BRANCHES_EXT/$response
+	    svn info $address &> /dev/null
+	    # If $address does not exist, try the tags
+	    [[ $? -ne 0 ]] && address=$SVN_URL/$TAGS_EXT/$response
 	fi
 
-	echo -n "Downloading matterhorn source from $address... "
 	rm -rf $SOURCE
-	svn co --force $address $SOURCE > /dev/null
+	echo -n "Attempting to download matterhorn source from $address... "
+	svn co --force $address $SOURCE &> /dev/null	
 
 	if [[ $? -eq 0 ]]; then
 	    #### Exit the loop ####
 	    break
 	fi
+
 	## Error. The loop repeats
 	echo "Error!"
 	echo "Couldn't check out the matterhorn code. Is the URL correct?"

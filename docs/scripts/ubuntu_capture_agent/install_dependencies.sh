@@ -52,7 +52,7 @@ while [[ true ]]; do
     echo "deb ${mirrors[1]:-$DEFAULT_SECURITY} ${DIST_NAME}-security main restricted universe multiverse" >> $SRC_LIST
     echo "deb ${mirrors[2]:-$DEFAULT_PARTNER} ${DIST_NAME} partner" >> $SRC_LIST
     
-    apt-get -qq update 2> /dev/null
+    apt-get -qq update &> /dev/null
     
     if [[ $? -eq 0 ]]; then
 	break
@@ -90,7 +90,7 @@ for (( i = 0; i < ${#pkgs[@]}; i++ )); do
 done
 
 # Install the required 3rd party packages
-apt-get -y --force-yes install ${noinst[@]} > /dev/null
+apt-get -y -qq --force-yes install ${noinst[@]} 2> /dev/null
 
 if [[ $? -ne 0 ]]; then
     echo "Error!"
@@ -175,4 +175,3 @@ read -p "Which NTP server would you like to use [ntp.ubuntu.com]? " server
 sed -i "s#^server .*#server ${server:-$DEFAULT_NTP_SERVER}#" $NTP_CONF
 echo "NTP server set to ${server:-$DEFAULT_NTP_SERVER}"
 echo "Consider editing the file $NTP_CONF for manually changing the default NTP server or adding more servers to the list"
-echo

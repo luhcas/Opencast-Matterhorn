@@ -15,10 +15,14 @@ export USERNAME=matterhorn                                  # Default name for t
 
 export START_PATH=$PWD                                      # Path from where this script is run initially
 export WORKING_DIR=/tmp/cainstallscript                     # Directory where this script will be run
-export TRUNK_URL=http://opencast.jira.com/svn/MH/trunk
-export BRANCHES_URL=http://opencast.jira.com/svn/MH/branches
-export SRC_DEFAULT=0.8.x                                    # Default location from where the source code is fetched
+
+export SVN_URL=http://opencast.jira.com/svn/MH              # Root for the source code repository
+export TRUNK_EXT=trunk                                      # Extension for the SVN_URL to reach the trunk
+export BRANCHES_EXT=branches                                # Extension for the SVN_URL to reach the branches
+export TAGS_EXT=tags                                        # Extension for the SVN_URL to reach the tags
 export SRC_SUBDIR=matterhorn-source                         # Subdir under the selected user $HOME directory
+export SRC_DEFAULT=$TRUNK_EXT                               # Default branch or tag (including trunk) from where scripts and java source will be dowloaded
+
 export OC_DIR=/opt/matterhorn                               # Storage directory for the CA
 export DEV_RULES=/etc/udev/rules.d/matterhorn.rules         # File containing the rules to be applied by udev to the configured devices -- not a pun!
 export CONFIG_SCRIPT=device_config.sh                       # File name for the bash script under HOME containing the device configuration routine
@@ -75,7 +79,7 @@ SETUP_BOOT=./setup_boot.sh
 export CLEANUP=./cleanup.sh                # This variable is exported because the script is modified by another
 
 SCRIPTS=( "$SETUP_USER" "$INSTALL_VGA2USB" "$SETUP_DEVICES" "$INSTALL_DEPENDENCIES" "$SETUP_ENVIROMENT" "$SETUP_SOURCE" "$SETUP_BOOT" "$CLEANUP" )
-SCRIPTS_URL=http://opencast.jira.com/svn/MH/trunk/docs/scripts/ubuntu_capture_agent
+SCRIPTS_EXT=docs/scripts/ubuntu_capture_agent
 
 # End of variables section########################################################################################
 
@@ -113,7 +117,7 @@ for (( i = 0; i < ${#SCRIPTS[@]}; i++ )); do
 	    cp $START_PATH/$f $WORKING_DIR
 	else
 	    # The script is not in the initial directory, so try to download it from the opencast source page
-	    wget $SCRIPTS_URL/$f &> /dev/null	    
+	    wget $SVN_URL/$SRC_DEFAULT/$SCRIPTS_EXT/$f &> /dev/null	    
 	    # Check the file is downloaded
 	    if [[ $? -ne 0 ]]; then
 		echo "Couldn't retrieve the script $f from the repository. Try to download it manually and re-run this script."
@@ -166,7 +170,7 @@ echo -e "\n\nProceeding to build the capture agent source. This may take a long 
 read -n 1 -s
 
 cd $SOURCE
-su matterhorn -c "mvn clean install -Pcapture -DdeployTo=\${FELIX_HOME}/load"
+su matterhorn -c "mvn clean install -Pcapture -DdeployTo=\${FELIX_HOME}/load/bundles"
 if [[ "$?" -ne 0 ]]; then
     echo -e "\nError building the matterhorn code. Contact matterhorn@opencastproject.org for assistance."
     exit 1
