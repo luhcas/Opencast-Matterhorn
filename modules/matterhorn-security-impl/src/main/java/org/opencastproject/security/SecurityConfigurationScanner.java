@@ -85,7 +85,13 @@ public class SecurityConfigurationScanner {
       securityConfig = getSecurityConfig();
       if(! securityConfig.exists() || ! securityConfig.canRead()) {
         if(!warned) {
-          logger.warn("Unable to read security configuration file at " + bundleContext.getProperty(SECURITY_CONFIG_FILE));
+          logger.error("Unable to read security configuration file at " + securityConfig.getAbsolutePath());
+          // also print a stack trace so it's very obvious that there's something wrong
+          try {
+            throw new IllegalStateException("Unable to read security configuration file at " + securityConfig.getAbsolutePath());
+          } catch(IllegalStateException e) {
+            e.printStackTrace();
+          }
           warned = true;
         }
         return;
