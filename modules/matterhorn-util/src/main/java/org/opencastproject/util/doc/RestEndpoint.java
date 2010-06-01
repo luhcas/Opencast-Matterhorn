@@ -15,11 +15,10 @@
  */
 package org.opencastproject.util.doc;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
+import org.apache.commons.lang.StringEscapeUtils;
 
 public class RestEndpoint {
   public static enum Type {
@@ -267,13 +266,15 @@ public class RestEndpoint {
             sb.append("}");
           }
         }
-        try {
+        /*try {                                          
           qs = URLEncoder.encode(sb.toString(),"UTF-8");
         } catch (UnsupportedEncodingException e) {
           qs = sb.toString();
-        }
+        }*/
+        qs = StringEscapeUtils.escapeHtml(sb.toString());
       }
     }
+    System.out.println("Query: " + qs);
     return qs;
   }
   // GETTERS
