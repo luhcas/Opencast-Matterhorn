@@ -24,7 +24,7 @@ Opencast.Watch = (function ()
 	        mediaTwoHeight         = 0,
 	        mediaTwoWidth          = 0,
 	        mediaTwoFormat         = 0;
-	  
+
         var mediaPackageId = Opencast.engage.getMediaPackageId();
 
         var restEndpoint = Opencast.engage.getSearchServiceEpisodeIdURL() + mediaPackageId;
@@ -164,7 +164,7 @@ Opencast.Watch = (function ()
             data: "id=" + mediaPackageId,
             dataType: 'xml',
             success: function(xml) {
-            $('#oc_description').append("Views: "+$(xml).find("views").text());
+            $('#oc_description').append("<br>Views: "+$(xml).find("views").text());
             },
             error: function(a, b, c) {
               // Some error while trying to get the views
