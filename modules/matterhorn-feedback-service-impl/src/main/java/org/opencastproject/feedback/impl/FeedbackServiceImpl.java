@@ -137,8 +137,8 @@ public class FeedbackServiceImpl implements FeedbackService {
     } else {
       em.persist(a);
     }
-      tx.commit();
-      return a;
+    tx.commit();
+    return a;
     } finally {
       if (tx.isActive()) {
         tx.rollback();

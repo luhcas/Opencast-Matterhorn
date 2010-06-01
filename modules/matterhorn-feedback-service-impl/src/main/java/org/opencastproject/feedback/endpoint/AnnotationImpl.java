@@ -78,6 +78,10 @@ public class AnnotationImpl implements Annotation {
   @XmlElement(name = "outpoint")
   private int outpoint;
 
+  @Column(name = "length")
+  @XmlElement(name = "length")
+  private int length;
+
   @Column(name = "key")
   @XmlElement(name = "key")
   private String key;
@@ -128,6 +132,7 @@ public class AnnotationImpl implements Annotation {
 
   public void setInpoint(int inpoint) {
     this.inpoint = inpoint;
+    this.length = this.outpoint - this.inpoint;
   }
 
   public int getOutpoint() {
@@ -136,6 +141,11 @@ public class AnnotationImpl implements Annotation {
 
   public void setOutpoint(int outpoint) {
     this.outpoint = outpoint;
+    this.length = this.outpoint - this.inpoint;
+  }
+  
+  public int getLength() {
+    return length;
   }
 
   public String getKey() {

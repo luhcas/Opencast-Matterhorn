@@ -43,6 +43,8 @@ public interface Annotation {
   int getOutpoint();
 
   void setOutpoint(int outpoint);
+  
+  int getLength();
 
   String getKey();
 

@@ -202,11 +202,11 @@ public class FeedbackRestService {
     data.addEndpoint(RestEndpoint.Type.READ, addEndpoint);
 
     // annotation
-    RestEndpoint annotationEndpoint = new RestEndpoint("annotation", RestEndpoint.Method.GET, "/annotation", "Get annotations of a key and day");
+    RestEndpoint annotationEndpoint = new RestEndpoint("annotation", RestEndpoint.Method.GET, "/annotation", "Get annotations by key and day");
     annotationEndpoint.addFormat(new Format("XML", null, null));
     annotationEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The annotations, expressed as xml"));
-    annotationEndpoint.addOptionalParam(new Param("key", Type.STRING, null, "The key of the episode"));
-    annotationEndpoint.addOptionalParam(new Param("day", Type.STRING, null, "The day of creation (format YYYYMMDD)"));
+    annotationEndpoint.addOptionalParam(new Param("key", Type.STRING, null, "The key of the annotation"));
+    annotationEndpoint.addOptionalParam(new Param("day", Type.STRING, null, "The day of creation (format: YYYYMMDD)"));
     annotationEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0", "The maximum number of items to return per page")); 
     annotationEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
     annotationEndpoint.setTestForm(RestTestForm.auto());
