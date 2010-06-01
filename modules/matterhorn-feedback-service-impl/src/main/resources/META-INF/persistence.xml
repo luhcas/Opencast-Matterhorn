@@ -6,6 +6,5 @@
     http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
     <persistence-unit name="org.opencastproject.feedback" transaction-type="RESOURCE_LOCAL">
        <class>org.opencastproject.feedback.endpoint.AnnotationImpl</class>
-       <class>org.opencastproject.feedback.endpoint.SessionImpl</class>
     </persistence-unit>
 </persistence>

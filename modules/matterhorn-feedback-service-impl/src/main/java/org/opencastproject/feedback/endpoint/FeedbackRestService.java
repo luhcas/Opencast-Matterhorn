@@ -26,11 +26,15 @@ import javax.ws.rs.core.Response.Status;
 import org.apache.commons.lang.StringUtils;
 import org.opencastproject.feedback.api.Annotation;
 import org.opencastproject.feedback.api.FeedbackService;
-import org.opencastproject.feedback.api.Session;
 import org.opencastproject.feedback.api.Stats;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Param.Type;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,19 +120,10 @@ public class FeedbackRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("stats")
-  public Response add(@QueryParam("id") String mediapackageId) {
+  public Response stats(@QueryParam("id") String mediapackageId) {
     Stats s = new StatsImpl();
     s.setMediapackageId(mediapackageId);
     s.setViews(feedbackService.getViews(mediapackageId));
-
-    return Response.ok(s).build();
-  }
-
-  @GET
-  @Produces(MediaType.TEXT_XML)
-  @Path("session")
-  public Response add(@QueryParam("sessionId") String sessionId, @QueryParam("userId") String userId) {
-    Session s = feedbackService.getUserSession(userId);
 
     return Response.ok(s).build();
   }
@@ -184,6 +179,38 @@ public class FeedbackRestService {
 
     // abstract
     data.setAbstract("This service creates, edits and retrieves annotations.");
+
+    // stats
+    RestEndpoint statsEndpoint = new RestEndpoint("stats", RestEndpoint.Method.GET, "/stats", "Get the statistics for an episode");
+    statsEndpoint.addFormat(new Format("XML", null, null));
+    statsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The statistics, expressed as xml"));
+    statsEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The ID of the single episode to return the statistics for, if it exists"));
+    statsEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, statsEndpoint);
+
+    // add
+    RestEndpoint addEndpoint = new RestEndpoint("add", RestEndpoint.Method.GET, "/add", "Add an annotation on an episode");
+    addEndpoint.addFormat(new Format("XML", null, null));
+    addEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The annotation, expressed as xml"));
+    addEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The ID of the single episode"));
+    addEndpoint.addOptionalParam(new Param("session", Type.STRING, null, "The session related to the annotation"));
+    addEndpoint.addOptionalParam(new Param("in", Type.STRING, null, "The inpoint of the annotation"));
+    addEndpoint.addOptionalParam(new Param("out", Type.STRING, null, "The outpoint of the annotation"));
+    addEndpoint.addOptionalParam(new Param("key", Type.STRING, null, "The key of the annotation"));
+    addEndpoint.addOptionalParam(new Param("value", Type.STRING, null, "The value of the annotation"));
+    addEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, addEndpoint);
+
+    // annotation
+    RestEndpoint annotationEndpoint = new RestEndpoint("annotation", RestEndpoint.Method.GET, "/annotation", "Get annotations of a key and day");
+    annotationEndpoint.addFormat(new Format("XML", null, null));
+    annotationEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The annotations, expressed as xml"));
+    annotationEndpoint.addOptionalParam(new Param("key", Type.STRING, null, "The key of the episode"));
+    annotationEndpoint.addOptionalParam(new Param("day", Type.STRING, null, "The day of creation (format YYYYMMDD)"));
+    annotationEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0", "The maximum number of items to return per page")); 
+    annotationEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
+    annotationEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, annotationEndpoint);
 
     return DocUtil.generate(data);
   }
