@@ -19,15 +19,30 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
+import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.elementbuilder.TrackBuilderPlugin;
 
+import junit.framework.Assert;
+
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.w3c.dom.Document;
 
+import java.io.StringWriter;
 import java.net.URI;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
 
 /**
  * Test case to Test the implementation of {@link TrackImpl}.
@@ -111,4 +126,32 @@ public class TrackTest {
     fail("Not yet implemented"); // TODO
   }
 
+  @Test
+  public void testFlavorMarshalling() throws Exception {
+    track.setFlavor(MediaPackageElements.PRESENTATION_SOURCE);
+    JAXBContext context = JAXBContext.newInstance("org.opencastproject.media.mediapackage:org.opencastproject.media.mediapackage.track", MediaPackage.class.getClassLoader());
+    Marshaller marshaller = context.createMarshaller();
+    StringWriter writer = new StringWriter();
+    marshaller.marshal(track, writer);
+    Unmarshaller unmarshaller = context.createUnmarshaller();
+    TrackImpl t1 = unmarshaller.unmarshal(new StreamSource(IOUtils.toInputStream(writer.toString())), TrackImpl.class).getValue();
+    Assert.assertEquals(MediaPackageElements.PRESENTATION_SOURCE, t1.getFlavor());
+
+    // Now again without namespaces
+    String xml = "<track type=\"presentation/source\"><tags/><url>http://downloads.opencastproject.org/media/movie.m4v</url><duration>-1</duration></track>";
+    TrackImpl t2 = unmarshaller.unmarshal(new StreamSource(IOUtils.toInputStream(xml)), TrackImpl.class).getValue();
+    Assert.assertEquals(MediaPackageElements.PRESENTATION_SOURCE, t2.getFlavor());
+
+    // Get the xml from the object itself
+    String xmlFromTrack = track.getAsXml();
+    Assert.assertTrue(xmlFromTrack.contains(MediaPackageElements.PRESENTATION_SOURCE.toString()));
+    
+    // And finally, using the element builder
+    DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    Document doc = docBuilder.parse(IOUtils.toInputStream(xml));
+        
+    Track t3 = (Track)MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+            .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
+    Assert.assertEquals(MediaPackageElements.PRESENTATION_SOURCE, t3.getFlavor());
+  }
 }

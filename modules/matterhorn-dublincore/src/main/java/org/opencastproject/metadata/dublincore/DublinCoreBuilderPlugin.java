@@ -101,6 +101,9 @@ public class DublinCoreBuilderPlugin extends AbstractElementBuilderPlugin implem
   public boolean accept(Node elementNode) {
     try {
       String name = elementNode.getNodeName();
+      if(name.contains(":")) {
+        name = name.substring(name.indexOf(":") + 1);
+      }
       String flavor = xpath.evaluate("@type", elementNode);
       return name.equalsIgnoreCase(MediaPackageElement.Type.Catalog.toString())
               && MediaPackageElements.DUBLINCORE_EPISODE.eq(flavor);

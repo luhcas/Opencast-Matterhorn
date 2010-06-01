@@ -112,7 +112,17 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Import-Package> org.apache.commons.httpclient.*, *;resolution:=optional </Import-Package>
+            <Import-Package>
+              org.osgi.service.component.*,
+              org.apache.commons.httpclient.*,
+              org.opencastproject.media.mediapackage,
+              org.opencastproject.media.mediapackage.attachment,
+              org.opencastproject.media.mediapackage.dublincore,
+              org.opencastproject.media.mediapackage.identifier,
+              org.opencastproject.media.mediapackage.mpeg7,
+              org.opencastproject.media.mediapackage.track,
+              *;resolution:=optional
+            </Import-Package>
             <Private-Package> org.apache.xmlrpc.* </Private-Package>
             <Export-Package>org.opencastproject.composer.impl.*</Export-Package>
             <Embed-Dependency>xmlrpc-client;inline=true</Embed-Dependency>

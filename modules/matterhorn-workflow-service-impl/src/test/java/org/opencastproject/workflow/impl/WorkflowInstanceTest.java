@@ -20,6 +20,7 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.media.mediapackage.track.TrackImpl;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
@@ -94,4 +95,29 @@ public class WorkflowInstanceTest {
     Assert.assertEquals("Unit testing workflow", def.getDescription());
     Assert.assertTrue(def.isPublished());
   }
+  
+  @Test
+  public void testFlavorMarshalling() throws Exception {
+    URI uri = new URI("http://testing");
+    Track track = TrackImpl.fromURI(uri);
+    track.setFlavor(MediaPackageElements.PRESENTATION_SOURCE);
+
+    MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
+    mp.add(track);
+
+    WorkflowInstance workflow = new WorkflowInstanceImpl();
+    workflow.setMediaPackage(mp);
+    
+    // Marshall the workflow to xml
+    String xml = WorkflowBuilder.getInstance().toXml(workflow);
+
+    // Get it back from xml
+    WorkflowInstance instance2 = WorkflowBuilder.getInstance().parseWorkflowInstance(xml);
+    Assert.assertEquals(workflow.getMediaPackage().getTracks()[0].getFlavor(), instance2.getMediaPackage().getTracks()[0].getFlavor());
+
+    // now without namespaces
+    String noNamespaceXml = "<workflow><parent/><mediapackage><media><track type=\"presentation/source\" id=\"track-1\"><url>http://testing</url></track></media></mediapackage></workflow>";
+    WorkflowInstance instance3 = WorkflowBuilder.getInstance().parseWorkflowInstance(noNamespaceXml);
+    Assert.assertEquals(workflow.getMediaPackage().getTracks()[0].getFlavor(), instance3.getMediaPackage().getTracks()[0].getFlavor());
+ }
 }

@@ -71,6 +71,9 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
    */
   public boolean accept(Node elementNode) {
     String name = elementNode.getNodeName();
+    if(name.contains(":")) {
+      name = name.substring(name.indexOf(":") + 1);
+    }
     return name.equalsIgnoreCase(MediaPackageElement.Type.Track.toString());
   }
 
@@ -110,6 +113,7 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
 
     String id = null;
     MimeType mimeType = null;
+    MediaPackageElementFlavor flavor = null;
     String reference = null;
     URI url = null;
     long size = -1;
@@ -129,6 +133,11 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
       String trackSize = xpath.evaluate("size/text()", elementNode).trim();
       if (!"".equals(trackSize))
         size = Long.parseLong(trackSize);
+
+      // flavor
+      String flavorValue = (String) xpath.evaluate("@type", elementNode, XPathConstants.STRING);
+      if (flavorValue != null && !flavorValue.equals(""))
+        flavor = MediaPackageElementFlavor.parseFlavor(flavorValue);
 
       // checksum
       String checksumValue = (String) xpath.evaluate("checksum/text()", elementNode, XPathConstants.STRING);
@@ -168,6 +177,9 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
       // Set mimetpye
       if (mimeType != null)
         track.setMimeType(mimeType);
+      
+      if(flavor != null)
+        track.setFlavor(flavor);
 
       // description
       String description = (String) xpath.evaluate("description/text()", elementNode, XPathConstants.STRING);

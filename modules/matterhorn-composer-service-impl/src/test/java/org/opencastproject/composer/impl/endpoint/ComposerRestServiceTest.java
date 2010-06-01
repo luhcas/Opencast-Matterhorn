@@ -97,7 +97,7 @@ public class ComposerRestServiceTest {
   public void testEncode() throws Exception {    
     Response response = restService.encode(mp, audioTrackId, videoTrackId, profileId);
     Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-    Assert.assertEquals(receipt, response.getEntity());
+    Assert.assertEquals(receipt.toXml(), response.getEntity());
   }
   
   @Test

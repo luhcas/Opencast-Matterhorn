@@ -221,6 +221,10 @@ public class VideoSegmenterTest {
 
     public void setType(String type) {
     }
+
+    public String toXml() {
+      return null;
+    }
   }
 
 }

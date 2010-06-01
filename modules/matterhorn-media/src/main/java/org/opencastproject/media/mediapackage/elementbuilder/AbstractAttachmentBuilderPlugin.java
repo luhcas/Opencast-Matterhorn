@@ -101,6 +101,9 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
     try {
       // Test for attachment
       String nodeName = elementNode.getNodeName();
+      if(nodeName.contains(":")) {
+        nodeName = nodeName.substring(nodeName.indexOf(":") + 1);
+      }
       if (!MediaPackageElement.Type.Attachment.toString().equalsIgnoreCase(nodeName))
         return false;
       // Check flavor

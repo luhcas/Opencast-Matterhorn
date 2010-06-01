@@ -72,6 +72,7 @@ public class ReceiptServiceImpl implements ReceiptService {
   protected EntityManagerFactory emf = null;
   
   public void activate(ComponentContext cc) {
+    logger.debug("activate");
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.remote", persistenceProperties);
     if(cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
       hostName = UrlSupport.DEFAULT_BASE_URL;
@@ -81,6 +82,7 @@ public class ReceiptServiceImpl implements ReceiptService {
   }
 
   public void deactivate() {
+    logger.debug("deactivate");
     emf.close();
   }
 

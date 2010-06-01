@@ -39,6 +39,7 @@ import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.remote.api.Maintainable;
+import org.opencastproject.remote.api.MaintenanceException;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.ReceiptService;
 import org.opencastproject.remote.api.Receipt.Status;
@@ -266,6 +267,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
    * @throws MediaAnalysisException
    */
   public Receipt analyze(final MediaPackageElement element, boolean block) throws MediaAnalysisException {
+    if(maintenanceMode) throw new MaintenanceException();
     final ReceiptService rs = receiptService;
     final Receipt receipt = rs.createReceipt(RECEIPT_TYPE);
 

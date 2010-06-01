@@ -89,6 +89,7 @@ public class WorkspaceImplTest {
   public void testPutCachingWithFilesystemMapping() throws Exception {
     // First, mock up the collaborating working file repository
     WorkingFileRepository repo = EasyMock.createMock(WorkingFileRepository.class);
+    EasyMock.expect(repo.getURI((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files/mp/foo/bar/header.gif"));
     EasyMock.expect(repo.put((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (InputStream)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files/mp/foo/bar/header.gif"));
     EasyMock.replay(repo);
 
@@ -106,7 +107,7 @@ public class WorkspaceImplTest {
     EasyMock.verify(repo);
 
     // Ensure that the file was not cached in the workspace (since there is a configured filesystem mapping)
-    File file = new File(workspaceRoot, "httplocalhost8080filesfoobarheader.gif");
+    File file = new File(workspaceRoot, "http___localhost_8080_files_foo_bar_header.gif");
     Assert.assertFalse(file.exists());
   }
 
@@ -116,6 +117,7 @@ public class WorkspaceImplTest {
   public void testPutCachingWithoutFilesystemMapping() throws Exception {
     // First, mock up the collaborating working file repository
     WorkingFileRepository repo = EasyMock.createMock(WorkingFileRepository.class);
+    EasyMock.expect(repo.getURI((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files/mp/foo/bar/header.gif"));
     EasyMock.expect(repo.put((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (InputStream)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files/mp/foo/bar/header.gif"));
     EasyMock.replay(repo);
     workspace.setRepository(repo);
@@ -131,7 +133,7 @@ public class WorkspaceImplTest {
     EasyMock.verify(repo);
 
     // Ensure that the file was cached in the workspace (since there is no configured filesystem mapping)
-    File file = new File(workspaceRoot, "httplocalhost8080filesmpfoobarheader.gif");
+    File file = new File(workspaceRoot, "http___localhost_8080_files_mp_foo_bar_header.gif");
     Assert.assertTrue(file.exists());
   }
   
@@ -139,6 +141,7 @@ public class WorkspaceImplTest {
   public void testGarbageCollection() throws Exception {
     // First, mock up the collaborating working file repository
     WorkingFileRepository repo = EasyMock.createMock(WorkingFileRepository.class);
+    EasyMock.expect(repo.getURI((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files/mp/mediapackage/element/sample.txt"));
     EasyMock.expect(repo.put((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject(),
             (InputStream)EasyMock.anyObject())).andReturn(
                     new URI("http://localhost:8080/files/mp/mediapackage/element/sample.txt"));

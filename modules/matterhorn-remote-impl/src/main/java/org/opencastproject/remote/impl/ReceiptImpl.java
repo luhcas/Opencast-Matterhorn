@@ -15,6 +15,7 @@
  */
 package org.opencastproject.remote.impl;
 
+import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
@@ -25,9 +26,6 @@ import org.opencastproject.remote.api.Receipt;
 
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-
-import java.io.StringWriter;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -45,10 +43,6 @@ import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 /**
  * A receipt for a long running, asynchronously executed job.
@@ -226,24 +220,30 @@ public class ReceiptImpl implements Receipt {
   @Column(name="element")
   public String getElementAsXml() throws Exception {
     if(element == null) return null;
-    DocumentBuilder docBuilder;
-    docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-    Document doc = docBuilder.newDocument();
-    Node node = element.toManifest(doc, null);
-    DOMSource domSource = new DOMSource(node);
-    StringWriter writer = new StringWriter();
-    StreamResult result = new StreamResult(writer);
-    Transformer transformer;
-    transformer = TransformerFactory.newInstance().newTransformer();
-    transformer.transform(domSource, result);
-    return writer.toString();
+    return ((AbstractMediaPackageElement)element).getAsXml();
   }
 
   public void setElementAsXml(String xml) throws Exception {
-    if(xml == null) return;
-    DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-    Document doc = docBuilder.parse(IOUtils.toInputStream(xml));
-    element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromManifest(
-            doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
+    if(xml == null) {
+      element = null;
+    } else {
+      DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+      Document doc = docBuilder.parse(IOUtils.toInputStream(xml));
+      element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+              .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.remote.api.Receipt#toXml()
+   */
+  @Override
+  public String toXml() {
+    try {
+      return ReceiptBuilder.getInstance().toXml(this);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }

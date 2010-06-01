@@ -16,6 +16,7 @@
 package org.opencastproject.remote.impl;
 
 
+import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
@@ -71,6 +72,26 @@ public class ReceiptTest {
   }
 
   @Test
+  public void testMarshalling() throws Exception {
+    ReceiptImpl receipt = (ReceiptImpl) receiptService.createReceipt(RECEIPT_TYPE_1);
+    Track t = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
+            new URI("file://test.mov"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
+    t.setIdentifier("track-1");
+    receipt.setElement(t);
+    receipt.setStatus(Status.FINISHED);
+    receiptService.updateReceipt(receipt);
+    String xml = receipt.toXml();
+    Receipt parsed = ReceiptBuilder.getInstance().parseReceipt(xml);
+    Assert.assertEquals(receipt.getId(), parsed.getId());
+    
+    // Unmarshall an attachment
+    String attachmentXml = "<ns2:attachment xmlns:ns2=\"http://mediapackage.opencastproject.org\"><tags/><url>http://localhost:8080/camera25fpslowdl.jpg</url></ns2:attachment>";
+    ReceiptImpl attachmentReceipt = new ReceiptImpl();
+    attachmentReceipt.setElementAsXml(attachmentXml);
+    Assert.assertTrue(attachmentReceipt.getElement() instanceof Attachment);
+  }
+  
+  @Test
   public void testGetReceipt() throws Exception {
     ReceiptImpl receipt = (ReceiptImpl) receiptService.createReceipt(RECEIPT_TYPE_1);
     
@@ -87,7 +108,7 @@ public class ReceiptTest {
     receiptFromDb = receiptService.getReceipt(receipt.getId());
     Assert.assertEquals(receipt.getElement().getIdentifier(), receiptFromDb.getElement().getIdentifier());
   }
-
+  
   @Test
   public void testGetReceipts() throws Exception {
     String id = receiptService.createReceipt(RECEIPT_TYPE_1).getId();

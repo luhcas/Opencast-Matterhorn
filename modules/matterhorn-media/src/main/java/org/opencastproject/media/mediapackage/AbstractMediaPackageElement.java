@@ -18,6 +18,8 @@ package org.opencastproject.media.mediapackage;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -25,6 +27,7 @@ import org.w3c.dom.Node;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.net.URI;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -47,7 +50,8 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class AbstractMediaPackageElement implements
         MediaPackageElement, Serializable {
-
+  private static final Logger logger = LoggerFactory.getLogger(AbstractMediaPackageElement.class);
+  
   /** Serial version uid */
   private static final long serialVersionUID = 1L;
 
@@ -563,4 +567,16 @@ public abstract class AbstractMediaPackageElement implements
     }
   }
 
+  public String getAsXml() throws MediaPackageException {
+    StringWriter writer = new StringWriter();
+    Marshaller m = null;
+    try {
+      m = MediaPackageImpl.context.createMarshaller();
+      m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, false);
+      m.marshal(this, writer);
+      return writer.toString();
+    } catch(JAXBException e) {
+      throw new MediaPackageException(e.getLinkedException() != null ? e.getLinkedException() : e);
+    }
+  }
 }

@@ -75,7 +75,7 @@ public class MediaInspectionRestEndpoint {
     checkNotNull(service);
     try {
       Receipt r = service.inspect(uri, false);
-      return Response.ok(r).build();
+      return Response.ok(r.toXml()).build();
     } catch (Exception e) {
       logger.info(e.getMessage());
       return Response.serverError().status(400).build();
@@ -89,9 +89,12 @@ public class MediaInspectionRestEndpoint {
           @FormParam("override") boolean override) {
     checkNotNull(service);
     try {
-      MediaPackageElement mpe = getElement(mediaPackageElement);
+      DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+      Document doc = docBuilder.parse(IOUtils.toInputStream(mediaPackageElement));
+      MediaPackageElement mpe = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+              .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
       Receipt r = service.enrich(mpe, override, false);
-      return Response.ok(r).build();
+      return Response.ok(r.toXml()).build();
     } catch (Exception e) {
       logger.info(e.getMessage(), e);
       return Response.serverError().status(400).build();
@@ -131,14 +134,14 @@ public class MediaInspectionRestEndpoint {
     // abstract
     data.setAbstract("This service extracts technical metadata from media files.");
     // inspect
-    RestEndpoint endpoint = new RestEndpoint("inspect", RestEndpoint.Method.GET, "/inspect",
+    RestEndpoint inspectEndpoint = new RestEndpoint("inspect", RestEndpoint.Method.GET, "/inspect",
             "Analyze a given media file, returning a receipt to check on the status and outcome of the job");
-    endpoint.addOptionalParam(new Param("uri", Param.Type.STRING, null, "Location of the media file"));
-    endpoint.addFormat(Format.xml());
-    endpoint.addStatus(Status.OK("XML encoded receipt is returned"));
-    endpoint.addStatus(new Status(400, "Problem retrieving media file or invalid media file or URL"));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+    inspectEndpoint.addOptionalParam(new Param("uri", Param.Type.STRING, null, "Location of the media file"));
+    inspectEndpoint.addFormat(Format.xml());
+    inspectEndpoint.addStatus(Status.OK("XML encoded receipt is returned"));
+    inspectEndpoint.addStatus(new Status(400, "Problem retrieving media file or invalid media file or URL"));
+    inspectEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, inspectEndpoint);
 
     // enrich
     RestEndpoint enrichEndpoint = new RestEndpoint(
@@ -146,7 +149,7 @@ public class MediaInspectionRestEndpoint {
             RestEndpoint.Method.POST,
             "/enrich",
             "Analyze and add missing metadata of a given media file, returning a receipt to check on the status and outcome of the job");
-    enrichEndpoint.addRequiredParam(new Param("mediaPackageElement", Param.Type.STRING, null,
+    enrichEndpoint.addRequiredParam(new Param("mediaPackageElement", Param.Type.TEXT, null,
             "MediaPackage Element, that should be enriched with metadata"));
     enrichEndpoint.addRequiredParam(new Param("override", Param.Type.BOOLEAN, null,
             "Should the existing metadata values remain"));
@@ -154,7 +157,7 @@ public class MediaInspectionRestEndpoint {
     enrichEndpoint.addStatus(Status.OK("XML encoded receipt is returned"));
     enrichEndpoint.addStatus(new Status(400, "Problem retrieving media file or invalid media file or URL"));
     enrichEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, enrichEndpoint);
+    data.addEndpoint(RestEndpoint.Type.WRITE, enrichEndpoint);
 
     // getReceipt
     RestEndpoint receiptEndpoint = new RestEndpoint("getReceipt", RestEndpoint.Method.GET, "/receipt/{id}.xml",
@@ -184,14 +187,4 @@ public class MediaInspectionRestEndpoint {
       }
     }
   }
-
-  public MediaPackageElement getElement(String xml) throws Exception {
-    if (xml == null)
-      return null;
-    DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-    Document doc = docBuilder.parse(IOUtils.toInputStream(xml));
-    return MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromManifest(
-            doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
-  }
-
 }

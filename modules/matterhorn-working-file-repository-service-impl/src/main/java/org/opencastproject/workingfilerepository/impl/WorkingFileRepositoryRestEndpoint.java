@@ -182,11 +182,21 @@ public class WorkingFileRepositoryRestEndpoint {
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
     // URI
-    endpoint = new RestEndpoint("uri", RestEndpoint.Method.GET, "/uri/{mediaPackageID}/{mediaPackageElementID}",
+    endpoint = new RestEndpoint("uriWithoutFilename", RestEndpoint.Method.GET, "/uri/{mediaPackageID}/{mediaPackageElementID}",
             "Retrieve the URI for this mediaPackageID and MediaPackageElementID");
     endpoint.addPathParam(new Param("mediaPackageID", Param.Type.STRING, null,
             "ID of the media package with desired element"));
     endpoint.addPathParam(new Param("mediaPackageElementID", Param.Type.STRING, null, "ID of desired element"));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+
+    // URI
+    endpoint = new RestEndpoint("uriWithFilename", RestEndpoint.Method.GET, "/uri/{mediaPackageID}/{mediaPackageElementID}/{fileName}",
+            "Retrieve the URI for this mediaPackageID, MediaPackageElementID, and filename");
+    endpoint.addPathParam(new Param("mediaPackageID", Param.Type.STRING, null,
+            "ID of the media package with desired element"));
+    endpoint.addPathParam(new Param("mediaPackageElementID", Param.Type.STRING, null, "ID of desired element"));
+    endpoint.addPathParam(new Param("fileName", Param.Type.STRING, null, "The filename"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
@@ -282,6 +292,9 @@ public class WorkingFileRepositoryRestEndpoint {
   public Response get(@PathParam("mediaPackageID") String mediaPackageID,
           @PathParam("mediaPackageElementID") String mediaPackageElementID, @PathParam("fileName") String fileName) {
     InputStream in = repo.get(mediaPackageID, mediaPackageElementID);
+    if(in == null) {
+      return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
+    }
     String contentType = mimeMap.getContentType(fileName);
     int contentLength = 0;
     try {
@@ -317,6 +330,15 @@ public class WorkingFileRepositoryRestEndpoint {
   public Response getUri(@PathParam("mediaPackageID") String mediaPackageID,
           @PathParam("mediaPackageElementID") String mediaPackageElementID) {
     URI uri = repo.getURI(mediaPackageID, mediaPackageElementID);
+    return Response.ok(uri.toString()).build();
+  }
+
+  @GET
+  @Path("/uri/{mediaPackageID}/{mediaPackageElementID}/{fileName}")
+  public Response getUri(@PathParam("mediaPackageID") String mediaPackageID,
+          @PathParam("mediaPackageElementID") String mediaPackageElementID,
+          @PathParam("fileName") String fileName) {
+    URI uri = repo.getURI(mediaPackageID, mediaPackageElementID, fileName);
     return Response.ok(uri.toString()).build();
   }
 

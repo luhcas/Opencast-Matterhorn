@@ -57,13 +57,6 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     }
   };
 
-  /** The filename filter matching .md5 files */
-  private static final FilenameFilter NOT_MD5_FINAME_FILTER = new FilenameFilter() {
-    public boolean accept(File dir, String name) {
-      return ! name.endsWith(".md5");
-    }
-  };
-
   /* The root directory for storing files */
   private String rootDirectory = null;
 
@@ -140,26 +133,32 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   }
 
   public URI getURI(String mediaPackageID, String mediaPackageElementID) {
-    // FIXME Either make this configurable, try to determine it from the system, or refer to another service
-    // FIXME URL encode the IDs
-    File f = getFile(mediaPackageID, mediaPackageElementID);
-    if (f == null) {
-      logger.warn("Tried to look up uri for non existing object {}/{}", mediaPackageID, mediaPackageElementID);
-      return null;
-    }
-    try {
-      if (f.getName().equals(mediaPackageElementID)) {
+    return getURI(mediaPackageID, mediaPackageElementID, null);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#getURI(java.lang.String, java.lang.String,
+   *      java.lang.String)
+   */
+  @Override
+  public URI getURI(String mediaPackageID, String mediaPackageElementID, String fileName) {
+    if (fileName == null) {
+      try {
         return new URI(serverUrl + "/files/mp/" + mediaPackageID + "/" + mediaPackageElementID);
-      } else {
-        try {
-          return new URI(serverUrl + "/files/mp/" + mediaPackageID + "/" + mediaPackageElementID + "/"
-                  + URLEncoder.encode(f.getName(), CHAR_ENCODING));
-        } catch (UnsupportedEncodingException e) {
-          throw new IllegalStateException("Can not encode to " + CHAR_ENCODING);
-        }
+      } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
       }
-    } catch (URISyntaxException e) {
-      throw new RuntimeException(e);
+    } else {
+      try {
+        return new URI(serverUrl + "/files/mp/" + mediaPackageID + "/" + mediaPackageElementID + "/"
+                + URLEncoder.encode(fileName, CHAR_ENCODING));
+      } catch (UnsupportedEncodingException e) {
+        throw new IllegalStateException("Can not encode to " + CHAR_ENCODING);
+      } catch (URISyntaxException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 
@@ -172,12 +171,12 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     checkPathSafe(mediaPackageElementID);
     File f = null;
     File dir = getElementDirectory(mediaPackageID, mediaPackageElementID);
-    if(dir.exists()) {
+    if (dir.exists()) {
       // clear the directory
       File[] filesToDelete = dir.listFiles();
-      if(filesToDelete != null && filesToDelete.length > 0) {
-        for(File fileToDelete : filesToDelete) {
-          if( ! fileToDelete.delete()) {
+      if (filesToDelete != null && filesToDelete.length > 0) {
+        for (File fileToDelete : filesToDelete) {
+          if (!fileToDelete.delete()) {
             throw new IllegalStateException("Unable to delete file: " + fileToDelete.getAbsolutePath());
           }
         }
@@ -212,12 +211,14 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       IOUtils.closeQuietly(in);
     }
     addMd5(f);
-    return getURI(mediaPackageID, mediaPackageElementID);
+    return getURI(mediaPackageID, mediaPackageElementID, filename);
   }
 
   /**
    * Creates a file containing the md5 hash for the contents of a source file
-   * @param f The source file containing the data to hash
+   * 
+   * @param f
+   *          The source file containing the data to hash
    */
   protected File addMd5(File f) {
     // Create an md5 file
@@ -229,32 +230,36 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       File md5File = getMd5File(f);
       FileUtils.writeStringToFile(md5File, md5);
       return md5File;
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new RuntimeException(e);
     } finally {
       IOUtils.closeQuietly(md5In);
     }
   }
-  
+
   /**
-   * Gets the file handle for an md5 associated with a content file.  Calling this method and obtaining a File handle
-   * is not a guarantee that the md5 file exists.
-   * @param f The source file
+   * Gets the file handle for an md5 associated with a content file. Calling this method and obtaining a File handle is
+   * not a guarantee that the md5 file exists.
+   * 
+   * @param f
+   *          The source file
    * @return The md5 file
    */
   protected File getMd5File(File f) {
     return new File(f.getParent(), f.getName() + ".md5");
   }
-  
+
   /**
    * Gets the file handle for a source file from its md5 file.
-   * @param md5File The md5 file
+   * 
+   * @param md5File
+   *          The md5 file
    * @return The source file
    */
   protected File getSourceFile(File md5File) {
     return new File(md5File.getParent(), md5File.getName().substring(0, md5File.getName().length() - 4));
   }
-  
+
   protected void checkPathSafe(String id) {
     if (id == null)
       throw new NullPointerException("IDs can not be null");
@@ -265,7 +270,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
 
   private File getFile(String mediaPackageID, String mediaPackageElementID) {
     File directory = getElementDirectory(mediaPackageID, mediaPackageElementID);
-    
+
     File[] md5Files = directory.listFiles(MD5_FINAME_FILTER);
     if (md5Files == null) {
       logger.debug("Element directory {} does not exist", directory);
@@ -275,7 +280,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       return null;
     } else if (md5Files.length == 1) {
       File f = getSourceFile(md5Files[0]);
-      if(f.exists()) {
+      if (f.exists()) {
         return f;
       } else {
         return null;
@@ -292,15 +297,15 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     File directory = getCollectionDirectory(collectionId);
     File sourceFile = new File(directory, fileName);
     File md5File = getMd5File(sourceFile);
-    if( ! sourceFile.exists() || ! md5File.exists()) {
+    if (!sourceFile.exists() || !md5File.exists()) {
       return null;
     }
     return sourceFile;
   }
 
   private File getElementDirectory(String mediaPackageID, String mediaPackageElementID) {
-    return new File(rootDirectory + File.separator + "mp" + File.separator + mediaPackageID
-            + File.separator + mediaPackageElementID);
+    return new File(rootDirectory + File.separator + "mp" + File.separator + mediaPackageID + File.separator
+            + mediaPackageElementID);
   }
 
   private File getCollectionDirectory(String collectionId) {
@@ -437,7 +442,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   @Override
   public URI copyTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement) {
     File source = getFileFromCollection(fromCollection, fromFileName);
-    if(source == null) throw new IllegalArgumentException("Source file " + fromCollection + "/" + fromFileName + " does not exist");
+    if (source == null)
+      throw new IllegalArgumentException("Source file " + fromCollection + "/" + fromFileName + " does not exist");
     File destDir = getElementDirectory(toMediaPackage, toMediaPackageElement);
     if (!destDir.exists()) {
       // we needed to create the directory, but couldn't
@@ -468,7 +474,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   @Override
   public URI moveTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement) {
     File source = getFileFromCollection(fromCollection, fromFileName);
-    if(source == null) throw new IllegalArgumentException("Source file " + fromCollection + "/" + fromFileName + " does not exist");
+    if (source == null)
+      throw new IllegalArgumentException("Source file " + fromCollection + "/" + fromFileName + " does not exist");
     File sourceMd5 = getMd5File(source);
     File destDir = getElementDirectory(toMediaPackage, toMediaPackageElement);
     if (!destDir.exists()) {
@@ -481,14 +488,14 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
       }
     }
     File dest = getFile(toMediaPackage, toMediaPackageElement);
-    if(dest == null) {
+    if (dest == null) {
       dest = new File(getElementDirectory(toMediaPackage, toMediaPackageElement), source.getName());
     }
-    
+
     try {
       FileUtils.moveFile(source, dest);
       addMd5(dest);
-      if(!sourceMd5.delete()) {
+      if (!sourceMd5.delete()) {
         throw new IllegalStateException("Unable to delete " + sourceMd5.getAbsolutePath());
       }
     } catch (IOException e) {
@@ -506,7 +513,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   @Override
   public void removeFromCollection(String collectionId, String fileName) {
     File f = getFileFromCollection(collectionId, fileName);
-    if(f == null) throw new IllegalArgumentException("Source file " + collectionId + "/" + fileName + " does not exist");
+    if (f == null)
+      throw new IllegalArgumentException("Source file " + collectionId + "/" + fileName + " does not exist");
     File md5File = getMd5File(f);
     if (f.exists() && f.isFile() && f.canWrite() && md5File.exists() && md5File.isFile() && md5File.canWrite()) {
       boolean md5Success = md5File.delete();
@@ -531,7 +539,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     URI[] uris = new URI[files.length];
     for (int i = 0; i < files.length; i++) {
       try {
-        uris[i] = new URI(serverUrl + "/files/collection/" + collectionId + "/" + URLEncoder.encode(getSourceFile(files[i]).getName(), CHAR_ENCODING));
+        uris[i] = new URI(serverUrl + "/files/collection/" + collectionId + "/"
+                + URLEncoder.encode(getSourceFile(files[i]).getName(), CHAR_ENCODING));
       } catch (URISyntaxException e) {
         throw new IllegalStateException("Invalid URI for " + files[i]);
       } catch (UnsupportedEncodingException e) {

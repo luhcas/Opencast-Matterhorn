@@ -74,6 +74,9 @@ public class CatalogBuilderPlugin implements MediaPackageElementBuilderPlugin {
    */
   public boolean accept(Node elementNode) {
     String name = elementNode.getNodeName();
+    if(name.contains(":")) {
+      name = name.substring(name.indexOf(":") + 1);
+    }
     return name.equalsIgnoreCase(MediaPackageElement.Type.Catalog.toString());
   }
 

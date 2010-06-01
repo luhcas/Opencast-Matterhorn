@@ -111,7 +111,9 @@ public class UrlSupport {
       throw new IllegalArgumentException("Array parts is empty");
     String path = parts[0];
     for (int i = 1; i < parts.length; i++) {
-      path = concat(path, parts[i]);
+      if(parts[i] != null) {
+        path = concat(path, parts[i]);
+      }
     }
     return path;
   }

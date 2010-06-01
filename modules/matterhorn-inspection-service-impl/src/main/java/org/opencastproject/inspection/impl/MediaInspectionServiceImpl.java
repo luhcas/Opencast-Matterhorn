@@ -38,6 +38,7 @@ import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.UnknownFileTypeException;
+import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -73,6 +74,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
   Workspace workspace;
   ReceiptService receiptService;
   ExecutorService executor = null;
+  String serverUrl = null;
   Map<String, Object> analyzerConfig = new ConcurrentHashMap<String, Object>();
 
   public void setWorkspace(Workspace workspace) {
@@ -99,13 +101,23 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         logger.info("CONFIG " + CONFIG_ANALYZER_MEDIAINFOPATH + ": " + path);
       }
     }
+    if (cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
+      serverUrl = UrlSupport.DEFAULT_BASE_URL;
+    } else {
+      serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
+    }
     activate();
   }
 
   public void activate() {
     executor = Executors.newFixedThreadPool(4);
+    receiptService.registerService(RECEIPT_TYPE, serverUrl);
   }
 
+  public void deactivate() {
+    receiptService.unRegisterService(RECEIPT_TYPE, serverUrl);
+  }
+  
   /**
    * {@inheritDoc}
    * 

@@ -79,6 +79,9 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
   public boolean accept(Node elementNode) {
     try {
       String name = elementNode.getNodeName();
+      if(name.contains(":")) {
+        name = name.substring(name.indexOf(":") + 1);
+      }
       String flavor = xpath.evaluate("@type", elementNode);
       return name.equalsIgnoreCase(MediaPackageElement.Type.Catalog.toString()) && Mpeg7Catalog.FLAVOR.eq(flavor);
     } catch (XPathExpressionException e) {

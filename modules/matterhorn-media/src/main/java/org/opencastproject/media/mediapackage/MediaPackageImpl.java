@@ -111,8 +111,8 @@ public final class MediaPackageImpl implements MediaPackage {
 
   static {
     try {
-      context = JAXBContext.newInstance("org.opencastproject.media.mediapackage", MediaPackageImpl.class
-              .getClassLoader());
+      context = JAXBContext.newInstance("org.opencastproject.media.mediapackage:" +
+              "org.opencastproject.media.mediapackage.track", MediaPackageImpl.class.getClassLoader());
     } catch (JAXBException e) {
       throw new RuntimeException(e);
     }

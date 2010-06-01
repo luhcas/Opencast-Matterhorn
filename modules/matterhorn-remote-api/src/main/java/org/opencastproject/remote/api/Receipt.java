@@ -42,4 +42,6 @@ public interface Receipt {
   public MediaPackageElement getElement();
 
   public void setElement(MediaPackageElement element);
+  
+  public String toXml();
 }

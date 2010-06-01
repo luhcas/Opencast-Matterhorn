@@ -116,7 +116,7 @@ public class ComposerRestService {
     }
     if (receipt == null)
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Encoding failed").build();
-    return Response.ok().entity(receipt).build();
+    return Response.ok().entity(receipt.toXml()).build();
   }
 
   /**
@@ -149,7 +149,7 @@ public class ComposerRestService {
     }
     try {
       Receipt receipt = composerService.image(mediaPackage, sourceTrackId, profileId, time);
-      return Response.ok().entity(receipt).build();
+      return Response.ok().entity(receipt.toXml()).build();
     } catch (EncoderException e) {
       logger.warn("Unable to extract image: " + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -163,7 +163,7 @@ public class ComposerRestService {
     Receipt r = composerService.getReceipt(id);
     if (r == null)
       return Response.status(Response.Status.NOT_FOUND).build();
-    return Response.ok().entity(r).build();
+    return Response.ok().entity(r.toXml()).build();
   }
 
   @GET

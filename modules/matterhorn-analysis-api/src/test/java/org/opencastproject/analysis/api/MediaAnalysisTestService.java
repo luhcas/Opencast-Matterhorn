@@ -100,6 +100,9 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
     }
     public void setType(String type) {
     }
+    public String toXml() {
+      return null;
+    }
   }
 
 }

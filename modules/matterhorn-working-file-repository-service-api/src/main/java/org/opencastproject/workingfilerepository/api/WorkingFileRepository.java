@@ -53,13 +53,26 @@ public interface WorkingFileRepository {
   InputStream get(String mediaPackageID, String mediaPackageElementID);
   
   /**
-   * Get the URL of the file stored under the given media package and element IDs, or null if it does not exist.
+   * Get the URL for a file stored under the given media package and element IDs.  This may be called for mediapackages,
+   * elements, or files that have not yet been stored in the repository.
+   * 
    * @param mediaPackageID
    * @param mediaPackageElementID
    * @return
    */
   URI getURI(String mediaPackageID, String mediaPackageElementID);
-  
+
+  /**
+   * Get the URL for a file stored under the given media package and element IDs.  This may be called for mediapackages,
+   * elements, or files that have not yet been stored in the repository.
+   * 
+   * @param mediaPackageID
+   * @param mediaPackageElementID
+   * @param fileName
+   * @return
+   */
+  URI getURI(String mediaPackageID, String mediaPackageElementID, String fileName);
+
   /**
    * Delete the file stored at the given media package and element IDs.
    * @param mediaPackageID

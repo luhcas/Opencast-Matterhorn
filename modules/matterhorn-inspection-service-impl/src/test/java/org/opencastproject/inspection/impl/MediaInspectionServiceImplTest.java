@@ -162,5 +162,8 @@ public class MediaInspectionServiceImplTest {
     }
     public void setType(String type) {
     }
+    public String toXml() {
+      return null;
+    }
   }
 }

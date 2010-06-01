@@ -325,7 +325,8 @@ public class MediaPackageElementFlavor implements Cloneable, Comparable<MediaPac
     }
     @Override
     public MediaPackageElementFlavor unmarshal(String str) throws Exception {
-      return parseFlavor(str);
+      MediaPackageElementFlavor f = parseFlavor(str);
+      return f;
     }
   }
 

@@ -232,8 +232,8 @@ public class WorkspaceImpl implements Workspace {
 
   protected String toFilesystemSafeName(String urlString) {
     String urlExtension = FilenameUtils.getExtension(urlString);
-    String baseName = urlString.substring(0, urlString.length() - urlExtension.length());
-    String safeBaseName = baseName.replaceAll("\\W", ""); // TODO -- ensure that this filename is safe on all platforms
+    String baseName = urlString.substring(0, urlString.length() - (urlExtension.length() + 1));
+    String safeBaseName = baseName.replaceAll("\\W", "_"); // TODO -- ensure that this filename is safe on all platforms
     String safeString = null;
     if ("".equals(urlExtension)) {
       safeString = safeBaseName;
@@ -263,41 +263,33 @@ public class WorkspaceImpl implements Workspace {
   }
 
   public URI put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in) {
-    // Ensure the filename doesn't contain any path separators
-    fileName = fileName.replace(File.separator, "");
+    String safeFileName = toFilesystemSafeName(fileName);
+    String shortSafeFileName = safeFileName.lastIndexOf("_") > 0 ? safeFileName
+            .substring(safeFileName.lastIndexOf("_") + 1) : safeFileName;
+    URI uri = repo.getURI(mediaPackageID, mediaPackageElementID, shortSafeFileName);
 
-    // Store this stream in a temp file so we can cache it quickly
-    File tempFile = null;
-    FileOutputStream out = null;
-    try {
-      tempFile = new File(rootDirectory, mediaPackageID + mediaPackageElementID + fileName);
-      out = new FileOutputStream(tempFile);
-    } catch (IOException e) {
-      throw new RuntimeException(e); // this should never happen
+    //  if this isn't a locally mounted file, branch the file to the workspace where it would be placed by get(URI)
+    File localFile = getLocallyMountedFile(uri.toString());
+    InputStream tee = null;
+    if (localFile == null) {
+      File tempFile = null;
+      FileOutputStream out = null;
+      try {
+        tempFile = new File(rootDirectory, toFilesystemSafeName(uri.toString()));
+        out = new FileOutputStream(tempFile);
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+      tee = new TeeInputStream(in, out, true);
+    } else {
+      tee = in;
     }
-    InputStream tee = new TeeInputStream(in, out, true);
-    String safeFilename = toFilesystemSafeName(fileName);
-    URI uri = repo.put(mediaPackageID, mediaPackageElementID, safeFilename, tee);
+    repo.put(mediaPackageID, mediaPackageElementID, shortSafeFileName, tee);
     try {
       tee.close();
-      out.close();
     } catch (IOException e) {
       logger.warn("Unable to close file stream: " + e.getLocalizedMessage());
     }
-
-    File localFile = getLocallyMountedFile(uri.toString());
-    if (localFile == null) {
-      // The working file repo isn't mounted locally, so cache the file for subsequent calls to get(URI)
-      // TODO uri can be null. Fix this in the repo API.
-      File newFile = new File(rootDirectory, toFilesystemSafeName(uri.toString()));
-      boolean success = tempFile.renameTo(newFile);
-      if (!success)
-        throw new IllegalStateException("could not cache " + uri + " at " + newFile.getAbsolutePath());
-    } else {
-      // remove the temp file
-      tempFile.delete();
-    }
-
     return uri;
   }
 

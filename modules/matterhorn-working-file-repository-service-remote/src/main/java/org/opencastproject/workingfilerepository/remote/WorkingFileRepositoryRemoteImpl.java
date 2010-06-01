@@ -203,7 +203,18 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public URI getURI(String mediaPackageID, String mediaPackageElementID) {
-    String url = UrlSupport.concat(new String[] {remoteHost, "files", "uri", mediaPackageID, mediaPackageElementID});
+    return getURI(mediaPackageID, mediaPackageElementID, null);
+  }
+  
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#getURI(java.lang.String, java.lang.String,
+   *      java.lang.String)
+   */
+  @Override
+  public URI getURI(String mediaPackageID, String mediaPackageElementID, String fileName) {
+    String url = UrlSupport.concat(new String[] {remoteHost, "files", "uri", mediaPackageID, mediaPackageElementID, fileName});
     HttpGet get = new HttpGet(url);
     HttpResponse response = client.execute(get);
     try {
@@ -212,6 +223,7 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
       throw new RuntimeException(e);
     }
   }
+
   
   /**
    * {@inheritDoc}
@@ -237,7 +249,7 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public URI put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in) {
-    String url = UrlSupport.concat(new String[] {remoteHost, "files", "mp", mediaPackageElementID, mediaPackageElementID});
+    String url = UrlSupport.concat(new String[] {remoteHost, "files", "mp", mediaPackageID, mediaPackageElementID});
     HttpPost post = new HttpPost(url);
     MultipartEntity entity = new MultipartEntity();
     ContentBody body = new InputStreamBody(in, filename);
