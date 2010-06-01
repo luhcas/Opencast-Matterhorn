@@ -274,7 +274,6 @@ public class RestEndpoint {
         qs = StringEscapeUtils.escapeHtml(sb.toString());
       }
     }
-    System.out.println("Query: " + qs);
     return qs;
   }
   // GETTERS
