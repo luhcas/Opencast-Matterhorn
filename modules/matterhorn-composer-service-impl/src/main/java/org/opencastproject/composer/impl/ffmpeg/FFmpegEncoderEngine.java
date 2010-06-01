@@ -19,17 +19,15 @@ package org.opencastproject.composer.impl.ffmpeg;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.impl.AbstractCmdlineEncoderEngine;
-import org.opencastproject.util.ConfigurationException;
 
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Implementation for the encoder engine backed by ffmpeg.
@@ -38,63 +36,31 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
 
   /** Default location of the ffmepg binary (resembling the installer) */
   public static final String FFMPEG_BINARY_DEFAULT = "/usr/local/bin/ffmpeg";
-  public static final String CONFIG_FFMPEG_BINARY = "ffmpeg.binary";
-
-  /** Name of the ffmpeg binary option */
-  private static final String OPT_BINARY = "ffmpeg.binary";
-
-  /** The ffmpeg properties file */
-  public static final String PROPERTIES_FILE = "/ffmpeg.properties";
 
   /** The ffmpeg commandline suffix */
   public static final String CMD_SUFFIX = "ffmpeg.command";
 
+  private static final String CONFIG_FFMPEG_PATH = "composer.ffmpegpath";
+
   /** the logging facility provided by log4j */
-  private static final Logger log_ = LoggerFactory
-          .getLogger(FFmpegEncoderEngine.class);
+  private static final Logger log_ = LoggerFactory.getLogger(FFmpegEncoderEngine.class);
 
   /**
    * Creates the ffmpeg encoder engine.
    */
   public FFmpegEncoderEngine() {
     super(FFMPEG_BINARY_DEFAULT);
-    initEncoder();
   }
 
-  /**
-   * Allows for configuration
-   * @param config
-   */
-  public void setConfig(Map<String, Object> config) {
-    if (config != null) {
-      if (config.containsKey(CONFIG_FFMPEG_BINARY)) {
-        String binary = (String)config.get(CONFIG_FFMPEG_BINARY);
-        setBinary(binary);
-        log_.info("FFmpegEncoderEngine config binary: "+binary);
-      }
-    }
-  }
-
-  /**
-   * Initializes the FFMpeg encoder by looking up the commandlines for the
-   * various distribution formats.
-   * 
-   * @throws ConfigurationException
-   */
-  private synchronized void initEncoder() throws ConfigurationException {
-    Properties ffmpegProperties = new Properties();
-    try {
-      ffmpegProperties.load(FFmpegEncoderEngine.class
-              .getResourceAsStream(PROPERTIES_FILE));
-    } catch (IOException e) {
-      log_.error("Error reading configuration for ffmpeg encoder engine: "
-              + e.getMessage());
-    }
-
-    // Check binary location
-    String binary = ffmpegProperties.getProperty(OPT_BINARY);
-    if (binary != null) {
-      setBinary(binary);
+  public void activate(ComponentContext cc) {
+    // Configure ffmpeg
+    String path = (String) cc.getBundleContext().getProperty(CONFIG_FFMPEG_PATH);
+    if (path == null) {
+      // DEFAULT - https://issues.opencastproject.org/jira/browse/MH-2158
+      log_.info("DEFAULT " + CONFIG_FFMPEG_PATH + ": " + FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
+    } else {
+      setBinary(path);
+      log_.info("FFmpegEncoderEngine config binary: {}", path);
     }
   }
 
@@ -108,12 +74,10 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
    * @return the argument list
    */
   @Override
-  protected List<String> buildArgumentList(EncodingProfile format)
-          throws EncoderException {
+  protected List<String> buildArgumentList(EncodingProfile format) throws EncoderException {
     String commandline = format.getExtension(CMD_SUFFIX);
     if (commandline == null)
-      throw new EncoderException(this, "No commandline configured for "
-              + format);
+      throw new EncoderException(this, "No commandline configured for " + format);
 
     // Process the commandline. The variables in that commandline might either
     // be replaced by commandline parts from the configuration or commandline
@@ -143,8 +107,7 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
   }
 
   /**
-   * Handles the encoder output by analyzing it first and then firing it off to
-   * the registered listeners.
+   * Handles the encoder output by analyzing it first and then firing it off to the registered listeners.
    * 
    * @param track
    *          the track that is currently being encoded
@@ -154,8 +117,7 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
    *          the message returned by the encoder
    */
   @Override
-  protected void handleEncoderOutput(EncodingProfile format, String message,
-          File... sourceFiles) {
+  protected void handleEncoderOutput(EncodingProfile format, String message, File... sourceFiles) {
     super.handleEncoderOutput(format, message, sourceFiles);
     message = message.trim();
     if (message.equals(""))
@@ -166,25 +128,17 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
       return;
 
     // Others go to trace logging
-    if (message.startsWith("FFmpeg version")
-            || message.startsWith("configuration") || message.startsWith("lib")
-            || message.startsWith("size=") || message.startsWith("frame=") 
-            || message.startsWith("built on"))
+    if (message.startsWith("FFmpeg version") || message.startsWith("configuration") || message.startsWith("lib")
+            || message.startsWith("size=") || message.startsWith("frame=") || message.startsWith("built on"))
 
       log_.trace(message);
 
     // Some to debug
-    else if (message.startsWith("Input #")
-            || message.startsWith("Duration:")
-            || message.startsWith("Stream #")
-            || message.startsWith("Stream mapping")
-            || message.startsWith("Output #")
-            || message.startsWith("video:")
-            || message.startsWith("Metadata")
-            || message.startsWith("Program")
+    else if (message.startsWith("Input #") || message.startsWith("Duration:") || message.startsWith("Stream #")
+            || message.startsWith("Stream mapping") || message.startsWith("Output #") || message.startsWith("video:")
+            || message.startsWith("Metadata") || message.startsWith("Program")
             || message.startsWith("Last message repeated")
-            || message
-                    .startsWith("PIX_FMT_YUV420P will be used as an intermediate format for rescaling"))
+            || message.startsWith("PIX_FMT_YUV420P will be used as an intermediate format for rescaling"))
 
       log_.debug(message);
 

@@ -44,7 +44,7 @@ public class FeedRegistrationScanner implements ArtifactUrlTransformer {
    */
   @Override
   public boolean canHandle(File artifact) {
-    return artifact.getName().endsWith("feed.xml");
+    return artifact.getParentFile().getName().equals("feeds") && artifact.getName().endsWith(".xml");
   }
   
   /**

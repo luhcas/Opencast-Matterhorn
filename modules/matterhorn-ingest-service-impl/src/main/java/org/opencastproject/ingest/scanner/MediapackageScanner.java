@@ -83,6 +83,6 @@ public class MediapackageScanner implements ArtifactInstaller {
    * @see org.apache.felix.fileinstall.ArtifactListener#canHandle(java.io.File)
    */
   public boolean canHandle(File artifact) {
-    return artifact.getName().endsWith(".zip");
+    return artifact.getParentFile().getName().equals("mediapackages") && artifact.getName().endsWith(".zip");
   }
 }

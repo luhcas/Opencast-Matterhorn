@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="org.opencastproject.composer.impl.EncodingProfileScanner" immediate="true">
+  <implementation class="org.opencastproject.composer.impl.EncodingProfileScanner" />
+  <property name="service.description" value="Encoding Profile Scanner" />
+  <service>
+    <provide interface="org.apache.felix.fileinstall.ArtifactInstaller" />
+    <provide interface="org.opencastproject.composer.impl.EncodingProfileScanner" />
+  </service>
+</component>

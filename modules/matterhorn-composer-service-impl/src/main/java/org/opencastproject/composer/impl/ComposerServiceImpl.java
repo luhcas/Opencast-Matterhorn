@@ -19,7 +19,6 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderEngine;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
-import org.opencastproject.composer.impl.ffmpeg.FFmpegEncoderEngine;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -33,7 +32,6 @@ import org.opencastproject.remote.api.MaintenanceException;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.ReceiptService;
 import org.opencastproject.remote.api.Receipt.Status;
-import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
@@ -45,13 +43,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -66,7 +62,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
   private static final Logger logger = LoggerFactory.getLogger(ComposerServiceImpl.class);
 
   /** Encoding profile manager */
-  private EncodingProfileManager profileManager = null;
+  private EncodingProfileScanner profileScanner = null;
 
   /** Reference to the media inspection service */
   private MediaInspectionService inspectionService = null;
@@ -77,6 +73,9 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
   /** Reference to the receipt service */
   private ReceiptService receiptService;
 
+  /** Reference to the encoder engine */
+  private EncoderEngine encoderEngine;
+  
   /** Id builder used to create ids for encoded tracks */
   private final IdBuilder idBuilder = IdBuilderFactory.newInstance().newIdBuilder();
 
@@ -89,8 +88,6 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
   /** The server's base URL */
   protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
   
-  private Map<String, Object> encoderEngineConfig = new ConcurrentHashMap<String, Object>();
-  public static final String CONFIG_FFMPEG_PATH = "composer.ffmpegpath";
   public static final String CONFIG_THREADS = "composer.threads";
   public static final int DEFAULT_THREADS = 2;
   
@@ -104,6 +101,14 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
     this.inspectionService = mediaInspectionService;
   }
 
+  /**
+   * Sets the encoder engine
+   * @param encoderEngine The encoder engine
+   */
+  public void setEncoderEngine(EncoderEngine encoderEngine) {
+    this.encoderEngine = encoderEngine;
+  }
+  
   /**
    * Sets the workspace
    * 
@@ -120,6 +125,10 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
    */
   public void setReceiptService(ReceiptService receiptService) {
     this.receiptService = receiptService;
+  }
+  
+  public void setProfileScanner(EncodingProfileScanner scanner) {
+    this.profileScanner = scanner;
   }
 
   /**
@@ -139,25 +148,6 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
       throw new IllegalStateException("The composer needs one or more threads to function.");
     }
     setExecutorThreads(threads);
-    
-    try {
-      profileManager = new EncodingProfileManager();
-    } catch (ConfigurationException e) {
-      throw new RuntimeException(e);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-
-    // Configure ffmpeg
-    String path = (String) cc.getBundleContext().getProperty(CONFIG_FFMPEG_PATH);
-    if (path == null) {
-      // DEFAULT - https://issues.opencastproject.org/jira/browse/MH-2158
-      logger.info("DEFAULT " + CONFIG_FFMPEG_PATH + ": " + FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
-    } else {
-      // use CONFIG
-      encoderEngineConfig.put(FFmpegEncoderEngine.CONFIG_FFMPEG_BINARY, path);
-      logger.info("CONFIG " + CONFIG_FFMPEG_PATH + ": " + path);
-    }
     
     serverUrl = (String)cc.getBundleContext().getProperty("org.opencastproject.server.url");
     // Register as a handler
@@ -255,9 +245,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
     }
 
     // Create the engine
-    EncoderEngineFactory factory = EncoderEngineFactory.newInstance();
-    final EncoderEngine engine = factory.newEngineByProfile(profileId);
-    final EncodingProfile profile = profileManager.getProfile(profileId);
+    final EncodingProfile profile = profileScanner.getProfile(profileId);
     if (profile == null) {
       composerReceipt.setStatus(Status.FAILED);
       receiptService.updateReceipt(composerReceipt);
@@ -274,7 +262,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
         // Do the work
         File encodingOutput;
         try {
-          encodingOutput = engine.encode(audioFile, videoFile, profile, null);
+          encodingOutput = encoderEngine.encode(audioFile, videoFile, profile, null);
         } catch (EncoderException e) {
           composerReceipt.setStatus(Status.FAILED);
           receiptService.updateReceipt(composerReceipt);
@@ -328,7 +316,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
       } catch (Exception e) {
         composerReceipt.setStatus(Status.FAILED);
         receiptService.updateReceipt(composerReceipt);
-        throw new EncoderException(engine, e);
+        throw new EncoderException(encoderEngine, e);
       }
     }
     return composerReceipt;
@@ -340,7 +328,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
    * @see org.opencastproject.composer.api.ComposerService#listProfiles()
    */
   public EncodingProfile[] listProfiles() {
-    Collection<EncodingProfile> profiles = profileManager.getProfiles().values();
+    Collection<EncodingProfile> profiles = profileScanner.getProfiles().values();
     return profiles.toArray(new EncodingProfile[profiles.size()]);
   }
 
@@ -351,7 +339,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
    */
   @Override
   public EncodingProfile getProfile(String profileId) {
-    return profileManager.getProfiles().get(profileId);
+    return profileScanner.getProfiles().get(profileId);
   }
 
   /**
@@ -379,10 +367,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
 
     final String targetAttachmentId = "attachment-" + (mediaPackage.getAttachments().length + 1);
 
-    // Create the engine
-    final EncoderEngine engine = EncoderEngineFactory.newInstance().newEngineByProfile(profileId);
-
-    final EncodingProfile profile = profileManager.getProfile(profileId);
+    final EncodingProfile profile = profileScanner.getProfile(profileId);
     if (profile == null) {
       throw new RuntimeException("Profile '" + profileId + " is unkown");
     }
@@ -422,7 +407,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
         // Do the work
         File encodingOutput = null;
         try {
-          encodingOutput = engine.encode(videoFile, profile, properties);
+          encodingOutput = encoderEngine.encode(videoFile, profile, properties);
         } catch (EncoderException e) {
           throw new RuntimeException(e);
         }
@@ -460,9 +445,9 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
       try {
         future.get();
       } catch (ExecutionException e) {
-        throw new EncoderException(engine, e);
+        throw new EncoderException(encoderEngine, e);
       } catch (InterruptedException e) {
-        throw new EncoderException(engine, e);
+        throw new EncoderException(encoderEngine, e);
       }
     }
     return receipt;

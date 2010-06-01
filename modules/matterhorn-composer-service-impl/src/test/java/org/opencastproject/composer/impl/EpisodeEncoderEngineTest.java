@@ -16,7 +16,6 @@
 package org.opencastproject.composer.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.opencastproject.composer.api.EncoderEngine;
@@ -24,12 +23,14 @@ import org.opencastproject.composer.impl.episode.EpisodeEncoderEngine;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * Test suite for the Telestream Episode encoding engine. Since you would need an instance of that engine in order to
  * fully test it, there are no actual encoding tests done, just configuration and setup. 
  */
+@Ignore
 public class EpisodeEncoderEngineTest {
 
   /** Instance of the episode encoder engine */
@@ -40,9 +41,7 @@ public class EpisodeEncoderEngineTest {
    */
   @Before
   public void setUp() throws Exception {
-    EncoderEngineFactory factory = EncoderEngineFactory.newInstance();
-    EncoderEngine engine = factory.newEngineByProfile("episode-format.generic");
-    assertNotNull(engine);
+    EncoderEngine engine = new EpisodeEncoderEngine();
     assertEquals(EpisodeEncoderEngine.class, engine.getClass());
     episodeEngine = (EpisodeEncoderEngine)engine;
   }

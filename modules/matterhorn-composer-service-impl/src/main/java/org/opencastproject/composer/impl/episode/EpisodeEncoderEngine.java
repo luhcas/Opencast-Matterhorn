@@ -22,11 +22,11 @@ import org.opencastproject.composer.impl.AbstractEncoderEngine;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.util.PathSupport;
 
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
@@ -34,9 +34,6 @@ import java.util.Properties;
  * Wrapper for the Telestream Episode Compression Engine.
  */
 public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
-
-  /** Name of the properties file */
-  public static final String EPISODE_PROPERTIES = "/episode.properties";
 
   /** The episode inbox option name */
   public static final String OPT_MONITORTYPE = "episode.type";
@@ -64,6 +61,9 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
 
   /** Default xmlrpc password */
   public static final String XMLRPC_DEFAULT_PASSWORD = "anonymous";
+
+  /** Default xmlrpc path */
+  public static final String XMLRPC_DEFAULT_PATH = "/RPC2";
 
   /** Medium priority */
   public static final int PRIORITY_MEDIUM = 500;
@@ -100,37 +100,18 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
    */
   public EpisodeEncoderEngine() {
     super(true);
-
-    // Load the local properties file
-    try {
-      Properties properties = new Properties();
-      properties.load(EpisodeEncoderEngine.class.getResourceAsStream(EPISODE_PROPERTIES));
-      configure(properties);
-    } catch (IOException e) {
-      throw new ConfigurationException("Reading properties for episode engine failed: " + e.getMessage());
-    }
-
-    // Start the monitor
-    monitorThread.setDaemon(true);
-    monitorThread.start(); // Since this is dangerous for subclasses, I've made this class final (jmh)
   }
 
-  /**
-   * Creates a new instance of the episode telestream engine wrapper.
-   */
-  public EpisodeEncoderEngine(Properties config) {
-    super(true);
-
+  public void activate(ComponentContext cc) {
+    // TODO: read configuration data
+    Properties config = new Properties();
+    
     // Use the passed in configuration
     configure(config);
 
     // Start the monitor
     monitorThread.setDaemon(true);
     monitorThread.start(); // Since this is dangerous for subclasses, I've made this class final (jmh)
-  }
-
-  public void setConfig(Map<String, Object> config) {
-    // not used here
   }
 
   /**

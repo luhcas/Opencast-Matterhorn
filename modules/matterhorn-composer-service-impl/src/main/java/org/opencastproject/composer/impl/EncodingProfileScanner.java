@@ -20,26 +20,25 @@ import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfile.MediaType;
 import org.opencastproject.util.ConfigurationException;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 /**
  * This manager class tries to read encoding profiles from the classpath.
- * 
- * TODO: Do we need another way of defining them? -tw
  */
-public class EncodingProfileManager {
-
-  /** Default name of the file containing the properties */
-  private static final String PROP_FILENAME = "/encodingprofiles.properties";
+public class EncodingProfileScanner implements ArtifactInstaller {
 
   /** Prefix for encoding profile property keys **/
   private static String PROP_PREFIX = "profile.";
@@ -52,40 +51,10 @@ public class EncodingProfileManager {
   private static final String PROP_MIMETYPE = ".mimetype";
 
   /** The profiles map */
-  private Map<String, EncodingProfile> profiles = null;
+  private Map<String, EncodingProfile> profiles = new HashMap<String, EncodingProfile>();
 
   /** The logging instance */
-  private static final Logger log_ = LoggerFactory.getLogger(EncodingProfileManager.class);
-
-  /**
-   * Creates a profile manager that will load the profiles from its default location, which is a file called
-   * <code>encodingprofiles.properties</code> that needs to be on the classpath.
-   * 
-   * @throws IOException
-   *           if the properties file cannot be located or accessed
-   * @throws ConfigurationException
-   *           if the configuration data is malformed
-   */
-  public EncodingProfileManager() throws IOException, ConfigurationException {
-    Properties props = new Properties();
-    InputStream is = EncodingProfileManager.class.getResourceAsStream(PROP_FILENAME);
-    if (is == null)
-      throw new ConfigurationException("Configuration for encoding profiles (" + PROP_FILENAME + ") missing");
-    props.load(is);
-    loadFromProperties(props);
-  }
-
-  /**
-   * Initializes a set of encoding profiles from the given properties.
-   * 
-   * @param props
-   *          the properties
-   * @throws ConfigurationException
-   *           if the configuration data is malformed
-   */
-  public EncodingProfileManager(Properties props) throws ConfigurationException {
-    loadFromProperties(props);
-  }
+  private static final Logger log_ = LoggerFactory.getLogger(EncodingProfileScanner.class);
 
   /**
    * Returns the list of profiles.
@@ -95,10 +64,9 @@ public class EncodingProfileManager {
   public Map<String, EncodingProfile> getProfiles() {
     return profiles;
   }
-  
+
   /**
-   * Returns the encoding profile for the given identifier or <code>null</code> if no
-   * such profile has been configured.
+   * Returns the encoding profile for the given identifier or <code>null</code> if no such profile has been configured.
    * 
    * @param id
    *          the profile identifier
@@ -129,11 +97,21 @@ public class EncodingProfileManager {
    * 
    * @param properties
    *          the properties
+   * @return the profiles found in the properties
    */
-  private void loadFromProperties(Properties properties) {
-    if (properties == null)
-      throw new IllegalArgumentException("Encoding properties cannot be null");
-    
+  Map<String, EncodingProfile> loadFromProperties(File artifact) {
+    // Format name
+    FileInputStream in = null;
+    Properties properties = new Properties();
+    try {
+      in = new FileInputStream(artifact);
+      properties.load(in);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+
     // Find list of formats in properties
     List<String> profileNames = new ArrayList<String>();
     for (Object fullKey : properties.keySet()) {
@@ -150,12 +128,14 @@ public class EncodingProfileManager {
     }
 
     // Load the formats
-    profiles = new HashMap<String, EncodingProfile>();
+    Map<String, EncodingProfile> profiles = new HashMap<String, EncodingProfile>();
     for (String profileId : profileNames) {
       log_.debug("Enabling media format " + profileId);
-      EncodingProfile profile = loadProfile(profileId, properties);
+      EncodingProfile profile = loadProfile(profileId, properties, artifact);
       profiles.put(profileId, profile);
     }
+
+    return profiles;
   }
 
   /**
@@ -163,19 +143,20 @@ public class EncodingProfileManager {
    * 
    * @param profile
    * @param properties
+   * @param artifact
    * @return
+   * @throws RuntimeException
    */
-  private EncodingProfile loadProfile(String profile, Properties properties) {
+  private EncodingProfile loadProfile(String profile, Properties properties, File artifact) throws RuntimeException {
     String identifier = profile;
     List<String> defaultProperties = new ArrayList<String>(10);
 
-    // Format name
     Object name = getDefaultProperty(profile, PROP_NAME, properties, defaultProperties);
     if (name == null || "".equals(name.toString().trim()))
       throw new ConfigurationException("Distribution profile '" + profile
               + "' is missing a name. (Check web.xml profiles.)");
 
-    EncodingProfileImpl df = new EncodingProfileImpl(identifier, name.toString().trim());
+    EncodingProfileImpl df = new EncodingProfileImpl(identifier, name.toString().trim(), artifact);
 
     // Output Type
     Object type = getDefaultProperty(profile, PROP_OUTPUT, properties, defaultProperties);
@@ -241,4 +222,49 @@ public class EncodingProfileManager {
     return properties.getProperty(key);
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.felix.fileinstall.ArtifactListener#canHandle(java.io.File)
+   */
+  @Override
+  public boolean canHandle(File artifact) {
+    return artifact.getParentFile().getName().equals("encoding") && artifact.getName().endsWith(".properties");
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.felix.fileinstall.ArtifactInstaller#install(java.io.File)
+   */
+  @Override
+  public void install(File artifact) throws Exception {
+    profiles.putAll(loadFromProperties(artifact));
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.felix.fileinstall.ArtifactInstaller#uninstall(java.io.File)
+   */
+  @Override
+  public void uninstall(File artifact) throws Exception {
+    for (Iterator<EncodingProfile> iter = profiles.values().iterator(); iter.hasNext();) {
+      EncodingProfile profile = iter.next();
+      if (artifact.equals(profile.getSource())) {
+        iter.remove();
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.apache.felix.fileinstall.ArtifactInstaller#update(java.io.File)
+   */
+  @Override
+  public void update(File artifact) throws Exception {
+    uninstall(artifact);
+    install(artifact);
+  }
 }

@@ -75,6 +75,13 @@ public interface EncodingProfile {
    */
   String getName();
 
+  
+  /**
+   * Returns the source object that provided this encoding profile
+   * @return
+   */
+  Object getSource();
+  
   /**
    * Returns the encoding format's media type, which is either video (plus
    * audio) or audio only.

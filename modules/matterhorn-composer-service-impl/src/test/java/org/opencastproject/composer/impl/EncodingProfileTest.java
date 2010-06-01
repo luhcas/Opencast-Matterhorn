@@ -29,9 +29,10 @@ import org.opencastproject.composer.api.EncodingProfile.MediaType;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * Tests for encoding format handling.
@@ -52,10 +53,9 @@ public class EncodingProfileTest {
    */
   @Before
   public void setUp() throws Exception {
-    Properties properties = new Properties();
-    properties.load(EncodingProfileTest.class.getResource("/encodingtestprofiles.properties").openStream());
-    EncodingProfileManager mgr = new EncodingProfileManager(properties);
-    profiles = mgr.getProfiles();
+    URL url = EncodingProfileTest.class.getResource("/encodingtestprofiles.properties");
+    EncodingProfileScanner mgr = new EncodingProfileScanner();
+    profiles = mgr.loadFromProperties(new File(url.toURI()));
   }
 
   /**

@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 /**
@@ -46,6 +47,9 @@ public class EncodingProfileImpl implements EncodingProfile {
   @XmlElement(name = "name")
   protected String name = null;
 
+  @XmlTransient
+  protected Object source;
+  
   /** Format type */
   @XmlElement(name = "outputmediatype")
   protected MediaType outputType = null;
@@ -75,9 +79,10 @@ public class EncodingProfileImpl implements EncodingProfile {
    * @param name
    *          the profile name
    */
-  public EncodingProfileImpl(String identifier, String name) {
+  public EncodingProfileImpl(String identifier, String name, Object source) {
     this.identifier = identifier;
     this.name = name;
+    this.source = source;
   }
 
   // Needed by JAXB
@@ -337,4 +342,12 @@ public class EncodingProfileImpl implements EncodingProfile {
   }
   
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.composer.api.EncodingProfile#getSource()
+   */
+  @Override
+  public Object getSource() {
+    return source;
+  }
 }

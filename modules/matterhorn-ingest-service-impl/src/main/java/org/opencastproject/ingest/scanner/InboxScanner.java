@@ -48,7 +48,7 @@ public class InboxScanner implements ArtifactInstaller {
     FileInputStream in = null;
     try {
       in = new FileInputStream(artifact);
-      fileRepository.putInCollection("inbox", artifact.getName().substring(5), in); // strip the word "inbox"
+      fileRepository.putInCollection("inbox", artifact.getName(), in);
     } catch(IOException e) {
       logger.warn("Unable to store file {} in the inbox, {}", artifact.getAbsolutePath(), e);
       return;
@@ -83,6 +83,6 @@ public class InboxScanner implements ArtifactInstaller {
    * @see org.apache.felix.fileinstall.ArtifactListener#canHandle(java.io.File)
    */
   public boolean canHandle(File artifact) {
-    return artifact.getName().startsWith("inbox");
+    return artifact.getParentFile().getName().equals("inbox");
   }
 }
