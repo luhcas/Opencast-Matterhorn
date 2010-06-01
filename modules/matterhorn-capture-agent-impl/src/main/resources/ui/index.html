@@ -8,7 +8,7 @@
     <script type="text/javascript" src="js/state.js"></script>
 </head>
 <script type="text/javascript" language="javascript">
-var stateURL = "http://" + window.location.hostname + ":8080/state/rest/GetState";
+var stateURL = "http://" + window.location.hostname + ":8080/state/rest/state";
 function refreshState(url, target) {
   req = new XMLHttpRequest();
   req.onreadystatechange = function() {getResponse(target);};
