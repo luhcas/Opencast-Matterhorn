@@ -350,7 +350,7 @@ public class WorkingFileRepositoryRestEndpoint {
     URI[] uris = repo.getCollectionContents(collectionId);
     JSONArray jsonArray = new JSONArray();
     for (URI uri : uris) {
-      jsonArray.add(uri);
+      jsonArray.add(uri.toString());
     }
     return Response.ok(jsonArray.toJSONString()).build();
   }

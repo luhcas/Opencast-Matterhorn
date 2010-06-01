@@ -37,6 +37,11 @@
 			<artifactId>matterhorn-workspace-api</artifactId>
 			<version>0.9-SNAPSHOT</version>
 		</dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-working-file-repository-service-api</artifactId>
+      <version>0.9-SNAPSHOT</version>
+    </dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
@@ -213,6 +218,7 @@
 							OSGI-INF/ingest-service-local.xml,
 							OSGI-INF/ingest-service-remote.xml,
 							OSGI-INF/ingest-service-rest.xml,
+              OSGI-INF/inbox-scanner.xml,
               OSGI-INF/mediapackage-scanner.xml
             </Service-Component>
 						<JPA-PersistenceUnits>
