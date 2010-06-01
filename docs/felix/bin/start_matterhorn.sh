@@ -1,86 +1,48 @@
-#!/bin/bash
+##
+# Configure these variables to match your environment
+##
 
-
-#commented out if clauses because teh currently do not work for when started wit sudo 
-#if [ -n "${FELIX_HOME:-x}" ]; then
-#  FELIX=$FELIX_HOME
-#else
-  FELIX="/opt/matterhorn/felix"
-#fi
-
-#if [ -n "${M2_REPO:-x}" ]; then
-#  M2_REPO=$M2_REPO
-#else
-  M2_REPO="/home/opencast/.m2/repository"
-#fi
-
-#if [ -n "${JAVA_HOME:-x}" ]; then
-#  JAVA_HOME=$JAVA_HOME
-#else
-  JAVA_HOME="/usr/lib/jvm/java-6-sun"
-#fi
-
-MATTERHORN_HOME=/opt/matterhorn
-MATTERHORN_CONF=/opt/matterhorn/felix/conf
-MATTERHORN_LIB=/opt/matterhorn/felix
-MATTERHORN_LOG=/opt/matterhorn/log
-FELIX_HOME=/opt/matterhorn/felix
-
-#
-# Define Constants
-#
-MAVEN_ARG="-DM2_REPO=$M2_REPO"
-MATTERHORN_BUNDLE_DIR=$MATTERHORN_LIB/load
-MATTERHORN_WORK_DIR=$MATTERHORN_LIB/work
-MATTERHORN_STATIC_DIR=$MATTERHORN_WORK_DIR/opencast/static
-MATTERHORN_CACHE_DIR=$MATTERHORN_LIB/felix-cache
-MATTERHORN_LOG_FILE=/opt/matterhorn/log/felix.log
-
-#
-# Check if nightly is already running
-#
-FELIX_PID=`ps ux | awk '/felix.jar/ && !/awk/ {print $2}'`
-if [ ! -z $FELIX_PID ]; then
-  echo "Felix is already running with pid $FELIX_PID"
-  exit 1
+if [ ! -z $FELIX_HOME ]; then
+  FELIX=$FELIX_HOME
+else
+  FELIX="/Applications/Matterhorn"
 fi
 
-#
-# Clear the matterhorn work directory
-#
-# rm -rf $MATTERHORN_WORK_DIR
+if [ ! -z $M2_REPO ]; then
+  M2_REPO=$M2_REPO
+else
+  M2_REPO="/Users/johndoe/.m2/repository"
+fi
 
-#
-# Create the directories under /var/lib/matterhorn
-#
+if [ ! -z $OPENCAST_LOGDIR ]; then
+  LOGDIR=$OPENCAST_LOGDIR
+else
+  LOGDIR=$FELIX/logs
+fi
 
-mkdir -p $MATTERHORN_WORK_DIR
-mkdir -p $MATTERHORN_WORK_DIR/opencast
-mkdir -p $MATTERHORN_STATIC_DIR
-mkdir -p $MATTERHORN_BUNDLE_DIR
+##
+# To enable the debugger on the vm, enable all of the following options
+##
 
-# Save current version
-svnversion > $MATTERHORN_STATIC_DIR/version.txt
+DEBUG_PORT="8000"
+DEBUG_SUSPEND="n"
+#DEBUG_OPTS="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=$DEBUG_PORT,server=y,suspend=$DEBUG_SUSPEND"
 
-#
-# Cd into the work dir, since some java code creates work files in the
-# directory used when starting the vm.
-#
-cd $MATTERHORN_WORK_DIR
+##
+# Only change the line below if you want to customize the server
+##
 
-#
-# Start felix
-#
-FELIX_FILEINSTALL_OPTS="-Dfelix.fileinstall.dir=$MATTERHORN_BUNDLE_DIR"
-PAX_CONFMAN_OPTS="-Dbundles.configuration.location=$MATTERHORN_CONF"
-CXF_OPTS="-Djava.util.logging.config.file=$MATTERHORN_CONF/cxf.properties"
-JAVA_OPTS="-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128m -Djava.io.tmpdir=$MATTERHORN_WORK_DIR"
-DEBUG_OPTS="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"
-PAX_LOGGING_OPTS="-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN -Dopencast.logdir=$MATTERHORN_LOG"
-UTIL_LOGGING_OPTS="-Djava.util.logging.config.file=$FELIX_HOME/conf/services/java.util.logging.properties"
+MAVEN_ARG="-DM2_REPO=$M2_REPO"
+FELIX_FILEINSTALL_OPTS="-Dfelix.fileinstall.dir=$FELIX/load"
+PAX_CONFMAN_OPTS="-Dbundles.configuration.location=$FELIX/conf"
+PAX_LOGGING_OPTS="-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN -Dopencast.logdir=$LOGDIR"
+UTIL_LOGGING_OPTS="-Djava.util.logging.config.file=$FELIX/conf/services/java.util.logging.properties"
 GRAPHICS_OPTS="-Djava.awt.headless=true -Dawt.toolkit=sun.awt.HeadlessToolkit"
 
+# Clear the felix cache directory
+FELIX_CACHE="$FELIX/felix-cache"
+rm -rf $FELIX_CACHE
 
-# Start felix
-nohup java $JAVA_OPTS $MAVEN_ARG $DEBUG_OPTS $GRAPHICS_OPTS $FELIX_FILEINSTALL_OPTS $PAX_CONFMAN_OPTS $CXF_OPTS $PAX_LOGGING_OPTS $UTIL_LOGGING_OPTS -jar $FELIX_HOME/bin/felix.jar $MATTERHORN_CACHE_DIR >> $MATTERHORN_LOG_FILE &
-
+# Finally start felix
+cd $FELIX
+java $DEBUG_OPTS $GRAPHICS_OPTS $MAVEN_ARG $FELIX_FILEINSTALL_OPTS $PAX_CONFMAN_OPTS $PAX_LOGGING_OPTS $UTIL_LOGGING_OPTS $CXF_OPTS -jar $FELIX/bin/felix.jar $FELIX_CACHE
