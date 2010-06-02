@@ -53,8 +53,7 @@
 		
 		<div id="oc-segments">
 		<div id="slider">
-    <img class="scrollButtons left"
-  src="img/leftarrow.png"/>
+    <img class="scrollButtons left" src="img/leftarrow.png" alt="Scroll to previous slides"/>
 
 <div style="overflow: hidden;" class="scroll">
 
@@ -82,7 +81,7 @@
 </div>
 
 </div>
-<img class="scrollButtons right" src="img/rightarrow.png"/>
+<img class="scrollButtons right" src="img/rightarrow.png" alt="Scroll to subsequent slides"/>
     </div>
     </div>
 		<xsl:for-each
