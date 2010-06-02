@@ -412,9 +412,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     logger.debug("stopCapture() called.");
     // If pipe is null and no mock capture is on
     if (pipe == null) {
-        logger.warn("Pipeline is null, unable to stop capture.");
+        logger.warn("Pipeline is null, this is normal if running a mock capture.");
         setAgentState(AgentState.IDLE);
-        return false;
     } else {
       // We must stop the capture as soon as possible, then check whatever needed
       if (!pipe.sendEvent(new EOSEvent())) {
@@ -437,6 +436,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
 
     AgentRecording theRec = pendingRecordings.get(currentRecID);
+    if (theRec == null) {
+      logger.info("Stop capture called, but no capture running. This is normal if running a mock capture.");
+      return true;
+    }
 
     // Clears currentRecID to indicate no recording is on
     currentRecID = null;
