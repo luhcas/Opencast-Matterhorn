@@ -463,7 +463,7 @@ Opencast.Initialize = (function ()
             
            
         marginleft = Math.round( (flashWidth * 0.4) - controlsWidth ) / 2;
-        $('.oc_btn-skip-backward').css("margin-left", marginleft + 'px');
+        $('.oc_btn-play').css("margin-left", marginleft + 'px');
    
         // create watch.html link
         var embedUrl = window.location.href;
