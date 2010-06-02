@@ -17,12 +17,11 @@ Opencast.engage = (function () {
 
       var restEndpoint = "../../search/rest/episode?id=";
       //restEndpoint = "episode.xml?id="; // Activate for testing purposes
-	  //var restEndpoint = "xml/episode.xml?id="; // Activate for testing purposes
+      //var restEndpoint = "xml/episode.xml?id="; // Activate for testing purposes
 
       return restEndpoint;
-
    }
-  
+
   function getCookie(name) {
     var start = document.cookie.indexOf( name + "=" );
     var len = start + name.length + 1;
