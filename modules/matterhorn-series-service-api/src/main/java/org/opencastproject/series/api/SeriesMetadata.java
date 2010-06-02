@@ -35,5 +35,9 @@ public interface SeriesMetadata {
   public abstract boolean equals(Object o);
 
   public abstract int hashCode();
+  
+  public void setSeries (Series s);
+  
+  public Series getSeries();
 
 }

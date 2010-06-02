@@ -20,7 +20,7 @@ import java.util.List;
 
 import org.opencastproject.metadata.dublincore.DublinCore;
 
-public interface Series {
+public interface Series extends Comparable<Series> {
 
   public abstract String getSeriesId();
 
@@ -37,5 +37,7 @@ public interface Series {
   public abstract DublinCore getDublinCore();
 
   public abstract boolean valid();
+  
+  public String getDescription();
 
 }
