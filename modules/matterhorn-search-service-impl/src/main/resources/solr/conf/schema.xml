@@ -235,13 +235,14 @@
    
     <!-- Dublin core fields. -->
     
-     <field name="dc_extent" type="integer" indexed="false" stored="true" /> 
-    <field name="dc_title" type="text" indexed="true" stored="true" omitNorms="true"/>
-    <field name="dc_subject" type="text" indexed="true" stored="true" omitNorms="true"/>
-    <field name="dc_creator" type="text" indexed="true" stored="true" omitNorms="true"/>
-    <field name="dc_publisher" type="text" indexed="true" stored="true" omitNorms="true"/>  
-    <field name="dc_contributor" type="text" indexed="true" stored="true" omitNorms="true"/>
-    <field name="dc_abstract" type="text" indexed="true" stored="true" omitNorms="true"/>
+   <field name="dc_extent" type="integer" indexed="false" stored="true" /> 
+   <field name="dc_title" type="text" indexed="true" stored="true" omitNorms="true"/>
+   <field name="dc_subject" type="text" indexed="true" stored="true" omitNorms="true"/>
+   <field name="dc_creator" type="text" indexed="true" stored="true" omitNorms="true"/>
+   <field name="dc_publisher" type="text" indexed="true" stored="true" omitNorms="true"/>  
+   <field name="dc_contributor" type="text" indexed="true" stored="true" omitNorms="true"/>
+   <field name="dc_abstract" type="text" indexed="true" stored="true" omitNorms="true"/>
+   <field name="dc_description" type="text" indexed="true" stored="true" omitNorms="true"/>
    <field name="dc_created" type="date" indexed="true" stored="true" omitNorms="true"/>
    <field name="dc_available_from" type="date" indexed="true" stored="true" omitNorms="true"/>
    <field name="dc_available_to" type="date" indexed="true" stored="true" omitNorms="true"/>
@@ -266,8 +267,8 @@
    <field name="oc_elementflavors" type="text" indexed="true" stored="true" omitNorms="true"/>
    
    <!-- The dynamic fields with segment text and hint -->
-     <dynamicField name="oc_text_*"  type="text"  indexed="true"  stored="true"/>
-     <dynamicField name="oc_hint_*"  type="text"   indexed="false"  stored="true"/>
+   <dynamicField name="oc_text_*"  type="text"  indexed="true"  stored="true"/>
+   <dynamicField name="oc_hint_*"  type="text"   indexed="false"  stored="true"/>
 
   <!-- A fulltext copy field. -->
     <field name="fulltext" type="text" indexed="true" stored="false" multiValued="true"/>
@@ -293,6 +294,7 @@
    <copyField source="dc_subject" dest="fulltext"/>
    <copyField source="dc_creator" dest="fulltext"/>
    <copyField source="dc_abstract" dest="fulltext"/>
+   <copyField source="dc_description" dest="fulltext"/>
    <copyField source="dc_publisher" dest="fulltext"/>
    <copyField source="dc_contributor" dest="fulltext"/>
    <copyField source="oc_keywords" dest="fulltext"/>    

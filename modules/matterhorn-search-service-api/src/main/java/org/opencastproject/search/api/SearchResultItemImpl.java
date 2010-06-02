@@ -82,6 +82,10 @@ public class SearchResultItemImpl implements SearchResultItem {
   @XmlElement
   private String dcAbstract = null;
 
+  /** Dublin core field 'dc:description' */
+  @XmlElement
+  private String dcDescription = null;
+
   /** Dublin core field 'dc:created' */
   @XmlElement
   private Date dcCreated = null;
@@ -289,6 +293,23 @@ public class SearchResultItemImpl implements SearchResultItem {
    */
   public void setDcAbstract(String dcAbstract) {
     this.dcAbstract = dcAbstract;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.search.api.SearchResultItem#getDcDescription()
+   */
+  public String getDcDescription() {
+    return dcDescription;
+  }
+
+  /**
+   * @param dcDescription
+   *          the dcDescription to set
+   */
+  public void setDcDescription(String dcDescription) {
+    this.dcDescription = dcDescription;
   }
 
   /**

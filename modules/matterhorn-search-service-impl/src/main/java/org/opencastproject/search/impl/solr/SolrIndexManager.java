@@ -399,6 +399,11 @@ public class SolrIndexManager {
       solrInput.addField(SolrFields.DC_ABSTRACT, dc.getFirst(DublinCore.PROPERTY_ABSTRACT));
     }
 
+    // dc:description
+    if (dc.hasValue(DublinCore.PROPERTY_DESCRIPTION)) {
+      solrInput.addField(SolrFields.DC_DESCRIPTION, dc.getFirst(DublinCore.PROPERTY_DESCRIPTION));
+    }
+
     // dc:created
     if (mediaPackage.getDate() != null) {
       solrInput.addField(SolrFields.DC_CREATED, mediaPackage.getDate());

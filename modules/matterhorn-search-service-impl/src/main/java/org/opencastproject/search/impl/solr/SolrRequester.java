@@ -205,6 +205,7 @@ public class SolrRequester {
       item.setDcPublisher(toString(doc.getFieldValue(SolrFields.DC_PUBLISHER)));
       item.setDcContributor(toString(doc.getFieldValue(SolrFields.DC_CONTRIBUTOR)));
       item.setDcAbstract(toString(doc.getFieldValue(SolrFields.DC_ABSTRACT)));
+      item.setDcDescription(toString(doc.getFieldValue(SolrFields.DC_DESCRIPTION)));
       item.setDcCreated((Date) (doc.getFieldValue(SolrFields.DC_CREATED)));
       item.setDcAvailableFrom((Date) (doc.getFieldValue(SolrFields.DC_AVAILABLE_FROM)));
       item.setDcAvailableTo((Date) (doc.getFieldValue(SolrFields.DC_AVAILABLE_TO)));
@@ -370,6 +371,13 @@ public class SolrRequester {
     sb.append(uq);
     sb.append(")^");
     sb.append(SolrFields.DC_ABSTRACT_BOOST);
+    sb.append(" ");
+
+    sb.append(SolrFields.DC_DESCRIPTION);
+    sb.append(":(");
+    sb.append(uq);
+    sb.append(")^");
+    sb.append(SolrFields.DC_DESCRIPTION_BOOST);
     sb.append(" ");
 
     sb.append(SolrFields.FULLTEXT);

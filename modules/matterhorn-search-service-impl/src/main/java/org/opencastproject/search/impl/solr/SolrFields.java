@@ -31,6 +31,7 @@ public interface SolrFields {
   public static final String DC_PUBLISHER = "dc_publisher";
   public static final String DC_CONTRIBUTOR = "dc_contributor";
   public static final String DC_ABSTRACT = "dc_abstract";
+  public static final String DC_DESCRIPTION = "dc_description";
   public static final String DC_CREATED = "dc_created";
   public static final String DC_AVAILABLE_FROM = "dc_available_from";
   public static final String DC_AVAILABLE_TO = "dc_available_to";
@@ -75,6 +76,7 @@ public interface SolrFields {
   // TODO: move this to configuration file
   public static final double DC_TITLE_BOOST = 6.0;
   public static final double DC_ABSTRACT_BOOST = 4.0;
+  public static final double DC_DESCRIPTION_BOOST = 4.0;
   public static final double DC_CONTRIBUTOR_BOOST = 2.0;
   public static final double DC_PUBLISHER_BOOST = 2.0;
   public static final double DC_CREATOR_BOOST = 4.0;

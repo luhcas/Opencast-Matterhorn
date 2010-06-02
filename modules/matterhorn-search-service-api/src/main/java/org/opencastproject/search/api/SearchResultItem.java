@@ -62,6 +62,11 @@ public interface SearchResultItem {
   String getDcSubject();
 
   /**
+   * @return the dcDescription
+   */
+  String getDcDescription();
+  
+  /**
    * @return the dcCreator
    */
   String getDcCreator();

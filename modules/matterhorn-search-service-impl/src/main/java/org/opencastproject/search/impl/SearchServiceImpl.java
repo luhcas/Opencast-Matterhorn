@@ -172,14 +172,14 @@ public class SearchServiceImpl implements SearchService {
       }
 
       SolrCore.log.getParent().setLevel(Level.WARNING);
-      solrConnection = new SolrConnection(solrRoot, PathSupport.concat(solrRoot, "data"));
+      solrConnection = new SolrConnection(solrRoot, PathSupport.concat(solrRoot,"data"));
       solrRequester = new SolrRequester(solrConnection);
       solrIndexManager = new SolrIndexManager(solrConnection);
       solrIndexManager.setDcService(dcService);
       solrIndexManager.setMpeg7Service(mpeg7Service);
-      // The solr index needs some time to setup
-      // FIXME Not ideal solution
-      Thread.sleep(3000);
+      // On windows, the solr index needs some time to setup
+      if (System.getProperty("os.name").toLowerCase().indexOf("windows") > -1)
+        Thread.sleep(3000);
     } catch (IOException e) {
       throw new RuntimeException("Error setting up solr index at " + solrRoot, e);
     } catch (InterruptedException e) {
