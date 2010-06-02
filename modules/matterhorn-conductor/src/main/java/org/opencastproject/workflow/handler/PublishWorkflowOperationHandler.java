@@ -113,6 +113,10 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
       // Fix references and flavors
       for (MediaPackageElement element : mp.getElements()) {
+        
+        // Clear the tags, we don't want them to show up outside of processing
+        element.clearTags();
+        
         if (removals.contains(element))
           continue;
         
