@@ -16,7 +16,6 @@
 package org.opencastproject.capture.endpoint;
 
 import org.opencastproject.capture.api.ConfidenceMonitor;
-import org.opencastproject.capture.api.AgentDevice;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
