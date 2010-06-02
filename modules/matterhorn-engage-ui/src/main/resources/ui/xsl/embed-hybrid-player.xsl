@@ -21,6 +21,7 @@
 		         <xsl:attribute name="id">segment<xsl:value-of select="position()" /></xsl:attribute>
 		         <xsl:attribute name="onmouseover">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
 		         <xsl:attribute name="onmouseout">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
+		         <xsl:attribute name="alt">Slide <xsl:value-of select="position()" /> of <xsl:value-of select="last()" /></xsl:attribute>
 		         <xsl:attribute name="onclick">Opencast.Watch.seekSegment(<xsl:value-of select="floor(./@time div 1000)" />)</xsl:attribute>
 		         <xsl:attribute name="style">width: <xsl:value-of select="./@duration div (../../mediapackage/@duration) * 100" />%;</xsl:attribute>
 		       </td>
