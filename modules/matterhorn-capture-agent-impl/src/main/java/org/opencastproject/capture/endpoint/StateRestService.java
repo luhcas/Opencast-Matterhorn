@@ -79,7 +79,7 @@ public class StateRestService {
         update.add(new RecordingStateUpdate(e.getValue()));
       }
     } else {
-      logger.debug("Service is null in getRecordings()");
+      logger.warn("Service is null in getRecordings()");
     }
     return update;
   }
