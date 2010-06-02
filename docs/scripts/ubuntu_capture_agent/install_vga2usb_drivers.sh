@@ -123,8 +123,6 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
 	    fi
 	fi
     done
-    
-    cd $WORKING_DIR
 else
     echo "VGA2USB driver already installed."
 fi

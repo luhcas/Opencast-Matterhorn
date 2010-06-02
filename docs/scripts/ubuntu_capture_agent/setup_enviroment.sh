@@ -62,28 +62,33 @@ if [ "$?" -ne 0 ]; then
     echo "${EXPORT_JAVA_HOME}" >> $HOME/.bashrc
 fi
 
-chown $USERNAME:$USERNAME $HOME/.bashrc
+#chown $USERNAME:$USERNAME $HOME/.bashrc
 
 # Change permissions and owner of the $CA_DIR folder
 chmod -R 770 $CA_DIR
 chown -R $USERNAME:$USERNAME $CA_DIR
+
+# Add a link to the capture agent folder in the user home folder
+ln -s $CA_DIR $HOME/${CA_DIR##*/}
+chown $USERNAME:$USERNAME $HOME/${CA_DIR##*/}
 
 echo "Done"
 
 # Set up the deinstallation script
 echo -n "Creating the cleanup script... "
 SRC_LIST_BKP=$SRC_LIST.$BKP_SUFFIX
-sed -i "s#^USER=[^\ ]*\?\(.*\)\$#USER=$USERNAME\1#" "$CLEANUP"
-sed -i "s#^SRC_LIST=[^\ ]*\?\(.*\)\$#SRC_LIST=$SRC_LIST\1#" "$CLEANUP"
-sed -i "s#^SRC_LIST_BKP=[^\ ]*\?\(.*\)\$#SRC_LIST_BKP=$SRC_LIST_BKP\1#" "$CLEANUP"
-sed -i "s#^oc_dir=[^\ ]*\?\(.*\)\$#oc_dir=$oc_dir\1#" "$CLEANUP"
-sed -i "s#^CA_DIR=[^\ ]*\?\(.*\)\$#CA_DIR=$CA_DIR\1#" "$CLEANUP"
-sed -i "s#^RULES_FILE=[^\ ]*\?\(.*\)\$#RULES_FILE=$DEV_RULES\1#" "$CLEANUP"
-sed -i "s#^CA_DIR=[^\ ]*\?\(.*\)\$#CA_DIR=$CA_DIR\1#" "$CLEANUP"
-sed -i "s#^STARTUP_SCRIPT=[^\ ]*\?\(.*\)\$#STARTUP_SCRIPT=$STARTUP_SCRIPT\1#" "$CLEANUP"
+sed -i "s#^USER=.*\$#USER=$USERNAME#" "$CLEANUP"
+sed -i "s#^HOME=.*\$#HOME=$HOME#" "$CLEANUP"
+sed -i "s#^SRC_LIST=.*\$#SRC_LIST=$SRC_LIST#" "$CLEANUP"
+sed -i "s#^SRC_LIST_BKP=.*\$#SRC_LIST_BKP=$SRC_LIST_BKP#" "$CLEANUP"
+sed -i "s#^oc_dir=.*\$#OC_DIR=$oc_dir#" "$CLEANUP"
+sed -i "s#^CA_DIR=.*\$#CA_DIR=$CA_DIR#" "$CLEANUP"
+sed -i "s#^RULES_FILE=.*\$#RULES_FILE=$DEV_RULES#" "$CLEANUP"
+sed -i "s#^CA_DIR=.*\$#CA_DIR=$CA_DIR#" "$CLEANUP"
+sed -i "s#^STARTUP_SCRIPT=.*\$#STARTUP_SCRIPT=$STARTUP_SCRIPT#" "$CLEANUP"
 
 # Write the uninstalled package list to the cleanup.sh template
-sed -i "s/^PKG_LIST=[^ ]*\(.*\)$/PKG_LIST=\"$PKG_LIST\"\1/" $CLEANUP
+sed -i "s/^PKG_LIST=.*\$/PKG_LIST=\"$PKG_LIST\"/" "$CLEANUP"
 
 echo "Done"
 

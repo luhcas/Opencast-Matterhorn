@@ -4,14 +4,24 @@
 # Cleanup all traces of the capture agent #
 ###########################################
 
-USER=                                                    # Matterhorn's user name
-SRC_LIST=                                                # Location for sources.list
-SRC_LIST_BKP=                                            # Location for the backup file
-OC_DIR=                                                  # Location of matterhorn files
-CA_DIR=                                                  # The directory where the capture agent files live
-STARTUP_SCRIPT=                                          # Path to the matterhorn startup script
-RULES_FILE=                                              # Path to the file specifying rules for the installed devices
-PKG_LIST=                                                # List of packages to be uninstalled
+# Matterhorn's user name
+USER=
+# Location for the user's home
+HOME=
+# Location for sources.list
+SRC_LIST=
+# Location for the backup file
+SRC_LIST_BKP=
+# Location of matterhorn files
+OC_DIR=
+# The directory where the capture agent files live
+CA_DIR=
+# Path to the matterhorn startup script
+STARTUP_SCRIPT=
+# Path to the file specifying rules for the installed devices
+RULES_FILE=
+# List of packages to be uninstalled
+PKG_LIST=
 
 # Checks if this script is being run with root privileges, exiting if it doesn't
 if [[ `id -u` -ne 0 ]]; then
@@ -46,7 +56,7 @@ echo "Done"
 # Restore appropriate sources.list
 echo -n "Restoring the sources.list backup... "
 mv $SRC_LIST.$SRC_LIST_BKP $SRC_LIST &> /dev/null
-apt-get -y update
+apt-get -y -qq update
 echo "Done"
 
 # Remove the configuration that starts matterhorn on boot
@@ -70,7 +80,7 @@ rm -f /usr/lib/libjv4linfo.so
 echo "Done"
 
 # Remove the CA_DIR directory
-echo -n "Deleting the capture agent directory under ${USER}'s home... "
+echo -n "Deleting the capture agent directory... "
 rm -rf $CA_DIR
 echo "Done"
 
@@ -84,10 +94,14 @@ if [[ $(echo ${response:-no} | grep -i '^y') ]]; then
     echo -n "Deleting user $USER... "
     userdel -r -f $USER &> /dev/null
     echo "Done"
+else 
+    # Delete the soft link to the capture agent folder
+    rm -f $HOME/${CA_DIR##*/}
 fi
 
+
 # Kills felix
-kill -9 $(ps U matterhorn 2> /dev/null | grep java | cut -d ' ' -f 2) 2> /dev/null
+kill -9 $(ps U $USER 2> /dev/null | grep java | cut -d ' ' -f 2) 2> /dev/null
 
 echo -e "\n\nDone uninstalling Matterhorn Capture Agent.\n\n" 
 

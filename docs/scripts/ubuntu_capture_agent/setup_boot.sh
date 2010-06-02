@@ -12,10 +12,10 @@ fi
 
 echo "# Start the matterhorn capture agent" > $STARTUP_SCRIPT
 
-# This section sets up some enviroment variables
-echo "env FELIX_HOME=${FELIX_HOME}" >> $STARTUP_SCRIPT
-echo "env M2_REPO=${M2_REPO}" >> $STARTUP_SCRIPT
-echo "env JAVA_HOME=${JAVA_HOME}" >> $STARTUP_SCRIPT
+# This section sets up some enviroment variables --no longer needed!
+#echo "env FELIX_HOME=${FELIX_HOME}" >> $STARTUP_SCRIPT
+#echo "env M2_REPO=${M2_REPO}" >> $STARTUP_SCRIPT
+#echo "env JAVA_HOME=${JAVA_HOME}" >> $STARTUP_SCRIPT
 
 # This specifies in which runlevel shall and shall not be run this script
 echo "start on runlevel [2345]" >> $STARTUP_SCRIPT
@@ -33,7 +33,7 @@ echo "make -C $CA_DIR/$VGA2USB_DIR reload" >> $STARTUP_SCRIPT
 echo "$CA_DIR/$CONFIG_SCRIPT" >> $STARTUP_SCRIPT
 # Starts matterhorn
 echo "su matterhorn -c \"exec /bin/bash ${FELIX_HOME}/bin/start_matterhorn.sh\" &" >> $STARTUP_SCRIPT
-
+echo "su matterhorn -l -c \"/bin/bash -i /opt/matterhorn/felix/bin/start_matterhorn.sh &\"" >> $STARTUP_SCRIPT
 echo "end script" >> $STARTUP_SCRIPT
 
 

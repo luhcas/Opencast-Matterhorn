@@ -79,7 +79,7 @@ sun-java5-jdk shared/accepted-sun-dlj-v1-1 boolean true
 EOF
 
 
-echo -n "Installing third party packages from Ubuntu repository, this may take some time... "
+echo "Installing third party packages from Ubuntu repository, this may take some time... "
 
 pkgs=( $PKG_LIST )
 # Check which required packages are already installed
@@ -109,8 +109,6 @@ echo "Done"
 export JAVA_HOME=$JAVA_PREFIX/`ls $JAVA_PREFIX | grep ^$JAVA_PATTERN$`
 export PKG_LIST=${noinst[@]}
 
-cd $CA_DIR
-
 # Setup felix
 echo -n "Downloading Felix... "
 while [[ true ]]; do 
@@ -120,9 +118,14 @@ while [[ true ]]; do
     # On success, uncompress the felix files in their location
     if [[ $? -eq 0 ]]; then
 	echo -n "Uncompressing... "
+	dir_name=$(tar tzf ${FELIX_FILENAME} | grep -m 1 '^.*$')
+	echo $dir_name
 	tar xzf ${FELIX_FILENAME}
 	if [[ $? -eq 0 ]]; then
-	    mkdir -p ${FELIX_HOME}/load
+	    rm -rf $FELIX_HOME
+	    mv ${dir_name%/} -T $FELIX_HOME
+	    mv $FELIX_FILENAME $CA_DIR
+	    #mkdir -p ${FELIX_HOME}/load
 	    echo "Done"
 	    break
 	fi
@@ -143,6 +146,9 @@ done
 
 # Setup jv4linfo
 if [[ ! -e "$JV4LINFO_PATH/$JV4LINFO_LIB" ]]; then
+    mkdir -p $JV4LINFO_DIR
+    cd $JV4LINFO_DIR
+
     echo -n "Installing jv4linfo... "
     if [[ ! -e "$JV4LINFO_JAR" ]]; then
 	wget -q $JV4LINFO_URL/$JV4LINFO_JAR
@@ -161,13 +167,11 @@ if [[ ! -e "$JV4LINFO_PATH/$JV4LINFO_LIB" ]]; then
     fi
     cp ../lib/$JV4LINFO_LIB $JV4LINFO_PATH
     
-    cd ../..
+    cd $WORKING_DIR
     echo "Done"
 else
     echo "libjv4linfo.so already installed"
 fi
-
-cd $WORKING_DIR
 
 # Setup ntdp
 echo 

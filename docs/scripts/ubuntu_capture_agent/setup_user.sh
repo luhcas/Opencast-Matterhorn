@@ -28,7 +28,8 @@ if [[ $var -eq 0 ]]; then
 	    break
 	elif [[ $i -eq $MAX_PASSWD_ATTEMPTS ]]; then
 	    echo "Error. Too many password attempts. Aborting."
-	    return 1
+	    deluser $USERNAME --quiet --remove-home
+	    exit 1
 	fi
    done
 elif [[ $var -ne 9 ]]; then
@@ -39,7 +40,7 @@ fi
 # Setting up user's permissions by including it in the appropriate groups
 usermod -aG admin,video,audio $USERNAME
 
-# Exports the username, its home and the directory where the capture agent files will be stored
+# Exports the username, its home and other directories depending on them
 export USERNAME=$USERNAME
 export HOME=$(grep "^${USERNAME}:" /etc/passwd | cut -d: -f 6)
 if [[ -z "$HOME" ]]; then
@@ -47,13 +48,4 @@ if [[ -z "$HOME" ]]; then
     exit 1
 fi
 
-# Export some other env. variables depending on the locations just created
-export CA_DIR=$HOME/$CA_SUBDIR
-export SOURCE=$CA_DIR/$SRC_SUBDIR
-export FELIX_HOME=$CA_DIR/$FELIX_SUBDIR
-export CAPTURE_PROPS=${FELIX_HOME}/${FELIX_PROPS_SUFFIX}
-export GEN_PROPS=${FELIX_HOME}/${FELIX_GENCONF_SUFFIX}
 export M2_REPO=$HOME/$M2_SUFFIX
-
-# Create the directory where all the capture-agent-related files will be stored
-mkdir -p $CA_DIR

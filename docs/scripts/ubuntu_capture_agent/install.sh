@@ -1,72 +1,115 @@
 #!/bin/bash
 
-###################################################
-# Configure capture agent for use with Matterhorn #
-###################################################
+######################################
+# Configure Matterhorn Capture Agent #
+######################################
 
 # Variables section ####################################################################################################################
 
 # General variables
 
-MAX_PASSWD_ATTEMPTS=3                                       # Maximum number of attempts to stablish the matterhorn user password
-CA_SUBDIR=capture-agent                                     # Name for the directory where the matterhorn-related files will be stored
+# Maximum number of attempts to stablish the matterhorn user password
+MAX_PASSWD_ATTEMPTS=3
 
-export USERNAME=matterhorn                                  # Default name for the matterhorn user 
+# Default name for the matterhorn user 
+export USERNAME=matterhorn
+# Storage directory for the matterhorn-related files
+export OC_DIR=/opt/matterhorn
+# Name for the directory where the matterhorn-related files will be stored
+export CA_DIR=$OC_DIR/capture-agent
+# Directory where the source code will be downloaded to
+export SOURCE=$CA_DIR/matterhorn-source
 
-export START_PATH=$PWD                                      # Path from where this script is run initially
-export WORKING_DIR=/tmp/cainstallscript                     # Directory where this script will be run
+# Path from where this script is run initially
+export START_PATH=$PWD
+# Directory where this script will be run
+export WORKING_DIR=/tmp/cainstallscript
 
-export SVN_URL=http://opencast.jira.com/svn/MH              # Root for the source code repository
-export TRUNK_EXT=trunk                                      # Extension for the SVN_URL to reach the trunk
-export BRANCHES_EXT=branches                                # Extension for the SVN_URL to reach the branches
-export TAGS_EXT=tags                                        # Extension for the SVN_URL to reach the tags
-export SRC_SUBDIR=matterhorn-source                         # Subdir under the selected user $HOME directory
-export SRC_DEFAULT=$TRUNK_EXT                               # Default branch or tag (including trunk) from where scripts and java source will be dowloaded
+# Root for the source code repository
+export SVN_URL=http://opencast.jira.com/svn/MH
+# Extension for the SVN_URL to reach the trunk
+export TRUNK_EXT=trunk
+# Extension for the SVN_URL to reach the branches
+export BRANCHES_EXT=branches
+# Extension for the SVN_URL to reach the tags
+export TAGS_EXT=tags
+# Default branch or tag (including trunk) from where scripts and java source will be dowloaded
+export SRC_DEFAULT=$TRUNK_EXT
 
-export OC_DIR=/opt/matterhorn                               # Storage directory for the CA
-export DEV_RULES=/etc/udev/rules.d/matterhorn.rules         # File containing the rules to be applied by udev to the configured devices -- not a pun!
-export CONFIG_SCRIPT=device_config.sh                       # File name for the bash script under HOME containing the device configuration routine
-export DEFAULT_INGEST_URL=http://localhost:8080             # Default value for the core url
-export VGA2USB_DIR=epiphan_driver                           # Subdirectory under HOME where the epiphan driver will be downloaded to
-export SRC_LIST=/etc/apt/sources.list                       # Location of the file 'sources.list'
-export BKP_SUFFIX=backup                                    # Suffix to be appended to the backup file for sources.list
-export STARTUP_SCRIPT=/etc/init/matterhorn.conf             # Path of the script which is set up to configure and run felix upon startup
-export DEFAULT_MIRROR=http://archive.ubuntu.com/ubuntu      # URL of the default Ubuntu mirror where the packages will be downloaded from
-export DEFAULT_SECURITY=http://security.ubuntu.com/ubuntu   # URL of the default Ubuntu 'security' mirror
-export DEFAULT_PARTNER=http://archive.canonical.com/ubuntu  # URL of the default Ubuntu 'partner' mirror
+# File containing the rules to be applied by udev to the configured devices -- not a pun!
+export DEV_RULES=/etc/udev/rules.d/matterhorn.rules
+# File name for the bash script under HOME containing the device configuration routine
+export CONFIG_SCRIPT=device_config.sh
+# Default value for the core url
+export DEFAULT_INGEST_URL=http://localhost:8080
+# Subdirectory under HOME where the epiphan driver will be downloaded to
+export VGA2USB_DIR=epiphan_driver
+# Location of the file 'sources.list'
+export SRC_LIST=/etc/apt/sources.list
+# Suffix to be appended to the backup file for sources.list
+export BKP_SUFFIX=backup
+# Path of the script which is set up to configure and run felix upon startup
+export STARTUP_SCRIPT=/etc/init/matterhorn.conf
+# URL of the default Ubuntu mirror where the packages will be downloaded from
+export DEFAULT_MIRROR=http://archive.ubuntu.com/ubuntu
+# URL of the default Ubuntu 'security' mirror
+export DEFAULT_SECURITY=http://security.ubuntu.com/ubuntu
+# URL of the default Ubuntu 'partner' mirror
+export DEFAULT_PARTNER=http://archive.canonical.com/ubuntu
 
-export INSTALL_RUN=true                                     # The subsidiary scripts will check for this variable to check they are being run from here
+# The subsidiary scripts will check for this variable to check they are being run from here
+export INSTALL_RUN=true
 
 
 # Third-party dependencies variables
 export PKG_LIST="alsa-utils v4l-conf ivtv-utils curl maven2 sun-java6-jdk subversion wget openssh-server gcc gstreamer0.10-alsa gstreamer0.10-plugins-bad gstreamer0.10-plugins-bad-multiverse gstreamer0.10-plugins-base gstreamer0.10-plugins-good gstreamer0.10-plugins-ugly gstreamer0.10-plugins-ugly-multiverse gstreamer0.10-ffmpeg ntp acpid"
 
-export DEFAULT_FLAVOR=0                                                  # 0-based index default option for the device flavor
+# 0-based index default option for the device flavor
+export DEFAULT_FLAVOR=0
+# Lists of flavors the user can choose from to assign to a certain device
 export FLAVORS="presenter/source presentation/source audience/source indefinite/source"
-                                                                         # Lists of flavors the user can choose from to assign to a certain device
 
-export EPIPHAN_URL=http://www.epiphan.com/downloads/linux                # URL to download the epiphan driver
-                                                                         # List of required packages
+# URL to download the epiphan driver
+export EPIPHAN_URL=http://www.epiphan.com/downloads/linux
+
+# Name of the file containing the felix files
 export FELIX_FILENAME=org.apache.felix.main.distribution-2.0.4.tar.gz
+# URL where the previous file can be fetched
 export FELIX_URL=http://archive.apache.org/dist/felix/$FELIX_FILENAME
-export FELIX_SUBDIR=felix-framework-2.0.4                                # Subdir under the user home where FELIX_HOME is
-export FELIX_GENCONF_SUFFIX=conf/config.properties                       # Path under FELIX_HOME where the general matterhorn configuration
-export FELIX_PROPS_SUFFIX=conf/services/org.opencastproject.capture.impl.ConfigurationManager.properties
-                                                                         # Path under FELIX_HOME where the capture agent properties are
-export JAVA_PREFIX=/usr/lib/jvm                                          # Path to where the installed jvm's are
-export JAVA_PATTERN=java-6-sun                                           # A regexp to filter the right jvm directory from among all the installed ones
-                                                                         # The chosen JAVA_HOME will be $JAVA_PREFIX/`ls $JAVA_PREFIX | grep $JAVA_PATTERN`
+# Subdir under the user home where FELIX_HOME is
+export FELIX_HOME=$OC_DIR/felix
+# Path under FELIX_HOME where the general matterhorn configuration
+export GEN_PROPS=$FELIX_HOME/conf/config.properties
+# Path under FELIX_HOME where the capture agent properties are
+export CAPTURE_PROPS=$FELIX_HOME/conf/services/org.opencastproject.capture.impl.ConfigurationManager.properties
+# Directory UNDER FELIX HOME where the felix filex will be deployed
+export DEPLOY_DIR=load/matterhorn
 
-export M2_SUFFIX=.m2/repository                                          # Path to the maven2 repository, under the user home
+# Path to where the installed jvm's are
+export JAVA_PREFIX=/usr/lib/jvm
+# A regexp to filter the right jvm directory from among all the installed ones
+# The chosen JAVA_HOME will be $JAVA_PREFIX/`ls $JAVA_PREFIX | grep $JAVA_PATTERN`
+export JAVA_PATTERN=java-6-sun                                           
+                                                                         
+# Path to the maven2 repository, under the user home
+export M2_SUFFIX=.m2/repository
 
-export DEFAULT_NTP_SERVER=ntp.ubuntu.com                                 # Default ntp server
-export NTP_CONF=/etc/ntp.conf                                            # Location for the ntp configuration files
+# Default ntp server
+export DEFAULT_NTP_SERVER=ntp.ubuntu.com
+# Location for the ntp configuration files
+export NTP_CONF=/etc/ntp.conf
 
-export JV4LINFO_URL=http://luniks.net/luniksnet/download/java/jv4linfo   # Location of the jv4linfo jar
-export JV4LINFO_JAR=jv4linfo-0.2.1-src.jar                               # Name of the jv4linfo file
-export JV4LINFO_LIB=libjv4linfo.so                                       # Shared object required by the jv4linfo jar to function
-export JV4LINFO_PATH=/usr/lib                                            # Location where the shared object will be copied so that jvm can find it
-                                                                         # In other words, it must be in the java.library.path
+# Location of the jv4linfo jar
+export JV4LINFO_URL=http://luniks.net/luniksnet/download/java/jv4linfo
+# Name of the jv4linfo file
+export JV4LINFO_JAR=jv4linfo-0.2.1-src.jar
+# Shared object required by the jv4linfo jar to function
+export JV4LINFO_LIB=libjv4linfo.so
+# Directory where the shared object will be copied so that jvm can find it. In other words, it must be in the java.library.path
+export JV4LINFO_PATH=/usr/lib
+# Directory where the jv4linfo-related files are stored
+export JV4LINFO_DIR=$CA_DIR/jv4linfo
+                                                                         
 
 # Required scripts for installation
 SETUP_USER=./setup_user.sh
@@ -130,6 +173,9 @@ done
 # Choose/create the matterhorn user (WARNING: The initial perdiod (.) MUST be there so that the script can export several variables)
 . ${SETUP_USER}
 
+# Create the directory where all the capture-agent-related files will be stored
+mkdir -p $CA_DIR
+
 # Install the 3rd party dependencies (WARNING: The initial perdiod (.) MUST be there so that the script can export several variables)
 . ${INSTALL_DEPENDENCIES}
 if [[ "$?" -ne 0 ]]; then
@@ -170,7 +216,7 @@ echo -e "\n\nProceeding to build the capture agent source. This may take a long 
 read -n 1 -s
 
 cd $SOURCE
-su matterhorn -c "mvn clean install -Pcapture -DdeployTo=\${FELIX_HOME}/load/bundles"
+su matterhorn -c "mvn clean install -Pcapture -DdeployTo=\${FELIX_HOME}/${DEPLOY_DIR}"
 if [[ "$?" -ne 0 ]]; then
     echo -e "\nError building the matterhorn code. Contact matterhorn@opencastproject.org for assistance."
     exit 1
