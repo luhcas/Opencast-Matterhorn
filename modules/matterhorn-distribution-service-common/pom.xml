@@ -4,6 +4,11 @@
   <groupId>org.opencastproject</groupId>
   <artifactId>matterhorn-distribution-service-common</artifactId>
   
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+  
   <!--
   Note that this is not an OSGI bundle.
   
