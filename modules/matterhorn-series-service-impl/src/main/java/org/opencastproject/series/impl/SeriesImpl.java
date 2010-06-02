@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  */
  
 @Entity
-@Table(name="Series")
+@Table(name="SeriesImpl")
 public class SeriesImpl implements Series {
   private static final Logger logger = LoggerFactory.getLogger(SeriesImpl.class);
   
@@ -105,6 +105,12 @@ public class SeriesImpl implements Series {
     }
   }
   
+  private String getFromMetadata (String key) {
+    for (SeriesMetadata m: getMetadata()) 
+      if (m.getKey().equals(key)) return m.getValue();
+    return null;
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.series.api.Series#generateSeriesId()
@@ -132,8 +138,10 @@ public class SeriesImpl implements Series {
    */
   public void setMetadata (List<SeriesMetadata> metadata) {
     LinkedList<SeriesMetadataImpl> list = new LinkedList<SeriesMetadataImpl>();
-    for (SeriesMetadata m : metadata) 
+    for (SeriesMetadata m : metadata) {
+      m.setSeries(this);
       list.add((SeriesMetadataImpl)m);
+    }
     this.metadata = list;
     dublinCore = null;
   }
@@ -216,5 +224,16 @@ public class SeriesImpl implements Series {
     }
     
     return dc;
+  }
+
+  @Override
+  public String getDescription() {
+    String result = getFromMetadata("title") +" - "+getFromMetadata("creator")+" ("+getFromMetadata("temporal")+")";
+    return result;
+  }
+
+  @Override
+  public int compareTo(Series o) {
+    return getDescription().compareTo(o.getDescription());
   }
 }

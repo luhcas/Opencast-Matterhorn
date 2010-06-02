@@ -15,7 +15,10 @@
  */
 package org.opencastproject.series.impl;
 
+import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +30,7 @@ import javax.persistence.spi.PersistenceProvider;
 
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.series.api.Series;
+import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.api.SeriesService;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -87,7 +91,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
 
   protected Series makeIdUnique (Series series) {
     EntityManager em = emf.createEntityManager();
-    if (series.getSeriesId() == null) series.generateSeriesId();
+    if (series.getSeriesId() == null || series.getSeriesId().length() == 0) series.generateSeriesId();
     try {
       Series found = em.find(SeriesImpl.class, series.getSeriesId());
       while (found != null) {
@@ -240,8 +244,32 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
 
   @Override
   public List<Series> searchSeries(String pattern) {
-    // TODO Auto-generated method stub
-    return null;
+    EntityManager em = emf.createEntityManager();
+    List<SeriesMetadataImpl> found = null;
+    try {
+      Query query = em.createQuery("SELECT o FROM SeriesMetadataImpl o WHERE o.value LIKE :keyword");
+      query.setParameter("keyword", "%"+pattern+"%");
+      found = (List<SeriesMetadataImpl>) query.getResultList();
+      logger.debug("Found {} values containing {}.", found.size(), pattern);
+    } catch (Exception e) {
+      logger.warn("Could not search for pattern {}: {} ",pattern, e.getMessage());
+      return null;
+    } finally {
+      em.close();
+    } 
+    
+    HashSet<Series> series = new HashSet<Series>(); 
+    for (SeriesMetadata m : found) {
+      series.add(m.getSeries());
+    }
+    
+    LinkedList<Series> result = new LinkedList<Series>(series);
+    
+    Collections.sort(result);
+    
+    return result;
+    
+    
   }
 
 }

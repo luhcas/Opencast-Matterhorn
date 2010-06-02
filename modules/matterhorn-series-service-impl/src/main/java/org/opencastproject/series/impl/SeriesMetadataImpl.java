@@ -20,13 +20,15 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 
 
-@Entity(name="SeriesMetadata")
-@Table(name="SeriesMetadata")
+@Entity(name="SeriesMetadataImpl")
+@Table(name="SeriesMetadataImpl")
 public class SeriesMetadataImpl implements SeriesMetadata {
   @Id
   @GeneratedValue
@@ -37,6 +39,18 @@ public class SeriesMetadataImpl implements SeriesMetadata {
   @Column(name="value")
   protected String value;
   
+  @ManyToOne
+  protected SeriesImpl series;
+  
+  public SeriesImpl getSeries() {
+    return series;
+  }
+
+  public void setSeries(Series series) {
+    if (series instanceof SeriesImpl)
+      this.series = (SeriesImpl) series;
+  }
+
   public SeriesMetadataImpl () {
     super();
   }

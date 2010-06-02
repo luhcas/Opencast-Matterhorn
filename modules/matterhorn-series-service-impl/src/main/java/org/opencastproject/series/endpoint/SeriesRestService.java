@@ -34,8 +34,8 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -127,10 +127,15 @@ public class SeriesRestService {
     try {
       List<Series> list = service.searchSeries(pattern);
       if (list == null) return Response.status(Status.BAD_REQUEST).build();
-      String jsonList = null;
-      jsonList = JSONValue.toJSONString(list);
+      JSONArray a = new JSONArray();
+      for (Series s : list) {
+        JSONObject j = new JSONObject();
+        j.put("description", s.getDescription());
+        j.put("id", s.getSeriesId());
+        a.add(j);
+      }
       //TODO convert result to JSON
-      return Response.ok(jsonList).build();  
+      return Response.ok(a.toJSONString()).build();  
     } catch (Exception e) {
       logger.warn("search for series failed. Pattern: {}", pattern);
       return Response.status(Status.SERVICE_UNAVAILABLE).build();
@@ -190,7 +195,7 @@ public class SeriesRestService {
       return Response.status(Status.BAD_REQUEST).build();
     }   
     boolean result = service.addSeries(series);
-    logger.info("Adding event {} to scheduler",series.getSeriesId());
+    logger.info("Adding series {} ",series.getSeriesId());
     JSONObject j = new JSONObject();
     j.put("success", result);
     j.put("id", series.getSeriesId());
