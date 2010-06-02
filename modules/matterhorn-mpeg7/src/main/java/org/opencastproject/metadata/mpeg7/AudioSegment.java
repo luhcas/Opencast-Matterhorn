@@ -45,7 +45,7 @@ package org.opencastproject.metadata.mpeg7;
  * &lt;/complexType&gt;
  * </pre>
  */
-public interface AudioSegment extends ContentSegment {
+public interface AudioSegment extends Segment {
 
   // Marker interface only
 

@@ -80,7 +80,7 @@ public class Mpeg7Parser extends DefaultHandler {
   private TemporalDecomposition<?> temporalDecomposition = null;
 
   /** The temporal segment */
-  private ContentSegment segment = null;
+  private Segment segment = null;
 
   /** The text annoation */
   private TextAnnotation textAnnotation = null;

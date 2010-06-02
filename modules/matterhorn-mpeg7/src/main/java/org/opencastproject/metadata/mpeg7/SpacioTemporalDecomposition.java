@@ -18,19 +18,12 @@ package org.opencastproject.metadata.mpeg7;
 
 import org.opencastproject.media.mediapackage.XmlElement;
 
-import java.util.Iterator;
+import java.awt.Rectangle;
 
 /**
- * This interface describes that basis for a temporal decomposition of an audio, video or audiovisual content element.
+ * Decomposition type for space and time.
  */
-public interface TemporalDecomposition<T extends Segment> extends XmlElement {
-
-  /**
-   * Criteria of decomposition.
-   */
-  enum DecompositionCriteria {
-    Temporal
-  };
+public interface SpacioTemporalDecomposition extends XmlElement {
 
   /**
    * Set the <code>hasGap</code> property indicating that there may be gaps in between the segments.
@@ -63,50 +56,25 @@ public interface TemporalDecomposition<T extends Segment> extends XmlElement {
   boolean isOverlapping();
 
   /**
-   * Sets the decomposition criteria.
+   * Adds the specified text as a <code>VideoText</code> element to the decomposition.
    * 
-   * @param criteria
-   *          the criteria
+   * @param text
+   *          the text
+   * @param boundary
+   *          the text's bounding box
+   * @param time
+   *          the time and duration
+   * 
+   * @return the new video text element
    */
-  void setCriteria(DecompositionCriteria criteria);
+  VideoText addVideoText(Textual text, Rectangle boundary, MediaTime time);
 
   /**
-   * Returns the decomposition criteria.
+   * Adds the <code>VideoText</code> element to the decomposition.
    * 
-   * @return the criteria
+   * @param videoText
+   *          the video text
    */
-  DecompositionCriteria getCriteria();
-
-  /**
-   * Creates a new segment and returns it.
-   * 
-   * @param id
-   *          the segment identifier
-   * @return the new segment
-   */
-  T createSegment(String id);
-
-  /**
-   * Returns <code>true</code> if the composition actually contains segments.
-   * 
-   * @return <code>true</code> if there are segments
-   */
-  boolean hasSegments();
-
-  /**
-   * Returns an iteration of the video's segments.
-   * 
-   * @return the video segments
-   */
-  Iterator<T> segments();
-
-  /**
-   * Returns the segment with the given identifier or <code>null</code> if the segment does not exist.
-   * 
-   * @param segmentId
-   *          the segment identifier
-   * @return the segment
-   */
-  T getSegmentById(String segmentId);
+  void addVideoText(VideoText videoText);
 
 }

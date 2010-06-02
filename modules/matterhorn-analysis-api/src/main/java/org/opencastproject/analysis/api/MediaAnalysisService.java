@@ -39,7 +39,9 @@ public interface MediaAnalysisService {
 
   /**
    * Gets the receipt with this identifier
-   * @param id The ID of the receipt
+   * 
+   * @param id
+   *          The ID of the receipt
    * @return The receipt, or null if none is found.
    */
   Receipt getReceipt(String id);
@@ -64,6 +66,7 @@ public interface MediaAnalysisService {
 
   /**
    * Returns the type of analysis this service performs.
+   * 
    * @return The media analysis type
    */
   String getAnalysisType();

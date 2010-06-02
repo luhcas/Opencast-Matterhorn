@@ -23,7 +23,7 @@ import org.w3c.dom.Node;
 /**
  * TODO: Comment me!
  */
-public class MultimediaContentTypeImpl<S extends ContentSegment> implements MultimediaContentType, Audio, Video,
+public class MultimediaContentTypeImpl<S extends Segment> implements MultimediaContentType, Audio, Video,
         AudioVisual {
 
   /** The content type */
@@ -84,11 +84,11 @@ public class MultimediaContentTypeImpl<S extends ContentSegment> implements Mult
    */
   private TemporalDecomposition<S> createTemporalDecomposition(MultimediaContentType.Type contentType) {
     if (type.equals(MultimediaContentType.Type.AudioVisual))
-      return new TemporalDecompositionImpl<S>(ContentSegment.Type.AudioVisualSegment);
+      return new TemporalDecompositionImpl<S>(Segment.Type.AudioVisualSegment);
     else if (type.equals(MultimediaContentType.Type.Audio))
-      return new TemporalDecompositionImpl<S>(ContentSegment.Type.AudioSegment);
+      return new TemporalDecompositionImpl<S>(Segment.Type.AudioSegment);
     else if (type.equals(MultimediaContentType.Type.Video))
-      return new TemporalDecompositionImpl<S>(ContentSegment.Type.VideoSegment);
+      return new TemporalDecompositionImpl<S>(Segment.Type.VideoSegment);
     throw new IllegalStateException("Unknown multimedia content type detected: " + contentType.toString());
   }
 

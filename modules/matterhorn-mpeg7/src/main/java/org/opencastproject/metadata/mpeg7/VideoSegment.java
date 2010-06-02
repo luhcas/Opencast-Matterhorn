@@ -48,8 +48,13 @@ package org.opencastproject.metadata.mpeg7;
  * &lt;/complexType&gt;
  * </pre>
  */
-public interface VideoSegment extends ContentSegment {
+public interface VideoSegment extends Segment {
 
-  // Marker interface only
+  /**
+   * Returns the segment's spacio temporal decomposition.
+   * 
+   * @return the decomposition
+   */
+  SpacioTemporalDecomposition getSpacioTemporalDecomposition();
 
 }

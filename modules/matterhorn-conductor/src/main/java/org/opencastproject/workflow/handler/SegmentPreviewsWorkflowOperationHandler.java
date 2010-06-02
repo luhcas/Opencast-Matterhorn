@@ -29,7 +29,7 @@ import org.opencastproject.media.mediapackage.MediaPackageReference;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.metadata.mpeg7.ContentSegment;
+import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.MediaTimePoint;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
@@ -236,7 +236,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
         }
 
         Video videoContent = mpeg7.videoContent().next();
-        TemporalDecomposition<? extends ContentSegment> decomposition = videoContent.getTemporalDecomposition();
+        TemporalDecomposition<? extends Segment> decomposition = videoContent.getTemporalDecomposition();
 
         // Are there any segments?
         if (decomposition == null || !decomposition.hasSegments()) {
@@ -250,10 +250,10 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
         // Create the preview images according to the mpeg7 segments
         if (t.hasVideo() && mpeg7 != null) {
 
-          Iterator<? extends ContentSegment> segmentIterator = decomposition.segments();
+          Iterator<? extends Segment> segmentIterator = decomposition.segments();
 
           while (segmentIterator.hasNext()) {
-            ContentSegment segment = segmentIterator.next();
+            Segment segment = segmentIterator.next();
             MediaTimePoint tp = segment.getMediaTime().getMediaTimePoint();
 
             // Choose a time

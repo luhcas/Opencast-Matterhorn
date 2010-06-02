@@ -25,9 +25,9 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * TODO: Comment me!
+ * Default implementation of the temporal decomposition.
  */
-public class TemporalDecompositionImpl<T extends ContentSegment> implements TemporalDecomposition<T> {
+public class TemporalDecompositionImpl<T extends Segment> implements TemporalDecomposition<T> {
 
   /** <code>True</code> if there is a gap */
   protected boolean gap = false;
@@ -48,7 +48,7 @@ public class TemporalDecompositionImpl<T extends ContentSegment> implements Temp
   boolean isOverlapping = false;
 
   /** The segment type */
-  private ContentSegment.Type segmentType = null;
+  private Segment.Type segmentType = null;
 
   /**
    * Creates a new temporal decomposition container.
@@ -56,7 +56,7 @@ public class TemporalDecompositionImpl<T extends ContentSegment> implements Temp
    * @param segmentType
    *          the segment type
    */
-  public TemporalDecompositionImpl(ContentSegment.Type segmentType) {
+  public TemporalDecompositionImpl(Segment.Type segmentType) {
     segments = new ArrayList<T>();
     this.segmentType = segmentType;
   }
@@ -77,7 +77,7 @@ public class TemporalDecompositionImpl<T extends ContentSegment> implements Temp
 
   @SuppressWarnings("unchecked")
   public T createSegment(String id) {
-    T segment = (T) new ContentSegmentImpl(segmentType, id);
+    T segment = (T) new SegmentImpl(segmentType, id);
     if (segments.contains(segment))
       throw new IllegalArgumentException("Duplicate segment id detected: " + id);
     segments.add(segment);
@@ -147,7 +147,7 @@ public class TemporalDecompositionImpl<T extends ContentSegment> implements Temp
     node.setAttribute("gap", (gap ? "true" : "false"));
     node.setAttribute("overlap", (overlap ? "true" : "false"));
     node.setAttribute("criteria", criteria.toString().toLowerCase());
-    for (ContentSegment segment : segments) {
+    for (Segment segment : segments) {
       node.appendChild(segment.toXml(document));
     }
     return node;

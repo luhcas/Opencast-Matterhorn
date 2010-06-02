@@ -73,6 +73,6 @@ public interface MultimediaContentType extends XmlElement {
    * 
    * @return the temporal decomposition
    */
-  TemporalDecomposition<? extends ContentSegment> getTemporalDecomposition();
+  TemporalDecomposition<? extends Segment> getTemporalDecomposition();
 
 }

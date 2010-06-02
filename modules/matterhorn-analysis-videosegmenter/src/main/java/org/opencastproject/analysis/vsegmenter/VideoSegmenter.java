@@ -31,7 +31,7 @@ import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReference;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.metadata.mpeg7.ContentSegment;
+import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.MediaLocator;
 import org.opencastproject.metadata.mpeg7.MediaLocatorImpl;
 import org.opencastproject.metadata.mpeg7.MediaRelTimeImpl;
@@ -369,7 +369,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
           processor.setRate(1.0f);
           processor.start();
           dsh.start();
-          List<ContentSegment> segments = segment(videoContent, dsh);
+          List<Segment> segments = segment(videoContent, dsh);
 
           logger.info("Segmentation of {} yields {} segments", mediaUrl, segments.size());
 
@@ -467,8 +467,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
    * @throws MediaAnalysisException
    *           if segmentation of the video fails
    */
-  protected List<ContentSegment> segment(Video video, FrameGrabber dsh) throws IOException, MediaAnalysisException {
-    List<ContentSegment> segments = new ArrayList<ContentSegment>();
+  protected List<Segment> segment(Video video, FrameGrabber dsh) throws IOException, MediaAnalysisException {
+    List<Segment> segments = new ArrayList<Segment>();
 
     int t = 1;
     int lastStableImageTime = 0;
@@ -481,7 +481,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
     BufferedImage lastStableImage = null;
     BlockingQueue<Buffer> bufferQueue = new ArrayBlockingQueue<Buffer>(STABILITY_THRESHOLD + 1);
     long durationInSeconds = video.getMediaTime().getMediaDuration().getDurationInMilliseconds() / 1000;
-    ContentSegment contentSegment = video.getTemporalDecomposition().createSegment("segment-" + segmentCount);
+    Segment contentSegment = video.getTemporalDecomposition().createSegment("segment-" + segmentCount);
     ImageComparator icomp = new ImageComparator(CHANGES_THRESHOLD);
     
 //    icomp.setStatistics(true);

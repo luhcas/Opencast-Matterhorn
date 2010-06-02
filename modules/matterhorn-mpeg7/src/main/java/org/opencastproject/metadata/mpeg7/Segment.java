@@ -25,51 +25,51 @@ import java.util.Iterator;
  * annotations attached to it.
  * 
  * <pre>
- * &lt;complexType name=&quot;SegmentType&quot; abstract=&quot;true&quot;&gt;
+ * &lt;complexType name="SegmentType" abstract="true"&gt;
  *   &lt;complexContent&gt;
- *       &lt;extension base=&quot;mpeg7:DSType&quot;&gt;
+ *       &lt;extension base="mpeg7:DSType"&gt;
  *           &lt;sequence&gt;
- *               &lt;choice minOccurs=&quot;0&quot;&gt;
- *                   &lt;element name=&quot;MediaInformation&quot; type=&quot;mpeg7:MediaInformationType&quot;/&gt;
- *                   &lt;element name=&quot;MediaInformationRef&quot; type=&quot;mpeg7:ReferenceType&quot;/&gt;
- *                   &lt;element name=&quot;MediaLocator&quot; type=&quot;mpeg7:MediaLocatorType&quot;/&gt;
+ *               &lt;choice minOccurs="0"&gt;
+ *                   &lt;element name="MediaInformation" type="mpeg7:MediaInformationType"/&gt;
+ *                   &lt;element name="MediaInformationRef" type="mpeg7:ReferenceType"/&gt;
+ *                   &lt;element name="MediaLocator" type="mpeg7:MediaLocatorType"/&gt;
  *               &lt;/choice&gt;
- *               &lt;element name=&quot;StructuralUnit&quot; type=&quot;mpeg7:ControlledTermUseType&quot; minOccurs=&quot;0&quot;/&gt;
- *               &lt;choice minOccurs=&quot;0&quot;&gt;
- *                   &lt;element name=&quot;CreationInformation&quot; type=&quot;mpeg7:CreationInformationType&quot;/&gt;
- *                   &lt;element name=&quot;CreationInformationRef&quot; type=&quot;mpeg7:ReferenceType&quot;/&gt;
+ *               &lt;element name="StructuralUnit" type="mpeg7:ControlledTermUseType" minOccurs="0"/&gt;
+ *               &lt;choice minOccurs="0"&gt;
+ *                   &lt;element name="CreationInformation" type="mpeg7:CreationInformationType"/&gt;
+ *                   &lt;element name="CreationInformationRef" type="mpeg7:ReferenceType"/&gt;
  *               &lt;/choice&gt;
- *               &lt;choice minOccurs=&quot;0&quot;&gt;
- *                   &lt;element name=&quot;UsageInformation&quot; type=&quot;mpeg7:UsageInformationType&quot;/&gt;
- *                   &lt;element name=&quot;UsageInformationRef&quot; type=&quot;mpeg7:ReferenceType&quot;/&gt;
+ *               &lt;choice minOccurs="0"&gt;
+ *                   &lt;element name="UsageInformation" type="mpeg7:UsageInformationType"/&gt;
+ *                   &lt;element name="UsageInformationRef" type="mpeg7:ReferenceType"/&gt;
  *               &lt;/choice&gt;
- *               &lt;element name=&quot;TextAnnotation&quot; minOccurs=&quot;0&quot; maxOccurs=&quot;unbounded&quot;&gt;
+ *               &lt;element name="TextAnnotation" minOccurs="0" maxOccurs="unbounded"&gt;
  *                   &lt;complexType&gt;
  *                       &lt;complexContent&gt;
- *                           &lt;extension base=&quot;mpeg7:TextAnnotationType&quot;&gt;
- *                               &lt;attribute name=&quot;type&quot; use=&quot;optional&quot;&gt;
+ *                           &lt;extension base="mpeg7:TextAnnotationType"&gt;
+ *                               &lt;attribute name="type" use="optional"&gt;
  *                                   &lt;simpleType&gt;
- *                                       &lt;union memberTypes=&quot;mpeg7:termReferenceType string&quot;/&gt;
+ *                                       &lt;union memberTypes="mpeg7:termReferenceType string"/&gt;
  *                                   &lt;/simpleType&gt;
  *                               &lt;/attribute&gt;
  *                           &lt;/extension&gt;
  *                       &lt;/complexContent&gt;
  *                   &lt;/complexType&gt;
  *               &lt;/element&gt;
- *               &lt;choice minOccurs=&quot;0&quot; maxOccurs=&quot;unbounded&quot;&gt;
- *                   &lt;element name=&quot;Semantic&quot; type=&quot;mpeg7:SemanticType&quot;/&gt;
- *                   &lt;element name=&quot;SemanticRef&quot; type=&quot;mpeg7:ReferenceType&quot;/&gt;
+ *               &lt;choice minOccurs="0" maxOccurs="unbounded"&gt;
+ *                   &lt;element name="Semantic" type="mpeg7:SemanticType"/&gt;
+ *                   &lt;element name="SemanticRef" type="mpeg7:ReferenceType"/&gt;
  *               &lt;/choice&gt;
- *               &lt;element name=&quot;MatchingHint&quot; type=&quot;mpeg7:MatchingHintType&quot; minOccurs=&quot;0&quot; maxOccurs=&quot;unbounded&quot;/&gt;
- *               &lt;element name=&quot;PointOfView&quot; type=&quot;mpeg7:PointOfViewType&quot; minOccurs=&quot;0&quot; maxOccurs=&quot;unbounded&quot;/&gt;
- *               &lt;element name=&quot;Relation&quot; type=&quot;mpeg7:RelationType&quot; minOccurs=&quot;0&quot; maxOccurs=&quot;unbounded&quot;/&gt;
+ *               &lt;element name="MatchingHint" type="mpeg7:MatchingHintType" minOccurs="0" maxOccurs="unbounded"/&gt;
+ *               &lt;element name="PointOfView" type="mpeg7:PointOfViewType" minOccurs="0" maxOccurs="unbounded"/&gt;
+ *               &lt;element name="Relation" type="mpeg7:RelationType" minOccurs="0" maxOccurs="unbounded"/&gt;
  *           &lt;/sequence&gt;
  *       &lt;/extension&gt;
  *   &lt;/complexContent&gt;
  * &lt;/complexType&gt;
  * </pre>
  */
-public interface ContentSegment extends XmlElement {
+public interface Segment extends XmlElement {
 
   /** The segment type */
   enum Type {

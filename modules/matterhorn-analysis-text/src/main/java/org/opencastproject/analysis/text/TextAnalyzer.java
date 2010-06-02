@@ -21,7 +21,13 @@ import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
+import org.opencastproject.metadata.mpeg7.AudioVisual;
+import org.opencastproject.metadata.mpeg7.MediaTime;
+import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
+import org.opencastproject.metadata.mpeg7.SpacioTemporalDecomposition;
+import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
+import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.ReceiptService;
@@ -121,16 +127,6 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   }
 
   /**
-   * Sets the receipt service
-   * 
-   * @param receiptService
-   *          the receipt service
-   */
-  public void setReceiptService(ReceiptService receiptService) {
-    this.receiptService = receiptService;
-  }
-
-  /**
    * Starts text extraction on the image and returns a receipt containing the final result in the form of a {@link
    * import org.opencastproject.metadata.mpeg7.Mpeg7Catalog}.
    * 
@@ -153,6 +149,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
     final URI imageUrl = attachment.getURI();
 
     Runnable command = new Runnable() {
+      @SuppressWarnings("unchecked")
       public void run() {
         receipt.setStatus(Status.RUNNING);
         rs.updateReceipt(receipt);
@@ -165,8 +162,19 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
 
           File imageFile = workspace.get(imageUrl);
           VideoText videoText = analyze(imageFile);
-
-          // mpeg7.addVideotext(videoText);
+          
+          // Create a temporal decomposition
+          MediaTime mediaTime = new MediaTimeImpl(0, 0);
+          AudioVisual avContent = mpeg7.addAudioVisualContent(element.getIdentifier(), mediaTime, null);
+          TemporalDecomposition<VideoSegment> temporalDecomposition = (TemporalDecomposition<VideoSegment>) avContent.getTemporalDecomposition();
+          
+          // Add a segment
+          VideoSegment videoSegment = temporalDecomposition.createSegment("segment-0");
+          videoSegment.setMediaTime(mediaTime);
+          
+          // Add the video text to the spacio temporal decomposition of the segment
+          SpacioTemporalDecomposition spacioTemporalDecomposition = videoSegment.getSpacioTemporalDecomposition();
+          spacioTemporalDecomposition.addVideoText(videoText);
 
           logger.info("Text extraction of {} finished", attachment.getURI());
 
@@ -263,6 +271,56 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
     VideoText videoText = null;
 
     return videoText;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.analysis.api.MediaAnalysisService#getAnalysisType()
+   */
+  @Override
+  public String getAnalysisType() {
+    return RECEIPT_TYPE;
+  }
+
+  /**
+   * Sets the receipt service
+   * 
+   * @param receiptService
+   *          the receipt service
+   */
+  public void setReceiptService(ReceiptService receiptService) {
+    this.receiptService = receiptService;
+  }
+
+  /**
+   * Sets the file repository
+   * 
+   * @param repository
+   *          an instance of the working file repository
+   */
+  public void setFileRepository(WorkingFileRepository repository) {
+    this.repository = repository;
+  }
+
+  /**
+   * Sets the workspace
+   * 
+   * @param workspace
+   *          an instance of the workspace
+   */
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
+  }
+
+  /**
+   * Sets the trusted http client which is used for authenticated service distribution.
+   * 
+   * @param trustedHttpClient
+   *          the trusted http client
+   */
+  public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
+    this.trustedHttpClient = trustedHttpClient;
   }
 
 }

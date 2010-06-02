@@ -24,7 +24,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.track.TrackImpl;
 import org.opencastproject.media.mediapackage.track.VideoStreamImpl;
-import org.opencastproject.metadata.mpeg7.ContentSegment;
+import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.metadata.mpeg7.MultimediaContentType;
@@ -157,10 +157,10 @@ public class VideoSegmenterTest {
     MultimediaContentType contentType = catalog.multimediaContent().next().elements().next();
 
     // Is there at least one segment?
-    TemporalDecomposition<? extends ContentSegment> segments = contentType.getTemporalDecomposition();
-    Iterator<? extends ContentSegment> si = segments.segments();
+    TemporalDecomposition<? extends Segment> segments = contentType.getTemporalDecomposition();
+    Iterator<? extends Segment> si = segments.segments();
     assertTrue(si.hasNext());
-    ContentSegment firstSegment = si.next();
+    Segment firstSegment = si.next();
     MediaTime firstSegmentMediaTime = firstSegment.getMediaTime();
     long startTime = firstSegmentMediaTime.getMediaTimePoint().getTimeInMilliseconds();
     long duration = firstSegmentMediaTime.getMediaDuration().getDurationInMilliseconds();
@@ -170,7 +170,7 @@ public class VideoSegmenterTest {
     // What about the second one?
     assertTrue("Video is expected to have more than one segment", si.hasNext());
 
-    ContentSegment secondSegment = si.next();
+    Segment secondSegment = si.next();
     MediaTime secondSegmentMediaTime = secondSegment.getMediaTime();
     startTime = secondSegmentMediaTime.getMediaTimePoint().getTimeInMilliseconds();
     duration = secondSegmentMediaTime.getMediaDuration().getDurationInMilliseconds();

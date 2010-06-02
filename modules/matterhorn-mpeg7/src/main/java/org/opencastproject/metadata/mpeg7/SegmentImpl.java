@@ -28,12 +28,12 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * TODO: Comment me!
+ * Default implementation of the <code>SegmentType</code>.
  */
-public class ContentSegmentImpl implements ContentSegment, AudioSegment, VideoSegment, AudioVisualSegment {
+public class SegmentImpl implements Segment, AudioSegment, VideoSegment, AudioVisualSegment {
 
   /** The content type */
-  protected ContentSegment.Type type = null;
+  protected Segment.Type type = null;
 
   /** The content element identifier */
   protected String id = null;
@@ -44,6 +44,9 @@ public class ContentSegmentImpl implements ContentSegment, AudioSegment, VideoSe
   /** The text annotations */
   protected List<TextAnnotation> annotations = null;
 
+  /** An optional spacio-temporal decomposition */
+  protected SpacioTemporalDecomposition spacioTemporalDecomposition = null;
+
   /**
    * Creates a new content segment.
    * 
@@ -52,56 +55,56 @@ public class ContentSegmentImpl implements ContentSegment, AudioSegment, VideoSe
    * @param id
    *          the segment identifier
    */
-  public ContentSegmentImpl(ContentSegment.Type type, String id) {
+  public SegmentImpl(Segment.Type type, String id) {
     this.type = type;
     this.id = id;
     annotations = new ArrayList<TextAnnotation>();
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.ContentSegment#getIdentifier()
+   * @see org.opencastproject.media.mediapackage.mpeg7.Segment#getIdentifier()
    */
   public String getIdentifier() {
     return id;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.ContentSegment#setMediaTime(org.opencastproject.media.mediapackage.mpeg7.MediaTime)
+   * @see org.opencastproject.media.mediapackage.mpeg7.Segment#setMediaTime(org.opencastproject.media.mediapackage.mpeg7.MediaTime)
    */
   public void setMediaTime(MediaTime mediaTime) {
     this.mediaTime = mediaTime;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.ContentSegment#getMediaTime()
+   * @see org.opencastproject.media.mediapackage.mpeg7.Segment#getMediaTime()
    */
   public MediaTime getMediaTime() {
     return mediaTime;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.ContentSegment#hasTextAnnotations()
+   * @see org.opencastproject.media.mediapackage.mpeg7.Segment#hasTextAnnotations()
    */
   public boolean hasTextAnnotations() {
     return annotations.size() > 0;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.ContentSegment#hasTextAnnotations(java.lang.String)
+   * @see org.opencastproject.media.mediapackage.mpeg7.Segment#hasTextAnnotations(java.lang.String)
    */
   public boolean hasTextAnnotations(String language) {
     return hasTextAnnotations(0.0f, 0.0f, language);
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.ContentSegment#hasTextAnnotations(float, float)
+   * @see org.opencastproject.media.mediapackage.mpeg7.Segment#hasTextAnnotations(float, float)
    */
   public boolean hasTextAnnotations(float relevance, float confidence) {
     return hasTextAnnotations(relevance, confidence, null);
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.ContentSegment#hasTextAnnotations(float, float, java.lang.String)
+   * @see org.opencastproject.media.mediapackage.mpeg7.Segment#hasTextAnnotations(float, float, java.lang.String)
    */
   public boolean hasTextAnnotations(float relevance, float confidence, String language) {
     for (TextAnnotation annotation : annotations) {
@@ -118,14 +121,14 @@ public class ContentSegmentImpl implements ContentSegment, AudioSegment, VideoSe
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.ContentSegment#getTextAnnotationCount()
+   * @see org.opencastproject.media.mediapackage.mpeg7.Segment#getTextAnnotationCount()
    */
   public int getTextAnnotationCount() {
     return annotations.size();
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.ContentSegment#textAnnotationsByConfidence()
+   * @see org.opencastproject.media.mediapackage.mpeg7.Segment#textAnnotationsByConfidence()
    */
   public Iterator<TextAnnotation> textAnnotationsByConfidence() {
     SortedSet<TextAnnotation> set = new TreeSet<TextAnnotation>(new Comparator<TextAnnotation>() {
@@ -142,7 +145,7 @@ public class ContentSegmentImpl implements ContentSegment, AudioSegment, VideoSe
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.ContentSegment#textAnnotationsByRelevance()
+   * @see org.opencastproject.media.mediapackage.mpeg7.Segment#textAnnotationsByRelevance()
    */
   public Iterator<TextAnnotation> textAnnotationsByRelevance() {
     SortedSet<TextAnnotation> set = new TreeSet<TextAnnotation>(new Comparator<TextAnnotation>() {
@@ -159,7 +162,7 @@ public class ContentSegmentImpl implements ContentSegment, AudioSegment, VideoSe
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.ContentSegment#createTextAnnotation(float, float, String)
+   * @see org.opencastproject.media.mediapackage.mpeg7.Segment#createTextAnnotation(float, float, String)
    */
   public TextAnnotation createTextAnnotation(float relevance, float confidence, String language) {
     TextAnnotationImpl annotation = new TextAnnotationImpl(relevance, confidence, language);
@@ -168,10 +171,44 @@ public class ContentSegmentImpl implements ContentSegment, AudioSegment, VideoSe
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.ContentSegment#textAnnotations()
+   * @see org.opencastproject.media.mediapackage.mpeg7.Segment#textAnnotations()
    */
   public Iterator<TextAnnotation> textAnnotations() {
     return annotations.iterator();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.metadata.mpeg7.AudioVisualSegment#createSpacioTemporalDecomposition()
+   */
+  @Override
+  public SpacioTemporalDecomposition createSpacioTemporalDecomposition(boolean gap, boolean overlap)
+          throws IllegalStateException {
+    if (spacioTemporalDecomposition != null)
+      throw new IllegalStateException("A spacio temporal decomposition has already been created");
+    spacioTemporalDecomposition = new SpacioTemporalDecompositionImpl(true, false);
+    return spacioTemporalDecomposition;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.metadata.mpeg7.AudioVisualSegment#getSpacioTemporalDecomposition()
+   */
+  @Override
+  public SpacioTemporalDecomposition getSpacioTemporalDecomposition() {
+    return spacioTemporalDecomposition;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.metadata.mpeg7.AudioVisualSegment#hasSpacioTemporalDecomposition()
+   */
+  @Override
+  public boolean hasSpacioTemporalDecomposition() {
+    return spacioTemporalDecomposition != null;
   }
 
   /**
@@ -187,8 +224,8 @@ public class ContentSegmentImpl implements ContentSegment, AudioSegment, VideoSe
    */
   @Override
   public boolean equals(Object obj) {
-    if (obj instanceof ContentSegment) {
-      return id.equals(((ContentSegment) obj).getIdentifier());
+    if (obj instanceof Segment) {
+      return id.equals(((Segment) obj).getIdentifier());
     }
     return super.equals(obj);
   }
