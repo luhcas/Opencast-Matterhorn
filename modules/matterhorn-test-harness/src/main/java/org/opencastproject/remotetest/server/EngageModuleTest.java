@@ -138,7 +138,7 @@ public class EngageModuleTest {
 
   @Test
   public void testJQuery() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/jquery/jquery-1.3.2.js");
+    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/jquery/jquery-1.4.2.min.js");
     HttpResponse response = client.execute(get);
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
@@ -157,7 +157,6 @@ public class EngageModuleTest {
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
 
-
   @Test
   public void testFABridge() throws Exception {
     HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/engage-hybrid-player/bridge/lib/FABridge.js");
@@ -172,10 +171,4 @@ public class EngageModuleTest {
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
   }
 
-  @Test
-  public void testJQueryCore() throws Exception {
-    HttpGet get = new HttpGet(ENGAGE_BASE_URL + "/jquery/ui/ui.core.js");
-    HttpResponse response = client.execute(get);
-    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-  }
 }
