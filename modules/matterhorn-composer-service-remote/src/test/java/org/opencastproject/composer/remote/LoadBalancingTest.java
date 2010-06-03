@@ -16,6 +16,7 @@
 package org.opencastproject.composer.remote;
 
 import org.opencastproject.composer.api.ComposerService;
+import org.opencastproject.remote.api.RemoteServiceUtil;
 import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.remote.impl.ReceiptImpl;
 import org.opencastproject.remote.impl.ReceiptServiceImpl;
@@ -29,9 +30,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class LoadBalancingTest {
@@ -117,7 +116,7 @@ public class LoadBalancingTest {
 
     // Host 1 has 1 running and one queued receipt.  Host 2 has 1 running and 1 finished receipt.
     // Host 3 has no running or queued receipts. so host 3 is the 'lightest'
-    Assert.assertEquals(HOST_3, service.getRemoteHosts().get(0));
+    Assert.assertEquals(HOST_3, RemoteServiceUtil.getRemoteHosts(receiptService, ComposerService.RECEIPT_TYPE).get(0));
     
     // Now let's load host 3 with some running and queued receipts
     ReceiptImpl host3Running1 = (ReceiptImpl)receiptService.createReceipt(ComposerService.RECEIPT_TYPE);
@@ -136,6 +135,6 @@ public class LoadBalancingTest {
     receiptService.updateReceipt(host3Queued);
     
     // Now that host3 is loaded, host 2 is the lightest, since it has only 1 running and no queued receipts
-    Assert.assertEquals(HOST_2, service.getRemoteHosts().get(0));
+    Assert.assertEquals(HOST_2, RemoteServiceUtil.getRemoteHosts(receiptService, ComposerService.RECEIPT_TYPE).get(0));
   }
 }

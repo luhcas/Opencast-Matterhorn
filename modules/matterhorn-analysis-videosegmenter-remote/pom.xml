@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>matterhorn-analysis-remote</artifactId>
+  <artifactId>matterhorn-analysis-videosegmenter-remote</artifactId>
   <packaging>bundle</packaging>
-  <name>matterhorn-analysis-remote</name>
+  <name>matterhorn-analysis-videosegmenter-remote</name>
   <version>0.9-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -18,6 +18,12 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-analysis-api</artifactId>
+      <version>0.9-SNAPSHOT</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-analysis-remote</artifactId>
       <version>0.9-SNAPSHOT</version>
     </dependency>
 
@@ -86,12 +92,14 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Export-Package>
-              org.opencastproject.analysis.remote
-            </Export-Package>
             <Import-Package>
+              org.opencastproject.analysis.api,
+              org.opencastproject.analysis.remote,
               *;resolution:=optional
             </Import-Package>
+            <Service-Component>
+              OSGI-INF/segmenter-remote.xml
+            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

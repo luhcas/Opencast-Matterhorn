@@ -101,7 +101,7 @@ public class MediaAnalysisRestEndpoint {
       MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
               .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
       Receipt receipt = service.analyze(element, false);
-      return Response.ok(receipt).build();
+      return Response.ok(receipt.toXml()).build();
     } catch (Exception e) {
       logger.warn(e.getMessage(), e);
       return Response.serverError().build();
@@ -115,9 +115,9 @@ public class MediaAnalysisRestEndpoint {
     MediaAnalysisService service = getMediaAnalysiService(analysisType);
     Receipt receipt = service.getReceipt(id);
     if (receipt == null) {
-      return Response.status(404).build();
+      return Response.status(Status.NOT_FOUND).type(MediaType.TEXT_HTML).build();
     } else {
-      return Response.ok(receipt).build();
+      return Response.ok(receipt.toXml()).build();
     }
   }
 

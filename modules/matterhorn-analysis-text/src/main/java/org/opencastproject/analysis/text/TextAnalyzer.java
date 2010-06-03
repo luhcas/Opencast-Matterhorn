@@ -95,6 +95,9 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   /** The executor service used to queue and run jobs */
   private ExecutorService executor;
 
+  /** This server's base URL */
+  private String serverUrl = null;
+  
   /**
    * Creates a new text analzer.
    */
@@ -116,8 +119,16 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
       throw new IllegalStateException("The text analyzer needs one or more threads to function.");
     }
     setExecutorThreads(threads);
+    
+    // register as a handler for "org.opencastproject.analysis.text" jobs
+    serverUrl = (String)cc.getBundleContext().getProperty("org.opencastproject.server.url");
+    receiptService.registerService(RECEIPT_TYPE, serverUrl);
   }
 
+  protected void deactivate() {
+    receiptService.unRegisterService(RECEIPT_TYPE, serverUrl);
+  }
+  
   /**
    * Separating this from the activate method so it's easier to test
    */

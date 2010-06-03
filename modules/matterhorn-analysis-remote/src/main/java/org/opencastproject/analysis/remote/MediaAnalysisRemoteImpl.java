@@ -118,6 +118,8 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
         if(receipt == null) {
           logger.warn("Unable to parse receipt, trying next remote server");
           continue;
+        } else {
+          break;
         }
       } catch (Exception e) {
         logger.warn("{} returned an invalid response, {}", remoteHostMethod, e);
@@ -145,7 +147,7 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
     Receipt r = getReceipt(id);
     while (r.getStatus() != Status.FAILED && r.getStatus() != Status.FINISHED) {
       try {
-        Thread.sleep(1000);
+        Thread.sleep(10000);
       } catch (InterruptedException e) {
         logger.warn("polling interrupted");
       }
@@ -174,8 +176,8 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
   public Receipt getReceipt(String id) {
     List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, analysisType);
     for(String remoteHost : remoteHosts) {
-      logger.info("Returning a Receipt(" + id + ") from a remote server: " + remoteHost);
-      String url = remoteHost + "/analyze/rest/" + analysisType + "/" + id + ".xml";
+      logger.debug("Returning a Receipt(" + id + ") from a remote server: " + remoteHost);
+      String url = remoteHost + "/analysis/rest/" + analysisType + "/" + id + ".xml";
       HttpGet get = new HttpGet(url);
       HttpResponse response = trustedHttpClient.execute(get);
       StatusLine statusLine = response.getStatusLine();

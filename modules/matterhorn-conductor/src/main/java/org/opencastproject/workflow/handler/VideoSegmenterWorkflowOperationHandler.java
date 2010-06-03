@@ -16,12 +16,14 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.analysis.api.MediaAnalysisService;
+import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
+import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -76,6 +78,17 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
   /** The composer service */
   private MediaAnalysisService videosegmenter = null;
 
+  /** The trusted http client, used to load mpeg7 catalogs */
+  private TrustedHttpClient trustedHttpClient = null;
+
+  /**
+   * Sets the http client
+   * @param trustedHttpClient
+   */
+  protected void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
+    this.trustedHttpClient = trustedHttpClient;
+  }
+
   /**
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
@@ -123,13 +136,14 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
     Track track = candidates.get(0);
     
     // Segment the media package
-    Mpeg7Catalog mpeg7 = null;
+    Mpeg7CatalogImpl mpeg7 = null;
     try {
       Receipt receipt = videosegmenter.analyze(track, true);
       if (receipt.getStatus().equals(Receipt.Status.FAILED)) {
         throw new WorkflowOperationException("Videosegmentation on " + track + " failed");
       }
-      mpeg7 = (Mpeg7Catalog)receipt.getElement();
+      mpeg7 = new Mpeg7CatalogImpl((Catalog)receipt.getElement());
+      mpeg7.setTrustedHttpClient(trustedHttpClient);
       mediaPackage.add(mpeg7);
     } catch (Exception e) {
       throw new WorkflowOperationException(e);

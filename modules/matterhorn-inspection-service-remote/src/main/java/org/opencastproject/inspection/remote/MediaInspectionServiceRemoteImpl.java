@@ -176,7 +176,7 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
   public Receipt getReceipt(String id) {
     List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, RECEIPT_TYPE);
     for(String remoteHost : remoteHosts) {
-      logger.info("Returning a Receipt(" + id + ") from a remote server: " + remoteHost);
+      logger.debug("Returning a Receipt(" + id + ") from a remote server: " + remoteHost);
       String url = remoteHost + "/inspection/rest/receipt/" + id + ".xml";
       HttpGet get = new HttpGet(url);
       try {

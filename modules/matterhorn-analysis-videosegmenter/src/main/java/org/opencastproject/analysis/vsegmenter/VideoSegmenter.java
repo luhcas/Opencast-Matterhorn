@@ -361,7 +361,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
           logger.info("Track {} loaded, duration is {} s", mediaUrl, duration.getSeconds());
 
           MediaTime contentTime = new MediaRelTimeImpl(0, (long) duration.getSeconds() * 1000);
-          MediaLocator contentLocator = new MediaLocatorImpl(mediaUrl.toURI());
+          MediaLocator contentLocator = new MediaLocatorImpl(mjpegTrack.getURI());
           Video videoContent = mpeg7.addVideoContent("videosegment", contentTime, contentLocator);
 
           logger.info("Starting video segmentation of {}", mediaUrl);

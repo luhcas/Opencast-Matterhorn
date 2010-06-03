@@ -34,7 +34,7 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
    */
   @Override
   public String getAnalysisType() {
-    return "video.segmenter";
+    return "org.opencastproject.analysis.vsegmenter";
   }
   
   /**
