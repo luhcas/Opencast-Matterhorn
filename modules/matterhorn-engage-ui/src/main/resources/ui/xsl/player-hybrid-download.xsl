@@ -214,5 +214,17 @@
 			</xsl:choose>
 		</div>
 		
+		
+	<xsl:for-each
+      	select="ns2:search-results/result/mediapackage/metadata/catalog">
+		<xsl:if test="@type='captions/timedtext'">
+        <xsl:if test="./mimetype='text/xml'">
+           <div id="oc-captions" style="display: none">
+              <xsl:value-of select="url" />
+            </div>
+        </xsl:if>
+      </xsl:if>
+    </xsl:for-each>
+		
 			</xsl:template>
 </xsl:stylesheet>
