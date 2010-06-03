@@ -157,6 +157,7 @@ Upload.initRetry = function() {
         if ($(elm).attr('type').split(/\//)[1] == 'source') {
           var filename = $(elm).find('url').text();
           $('#previous-file-flavor').val($(elm).attr('type'));
+          $('#flavor').val($(elm).attr('type'));
           $('#previous-file-link').attr('href', filename);
           $('#track').val(filename);
           $('#previous-file-url').val(filename);

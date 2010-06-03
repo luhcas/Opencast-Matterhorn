@@ -127,8 +127,7 @@ ocIngest.startIngest = function(mediaPackage) {
     type       : 'POST',
     dataType   : 'text',
     data       : data,
-    error      : function(XHR,status,e){
-      alert("Error!!");
+    error      : function(XHR,status,e) {
       showFailedScreen("Could not start Ingest on MediaPackage");
     },
     success    : function(data, status) {

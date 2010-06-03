@@ -286,6 +286,7 @@ Recordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
 Recordings.adjustHoldActionPanelHeight = function() {
   var height = $("#holdActionPanel-iframe").contents().find("html").height();
   $('#holdActionPanel-iframe').height(height+10);
+  alert("Hold action panel height: " + height);
 }
 
 /** Calls workflow endpoint to end hold operation and continue the workflow
