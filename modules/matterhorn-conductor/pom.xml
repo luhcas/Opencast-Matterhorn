@@ -126,7 +126,6 @@
               org.opencastproject.workflow.handler
             </Export-Package>
             <Service-Component>
-              OSGI-INF/workflow-definition-loader.xml,
               OSGI-INF/workflow-definition-scanner.xml,
               OSGI-INF/operations/compose.xml,
               OSGI-INF/operations/distribute-download.xml,
