@@ -32,7 +32,7 @@ if
 	# installing prerequisite tools
 	su -c "yum -y install gcc gcc-c++ pkgconfig zlib-devel byacc subversion patch wget" &&
 	# installing required libraries
-	su -c "yum -y install libjpeg-devel libpng-devel libtiff-devel" &&
+	su -c "yum -y install libjpeg-devel libpng-devel libtiff-devel aspell-devel" &&
 	# checking for jam package
 	jam_check &&
 	# installing gstreamer
