@@ -138,7 +138,7 @@ public class StateRestEndpointTest {
     Assert.assertEquals(200, startCaptureResponse.getStatusLine().getStatusCode());
     String responseString = EntityUtils.toString(startCaptureResponse.getEntity());
     
-    String pattern = "Unscheduled-\\d+";
+    String pattern = "Unscheduled-\\w+-\\d+";
     Matcher matcher = Pattern.compile(pattern).matcher(responseString);
     matcher.find();
     recordingId = matcher.group();

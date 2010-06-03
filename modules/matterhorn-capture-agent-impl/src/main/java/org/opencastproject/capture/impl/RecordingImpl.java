@@ -19,14 +19,23 @@ import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.util.ConfigurationException;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Properties;
+import java.util.TimeZone;
 
 /**
  * This class is a container for the properties relating a certain recording -- 
@@ -35,6 +44,9 @@ import java.util.Properties;
 public class RecordingImpl implements AgentRecording {
 
   private static final Logger logger = LoggerFactory.getLogger(RecordingImpl.class);
+
+  /** Date formatter for the metadata file */
+  private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
   
   /** Directory in the filesystem where the files related with this recording are */
   private File baseDir = null;
@@ -44,6 +56,8 @@ public class RecordingImpl implements AgentRecording {
 
   /** The recording's state */
   private String state = RecordingState.UNKNOWN;
+
+  private long startTime = -1L;
   
   /**
    * The time at which the recording last checked in with this service.
@@ -66,6 +80,15 @@ public class RecordingImpl implements AgentRecording {
   public RecordingImpl(MediaPackage mp, Properties properties) throws IOException, IllegalArgumentException {
     // Stores the MediaPackage
     this.mPkg = mp;
+    if (mPkg == null) {
+      try {
+        mPkg = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
+      } catch (ConfigurationException e) {
+        throw new RuntimeException("ConfigurationException building default mediapackage!", e);
+      } catch (MediaPackageException e) {
+        throw new RuntimeException("MediaPackageException building default mediapackage!", e);
+      }
+    }
     if (properties != null) {
       this.props = (Properties) properties.clone();
     } else {
@@ -89,6 +112,21 @@ public class RecordingImpl implements AgentRecording {
         //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
         throw new IOException ("Unable to create base directory");
       }
+    }
+
+    //TODO:  make this a constant?
+    File metadataFile = new File(baseDir, "metadata.xml");
+    if (!metadataFile.exists()) {
+      FileWriter out = new FileWriter(metadataFile);
+      out.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
+      out.write("<dublincore xmlns=\"http://www.opencastproject.org/xsd/1.0/dublincore/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">");
+      out.write("<dcterms:created xsi:type=\"dcterms:W3CDTF\">" + formatDate(new Date()) + "</dcterms:created>");
+      out.write("<dcterms:identifier>" + id + "</dcterms:identifier>");
+      out.write("<dcterms:title>" + id + "</dcterms:title>");
+      out.write("</dublincore>");
+      out.close();
+
+      mPkg.add(metadataFile.toURI(), MediaPackageElement.Type.Catalog, MediaPackageElements.DUBLINCORE_EPISODE);
     }
   }
 
@@ -121,7 +159,8 @@ public class RecordingImpl implements AgentRecording {
         baseDir = new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), id);
       } else {
         //Unscheduled capture, use a timestamp value instead
-        id = "Unscheduled-" + System.currentTimeMillis();
+        startTime = System.currentTimeMillis();
+        id = "Unscheduled-" + props.getProperty(CaptureParameters.AGENT_NAME) + "-" + startTime;
         props.setProperty(CaptureParameters.RECORDING_ID, id);
         baseDir = new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), id);
       }
@@ -209,5 +248,15 @@ public class RecordingImpl implements AgentRecording {
    */
   public Long getLastCheckinTime() {
     return lastHeardFrom;
+  }
+
+  /**
+   * Formats a Date object according to the dublin core rules for dcterms:created
+   * @param d The Date to format
+   * @return The formatted Date
+   */
+  private static synchronized String formatDate(Date d) {
+    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+    return sdf.format(d);
   }
 }

@@ -66,9 +66,9 @@ public class RecordingImplTest {
     rec = new RecordingImpl(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew(), configManager.getAllProperties());
     Assert.assertNotNull(rec);
     Assert.assertEquals(configManager.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), rec.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL));
-    Assert.assertTrue(Pattern.matches("Unscheduled-\\d+", rec.getID()));
-    Assert.assertTrue(Pattern.matches("Unscheduled-\\d+", rec.getProperty(CaptureParameters.RECORDING_ID)));
-    Assert.assertTrue(Pattern.matches("Unscheduled-\\d+", rec.getProperties().getProperty(CaptureParameters.RECORDING_ID)));
+    Assert.assertTrue(Pattern.matches("Unscheduled-demo_capture_agent-\\d+", rec.getID()));
+    Assert.assertTrue(Pattern.matches("Unscheduled-demo_capture_agent-\\d+", rec.getProperty(CaptureParameters.RECORDING_ID)));
+    Assert.assertTrue(Pattern.matches("Unscheduled-demo_capture_agent-\\d+", rec.getProperties().getProperty(CaptureParameters.RECORDING_ID)));
   }
 
   @Test
