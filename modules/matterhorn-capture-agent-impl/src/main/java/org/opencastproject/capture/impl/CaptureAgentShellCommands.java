@@ -51,7 +51,7 @@ public class CaptureAgentShellCommands {
    * Tells the capture agent to start capturing with the default set of properties.
    */
   public void start() {
-    if (!AgentState.IDLE.equals(agent.getAgentState())) {
+    if (AgentState.IDLE.equals(agent.getAgentState())) {
       System.err.println("The agent is currently busy (" + recordingId + ")");
       return;
     } else if (recordingId != null) {
