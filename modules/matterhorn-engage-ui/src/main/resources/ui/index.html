@@ -62,7 +62,6 @@
             var timeDate = $(this).text();
             if (timeDate) {
               var sd = new Date();
-              sd.setTime(timeDate);
               sd.setFullYear(parseInt(timeDate.substring(0,4)));
               sd.setMonth(parseInt(timeDate.substring(5,7))-1);
               sd.setDate(parseInt(timeDate.substring(8,10)));

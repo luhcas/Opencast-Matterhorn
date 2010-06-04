@@ -44,7 +44,6 @@ Opencast.Watch = (function ()
           // set date
           var timeDate = $('#oc-date').html();
           var sd = new Date();
-          sd.setTime(timeDate);
           sd.setFullYear(parseInt(timeDate.substring(0,4)));
           sd.setMonth(parseInt(timeDate.substring(5,7))-1);
           sd.setDate(parseInt(timeDate.substring(8,10)));
@@ -54,7 +53,7 @@ Opencast.Watch = (function ()
 
           var creator = $('#oc-creator').html();
 
-          if(!creator === "")
+          if(creator !== "")
             $('#oc_title_from').html(" by " + creator);
 
           $('#oc_title_from').append(" (" + sd.toLocaleString() + ")");

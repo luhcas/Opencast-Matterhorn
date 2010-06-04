@@ -16,24 +16,26 @@ Opencast.segments = ( function() {
    */
   function initialize() {
 
-    totalPanels     = $(".scrollContainer").children().size();
+    if ($panels !== undefined){
+      totalPanels     = $(".scrollContainer").children().size();
 
-    var $panels       = $('#slider .scrollContainer > div');
-    var $container      = $('#slider .scrollContainer');
+      var $panels       = $('#slider .scrollContainer > div');
+      var $container      = $('#slider .scrollContainer');
 
-    $panels.css({'float' : 'left','position' : 'relative'});
+      $panels.css({'float' : 'left','position' : 'relative'});
 
-    $("#slider").data("currentlyMoving", false);
+      $("#slider").data("currentlyMoving", false);
 
-    $container
-      .css('width', ($panels[0].offsetWidth * $panels.length))
-      .css('left', "0px");
+      $container
+        .css('width', ($panels[0].offsetWidth * $panels.length))
+        .css('left', "0px");
 
-    var scroll = $('#slider .scroll').css('overflow', 'hidden');
+      var scroll = $('#slider .scroll').css('overflow', 'hidden');
 
-    //when the left/right arrows are clicked
-    $(".right").click(function(){ change(true); }); 
-    $(".left").click(function(){ change(false); });
+      //when the left/right arrows are clicked
+      $(".right").click(function(){ change(true); }); 
+      $(".left").click(function(){ change(false); });
+    }
   }
 
   /**
