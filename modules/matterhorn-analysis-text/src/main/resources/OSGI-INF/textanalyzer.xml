@@ -5,7 +5,7 @@
   immediate="true">
   <implementation class="org.opencastproject.analysis.text.TextAnalyzer" />
   <property name="service.description" value="Text Analysis Service" />
-  <property name="analysis.type" value="text.analyzer" />
+  <property name="analysis.type" value="org.opencastproject.analysis.text" />
   <service>
     <provide interface="org.opencastproject.analysis.api.MediaAnalysisService" />
   </service>

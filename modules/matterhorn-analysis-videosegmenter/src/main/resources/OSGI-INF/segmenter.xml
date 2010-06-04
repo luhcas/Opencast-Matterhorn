@@ -4,7 +4,7 @@
   activate="activate" deactivate="deactivate" immediate="true">
   <implementation class="org.opencastproject.analysis.vsegmenter.VideoSegmenter" />
   <property name="service.description" value="VideoSegmenter Service" />
-  <property name="analysis.type" value="video.segmenter" />
+  <property name="analysis.type" value="org.opencastproject.analysis.vsegmenter" />
   <service>
     <provide interface="org.opencastproject.remote.api.Maintainable" />
     <provide interface="org.opencastproject.analysis.api.MediaAnalysisService" />
