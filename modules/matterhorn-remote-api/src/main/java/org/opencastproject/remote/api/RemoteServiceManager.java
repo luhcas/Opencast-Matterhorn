@@ -24,31 +24,31 @@ import java.util.Map;
 /**
  * Manages {@link Receipt}s for asynchronous services.
  */
-public interface ReceiptService {
+public interface RemoteServiceManager {
 
   /**
    * Registers a host that can handle a specific receipt type
    * 
-   * @param receiptType
+   * @param jobType
    * @param baseUrl
    */
-  void registerService(String receiptType, String baseUrl);
+  void registerService(String jobType, String baseUrl);
 
   /**
    * Registers a host
    * 
-   * @param receiptType
+   * @param jobType
    * @param baseUrl
    */
-  void unRegisterService(String receiptType, String baseUrl);
+  void unRegisterService(String jobType, String baseUrl);
 
   /**
    * Get all of the hosts that can handle a specific receipt type
    * 
-   * @param receiptType
+   * @param jobType
    * @return
    */
-  List<String> getHosts(String receiptType);
+  List<String> getHosts(String jobType);
   
   /**
    * Parses an xml string representing a Receipt
@@ -109,4 +109,13 @@ public interface ReceiptService {
    * @return
    */
   Map<String, Long> getHostsCount(String type, Status[] statuses);
+
+  /**
+   * Finds the remote services, ordered by their load (lightest to heaviest).
+   * 
+   * @param jobType The type of job that must be handled by the hosts
+   * @return A list of hosts that handle this job type, in order of their running and queued job load
+   */
+  public List<String> getRemoteHosts(String jobType);
+  
 }

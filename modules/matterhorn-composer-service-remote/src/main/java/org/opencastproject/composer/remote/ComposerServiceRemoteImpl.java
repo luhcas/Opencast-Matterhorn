@@ -24,8 +24,7 @@ import org.opencastproject.composer.api.EncodingProfileList;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.ReceiptService;
-import org.opencastproject.remote.api.RemoteServiceUtil;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 
@@ -63,14 +62,14 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   protected ResponseHandler<Receipt> receiptResponseHandler = new ReceiptResponseHandler();
 
   protected TrustedHttpClient trustedHttpClient;
-  protected ReceiptService receiptService;
+  protected RemoteServiceManager remoteServiceManager;
 
   public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
     this.trustedHttpClient = trustedHttpClient;
   }
 
-  public void setReceiptService(ReceiptService receiptService) {
-    this.receiptService = receiptService;
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
   }
 
   public void activate(ComponentContext cc) {
@@ -112,7 +111,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
     if (host != null) {
       queryStringParams.add(new BasicNameValuePair("host", host));
     }
-    List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/count?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
       HttpGet get = new HttpGet(url);
@@ -175,7 +174,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   public Receipt encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
           String profileId, boolean block) throws EncoderException, MediaPackageException {
     Receipt r = null;
-    List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/encode";
       HttpPost post = new HttpPost(url);
@@ -192,7 +191,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
           continue;
         }
         String content = EntityUtils.toString(response.getEntity());
-        r = receiptService.parseReceipt(content);
+        r = remoteServiceManager.parseReceipt(content);
         break;
       } catch (Exception e) {
         logger.info(e.getMessage(), e);
@@ -218,7 +217,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public EncodingProfile getProfile(String profileId) {
-    List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/profile/" + profileId + ".xml";
       HttpGet get = new HttpGet(url);
@@ -243,7 +242,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public Receipt getReceipt(String id) {
-    List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/receipt/" + id + ".xml";
       HttpGet get = new HttpGet(url);
@@ -297,7 +296,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
 
     Receipt r = null;
 
-    List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/image";
       HttpPost post = new HttpPost(url);
@@ -305,7 +304,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
         post.setEntity(entity);
         HttpResponse response = trustedHttpClient.execute(post);
         if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-          r = receiptService.parseReceipt(response.getEntity().getContent());
+          r = remoteServiceManager.parseReceipt(response.getEntity().getContent());
           break;
         }
       } catch (Exception e) {
@@ -332,7 +331,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public EncodingProfile[] listProfiles() {
-    List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
     for (String remoteHost : remoteHosts) {
       
       String url = remoteHost + "/composer/rest/profiles.xml";
@@ -414,7 +413,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
     public Receipt handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
       HttpEntity entity = response.getEntity();
       try {
-        return entity == null ? null : receiptService.parseReceipt(entity.getContent());
+        return entity == null ? null : remoteServiceManager.parseReceipt(entity.getContent());
       } catch (Exception e) {
         throw new RuntimeException(e);
       }

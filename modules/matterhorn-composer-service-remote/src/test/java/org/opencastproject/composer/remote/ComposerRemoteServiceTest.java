@@ -8,7 +8,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.Track;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.Receipt.Status;
-import org.opencastproject.remote.impl.ReceiptServiceImpl;
+import org.opencastproject.remote.impl.RemoteServiceManagerImpl;
 import org.opencastproject.security.TrustedHttpClientImpl;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
@@ -31,7 +31,7 @@ import javax.ws.rs.WebApplicationException;
 public class ComposerRemoteServiceTest {
   private ComposerServiceRemoteImpl service;
   private ComboPooledDataSource pooledDataSource = null;
-  private ReceiptServiceImpl receiptService = null;
+  private RemoteServiceManagerImpl remoteServiceManageranager = null;
  
   @Before
   public void setUp() throws Exception {

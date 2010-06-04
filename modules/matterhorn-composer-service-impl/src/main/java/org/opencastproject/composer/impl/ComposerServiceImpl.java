@@ -30,7 +30,7 @@ import org.opencastproject.media.mediapackage.identifier.IdBuilderFactory;
 import org.opencastproject.remote.api.Maintainable;
 import org.opencastproject.remote.api.MaintenanceException;
 import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.ReceiptService;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.NotFoundException;
@@ -71,7 +71,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
   private Workspace workspace = null;
 
   /** Reference to the receipt service */
-  private ReceiptService receiptService;
+  private RemoteServiceManager remoteServiceManager;
 
   /** Reference to the encoder engine */
   private EncoderEngine encoderEngine;
@@ -121,10 +121,10 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
 
   /**
    * Sets the receipt service
-   * @param receiptService
+   * @param remoteServiceManager
    */
-  public void setReceiptService(ReceiptService receiptService) {
-    this.receiptService = receiptService;
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
   }
   
   public void setProfileScanner(EncodingProfileScanner scanner) {
@@ -151,7 +151,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
     
     serverUrl = (String)cc.getBundleContext().getProperty("org.opencastproject.server.url");
     // Register as a handler
-    receiptService.registerService(RECEIPT_TYPE, serverUrl);
+    remoteServiceManager.registerService(RECEIPT_TYPE, serverUrl);
   }
 
   /** Separating this from the activate method so it's easier to test */
@@ -161,7 +161,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
   }
 
   protected void deactivate() {
-    receiptService.unRegisterService(RECEIPT_TYPE, serverUrl);
+    remoteServiceManager.unRegisterService(RECEIPT_TYPE, serverUrl);
   }
 
   /**
@@ -213,7 +213,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
           final String profileId, final boolean block) throws EncoderException, MediaPackageException {
     if(maintenanceMode) throw new MaintenanceException();
     final String targetTrackId = idBuilder.createNew().toString();
-    final Receipt composerReceipt = receiptService.createReceipt(RECEIPT_TYPE);
+    final Receipt composerReceipt = remoteServiceManager.createReceipt(RECEIPT_TYPE);
 
     // Get the tracks and make sure they exist
     Track audioTrack = mp.getTrack(sourceAudioTrackId);
@@ -225,7 +225,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
         audioFile = workspace.get(audioTrack.getURI());
       } catch (NotFoundException e) {
         composerReceipt.setStatus(Status.FAILED);
-        receiptService.updateReceipt(composerReceipt);
+        remoteServiceManager.updateReceipt(composerReceipt);
         throw new MediaPackageException("unable to access audio track " + audioTrack);
       }
     }
@@ -239,7 +239,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
         videoFile = workspace.get(videoTrack.getURI());
       } catch (NotFoundException e) {
         composerReceipt.setStatus(Status.FAILED);
-        receiptService.updateReceipt(composerReceipt);
+        remoteServiceManager.updateReceipt(composerReceipt);
         throw new MediaPackageException("unable to access video track " + videoTrack);
       }
     }
@@ -248,7 +248,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
     final EncodingProfile profile = profileScanner.getProfile(profileId);
     if (profile == null) {
       composerReceipt.setStatus(Status.FAILED);
-      receiptService.updateReceipt(composerReceipt);
+      remoteServiceManager.updateReceipt(composerReceipt);
       throw new RuntimeException("Profile '" + profileId + " is unkown");
     }
 
@@ -257,7 +257,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
         logger.info("encoding track {} for media package {} using source audio track {} and source video track {}",
                 new String[] { targetTrackId, mp.getIdentifier().toString(), sourceAudioTrackId, sourceVideoTrackId });
         composerReceipt.setStatus(Status.RUNNING);
-        receiptService.updateReceipt(composerReceipt);
+        remoteServiceManager.updateReceipt(composerReceipt);
 
         // Do the work
         File encodingOutput;
@@ -265,7 +265,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
           encodingOutput = encoderEngine.encode(audioFile, videoFile, profile, null);
         } catch (EncoderException e) {
           composerReceipt.setStatus(Status.FAILED);
-          receiptService.updateReceipt(composerReceipt);
+          remoteServiceManager.updateReceipt(composerReceipt);
           throw new RuntimeException(e);
         }
 
@@ -280,7 +280,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
           logger.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
         } catch (Exception e) {
           composerReceipt.setStatus(Status.FAILED);
-          receiptService.updateReceipt(composerReceipt);
+          remoteServiceManager.updateReceipt(composerReceipt);
           logger.error("unable to put the encoded file into the workspace");
           throw new RuntimeException(e);
         } finally {
@@ -306,7 +306,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
 
         composerReceipt.setElement(inspectedTrack);
         composerReceipt.setStatus(Status.FINISHED);
-        receiptService.updateReceipt(composerReceipt);
+        remoteServiceManager.updateReceipt(composerReceipt);
       }
     };
     Future<?> future = executor.submit(runnable);
@@ -315,7 +315,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
         future.get();
       } catch (Exception e) {
         composerReceipt.setStatus(Status.FAILED);
-        receiptService.updateReceipt(composerReceipt);
+        remoteServiceManager.updateReceipt(composerReceipt);
         throw new EncoderException(encoderEngine, e);
       }
     }
@@ -390,7 +390,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
     } catch (NotFoundException e) {
       throw new MediaPackageException("unable to access video track " + videoTrack, e);
     }
-    final Receipt receipt = receiptService.createReceipt(RECEIPT_TYPE);
+    final Receipt receipt = remoteServiceManager.createReceipt(RECEIPT_TYPE);
 
     Runnable runnable = new Runnable() {
       @Override
@@ -399,7 +399,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
                 mediaPackage.getIdentifier().toString(), sourceVideoTrackId });
 
         receipt.setStatus(Status.RUNNING);
-        receiptService.updateReceipt(receipt);
+        remoteServiceManager.updateReceipt(receipt);
 
         Map<String, String> properties = new HashMap<String, String>();
         String timeAsString = Long.toString(time);
@@ -425,7 +425,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
           logger.debug("Copied the encoded file to the workspace at {}", returnURL);
         } catch (Exception e) {
           receipt.setStatus(Status.FAILED);
-          receiptService.updateReceipt(receipt);
+          remoteServiceManager.updateReceipt(receipt);
           throw new RuntimeException("unable to put the encoded file into the workspace", e);
         } finally {
           IOUtils.closeQuietly(in);
@@ -437,7 +437,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
 
         receipt.setElement(attachment);
         receipt.setStatus(Status.FINISHED);
-        receiptService.updateReceipt(receipt);
+        remoteServiceManager.updateReceipt(receipt);
       }
     };
     Future<?> future = executor.submit(runnable);
@@ -459,7 +459,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
    * @see org.opencastproject.composer.api.ComposerService#getReceipt(java.lang.String)
    */
   public Receipt getReceipt(String id) {
-    return receiptService.getReceipt(id);
+    return remoteServiceManager.getReceipt(id);
   }
 
   /**
@@ -469,7 +469,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
    */
   @Override
   public long countJobs(Status status) {
-    return receiptService.count(RECEIPT_TYPE, status);
+    return remoteServiceManager.count(RECEIPT_TYPE, status);
   }
 
   /**
@@ -479,7 +479,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
    */
   @Override
   public long countJobs(Status status, String host) {
-    return receiptService.count(RECEIPT_TYPE, status, host);
+    return remoteServiceManager.count(RECEIPT_TYPE, status, host);
   }
 
   /**

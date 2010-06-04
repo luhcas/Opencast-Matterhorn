@@ -9,8 +9,8 @@
   <service>
     <provide interface="org.opencastproject.analysis.dictionary.DictionaryService" />
   </service>
-  <reference name="receiptService" interface="org.opencastproject.remote.api.ReceiptService"
-    cardinality="1..1" policy="static" bind="setReceiptService" />
+  <reference name="remoteServiceManager" interface="org.opencastproject.remote.api.RemoteServiceManager"
+    cardinality="1..1" policy="static" bind="setRemoteServiceManager" />
   <reference name="trustedHttpClient" interface="org.opencastproject.security.api.TrustedHttpClient"
     cardinality="1..1" policy="static" bind="setTrustedHttpClient" />
   <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"

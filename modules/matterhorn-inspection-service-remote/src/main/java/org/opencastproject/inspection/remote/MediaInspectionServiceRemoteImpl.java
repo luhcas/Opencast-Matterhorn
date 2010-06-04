@@ -19,8 +19,7 @@ import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.ReceiptService;
-import org.opencastproject.remote.api.RemoteServiceUtil;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 
@@ -51,15 +50,15 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceRemoteImpl.class);
 
   protected ResponseHandler<Receipt> receiptResponseHandler = new ReceiptResponseHandler();
-  protected ReceiptService receiptService;
+  protected RemoteServiceManager remoteServiceManager;
   protected TrustedHttpClient trustedHttpClient;
 
   public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
     this.trustedHttpClient = trustedHttpClient;
   }
 
-  public void setReceiptService(ReceiptService receiptService) {
-    this.receiptService = receiptService;
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
   }
 
   /**
@@ -69,7 +68,7 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
    */
   @Override
   public Receipt inspect(URI uri, boolean block) {
-    List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
     List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
     queryStringParams.add(new BasicNameValuePair("uri", uri.toString()));
 
@@ -109,7 +108,7 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
    */
   @Override
   public Receipt enrich(MediaPackageElement original, boolean override, boolean block) {
-    List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     try {
       params.add(new BasicNameValuePair("mediaPackageElement", ((AbstractMediaPackageElement)original).getAsXml()));
@@ -174,7 +173,7 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
    */
   @Override
   public Receipt getReceipt(String id) {
-    List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
     for(String remoteHost : remoteHosts) {
       logger.debug("Returning a Receipt(" + id + ") from a remote server: " + remoteHost);
       String url = remoteHost + "/inspection/rest/receipt/" + id + ".xml";
@@ -203,7 +202,7 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
     public Receipt handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
       HttpEntity entity = response.getEntity();
       try {
-        return entity == null ? null : receiptService.parseReceipt(entity.getContent());
+        return entity == null ? null : remoteServiceManager.parseReceipt(entity.getContent());
       } catch (Exception e) {
         throw new RuntimeException(e);
       }

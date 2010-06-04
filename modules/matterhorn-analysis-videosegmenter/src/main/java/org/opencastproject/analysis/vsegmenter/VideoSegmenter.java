@@ -41,7 +41,7 @@ import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.remote.api.Maintainable;
 import org.opencastproject.remote.api.MaintenanceException;
 import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.ReceiptService;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.MimeType;
@@ -137,7 +137,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
   protected static final Logger logger = LoggerFactory.getLogger(VideoSegmenter.class);
 
   /** Reference to the receipt service */
-  protected ReceiptService receiptService;
+  protected RemoteServiceManager remoteServiceManager;
 
   /** The repository to store the mpeg7 catalogs */
   protected WorkingFileRepository repository;
@@ -188,11 +188,11 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
     if(serverUrl == null) throw new IllegalStateException("property 'org.opencastproject.server.url' must be configured");
 
     // Register as a handler for RECEIPT_TYPE receipts
-    receiptService.registerService(RECEIPT_TYPE, serverUrl);
+    remoteServiceManager.registerService(RECEIPT_TYPE, serverUrl);
   }
 
   public void deactivate() {
-    receiptService.unRegisterService(RECEIPT_TYPE, serverUrl);
+    remoteServiceManager.unRegisterService(RECEIPT_TYPE, serverUrl);
   }
   
   /** Separating this from the activate method so it's easier to test */
@@ -233,11 +233,11 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
   /**
    * Sets the receipt service
    * 
-   * @param receiptService
+   * @param remoteServiceManager
    *          the receipt service
    */
-  public void setReceiptService(ReceiptService receiptService) {
-    this.receiptService = receiptService;
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
   }
 
   /**
@@ -268,7 +268,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
    */
   public Receipt analyze(final MediaPackageElement element, boolean block) throws MediaAnalysisException {
     if(maintenanceMode) throw new MaintenanceException();
-    final ReceiptService rs = receiptService;
+    final RemoteServiceManager rs = remoteServiceManager;
     final Receipt receipt = rs.createReceipt(RECEIPT_TYPE);
 
     // Make sure the element can be analyzed using this analysis implementation
@@ -403,7 +403,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
         future.get();
       } catch (Exception e) {
         receipt.setStatus(Status.FAILED);
-        receiptService.updateReceipt(receipt);
+        remoteServiceManager.updateReceipt(receipt);
         throw new MediaAnalysisException(e);
       }
     }
@@ -449,7 +449,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
    */
   @Override
   public Receipt getReceipt(String id) {
-    return receiptService.getReceipt(id);
+    return remoteServiceManager.getReceipt(id);
   }
 
   /**

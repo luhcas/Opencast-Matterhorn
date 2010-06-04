@@ -32,7 +32,7 @@ import org.opencastproject.media.mediapackage.track.AudioStreamImpl;
 import org.opencastproject.media.mediapackage.track.TrackImpl;
 import org.opencastproject.media.mediapackage.track.VideoStreamImpl;
 import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.ReceiptService;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
@@ -72,7 +72,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceImpl.class);
 
   Workspace workspace;
-  ReceiptService receiptService;
+  RemoteServiceManager remoteServiceManager;
   ExecutorService executor = null;
   String serverUrl = null;
   Map<String, Object> analyzerConfig = new ConcurrentHashMap<String, Object>();
@@ -82,8 +82,8 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     this.workspace = workspace;
   }
 
-  public void setReceiptService(ReceiptService receiptService) {
-    this.receiptService = receiptService;
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
   }
 
   @SuppressWarnings("unchecked")
@@ -111,11 +111,11 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
 
   public void activate() {
     executor = Executors.newFixedThreadPool(4);
-    receiptService.registerService(RECEIPT_TYPE, serverUrl);
+    remoteServiceManager.registerService(RECEIPT_TYPE, serverUrl);
   }
 
   public void deactivate() {
-    receiptService.unRegisterService(RECEIPT_TYPE, serverUrl);
+    remoteServiceManager.unRegisterService(RECEIPT_TYPE, serverUrl);
   }
   
   /**
@@ -125,7 +125,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
    */
   @Override
   public Receipt getReceipt(String id) {
-    return receiptService.getReceipt(id);
+    return remoteServiceManager.getReceipt(id);
   }
 
   /**
@@ -137,8 +137,8 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     logger.debug("inspect(" + uri + ") called, using workspace " + workspace);
 
     // Construct a receipt for this operation
-    final Receipt receipt = receiptService.createReceipt(RECEIPT_TYPE);
-    final ReceiptService rs = receiptService;
+    final Receipt receipt = remoteServiceManager.createReceipt(RECEIPT_TYPE);
+    final RemoteServiceManager rs = remoteServiceManager;
     Callable<Track> command = new Callable<Track>() {
       public Track call() throws Exception {
         // Update the receipt status
@@ -243,7 +243,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
 
   protected Callable<MediaPackageElement> getEnrichTrackCommand(final Track originalTrack, final boolean override,
           final Receipt receipt) {
-    final ReceiptService rs = receiptService;
+    final RemoteServiceManager rs = remoteServiceManager;
     return new Callable<MediaPackageElement>() {
       public MediaPackageElement call() throws Exception {
         // Set the receipt state to running
@@ -373,7 +373,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
 
   protected Callable<MediaPackageElement> getEnrichElementCommand(final MediaPackageElement element,
           final boolean override, final Receipt receipt) {
-    final ReceiptService rs = receiptService;
+    final RemoteServiceManager rs = remoteServiceManager;
     return new Callable<MediaPackageElement>() {
       public MediaPackageElement call() throws Exception {
         receipt.setStatus(Status.RUNNING);
@@ -419,7 +419,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
   @Override
   public Receipt enrich(final MediaPackageElement element, final boolean override, final boolean block) {
     Callable<MediaPackageElement> command;
-    final Receipt receipt = receiptService.createReceipt(RECEIPT_TYPE);
+    final Receipt receipt = remoteServiceManager.createReceipt(RECEIPT_TYPE);
     if (element instanceof Track) {
       final Track originalTrack = (Track) element;
       command = getEnrichTrackCommand(originalTrack, override, receipt);

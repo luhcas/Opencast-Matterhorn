@@ -30,7 +30,7 @@ import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.metadata.mpeg7.MultimediaContentType;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.ReceiptService;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.Workspace;
@@ -124,15 +124,15 @@ public class VideoSegmenterTest {
     EasyMock.replay(workspace);
     Receipt receipt = new ReceiptStub();
 
-    ReceiptService receiptService = EasyMock.createNiceMock(ReceiptService.class);
-    EasyMock.expect(receiptService.createReceipt((String) EasyMock.anyObject())).andReturn(receipt).anyTimes();
-    EasyMock.replay(receiptService);
+    RemoteServiceManager remoteServiceManager = EasyMock.createNiceMock(RemoteServiceManager.class);
+    EasyMock.expect(remoteServiceManager.createReceipt((String) EasyMock.anyObject())).andReturn(receipt).anyTimes();
+    EasyMock.replay(remoteServiceManager);
 
     vsegmenter = new VideoSegmenter();
     vsegmenter.setExecutorThreads(1);
     vsegmenter.setFileRepository(fileRepo);
     vsegmenter.setWorkspace(workspace);
-    vsegmenter.setReceiptService(receiptService);
+    vsegmenter.setRemoteServiceManager(remoteServiceManager);
   }
 
   public void tearDown() throws Exception {

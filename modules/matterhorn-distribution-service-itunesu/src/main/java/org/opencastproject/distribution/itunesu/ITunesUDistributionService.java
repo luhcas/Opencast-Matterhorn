@@ -27,6 +27,7 @@ import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.component.ComponentContext;
@@ -45,15 +46,26 @@ public class ITunesUDistributionService implements DistributionService {
   /** workspace instance */
   protected Workspace workspace = null;
 
+  /** the remote services registry */
+  protected RemoteServiceManager remoteServiceManager;
+
   /** iTunes configuration instance */
   private static ITunesConfiguration config = null;
   /** group handle */
+  
   private static String destination;
+
   /** only one scheduler instance for this service */
   private static Schedule schedule;
-  
+
   /** context strategy for the distribution service */
   ITunesUDistributionContextStrategy contextStrategy;
+
+  /** this server's base URL */
+  protected String serverUrl = null;
+
+  /* the configured id for this distribution channel */
+  protected String distChannelId = null;
 
   /**
    * Called when service activates. Defined in OSGi resource file.
@@ -84,19 +96,20 @@ public class ITunesUDistributionService implements DistributionService {
     data_directory.mkdirs();
     schedule = new Schedule(data_directory);
 
-    // create the scheduler using JPA store
-    // schedule = new Schedule(new JPAStore<Task>(new TaskSerializer(), emf, "ITUNESU_ACTIVE"),
-    //                         new JPAStore<Task>(new TaskSerializer(), emf, "ITUNESU_COMPLETED"));
+    serverUrl = (String)cc.getBundleContext().getProperty("org.opencastproject.server.url");
+    distChannelId = (String)cc.getProperties().get("distribution.channel");
+    remoteServiceManager.registerService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
   }
 
   /**
    * Called when service deactivates. Defined in OSGi resource file.
    */
   public void deactivate() {
+    // unregister as a handler for itunesU distribution
+    remoteServiceManager.unRegisterService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
+    
     // shutdown the scheduler
     schedule.shutdown();
-    // destroy JPA entity manager factory
-    // emf.close();
   }
 
   /**
@@ -255,6 +268,10 @@ public class ITunesUDistributionService implements DistributionService {
 
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
+  }
+
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
   }
 
   /**

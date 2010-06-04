@@ -19,6 +19,7 @@ import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UrlSupport;
 
@@ -39,9 +40,18 @@ import java.util.List;
 public class StreamingDistributionService extends AbstractLocalDistributionService {
   private static final Logger logger = LoggerFactory.getLogger(StreamingDistributionService.class);
   
+  protected RemoteServiceManager remoteServiceManager;
   public static final String DEFAULT_DISTRIBUTION_DIR = "opencast" + File.separator + "streaming";
   protected File distributionDirectory = null;
+
+  /** this server's base URL */
   protected String serverUrl = null;
+
+  /** the base URL for streaming */
+  protected String streamingUrl = null;
+  
+  /* the configured id for this distribution channel */
+  protected String distChannelId = null;
 
   /**
    * Creates a streaming distribution service publishing to the default directory {@link #DEFAULT_DISTRIBUTION_DIR} located
@@ -61,18 +71,23 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
     this.distributionDirectory = distributionRoot;
   }
 
-  public void activate(ComponentContext cc) {
-    // Get the configured server URL
-    if (cc == null) {
-      serverUrl = UrlSupport.DEFAULT_BASE_URL + "/streaming";
-    } else {
-      serverUrl = cc.getBundleContext().getProperty("org.opencastproject.streaming.url");
-      distributionDirectory = new File(cc.getBundleContext().getProperty("org.opencastproject.streaming.directory"));
-      if (serverUrl == null)
-        throw new IllegalStateException("Streaming url is not configured");
-    }
-    logger.info("streaming url is {}", serverUrl);
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
+  }
+
+  protected void activate(ComponentContext cc) {
+    // Get the configured streaming and server URLs
+    streamingUrl = cc.getBundleContext().getProperty("org.opencastproject.streaming.url") + "/streaming";
+    serverUrl = (String)cc.getBundleContext().getProperty("org.opencastproject.server.url");
+    distributionDirectory = new File(cc.getBundleContext().getProperty("org.opencastproject.streaming.directory"));
+    logger.info("streaming url is {}", streamingUrl);
     logger.info("distributionDirectory is {}", distributionDirectory);
+    distChannelId = (String)cc.getProperties().get("distribution.channel");
+    remoteServiceManager.registerService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
+  }
+
+  protected void deactivate() {
+    remoteServiceManager.unRegisterService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
   }
 
   /**
@@ -113,7 +128,7 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
     String mediaPackageId = element.getMediaPackage().getIdentifier().compact();
     String elementType = element.getElementType().toString().toLowerCase(); 
     String fileName = FilenameUtils.getName(element.getURI().toString());
-    String destinationURI = UrlSupport.concat(new String[] { serverUrl, mediaPackageId, elementType, fileName });
+    String destinationURI = UrlSupport.concat(new String[] { streamingUrl, mediaPackageId, elementType, fileName });
     return new URI(destinationURI);
   }
 }

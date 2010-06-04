@@ -16,10 +16,13 @@
 package org.opencastproject.remote.impl;
 
 import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.ReceiptService;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.util.UrlSupport;
 
+import org.apache.commons.collections.MapIterator;
+import org.apache.commons.collections.bidimap.TreeBidiMap;
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -40,10 +44,10 @@ import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
 
 /**
- * JPA implementation of the {@link ReceiptService}
+ * JPA implementation of the {@link RemoteServiceManager}
  */
-public class ReceiptServiceImpl implements ReceiptService {
-  private static final Logger logger = LoggerFactory.getLogger(ReceiptServiceImpl.class);
+public class RemoteServiceManagerImpl implements RemoteServiceManager {
+  private static final Logger logger = LoggerFactory.getLogger(RemoteServiceManagerImpl.class);
 
   /** The JPA provider */
   protected PersistenceProvider persistenceProvider;
@@ -88,7 +92,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ReceiptService#parseReceipt(java.io.InputStream)
+   * @see org.opencastproject.remote.api.RemoteServiceManager#parseReceipt(java.io.InputStream)
    */
   @Override
   public Receipt parseReceipt(InputStream in) {
@@ -101,7 +105,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ReceiptService#parseReceipt(java.lang.String)
+   * @see org.opencastproject.remote.api.RemoteServiceManager#parseReceipt(java.lang.String)
    */
   @Override
   public Receipt parseReceipt(String xml) {
@@ -114,7 +118,7 @@ public class ReceiptServiceImpl implements ReceiptService {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ReceiptService#count(java.lang.String, org.opencastproject.remote.api.Receipt.Status)
+   * @see org.opencastproject.remote.api.RemoteServiceManager#count(java.lang.String, org.opencastproject.remote.api.Receipt.Status)
    */
   @Override
   public long count(String type, Status status) {
@@ -132,7 +136,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ReceiptService#count(java.lang.String, org.opencastproject.remote.api.Receipt.Status, java.lang.String)
+   * @see org.opencastproject.remote.api.RemoteServiceManager#count(java.lang.String, org.opencastproject.remote.api.Receipt.Status, java.lang.String)
    */
   @Override
   public long count(String type, Status status, String host) {
@@ -151,7 +155,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ReceiptService#getHostsCount(java.lang.String, org.opencastproject.remote.api.Receipt.Status[])
+   * @see org.opencastproject.remote.api.RemoteServiceManager#getHostsCount(java.lang.String, org.opencastproject.remote.api.Receipt.Status[])
    */
   @Override
   public Map<String, Long> getHostsCount(String type, Status[] statuses) {
@@ -173,7 +177,7 @@ public class ReceiptServiceImpl implements ReceiptService {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ReceiptService#createReceipt(java.lang.String)
+   * @see org.opencastproject.remote.api.RemoteServiceManager#createReceipt(java.lang.String)
    */
   @Override
   public Receipt createReceipt(String type) {
@@ -196,7 +200,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ReceiptService#getReceipt(java.lang.String)
+   * @see org.opencastproject.remote.api.RemoteServiceManager#getReceipt(java.lang.String)
    */
   @Override
   public Receipt getReceipt(String id) {
@@ -210,7 +214,7 @@ public class ReceiptServiceImpl implements ReceiptService {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ReceiptService#updateReceipt(org.opencastproject.remote.api.Receipt)
+   * @see org.opencastproject.remote.api.RemoteServiceManager#updateReceipt(org.opencastproject.remote.api.Receipt)
    */
   @Override
   public void updateReceipt(Receipt receipt) {
@@ -240,10 +244,13 @@ public class ReceiptServiceImpl implements ReceiptService {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ReceiptService#registerService(java.lang.String, java.lang.String)
+   * @see org.opencastproject.remote.api.RemoteServiceManager#registerService(java.lang.String, java.lang.String)
    */
   @Override
   public void registerService(String receiptType, String baseUrl) {
+    if(StringUtils.trimToNull(receiptType) == null || StringUtils.trimToNull(baseUrl) == null) {
+      throw new IllegalArgumentException("receiptType and baseUrl must not be empty or null");
+    }
     ReceiptHandler rh = new ReceiptHandler(baseUrl, receiptType);
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
@@ -261,7 +268,7 @@ public class ReceiptServiceImpl implements ReceiptService {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ReceiptService#unRegisterService(java.lang.String, java.lang.String)
+   * @see org.opencastproject.remote.api.RemoteServiceManager#unRegisterService(java.lang.String, java.lang.String)
    */
   @Override
   public void unRegisterService(String receiptType, String baseUrl) {
@@ -285,7 +292,7 @@ public class ReceiptServiceImpl implements ReceiptService {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ReceiptService#getHosts(java.lang.String)
+   * @see org.opencastproject.remote.api.RemoteServiceManager#getHosts(java.lang.String)
    */
   @SuppressWarnings("unchecked")
   @Override
@@ -298,5 +305,31 @@ public class ReceiptServiceImpl implements ReceiptService {
     } finally {
       em.close();
     }
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.remote.api.RemoteServiceManager#getRemoteHosts(java.lang.String)
+   */
+  @Override
+  public List<String> getRemoteHosts(String jobType) {
+    Map<String, Long> runningComposerJobs = getHostsCount(jobType, new Status[] { Status.QUEUED,
+            Status.RUNNING });
+    List<String> hosts = getHosts(jobType);
+    TreeBidiMap bidiMap = new TreeBidiMap(runningComposerJobs);
+
+    LinkedList<String> sortedRemoteHosts = new LinkedList<String>();
+    MapIterator iter = bidiMap.inverseOrderedBidiMap().orderedMapIterator();
+    while (iter.hasNext()) {
+      iter.next();
+      sortedRemoteHosts.add((String) iter.getValue());
+    }
+    // If some of the hosts have no jobs, they are not in the list yet. Add them at the front of the list.
+    for (String host : hosts) {
+      if (!sortedRemoteHosts.contains(host)) {
+        sortedRemoteHosts.add(0, host);
+      }
+    }
+    return sortedRemoteHosts;
   }
 }

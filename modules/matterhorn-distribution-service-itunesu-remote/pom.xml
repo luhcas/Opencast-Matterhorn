@@ -2,9 +2,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.opencastproject</groupId>
-  <artifactId>matterhorn-distribution-service-local</artifactId>
+  <artifactId>matterhorn-distribution-service-itunesu-remote</artifactId>
   <packaging>bundle</packaging>
-  <name>matterhorn-distribution-service-local</name>
+  <name>matterhorn-distribution-service-itunesu-remote</name>
   <version>0.9-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -19,12 +19,17 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-remote-api</artifactId>
+      <artifactId>matterhorn-distribution-service-remote</artifactId>
       <version>0.9-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-workspace-api</artifactId>
+      <artifactId>matterhorn-security-api</artifactId>
+      <version>0.9-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-remote-api</artifactId>
       <version>0.9-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -82,11 +87,12 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.distribution.local.* </Export-Package>
+            <Import-Package>
+              org.opencastproject.distribution.remote,
+              *;resolution:=optional
+            </Import-Package>
             <Service-Component>
-              OSGI-INF/distribution-service-download.xml,
-              OSGI-INF/distribution-service-streaming.xml,
-              OSGI-INF/distribution-rest.xml
+              OSGI-INF/distribution-remote-itunes.xml
             </Service-Component>
           </instructions>
         </configuration>

@@ -15,8 +15,8 @@
       cardinality="1..1" policy="static" bind="setMediaInspectionService" />
     <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
       cardinality="1..1" policy="static" bind="setWorkspace" />
-    <reference name="receiptService" interface="org.opencastproject.remote.api.ReceiptService"
-      cardinality="1..1" policy="static" bind="setReceiptService" />
+    <reference name="remoteServiceManager" interface="org.opencastproject.remote.api.RemoteServiceManager"
+      cardinality="1..1" policy="static" bind="setRemoteServiceManager" />
     <reference name="encoderEngine" policy="static" bind="setEncoderEngine"
       cardinality="1..1" interface="org.opencastproject.composer.api.EncoderEngine" />
     <reference name="profileScanner" policy="static" bind="setProfileScanner"

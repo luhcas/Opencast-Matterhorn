@@ -22,6 +22,11 @@ import org.opencastproject.media.mediapackage.MediaPackage;
  */
 public interface DistributionService {
   /**
+   * A prefix used by distribution service implementations to indicate the types of distribution channels they manage.
+   */
+  public static final String JOB_TYPE_PREFIX = "org.opencastproject.distribution.";
+
+  /**
    * Distribute the elementIds from a media package.
    * 
    * @param mediaPackage The media package to distribute

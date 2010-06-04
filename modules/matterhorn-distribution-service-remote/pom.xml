@@ -23,6 +23,11 @@
       <version>0.9-SNAPSHOT</version>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-remote-api</artifactId>
+      <version>0.9-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
@@ -78,12 +83,6 @@
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.distribution.remote </Export-Package>
-            <Service-Component>
-              OSGI-INF/distribution-remote-download.xml,
-              OSGI-INF/distribution-remote-streaming.xml,
-              OSGI-INF/distribution-remote-itunes.xml,
-              OSGI-INF/distribution-remote-youtube.xml
-            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

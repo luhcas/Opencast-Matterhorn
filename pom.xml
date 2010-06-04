@@ -79,6 +79,10 @@
         <module>modules/matterhorn-demo</module>
         <module>modules/matterhorn-distribution-service-api</module>
         <module>modules/matterhorn-distribution-service-remote</module>
+        <module>modules/matterhorn-distribution-service-download-remote</module>
+        <module>modules/matterhorn-distribution-service-streaming-remote</module>
+        <module>modules/matterhorn-distribution-service-itunesu-remote</module>
+        <module>modules/matterhorn-distribution-service-youtube-remote</module>
         <module>modules/matterhorn-http</module>
         <module>modules/matterhorn-rest</module>
         <module>modules/matterhorn-ingest-service-api</module>
@@ -146,6 +150,8 @@
         <module>modules/matterhorn-search-service-feeds</module>
         <module>modules/matterhorn-feedback-service-api</module>
         <module>modules/matterhorn-feedback-service-impl</module> 
+        <module>modules/matterhorn-remote-api</module>
+        <module>modules/matterhorn-remote-impl</module>
         <module>modules/matterhorn-workspace-api</module>
         <module>modules/matterhorn-workspace-impl</module>
         <module>modules/matterhorn-working-file-repository-service-api</module>

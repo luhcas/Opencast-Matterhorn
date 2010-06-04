@@ -17,7 +17,7 @@ package org.opencastproject.analysis.dictionary;
 
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.ReceiptService;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -27,7 +27,7 @@ import org.opencastproject.workspace.api.Workspace;
 public class DictionaryService {
 
   /** Reference to the receipt service */
-  private ReceiptService receiptService;
+  private RemoteServiceManager remoteServiceManager;
 
   /** The workspace to ue when retrieving remote media files */
   private Workspace workspace;
@@ -57,7 +57,7 @@ public class DictionaryService {
    * @return The receipt, or null if none is found.
    */
   public Receipt getReceipt(String id) {
-    return receiptService.getReceipt(id);
+    return remoteServiceManager.getReceipt(id);
   }
 
   /**
@@ -73,11 +73,11 @@ public class DictionaryService {
   /**
    * Sets the receipt service
    * 
-   * @param receiptService
+   * @param remoteServiceManager
    *          the receipt service
    */
-  public void setReceiptService(ReceiptService receiptService) {
-    this.receiptService = receiptService;
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
   }
 
   /**

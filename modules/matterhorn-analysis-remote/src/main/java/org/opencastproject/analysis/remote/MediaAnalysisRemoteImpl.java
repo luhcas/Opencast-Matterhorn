@@ -21,8 +21,7 @@ import org.opencastproject.analysis.api.MediaAnalysisServiceSupport;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.ReceiptService;
-import org.opencastproject.remote.api.RemoteServiceUtil;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 
@@ -60,15 +59,15 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
   protected ResponseHandler<Receipt> receiptResponseHandler = new ReceiptResponseHandler();
   protected String analysisType;
   
-  protected ReceiptService receiptService;
+  protected RemoteServiceManager remoteServiceManager;
   protected TrustedHttpClient trustedHttpClient;
 
   public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
     this.trustedHttpClient = trustedHttpClient;
   }
 
-  public void setReceiptService(ReceiptService receiptService) {
-    this.receiptService = receiptService;
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
   }
 
   public void activate(ComponentContext cc) {
@@ -92,7 +91,7 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
 
   @Override
   public Receipt analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException {
-    List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, analysisType);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(analysisType);
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     UrlEncodedFormEntity entity;
     try {
@@ -174,7 +173,7 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
 
   @Override
   public Receipt getReceipt(String id) {
-    List<String> remoteHosts = RemoteServiceUtil.getRemoteHosts(receiptService, analysisType);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(analysisType);
     for(String remoteHost : remoteHosts) {
       logger.debug("Returning a Receipt(" + id + ") from a remote server: " + remoteHost);
       String url = remoteHost + "/analysis/rest/" + analysisType + "/" + id + ".xml";
@@ -200,7 +199,7 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
     public Receipt handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
       HttpEntity entity = response.getEntity();
       try {
-        return entity == null ? null : receiptService.parseReceipt(entity.getContent());
+        return entity == null ? null : remoteServiceManager.parseReceipt(entity.getContent());
       } catch (Exception e) {
         throw new RuntimeException(e);
       }

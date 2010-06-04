@@ -16,10 +16,9 @@
 package org.opencastproject.composer.remote;
 
 import org.opencastproject.composer.api.ComposerService;
-import org.opencastproject.remote.api.RemoteServiceUtil;
 import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.remote.impl.ReceiptImpl;
-import org.opencastproject.remote.impl.ReceiptServiceImpl;
+import org.opencastproject.remote.impl.RemoteServiceManagerImpl;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -41,7 +40,7 @@ public class LoadBalancingTest {
 
   ComposerServiceRemoteImpl service;
   ComboPooledDataSource pooledDataSource = null;
-  ReceiptServiceImpl receiptService = null;
+  RemoteServiceManagerImpl remoteServiceManager = null;
 
   @Before
   public void setUp() throws Exception {
@@ -58,83 +57,83 @@ public class LoadBalancingTest {
     props.put("eclipselink.ddl-generation", "create-tables");
     props.put("eclipselink.ddl-generation.output-mode", "database");
 
-    receiptService = new ReceiptServiceImpl();
-    receiptService.setPersistenceProvider(new PersistenceProvider());
-    receiptService.setPersistenceProperties(props);
-    receiptService.activate(null);
+    remoteServiceManager = new RemoteServiceManagerImpl();
+    remoteServiceManager.setPersistenceProvider(new PersistenceProvider());
+    remoteServiceManager.setPersistenceProperties(props);
+    remoteServiceManager.activate(null);
 
-    service.setReceiptService(receiptService);
+    service.setRemoteServiceManager(remoteServiceManager);
   }
 
   @After
   public void tearDown() throws Exception {
-    receiptService.deactivate();
+    remoteServiceManager.deactivate();
     pooledDataSource.close();
   }
 
   @Test
   public void testRemoteHostSelection() throws Exception {
-    receiptService.registerService(ComposerService.RECEIPT_TYPE, HOST_1);
-    receiptService.registerService(ComposerService.RECEIPT_TYPE, HOST_2);
-    receiptService.registerService(ComposerService.RECEIPT_TYPE, HOST_3);
+    remoteServiceManager.registerService(ComposerService.RECEIPT_TYPE, HOST_1);
+    remoteServiceManager.registerService(ComposerService.RECEIPT_TYPE, HOST_2);
+    remoteServiceManager.registerService(ComposerService.RECEIPT_TYPE, HOST_3);
     
     // Add some receipts for each of these hosts
-    ReceiptImpl localRunning = (ReceiptImpl)receiptService.createReceipt(ComposerService.RECEIPT_TYPE);
+    ReceiptImpl localRunning = (ReceiptImpl)remoteServiceManager.createReceipt(ComposerService.RECEIPT_TYPE);
     localRunning.setHost(HOST_1);
     localRunning.setStatus(Status.RUNNING);
-    receiptService.updateReceipt(localRunning);
+    remoteServiceManager.updateReceipt(localRunning);
     
-    ReceiptImpl localQueued = (ReceiptImpl)receiptService.createReceipt(ComposerService.RECEIPT_TYPE);
+    ReceiptImpl localQueued = (ReceiptImpl)remoteServiceManager.createReceipt(ComposerService.RECEIPT_TYPE);
     localQueued.setHost(HOST_1);
     localQueued.setStatus(Status.QUEUED);
-    receiptService.updateReceipt(localQueued);
+    remoteServiceManager.updateReceipt(localQueued);
 
-    ReceiptImpl localFinished = (ReceiptImpl)receiptService.createReceipt(ComposerService.RECEIPT_TYPE);
+    ReceiptImpl localFinished = (ReceiptImpl)remoteServiceManager.createReceipt(ComposerService.RECEIPT_TYPE);
     localFinished.setHost(HOST_1);
     localFinished.setStatus(Status.FINISHED);
-    receiptService.updateReceipt(localFinished);
+    remoteServiceManager.updateReceipt(localFinished);
 
-    ReceiptImpl remoteRunning = (ReceiptImpl)receiptService.createReceipt(ComposerService.RECEIPT_TYPE);
+    ReceiptImpl remoteRunning = (ReceiptImpl)remoteServiceManager.createReceipt(ComposerService.RECEIPT_TYPE);
     remoteRunning.setHost(HOST_2);
     remoteRunning.setStatus(Status.RUNNING);
-    receiptService.updateReceipt(remoteRunning);
+    remoteServiceManager.updateReceipt(remoteRunning);
 
-    ReceiptImpl remoteFinished = (ReceiptImpl)receiptService.createReceipt(ComposerService.RECEIPT_TYPE);
+    ReceiptImpl remoteFinished = (ReceiptImpl)remoteServiceManager.createReceipt(ComposerService.RECEIPT_TYPE);
     remoteFinished.setHost(HOST_2);
     remoteFinished.setStatus(Status.FINISHED);
-    receiptService.updateReceipt(remoteFinished);
+    remoteServiceManager.updateReceipt(remoteFinished);
 
-    ReceiptImpl otherTypeRunning = (ReceiptImpl)receiptService.createReceipt(RECEIPT_TYPE_OTHER);
+    ReceiptImpl otherTypeRunning = (ReceiptImpl)remoteServiceManager.createReceipt(RECEIPT_TYPE_OTHER);
     otherTypeRunning.setHost(HOST_1);
     otherTypeRunning.setStatus(Status.RUNNING);
-    receiptService.updateReceipt(otherTypeRunning);
+    remoteServiceManager.updateReceipt(otherTypeRunning);
 
-    ReceiptImpl otherTypeFinished = (ReceiptImpl)receiptService.createReceipt(RECEIPT_TYPE_OTHER);
+    ReceiptImpl otherTypeFinished = (ReceiptImpl)remoteServiceManager.createReceipt(RECEIPT_TYPE_OTHER);
     otherTypeFinished.setHost(HOST_1);
     otherTypeFinished.setStatus(Status.FINISHED);
-    receiptService.updateReceipt(otherTypeFinished);
+    remoteServiceManager.updateReceipt(otherTypeFinished);
 
     // Host 1 has 1 running and one queued receipt.  Host 2 has 1 running and 1 finished receipt.
     // Host 3 has no running or queued receipts. so host 3 is the 'lightest'
-    Assert.assertEquals(HOST_3, RemoteServiceUtil.getRemoteHosts(receiptService, ComposerService.RECEIPT_TYPE).get(0));
+    Assert.assertEquals(HOST_3, remoteServiceManager.getRemoteHosts(ComposerService.RECEIPT_TYPE).get(0));
     
     // Now let's load host 3 with some running and queued receipts
-    ReceiptImpl host3Running1 = (ReceiptImpl)receiptService.createReceipt(ComposerService.RECEIPT_TYPE);
+    ReceiptImpl host3Running1 = (ReceiptImpl)remoteServiceManager.createReceipt(ComposerService.RECEIPT_TYPE);
     host3Running1.setHost(HOST_3);
     host3Running1.setStatus(Status.RUNNING);
-    receiptService.updateReceipt(host3Running1);
+    remoteServiceManager.updateReceipt(host3Running1);
 
-    ReceiptImpl host3Running2 = (ReceiptImpl)receiptService.createReceipt(ComposerService.RECEIPT_TYPE);
+    ReceiptImpl host3Running2 = (ReceiptImpl)remoteServiceManager.createReceipt(ComposerService.RECEIPT_TYPE);
     host3Running2.setHost(HOST_3);
     host3Running2.setStatus(Status.RUNNING);
-    receiptService.updateReceipt(host3Running2);
+    remoteServiceManager.updateReceipt(host3Running2);
 
-    ReceiptImpl host3Queued = (ReceiptImpl)receiptService.createReceipt(ComposerService.RECEIPT_TYPE);
+    ReceiptImpl host3Queued = (ReceiptImpl)remoteServiceManager.createReceipt(ComposerService.RECEIPT_TYPE);
     host3Queued.setHost(HOST_3);
     host3Queued.setStatus(Status.RUNNING);
-    receiptService.updateReceipt(host3Queued);
+    remoteServiceManager.updateReceipt(host3Queued);
     
     // Now that host3 is loaded, host 2 is the lightest, since it has only 1 running and no queued receipts
-    Assert.assertEquals(HOST_2, RemoteServiceUtil.getRemoteHosts(receiptService, ComposerService.RECEIPT_TYPE).get(0));
+    Assert.assertEquals(HOST_2, remoteServiceManager.getRemoteHosts(ComposerService.RECEIPT_TYPE).get(0));
   }
 }

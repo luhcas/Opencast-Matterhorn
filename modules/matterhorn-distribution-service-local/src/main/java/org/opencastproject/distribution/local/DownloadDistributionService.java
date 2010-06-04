@@ -16,6 +16,7 @@
 package org.opencastproject.distribution.local;
 
 import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UrlSupport;
 
@@ -35,8 +36,15 @@ public class DownloadDistributionService extends AbstractLocalDistributionServic
   private static final Logger logger = LoggerFactory.getLogger(DownloadDistributionService.class);
   
   public static final String DEFAULT_DISTRIBUTION_DIR = "opencast" + File.separator + "static";
+  protected RemoteServiceManager remoteServiceManager;
   protected File distributionDirectory = null;
+
+
+  /** this server's base URL */
   protected String serverUrl = null;
+
+  /* the configured id for this distribution channel */
+  protected String distChannelId = null;
 
   /**
    * Creates a download distribution service publishing to the default directory {@link #DEFAULT_DISTRIBUTION_DIR} located
@@ -44,6 +52,10 @@ public class DownloadDistributionService extends AbstractLocalDistributionServic
    */
   public DownloadDistributionService() {
     this(new File(System.getProperty("java.io.tmpdir") + File.separator + DEFAULT_DISTRIBUTION_DIR));
+  }
+  
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
   }
 
   /**
@@ -56,26 +68,26 @@ public class DownloadDistributionService extends AbstractLocalDistributionServic
     this.distributionDirectory = distributionRoot;
   }
 
-  public void activate(ComponentContext cc) {
+  protected void activate(ComponentContext cc) {
     // Get the configured server URL
     if (cc == null) {
-      serverUrl = UrlSupport.DEFAULT_BASE_URL + "/static";
+      serverUrl = UrlSupport.DEFAULT_BASE_URL;
     } else {
-      String ccServerUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
-      logger.info("configured server url is {}", ccServerUrl);
-      if (ccServerUrl == null) {
-        serverUrl = UrlSupport.DEFAULT_BASE_URL + "/static";
-      } else {
-        serverUrl = ccServerUrl + "/static";
-      }
+      serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
       String ccDistributionDirectory = cc.getBundleContext().getProperty("org.opencastproject.download.directory");
       logger.info("configured download directory is {}", ccDistributionDirectory);
       if(ccDistributionDirectory != null) {
         this.distributionDirectory = new File(ccDistributionDirectory);
       }
+      distChannelId = (String)cc.getProperties().get("distribution.channel");
+      remoteServiceManager.registerService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
     }
   }
 
+  protected void deactivate() {
+    remoteServiceManager.unRegisterService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.distribution.local.AbstractLocalDistributionService#getDistributionFile(org.opencastproject.media.mediapackage.MediaPackageElement)
@@ -99,7 +111,7 @@ public class DownloadDistributionService extends AbstractLocalDistributionServic
     String mediaPackageId = element.getMediaPackage().getIdentifier().compact();
     String elementType = element.getElementType().toString().toLowerCase(); 
     String fileName = FilenameUtils.getName(element.getURI().toString());
-    String destinationURI = UrlSupport.concat(new String[] { serverUrl, mediaPackageId, elementType, fileName });
+    String destinationURI = UrlSupport.concat(new String[] { serverUrl + "/static", mediaPackageId, elementType, fileName });
     return new URI(destinationURI);
   }
   

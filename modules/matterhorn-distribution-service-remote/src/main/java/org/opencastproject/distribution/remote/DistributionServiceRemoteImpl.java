@@ -19,6 +19,8 @@ import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.security.api.TrustedHttpClient;
 
 import org.apache.commons.io.IOUtils;
@@ -28,6 +30,8 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -37,83 +41,103 @@ import java.util.List;
  * A remote distribution service invoker.
  */
 public class DistributionServiceRemoteImpl implements DistributionService {
-  public static final String REMOTE_SERVICE_KEY = "remote.distribution";
+  private static final Logger logger = LoggerFactory.getLogger(DistributionServiceRemoteImpl.class);
+  public static final String REMOTE_SERVICE_TYPE = "org.opencastproject.distribution";
   public static final String REMOTE_SERVICE_CHANNEL = "distribution.channel";
   protected String distributionChannel;
-  protected String remoteHost;
   protected TrustedHttpClient trustedHttpClient;
-  
-  /** Default, no-arg constructor needed by OSGI declarative services */
-  public DistributionServiceRemoteImpl() {}
-
-  /** Constructs a DistributionServiceRemoteImpl with a specific remote host and dist channel */
-  public DistributionServiceRemoteImpl(String remoteHost, String distributionChannel) {
-    this.remoteHost = remoteHost;
-    this.distributionChannel = distributionChannel;
-  }
-  
-  public void setRemoteHost(String remoteHost) {
-    this.remoteHost = remoteHost;
-  }
+  protected RemoteServiceManager remoteServiceManager;
+  protected String serverUrl;
 
   public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
     this.trustedHttpClient = trustedHttpClient;
   }
- 
-  public void activate(ComponentContext cc) {
-    this.remoteHost = cc.getBundleContext().getProperty(REMOTE_SERVICE_KEY);
-    this.distributionChannel = (String)cc.getProperties().get(REMOTE_SERVICE_CHANNEL);
+
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
   }
-  
+
+  protected void activate(ComponentContext cc) {
+    this.distributionChannel = (String) cc.getProperties().get(REMOTE_SERVICE_CHANNEL);
+    serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
+    if (serverUrl == null)
+      throw new IllegalStateException("property 'org.opencastproject.server.url' must be configured");
+  }
+
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.media.mediapackage.MediaPackage, java.lang.String[])
+   * 
+   * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.media.mediapackage.MediaPackage,
+   *      java.lang.String[])
    */
   @Override
   public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException {
-    String url = remoteHost + "/distribution/rest/" + distributionChannel;
-    HttpPost post = new HttpPost(url);
-    InputStream in = null;
+    String xml = null;
     try {
-      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-      params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
-      if(elementIds != null && elementIds.length > 0) {
-        for(String elementId : elementIds) {
-          params.add(new BasicNameValuePair("elementId", elementId));
-        }
-      }
-      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
-      post.setEntity(entity);
-      HttpResponse response = trustedHttpClient.execute(post);
-      in = response.getEntity().getContent();
-      return MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(in);
-    } catch(Exception e) {
-      throw new DistributionException(e);
-    } finally {
-      IOUtils.closeQuietly(in);
+      xml = mediaPackage.toXml();
+    } catch (MediaPackageException e) {
+      throw new DistributionException("Unable to marshall mediapackage to xml: " + e.getMessage());
     }
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(REMOTE_SERVICE_TYPE);
+    List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+    params.add(new BasicNameValuePair("mediapackage", xml));
+    if (elementIds != null && elementIds.length > 0) {
+      for (String elementId : elementIds) {
+        params.add(new BasicNameValuePair("elementId", elementId));
+      }
+    }
+    for (String remoteHost : remoteHosts) {
+      String url = remoteHost + "/distribution/rest/" + distributionChannel;
+      HttpPost post = new HttpPost(url);
+      InputStream in = null;
+      try {
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+        post.setEntity(entity);
+        HttpResponse response = trustedHttpClient.execute(post);
+        in = response.getEntity().getContent();
+        return MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(in);
+      } catch (Exception e) {
+        continue;
+      } finally {
+        IOUtils.closeQuietly(in);
+      }
+    }
+    throw new DistributionException("Unable to distribute mediapackage " + mediaPackage + " to any of "
+            + remoteHosts.size() + " remote services.");
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.distribution.api.DistributionService#retract(org.opencastproject.media.mediapackage.MediaPackage)
    */
   @Override
   public void retract(MediaPackage mediaPackage) throws DistributionException {
-    String url = remoteHost + "/distribution/rest/retract/" + distributionChannel;
-    HttpPost post = new HttpPost(url);
+    String xml = null;
     try {
-      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-      params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
-      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
-      post.setEntity(entity);
-      HttpResponse response = trustedHttpClient.execute(post);
-      if(HttpStatus.SC_NO_CONTENT != response.getStatusLine().getStatusCode()) {
-        throw new DistributionException("Remote retract failed with status code " + response.getStatusLine().getStatusCode());
-      }
-    } catch(Exception e) {
-      throw new DistributionException(e);
+      xml = mediaPackage.toXml();
+    } catch (MediaPackageException e) {
+      throw new DistributionException("Unable to marshall mediapackage to xml: " + e.getMessage());
     }
+    List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+    params.add(new BasicNameValuePair("mediapackage", xml));
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(REMOTE_SERVICE_TYPE);
+    for(String remoteHost : remoteHosts) {
+      String url = remoteHost + "/distribution/rest/retract/" + distributionChannel;
+      HttpPost post = new HttpPost(url);
+      try {
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+        post.setEntity(entity);
+        HttpResponse response = trustedHttpClient.execute(post);
+        int httpStatusCode = response.getStatusLine().getStatusCode();
+        if (HttpStatus.SC_NO_CONTENT != httpStatusCode) {
+          logger.debug("Unable to retract using distribution service at {}. Status code = {}", url, httpStatusCode);
+          continue;
+        }
+      } catch (Exception e) {
+        logger.debug("Unable to retract using distribution service at {}. {}", url, e);
+      }
+    }
+    throw new DistributionException("Unable to retract mediapackage " + mediaPackage + " using any of " + remoteHosts.size() + " remote services");
   }
-  
 }
