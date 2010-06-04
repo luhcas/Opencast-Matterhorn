@@ -11,6 +11,7 @@
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/player-multi-hybrid.css" />
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/player-multi-hybrid-icons.css" />
     <link rel="stylesheet" type="text/css" href="shared_css/jquery-ui-1.8.1.custom.css" />
+    <link rel="stylesheet" type="text/css" href="shared_css/shared.css" />
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/opencast-reset.css" />
     <link rel="stylesheet" type="text/css" href="jquery/plugins/jwysiwyg/jquery.wysiwyg.css"  />
     <link rel="stylesheet" type="text/css" href="css/oc.segments.css">
@@ -40,6 +41,9 @@
       <strong>Please turn JavaScript on to use this site, then refresh the page.</strong>
     </p>
   </noscript>
+  <div id="skip">
+	<a href="#controls">Skip to player controls</a>
+  </div>	  
   <div id="oc_title-bar" style="padding-top:5px;">
     	<div id="oc_title-bar-container">
     	<div id="oc_title-bar-logo">
@@ -57,7 +61,9 @@
 		</div>
 		</div>  
   </div>
-    
+  <div id="skip">
+	<a href="#shortcuts" onclick="Opencast.Player.doToggleShortcuts()">Skip to Shortcuts</a>
+  </div>	  
   <div id="oc_body" style="padding-top:5px;">
       
     <div id="oc_flash-player">
@@ -76,6 +82,10 @@
       </div>
  
       <div id="oc_video-controls">
+	<span id="skip">
+		<a name="controls"></a>
+		<h2>Video Player Controls</h2>
+	</span>
         <input id="oc_btn-skip-backward" class="oc_btn-skip-backward" type="submit" name="Jump To The Previous Slide" alt="Jump To The Previous Slide" title="Jump To The Previous Slide" value=""></input>
         <input id="oc_btn-rewind" class="oc_btn-rewind" type="submit" name="Jump Back: Control + Alt + R" alt="Jump Back: Control + Alt + R" title="Jump Back: Control + Alt + R" value=""></input>
         <input id="oc_btn-play-pause" class="oc_btn-play" type="submit" name="Play: Control + Alt + P"  alt="Play: Control + Alt + P" title="Play: Control + Alt + P" value=""></input>
@@ -91,7 +101,7 @@
               <li>
                 <div id="oc_volume-dropdown-div">
                   <div id="oc_volume-slider">
-                    <div id="slider_volume_Rail" class="oc_slider-volume-Rail" title="Volume">
+                    <div id="slider_volume_Rail" class="oc_slider-volume-Rail" title="Volume" alt="Volume">
                       <label id="volumeLabel" for="slider_volume_Rail" class="oc_offScreen-hidden">Volume</label>
                       <input id="slider_volume_Thumb" class="oc_slider-volume-Thumb" type="submit" value=""></input>
                     </div>
@@ -193,6 +203,10 @@
         </div>
 
         <div id=oc_shortcuts class="oc_DisplayNone fl-fix" >
+	<span id="skip">
+		<a name="shortcuts"></a>
+	</span>
+	  <h4>OS specific shortcuts</h4>
           Press Control + Alt + I    = Toggle the keyboard shortcuts information between show or hide.<br>
           Press Control + Alt + P    = Toggle the video between pause or play.<br>
           Press Control + Alt + S    = Stop the video.<br>
@@ -208,6 +222,11 @@
           Press on Mac cmd -         = to minimize the player<br>
           Press on Windows Control + = to zoom in the player<br>
           Press on Windows Control - = to minimize the player<br>
+	  <h4>Screen reader specific shortcuts</h4>
+	  For JAWS:        press ... <br/>
+	  For NVDA:        press ... <br/>
+	  For ORCA:        press ... <br/>
+	  For Window-Eyes: press ... <br/>
         </div>
         
       </div>

@@ -20,3 +20,15 @@ body {
 	padding-left: 5px;
 	padding-right: 5px;
 }
+
+#skip {
+	position: absolute;
+	width: 80%;
+	top: -300px;
+	left: 0;
+}
+
+#skip a {
+	position: absolute;
+	top: 0;
+}
