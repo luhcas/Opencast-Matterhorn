@@ -38,6 +38,7 @@ import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
+import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -56,7 +57,7 @@ import java.util.concurrent.ExecutionException;
  * run a text analysis on the associated still images. The resulting <code>VideoText</code> elements will then be added
  * to the segments.
  */
-public class TextAnalysisOperationHandler extends AbstractWorkflowOperationHandler {
+public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
 
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(SegmentPreviewsWorkflowOperationHandler.class);
@@ -68,6 +69,9 @@ public class TextAnalysisOperationHandler extends AbstractWorkflowOperationHandl
     CONFIG_OPTIONS = new TreeMap<String, String>();
     CONFIG_OPTIONS.put("source-tags", "The required tags that must exist on the catalog");
   }
+
+  /** The local workspace */
+  private Workspace workspace = null;
 
   /** The text analysis service */
   private TextAnalyzer textAnalysisService = null;
@@ -91,7 +95,7 @@ public class TextAnalysisOperationHandler extends AbstractWorkflowOperationHandl
    * @param textAnalyzer
    *          the text analysis service
    */
-  protected void setTextAnalysisService(TextAnalyzer textAnalyzer) {
+  protected void setTextAnalyzer(TextAnalyzer textAnalyzer) {
     this.textAnalysisService = textAnalyzer;
   }
 
@@ -103,6 +107,17 @@ public class TextAnalysisOperationHandler extends AbstractWorkflowOperationHandl
    */
   protected void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
     this.trustedHttpClient = trustedHttpClient;
+  }
+
+  /**
+   * Callback for declarative services configuration that will introduce us to the local workspace service.
+   * Implementation assumes that the reference is configured as being static.
+   * 
+   * @param workspace
+   *          an instance of the workspace
+   */
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
   }
 
   /**
