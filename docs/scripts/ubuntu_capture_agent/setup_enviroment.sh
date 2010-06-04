@@ -48,6 +48,7 @@ echo -n "Setting up maven and felix enviroment for $USERNAME... "
 EXPORT_M2_REPO="export M2_REPO=${M2_REPO}"
 EXPORT_FELIX_HOME="export FELIX_HOME=${FELIX_HOME}"
 EXPORT_JAVA_HOME="export JAVA_HOME=${JAVA_HOME}"
+EXPORT_SOURCE_HOME="export MATTERHORN_SOURCE=${SOURCE}"
 
 grep -e "${EXPORT_M2_REPO}" $HOME/.bashrc &> /dev/null
 if [ "$?" -ne 0 ]; then
@@ -61,6 +62,12 @@ grep -e "${EXPORT_JAVA_HOME}" $HOME/.bashrc &> /dev/null
 if [ "$?" -ne 0 ]; then
     echo "${EXPORT_JAVA_HOME}" >> $HOME/.bashrc
 fi
+grep -e "${EXPORT_SOURCE_HOME}" $HOME/.bashrc &> /dev/null
+if [ "$?" -ne 0 ]; then
+    echo "${EXPORT_SOURCE_HOME}" >> $HOME/.bashrc
+fi
+echo "alias deploy=\"mvn install -DdeployTo=$FELIX_HOME/load\""
+echo "alias redeploy=\"mvn clean && deploy"
 
 #chown $USERNAME:$USERNAME $HOME/.bashrc
 
