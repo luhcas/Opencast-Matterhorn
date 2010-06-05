@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.capture.api.CaptureAgent" immediate="true" activate="activate">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.capture.api.CaptureAgent" immediate="true" activate="activate">
   <implementation class="org.opencastproject.capture.impl.CaptureAgentImpl" />
   <property name="service.description" value="Capture Service" />
   <property name="service.pid" value="org.opencastproject.capture.impl.CaptureAgentImpl" />
@@ -14,4 +15,4 @@
     cardinality="1..1" policy="static" bind="setConfigService" />
   <reference name="trustedClient" interface="org.opencastproject.security.api.TrustedHttpClient"
     cardinality="1..1" policy="dynamic" bind="setTrustedClient" />
-</component>
+</scr:component>

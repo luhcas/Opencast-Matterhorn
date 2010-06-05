@@ -60,7 +60,7 @@ public class MediaInspectionServiceImplTest {
     service.setWorkspace(workspace);
 
     RemoteServiceManager rs = EasyMock.createNiceMock(RemoteServiceManager.class);
-    EasyMock.expect(rs.createReceipt(MediaInspectionService.RECEIPT_TYPE)).andReturn(new ReceiptStub()).anyTimes();
+    EasyMock.expect(rs.createReceipt(MediaInspectionService.JOB_TYPE)).andReturn(new ReceiptStub()).anyTimes();
     EasyMock.replay(rs);
     service.setRemoteServiceManager(rs);
     
@@ -148,7 +148,7 @@ public class MediaInspectionServiceImplTest {
       return status;
     }
     public String getType() {
-      return MediaInspectionService.RECEIPT_TYPE;
+      return MediaInspectionService.JOB_TYPE;
     }
     public void setElement(MediaPackageElement element) {
       this.element = element;

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="admin.ui" immediate="true" activate="activate" deactivate="deactivate">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+  name="admin.ui" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.http.StaticResource" />
   <property name="service.description" value="Administrative UIs" />
   <property name="alias" value="/admin" />
@@ -15,4 +16,4 @@
     cardinality="1..1" policy="static" bind="setHttpService" />
   <reference name="http-context" interface="org.osgi.service.http.HttpContext"
     cardinality="1..1" policy="static" bind="setHttpContext" />
-</component>
+</scr:component>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.capture.endpoint.ConfidenceMonitorRestService" activate="activate" immediate="true">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.capture.endpoint.ConfidenceMonitorRestService" activate="activate" immediate="true">
   <implementation class="org.opencastproject.capture.endpoint.ConfidenceMonitorRestService" />
   <property name="service.description" value="Confidence Monitoring REST Endpoint" />
   <property name="opencast.rest.url" value="/confidence/rest" />
@@ -8,5 +9,5 @@
   </service>
   <reference name="monitor-impl" interface="org.opencastproject.capture.api.ConfidenceMonitor"
     cardinality="1..1" policy="static" bind="setService" unbind="unsetService"/>
-</component>
+</scr:component>
 

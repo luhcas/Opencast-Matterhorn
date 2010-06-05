@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.series.endpoint.SeriesRestService" immediate="true" activate="activate" deactivate="deactivate">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.series.endpoint.SeriesRestService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.series.endpoint.SeriesRestService" />
   <property name="service.description" value="Series REST Endpoint" />
   <property name="opencast.rest.url" value="/series/rest" />
@@ -8,4 +9,4 @@
   </service>
   <reference name="service-impl" interface="org.opencastproject.series.api.SeriesService"
     cardinality="0..1" policy="dynamic" bind="setService" unbind="unsetService" />     
-</component>
+</scr:component>

@@ -151,7 +151,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
     
     serverUrl = (String)cc.getBundleContext().getProperty("org.opencastproject.server.url");
     // Register as a handler
-    remoteServiceManager.registerService(RECEIPT_TYPE, serverUrl);
+    remoteServiceManager.registerService(JOB_TYPE, serverUrl);
   }
 
   /** Separating this from the activate method so it's easier to test */
@@ -161,7 +161,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
   }
 
   protected void deactivate() {
-    remoteServiceManager.unRegisterService(RECEIPT_TYPE, serverUrl);
+    remoteServiceManager.unRegisterService(JOB_TYPE, serverUrl);
   }
 
   /**
@@ -213,7 +213,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
           final String profileId, final boolean block) throws EncoderException, MediaPackageException {
     if(maintenanceMode) throw new MaintenanceException();
     final String targetTrackId = idBuilder.createNew().toString();
-    final Receipt composerReceipt = remoteServiceManager.createReceipt(RECEIPT_TYPE);
+    final Receipt composerReceipt = remoteServiceManager.createReceipt(JOB_TYPE);
 
     // Get the tracks and make sure they exist
     Track audioTrack = mp.getTrack(sourceAudioTrackId);
@@ -390,7 +390,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
     } catch (NotFoundException e) {
       throw new MediaPackageException("unable to access video track " + videoTrack, e);
     }
-    final Receipt receipt = remoteServiceManager.createReceipt(RECEIPT_TYPE);
+    final Receipt receipt = remoteServiceManager.createReceipt(JOB_TYPE);
 
     Runnable runnable = new Runnable() {
       @Override
@@ -469,7 +469,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
    */
   @Override
   public long countJobs(Status status) {
-    return remoteServiceManager.count(RECEIPT_TYPE, status);
+    return remoteServiceManager.count(JOB_TYPE, status);
   }
 
   /**
@@ -479,7 +479,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
    */
   @Override
   public long countJobs(Status status, String host) {
-    return remoteServiceManager.count(RECEIPT_TYPE, status, host);
+    return remoteServiceManager.count(JOB_TYPE, status, host);
   }
 
   /**

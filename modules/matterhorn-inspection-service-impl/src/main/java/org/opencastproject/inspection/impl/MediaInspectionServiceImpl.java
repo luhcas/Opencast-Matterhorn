@@ -111,11 +111,11 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
 
   public void activate() {
     executor = Executors.newFixedThreadPool(4);
-    remoteServiceManager.registerService(RECEIPT_TYPE, serverUrl);
+    remoteServiceManager.registerService(JOB_TYPE, serverUrl);
   }
 
   public void deactivate() {
-    remoteServiceManager.unRegisterService(RECEIPT_TYPE, serverUrl);
+    remoteServiceManager.unRegisterService(JOB_TYPE, serverUrl);
   }
   
   /**
@@ -137,7 +137,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
     logger.debug("inspect(" + uri + ") called, using workspace " + workspace);
 
     // Construct a receipt for this operation
-    final Receipt receipt = remoteServiceManager.createReceipt(RECEIPT_TYPE);
+    final Receipt receipt = remoteServiceManager.createReceipt(JOB_TYPE);
     final RemoteServiceManager rs = remoteServiceManager;
     Callable<Track> command = new Callable<Track>() {
       public Track call() throws Exception {
@@ -419,7 +419,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
   @Override
   public Receipt enrich(final MediaPackageElement element, final boolean override, final boolean block) {
     Callable<MediaPackageElement> command;
-    final Receipt receipt = remoteServiceManager.createReceipt(RECEIPT_TYPE);
+    final Receipt receipt = remoteServiceManager.createReceipt(JOB_TYPE);
     if (element instanceof Track) {
       final Track originalTrack = (Track) element;
       command = getEnrichTrackCommand(originalTrack, override, receipt);

@@ -187,7 +187,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
     serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     if(serverUrl == null) throw new IllegalStateException("property 'org.opencastproject.server.url' must be configured");
 
-    // Register as a handler for RECEIPT_TYPE receipts
+    // Register as a handler for JOB_TYPE receipts
     remoteServiceManager.registerService(RECEIPT_TYPE, serverUrl);
   }
 

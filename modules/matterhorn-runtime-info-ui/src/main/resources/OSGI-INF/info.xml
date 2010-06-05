@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.runtimeinfo.ServiceInfo" immediate="true" activate="activate" deactivate="deactivate">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.runtimeinfo.ServiceInfo" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.runtimeinfo.ServiceInfo" />
   <property name="service.description" value="Service Listing User Interface" />
   <service>
@@ -7,4 +8,4 @@
   </service>
   <reference name="http-service" interface="org.osgi.service.http.HttpService"
     cardinality="1..1" policy="static" bind="setHttpService" />
-</component>
+</scr:component>

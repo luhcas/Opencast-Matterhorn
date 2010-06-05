@@ -26,13 +26,17 @@ import org.opencastproject.media.mediapackage.MediaPackageBuilder;
 import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
 
 import org.apache.commons.io.FileUtils;
+import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.osgi.framework.BundleContext;
+import org.osgi.service.component.ComponentContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +58,10 @@ public class SearchServiceImplTest {
   public void setup() {
     service = new SearchServiceImpl(solrRoot);
     service.setDublincoreService(new DublinCoreCatalogService());
-    service.activate(null);
+    service.setupSolr(solrRoot);
+    RemoteServiceManager remote = EasyMock.createNiceMock(RemoteServiceManager.class);
+    EasyMock.replay(remote);
+    service.setRemoteServiceManager(remote);
   }
 
   @After

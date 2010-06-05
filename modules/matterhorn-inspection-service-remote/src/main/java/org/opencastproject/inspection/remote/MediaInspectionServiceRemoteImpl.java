@@ -68,7 +68,7 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
    */
   @Override
   public Receipt inspect(URI uri, boolean block) {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
     List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
     queryStringParams.add(new BasicNameValuePair("uri", uri.toString()));
 
@@ -108,7 +108,7 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
    */
   @Override
   public Receipt enrich(MediaPackageElement original, boolean override, boolean block) {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     try {
       params.add(new BasicNameValuePair("mediaPackageElement", ((AbstractMediaPackageElement)original).getAsXml()));
@@ -173,7 +173,7 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
    */
   @Override
   public Receipt getReceipt(String id) {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
     for(String remoteHost : remoteHosts) {
       logger.debug("Returning a Receipt(" + id + ") from a remote server: " + remoteHost);
       String url = remoteHost + "/inspection/rest/receipt/" + id + ".xml";

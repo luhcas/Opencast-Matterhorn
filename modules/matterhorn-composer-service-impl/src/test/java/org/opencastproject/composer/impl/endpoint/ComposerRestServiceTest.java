@@ -56,7 +56,7 @@ public class ComposerRestServiceTest {
     audioTrackId = "audio1";
     videoTrackId = "video1";
     profileId = "profile1";
-    receipt = new ReceiptImpl("123", org.opencastproject.remote.api.Receipt.Status.QUEUED, ComposerService.RECEIPT_TYPE, "encoding_farm_server_456", null);
+    receipt = new ReceiptImpl("123", org.opencastproject.remote.api.Receipt.Status.QUEUED, ComposerService.JOB_TYPE, "encoding_farm_server_456", null);
     profile = new EncodingProfileImpl();
     profile.setIdentifier(profileId);
     List<EncodingProfileImpl> list = new ArrayList<EncodingProfileImpl>();

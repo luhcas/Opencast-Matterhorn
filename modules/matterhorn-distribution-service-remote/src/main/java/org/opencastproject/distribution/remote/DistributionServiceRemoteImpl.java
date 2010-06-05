@@ -42,12 +42,11 @@ import java.util.List;
  */
 public class DistributionServiceRemoteImpl implements DistributionService {
   private static final Logger logger = LoggerFactory.getLogger(DistributionServiceRemoteImpl.class);
-  public static final String REMOTE_SERVICE_TYPE = "org.opencastproject.distribution";
+  public static final String REMOTE_SERVICE_TYPE_PREFIX = "org.opencastproject.distribution.";
   public static final String REMOTE_SERVICE_CHANNEL = "distribution.channel";
   protected String distributionChannel;
   protected TrustedHttpClient trustedHttpClient;
   protected RemoteServiceManager remoteServiceManager;
-  protected String serverUrl;
 
   public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
     this.trustedHttpClient = trustedHttpClient;
@@ -59,9 +58,6 @@ public class DistributionServiceRemoteImpl implements DistributionService {
 
   protected void activate(ComponentContext cc) {
     this.distributionChannel = (String) cc.getProperties().get(REMOTE_SERVICE_CHANNEL);
-    serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
-    if (serverUrl == null)
-      throw new IllegalStateException("property 'org.opencastproject.server.url' must be configured");
   }
 
   /**
@@ -78,7 +74,7 @@ public class DistributionServiceRemoteImpl implements DistributionService {
     } catch (MediaPackageException e) {
       throw new DistributionException("Unable to marshall mediapackage to xml: " + e.getMessage());
     }
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(REMOTE_SERVICE_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(REMOTE_SERVICE_TYPE_PREFIX + distributionChannel);
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("mediapackage", xml));
     if (elementIds != null && elementIds.length > 0) {
@@ -121,7 +117,7 @@ public class DistributionServiceRemoteImpl implements DistributionService {
     }
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("mediapackage", xml));
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(REMOTE_SERVICE_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(REMOTE_SERVICE_TYPE_PREFIX + distributionChannel);
     for(String remoteHost : remoteHosts) {
       String url = remoteHost + "/distribution/rest/retract/" + distributionChannel;
       HttpPost post = new HttpPost(url);

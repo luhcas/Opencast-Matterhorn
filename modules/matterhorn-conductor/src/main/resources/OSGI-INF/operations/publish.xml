@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.workflow.handler.PublishWorkflowOperationHandler" immediate="true" activate="activate">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.workflow.handler.PublishWorkflowOperationHandler" immediate="true">
   <implementation class="org.opencastproject.workflow.handler.PublishWorkflowOperationHandler" />
   <property name="service.description" value="Publish Workflow Operation Handler" />
   <property name="workflow.operation" value="publish" />
@@ -8,4 +9,4 @@
   </service>
   <reference cardinality="1..1" interface="org.opencastproject.search.api.SearchService"
   name="SearchService" policy="static" bind="setSearchService"/>
-</component>
+</scr:component>

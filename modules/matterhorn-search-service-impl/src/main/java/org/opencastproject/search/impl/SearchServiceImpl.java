@@ -19,6 +19,7 @@ package org.opencastproject.search.impl;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
@@ -70,6 +71,14 @@ public class SearchServiceImpl implements SearchService {
 
   private Mpeg7CatalogService mpeg7Service;
 
+  protected String serverUrl = null;
+  
+  protected RemoteServiceManager remoteServiceManager;
+
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
+  }
+
   public void setDublincoreService(DublinCoreCatalogService dcService) {
     this.dcService = dcService;
     if (solrIndexManager != null)
@@ -117,10 +126,13 @@ public class SearchServiceImpl implements SearchService {
       // DEFAULT
       log_.info("DEFAULT " + CONFIG_SOLR_ROOT + ": " + this.solrRoot);
     }
+    serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     setupSolr(this.solrRoot);
+    remoteServiceManager.registerService(JOB_TYPE, serverUrl);
   }
 
   public void deactivate() {
+    remoteServiceManager.unRegisterService(JOB_TYPE, serverUrl);
     try {
       solrConnection.destroy();
       // Needs some time to close properly
@@ -137,7 +149,7 @@ public class SearchServiceImpl implements SearchService {
    * @param solrRoot
    *          the solr root directory
    */
-  private void setupSolr(String solrRoot) {
+  protected void setupSolr(String solrRoot) {
     try {
       log_.info("Setting up solr search index at {}", solrRoot);
       File solrConfigDir = new File(solrRoot, "conf");

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.engageui.endpoint.EngageuiRestService" immediate="true" activate="activate" deactivate="deactivate">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.engageui.endpoint.EngageuiRestService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.engageui.endpoint.EngageuiRestService" />
   <property name="service.description" value="Engage UI REST Proxy" />
   <property name="opencast.rest.url" value="/engageui/rest" />
@@ -8,4 +9,4 @@
   </service>
   <reference name="search-service" interface="org.opencastproject.search.api.SearchService"
     cardinality="0..1" policy="dynamic" bind="setSearchService" unbind="unsetSearchService" />
-</component>
+</scr:component>

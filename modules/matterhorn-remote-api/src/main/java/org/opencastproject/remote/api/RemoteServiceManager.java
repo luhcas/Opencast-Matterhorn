@@ -19,36 +19,27 @@ import org.opencastproject.remote.api.Receipt.Status;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Manages {@link Receipt}s for asynchronous services.
+ * Manages clustered services and the {@link Receipt}s they may create to enable asynchronous job handling.
  */
 public interface RemoteServiceManager {
 
   /**
-   * Registers a host that can handle a specific receipt type
+   * Registers a host to handle a specific type of job
    * 
-   * @param jobType
-   * @param baseUrl
+   * @param jobType The job type
+   * @param baseUrl The base URL where the service that can handle this job type can be found
    */
   void registerService(String jobType, String baseUrl);
 
   /**
-   * Registers a host
+   * Unregisters a host from handling a specific type of job
    * 
    * @param jobType
    * @param baseUrl
    */
   void unRegisterService(String jobType, String baseUrl);
-
-  /**
-   * Get all of the hosts that can handle a specific receipt type
-   * 
-   * @param jobType
-   * @return
-   */
-  List<String> getHosts(String jobType);
   
   /**
    * Parses an xml string representing a Receipt
@@ -86,7 +77,7 @@ public interface RemoteServiceManager {
   Receipt getReceipt(String id);
   
   /**
-   * Count the number of receipts of this type in this {@link Status}
+   * Count the number of receipts of this type in this {@link Status} across all hosts
    * @param type The type of receipts
    * @param status The status of the receipts
    * @return
@@ -101,14 +92,6 @@ public interface RemoteServiceManager {
    * @return
    */
   long count(String type, Status status, String host);
-  
-  /**
-   * Get the receipt counts for a receipt type and statuses.
-   * @param type The type of receipts
-   * @param statuses The status of the receipts
-   * @return
-   */
-  Map<String, Long> getHostsCount(String type, Status[] statuses);
 
   /**
    * Finds the remote services, ordered by their load (lightest to heaviest).

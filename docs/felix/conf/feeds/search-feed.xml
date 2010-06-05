@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.feed.impl.CustomFeedService-search" immediate="true" activate="activate" deactivate="deactivate">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.feed.impl.CustomFeedService-search" immediate="true" activate="activate">
   <implementation class="org.opencastproject.feed.impl.CustomFeedService" />
   <property name="service.description" value="Episode Search Feed" />
   <property name="feed.uri" value="search" />
@@ -21,4 +22,4 @@
     <provide interface="org.opencastproject.feed.api.FeedGenerator" />
   </service>
   <reference name="service-impl" interface="org.opencastproject.search.api.SearchService" cardinality="1..1" policy="static" bind="setSearchService" />
-</component>
+</scr:component>

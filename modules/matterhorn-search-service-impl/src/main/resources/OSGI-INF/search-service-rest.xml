@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.search.endpoint.SearchRestService" immediate="true">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.search.endpoint.SearchRestService" immediate="true">
   <implementation class="org.opencastproject.search.endpoint.SearchRestService" />
   <property name="service.description" value="Search REST Endpoint" />
   <property name="opencast.rest.url" value="/search/rest" />
@@ -8,4 +9,4 @@
   </service>
   <reference name="service-impl" interface="org.opencastproject.search.api.SearchService"
     cardinality="1..1" policy="static" bind="setSearchService" />
-</component>
+</scr:component>

@@ -111,7 +111,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
     if (host != null) {
       queryStringParams.add(new BasicNameValuePair("host", host));
     }
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/count?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
       HttpGet get = new HttpGet(url);
@@ -174,7 +174,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   public Receipt encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
           String profileId, boolean block) throws EncoderException, MediaPackageException {
     Receipt r = null;
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/encode";
       HttpPost post = new HttpPost(url);
@@ -217,7 +217,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public EncodingProfile getProfile(String profileId) {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/profile/" + profileId + ".xml";
       HttpGet get = new HttpGet(url);
@@ -242,7 +242,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public Receipt getReceipt(String id) {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/receipt/" + id + ".xml";
       HttpGet get = new HttpGet(url);
@@ -296,7 +296,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
 
     Receipt r = null;
 
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/image";
       HttpPost post = new HttpPost(url);
@@ -331,7 +331,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
    */
   @Override
   public EncodingProfile[] listProfiles() {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
     for (String remoteHost : remoteHosts) {
       
       String url = remoteHost + "/composer/rest/profiles.xml";

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.workflow.impl.WorkflowServiceImplDao" immediate="true" activate="activate" deactivate="deactivate">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.workflow.impl.WorkflowServiceImplDao" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.workflow.impl.WorkflowServiceImplDaoFileImpl" />
   <property name="service.description" value="Workflow Service DAO" />
   <service>
@@ -7,4 +8,4 @@
   </service>
   <reference name="REPO" interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository"
     cardinality="1..1" policy="static" bind="setRepository" />
-</component>
+</scr:component>

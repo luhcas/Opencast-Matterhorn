@@ -154,11 +154,15 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   }
 
   /**
-   * {@inheritDoc}
-   * @see org.opencastproject.remote.api.RemoteServiceManager#getHostsCount(java.lang.String, org.opencastproject.remote.api.Receipt.Status[])
+   * Gets a map of hosts to the number of jobs that are in the specified statuses.  For instance, a call such as
+   * getHostscount("org.opencastproject.composer", new Status[] {RUNNING}) would return map where the keys are the hosts
+   * that are currently running composer jobs, and the value is the number of running jobs on that host.
+   * 
+   * @param type The job type
+   * @param statuses The statuses to query
+   * @return
    */
-  @Override
-  public Map<String, Long> getHostsCount(String type, Status[] statuses) {
+  protected Map<String, Long> getHostsCount(String type, Status... statuses) {
     EntityManager em = emf.createEntityManager();
     try {
       Query query = em.createQuery("SELECT r.host, COUNT(r) FROM Receipt r where r.status in :statuses and r.type = :type group by r.host");
@@ -289,18 +293,18 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
       em.close();
     }
   }
-  
+
   /**
-   * {@inheritDoc}
-   * @see org.opencastproject.remote.api.RemoteServiceManager#getHosts(java.lang.String)
+   * Get the lists of hosts that can handle this jobType
+   * @param jobType The job type
+   * @return the list of hosts that can handle this kind of job
    */
   @SuppressWarnings("unchecked")
-  @Override
-  public List<String> getHosts(String receiptType) {
+  protected List<String> getHosts(String jobType) {
     EntityManager em = emf.createEntityManager();
     try {
       Query query = em.createQuery("SELECT DISTINCT rh.host FROM ReceiptHandler rh where rh.receiptType = :receiptType");
-      query.setParameter("receiptType", receiptType);
+      query.setParameter("receiptType", jobType);
       return query.getResultList();
     } finally {
       em.close();

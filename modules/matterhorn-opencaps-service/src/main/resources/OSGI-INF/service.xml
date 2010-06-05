@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.opencaps.OpencapsService" immediate="true" activate="activate" deactivate="deactivate">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.opencaps.OpencapsService" immediate="true" activate="activate" deactivate="deactivate">
     <implementation class="org.opencastproject.opencaps.OpencapsService" />
     <property name="service.description"
         value="Captions Service - handles captionable lookup and attachment of caption data" />
@@ -14,4 +15,4 @@
         <provide interface="org.opencastproject.opencaps.OpencapsService" />
         <provide interface="org.opencastproject.workflow.api.WorkflowOperationHandler" />
     </service>
-</component>
+</scr:component>

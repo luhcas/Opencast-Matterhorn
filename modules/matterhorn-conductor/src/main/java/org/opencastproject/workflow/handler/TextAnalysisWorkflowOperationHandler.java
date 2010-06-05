@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.analysis.text.TextAnalyzer;
+import org.opencastproject.analysis.api.MediaAnalysisService;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
@@ -74,7 +74,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
   private Workspace workspace = null;
 
   /** The text analysis service */
-  private TextAnalyzer textAnalysisService = null;
+  private MediaAnalysisService analysisService = null;
 
   /** The trusted http client, used to load mpeg7 catalogs */
   private TrustedHttpClient trustedHttpClient = null;
@@ -95,8 +95,8 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    * @param textAnalyzer
    *          the text analysis service
    */
-  protected void setTextAnalyzer(TextAnalyzer textAnalyzer) {
-    this.textAnalysisService = textAnalyzer;
+  protected void setTextAnalyzer(MediaAnalysisService analysisService) {
+    this.analysisService = analysisService;
   }
 
   /**
@@ -237,7 +237,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         // If there is a corresponding spaciotemporal decomposition, remove all the videotext elements
         // TODO: Remove existing videotext elements
 
-        Receipt receipt = textAnalysisService.analyze(images[0], true);
+        Receipt receipt = analysisService.analyze(images[0], true);
         Mpeg7Catalog videoTextCatalog = (Mpeg7Catalog)receipt.getElement();
         if (videoTextCatalog == null)
           throw new RuntimeException("Text analysis service did not return a result");

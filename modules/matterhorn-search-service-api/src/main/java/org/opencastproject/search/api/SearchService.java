@@ -24,7 +24,11 @@ import org.opencastproject.media.mediapackage.MediaPackage;
  * TODO: Improve documentation
  */
 public interface SearchService {
-
+  /**
+   * Identifier for service registration and location
+   */
+  String JOB_TYPE="org.opencastproject.search";
+  
   /**
    * Adds the media package to the search index.
    * 

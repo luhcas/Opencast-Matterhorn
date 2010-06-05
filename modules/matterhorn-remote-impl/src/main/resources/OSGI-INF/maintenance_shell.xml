@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.remote.command.MaintenanceCommand" immediate="true" activate="activate" deactivate="deactivate">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.remote.command.MaintenanceCommand" immediate="true">
   <implementation class="org.opencastproject.remote.command.MaintenanceCommand" />
   <property name="service.description" value="Maintenance Command (m:set id true|false, m:list)" />
   <property name="osgi.command.scope" value="m" />
@@ -12,4 +13,4 @@
   </service>
   <reference name="maint" interface="org.opencastproject.remote.api.Maintainable"
     cardinality="0..n" policy="dynamic" bind="addMaintainable" unbind="removeMaintainable" />
-</component>
+</scr:component>

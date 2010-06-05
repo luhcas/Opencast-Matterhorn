@@ -49,7 +49,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
  */
 @Entity(name="Receipt")
 @Access(AccessType.PROPERTY)
-@Table(name="MH_RECEIPT")
+@Table(name="JOB")
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="receipt", namespace="http://receipt.opencastproject.org/")
 public class ReceiptImpl implements Receipt {

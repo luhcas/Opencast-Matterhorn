@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component name="org.opencastproject.feedback.api.FeedbackService" immediate="true" activate="activate" deactivate="deactivate">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.feedback.api.FeedbackService" immediate="true" activate="activate" deactivate="deactivate">
 	<implementation class="org.opencastproject.feedback.impl.FeedbackServiceImpl" />
 	<property name="service.description" value="Feedback Service" />
 	<service>
@@ -7,4 +8,4 @@
 	</service>
 	<reference name="persistence" interface="javax.persistence.spi.PersistenceProvider" cardinality="1..1" policy="static" bind="setPersistenceProvider" />
   <reference name="props" interface="java.util.Map" cardinality="1..1" policy="static" target="(type=persistence)" bind="setPersistenceProperties" />
-</component>
+</scr:component>

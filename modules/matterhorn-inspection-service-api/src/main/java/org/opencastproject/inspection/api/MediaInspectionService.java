@@ -25,9 +25,9 @@ import java.net.URI;
  */
 public interface MediaInspectionService {
   /**
-   * The namespace distinguishing media inspection receipts from other types
+   * The namespace distinguishing media inspection jobs from other types
    */
-  String RECEIPT_TYPE = "org.opencastproject.inspection";
+  String JOB_TYPE = "org.opencastproject.inspection";
 
   /**
    * Inspect a track based on a given uri to the track and put the gathered data into the track

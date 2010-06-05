@@ -19,11 +19,13 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * A record of a service that creates and manages receipts.
  */
 @Entity
+@Table(name="SERVICE_REGISTRATION")
 public class ReceiptHandler {
 
   @Id
