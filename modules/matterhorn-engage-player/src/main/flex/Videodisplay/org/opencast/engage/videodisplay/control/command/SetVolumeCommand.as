@@ -17,7 +17,6 @@ package org.opencast.engage.videodisplay.control.command
 {
     import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
-    import org.opencast.engage.videodisplay.state.MediaState;
     import org.swizframework.Swiz;
 
     public class SetVolumeCommand
@@ -39,7 +38,7 @@ package org.opencast.engage.videodisplay.control.command
          * */
         public function execute( event:SetVolumeEvent ):void
         {
-            model.mediaPlayer.volume = event.volume;
+            model.mediaPlayer.setVolume( event.volume );
             model.playerVolume = event.volume;
         }
     }

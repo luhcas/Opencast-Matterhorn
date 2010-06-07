@@ -27,27 +27,42 @@ table
 #oc_title-bar
 {
   min-width:                760px;
-  height:                   26px;
-  margin-left:              5px;
-  margin-right:             5px;
+  margin-left:              10%;
+  margin-right:             10%;
+}
+
+#oc_title-bar-container
+{
+  display:                  table-row; 
+  width:                    100%
+}
+
+#oc_title-bar-logo
+{
+  display:                  table-cell; 
+}
+
+#oc_title-bar-heading
+{
+  display:                  table-cell; 
+  width:                    100%;
 }
 
 #oc_title
 {
-  float:                    left;
+  padding-left:             5px;
   font-size:                1.5em;
   text-align:               left;
   height:                   100%;
+  vertical-align:           bottom;
 }
 
 #oc_title_from
 {
-  float:                    left;
   font-size:                1.0em;
   text-align:               left;
   height:                   100%;
-  padding-left:             5px; 
-  margin-top:               8px;
+  vertical-align:           bottom;  
 }
 
 #oc_search
@@ -55,6 +70,9 @@ table
   float:                    right;
   height:                   100%;
   padding-top:              3px;
+  display:                  table-cell;
+  white-space:              nowrap;
+  float:                    right;
 }
 
 .oc_search-Field
@@ -65,7 +83,7 @@ table
   background-image:         url(../icons/magnifier.png);
   background-repeat:        no-repeat;
   padding-left:             20px;
-  width:                    140px !important;
+  width:                    150px !important;
  }
 
 #oc_btn-search
@@ -554,7 +572,7 @@ option:hover
 
 .oc-segments-holder
 {
-  overflow-x:scroll;
+  overflow-x:hidden;
   overflow-y:hidden;
   border:1px;
   border-style:solid;
@@ -605,7 +623,7 @@ option:hover
   margin-left:              -6px;
   position:                 relative; 
   border:                   0px;
-  top:                      -15px; 
+  top:                      -11px; 
   z-index:                  2;
 }
 
@@ -619,7 +637,7 @@ option:hover
   margin-left:              -6px;
   position:                 relative; 
   border:                   0px;
-  top:                      -16px; 
+  top:                      -12px; 
   z-index:                  3;
 }
 
@@ -678,14 +696,14 @@ option:hover
 {
   background-image:url("../img/icons.png");
   background-position: 0 -432px;
-  height: 13px;
+  height: 7px;
 }
 
 .load-progress 
 {
   background-image:url("../img/icons.png");
   background-position: 0 -419px;
-  height: 13px;
+  height: 7px;
   display:block;
   margin-top:0;
   position:relative;

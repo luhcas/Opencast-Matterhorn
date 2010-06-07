@@ -50,14 +50,11 @@
              *  */
             public function initPlayer():void
             {
-                // Set up the media player
-                model.mediaPlayer = new MediaPlayer();
-                model.mediaPlayer.autoRewind = true;
-                model.mediaPlayer.autoPlay = true;
-                model.mediaPlayer.volume = 0;
+               
                
                 // Set up the container
                 model.mediaContainer = new MediaContainer();
+               
                 
                 this.mediaContainerUIComponent.container = model.mediaContainer;
                 

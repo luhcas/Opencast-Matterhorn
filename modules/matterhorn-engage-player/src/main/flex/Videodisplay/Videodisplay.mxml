@@ -87,7 +87,6 @@
                 else
                 {
                     model.fullscreenMode = false;
-                    model.layoutMetadataParallelElement.verticalAlign = VerticalAlign.BOTTOM;
                 }
             }
 
@@ -179,6 +178,8 @@
                 value = "true"
                 />
         </mx:State>
+        
+        
     </mx:states>
 
     <br:FABridge />
@@ -193,6 +194,7 @@
     	id="bx_media"
     	visible = "false"
         includeInLayout = "false"
+        currentState="{ model.videoState }"
     	/>
 
     <view:ErrorView 

@@ -55,7 +55,7 @@ package org.opencast.engage.videodisplay.control.command
             switch ( event.videoControlType )
             {
                 case VideoControlEvent.PLAY:
-                	if( !model.mediaPlayer.playing )
+                	if( !model.mediaPlayer.playing() )
                 	{
                 		model.mediaPlayer.play();
                 	}
@@ -65,7 +65,7 @@ package org.opencast.engage.videodisplay.control.command
                 	break;
 
                 case VideoControlEvent.PAUSE:
-                    if( model.mediaPlayer.playing )
+                    if( model.mediaPlayer.playing() )
                     {
                         model.mediaPlayer.pause();
                     }
@@ -75,7 +75,7 @@ package org.opencast.engage.videodisplay.control.command
                     break;
 
                 case VideoControlEvent.STOP:
-                    if( model.mediaPlayer.playing )
+                    if( model.mediaPlayer.playing() )
                     {
                         model.mediaPlayer.pause();
                         model.mediaPlayer.seek( 0 );
@@ -91,9 +91,9 @@ package org.opencast.engage.videodisplay.control.command
                     
                 case VideoControlEvent.SKIPBACKWARD:
                 	
-                	playState = model.mediaPlayer.playing;
+                	playState = model.mediaPlayer.playing();
                 	
-                	if( model.mediaPlayer.playing )
+                	if( model.mediaPlayer.playing() )
                 	{
                 	   model.mediaPlayer.pause();
                 	}
@@ -108,7 +108,7 @@ package org.opencast.engage.videodisplay.control.command
 
                 case VideoControlEvent.REWIND:
                     
-                    if( model.mediaPlayer.playing )
+                    if( model.mediaPlayer.playing() )
                     {
                         model.mediaPlayer.pause();
                     }
@@ -125,7 +125,7 @@ package org.opencast.engage.videodisplay.control.command
 
                 case VideoControlEvent.FASTFORWARD:
                 
-                	if( model.mediaPlayer.playing )
+                	if( model.mediaPlayer.playing() )
                     {
                         model.mediaPlayer.pause();
                     }
@@ -140,9 +140,9 @@ package org.opencast.engage.videodisplay.control.command
                     break;
 
                 case VideoControlEvent.SKIPFORWARD:
-                    playState = model.mediaPlayer.playing;
+                    playState = model.mediaPlayer.playing();
                     
-                    if( model.mediaPlayer.playing )
+                    if( model.mediaPlayer.playing() )
                     {
                        model.mediaPlayer.pause();
                     }
@@ -157,36 +157,36 @@ package org.opencast.engage.videodisplay.control.command
                     
                 case VideoControlEvent.MUTE:
                 
-                	if( model.mediaPlayer.muted )
+                	if( model.mediaPlayer.getMuted() )
                 	{
-                	   model.mediaPlayer.muted = false;
+                	   model.mediaPlayer.setMuted( false);
                 	}
                 	else
                 	{
-                	    model.mediaPlayer.muted = true;
+                	    model.mediaPlayer.setMuted( true );
                 	}
                 	break;
 
                 case VideoControlEvent.VOLUMEUP:
                 
-                	if ( model.mediaPlayer.volume != 1 )
+                	if ( model.mediaPlayer.getVolume() != 1 )
                     {
-                        model.mediaPlayer.volume = model.mediaPlayer.volume + skipVolume;
+                        model.mediaPlayer.setVolume( model.mediaPlayer.getVolume() + skipVolume );
                     }
-                    ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round(model.mediaPlayer.volume * percent) );
+                    ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round(model.mediaPlayer.getVolume() * percent) );
             	    break;
 
                 case VideoControlEvent.VOLUMEDOWN:
                 
-                	if ( model.mediaPlayer.volume != 0 )
+                	if ( model.mediaPlayer.getVolume() != 0 )
                     {
-                        model.mediaPlayer.volume = model.mediaPlayer.volume - skipVolume;
-                        if( model.mediaPlayer.volume < 0 )
+                        model.mediaPlayer.setVolume( model.mediaPlayer.getVolume() - skipVolume );
+                        if( model.mediaPlayer.getVolume() < 0 )
                         {
-                            model.mediaPlayer.volume = 0;
+                            model.mediaPlayer.setVolume( 0 );
                         }
                     }
-                    ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round(model.mediaPlayer.volume * percent) );
+                    ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round(model.mediaPlayer.getVolume() * percent) );
             	    break;
 
                 case VideoControlEvent.SEEKZERO:

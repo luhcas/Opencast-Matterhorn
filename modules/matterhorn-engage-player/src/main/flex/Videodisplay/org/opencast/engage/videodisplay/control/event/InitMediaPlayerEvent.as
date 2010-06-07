@@ -26,20 +26,22 @@ package org.opencast.engage.videodisplay.control.event
         public static var EVENT_NAME:String = 'InitMediaPlayerEvent';
         private var _mediaURLOne:String;
         private var _mediaURLTwo:String;
+        private var _coverURL:String;
 
         /** Constructor */
-        public function InitMediaPlayerEvent( mediaURLOne:String, mediaURLTwo:String, bubbles:Boolean = false, cancelable:Boolean = false )
+        public function InitMediaPlayerEvent( coverURL:String, mediaURLOne:String, mediaURLTwo:String, bubbles:Boolean = false, cancelable:Boolean = false )
         {
             super( EVENT_NAME, bubbles, cancelable );
             _mediaURLOne = mediaURLOne;
             _mediaURLTwo = mediaURLTwo;
+            _coverURL = coverURL;
             
         }
 
         // Override the inherited clone() method.
         override public function clone():Event
         {
-            return new InitMediaPlayerEvent( mediaURLOne, mediaURLTwo, bubbles, cancelable );
+            return new InitMediaPlayerEvent( coverURL, mediaURLOne, mediaURLTwo, bubbles, cancelable );
         }
         
         /**
@@ -60,6 +62,16 @@ package org.opencast.engage.videodisplay.control.event
         public function get mediaURLTwo():String
         {
             return _mediaURLTwo;
+        }
+        
+        /**
+         * coverURL
+         *
+         * Get the coverURL.
+         *  */
+        public function get coverURL():String
+        {
+            return _coverURL;
         }
     }
 }

@@ -15,18 +15,19 @@
  */
 package org.opencast.engage.videodisplay.model
 {
-    
     import mx.collections.ArrayCollection;
     import mx.controls.ProgressBar;
+    import mx.core.Application;
     
+    import org.opencast.engage.videodisplay.control.util.OpencastMediaPlayer;
     import org.opencast.engage.videodisplay.control.util.TimeCode;
     import org.opencast.engage.videodisplay.state.MediaState;
     import org.opencast.engage.videodisplay.state.SoundState;
     import org.opencast.engage.videodisplay.state.VideoSizeState;
+    import org.opencast.engage.videodisplay.state.VideoState;
     import org.opencast.engage.videodisplay.vo.LanguageVO;
     import org.osmf.containers.MediaContainer;
     import org.osmf.layout.LayoutMetadata;
-    import org.osmf.media.MediaPlayer;
 
     [Bindable]
     public class VideodisplayModel
@@ -48,6 +49,12 @@ package org.opencast.engage.videodisplay.model
     
         // AUDIOPLAYER
     	public var AUDIOPLAYER:String = "Audioplayer";
+    	
+    	// HTML
+    	public var HTML:String = 'html';
+    	
+    	// RTMP
+    	public var RTMP:String = 'rtmp';
     	 	
     	// audioURLaudioURL
         public var audioURL:String = "";
@@ -112,6 +119,9 @@ package org.opencast.engage.videodisplay.model
         // mediaState
         public var mediaState:String = MediaState.MEDIA;
         
+        // videoState
+        public var videoState:String = VideoState.COVER;
+        
         // videoSizeState
         public var videoSizeState:String = VideoSizeState.CENTER;
 
@@ -119,21 +129,16 @@ package org.opencast.engage.videodisplay.model
         public var oldSubtitle:String = '';
         
         // mediaPlayer
-        public var mediaPlayer:MediaPlayer;
-        
-        
+        public var mediaPlayer:OpencastMediaPlayer;
         
         // MediaContainer
         public var mediaContainer:MediaContainer;
         
-        // mediaContainerVisible
-        public var mediaContainerVisible:Boolean = false;
+        // mediaContainerOne
+        public var mediaContainerOne:MediaContainer;
         
-        // layoutMetadata
-        public var layoutMetadata:LayoutMetadata;
-        
-        // layoutMetadataParallelElement
-        public var layoutMetadataParallelElement:LayoutMetadata;
+        // mediaContainerTwo
+        public var mediaContainerTwo:MediaContainer;
         
         // layoutMetadataOne
         public var layoutMetadataOne:LayoutMetadata;
@@ -162,8 +167,20 @@ package org.opencast.engage.videodisplay.model
         // bytesTotal
         public var bytesTotal:Number = 0;
         
+         // bytesTotalOne
+        public var bytesTotalOne:Number = 0;
+        
+         // bytesTotalTwo
+        public var bytesTotalTwo:Number = 0;
+        
         // bytesLoaded
         public var bytesLoaded:Number = 0;
+        
+        // bytesLoadedOne
+        public var bytesLoadedOne:Number = 0;
+        
+        // bytesLoadedTwo
+        public var bytesLoadedTwo:Number = 0;
         
         // progress
         public var progress:Number = 0;
@@ -171,10 +188,26 @@ package org.opencast.engage.videodisplay.model
         // soundState
         public var soundState:String = SoundState.VOLUMEMAX;
         
-        // url
-        public var url:String = '';
+        
         
         // loader
         public var loader:Boolean = true;
+        
+        //
+        public var mediaTypeOne:String;
+        
+        //
+        public var mediaTypeTwo:String;
+        
+        // mediaContainerLeftWidth
+        public var mediaContainerLeftWidth:int = ( Application.application.width - 10 ) / 2;
+        
+        // mediaContainerRightWidth
+        public var mediaContainerRightWidth:int = ( Application.application.width - 10 ) / 2;
+        
+        // coverURL
+        public var coverURL:String = '';
+        
+        
     }
 }

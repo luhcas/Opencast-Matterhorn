@@ -120,7 +120,7 @@
              * */
             private function changeVolume():void
             {
-               model.mediaPlayer.volume = hs_volume.value;
+               model.mediaPlayer.setVolume( hs_volume.value );
             }
             
             /**
@@ -143,7 +143,7 @@
              * */
             private function jumpForward():void
             {
-               if( !model.mediaPlayer.seeking )
+               if( !model.mediaPlayer.seeking() )
                {
                 model.mediaPlayer.seek( model.currentPlayhead + ( model.currentDuration * 0.2 ) );
                }
@@ -157,7 +157,7 @@
              * */
             private function jumpBack():void
             {
-               if( !model.mediaPlayer.seeking )
+               if( !model.mediaPlayer.seeking() )
                {
                 model.mediaPlayer.seek( model.currentPlayhead - ( model.currentDuration * 0.2 ) );
                }

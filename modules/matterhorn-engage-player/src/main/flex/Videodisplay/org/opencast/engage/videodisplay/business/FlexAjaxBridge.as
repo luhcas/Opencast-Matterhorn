@@ -20,15 +20,13 @@ package org.opencast.engage.videodisplay.business
     import flash.events.KeyboardEvent;
     import flash.external.ExternalInterface;
     
-    import mx.controls.Alert;
-    
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
     import org.opencast.engage.videodisplay.control.event.InitMediaPlayerEvent;
     import org.opencast.engage.videodisplay.control.event.LoadDFXPXMLEvent;
     import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
     import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
-    import org.osmf.layout.LayoutMode;
+    import org.osmf.layout.HorizontalAlign;
     import org.swizframework.Swiz;
 
     public class FlexAjaxBridge
@@ -175,8 +173,8 @@ package org.opencast.engage.videodisplay.business
         {
             if ( captionsURL != model.captionsURL )
             {
-                var pos:int = model.url.lastIndexOf( "/" );
-                var fileType:String = model.url.substring( pos +1 );
+                model.captionsURL = captionsURL;
+                Swiz.dispatchEvent( new LoadDFXPXMLEvent( model.captionsURL ) );
             }
         }
         
@@ -187,10 +185,10 @@ package org.opencast.engage.videodisplay.business
          * 
          * @param String mediaURLOne, String mediaURLTwo
          */
-        public function setMediaURL( mediaURLOne:String, mediaURLTwo:String ):void
+        public function setMediaURL(coverURL:String, mediaURLOne:String, mediaURLTwo:String ):void
         {
-            Swiz.dispatchEvent( new InitMediaPlayerEvent( mediaURLOne, mediaURLTwo ) );
-            model.url = mediaURLOne;
+            Swiz.dispatchEvent( new InitMediaPlayerEvent(coverURL, mediaURLOne, mediaURLTwo ) );
+
         }
         
         /**
@@ -202,16 +200,41 @@ package org.opencast.engage.videodisplay.business
          */
         public function videoSizeControl( sizeLeft:Number, sizeRight:Number ):void
         {
-			if( sizeLeft == 0 && sizeRight == 100 || sizeLeft == 100 && sizeRight == 0 )
-			{
-			    model.layoutMetadataParallelElement.layoutMode = LayoutMode.NONE;
-			}
-			else
-			{
-		        model.layoutMetadataParallelElement.layoutMode = LayoutMode.HORIZONTAL;
-			}
-			model.layoutMetadataOne.percentWidth = sizeLeft;
-            model.layoutMetadataTwo.percentWidth = sizeRight;
+			
+			
+            
+            if( sizeLeft == 50 &&  sizeRight == 100 )
+            {
+            
+                        
+            
+            }
+            else if( sizeLeft == 100 &&  sizeRight == 50 )
+            {
+            
+            }
+            else if( sizeLeft == 100 &&  sizeRight == 100 )
+            {
+               
+            
+            }
+            else if( sizeLeft == 0 &&  sizeRight == 100 )
+            {
+                
+            
+            }
+            else if( sizeLeft == 100 &&  sizeRight == 0 )
+            {
+               
+            
+            }
+            
+            
+            
+            
+            
+            
+            
 		}
         
         /**
@@ -259,7 +282,7 @@ package org.opencast.engage.videodisplay.business
             // Play or pause the video
             if( charCode == 80 || charCode == 112 ) // P or p
             {
-                if( model.mediaPlayer.playing )
+                if( model.mediaPlayer.playing() )
                 {
                     Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.PAUSE ) );
                 }
@@ -362,7 +385,7 @@ package org.opencast.engage.videodisplay.business
             // rewind
             if( charCode == 82 || charCode == 114 ) // R or r
             {
-                var playRewind:Boolean = model.mediaPlayer.playing;
+                var playRewind:Boolean = model.mediaPlayer.playing();
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.REWIND ) );
                 if(playRewind)
                 {
@@ -373,7 +396,7 @@ package org.opencast.engage.videodisplay.business
             // Fast forward
             if( charCode == 70 || charCode == 102 ) // F or f
             {
-                var playForward:Boolean = model.mediaPlayer.playing;
+                var playForward:Boolean = model.mediaPlayer.playing();
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.FASTFORWARD ) );
                 if(playForward)
                 {
