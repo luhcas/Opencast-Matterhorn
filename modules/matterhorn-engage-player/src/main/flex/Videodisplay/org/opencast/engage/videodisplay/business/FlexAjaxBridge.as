@@ -177,12 +177,6 @@ package org.opencast.engage.videodisplay.business
             {
                 var pos:int = model.url.lastIndexOf( "/" );
                 var fileType:String = model.url.substring( pos +1 );
-                
-                if( fileType == 'matterhorn.mp4' || 'matterhorn25fps.flv')
-                {
-                    model.captionsURL = captionsURL;
-                    Swiz.dispatchEvent( new LoadDFXPXMLEvent( model.captionsURL ) );
-                }
             }
         }
         
