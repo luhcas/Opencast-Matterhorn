@@ -30,7 +30,9 @@ import javax.persistence.spi.PersistenceProvider;
 import org.opencastproject.feedback.api.Annotation;
 import org.opencastproject.feedback.api.AnnotationList;
 import org.opencastproject.feedback.api.FeedbackService;
+import org.opencastproject.feedback.api.Report;
 import org.opencastproject.feedback.endpoint.AnnotationListImpl;
+import org.opencastproject.feedback.endpoint.ReportImpl;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -272,11 +274,16 @@ public class FeedbackServiceImpl implements FeedbackService {
   }
 
   private int getTotal(Calendar calBegin, Calendar calEnd) {
-
     Query q = em.createNamedQuery("findTotalByIntervall");
     q.setParameter("begin", calBegin, TemporalType.TIMESTAMP);
     q.setParameter("end", calEnd, TemporalType.TIMESTAMP);
     return ((Long) q.getSingleResult()).intValue();
   }
 
+  public Report getReport(String from, String to, int offset, int limit){
+    Report r = new ReportImpl();
+    r.setLimit(limit);
+    r.setOffset(offset);
+    return r;
+  }
 }

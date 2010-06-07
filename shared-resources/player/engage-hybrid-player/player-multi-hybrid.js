@@ -830,13 +830,13 @@ Opencast.Player = (function () {
         @description Set the media URL.
         @param String mediaURL
      */
-    function setMediaURL(mediaURLOne, mediaURLTwo)
+    function setMediaURL(coverURL, mediaURLOne, mediaURLTwo)
     {
         if (mediaURLOne[0] === 'h' || mediaURLOne[0] === 'H' && mediaURLOne[2] === 't' || mediaURLOne[2] === 'T')
         {
             $("#oc-background-progress").attr('className', 'matterhorn-progress-bar-background');
         }
-        Videodisplay.setMediaURL(mediaURLOne, mediaURLTwo);
+        Videodisplay.setMediaURL(coverURL, mediaURLOne, mediaURLTwo);
     }
     
     /**
@@ -1347,28 +1347,28 @@ Opencast.Player = (function () {
      */
     function setPlayhead(newPosition) 
     {
-      if (getDragging() === false)
-      {
-        
         var fullPosition = Math.round(newPosition);
-        var interval = inPosition + INTERVAL_LENGTH
-        if(inPosition <= fullPosition && fullPosition <= interval){
+
+        
+
+        if(inPosition <= fullPosition && fullPosition <= inPosition + INTERVAL_LENGTH){
           outPosition = fullPosition;
-          if(interval === outPosition){
+          if(inPosition + INTERVAL_LENGTH === outPosition){
             addFootprint();
             inPosition = outPosition;
           }
         } else {
           addFootprint();
-          outPosition = fullPosition;
           inPosition = fullPosition;
+          outPosition = fullPosition;
         }
 
-        
-        var newPos = Math.round((newPosition / getDuration()) *  $("#scubber-channel").width());
-        $("#draggable").css("left", newPos);
-        $("#scrubber").css("left", newPos);
-        $("#play-progress").css("width", newPos);
+        if (getDragging() === false)
+        {
+            var newPos = Math.round((newPosition / getDuration()) *  $("#scubber-channel").width());
+            $("#draggable").css("left", newPos);
+            $("#scrubber").css("left", newPos);
+            $("#play-progress").css("width", newPos);
         }
     }
     
@@ -1391,7 +1391,7 @@ Opencast.Player = (function () {
     
     /**
         @memberOf Opencast.Player
-        @description Set the width of the progress bar.
+        @description Set the with of the progress bar.
         @param Number value
      */
     function setProgress(value) 

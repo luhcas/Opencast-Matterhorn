@@ -58,8 +58,8 @@ Opencast.Watch = (function ()
 
           $('#oc_title_from').append(" (" + sd.toLocaleString() + ")");
 
-          // set the abstract
-          $('#oc_description').html($('#oc-abstract').html());
+          // set the dcDescription
+          $('#oc_description').append($('#oc-description').html());
 
           $('#oc_segment-table').html($('#oc-segments').html());
 
@@ -95,7 +95,10 @@ Opencast.Watch = (function ()
           mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
           mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
 
-          Opencast.Player.setMediaURL(mediaUrlOne, mediaUrlTwo);
+          var coverUrl = $('#oc-cover').html();
+          coverUrl = coverUrl === null ? '' : coverUrl;
+
+          Opencast.Player.setMediaURL(coverUrl, mediaUrlOne, mediaUrlTwo);
 
           if (mediaUrlOne !== '' && mediaUrlTwo !== '')
           {
@@ -158,7 +161,7 @@ Opencast.Watch = (function ()
             Opencast.Player.stopFastForward();
           });
           Opencast.segments.initialize();
-          
+          getClientShortcuts();
           $.ajax({
             type: 'GET',
             contentType: 'text/xml',
@@ -196,9 +199,42 @@ Opencast.Watch = (function ()
       // Opencast.Player.setPlayhead(seconds);
       var eventSeek = Videodisplay.seek(seconds);
     }
+    /**
+     * @memberOf Opencast.Watch
+     * @description Gets the OS-specific shortcuts of the client
+     */
+    function getClientShortcuts()
+    {	
+      $('#oc_client_shortcuts').append("Control + Alt + I = Toggle the keyboard shortcuts information between show or hide.<br/>");
+      $('#oc_client_shortcuts').append("Control + Alt + P = Toggle the video between pause or play.<br/>");
+      $('#oc_client_shortcuts').append("Control + Alt + S = Stop the video.<br/>");
+      $('#oc_client_shortcuts').append("Control + Alt + M = Toggle between mute or unmute the video.<br/>");
+      $('#oc_client_shortcuts').append("Control + Alt + U = Volume up<br/>");
+      $('#oc_client_shortcuts').append("Control + Alt + D = Volume down<br/>");
+      $('#oc_client_shortcuts').append("Control + Alt 0 - 9 = Seek the time slider<br/>");
+      $('#oc_client_shortcuts').append("Control + Alt + C = Toggle between captions on or off.<br/>");
+      $('#oc_client_shortcuts').append("Control + Alt + F = Forward the video.<br/>");
+      $('#oc_client_shortcuts').append("Control + Alt + R = Rewind the video.<br/>");
+      $('#oc_client_shortcuts').append("Control + Alt + T = the current time for the screen reader<br/>");
+
+      switch($.client.os){
+      	   case "Windows":
+      	$('#oc_client_shortcuts').append("Windows Control + = to zoom in the player<br/>"); 
+      	$('#oc_client_shortcuts').append("Windows Control - = to minimize in the player<br/>");
+      	break; 
+         case "Mac":
+      	$('#oc_client_shortcuts').append("cmd + = to zoom in the player<br/>"); 
+      	$('#oc_client_shortcuts').append("cmd - = to minimize the player<br/>");
+      	break; 
+         case "Linux":
+      	break;
+      } 	
+    }
+
     return {
       onPlayerReady : onPlayerReady,
       hoverSegment : hoverSegment,
-      seekSegment : seekSegment
+      seekSegment : seekSegment,
+      getClientShortcuts : getClientShortcuts
     };
 }());

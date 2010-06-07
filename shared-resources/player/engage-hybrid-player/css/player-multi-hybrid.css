@@ -623,7 +623,7 @@ option:hover
   margin-left:              -6px;
   position:                 relative; 
   border:                   0px;
-  top:                      -15px; 
+  top:                      -11px; 
   z-index:                  2;
 }
 
@@ -637,7 +637,7 @@ option:hover
   margin-left:              -6px;
   position:                 relative; 
   border:                   0px;
-  top:                      -16px; 
+  top:                      -12px; 
   z-index:                  3;
 }
 
@@ -696,14 +696,14 @@ option:hover
 {
   background-image:url("../img/icons.png");
   background-position: 0 -432px;
-  height: 13px;
+  height: 7px;
 }
 
 .load-progress 
 {
   background-image:url("../img/icons.png");
   background-position: 0 -419px;
-  height: 13px;
+  height: 7px;
   display:block;
   margin-top:0;
   position:relative;

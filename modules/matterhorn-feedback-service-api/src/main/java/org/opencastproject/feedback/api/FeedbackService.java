@@ -71,9 +71,9 @@ public interface FeedbackService {
    * Returns annotations of a given key and day
    * 
    * @param key
-   *          The annotation key
+   *          the annotation key
    * @param day
-   *          The day
+   *          the day
    * @param offset
    *          the offset
    * @param limit
@@ -90,4 +90,19 @@ public interface FeedbackService {
    * @return the views
    */
   int getViews(String mediapackageId);
+
+  /**
+   * Returns a report
+   * 
+   * @param from
+   *          The from day key
+   * @param to
+   *          The to day key
+   * @param offset
+   *          the offset
+   * @param limit
+   *          the limit
+   * @return the annotation list
+   */
+  Report getReport(String from, String to, int offset, int limit);
 }

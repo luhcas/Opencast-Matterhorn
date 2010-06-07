@@ -130,6 +130,14 @@ public class FeedbackRestService {
 
   @GET
   @Produces(MediaType.TEXT_XML)
+  @Path("report")
+  public Response report(@QueryParam("from") String from, @QueryParam("to") String to,
+          @QueryParam("offset") int offset, @QueryParam("limit") int limit) {
+    return Response.ok(feedbackService.getReport(from, to, offset, limit)).build();
+  }
+
+  @GET
+  @Produces(MediaType.TEXT_XML)
   @Path("add")
   public Response add(@QueryParam("id") String mediapackageId, @QueryParam("session") String sessionId,
           @QueryParam("in") int inpoint, @QueryParam("out") int outpoint, @QueryParam("key") String key,
@@ -181,15 +189,18 @@ public class FeedbackRestService {
     data.setAbstract("This service creates, edits and retrieves annotations.");
 
     // stats
-    RestEndpoint statsEndpoint = new RestEndpoint("stats", RestEndpoint.Method.GET, "/stats", "Get the statistics for an episode");
+    RestEndpoint statsEndpoint = new RestEndpoint("stats", RestEndpoint.Method.GET, "/stats",
+            "Get the statistics for an episode");
     statsEndpoint.addFormat(new Format("XML", null, null));
     statsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The statistics, expressed as xml"));
-    statsEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The ID of the single episode to return the statistics for, if it exists"));
+    statsEndpoint.addOptionalParam(new Param("id", Type.STRING, null,
+            "The ID of the single episode to return the statistics for, if it exists"));
     statsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, statsEndpoint);
 
     // add
-    RestEndpoint addEndpoint = new RestEndpoint("add", RestEndpoint.Method.GET, "/add", "Add an annotation on an episode");
+    RestEndpoint addEndpoint = new RestEndpoint("add", RestEndpoint.Method.GET, "/add",
+            "Add an annotation on an episode");
     addEndpoint.addFormat(new Format("XML", null, null));
     addEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The annotation, expressed as xml"));
     addEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The ID of the single episode"));
@@ -202,12 +213,14 @@ public class FeedbackRestService {
     data.addEndpoint(RestEndpoint.Type.READ, addEndpoint);
 
     // annotation
-    RestEndpoint annotationEndpoint = new RestEndpoint("annotation", RestEndpoint.Method.GET, "/annotation", "Get annotations by key and day");
+    RestEndpoint annotationEndpoint = new RestEndpoint("annotation", RestEndpoint.Method.GET, "/annotation",
+            "Get annotations by key and day");
     annotationEndpoint.addFormat(new Format("XML", null, null));
     annotationEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The annotations, expressed as xml"));
     annotationEndpoint.addOptionalParam(new Param("key", Type.STRING, null, "The key of the annotation"));
     annotationEndpoint.addOptionalParam(new Param("day", Type.STRING, null, "The day of creation (format: YYYYMMDD)"));
-    annotationEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0", "The maximum number of items to return per page")); 
+    annotationEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0",
+            "The maximum number of items to return per page"));
     annotationEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
     annotationEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, annotationEndpoint);

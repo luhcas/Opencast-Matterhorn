@@ -192,8 +192,19 @@
 				</xsl:otherwise>
 			</xsl:choose>
 		</div>
-		
-		<div id="oc-date" style="display: none">
+
+    <div id="oc-creator" style="display: none">
+      <xsl:choose>
+        <xsl:when test="ns2:search-results/result/dcCreator">
+          <xsl:value-of select="ns2:search-results/result/dcCreator" />
+        </xsl:when>
+        <xsl:otherwise>
+          No Creator
+        </xsl:otherwise>
+      </xsl:choose>
+    </div>
+
+    <div id="oc-date" style="display: none">
       <xsl:choose>
         <xsl:when test="ns2:search-results/result/dcCreated">
           <xsl:value-of select="ns2:search-results/result/dcCreated" />
@@ -203,10 +214,20 @@
       </xsl:choose>
     </div>
 
-		<div id="oc-abstract" style="display: none">
+    <div id="oc-cover" style="display: none">
+      <xsl:choose>
+        <xsl:when test="ns2:search-results/result/cover">
+          <xsl:value-of select="ns2:search-results/result/cover" />
+        </xsl:when>
+        <xsl:otherwise>
+        </xsl:otherwise>
+      </xsl:choose>
+    </div>
+
+		<div id="oc-description" style="display: none">
 			<xsl:choose>
-				<xsl:when test="ns2:search-results/result/dcAbstract">
-					<xsl:value-of select="ns2:search-results/result/dcAbstract" />
+				<xsl:when test="ns2:search-results/result/dcDescription">
+					<xsl:value-of select="ns2:search-results/result/dcDescription" />
 				</xsl:when>
 				<xsl:otherwise>
 					No Abstract
