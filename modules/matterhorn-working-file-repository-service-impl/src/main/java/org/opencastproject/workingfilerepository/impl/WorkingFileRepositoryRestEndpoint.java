@@ -27,6 +27,12 @@ import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.io.IOUtils;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.Parser;
+import org.apache.tika.sax.BodyContentHandler;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
@@ -36,6 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -46,8 +53,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import javax.activation.MimetypesFileTypeMap;
 
 @Path("/")
 public class WorkingFileRepositoryRestEndpoint {
@@ -278,15 +283,42 @@ public class WorkingFileRepositoryRestEndpoint {
   public Response get(@PathParam("mediaPackageID") String mediaPackageID,
           @PathParam("mediaPackageElementID") String mediaPackageElementID) {
     checkService();
-    URI url = repo.getURI(mediaPackageID, mediaPackageElementID);
-    if (url == null)
-      return Response.noContent().build();
-    String fileName = url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
-    String contentType = mimeMap.getContentType(fileName);
-    return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type",
-            contentType).entity(repo.get(mediaPackageID, mediaPackageElementID)).build();
+    String contentType = null;
+    InputStream in = null;
+    try {
+      in = repo.get(mediaPackageID, mediaPackageElementID);
+      if(in == null) {
+        return Response.status(404).build();
+      }
+      contentType = extractContentType(in);
+      return Response.ok(repo.get(mediaPackageID, mediaPackageElementID)).header("Content-Type", contentType).build();
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
   }
 
+  /**
+   * Determines the content type of an input stream. This method reads part of the stream, so it is typically best to
+   * close the stream immediately after calling this method.
+   * 
+   * @param in the input stream
+   * @return the content type
+   */
+  protected String extractContentType(InputStream in) {
+    try {
+      // Find the content type, based on the stream content
+      BodyContentHandler contenthandler = new BodyContentHandler();
+      Metadata metadata = new Metadata();
+      Parser parser = new AutoDetectParser();
+      ParseContext context = new ParseContext();
+      parser.parse(in, contenthandler, metadata, context);
+      return metadata.get(Metadata.CONTENT_TYPE);
+    } catch (Exception e) {
+      logger.warn("Unable to extract mimetype from input stream, ", e);
+      return MediaType.APPLICATION_OCTET_STREAM;
+    }
+  }
+  
   @GET
   @Path("/mp/{mediaPackageID}/{mediaPackageElementID}/{fileName}")
   public Response get(@PathParam("mediaPackageID") String mediaPackageID,

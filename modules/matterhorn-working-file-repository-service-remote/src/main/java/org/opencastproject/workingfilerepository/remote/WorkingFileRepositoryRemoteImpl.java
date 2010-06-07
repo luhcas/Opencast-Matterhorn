@@ -236,15 +236,6 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
     
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#put(java.lang.String, java.lang.String, java.io.InputStream)
-   */
-  @Override
-  public URI put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
-    return put(mediaPackageID, mediaPackageElementID, mediaPackageElementID, in);
-  }
-  
-  /**
-   * {@inheritDoc}
    * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#put(java.lang.String, java.lang.String, java.lang.String, java.io.InputStream)
    */
   @Override

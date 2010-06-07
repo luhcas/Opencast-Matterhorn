@@ -162,10 +162,6 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     }
   }
 
-  public URI put(String mediaPackageID, String mediaPackageElementID, InputStream in) {
-    return put(mediaPackageID, mediaPackageElementID, mediaPackageElementID, in);
-  }
-
   public URI put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in) {
     checkPathSafe(mediaPackageID);
     checkPathSafe(mediaPackageElementID);

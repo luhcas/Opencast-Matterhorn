@@ -24,15 +24,7 @@ import java.net.URISyntaxException;
  * It may be used by other clients, but is neither intended nor required to be used by other systems.
  */
 public interface WorkingFileRepository {
-  /**
-   * Store the data stream under the given media package and element IDs. Name of the
-   * file is equal to element ID.
-   * @param mediaPackageID
-   * @param mediaPackageElementID
-   * @param in
-   */
-  URI put(String mediaPackageID, String mediaPackageElementID, InputStream in);
-  
+
   /**
    * Store the data stream under the given media package and element IDs with filename as
    * name of the file.

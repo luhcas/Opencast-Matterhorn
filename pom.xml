@@ -498,6 +498,12 @@
         <version>2.0.0-M6</version>
       </dependency>
 
+      <dependency>
+        <groupId>org.apache.tika</groupId>
+        <artifactId>tika-bundle</artifactId>
+        <version>0.7</version>
+      </dependency>
+
       <!-- OSGi -->
       <dependency>
         <groupId>org.osgi</groupId>

@@ -28,7 +28,7 @@ public class WorkingFileRepositoryTest {
     repo.activate(null);
     // Put an image file into the repository using the mediapackage / element storage
     InputStream in = getClass().getClassLoader().getResourceAsStream("opencast_header.gif");
-    repo.put(mediaPackageID, mediaPackageElementID, in);
+    repo.put(mediaPackageID, mediaPackageElementID, "opencast_header.gif", in);
     try {in.close();} catch (IOException e) {logger.error(e.getMessage());}
 
     // Put an image file into the repository into a collection
@@ -66,7 +66,7 @@ public class WorkingFileRepositoryTest {
     String badId = "../etc";
     InputStream in = getClass().getClassLoader().getResourceAsStream("opencast_header.gif");
     try {
-      repo.put(badId, mediaPackageElementID, in);
+      repo.put(badId, mediaPackageElementID, "opencast_header.gif", in);
       Assert.fail();
     } catch (Exception e) {
     } finally {
