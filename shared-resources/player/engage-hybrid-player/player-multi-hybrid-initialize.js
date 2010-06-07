@@ -499,6 +499,13 @@ Opencast.Initialize = (function ()
         });
         
         // Handler keypress
+        $('#oc_current-time').keypress(function (event) 
+        {
+            if (event.keyCode === 13) 
+            {
+                Opencast.Player.showEditTime();
+            }
+        })
         $('#oc_edit-time').keypress(function (event) 
         {
             if (event.keyCode === 13) 
