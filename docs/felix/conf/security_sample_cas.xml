@@ -1,0 +1,86 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:sec="http://www.springframework.org/schema/security"
+  xmlns:oauth="http://spring-security-oauth.codehaus.org/3.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/security
+       http://www.springframework.org/schema/security/spring-security-3.0.xsd">
+
+  <sec:http create-session="ifRequired" servlet-api-provision="true" realm="Opencast Matterhorn" entry-point-ref="matterhornEntryPoint">
+    <sec:intercept-url  pattern="/favicon.ico" filters="none"/>
+    <sec:intercept-url  pattern="/shared_img/**" filters="none"/>
+    <sec:intercept-url pattern='/style.css' access='ROLE_ANONYMOUS, ROLE_USER, ROLE_ADMIN'/>
+    <sec:intercept-url pattern='/images/**' access='ROLE_ANONYMOUS, ROLE_USER, ROLE_ADMIN '/>
+    <sec:intercept-url pattern='/**' access='ROLE_USER, ROLE_ADMIN'/>
+    <sec:custom-filter position="BASIC_AUTH_FILTER" ref="digestFilter" />
+    <sec:custom-filter position="FORM_LOGIN_FILTER" ref="casFilter" />
+    <sec:anonymous />
+  </sec:http>
+
+  <sec:user-service id="userDetailsService">
+    <sec:user name="matterhorn_system_account" password="CHANGE_ME" authorities="ROLE_ADMIN,ROLE_USER" />
+    <sec:user name="231693" password="not_used" authorities="ROLE_ADMIN,ROLE_USER" />
+  </sec:user-service>
+
+  <bean id="casFilter"
+    class="org.springframework.security.cas.web.CasAuthenticationFilter">
+    <property name="authenticationManager" ref="authenticationManager"/>
+  </bean>
+
+  <bean id="casEntryPoint"
+    class="org.springframework.security.cas.web.CasAuthenticationEntryPoint">
+    <property name="loginUrl" value="https://auth-test.berkeley.edu/cas/login"/>
+    <property name="serviceProperties" ref="serviceProperties"/>
+  </bean>
+
+  <bean id="serviceProperties"
+        class="org.springframework.security.cas.ServiceProperties">
+    <property name="service"
+        value="http://localhost:8080/j_spring_cas_security_check"/>
+    <property name="sendRenew" value="false"/>
+  </bean>
+  
+  <sec:authentication-manager alias="authenticationManager">
+    <sec:authentication-provider ref="casAuthenticationProvider" />
+    <sec:authentication-provider user-service-ref="userDetailsService" />
+  </sec:authentication-manager>
+
+  <bean id="casAuthenticationProvider"
+      class="org.springframework.security.cas.authentication.CasAuthenticationProvider">
+    <property name="userDetailsService" ref="userDetailsService"/>
+    <property name="serviceProperties" ref="serviceProperties" />
+    <property name="ticketValidator">
+      <bean class="org.jasig.cas.client.validation.Cas20ServiceTicketValidator">
+        <constructor-arg index="0" value="https://auth-test.berkeley.edu/cas/serviceValidate" />
+      </bean>
+    </property>
+    <property name="key" value="cas"/>
+  </bean>
+
+  <bean id="matterhornEntryPoint" class= "org.opencastproject.security.DelegatingAuthenticationEntryPoint">
+    <property name="userEntryPoint" ref="casEntryPoint" />
+    <property name="systemAuthenticationEntryPoint" ref="digestEntryPoint" />
+  </bean>
+  
+  <bean id="digestEntryPoint" class="org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
+    <property name="realmName" value="Opencast Matterhorn"/>
+    <property name="key" value="matterhorn"/>
+    <property name="nonceValiditySeconds" value="10"/>
+  </bean>
+
+  <bean id="digestFilter" class= "org.springframework.security.web.authentication.www.DigestAuthenticationFilter">
+    <property name="userDetailsService" ref="userDetailsService"/>
+    <property name="authenticationEntryPoint" ref="digestEntryPoint"/>
+    <property name="userCache">
+      <bean class="org.springframework.security.core.userdetails.cache.NullUserCache" />
+    </property>
+  </bean>
+
+  <sec:global-method-security jsr250-annotations="enabled" />
+
+  <!-- Logging interceptors, in case they are needed -->
+  <bean class="org.springframework.security.access.event.LoggerListener" />
+  <bean class="org.springframework.security.authentication.event.LoggerListener" />
+
+</beans>

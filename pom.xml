@@ -762,6 +762,24 @@
       </dependency>
 
       <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-cas-client</artifactId>
+        <version>3.0.2.RELEASE</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jasig.cas</groupId>
+        <artifactId>com.springsource.org.jasig.cas.client</artifactId>
+        <version>3.1.8</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.opensaml</groupId>
+        <artifactId>com.springsource.org.opensaml</artifactId>
+        <version>1.1.0</version>
+      </dependency>
+
+      <dependency>
         <groupId>org.openid4java</groupId>
         <artifactId>com.springsource.org.openid4java</artifactId>
         <version>0.9.5</version>
