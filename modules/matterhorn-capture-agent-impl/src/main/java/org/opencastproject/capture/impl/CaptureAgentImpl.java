@@ -727,7 +727,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   protected void setAgentState(String state) {
     if (confidence) {
-      Bus bus = confidencePipe.getBus();
       if (state.equalsIgnoreCase(AgentState.CAPTURING) && confidencePipe != null) {
         confidencePipe.stop();
         while (confidencePipe.isPlaying());
@@ -737,6 +736,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         try {
           while (configService.getAllProperties().size() == 0);
           confidencePipe = PipelineFactory.create(configService.getAllProperties(), true);
+          Bus bus = confidencePipe.getBus();
           bus.connect(new Bus.EOS() {
             
             @Override

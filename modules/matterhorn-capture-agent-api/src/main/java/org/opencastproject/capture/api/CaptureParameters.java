@@ -202,4 +202,7 @@ public interface CaptureParameters {
   /** Maximum number of seconds of audio monitoring data to store in memory */
   String CAPTURE_CONFIDENCE_AUDIO_LENGTH = "capture.confidence.audio.length";
   
+  /** Flag to turn confidence monitoring debugging on or off (boolean) */
+  String CAPTURE_CONFIDENCE_DEBUG = "capture.confidence.debug";
+  
 }

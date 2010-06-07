@@ -48,7 +48,7 @@ public class VideoMonitoringTest {
       Assert.fail();
     }
     
-    boolean ret = VideoMonitoring.addVideoMonitor(pipeline, src, sink, 1, "dev/null", "");
+    boolean ret = VideoMonitoring.addVideoMonitor(pipeline, src, sink, 1, "dev/null", "", false);
     Assert.assertTrue(ret);
     Assert.assertEquals(11, pipeline.getElements().size());
   }

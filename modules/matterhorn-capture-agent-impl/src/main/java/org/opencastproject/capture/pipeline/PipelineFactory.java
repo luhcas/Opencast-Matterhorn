@@ -325,6 +325,7 @@ public class PipelineFactory {
       logger.debug("{} bitrate set to: {}", captureDevice.getName(), bitrate);
       enc.set("bitrate", bitrate);
     }
+    queue.set("leaky", "1");
     pipeline.addMany(filesrc, queue, mpegpsdemux, mpegvideoparse, dec, enc, muxer, filesink);
 
     /*
@@ -336,22 +337,23 @@ public class PipelineFactory {
       }
     });
     Pad newpad = new Pad(null, PadDirection.SRC);
-    if (confidence) {
-      if (!VideoMonitoring.addVideoMonitor(pipeline, filesrc, queue, interval, imageloc, device))
-        error = formatPipelineError(captureDevice, filesrc, queue);
-    } else {
-      if (!filesrc.link(queue))
-        error = formatPipelineError(captureDevice, filesrc, queue);
-    }
-    if (!queue.link(mpegpsdemux))
+    if (!filesrc.link(queue))
+      error = formatPipelineError(captureDevice, filesrc, queue);
+    else if (!queue.link(mpegpsdemux))
       error = formatPipelineError(captureDevice, queue, mpegpsdemux);
     else if (!mpegpsdemux.addPad(newpad))
       error = formatPipelineError(captureDevice, mpegpsdemux, mpegvideoparse);
     else if (!mpegvideoparse.link(dec))
       error = formatPipelineError(captureDevice, mpegvideoparse, dec);
-    else if (!dec.link(enc))
-      error = formatPipelineError(captureDevice, dec, enc);
-    else if (!enc.link(muxer))
+    if (confidence) {
+      boolean trace = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG));
+      if (!VideoMonitoring.addVideoMonitor(pipeline, dec, enc, interval, imageloc, device, trace))
+        error = formatPipelineError(captureDevice, dec, enc);
+    } else {
+      if (!dec.link(enc))
+        error = formatPipelineError(captureDevice, dec, enc);
+    }
+    if (!enc.link(muxer))
       error = formatPipelineError(captureDevice, enc, muxer);
     else if (!muxer.link(filesink))
       error = formatPipelineError(captureDevice, muxer, filesink);
@@ -440,6 +442,7 @@ public class PipelineFactory {
       enc.set("bitrate", "2000000");
 
     pipeline.addMany(v4lsrc, queue, videoscale, videorate, filter, ffmpegcolorspace, enc, muxer, filesink);
+    queue.set("leaky", "1");
 
     if (!v4lsrc.link(queue))
       error = formatPipelineError(captureDevice, v4lsrc, queue);
@@ -450,7 +453,8 @@ public class PipelineFactory {
     else if (!videorate.link(filter))
       error = formatPipelineError(captureDevice, videorate, filter);
     if (confidence) {
-      if (!VideoMonitoring.addVideoMonitor(pipeline, filter, ffmpegcolorspace, interval, imageloc, device))
+      boolean trace = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG));
+      if (!VideoMonitoring.addVideoMonitor(pipeline, filter, ffmpegcolorspace, interval, imageloc, device, trace))
         error = formatPipelineError(captureDevice, filter, ffmpegcolorspace);
     } else {
       if (!filter.link(ffmpegcolorspace))
@@ -629,13 +633,15 @@ public class PipelineFactory {
     }
     else
       enc.set("bitrate", "2000000");
+    queue.set("leaky", "1");
 
     pipeline.addMany(v4l2src, queue, enc, muxer, filesink);
 
     if (!v4l2src.link(queue))
       error = formatPipelineError(captureDevice, v4l2src, queue);
     if (confidence) {
-      if (!VideoMonitoring.addVideoMonitor(pipeline, queue, enc, interval, imageloc, device))
+      boolean trace = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG));
+      if (!VideoMonitoring.addVideoMonitor(pipeline, queue, enc, interval, imageloc, device, trace))
         error = formatPipelineError(captureDevice, queue, enc);
     } else {
       if (!queue.link(enc))

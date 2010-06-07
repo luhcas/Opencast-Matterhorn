@@ -21,7 +21,6 @@ import org.opencastproject.capture.api.CaptureParameters;
 import com.sun.jna.Pointer;
 
 import org.gstreamer.Buffer;
-import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
@@ -31,13 +30,16 @@ import org.gstreamer.elements.AppSink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.sql.Timestamp;
 import java.util.Properties;
+
+import javax.imageio.ImageIO;
 
 /**
  * Class containing video monitoring services that can be incorporated into
@@ -60,9 +62,9 @@ public class VideoMonitoring {
    * @return the pipeline with the video monitoring added, or null on failure
    */
   public static boolean addVideoMonitor(Pipeline pipeline, Element src, Element sink, final long interval, final String location,
-          final String device) {
+          final String device, final boolean trace) {
           
-      Element tee, queue0, queue1, decodebin, videorate, capsfilter, jpegenc;
+      Element tee, queue0, queue1, decodebin, capsfilter, jpegenc, queue2;
       final Element ffmpegcolorspace;
       AppSink appsink;
       
@@ -72,17 +74,17 @@ public class VideoMonitoring {
       queue1 = ElementFactory.make("queue", null);
       decodebin = ElementFactory.make("decodebin", null);
       ffmpegcolorspace = ElementFactory.make("ffmpegcolorspace", null);
-      videorate = ElementFactory.make("videorate", null);
       capsfilter = ElementFactory.make("capsfilter", null);
       jpegenc = ElementFactory.make("jpegenc", null);
+      queue2 = ElementFactory.make("queue", null);
       appsink = (AppSink) ElementFactory.make("appsink", null);
       
       tee.set("silent", "false");
-      capsfilter.setCaps(Caps.fromString("video/x-raw-yuv, framerate=1/"+interval));
       appsink.set("emit-signals", "true");
       
-      pipeline.addMany(tee, queue0, queue1, decodebin, ffmpegcolorspace, videorate, capsfilter, jpegenc, appsink);
+      pipeline.addMany(tee, queue0, queue1, decodebin, ffmpegcolorspace, capsfilter, jpegenc, queue2, appsink);
       src.unlink(sink);
+      appsink.set("drop", "true");
       
       decodebin.connect(new Element.PAD_ADDED() {
         public void padAdded(Element element, Pad pad) {
@@ -114,20 +116,20 @@ public class VideoMonitoring {
       Pad p = new Pad(null, PadDirection.SRC);
       decodebin.addPad(p);
       
-      if (!ffmpegcolorspace.link(videorate)) {
-        logger.error("Could not link {} with {}", ffmpegcolorspace.toString(), videorate.toString());
-        return false;
-      }
-      if (!videorate.link(capsfilter)) {
-        logger.error("Could not link {} with {}", videorate.toString(), capsfilter.toString());
+      if (!ffmpegcolorspace.link(capsfilter)) {
+        logger.error("Could not link {} with {}", ffmpegcolorspace.toString(), capsfilter.toString());
         return false;
       }
       if (!capsfilter.link(jpegenc)) {
         logger.error("Could not link {} with {}", capsfilter.toString(), jpegenc.toString());
         return false;
       }
-      if (!jpegenc.link(appsink)) {
-        logger.error("Could not link {} with {}", jpegenc.toString(), appsink.toString());
+      if (!jpegenc.link(queue2)) {
+        logger.error("Could not link {} with {}", jpegenc.toString(), queue2.toString());
+        return false;
+      }
+      if (!queue2.link(appsink)) {
+        logger.error("Could not link {} with {}", queue2.toString(), appsink.toString());
         return false;
       }
 
@@ -142,22 +144,27 @@ public class VideoMonitoring {
           Buffer buffer = appsink.pullBuffer();
           if (seconds % interval == 0 && seconds != previous) {
             previous = seconds;
-
             /* saving the frame to disk */
-            byte bytes[] = new byte[buffer.getSize()];
-            ByteBuffer byteBuffer = buffer.getByteBuffer();
-            byteBuffer.get(bytes, 0, buffer.getSize());
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            String text = timestamp.toString();
+            if (text.split("\\.").length > 1)
+              text = text.split("\\.")[0];
             try {
-              baos.write(bytes);
-              OutputStream fos = new FileOutputStream(new File(location, device + ".jpg"));
-              baos.writeTo(fos);
-              fos.close();
-              baos.close();
-            } catch (IOException e) {
-              e.printStackTrace();
+              byte bytes[] = new byte[buffer.getSize()];
+              ByteBuffer byteBuffer = buffer.getByteBuffer();
+              byteBuffer.get(bytes, 0, buffer.getSize());
+              BufferedImage br = ImageIO.read(new ByteArrayInputStream(bytes));
+              if (trace) {
+                Graphics2D graphic = br.createGraphics();
+                graphic.setFont(new Font("Helvetica", Font.BOLD, 16));
+                graphic.drawString(text, 0, 20);
+                graphic.finalize();
+              }
+              if (!ImageIO.write(br, "jpeg", new File(location, device + ".jpg")))
+                logger.error("Unable to save confidence image for device: {}", device);
+            } catch (Exception e) {
+              logger.error(e.getMessage());
             }
-            
           }
           buffer = null;
         }
@@ -174,15 +181,15 @@ public class VideoMonitoring {
    * @param properties Properties that define the interval and location for the confidence monitoring
    */
   public static void getConfidencePipeline(Pipeline pipeline, CaptureDevice capdev, Properties properties) {
-      Element src, queue, decodebin, jpegenc;
+      Element src, queue, decodebin, jpegenc, queue2;
       final Element ffmpegcolorspace;
       AppSink appsink;
       boolean success = true;
       final int interval = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + capdev.getFriendlyName() + CaptureParameters.CAPTURE_DEVICE_CONFIDENCE_INTERVAL, "30"));
       final String device = new File(capdev.getOutputPath()).getName();
       final String location = properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
+      final boolean trace = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG));
 
-      
       switch (capdev.getName()) {
         case EPIPHAN_VGA2USB: src = ElementFactory.make("v4lsrc", null); src.set("device", capdev.getLocation()); break;
         case HAUPPAUGE_WINTV: src = ElementFactory.make("filesrc", null); src.set("location", capdev.getLocation()); break;
@@ -194,11 +201,12 @@ public class VideoMonitoring {
       decodebin = ElementFactory.make("decodebin", null);
       ffmpegcolorspace = ElementFactory.make("ffmpegcolorspace", null);
       jpegenc = ElementFactory.make("jpegenc", null);
+      queue2 = ElementFactory.make("queue", null);
       appsink = (AppSink) ElementFactory.make("appsink", null);
       
       appsink.set("emit-signals", "true");
       
-      pipeline.addMany(src, queue, decodebin, ffmpegcolorspace, jpegenc, appsink);
+      pipeline.addMany(src, queue, decodebin, ffmpegcolorspace, jpegenc, queue2, appsink);
       
       decodebin.connect(new Element.PAD_ADDED() {
         public void padAdded(Element element, Pad pad) {
@@ -222,16 +230,19 @@ public class VideoMonitoring {
         logger.error("Could not link {} with {}", ffmpegcolorspace.toString(), jpegenc.toString());
         success = false;
       }
-      if (!jpegenc.link(appsink)) {
-        logger.error("Could not link {} with {}", jpegenc.toString(), appsink.toString());
+      if (!jpegenc.link(queue2)) {
+        logger.error("Could not link {} with {}", jpegenc.toString(), queue2.toString());
+        success = false;
+      }
+      if (!queue2.link(appsink)) {
+        logger.error("Could not link {} with {}", queue2.toString(), appsink.toString());
         success = false;
       }
       
       if (!success) {
-        pipeline.removeMany(src, queue, decodebin, ffmpegcolorspace, jpegenc, appsink);
+        pipeline.removeMany(src, queue, decodebin, ffmpegcolorspace, jpegenc, queue2, appsink);
         return;
       }
-      
       
       // Callback that will be executed every time a new buffer is received
       // from the pipeline capturing the video. For confidence monitoring
@@ -244,22 +255,27 @@ public class VideoMonitoring {
           Buffer buffer = appsink.pullBuffer();
           if (seconds % interval == 0 && seconds != previous) {
             previous = seconds;
-            
             /* saving the frame to disk */
-            byte bytes[] = new byte[buffer.getSize()];
-            ByteBuffer byteBuffer = buffer.getByteBuffer();
-            byteBuffer.get(bytes, 0, buffer.getSize());
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+            String text = timestamp.toString();
+            if (text.split("\\.").length > 1)
+              text = text.split("\\.")[0];
             try {
-              baos.write(bytes);
-              OutputStream fos = new FileOutputStream(new File(location, device + ".jpg"));
-              baos.writeTo(fos);
-              fos.close();
-              baos.close();
-            } catch (IOException e) {
-              e.printStackTrace();
+              byte bytes[] = new byte[buffer.getSize()];
+              ByteBuffer byteBuffer = buffer.getByteBuffer();
+              byteBuffer.get(bytes, 0, buffer.getSize());
+              BufferedImage br = ImageIO.read(new ByteArrayInputStream(bytes));
+              if (trace) {
+                Graphics2D graphic = br.createGraphics();
+                graphic.setFont(new Font("Helvetica", Font.BOLD, 16));
+                graphic.drawString(text, 0, 20);
+                graphic.finalize();
+              }
+              if (!ImageIO.write(br, "jpeg", new File(location, device + ".jpg")))
+                logger.error("Unable to save confidence image for device: {}", device);
+            } catch (Exception e) {
+              logger.error(e.getMessage());
             }
-            
           }
           buffer = null;
         }
