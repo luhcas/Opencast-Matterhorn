@@ -35,6 +35,9 @@ public class AgentDevice {
   @XmlElement(name="name")
   private String name;
   
+  /**
+   * Used to classify the device as video or audio
+   */
   @XmlElement(name="type")
   private String type;
   
