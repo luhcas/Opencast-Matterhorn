@@ -296,6 +296,7 @@ table
   float:                    left;
   width:                    5%;
   text-align:               center;
+  visibility:               hidden;
 }
 
 #oc_video-size-controls

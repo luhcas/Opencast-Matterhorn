@@ -856,6 +856,9 @@ Opencast.Player = (function () {
      */
     function setCaptionsURL(captionsURL)
     {
+        if(captionsURL != undefined) {
+            $('#oc_video-cc').css('visibility', 'visible');
+        }
         Videodisplay.setCaptionsURL(captionsURL);
     }  
     
