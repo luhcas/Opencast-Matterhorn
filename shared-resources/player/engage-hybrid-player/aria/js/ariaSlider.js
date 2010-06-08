@@ -106,6 +106,7 @@ Opencast.ariaSlider = (function ()
             target.setAttribute('aria-valuenow', newValue);
         	target.setAttribute('aria-valuetext', 'Volume: ' + Math.round(newValue) + '%');
         	$("#slider_volume_Rail").attr("title", 'Volume ' + Math.round(newValue) + '%');
+            $("#slider_volume_Rail").attr("alt", 'Volume ' + Math.round(newValue) + '%');
             Opencast.Player.setPlayerVolume(newValue / 100);
         }
         else if( target.id === sliderVolume && $("#oc_volume-menue").css("visibility") === undefined )
@@ -114,6 +115,7 @@ Opencast.ariaSlider = (function ()
             target.setAttribute('aria-valuenow', newValue);
         	target.setAttribute('aria-valuetext', 'Volume: ' + Math.round(newValue) + '%');
         	$("#slider_volume_Rail").attr("title", 'Volume ' + Math.round(newValue) + '%');
+            $("#slider_volume_Rail").attr("alt", 'Volume ' + Math.round(newValue) + '%');
             Opencast.Player.setPlayerVolume(newValue / 100);
         }
     }
