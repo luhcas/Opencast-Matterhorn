@@ -218,8 +218,7 @@
 							OSGI-INF/ingest-service-local.xml,
 							OSGI-INF/ingest-service-remote.xml,
 							OSGI-INF/ingest-service-rest.xml,
-              OSGI-INF/inbox-scanner.xml,
-              OSGI-INF/mediapackage-scanner.xml
+              OSGI-INF/inbox-scanner.xml
             </Service-Component>
 						<JPA-PersistenceUnits>
 							org.opencastproject.ingest.endpoint

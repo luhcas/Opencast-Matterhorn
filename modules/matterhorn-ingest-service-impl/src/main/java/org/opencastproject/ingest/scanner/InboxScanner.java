@@ -15,9 +15,11 @@
  */
 package org.opencastproject.ingest.scanner;
 
+import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.slf4j.Logger;
@@ -40,21 +42,45 @@ public class InboxScanner implements ArtifactInstaller {
     this.fileRepository = fileRepository;
   }
 
+  protected IngestService ingestService;
+  
+  public void setIngestService(IngestService ingestService) {
+    this.ingestService = ingestService;
+  }
+
   /**
    * {@inheritDoc}
    * @see org.apache.felix.fileinstall.ArtifactInstaller#install(java.io.File)
    */
   public void install(File artifact) throws Exception {
-    FileInputStream in = null;
-    try {
-      in = new FileInputStream(artifact);
-      fileRepository.putInCollection("inbox", artifact.getName(), in);
-    } catch(IOException e) {
-      logger.warn("Unable to store file {} in the inbox, {}", artifact.getAbsolutePath(), e);
-      return;
-    } finally {
-      IOUtils.closeQuietly(in);
+    boolean mediaPackageIngestSuccess = false;
+    if("zip".equals(FilenameUtils.getExtension(artifact.getName()))) {
+      FileInputStream in = null;
+      try {
+        in = new FileInputStream(artifact);
+        ingestService.addZippedMediaPackage(in);
+        logger.info("Ingested '{}' as a mediapackage", artifact.getAbsolutePath());
+        mediaPackageIngestSuccess = true;
+      } catch(IOException e) {
+        logger.debug("Unable to ingest mediapackage '{}', {}", artifact.getAbsolutePath(), e);
+      } finally {
+        IOUtils.closeQuietly(in);
+      }
     }
+
+    if(!mediaPackageIngestSuccess) {
+      FileInputStream in = null;
+      try {
+        in = new FileInputStream(artifact);
+        fileRepository.putInCollection("inbox", artifact.getName(), in);
+        logger.info("Ingested '{}' as an inbox file", artifact.getAbsolutePath());
+      } catch(IOException e) {
+        logger.warn("Unable to process inbox file '{}', {}", artifact.getAbsolutePath(), e);
+      } finally {
+        IOUtils.closeQuietly(in);
+      }
+    }
+
     try {
       FileUtils.forceDelete(artifact);
     } catch(IOException e) {
