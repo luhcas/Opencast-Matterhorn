@@ -11,7 +11,7 @@ Monitor.loadDevices = function(){
   //load the devices
   $.get(CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/devices", function(data){
     //do stuff to make a device array.
-    var devices = $('ns1\\:agent-device', data).toArray();
+    var devices = $('agent-device', data).toArray();
     log(devices);
     Monitor.devices = [];
     $('#video_devices').empty();
@@ -101,7 +101,7 @@ Monitor.updateAudio = function(){
 
 AudioBar.setValue = function(dbLevel){
 	var level_pct = Math.round((1 - Math.pow(10, dbLevel/20)) * 100);
-	log(level_pct, dbLevel)
+	log(level_pct, dbLevel);
   $('#left_mask').css('height', level_pct + "%");
   //$('#right_mask').css('height', right_pct + "%");
 }
