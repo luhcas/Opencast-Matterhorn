@@ -28,13 +28,14 @@ export WORKING_DIR=/tmp/cainstallscript
 # Root for the source code repository
 export SVN_URL=http://opencast.jira.com/svn/MH
 # Extension for the SVN_URL to reach the trunk
-export TRUNK_EXT=trunk
+export TRUNK_URL=$SVN_URL/trunk
 # Extension for the SVN_URL to reach the branches
-export BRANCHES_EXT=branches
+export BRANCHES_URL=$SVN_URL/branches
 # Extension for the SVN_URL to reach the tags
-export TAGS_EXT=tags
-# Default branch or tag (including trunk) from where scripts and java source will be dowloaded
-export SRC_DEFAULT=$TRUNK_EXT
+export TAGS_URL=$SVN_URL/tags
+
+# Default URL from where scripts and java source will be dowloaded
+export SRC_DEFAULT=$TRUNK_URL
 
 # File containing the rules to be applied by udev to the configured devices -- not a pun!
 export DEV_RULES=/etc/udev/rules.d/matterhorn.rules
@@ -83,7 +84,7 @@ export GEN_PROPS=$FELIX_HOME/conf/config.properties
 # Path under FELIX_HOME where the capture agent properties are
 export CAPTURE_PROPS=$FELIX_HOME/conf/services/org.opencastproject.capture.impl.ConfigurationManager.properties
 # Directory UNDER FELIX HOME where the felix filex will be deployed
-export DEPLOY_DIR=load/matterhorn
+export DEPLOY_DIR=matterhorn
 
 # Path to where the installed jvm's are
 export JAVA_PREFIX=/usr/lib/jvm
@@ -160,7 +161,7 @@ for (( i = 0; i < ${#SCRIPTS[@]}; i++ )); do
 	    cp $START_PATH/$f $WORKING_DIR
 	else
 	    # The script is not in the initial directory, so try to download it from the opencast source page
-	    wget $SVN_URL/$SRC_DEFAULT/$SCRIPTS_EXT/$f &> /dev/null	    
+	    wget $SRC_DEFAULT/$SCRIPTS_EXT/$f &> /dev/null	    
 	    # Check the file is downloaded
 	    if [[ $? -ne 0 ]]; then
 		echo "Couldn't retrieve the script $f from the repository. Try to download it manually and re-run this script."

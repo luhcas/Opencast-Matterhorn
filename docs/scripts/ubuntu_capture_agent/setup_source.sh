@@ -26,17 +26,17 @@ if [[ -n "$(echo "${keep:-Y}" | grep -i '^n')" ]]; then
     # Get the necessary matterhorn source code (the whole trunk, as specified in MH-3211)
     while [[ true ]]; do
 	echo
-	read -p "Enter the branch or tag you would like to download [$SRC_DEFAULT]: " response
-	: ${response:=$SRC_DEFAULT}
+	read -p "Enter the branch or tag you would like to download [${SRC_DEFAULT##*/}]: " response
+	: ${response:=${SRC_DEFAULT##*/}}
 
 	if [[ "$response" == "$TRUNK_EXT" ]]; then
-	    address=$SVN_URL/$TRUNK_EXT
+	    address=$TRUNK_URL
 	else
 	    # Check the branches first
-	    address=$SVN_URL/$BRANCHES_EXT/$response
+	    address=$BRANCHES_URL/$response
 	    svn info $address &> /dev/null
 	    # If $address does not exist, try the tags
-	    [[ $? -ne 0 ]] && address=$SVN_URL/$TAGS_EXT/$response
+	    [[ $? -ne 0 ]] && address=$TAGS_URL/$response
 	fi
 
 	rm -rf $SOURCE
