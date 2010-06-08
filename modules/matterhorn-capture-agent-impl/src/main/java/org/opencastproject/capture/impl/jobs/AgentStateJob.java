@@ -32,6 +32,9 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -98,11 +101,20 @@ public class AgentStateJob implements Job {
       logger.warn("Unable to build valid state endpoint for agents.");
       return;
     }
+    
+    String address = "";
+    try {
+       address = InetAddress.getLocalHost().getCanonicalHostName();
+    }catch(UnknownHostException h){
+      logger.warn("Unable to determine local host address.");
+      return;
+    }
 
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
 
     //formParams.add(new BasicNameValuePair("agentName", a.getName()));
     formParams.add(new BasicNameValuePair("state", state.getAgentState()));
+    formParams.add(new BasicNameValuePair("address", address));
 
     send(formParams, url);
   }

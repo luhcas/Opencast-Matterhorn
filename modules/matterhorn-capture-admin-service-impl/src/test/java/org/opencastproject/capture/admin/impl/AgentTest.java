@@ -29,7 +29,7 @@ public class AgentTest {
 
   @Before
   public void setup() {
-    agent = new AgentImpl("test", AgentState.IDLE, null);
+    agent = new AgentImpl("test", AgentState.IDLE, "http://localhost/", null);
     Assert.assertNotNull(agent);
     time = agent.getLastHeardFrom();
   }
@@ -44,6 +44,7 @@ public class AgentTest {
   public void correctInformation() {
     Assert.assertEquals("test", agent.getName());
     Assert.assertEquals(AgentState.IDLE, agent.getState());
+    Assert.assertEquals("http://localhost/", agent.getUrl());
   }
   
   @Test

@@ -149,12 +149,24 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     } else {     
       // If the agent doesn't exists, but the name is not null nor empty, create a new one.
       logger.debug("Creating Agent {} with state {}.", agentName, state);
-      Agent a = new AgentImpl(agentName, state, new Properties());
+      Agent a = new AgentImpl(agentName, state, "", new Properties());
       agents.put(agentName, a);
       updateAgentInDatabase(a);
     }
 
     return OK;
+  }
+  
+  public boolean setAgentUrl(String agentName, String agentUrl) {
+    Agent req = agents.get(agentName);
+    if(req != null) {
+      req.setUrl(agentUrl);
+      agents.put(agentName, req);
+      updateAgentInDatabase(req);
+    } else {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -213,7 +225,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       }
 
       logger.debug("Creating Agent {} with state {}.", agentName, AgentState.UNKNOWN);
-      Agent a = new AgentImpl(agentName, AgentState.UNKNOWN, capabilities);
+      Agent a = new AgentImpl(agentName, AgentState.UNKNOWN, "", capabilities);
       agents.put(agentName, a);
       updateAgentInDatabase(a);
     }

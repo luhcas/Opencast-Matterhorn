@@ -48,6 +48,13 @@ public class AgentImpl implements Agent {
    */
   @Column(name = "state", nullable = false)
   protected String state;
+  
+  /**
+   * The URL of the agent. This is determined from the referer header parameter when the agent is registered.
+   *
+   */
+  @Column(name = "url")
+  protected String url;
 
   /**
    * The time at which the agent last checked in with this service.
@@ -76,9 +83,10 @@ public class AgentImpl implements Agent {
    * @param agentState The state of the agent.  This should be defined from the constants in {@link org.opencastproject.capture.admin.api.AgentState}.
    * @see AgentState
    */
-  public AgentImpl(String agentName, String agentState, Properties capabilities) {
+  public AgentImpl(String agentName, String agentState, String agentUrl, Properties capabilities) {
     name = agentName;
     this.setState(agentState);
+    this.setUrl(agentUrl);
     //Agents with no capabilities are allowed.  These can/will be updated after the agent is built if necessary.
     this.capabilities = capabilities;
   }
@@ -107,6 +115,22 @@ public class AgentImpl implements Agent {
    */
   public String getState() {
     return state;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.admin.api.Agent#setUrl()
+   */
+  public void setUrl(String agentUrl){
+    url = agentUrl;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.admin.api.Agent#getUrl()
+   */
+  public String getUrl(){
+    return url;
   }
 
   /**

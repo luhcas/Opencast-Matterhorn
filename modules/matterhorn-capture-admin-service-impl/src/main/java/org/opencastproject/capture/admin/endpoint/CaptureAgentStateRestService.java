@@ -87,13 +87,16 @@ public class CaptureAgentStateRestService {
   @POST
   //@Produces(MediaType.TEXT_XML)
   @Path("agents/{name}")
-  public Response setAgentState(@PathParam("name") String agentName, @FormParam("state") String state) {
+  public Response setAgentState(@FormParam("address") String agentUrl, @PathParam("name") String agentName, @FormParam("state") String state) {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
-
+    logger.debug("Agents URL: {}", agentUrl);
+    
     int result = service.setAgentState(agentName, state);
-
+    if(!service.setAgentUrl(agentName, agentUrl)){
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    }
     switch (result) {
       case CaptureAgentStateService.OK:
         logger.debug("{}'s state successfully set to {}", agentName, state);
@@ -140,6 +143,7 @@ public class CaptureAgentStateRestService {
     LinkedList<AgentStateUpdate> update = new LinkedList<AgentStateUpdate>();
     if (service != null) {
       Map<String, Agent> data = service.getKnownAgents();
+      logger.debug("Agents: {}", data);
       //Run through and build a map of updates (rather than states)
       for (Entry<String, Agent> e : data.entrySet()) {
         update.add(new AgentStateUpdate(e.getValue()));
@@ -179,7 +183,7 @@ public class CaptureAgentStateRestService {
   //@Consumes(MediaType.TEXT_XML)
   @Produces(MediaType.TEXT_XML)
   @Path("agents/{name}/capabilities")
-  public Response setCapabilities(@PathParam("name") String agentName, InputStream reqBody) {
+  public Response setCapabilities(@FormParam("address") String agentUrl, @PathParam("name") String agentName, InputStream reqBody) {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
@@ -188,7 +192,9 @@ public class CaptureAgentStateRestService {
     try {
       caps.loadFromXML(reqBody);
       int result = service.setAgentCapabilities(agentName, caps);
-      
+      if(!service.setAgentUrl(agentName, agentUrl)){
+        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
+      }
       // Prepares the value to return
       ByteArrayOutputStream buffer = new ByteArrayOutputStream(); 
       caps.storeToXML(buffer, "Capabilities for the agent " + agentName);
@@ -204,12 +210,10 @@ public class CaptureAgentStateRestService {
           logger.error("Unexpected server error in setCapabilities endpoint");
           return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
       }
-      
     } catch (IOException e) {
       logger.debug("Unexpected I/O Exception when unmarshalling the capabilities: {}", e.getMessage());
       return Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST).build();
     }
-
   }
 
   @GET

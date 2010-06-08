@@ -31,7 +31,7 @@ public class AgentStateUpdateTest {
 
   @Before
   public void setup() throws InterruptedException {
-    agent = new AgentImpl("test", AgentState.IDLE, null);
+    agent = new AgentImpl("test", AgentState.IDLE, "", null);
     Assert.assertNotNull(agent);
     Thread.sleep(5);
     asu = new AgentStateUpdate(agent);
