@@ -756,7 +756,9 @@ Opencast.Player = (function () {
      */
     function addBookmark(value, name, text)
     {
-    	var option = '<option value="'+value+'" class="oc_option-myBookmark" title="'+value+' '+name+': '+text+'">'+value+' '+name+': '+text+'</option>'
+        var unencoded = value + ' ' + name + ': ' + text,
+            encoded = $('<div/>').text(unencoded).html();
+    	var option = $('<option/>').val(encoded).addClass("oc_option-myBookmark").attr("title", encoded).text(unencoded);
     	
     	$('#oc_bookmarkSelect').prepend( option );
     	if ($("#oc_myBookmarks-checkbox").attr('aria-checked') === 'false')
@@ -776,7 +778,15 @@ Opencast.Player = (function () {
     	var posLeft = ( playhead * 100 ) / duration;
     	
   
-    	var btn = '<input class="oc_boomarkPoint" onClick="Opencast.Player.playBookmark(this.name)" style="left:'+posLeft+'%; width: 5px; height: 10px; margin-left: 5px; position: absolute; background-color: #90ee90 !important;" name="'+value+'" alt="'+value+' '+name+': '+text+'" title="'+value+' '+name+': '+text+'"></input>';
+    	var btn = $('<input/>')
+    	          .addClass("oc_boomarkPoint")
+    	          .attr({
+    	            onClick: "Opencast.Player.playBookmark(this.name)",
+    	            style: 'left:' + posLeft + '%; width: 5px; height: 10px; margin-left: 5px; position: absolute; background-color: #90ee90 !important;',
+    	            name: value,
+    	            alt: encoded,
+    	            title: encoded});
+
     	$('#oc_bookmarksPoints').append( btn );
     }
     
