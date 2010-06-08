@@ -39,7 +39,7 @@
           // replace all occurences of + by a space
           searchQuery = searchQuery.replace(/\+/g," ");
 
-          keywordString = " for  &#8220;" + unescape(searchQuery) +"&#8221;";
+          keywordString = " for  “" + unescape(searchQuery) +"”";
           
           $('#searchField').attr("value", unescape(searchQuery));
           
@@ -56,7 +56,7 @@
           var toIndex = parseInt($('#oc-episodes-limit').html()) +  (page - 1) * 10;
           var fromIndex = Math.min(parseInt($('#oc-episodes-offset').html()) + 1, toIndex);
           
-          $('#title').html("Results "+ fromIndex + "-"+ toIndex + " of "+ total + keywordString);
+          $('#title').text("Results "+ fromIndex + "-"+ toIndex + " of "+ total + keywordString).html();
 
           $('.timeDate').each( function() {
             var timeDate = $(this).text();
