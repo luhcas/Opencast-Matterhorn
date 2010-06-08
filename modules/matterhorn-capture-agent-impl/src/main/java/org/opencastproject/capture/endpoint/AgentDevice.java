@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlType;
  * A representation of the devices associated with a capture agent
  */
 @XmlType(name="agent-device", namespace="http://capture.admin.opencastproject.org")
-@XmlRootElement(name="agent-device", namespace="http://capture.admin.opencastproject.org")
+@XmlRootElement(name="agent-device")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AgentDevice {
   
@@ -55,6 +55,4 @@ public class AgentDevice {
   public String getType() {
     return this.type;
   }
-  
-
 }
