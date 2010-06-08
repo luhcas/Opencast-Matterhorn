@@ -1,6 +1,9 @@
 body {
 	padding-top: 20px;
 }
+a {
+	 cursor: pointer;
+}
 
 #pageHeader {
 	position: absolute;
