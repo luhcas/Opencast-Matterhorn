@@ -100,6 +100,11 @@ public class ConfidenceMonitorRestService {
   @Produces("image/jpeg")
   @Path("{name}")
   public Response grabFrame(@PathParam("name") String device) {
+    if (service == null) {
+      //TODO:  What happens here if we return a string?  Is this going to break things in the confidence monitor UI?
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity("Confidence monitor unavailable, please wait...").build();
+    }
+
     CacheControl cc = new CacheControl();
     cc.setNoCache(true);
     return Response.ok(service.grabFrame(device)).cacheControl(cc).build();
@@ -109,11 +114,16 @@ public class ConfidenceMonitorRestService {
   @Produces(MediaType.TEXT_XML)
   @Path("devices")
   public List<AgentDevice> getDevices() {
+    //TODO:  Should we be storing this list of device names as a list of AgentDevice objects instead?
     LinkedList<AgentDevice> devices = new LinkedList<AgentDevice>();
-    List<String> names = service.getFriendlyNames();
-    for (String name : names) {
-      String nameType[] = name.split(",");
-      devices.add(new AgentDevice(nameType[0], nameType[1]));
+    if (service != null) {
+      List<String> names = service.getFriendlyNames();
+      for (String name : names) {
+        String nameType[] = name.split(",");
+        devices.add(new AgentDevice(nameType[0], nameType[1]));
+      }
+    } else {
+      logger.warn("Service is null in getDevices()");
     }
     return devices;
   }
@@ -122,6 +132,11 @@ public class ConfidenceMonitorRestService {
   @Produces(MediaType.TEXT_PLAIN)
   @Path("audio/{name}/{timestamp}")
   public String getRMSValues(@PathParam("name") String device, @PathParam("timestamp") double timestamp) {
+    if (service == null) {
+      return "Confidence monitor unavailable, please wait...";
+    }
+
+    //TODO:  Add explanation of output format in rest documentation
     List<Double> rmsValues = service.getRMSValues(device, timestamp);
     String output = Long.toString(System.currentTimeMillis()) + "\n";
     for (double value : rmsValues) {

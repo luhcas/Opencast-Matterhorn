@@ -33,7 +33,7 @@ public interface CaptureAgent {
   /**
    * Starting a simple capture.  Uses the machine's default settings for capture parameters and assigns a generated recording ID to the capture, but uses the metadata passed in via the parameter.
    * Note that this will not start a second capture if there is already one in progress.  You must first stop the running capture before starting another.
-   * @param mediaPackage The media package of metadata for the capture.
+   * @param mediaPackage The {@code MediaPackage} of metadata for the capture.
    * @return The recording ID associated with the recording, or null in the case of an error.
    */
   String startCapture(MediaPackage mediaPackage);
@@ -42,7 +42,7 @@ public interface CaptureAgent {
    * Starting a simple capture.  Uses the machine's default metadata and assigns a generated recording ID to the capture if one is not specified in the properties object.  The relevant keys can be found in CaptureParameters.
    * Properties not in the configuration parameter use the machine defaults.  If, for example, you only wish to specify the recording's ID then only set that value in the properties and the machine will use its defeaults for the others. 
    * Note that this will not start a second capture if there is already one in progress.  You must first stop the running capture before starting another.
-   * @param configuration Properties object containing the properties for the recording.
+   * @param configuration {@code Properties} object containing the properties for the recording.
    * @return The recording ID associated with the recording, or null in the case of an error.
    * @see org.opencastproject.capture.api.CaptureParameters
    */
@@ -52,10 +52,9 @@ public interface CaptureAgent {
    * Starting a simple capture.  Generates a recording ID to the capture if one is not specified in the properties object.  The relevant keys can be found in CaptureParameters.
    * Both parameters - the recording properties and the metadata - are used rather than the machine defaults.
    * Note that this will not start a second capture if there is already one in progress.  You must first stop the running capture before starting another.
-   * @param mediaPackage The media package of metadata for the capture.
-   * @param configuration Properties object containing the properties for the recording.
+   * @param mediaPackage The {@code MediaPackage} of metadata for the capture.
+   * @param configuration {@code Properties} object containing the properties for the recording.
    * @return The recording ID associated with the recording, or null in the case of an error.
-   * @see CaptureAgent#startCapture(Properties)
    * @see org.opencastproject.capture.api.CaptureParameters
    */
   String startCapture(MediaPackage mediaPackage, Properties configuration);
@@ -75,7 +74,7 @@ public interface CaptureAgent {
    * @param recordingID The ID of the recording you wish to stop
    * @param immediateIngest True to cause the agent to immediately ingest the capture, false to wait until the normal stop time to ingest.
    * @return True if the capture stopped successfully, false if the recordingID parameter was not the recording currently being captured, or there was an error.
-   * @see org.opencastproject.capture.api.CaptureAgent#stopCapture()
+   * @see org.opencastproject.capture.api.CaptureAgent#stopCapture(boolean)
    */
   boolean stopCapture(String recordingID, boolean immediateIngest);
 

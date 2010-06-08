@@ -53,12 +53,13 @@ public class AudioMonitoring {
     private double timestamp;
     
     private double rms;
-    
+
+    //TODO:  Comment me?
     public Pair(double timestamp, double rms) {
       this.timestamp = timestamp;
       this.rms = rms;
     }
-    
+
     public double getTimestamp() {
       return timestamp;
     }
@@ -78,19 +79,18 @@ public class AudioMonitoring {
     }
     
   }
-  
-  
+
   /**
    * Add a method for confidence monitoring to a pipeline capturing audio by
    * teeing the raw data a pulling it to the appsink element.
    * 
-   * @param p pipeline to add audio monitoring to
-   * @param src the source element which will be tee'd
-   * @param sink the sink element which the src originally sent data to
+   * @param pipeline {@code Pipeline} to add audio monitoring to
+   * @param src the source {@code Element} which will be tee'd
+   * @param sink the sink {@code Element} which the src originally sent data to
    * @param interval how often to grab data from the pipeline
    * @param maxLength The number of seconds to store RMS data for
    * @param name The friendly name of the device to add audio monitoring to
-   * @return the pipeline with the audio monitoring added, or null on failure
+   * @return the {@code Pipeline} with the audio monitoring added, or null on failure
    */
   public static boolean addAudioMonitor(Pipeline pipeline, Element src, Element sink, final long interval, final long maxLength, final String name) {
           
@@ -102,10 +102,7 @@ public class AudioMonitoring {
         deviceRMSValues = new HashMap<String, SortedSet<Pair>>();
       }
       deviceRMSValues.put(name, new TreeSet<Pair>());
-      
-      
-      
-      
+
       // the items to be tee'd and added to the pipeline
       tee = ElementFactory.make("tee", null);
       queue0 = ElementFactory.make("queue", null);
@@ -164,9 +161,11 @@ public class AudioMonitoring {
           if (msg.getSource().equals(level)) {
             Element level = (Element) msg.getSource();
             long seconds = level.getClock().getTime().getSeconds();
+            //If we're on the division between intervals and we're not in the same second as the last entry
             if (seconds % interval == 0 && seconds != previous) {
               previous = seconds;
               String data = msg.getStructure().toString();
+              //TODO:  Can we get an example of what the output of .getStructure().toString() looks like?
               int start = data.indexOf("rms");
               int end = data.indexOf("}", start);
               String rms = data.substring(start, end+1);
@@ -211,9 +210,9 @@ public class AudioMonitoring {
   /**
    * Return a pipeline that doesn't capture, but only does confidence monitoring
    * 
-   * @param pipeline The pipeline to add the new confidence monitoring pipeline to
-   * @param c The CaptureDevice the confidence monitoring is for
-   * @param properties Properties that define the interval and maximum time for the confidence monitoring
+   * @param pipeline The {@code Pipeline} to add the new confidence monitoring pipeline to
+   * @param c The {@code CaptureDevice} the confidence monitoring is for
+   * @param properties {@code Properties} that define the interval and maximum time for the confidence monitoring
    */
   public static void getConfidencePipeline(Pipeline pipeline, CaptureDevice c, Properties properties) {
     Element alsasrc, queue, decodebin, fakesink;
@@ -265,7 +264,8 @@ public class AudioMonitoring {
       pipeline.removeMany(alsasrc, queue, decodebin, level, fakesink);
       return;
     }
-   
+
+    //FIXME:  This looks like duplicated code.  Can we move it out into a private function or is there a reason for the duplication?  
     // callback to listen for messages from the level element, giving us
     // information about the audio being recorded
     Bus bus = pipeline.getBus();
@@ -275,9 +275,11 @@ public class AudioMonitoring {
         if (msg.getSource().equals(level)) {
           Element level = (Element) msg.getSource();
           long seconds = level.getClock().getTime().getSeconds();
+          //If we're on the division between intervals and we're not in the same second as the last entry
           if (seconds % interval == 0 && seconds != previous) {
             previous = seconds;
             String data = msg.getStructure().toString();
+            //TODO:  Can we get an example of what the output of .getStructure().toString() looks like?
             int start = data.indexOf("rms");
             int end = data.indexOf("}", start);
             String rms = data.substring(start, end+1);

@@ -36,7 +36,8 @@ public class IngestJob implements StatefulJob {
   /**
    * Attempts to ingest the job to the central core.
    * {@inheritDoc}
-   * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
+   * @see org.quartz.Job#execute(JobExecutionContext)
+   * @throws JobExecutionException
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
 

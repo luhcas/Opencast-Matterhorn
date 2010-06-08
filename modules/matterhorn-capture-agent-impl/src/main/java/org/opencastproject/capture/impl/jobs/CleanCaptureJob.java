@@ -54,7 +54,8 @@ public class CleanCaptureJob implements Job {
   /**
    * Cleans up lectures which no longer need to be stored on the capture agent itself.
    * {@inheritDoc}
-   * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
+   * @see org.quartz.Job#execute(JobExecutionContext)
+   * @throws JobExecutionException
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
 
@@ -71,8 +72,8 @@ public class CleanCaptureJob implements Job {
   
   /**
    * This method is public to allow an easy testing without having to schedule anything
-   * @param p Properties including the keys for maximum archival days and minimum disk space
-   * @param service The capture agent
+   * @param p {@code Properties} including the keys for maximum archival days and minimum disk space
+   * @param recordings The {@code Collection} of {@code AgentRecording}s
    */
   public void doCleaning(Properties p , Collection<AgentRecording> recordings) {
     // Parse the necessary values for minimum disk space and maximum archival days. 

@@ -107,13 +107,18 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   private CaptureAgentImpl captureAgent = null;
 
   /** The maximum duration to schedule something for */
-  private Dur maxDuration = new Dur(new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis() + (CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH * 1000)));
+  private Dur maxDuration = null;
 
   /** The trusted HttpClient used to talk to the core */
   private TrustedHttpClient trustedClient = null;
 
   public void setConfigService(ConfigurationManager svc) {
     configService = svc;
+    int length = Integer.parseInt(svc.getItem(CaptureParameters.CAPTURE_MAX_LENGTH)) * 1000;
+    maxDuration = new Dur(
+            new Date(System.currentTimeMillis()),
+            new Date(System.currentTimeMillis() + length)
+            );
   }
 
   public void unsetConfigService() {
@@ -130,7 +135,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   /**
    * Updates the scheduler with new configuration data.
    * {@inheritDoc}
-   * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
+   * @see org.osgi.service.cm.ManagedService#updated(Dictionary)
    */
   @SuppressWarnings("unchecked")
   @Override
@@ -157,7 +162,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         props.put(key, properties.get(key));
       }
 
-      //Create the scheduler!
+      //Create the scheduler factory
       SchedulerFactory sched_fact = null;
       sched_fact = new StdSchedulerFactory(props);
       //Create and start the scheduler
@@ -172,7 +177,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * Creates the polling task with the 
+   * Creates the schedule polling task which checks with the core to see if there is any new scheduling data 
    */
   private void setupPolling() {
     if (scheduler == null) {
@@ -186,7 +191,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         scheduler.deleteJob(name, JobParameters.RECURRING_TYPE);
       }
 
-      //Find the remote endpoint for the scheduler
+      //Find the remote endpoint for the scheduler and add the agent's name to it
       String remoteBase = StringUtils.trimToNull(configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL));
       if (remoteBase != null && remoteBase.charAt(remoteBase.length()-1) != '/') {
         remoteBase = remoteBase + "/";
@@ -201,7 +206,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       if (pollTime > 1) {
         //Setup the polling
         JobDetail job = new JobDetail("calendarUpdate", JobParameters.RECURRING_TYPE, PollCalendarJob.class);
-        //Create a new trigger                    Name       Group name               Start       End   # of times to repeat               Repeat interval
+        //Create a new trigger                       Name         Group name               Start       End   # of times to repeat               Repeat interval
         SimpleTrigger trigger = new SimpleTrigger("polling", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, pollTime * 1000L);
         trigger.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
 
@@ -234,6 +239,10 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     }
   }
 
+  /**
+   * Sets the trusted client this service uses to communicate with the outside work.
+   * @param client The {@code TrustedHttpClient} which is setup to communicate with the outside world.
+   */
   public void setTrustedClient(TrustedHttpClient client) {
     trustedClient = client;
   }
@@ -275,8 +284,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /**
    * Reads in a calendar from either an HTTP or local source and turns it into a iCal4j Calendar object.
-   * @param url The URL to read the calendar data from.
-   * @return A calendar object, or null in the case of an error or to indicate that no update should be performed.
+   * @param url The {@code URL} to read the calendar data from.
+   * @return A {@code Calendar} object, or null in the case of an error or to indicate that no update should be performed.
    */
   private Calendar parseCalendar(URL url) {
 
@@ -337,8 +346,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * Writes the contents variable to the URL.  Note that the URL must be a local URL.
-   * @param file The URL of the local file you wish to write to.
+   * Writes the contents variable to the {@code URL}.  Note that the URL must be a local {@code URL}.
+   * @param file The {@code URL} of the local file you wish to write to.
    * @param contents The contents of the file you wish to create.
    */
   private void writeFile(URL file, String contents) {
@@ -361,7 +370,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /**
    * Convenience method to read in a file from either a remote or local source.
-   * @param url The URL to read the source data from.
+   * @param url The {@code URL} to read the source data from.
    * @return A String containing the source data.
    * @throws IOException
    * @throws URISyntaxException 
@@ -369,6 +378,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   private String readCalendar(URL url) throws IOException, NullPointerException, URISyntaxException {
     StringBuilder sb = new StringBuilder();
     DataInputStream in = null;
+    //Do different things depending on what we're reading...
     if (url.getProtocol().equals("file")) {
       in = new DataInputStream(url.openStream());
     } else {
@@ -385,8 +395,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /**
    * Returns the name for every scheduled job.
-   * Job titles are their UUIDs assigned from the scheduler, or Unscheduled-$timestamp.
-   * @return An array of Strings containing the name of every scheduled job, or null if there is an error.
+   * Job titles are their {@code UUID}s assigned from the scheduler, or Unscheduled-$machine_name-$timestamp.
+   * @return An array of {@code String}s containing the name of every scheduled job, or null if there is an error.
    */
   public String[] getCaptureSchedule() {
     if (scheduler != null) {
@@ -436,7 +446,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * Sets this machine's schedule based on the iCal data passed in as a parameter.
    * Note that this call wipes all currently scheduled captures and then schedules based on the new data.
    * Also note that any files which are in the way when this call tries to save the iCal attachments are overwritten without prompting.
-   * @param newCal The new calendar data
+   * @param newCal The new {@code Calendar} data
    */
   private synchronized void setCaptureSchedule(Calendar newCal) {
     log.debug("setCaptureSchedule(newCal)");
@@ -555,10 +565,10 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * A helper function to wrap the configuration of an event.  This function writes the attached files to disk and generates the initial mediapackage. 
-   * @param event The VEvent of the capture.  This contains all of the attachments and such needed to setup the directory structure.
-   * @param props The system properties for the job.  This can be overridden by the properties attached to the event.
-   * @param job The job instance itself.  This is what everything gets attached to so that Quartz can run properly.
+   * A helper function to wrap the configuration of an event.  This function writes the attached files to disk and generates the initial {@code Mediapackage}. 
+   * @param event The {@code VEvent} of the capture.  This contains all of the attachments and such needed to setup the directory structure.
+   * @param props The system {@code Properties} for the job.  This can be overridden by the properties attached to the event.
+   * @param job The {@code JobDetail} instance itself.  This is what everything gets attached to so that Quartz can run properly.
    * @return True if the setup worked, false if there was an error.
    * @throws org.opencastproject.util.ConfigurationException
    * @throws MediaPackageException
@@ -639,7 +649,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * Decodes and returns a Base64 encoded attachment as a String.  Note that this function does *not*
    * attempt to guess what the file might actually be.
    * @param property The attachment to decode
-   * @return A String representation of the attachment
+   * @return A {@code String} representation of the attachment
    * @throws ParseException
    */
   private String getAttachmentAsString(Property property) throws ParseException {
@@ -650,47 +660,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /**
    * Parses an date to build a cron-like time string.
-   * @param date The Date you want returned in a cronstring.
-   * @return A cron-like scheduling string.
+   * @param date The {@code Date} you want returned in a cronstring.
+   * @return A cron-like scheduling string in a {@code CronExpression} object.
    * @throws ParseException
    */
   private CronExpression getCronString(Date date) throws ParseException {
-    /*
-     * Initial implementation called for recurring events.  Keeping this code for later (ie, once the specs are set in stone)
-    if (event.getProperty(Property.RRULE) != null) {
-      Recur rrule = new Recur(event.getProperty(Property.RRULE).getValue());
-
-      WeekDayList weekdays = rrule.getDayList();
-      Iterator<WeekDay> iter = (Iterator<WeekDay>) weekdays.iterator();
-      StringBuilder captureDays = new StringBuilder();
-      while (iter.hasNext()) {
-        WeekDay cur = iter.next();
-        //Sigh, why doesn't RFC 2445 use *normal* day abbreviations?  There's no other way to do this unfortunately...
-        if (cur.equals(WeekDay.SU)) {class
-          captureDays.append("SUN,");
-        } else if (cur.equals(WeekDay.MO)) {
-          captureDays.append("MON,");
-        } else if (cur.equals(WeekDay.TU)) {
-          captureDays.append("TUE,");
-        } else if (cur.equals(WeekDay.WE)) {
-          captureDays.append("WED,");
-        } else if (cur.equals(WeekDay.TH)) {
-          captureDays.append("THU,");
-        } else if (cur.equals(WeekDay.FR)) {
-          captureDays.append("FRI,");
-        } else if (cur.equals(WeekDay.SA)) {
-          captureDays.append("SAT,");
-        }
-      }
-      //Remove the trailing comma to conform to Cron style
-      captureDays.deleteCharAt(captureDays.length()-1);
-
-      String frequency = rrule.getFrequency();
-      int interval = rrule.getInterval();
-     */
-
-    //Note:  Skipped above code because we no longer need to deal with recurring events.  Keeping it for now since they might come back.
-    //Note:  "?" means no particular setting.  Equivalent to "ignore me", rather than "I don't know what to put here"
     //TODO:  Remove the deprecated calls here.
     StringBuilder sb = new StringBuilder();
     sb.append(date.getSeconds() + " ");
@@ -700,14 +674,12 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     sb.append(date.getMonth() + 1 + " "); //Note:  Java numbers months from 0-11, Quartz uses 1-12.  Sigh.
     sb.append("? ");
     return new CronExpression(sb.toString());
-    /*}
-    return null;*/
   }
 
   /**
-   * Schedules a {@Code StopCaptureJob} to stop a capture at a given time.
+   * Schedules a {@code StopCaptureJob} to stop a capture at a given time.
    * @param recordingID The recordingID of the recording you wish to stop.
-   * @param stop The time (in seconds since 1970) at which to stop the capture.
+   * @param stop The time (in seconds since 1970) in a {@code Date} at which to stop the capture.
    * @return True if the job was scheduled, false otherwise.
    */
   public boolean scheduleUnscheduledStopCapture(String recordingID, Date stop) {
@@ -729,9 +701,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * Schedules a {@Code StopCaptureJob} to stop a capture at a given time.
+   * Schedules a {@code StopCaptureJob} to stop a capture at a given time.
    * @param recordingID The recordingID of the recording you wish to stop.
-   * @param atTime The time (in seconds since 1970) at which to stop the capture.
+   * @param atTime The time (in seconds since 1970) in a {@code Date} at which to stop the capture.
    * @return True if the job was scheduled, false otherwise.
    */
   public boolean scheduleUnscheduledStopCapture(String recordingID, long atTime) {
@@ -791,7 +763,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       cleanJob.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captureAgent);
       cleanJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
 
-      //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
+      //Create a new trigger                            Name              Group name               Start       End   # of times to repeat               Repeat interval
       SimpleTrigger cleanTrigger = new SimpleTrigger("cleanCapture", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, cleanInterval);
 
       //Schedule the update
@@ -877,7 +849,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.Scheduler#setScheduleEndpoint(java.net.URL)
+   * @see org.opencastproject.capture.api.Scheduler#setScheduleEndpoint(URL)
    */
   public void setScheduleEndpoint(URL url) {
     if (url == null) {

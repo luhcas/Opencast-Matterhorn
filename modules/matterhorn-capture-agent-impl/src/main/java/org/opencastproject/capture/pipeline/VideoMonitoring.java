@@ -50,16 +50,16 @@ public class VideoMonitoring {
   private static final Logger logger = LoggerFactory.getLogger(VideoMonitoring.class);
   
   /**
-   * Add a method for confidence monitoring to a pipeline capturing video by
+   * Add a method for confidence monitoring to a {@code Pipeline} capturing video by
    * teeing the raw data a pulling it to the appsink element.
    * 
-   * @param p pipeline to add video monitoring to
-   * @param src the source element which will be tee'd
-   * @param sink the sink element which the src originally sent data to
+   * @param pipeline {@code Pipeline} to add video monitoring to
+   * @param src the source {@code Element} which will be tee'd
+   * @param sink the sink {@code Element} which the src originally sent data to
    * @param interval how often to grab data from the pipeline
    * @param location the directory to save the image to
    * @param device name of device; used to name the jpeg file
-   * @return the pipeline with the video monitoring added, or null on failure
+   * @return True if the pipeline worked, or null on failure
    */
   public static boolean addVideoMonitor(Pipeline pipeline, Element src, Element sink, final long interval, final String location,
           final String device, final boolean trace) {
@@ -142,6 +142,7 @@ public class VideoMonitoring {
           AppSink appsink = (AppSink) elem;
           long seconds = appsink.getClock().getTime().getSeconds();
           Buffer buffer = appsink.pullBuffer();
+          //If we're on the division between intervals and we're not in the same second as the last entry
           if (seconds % interval == 0 && seconds != previous) {
             previous = seconds;
             /* saving the frame to disk */
@@ -174,11 +175,11 @@ public class VideoMonitoring {
   }
   
   /**
-   * Return a pipeline that doesn't capture, but only does confidence monitoring
+   * Return a {@code Pipeline} that doesn't capture, but only does confidence monitoring
    * 
-   * @param pipeline The pipeline to add the new confidence monitoring pipeline to
-   * @param capdev The CaptureDevice the confidence monitoring is for
-   * @param properties Properties that define the interval and location for the confidence monitoring
+   * @param pipeline The {@code Pipeline} to add the new confidence monitoring pipeline to
+   * @param capdev The {@code CaptureDevice} the confidence monitoring is for
+   * @param properties The {@code Properties} that define the interval and location for the confidence monitoring
    */
   public static void getConfidencePipeline(Pipeline pipeline, CaptureDevice capdev, Properties properties) {
       Element src, queue, decodebin, jpegenc, queue2;
@@ -243,7 +244,8 @@ public class VideoMonitoring {
         pipeline.removeMany(src, queue, decodebin, ffmpegcolorspace, jpegenc, queue2, appsink);
         return;
       }
-      
+
+      //FIXME:  This looks like duplicated code.  Can we move it out into a private function or is there a reason for the duplication?
       // Callback that will be executed every time a new buffer is received
       // from the pipeline capturing the video. For confidence monitoring
       // it is not necessary to use every buffer

@@ -90,13 +90,14 @@ public class ConfigurationManager implements ManagedService {
       logger.warn("Malformed URL for {}, disabling polling.", CaptureParameters.CAPTURE_CONFIG_REMOTE_ENDPOINT_URL);
     }
 
-    // If this is the case capture there will be no capture devices specified
+    // If there's no URL then throw up an info just to be safe
     if (url == null) {
       logger.info("No remote configuration endpoint was found, relying on local config.");
     }
 
     createCoreDirectories();
 
+    //Grab the remote config file, dump it to disk and then merge it into the current config
     Properties server = retrieveConfigFromServer();
     if (server != null) {
       writeConfigFileToDisk();
@@ -225,7 +226,7 @@ public class ConfigurationManager implements ManagedService {
    * The URL it attempts to read from is defined by CaptureParameters.CAPTURE_CONFIG_ENDPOINT_URL
    * 
    * @return The properties (if any) fetched from the server
-   * @see org.opencastproject.capture.impl.CaptureParameters#CAPTURE_CONFIG_REMOTE_ENDPOINT_URL
+   * @see org.opencastproject.capture.api.CaptureParameters#CAPTURE_CONFIG_REMOTE_ENDPOINT_URL
    */
   protected Properties retrieveConfigFromServer() {
     if (url == null) {
@@ -247,7 +248,7 @@ public class ConfigurationManager implements ManagedService {
   /**
    * Stores a local copy of the properties on disk.
    * 
-   * @see org.opencastproject.capture.impl.CaptureParameters#CAPTURE_CONFIG_CACHE_URL
+   * @see org.opencastproject.capture.api.CaptureParameters#CAPTURE_CONFIG_CACHE_URL
    */
   protected void writeConfigFileToDisk() {
     File cachedConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
@@ -315,7 +316,7 @@ public class ConfigurationManager implements ManagedService {
 
     //Check to make sure the counts are all correct, otherwise return null/error
     for (String name : friendlyNames) {
-      //TODO:  This is a stupid check, how else can we do this?  They might have three properties, but none of the right ones...
+      //TODO:  This is a stupid check, how else can we do this?  They might have three properties, but none of the required ones...
       if (propertyCounts.get(name) < 3) {
         logger.error("Invalid configuration data for device {}, agent capabilities are null!", name);
         return null;

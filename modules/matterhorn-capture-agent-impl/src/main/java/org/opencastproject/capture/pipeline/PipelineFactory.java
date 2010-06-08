@@ -52,15 +52,14 @@ public class PipelineFactory {
   /**
    * Create a bin that contains multiple pipelines using each source in the properties object as the gstreamer source
    * 
-   * @param properties
-   *          Properties object defining sources 
-   * @return The bin to control the pipelines
+   * @param props
+   *          {@code Properties} object defining sources 
+   * @return The {@code Pipeline} to control the pipelines
    * @throws UnsupportedDeviceException
    */
   public static Pipeline create(Properties props, boolean confidence) {
     properties = props;
     ArrayList<CaptureDevice> devices = new ArrayList<CaptureDevice>();
-    
 
     // Setup pipeline for all the devices specified
     String deviceNames = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
@@ -69,6 +68,7 @@ public class PipelineFactory {
       return null;
     }
 
+    //Sanity checks for the device list
     String[] friendlyNames = deviceNames.split(",");
     if (friendlyNames.length < 1) {
       logger.error("Insufficient number of capture devices listed.  Aborting!");
@@ -87,7 +87,7 @@ public class PipelineFactory {
       name = name.trim();
       DeviceName devName;
 
-      // Get properties from 
+      // Get properties from the configuration
       String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
       String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
       if (outputDirectory == null && confidence == false) {
@@ -101,7 +101,8 @@ public class PipelineFactory {
       File outputFile = new File(outputDirectory, properties.getProperty(outputProperty));
       logger.debug("Device {} has source at {}.", name, srcLoc);
       logger.debug("Device {} has output at {}.", name, outputFile);
-      
+
+      //Only try and create an output file if this pipeline will *not* be used for confidence monitoring
       if (!confidence) {
         try {
           if(!outputFile.createNewFile()){
@@ -190,6 +191,7 @@ public class PipelineFactory {
     return pipeline;
   }
 
+  //TODO:  Document me!
   private static CaptureDevice createCaptureDev(String srcLoc, DeviceName devName, String name, String outputLoc) {
     CaptureDevice capdev = new CaptureDevice(srcLoc, devName, name, outputLoc);
     String codecProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_CODEC;
@@ -226,9 +228,9 @@ public class PipelineFactory {
    * addPipeline will add a pipeline for the specified capture device to the bin.
    * 
    * @param captureDevice
-   *          CaptureDevice to create pipeline around
+   *          {@code CaptureDevice} to create pipeline around
    * @param pipeline
-   *          The Pipeline bin to add it to
+   *          The {@code Pipeline} bin to add it to
    * @return True, if successful
    */
   public static boolean addPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
@@ -251,11 +253,11 @@ public class PipelineFactory {
    * String representation of linking errors that occur when creating pipeline
    * 
    * @param device
-   *          The device the error occurred on
+   *          The {@code CaptureDevice} the error occurred on
    * @param src
-   *          The source element being linked
+   *          The source {@code Element} being linked
    * @param sink
-   *          The sink element being linked
+   *          The sink {@code Element} being linked
    * @return String representation of the error
    */
   private static String formatPipelineError(CaptureDevice device, Element src, Element sink) {
@@ -266,9 +268,9 @@ public class PipelineFactory {
    * Adds a pipeline specifically designed to captured from the Hauppauge WinTv cards to the main pipeline
    * 
    * @param captureDevice
-   *          The Hauppauge CaptureDevice to create pipeline around
+   *          The Hauppauge {@code CaptureDevice} to create pipeline around
    * @param pipeline
-   *          The Pipeline bin to add it to
+   *          The {@code Pipeline} bin to add it to
    * @return True, if successful
    */
   private static boolean getHauppaugePipeline(CaptureDevice captureDevice, Pipeline pipeline) {
@@ -288,7 +290,7 @@ public class PipelineFactory {
 
     Element dec, enc, muxer;
     Element filesrc = ElementFactory.make("filesrc", null);
-    Element queue = ElementFactory.make("queue", "hauppage");
+    Element queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
     if (bufferCount != null)
       queue.set("max-size-buffers", bufferCount);
     if (bufferBytes != null)
@@ -376,9 +378,9 @@ public class PipelineFactory {
    * Adds a pipeline specifically designed to captured from the Epiphan VGA2USB cards to the main pipeline
    * 
    * @param captureDevice
-   *          The VGA2USB CaptureDevice to create pipeline around
+   *          The VGA2USB {@code CaptureDevice} to create pipeline around
    * @param pipeline
-   *          The Pipeline bin to add it to
+   *          The {@code Pipeline} bin to add it to
    * @return True, if successful
    */
   private static boolean getVGA2USBPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
@@ -400,7 +402,7 @@ public class PipelineFactory {
     // Create elements, add them to pipeline, then link them 
     Element enc, muxer;
     Element v4lsrc = ElementFactory.make("v4lsrc", null);
-    Element queue = ElementFactory.make("queue", "epiphan");
+    Element queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
     if (bufferCount != null)
       queue.set("max-size-buffers", bufferCount);
     if (bufferBytes != null)
@@ -485,9 +487,9 @@ public class PipelineFactory {
    * Adds a pipeline specifically designed to captured from an ALSA source to the main pipeline
    * 
    * @param captureDevice
-   *          The ALSA source CaptureDevice to create pipeline around
+   *          The ALSA source {@code CaptureDevice} to create pipeline around
    * @param pipeline
-   *          The Pipeline bin to add it to
+   *          The {@code Pipeline} bin to add it to
    * @return True, if successful
    */
   private static boolean getAlsasrcPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
@@ -505,7 +507,7 @@ public class PipelineFactory {
     Element enc, mux;
 
     Element alsasrc = ElementFactory.make("alsasrc", null);
-    Element queue = ElementFactory.make("queue", "alsa");
+    Element queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
     Element audioconvert = ElementFactory.make("audioconvert", null);
     if (bufferCount != null)
       queue.set("max-size-buffers", bufferCount);
@@ -577,9 +579,9 @@ public class PipelineFactory {
    * Adds a pipeline specifically designed to captured from the Bluecherry Provideo cards to the main pipeline
    * 
    * @param captureDevice
-   *          The Bluecherry CaptureDevice to create pipeline around
+   *          The Bluecherry {@code CaptureDevice} to create pipeline around
    * @param pipeline
-   *          The Pipeline bin to add it to
+   *          The {@code Pipeline} bin to add it to
    * @return True, if successful
    */
   private static boolean getBluecherryPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
@@ -600,7 +602,7 @@ public class PipelineFactory {
 
     Element enc, muxer;
     Element v4l2src = ElementFactory.make("v4l2src", null);
-    Element queue = ElementFactory.make("queue", "bluecherry");
+    Element queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
     if (bufferCount != null)
       queue.set("max-size-buffers", bufferCount);
     if (bufferBytes != null)
@@ -670,9 +672,9 @@ public class PipelineFactory {
    * Adds a pipeline for a media file that just copies it to a new location
    * 
    * @param captureDevice
-   *          capture device with source and output information
+   *          The {@code CaptureDevice} with source and output information
    * @param pipeline
-   *          the Pipeline bin to add it to
+   *          The {@code Pipeline} bin to add it to
    * @return True, if successful
    */
   private static boolean getFilePipeline(CaptureDevice captureDevice, Pipeline pipeline) {
@@ -697,9 +699,9 @@ public class PipelineFactory {
    * Adds a pipeline specifically designed to captured from a DV Camera attached by firewire to the main pipeline
    * 
    * @param captureDevice
-   *          DV Camera attached to firewire
+   *          DV Camera attached to firewire {@code CaptureDevice} to create pipeline around
    * @param pipeline
-   *          The Pipeline bin to add it to
+   *          The {@code Pipeline} bin to add it to
    * @return True, if successful
    */
   private static boolean getDvPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
@@ -710,7 +712,7 @@ public class PipelineFactory {
     String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
     String bufferTime = captureDevice.properties.getProperty("bufferTime");
 
-    Element queue = ElementFactory.make("queue", "dv");
+    Element queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
     if (bufferCount != null)
       queue.set("max-size-buffers", bufferCount);
     if (bufferBytes != null)
@@ -756,6 +758,10 @@ public class PipelineFactory {
   
 }
 
+/**
+ * A Quick and dirty logging class.  This will only be created when the logging level is set to TRACE.
+ * It's sole purpose is to output the three limits on the buffer for each device
+ */
 class BufferThread extends Thread {
 
   private static final Logger log = LoggerFactory.getLogger(BufferThread.class);

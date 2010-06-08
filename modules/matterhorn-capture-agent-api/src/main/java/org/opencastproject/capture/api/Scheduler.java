@@ -24,19 +24,19 @@ import java.net.URL;
 public interface Scheduler {
 
   /**
-   * Sets the schedule data URL from which to gather scheduling data.  This should be a endpoint which generates iCal (RFC 2445) format scheduling data.
-   * @param url The URL to pull the calendaring data from.
+   * Sets the schedule data {@code URL} from which to gather scheduling data.  This should be a endpoint which generates iCal (RFC 2445) format scheduling data.
+   * @param url The {@code URL} to pull the calendaring data from.
    */
   void setScheduleEndpoint(URL url);
 
   /**
-   * Gets the current schedule data URL.  This should be an endpoint which generates iCal (RFC 2445) format scheduling data.
-   * @return The current schedule data URL.
+   * Gets the current schedule data {@code URL}.  This should be an endpoint which generates iCal (RFC 2445) format scheduling data.
+   * @return The current schedule data {@code URL}.
    */
   URL getScheduleEndpoint();
 
   /**
-   * Polls the current schedule endpoint URL for new scheduling data.
+   * Polls the current schedule endpoint {@code URL} for new scheduling data.
    * If the new schedule data contains an error or is unreachable the previous recording schedule is used instead.
    */
   void updateCalendar();

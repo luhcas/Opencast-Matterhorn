@@ -45,7 +45,8 @@ public class AgentCapabilitiesJob implements Job {
   /**
    * Pushes the agent's capabilities to the remote state service.
    * {@inheritDoc}
-   * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
+   * @see org.quartz.Job#execute(JobExecutionContext)
+   * @throws JobExecutionException
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
     config = (ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE);

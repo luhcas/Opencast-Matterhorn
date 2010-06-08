@@ -69,7 +69,7 @@ public interface Agent {
   /**
    * Sets the capture agent's capability list.
    *
-   * @param The agent's capabilities.
+   * @param capabilities The agent's capabilities.
   */
   public void setCapabilities(Properties capabilities);
 }

@@ -43,7 +43,9 @@ public class CaptureDevice {
    * @param loc
    *          The location of the device on the system
    * @param name
-   *          The name of the device
+   *          The {@code DeviceName} object of the device
+   * @param fname
+   *          The user friendly name of the device
    * @param output
    *          The output path
    */

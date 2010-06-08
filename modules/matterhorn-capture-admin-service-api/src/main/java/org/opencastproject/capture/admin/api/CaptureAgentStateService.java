@@ -79,7 +79,7 @@ public interface CaptureAgentStateService {
    * Sets the capabilities for the specified agent
    * @param agentName
    * @param capabilities
-   * @return
+   * @return One of the constants defined in this class
    */
   public int setAgentCapabilities(String agentName, Properties capabilities);
   

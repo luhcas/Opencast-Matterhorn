@@ -34,7 +34,10 @@ public class AgentDevice {
    */
   @XmlElement(name="name")
   private String name;
-  
+
+  /**
+   * TODO:  Document what I can be
+   */
   /**
    * Used to classify the device as video or audio
    */

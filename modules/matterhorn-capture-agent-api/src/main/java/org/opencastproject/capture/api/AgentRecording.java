@@ -50,7 +50,7 @@ public interface AgentRecording extends Recording {
   public void setProps(Properties props);
 
   /**
-   * @return The current MediaPackage
+   * @return The current {@code MediaPackage}
    */
   public MediaPackage getMediaPackage();
 

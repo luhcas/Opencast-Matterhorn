@@ -57,13 +57,11 @@ public class RecordingImpl implements AgentRecording {
   /** The recording's state */
   private String state = RecordingState.UNKNOWN;
 
-  private long startTime = -1L;
-  
   /**
    * The time at which the recording last checked in with this service.
    * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in). 
    */
-  public Long lastHeardFrom; 
+  private Long lastHeardFrom; 
 
   /** Keeps the properties associated with this recording */
   private Properties props = null;
@@ -73,13 +71,15 @@ public class RecordingImpl implements AgentRecording {
 
   /** 
    * Constructs a RecordingImpl object using the Properties and MediaPackage provided
-   * @param props The {@code Properties} object associated to this recording
+   * @param properties The {@code Properties} object associated to this recording
    * @param mp    The {@code MediaPackage} with this recording files
    * @throws IOException If the base directory could not be fetched
    */
   public RecordingImpl(MediaPackage mp, Properties properties) throws IOException, IllegalArgumentException {
     // Stores the MediaPackage
     this.mPkg = mp;
+
+    //If the mediapackage is null create a new one
     if (mPkg == null) {
       try {
         mPkg = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
@@ -89,6 +89,7 @@ public class RecordingImpl implements AgentRecording {
         throw new RuntimeException("MediaPackageException building default mediapackage!", e);
       }
     }
+
     if (properties != null) {
       this.props = (Properties) properties.clone();
     } else {
@@ -114,6 +115,7 @@ public class RecordingImpl implements AgentRecording {
       }
     }
 
+    //Write out the metadata file needed by the core if it's not present
     //TODO:  make this a constant?
     File metadataFile = new File(baseDir, "metadata.xml");
     if (!metadataFile.exists()) {
@@ -145,6 +147,7 @@ public class RecordingImpl implements AgentRecording {
     if (this.props.containsKey(CaptureParameters.RECORDING_ROOT_URL)) {
       baseDir = new File(props.getProperty(CaptureParameters.RECORDING_ROOT_URL));
       if (props.containsKey(CaptureParameters.RECORDING_ID)) {
+        //In this case they've set both the root URL and the recording ID, so we're done.
         id = props.getProperty(CaptureParameters.RECORDING_ID);
       } else {
         //In this case they've set the root URL, but not the recording ID.  Get the id from that url instead then.
@@ -159,8 +162,7 @@ public class RecordingImpl implements AgentRecording {
         baseDir = new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), id);
       } else {
         //Unscheduled capture, use a timestamp value instead
-        startTime = System.currentTimeMillis();
-        id = "Unscheduled-" + props.getProperty(CaptureParameters.AGENT_NAME) + "-" + startTime;
+        id = "Unscheduled-" + props.getProperty(CaptureParameters.AGENT_NAME) + "-" + System.currentTimeMillis();
         props.setProperty(CaptureParameters.RECORDING_ID, id);
         baseDir = new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), id);
       }
@@ -251,7 +253,7 @@ public class RecordingImpl implements AgentRecording {
   }
 
   /**
-   * Formats a Date object according to the dublin core rules for dcterms:created
+   * Formats a Date object to UTC time and according to the dublin core rules for dcterms:created
    * @param d The Date to format
    * @return The formatted Date
    */

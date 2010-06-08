@@ -135,7 +135,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
     /**
    * Sets the configuration service form which this capture agent should draw its configuration data.
-   * @param service The configuration service.
+   * @param cfg The configuration service.
    */
   public void setConfigService(ConfigurationManager cfg) {
     configService = cfg;
@@ -143,13 +143,17 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   }
 
   /**
-   * Sets he scheduler service which this service uses to schedule stops for unscheduled captures.
+   * Sets the scheduler service which this service uses to schedule stops for unscheduled captures.
    * @param s The scheduler service.
    */
   public void setScheduler(SchedulerImpl s) {
     scheduler = s;
   }
 
+  /**
+   * Sets the http client which this service uses to communicate with the core.
+   * @param c The client object.
+   */
   public void setTrustedClient(TrustedHttpClient c) {
     client = c;
   }
@@ -182,7 +186,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.capture.api.CaptureAgent#startCapture(org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.capture.api.CaptureAgent#startCapture(MediaPackage)
    */
   @Override
   public String startCapture(MediaPackage mediaPackage) {
@@ -196,7 +200,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.capture.api.CaptureAgent#startCapture(java.util.HashMap)
+   * @see org.opencastproject.capture.api.CaptureAgent#startCapture(Properties)
    */
   @Override
   public String startCapture(Properties properties) {
@@ -219,44 +223,52 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * {@inheritDoc}
    * 
    * @see 
-   *      org.opencastproject.capture.api.CaptureAgent#startCapture(org.opencastproject.media.mediapackage.MediaPackage,
-   *      HashMap properties)
+   *      org.opencastproject.capture.api.CaptureAgent#startCapture(MediaPackage, Properties)
    */
   @Override
   public String startCapture(MediaPackage mediaPackage, Properties properties) {
     logger.debug("startCapture(mediaPackage, properties): {} {}", mediaPackage, properties);
+    //Check to make sure we're not already capturing something
     if (currentRecID != null || !agentState.equals(AgentState.IDLE)) {
       logger.warn("Unable to start capture, a different capture is still in progress in {}.",
               pendingRecordings.get(currentRecID).getDir().getAbsolutePath());
+      //Set the recording's state to error
       if (properties != null && properties.getProperty(CaptureParameters.RECORDING_ID) != null) {
         setRecordingState(properties.getProperty(CaptureParameters.RECORDING_ID), RecordingState.CAPTURE_ERROR);
       } else {
-        setRecordingState("Unscheduled-" + System.currentTimeMillis(), RecordingState.CAPTURE_ERROR);
+        setRecordingState("Unscheduled-" + agentName + "-" + System.currentTimeMillis(), RecordingState.CAPTURE_ERROR);
       }
       return null;
     } else {
       setAgentState(AgentState.CAPTURING);
     }
+    //Generate a combined properties object for this capture
     properties = configService.merge(properties, false);
-    
+
+    //Create the recording
     RecordingImpl newRec = createRecording(mediaPackage, properties);
     if (newRec == null) {
-      //TODO:  What if we don't have a recording ID already (eg, an unscheduled capture)
       if (properties != null && properties.contains(CaptureParameters.RECORDING_ID)) {
-        setRecordingState((String) properties.get(CaptureParameters.RECORDING_ID), RecordingState.CAPTURE_ERROR);
+        resetOnFailure((String) properties.get(CaptureParameters.RECORDING_ID));
+      } else {
+        resetOnFailure("Unscheduled-" + agentName + "-" + System.currentTimeMillis());
       }
       return null;
     }
 
+    //Init the pipeline and break out if it fails
     String recordingID = initPipeline(newRec);
     if (recordingID == null) {
       resetOnFailure(newRec.getID());
       return null;
     }
 
+    //Great, capture is running.  Set the agent state appropriately.
     setRecordingState(recordingID, RecordingState.CAPTURING);
+    //If the recording does *not* have a scheduled endpoint then schedule one.
     if (newRec.getProperty(CaptureParameters.RECORDING_END) == null) {
       if (!scheduleStop(newRec.getID())) {
+        //If the attempt to schedule an end to the recording fails then shut everything down.
         stopCapture(newRec.getID(), false);
         resetOnFailure(newRec.getID());
       }
@@ -265,7 +277,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   }
 
   /**
-   * Creates the RecordingImpl instance used for this capture
+   * Creates a RecordingImpl instance used in a capture.  Also adds the recording to the agent's internal list of upcoming recordings.
    * @param mediaPackage The media package to create the recording around
    * @param properties The properties of the recording
    * @return The RecordingImpl instance, or null in the case of an error
@@ -277,22 +289,15 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       newRec = new RecordingImpl(mediaPackage, configService.merge(properties, false));
     } catch (IllegalArgumentException e) {
       logger.error("Recording not created: {}", e.getMessage());
-      setAgentState(AgentState.IDLE);
-      //TODO:  Heh, now what?  We can't set a capture error if the id doesn't exist...
-      //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
       return null;
     } catch (IOException e) {
       logger.error("Recording not created due to an I/O Exception: {}", e.getMessage());
-      setAgentState(AgentState.IDLE);
       return null;
     }
     // Checks there is no duplicate ID
     String recordingID = newRec.getID();
     if (pendingRecordings.containsKey(recordingID)) {
       logger.error("Can't create a recording with ID {}: there is already another recording with such ID", recordingID);
-      setAgentState(AgentState.IDLE);
-      //TODO:  Do we set the recording to an error state here?
-      //setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
       return null;
     } else {
       pendingRecordings.put(recordingID, newRec);
@@ -307,6 +312,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @return The recording ID (equal to newRec.getID()) or null in the case of an error
    */
   private String initPipeline(RecordingImpl newRec) {
+    //Create the pipeline
     try {
       pipe = PipelineFactory.create(newRec.getProperties(), false);
     } catch (UnsatisfiedLinkError e) {
@@ -314,6 +320,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       return null;
     }
 
+    //Check if the pipeline came up ok
     if (pipe == null) {
       logger.error("Capture {} could not start, pipeline was null!", newRec.getID());
       resetOnFailure(newRec.getID());
@@ -322,6 +329,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
     logger.info("Initializing devices for capture.");
 
+    //Hook up the shutdown handlers
     Bus bus = pipe.getBus();
     bus.connect(new Bus.EOS() {
       /**
@@ -348,10 +356,13 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     // Grab time to wait for pipeline to start
     int wait;
     String waitProp = newRec.getProperty(CaptureParameters.CAPTURE_START_WAIT);
-    if (waitProp != null)
+    if (waitProp != null) {
       wait = Integer.parseInt(waitProp);
-    else
+    } else {
       wait = 5; // Default taken from gstreamer docs
+    }
+
+    //Try and start the pipline
     pipe.play();
     if (pipe.getState(wait * GST_SECOND) != State.PLAYING) {
       logger.error("Unable to start pipeline after {} seconds.  Aborting!", wait);
@@ -397,6 +408,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     length = length * 1000L;
     Date stop = new Date(length + System.currentTimeMillis());
     if (scheduler != null) {
+      logger.debug("Scheduling stop for recording {} at {}.", recordingID, stop);
       return scheduler.scheduleUnscheduledStopCapture(recordingID, stop);
     }
     return false;
@@ -422,6 +434,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         return false;
       }
       while (pipe != null) {
+        //TODO:  What happens if this loop never exits?
         try {
           Thread.sleep(1000);
         } catch (InterruptedException e) {}
@@ -448,7 +461,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     setRecordingState(theRec.getID(), RecordingState.CAPTURE_FINISHED);
     setAgentState(AgentState.IDLE);
 
-    // Creates the file indicating the recording has been successfuly stopped
+    // Creates the file indicating the recording has been successfully stopped
     try {
       new File(theRec.getDir(), CaptureParameters.CAPTURE_STOPPED_FILE_NAME).createNewFile();
     } catch (IOException e) {
@@ -480,7 +493,11 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     if (currentRecID != null) {
       if (recordingID.equals(currentRecID)) {
         return stopCapture(immediateIngest);
+      } else {
+        logger.debug("Current capture ID does not match parameter capture ID, ignoring stopCapture call.");
       }
+    } else {
+      logger.debug("No capture in progress, ignoring stopCapture call.");
     }
     return false;
   }
@@ -496,12 +513,16 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     if (recording == null) {
       logger.error("[createManifest] Recording {} not found!", recID);
       return false;
-    } else
+    } else {
       logger.debug("Generating manifest for recording {}", recID);
+    }
 
+    //Get the list of device names so we can attach all the files appropriately (re: flavours, etc)
     String[] friendlyNames = recording.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES).split(",");
     if (friendlyNames.length == 1 && friendlyNames[0].equals("")) {
+      //Idiot check against blank name lists.
       logger.error("Unable to build mediapackage for recording {} because the device names list is blank!", recID);
+      //TODO:  Return false here?  The above line is an error...
     }
 
     MediaPackageElementBuilder elemBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
@@ -590,13 +611,16 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       String elementPath = item.getURI().getPath();
 
       // Relative and absolute paths are mixed
-      if (elementPath.startsWith("file:") || elementPath.startsWith(File.separator))
+      if (elementPath.startsWith("file:") || elementPath.startsWith(File.separator)) {
         tmpFile = new File(elementPath);
-      else
+      } else {
         tmpFile = new File(recording.getDir(), elementPath);
-      // TODO: Is this really a warning or should we fail completely and return an error?
-      if (!tmpFile.isFile())
+      }
+
+      if (!tmpFile.isFile()) {
+        // TODO: Is this really a warning or should we fail completely and return an error?
         logger.warn("Required file {} doesn't exist!", tmpFile.getAbsolutePath());
+      }
       filesToZip.add(tmpFile);
     }
     filesToZip.add(new File(recording.getDir(), CaptureParameters.MANIFEST_NAME));
@@ -605,6 +629,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     for (File f : filesToZip)
       logger.debug("--> {}", f.getName());
 
+    //Return a pointer to the zipped file
     return ZipUtil.zip(filesToZip.toArray(new File[filesToZip.size()]), new File(recording.getDir(), CaptureParameters.ZIP_NAME).getAbsolutePath());
   }
 
@@ -651,16 +676,19 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
     File fileDesc = new File(recording.getDir(), CaptureParameters.ZIP_NAME);
 
-    // Sets the file as the body of the request
+    // Set the file as the body of the request
     MultipartEntity entities = new MultipartEntity();
+    //Check to see if the properties have an alternate workflow definition attached
     if (recording.getProperty(CaptureParameters.INGEST_WORKFLOW_DEFINITION) != null) {
       try {
+        //Add it to the normal endpoint URL
         url = new URL(url.toString() + "/" + recording.getProperty(CaptureParameters.INGEST_WORKFLOW_DEFINITION));
       } catch (MalformedURLException e1) {
         logger.warn("Malformed URL for ingest target with workflow definition.");
         return -3;
       }
 
+      //Copy appropriate keys from the properties so they can be passed to the REST endpoint separately
       Set<Object> keys = recording.getProperties().keySet();
       for (Object o : keys) {
         String key = (String) o;
@@ -729,6 +757,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     if (confidence) {
       if (state.equalsIgnoreCase(AgentState.CAPTURING) && confidencePipe != null) {
         confidencePipe.stop();
+        //TODO:  What if this loop never finishes?
         while (confidencePipe.isPlaying());
         confidencePipe = null;
         logger.info("Confidence monitoring has been shut down.");
@@ -746,6 +775,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
             }
           });
           confidencePipe.play();
+          //TODO:  What if the pipeline crashes out?  We just run without it?  Should we add endpoints to manually restart it?
           logger.info("Confidence monitoring beginning.");
         } catch (Exception e) {
           logger.warn("Confidence monitoring not started: {}", e.getMessage());
@@ -772,7 +802,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @see org.opencastproject.capture.admin.api.RecordingState
    */
   protected void setRecordingState(String recordingID, String state) {
-    if (pendingRecordings != null && recordingID != null && state != null) {
+    if (recordingID != null && state != null) {
       AgentRecording rec = pendingRecordings.get(recordingID);
       if (rec != null) {
         rec.setState(state);
@@ -789,8 +819,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       logger.info("Unable to create recording because recordingID parameter was null!");
     } else if (state == null) {
       logger.info("Unable to create recording because state parameter was null!");
-    } else if (pendingRecordings == null) {
-      logger.info("Unable to create recording because memory structure was null!");
     }
   }
 
@@ -817,6 +845,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   public Properties getAgentCapabilities() {
     if (configService != null) {
       Properties p = configService.getCapabilities();
+      //TODO:  Do we need this?  What is it used for?  If nothing else the key should be in the capture parameters file...
       Calendar cal = Calendar.getInstance();
       p.setProperty("capture.device.timezone.offset", Integer.toString((cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)) / (60 * 1000)));
       return p;
@@ -831,20 +860,19 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   public String getDefaultAgentPropertiesAsString() {
     Properties p = configService.getAllProperties();
-    String result = "";
-    String[] l = new String[p.size()];
+    StringBuffer result = new StringBuffer();
+    String[] lines = new String[p.size()];
     int i = 0;
     for (Object k : p.keySet()) {
       String key = (String) k;
-      String newline =  key + "=" + p.getProperty(key) + "\n";
-      l[i++] = newline;
+      lines[i++] = key + "=" + p.getProperty(key) + "\n";
     }
-    Arrays.sort(l);
-    for (String s : l) {
-      result = result + s;
+    Arrays.sort(lines);
+    for (String s : lines) {
+      result.append(s);
     }
     
-    return result;
+    return result.toString();
   }
 
   /**
@@ -857,12 +885,14 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       throw new ConfigurationException("null", "Null configuration in updated!");
     }
 
+    //Update the agent's properties from the parameter
     Properties props = new Properties();
     Enumeration<String> keys = properties.keys();
     while (keys.hasMoreElements()) {
       String key = keys.nextElement();
       props.put(key, properties.get(key));
     }
+    //Recreate the agent state push tasks
     createPushTask(props);
   }
 
@@ -949,7 +979,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       stateJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
       stateJob.getJobDataMap().put(JobParameters.TRUSTED_CLIENT, client);
 
-      //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
+      //Create a new trigger                          Name              Group name               Start       End   # of times to repeat               Repeat interval
       SimpleTrigger stateTrigger = new SimpleTrigger("state_push", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, statePushTime);
       
       //Schedule the update
@@ -997,6 +1027,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     int length = (int) fimage.length();
     byte[] ibytes = new byte[length];
     try {
+      //Read the bytes and dump them to the byte array
       InputStream fis = new FileInputStream(fimage);
       fis.read(ibytes, 0, length);
       fis.close();
@@ -1018,8 +1049,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     String devices = configService.getItem(CaptureParameters.CAPTURE_DEVICE_NAMES);
     String[] friendlyNames = devices.split(",");
     LinkedList<String> deviceList = new LinkedList<String>();
+    //For each device name in the split list above
     for (String name : friendlyNames) {
       String srcName = configService.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE);
+      //Determine the type and add it to the appropriate list
       if (srcName.contains("hw:")) {
         deviceList.add(name + ",audio");
       } else {

@@ -28,7 +28,8 @@ public class PollCalendarJob implements Job {
   /**
    * Pulls the calendar data and updates the calendar for the capture scheduling service.
    * {@inheritDoc}
-   * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
+   * @see org.quartz.Job#execute(JobExecutionContext)
+   * @throws JobExecutionException
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
     SchedulerImpl sched = (SchedulerImpl) ctx.getMergedJobDataMap().get(JobParameters.SCHEDULER);

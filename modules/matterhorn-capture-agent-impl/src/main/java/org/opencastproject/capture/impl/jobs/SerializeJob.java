@@ -38,9 +38,10 @@ public class SerializeJob implements Job {
   private static final Logger logger = LoggerFactory.getLogger(SerializeJob.class);
 
   /**
-   * Generates a manifest file then zips everything up so it can be ingested.  Also schedules a IngestJob
+   * Generates a manifest file then zips everything up so it can be ingested.  Also schedules a IngestJob.
    * {@inheritDoc}
-   * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
+   * @see org.quartz.Job#execute(JobExecutionContext)
+   * @throws JobExecutionException
    */
   @Override
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
