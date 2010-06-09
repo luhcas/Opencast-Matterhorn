@@ -24,6 +24,7 @@ import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Param.Type;
 
+import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,10 +71,10 @@ public class ConfidenceMonitorRestService {
     data.addEndpoint(RestEndpoint.Type.READ, getDevices);
     
     // audio rms endpoint
-    RestEndpoint getRMSValues = new RestEndpoint("getRMSValues", RestEndpoint.Method.GET, "/audio/{name}/{timestamp}", "List X seconds of RMS values from audio device");
-    getRMSValues.addFormat(new Format("String", "Current timestamp of capture agent followed by list of RMS values", null));
-    getRMSValues.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
+    RestEndpoint getRMSValues = new RestEndpoint("getRMSValues", RestEndpoint.Method.GET, "/audio/{name}/{timestamp}", "Retrieve all RMS data for device {name} after Unix time {timestamp}");
+    getRMSValues.addStatus(org.opencastproject.util.doc.Status.OK(("NONE")));
     getRMSValues.addStatus(org.opencastproject.util.doc.Status.ERROR("Couldn't grab RMS values"));
+    getRMSValues.addFormat(new Format("JSON", "start:Unix time to start getting values, interval: time between samples (ns), samples:list of RMS values", null));
     Param audioDevice = new Param("name", Type.STRING, null, "The device to get RMS values from");
     Param timestamp = new Param("timestamp", Type.STRING, null, "The timestamp to start getting RMS values from");
     getRMSValues.addPathParam(audioDevice);
@@ -128,22 +129,32 @@ public class ConfidenceMonitorRestService {
     return devices;
   }
   
+  /**
+   * Returns the RMS values for device after a given Unix timestamp. 
+   * @param device Friendly name of the audio device
+   * @param timestamp A Unix timestamp (set to 0 to get all values stored)
+   * @return application/json with keys start, interval and samples
+   */
+  @SuppressWarnings("unchecked")
   @GET
-  @Produces(MediaType.TEXT_PLAIN)
+  @Produces(MediaType.APPLICATION_JSON)
   @Path("audio/{name}/{timestamp}")
-  public String getRMSValues(@PathParam("name") String device, @PathParam("timestamp") double timestamp) {
+  public Response getRMSValues(@PathParam("name") String device, @PathParam("timestamp") double timestamp) {
+    JSONObject jsonOutput = new JSONObject();
     if (service == null) {
-      return "Confidence monitor unavailable, please wait...";
+      return Response.serverError().build();
     }
-
-    //TODO:  Add explanation of output format in rest documentation
+    
     List<Double> rmsValues = service.getRMSValues(device, timestamp);
-    String output = Long.toString(System.currentTimeMillis()) + "\n";
-    for (double value : rmsValues) {
+    for (int i = 0; i < rmsValues.size(); i++) {
+      double value = rmsValues.get(i);
       value = Math.round(value * 100.00) / 100.00;
-      output += Double.toString(value) + "\n";
+      rmsValues.set(i, value);
     }
-    return output.substring(0, output.length() - 2);
+    jsonOutput.put("start", timestamp);
+    jsonOutput.put("interval", "100000000");
+    jsonOutput.put("samples", rmsValues.toString());
+    return Response.ok(jsonOutput.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
   }
   
   @GET
