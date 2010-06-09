@@ -17,6 +17,7 @@ package org.opencastproject.composer.impl;
 
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderEngine;
+import org.opencastproject.composer.api.EncoderEngineFactory;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.inspection.api.MediaInspectionService;
@@ -73,8 +74,8 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
   /** Reference to the receipt service */
   private RemoteServiceManager remoteServiceManager;
 
-  /** Reference to the encoder engine */
-  private EncoderEngine encoderEngine;
+  /** Reference to the encoder engine factory */
+  private EncoderEngineFactory encoderEngineFactory;
   
   /** Id builder used to create ids for encoded tracks */
   private final IdBuilder idBuilder = IdBuilderFactory.newInstance().newIdBuilder();
@@ -102,11 +103,11 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
   }
 
   /**
-   * Sets the encoder engine
-   * @param encoderEngine The encoder engine
+   * Sets the encoder engine factory
+   * @param encoderEngineFactory The encoder engine factory
    */
-  public void setEncoderEngine(EncoderEngine encoderEngine) {
-    this.encoderEngine = encoderEngine;
+  public void setEncoderEngineFactory(EncoderEngineFactory encoderEngineFactory) {
+    this.encoderEngineFactory = encoderEngineFactory;
   }
   
   /**
@@ -249,9 +250,15 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
     if (profile == null) {
       composerReceipt.setStatus(Status.FAILED);
       remoteServiceManager.updateReceipt(composerReceipt);
-      throw new RuntimeException("Profile '" + profileId + " is unkown");
+      throw new EncoderException(null, "Profile '" + profileId + " is unkown");
     }
-
+    final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
+    if (encoderEngine == null) {
+      composerReceipt.setStatus(Status.FAILED);
+      remoteServiceManager.updateReceipt(composerReceipt);
+      throw new EncoderException(null, "No encoder engine available for profile '" + profileId + "'");
+    }
+    
     Runnable runnable = new Runnable() {
       public void run() {
         logger.info("encoding track {} for media package {} using source audio track {} and source video track {}",
@@ -365,11 +372,20 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
           final long time, boolean block) throws EncoderException, MediaPackageException {
     if(maintenanceMode) throw new MaintenanceException();
 
+    final Receipt receipt = remoteServiceManager.createReceipt(JOB_TYPE);
     final String targetAttachmentId = "attachment-" + (mediaPackage.getAttachments().length + 1);
 
     final EncodingProfile profile = profileScanner.getProfile(profileId);
     if (profile == null) {
-      throw new RuntimeException("Profile '" + profileId + " is unkown");
+      receipt.setStatus(Status.FAILED);
+      remoteServiceManager.updateReceipt(receipt);
+      throw new EncoderException(null, "Profile '" + profileId + "' is unknown");
+    }
+    final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
+    if (encoderEngine == null) {
+      receipt.setStatus(Status.FAILED);
+      remoteServiceManager.updateReceipt(receipt);
+      throw new EncoderException(null, "No encoder engine available for profile '" + profileId + "'");
     }
 
     // Get the video track and make sure it exists
@@ -390,7 +406,6 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
     } catch (NotFoundException e) {
       throw new MediaPackageException("unable to access video track " + videoTrack, e);
     }
-    final Receipt receipt = remoteServiceManager.createReceipt(JOB_TYPE);
 
     Runnable runnable = new Runnable() {
       @Override

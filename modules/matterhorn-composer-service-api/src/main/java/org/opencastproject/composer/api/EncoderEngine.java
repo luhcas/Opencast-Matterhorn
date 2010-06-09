@@ -22,7 +22,8 @@ import java.io.File;
 import java.util.Map;
 
 /**
- * Interface for encoding engines like ffmpeg or telestream's episode engine.
+ * Interface for encoding engines like ffmpeg or telestream's episode engine. EncoderEngines are thread unsafe.  Use
+ * {@link EncoderEngineFactory#newEncoderEngine(EncodingProfile)} for each encoding operation.
  */
 public interface EncoderEngine {
 
