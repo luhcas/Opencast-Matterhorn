@@ -17,6 +17,9 @@ package org.opencastproject.analysis.text;
 
 import org.opencastproject.analysis.api.MediaAnalysisException;
 import org.opencastproject.analysis.api.MediaAnalysisServiceSupport;
+import org.opencastproject.analysis.text.ocropus.OcropusTextAnalyzer;
+import org.opencastproject.analysis.text.ocropus.OcropusTextFrame;
+import org.opencastproject.analysis.text.ocropus.OcropusWord;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
@@ -27,8 +30,11 @@ import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
+import org.opencastproject.metadata.mpeg7.Textual;
+import org.opencastproject.metadata.mpeg7.TextualImpl;
 import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
+import org.opencastproject.metadata.mpeg7.VideoTextImpl;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
@@ -46,6 +52,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -72,7 +80,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   public static final String COLLECTION_ID = "ocrtext";
 
   /** The configuration key for setting the number of worker threads */
-  public static final String CONFIG_THREADS = "videosegmenter.threads";
+  public static final String CONFIG_THREADS = "textanalyzer.threads";
 
   /** The default worker thread pool size to use if no configuration is specified */
   public static final int DEFAULT_THREADS = 2;
@@ -93,11 +101,14 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   protected TrustedHttpClient trustedHttpClient = null;
 
   /** The executor service used to queue and run jobs */
-  private ExecutorService executor;
+  private ExecutorService executor = null;
 
   /** This server's base URL */
   private String serverUrl = null;
-  
+
+  /** Path to the ocropus binary */
+  private String ocropusbinary = "/usr/local/bin/ocrocmd";
+
   /**
    * Creates a new text analzer.
    */
@@ -119,16 +130,18 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
       throw new IllegalStateException("The text analyzer needs one or more threads to function.");
     }
     setExecutorThreads(threads);
-    
+
     // register as a handler for "org.opencastproject.analysis.text" jobs
-    serverUrl = (String)cc.getBundleContext().getProperty("org.opencastproject.server.url");
+    serverUrl = (String) cc.getBundleContext().getProperty("org.opencastproject.server.url");
+    if (cc.getBundleContext().getProperty("textanalyzer.ocrocmd") != null)
+      ocropusbinary = (String) cc.getBundleContext().getProperty("textanalyzer.ocrocmd");
     remoteServiceManager.registerService(RECEIPT_TYPE, serverUrl);
   }
 
   protected void deactivate() {
     remoteServiceManager.unRegisterService(RECEIPT_TYPE, serverUrl);
   }
-  
+
   /**
    * Separating this from the activate method so it's easier to test
    */
@@ -172,22 +185,25 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
           logger.info("Starting text extraction from {}", imageUrl);
 
           File imageFile = workspace.get(imageUrl);
-          VideoText videoText = analyze(imageFile);
-          
+          VideoText[] videoTexts = analyze(imageFile, element.getIdentifier());
+
           // Create a temporal decomposition
           MediaTime mediaTime = new MediaTimeImpl(0, 0);
           AudioVisual avContent = mpeg7.addAudioVisualContent(element.getIdentifier(), mediaTime, null);
-          TemporalDecomposition<VideoSegment> temporalDecomposition = (TemporalDecomposition<VideoSegment>) avContent.getTemporalDecomposition();
-          
+          TemporalDecomposition<VideoSegment> temporalDecomposition = (TemporalDecomposition<VideoSegment>) avContent
+                  .getTemporalDecomposition();
+
           // Add a segment
           VideoSegment videoSegment = temporalDecomposition.createSegment("segment-0");
           videoSegment.setMediaTime(mediaTime);
-          
+
           // Add the video text to the spacio temporal decomposition of the segment
           SpatioTemporalDecomposition spatioTemporalDecomposition = videoSegment.getSpatioTemporalDecomposition();
-          spatioTemporalDecomposition.addVideoText(videoText);
+          for (VideoText videoText : videoTexts) {
+            spatioTemporalDecomposition.addVideoText(videoText);
+          }
 
-          logger.info("Text extraction of {} finished", attachment.getURI());
+          logger.info("Text extraction of {} finished, {} words found", attachment.getURI(), videoTexts.length);
 
           URI uri = uploadMpeg7(mpeg7);
           mpeg7.setURI(uri);
@@ -274,14 +290,25 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
    * 
    * @param imageFile
    *          the image
+   * @param id
+   *          the video text id
    * @return the video text found on the image
    * @throws IOException
    *           if accessing the image fails
    */
-  protected VideoText analyze(File imageFile) throws IOException {
-    VideoText videoText = null;
-
-    return videoText;
+  protected VideoText[] analyze(File imageFile, String id) throws IOException {
+    List<VideoText> videoTexts = new ArrayList<VideoText>();
+    OcropusTextAnalyzer analyzer = new OcropusTextAnalyzer(ocropusbinary);
+    OcropusTextFrame textFrame = analyzer.analyze(imageFile);
+    int i = 1;
+    for (OcropusWord word : textFrame.getWords()) {
+      VideoText videoText = new VideoTextImpl(id + "-" + i);
+      videoText.setBoundary(word.getBoundaries());
+      Textual text = new TextualImpl(word.getWord());
+      videoText.setText(text);
+      videoTexts.add(videoText);
+    }
+    return videoTexts.toArray(new VideoText[videoTexts.size()]);
   }
 
   /**

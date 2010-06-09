@@ -30,6 +30,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
 import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
+import org.opencastproject.metadata.mpeg7.AudioVisual;
 import org.opencastproject.metadata.mpeg7.FreeTextAnnotation;
 import org.opencastproject.metadata.mpeg7.KeywordAnnotation;
 import org.opencastproject.metadata.mpeg7.MediaDuration;
@@ -39,8 +40,11 @@ import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.MultimediaContent;
 import org.opencastproject.metadata.mpeg7.MultimediaContentType;
-import org.opencastproject.metadata.mpeg7.Segment;
+import org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.TextAnnotation;
+import org.opencastproject.metadata.mpeg7.Video;
+import org.opencastproject.metadata.mpeg7.VideoSegment;
+import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
 
 import org.apache.commons.lang.StringUtils;
@@ -73,10 +77,6 @@ public class SolrIndexManager {
 
   /** Connection to the database */
   private SolrConnection solrConnection = null;
-
-  /** Annotations with a lower confidence will be excluded from the search index */
-  // TODO: Read from store configuration
-  private static final float CONFIDENCE_THRESHOLD = 0.0f;
 
   /**
    * Factor multiplied to fine tune relevance and confidence impact on important keyword decision. importance =
@@ -493,6 +493,7 @@ public class SolrIndexManager {
    * @param mpeg7
    *          the mpeg7 catalog
    */
+  @SuppressWarnings("unchecked")
   private void addMpeg7Metadata(SolrUpdateableInputDocument solrInput, MediaPackage mediaPackage, Mpeg7Catalog mpeg7) {
 
     // Check for multimedia content
@@ -532,52 +533,64 @@ public class SolrIndexManager {
     while (mmIter.hasNext()) {
       MultimediaContent<?> multimediaContent = mmIter.next();
 
-      // for every multimedia content track
+      // We need to process visual segments first, due to the way they are handled in the ui.
       for (Iterator<?> iterator = multimediaContent.elements(); iterator.hasNext();) {
+        
         MultimediaContentType type = (MultimediaContentType) iterator.next();
+        if (!(type instanceof Video) && !(type instanceof AudioVisual))
+          continue;
 
         // for every segment in the current multimedia content track
 
-        Iterator<? extends Segment> ctIter = type.getTemporalDecomposition().segments();
-        while (ctIter.hasNext()) {
-          Segment contentSegment = ctIter.next();
+        Video video = (Video)type;
+        Iterator<VideoSegment> vsegments = (Iterator<VideoSegment>)video.getTemporalDecomposition().segments();
+        while (vsegments.hasNext()) {
+          VideoSegment segment = vsegments.next();
+          SpatioTemporalDecomposition spt = segment.getSpatioTemporalDecomposition();
+          if (spt == null)
+            continue;
 
-          // collect the keywords to a segment text
+          // Collect the video text elements to a segment text
           StringBuffer segmentText = new StringBuffer();
+          for (VideoText videoText : spt.getVideoText()) {
+            if (segmentText.length() > 0)
+              segmentText.append(" ");
+            segmentText.append(videoText.getText());
+          }
 
-          // Iterate over all text annotations
-          Iterator<TextAnnotation> textAnnotations = contentSegment.textAnnotations();
+          // Add keyword annotations
+          Iterator<TextAnnotation> textAnnotations = segment.textAnnotations();
           while (textAnnotations.hasNext()) {
             TextAnnotation textAnnotation = textAnnotations.next();
-
-            // Skip annotations with confidence < threshold
-            if (textAnnotation.getConfidence() <= CONFIDENCE_THRESHOLD)
-              continue;
-
-            // check if we are collecting the most important keywords
-            if (sortedAnnotations != null)
-              sortedAnnotations.add(textAnnotation);
-
-            // for every keyword annotation
             Iterator<?> kwIter = textAnnotation.keywordAnnotations();
             while (kwIter.hasNext()) {
               KeywordAnnotation keywordAnnotation = (KeywordAnnotation) kwIter.next();
+              if (segmentText.length() > 0)
+                segmentText.append(" ");
               segmentText.append(keywordAnnotation.getKeyword());
-              segmentText.append(" ");
             }
+          }
 
-            // TODO: process free text annotations
+          // Add free text annotations
+          Iterator<TextAnnotation> freeIter = segment.textAnnotations();
+          if (freeIter.hasNext()) {
+            Iterator<FreeTextAnnotation> freeTextIter = freeIter.next().freeTextAnnotations();
+            while (freeTextIter.hasNext()) {
+              FreeTextAnnotation freeTextAnnotation = freeTextIter.next();
+              if (segmentText.length() > 0)
+                segmentText.append(" ");
+              segmentText.append(freeTextAnnotation.getText());
+            }
           }
 
           // add segment text to solr document
           solrInput.addField(SolrFields.SEGMENT_TEXT + segmentCount, segmentText.toString());
 
           // get the segments time properties
-          MediaTimePoint timepoint = contentSegment.getMediaTime().getMediaTimePoint();
-          MediaDuration duration = contentSegment.getMediaTime().getMediaDuration();
+          MediaTimePoint timepoint = segment.getMediaTime().getMediaTimePoint();
+          MediaDuration duration = segment.getMediaTime().getMediaDuration();
 
-          // System.out.println("MediaTimePoint: "+timepoint.getTimeInMilliseconds());
-          // dont forget: hints are stores as properties
+          // Hints are stores as properties
           StringBuffer hintField = new StringBuffer();
 
           // TODO: define a class with hint field constants
@@ -600,15 +613,6 @@ public class SolrIndexManager {
           }
 
           log_.trace("Adding segment: " + timepoint.toString());
-          // add freetext annotation to solr document
-          Iterator<TextAnnotation> freeIter = contentSegment.textAnnotations();
-          if (freeIter.hasNext()) {
-            Iterator<FreeTextAnnotation> freeTextIter = freeIter.next().freeTextAnnotations();
-            while (freeTextIter.hasNext()) {
-              FreeTextAnnotation freeTextAnnotation = freeTextIter.next();
-              hintField.append(freeTextAnnotation.getText() + "\n");
-            }
-          }
           solrInput.addField(SolrFields.SEGMENT_HINTS + segmentCount, hintField.toString());
 
           // increase segment counter
