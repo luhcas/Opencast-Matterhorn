@@ -25,7 +25,7 @@ mvn clean install -DskipTests -DdeployTo=/opt/matterhorn/felix/load
 tar -czf /home/opencast/felix-config-backup.tar.gz /opt/matterhorn/felix/conf/ 
 
 # update felix configuration
-cp -rf docs/felix/conf/* /opt/matterhorn/felix/conf/
+cp -rf docs/felix/* /opt/matterhorn/felix/
 cd /home/opencast
 
 # update felix config (url)
