@@ -16,50 +16,66 @@ AdminUI.internationalize = function(obj, prefix){
   }
 }
 
-$(document).ready(
-  AdminUI.log = function(){
-    if(window.console){
-      try{
-        window.console && console.log.apply(console,Array.prototype.slice.call(arguments));
-      }catch(e){
-        console.log(e);
-      }
+AdminUI.log = function(){
+  if(window.console){
+    try{
+      window.console && console.log.apply(console,Array.prototype.slice.call(arguments));
+    }catch(e){
+      console.log(e);
     }
   }
-);
+}
 
 AdminForm.components = {};
 
-AdminForm.Manager = function(rootElm, rootNs){
-
+AdminForm.Manager = function(rootElm, rootNs, components){
+  this.rootElm = rootElm;
+  this.rootNs = rootNs;
+  this.components = components;
 };
 
 $.extend(AdminForm.Manager.prototype, {
-  rootElm: "",
-  rootNs: "",
   serialize: function(){
     if(this.validate()){
       var doc = this.createDoc();
+      AdminUI.log(doc);
       var mdlist = doc.createElement('metadata_list');
-      for(var c in AdminForm.components){
-        AdminForm.components[c].toNode(mdlist);
+      for(var c in this.components){
+        AdminUI.log(c);
+        this.components[c].toNode(mdlist);
+      }
+      doc.documentElement.appendChild(mdlist);
+      if(typeof XMLSerializer != 'undefined') {
+        return (new XMLSerializer()).serializeToString(doc);
+      } else if(doc.xml) {
+        return doc.xml;
+      } else { 
+        return false;
       }
     }
+    return false;
   },
   populate: function(){
 
   },
   validate: function(){
-    return true;
+    var error = false;
+    for(var k in this.components){
+      AdminUI.log(k, this.components[k].required, !this.components[k].validate())
+      if(this.components[k].required && !this.components[k].validate()){
+        error = true;
+      }
+    }
+    return !error;
   },
   createDoc: function(){
     var doc = null;
     //Create a DOM Document, methods vary between browsers, e.g. IE and Firefox
     if(document.implementation && document.implementation.createDocument) { //Firefox, Opera, Safari, Chrome, etc.
-      doc = document.implementation.createDocument(this.rootNS, this.rootEl, null);
+      doc = document.implementation.createDocument(this.rootNs, this.rootElm, null);
     } else { // IE
       doc = new ActiveXObject('MSXML2.DOMDocument');
-      doc.loadXML('<' + this.rootEl + ' xmlns="' + this.rootNS + '"></' + this.rootEl + '>');
+      doc.loadXML('<' + this.rootElm + ' xmlns="' + this.rootNs + '"></' + this.rootElm + '>');
     }
     return doc;
   }
@@ -70,6 +86,13 @@ $.extend(AdminForm.Manager.prototype, {
  * and XMLifying the form elements.
  */
 AdminForm.Component = function Component(fields, props, funcs){
+  this.fields = [];
+  this.errorField = "";
+  this.label = "";
+  this.properties = [];
+  this.required = false;
+  this.value = null;
+  
   this.setFields(fields);
   this.setFunctions(funcs);
   this.setProperties(props);
@@ -77,26 +100,20 @@ AdminForm.Component = function Component(fields, props, funcs){
 
 $.extend(AdminForm.Component.prototype, {
   /* @lends AdminForm.Component.prototype */
-  fields:     [],
-  errorField: "",
-  label:      "",
-  properties: [],
-  required:   false,
-  value:      null,
   /** 
    *  Sets the fields from an array of element ids.
    *  @param {String[]} Array of element ids
    */
-  setFields:  function(f){
+  setFields:  function(fields){
     if(typeof f == 'string') { //If a single field is specified, wrap in an array.
-      f = [f];
+      fields = [fields];
     }
-    AdminUI.log(f);
-    for(var k in f) {
-      var e = $('#' + f[k]);
-      AdminUI.log(f[k],e);
+    AdminUI.log(fields);
+    for(var k in fields) {
+      var e = $('#' + fields[k]);
+      AdminUI.log(fields[k],e);
       if(e[0]){
-        this.fields[f[k]] = e;
+        this.fields[fields[k]] = e;
       }
     }
   },
@@ -223,7 +240,6 @@ $.extend(AdminForm.Component.prototype, {
     return false;
   }
 });
-
 /*
 TODO: Create a container for components to handle those components that can repeat
 
