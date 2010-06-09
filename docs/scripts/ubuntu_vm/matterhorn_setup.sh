@@ -170,8 +170,8 @@ start_mh ()
   export MAVEN_OPTS="-Xms256m -Xmx512m -XX:PermSize=64m -XX:MaxPermSize=128m"
 
   cd $INST_DIR
-
-  /home/opencast/startup.sh
+  sudo update-rc.d matterhorn defaults
+  sudo service matterhorn start
 
   echo "" | sudo tee -a $MOTD_FILE
   echo "********************************************" | sudo tee -a $MOTD_FILE

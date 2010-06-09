@@ -26,15 +26,6 @@ else
     echo "Waiting for network connection..." > /dev/console
     sleep 5
   done
-  if [ -z $MY_IP ]; then
-    echo "ERROR: Could not determine IP address of this VM." > /dev/console
-    echo "To start Matterhorn manually, run the following command" > /dev/console
-    echo "  /home/opencast/startup.sh" > /dev/console
-  else
-    echo "Starting Matterhorn..." > /dev/console
-    /home/opencast/startup.sh
-    echo "Matterhorn console is avilable at http://$MY_IP:8080" > /dev/console
-  fi
 fi
 
 echo "***********************************************************" > /dev/console

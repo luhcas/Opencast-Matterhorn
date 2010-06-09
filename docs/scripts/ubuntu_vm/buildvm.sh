@@ -37,6 +37,19 @@ else
 	sudo vmware-mount -d mnt
 	sleep 2
 fi
+
+
+if [ "$1" = "clean" ]; then 
+  echo "==============================="
+  echo "====Cleaning up for release===="
+  echo "==============================="
+  sudo rm -rf vmbackup/
+  sudo rm -rf m2/
+  sudo rm -rf matterhorn_trunk/
+  sudo rm -rf red5*
+  sudo rm -rf matterhorn-engage-streaming/
+  sudo rm -rf felix-framework*
+fi
 sudo rm -rf ubuntu-vmw6/
 sudo rm -rf mnt
 
@@ -51,26 +64,32 @@ echo "deb $UBUNTU_MIRROR karmic-updates main restricted universe multiverse" >> 
 echo "deb http://archive.canonical.com/ubuntu karmic partner" >> sources.list
 echo "deb http://security.ubuntu.com/ubuntu karmic-security main restricted universe multiverse" >> sources.list
 
-#build the ubuntu vm
-sudo ubuntu-vm-builder vmw6 karmic --arch 'i386' --mem '512' --cpus 1 \
---rootsize '12288' --swapsize '1024' --kernel-flavour='virtual' \
---hostname 'opencast' --mirror $UBUNTU_MIRROR \
---components 'main,universe,multiverse' \
---name 'opencast' --user 'opencast' \
---pass 'matterhorn' --tmpfs - --addpkg zlib1g-dev --addpkg patch \
---addpkg byacc --addpkg libcv1 --addpkg libcv-dev --addpkg opencv-doc \
---addpkg build-essential --addpkg locate --addpkg git-core \
---addpkg checkinstall --addpkg yasm --addpkg texi2html  --addpkg libsdl1.2-dev \
---addpkg libtheora-dev --addpkg libx11-dev \
---addpkg zlib1g-dev --addpkg libpng12-dev --addpkg libjpeg62-dev \
---addpkg libtiff4-dev --addpkg ssh --addpkg maven2 --addpkg subversion \
---addpkg wget --addpkg curl --addpkg update-motd --addpkg ntp \
---addpkg expect-dev --addpkg expect --addpkg vim --addpkg nano \
---addpkg gstreamer0.10-plugins* --addpkg gstreamer0.10-ffmpeg --addpkg gstreamer-tools \
---addpkg acpid --exec $HOME/postinstall.sh
+if [ ! -e vmbackup ]; then
+  #build the ubuntu vm
+  sudo ubuntu-vm-builder vmw6 karmic --arch 'i386' --mem '512' --cpus 1 \
+  --rootsize '12288' --swapsize '1024' --kernel-flavour='virtual' \
+  --hostname 'opencast' --mirror $UBUNTU_MIRROR \
+  --components 'main,universe,multiverse' \
+  --name 'opencast' --user 'opencast' \
+  --pass 'matterhorn' --tmpfs - --addpkg zlib1g-dev --addpkg patch \
+  --addpkg byacc --addpkg libcv1 --addpkg libcv-dev --addpkg opencv-doc \
+  --addpkg build-essential --addpkg locate --addpkg git-core \
+  --addpkg checkinstall --addpkg yasm --addpkg texi2html  --addpkg libsdl1.2-dev \
+  --addpkg libtheora-dev --addpkg libx11-dev \
+  --addpkg zlib1g-dev --addpkg libpng12-dev --addpkg libjpeg62-dev \
+  --addpkg libtiff4-dev --addpkg ssh --addpkg maven2 --addpkg subversion \
+  --addpkg wget --addpkg curl --addpkg update-motd --addpkg ntp \
+  --addpkg expect-dev --addpkg expect --addpkg vim --addpkg nano \
+  --addpkg gstreamer0.10-plugins* --addpkg gstreamer0.10-ffmpeg --addpkg gstreamer-tools \
+  --addpkg acpid --exec $HOME/postinstall.sh
 
-echo "change the vm to use nat networking instead of bridged"
-sed -i 's/bridged/nat/g' ubuntu-vmw6/opencast.vmx
+  echo "change the vm to use nat networking instead of bridged"
+  sed -i 's/bridged/nat/g' ubuntu-vmw6/opencast.vmx
+  cp ubuntu-vmw6 vmbackup
+else 
+  #restore from copy
+  cp vmbackup ubuntu-vmw6
+fi
 
 echo "change matterhorn_setup.sh to use the correct svn repo path"
 sed -i "s'OC_URL=.*$'OC_URL=$MATTERHORN_SVN'" matterhorn_setup.sh
@@ -114,6 +133,7 @@ sudo chmod 755 mnt/home/opencast/opencaps_matterhorn_only.sh
 sudo ln -s /opt/matterhorn/matterhorn_trunk/docs/felix/bin/start_matterhorn.sh mnt/home/opencast/startup.sh
 sudo ln -s /opt/matterhorn/matterhorn_trunk/docs/felix/bin/shutdown_matterhorn.sh mnt/home/opencast/shutdown.sh
 sudo ln -s /opt/matterhorn/matterhorn_trunk/docs/felix/bin/update_matterhorn.sh mnt/home/opencast/update_matterhorn.sh
+sudo ln -s /opt/matterhorn/matterhorn_trunk/docs/felix/bin/matterhorn_init_d.sh mnt/etc/init.d/matterhorn
 
 sudo mkdir mnt/opt/matterhorn
 
@@ -259,7 +279,7 @@ echo "================================="
 echo "Building archive opencast-$OC_REV.zip."
 mv ubuntu-vmw6 opencast-$OC_REV
 zip -db -r -9 opencast-$OC_REV.zip opencast-$OC_REV
-rm -rf opencast-$OC_REV
+#rm -rf opencast-$OC_REV
 
 #copy it to the web
 #scp opencast-$OC_REV.zip cab938@aries:/var/www/opencast/unofficial-vms/
