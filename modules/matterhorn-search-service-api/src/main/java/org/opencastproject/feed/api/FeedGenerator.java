@@ -16,6 +16,10 @@
 
 package org.opencastproject.feed.api;
 
+import org.opencastproject.search.api.SearchService;
+
+import java.util.Properties;
+
 /**
  * A <code>FeedGenerator</code> is able to create an xml feed of the requested type, based on a query string.
  * <p>
@@ -68,15 +72,6 @@ public interface FeedGenerator {
    * @return the feed or <code>null</code>
    */
   Feed createFeed(Feed.Type type, String[] query);
-
-  /**
-   * Sets the entry's base url that will be used to form the episode link in the feeds. If the url contains a
-   * placeholder in the form <code>{0}</code>, it will be replaced by the episode id.
-   * 
-   * @param url
-   *          the url
-   */
-  void setLinkTemplate(String url);
   
   /**
    * Returns the copyright for the feed.
@@ -91,5 +86,37 @@ public interface FeedGenerator {
    * @return the cover
    */
   String getCover();
+  
+  /**
+   * Initializes the feed generator using the following properties:
+   * <ul>
+   * <li><code>feed.uri</code> - the feed uri</li>
+   * <li><code>feed.selector</code> the pattern that is used to determine if the feed implementation wants to handle a
+   * request, e. g. the selector {{latest}} in {{http://<servername>/feeds/atom/0.3/latest}} maps the latest feed
+   * handler to urls containing that selector</li>
+   * <li><code>feed.name</code> - name of this feed</li>
+   * <li><code>feed.description</code> - an abstract of this feed</li>
+   * <li><code>feed.copyright</code> - the feed copyright note</li>
+   * <li><code>feed.home</code> - url of the feed's home page</li>
+   * <li><code>feed.cover</code> - url of the feed's cover image</li>
+   * <li><code>feed.entry</code> - template to create a link to a feed entry</li>
+   * <li><code>feed.rssflavor</code> - media package flavor identifying rss feed media package elements</li>
+   * <li><code>feed.atomflavors</code> - comma separated list of flavors identifying atom feed media package elements</li>
+   * <li><code>feed.rsstags</code> - tags identifying rss feed media package elements</li>
+   * <li><code>feed.atomtags</code> - comma separated list of tags identifying atom feed media package elements</li>
+   * <li><code>org.opencastproject.server.url</code> - this server's base URL</li>
+   * </ul>
+   * 
+   * @param properties used to initialize the feed
+   */
+  void initialize(Properties properties);
+
+  /**
+   * Sets the search service for this feed generator.  FIXME: This shouldn't be exposed in the API, but must be present
+   * for the FeedRegistrationScanner to function.
+   * 
+   * @param searchService The search service to use in finding data to expose in the feed
+   */
+  void setSearchService(SearchService searchService);
 
 }

@@ -15,81 +15,119 @@
  */
 package org.opencastproject.feed.scanner;
 
-import org.apache.commons.io.FileUtils;
+import org.opencastproject.feed.api.FeedGenerator;
+import org.opencastproject.search.api.SearchService;
+
 import org.apache.commons.io.IOUtils;
-import org.apache.felix.fileinstall.ArtifactUrlTransformer;
+import org.apache.felix.fileinstall.ArtifactInstaller;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.jar.JarEntry;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
- * Installs feeds matching "*-feed.xml" in any of felix fileinstall's watch directories.
+ * Installs feeds matching "*.properties" in the feeds watch directory.
  */
-public class FeedRegistrationScanner implements ArtifactUrlTransformer {
+public class FeedRegistrationScanner implements ArtifactInstaller {
+  public static final String FEED_CLASS="feed.class";
+  public static final String FEED_URI="feed.uri";
+  public static final String FEED_SELECTOR="feed.selector";
+  public static final String FEED_ENTRY="feed.entry";
+  
   private static final Logger logger = LoggerFactory.getLogger(FeedRegistrationScanner.class);
+
+  /** A map to keep track of each feed registration file and feed generator it produces */
+  protected Map<File, ServiceRegistration> generators = new HashMap<File, ServiceRegistration>();
   
-  protected File tempJarDirectory = new File(System.getProperty("java.io.tmpdir"), "dynamicbundles");
+  /** The search service to use in each feed generator */
+  protected SearchService searchService;
+
+  /** The bundle context for this osgi component */
+  protected BundleContext bundleContext;
+
+  /** Sets the search service */
+  public void setSearchService(SearchService searchService) {
+    this.searchService = searchService;
+  }
+
+  /**
+   * Activates the component
+   * @param cc the component's context
+   */
+  protected void activate(ComponentContext cc) {
+    this.bundleContext = cc.getBundleContext();
+  }
+
+  /**
+   * Deactivates the component
+   */
+  protected void deactivate() {
+    this.bundleContext = null;
+  }
   
+
   /**
    * {@inheritDoc}
    * @see org.apache.felix.fileinstall.ArtifactListener#canHandle(java.io.File)
    */
   @Override
   public boolean canHandle(File artifact) {
-    return artifact.getParentFile().getName().equals("feeds") && artifact.getName().endsWith(".xml");
+    return artifact.getParentFile().getName().equals("feeds") && artifact.getName().endsWith(".properties");
   }
   
   /**
    * {@inheritDoc}
-   * @see org.apache.felix.fileinstall.ArtifactUrlTransformer#transform(java.net.URL)
+   * @see org.apache.felix.fileinstall.ArtifactInstaller#install(java.io.File)
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  public void install(File artifact) throws Exception {
+    logger.info("Installing a feed from {}", artifact.getAbsolutePath());
+    Properties props = new Properties();
+    FileInputStream in = null;
+    try {
+      in = new FileInputStream(artifact);
+      props.load(in);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+    // Always include the server URL obtained from the bundle context
+    props.put("org.opencastproject.server.url", bundleContext.getProperty("org.opencastproject.server.url"));
+    Class clazz = getClass().getClassLoader().loadClass(props.getProperty(FEED_CLASS));
+    FeedGenerator generator = (FeedGenerator)clazz.newInstance();
+    generator.setSearchService(searchService);
+    generator.initialize(props);
+    ServiceRegistration reg = bundleContext.registerService(FeedGenerator.class.getName(), generator, null);
+    generators.put(artifact, reg);
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.apache.felix.fileinstall.ArtifactInstaller#uninstall(java.io.File)
    */
   @Override
-  public URL transform(URL url) throws Exception {
-    File artifact = FileUtils.toFile(url);
-    logger.info("Installing feed {}", artifact.getName());
-    
-    // make the temp directory
-    if( ! tempJarDirectory.exists()) {
-      tempJarDirectory.mkdirs();
+  public void uninstall(File artifact) throws Exception {
+    ServiceRegistration reg = generators.get(artifact);
+    if(reg != null) {
+      reg.unregister();
+      generators.remove(artifact);
     }
-    // construct the osgi bundle jar
-    InputStream manifestIn = getClass().getResourceAsStream("/OSGI-INF/component-manifest.txt");
-    String manifestString = IOUtils.toString(manifestIn).replaceAll("filename", artifact.getName());
-    logger.debug("Using manifest:\n{}\n", manifestString);
-    Manifest manifest = new Manifest(IOUtils.toInputStream(manifestString));
-
-    FileOutputStream fileOut = null;
-    JarOutputStream jarOut = null;
-    FileInputStream fileIn = null;
-    File outFile = new File(tempJarDirectory, artifact.getName() + ".jar");
-    try {
-      fileOut = new FileOutputStream(outFile);
-      jarOut = new JarOutputStream(fileOut, manifest);
-      fileIn = new FileInputStream(artifact);
-      JarEntry dirEntry = new JarEntry("OSGI-INF/");
-      dirEntry.setTime(artifact.lastModified());
-      jarOut.putNextEntry(dirEntry);
-      jarOut.closeEntry();
-
-      JarEntry componentRegistrationEntry = new JarEntry("OSGI-INF/component.xml");
-      componentRegistrationEntry.setTime(artifact.lastModified());
-      jarOut.putNextEntry(componentRegistrationEntry);
-      IOUtils.copy(fileIn, jarOut);
-      jarOut.closeEntry();
-      
-    } finally {
-      IOUtils.closeQuietly(fileIn);
-      IOUtils.closeQuietly(jarOut);
-      IOUtils.closeQuietly(fileOut);
-    }
-    return outFile.toURI().toURL();
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.apache.felix.fileinstall.ArtifactInstaller#update(java.io.File)
+   */
+  @Override
+  public void update(File artifact) throws Exception {
+    uninstall(artifact);
+    install(artifact);
   }
 }

@@ -19,15 +19,13 @@ import org.opencastproject.feed.api.Feed.Type;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchService;
-import org.opencastproject.util.UrlSupport;
 
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Dictionary;
+import java.util.Properties;
 import java.util.StringTokenizer;
 
 /**
@@ -163,41 +161,19 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
    *      java.lang.String[], int, int)
    */
   protected abstract SearchResult loadFeedData(Type type, String[] query, int limit, int offset);
-
+  
   /**
-   * Callback used by the OSGi environment when this component is started. The method tries to read the following
-   * properties from the service's component context:
-   * <ul>
-   * <li><code>feed.uri</code> - the feed uri</li>
-   * <li><code>feed.selector</code> the pattern that is used to determine if the feed implementation wants to handle a
-   * request, e. g. the selector {{latest}} in {{http://<servername>/feeds/atom/0.3/latest}} maps the latest feed
-   * handler to urls containing that selector</li>
-   * <li><code>feed.name</code> - name of this feed</li>
-   * <li><code>feed.description</code> - an abstract of this feed</li>
-   * <li><code>feed.copyright</code> - the feed copyright note</li>
-   * <li><code>feed.home</code> - url of the feed's home page</li>
-   * <li><code>feed.cover</code> - url of the feed's cover image</li>
-   * <li><code>feed.entry</code> - template to create a link to a feed entry</li>
-   * <li><code>feed.rssflavor</code> - media package flavor identifying rss feed media package elements</li>
-   * <li><code>feed.atomflavors</code> - comma separated list of flavors identifying atom feed media package elements</li>
-   * <li><code>feed.rsstags</code> - tags identifying rss feed media package elements</li>
-   * <li><code>feed.atomtags</code> - comma separated list of tags identifying atom feed media package elements</li>
-   * </ul>
-   * 
-   * @param context
-   *          the osgi component context
-   * @throws Exception
-   *           if starting the component is resulting in an error
+   * {@inheritDoc}
+   * @see org.opencastproject.feed.api.FeedGenerator#initialize(java.util.Properties)
    */
-  public void activate(ComponentContext context) throws Exception {
-    String serverUrl = context.getBundleContext().getProperty("org.opencastproject.server.url");
-    if(serverUrl == null) serverUrl = UrlSupport.DEFAULT_BASE_URL;
-    Dictionary<?, ?> properties = context.getProperties();
+  @Override
+  public void initialize(Properties properties) {
     uri = (String) properties.get(PROP_URI);
     selector = (String) properties.get(PROP_SELECTOR);
     name = (String) properties.get(PROP_NAME);
     description = (String) properties.get(PROP_DESCRIPTION);
     copyright = (String) properties.get(PROP_COPYRIGHT);
+    String serverUrl = (String) properties.get("org.opencastproject.server.url");
     home = ensureUrl(((String) properties.get(PROP_HOME)), serverUrl);
     cover = ensureUrl((String) properties.get(PROP_COVER), serverUrl);
     linkTemplate = ensureUrl((String) properties.get(PROP_ENTRY), serverUrl);

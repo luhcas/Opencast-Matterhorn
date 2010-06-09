@@ -20,11 +20,11 @@ import org.opencastproject.feed.api.FeedGenerator;
 import org.opencastproject.feed.api.Feed.Type;
 import org.opencastproject.search.api.SearchResult;
 
-import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
+import java.util.Properties;
 
 /**
  * This feed generator creates a feed for the episodes returned by the query specified by the service property
@@ -79,20 +79,18 @@ public class CustomFeedService extends AbstractFeedService implements FeedGenera
       return null;
     }
   }
-
+  
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.feed.impl.AbstractFeedService#activate(org.osgi.service.component.ComponentContext)
+   * @see org.opencastproject.feed.impl.AbstractFeedService#initialize(java.util.Properties)
    */
   @Override
-  public void activate(ComponentContext context) throws Exception {
-    super.activate(context);
-    String query = (String) context.getProperties().get(PROP_QUERY);
+  public void initialize(Properties properties) {
+    String query = (String) properties.get(PROP_QUERY);
     if (query != null && !"".equals(query)) {
       solrQuery = query;
       log_.debug("Configuring custom feed with query '{}'", query);
     }
+    super.initialize(properties);
   }
-
 }
