@@ -188,7 +188,7 @@ fi
 
 sudo cp -r matterhorn_trunk mnt/opt/matterhorn/
 
-sudo cp -rf matterhorn_trunk/docs/felix/conf/* mnt/opt/matterhorn/felix/conf/
+sudo cp -rf matterhorn_trunk/docs/felix/* mnt/opt/matterhorn/felix/
 sudo sed -i "s/conf\/security.xml/\/opt\/matterhorn\/felix\/conf\/security.xml/" mnt/opt/matterhorn/felix/conf/config.properties
 
 export OC_REV=`svn info matterhorn_trunk | awk /Revision/ | cut -d " " -f 2`
