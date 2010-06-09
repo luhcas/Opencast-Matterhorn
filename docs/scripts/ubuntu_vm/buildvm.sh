@@ -279,7 +279,7 @@ echo "================================="
 echo "Building archive opencast-$OC_REV.zip."
 mv ubuntu-vmw6 opencast-$OC_REV
 zip -db -r -9 opencast-$OC_REV.zip opencast-$OC_REV
-#rm -rf opencast-$OC_REV
+rm -rf opencast-$OC_REV
 
 #copy it to the web
 #scp opencast-$OC_REV.zip cab938@aries:/var/www/opencast/unofficial-vms/
