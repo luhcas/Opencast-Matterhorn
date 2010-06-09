@@ -16,6 +16,7 @@ MATTERHORN="/opt/matterhorn"
 FELIX="$MATTERHORN/felix"
 M2_REPO="/home/opencast/.m2/repository"
 LOGDIR=$MATTERHORN/logs
+MATTERHORN_USER="opencast"
 
 ##
 # To enable the debugger on the vm, enable all of the following options
@@ -43,7 +44,7 @@ rm -rf $FELIX_CACHE
 DAEMON="/usr/bin/java"
 OPTS="$DEBUG_OPTS $GRAPHICS_OPTS $MAVEN_ARG $FELIX_FILEINSTALL_OPTS $PAX_CONFMAN_OPTS $PAX_LOGGING_OPTS $UTIL_LOGGING_OPTS $CXF_OPTS -jar $FELIX/bin/felix.jar $FELIX_CACHE"
 NAME=matterhorn
-PATH=/sbin:/bin:/usr/sbin:/usr/bin:/opt/matterhorn/felix
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:$FELIX
 LOGFILE=/var/log/matterhorn.log
 CHROOT=/var/run/matterhorn/empty
 CHDIR=$FELIX
@@ -63,7 +64,7 @@ case "$1" in
     log_begin_msg "Starting OpenCast Matterhorn: $NAME"
     [ -d ${CHROOT} ] || mkdir -p ${CHROOT}
     [ -d ${CHDIR} ] || mkdir -p ${CHDIR}
-    start-stop-daemon --start --background -m --oknodo --chuid opencast --chdir $CHDIR --pidfile /var/run/matterhorn/matterhorn.pid --exec $DAEMON -- $OPTS && log_end_msg 0 || log_end_msg 1
+    start-stop-daemon --start --background -m --oknodo --chuid $MATTERHORN_USER --chdir $CHDIR --pidfile /var/run/matterhorn/matterhorn.pid --exec $DAEMON -- $OPTS && log_end_msg 0 || log_end_msg 1
     ;;
   stop)
     log_begin_msg "Stopping OpenCast Matterhorn: $NAME"
