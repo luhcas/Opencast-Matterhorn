@@ -52,6 +52,8 @@ public interface CaptureAgentStateService {
    * @see AgentState
    */
   public int setAgentState(String agentName, String state);
+  
+  public boolean setAgentUrl(String agentName, String agentUrl);
 
   /**
    * Remove an agent from the system, if the agent exists.

@@ -44,6 +44,18 @@ public interface Agent {
    * @see AgentState
    */
   public String getState();
+  
+  /**
+   * Sets the url of the agent.
+   * @param agentUrl The url of the agent as determined by the referer header field of its request while registering
+   */
+  public void setUrl(String agentUrl);
+  
+  /**
+   * Gets the url of the agent.
+   * @return the url of the agent.
+   */
+  public String getUrl();
 
   /**
    * Sets the time at which the agent last checked in.

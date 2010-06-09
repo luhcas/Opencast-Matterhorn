@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -47,6 +48,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -87,14 +89,15 @@ public class CaptureAgentStateRestService {
   @POST
   //@Produces(MediaType.TEXT_XML)
   @Path("agents/{name}")
-  public Response setAgentState(@FormParam("address") String agentUrl, @PathParam("name") String agentName, @FormParam("state") String state) {
+  //Todo: Capture agent may send an optional FormParam containing it's configured address. If this exists don't use request.getRemoteHost() for the URL
+  public Response setAgentState(@Context HttpServletRequest request, @PathParam("name") String agentName, @FormParam("state") String state) {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
-    logger.debug("Agents URL: {}", agentUrl);
+    logger.debug("Agents URL: {}", request.getRemoteHost());
     
     int result = service.setAgentState(agentName, state);
-    if(!service.setAgentUrl(agentName, agentUrl)){
+    if(!service.setAgentUrl(agentName, request.getRemoteHost())){
       return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
     switch (result) {
@@ -183,7 +186,7 @@ public class CaptureAgentStateRestService {
   //@Consumes(MediaType.TEXT_XML)
   @Produces(MediaType.TEXT_XML)
   @Path("agents/{name}/capabilities")
-  public Response setCapabilities(@FormParam("address") String agentUrl, @PathParam("name") String agentName, InputStream reqBody) {
+  public Response setCapabilities(@Context HttpServletRequest request, @PathParam("name") String agentName, InputStream reqBody) {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
@@ -192,7 +195,7 @@ public class CaptureAgentStateRestService {
     try {
       caps.loadFromXML(reqBody);
       int result = service.setAgentCapabilities(agentName, caps);
-      if(!service.setAgentUrl(agentName, agentUrl)){
+      if(!service.setAgentUrl(agentName, request.getRemoteHost())){
         return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
       }
       // Prepares the value to return

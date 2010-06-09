@@ -41,6 +41,12 @@ public class AgentStateUpdate {
    */
   @XmlElement(name="state")
   public String state;
+  
+  /**
+   * The agent's URL.
+   */ 
+  @XmlElement(name="url")
+  public String url;
 
   /**
    * The number of milliseconds since the last time the agent checked in.  Note that this is relative (ie, it's been 3000 ms) rather than absolute (milliseconds since 1970).
@@ -61,6 +67,7 @@ public class AgentStateUpdate {
   public AgentStateUpdate(Agent a) {
     name = a.getName();
     state = a.getState();
+    url = a.getUrl();
     time_since_last_update = System.currentTimeMillis() - a.getLastHeardFrom();
   }
 }

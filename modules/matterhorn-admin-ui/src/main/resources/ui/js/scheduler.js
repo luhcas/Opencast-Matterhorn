@@ -19,7 +19,9 @@ var SCHEDULER_URL     = '/scheduler/rest';
 var WORKFLOW_URL      = '/workflow/rest';
 var CAPTURE_ADMIN_URL = '/capture-admin/rest';
 
+/* @namespace Scheduluer Form Namespace */
 var SchedulerForm     = SchedulerForm || {};
+/* @namespace Scheduluer UI Namespace */
 var SchedulerUI       = SchedulerUI || {};
 var Agent             = Agent || {};
 
