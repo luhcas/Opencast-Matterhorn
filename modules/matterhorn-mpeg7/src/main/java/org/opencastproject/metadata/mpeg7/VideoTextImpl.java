@@ -28,10 +28,10 @@ public class VideoTextImpl implements VideoText {
 
   /** The video text type */
   protected Type type = Type.superimposed;
-  
+
   /** The segment identifier */
   protected String id = null;
-  
+
   /** The text */
   protected Textual text = null;
 
@@ -39,30 +39,54 @@ public class VideoTextImpl implements VideoText {
   protected Rectangle boundary = null;
 
   /** The text' time and duration */
-  protected SpacioTemporalLocator locator = null;
-  
+  protected SpatioTemporalLocator locator = null;
+
   /** The font's name */
   protected String fontType = null;
-  
+
   /** The font size */
   protected int fontSize = -1;
 
+  /**
+   * Creates a new <code>VideoText</code> element with the given id, text and text boundary.
+   * 
+   * @param id
+   *          the text identifier
+   */
+  public VideoTextImpl(String id) {
+    this(id, null, null, null);
+  }
+
+  /**
+   * Creates a new <code>VideoText</code> element with the given id, text and text boundary.
+   * 
+   * @param id
+   *          the text identifier
+   * @param text
+   *          the text
+   * @param boundary
+   *          the text's bounding box
+   * @param time
+   *          the media time
+   */
   public VideoTextImpl(String id, Textual text, Rectangle boundary, MediaTime time) {
     this.id = id;
     this.text = text;
     this.boundary = boundary;
-    this.locator = new SpacioTemporalLocatorImpl(time);
+    if (time != null)
+      this.locator = new SpatioTemporalLocatorImpl(time);
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.mpeg7.VideoText#setIdentifier(java.lang.String)
    */
   @Override
   public void setIdentifier(String id) {
     this.id = id;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -102,9 +126,10 @@ public class VideoTextImpl implements VideoText {
   public void setText(Textual text) {
     this.text = text;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.mpeg7.VideoText#getText()
    */
   @Override
@@ -114,22 +139,24 @@ public class VideoTextImpl implements VideoText {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.mpeg7.VideoText#setBoundary(java.awt.Rectangle)
    */
   @Override
   public void setBoundary(Rectangle rectangle) {
     this.boundary = rectangle;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.mpeg7.VideoText#getBoundary()
    */
   @Override
   public Rectangle getBoundary() {
     return boundary;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -173,10 +200,20 @@ public class VideoTextImpl implements VideoText {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.mpeg7.MovingRegion#getSpacioTemporalLocator()
+   * @see org.opencastproject.metadata.mpeg7.MovingRegion#setSpatioTemporalLocator(org.opencastproject.metadata.mpeg7.SpatioTemporalLocator)
    */
   @Override
-  public SpacioTemporalLocator getSpacioTemporalLocator() {
+  public void setSpatioTemporalLocator(SpatioTemporalLocator locator) {
+    this.locator = locator;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.metadata.mpeg7.MovingRegion#getSpatioTemporalLocator()
+   */
+  @Override
+  public SpatioTemporalLocator getSpatioTemporalLocator() {
     return locator;
   }
 
@@ -194,7 +231,7 @@ public class VideoTextImpl implements VideoText {
       videoText.setAttribute("fontSize", Integer.toString(fontSize));
     if (fontType != null)
       videoText.setAttribute("fontType", fontType);
-    
+
     // Media locator
     videoText.appendChild(locator.toXml(document));
 
@@ -204,11 +241,11 @@ public class VideoTextImpl implements VideoText {
     temporalMask.appendChild(subRegion);
     Element parameterTrajectory = document.createElement("ParameterTrajectory");
     subRegion.appendChild(parameterTrajectory);
-    
+
     parameterTrajectory.appendChild(new MediaTimeImpl(new MediaTimePointImpl(0), null).toXml(document));
     Element initialRegion = document.createElement("InitialRegion");
     parameterTrajectory.appendChild(initialRegion);
-    
+
     StringBuffer coordinates = new StringBuffer();
     coordinates.append(boundary.getX()).append(" ");
     coordinates.append(boundary.getY()).append(" ");
@@ -219,7 +256,7 @@ public class VideoTextImpl implements VideoText {
     box.setAttribute("dim", "2 2");
     box.appendChild(document.createTextNode(coordinates.toString()));
     initialRegion.appendChild(box);
-    
+
     // Text
     videoText.appendChild(text.toXml(document));
     return videoText;

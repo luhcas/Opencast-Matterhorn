@@ -42,6 +42,11 @@ public class TextualImpl implements Textual {
 
   /**
    * Creates a new textual base element.
+   */
+  public TextualImpl() {}
+
+  /**
+   * Creates a new textual base element.
    * 
    * @param text
    *          the text
@@ -97,6 +102,15 @@ public class TextualImpl implements Textual {
     return transcription;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.metadata.mpeg7.Textual#setText(java.lang.String)
+   */
+  @Override
+  public void setText(String text) {
+    this.text = text;
+  }
+  
   /**
    * {@inheritDoc}
    * 

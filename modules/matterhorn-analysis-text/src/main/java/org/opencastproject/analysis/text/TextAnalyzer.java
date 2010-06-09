@@ -25,7 +25,7 @@ import org.opencastproject.metadata.mpeg7.AudioVisual;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
-import org.opencastproject.metadata.mpeg7.SpacioTemporalDecomposition;
+import org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
@@ -184,8 +184,8 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
           videoSegment.setMediaTime(mediaTime);
           
           // Add the video text to the spacio temporal decomposition of the segment
-          SpacioTemporalDecomposition spacioTemporalDecomposition = videoSegment.getSpacioTemporalDecomposition();
-          spacioTemporalDecomposition.addVideoText(videoText);
+          SpatioTemporalDecomposition spatioTemporalDecomposition = videoSegment.getSpatioTemporalDecomposition();
+          spatioTemporalDecomposition.addVideoText(videoText);
 
           logger.info("Text extraction of {} finished", attachment.getURI());
 

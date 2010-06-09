@@ -51,6 +51,26 @@
                 <Keyword>Francesco</Keyword>
               </KeywordAnnotation>
             </TextAnnotation>
+            <SpatioTemporalDecomposition gap="true" overlap="false">
+              <VideoText id="text1" textType="Superimposed">
+                <SpatioTemporalLocator>
+                  <MediaTime>
+                     <MediaRelTimePoint>T00:00:00:0F25</MediaRelTimePoint>
+                     <MediaDuration>PT01H07M35S</MediaDuration>
+                  </MediaTime>
+                </SpatioTemporalLocator>
+                <SpatioTemporalMask>
+                  <SubRegion>
+                    <ParameterTrajectory>
+                      <InitialRegion>
+                        <Box>10 20 150 35</Box>
+                      </InitialRegion>
+                    </ParameterTrajectory>
+                  </SubRegion>
+                </SpatioTemporalMask>
+                <Text xml:lang="en">Text</Text>
+              </VideoText>
+            </SpatioTemporalDecomposition>
           </VideoSegment>
           <VideoSegment id="track-2.segment-2">
             <MediaTime>

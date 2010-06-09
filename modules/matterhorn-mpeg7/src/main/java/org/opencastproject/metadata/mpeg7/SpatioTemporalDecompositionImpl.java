@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Default implementation of a spacio temporal decomposition.
+ * Default implementation of a spatio temporal decomposition.
  */
-public class SpacioTemporalDecompositionImpl implements SpacioTemporalDecomposition {
+public class SpatioTemporalDecompositionImpl implements SpatioTemporalDecomposition {
 
   /** Flag to indicate whether the elements in this decomposition may exhibit gaps */
   protected boolean hasGap = true;
@@ -38,14 +38,14 @@ public class SpacioTemporalDecompositionImpl implements SpacioTemporalDecomposit
   protected List<VideoText> videoTexts = null;
 
   /**
-   * Creates a new spacio temporal decomposition.
+   * Creates a new spatio temporal decomposition.
    * 
    * @param gap
    *          <code>true</code> if there are gaps in the decomposition
    * @param overlap
    *          <code>true</code> if there are overlapping elements
    */
-  public SpacioTemporalDecompositionImpl(boolean gap, boolean overlap) {
+  public SpatioTemporalDecompositionImpl(boolean gap, boolean overlap) {
     this.hasGap = gap;
     this.hasOverlap = overlap;
     this.videoTexts = new ArrayList<VideoText>();
@@ -54,7 +54,7 @@ public class SpacioTemporalDecompositionImpl implements SpacioTemporalDecomposit
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.mpeg7.SpacioTemporalDecomposition#hasGap()
+   * @see org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition#hasGap()
    */
   @Override
   public boolean hasGap() {
@@ -64,7 +64,7 @@ public class SpacioTemporalDecompositionImpl implements SpacioTemporalDecomposit
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.mpeg7.SpacioTemporalDecomposition#isOverlapping()
+   * @see org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition#isOverlapping()
    */
   @Override
   public boolean isOverlapping() {
@@ -74,7 +74,7 @@ public class SpacioTemporalDecompositionImpl implements SpacioTemporalDecomposit
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.mpeg7.SpacioTemporalDecomposition#setGap(boolean)
+   * @see org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition#setGap(boolean)
    */
   @Override
   public void setGap(boolean hasGap) {
@@ -84,7 +84,7 @@ public class SpacioTemporalDecompositionImpl implements SpacioTemporalDecomposit
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.mpeg7.SpacioTemporalDecomposition#setOverlapping(boolean)
+   * @see org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition#setOverlapping(boolean)
    */
   @Override
   public void setOverlapping(boolean isOverlapping) {
@@ -94,7 +94,7 @@ public class SpacioTemporalDecompositionImpl implements SpacioTemporalDecomposit
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.mpeg7.SpacioTemporalDecomposition#addVideoText(org.opencastproject.metadata.mpeg7.Textual,
+   * @see org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition#addVideoText(org.opencastproject.metadata.mpeg7.Textual,
    *      java.awt.Rectangle, org.opencastproject.metadata.mpeg7.MediaTime)
    */
   public VideoText addVideoText(Textual text, Rectangle boundary, MediaTime time) {
@@ -106,7 +106,7 @@ public class SpacioTemporalDecompositionImpl implements SpacioTemporalDecomposit
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.mpeg7.SpacioTemporalDecomposition#addVideoText(org.opencastproject.metadata.mpeg7.VideoText)
+   * @see org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition#addVideoText(org.opencastproject.metadata.mpeg7.VideoText)
    */
   @Override
   public void addVideoText(VideoText videoText) {
@@ -114,10 +114,32 @@ public class SpacioTemporalDecompositionImpl implements SpacioTemporalDecomposit
   }
 
   /**
+   * {@inheritDoc}
+   * @see org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition#getVideoText()
+   */
+  @Override
+  public VideoText[] getVideoText() {
+    return videoTexts.toArray(new VideoText[videoTexts.size()]);
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition#getVideoText(java.lang.String)
+   */
+  @Override
+  public VideoText getVideoText(String id) {
+    for (VideoText videoText : videoTexts) {
+      if (id.equals(videoText.getIdentifier()))
+        return videoText;
+    }
+    return null;
+  }
+  
+  /**
    * @see org.opencastproject.media.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
    */
   public Node toXml(Document document) {
-    Element node = document.createElement("SpacioTemporalDecomposition");
+    Element node = document.createElement("SpatioTemporalDecomposition");
     node.setAttribute("gap", (hasGap ? "true" : "false"));
     node.setAttribute("overlap", (hasOverlap ? "true" : "false"));
     for (VideoText videoText : videoTexts) {

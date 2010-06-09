@@ -22,25 +22,25 @@ import org.w3c.dom.Node;
 /**
  * Default implementation of the media time.
  */
-public class SpacioTemporalLocatorImpl implements SpacioTemporalLocator {
+public class SpatioTemporalLocatorImpl implements SpatioTemporalLocator {
 
   /** The media time */
   protected MediaTime mediaTime = null;
 
   /**
-   * Creates a new spacio temporal locator.
+   * Creates a new spatio temporal locator.
    * 
    * @param time
    *          the time
    */
-  public SpacioTemporalLocatorImpl(MediaTime time) {
+  public SpatioTemporalLocatorImpl(MediaTime time) {
     this.mediaTime = time;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.mpeg7.SpacioTemporalLocator#setMediaTime(org.opencastproject.metadata.mpeg7.MediaTime)
+   * @see org.opencastproject.metadata.mpeg7.SpatioTemporalLocator#setMediaTime(org.opencastproject.metadata.mpeg7.MediaTime)
    */
   @Override
   public void setMediaTime(MediaTime time) {
@@ -52,7 +52,7 @@ public class SpacioTemporalLocatorImpl implements SpacioTemporalLocator {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.mpeg7.SpacioTemporalLocator#getMediaTime()
+   * @see org.opencastproject.metadata.mpeg7.SpatioTemporalLocator#getMediaTime()
    */
   @Override
   public MediaTime getMediaTime() {

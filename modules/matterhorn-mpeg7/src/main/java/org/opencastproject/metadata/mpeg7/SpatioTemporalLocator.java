@@ -38,7 +38,7 @@ import org.opencastproject.media.mediapackage.XmlElement;
  * &lt;/complexType&gt;
  * </pre>
  */
-public interface SpacioTemporalLocator extends XmlElement {
+public interface SpatioTemporalLocator extends XmlElement {
 
   /**
    * Sets the media time.

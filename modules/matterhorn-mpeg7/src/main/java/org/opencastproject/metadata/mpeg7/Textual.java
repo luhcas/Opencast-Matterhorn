@@ -39,6 +39,14 @@ import org.opencastproject.media.mediapackage.XmlElement;
 public interface Textual extends XmlElement {
 
   /**
+   * Sets the text.
+   * 
+   * @param text
+   *          the text
+   */
+  void setText(String text);
+
+  /**
    * Returns the actual text.
    * 
    * @return the text

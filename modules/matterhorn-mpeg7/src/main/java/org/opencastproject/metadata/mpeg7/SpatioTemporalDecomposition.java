@@ -23,7 +23,7 @@ import java.awt.Rectangle;
 /**
  * Decomposition type for space and time.
  */
-public interface SpacioTemporalDecomposition extends XmlElement {
+public interface SpatioTemporalDecomposition extends XmlElement {
 
   /**
    * Set the <code>hasGap</code> property indicating that there may be gaps in between the segments.
@@ -76,5 +76,22 @@ public interface SpacioTemporalDecomposition extends XmlElement {
    *          the video text
    */
   void addVideoText(VideoText videoText);
+
+  /**
+   * Returns all the video text elements from this decomposition.
+   * 
+   * @return the video text elements
+   */
+  VideoText[] getVideoText();
+
+  /**
+   * Returns the <code>VideoText</code> element with the given identifier or <code>null</code> if there is no such
+   * element.
+   * 
+   * @param id
+   *          the video text id
+   * @return the video text element
+   */
+  VideoText getVideoText(String id);
 
 }

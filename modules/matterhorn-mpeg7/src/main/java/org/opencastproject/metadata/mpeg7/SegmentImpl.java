@@ -44,8 +44,8 @@ public class SegmentImpl implements Segment, AudioSegment, VideoSegment, AudioVi
   /** The text annotations */
   protected List<TextAnnotation> annotations = null;
 
-  /** An optional spacio-temporal decomposition */
-  protected SpacioTemporalDecomposition spacioTemporalDecomposition = null;
+  /** An optional spatio-temporal decomposition */
+  protected SpatioTemporalDecomposition spatioTemporalDecomposition = null;
 
   /**
    * Creates a new content segment.
@@ -180,35 +180,35 @@ public class SegmentImpl implements Segment, AudioSegment, VideoSegment, AudioVi
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.mpeg7.AudioVisualSegment#createSpacioTemporalDecomposition()
+   * @see org.opencastproject.metadata.mpeg7.AudioVisualSegment#createSpatioTemporalDecomposition()
    */
   @Override
-  public SpacioTemporalDecomposition createSpacioTemporalDecomposition(boolean gap, boolean overlap)
+  public SpatioTemporalDecomposition createSpatioTemporalDecomposition(boolean gap, boolean overlap)
           throws IllegalStateException {
-    if (spacioTemporalDecomposition != null)
-      throw new IllegalStateException("A spacio temporal decomposition has already been created");
-    spacioTemporalDecomposition = new SpacioTemporalDecompositionImpl(true, false);
-    return spacioTemporalDecomposition;
+    if (spatioTemporalDecomposition != null)
+      throw new IllegalStateException("A spatio temporal decomposition has already been created");
+    spatioTemporalDecomposition = new SpatioTemporalDecompositionImpl(true, false);
+    return spatioTemporalDecomposition;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.mpeg7.AudioVisualSegment#getSpacioTemporalDecomposition()
+   * @see org.opencastproject.metadata.mpeg7.AudioVisualSegment#getSpatioTemporalDecomposition()
    */
   @Override
-  public SpacioTemporalDecomposition getSpacioTemporalDecomposition() {
-    return spacioTemporalDecomposition;
+  public SpatioTemporalDecomposition getSpatioTemporalDecomposition() {
+    return spatioTemporalDecomposition;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.mpeg7.AudioVisualSegment#hasSpacioTemporalDecomposition()
+   * @see org.opencastproject.metadata.mpeg7.AudioVisualSegment#hasSpatioTemporalDecomposition()
    */
   @Override
-  public boolean hasSpacioTemporalDecomposition() {
-    return spacioTemporalDecomposition != null;
+  public boolean hasSpatioTemporalDecomposition() {
+    return spatioTemporalDecomposition != null;
   }
 
   /**

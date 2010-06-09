@@ -48,14 +48,14 @@ package org.opencastproject.metadata.mpeg7;
 public interface AudioVisualSegment extends Segment {
 
   /**
-   * Returns <code>true</code> if there is a spacio temporal decomposition as part of this segment.
+   * Returns <code>true</code> if there is a spatio temporal decomposition as part of this segment.
    * 
-   * @return <code>true</code> if there is a spacio temporal decomposition
+   * @return <code>true</code> if there is a spatio temporal decomposition
    */
-  boolean hasSpacioTemporalDecomposition();
+  boolean hasSpatioTemporalDecomposition();
 
   /**
-   * Creates a spacio temporal decomposition in this video segment.
+   * Creates a spatio temporal decomposition in this video segment.
    * 
    * @param gap
    *          <code>true</code> if there may be gap between the elements
@@ -65,15 +65,15 @@ public interface AudioVisualSegment extends Segment {
    * @throws IllegalStateException
    *           if there is already such a decomposition
    */
-  SpacioTemporalDecomposition createSpacioTemporalDecomposition(boolean gap, boolean overlap)
+  SpatioTemporalDecomposition createSpatioTemporalDecomposition(boolean gap, boolean overlap)
           throws IllegalStateException;
 
   /**
-   * Returns the spacio temporal decomposition that contains information about elements on the segment such as text
+   * Returns the spatio temporal decomposition that contains information about elements on the segment such as text
    * elements.
    * 
-   * @return the spacio temporal decomposition
+   * @return the spatio temporal decomposition
    */
-  SpacioTemporalDecomposition getSpacioTemporalDecomposition();
+  SpatioTemporalDecomposition getSpatioTemporalDecomposition();
 
 }

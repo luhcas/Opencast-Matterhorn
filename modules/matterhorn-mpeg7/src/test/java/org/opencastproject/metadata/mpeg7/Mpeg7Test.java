@@ -27,6 +27,7 @@ import org.opencastproject.util.FileSupport;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -121,7 +122,7 @@ public class Mpeg7Test {
    * Tests the contents of the sample catalog mpeg7.xml.
    */
   @SuppressWarnings("unchecked")
-  public void testContent(Mpeg7Catalog mpeg7) {
+  protected void testContent(Mpeg7Catalog mpeg7) {
     // Check presence of content
     assertTrue(mpeg7.hasAudioContent());
     assertTrue(mpeg7.hasVideoContent());
@@ -214,6 +215,31 @@ public class Mpeg7Test {
     TextAnnotation textAnnotation = v1Segment1.textAnnotations().next();
     assertEquals("Armin", textAnnotation.keywordAnnotations().next().getKeyword());
     assertEquals("Hint Armin", textAnnotation.freeTextAnnotations().next().getText());
+    // Spaciotemporal decomposition
+    SpatioTemporalDecomposition stdecomposition = v1Segment1.getSpatioTemporalDecomposition();
+    assertNotNull(stdecomposition);
+    assertTrue(stdecomposition.hasGap());
+    assertFalse(stdecomposition.isOverlapping());
+    // VideoText
+    assertEquals(1, stdecomposition.getVideoText().length);
+    VideoText videoText = stdecomposition.getVideoText("text1");
+    assertNotNull(videoText);
+    SpatioTemporalLocator locator = videoText.getSpatioTemporalLocator();
+    assertNotNull(locator);
+    MediaTime locatorMediaTime = locator.getMediaTime();
+    assertNotNull(locatorMediaTime);
+    assertEquals(MediaRelTimePointImpl.parseTimePoint("T00:00:00:0F25"), locatorMediaTime.getMediaTimePoint());
+    assertEquals(MediaDurationImpl.parseDuration("PT01H07M35S"), locatorMediaTime.getMediaDuration());
+    Textual textual = videoText.getText();
+    assertNotNull(textual);
+    assertEquals("Text", textual.getText());
+    assertEquals("en", textual.getLanguage());
+    Rectangle boundingBox = videoText.getBoundary();
+    assertNotNull(boundingBox);
+    assertEquals(10, (int)boundingBox.getX());
+    assertEquals(150, (int)boundingBox.getWidth());
+    assertEquals(20, (int)boundingBox.getY());
+    assertEquals(35, (int)boundingBox.getHeight());
 
     //
     // Check video track (track-3)

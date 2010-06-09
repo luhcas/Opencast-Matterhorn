@@ -21,6 +21,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -37,7 +38,7 @@ public class Mpeg7Parser extends DefaultHandler {
 
   /** The current parser state */
   enum ParserState {
-    Document, MultimediaContent, Segment
+    Document, MultimediaContent, Segment, VideoText
   };
 
   /** The manifest */
@@ -55,26 +56,20 @@ public class Mpeg7Parser extends DefaultHandler {
   /** The multimedia content identifier */
   private String contentId = null;
 
-  /** The content media locator */
-  private MediaLocator contentMediaLocator = null;
-
-  /** The content media time and duration */
-  private MediaTimeImpl contentMediaTime = null;
+  /** The media locator */
+  private MediaLocator mediaLocator = null;
 
   /** The content media time point (will usually refer to 0:00:00) */
   private MediaTimePoint contentTimePoint = null;
 
-  /** The content duration */
-  private MediaDuration contentDuration = null;
+  /** The time point (relative to the content time point) */
+  private MediaTimePoint mediaTimePoint = null;
 
-  /** The segment time point (relative to the content time point) */
-  private MediaTimePoint segmentTimePoint = null;
+  /** The duration */
+  private MediaDuration mediaDuration = null;
 
-  /** The segment duration */
-  private MediaDuration segmentDuration = null;
-
-  /** The segment media time and duration */
-  private MediaTime segmentMediaTime = null;
+  /** The media time and duration */
+  private MediaTime mediaTime = null;
 
   /** The temporal decomposition container */
   private TemporalDecomposition<?> temporalDecomposition = null;
@@ -82,8 +77,17 @@ public class Mpeg7Parser extends DefaultHandler {
   /** The temporal segment */
   private Segment segment = null;
 
+  /** The spatio temporal decomposition container */
+  private SpatioTemporalDecomposition spatioTemporalDecomposition = null;
+
   /** The text annoation */
   private TextAnnotation textAnnotation = null;
+  
+  /** The videotext element */
+  private VideoText videoText = null;
+
+  /** The videotext text */
+  private Textual textual = null;
 
   /** The current parser state */
   private Mpeg7Parser.ParserState state = ParserState.Document;
@@ -158,11 +162,11 @@ public class Mpeg7Parser extends DefaultHandler {
       contentType = MultimediaContentType.Type.valueOf(localName);
       contentId = attributes.getValue("id");
       if (MultimediaContentType.Type.Audio.equals(contentType))
-        multimediaContent = mpeg7Doc.addAudioContent(contentId, contentMediaTime, contentMediaLocator);
+        multimediaContent = mpeg7Doc.addAudioContent(contentId, mediaTime, mediaLocator);
       else if (MultimediaContentType.Type.Video.equals(contentType))
-        multimediaContent = mpeg7Doc.addVideoContent(contentId, contentMediaTime, contentMediaLocator);
+        multimediaContent = mpeg7Doc.addVideoContent(contentId, mediaTime, mediaLocator);
       else if (MultimediaContentType.Type.AudioVisual.equals(contentType))
-        multimediaContent = mpeg7Doc.addAudioVisualContent(contentId, contentMediaTime, contentMediaLocator);
+        multimediaContent = mpeg7Doc.addAudioVisualContent(contentId, mediaTime, mediaLocator);
     }
 
     // Temporal decomposition
@@ -201,6 +205,33 @@ public class Mpeg7Parser extends DefaultHandler {
       }
       textAnnotation = segment.createTextAnnotation(confidence, relevance, language);
     }
+    
+    // Spatiotemporal decomposition
+    if ("SpatioTemporalDecomposition".equals(localName)) {
+      String hasGap = attributes.getValue("gap");
+      String isOverlapping = attributes.getValue("overlap");
+      if (!(segment instanceof VideoSegment))
+        throw new IllegalStateException("Can't have a spatio temporal decomposition outside of a video segment");
+      boolean gap = "true".equalsIgnoreCase(attributes.getValue("gap"));
+      boolean overlap = "true".equalsIgnoreCase(attributes.getValue("overlap"));
+      spatioTemporalDecomposition = ((VideoSegment)segment).createSpatioTemporalDecomposition(gap, overlap);
+      spatioTemporalDecomposition.setGap("true".equals(hasGap));
+      spatioTemporalDecomposition.setOverlapping("overlap".equals(isOverlapping));
+    }
+    
+    // Video Text
+    if ("VideoText".equals(localName)) {
+      String id = attributes.getValue("id");
+      videoText = new VideoTextImpl(id);
+    }
+
+    // Textual
+    if ("Text".equals(localName)) {
+      String language = attributes.getValue("xml:lang");
+      textual = new TextualImpl();
+      textual.setLanguage(language);
+    }
+
   }
 
   /**
@@ -230,42 +261,39 @@ public class Mpeg7Parser extends DefaultHandler {
     // Media/Segment time
     if ("MediaTime".equals(localName)) {
       if (ParserState.MultimediaContent.equals(state)) {
-        contentMediaTime = new MediaTimeImpl(contentTimePoint, contentDuration);
-        multimediaContent.setMediaTime(contentMediaTime);
+        mediaTime = new MediaTimeImpl(mediaTimePoint, mediaDuration);
+        multimediaContent.setMediaTime(mediaTime);
       } else if (ParserState.Segment.equals(state)) {
-        segmentMediaTime = new MediaTimeImpl(segmentTimePoint, segmentDuration);
-        segment.setMediaTime(segmentMediaTime);
+        mediaTime = new MediaTimeImpl(mediaTimePoint, mediaDuration);
+        segment.setMediaTime(mediaTime);
+      } else if (ParserState.VideoText.equals(state)) {
+        SpatioTemporalLocator spatioTemporalLocator = new SpatioTemporalLocatorImpl(mediaTime);
+        videoText.setSpatioTemporalLocator(spatioTemporalLocator);
       }
     }
 
     // Media/Segment time point
     if ("MediaTimePoint".equals(localName)) {
-      MediaTimePointImpl tp = MediaTimePointImpl.parseTimePoint(getTagContent());
-      if (ParserState.MultimediaContent.equals(state))
-        contentTimePoint = tp;
-      else if (ParserState.Segment.equals(state)) {
-        segmentTimePoint = tp;
+      mediaTimePoint = MediaTimePointImpl.parseTimePoint(getTagContent());
+      if (ParserState.MultimediaContent.equals(state)) {
+        contentTimePoint = mediaTimePoint;
       }
     }
 
     // Media/Segment time point
     if ("MediaRelTimePoint".equals(localName)) {
       MediaRelTimePointImpl tp = MediaRelTimePointImpl.parseTimePoint(getTagContent());
+      mediaTimePoint = tp;
       if (ParserState.MultimediaContent.equals(state))
         contentTimePoint = tp;
       else if (ParserState.Segment.equals(state)) {
-        segmentTimePoint = tp;
         tp.setReferenceTimePoint(contentTimePoint);
       }
     }
 
     // Media/Segment duration
     if ("MediaDuration".equals(localName)) {
-      MediaDuration td = MediaDurationImpl.parseDuration(getTagContent());
-      if (ParserState.MultimediaContent.equals(state))
-        contentDuration = td;
-      else if (ParserState.Segment.equals(state))
-        segmentDuration = td;
+      mediaDuration = MediaDurationImpl.parseDuration(getTagContent());
     }
 
     // Keyword
@@ -278,6 +306,33 @@ public class Mpeg7Parser extends DefaultHandler {
     if ("FreeTextAnnotation".equals(localName)) {
       FreeTextAnnotation freeText = new FreeTextAnnotationImpl(tagContent.toString());
       textAnnotation.addFreeTextAnnotation(freeText);
+    }
+
+    // Video Text
+    if ("VideoText".equals(localName)) {
+      spatioTemporalDecomposition.addVideoText(videoText);
+    }
+    
+    // SpatioTemporalLocator
+    if ("SpatioTemporalLocator".equals(localName)) {
+      videoText.setSpatioTemporalLocator(new SpatioTemporalLocatorImpl(mediaTime));
+    }
+
+    // Videotext text
+    if ("Text".equals(localName)) {
+      textual.setText(tagContent.toString());
+      videoText.setText(textual);
+    }
+
+    // Videotext bouding box
+    if ("Box".equals(localName)) {
+      String[] coords = tagContent.toString().trim().split(" ");
+      if (coords.length != 4)
+        throw new IllegalStateException("Box coordinates '" + tagContent + "' is malformatted");
+      int[] coordsL = new int[4];
+      for (int i=0; i < 4; i++)
+        coordsL[i] = Integer.parseInt(coords[i]);
+      videoText.setBoundary(new Rectangle(coordsL[0], coordsL[1], coordsL[2], coordsL[3]));
     }
 
   }

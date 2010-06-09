@@ -51,10 +51,18 @@ import org.opencastproject.media.mediapackage.XmlElement;
 public interface MovingRegion extends XmlElement {
 
   /**
-   * Returns the spacio temporal locator.
+   * Sets the spatio temporal locator.
+   * 
+   * @param locator
+   *          the region locator
+   */
+  void setSpatioTemporalLocator(SpatioTemporalLocator locator);
+
+  /**
+   * Returns the spatio temporal locator.
    * 
    * @return the locator
    */
-  SpacioTemporalLocator getSpacioTemporalLocator();
+  SpatioTemporalLocator getSpatioTemporalLocator();
 
 }
