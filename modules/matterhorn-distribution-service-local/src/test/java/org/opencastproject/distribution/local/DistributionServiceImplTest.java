@@ -68,9 +68,9 @@ public class DistributionServiceImplTest {
     service.distribute(mp, new String[] {"track-1", "catalog-1"}); // "catalog-2" and "notes" are not to be distributed
     File mpDir = new File(distributionRoot, mp.getIdentifier().compact());
     Assert.assertTrue(mpDir.exists());
-    File mediaDir = new File(mpDir, "track");
-    File metadataDir = new File(mpDir, "catalog");
-    File attachmentsDir = new File(mpDir, "attachment");
+    File mediaDir = new File(mpDir, "track-1");
+    File metadataDir = new File(mpDir, "catalog-1");
+    File attachmentsDir = new File(mpDir, "attachment-1");
     Assert.assertTrue(mediaDir.exists());
     Assert.assertTrue(metadataDir.exists());
     Assert.assertFalse(attachmentsDir.exists());

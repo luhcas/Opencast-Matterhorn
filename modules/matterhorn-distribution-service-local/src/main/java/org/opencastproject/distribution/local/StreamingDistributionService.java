@@ -112,10 +112,10 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
   @Override
   protected File getDistributionFile(MediaPackageElement element) {
     String mediaPackageId = element.getMediaPackage().getIdentifier().compact();
-    String elementType = element.getElementType().toString().toLowerCase(); 
+    String elementId = element.getIdentifier(); 
     String fileName = FilenameUtils.getName(element.getURI().toString());
     String directoryName = distributionDirectory.getAbsolutePath();
-    String destinationFileName = PathSupport.concat(new String[] { directoryName, mediaPackageId, elementType, fileName });
+    String destinationFileName = PathSupport.concat(new String[] { directoryName, mediaPackageId, elementId, fileName });
     return new File(destinationFileName);
   }
   
@@ -126,9 +126,9 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
   @Override
   protected URI getDistributionUri(MediaPackageElement element) throws URISyntaxException {
     String mediaPackageId = element.getMediaPackage().getIdentifier().compact();
-    String elementType = element.getElementType().toString().toLowerCase(); 
+    String elementId = element.getIdentifier(); 
     String fileName = FilenameUtils.getName(element.getURI().toString());
-    String destinationURI = UrlSupport.concat(new String[] { streamingUrl, mediaPackageId, elementType, fileName });
+    String destinationURI = UrlSupport.concat(new String[] { streamingUrl, mediaPackageId, elementId, fileName });
     return new URI(destinationURI);
   }
 }
