@@ -51,15 +51,9 @@ Opencast.Watch = (function ()
           sd.setMinutes(parseInt(timeDate.substring(14,16)));
           sd.setSeconds(parseInt(timeDate.substring(17,19)));
 
-          var creator = $('#oc-creator').html();
-
-          if(creator !== "")
-            $('#oc_title_from').html(" by " + creator);
-
-          $('#oc_title_from').append(" (" + sd.toLocaleString() + ")");
-
           // set the dcDescription
           $('#oc_description').append($('#oc-description').html());
+          $('#oc_description').append("<br/>Date: "+  sd.toLocaleString());
 
           $('#oc_segment-table').html($('#oc-segments').html());
 
@@ -169,7 +163,7 @@ Opencast.Watch = (function ()
             data: "id=" + mediaPackageId,
             dataType: 'xml',
             success: function(xml) {
-            $('#oc_description').append("<br>Views: "+$(xml).find("views").text());
+            $('#oc_description').append("<br/>Views: "+$(xml).find("views").text());
             },
             error: function(a, b, c) {
               // Some error while trying to get the views
@@ -218,12 +212,12 @@ Opencast.Watch = (function ()
       $('#oc_client_shortcuts').append("Control + Alt + T = the current time for the screen reader<br/>");
 
       switch($.client.os){
-      	   case "Windows":
-      	$('#oc_client_shortcuts').append("Windows Control + = to zoom in the player<br/>"); 
-      	$('#oc_client_shortcuts').append("Windows Control - = to minimize in the player<br/>");
-      	break; 
-         case "Mac":
-      	$('#oc_client_shortcuts').append("cmd + = to zoom in the player<br/>"); 
+        case "Windows":
+          $('#oc_client_shortcuts').append("Windows Control + = to zoom in the player<br/>"); 
+          $('#oc_client_shortcuts').append("Windows Control - = to minimize in the player<br/>");
+         break; 
+        case "Mac":
+          $('#oc_client_shortcuts').append("cmd + = to zoom in the player<br/>"); 
       	$('#oc_client_shortcuts').append("cmd - = to minimize the player<br/>");
       	break; 
          case "Linux":

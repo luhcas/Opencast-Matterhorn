@@ -50,19 +50,12 @@ table
 
 #oc_title
 {
+  margin:                   0px;
   padding-left:             5px;
-  font-size:                1.5em;
   text-align:               left;
   height:                   100%;
   vertical-align:           bottom;
-}
-
-#oc_title_from
-{
-  font-size:                1.0em;
-  text-align:               left;
-  height:                   100%;
-  vertical-align:           bottom;  
+  font-weight:              normal;
 }
 
 #oc_search

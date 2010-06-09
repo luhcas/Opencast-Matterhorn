@@ -51,8 +51,7 @@
 			<a href="index.html"><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn" style="float:left;"></a>
 		</div>
 		<div id="oc_title-bar-heading">
-			<span id="oc_title"></span>
-			<span id="oc_title_from"></span>
+			<h2 id="oc_title"></h2>
 		</div>
 		<div id="oc_search">    
 			<form action="index.html">
@@ -196,26 +195,27 @@
         <input id="oc_btn-shortcuts" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleShortcuts()" name="Shortcuts" value="Shortcuts" alt="Shortcuts" title="Shortcuts"></input>
 
         <div class="clear"></div>
-
-        <div id="oc_description" class="oc_DisplayNone fl-fix">description</div>
+        
+        <div id="oc_description" class="oc_DisplayNone fl-fix">
+          <h4>Description</h4>
+        </div>
 
         <div id="oc_notes" class="oc_DisplayNone fl-fix">
           <textarea name="wysiwyg" id="wysiwyg" rows="5" cols="60"></textarea>
         </div>
 
         <div id=oc_shortcuts class="oc_DisplayNone fl-fix" >
-	<span id="skip">
-		<a name="shortcuts"></a>
-	</span>
-	  <h4>Player-Shortcuts</h4>
-	  <div id="oc_client_shortcuts">
-	  </div>
-        </div>
-        
+          <span id="skip">
+          	<a name="shortcuts"></a>
+          </span>
+            <h4>Player-Shortcuts</h4>
+            <div id="oc_client_shortcuts">
+            </div>
+          </div>
       </div>
-      
+
       <div class="oc_tabTableRight">
-      
+
         <input id="oc_btn-slidetext" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlideText()" name="Slide Text" value="Slide Text" alt="Slide Text" title="Slide Text"></input>
         <input id="oc_btn-transcript" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleTranscript()" name="Transcript" value="Transcript" alt="Transcript" title="Transcript"></input>
         

@@ -21,8 +21,8 @@
 									<a>
 										<xsl:attribute name="href">watch.html?id=<xsl:value-of
 											select="mediapackage/@id" /></xsl:attribute>
-										<xsl:value-of select='substring(dcTitle, 0, 60)' />
-										<xsl:if test='string-length(dcTitle)>60'>
+										<xsl:value-of select='substring(dcTitle, 0, 80)' />
+										<xsl:if test='string-length(dcTitle)>80'>
 											...
 										</xsl:if>
 									</a>
@@ -37,17 +37,16 @@
 								<div class="timeDate">
 									<xsl:value-of select="dcCreated"/>
 								</div>
-								<br />
-								<xsl:value-of select='substring(dcAbstract, 0, 170)' />
-								<xsl:if test='string-length(dcAbstract)>170'>
+								<xsl:value-of select='substring(dcDescription, 0, 170)' />
+								<xsl:if test='string-length(dcDescription)>170'>
 									...
 								</xsl:if>
 							</xsl:when>
 
 							<xsl:otherwise>
 								<b>
-									<xsl:value-of select='substring(dcTitle, 0, 60)' />
-									<xsl:if test='string-length(dcTitle)>60'>
+									<xsl:value-of select='substring(dcTitle, 0, 80)' />
+									<xsl:if test='string-length(dcTitle)>80'>
 										...
 									</xsl:if>
 								</b>

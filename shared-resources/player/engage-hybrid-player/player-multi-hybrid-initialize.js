@@ -663,6 +663,10 @@ Opencast.Initialize = (function ()
         }
         Opencast.Player.setBrowserWidth(myWidth);
         
+        var currentWidth = $('#oc_title').height();
+        $('#oc_title').html($('#oc-title').html() + " by " + $('#oc-creator').html());
+        
+    
     }
     
     function doTest()

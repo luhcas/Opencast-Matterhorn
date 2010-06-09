@@ -182,17 +182,6 @@
 			</xsl:choose>
 		</div>
 
-		<div id="oc-creator" style="display: none">
-			<xsl:choose>
-				<xsl:when test="ns2:search-results/result/dcCreator">
-					<xsl:value-of select="ns2:search-results/result/dcCreator" />
-				</xsl:when>
-				<xsl:otherwise>
-					No Creator
-				</xsl:otherwise>
-			</xsl:choose>
-		</div>
-
     <div id="oc-creator" style="display: none">
       <xsl:choose>
         <xsl:when test="ns2:search-results/result/dcCreator">
