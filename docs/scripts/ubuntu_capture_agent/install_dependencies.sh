@@ -81,7 +81,28 @@ EOF
 
 echo "Installing third party packages from Ubuntu repository, this may take some time... "
 
-pkgs=( $PKG_LIST )
+# Changes the default array delimiter: from 'space' to 'newline'
+IFS='
+'
+
+# Gets the list of the packages to install
+pkgs=( $GOOD_PKG_LIST )
+bad=( $BAD_PKG_LIST )
+reason=( $BAD_PKG_REASON )
+
+for (( i = 0; i < ${#bad[@]}; i++ )); do
+    read -p "Do you wish to install ${bad[$i]}? ${reason[$i]} [y/N]: " answer
+    while [[ -z "$(echo ${answer:-N} | grep -i '^[yn]')" ]]; do
+        read -p "Please answer [y]es or [N]o: " answer
+    done
+    if [[ -n "$(echo ${answer:-N} | grep -i '^y')" ]]; then
+	pkgs[${#pkgs}]=${bad[$i]}
+    fi
+done
+
+# Restore the default array delimiter
+IFS=' '
+
 # Check which required packages are already installed
 for (( i = 0; i < ${#pkgs[@]}; i++ )); do
     if [[ -z "$(dpkg -l | grep " ${pkgs[$i]} ")" ]]; then

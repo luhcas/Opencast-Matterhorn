@@ -66,8 +66,8 @@ grep -e "${EXPORT_SOURCE_HOME}" $HOME/.bashrc &> /dev/null
 if [ "$?" -ne 0 ]; then
     echo "${EXPORT_SOURCE_HOME}" >> $HOME/.bashrc
 fi
-echo "alias deploy=\"mvn install -DdeployTo=$FELIX_HOME/load\""
-echo "alias redeploy=\"mvn clean && deploy"
+echo "alias deploy=\"mvn install -DdeployTo=$FELIX_HOME/load\"" >> $HOME/.bashrc
+echo "alias redeploy=\"mvn clean && deploy" >> $HOME/.bashrc
 
 #chown $USERNAME:$USERNAME $HOME/.bashrc
 
