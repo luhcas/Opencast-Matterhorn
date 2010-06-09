@@ -36,13 +36,13 @@ if
 	# checking for jam package
 	jam_check &&
 	# installing gstreamer
-	su -c "yum -y install gstreamer gstreamer-plugins-*"
+	su -c "yum -y install gstreamer gstreamer-plugins-base gstreamer-plugins-good"
 then
 	echo
 	echo "Required libraries were installed. Executing main script..."
 	echo
 	sleep 1 
-	su -c "sh install_3rd_party.sh $install_script_parameters 2>&1"
+	su -c "sh install_3rd_party.sh $install_parameters 2>&1"
 	exit $?
 else
 	echo
