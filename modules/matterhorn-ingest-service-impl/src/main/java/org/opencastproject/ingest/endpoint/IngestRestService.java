@@ -40,6 +40,7 @@ import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
 import org.apache.commons.io.IOUtils;
+import org.json.simple.JSONObject;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +70,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import org.json.simple.JSONObject;
 
 /**
  * Creates and augments Matterhorn MediaPackages using the api. Stores media into the Working File Repository.
@@ -612,6 +612,7 @@ public class IngestRestService {
    * @param jobId
    * @return progress JSON string
    */
+  @SuppressWarnings("unchecked")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("getProgress/{jobId}")

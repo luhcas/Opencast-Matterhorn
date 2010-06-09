@@ -25,6 +25,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
 import org.opencastproject.media.mediapackage.identifier.HandleException;
+import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.ZipUtil;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -35,6 +36,8 @@ import org.opencastproject.workspace.api.Workspace;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +63,7 @@ public class IngestServiceImpl implements IngestService {
   private MediaPackageBuilder builder = null;
   private WorkflowService workflowService;
   private Workspace workspace;
+  private TrustedHttpClient httpClient;
   private String tempFolder;
   private String fs;
 
@@ -86,12 +90,17 @@ public class IngestServiceImpl implements IngestService {
     return addZippedMediaPackage(zipStream, wd, null);
   }
 
+  public void setHttpClient(TrustedHttpClient httpClient) {
+    this.httpClient = httpClient;
+  }
+
   /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.ingest.api.IngestService#addZippedMediaPackage(java.io.InputStream, java.lang.String)
    */
-  public WorkflowInstance addZippedMediaPackage(InputStream zipStream, String wd, Map<String,String> workflowConfig) throws Exception {
+  public WorkflowInstance addZippedMediaPackage(InputStream zipStream, String wd, Map<String, String> workflowConfig)
+          throws Exception {
     // locally unpack the mediaPackage
     String tempPath = tempFolder + UUID.randomUUID().toString();
     // save inputStream to file
@@ -156,10 +165,10 @@ public class IngestServiceImpl implements IngestService {
       throw (e);
     }
     removeDirectory(tempPath);
-    if(wd == null) {
+    if (wd == null) {
       return ingest(mp);
     } else {
-      return ingest(mp, wd, workflowConfig);    // workflowConfig == null is handled by ingest(mp, wd, props)
+      return ingest(mp, wd, workflowConfig); // workflowConfig == null is handled by ingest(mp, wd, props)
     }
   }
 
@@ -279,14 +288,15 @@ public class IngestServiceImpl implements IngestService {
 
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String, java.lang.String, java.util.Map)
    */
   @Override
-  public WorkflowInstance ingest(MediaPackage mp, String wd, Map<String,String> properties) throws Exception {
+  public WorkflowInstance ingest(MediaPackage mp, String wd, Map<String, String> properties) throws Exception {
     WorkflowInstance workflowInst;
     WorkflowDefinition workflowDef = workflowService.getWorkflowDefinitionById(wd);
-    if(workflowDef == null) throw new IllegalStateException(wd + " is not a registered workflow definition");
+    if (workflowDef == null)
+      throw new IllegalStateException(wd + " is not a registered workflow definition");
     if (properties == null) {
       workflowInst = workflowService.start(workflowDef, mp);
     } else {
@@ -310,7 +320,7 @@ public class IngestServiceImpl implements IngestService {
       }
     }
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -321,18 +331,24 @@ public class IngestServiceImpl implements IngestService {
     return workflowService.getWorkflowById(id);
   }
 
-  private URI addContentToRepo(MediaPackage mp, String elementId, URI uri) throws IOException,
+  protected URI addContentToRepo(MediaPackage mp, String elementId, URI uri) throws IOException,
           UnsupportedElementException {
-    InputStream uriStream = uri.toURL().openStream();
-    URI returnedUri = workspace.put(mp.getIdentifier().compact(), elementId, FilenameUtils.getName(uri.toURL()
-            .toString()), uriStream);
-    try {
-      uriStream.close();
-    } catch (IOException e) {
-      logger.error(e.getMessage());
+    InputStream in = null;
+    if(uri.toString().startsWith("http")) {
+      HttpGet get = new HttpGet(uri);
+      HttpResponse response = httpClient.execute(get);
+      int httpStatusCode = response.getStatusLine().getStatusCode();
+      if (httpStatusCode != 200) {
+        throw new IOException(uri + " returns http " + httpStatusCode);
+      }
+      in = response.getEntity().getContent();
+    } else {
+      in = uri.toURL().openStream();
     }
+    URI returnedUri = workspace.put(mp.getIdentifier().compact(), elementId, FilenameUtils.getName(uri.toURL()
+            .toString()), in);
+    IOUtils.closeQuietly(in);
     return returnedUri;
-    // return addContentToMediaPackage(mp, elementId, newUrl, type, flavor);
   }
 
   private URI addContentToRepo(MediaPackage mp, String elementId, String filename, InputStream file)

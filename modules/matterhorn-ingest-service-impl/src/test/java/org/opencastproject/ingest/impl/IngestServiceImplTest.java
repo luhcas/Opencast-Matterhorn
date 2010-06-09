@@ -17,6 +17,7 @@ package org.opencastproject.ingest.impl;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -24,6 +25,10 @@ import org.opencastproject.workspace.api.Workspace;
 
 import junit.framework.Assert;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.HttpGet;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
@@ -120,7 +125,25 @@ public class IngestServiceImplTest {
     EasyMock.replay(workflowInstance);
     EasyMock.replay(workflowService);
 
+    HttpEntity entity = EasyMock.createMock(HttpEntity.class);
+    EasyMock.expect(entity.getContent()).andReturn(getClass().getResourceAsStream("/av.mov")).anyTimes();
+    EasyMock.replay(entity);
+    
+    StatusLine statusLine = EasyMock.createMock(StatusLine.class);
+    EasyMock.expect(statusLine.getStatusCode()).andReturn(200).anyTimes();
+    EasyMock.replay(statusLine);
+    
+    HttpResponse httpResponse = EasyMock.createMock(HttpResponse.class);
+    EasyMock.expect(httpResponse.getStatusLine()).andReturn(statusLine).anyTimes();
+    EasyMock.expect(httpResponse.getEntity()).andReturn(entity).anyTimes();
+    EasyMock.replay(httpResponse);
+    
+    TrustedHttpClient httpClient = EasyMock.createMock(TrustedHttpClient.class);
+    EasyMock.expect(httpClient.execute((HttpGet)EasyMock.anyObject())).andReturn(httpResponse).anyTimes();
+    EasyMock.replay(httpClient);
+    
     service = new IngestServiceImpl();
+    service.setHttpClient(httpClient);
     service.setTempFolder("target/temp/");
     service.setWorkspace(workspace);
     service.setWorkflowService(workflowService);
