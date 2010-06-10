@@ -93,6 +93,9 @@
            <div id="oc-video-presenter-delivery-x-flv-http" style="display: none">
               <xsl:value-of select="url" />
             </div>
+            <div id="oc-resolution-presenter-delivery-x-flv-http" style="display: none">
+              <xsl:value-of select="video/resolution" />
+            </div>
           </xsl:if>
         </xsl:if>
       </xsl:if>
@@ -102,6 +105,9 @@
           <xsl:if test="substring(url, 1, 4)='http'">
            <div id="oc-video-presentation-delivery-x-flv-http" style="display: none">
               <xsl:value-of select="url" />
+            </div>
+            <div id="oc-resolution-presentation-delivery-x-flv-http" style="display: none">
+              <xsl:value-of select="video/resolution" />
             </div>
           </xsl:if>
         </xsl:if>
@@ -123,6 +129,9 @@
            <div id="oc-video-presentation-delivery-x-flv-rtmp" style="display: none">
               <xsl:value-of select="url" />
             </div>
+            <div id="oc-resolution-presentation-delivery-x-flv-rtmp" style="display: none">
+              <xsl:value-of select="video/resolution" />
+            </div>
           </xsl:if>
         </xsl:if>
       </xsl:if>
@@ -135,6 +144,9 @@
            <div id="oc-video-presenter-source-x-flv-http" style="display: none">
               <xsl:value-of select="url" />
             </div>
+            <div id="oc-resolution-presenter-source-x-flv-http" style="display: none">
+              <xsl:value-of select="video/resolution" />
+            </div>
           </xsl:if>
         </xsl:if>
       </xsl:if>
@@ -144,6 +156,9 @@
           <xsl:if test="substring(url, 1, 4)='http'">
            <div id="oc-video-presentation-source-x-flv-http" style="display: none">
               <xsl:value-of select="url" />
+            </div>
+            <div id="oc-resolution-presentation-source-x-flv-http" style="display: none">
+              <xsl:value-of select="video/resolution" />
             </div>
           </xsl:if>
         </xsl:if>
@@ -155,6 +170,9 @@
            <div id="oc-video-presenter-source-x-flv-rtmp" style="display: none">
               <xsl:value-of select="url" />
             </div>
+            <div id="oc-resolution-presenter-source-x-flv-rtmp" style="display: none">
+              <xsl:value-of select="video/resolution" />
+            </div>
           </xsl:if>
         </xsl:if>
       </xsl:if>
@@ -164,6 +182,9 @@
           <xsl:if test="substring(url, 1, 4)='rtmp'">
            <div id="oc-video-presentation-source-x-flv-rtmp" style="display: none">
               <xsl:value-of select="url" />
+            </div>
+            <div id="oc-resolution-presentation-source-x-flv-rtmp" style="display: none">
+              <xsl:value-of select="video/resolution" />
             </div>
           </xsl:if>
         </xsl:if>
