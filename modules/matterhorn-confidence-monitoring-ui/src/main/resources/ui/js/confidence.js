@@ -89,12 +89,13 @@ Monitor.updateAudio = function(){
 	log('update audio');
 	$.get(CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/audio/" + Monitor.devices[Monitor.selectedAudioDevice].name + "/0",
 	function(data){ 
-		var a = data.split('\n');
-		var dbLevel = parseFloat(a[1]);
+		var a = data.samples[0];
+		var dbLevel = parseFloat(a);
 		if(dbLevel && dbLevel != 'NaN'){
 			AudioBar.setValue(dbLevel);
 		}else{
-			log('Bad audio levels', dbLevel);
+		  AudioBar.setValue(-100); //no audio
+			log('Bad audio levels', dbLevel, data);
 		}
 	});
 }
@@ -102,6 +103,7 @@ Monitor.updateAudio = function(){
 AudioBar.setValue = function(dbLevel){
 	var level_pct = Math.round((1 - Math.pow(10, dbLevel/20)) * 100);
 	log(level_pct, dbLevel);
+	$('#dbValue').val(dbLevel);
   $('#left_mask').css('height', level_pct + "%");
   //$('#right_mask').css('height', right_pct + "%");
 }

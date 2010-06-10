@@ -39,7 +39,10 @@
             <ul id="audio_devices" class="device_tab"></ul>
           </div>
           <div id="preview_area">
-              <div id="left_channel" class="audio_meter"><img id="left_mask" class="meter_mask" src="img/mask.png"></div>
+              <div id="left_channel" class="audio_meter">
+                <div style="height: 100%;"><span id="dbValue" style="position: relative; top: 450px"></span></div>
+                <img id="left_mask" class="meter_mask" src="img/mask.png">
+              </div>
               <!-- <div id="right_channel" class="audio_meter" style="display: none;"><img id="right_mask" class="meter_mask" src="img/mask.png"></img></div> -->
           </div>
         </div>
