@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.analysis.dictionary.parser;
+package org.opencastproject.dictionary.impl.parser;
 
 public class StringUtil {
   public static long hash(String str) {

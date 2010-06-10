@@ -30,7 +30,8 @@
         <module>modules/matterhorn-db</module>
         <module>modules/matterhorn-analysis-api</module>
         <module>modules/matterhorn-analysis-rest</module>
-        <module>modules/matterhorn-analysis-dictionary</module>
+        <module>modules/matterhorn-dictionary-api</module>
+        <module>modules/matterhorn-dictionary-impl</module>
         <module>modules/matterhorn-analysis-text</module>
         <module>modules/matterhorn-analysis-videosegmenter</module>
         <module>modules/matterhorn-composer-service-api</module>
@@ -170,7 +171,8 @@
         <module>modules/matterhorn-db</module>
         <module>modules/matterhorn-analysis-api</module>
         <module>modules/matterhorn-analysis-rest</module>
-        <module>modules/matterhorn-analysis-dictionary</module>
+        <module>modules/matterhorn-dictionary-api</module>
+        <module>modules/matterhorn-dictionary-impl</module>
         <module>modules/matterhorn-analysis-text</module>
         <module>modules/matterhorn-analysis-videosegmenter</module>
         <module>modules/matterhorn-caption-api</module>

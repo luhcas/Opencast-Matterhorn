@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.analysis.dictionary.parser;
+package org.opencastproject.dictionary.impl.parser;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;

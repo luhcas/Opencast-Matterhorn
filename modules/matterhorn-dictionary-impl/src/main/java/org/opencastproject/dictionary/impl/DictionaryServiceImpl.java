@@ -13,8 +13,9 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.analysis.dictionary;
+package org.opencastproject.dictionary.impl;
 
+import org.opencastproject.dictionary.api.DictionaryService;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
@@ -24,7 +25,7 @@ import org.opencastproject.workspace.api.Workspace;
 /**
  * The dictionary service can be used to clean a list of words with respect to a given dictionary.
  */
-public class DictionaryService {
+public class DictionaryServiceImpl implements DictionaryService {
 
   /** Reference to the receipt service */
   private RemoteServiceManager remoteServiceManager;
