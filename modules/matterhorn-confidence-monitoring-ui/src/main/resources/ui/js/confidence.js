@@ -103,7 +103,7 @@ Monitor.updateAudio = function(){
 AudioBar.setValue = function(dbLevel){
 	var level_pct = Math.round((1 - Math.pow(10, dbLevel/20)) * 100);
 	log(level_pct, dbLevel);
-	$('#dbValue').val(dbLevel);
+	$('#dbValue').text(dbLevel + 'dB');
   $('#left_mask').css('height', level_pct + "%");
   //$('#right_mask').css('height', right_pct + "%");
 }

@@ -7,7 +7,7 @@
     <link rel="stylesheet" type="text/css" href="css/confidence.css">
     <!-- scripts -->
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
-    <!--<script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>-->
+    <script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
     <script type="text/javascript" src="js/confidence.js"></script>
     <script type="text/javascript">
       $(document).ready(function(){ Monitor.loadDevices(); });
@@ -40,9 +40,9 @@
           </div>
           <div id="preview_area">
               <div id="left_channel" class="audio_meter">
-                <div style="height: 100%;"><span id="dbValue" style="position: relative; top: 450px"></span></div>
                 <img id="left_mask" class="meter_mask" src="img/mask.png">
               </div>
+              <div id="dbValue" style="position: relative;"></div>
               <!-- <div id="right_channel" class="audio_meter" style="display: none;"><img id="right_mask" class="meter_mask" src="img/mask.png"></img></div> -->
           </div>
         </div>
