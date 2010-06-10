@@ -206,8 +206,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
             break;
           }
         }
-        if (!match)
-          continue;
+        if (!match)continue;
       }
     
       Mpeg7CatalogImpl mpeg7 = new Mpeg7CatalogImpl(c);
