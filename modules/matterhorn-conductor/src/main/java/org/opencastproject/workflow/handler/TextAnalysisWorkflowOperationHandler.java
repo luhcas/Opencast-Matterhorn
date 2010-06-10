@@ -19,16 +19,27 @@ import org.opencastproject.analysis.api.MediaAnalysisService;
 import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReference;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.UnsupportedElementException;
+import org.opencastproject.metadata.mpeg7.MediaDuration;
+import org.opencastproject.metadata.mpeg7.MediaRelTimePointImpl;
+import org.opencastproject.metadata.mpeg7.MediaTime;
+import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
 import org.opencastproject.metadata.mpeg7.MediaTimePoint;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
+import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.metadata.mpeg7.Segment;
+import org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition;
+import org.opencastproject.metadata.mpeg7.SpatioTemporalLocator;
+import org.opencastproject.metadata.mpeg7.SpatioTemporalLocatorImpl;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.Video;
+import org.opencastproject.metadata.mpeg7.VideoSegment;
+import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -40,10 +51,15 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -51,6 +67,11 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
+
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * The <code>TextAnalysisOperationHandler</code> will take an <code>MPEG-7</code> catalog, look for video segments and
@@ -165,9 +186,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
   private MediaPackage extractVideoText(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
           throws MediaPackageException, UnsupportedElementException, InterruptedException, ExecutionException {
 
-    // Read the configuration properties
     String sourceTags = StringUtils.trimToNull(operation.getConfiguration("source-tags"));
-
     Set<String> sourceTagSet = null;
     if (StringUtils.trimToNull(sourceTags) != null) {
       sourceTagSet = new HashSet<String>();
@@ -176,28 +195,39 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
 
     // Select the catalogs according to the tags
     Set<Mpeg7Catalog> catalogs = new HashSet<Mpeg7Catalog>();
-    for (String tag : sourceTagSet) {
-      for (Catalog c : mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS_FLAVOR)) {
-        if (c.containsTag(tag) && c instanceof Mpeg7Catalog) {
-          Mpeg7Catalog mpeg7 = (Mpeg7Catalog)c;
-          
-          // Make sure there is video content
-          if (mpeg7.videoContent() == null || mpeg7.videoContent().next() == null) {
-            logger.info("Mpeg-7 catalog {} does not contain any video content", mpeg7);
-            continue;
+    for (Catalog c : mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS_FLAVOR)) {
+      
+      // Check for tags
+      if (sourceTagSet != null) {
+        boolean match = false;
+        for (String tag : sourceTagSet) {
+          if (c.containsTag(tag)) {
+            match = true;
+            break;
           }
-          
-          // Make sure there is a temporal decomposition
-          Video videoContent = mpeg7.videoContent().next();
-          TemporalDecomposition<? extends Segment> decomposition = videoContent.getTemporalDecomposition();
-          if (decomposition == null || !decomposition.hasSegments()) {
-            logger.info("Mpeg-7 catalog {} does not contain a temporal decomposition", mpeg7);
-            continue;
-          }
-
-          catalogs.add((Mpeg7Catalog)c);
         }
+        if (!match)
+          continue;
       }
+    
+      Mpeg7CatalogImpl mpeg7 = new Mpeg7CatalogImpl(c);
+      mpeg7.setTrustedHttpClient(trustedHttpClient);
+      
+      // Make sure there is video content
+      if (mpeg7.videoContent() == null || mpeg7.videoContent().next() == null) {
+        logger.info("Mpeg-7 catalog {} does not contain any video content", mpeg7);
+        continue;
+      }
+      
+      // Make sure there is a temporal decomposition
+      Video videoContent = mpeg7.videoContent().next();
+      TemporalDecomposition<? extends Segment> decomposition = videoContent.getTemporalDecomposition();
+      if (decomposition == null || !decomposition.hasSegments()) {
+        logger.info("Mpeg-7 catalog {} does not contain a temporal decomposition", mpeg7);
+        continue;
+      }
+
+      catalogs.add(mpeg7);
     }
     
     // Was there at least one matching catalog
@@ -207,7 +237,9 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
     }
 
     // Loop over all catalogs
-    for (Mpeg7Catalog mpeg7 : catalogs) {
+    for (Mpeg7Catalog mpeg7WithSegments : catalogs) {
+      Mpeg7CatalogImpl mpeg7 = (Mpeg7CatalogImpl)mpeg7WithSegments.clone();
+      mpeg7.setTrustedHttpClient(trustedHttpClient);
 
       logger.info("Inspecting segments of mpeg-7 catalog {}", mpeg7);
 
@@ -219,37 +251,88 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
       // For every segment, try to find the still image and run text analysis on it
       while (segmentIterator.hasNext()) {
         Segment segment = segmentIterator.next();
-        MediaTimePoint tp = segment.getMediaTime().getMediaTimePoint();
+        if (!(segment instanceof VideoSegment))
+          continue;
+        
+        VideoSegment videoSegment = (VideoSegment)segment;
+        MediaTimePoint segmentTimePoint = videoSegment.getMediaTime().getMediaTimePoint();
+        MediaDuration segmentDuration = videoSegment.getMediaTime().getMediaDuration();
 
         // Choose a time
         MediaPackageReference reference = new MediaPackageReferenceImpl();
-        reference.setProperty("time", tp.toString());
+        reference.setProperty("time", segmentTimePoint.toString());
         Attachment[] images = mediaPackage.getAttachments(reference);
         
         // Do we have a slide preview?
         if (images == null || images.length == 0) {
-          logger.info("No slide preview found for segment {} of mpeg-7 catalog {}", tp, mpeg7);
+          logger.info("No slide preview found for segment {} of mpeg-7 catalog {}", segmentTimePoint, mpeg7);
           continue;
         } else if (images.length > 1) {
-          logger.info("More than one slide preview found for segment {} of mpeg-7 catalog {}, using the first one", tp, mpeg7);
+          logger.info("More than one slide preview found for segment {} of mpeg-7 catalog {}, using the first one", segmentTimePoint, mpeg7);
         }
         
         // If there is a corresponding spaciotemporal decomposition, remove all the videotext elements
-        // TODO: Remove existing videotext elements
 
         Receipt receipt = analysisService.analyze(images[0], true);
         Mpeg7Catalog videoTextCatalog = (Mpeg7Catalog)receipt.getElement();
         if (videoTextCatalog == null)
           throw new RuntimeException("Text analysis service did not return a result");
 
-        // Add the videotext elements from the analysis result
-        // TODO: Add videotext elements to mpeg7 catalog
+        // Add the spatiotemporal decompositions from the new catalog to the existing video segments
+        Iterator<Video> textVideoContents = videoTextCatalog.videoContent();
+        if (!textVideoContents.hasNext()) {
+          logger.info("Text analysis was not able to extract any text from {}", images[0]);
+          break;
+        }
+
+        try {
+          Video textVideoContent = textVideoContents.next();
+          VideoSegment textVideoSegment = (VideoSegment)textVideoContent.getTemporalDecomposition().segments().next();
+          VideoText[] videoTexts = textVideoSegment.getSpatioTemporalDecomposition().getVideoText();
+          SpatioTemporalDecomposition std = videoSegment.createSpatioTemporalDecomposition(true, false);
+          for (VideoText videoText : videoTexts) {
+            MediaTime mediaTime = new MediaTimeImpl(new MediaRelTimePointImpl(0), segmentDuration);
+            SpatioTemporalLocator locator = new SpatioTemporalLocatorImpl(mediaTime);
+            videoText.setSpatioTemporalLocator(locator);
+            std.addVideoText(videoText);
+          }
+        } catch (Exception e) {
+          logger.warn("The mpeg-7 structure returned by the text analyzer is not what is expected", e);
+          continue;
+        }
         
       }
       
-      // TODO: update mpeg-7 catalog
+      // Store the catalog in the workspace
+      InputStream in = null;
+      try {
+        Transformer tf = TransformerFactory.newInstance().newTransformer();
+        DOMSource xmlSource = new DOMSource(mpeg7.toXml());
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        tf.transform(xmlSource, new StreamResult(out));
+        in = new ByteArrayInputStream(out.toByteArray());
+      } catch (Exception e) {
+        logger.error("Error serializing mpeg-7catalog", e);
+        throw new RuntimeException(e);
+      }
+      
+      // Put the result into the workspace
+      String mediaPackageId = mediaPackage.getIdentifier().toString();
+      String filename = FilenameUtils.getName(mpeg7.getURI().toString());
+      mpeg7.setIdentifier(null);
+      mpeg7.setFlavor(MediaPackageElements.TEXTS_FLAVOR);
+      MediaPackageElement source = null;
+      if (mpeg7WithSegments.getReference() != null) {
+        source = mediaPackage.getElementByReference(mpeg7WithSegments.getReference());
+        mediaPackage.addDerived(mpeg7, source);
+      } else {
+        mediaPackage.add(mpeg7);
+      }
+      URI workspaceURI = workspace.put(mediaPackageId, mpeg7.getIdentifier(), filename, in);
+      mpeg7.setURI(workspaceURI);
     }
 
+    logger.debug("Text analysis completed");
     return mediaPackage;
   }
 

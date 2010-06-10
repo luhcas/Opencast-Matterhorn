@@ -261,12 +261,19 @@ public class SolrIndexManager {
     }
 
     // Add mpeg7
-    Catalog mpeg7Catalogs[] = mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS_FLAVOR);
+    log_.debug("Looking for mpeg-7 catalogs containing segment texts");
+    Catalog mpeg7Catalogs[] = mediaPackage.getCatalogs(MediaPackageElements.TEXTS_FLAVOR);
+    if(mpeg7Catalogs.length == 0) {
+      log_.debug("No text catalogs found, trying segments only");
+      mpeg7Catalogs = mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS_FLAVOR);
+    }
+    // TODO: merge the segments from each mpeg7 if there is more than one mpeg7 catalog
     if (mpeg7Catalogs.length > 0) {
       Mpeg7Catalog mpeg7Catalog = mpeg7Service.load(mpeg7Catalogs[0]);
       addMpeg7Metadata(solrEpisodeDocument, mediaPackage, mpeg7Catalog);
+    } else {
+      log_.debug("No segmentation catalog found");
     }
-
     return solrEpisodeDocument;
   }
 
