@@ -24,7 +24,6 @@ import org.opencastproject.media.mediapackage.Attachment;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
 import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
-import org.opencastproject.metadata.mpeg7.AudioVisual;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
@@ -32,6 +31,7 @@ import org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.Textual;
 import org.opencastproject.metadata.mpeg7.TextualImpl;
+import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.metadata.mpeg7.VideoTextImpl;
@@ -189,7 +189,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
 
           // Create a temporal decomposition
           MediaTime mediaTime = new MediaTimeImpl(0, 0);
-          AudioVisual avContent = mpeg7.addAudioVisualContent(element.getIdentifier(), mediaTime, null);
+          Video avContent = mpeg7.addVideoContent(element.getIdentifier(), mediaTime, null);
           TemporalDecomposition<VideoSegment> temporalDecomposition = (TemporalDecomposition<VideoSegment>) avContent
                   .getTemporalDecomposition();
 

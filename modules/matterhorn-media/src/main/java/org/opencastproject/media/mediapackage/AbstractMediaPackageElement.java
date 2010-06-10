@@ -592,4 +592,5 @@ public abstract class AbstractMediaPackageElement implements
       throw new MediaPackageException(e.getLinkedException() != null ? e.getLinkedException() : e);
     }
   }
+
 }

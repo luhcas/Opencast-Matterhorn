@@ -553,16 +553,19 @@ public class SolrIndexManager {
         Iterator<VideoSegment> vsegments = (Iterator<VideoSegment>)video.getTemporalDecomposition().segments();
         while (vsegments.hasNext()) {
           VideoSegment segment = vsegments.next();
-          SpatioTemporalDecomposition spt = segment.getSpatioTemporalDecomposition();
-          if (spt == null)
-            continue;
+
+          StringBuffer segmentText = new StringBuffer();
+          StringBuffer hintField = new StringBuffer();
 
           // Collect the video text elements to a segment text
-          StringBuffer segmentText = new StringBuffer();
-          for (VideoText videoText : spt.getVideoText()) {
-            if (segmentText.length() > 0)
-              segmentText.append(" ");
-            segmentText.append(videoText.getText());
+          SpatioTemporalDecomposition spt = segment.getSpatioTemporalDecomposition();
+          if (spt != null) {
+            for (VideoText videoText : spt.getVideoText()) {
+              if (segmentText.length() > 0)
+                segmentText.append(" ");
+              segmentText.append(videoText.getText().getText());
+              // TODO: Add hint on bounding box
+            }
           }
 
           // Add keyword annotations
@@ -596,9 +599,6 @@ public class SolrIndexManager {
           // get the segments time properties
           MediaTimePoint timepoint = segment.getMediaTime().getMediaTimePoint();
           MediaDuration duration = segment.getMediaTime().getMediaDuration();
-
-          // Hints are stores as properties
-          StringBuffer hintField = new StringBuffer();
 
           // TODO: define a class with hint field constants
           hintField.append("time=" + timepoint.getTimeInMilliseconds() + "\n");

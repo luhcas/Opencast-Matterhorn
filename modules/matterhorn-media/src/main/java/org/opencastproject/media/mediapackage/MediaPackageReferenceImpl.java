@@ -74,9 +74,9 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
   /**
    * Creates a reference to the specified media package element.
    * <p>
-   * Note that the referenced element must already be part of the media package,
-   * otherwise a <code>MediaPackageException</code> will be thrown as the object
-   * holding this reference is added to the media package.
+   * Note that the referenced element must already be part of the media package, otherwise a
+   * <code>MediaPackageException</code> will be thrown as the object holding this reference is added to the media
+   * package.
    * 
    * @param mediaPackageElement
    *          the media package element to refer to
@@ -90,8 +90,7 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
   }
 
   /**
-   * Creates a reference to the entity identified by <code>type</code> and
-   * <code>identifier</code>.
+   * Creates a reference to the entity identified by <code>type</code> and <code>identifier</code>.
    * 
    * @param type
    *          the reference type
@@ -189,8 +188,7 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.media.mediapackage.MediaPackageReference#setProperty(java.lang.String,
-   *      java.lang.String)
+   * @see org.opencastproject.media.mediapackage.MediaPackageReference#setProperty(java.lang.String, java.lang.String)
    */
   @Override
   public void setProperty(String key, String value) {
@@ -205,17 +203,17 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
   public boolean matches(MediaPackageReference reference) {
     if (reference == null)
       return false;
-    
+
     // type
     if (!type.equals(reference.getType()))
       return false;
-    
+
     // properties
     if (properties != null && !properties.equals(reference.getProperties()))
       return false;
     else if (reference.getProperties() != null && !reference.getProperties().equals(properties))
       return false;
-    
+
     // identifier
     if (identifier.equals(reference.getIdentifier()))
       return true;
@@ -225,6 +223,18 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
       return true;
 
     return false;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#clone()
+   */
+  @Override
+  public Object clone() {
+    MediaPackageReferenceImpl clone = new MediaPackageReferenceImpl(type, identifier);
+    clone.getProperties().putAll(properties);
+    return clone;
   }
 
   /**

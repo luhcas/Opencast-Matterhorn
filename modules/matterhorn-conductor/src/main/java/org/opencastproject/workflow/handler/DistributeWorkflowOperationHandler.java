@@ -105,13 +105,15 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
         MediaPackageElement[] elts = currentMediaPackage.getElementsByTag(tag);
         for (MediaPackageElement e : elts) {
           if (elementIds.add(e.getIdentifier())) {
-            logger.info("Distributing '{}'to the local repository", e.getIdentifier(), currentMediaPackage);
+            logger.info("Distributing '{}' to the local repository", e.getIdentifier(), currentMediaPackage);
           }
         }
       }
 
       // Also distribute all of the metadata catalogs
       for(Catalog c : clone.getCatalogs()) elementIds.add(c.getIdentifier());
+      
+      // Finally, push the elements to the distribution channel
       try {
         resultingMediaPackage = distributionService.distribute(clone, elementIds.toArray(new String[elementIds.size()]));
       } catch(DistributionException e) {

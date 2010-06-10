@@ -129,8 +129,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
     for(String t : cat.getTags()) tags.add(t);
     this.flavor = Mpeg7Catalog.FLAVOR;
     if (cat.getReference() != null) {
-      this.reference = new MediaPackageReferenceImpl(cat.getReference().getType(), cat.getReference().getIdentifier());
-      this.reference.getProperties().putAll(cat.getReference().getProperties());
+      this.reference = (MediaPackageReferenceImpl)cat.getReference().clone();
     }
   }
 

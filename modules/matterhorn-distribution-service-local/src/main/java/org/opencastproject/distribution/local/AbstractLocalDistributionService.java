@@ -20,7 +20,6 @@ import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
 import org.opencastproject.media.mediapackage.MediaPackageReference;
-import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -88,20 +87,24 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
           FileSupport.copy(sourceFile, destination);
 
           // Create a representation of the distributed file in the mediapackage
-          MediaPackageElement clone = (MediaPackageElement) element.clone();
-          clone.setURI(getDistributionUri(element));
-          clone.setIdentifier(null);
-          clone.clearTags();
+          MediaPackageElement distributedElement = (MediaPackageElement) element.clone();
+          distributedElement.setURI(getDistributionUri(element));
+          distributedElement.setIdentifier(null);
+          distributedElement.clearTags();
 
           MediaPackageReference ref = element.getReference();
           if (ref != null && mediaPackage.getElementByReference(ref) != null) {
-            clone.setReference(ref);
-            mediaPackage.add(clone);
+            distributedElement.setReference((MediaPackageReference)ref.clone());
+            mediaPackage.add(distributedElement);
           } else {
-            mediaPackage.addDerived(clone, element);
+            mediaPackage.addDerived(distributedElement, element);
+            if (ref != null) {
+              Map<String, String> props = ref.getProperties();
+              distributedElement.getReference().getProperties().putAll(props);
+            }
           }
 
-          mappings.put(element, clone);
+          mappings.put(element, distributedElement);
         }
       }
 
@@ -128,10 +131,7 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
         MediaPackageElement oldReference = mediaPackage.getElementByReference(ref);
         MediaPackageElement newReference = mappings.get(oldReference);
         if (newReference != null) {
-          MediaPackageReference newRef = new MediaPackageReferenceImpl(newReference);
-          for (Map.Entry<String, String> entry : ref.getProperties().entrySet()) {
-            newRef.setProperty(entry.getKey(), entry.getValue());
-          }
+          MediaPackageReference newRef = (MediaPackageReference)newReference.clone();
           clone.setReference(newRef);
         }
       }

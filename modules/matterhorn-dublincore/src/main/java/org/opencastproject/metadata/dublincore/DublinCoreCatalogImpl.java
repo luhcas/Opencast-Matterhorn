@@ -20,6 +20,7 @@ import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.EName;
 import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.media.mediapackage.XMLCatalogImpl;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.Checksum;
@@ -182,7 +183,9 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
     for (String t : cat.getTags())
       tags.add(t);
     this.flavor = cat.getFlavor();
-    this.reference = cat.getReference();
+    if (cat.getReference() != null) {
+      this.reference = (MediaPackageReferenceImpl)cat.getReference().clone();
+    }
     this.isLoaded = false;
   }
 
