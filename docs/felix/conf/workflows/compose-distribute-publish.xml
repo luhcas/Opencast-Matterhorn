@@ -112,6 +112,20 @@
         <configuration key="encoding-profile">flash.http</configuration>
       </configurations>
     </operation>
+    
+    <operation
+      id="compose"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encode presenter audio to Flash download">
+      <configurations>
+        <configuration key="source-audio-flavor">*/source</configuration>
+        <configuration key="source-video-flavor">*/source</configuration>
+        <configuration key="target-flavor">presenter/delivery</configuration>
+        <configuration key="target-tags">engage, rss, atom</configuration>
+        <configuration key="encoding-profile">mp3.http</configuration>
+      </configurations>
+    </operation>
 
     <!-- encode to quicktime download -->
 
@@ -294,28 +308,28 @@
     </operation>
 
     <!-- Run text analysis -->
-    <operation
-      id="textanalysis"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Extracts text from presenter segments">
-      <configurations>
-        <configuration key="source-flavor">presenter/source</configuration>
-        <configuration key="source-tags"></configuration>
-        <configuration key="target-tags">engage</configuration>
-      </configurations>
-    </operation>
-    <operation
-      id="textanalysis"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Extracts text from presentation segments">
-      <configurations>
-        <configuration key="source-flavor">presentation/source</configuration>
-        <configuration key="source-tags"></configuration>
-        <configuration key="target-tags">engage</configuration>
-      </configurations>
-    </operation>
+<!--    <operation-->
+<!--      id="textanalysis"-->
+<!--      fail-on-error="true"-->
+<!--      exception-handler-workflow="error"-->
+<!--      description="Extracts text from presenter segments">-->
+<!--      <configurations>-->
+<!--        <configuration key="source-flavor">presenter/source</configuration>-->
+<!--        <configuration key="source-tags"></configuration>-->
+<!--        <configuration key="target-tags">engage</configuration>-->
+<!--      </configurations>-->
+<!--    </operation>-->
+<!--    <operation-->
+<!--      id="textanalysis"-->
+<!--      fail-on-error="true"-->
+<!--      exception-handler-workflow="error"-->
+<!--      description="Extracts text from presentation segments">-->
+<!--      <configurations>-->
+<!--        <configuration key="source-flavor">presentation/source</configuration>-->
+<!--        <configuration key="source-tags"></configuration>-->
+<!--        <configuration key="target-tags">engage</configuration>-->
+<!--      </configurations>-->
+<!--    </operation>-->
     
     <operation
       id="distribute-download"
