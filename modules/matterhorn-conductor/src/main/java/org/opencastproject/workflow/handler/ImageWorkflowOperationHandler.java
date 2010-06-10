@@ -140,27 +140,17 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
       throw new IllegalStateException("Encoding profile '" + encodingProfileName + "' was not found");
 
     Set<String> sourceTagSet = null;
-    if(StringUtils.trimToNull(sourceTags) != null) {
+    if (sourceTags != null) {
       sourceTagSet = new HashSet<String>();
       sourceTagSet.addAll(Arrays.asList(sourceTags.split("\\W")));
     }
 
-    // Select the tracks based on the flavors
+    // Select the tracks based on source flavors and tags
     Set<Track> videoTracks = new HashSet<Track>();
     for(Track track : mediaPackage.getTracks()) {
-      if(sourceVideoFlavor == null || (track.getFlavor() != null && sourceVideoFlavor.equals(track.getFlavor().toString()))) {
-        if (!track.hasVideo())
-          continue;
-        if(sourceTags == null) {
+      if (sourceVideoFlavor == null || (track.getFlavor() != null && sourceVideoFlavor.equals(track.getFlavor().toString()))) {
+        if (track.hasVideo() && track.containsTag(sourceTagSet)) {
           videoTracks.add(track);
-          continue;
-        } else {
-          for(String tag : track.getTags()) {
-            if(sourceTagSet.contains(tag)) {
-              videoTracks.add(track);
-              continue;
-            }
-          }
         }
       }
     }
@@ -169,38 +159,38 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
       logger.debug("Mediapackage {} has no suitable tracks to extract images based on tags {} and flavor {}",
               new Object[] {mediaPackage, sourceTags, sourceVideoFlavor});
       return mediaPackage;
-    } else {
-      for (Track t : videoTracks) {
-        if (t.hasVideo()) {
-          // take the minimum of the specified time and the video track duration
-          long time = Math.min(Long.parseLong(timeConfiguration), t.getDuration()/1000L);
-          
-          Receipt receipt = composerService.image(mediaPackage, t.getIdentifier(), profile.getIdentifier(), time, true);
-          Attachment composedImage = (Attachment)receipt.getElement();
-          if (composedImage == null)
-            throw new RuntimeException("unable to compose image");
+    }
 
-          // Add the flavor, either from the operation configuration or from the composer
-          if (targetImageFlavor != null)
-            composedImage.setFlavor(MediaPackageElementFlavor.parseFlavor(targetImageFlavor));
-          logger.debug("image has flavor '{}'", composedImage.getFlavor());
+    for (Track t : videoTracks) {
+      // take the minimum of the specified time and the video track duration
+      long time = Math.min(Long.parseLong(timeConfiguration), t.getDuration()/1000L);
+      
+      Receipt receipt = composerService.image(mediaPackage, t.getIdentifier(), profile.getIdentifier(), time, true);
+      Attachment composedImage = (Attachment)receipt.getElement();
+      if (composedImage == null)
+        throw new RuntimeException("Composer service did not return an image");
 
-          // Set the mimetype
-          if (profile.getMimeType() != null)
-            composedImage.setMimeType(MimeTypes.parseMimeType(profile.getMimeType()));
-          
-          // Add tags
-          if (targetImageTags != null) {
-            for (String tag : targetImageTags.split("\\W")) {
-              logger.trace("Tagging image with '{}'", tag);
-              if(StringUtils.trimToNull(tag) != null) composedImage.addTag(tag);
-            }
-          }
-          // store new image in the mediaPackage
-          mediaPackage.addDerived(composedImage, t);
+      // Add the flavor, either from the operation configuration or from the composer
+      if (targetImageFlavor != null)
+        composedImage.setFlavor(MediaPackageElementFlavor.parseFlavor(targetImageFlavor));
+      logger.debug("image has flavor '{}'", composedImage.getFlavor());
+
+      // Set the mimetype
+      if (profile.getMimeType() != null)
+        composedImage.setMimeType(MimeTypes.parseMimeType(profile.getMimeType()));
+      
+      // Add tags
+      if (targetImageTags != null) {
+        for (String tag : targetImageTags.split("\\W")) {
+          logger.trace("Tagging image with '{}'", tag);
+          if (StringUtils.trimToNull(tag) != null) composedImage.addTag(tag);
         }
       }
+      // store new image in the mediaPackage
+      mediaPackage.addDerived(composedImage, t);
     }
+
     return mediaPackage;
   }
+
 }

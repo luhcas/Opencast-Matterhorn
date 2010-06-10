@@ -130,18 +130,6 @@ public class AttachmentImpl extends AbstractMediaPackageElement implements Attac
     return node;
   }
 
-  /**
-   * @see org.opencastproject.media.mediapackage.AbstractMediaPackageElement#toString()
-   */
-  @Override
-  public String toString() {
-    StringBuffer buf = new StringBuffer("attachment");
-    if (getIdentifier() != null) {
-      buf.append(" '").append(getIdentifier()).append("'");
-    }
-    return buf.toString();
-  }
-
   public static class Adapter extends XmlAdapter<AttachmentImpl, Attachment> {
     public AttachmentImpl marshal(Attachment mp) throws Exception {return (AttachmentImpl)mp;}
     public Attachment unmarshal(AttachmentImpl mp) throws Exception {return mp;}

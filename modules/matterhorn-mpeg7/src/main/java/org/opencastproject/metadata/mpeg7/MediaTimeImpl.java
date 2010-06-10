@@ -101,8 +101,10 @@ public class MediaTimeImpl implements MediaTime {
    */
   public Node toXml(Document document) {
     Element node = document.createElement("MediaTime");
-    node.appendChild(mediaTimePoint.toXml(document));
-    node.appendChild(mediaDuration.toXml(document));
+    if (mediaTimePoint != null)
+      node.appendChild(mediaTimePoint.toXml(document));
+    if (mediaDuration != null)
+      node.appendChild(mediaDuration.toXml(document));
     return node;
   }
 

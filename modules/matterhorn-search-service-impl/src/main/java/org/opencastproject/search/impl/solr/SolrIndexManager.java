@@ -288,7 +288,7 @@ public class SolrIndexManager {
     SolrUpdateableInputDocument solrSeriesDocument = new SolrUpdateableInputDocument();
 
     // Check if there is a dublin core for series
-    if (!mediaPackage.hasCatalogs(MediaPackageElements.DUBLINCORE_SERIES)) {
+    if (mediaPackage.getCatalogs(MediaPackageElements.DUBLINCORE_SERIES).length == 0) {
       log_.debug("No series dublincore found in media package " + mediaPackage);
       return null;
     }

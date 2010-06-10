@@ -205,14 +205,25 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
   public boolean matches(MediaPackageReference reference) {
     if (reference == null)
       return false;
+    
+    // type
     if (!type.equals(reference.getType()))
       return false;
+    
+    // properties
+    if (properties != null && !properties.equals(reference.getProperties()))
+      return false;
+    else if (reference.getProperties() != null && !reference.getProperties().equals(properties))
+      return false;
+    
+    // identifier
     if (identifier.equals(reference.getIdentifier()))
       return true;
     else if (identifier.equals("*") || reference.getIdentifier().equals("*"))
       return true;
     else if (identifier.equals("self") || reference.getIdentifier().equals("self"))
       return true;
+
     return false;
   }
 

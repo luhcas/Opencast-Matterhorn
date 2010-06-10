@@ -237,6 +237,8 @@ public class SegmentImpl implements Segment, AudioSegment, VideoSegment, AudioVi
     Element node = document.createElement(type.toString());
     node.setAttribute("id", id);
     node.appendChild(mediaTime.toXml(document));
+    if (spatioTemporalDecomposition != null)
+      node.appendChild(spatioTemporalDecomposition.toXml(document));
     for (TextAnnotation annotation : annotations) {
       node.appendChild(annotation.toXml(document));
     }

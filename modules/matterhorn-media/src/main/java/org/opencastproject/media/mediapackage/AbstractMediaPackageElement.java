@@ -18,8 +18,6 @@ package org.opencastproject.media.mediapackage;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -29,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.net.URI;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -50,7 +49,6 @@ import javax.xml.bind.annotation.XmlTransient;
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class AbstractMediaPackageElement implements
         MediaPackageElement, Serializable {
-  private static final Logger logger = LoggerFactory.getLogger(AbstractMediaPackageElement.class);
   
   /** Serial version uid */
   private static final long serialVersionUID = 1L;
@@ -221,6 +219,21 @@ public abstract class AbstractMediaPackageElement implements
     return tags.contains(tag);
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.media.mediapackage.MediaPackageElement#containsTag(java.util.Set)
+   */
+  @Override
+  public boolean containsTag(Set<String> tags) {
+    if (tags == null || tags.size() == 0)
+      return true;
+    for (String tag : tags) {
+      if (containsTag(tag))
+        return true;
+    }
+    return false;
+  }
+  
   /**
    * {@inheritDoc}
    * 

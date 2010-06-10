@@ -233,7 +233,8 @@ public class VideoTextImpl implements VideoText {
       videoText.setAttribute("fontType", fontType);
 
     // Media locator
-    videoText.appendChild(locator.toXml(document));
+    if (locator != null)
+      videoText.appendChild(locator.toXml(document));
 
     // Boundary
     Element temporalMask = document.createElement("SpatioTemporalMask");

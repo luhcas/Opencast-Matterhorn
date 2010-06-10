@@ -74,7 +74,7 @@ public class PublishWorkflowOperationHandlerTest {
     workflowInstance.next(); // Simulate starting the workflow
 
     // mock Search service, ensuring the correct media package is distributed to search service
-    SearchService searchService = EasyMock.createStrictMock(SearchService.class);
+    SearchService searchService = EasyMock.createNiceMock(SearchService.class);
     searchService.add(eqMediaPackage(mpSearch));
     EasyMock.replay(searchService);
     operationHandler.setSearchService(searchService);

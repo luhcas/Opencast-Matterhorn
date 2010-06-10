@@ -324,18 +324,34 @@ final class ManifestImpl {
    *          the reference
    * @return the tracks
    */
-  Track[] getTracks(MediaPackageReference reference) {
+  Track[] getTracks(MediaPackageReference reference, boolean includeDerived) {
     if (reference == null)
       throw new IllegalArgumentException("Unable to filter by null reference");
 
     // Go through tracks and remove those that don't match
     Collection<Track> tracks = loadTracks();
     List<Track> candidates = new ArrayList<Track>(tracks);
-    for (Track a : tracks) {
-      if (!reference.matches(a.getReference())) {
-        candidates.remove(a);
+    for (Track t : tracks) {
+      MediaPackageReference r = t.getReference();
+      if (!reference.matches(r)) {
+        boolean indirectHit = false;
+        
+        // Create a reference that will match regardless of properties
+        MediaPackageReference elementRef = new MediaPackageReferenceImpl(reference.getType(), reference.getIdentifier());
+
+        // Try to find a derived match if possible
+        while (includeDerived && (r = getElement(r).getReference()) != null) {
+          if (r.matches(elementRef)) {
+            indirectHit = true;
+            break;
+          }
+        }
+        
+        if (!indirectHit)
+          candidates.remove(t);
       }
-    }
+    }    
+    
     return candidates.toArray(new Track[candidates.size()]);
   }
 
@@ -372,29 +388,6 @@ final class ManifestImpl {
    */
   boolean hasTracks() {
     return tracks > 0;
-  }
-
-  /**
-   * Returns <code>true</code> if the media package contains tracks of any kind.
-   * 
-   * @return <code>true</code> if the media package contains matching tracks
-   */
-  boolean hasTracks(MediaPackageElementFlavor flavor) {
-    if (flavor == null)
-      throw new IllegalArgumentException("Unable to filter by null criterion");
-    return getTracks(flavor).length > 0;
-  }
-
-  /**
-   * Returns <code>true</code> if the media package contains tracks with a matching reference.
-   * 
-   * @return <code>true</code> if the media package contains matching tracks
-   */
-  boolean hasTracks(MediaPackageReference reference) {
-    if (reference == null)
-      throw new IllegalArgumentException("Unable to filter by null reference");
-    else
-      return getTracks(reference).length > 0;
   }
 
   /**
@@ -448,7 +441,7 @@ final class ManifestImpl {
     }
     return result.toArray(new Attachment[result.size()]);
   }
-
+  
   /**
    * Returns the media package's attachments.
    * 
@@ -488,7 +481,7 @@ final class ManifestImpl {
    *          the reference
    * @return the attachments
    */
-  Attachment[] getAttachments(MediaPackageReference reference) {
+  Attachment[] getAttachments(MediaPackageReference reference, boolean includeDerived) {
     if (reference == null)
       throw new IllegalArgumentException("Unable to filter by null reference");
 
@@ -496,11 +489,81 @@ final class ManifestImpl {
     Collection<Attachment> attachments = loadAttachments();
     List<Attachment> candidates = new ArrayList<Attachment>(attachments);
     for (Attachment a : attachments) {
-      if (!reference.matches(a.getReference())) {
-        candidates.remove(a);
+      MediaPackageReference r = a.getReference();
+      if (!reference.matches(r)) {
+        boolean indirectHit = false;
+        
+        // Create a reference that will match regardless of properties
+        MediaPackageReference elementRef = new MediaPackageReferenceImpl(reference.getType(), reference.getIdentifier());
+
+        // Try to find a derived match if possible
+        while (includeDerived && (r = getElement(r).getReference()) != null) {
+          if (r.matches(elementRef)) {
+            indirectHit = true;
+            break;
+          }
+        }
+        
+        if (!indirectHit)
+          candidates.remove(a);
       }
     }
     return candidates.toArray(new Attachment[candidates.size()]);
+  }
+
+  /**
+   * Returns the media package element that matches the given reference.
+   * 
+   * @param reference the reference
+   * @return the element
+   */
+  MediaPackageElement getElement(MediaPackageReference reference) {
+    if (reference == null)
+      return null;
+    for (MediaPackageElement e : elements) {
+      if (e.getIdentifier().equals(reference.getIdentifier()))
+        return e;
+    }
+    return null;
+  }
+
+  /**
+   * Returns the media package elements that contain the specified reference.
+   * 
+   * @param reference
+   *          the reference
+   * @return the tracks
+   */
+  MediaPackageElement[] getElements(MediaPackageReference reference, boolean includeDerived) {
+    if (reference == null)
+      throw new IllegalArgumentException("Unable to filter by null reference");
+
+    // Go through tracks and remove those that don't match
+    Collection<MediaPackageElement> elements = new ArrayList<MediaPackageElement>();
+    elements.addAll(this.elements);
+    List<MediaPackageElement> candidates = new ArrayList<MediaPackageElement>(tracks);
+    for (MediaPackageElement e : elements) {
+      MediaPackageReference r = e.getReference();
+      if (!reference.matches(r)) {
+        boolean indirectHit = false;
+        
+        // Create a reference that will match regardless of properties
+        MediaPackageReference elementRef = new MediaPackageReferenceImpl(reference.getType(), reference.getIdentifier());
+
+        // Try to find a derived match if possible
+        while (includeDerived && (r = getElement(r).getReference()) != null) {
+          if (r.matches(elementRef)) {
+            indirectHit = true;
+            break;
+          }
+        }
+        
+        if (!indirectHit)
+          candidates.remove(e);
+      }
+    }    
+    
+    return candidates.toArray(new MediaPackageElement[candidates.size()]);
   }
 
   /**
@@ -536,29 +599,6 @@ final class ManifestImpl {
    */
   boolean hasAttachments() {
     return attachments > 0;
-  }
-
-  /**
-   * Returns <code>true</code> if the media package contains attachments of any kind.
-   * 
-   * @return <code>true</code> if the media package contains matching attachments
-   */
-  boolean hasAttachments(MediaPackageElementFlavor flavor) {
-    if (flavor == null)
-      throw new IllegalArgumentException("Unable to filter by null criterion");
-    return getAttachments(flavor).length > 0;
-  }
-
-  /**
-   * Returns <code>true</code> if the media package contains attachments with a matching reference.
-   * 
-   * @return <code>true</code> if the media package contains matching attachments
-   */
-  boolean hasAttachments(MediaPackageReference reference) {
-    if (reference == null)
-      throw new IllegalArgumentException("Unable to filter by null reference");
-    else
-      return getAttachments(reference).length > 0;
   }
 
   /**
@@ -652,7 +692,7 @@ final class ManifestImpl {
    *          the reference
    * @return the catalogs
    */
-  Catalog[] getCatalogs(MediaPackageReference reference) {
+  Catalog[] getCatalogs(MediaPackageReference reference, boolean includeDerived) {
     if (reference == null)
       throw new IllegalArgumentException("Unable to filter by null reference");
 
@@ -660,10 +700,26 @@ final class ManifestImpl {
     Collection<Catalog> catalogs = loadCatalogs();
     List<Catalog> candidates = new ArrayList<Catalog>(catalogs);
     for (Catalog c : catalogs) {
-      if (!reference.matches(c.getReference())) {
-        candidates.remove(c);
+      MediaPackageReference r = c.getReference();
+      if (!reference.matches(r)) {
+        boolean indirectHit = false;
+        
+        // Create a reference that will match regardless of properties
+        MediaPackageReference elementRef = new MediaPackageReferenceImpl(reference.getType(), reference.getIdentifier());
+
+        // Try to find a derived match if possible
+        while (includeDerived && (r = getElement(r).getReference()) != null) {
+          if (r.matches(elementRef)) {
+            indirectHit = true;
+            break;
+          }
+        }
+        
+        if (!indirectHit)
+          candidates.remove(c);
       }
     }
+    
     return candidates.toArray(new Catalog[candidates.size()]);
   }
 
@@ -700,29 +756,6 @@ final class ManifestImpl {
    */
   boolean hasCatalogs() {
     return catalogs > 0;
-  }
-
-  /**
-   * Returns <code>true</code> if the media package contains catalogs of any kind.
-   * 
-   * @return <code>true</code> if the media package contains matching catalogs
-   */
-  boolean hasCatalogs(MediaPackageElementFlavor flavor) {
-    if (flavor == null)
-      throw new IllegalArgumentException("Unable to filter by null criterion");
-    return getCatalogs(flavor).length > 0;
-  }
-
-  /**
-   * Returns <code>true</code> if the media package contains catalogs with a matching reference.
-   * 
-   * @return <code>true</code> if the media package contains matching catalogs
-   */
-  boolean hasCatalogs(MediaPackageReference reference) {
-    if (reference == null)
-      throw new IllegalArgumentException("Unable to filter by null reference");
-    else
-      return getCatalogs(reference).length > 0;
   }
 
   /**

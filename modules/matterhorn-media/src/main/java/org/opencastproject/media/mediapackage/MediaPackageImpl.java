@@ -111,8 +111,8 @@ public final class MediaPackageImpl implements MediaPackage {
 
   static {
     try {
-      context = JAXBContext.newInstance("org.opencastproject.media.mediapackage:" +
-              "org.opencastproject.media.mediapackage.track", MediaPackageImpl.class.getClassLoader());
+      context = JAXBContext.newInstance("org.opencastproject.media.mediapackage:"
+              + "org.opencastproject.media.mediapackage.track", MediaPackageImpl.class.getClassLoader());
     } catch (JAXBException e) {
       throw new RuntimeException(e);
     }
@@ -136,8 +136,7 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Creates a new media media package derived from the given media media
-   * package catalog document.
+   * Creates a new media media package derived from the given media media package catalog document.
    * 
    * @param manifest
    *          the manifest
@@ -197,7 +196,7 @@ public final class MediaPackageImpl implements MediaPackage {
       } catch (Exception e) {
         log_.info("Unable to parse start time {}", startTime);
       }
-    }else{
+    } else {
       manifest.setStartDate(0);
     }
   }
@@ -222,17 +221,18 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#getElementByReference(org.opencastproject.media.mediapackage.MediaPackageReference)
    */
   public MediaPackageElement getElementByReference(MediaPackageReference reference) {
-    if (reference == null)
-      throw new IllegalArgumentException("Argument reference is null");
-    for (MediaPackageElement element : manifest.getEntries()) {
-      String elementType = element.getElementType().toString().toLowerCase();
-      String elementId = element.getIdentifier().toLowerCase();
-      String refType = reference.getType().toLowerCase();
-      String refId = reference.getIdentifier().toLowerCase();
-      if (elementType.equals(refType) && elementId.equals(refId))
-        return element;
-    }
-    return null;
+    MediaPackageElement[] e = getElementsByReference(reference, false);
+    return (e != null && e.length > 0) ? e[0] : null;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getElementsByReference(org.opencastproject.media.mediapackage.MediaPackageReference,
+   *      boolean)
+   */
+  public MediaPackageElement[] getElementsByReference(MediaPackageReference reference, boolean includeDerived) {
+    return manifest.getElements(reference, includeDerived);
   }
 
   /**
@@ -284,13 +284,11 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Returns <code>true</code> if the media package contains an element with the
-   * specified identifier.
+   * Returns <code>true</code> if the media package contains an element with the specified identifier.
    * 
    * @param identifier
    *          the identifier
-   * @return <code>true</code> if the media package contains an element with
-   *         this identifier
+   * @return <code>true</code> if the media package contains an element with this identifier
    */
   boolean contains(String identifier) {
     for (MediaPackageElement element : manifest.getEntries()) {
@@ -392,7 +390,18 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#getCatalogs(org.opencastproject.media.mediapackage.MediaPackageReference)
    */
   public Catalog[] getCatalogs(MediaPackageReference reference) {
-    return manifest.getCatalogs(reference);
+    return getCatalogs(reference, false);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getCatalogs(org.opencastproject.media.mediapackage.MediaPackageReference,
+   *      boolean)
+   */
+  @Override
+  public Catalog[] getCatalogs(MediaPackageReference reference, boolean includeDerived) {
+    return manifest.getCatalogs(reference, includeDerived);
   }
 
   /**
@@ -408,20 +417,6 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   public boolean hasCatalogs() {
     return manifest.hasCatalogs();
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#hasCatalogs(MediaPackageElementFlavor)
-   */
-  public boolean hasCatalogs(MediaPackageElementFlavor type, MediaPackageReference reference) {
-    return manifest.hasCatalogs(type, reference);
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#hasCatalogs(MediaPackageElementFlavor)
-   */
-  public boolean hasCatalogs(MediaPackageElementFlavor type) {
-    return manifest.hasCatalogs(type);
   }
 
   /**
@@ -476,7 +471,17 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#getTracks(org.opencastproject.media.mediapackage.MediaPackageReference)
    */
   public Track[] getTracks(MediaPackageReference reference) {
-    return manifest.getTracks(reference);
+    return getTracks(reference, false);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getTracks(org.opencastproject.media.mediapackage.MediaPackageReference,
+   *      boolean)
+   */
+  public Track[] getTracks(MediaPackageReference reference, boolean includeDerived) {
+    return manifest.getTracks(reference, includeDerived);
   }
 
   /**
@@ -492,13 +497,6 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   public boolean hasTracks() {
     return manifest.hasTracks();
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#hasTracks(MediaPackageElementFlavor)
-   */
-  public boolean hasTracks(MediaPackageElementFlavor type) {
-    return manifest.hasTracks(type);
   }
 
   /**
@@ -590,7 +588,18 @@ public final class MediaPackageImpl implements MediaPackage {
    * @see org.opencastproject.media.mediapackage.MediaPackage#getAttachments(org.opencastproject.media.mediapackage.MediaPackageReference)
    */
   public Attachment[] getAttachments(MediaPackageReference reference) {
-    return manifest.getAttachments(reference);
+    return getAttachments(reference, false);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.media.mediapackage.MediaPackage#getAttachments(org.opencastproject.media.mediapackage.MediaPackageReference,
+   *      boolean)
+   */
+  @Override
+  public Attachment[] getAttachments(MediaPackageReference reference, boolean includeDerived) {
+    return manifest.getAttachments(reference, includeDerived);
   }
 
   /**
@@ -606,13 +615,6 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   public boolean hasAttachments() {
     return manifest.hasAttachments();
-  }
-
-  /**
-   * @see org.opencastproject.media.mediapackage.MediaPackage#hasAttachments(MediaPackageElementFlavor)
-   */
-  public boolean hasAttachments(MediaPackageElementFlavor type) {
-    return manifest.hasAttachments(type);
   }
 
   /**
@@ -783,8 +785,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * {@inheritDoc}
    * 
    * @see org.opencastproject.media.mediapackage.MediaPackage#addDerived(org.opencastproject.media.mediapackage.MediaPackageElement,
-   *      org.opencastproject.media.mediapackage.MediaPackageElement,
-   *      java.util.Map)
+   *      org.opencastproject.media.mediapackage.MediaPackageElement, java.util.Map)
    */
   @Override
   public void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement,
@@ -872,8 +873,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Integrates the element into the media package. This mainly involves moving
-   * the element into the media package file structure.
+   * Integrates the element into the media package. This mainly involves moving the element into the media package file
+   * structure.
    * 
    * @param element
    *          the element to integrate
@@ -886,8 +887,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Integrates the catalog into the media package. This mainly involves moving
-   * the catalog into the media package file structure.
+   * Integrates the catalog into the media package. This mainly involves moving the catalog into the media package file
+   * structure.
    * 
    * @param catalog
    *          the catalog to integrate
@@ -905,8 +906,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Integrates the track into the media package. This mainly involves moving
-   * the track into the media package file structure.
+   * Integrates the track into the media package. This mainly involves moving the track into the media package file
+   * structure.
    * 
    * @param track
    *          the track to integrate
@@ -924,8 +925,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Integrates the attachment into the media package. This mainly involves
-   * moving the attachment into the media package file structure.
+   * Integrates the attachment into the media package. This mainly involves moving the attachment into the media package
+   * file structure.
    * 
    * @param attachment
    *          the attachment to integrate
@@ -943,9 +944,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * Returns a media package element identifier with the given prefix and the
-   * given number or a higher one as the suffix. The identifier will be unique
-   * within the media package.
+   * Returns a media package element identifier with the given prefix and the given number or a higher one as the
+   * suffix. The identifier will be unique within the media package.
    * 
    * @param prefix
    *          the identifier prefix
@@ -1064,8 +1064,7 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * A JAXB adapter that allows the {@link MediaPackage} interface to be
-   * un/marshalled
+   * A JAXB adapter that allows the {@link MediaPackage} interface to be un/marshalled
    */
   static class Adapter extends XmlAdapter<MediaPackageImpl, MediaPackage> {
     public MediaPackageImpl marshal(MediaPackage mp) throws Exception {
@@ -1080,8 +1079,7 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.media.mediapackage.MediaPackage#toXml(OutputStream,
-   *      boolean)
+   * @see org.opencastproject.media.mediapackage.MediaPackage#toXml(OutputStream, boolean)
    */
   @Override
   public void toXml(OutputStream out, boolean format) throws MediaPackageException {

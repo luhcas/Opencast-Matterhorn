@@ -198,7 +198,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
           videoSegment.setMediaTime(mediaTime);
 
           // Add the video text to the spacio temporal decomposition of the segment
-          SpatioTemporalDecomposition spatioTemporalDecomposition = videoSegment.getSpatioTemporalDecomposition();
+          SpatioTemporalDecomposition spatioTemporalDecomposition = videoSegment.createSpatioTemporalDecomposition(true, false);
           for (VideoText videoText : videoTexts) {
             spatioTemporalDecomposition.addVideoText(videoText);
           }

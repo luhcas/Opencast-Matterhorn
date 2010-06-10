@@ -18,6 +18,7 @@ package org.opencastproject.metadata.mpeg7;
 
 import org.opencastproject.media.mediapackage.Catalog;
 import org.opencastproject.media.mediapackage.CatalogImpl;
+import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeTypes;
@@ -127,7 +128,10 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
     this.tags = new TreeSet<String>();
     for(String t : cat.getTags()) tags.add(t);
     this.flavor = Mpeg7Catalog.FLAVOR;
-    this.reference = cat.getReference();
+    if (cat.getReference() != null) {
+      this.reference = new MediaPackageReferenceImpl(cat.getReference().getType(), cat.getReference().getIdentifier());
+      this.reference.getProperties().putAll(cat.getReference().getProperties());
+    }
   }
 
   /**
@@ -255,18 +259,6 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
             "http://www.w3.org/2001/XMLSchema-instance/");
     doc.appendChild(rootElement);
     return doc;
-  }
-
-  /**
-   * @see java.lang.Object#toString()
-   */
-  @Override
-  public String toString() {
-    StringBuffer buf = new StringBuffer("mpeg-7");
-    if (getIdentifier() != null) {
-      buf.append(" '").append(getIdentifier()).append("'");
-    }
-    return buf.toString();
   }
 
   /**

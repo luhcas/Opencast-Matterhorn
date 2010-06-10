@@ -240,18 +240,6 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
   // return super.clone();
   // }
 
-  /**
-   * @see java.lang.Object#toString()
-   */
-  @Override
-  public String toString() {
-    StringBuffer result = new StringBuffer("track");
-    if (getIdentifier() != null) {
-      result.append(" '").append(getIdentifier()).append("'");
-    }
-    return result.toString();
-  }
-
   public static class Adapter extends XmlAdapter<TrackImpl, Track> {
     public TrackImpl marshal(Track mp) throws Exception {return (TrackImpl)mp;}
     public Track unmarshal(TrackImpl mp) throws Exception {return mp;}

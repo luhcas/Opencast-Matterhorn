@@ -68,16 +68,8 @@ public abstract class AbstractMediaPackageElementSelector<T extends MediaPackage
           continue;
 
         // What about tags?
-        if (tags.size() > 0) {
-          boolean anyTag = false;
-          for (String tag : tags)
-            if (e.containsTag(tag)) {
-              anyTag = true;
-              break;
-            }
-          if (!anyTag)
-            continue;
-        }
+        if (!e.containsTag(tags))
+          continue;
 
         // Match!
         result.add((T) e);

@@ -20,6 +20,7 @@ import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 
 import java.net.URI;
+import java.util.Set;
 
 /**
  * All classes that will be part of a media package must implement this interface.
@@ -97,6 +98,16 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
   boolean containsTag(String tag);
 
   /**
+   * Returns <code>true</code> if the media package element contains at least one of the given tags. If there are no
+   * tags contained in the set, then the element is considered to match as well.
+   * 
+   * @param tags
+   *          the set of tag
+   * @return <code>true</code> if the element is tagged accordingly
+   */
+  boolean containsTag(Set<String> tags);
+
+  /**
    * Returns the tags for this media package element or an empty array if there are no tags.
    * 
    * @return the tags
@@ -105,7 +116,7 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
 
   /** Removes all tags associated with this element */
   void clearTags();
-  
+
   /**
    * Returns the media package if the element has been added, <code>null</code> otherwise.
    * 
@@ -119,7 +130,7 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
    * @return the reference
    */
   MediaPackageReference getReference();
-  
+
   /**
    * Sets the element reference.
    * 

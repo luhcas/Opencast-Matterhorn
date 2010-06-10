@@ -294,7 +294,6 @@
     </operation>
 
     <!-- Run text analysis -->
-    <!--  UNCOMMENT TO ACTIVATE
     <operation
       id="textanalysis"
       fail-on-error="true"
@@ -317,7 +316,6 @@
         <configuration key="target-tags">engage</configuration>
       </configurations>
     </operation>
-    -->
     
     <operation
       id="distribute-download"
