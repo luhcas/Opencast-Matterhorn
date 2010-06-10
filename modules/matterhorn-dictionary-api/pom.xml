@@ -26,6 +26,12 @@
       <artifactId>matterhorn-mpeg7</artifactId>
       <version>0.9-SNAPSHOT</version>
     </dependency>
+    
+    <dependency>
+    	<groupId>org.opencastproject</groupId>
+    	<artifactId>matterhorn-analysis-api</artifactId>
+    	<version>0.9-SNAPSHOT</version>
+    </dependency>
 
     <!--  Thirdparty dependencies -->
 
