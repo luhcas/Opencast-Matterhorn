@@ -25,6 +25,7 @@ import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
 import org.easymock.EasyMock;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -74,14 +75,13 @@ public class PublishWorkflowOperationHandlerTest {
     workflowInstance.next(); // Simulate starting the workflow
 
     // mock Search service, ensuring the correct media package is distributed to search service
-    SearchService searchService = EasyMock.createNiceMock(SearchService.class);
+    SearchService searchService = EasyMock.createMock(SearchService.class);
     searchService.add(eqMediaPackage(mpSearch));
     EasyMock.replay(searchService);
     operationHandler.setSearchService(searchService);
-
+    
     // Run the media package through the operation handler, ensuring that the flavors are retained
     operationHandler.start(workflowInstance);
-
   }
 
   // register custom matcher for media packages to EasyMock

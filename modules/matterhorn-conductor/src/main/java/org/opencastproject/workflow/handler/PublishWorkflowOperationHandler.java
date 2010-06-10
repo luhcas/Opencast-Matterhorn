@@ -17,6 +17,7 @@ package org.opencastproject.workflow.handler;
 
 import org.opencastproject.media.mediapackage.MediaPackage;
 import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.media.mediapackage.MediaPackageException;
 import org.opencastproject.media.mediapackage.MediaPackageReference;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -76,95 +77,109 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
     this.searchService = searchService;
   }
 
+  protected MediaPackage getMediaPackageForSearchIndex(MediaPackage current, Set<String> tags) throws MediaPackageException {
+    MediaPackage mp = (MediaPackage)current.clone();
+
+    Set<MediaPackageElement> keep = new HashSet<MediaPackageElement>();
+
+    // Check which tags have been configured
+    for (String tag : tags) {
+      keep.addAll(Arrays.asList(mp.getTracksByTag(tag)));
+      keep.addAll(Arrays.asList(mp.getAttachmentsByTag(tag)));
+      keep.addAll(Arrays.asList(mp.getCatalogsByTag(tag)));
+    }
+
+    // Mark everything that is set for removal
+    List<MediaPackageElement> removals = new ArrayList<MediaPackageElement>();
+    for (MediaPackageElement element : mp.getElements()) {
+      if(!keep.contains(element)) {
+        removals.add(element);
+      }
+    }
+
+    // Fix references and flavors
+    for (MediaPackageElement element : mp.getElements()) {
+      
+      // Clear the tags, we don't want them to show up outside of processing
+      element.clearTags();
+      
+      if (removals.contains(element))
+        continue;
+      
+      // Is the element referencing anything?
+      MediaPackageReference reference = element.getReference();
+      if (reference != null) {
+        Map<String, String> referenceProperties = reference.getProperties();
+        MediaPackageElement referencedElement = mp.getElementByReference(reference);
+        
+        // if we are distributing the referenced element, everything is fine. Otherwhise...
+        if (referencedElement != null && removals.contains(referencedElement)) {
+
+          // Follow the references until we find a flavor
+          MediaPackageElement parent = null;
+          while ((parent = current.getElementByReference(reference)) != null) {
+            if (parent.getFlavor() != null && element.getFlavor() == null) {
+              element.setFlavor(parent.getFlavor());
+            }
+            if (parent.getReference() == null)
+              break;
+            reference = parent.getReference();
+          }
+          
+          // Done. Let's cut the path but keep references to the mediapackage itself
+          if (reference != null && reference.getType().equals(MediaPackageReference.TYPE_MEDIAPACKAGE))
+            element.setReference(reference);
+          else if (reference != null && (referenceProperties == null || referenceProperties.size() == 0))
+            element.clearReference();
+          else {
+            // Ok, there is more to that reference than just pointing at an element. Let's keep the original,
+            // you never know.
+            removals.remove(referencedElement);
+            referencedElement.setURI(null);
+            referencedElement.setChecksum(null);
+          }
+        }
+      }
+    }
+    
+    // Remove everything we don't want to add to publish
+    for (MediaPackageElement element : removals) {
+      mp.remove(element);
+    }
+    return mp;
+  }
+  
   /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    MediaPackage mediaPackageFromWorkflow = workflowInstance.getMediaPackage();
+
+    // Check which tags have been configured
+    String tags = workflowInstance.getCurrentOperation().getConfiguration("source-tags");
+    if (StringUtils.trimToNull(tags) == null) {
+      logger.warn("No source tags have been specified, so nothing will be added to the search index");
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackageFromWorkflow, Action.CONTINUE);
+    }
+
+    Set<String> tagSet = new HashSet<String>();
+    for (String tag : tags.split("\\W")) {
+      if(StringUtils.trimToNull(tag) == null) continue;
+      tagSet.add(tag);
+    }
+
     try {
-      MediaPackage current = workflowInstance.getMediaPackage();
-      MediaPackage mp = (MediaPackage)current.clone();
-      logger.info("Publishing media package {} to search index", mp);
-
-      // Check which tags have been configured
-      String tags = workflowInstance.getCurrentOperation().getConfiguration("source-tags");
-      if (StringUtils.trimToNull(tags) == null) {
-        logger.warn("No tags have been specified");
-        return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, Action.CONTINUE);
+      MediaPackage mediaPackageForSearch = getMediaPackageForSearchIndex(mediaPackageFromWorkflow, tagSet);
+      if(mediaPackageForSearch == null) {
+        WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackageForSearch, Action.CONTINUE);
       }
-
-      // Look for elements matching any tag
-      Set<MediaPackageElement> keep = new HashSet<MediaPackageElement>();
-      for (String tag : tags.split("\\W")) {
-        if(StringUtils.trimToNull(tag) == null) continue;
-        keep.addAll(Arrays.asList(mp.getTracksByTag(tag)));
-        keep.addAll(Arrays.asList(mp.getAttachmentsByTag(tag)));
-        keep.addAll(Arrays.asList(mp.getCatalogsByTag(tag)));
-      }
-
-      // Mark everything that is set for removal
-      List<MediaPackageElement> removals = new ArrayList<MediaPackageElement>();
-      for (MediaPackageElement element : mp.getElements()) {
-        if(!keep.contains(element)) {
-          removals.add(element);
-        }
-      }
-
-      // Fix references and flavors
-      for (MediaPackageElement element : mp.getElements()) {
-        
-        // Clear the tags, we don't want them to show up outside of processing
-        element.clearTags();
-        
-        if (removals.contains(element))
-          continue;
-        
-        // Is the element referencing anything?
-        MediaPackageReference reference = element.getReference();
-        if (reference != null) {
-          Map<String, String> referenceProperties = reference.getProperties();
-          MediaPackageElement referencedElement = mp.getElementByReference(reference);
-          
-          // if we are distributing the referenced element, everything is fine. Otherwhise...
-          if (referencedElement != null && removals.contains(referencedElement)) {
-
-            // Follow the references until we find a flavor
-            MediaPackageElement parent = null;
-            while ((parent = current.getElementByReference(reference)) != null) {
-              if (parent.getFlavor() != null && element.getFlavor() == null) {
-                element.setFlavor(parent.getFlavor());
-              }
-              if (parent.getReference() == null)
-                break;
-              reference = parent.getReference();
-            }
-            
-            // Done. Let's cut the path but keep references to the mediapackage itself
-            if (reference != null && reference.getType().equals(MediaPackageReference.TYPE_MEDIAPACKAGE))
-              element.setReference(reference);
-            else if (reference != null && (referenceProperties == null || referenceProperties.size() == 0))
-              element.clearReference();
-            else {
-              // Ok, there is more to that reference than just pointing at an element. Let's keep the original,
-              // you never know.
-              removals.remove(referencedElement);
-              referencedElement.setURI(null);
-              referencedElement.setChecksum(null);
-            }
-          }
-        }
-      }
-      
-      // Remove everything we don't want to add to publish
-      for (MediaPackageElement element : removals) {
-        mp.remove(element);
-      }
-
+      logger.info("Publishing media package {} to search index", mediaPackageForSearch);
       // adding media package to the search index
-      searchService.add(mp);
+      searchService.add(mediaPackageForSearch);
       logger.debug("Publish operation complete");
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(current, Action.CONTINUE);
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackageFromWorkflow, Action.CONTINUE);
     } catch (Throwable t) {
       throw new WorkflowOperationException(t);
     }

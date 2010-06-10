@@ -51,7 +51,7 @@ public class MediaPackageEquals implements IArgumentMatcher {
 
   public void appendTo(StringBuffer buffer) {
     buffer.append("eqMediaPackage(\"");
-    buffer.append(expected.getIdentifier().compact());
+    buffer.append(expected.getIdentifier());
     buffer.append("\")");
   }
 }
