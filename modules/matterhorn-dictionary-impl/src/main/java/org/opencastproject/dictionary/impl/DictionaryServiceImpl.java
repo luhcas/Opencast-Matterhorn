@@ -118,43 +118,43 @@ public class DictionaryServiceImpl implements DictionaryService {
   @Override
   public String[] getLanguages(String word) {
     // TODO Auto-generated method stub
-    return null;
+    return new String[]{"en", "sl"};
   }
 
   @Override
   public Integer getWordCount(String word, String language) {
     // TODO Auto-generated method stub
-    return null;
+    return 42;
   }
 
   @Override
   public double getWordWeight(String word, String language) {
     // TODO Auto-generated method stub
-    return 0;
+    return 0.0042;
   }
 
   @Override
   public Boolean isStopWord(String word) {
     // TODO Auto-generated method stub
-    return null;
+    return false;
   }
 
   @Override
   public Boolean isStopWord(String word, String language) {
     // TODO Auto-generated method stub
-    return null;
+    return false;
   }
 
   @Override
   public Boolean isWord(String word) {
     // TODO Auto-generated method stub
-    return null;
+    return true;
   }
 
   @Override
   public Boolean isWord(String word, String language) {
     // TODO Auto-generated method stub
-    return null;
+    return true;
   }
 
 }
