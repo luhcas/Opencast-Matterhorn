@@ -26,7 +26,7 @@
                     <tr class="highlightable">
                         <td>
                           <a title="Confidence Monitoring">
-                            <xsl:attribute name="href">http://<xsl:value-of select="url" />/confidence-monitoring/index.html</xsl:attribute>
+                            <xsl:attribute name="href"><xsl:value-of select="url" />/confidence-monitoring/index.html</xsl:attribute>
                             <xsl:value-of select="name" />
                           </a>
                         </td>
