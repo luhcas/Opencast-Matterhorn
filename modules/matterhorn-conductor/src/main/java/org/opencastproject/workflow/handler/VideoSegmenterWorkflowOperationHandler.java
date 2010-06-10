@@ -62,7 +62,7 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
   private static final Logger logger = LoggerFactory.getLogger(VideoSegmenterWorkflowOperationHandler.class);
   
   /** Name of the configuration key that specifies the flavor of the track to analyze */ 
-  private static final String PROP_ANALYSIS_TRACK_FLAVOR = "analysis.track.flavor";
+  private static final String PROP_ANALYSIS_TRACK_FLAVOR = "source-flavor";
 
   /** The configuration options for this handler */
   private static final SortedMap<String, String> CONFIG_OPTIONS;
