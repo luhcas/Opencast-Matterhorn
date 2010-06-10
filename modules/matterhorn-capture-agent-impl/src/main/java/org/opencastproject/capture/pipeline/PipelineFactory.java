@@ -423,6 +423,11 @@ public class PipelineFactory {
       enc = ElementFactory.make("ffenc_mpeg2video", null);
     }
     
+    // Must set H.264 encoding to use constant quantizer or else it will not start
+    // Pass 0 is CBR (default), Pass 4 is constant quantizer, Pass 4 is constant quality
+    if (codec.equalsIgnoreCase("x264enc"))
+      enc.set("pass", "4");
+    
     if (container != null) {
       logger.debug("{} muxing to: {}", captureDevice.getName(), container);
       muxer = ElementFactory.make(container, null);
@@ -434,7 +439,7 @@ public class PipelineFactory {
     Element filesink = ElementFactory.make("filesink", null);
 
     v4lsrc.set("device", captureDevice.getLocation());
-    filter.setCaps(Caps.fromString("video/x-raw-yuv,width=1024,height=768,framerate=30/1"));
+    filter.setCaps(Caps.fromString("video/x-raw-yuv"));
     filesink.set("location", captureDevice.getOutputPath());
     if (bitrate != null) {
       logger.debug("{} bitrate set to: {}", captureDevice.getName(), bitrate);      
