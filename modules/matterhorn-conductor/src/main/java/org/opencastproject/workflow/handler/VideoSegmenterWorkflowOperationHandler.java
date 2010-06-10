@@ -144,6 +144,7 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
       }
       mpeg7 = new Mpeg7CatalogImpl((Catalog)receipt.getElement());
       mpeg7.setTrustedHttpClient(trustedHttpClient);
+      mpeg7.setFlavor(MediaPackageElements.SEGMENTS_FLAVOR);
       mediaPackage.add(mpeg7);
     } catch (Exception e) {
       throw new WorkflowOperationException(e);
