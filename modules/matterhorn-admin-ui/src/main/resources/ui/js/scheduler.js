@@ -18,6 +18,7 @@
 var SCHEDULER_URL     = '/scheduler/rest';
 var WORKFLOW_URL      = '/workflow/rest';
 var CAPTURE_ADMIN_URL = '/capture-admin/rest';
+var SERIES_URL        = '/series/rest';
 
 /* @namespace Scheduluer Form Namespace */
 var SchedulerForm     = SchedulerForm || {};
@@ -115,6 +116,14 @@ function init() {
       }
       return true;
     });
+  
+  $('#series_select').autocomplete({
+    source: SERIES_URL + '/search',
+    select: function(event, ui){
+      $("#series").val(ui.item.id);
+    },
+    minLength: 3
+  });
   
   $('#submitButton').click(SchedulerUI.submitForm);
   $('#cancelButton').click(SchedulerUI.cancelForm);
@@ -431,7 +440,7 @@ SchedulerUI.selectRecordingType = function(recType){
       'title':                new FormField('title', true),
       'creator':              new FormField('creator'),
       'contributor':          new FormField('contributor'),
-      'series-id':            new FormField('series', true),
+      'series-id':            new FormField(['series_select', 'series'], true, { dispValue: getSeriesDisplay, getValue: getSeriesValue }),
       'subject':              new FormField('subject'),
       'language':             new FormField('language'),
       'abstract':             new FormField('description'),
@@ -490,7 +499,7 @@ SchedulerUI.selectRecordingType = function(recType){
       'title':            new FormField('title', true),
       'creator':          new FormField('creator'),
       'contributor':      new FormField('contributor'),
-      'series-id':        new FormField('series'),
+      'series-id':        new FormField(['series_select', 'series'], false, { dispValue: getSeriesDisplay, getValue: getSeriesValue }),
       'subject':          new FormField('subject'),
       'language':         new FormField('language'),
       'abstract':         new FormField('description'),
@@ -1395,4 +1404,18 @@ function checkRecurAgent() {
     return true;
   }
   return false;
+}
+
+function getSeriesValue(){
+  if(this.fields.series){
+    this.value = this.fields.series.val();
+  }
+  return this.value;
+}
+
+function getSeriesDisplay() {
+  if(this.fields.series_select){
+    return this.fields.series_select.val();
+  }
+  return this.getValue();
 }
