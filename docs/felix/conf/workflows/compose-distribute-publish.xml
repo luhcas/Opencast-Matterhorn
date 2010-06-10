@@ -293,6 +293,32 @@
       </configurations>
     </operation>
 
+    <!-- Run text analysis -->
+    <!--  UNCOMMENT TO ACTIVATE
+    <operation
+      id="textanalysis"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Extracts text from presenter segments">
+      <configurations>
+        <configuration key="source-flavor">presenter/source</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-tags">engage</configuration>
+      </configurations>
+    </operation>
+    <operation
+      id="textanalysis"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Extracts text from presentation segments">
+      <configurations>
+        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-tags">engage</configuration>
+      </configurations>
+    </operation>
+    -->
+    
     <operation
       id="distribute-download"
       fail-on-error="true"
