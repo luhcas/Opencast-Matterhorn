@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Map.Entry;
 
 /**
  * This manager class tries to read encoding profiles from the classpath.
@@ -239,7 +240,16 @@ public class EncodingProfileScanner implements ArtifactInstaller {
    */
   @Override
   public void install(File artifact) throws Exception {
-    profiles.putAll(loadFromProperties(artifact));
+    log_.info("Registering encoding profiles from {}", artifact);
+    try {
+      Map<String, EncodingProfile> profileMap = loadFromProperties(artifact);
+      for(Entry<String, EncodingProfile> entry : profileMap.entrySet()) {
+        log_.info("Installed profile {}", entry.getValue().getIdentifier());
+        profiles.put(entry.getKey(), entry.getValue());
+      }
+    } catch (Exception e) {
+      log_.error("Encoding profiles could not be read from " + artifact, e);
+    }
   }
 
   /**
@@ -252,6 +262,7 @@ public class EncodingProfileScanner implements ArtifactInstaller {
     for (Iterator<EncodingProfile> iter = profiles.values().iterator(); iter.hasNext();) {
       EncodingProfile profile = iter.next();
       if (artifact.equals(profile.getSource())) {
+        log_.info("Uninstalling profile {}", profile.getIdentifier());
         iter.remove();
       }
     }
@@ -267,4 +278,5 @@ public class EncodingProfileScanner implements ArtifactInstaller {
     uninstall(artifact);
     install(artifact);
   }
+  
 }
