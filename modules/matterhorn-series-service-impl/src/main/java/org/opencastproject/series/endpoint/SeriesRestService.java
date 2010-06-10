@@ -121,8 +121,8 @@ public class SeriesRestService {
   
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("search/{pattern}")
-  public Response searchSeries(@PathParam("pattern") String pattern) {
+  @Path("search")
+  public Response searchSeries(@FormParam("term") String pattern) {
     logger.debug("Searching all Series that match the pattern {}", pattern);
     try {
       List<Series> list = service.searchSeries(pattern);
@@ -130,8 +130,9 @@ public class SeriesRestService {
       JSONArray a = new JSONArray();
       for (Series s : list) {
         JSONObject j = new JSONObject();
-        j.put("description", s.getDescription());
         j.put("id", s.getSeriesId());
+        j.put("label", s.getDescription());
+        j.put("value", s.getDescription());
         a.add(j);
       }
       //TODO convert result to JSON

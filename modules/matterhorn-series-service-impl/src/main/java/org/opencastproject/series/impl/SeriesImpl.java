@@ -228,7 +228,15 @@ public class SeriesImpl implements Series {
 
   @Override
   public String getDescription() {
-    String result = getFromMetadata("title") +" - "+getFromMetadata("creator")+" ("+getFromMetadata("temporal")+")";
+    String result = getFromMetadata("title");
+    String creator = getFromMetadata("creator");
+    String temporal = getFromMetadata("temporal");
+    if(creator != null && !creator.isEmpty()) {
+      result += " - " + creator;
+    }
+    if(temporal != null && !temporal.isEmpty()){
+      result += " (" + temporal + ")";
+    }
     return result;
   }
 
