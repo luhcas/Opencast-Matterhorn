@@ -91,4 +91,70 @@ public class DictionaryServiceImpl implements DictionaryService {
     this.trustedHttpClient = trustedHttpClient;
   }
 
+  @Override
+  public void addStopWord(String word, String language) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void addWord(String word, String language) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void addWord(String word, String language, Integer count) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void clear(String language) {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public String[] getLanguages(String word) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Integer getWordCount(String word, String language) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public double getWordWeight(String word, String language) {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public Boolean isStopWord(String word) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Boolean isStopWord(String word, String language) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Boolean isWord(String word) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Boolean isWord(String word, String language) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
 }
