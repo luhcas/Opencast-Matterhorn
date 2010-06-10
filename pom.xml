@@ -111,6 +111,8 @@
         <module>modules/matterhorn-workspace-impl</module>
         <module>modules/matterhorn-scheduler-api</module>
         <module>modules/matterhorn-scheduler-impl</module>
+        <module>modules/matterhorn-series-service-api</module>
+        <module>modules/matterhorn-series-service-impl</module>
         <module>modules/matterhorn-test-harness</module>
         <module>modules/matterhorn-opencaps-service</module>
         <module>modules/matterhorn-caption-api</module>
@@ -208,6 +210,8 @@
         <module>modules/matterhorn-search-service-feeds</module>
         <module>modules/matterhorn-security-api</module>
         <module>modules/matterhorn-security-impl</module>
+        <module>modules/matterhorn-series-service-api</module>
+        <module>modules/matterhorn-series-service-impl</module>
         <module>modules/matterhorn-util</module>
         <module>modules/matterhorn-remote-api</module>
         <module>modules/matterhorn-remote-impl</module>
