@@ -153,7 +153,7 @@ public class ConfidenceMonitorRestService {
     }
     jsonOutput.put("start", timestamp);
     jsonOutput.put("interval", "100000000");
-    jsonOutput.put("samples", rmsValues.toString());
+    jsonOutput.put("samples", rmsValues);
     return Response.ok(jsonOutput.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
   }
   

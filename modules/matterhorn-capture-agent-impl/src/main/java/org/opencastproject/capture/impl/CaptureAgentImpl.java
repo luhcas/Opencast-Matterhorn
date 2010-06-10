@@ -924,6 +924,13 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
 
     setAgentState(AgentState.IDLE);
+    if (configService != null && ctx != null) {
+      configService.setItem("org.opencastproject.server.url", ctx.getBundleContext().getProperty("org.opencastproject.server.url"));
+    } else if (configService == null) {
+      logger.warn("Config service was null, unable to set local server url!");
+    } else if (ctx == null) {
+      logger.warn("Context was null, unable to set local server url!");
+    }
   }
 
   /**
@@ -978,6 +985,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       stateJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
       stateJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
       stateJob.getJobDataMap().put(JobParameters.TRUSTED_CLIENT, client);
+      stateJob.getJobDataMap().put("org.opencastproject.server.url", configService.getItem("org.opencastproject.server.url"));
 
       //Create a new trigger                          Name              Group name               Start       End   # of times to repeat               Repeat interval
       SimpleTrigger stateTrigger = new SimpleTrigger("state_push", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, statePushTime);
