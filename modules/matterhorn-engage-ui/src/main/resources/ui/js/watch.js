@@ -49,10 +49,6 @@ Opencast.Watch = (function ()
           sd.setMinutes(parseInt(timeDate.substring(14,16)));
           sd.setSeconds(parseInt(timeDate.substring(17,19)));
 
-          // set the dcDescription
-          $('#oc_description').append($('#oc-description').html());
-          $('#oc_description').append("<br/>Date: "+  sd.toLocaleString());
-
           $('#oc_segment-table').html($('#oc-segments').html());
 
           $('#oc-segments').html("");
@@ -112,9 +108,7 @@ Opencast.Watch = (function ()
           if (mediaUrlOne !== '' && mediaUrlTwo !== '')
           {
             Opencast.Player.setVideoSizeList(MULTIPLAYER);
-
-            Opencast.Initialize.setMediaResolution( mediaResolutionOne, mediaResolutionTwo );
-            
+            Opencast.Initialize.setMediaResolution(mediaResolutionOne, mediaResolutionTwo);
           }
           else if (mediaUrlOne !== '' && mediaUrlTwo === '')
           {
@@ -175,7 +169,14 @@ Opencast.Watch = (function ()
 
             success: function(xml) 
             {
-              $('#oc_description').append("<br>Views: "+$(xml).find("views").text());
+            // set the dcDescription
+            $('#oc_description').append("Presenter: "+  $('#oc-creator').html());
+            $('#oc_description').append("<br/>Date: "+  sd.toLocaleString());
+            $('#oc_description').append("<br/>Subject: "+  $('#dc-subject').html());
+            $('#oc_description').append("<br/>Sponsoring Department: "+  $('#dc-contributor').html());
+            $('#oc_description').append("<br/>Language: "+  $('#dc-language').html());
+              $('#oc_description').append("<br/>Views: "+$(xml).find("views").text());
+              $('#oc_description').append("<br/>" + $('#dc-description').html());
             },
             error: function(a, b, c) 
             {

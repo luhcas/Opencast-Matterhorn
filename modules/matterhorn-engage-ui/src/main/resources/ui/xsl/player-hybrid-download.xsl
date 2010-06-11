@@ -234,28 +234,58 @@
       </xsl:choose>
     </div>
 
-		<div id="oc-description" style="display: none">
-			<xsl:choose>
-				<xsl:when test="ns2:search-results/result/dcDescription">
-					<xsl:value-of select="ns2:search-results/result/dcDescription" />
-				</xsl:when>
-				<xsl:otherwise>
-					No Abstract
-				</xsl:otherwise>
-			</xsl:choose>
-		</div>
-		
-		
-	<xsl:for-each
-      	select="ns2:search-results/result/mediapackage/metadata/catalog">
-		<xsl:if test="@type='captions/timedtext'">
+    <div id="dc-subject" style="display: none">
+      <xsl:choose>
+        <xsl:when test="ns2:search-results/result/dcSubject">
+          <xsl:value-of select="ns2:search-results/result/dcSubject" />
+        </xsl:when>
+        <xsl:otherwise>
+          No Subject
+        </xsl:otherwise>
+      </xsl:choose>
+    </div>
+
+    <div id="dc-contributor" style="display: none">
+      <xsl:choose>
+        <xsl:when test="ns2:search-results/result/dcContributor">
+          <xsl:value-of select="ns2:search-results/result/dcContributor" />
+        </xsl:when>
+        <xsl:otherwise>
+          No Sponsoring Department
+        </xsl:otherwise>
+      </xsl:choose>
+    </div>
+
+    <div id="dc-description" style="display: none">
+      <xsl:choose>
+        <xsl:when test="ns2:search-results/result/dcDescription">
+          <xsl:value-of select="ns2:search-results/result/dcDescription" />
+        </xsl:when>
+        <xsl:otherwise>
+          No Description
+        </xsl:otherwise>
+      </xsl:choose>
+    </div>
+
+    <div id="dc-language" style="display: none">
+      <xsl:choose>
+        <xsl:when test="ns2:search-results/result/dcLanguage">
+          <xsl:value-of select="ns2:search-results/result/dcLanguage" />
+        </xsl:when>
+        <xsl:otherwise>
+          No Language
+        </xsl:otherwise>
+      </xsl:choose>
+    </div>
+
+    <xsl:for-each select="ns2:search-results/result/mediapackage/metadata/catalog">
+      <xsl:if test="@type='captions/timedtext'">
         <xsl:if test="./mimetype='text/xml'">
-           <div id="oc-captions" style="display: none">
-              <xsl:value-of select="url" />
-            </div>
+          <div id="oc-captions" style="display: none">
+             <xsl:value-of select="url" />
+           </div>
         </xsl:if>
       </xsl:if>
     </xsl:for-each>
-		
-			</xsl:template>
+  </xsl:template>
 </xsl:stylesheet>
