@@ -41,7 +41,7 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
   private static final Logger logger = LoggerFactory.getLogger(StreamingDistributionService.class);
   
   protected RemoteServiceManager remoteServiceManager;
-  public static final String DEFAULT_DISTRIBUTION_DIR = "opencast" + File.separator + "streaming";
+  public static final String DEFAULT_DISTRIBUTION_DIR = "opencast" + File.separator;
   protected File distributionDirectory = null;
 
   /** this server's base URL */
@@ -77,7 +77,7 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
 
   protected void activate(ComponentContext cc) {
     // Get the configured streaming and server URLs
-    streamingUrl = cc.getBundleContext().getProperty("org.opencastproject.streaming.url") + "/streaming";
+    streamingUrl = cc.getBundleContext().getProperty("org.opencastproject.streaming.url");
     serverUrl = (String)cc.getBundleContext().getProperty("org.opencastproject.server.url");
     distributionDirectory = new File(cc.getBundleContext().getProperty("org.opencastproject.streaming.directory"));
     logger.info("streaming url is {}", streamingUrl);
