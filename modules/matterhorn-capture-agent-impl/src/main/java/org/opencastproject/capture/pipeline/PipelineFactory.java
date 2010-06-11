@@ -425,7 +425,7 @@ public class PipelineFactory {
     
     // Must set H.264 encoding to use constant quantizer or else it will not start
     // Pass 0 is CBR (default), Pass 4 is constant quantizer, Pass 4 is constant quality
-    if (codec.equalsIgnoreCase("x264enc"))
+    if (codec != null && codec.equalsIgnoreCase("x264enc"))
       enc.set("pass", "4");
     
     if (container != null) {
