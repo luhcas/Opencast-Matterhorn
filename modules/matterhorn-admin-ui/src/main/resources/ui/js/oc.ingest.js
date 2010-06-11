@@ -131,6 +131,21 @@ ocIngest.startIngest = function(mediaPackage) {
       showFailedScreen("Could not start Ingest on MediaPackage");
     },
     success    : function(data, status) {
+      if (Upload.retryId != '') {
+        ocIngest.removeWorkflowInstance(Upload.retryId);
+      } else {
+        Upload.hideProgressStage();
+        Upload.showSuccessScreen();
+      }
+    }
+  });
+}
+
+ocIngest.removeWorkflowInstance = function(wfId) {
+  $.ajax({
+    url : '../workflow/rest/remove/' + wfId,
+    type: 'GET',
+    success: function() {
       Upload.hideProgressStage();
       Upload.showSuccessScreen();
     }

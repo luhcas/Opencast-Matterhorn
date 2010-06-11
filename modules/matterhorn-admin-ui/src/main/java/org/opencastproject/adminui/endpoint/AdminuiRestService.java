@@ -52,6 +52,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
@@ -106,7 +107,7 @@ public class AdminuiRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("recordings/{state}")
-  public RecordingDataViewListImpl getRecordings(@PathParam("state") String state) {
+  public RecordingDataViewListImpl getRecordings(@PathParam("state") String state, @QueryParam("pn") int pageNumber, @QueryParam("ps") int pageSize) {
     RecordingDataViewListImpl out = new RecordingDataViewListImpl();
     if ((state.toUpperCase().equals("UPCOMING")) || (state.toUpperCase().equals("ALL"))) {
       out.addAll(getUpcomingRecordings());
@@ -127,7 +128,22 @@ public class AdminuiRestService {
       out.addAll(getRecordingsFromWorkflowService(WorkflowState.FAILED));
       out.addAll(getRecordingsFromWorkflowService(WorkflowState.FAILING));
     }
-    return out;
+//    if (pageNumber < 0) {
+//      pageNumber = 0;
+//    }
+//    if (out.size() <= pageSize) {     // if # of items <= page size irgnore pageNumber jsut return the whole result set
+      return out;
+//    }
+//    RecordingDataViewListImpl page = new RecordingDataViewListImpl();
+//    int first = pageNumber * pageSize;
+//    for (int i = first; i < first + pageSize; i++) {
+//      try {
+//        page.add(out.get(i));
+//      } catch (IndexOutOfBoundsException e) {
+//        break;
+//      }
+//    }
+//    return page;
   }
 
   /**
@@ -155,6 +171,9 @@ public class AdminuiRestService {
         if (date != null) {
           item.setStartTime(Long.toString(date.getTime()));
           item.setEndTime(Long.toString(date.getTime() + duration));
+        } else {
+          item.setStartTime("0");
+          item.setEndTime("0");
         }
         item.setCaptureAgent(null); //FIXME get capture agent from where...?
         WorkflowOperationInstance operation = null;
@@ -179,7 +198,7 @@ public class AdminuiRestService {
         } else {
           out.add(item);
         }
-        // logger.info("Recording state: " + state.name() + " MediaPackage: " + mediapackage.getTitle() + " - " + joinStringArray(mediapackage.getCreators()) + " - " + mediapackage.getSeries());
+        //logger.info("Recording state: " + state.name() + " MediaPackage: " + mediapackage.getTitle() + " - " + joinStringArray(mediapackage.getCreators()) + " - " + mediapackage.getSeries());
       }
     } else {
       logger.warn("WorkflowService not present, returning empty list");
@@ -349,7 +368,7 @@ public class AdminuiRestService {
         item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
         item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
         item.setCaptureAgent(events[i].getDevice());
-        item.setProcessingStatus("scheduled");
+        item.setProcessingStatus("Scheduled");
         item.setDistributionStatus("not distributed");
         out.add(item);
       }
@@ -380,7 +399,7 @@ public class AdminuiRestService {
           recordingState = r.getState();
         }
         item.setRecordingStatus(recordingState);
-        item.setProcessingStatus("scheduled");
+        item.setProcessingStatus("Capturing");
         item.setDistributionStatus("not distributed");
         out.add(item);
       }

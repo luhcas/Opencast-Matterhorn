@@ -632,10 +632,28 @@ SchedulerForm.validate = function() {
       $(v).hide();
     }
   });
+  $('div.warnbox-content').children().children().css('display', 'none');
   for(var el in this.formFields) {
     var e = this.formFields[el];
     if(e.required){
       if(!e.checkValue()){
+        switch (el) {
+			case "series-id":
+				$('#missing-series').css('display', 'block');
+				break;
+			case "title":
+				$('#missing-title').css('display', 'block');
+				break;
+			case "recurrence.start":
+				$('#missing-startdate').css('display', 'block');
+				break;
+			case "recurrence.end":
+				$('#error-recurstart-end').css('display', 'block');
+				break;
+			case "attendees":
+				$('#missing-attendees').css('display', 'block');
+				break;
+		}	
         alert(el + " wrong!");
         error = true;
         $('#' + e.errorField).show();

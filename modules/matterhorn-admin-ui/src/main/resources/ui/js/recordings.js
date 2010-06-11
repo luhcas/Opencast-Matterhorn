@@ -180,7 +180,14 @@ Recordings.displayRecordings = function(state, reload) {
         if (startTime) {
           var sd = new Date();
           sd.setTime(startTime);
-          startTime = sd.getDate() + '/' + (sd.getMonth()+1) + '/' + sd.getFullYear() + ' ' + sd.getHours() + ':' + Recordings.ensureTwoDigits(sd.getMinutes());
+          
+          var sday  = sd.getDate();
+          var smon  = sd.getMonth()+1;
+                  
+          if (sday < 10) sday = "0" + sday;
+          if (smon < 10) smon = "0" + smon;
+          
+          startTime = sd.getFullYear() + '-' + smon + '-' + sday + ' ' + sd.getHours() + ':' + Recordings.ensureTwoDigits(sd.getMinutes());
         } else {
           startTime = "NA";
         }

@@ -44,6 +44,7 @@ UploadListener.getProgress = function() {
       dataType   : 'json',
       error      : function(XHR,status,e){
         Upload.log('failed to get progress information from ' + '../ingest/rest/getProgress/' + UploadListener.jobId);
+        window.clearInterval(UploadListener.updateInterval); // ie in case of inbox ingest
       },
       success    : function(data, status) {
         UploadListener.updateRequested = false;
@@ -77,6 +78,7 @@ UploadListener.uploadComplete = function() {
   Upload.log("upload complete");
   var uploadFrame = document.getElementById("filechooser-ajax");
   var mp = uploadFrame.contentWindow.document.getElementById("mp").value;
+  //alert(mp);
   ocIngest.addCatalog(mp, ocIngest.createDublinCoreCatalog(ocIngest.metadata));
 }
 

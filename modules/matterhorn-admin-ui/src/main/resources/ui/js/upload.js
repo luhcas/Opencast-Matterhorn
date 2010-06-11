@@ -105,53 +105,59 @@ Upload.init = function() {
   });
 
   // Event: workflow selected
-//  $('#workflow-selector').change( function() {
-//    Upload.workflowSelected($(this).val());
-//  })
+  //  $('#workflow-selector').change( function() {
+  //    Upload.workflowSelected($(this).val());
+  //  })
 
   // get workflow definitions
-//  $.ajax({
-//    method: 'GET',
-//    url: '../workflow/rest/definitions.json',
-//    dataType: 'json',
-//    success: function(data) {
-//      for (i in data.workflow_definitions) {
-//        if (data.workflow_definitions[i].id != 'error') {
-//          var option = document.createElement("option");
-//          option.setAttribute("value", data.workflow_definitions[i].id);
-//          option.innerHTML = data.workflow_definitions[i].title;
-//          if (data.workflow_definitions[i].id == "full") {
-//            option.setAttribute("selected", "true");
-//          }
-//          $('#workflow-selector').append(option);
-//        }
-//      }
-//      Upload.workflowSelected($('#workflow-selector').val());
-//    }
-//  });
+  //  $.ajax({
+  //    method: 'GET',
+  //    url: '../workflow/rest/definitions.json',
+  //    dataType: 'json',
+  //    success: function(data) {
+  //      for (i in data.workflow_definitions) {
+  //        if (data.workflow_definitions[i].id != 'error') {
+  //          var option = document.createElement("option");
+  //          option.setAttribute("value", data.workflow_definitions[i].id);
+  //          option.innerHTML = data.workflow_definitions[i].title;
+  //          if (data.workflow_definitions[i].id == "full") {
+  //            option.setAttribute("selected", "true");
+  //          }
+  //          $('#workflow-selector').append(option);
+  //        }
+  //      }
+  //      Upload.workflowSelected($('#workflow-selector').val());
+  //    }
+  //  });
   ocWorkflow.init($('#workflow-selector'), $('#workflow-config-container'));
 
   // test if we upload a new recording or want to retry a workflow
   Upload.retryId = Upload.getURLParam("retry");
-  if (Upload.retryId != "") {
-    Upload.initRetry();
+  if (Upload.retryId != '') {
+    $('#i18n_page_title').text("Edit Recording");
+    Upload.initRetry(Upload.retryId);
+  } else {                                             // FIXME well this has to be cleaned up, agile...
+    Upload.retryId = Upload.getURLParam("edit");
+    if (Upload.retryId != '') {
+      $('#i18n_page_title').text("Edit Recording Before Continuing");
+      Upload.initRetry(Upload.retryId);
+    }
   }
 }
 
-Upload.initRetry = function() {
+Upload.initRetry = function(wfId) {
   // display current file element / hide file chooser
   $('#retry-file').css('display', 'block');
   $('#regular-file-selection').css('display', 'none');
   $('#regular-file-chooser').css('display', 'none');
-  $('#i18n_page_title').text("Edit Recording");
   // get failed Workflow
   $.ajax({
     method: 'GET',
-    url: '../workflow/rest/instance/'+ Upload.retryId +'.xml',
+    url: '../workflow/rest/instance/'+ wfId +'.xml',
     dataType: 'xml',
     success: function(data) {
       var catalogUrl = $(data.documentElement).find("mediapackage > metadata > catalog[type='dublincore/episode'] > url").text();
-      Upload.loadDublinCore(catalogUrl);
+      Upload.loadDublinCore(catalogUrl + '/dublincore.xml');  // FIXME workaround for MH-3993
       // previous file
       $(data.documentElement).find("mediapackage > media > track").each(function(index, elm) {
         if ($(elm).attr('type').split(/\//)[1] == 'source') {
