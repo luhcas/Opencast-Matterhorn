@@ -13,6 +13,12 @@
     <script type="text/javascript">
       $(document).ready(function() {
         var id = parent.document.getElementById("holdWorkflowId").value;
+        // Event edit link clicked
+        $('#edit-link').click( function() {
+          //parent.Recordings.retryRecording(id);
+          parent.location.href = "../../../admin/upload.html?retry=" + id;
+          return false;
+        });
         // load preview player and metadata
         $.ajax({
           url : '../../../workflow/rest/instance/' + id + '.xml',
@@ -20,10 +26,11 @@
           success : function(data) {    
             // load metadata
             var catalogUrl = $(data.documentElement).find("mediapackage > metadata > catalog[type='dublincore/episode'] > url").text();
-            //alert(catalogUrl);
+            catalogUrl += '/dublincore.xml';    // FIXME workaround MH-3993
             $.ajax({
               url : catalogUrl,
               dataType: 'xml',
+              error: function(XMLHttpRequest, textStatus, errorThrown) {alert('error: ' + textStatus);},
               success: function(data) {
                 $(data.documentElement).children().each(function(index, elm) {
                   var tagName = elm.tagName.split(/:/)[1];
@@ -46,10 +53,11 @@
             if (previewTag != null) {
               var videoUrl = $(previewTag).parent().parent().find('url').text();
               //alert("videoUrl: " + videoUrl);
+              $('#video-url-container').attr('href',videoUrl).text(videoUrl);
               var url = '../../../engage/ui/preview.html?videoUrl=' + videoUrl;
               $('#player-container').attr('src', url);
             } else {
-              alert('No preview encoded track found in MediaPackage');
+              $('#player-container').text('No preview encoded track found in MediaPackage');
             }
             // show links to source media
             var singleFile = true;
@@ -75,9 +83,13 @@
   </head>
   <body>
     <!-- control buttons in the upper right -->
-    <a href="#" id="edit-link">Edit before continuing</a>
+    <a href="javascript: return false;" id="edit-link">Edit before continuing</a>
     <center>
       <iframe id="player-container"></iframe>
+    </center>
+    <center>
+      <span>Video URL:<a id="video-url-container" href=""></a></span>
+      <br>
     </center>
     <div id="metadata-container">
       <ul class="no-bullets formField-list fl-controls-right">
