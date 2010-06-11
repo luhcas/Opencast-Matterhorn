@@ -7,6 +7,11 @@ Prerequisites:
 To automatically install all other required tools execute:
 ./preinstall_mac.sh 
 
+NOTE:
+./preinstall_mac.sh does not include the components for text analysis
+Please also execute:
+./install_3rd_party.sh 
+
 If you don't execute scripts as privileged user you will be asked for password
 when needed. When reqired tools are installed, main installation script
 (install_3rd_party.sh) will be automatically executed.
