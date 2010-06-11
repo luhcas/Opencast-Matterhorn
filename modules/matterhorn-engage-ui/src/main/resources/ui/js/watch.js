@@ -100,7 +100,9 @@ Opencast.Watch = (function ()
           mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
           mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
 
-          var coverUrl = $('#oc-cover').html();
+          var coverUrl = $('#oc-cover-engage').html();
+          if(coverUrl === null)
+            coverUrl = $('#oc-cover-feed').html();
           coverUrl = coverUrl === null ? '' : coverUrl;
 
           Opencast.Player.setMediaURL(coverUrl, mediaUrlOne, mediaUrlTwo);
