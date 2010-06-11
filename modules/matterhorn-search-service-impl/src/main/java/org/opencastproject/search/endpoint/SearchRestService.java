@@ -227,7 +227,11 @@ public class SearchRestService {
     List<MediaPackageElementFlavor> flavorSet = new ArrayList<MediaPackageElementFlavor>();
     if (flavors != null) {
       for (String f : flavors) {
-        flavorSet.add(MediaPackageElementFlavor.parseFlavor(f));
+        try {
+          flavorSet.add(MediaPackageElementFlavor.parseFlavor(f));
+        } catch(IllegalArgumentException e) {
+          logger.debug("invalid flavor '{}' specified in query", f);
+        }
       }
     }
     
@@ -264,5 +268,4 @@ public class SearchRestService {
     query.withOffset(offset);
     return (SearchResultImpl) searchService.getByQuery(query);
   }
-  
 }

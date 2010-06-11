@@ -27,6 +27,7 @@ import org.opencastproject.search.api.SearchResultItemImpl;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
 import org.opencastproject.search.impl.SearchQueryImpl;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
@@ -63,97 +64,6 @@ public class SolrRequester {
       throw new IllegalStateException("Unable to run queries on null connection");
     this.solrConnection = connection;
   }
-
-//  /**
-//   * {@inheritDoc}
-//   * 
-//   * @see org.opencastproject.search.api.SearchService#getEpisodesAndSeriesByText(java.lang.String, int, int)
-//   */
-//  public SearchResult getEpisodesAndSeriesByText(String text, int limit, int offset) throws SolrServerException {
-//    SearchQueryImpl q1 = new SearchQueryImpl();
-//    q1.withText(text).withLimit(limit).withOffset(offset).includeSeries(true);
-//    return getByQuery(q1);
-//  }
-//
-//  /**
-//   * {@inheritDoc}
-//   * 
-//   * @see org.opencastproject.search.api.SearchService#getEpisodesBySeries(java.lang.String)
-//   */
-//  public SearchResult getEpisodesBySeries(String seriesId) throws SolrServerException {
-//    SearchQueryImpl q1 = new SearchQueryImpl();
-//    q1.withId(seriesId).includeSeries(false).includeEpisodes(true);
-//    
-//    return getByQuery(q1);
-//  }
-//
-//  /**
-//   * {@inheritDoc}
-//   * 
-//   * @see org.opencastproject.search.api.SearchService#getSeriesByDate(int, int)
-//   */
-//  public SearchResult getSeriesByDate(int limit, int offset) throws SolrServerException {
-//    SearchQueryImpl q1 = new SearchQueryImpl();
-//    q1.withLimit(limit).withOffset(offset).includeSeries(true).includeEpisodes(false);
-//    q1.withCreationDateSort(true);
-//    return getByQuery(q1);
-//  }
-//
-//  /**
-//   * {@inheritDoc}
-//   * 
-//   * @see org.opencastproject.search.api.SearchService#getSeriesById(java.lang.String, int, int)
-//   */
-//  public SearchResult getSeriesById(String seriesId) throws SolrServerException {
-//    SearchQueryImpl q1 = new SearchQueryImpl();
-//    q1.withId(seriesId).includeSeries(true).includeEpisodes(false);
-//    return getByQuery(q1);
-//  }
-//
-//  /**
-//   * {@inheritDoc}
-//   * 
-//   * @see org.opencastproject.search.api.SearchService#getSeriesByText(java.lang.String, int, int)
-//   */
-//  public SearchResult getSeriesByText(String text, int limit, int offset) throws SolrServerException {
-//    SearchQueryImpl q1 = new SearchQueryImpl();
-//    q1.withText(text).withLimit(limit).withOffset(offset).includeSeries(true).includeEpisodes(false);
-//    return getByQuery(q1);
-//  }
-//
-//  /**
-//   * {@inheritDoc}
-//   * 
-//   * @see org.opencastproject.search.api.SearchService#getEpisodesAndSeriesById(java.lang.String)
-//   */
-//  public SearchResult getEpisodeAndSeriesById(String seriesId) throws SolrServerException {
-//    SearchQueryImpl q1 = new SearchQueryImpl();
-//    q1.withId(seriesId).includeEpisodes(true).includeSeries(true);
-//    return getByQuery(q1);
-//  }
-//
-//  /**
-//   * {@inheritDoc}
-//   * 
-//   * @see org.opencastproject.search.api.SearchService#getEpisodeById(java.lang.String)
-//   */
-//  public SearchResult getEpisodeById(String episodeId) throws SolrServerException {
-//    SearchQueryImpl q1 = new SearchQueryImpl();
-//    q1.withId(episodeId).includeEpisodes(true);
-//    return getByQuery(q1);
-//  }
-//
-//  /**
-//   * {@inheritDoc}
-//   * 
-//   * @see org.opencastproject.search.api.SearchService#getEpisodesByDate(int, int)
-//   */
-//  public SearchResult getEpisodesByDate(int limit, int offset) throws SolrServerException {
-//    SearchQueryImpl q1 = new SearchQueryImpl();
-//    q1.withLimit(limit).withOffset(offset);
-//    q1.withCreationDateSort(true);
-//    return getByQuery(q1);
-//  }
 
   /**
    * {@inheritDoc}
@@ -411,61 +321,82 @@ public class SolrRequester {
   public SearchResult getByQuery(SearchQuery q) throws SolrServerException {
     StringBuilder sb = new StringBuilder();
     
-    if (q.getQuery() != null) {
+    String solrQueryRequest = q.getQuery();
+    if (solrQueryRequest != null) {
       sb.append(q.getQuery());
     }
-    
+
+    String solrIdRequest = q.getId();
     if(q.getId() != null) {
+      String cleanSolrIdRequest = SolrUtils.clean(solrIdRequest);
       if (sb.length() > 0)
         sb.append(" AND ");
       sb.append("(");
       sb.append(SolrFields.ID);
       sb.append(":");
-      sb.append(q.getId());
+      sb.append(cleanSolrIdRequest);
       if(q.isIncludeSeries() && q.isIncludeEpisodes()) {
         sb.append(" OR ");
         sb.append(SolrFields.DC_IS_PART_OF);
         sb.append(":");
-        sb.append(q.getId());
+        sb.append(cleanSolrIdRequest);
       }
       sb.append(")");
     }
-    
-    if (q.getText() != null) {
-      if (sb.length() > 0)
-        sb.append(" AND ");
-      sb.append("*:");
-      sb.append(boost(SolrUtils.clean(q.getText())));      
+
+    String solrTextRequest = q.getText();
+    if(solrTextRequest != null) {
+      String cleanSolrTextRequest = SolrUtils.clean(q.getText());
+      if(StringUtils.isNotEmpty(cleanSolrTextRequest)) {
+        if (sb.length() > 0)
+          sb.append(" AND ");
+        sb.append("*:");
+        sb.append(boost(cleanSolrTextRequest));      
+      }
     }
     
     if(q.getElementTags() != null && q.getElementTags().length > 0) {
       if (sb.length() > 0)
         sb.append(" AND ");
-      sb.append("(");
+      StringBuilder tagBuilder = new StringBuilder();
       for(int i=0; i<q.getElementTags().length; i++) {
-        if(i>0) {
-          sb.append(" OR ");
+        String tag = SolrUtils.clean(q.getElementTags()[i]);
+        if(StringUtils.isEmpty(tag)) continue;
+        if(tagBuilder.length() == 0) {
+          tagBuilder.append("(");
+        } else {
+          tagBuilder.append(" OR ");
         }
-        sb.append(SolrFields.OC_ELEMENTTAGS);
-        sb.append(":");
-        sb.append(q.getElementTags()[i]);
+        tagBuilder.append(SolrFields.OC_ELEMENTTAGS);
+        tagBuilder.append(":");
+        tagBuilder.append(tag);
       }
-      sb.append(") ");
+      if(tagBuilder.length() > 0) {
+        tagBuilder.append(") ");
+        sb.append(tagBuilder);
+      }
     }
 
     if(q.getElementFlavors() != null && q.getElementFlavors().length > 0) {
       if (sb.length() > 0)
         sb.append(" AND ");
-      sb.append("(");
+      StringBuilder flavorBuilder = new StringBuilder();
       for(int i=0; i<q.getElementFlavors().length; i++) {
-        if(i>0) {
-          sb.append(" OR ");
+        String flavor = SolrUtils.clean(q.getElementFlavors()[i].toString());
+        if(StringUtils.isEmpty(flavor)) continue;
+        if(flavorBuilder.length() == 0) {
+          flavorBuilder.append("(");
+        } else {
+          flavorBuilder.append(" OR ");
         }
-        sb.append(SolrFields.OC_ELEMENTFLAVORS);
-        sb.append(":");
-        sb.append(q.getElementFlavors()[i]);
+        flavorBuilder.append(SolrFields.OC_ELEMENTFLAVORS);
+        flavorBuilder.append(":");
+        flavorBuilder.append(flavor);
       }
-      sb.append(") ");
+      if(flavorBuilder.length() > 0) {
+        flavorBuilder.append(") ");
+        sb.append(flavorBuilder);
+      }
     }
     
     if (sb.length() == 0)

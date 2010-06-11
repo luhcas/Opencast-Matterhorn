@@ -19,8 +19,7 @@ import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.search.api.SearchQuery;
 
 /**
- * TODO: Comment me!
- *
+ * @see SearchQuery
  */
 public class SearchQueryImpl implements SearchQuery {
   boolean includeEpisode = true;
