@@ -14,7 +14,7 @@ if
 	# installing required libraries
 	sudo port install jpeg libpng tiff jam &&
 	# installing gstreamer
-	sudo port install gstreamer gst-plugins-*
+	sudo port install gstreamer gst-plugins-good
 then
 	echo
 	echo "Required libraries were installed. Executing main script..."

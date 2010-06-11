@@ -37,9 +37,6 @@ libswscale_revision="30929"
 # mediainfo
 mediainfo_version="0.7.19"
 
-# opencv
-opencv_version="1.0.0"
-
 # tesseract
 tesseract_version="2.01"
 tesseract_lang_version="2.00.eng"
@@ -61,8 +58,6 @@ ffmpeg_url="svn://svn.ffmpeg.org/ffmpeg/trunk"
 libswscale_url="svn://svn.mplayerhq.hu/mplayer/trunk/libswscale"
 
 mediainfo_url="${thirdparty_repository}/MediaInfo_CLI_${mediainfo_version}_GNU_FromSource.tar.bz2"
-
-opencv_url="${thirdparty_repository}/opencv${opencv_version}.tar.gz"
 
 tesseract_url="${thirdparty_repository}/tesseract${tesseract_version}.tar.gz"
 tesseract_lang_url="${thirdparty_repository}/tesseract${tesseract_lang_version}.tar.gz"
@@ -348,64 +343,6 @@ setup_mediainfo ()
 	fi
 }
 
-# opencv
-
-setup_opencv ()
-{
-	echo
-	echo "Installing opencv $opencv_version"
-	echo
-	mkdir -p ${working_dir}/opencv
-	cd ${working_dir}/opencv
-	if ! [ -f opencv-$opencv_version/configure.in ]
-	then
-		cp ${base_dir}/patches/opencv-1.0.0.patch . &&
-		curl --remote-name $opencv_url &&
-		tar zxfv opencv${opencv_version}.tar.gz &&
-		patch -p0 -N  opencv-${opencv_version}/cxcore/include/cxmisc.h opencv-1.0.0.patch
-		if ! [ $? -eq 0 ]
-		then
-			cd $working_dir
-			rm -rf opencv
-			return 1
-		fi
-	fi
-	cd opencv-$opencv_version
-	if ! [ -f ./cv/src/cvaccum.lo ]
-	then
-		./configure CPPFLAGS=-I/opt/local/include CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib --disable-apps --without-swig --without-python --without-gtk --without-quicktime --without-carbon &&
-		make
-		if ! [ $? -eq 0 ]
-		then
-			make clean
-			echo
-			echo "Trying to build with alternate configuration..."
-			echo
-			# fix that enables to build opencv on OSX 10.6
-			./configure CXXFLAGS="-I/opt/local/include -march=nocona -mtune=generic" LDFLAGS=-L/opt/local/lib --disable-apps --without-swig --without-python --without-gtk --without-quicktime --without-carbon &&
-			make
-			if ! [ $? -eq 0 ]
-			then
-				make clean
-				cd $working_dir
-				return 1
-			fi
-		fi
-	fi 
-	if make install
-	then
-		echo
-		echo "Opencv installed successfully."
-		cd $working_dir
-		return 0
-	else
-		echo
-		echo "Opencv installation failed."
-		cd $working_dir
-		return 1
-	fi 
-}
-
 # tesseract
 
 setup_tesseract ()
@@ -562,7 +499,6 @@ setup_ffmpeg &&
 
 
 # Media analyzer
-setup_opencv &&
 setup_tesseract &&
 setup_ocropus
 
