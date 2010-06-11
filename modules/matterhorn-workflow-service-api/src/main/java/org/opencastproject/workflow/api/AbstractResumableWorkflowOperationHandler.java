@@ -42,6 +42,10 @@ public abstract class AbstractResumableWorkflowOperationHandler extends Abstract
 
   private static final String DEFAULT_TITLE = "Action";    // TODO maybe there's a better default action title?
 
+  /** Name of the configuration option that determines whether this operation is run at all */
+  protected static final String REQUIRED_PROPERTY = "required-property";
+
+
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
     super.activate(componentContext);

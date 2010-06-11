@@ -51,6 +51,7 @@ public class ReviewWorkflowOperationHandler extends AbstractResumableWorkflowOpe
   static {
     CONFIG_OPTIONS = new TreeMap<String, String>();
     CONFIG_OPTIONS.put(PREVIEW_TAG_NAME, "The tag identifying the preview media");
+    CONFIG_OPTIONS.put(REQUIRED_PROPERTY, "The configuration key that must be set to true for this operation to run.");
   }
 
   /**
@@ -75,6 +76,9 @@ public class ReviewWorkflowOperationHandler extends AbstractResumableWorkflowOpe
    */
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    if(!"true".equalsIgnoreCase(workflowInstance.getCurrentOperation().getConfiguration(REQUIRED_PROPERTY)))
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+    
     logger.info("Holding for review...");
     
     // What are we looking for?

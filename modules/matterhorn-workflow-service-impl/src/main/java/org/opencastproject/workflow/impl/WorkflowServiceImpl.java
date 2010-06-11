@@ -405,15 +405,14 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   // TODO: this could be far more efficient, consider using e.g. velocity or freemarker
   protected String replaceVariables(String source, Map<String, String> properties) {
-    String parsed = null;
     if(properties == null) {
       return source;
     } else {
       for(Entry<String, String> prop : properties.entrySet()) {
         String key = "\\$\\{" + prop.getKey() + "\\}";
-        parsed = source.replaceAll(key, prop.getValue());
+        source = source.replaceAll(key, prop.getValue());
       }
-      return parsed == null ? source : parsed;
+      return source;
     }
   }
 

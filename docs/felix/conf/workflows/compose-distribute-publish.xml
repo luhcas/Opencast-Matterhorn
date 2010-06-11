@@ -14,8 +14,12 @@
                 <!-- field: License -->
                 <li class="ui-helper-clearfix">
                   <label class="fl-label"><span class="color-red">* </span><span id="i18n_dist_label">Distribution Channel(s)</span>:</label>
+                  <span id="holdconfig">
+                    <input id="review.hold" name="review.hold" type="checkbox" checked="checked" class="configField" value="true" style="width: inherit !important;">
+                    <span id="i18n_hold_for_review">&nbsp;Hold for review</span>
+                  </span>
                   <span id="dist" style="float:left;">
-                    <input id="distribution" type="checkbox" checked="checked" disabled="disabled" class="configField" value="Matterhorn Media Module" style="width: inherit !important;">
+                    <input id="distribution" name="distribution" type="checkbox" checked="checked" disabled="disabled" class="configField" value="Matterhorn Media Module" style="width: inherit !important;">
                     <span id="i18n_dist_mmm">&nbsp;Matterhorn Media Module</span>
                   </span>
                   <!-- span class="helpIcon" title="Click for help">&nbsp;</span -->
@@ -39,16 +43,6 @@
       exception-handler-workflow="error"
       description="Inspect the media package">
     </operation>
-
-    <!-- hold for review -->
-    <!-- UNCOMMENT TO ACTIVATE
-    <operation
-      id="review"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Wait for a user to review the media">
-    </operation>
-    -->
  
     <!-- run the videosegmentation -->
     <operation
@@ -110,20 +104,6 @@
         <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.http</configuration>
-      </configurations>
-    </operation>
-    
-    <operation
-      id="compose"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Encode presenter audio to Flash download">
-      <configurations>
-        <configuration key="source-audio-flavor">*/source</configuration>
-        <configuration key="source-video-flavor">*/source</configuration>
-        <configuration key="target-flavor">presenter/delivery</configuration>
-        <configuration key="target-tags">engage, rss, atom</configuration>
-        <configuration key="encoding-profile">mp3.http</configuration>
       </configurations>
     </operation>
 
@@ -305,6 +285,18 @@
       </configurations>
     </operation>
     
+    <!-- hold for review -->
+    <operation
+      id="review"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Waiting for user to review recording">
+      <configurations>
+        <configuration key="source-tag">preview</configuration>
+        <configuration key="required-property">${review.hold}</configuration>
+      </configurations>
+    </operation>
+
     <operation
       id="distribute-download"
       fail-on-error="true"
@@ -326,4 +318,5 @@
       </configurations>
     </operation>
   </operations>
+
 </definition>
