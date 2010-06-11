@@ -365,7 +365,9 @@ public class IngestRestService {
           FileItemStream item = iter.next();
           if (item.isFormField()) {
             workflowConfig.put(item.getFieldName(), IOUtils.toString(item.openStream()));
+            logger.info("Processing form field: " + item.getFieldName());
           } else {
+            logger.info("Processing file item");
             WorkflowInstance workflow = ingestService.addZippedMediaPackage(item.openStream(), wdID, workflowConfig);
             return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
           }
