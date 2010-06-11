@@ -11,7 +11,7 @@ else
 fi
 
 #stop felix
-sudo /home/opencast/shutdown.sh
+sudo service matterhorn stop
 
 # Clean old jars
 rm -rf /opt/matterhorn/felix/load
@@ -42,4 +42,4 @@ sed -i "s/http:\/\/localhost:8080/http:\/\/$MY_IP:8080/" /opencast/config/captur
 for i in /opt/matterhorn/felix/load/*.cfg; do sed -i 's/\.\//\/opt\/matterhorn\/felix\//' $i; done
 
 # restart felix
-sudo /home/opencast/startup.sh
+sudo service matterhorn start
