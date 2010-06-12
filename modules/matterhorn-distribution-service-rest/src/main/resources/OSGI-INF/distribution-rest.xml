@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.distribution.rest.DistributionRestService" immediate="true" activate="activate">
+  <implementation class="org.opencastproject.distribution.rest.DistributionRestService" />
+  <property name="service.description" value="Distribution REST Endpoint" />
+  <property name="opencast.rest.url" value="/distribution/rest" />
+  <service>
+    <provide interface="org.opencastproject.distribution.rest.DistributionRestService" />
+  </service>
+  <!-- Distribution services are looked up dynamically at runtime, so no references are needed here -->
+</scr:component>
