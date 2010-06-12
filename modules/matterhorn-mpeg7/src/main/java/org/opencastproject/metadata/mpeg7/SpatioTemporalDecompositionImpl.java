@@ -136,7 +136,7 @@ public class SpatioTemporalDecompositionImpl implements SpatioTemporalDecomposit
   }
   
   /**
-   * @see org.opencastproject.media.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
+   * @see org.opencastproject.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
    */
   public Node toXml(Document document) {
     Element node = document.createElement("SpatioTemporalDecomposition");

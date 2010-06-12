@@ -15,12 +15,12 @@
  */
 package org.opencastproject.analysis.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.media.mediapackage.track.TrackImpl;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.Track;
+import org.opencastproject.mediapackage.track.TrackImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 
 import junit.framework.TestCase;
@@ -55,7 +55,7 @@ public class MediaAnalaysisServiceSupportTest extends TestCase {
 
   /**
    * Test method for
-   * {@link org.opencastproject.analysis.api.MediaAnalysisServiceSupport#analyze(org.opencastproject.media.mediapackage.MediaPackage, java.lang.String)}
+   * {@link org.opencastproject.analysis.api.MediaAnalysisServiceSupport#analyze(org.opencastproject.mediapackage.MediaPackage, java.lang.String)}
    * .
    */
   public void testAnalyzeMediaPackageString() {
@@ -81,7 +81,7 @@ public class MediaAnalaysisServiceSupportTest extends TestCase {
 
   /**
    * Test method for
-   * {@link org.opencastproject.analysis.api.MediaAnalysisServiceSupport#isSupported(org.opencastproject.media.mediapackage.MediaPackageElement)}
+   * {@link org.opencastproject.analysis.api.MediaAnalysisServiceSupport#isSupported(org.opencastproject.mediapackage.MediaPackageElement)}
    * .
    */
   public void isSupported() {

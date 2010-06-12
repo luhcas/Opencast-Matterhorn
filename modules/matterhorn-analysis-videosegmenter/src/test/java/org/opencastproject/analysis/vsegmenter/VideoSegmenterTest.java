@@ -20,10 +20,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.track.TrackImpl;
-import org.opencastproject.media.mediapackage.track.VideoStreamImpl;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.track.TrackImpl;
+import org.opencastproject.mediapackage.track.VideoStreamImpl;
 import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;

@@ -16,7 +16,7 @@
 
 package org.opencastproject.metadata.mpeg7;
 
-import org.opencastproject.media.mediapackage.XmlElement;
+import org.opencastproject.mediapackage.XmlElement;
 
 /**
  * Models a keyword annotation with relevance, confidence and the text itself.

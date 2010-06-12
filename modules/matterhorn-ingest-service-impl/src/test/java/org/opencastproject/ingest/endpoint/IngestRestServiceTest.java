@@ -16,9 +16,9 @@
 package org.opencastproject.ingest.endpoint;
 
 import org.opencastproject.ingest.api.IngestService;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 

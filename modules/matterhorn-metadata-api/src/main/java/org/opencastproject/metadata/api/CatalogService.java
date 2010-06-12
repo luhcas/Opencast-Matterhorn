@@ -15,7 +15,7 @@
  */
 package org.opencastproject.metadata.api;
 
-import org.opencastproject.media.mediapackage.Catalog;
+import org.opencastproject.mediapackage.Catalog;
 
 /**
  * 

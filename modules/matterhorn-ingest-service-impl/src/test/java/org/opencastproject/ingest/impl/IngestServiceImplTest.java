@@ -15,8 +15,8 @@
  */
 package org.opencastproject.ingest.impl;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;

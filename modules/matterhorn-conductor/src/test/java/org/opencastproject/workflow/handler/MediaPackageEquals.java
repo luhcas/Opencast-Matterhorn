@@ -1,9 +1,9 @@
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.media.mediapackage.Attachment;
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.mediapackage.Attachment;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.Track;
 
 import org.easymock.IArgumentMatcher;
 

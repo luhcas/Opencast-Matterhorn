@@ -16,9 +16,9 @@
 package org.opencastproject.analysis.rest;
 
 import org.opencastproject.analysis.api.MediaAnalysisService;
-import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.remote.api.Maintainable;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.util.DocUtil;

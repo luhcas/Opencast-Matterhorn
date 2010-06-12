@@ -20,11 +20,11 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
 
-import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilder;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilder;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.search.api.SearchResult;

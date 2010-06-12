@@ -41,7 +41,7 @@ public class DFXPConverterTest {
   // sample
   private String dfxpSample;
   // expected output
-  private String expectedOutput = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>";
+  private String expectedOutput = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 
   @Before
   public void setup() throws IOException {

@@ -33,8 +33,8 @@ import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_PUBLIS
 import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_TITLE;
 import static org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl.PROPERTY_PROMOTED;
 
-import org.opencastproject.media.mediapackage.EName;
-import org.opencastproject.media.mediapackage.NamespaceBindingException;
+import org.opencastproject.mediapackage.EName;
+import org.opencastproject.mediapackage.NamespaceBindingException;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.UnknownFileTypeException;
 
@@ -82,7 +82,7 @@ public class DublinCoreTest {
 
   /**
    * Test method for
-   * {@link org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl#fromFile(java.io.File)} .
+   * {@link org.opencastproject.mediapackage.dublincore.DublinCoreCatalogImpl#fromFile(java.io.File)} .
    */
   @Test
   public void testFromFile() {
@@ -99,7 +99,7 @@ public class DublinCoreTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl#save()} .
+   * Test method for {@link org.opencastproject.mediapackage.dublincore.DublinCoreCatalogImpl#save()} .
    */
   @Test
   public void testNewInstance() {
@@ -167,7 +167,7 @@ public class DublinCoreTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.dublincore.DublinCoreCatalogImpl#save()} .
+   * Test method for {@link org.opencastproject.mediapackage.dublincore.DublinCoreCatalogImpl#save()} .
    */
   @Test(expected = IllegalStateException.class)
   public void testRequiredFields() {

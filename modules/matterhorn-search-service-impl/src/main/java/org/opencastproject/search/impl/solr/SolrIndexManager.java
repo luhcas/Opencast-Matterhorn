@@ -16,14 +16,14 @@
 
 package org.opencastproject.search.impl.solr;
 
-import org.opencastproject.media.mediapackage.Attachment;
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.MediaPackageReference;
+import org.opencastproject.mediapackage.Attachment;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.metadata.dublincore.DCMIPeriod;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;

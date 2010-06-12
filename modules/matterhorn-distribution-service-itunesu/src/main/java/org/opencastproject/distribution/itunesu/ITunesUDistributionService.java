@@ -24,9 +24,9 @@ import org.opencastproject.deliver.schedule.Task;
 // import org.opencastproject.deliver.store.JPAStore;
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -165,7 +165,7 @@ public class ITunesUDistributionService implements DistributionService {
   /**
    * Uploads media files to iTunes U under a group. {@inheritDoc}
    * 
-   * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.mediapackage.MediaPackage)
    */
   public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException {
 
@@ -276,7 +276,7 @@ public class ITunesUDistributionService implements DistributionService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.distribution.api.DistributionService#retract(org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.distribution.api.DistributionService#retract(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public void retract(MediaPackage mediaPackage) throws DistributionException {

@@ -15,8 +15,8 @@
  */
 package org.opencastproject.analysis.api;
 
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.remote.api.Receipt;
 

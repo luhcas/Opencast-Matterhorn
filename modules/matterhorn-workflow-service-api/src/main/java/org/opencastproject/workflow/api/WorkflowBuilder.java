@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workflow.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.apache.commons.io.IOUtils;
@@ -44,7 +44,7 @@ public class WorkflowBuilder {
   
   private WorkflowBuilder() throws JAXBException {
     StringBuilder sb = new StringBuilder();
-    sb.append("org.opencastproject.media.mediapackage");
+    sb.append("org.opencastproject.mediapackage");
     sb.append(":org.opencastproject.workflow.api");
     jaxbContext= JAXBContext.newInstance(sb.toString(), WorkflowBuilder.class.getClassLoader());
   }

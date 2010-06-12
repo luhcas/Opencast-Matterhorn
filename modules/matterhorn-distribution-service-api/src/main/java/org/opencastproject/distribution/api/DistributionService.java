@@ -15,7 +15,7 @@
  */
 package org.opencastproject.distribution.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackage;
 
 /**
  * Distributes elements from {@link MediaPackage}s to distribution channels.

@@ -16,12 +16,12 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
-import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.media.mediapackage.UnsupportedElementException;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
+import org.opencastproject.mediapackage.Track;
+import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;

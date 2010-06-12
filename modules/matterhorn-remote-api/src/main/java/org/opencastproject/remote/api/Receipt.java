@@ -15,7 +15,7 @@
  */
 package org.opencastproject.remote.api;
 
-import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElement;
 
 /**
  * A receipt for an long running, asynchronous job.  A Receipt may be used to track any task once it has been queued.

@@ -15,8 +15,8 @@
  */
 package org.opencastproject.workflow.impl;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageMetadata;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageMetadata;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -354,7 +354,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition, org.opencastproject.media.mediapackage.MediaPackage, java.lang.String, java.util.Map)
+   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition, org.opencastproject.mediapackage.MediaPackage, java.lang.String, java.util.Map)
    */
   @Override
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
@@ -384,7 +384,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition,
-   *      org.opencastproject.media.mediapackage.MediaPackage)
+   *      org.opencastproject.mediapackage.MediaPackage)
    */
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
           Map<String, String> properties) {
@@ -634,7 +634,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition, org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition, org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage) {
@@ -646,7 +646,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.media.mediapackage.MediaPackage, java.util.Map)
+   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.mediapackage.MediaPackage, java.util.Map)
    */
   @Override
   public WorkflowInstance start(MediaPackage mediaPackage, Map<String, String> properties) {
@@ -657,7 +657,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public WorkflowInstance start(MediaPackage mediaPackage) {

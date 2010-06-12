@@ -16,7 +16,7 @@
 
 package org.opencastproject.metadata.mpeg7;
 
-import org.opencastproject.media.mediapackage.XmlElement;
+import org.opencastproject.mediapackage.XmlElement;
 
 /**
  * Media time point represents a time within the track, e. g. the starting time of a video segment.

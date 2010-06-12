@@ -172,7 +172,7 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Import-Package>
               org.opencastproject.search.api,
-              org.opencastproject.media.mediapackage.*,
+              org.opencastproject.mediapackage.*,
               *;resolution:=optional
             </Import-Package>
             <Private-Package>

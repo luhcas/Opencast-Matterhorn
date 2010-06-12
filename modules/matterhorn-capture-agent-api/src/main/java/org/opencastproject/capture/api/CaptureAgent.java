@@ -15,7 +15,7 @@
  */
 package org.opencastproject.capture.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackage;
 
 import java.util.Properties;
 

@@ -16,8 +16,8 @@
 package org.opencastproject.inspection.impl;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.Checksum;

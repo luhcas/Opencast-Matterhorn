@@ -15,8 +15,8 @@
  */
 package org.opencastproject.composer.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.Receipt.Status;
 

@@ -55,7 +55,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-util</artifactId>
+      <artifactId>matterhorn-kernel</artifactId>
       <version>0.9-SNAPSHOT</version>
     </dependency>
     <dependency>
@@ -77,11 +77,6 @@
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.16</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-demo</artifactId>
-      <version>0.9-SNAPSHOT</version>
     </dependency>
   </dependencies>
   <build>

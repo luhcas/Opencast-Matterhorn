@@ -16,38 +16,25 @@
 package org.opencastproject.remotetest.server;
 
 import static org.opencastproject.remotetest.Main.BASE_URL;
-import static org.opencastproject.remotetest.Main.USERNAME;
 import static org.opencastproject.remotetest.Main.PASSWORD;
+import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.demo.DemodataLoader;
 import org.opencastproject.security.TrustedHttpClientImpl;
 
 import junit.framework.Assert;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 /**
@@ -87,53 +74,6 @@ public class EngageModuleTest {
 
     domFactory = DocumentBuilderFactory.newInstance();
     domFactory.setNamespaceAware(false); // don't forget this!
-  }
-
-  @After
-  public void teardown() throws Exception {
-  }
-
-
-  
-  @Test
-  @Ignore
-  public void testContainsEngageTrack() throws Exception {
-    // Clear the search index. Remove all media packages.
-    clearSearchIndex();
-
-    // Load the data
-    String[] args = { "-n", "1" };
-    DemodataLoader.main(args);
-
-    // Ensure that the data loading finishes successfully
-    int attempts = 0;
-    boolean success = false;
-    while (true) {
-      if (++attempts == 20)
-        Assert.fail("search rest endpoint test has hung");
-
-      HttpClient client = new DefaultHttpClient();
-      HttpGet get = new HttpGet(BASE_URL + "/search/rest/episode?limit=1&offset=0");
-      String getResponse = EntityUtils.toString(client.execute(get).getEntity());
-
-      DocumentBuilder builder = domFactory.newDocumentBuilder();
-      Document doc = builder.parse(IOUtils.toInputStream(getResponse));
-
-      XPath xpath = factory.newXPath();
-
-      // Test if the media package contains a track with the tag 'engage'
-      XPathExpression expr = xpath.compile("/search-results/result/mediapackage/media/track/tags/tag[.='engage']");
-
-      NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
-
-      success = (nodes.getLength() == 1);
-
-      if (success) {
-        Assert.assertTrue(true);  // FIXME this isn't necessary
-        break;
-      }
-      Thread.sleep(2000);
-    }
   }
 
   @Test

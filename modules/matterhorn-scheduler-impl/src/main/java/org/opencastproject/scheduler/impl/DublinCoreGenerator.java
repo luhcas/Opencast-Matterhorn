@@ -15,7 +15,7 @@
  */
 package org.opencastproject.scheduler.impl;
 
-import org.opencastproject.media.mediapackage.EName;
+import org.opencastproject.mediapackage.EName;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;

@@ -16,7 +16,7 @@
 package org.opencastproject.distribution.youtube;
 
 import org.opencastproject.distribution.api.DistributionContextStragety;
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

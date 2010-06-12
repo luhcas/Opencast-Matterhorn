@@ -42,9 +42,9 @@ public class ReceiptBuilder {
   
   private ReceiptBuilder() throws JAXBException {
     StringBuilder sb = new StringBuilder();
-    sb.append("org.opencastproject.media.mediapackage");
-    sb.append(":org.opencastproject.media.mediapackage.attachment");
-    sb.append(":org.opencastproject.media.mediapackage.track");
+    sb.append("org.opencastproject.mediapackage");
+    sb.append(":org.opencastproject.mediapackage.attachment");
+    sb.append(":org.opencastproject.mediapackage.track");
     sb.append(":org.opencastproject.remote.impl");
     jaxbContext= JAXBContext.newInstance(sb.toString(), ReceiptBuilder.class.getClassLoader());
   }

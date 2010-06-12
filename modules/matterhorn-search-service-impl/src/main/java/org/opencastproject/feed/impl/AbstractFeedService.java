@@ -16,7 +16,7 @@
 package org.opencastproject.feed.impl;
 
 import org.opencastproject.feed.api.Feed.Type;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchService;
 

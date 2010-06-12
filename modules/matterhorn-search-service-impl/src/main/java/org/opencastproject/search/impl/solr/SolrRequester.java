@@ -16,9 +16,9 @@
 
 package org.opencastproject.search.impl.solr;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilder;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilder;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.search.api.MediaSegmentImpl;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;

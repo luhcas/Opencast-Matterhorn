@@ -21,12 +21,6 @@
       <version>0.9-SNAPSHOT</version>
     </dependency>
 
-   <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-security-api</artifactId>
-      <version>0.9-SNAPSHOT</version>
-    </dependency>
-
     <!--  Thirdparty dependencies -->
 
     <dependency>

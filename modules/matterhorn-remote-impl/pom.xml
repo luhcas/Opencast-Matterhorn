@@ -98,12 +98,15 @@
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Import-Package>
-              org.opencastproject.media.mediapackage,
-              org.opencastproject.media.mediapackage.attachment,
-              org.opencastproject.media.mediapackage.track,
+              org.opencastproject.mediapackage,
+              org.opencastproject.mediapackage.attachment,
+              org.opencastproject.mediapackage.track,
               *;resolution:=optional
             </Import-Package>
-            <Export-Package>org.opencastproject.remote.impl, org.opencastproject.remote.command</Export-Package>
+            <Export-Package>
+              org.opencastproject.remote.impl,
+              org.opencastproject.remote.command
+            </Export-Package>
             <Service-Component>
               OSGI-INF/receipt.xml,
               OSGI-INF/maintenance_shell.xml

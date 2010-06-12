@@ -19,8 +19,8 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageImpl;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.impl.ReceiptImpl;
 

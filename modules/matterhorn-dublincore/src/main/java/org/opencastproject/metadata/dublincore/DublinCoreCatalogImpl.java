@@ -16,12 +16,12 @@
 
 package org.opencastproject.metadata.dublincore;
 
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.EName;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
-import org.opencastproject.media.mediapackage.XMLCatalogImpl;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.EName;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
+import org.opencastproject.mediapackage.XMLCatalogImpl;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeTypes;

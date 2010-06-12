@@ -15,8 +15,8 @@
  */
 package org.opencastproject.workflow.endpoint;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageImpl;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;

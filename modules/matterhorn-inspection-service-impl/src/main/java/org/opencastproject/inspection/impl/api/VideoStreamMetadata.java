@@ -16,10 +16,10 @@
 
 package org.opencastproject.inspection.impl.api;
 
-import org.opencastproject.media.mediapackage.track.Colorimetry;
-import org.opencastproject.media.mediapackage.track.FrameRateMode;
-import org.opencastproject.media.mediapackage.track.ScanOrder;
-import org.opencastproject.media.mediapackage.track.ScanType;
+import org.opencastproject.mediapackage.track.Colorimetry;
+import org.opencastproject.mediapackage.track.FrameRateMode;
+import org.opencastproject.mediapackage.track.ScanOrder;
+import org.opencastproject.mediapackage.track.ScanType;
 
 /**
  * This class bundles technical information about a video stream.

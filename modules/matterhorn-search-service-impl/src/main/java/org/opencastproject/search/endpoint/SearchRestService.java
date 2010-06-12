@@ -15,8 +15,8 @@
  */
 package org.opencastproject.search.endpoint;
 
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageImpl;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchResultImpl;
 import org.opencastproject.search.api.SearchService;

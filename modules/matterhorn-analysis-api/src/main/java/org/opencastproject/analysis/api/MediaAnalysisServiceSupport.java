@@ -15,9 +15,9 @@
  */
 package org.opencastproject.analysis.api;
 
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.Track;
 
 /**
  * Convencience implementation that can be used to easily build media analysis service implementations.

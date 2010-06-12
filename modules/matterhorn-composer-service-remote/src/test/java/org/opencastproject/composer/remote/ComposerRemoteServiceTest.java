@@ -1,11 +1,11 @@
 package org.opencastproject.composer.remote;
 
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.remote.impl.RemoteServiceManagerImpl;

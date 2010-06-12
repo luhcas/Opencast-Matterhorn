@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workflow.impl;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowConfiguration;
 import org.opencastproject.workflow.api.WorkflowConfigurationImpl;

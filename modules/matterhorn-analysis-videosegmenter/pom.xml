@@ -105,8 +105,7 @@
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Export-Package>
-              org.opencastproject.analysis.vsegmenter,
-              org.opencastproject.analysis.vsegmenter.endpoint
+              org.opencastproject.analysis.vsegmenter
             </Export-Package>
             <Embed-Dependency>
               jmf;inline=true

@@ -16,9 +16,9 @@
 package org.opencastproject.distribution.local;
 
 import org.opencastproject.distribution.api.DistributionException;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UrlSupport;
@@ -92,7 +92,7 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.distribution.local.AbstractLocalDistributionService#distribute(org.opencastproject.media.mediapackage.MediaPackage, java.lang.String[])
+   * @see org.opencastproject.distribution.local.AbstractLocalDistributionService#distribute(org.opencastproject.mediapackage.MediaPackage, java.lang.String[])
    */
   @Override
   public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException {
@@ -107,7 +107,7 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.distribution.local.AbstractLocalDistributionService#getDistributionFile(org.opencastproject.media.mediapackage.MediaPackageElement)
+   * @see org.opencastproject.distribution.local.AbstractLocalDistributionService#getDistributionFile(org.opencastproject.mediapackage.MediaPackageElement)
    */
   @Override
   protected File getDistributionFile(MediaPackageElement element) {
@@ -121,7 +121,7 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.distribution.local.AbstractLocalDistributionService#getDistributionUri(org.opencastproject.media.mediapackage.MediaPackageElement)
+   * @see org.opencastproject.distribution.local.AbstractLocalDistributionService#getDistributionUri(org.opencastproject.mediapackage.MediaPackageElement)
    */
   @Override
   protected URI getDistributionUri(MediaPackageElement element) throws URISyntaxException {

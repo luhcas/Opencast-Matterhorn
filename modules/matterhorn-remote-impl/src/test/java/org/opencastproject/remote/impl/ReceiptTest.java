@@ -16,10 +16,10 @@
 package org.opencastproject.remote.impl;
 
 
-import org.opencastproject.media.mediapackage.Attachment;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.mediapackage.Attachment;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.Receipt.Status;
 

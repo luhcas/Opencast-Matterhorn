@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workflow.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -216,7 +216,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowInstance#setMediaPackage(org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.workflow.api.WorkflowInstance#setMediaPackage(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public void setMediaPackage(MediaPackage mediaPackage) {

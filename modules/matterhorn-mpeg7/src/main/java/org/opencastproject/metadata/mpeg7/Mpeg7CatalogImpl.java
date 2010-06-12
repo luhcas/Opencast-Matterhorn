@@ -16,9 +16,9 @@
 
 package org.opencastproject.metadata.mpeg7;
 
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.CatalogImpl;
-import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.CatalogImpl;
+import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeTypes;
@@ -195,7 +195,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#multimediaContent()
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#multimediaContent()
    */
   public Iterator<MultimediaContent<? extends MultimediaContentType>> multimediaContent() {
     if (!isLoaded())
@@ -208,7 +208,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#getMultimediaContent(org.opencastproject.media.mediapackage.mpeg7.MultimediaContent.Type)
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#getMultimediaContent(org.opencastproject.mediapackage.mpeg7.MultimediaContent.Type)
    */
   public MultimediaContent<? extends MultimediaContentType> getMultimediaContent(MultimediaContent.Type type) {
     if (!isLoaded())
@@ -261,9 +261,9 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#addAudioContent(java.lang.String,
-   *      org.opencastproject.media.mediapackage.mpeg7.MediaTime,
-   *      org.opencastproject.media.mediapackage.mpeg7.MediaLocator)
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#addAudioContent(java.lang.String,
+   *      org.opencastproject.mediapackage.mpeg7.MediaTime,
+   *      org.opencastproject.mediapackage.mpeg7.MediaLocator)
    */
   @SuppressWarnings("unchecked")
   public Audio addAudioContent(String id, MediaTime time, MediaLocator locator) {
@@ -283,7 +283,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#removeAudioContent(java.lang.String)
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#removeAudioContent(java.lang.String)
    */
   public Audio removeAudioContent(String id) {
     if (!isLoaded())
@@ -296,7 +296,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#hasAudioContent()
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#hasAudioContent()
    */
   public boolean hasAudioContent() {
     if (!isLoaded())
@@ -306,7 +306,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#audioContent()
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#audioContent()
    */
   @SuppressWarnings("unchecked")
   public Iterator<Audio> audioContent() {
@@ -319,9 +319,9 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#addVideoContent(java.lang.String,
-   *      org.opencastproject.media.mediapackage.mpeg7.MediaTime,
-   *      org.opencastproject.media.mediapackage.mpeg7.MediaLocator)
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#addVideoContent(java.lang.String,
+   *      org.opencastproject.mediapackage.mpeg7.MediaTime,
+   *      org.opencastproject.mediapackage.mpeg7.MediaLocator)
    */
   @SuppressWarnings("unchecked")
   public Video addVideoContent(String id, MediaTime time, MediaLocator locator) {
@@ -341,7 +341,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#removeVideoContent(java.lang.String)
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#removeVideoContent(java.lang.String)
    */
   public Video removeVideoContent(String id) {
     if (!isLoaded())
@@ -354,7 +354,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#hasVideoContent()
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#hasVideoContent()
    */
   public boolean hasVideoContent() {
     if (!isLoaded())
@@ -364,7 +364,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#videoContent()
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#videoContent()
    */
   @SuppressWarnings("unchecked")
   public Iterator<Video> videoContent() {
@@ -377,9 +377,9 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#addAudioVisualContent(java.lang.String,
-   *      org.opencastproject.media.mediapackage.mpeg7.MediaTime,
-   *      org.opencastproject.media.mediapackage.mpeg7.MediaLocator)
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#addAudioVisualContent(java.lang.String,
+   *      org.opencastproject.mediapackage.mpeg7.MediaTime,
+   *      org.opencastproject.mediapackage.mpeg7.MediaLocator)
    */
   @SuppressWarnings("unchecked")
   public AudioVisual addAudioVisualContent(String id, MediaTime time, MediaLocator locator) {
@@ -399,7 +399,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#removeAudioVisualContent(java.lang.String)
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#removeAudioVisualContent(java.lang.String)
    */
   public AudioVisual removeAudioVisualContent(String id) {
     if (!isLoaded())
@@ -412,7 +412,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#hasAudioVisualContent()
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#hasAudioVisualContent()
    */
   public boolean hasAudioVisualContent() {
     if (!isLoaded())
@@ -422,7 +422,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#audiovisualContent()
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#audiovisualContent()
    */
   @SuppressWarnings("unchecked")
   public Iterator<AudioVisual> audiovisualContent() {
@@ -435,7 +435,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#getAudioById(java.lang.String)
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#getAudioById(java.lang.String)
    */
   @SuppressWarnings("unchecked")
   public Audio getAudioById(String id) {
@@ -448,7 +448,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#getAudioVisualById(java.lang.String)
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#getAudioVisualById(java.lang.String)
    */
   @SuppressWarnings("unchecked")
   public AudioVisual getAudioVisualById(String id) {
@@ -461,7 +461,7 @@ public class Mpeg7CatalogImpl extends CatalogImpl implements Mpeg7Catalog {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.Mpeg7#getVideoById(java.lang.String)
+   * @see org.opencastproject.mediapackage.mpeg7.Mpeg7#getVideoById(java.lang.String)
    */
   @SuppressWarnings("unchecked")
   public Video getVideoById(String id) {

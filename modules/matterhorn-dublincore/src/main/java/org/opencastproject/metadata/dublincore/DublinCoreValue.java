@@ -16,7 +16,7 @@
 
 package org.opencastproject.metadata.dublincore;
 
-import org.opencastproject.media.mediapackage.EName;
+import org.opencastproject.mediapackage.EName;
 
 import java.io.Serializable;
 
@@ -76,7 +76,7 @@ public class DublinCoreValue implements Serializable {
    * 
    * @param value
    *          the value
-   * @see org.opencastproject.media.mediapackage.dublincore.DublinCore#LANGUAGE_UNDEFINED
+   * @see org.opencastproject.mediapackage.dublincore.DublinCore#LANGUAGE_UNDEFINED
    */
   public DublinCoreValue(String value) {
     this(value, DublinCore.LANGUAGE_UNDEFINED, null);

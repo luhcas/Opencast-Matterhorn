@@ -39,14 +39,14 @@ public class FreeTextAnnotationImpl implements FreeTextAnnotation {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.FreeTextAnnotation#getText()
+   * @see org.opencastproject.mediapackage.mpeg7.FreeTextAnnotation#getText()
    */
   public String getText() {
     return text;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
+   * @see org.opencastproject.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
    */
   public Node toXml(Document document) {
     Element node = document.createElement("FreeTextAnnotation");

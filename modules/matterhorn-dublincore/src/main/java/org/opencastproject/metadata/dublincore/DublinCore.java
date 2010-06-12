@@ -16,7 +16,7 @@
 
 package org.opencastproject.metadata.dublincore;
 
-import org.opencastproject.media.mediapackage.EName;
+import org.opencastproject.mediapackage.EName;
 
 import java.util.List;
 import java.util.Set;

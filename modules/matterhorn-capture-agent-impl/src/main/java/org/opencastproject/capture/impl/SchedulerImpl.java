@@ -22,11 +22,11 @@ import org.opencastproject.capture.impl.jobs.PollCalendarJob;
 import org.opencastproject.capture.impl.jobs.SerializeJob;
 import org.opencastproject.capture.impl.jobs.StartCaptureJob;
 import org.opencastproject.capture.impl.jobs.StopCaptureJob;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.security.api.TrustedHttpClient;
 
 import net.fortuna.ical4j.data.CalendarBuilder;

@@ -16,13 +16,13 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.EName;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilder;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageMetadata;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.EName;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilder;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageMetadata;
+import org.opencastproject.mediapackage.Track;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;

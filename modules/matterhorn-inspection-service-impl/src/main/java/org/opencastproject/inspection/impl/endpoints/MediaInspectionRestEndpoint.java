@@ -16,9 +16,9 @@
 package org.opencastproject.inspection.impl.endpoints;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
-import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;

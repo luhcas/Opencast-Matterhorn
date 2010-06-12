@@ -17,9 +17,9 @@ package org.opencastproject.workflow.handler;
 
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;

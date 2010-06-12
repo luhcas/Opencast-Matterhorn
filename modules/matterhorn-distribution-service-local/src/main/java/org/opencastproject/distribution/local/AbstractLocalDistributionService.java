@@ -17,9 +17,9 @@ package org.opencastproject.distribution.local;
 
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageReference;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -69,7 +69,7 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
    * 
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.mediapackage.MediaPackage)
    */
   public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException {
     try {
@@ -145,7 +145,7 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.distribution.api.DistributionService#retract(org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.distribution.api.DistributionService#retract(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public void retract(MediaPackage mediaPackage) throws DistributionException {

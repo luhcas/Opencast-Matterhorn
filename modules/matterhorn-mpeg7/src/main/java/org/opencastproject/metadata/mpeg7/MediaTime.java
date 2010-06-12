@@ -16,7 +16,7 @@
 
 package org.opencastproject.metadata.mpeg7;
 
-import org.opencastproject.media.mediapackage.XmlElement;
+import org.opencastproject.mediapackage.XmlElement;
 
 /**
  * This interface defines the time constraints (start and duration) of a multimedia content element or segment.

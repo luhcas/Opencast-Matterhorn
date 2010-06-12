@@ -71,14 +71,14 @@ public class MediaTimeImpl implements MediaTime {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.MediaTime#getMediaDuration()
+   * @see org.opencastproject.mediapackage.mpeg7.MediaTime#getMediaDuration()
    */
   public MediaDuration getMediaDuration() {
     return mediaDuration;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.MediaTime#getMediaTimePoint()
+   * @see org.opencastproject.mediapackage.mpeg7.MediaTime#getMediaTimePoint()
    */
   public MediaTimePoint getMediaTimePoint() {
     return mediaTimePoint;
@@ -97,7 +97,7 @@ public class MediaTimeImpl implements MediaTime {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
+   * @see org.opencastproject.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
    */
   public Node toXml(Document document) {
     Element node = document.createElement("MediaTime");

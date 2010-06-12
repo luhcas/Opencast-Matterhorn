@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workflow.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackage;
 
 import java.net.URL;
 import java.util.Iterator;

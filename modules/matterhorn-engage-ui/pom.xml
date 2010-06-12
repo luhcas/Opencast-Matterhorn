@@ -173,7 +173,6 @@
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Import-Package> org.opencastproject.http, * </Import-Package>
-            <Export-Package> org.opencastproject.engageui.* </Export-Package>
             <Private-Package>ui.*</Private-Package>
             <Service-Component>
               OSGI-INF/engage-ui.xml

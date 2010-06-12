@@ -49,7 +49,7 @@ public class MediaLocatorImpl implements MediaLocator {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.MediaLocator#getMediaURI()
+   * @see org.opencastproject.mediapackage.mpeg7.MediaLocator#getMediaURI()
    */
   public URI getMediaURI() {
     return mediaUri;
@@ -68,7 +68,7 @@ public class MediaLocatorImpl implements MediaLocator {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
+   * @see org.opencastproject.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
    */
   public Node toXml(Document document) {
     Element node = document.createElement("MediaLocator");

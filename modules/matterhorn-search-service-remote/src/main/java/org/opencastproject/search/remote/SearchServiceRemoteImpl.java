@@ -15,7 +15,7 @@
  */
 package org.opencastproject.search.remote;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchQuery;
@@ -58,7 +58,7 @@ public class SearchServiceRemoteImpl implements SearchService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.search.api.SearchService#add(org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.search.api.SearchService#add(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public void add(MediaPackage mediaPackage) throws SearchException {

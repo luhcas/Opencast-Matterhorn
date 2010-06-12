@@ -11,7 +11,7 @@
     <artifactId>base</artifactId>
     <version>0.9-SNAPSHOT</version>
   </parent>
-  
+
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
@@ -30,27 +30,14 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-util</artifactId>
-      <version>0.9-SNAPSHOT</version>
-      <type>bundle</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-http</artifactId>
-      <version>0.9-SNAPSHOT</version>
-      <type>bundle</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-security-api</artifactId>
-      <version>0.9-SNAPSHOT</version>
-      <type>bundle</type>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-static</artifactId>
       <version>0.9-SNAPSHOT</version>
       <type>bundle</type>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-kernel</artifactId>
+      <version>0.9-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject.samples</groupId>
@@ -81,17 +68,17 @@
       <artifactId>jv4linfo</artifactId>
       <version>0.2.1</version>
       <classifier>jdk5</classifier>
-    </dependency> 
+    </dependency>
     <dependency>
       <groupId>org.gstreamer</groupId>
       <artifactId>gstreamer-java</artifactId>
       <version>1.2</version>
-    </dependency> 
+    </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
       <version>3.0.9</version>
-    </dependency> 
+    </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -156,11 +143,6 @@
       <version>1.0.0</version>
     </dependency>
     <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-util</artifactId>
-        <version>0.9-SNAPSHOT</version>
-    </dependency>
-    <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
       <version>2.5.1</version>
@@ -205,7 +187,7 @@
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
             <Import-Package>
               org.opencastproject.capture.api.*,
-              org.opencastproject.media.mediapackage.*,
+              org.opencastproject.mediapackage.*,
               org.opencastproject.metadata.dublincore,
               org.opencastproject.http,
               org.opencastproject.fsresources,

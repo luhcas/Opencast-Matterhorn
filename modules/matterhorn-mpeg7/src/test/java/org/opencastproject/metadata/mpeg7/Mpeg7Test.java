@@ -64,7 +64,7 @@ public class Mpeg7Test {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.mpeg7.Mpeg7CatalogImpl#fromFile(java.io.File)} .
+   * Test method for {@link org.opencastproject.mediapackage.mpeg7.Mpeg7CatalogImpl#fromFile(java.io.File)} .
    */
   @Test
   public void testFromFile() {
@@ -73,7 +73,7 @@ public class Mpeg7Test {
   }
 
   /**
-   * Test method for {@link org.opencastproject.media.mediapackage.mpeg7.Mpeg7CatalogImpl#save()}.
+   * Test method for {@link org.opencastproject.mediapackage.mpeg7.Mpeg7CatalogImpl#save()}.
    */
   @Test
   public void testNewInstance() {

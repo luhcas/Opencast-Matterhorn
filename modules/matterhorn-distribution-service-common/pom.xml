@@ -160,6 +160,7 @@
             <scope>compile</scope>
           </dependency>
         </dependencies>
+        <!--
         <executions>
           <execution>
             <goals>
@@ -167,6 +168,7 @@
             </goals>
           </execution>
         </executions>
+        -->
       </plugin>
     </plugins>
   </build>

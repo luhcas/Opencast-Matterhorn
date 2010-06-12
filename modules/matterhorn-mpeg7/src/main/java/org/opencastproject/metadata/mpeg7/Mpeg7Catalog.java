@@ -16,8 +16,8 @@
 
 package org.opencastproject.metadata.mpeg7;
 
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 
 import org.w3c.dom.Document;
 

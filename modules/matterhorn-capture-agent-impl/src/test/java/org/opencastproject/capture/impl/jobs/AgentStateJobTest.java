@@ -5,8 +5,8 @@ import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.ConfigurationManager;
 import org.opencastproject.capture.impl.RecordingImpl;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.ConfigurationException;
 

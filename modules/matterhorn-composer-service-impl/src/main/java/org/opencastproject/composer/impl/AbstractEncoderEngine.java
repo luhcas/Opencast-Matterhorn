@@ -20,7 +20,7 @@ import org.opencastproject.composer.api.EncoderEngine;
 import org.opencastproject.composer.api.EncoderListener;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfile.MediaType;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.mediapackage.Track;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +116,7 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
    * {@inheritDoc}
    * 
    * @see org.opencastproject.composer.api.EncoderEngine#supportsProfile(java.lang.String,
-   *      org.opencastproject.media.mediapackage.Track)
+   *      org.opencastproject.mediapackage.Track)
    */
   public boolean supportsProfile(String profile, MediaType type) {
     if (supportedProfiles.containsKey(profile)) {

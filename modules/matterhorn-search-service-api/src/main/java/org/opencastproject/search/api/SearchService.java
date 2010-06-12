@@ -16,7 +16,7 @@
 
 package org.opencastproject.search.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackage;
 
 /**
  * Provides search capabilities, possibly to the engage tools, possibly to other services.

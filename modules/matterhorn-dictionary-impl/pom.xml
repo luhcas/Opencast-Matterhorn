@@ -17,31 +17,7 @@
 
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-media</artifactId>
-      <version>0.9-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-mpeg7</artifactId>
-      <version>0.9-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-dictionary-api</artifactId>
-      <version>0.9-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-remote-api</artifactId>
-      <version>0.9-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-workspace-api</artifactId>
       <version>0.9-SNAPSHOT</version>
     </dependency>
 

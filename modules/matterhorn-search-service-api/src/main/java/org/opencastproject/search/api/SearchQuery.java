@@ -15,7 +15,7 @@
  */
 package org.opencastproject.search.api;
 
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 
 /**
  * Represents a query to find search results

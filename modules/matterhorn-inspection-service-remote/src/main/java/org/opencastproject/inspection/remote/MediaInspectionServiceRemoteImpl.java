@@ -16,8 +16,8 @@
 package org.opencastproject.inspection.remote;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
-import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.AbstractMediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
@@ -103,7 +103,7 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(org.opencastproject.media.mediapackage.AbstractMediaPackageElement,
+   * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(org.opencastproject.mediapackage.AbstractMediaPackageElement,
    *      boolean, boolean)
    */
   @Override

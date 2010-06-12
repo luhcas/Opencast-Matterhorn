@@ -16,15 +16,15 @@
 package org.opencastproject.ingest.impl;
 
 import org.opencastproject.ingest.api.IngestService;
-import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilder;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.media.mediapackage.identifier.HandleException;
+import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilder;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.UnsupportedElementException;
+import org.opencastproject.mediapackage.identifier.HandleException;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.ZipUtil;
 import org.opencastproject.workflow.api.WorkflowDefinition;

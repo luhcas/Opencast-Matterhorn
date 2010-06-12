@@ -15,9 +15,9 @@
  */
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilder;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilder;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;

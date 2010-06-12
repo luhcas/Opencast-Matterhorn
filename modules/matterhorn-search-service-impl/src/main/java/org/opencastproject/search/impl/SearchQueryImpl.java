@@ -15,7 +15,7 @@
  */
 package org.opencastproject.search.impl;
 
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.search.api.SearchQuery;
 
 /**
@@ -205,7 +205,7 @@ public class SearchQueryImpl implements SearchQuery {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.search.api.SearchQuery#withElementFlavors(org.opencastproject.media.mediapackage.MediaPackageElementFlavor[])
+   * @see org.opencastproject.search.api.SearchQuery#withElementFlavors(org.opencastproject.mediapackage.MediaPackageElementFlavor[])
    */
   @Override
   public SearchQuery withElementFlavors(MediaPackageElementFlavor[] flavors) {

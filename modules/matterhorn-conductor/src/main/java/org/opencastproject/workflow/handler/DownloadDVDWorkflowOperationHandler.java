@@ -15,8 +15,8 @@
  */
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.Track;
 import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;

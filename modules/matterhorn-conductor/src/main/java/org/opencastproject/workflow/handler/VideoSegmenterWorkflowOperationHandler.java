@@ -16,11 +16,11 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.analysis.api.MediaAnalysisService;
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageElements;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.Track;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.security.api.TrustedHttpClient;

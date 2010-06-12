@@ -15,10 +15,10 @@
  */
 package org.opencastproject.metadata.dublincore;
 
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageMetadata;
-import org.opencastproject.media.mediapackage.MediapackageMetadataImpl;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageMetadata;
+import org.opencastproject.mediapackage.MediapackageMetadataImpl;
 import org.opencastproject.metadata.api.CatalogService;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.security.api.TrustedHttpClient;
@@ -61,7 +61,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.metadata.api.CatalogService#getMetadata(org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.metadata.api.CatalogService#getMetadata(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public MediaPackageMetadata getMetadata(MediaPackage mp) {
@@ -122,7 +122,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.metadata.api.CatalogService#load(org.opencastproject.media.mediapackage.Catalog)
+   * @see org.opencastproject.metadata.api.CatalogService#load(org.opencastproject.mediapackage.Catalog)
    */
   @Override
   public DublinCoreCatalog load(Catalog catalog) {

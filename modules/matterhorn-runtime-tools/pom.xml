@@ -282,6 +282,10 @@
       <artifactId>org.apache.servicemix.bundles.commons-httpclient</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.xerces</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore-osgi</artifactId>
     </dependency>
@@ -298,11 +302,6 @@
       <groupId>org.apache.servicemix.bundles</groupId>
       <artifactId>org.apache.servicemix.bundles.wsdl4j</artifactId>
       <version>1.6.1_1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.servicemix.bundles</groupId>
-      <artifactId>org.apache.servicemix.bundles.xerces</artifactId>
-      <version>2.9.1_3</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.jettison</groupId>

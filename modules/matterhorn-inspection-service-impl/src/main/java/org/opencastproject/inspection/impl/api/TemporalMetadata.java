@@ -16,7 +16,7 @@
 
 package org.opencastproject.inspection.impl.api;
 
-import org.opencastproject.media.mediapackage.track.BitRateMode;
+import org.opencastproject.mediapackage.track.BitRateMode;
 
 /**
  * Common metadata for all kind of temporal media.

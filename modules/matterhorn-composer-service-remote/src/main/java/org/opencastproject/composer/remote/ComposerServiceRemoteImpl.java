@@ -21,8 +21,8 @@ import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfileBuilder;
 import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
@@ -264,7 +264,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.media.mediapackage.MediaPackage,
+   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.MediaPackage,
    *      java.lang.String, java.lang.String, long)
    */
   @Override
@@ -276,7 +276,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.media.mediapackage.MediaPackage,
+   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.MediaPackage,
    *      java.lang.String, java.lang.String, long, boolean)
    */
   @Override

@@ -15,13 +15,13 @@
  */
 package org.opencastproject.remote.impl;
 
-import org.opencastproject.media.mediapackage.AbstractMediaPackageElement;
-import org.opencastproject.media.mediapackage.Attachment;
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.media.mediapackage.Track;
+import org.opencastproject.mediapackage.AbstractMediaPackageElement;
+import org.opencastproject.mediapackage.Attachment;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Receipt;
 
 import org.apache.commons.io.IOUtils;
@@ -169,7 +169,7 @@ public class ReceiptImpl implements Receipt {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#setElement(org.opencastproject.media.mediapackage.MediaPackageElement)
+   * @see org.opencastproject.remote.api.Receipt#setElement(org.opencastproject.mediapackage.MediaPackageElement)
    */
   @Transient
   @Override

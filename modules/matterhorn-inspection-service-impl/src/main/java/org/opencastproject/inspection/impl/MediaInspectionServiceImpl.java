@@ -20,17 +20,17 @@ import org.opencastproject.inspection.impl.api.AudioStreamMetadata;
 import org.opencastproject.inspection.impl.api.MediaAnalyzer;
 import org.opencastproject.inspection.impl.api.MediaContainerMetadata;
 import org.opencastproject.inspection.impl.api.VideoStreamMetadata;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilder;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.Stream;
-import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.media.mediapackage.MediaPackageElement.Type;
-import org.opencastproject.media.mediapackage.track.AudioStreamImpl;
-import org.opencastproject.media.mediapackage.track.TrackImpl;
-import org.opencastproject.media.mediapackage.track.VideoStreamImpl;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementBuilder;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.Stream;
+import org.opencastproject.mediapackage.Track;
+import org.opencastproject.mediapackage.UnsupportedElementException;
+import org.opencastproject.mediapackage.MediaPackageElement.Type;
+import org.opencastproject.mediapackage.track.AudioStreamImpl;
+import org.opencastproject.mediapackage.track.TrackImpl;
+import org.opencastproject.mediapackage.track.VideoStreamImpl;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
@@ -413,7 +413,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(org.opencastproject.media.mediapackage.AbstractMediaPackageElement,
+   * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(org.opencastproject.mediapackage.AbstractMediaPackageElement,
    *      boolean, boolean)
    */
   @Override

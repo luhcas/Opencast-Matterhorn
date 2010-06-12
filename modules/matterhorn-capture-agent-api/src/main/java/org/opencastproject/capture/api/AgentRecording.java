@@ -16,7 +16,7 @@
 package org.opencastproject.capture.api;
 
 import org.opencastproject.capture.admin.api.Recording;
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackage;
 
 import java.io.File;
 import java.util.Properties;

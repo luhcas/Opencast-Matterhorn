@@ -15,7 +15,7 @@
  */
 package org.opencastproject.distribution.local;
 
-import org.opencastproject.media.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UrlSupport;
@@ -90,7 +90,7 @@ public class DownloadDistributionService extends AbstractLocalDistributionServic
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.distribution.local.AbstractLocalDistributionService#getDistributionFile(org.opencastproject.media.mediapackage.MediaPackageElement)
+   * @see org.opencastproject.distribution.local.AbstractLocalDistributionService#getDistributionFile(org.opencastproject.mediapackage.MediaPackageElement)
    */
   @Override
   protected File getDistributionFile(MediaPackageElement element) {
@@ -104,7 +104,7 @@ public class DownloadDistributionService extends AbstractLocalDistributionServic
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.distribution.local.AbstractLocalDistributionService#getDistributionUri(org.opencastproject.media.mediapackage.MediaPackageElement)
+   * @see org.opencastproject.distribution.local.AbstractLocalDistributionService#getDistributionUri(org.opencastproject.mediapackage.MediaPackageElement)
    */
   @Override
   protected URI getDistributionUri(MediaPackageElement element) throws URISyntaxException {

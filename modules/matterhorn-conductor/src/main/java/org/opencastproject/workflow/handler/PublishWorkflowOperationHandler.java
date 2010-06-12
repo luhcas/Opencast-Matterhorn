@@ -15,10 +15,10 @@
  */
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.MediaPackageReference;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;

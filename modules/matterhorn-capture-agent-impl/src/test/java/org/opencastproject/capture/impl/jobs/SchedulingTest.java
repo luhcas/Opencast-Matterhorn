@@ -17,9 +17,9 @@ package org.opencastproject.capture.impl.jobs;
 
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.CaptureAgentImpl;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.util.ConfigurationException;
 
 import org.junit.After;

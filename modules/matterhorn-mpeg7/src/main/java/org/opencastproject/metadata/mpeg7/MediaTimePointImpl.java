@@ -116,63 +116,63 @@ public class MediaTimePointImpl implements MediaTimePoint {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint#getDay()
+   * @see org.opencastproject.mediapackage.mpeg7.MediaTimePoint#getDay()
    */
   public int getDay() {
     return day;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint#getHour()
+   * @see org.opencastproject.mediapackage.mpeg7.MediaTimePoint#getHour()
    */
   public int getHour() {
     return hour;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint#getMinutes()
+   * @see org.opencastproject.mediapackage.mpeg7.MediaTimePoint#getMinutes()
    */
   public int getMinutes() {
     return minute;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint#getMonth()
+   * @see org.opencastproject.mediapackage.mpeg7.MediaTimePoint#getMonth()
    */
   public int getMonth() {
     return month;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint#getNFractions()
+   * @see org.opencastproject.mediapackage.mpeg7.MediaTimePoint#getNFractions()
    */
   public int getNFractions() {
     return fractions;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint#getSeconds()
+   * @see org.opencastproject.mediapackage.mpeg7.MediaTimePoint#getSeconds()
    */
   public int getSeconds() {
     return second;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint#getYear()
+   * @see org.opencastproject.mediapackage.mpeg7.MediaTimePoint#getYear()
    */
   public int getYear() {
     return year;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint#getFractionsPerSecond()
+   * @see org.opencastproject.mediapackage.mpeg7.MediaTimePoint#getFractionsPerSecond()
    */
   public int getFractionsPerSecond() {
     return fractionsPerSecond;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint#getTimeInMilliseconds()
+   * @see org.opencastproject.mediapackage.mpeg7.MediaTimePoint#getTimeInMilliseconds()
    */
   public long getTimeInMilliseconds() {
     long milliseconds = second * MS_PER_SECOND;
@@ -185,7 +185,7 @@ public class MediaTimePointImpl implements MediaTimePoint {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.MediaTimePoint#isRelative()
+   * @see org.opencastproject.mediapackage.mpeg7.MediaTimePoint#isRelative()
    */
   public boolean isRelative() {
     return referenceTimePoint != null;
@@ -336,7 +336,7 @@ public class MediaTimePointImpl implements MediaTimePoint {
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
+   * @see org.opencastproject.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
    */
   public Node toXml(Document document) {
     Element node = null;

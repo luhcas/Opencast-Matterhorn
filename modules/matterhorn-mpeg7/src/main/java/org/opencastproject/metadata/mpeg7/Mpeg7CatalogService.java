@@ -15,7 +15,7 @@
  */
 package org.opencastproject.metadata.mpeg7;
 
-import org.opencastproject.media.mediapackage.Catalog;
+import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.metadata.api.CatalogService;
 import org.opencastproject.security.api.TrustedHttpClient;
 
@@ -33,7 +33,7 @@ public class Mpeg7CatalogService implements CatalogService<Mpeg7Catalog> {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.api.CatalogService#load(org.opencastproject.media.mediapackage.Catalog)
+   * @see org.opencastproject.metadata.api.CatalogService#load(org.opencastproject.mediapackage.Catalog)
    */
   @Override
   public Mpeg7Catalog load(Catalog catalog) {

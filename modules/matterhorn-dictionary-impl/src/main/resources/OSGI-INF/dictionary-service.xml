@@ -9,10 +9,4 @@
   <service>
     <provide interface="org.opencastproject.dictionary.api.DictionaryService" />
   </service>
-  <reference name="remoteServiceManager" interface="org.opencastproject.remote.api.RemoteServiceManager"
-    cardinality="1..1" policy="static" bind="setRemoteServiceManager" />
-  <reference name="trustedHttpClient" interface="org.opencastproject.security.api.TrustedHttpClient"
-    cardinality="1..1" policy="static" bind="setTrustedHttpClient" />
-  <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
-    cardinality="1..1" policy="static" bind="setWorkspace" />
 </scr:component>

@@ -22,7 +22,7 @@ import org.opencastproject.adminui.api.RecordingDataViewListImpl;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.util.DocUtil;

@@ -13,7 +13,7 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-http</artifactId>
+      <artifactId>matterhorn-kernel</artifactId>
       <version>0.9-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
@@ -75,7 +75,8 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Private-Package>org.opencastproject.runtimeinfo, org.json.*, ui.*</Private-Package>
+            <Private-Package>org.opencastproject.runtimeinfo,
+              org.json.*, ui.*</Private-Package>
             <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
             <Service-Component>
               OSGI-INF/ui.xml,

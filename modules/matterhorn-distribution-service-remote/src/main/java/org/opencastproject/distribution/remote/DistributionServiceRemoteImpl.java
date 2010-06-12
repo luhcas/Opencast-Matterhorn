@@ -17,9 +17,9 @@ package org.opencastproject.distribution.remote;
 
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.security.api.TrustedHttpClient;
 
@@ -63,7 +63,7 @@ public class DistributionServiceRemoteImpl implements DistributionService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.media.mediapackage.MediaPackage,
+   * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.mediapackage.MediaPackage,
    *      java.lang.String[])
    */
   @Override
@@ -105,7 +105,7 @@ public class DistributionServiceRemoteImpl implements DistributionService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.distribution.api.DistributionService#retract(org.opencastproject.media.mediapackage.MediaPackage)
+   * @see org.opencastproject.distribution.api.DistributionService#retract(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public void retract(MediaPackage mediaPackage) throws DistributionException {

@@ -62,14 +62,14 @@ public class TemporalDecompositionImpl<T extends Segment> implements TemporalDec
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.TemporalDecomposition#setGap(boolean)
+   * @see org.opencastproject.mediapackage.mpeg7.TemporalDecomposition#setGap(boolean)
    */
   public void setGap(boolean hasGap) {
     this.hasGap = hasGap;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.TemporalDecomposition#hasGap()
+   * @see org.opencastproject.mediapackage.mpeg7.TemporalDecomposition#hasGap()
    */
   public boolean hasGap() {
     return gap;
@@ -85,21 +85,21 @@ public class TemporalDecompositionImpl<T extends Segment> implements TemporalDec
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.TemporalDecomposition#hasSegments()
+   * @see org.opencastproject.mediapackage.mpeg7.TemporalDecomposition#hasSegments()
    */
   public boolean hasSegments() {
     return segments.size() > 0;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.TemporalDecomposition#setOverlapping(boolean)
+   * @see org.opencastproject.mediapackage.mpeg7.TemporalDecomposition#setOverlapping(boolean)
    */
   public void setOverlapping(boolean isOverlapping) {
     this.isOverlapping = isOverlapping;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.TemporalDecomposition#setCriteria(org.opencastproject.media.mediapackage.mpeg7.TemporalDecomposition.DecompositionCriteria)
+   * @see org.opencastproject.mediapackage.mpeg7.TemporalDecomposition#setCriteria(org.opencastproject.mediapackage.mpeg7.TemporalDecomposition.DecompositionCriteria)
    */
   public void setCriteria(DecompositionCriteria criteria) {
     if (criteria == null)
@@ -108,21 +108,21 @@ public class TemporalDecompositionImpl<T extends Segment> implements TemporalDec
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.TemporalDecomposition#isOverlapping()
+   * @see org.opencastproject.mediapackage.mpeg7.TemporalDecomposition#isOverlapping()
    */
   public boolean isOverlapping() {
     return overlap;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.TemporalDecomposition#getCriteria()
+   * @see org.opencastproject.mediapackage.mpeg7.TemporalDecomposition#getCriteria()
    */
   public DecompositionCriteria getCriteria() {
     return DecompositionCriteria.Temporal;
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.TemporalDecomposition#getSegmentById(java.lang.String)
+   * @see org.opencastproject.mediapackage.mpeg7.TemporalDecomposition#getSegmentById(java.lang.String)
    */
   public T getSegmentById(String segmentId) {
     for (T segment : segments) {
@@ -133,14 +133,14 @@ public class TemporalDecompositionImpl<T extends Segment> implements TemporalDec
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.mpeg7.TemporalDecomposition#segments()
+   * @see org.opencastproject.mediapackage.mpeg7.TemporalDecomposition#segments()
    */
   public Iterator<T> segments() {
     return segments.iterator();
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
+   * @see org.opencastproject.mediapackage.XmlElement#toXml(org.w3c.dom.Document)
    */
   public Node toXml(Document document) {
     Element node = document.createElement("TemporalDecomposition");

@@ -21,13 +21,13 @@ import org.opencastproject.composer.api.EncoderEngineFactory;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.inspection.api.MediaInspectionService;
-import org.opencastproject.media.mediapackage.Attachment;
-import org.opencastproject.media.mediapackage.MediaPackage;
-import org.opencastproject.media.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.media.mediapackage.MediaPackageException;
-import org.opencastproject.media.mediapackage.Track;
-import org.opencastproject.media.mediapackage.identifier.IdBuilder;
-import org.opencastproject.media.mediapackage.identifier.IdBuilderFactory;
+import org.opencastproject.mediapackage.Attachment;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.Track;
+import org.opencastproject.mediapackage.identifier.IdBuilder;
+import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
 import org.opencastproject.remote.api.Maintainable;
 import org.opencastproject.remote.api.MaintenanceException;
 import org.opencastproject.remote.api.Receipt;
@@ -352,7 +352,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.media.mediapackage.MediaPackage,
+   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.MediaPackage,
    *      java.lang.String, java.lang.String, long)
    */
   @Override
@@ -365,7 +365,7 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
    * 
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.media.mediapackage.MediaPackage,
+   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.MediaPackage,
    *      java.lang.String, java.lang.String, long, boolean)
    */
   public Receipt image(final MediaPackage mediaPackage, final String sourceVideoTrackId, final String profileId,

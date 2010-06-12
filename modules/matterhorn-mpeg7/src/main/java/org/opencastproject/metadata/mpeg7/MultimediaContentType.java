@@ -16,7 +16,7 @@
 
 package org.opencastproject.metadata.mpeg7;
 
-import org.opencastproject.media.mediapackage.XmlElement;
+import org.opencastproject.mediapackage.XmlElement;
 
 /**
  * Base interface for either of <code>AudioVisual</code>, <code>Audio</code> or <code>Video</code>.

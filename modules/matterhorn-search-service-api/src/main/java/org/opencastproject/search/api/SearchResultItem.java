@@ -16,7 +16,7 @@
 
 package org.opencastproject.search.api;
 
-import org.opencastproject.media.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackage;
 
 import java.util.Date;
 

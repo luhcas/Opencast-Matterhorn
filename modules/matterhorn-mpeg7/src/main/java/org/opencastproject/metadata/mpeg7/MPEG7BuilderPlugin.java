@@ -16,14 +16,14 @@
 
 package org.opencastproject.metadata.mpeg7;
 
-import org.opencastproject.media.mediapackage.Catalog;
-import org.opencastproject.media.mediapackage.MediaPackageElement;
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.MediaPackageReferenceImpl;
-import org.opencastproject.media.mediapackage.MediaPackageSerializer;
-import org.opencastproject.media.mediapackage.UnsupportedElementException;
-import org.opencastproject.media.mediapackage.elementbuilder.AbstractElementBuilderPlugin;
-import org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
+import org.opencastproject.mediapackage.MediaPackageSerializer;
+import org.opencastproject.mediapackage.UnsupportedElementException;
+import org.opencastproject.mediapackage.elementbuilder.AbstractElementBuilderPlugin;
+import org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
@@ -57,8 +57,8 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.MediaPackageElementBuilder#newElement(org.opencastproject.media.mediapackage.MediaPackageElement.Type
-   *      , org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
+   * @see org.opencastproject.mediapackage.MediaPackageElementBuilder#newElement(org.opencastproject.mediapackage.MediaPackageElement.Type
+   *      , org.opencastproject.mediapackage.MediaPackageElementFlavor)
    */
   public MediaPackageElement newElement(MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
           throws IOException {
@@ -66,15 +66,15 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(org.opencastproject.media.mediapackage.MediaPackageElement.Type
-   *      , org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
+   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(org.opencastproject.mediapackage.MediaPackageElement.Type
+   *      , org.opencastproject.mediapackage.MediaPackageElementFlavor)
    */
   public boolean accept(MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
     return type.equals(MediaPackageElement.Type.Catalog) && flavor.equals(Mpeg7Catalog.FLAVOR);
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(org.w3c.dom.Node)
+   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(org.w3c.dom.Node)
    */
   public boolean accept(Node elementNode) {
     try {
@@ -90,16 +90,16 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(URI,
-   *      org.opencastproject.media.mediapackage.MediaPackageElement.Type,
-   *      org.opencastproject.media.mediapackage.MediaPackageElementFlavor)
+   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(URI,
+   *      org.opencastproject.mediapackage.MediaPackageElement.Type,
+   *      org.opencastproject.mediapackage.MediaPackageElementFlavor)
    */
   public boolean accept(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
      return type != null && type.equals(Catalog.TYPE) && flavor != null && flavor.equals(Mpeg7Catalog.FLAVOR);
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURI(URI)
+   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURI(URI)
    */
   public MediaPackageElement elementFromURI(URI uri) throws UnsupportedElementException {
     log_.trace("Creating mpeg-7 metadata container from " + uri);
@@ -115,8 +115,8 @@ public class MPEG7BuilderPlugin extends AbstractElementBuilderPlugin implements 
   }
 
   /**
-   * @see org.opencastproject.media.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromManifest(org.w3c.dom.Node,
-   *      org.opencastproject.media.mediapackage.MediaPackageSerializer)
+   * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromManifest(org.w3c.dom.Node,
+   *      org.opencastproject.mediapackage.MediaPackageSerializer)
    */
   public MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer)
           throws UnsupportedElementException {

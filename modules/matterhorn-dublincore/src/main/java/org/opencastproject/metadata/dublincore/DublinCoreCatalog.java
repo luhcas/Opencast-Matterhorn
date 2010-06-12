@@ -16,9 +16,9 @@
 
 package org.opencastproject.metadata.dublincore;
 
-import org.opencastproject.media.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.media.mediapackage.XMLCatalog;
-import org.opencastproject.media.mediapackage.XMLCatalogImpl;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.XMLCatalog;
+import org.opencastproject.mediapackage.XMLCatalogImpl;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 

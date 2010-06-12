@@ -15,7 +15,7 @@
  */
 package org.opencastproject.metadata.mpeg7;
 
-import org.opencastproject.media.mediapackage.XmlElement;
+import org.opencastproject.mediapackage.XmlElement;
 
 /**
  * A <code>MovingRegion</code> describes the location, the movement and contents of elements on a video segment:
