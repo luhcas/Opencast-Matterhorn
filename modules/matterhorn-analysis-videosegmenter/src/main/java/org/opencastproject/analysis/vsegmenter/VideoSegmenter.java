@@ -23,30 +23,31 @@ import org.opencastproject.analysis.vsegmenter.jmf.ImageUtils;
 import org.opencastproject.analysis.vsegmenter.jmf.PlayerListener;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
+import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.MediaLocator;
 import org.opencastproject.metadata.mpeg7.MediaLocatorImpl;
 import org.opencastproject.metadata.mpeg7.MediaRelTimeImpl;
 import org.opencastproject.metadata.mpeg7.MediaTime;
-import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
+import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
+import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
+import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.remote.api.Maintainable;
 import org.opencastproject.remote.api.MaintenanceException;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
-import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
-import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
@@ -55,10 +56,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -83,13 +83,8 @@ import javax.media.Time;
 import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.DataSource;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 /**
  * Media analysis plugin that takes a video stream and extracts video segments by trying to detect slide and/or scene
@@ -129,8 +124,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
 
   /** The configuration key for setting the number of worker threads */
   public static final String CONFIG_THREADS = "videosegmenter.threads";
-  
-  /** The default worker thread pool size to use if no configuration is specified  */
+
+  /** The default worker thread pool size to use if no configuration is specified */
   public static final int DEFAULT_THREADS = 2;
 
   /** The logging facility */
@@ -139,27 +134,24 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
   /** Reference to the receipt service */
   protected RemoteServiceManager remoteServiceManager;
 
-  /** The repository to store the mpeg7 catalogs */
-  protected WorkingFileRepository repository;
-
+  /**  The mpeg-7 service */
+  protected Mpeg7CatalogService mpeg7CatalogService;
+  
   /** The workspace to ue when retrieving remote media files */
   protected Workspace workspace;
 
   /** The composer service */
   protected ComposerService composer;
 
-  /** The http client to use for retrieving protected mpeg7 files */
-  protected TrustedHttpClient trustedHttpClient;
-
   /** The executor service used to queue and run jobs */
   protected ExecutorService executor;
-  
+
   /** Whether this service is in maintenance mode */
   protected boolean maintenanceMode = false;
 
   /** The base URL for this server */
   protected String serverUrl = null;
-  
+
   /**
    * Creates a new video segmenter.
    */
@@ -172,20 +164,21 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
     // set up threading
     int threads = -1;
     String configredThreads = (String) cc.getBundleContext().getProperty(CONFIG_THREADS);
-    // try to parse the value as a number.  If it fails to parse, there is a config problem so we throw an exception.
+    // try to parse the value as a number. If it fails to parse, there is a config problem so we throw an exception.
     if (configredThreads == null) {
       threads = DEFAULT_THREADS;
     } else {
       threads = Integer.parseInt(configredThreads);
     }
-    if(threads < 1) {
+    if (threads < 1) {
       throw new IllegalStateException("The composer needs one or more threads to function.");
     }
     setExecutorThreads(threads);
-    
+
     // Get this server's URL
     serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
-    if(serverUrl == null) throw new IllegalStateException("property 'org.opencastproject.server.url' must be configured");
+    if (serverUrl == null)
+      throw new IllegalStateException("property 'org.opencastproject.server.url' must be configured");
 
     // Register as a handler for JOB_TYPE receipts
     remoteServiceManager.registerService(RECEIPT_TYPE, serverUrl);
@@ -194,13 +187,13 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
   public void deactivate() {
     remoteServiceManager.unRegisterService(RECEIPT_TYPE, serverUrl);
   }
-  
+
   /** Separating this from the activate method so it's easier to test */
   void setExecutorThreads(int threads) {
     executor = Executors.newFixedThreadPool(threads);
     logger.info("Thread pool size = {}", threads);
   }
-  
+
   /**
    * Sets the composer service.
    * 
@@ -208,16 +201,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
    */
   public void setComposerService(ComposerService composerService) {
     this.composer = composerService;
-  }
-
-  /**
-   * Sets the file repository
-   * 
-   * @param repository
-   *          an instance of the working file repository
-   */
-  public void setFileRepository(WorkingFileRepository repository) {
-    this.repository = repository;
   }
 
   /**
@@ -231,6 +214,16 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
   }
 
   /**
+   * Sets the mpeg7CatalogService
+   * 
+   * @param mpeg7CatalogService
+   *          an instance of the mpeg7 catalog service
+   */
+  public void setMpeg7CatalogService(Mpeg7CatalogService mpeg7CatalogService) {
+    this.mpeg7CatalogService = mpeg7CatalogService;
+  }
+  
+  /**
    * Sets the receipt service
    * 
    * @param remoteServiceManager
@@ -238,16 +231,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
    */
   public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
-  }
-
-  /**
-   * Sets the trusted http client which is used for authenticated service distribution.
-   * 
-   * @param trustedHttpClient
-   *          the trusted http client
-   */
-  public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
-    this.trustedHttpClient = trustedHttpClient;
   }
 
   /**
@@ -287,7 +270,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
 
         PlayerListener processorListener = null;
 
-        Mpeg7CatalogImpl mpeg7 = Mpeg7CatalogImpl.newInstance();
+        Mpeg7Catalog mpeg7 = mpeg7CatalogService.newInstance();
 
         try {
 
@@ -373,13 +356,13 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
 
           logger.info("Segmentation of {} yields {} segments", mediaUrl, segments.size());
 
+          MediaPackageElement mpeg7Catalog = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+            .newElement(Catalog.TYPE, MediaPackageElements.SEGMENTS_FLAVOR);
           URI uri = uploadMpeg7(mpeg7);
-          mpeg7.setURI(uri);
-          mpeg7.setFlavor(MediaPackageElements.SEGMENTS_FLAVOR);
-          mpeg7.setReference(new MediaPackageReferenceImpl(element));
-          mpeg7.setTrustedHttpClient(trustedHttpClient);
+          mpeg7Catalog.setURI(uri);
+          mpeg7Catalog.setReference(new MediaPackageReferenceImpl(element));
 
-          receipt.setElement(mpeg7);
+          receipt.setElement(mpeg7Catalog);
           receipt.setStatus(Status.FINISHED);
           rs.updateReceipt(receipt);
 
@@ -427,19 +410,10 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
    * @throws URISyntaxException
    *           if the working file repository created an invalid uri
    */
-  protected URI uploadMpeg7(Mpeg7CatalogImpl catalog) throws TransformerFactoryConfigurationError,
+  protected URI uploadMpeg7(Mpeg7Catalog catalog) throws TransformerFactoryConfigurationError,
           TransformerException, ParserConfigurationException, IOException, URISyntaxException {
-    // Store the mpeg7 in the file repository, and store the mpeg7 catalog in the receipt
-    // Write the catalog to a byte[]
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    Transformer transformer = TransformerFactory.newInstance().newTransformer();
-    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-    transformer.transform(new DOMSource(catalog.toXml()), new StreamResult(out));
-
-    // Store the bytes in the file repository
-    ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
-    return repository.putInCollection(COLLECTION_ID, UUID.randomUUID().toString(), in);
+    InputStream in = mpeg7CatalogService.serialize(catalog);
+    return workspace.putInCollection(COLLECTION_ID, UUID.randomUUID().toString(), in);
   }
 
   /**
@@ -483,14 +457,14 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
     long durationInSeconds = video.getMediaTime().getMediaDuration().getDurationInMilliseconds() / 1000;
     Segment contentSegment = video.getTemporalDecomposition().createSegment("segment-" + segmentCount);
     ImageComparator icomp = new ImageComparator(CHANGES_THRESHOLD);
-    
-//    icomp.setStatistics(true);
-//    String imagesPath = PathSupport.concat(new String[] {
-//      System.getProperty("java.io.tmpdir"),
-//      "videosegments",
-//      video.getMediaLocator().getMediaURI().toString().replaceAll("\\W", "-")
-//    });
-//    icomp.saveImagesTo(new File(imagesPath));
+
+    // icomp.setStatistics(true);
+    // String imagesPath = PathSupport.concat(new String[] {
+    // System.getProperty("java.io.tmpdir"),
+    // "videosegments",
+    // video.getMediaLocator().getMediaURI().toString().replaceAll("\\W", "-")
+    // });
+    // icomp.saveImagesTo(new File(imagesPath));
 
     Buffer buf = dsh.getBuffer();
     while (t < durationInSeconds && buf != null && !buf.isEOM()) {
@@ -524,7 +498,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
         }
         sceneChangeImminent = true;
       }
-      
+
       // We are looking ahead and everyhting seems to be fine.
       else if (!sceneChangeImminent) {
         fillLookAheadBuffer(bufferQueue, buf, dsh);
@@ -540,8 +514,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
         currentSceneStabilityCount++;
         previousImage = bufferedImage;
         t++;
-      } 
-      
+      }
+
       // Did we find a new scene?
       else if (currentSceneStabilityCount == STABILITY_THRESHOLD) {
         lastStableImageTime = t;
@@ -566,8 +540,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
         currentSceneStabilityCount++;
         sceneChangeImminent = false;
         logger.info("Found new scene at {} s", startOfSegment);
-      } 
-  
+      }
+
       // Did we find a new scene by looking ahead?
       else if (sceneChangeImminent) {
         // We found a scene change by looking ahead. Now we want to get to the exact position
@@ -576,8 +550,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
         lastStableImage = bufferedImage;
         currentSceneStabilityCount++;
         t++;
-      } 
-      
+      }
+
       // Nothing special, business as usual
       else {
         // If things look stable, then let's look ahead as much as possible without loosing information (which is
@@ -601,12 +575,13 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
     long durationms = ((long) durationInSeconds - startOfSegment) * 1000;
     contentSegment.setMediaTime(new MediaRelTimeImpl(startOfSegmentms, durationms));
     segments.add(contentSegment);
-    
+
     // Print summary
     if (icomp.hasStatistics()) {
       NumberFormat nf = NumberFormat.getNumberInstance();
       nf.setMaximumFractionDigits(2);
-      logger.info("Image comparison finished with an average change of {}% in {} comparisons", nf.format(icomp.getAvgChange()), icomp.getComparisons());
+      logger.info("Image comparison finished with an average change of {}% in {} comparisons", nf.format(icomp
+              .getAvgChange()), icomp.getComparisons());
     }
 
     // Cleanup
@@ -694,24 +669,27 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.remote.api.Maintainable#isInMaintenanceMode()
    */
   @Override
   public boolean isInMaintenanceMode() {
     return maintenanceMode;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.remote.api.Maintainable#setMaintenanceMode(boolean)
    */
   @Override
   public void setMaintenanceMode(boolean maintenanceMode) {
     this.maintenanceMode = maintenanceMode;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.analysis.api.MediaAnalysisService#getAnalysisType()
    */
   @Override

@@ -32,7 +32,7 @@ import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
 import org.opencastproject.metadata.mpeg7.MediaTimePoint;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
-import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
+import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.SpatioTemporalLocator;
@@ -42,7 +42,6 @@ import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -52,26 +51,23 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workspace.api.Workspace;
 
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
-
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 /**
  * The <code>TextAnalysisOperationHandler</code> will take an <code>MPEG-7</code> catalog, look for video segments and
@@ -96,11 +92,11 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
   /** The local workspace */
   private Workspace workspace = null;
 
+  /** The mpeg7 catalog service */
+  private Mpeg7CatalogService mpeg7CatalogService = null;
+
   /** The text analysis service */
   private MediaAnalysisService analysisService = null;
-
-  /** The trusted http client, used to load mpeg7 catalogs */
-  private TrustedHttpClient trustedHttpClient = null;
 
   /**
    * {@inheritDoc}
@@ -123,16 +119,6 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
   }
 
   /**
-   * Callback from the OSGi environment that will set the trusted http client.
-   * 
-   * @param trustedHttpClient
-   *          the http client
-   */
-  protected void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
-    this.trustedHttpClient = trustedHttpClient;
-  }
-
-  /**
    * Callback for declarative services configuration that will introduce us to the local workspace service.
    * Implementation assumes that the reference is configured as being static.
    * 
@@ -141,6 +127,16 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    */
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
+  }
+
+  /**
+   * Callback for the OSGi declarative services configuration.
+   * 
+   * @param catalogService
+   *          the catalog service
+   */
+  protected void setMpeg7CatalogService(Mpeg7CatalogService catalogService) {
+    this.mpeg7CatalogService = catalogService;
   }
 
   /**
@@ -186,7 +182,8 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    * @throws InterruptedException
    */
   private MediaPackage extractVideoText(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
-          throws MediaPackageException, UnsupportedElementException, InterruptedException, ExecutionException {
+          throws MediaPackageException, UnsupportedElementException, InterruptedException, ExecutionException,
+          IOException {
 
     String sourceFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
 
@@ -205,24 +202,28 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
       targetTagSet = new HashSet<String>();
       targetTagSet.addAll(Arrays.asList(targetTags.split("\\W")));
     }
-    
+
     // Select the catalogs according to the tags
-    Set<Mpeg7Catalog> catalogs = new HashSet<Mpeg7Catalog>();
-    for (Catalog c : mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS_FLAVOR)) {
+    Map<Catalog, Mpeg7Catalog> catalogs = new HashMap<Catalog, Mpeg7Catalog>();
+    for (Catalog mediaPackageCatalog : mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS_FLAVOR)) {
       if (sourceFlavor != null) {
-        if (c.getReference() == null)
+        if (mediaPackageCatalog.getReference() == null)
           continue;
-        Track t = mediaPackage.getTrack(c.getReference().getIdentifier());
+        Track t = mediaPackage.getTrack(mediaPackageCatalog.getReference().getIdentifier());
         if (t == null || !t.getFlavor().matches(MediaPackageElementFlavor.parseFlavor(sourceFlavor)))
           continue;
       }
-      
+
       // Make sure the catalog features at least one of the required tags
-      if (!c.containsTag(sourceTagSet))
+      if (!mediaPackageCatalog.containsTag(sourceTagSet))
         continue;
 
-      Mpeg7CatalogImpl mpeg7 = new Mpeg7CatalogImpl(c);
-      mpeg7.setTrustedHttpClient(trustedHttpClient);
+      Mpeg7Catalog mpeg7 = null;
+      try {
+        mpeg7 = mpeg7CatalogService.load(mediaPackageCatalog);
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
 
       // Make sure there is video content
       if (mpeg7.videoContent() == null || !mpeg7.videoContent().hasNext()) {
@@ -237,9 +238,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         logger.debug("Mpeg-7 catalog {} does not contain a temporal decomposition", mpeg7);
         continue;
       }
-
-      mpeg7.setFlavor(MediaPackageElements.TEXTS_FLAVOR);
-      catalogs.add(mpeg7);
+      catalogs.put(mediaPackageCatalog, mpeg7);
     }
 
     // Was there at least one matching catalog
@@ -250,14 +249,13 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
     }
 
     // Loop over all existing segment catalogs
-    for (Mpeg7Catalog segmentCatalog : catalogs) {
-      
-      logger.info("Analyzing mpeg-7 segments catalog {} for text", segmentCatalog);
+    for (Entry<Catalog, Mpeg7Catalog> mapEntry : catalogs.entrySet()) {
+
+      logger.info("Analyzing mpeg-7 segments catalog {} for text", mapEntry.getKey());
 
       // Create a copy that will contain the segments enriched with the video text elements
-      Mpeg7CatalogImpl textCatalog = new Mpeg7CatalogImpl(segmentCatalog);
-      textCatalog.setTrustedHttpClient(trustedHttpClient);
-      
+      Mpeg7Catalog textCatalog = mapEntry.getValue().clone();
+
       // Load the temporal decomposition (segments)
       Video videoContent = textCatalog.videoContent().next();
       TemporalDecomposition<? extends Segment> decomposition = videoContent.getTemporalDecomposition();
@@ -274,7 +272,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         MediaDuration segmentDuration = videoSegment.getMediaTime().getMediaDuration();
 
         // Choose a time
-        MediaPackageReference catalogRef = textCatalog.getReference();
+        MediaPackageReference catalogRef = mapEntry.getKey().getReference();
         MediaPackageReference reference = null;
         if (catalogRef == null)
           reference = new MediaPackageReferenceImpl();
@@ -295,9 +293,14 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         // If there is a corresponding spaciotemporal decomposition, remove all the videotext elements
 
         Receipt receipt = analysisService.analyze(images[0], true);
-        Mpeg7Catalog videoTextCatalog = (Mpeg7Catalog) receipt.getElement();
+        Catalog catalog = (Catalog)receipt.getElement();
+        if(catalog == null) {
+          logger.warn("Text analysis did not return a valid mpeg7 for segment {}", segment);
+          continue;
+        }
+        Mpeg7Catalog videoTextCatalog = mpeg7CatalogService.load(catalog);
         if (videoTextCatalog == null)
-          throw new RuntimeException("Text analysis service did not return a result");
+          throw new RuntimeException("Text analysis service did not return a valid mpeg7");
 
         // Add the spatiotemporal decompositions from the new catalog to the existing video segments
         Iterator<Video> videoTextContents = videoTextCatalog.videoContent();
@@ -325,12 +328,12 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
       }
 
       // Add flavor and target tags
-      textCatalog.setFlavor(MediaPackageElements.TEXTS_FLAVOR);
+      mapEntry.getKey().setFlavor(MediaPackageElements.TEXTS_FLAVOR);
       for (String tag : targetTagSet)
-        textCatalog.addTag(tag);
+        mapEntry.getKey().addTag(tag);
 
       // Store the catalog in the workspace
-      store(mediaPackage, textCatalog);
+      store(mediaPackage, textCatalog, mapEntry.getKey());
     }
 
     logger.debug("Text analysis completed");
@@ -346,28 +349,18 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    *          the new mpeg-7 catalog
    * @return the resulting URI
    */
-  protected URI store(MediaPackage mediaPackage, Mpeg7Catalog mpeg7) {
-    InputStream in = null;
-    try {
-      Transformer tf = TransformerFactory.newInstance().newTransformer();
-      DOMSource xmlSource = new DOMSource(mpeg7.toXml());
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      tf.transform(xmlSource, new StreamResult(out));
-      in = new ByteArrayInputStream(out.toByteArray());
-    } catch (Exception e) {
-      logger.error("Error serializing mpeg-7catalog", e);
-      throw new RuntimeException(e);
-    }
+  protected URI store(MediaPackage mediaPackage, Mpeg7Catalog mpeg7, Catalog mediaPackageCatalog) throws IOException {
+    InputStream in = mpeg7CatalogService.serialize(mpeg7);
 
     // Add the catalog to the media package
-    mpeg7.setIdentifier(null);
-    mediaPackage.add(mpeg7);
+    mediaPackageCatalog.setIdentifier(null);
+    mediaPackage.add(mediaPackageCatalog);
 
     // Put the result into the workspace
     String mediaPackageId = mediaPackage.getIdentifier().toString();
     String filename = "slidetext.xml";
-    URI workspaceURI = workspace.put(mediaPackageId, mpeg7.getIdentifier(), filename, in);
-    mpeg7.setURI(workspaceURI);
+    URI workspaceURI = workspace.put(mediaPackageId, mediaPackageCatalog.getIdentifier(), filename, in);
+    mediaPackageCatalog.setURI(workspaceURI);
     return workspaceURI;
   }
 

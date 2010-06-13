@@ -26,7 +26,7 @@ import javax.xml.transform.TransformerException;
 /**
  * Definition for a plain xml catalog.
  */
-public interface XMLCatalog extends Catalog {
+public interface XMLCatalog {
 
   /**
    * Serializes the catalog to a DOM.

@@ -20,11 +20,14 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
 
+import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.search.api.SearchResult;
@@ -35,8 +38,6 @@ import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.framework.BundleContext;
-import org.osgi.service.component.ComponentContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +45,7 @@ import java.io.InputStream;
 import java.net.URL;
 
 /**
- * Tests the functionality  of the search service.
+ * Tests the functionality of the search service.
  */
 public class SearchServiceImplTest {
 
@@ -53,11 +54,17 @@ public class SearchServiceImplTest {
 
   /** The solr root directory */
   private String solrRoot = "target" + File.separator + "opencast" + File.separator + "searchindex";
-    
+
   @Before
-  public void setup() {
+  public void setup() throws Exception {
+    DublinCoreCatalog dcCatalog = new DublinCoreCatalogImpl(getClass().getResourceAsStream("/dublincore.xml"));
+    DublinCoreCatalogService dcService = org.easymock.classextension.EasyMock
+            .createNiceMock(DublinCoreCatalogService.class);
+    org.easymock.classextension.EasyMock.expect(dcService.load((Catalog) EasyMock.anyObject())).andReturn(dcCatalog);
+    org.easymock.classextension.EasyMock.replay(dcService);
+    
     service = new SearchServiceImpl(solrRoot);
-    service.setDublincoreService(new DublinCoreCatalogService());
+    service.setDublincoreService(dcService);
     service.setupSolr(solrRoot);
     RemoteServiceManager remote = EasyMock.createNiceMock(RemoteServiceManager.class);
     EasyMock.replay(remote);
@@ -73,7 +80,7 @@ public class SearchServiceImplTest {
       fail("Error on cleanup");
     }
   }
-  
+
   /**
    * Test wether an empty search index will work.
    */
@@ -82,7 +89,7 @@ public class SearchServiceImplTest {
     SearchResult result = service.getByQuery(new SearchQueryImpl().withId("foo"));
     assertEquals(0, result.size());
   }
-  
+
   /**
    * Ads a simple media package that has a dublin core for the episode only.
    */
@@ -92,7 +99,7 @@ public class SearchServiceImplTest {
     MediaPackageBuilder mediaPackageBuilder = builderFactory.newMediaPackageBuilder();
     URL rootUrl = SearchServiceImplTest.class.getResource("/");
     mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(rootUrl));
-    
+
     // Load the simple media package
     MediaPackage mediaPackage = null;
     InputStream is = SearchServiceImplTest.class.getResourceAsStream("/manifest-simple.xml");
@@ -100,20 +107,20 @@ public class SearchServiceImplTest {
 
     // Add the media package to the search index
     service.add(mediaPackage);
-    
+
     // Make sure it's properly indexed and returned
     SearchQueryImpl q = new SearchQueryImpl();
     q.includeEpisodes(true);
     q.includeSeries(false);
     q.withId("10.0000/1");
     assertEquals(1, service.getByQuery(q).size());
-    
+
     q = new SearchQueryImpl();
     q.includeEpisodes(true);
     q.includeSeries(false);
-    
+
     assertEquals(1, service.getByQuery(q).size());
-    
+
     // Test for various fields
     q = new SearchQueryImpl();
     q.includeEpisodes(true);
@@ -135,7 +142,7 @@ public class SearchServiceImplTest {
     MediaPackageBuilder mediaPackageBuilder = builderFactory.newMediaPackageBuilder();
     URL rootUrl = SearchServiceImplTest.class.getResource("/");
     mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(rootUrl));
-    
+
     // Load the simple media package
     MediaPackage mediaPackage = null;
     try {
@@ -147,7 +154,7 @@ public class SearchServiceImplTest {
 
     // Add the media package to the search index
     service.add(mediaPackage);
-    
+
     // Make sure it's properly indexed and returned
     SearchQueryImpl q = new SearchQueryImpl();
     q.includeEpisodes(true);
@@ -157,7 +164,7 @@ public class SearchServiceImplTest {
     q.withId(null); // Clear the ID requirement
     assertEquals(1, service.getByQuery(q).size());
   }
-  
+
   /**
    * Test removal from the search index.
    */
@@ -167,7 +174,7 @@ public class SearchServiceImplTest {
     MediaPackageBuilder mediaPackageBuilder = builderFactory.newMediaPackageBuilder();
     URL rootUrl = SearchServiceImplTest.class.getResource("/");
     mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(rootUrl));
-    
+
     // Load the simple media package
     MediaPackage mediaPackage = null;
     try {

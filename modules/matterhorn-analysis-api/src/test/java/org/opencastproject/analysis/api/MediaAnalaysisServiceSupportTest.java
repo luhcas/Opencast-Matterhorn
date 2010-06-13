@@ -15,13 +15,14 @@
  */
 package org.opencastproject.analysis.api;
 
+import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.track.TrackImpl;
-import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
 
 import junit.framework.TestCase;
 
@@ -84,17 +85,17 @@ public class MediaAnalaysisServiceSupportTest extends TestCase {
    * {@link org.opencastproject.analysis.api.MediaAnalysisServiceSupport#isSupported(org.opencastproject.mediapackage.MediaPackageElement)}
    * .
    */
-  public void isSupported() {
+  public void isSupported() throws Exception {
     try {
       analyzer.isSupported(null);
     } catch (IllegalArgumentException e) {
       // This is expected
     }
-    
+
     assertFalse(analyzer.isSupported(track));
 
-    Mpeg7CatalogImpl catalog = Mpeg7CatalogImpl.newInstance();
-    catalog.setFlavor(MediaPackageElements.SEGMENTS_FLAVOR);
+    Catalog catalog = (Catalog) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().newElement(
+            Catalog.TYPE, MediaPackageElements.SEGMENTS_FLAVOR);
     mediaPackage.add(catalog);
     assertTrue(analyzer.isSupported(track));
   }

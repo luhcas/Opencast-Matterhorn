@@ -56,6 +56,7 @@ import org.apache.solr.common.SolrDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -176,7 +177,7 @@ public class SolrIndexManager {
       episodeDocument = createEpisodeInputDocument(sourceMediaPackage);
       // FIXME: SolrUpdateableInputDocument seriesDocument =
       // createSeriesInputDocument(sourceMediaPackage);
-    } catch (MediaPackageException e) {
+    } catch (Exception e) {
       throw new SolrServerException(e);
     }
 
@@ -218,7 +219,7 @@ public class SolrIndexManager {
    *           if serialization of the media package fails
    */
   private SolrUpdateableInputDocument createEpisodeInputDocument(MediaPackage mediaPackage)
-          throws MediaPackageException {
+          throws MediaPackageException, IOException {
 
     SolrUpdateableInputDocument solrEpisodeDocument = new SolrUpdateableInputDocument();
     String mediaPackageId = mediaPackage.getIdentifier().toString();
@@ -284,7 +285,7 @@ public class SolrIndexManager {
    *          the media package
    * @return an input document ready to be posted to solr
    */
-  private SolrUpdateableInputDocument createSeriesInputDocument(MediaPackage mediaPackage) {
+  private SolrUpdateableInputDocument createSeriesInputDocument(MediaPackage mediaPackage) throws IOException {
     SolrUpdateableInputDocument solrSeriesDocument = new SolrUpdateableInputDocument();
 
     // Check if there is a dublin core for series
@@ -350,7 +351,7 @@ public class SolrIndexManager {
    *          flavor of the dublin core catalog
    */
   private void addStandardDublincCoreFields(SolrUpdateableInputDocument solrInput, MediaPackage mediaPackage,
-          MediaPackageElementFlavor flavor) {
+          MediaPackageElementFlavor flavor) throws IOException {
 
     // Add dublin core
     DublinCoreCatalog dc = null;

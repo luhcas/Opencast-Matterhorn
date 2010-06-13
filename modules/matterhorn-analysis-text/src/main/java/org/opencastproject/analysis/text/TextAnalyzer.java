@@ -21,12 +21,15 @@ import org.opencastproject.analysis.text.ocropus.OcropusTextAnalyzer;
 import org.opencastproject.analysis.text.ocropus.OcropusTextFrame;
 import org.opencastproject.analysis.text.ocropus.OcropusWord;
 import org.opencastproject.mediapackage.Attachment;
+import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.MediaTimeImpl;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
+import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.SpatioTemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.Textual;
@@ -38,7 +41,6 @@ import org.opencastproject.metadata.mpeg7.VideoTextImpl;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
-import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -46,10 +48,9 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -60,13 +61,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 /**
  * Media analysis service that takes takes an image and returns text as extracted from that image.
@@ -97,8 +93,8 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   /** The workspace to ue when retrieving remote media files */
   private Workspace workspace = null;
 
-  /** The http client to use for retrieving protected mpeg7 files */
-  protected TrustedHttpClient trustedHttpClient = null;
+  /** The mpeg-7 service */
+  protected Mpeg7CatalogService mpeg7CatalogService;
 
   /** The executor service used to queue and run jobs */
   private ExecutorService executor = null;
@@ -198,7 +194,8 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
           videoSegment.setMediaTime(mediaTime);
 
           // Add the video text to the spacio temporal decomposition of the segment
-          SpatioTemporalDecomposition spatioTemporalDecomposition = videoSegment.createSpatioTemporalDecomposition(true, false);
+          SpatioTemporalDecomposition spatioTemporalDecomposition = videoSegment.createSpatioTemporalDecomposition(
+                  true, false);
           for (VideoText videoText : videoTexts) {
             spatioTemporalDecomposition.addVideoText(videoText);
           }
@@ -206,12 +203,12 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
           logger.info("Text extraction of {} finished, {} words found", attachment.getURI(), videoTexts.length);
 
           URI uri = uploadMpeg7(mpeg7);
-          mpeg7.setURI(uri);
-          mpeg7.setFlavor(MediaPackageElements.TEXTS_FLAVOR);
-          mpeg7.setReference(new MediaPackageReferenceImpl(element));
-          mpeg7.setTrustedHttpClient(trustedHttpClient);
+          Catalog catalog = (Catalog)MediaPackageElementBuilderFactory.newInstance().newElementBuilder().newElement(
+                  Catalog.TYPE, MediaPackageElements.TEXTS_FLAVOR);
+          catalog.setURI(uri);
+          catalog.setReference(new MediaPackageReferenceImpl(element));
 
-          receipt.setElement(mpeg7);
+          receipt.setElement(catalog);
           receipt.setStatus(Status.FINISHED);
           rs.updateReceipt(receipt);
 
@@ -261,16 +258,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
    */
   protected URI uploadMpeg7(Mpeg7CatalogImpl catalog) throws TransformerFactoryConfigurationError,
           TransformerException, ParserConfigurationException, IOException, URISyntaxException {
-    // Store the mpeg7 in the file repository, and store the mpeg7 catalog in the receipt
-    // Write the catalog to a byte[]
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    Transformer transformer = TransformerFactory.newInstance().newTransformer();
-    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-    transformer.transform(new DOMSource(catalog.toXml()), new StreamResult(out));
-
-    // Store the bytes in the file repository
-    ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+    InputStream in = mpeg7CatalogService.serialize(catalog);
     return repository.putInCollection(COLLECTION_ID, UUID.randomUUID().toString(), in);
   }
 
@@ -352,13 +340,12 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   }
 
   /**
-   * Sets the trusted http client which is used for authenticated service distribution.
+   * Sets the mpeg7CatalogService
    * 
-   * @param trustedHttpClient
-   *          the trusted http client
+   * @param mpeg7CatalogService
+   *          an instance of the mpeg7 catalog service
    */
-  public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
-    this.trustedHttpClient = trustedHttpClient;
+  public void setMpeg7CatalogService(Mpeg7CatalogService mpeg7CatalogService) {
+    this.mpeg7CatalogService = mpeg7CatalogService;
   }
-
 }

@@ -15,9 +15,11 @@
  */
 package org.opencastproject.analysis.api;
 
+import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
+import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.remote.api.Receipt;
 
 import org.junit.Ignore;
@@ -57,7 +59,12 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
   @Override
   public Receipt analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException {
     ReceiptStub receipt = new ReceiptStub();
-    receipt.element = Mpeg7CatalogImpl.newInstance();
+    try {
+      receipt.element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder().newElement(Catalog.TYPE,
+              MediaPackageElements.SEGMENTS_FLAVOR);
+    } catch (Exception e) {
+      throw new MediaAnalysisException(e.getMessage());
+    }
     return receipt;
   }
 

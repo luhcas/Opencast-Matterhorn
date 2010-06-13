@@ -29,13 +29,13 @@ import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.UnsupportedElementException;
-import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.MediaTimePoint;
-import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
+import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
+import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
+import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -82,9 +82,9 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
 
   /** The composer service */
   private ComposerService composerService = null;
-
-  /** The trusted http client, used to load mpeg7 catalogs */
-  private TrustedHttpClient trustedHttpClient = null;
+  
+  /** The mpeg7 catalog service */
+  private Mpeg7CatalogService mpeg7CatalogService = null;
 
   /**
    * {@inheritDoc}
@@ -106,8 +106,14 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
     this.composerService = composerService;
   }
 
-  protected void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
-    this.trustedHttpClient = trustedHttpClient;
+  /**
+   * Callback for the OSGi declarative services configuration.
+   * 
+   * @param catalogService
+   *          the catalog service
+   */
+  protected void setMpeg7CatalogService(Mpeg7CatalogService catalogService) {
+    this.mpeg7CatalogService = catalogService;
   }
 
   /**
@@ -216,10 +222,13 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
         // Try to load the segments catalog
         MediaPackageReference trackReference = new MediaPackageReferenceImpl(t);
         Catalog[] segmentCatalogs = mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS_FLAVOR, trackReference);
-        Mpeg7CatalogImpl mpeg7 = null;
+        Mpeg7Catalog mpeg7 = null;
         if (segmentCatalogs.length > 0) {
-          mpeg7 = new Mpeg7CatalogImpl(segmentCatalogs[0]);
-          mpeg7.setTrustedHttpClient(trustedHttpClient);
+          try {
+            mpeg7 = mpeg7CatalogService.load(segmentCatalogs[0]);
+          } catch (Exception e) {
+            throw new RuntimeException(e);
+          }
           if (segmentCatalogs.length > 1)
             logger
                     .warn("More than one segments catalog found for track {}. Resuming with the first one ({})", t,

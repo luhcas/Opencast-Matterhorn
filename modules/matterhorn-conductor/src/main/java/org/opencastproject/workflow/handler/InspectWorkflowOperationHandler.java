@@ -38,11 +38,9 @@ import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.SortedMap;
@@ -170,12 +168,9 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
       }
       
       // Serialize changed dublin core
-      // TODO: this is too complicated! Add update() method to metadata service
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      dublinCore.toXml(out, true);
-      InputStream in = new ByteArrayInputStream(out.toByteArray());
+      InputStream in = dcService.serialize(dublinCore);
       String mpId = mediaPackage.getIdentifier().toString();
-      String elementId = dublinCore.getIdentifier();
+      String elementId = dcCatalogs[0].getIdentifier();
       workspace.put(mpId, elementId, FilenameUtils.getName(dcCatalogs[0].getURI().getPath()), in);
       dcCatalogs[0].setURI(workspace.getURI(mpId, elementId));
     }

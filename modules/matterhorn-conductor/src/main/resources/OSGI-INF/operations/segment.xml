@@ -10,8 +10,4 @@
   <reference cardinality="1..1" interface="org.opencastproject.analysis.api.MediaAnalysisService"
     name="VideoSegmenterService" policy="static" bind="setVideoSegmenter"
     target="(analysis.type=org.opencastproject.analysis.vsegmenter)"/>
-  <reference cardinality="1..1" interface="org.opencastproject.workspace.api.Workspace"
-    name="Workspace" policy="static" bind="setWorkspace"/>
-  <reference name="trustedHttpClient" interface="org.opencastproject.security.api.TrustedHttpClient"
-    cardinality="1..1" policy="static" bind="setTrustedHttpClient" />
 </scr:component>

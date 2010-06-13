@@ -287,7 +287,7 @@ public class MediaTimePointImpl implements MediaTimePoint {
     if (firstDateSeparator > -1) {
       year = Integer.parseInt(date.substring(0, firstDateSeparator));
       month = Short.parseShort(date.substring(firstDateSeparator + 1, lastDateSeparator));
-      day = Short.parseShort(date.substring(firstDateSeparator + 1));
+      day = Short.parseShort(date.substring(lastDateSeparator + 1));
     }
   }
 

@@ -17,16 +17,30 @@ package org.opencastproject.metadata.dublincore;
 
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageMetadata;
 import org.opencastproject.mediapackage.MediapackageMetadataImpl;
 import org.opencastproject.metadata.api.CatalogService;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
 import org.opencastproject.security.api.TrustedHttpClient;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.Map;
+
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * Parses {@link DublinCoreCatalog}s from serialized DC representations
@@ -61,6 +75,23 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
 
   /**
    * {@inheritDoc}
+   * @see org.opencastproject.metadata.api.CatalogService#serialize(org.opencastproject.metadata.api.MetadataCatalog)
+   */
+  @Override
+  public InputStream serialize(DublinCoreCatalog catalog) throws IOException {
+    try {
+      Transformer tf = TransformerFactory.newInstance().newTransformer();
+      DOMSource xmlSource = new DOMSource(catalog.toXml());
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      tf.transform(xmlSource, new StreamResult(out));
+      return new ByteArrayInputStream(out.toByteArray());
+    } catch (Exception e) {
+      throw new IOException(e);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
    * @see org.opencastproject.metadata.api.CatalogService#getMetadata(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
@@ -69,7 +100,13 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
     
     Catalog[] dcs = mp.getCatalogs(DublinCoreCatalog.ANY_DUBLINCORE);
     for (Catalog catalog : dcs) {
-      DublinCoreCatalog dc = load(catalog);
+      DublinCoreCatalog dc;
+      try {
+        dc = load(catalog);
+      } catch (IOException e) {
+        logger.warn("Unable to load metadata from catalog '{}'", catalog);
+        continue;
+      }
       if (catalog.getReference() == null) {
         // Title
         metadata.setTitle(dc.getFirst(DublinCore.PROPERTY_TITLE));
@@ -125,10 +162,29 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
    * @see org.opencastproject.metadata.api.CatalogService#load(org.opencastproject.mediapackage.Catalog)
    */
   @Override
-  public DublinCoreCatalog load(Catalog catalog) {
-    DublinCoreCatalogImpl cat = new DublinCoreCatalogImpl(catalog);
-    cat.trustedHttpClient = trustedHttpClient;
-    return cat;
+  public DublinCoreCatalog load(Catalog catalog) throws IOException {
+    if(catalog == null) throw new IllegalArgumentException("Catalog must not be null");
+    URI uri = catalog.getURI();
+    if(uri == null) throw new IllegalStateException("Found catalog without a URI");
+    HttpGet get = new HttpGet(uri);
+    HttpResponse response = trustedHttpClient.execute(get);
+    int httpStatus = response.getStatusLine().getStatusCode();
+    if(httpStatus != HttpStatus.SC_OK) {
+      throw new IOException("Unable to load dublin core catalog from uri " + uri + ", HTTP status " + httpStatus);
+    }
+    InputStream in = response.getEntity().getContent();
+    return new DublinCoreCatalogImpl(in);
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.metadata.api.CatalogService#accepts(org.opencastproject.mediapackage.Catalog)
+   */
+  @Override
+  public boolean accepts(Catalog catalog) {
+    if(catalog == null) throw new IllegalArgumentException("Catalog must not be null");
+    MediaPackageElementFlavor flavor = catalog.getFlavor();
+    return flavor != null && (flavor.equals(DublinCoreCatalog.ANY_DUBLINCORE));
   }
 
   /**

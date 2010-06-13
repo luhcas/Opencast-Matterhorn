@@ -108,7 +108,7 @@ public class InspectWorkflowOperationHandlerTest {
     EasyMock.expect(dc.hasValue(DublinCore.PROPERTY_CREATED)).andReturn(false);
     dc.set((EName) EasyMock.anyObject(), (DublinCoreValue) EasyMock.anyObject());
     dc.toXml((ByteArrayOutputStream) EasyMock.anyObject(), EasyMock.anyBoolean());
-    EasyMock.expect(dc.getIdentifier()).andReturn("123");
+//    EasyMock.expect(dc.getIdentifier()).andReturn("123");
     EasyMock.replay(dc);
 
     dcService = org.easymock.classextension.EasyMock.createNiceMock(DublinCoreCatalogService.class);

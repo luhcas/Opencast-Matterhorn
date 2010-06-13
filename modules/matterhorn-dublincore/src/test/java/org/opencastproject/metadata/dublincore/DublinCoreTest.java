@@ -38,10 +38,12 @@ import org.opencastproject.mediapackage.NamespaceBindingException;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.UnknownFileTypeException;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -85,9 +87,11 @@ public class DublinCoreTest {
    * {@link org.opencastproject.mediapackage.dublincore.DublinCoreCatalogImpl#fromFile(java.io.File)} .
    */
   @Test
-  public void testFromFile() {
+  public void testFromFile() throws Exception {
     DublinCoreCatalog dc = null;
-    dc = DublinCoreCatalogImpl.fromURI(catalogFile.toURI());
+    FileInputStream in = new FileInputStream(catalogFile);
+    dc = new DublinCoreCatalogImpl(in);
+    IOUtils.closeQuietly(in);
 
     // Check if the fields are available
     assertEquals("ETH Zurich, Switzerland", dc.getFirst(PROPERTY_PUBLISHER, LANGUAGE_UNDEFINED));
@@ -106,7 +110,9 @@ public class DublinCoreTest {
     try {
 
       // Read the sample catalog
-      DublinCoreCatalog dcSample = DublinCoreCatalogImpl.fromURI(catalogFile.toURI());
+      FileInputStream in = new FileInputStream(catalogFile);
+      DublinCoreCatalog dcSample = new DublinCoreCatalogImpl(in);
+      IOUtils.closeQuietly(in);
 
       // Create a new catalog and fill it with a few fields
       DublinCoreCatalog dcNew = DublinCoreCatalogImpl.newInstance();
@@ -152,7 +158,7 @@ public class DublinCoreTest {
       trans.transform(source, result);
 
       // Re-read the saved catalog and test for its content
-      DublinCoreCatalog dcNewFromDisk = DublinCoreCatalogImpl.fromURI(dcTempFile.toURI());
+      DublinCoreCatalog dcNewFromDisk = new DublinCoreCatalogImpl(dcTempFile.toURI().toURL().openStream());
       assertEquals(dcSample.getFirst(PROPERTY_IDENTIFIER), dcNewFromDisk.getFirst(PROPERTY_IDENTIFIER));
       assertEquals(dcSample.getFirst(PROPERTY_TITLE, "en"), dcNewFromDisk.getFirst(PROPERTY_TITLE, "en"));
       assertEquals(dcSample.getFirst(PROPERTY_PUBLISHER), dcNewFromDisk.getFirst(PROPERTY_PUBLISHER));
@@ -174,12 +180,13 @@ public class DublinCoreTest {
     try {
 
       // Read the sample catalog
-      DublinCoreCatalog dcSample = DublinCoreCatalogImpl.fromURI(catalogFile.toURI());
-
+      FileInputStream in = new FileInputStream(catalogFile);
+      DublinCoreCatalog dcSample = new DublinCoreCatalogImpl(in);
+      IOUtils.closeQuietly(in);
+      
       // Create a new catalog and fill it with a few fields
-      DublinCoreCatalog dcNew = DublinCoreCatalogImpl.newInstance();
       File dcTempFile = new File(FileSupport.getTempDirectory(), Long.toString(System.currentTimeMillis()));
-      dcNew.setURI(dcTempFile.toURI());
+      DublinCoreCatalog dcNew = new DublinCoreCatalogImpl();
 
       // Add the required fields but the title
       dcNew.set(PROPERTY_IDENTIFIER, dcSample.getFirst(PROPERTY_IDENTIFIER));
@@ -192,7 +199,7 @@ public class DublinCoreTest {
       Transformer trans = transfac.newTransformer();
       trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
       trans.setOutputProperty(OutputKeys.METHOD, "xml");
-      FileWriter sw = new FileWriter(new File(dcNew.getURI()));
+      FileWriter sw = new FileWriter(dcTempFile);
       StreamResult result = new StreamResult(sw);
       DOMSource source = new DOMSource(dcNew.toXml());
       trans.transform(source, result);

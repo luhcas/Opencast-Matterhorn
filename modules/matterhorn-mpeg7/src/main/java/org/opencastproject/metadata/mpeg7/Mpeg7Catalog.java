@@ -16,8 +16,8 @@
 
 package org.opencastproject.metadata.mpeg7;
 
-import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.metadata.api.MetadataCatalog;
 
 import org.w3c.dom.Document;
 
@@ -29,11 +29,9 @@ import javax.xml.transform.TransformerException;
 /**
  * The <code>MPEG7</code> catalog encapsulates MPEG-7 metadata.
  */
-public interface Mpeg7Catalog extends Mpeg7, Catalog {
-
-  /** Element type definition */
-  // TODO Remove the generic mpeg7 flavor
-  MediaPackageElementFlavor FLAVOR = new MediaPackageElementFlavor("metadata", "mpeg-7", "MPEG-7 slides catalog");
+public interface Mpeg7Catalog extends Mpeg7, MetadataCatalog, Cloneable {
+  /** A flavor that matches any mpeg7 element */
+  MediaPackageElementFlavor ANY_MPEG7 = MediaPackageElementFlavor.parseFlavor("mpeg-7/*");
 
   /**
    * Saves the catalog to disk.
@@ -49,4 +47,5 @@ public interface Mpeg7Catalog extends Mpeg7, Catalog {
    */
   Document toXml() throws ParserConfigurationException, TransformerException, IOException;
 
+  Mpeg7Catalog clone();
 }

@@ -18,6 +18,7 @@ package org.opencastproject.workspace.api;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Provides efficient access java.io.File objects from potentially remote URIs. This helper service
@@ -40,6 +41,7 @@ public interface Workspace {
 
   /**
    * Store the data stream under the given media package and element IDs, specifying a filename.
+   * 
    * @param mediaPackageID
    * @param mediaPackageElementID
    * @param fileName
@@ -47,6 +49,26 @@ public interface Workspace {
    */
   URI put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in);
 
+  /**
+   * Gets a file from a collection
+   * @param collectionId the collection
+   * @param fileName the filename
+   * @return the file
+   * @throws NotFoundException
+   */
+  File getFromCollection(String collectionId, String fileName) throws NotFoundException;
+  
+  /**
+   * Stores the data stream in the given collection, overwriting any data with the same collection id and file name.
+   * 
+   * @param collectionId The collection to use for storing this data
+   * @param fileName the filename to use in the collection.
+   * @param in the inputstream
+   * @return the URI of the stored data
+   * @throws URISyntaxException if the filename can not be stored at a proper URI
+   */
+  URI putInCollection(String collectionId, String fileName, InputStream in) throws URISyntaxException;
+  
   /**
    * Delete the file stored at the given media package and element IDs.
    * @param mediaPackageID
@@ -56,16 +78,13 @@ public interface Workspace {
   void delete(String mediaPackageID, String mediaPackageElementID) throws NotFoundException;
 
   /**
-   * Get the URL of the file stored under the given media package and element IDs.  MediaPackages may reference elements
-   * that are not stored in the working file repository, so this method should not be relied upon to return a URI for
-   * every possible mediapackage.
-   * 
-   * FIXME: If this method isn't reliable, what good is it?
+   * Get the URL for a file stored under the given media package and element IDs.  MediaPackages may reference elements
+   * that are not yet stored in the working file repository, so this method will return a URI even if the file is not
+   * yet stored.
    * 
    * @param mediaPackageID
    * @param mediaPackageElementID
-   * @return
-   * @throws NotFoundException If the mediapackage element can not be found in the working file repository.
+   * @return the URI to the file
    */
   URI getURI(String mediaPackageID, String mediaPackageElementID) throws NotFoundException;
 

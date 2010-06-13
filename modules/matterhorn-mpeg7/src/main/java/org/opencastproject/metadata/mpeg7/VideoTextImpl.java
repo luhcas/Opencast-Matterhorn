@@ -247,16 +247,20 @@ public class VideoTextImpl implements VideoText {
     Element initialRegion = document.createElement("InitialRegion");
     parameterTrajectory.appendChild(initialRegion);
 
-    StringBuffer coordinates = new StringBuffer();
-    coordinates.append(boundary.getX()).append(" ");
-    coordinates.append(boundary.getY()).append(" ");
-    coordinates.append(boundary.getX() + boundary.getWidth()).append(" ");
-    coordinates.append(boundary.getY() + boundary.getHeight());
+    // FIXME: boundaries should not be null.  Fix the mpeg7 parser so it does not ignore videotext boundaries while
+    // parsing mpeg7 documents.
+    if(boundary != null) {
+      StringBuffer coordinates = new StringBuffer();
+      coordinates.append(boundary.getX()).append(" ");
+      coordinates.append(boundary.getY()).append(" ");
+      coordinates.append(boundary.getX() + boundary.getWidth()).append(" ");
+      coordinates.append(boundary.getY() + boundary.getHeight());
 
-    Element box = document.createElement("Box");
-    box.setAttribute("dim", "2 2");
-    box.appendChild(document.createTextNode(coordinates.toString()));
-    initialRegion.appendChild(box);
+      Element box = document.createElement("Box");
+      box.setAttribute("dim", "2 2");
+      box.appendChild(document.createTextNode(coordinates.toString()));
+      initialRegion.appendChild(box);
+    }
 
     // Text
     videoText.appendChild(text.toXml(document));

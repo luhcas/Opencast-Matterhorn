@@ -497,7 +497,7 @@ final class ManifestImpl {
         MediaPackageReference elementRef = new MediaPackageReferenceImpl(reference.getType(), reference.getIdentifier());
 
         // Try to find a derived match if possible
-        while (includeDerived && (r = getElement(r).getReference()) != null) {
+        while (includeDerived && getElement(r) != null && (r = getElement(r).getReference()) != null) {
           if (r.matches(elementRef)) {
             indirectHit = true;
             break;

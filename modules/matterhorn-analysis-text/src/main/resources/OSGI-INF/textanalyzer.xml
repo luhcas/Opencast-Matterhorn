@@ -13,8 +13,8 @@
     cardinality="1..1" policy="static" bind="setRemoteServiceManager" />
   <reference name="repository" interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository"
     cardinality="1..1" policy="static" bind="setFileRepository"/>
-  <reference name="trustedHttpClient" interface="org.opencastproject.security.api.TrustedHttpClient"
-    cardinality="1..1" policy="static" bind="setTrustedHttpClient" />
   <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
     cardinality="1..1" policy="static" bind="setWorkspace" />
+  <reference name="Mpeg7Service" interface="org.opencastproject.metadata.mpeg7.Mpeg7CatalogService"
+    cardinality="1..1" policy="static" bind="setMpeg7CatalogService" />
 </scr:component>

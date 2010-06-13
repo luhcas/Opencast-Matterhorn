@@ -19,6 +19,7 @@ package org.opencastproject.metadata.dublincore;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.XMLCatalog;
 import org.opencastproject.mediapackage.XMLCatalogImpl;
+import org.opencastproject.metadata.api.MetadataCatalog;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -27,6 +28,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  * <code>http://dublincore.org/</code>.
  */
 @XmlJavaTypeAdapter(XMLCatalogImpl.Adapter.class)
-public interface DublinCoreCatalog extends XMLCatalog, DublinCore, Cloneable {
+public interface DublinCoreCatalog extends XMLCatalog, DublinCore, MetadataCatalog, Cloneable {
+  /** A flavor that matches any dublin core element */
   MediaPackageElementFlavor ANY_DUBLINCORE = MediaPackageElementFlavor.parseFlavor("dublincore/*");
 }

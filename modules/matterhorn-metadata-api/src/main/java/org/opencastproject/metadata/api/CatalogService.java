@@ -17,10 +17,41 @@ package org.opencastproject.metadata.api;
 
 import org.opencastproject.mediapackage.Catalog;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * 
  */
-public interface CatalogService<T extends Catalog> {
+public interface CatalogService<T extends MetadataCatalog> {
+  /**
+   * Returns a new, empty instance of the catalog
+   * @return
+   */
   T newInstance();
-  T load(Catalog catalog);
+  
+  /**
+   * Loads the catalog contents from a mediapackage's representation of a catalog
+   * @param catalog the mediapackage's representation of a catalog
+   * @return the catalog contents
+   * @throws IllegalArgumentException if the mediapackage catalog is not readable by this catalog service
+   * @throws IOException if the content of the catalog can not be loaded
+   */
+  T load(Catalog catalog) throws IllegalArgumentException, IOException;
+  
+  /**
+   * Whether the mediapackage catalog is readable by this catalog service
+   * @param catalog the mediapackage catalog
+   * @return
+   */
+  boolean accepts(Catalog catalog);
+  
+  /**
+   * Serializes a catalog
+   * 
+   * @param catalog The catalog to serialize
+   * @return the (usually xml) stream
+   * @throws IOException if the catalog can not be serialized properly
+   */
+  InputStream serialize(T catalog) throws IOException;
 }

@@ -34,8 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,6 +59,7 @@ public class WorkspaceImpl implements Workspace {
   protected WorkingFileRepository repo;
   protected TrustedHttpClient trustedHttpClient;
   protected String rootDirectory = null;
+  protected String collectionsDir = null;
   protected Map<String, String> filesystemMappings;
   protected long maxAgeInSeconds = -1;
   protected long garbageCollectionPeriodInSeconds = -1;
@@ -252,16 +251,11 @@ public class WorkspaceImpl implements Workspace {
     repo.delete(mediaPackageID, mediaPackageElementID);
   }
 
-  public InputStream get(String mediaPackageID, String mediaPackageElementID) throws NotFoundException {
-    URI uri = repo.getURI(mediaPackageID, mediaPackageElementID);
-    File f = get(uri);
-    try {
-      return new FileInputStream(f);
-    } catch (FileNotFoundException e) {
-      throw new NotFoundException(e);
-    }
-  }
-
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workspace.api.Workspace#put(java.lang.String, java.lang.String, java.lang.String, java.io.InputStream)
+   */
+  @Override
   public URI put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in) {
     String safeFileName = toFilesystemSafeName(fileName);
     String shortSafeFileName = safeFileName.lastIndexOf("_") > 0 ? safeFileName
@@ -292,6 +286,44 @@ public class WorkspaceImpl implements Workspace {
     }
     return uri;
   }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workspace.api.Workspace#getFromCollection(java.lang.String, java.lang.String)
+   */
+  @Override
+  public File getFromCollection(String collectionId, String fileName) throws NotFoundException {
+    File collectionDirectory = new File(collectionsDir, collectionId);
+    try {
+      FileUtils.forceMkdir(collectionDirectory);
+    } catch(IOException e) {
+      throw new IllegalStateException("unable to create directory " + collectionDirectory.getAbsolutePath());
+    }
+    File outFile = new File(collectionDirectory, fileName);
+    InputStream in = null;
+    OutputStream out = null;
+    try {
+      in = repo.getFromCollection(collectionId, fileName);
+      out = new FileOutputStream(outFile);
+      IOUtils.copy(in, out);
+    } catch(IOException e) {
+      throw new NotFoundException(e);
+    } finally {
+      IOUtils.closeQuietly(in);
+      IOUtils.closeQuietly(out);
+    }
+    return outFile;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workspace.api.Workspace#putInCollection(java.lang.String, java.lang.String, java.io.InputStream)
+   */
+  @Override
+  public URI putInCollection(String collectionId, String fileName, InputStream in) throws URISyntaxException {
+    return repo.putInCollection(collectionId, fileName, in);
+  }
+
 
   public void setRepository(WorkingFileRepository repo) {
     this.repo = repo;
@@ -307,9 +339,19 @@ public class WorkspaceImpl implements Workspace {
       try {
         FileUtils.forceMkdir(f);
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        throw new IllegalStateException(e);
       }
     }
+    // also create a parent directory for collections
+    File collectionsDir = new File(f, "_collections");
+    if (!f.exists()) {
+      try {
+        FileUtils.forceMkdir(collectionsDir);
+      } catch (Exception e) {
+        throw new IllegalStateException(e);
+      }
+    }
+    this.collectionsDir = collectionsDir.getAbsolutePath();
   }
 
   /**
@@ -318,10 +360,7 @@ public class WorkspaceImpl implements Workspace {
    * @see org.opencastproject.workspace.api.Workspace#getURI(java.lang.String, java.lang.String)
    */
   public URI getURI(String mediaPackageID, String mediaPackageElementID) throws NotFoundException {
-    URI uri = repo.getURI(mediaPackageID, mediaPackageElementID);
-    if (uri == null)
-      throw new NotFoundException();
-    return uri;
+    return repo.getURI(mediaPackageID, mediaPackageElementID);
   }
 
   class GarbageCollectionTimer extends TimerTask {
@@ -354,5 +393,4 @@ public class WorkspaceImpl implements Workspace {
     }
 
   }
-
 }

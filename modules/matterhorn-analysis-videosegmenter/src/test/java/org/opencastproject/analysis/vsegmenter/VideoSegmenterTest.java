@@ -20,23 +20,23 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.track.TrackImpl;
 import org.opencastproject.mediapackage.track.VideoStreamImpl;
-import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.MediaTime;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
+import org.opencastproject.metadata.mpeg7.Mpeg7CatalogImpl;
+import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.MultimediaContentType;
+import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.Workspace;
-
-import de.schlichtherle.io.File;
-import de.schlichtherle.io.FileOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -46,6 +46,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Iterator;
@@ -69,6 +71,8 @@ public class VideoSegmenterTest {
 
   /** The video segmenter */
   protected VideoSegmenter vsegmenter = null;
+
+  protected Mpeg7CatalogService mpeg7Service = null;
 
   /** The media url */
   protected static TrackImpl track = null;
@@ -101,6 +105,7 @@ public class VideoSegmenterTest {
    */
   @Before
   public void setUp() throws Exception {
+    mpeg7Service = new Mpeg7CatalogService();
     WorkingFileRepository fileRepo = EasyMock.createNiceMock(WorkingFileRepository.class);
     EasyMock.expect(
             fileRepo.putInCollection((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
@@ -121,6 +126,16 @@ public class VideoSegmenterTest {
     EasyMock.replay(fileRepo);
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(workspace.get((URI) EasyMock.anyObject())).andReturn(new File(track.getURI()));
+    final File tempFile = File.createTempFile(getClass().getName(), "xml");
+    EasyMock.expect(
+            workspace.putInCollection((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (InputStream) EasyMock.anyObject())).andAnswer(new IAnswer<URI>() {
+                      public URI answer() throws Throwable {
+                        InputStream in = (InputStream)EasyMock.getCurrentArguments()[2];
+                        IOUtils.copy(in, new FileOutputStream(tempFile));
+                        return tempFile.toURI();
+                      }
+                    });
     EasyMock.replay(workspace);
     Receipt receipt = new ReceiptStub();
 
@@ -130,7 +145,7 @@ public class VideoSegmenterTest {
 
     vsegmenter = new VideoSegmenter();
     vsegmenter.setExecutorThreads(1);
-    vsegmenter.setFileRepository(fileRepo);
+    vsegmenter.setMpeg7CatalogService(mpeg7Service);
     vsegmenter.setWorkspace(workspace);
     vsegmenter.setRemoteServiceManager(remoteServiceManager);
   }
@@ -146,15 +161,17 @@ public class VideoSegmenterTest {
   }
 
   @Test
-  public void testAnalyze() {
+  public void testAnalyze() throws Exception {
     Receipt receipt = vsegmenter.analyze(track, true);
-    Mpeg7Catalog catalog = (Mpeg7Catalog) receipt.getElement();
+    Catalog catalog = (Catalog) receipt.getElement();
 
-    // Is there multimedia content in the catalog?
-    assertTrue("Audiovisual content was expected", catalog.hasVideoContent());
-    assertNotNull("Audiovisual content expected", catalog.multimediaContent().next().elements().hasNext());
+    Mpeg7Catalog mpeg7 = new Mpeg7CatalogImpl(catalog.getURI().toURL().openStream());
 
-    MultimediaContentType contentType = catalog.multimediaContent().next().elements().next();
+    // Is there multimedia content in the mpeg7?
+    assertTrue("Audiovisual content was expected", mpeg7.hasVideoContent());
+    assertNotNull("Audiovisual content expected", mpeg7.multimediaContent().next().elements().hasNext());
+
+    MultimediaContentType contentType = mpeg7.multimediaContent().next().elements().next();
 
     // Is there at least one segment?
     TemporalDecomposition<? extends Segment> segments = contentType.getTemporalDecomposition();
