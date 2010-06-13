@@ -147,12 +147,6 @@ export CLEANUP=./cleanup.sh                # This variable is exported because t
 SCRIPTS=( "$SETUP_USER" "$INSTALL_VGA2USB" "$SETUP_DEVICES" "$INSTALL_DEPENDENCIES" "$SETUP_ENVIROMENT" "$SETUP_SOURCE" "$SETUP_BOOT" "$CLEANUP" )
 SCRIPTS_EXT=docs/scripts/ubuntu_capture_agent
 
-for (( i = 0; i < ${#SCRIPTS[@]}; i++ )); do
-    echo ${SCRIPTS[$i]}
-done
-
-exit 0
-
 # End of variables section########################################################################################
 
 

@@ -78,15 +78,12 @@ sun-java5-jdk shared/accepted-sun-dlj-v1-1 boolean true
 ?sun-java6-jdk shared/accepted-sun-dlj-v1-1 boolean true
 EOF
 
-
-echo "Installing third party packages from Ubuntu repository, this may take some time... "
-
 # Changes the default array delimiter: from 'space' to 'newline'
 IFS='
 '
 
 # Gets the list of the packages to install
-pkgs=( $GOOD_PKG_LIST )
+pkgs=( $PKG_LIST )
 bad=( $BAD_PKG_LIST )
 reason=( $BAD_PKG_REASON )
 
@@ -96,12 +93,14 @@ for (( i = 0; i < ${#bad[@]}; i++ )); do
         read -p "Please answer [y]es or [N]o: " answer
     done
     if [[ -n "$(echo ${answer:-N} | grep -i '^y')" ]]; then
-	pkgs[${#pkgs}]=${bad[$i]}
+	pkgs[${#pkgs[@]}]=${bad[$i]}
     fi
 done
 
 # Restore the default array delimiter
 IFS=' '
+
+echo "Installing third party packages from Ubuntu repository, this may take some time... "
 
 # Check which required packages are already installed
 for (( i = 0; i < ${#pkgs[@]}; i++ )); do
@@ -111,7 +110,7 @@ for (( i = 0; i < ${#pkgs[@]}; i++ )); do
 done
 
 # Install the required 3rd party packages
-apt-get -y -qq --force-yes install ${noinst[@]} 2> /dev/null
+apt-get -y -qq --force-yes install ${noinst[@]} > /dev/null
 
 if [[ $? -ne 0 ]]; then
     echo "Error!"
@@ -140,7 +139,6 @@ while [[ true ]]; do
     if [[ $? -eq 0 ]]; then
 	echo -n "Uncompressing... "
 	dir_name=$(tar tzf ${FELIX_FILENAME} | grep -m 1 '^.*$')
-	echo $dir_name
 	tar xzf ${FELIX_FILENAME}
 	if [[ $? -eq 0 ]]; then
 	    rm -rf $FELIX_HOME
