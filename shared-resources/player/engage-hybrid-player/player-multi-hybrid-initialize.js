@@ -29,6 +29,7 @@ Opencast.Initialize = (function ()
     clickLecturerSearchField = false,
     formatOne = 0,
     formatTwo = 0,
+    formatSingle = 0,
     size = "";
     
     /**
@@ -673,15 +674,15 @@ Opencast.Initialize = (function ()
         }
         Opencast.Player.setBrowserWidth(myWidth);
         
-        var creatorPostfix = "";
-        var creator = $('#oc-creator').html();
-        if(creator !== "")
-            creatorPostfix = " by " + $('#oc-creator').html();
-        
-        $('#oc_title').html($('#oc-title').html() + creatorPostfix);
+        $('#oc_title').html($('#oc-title').html() + " by " + $('#oc-creator').html());
         
     }
-    
+
+    /**
+        @memberOf Opencast.Player
+        @description Get the new height of the flash component.
+        @param Number mediaPercentOne, Number mediaPercentTwo
+     */
     function getNewHeight(mediaPercentOne, mediaPercentTwo)
     {
         var newHeight = 0;
@@ -745,7 +746,6 @@ Opencast.Initialize = (function ()
         if (newHeight < 300)
         {
             newHeight = 300;
-            
             switch (size) 
             {
             case VIDEOSIZEBIGRIGHT:
@@ -776,12 +776,77 @@ Opencast.Initialize = (function ()
         
         return newHeight + 10;
     }
+
     
+    
+    
+
+    /**
+        @memberOf Opencast.Player
+        @description Get the new height of the flash component.
+        @param Number mediaPercentOne, Number mediaPercentTwo
+     */
+    function getNewHeightSingle()
+    {
+    	
+    	var newHeight = 0;
+    	
+    	
+        var flashContainerWidth = $('#oc_flash-player').width() - 10;
+        
+       
+        var newHeight = flashContainerWidth / formatSingle;
+        
+        
+        
+        var newWidth = newHeight * formatSingle;
+        
+        
+   
+        var otherContentHeight = 0;
+        
+        if (Opencast.Player.getShowSections() === true)
+        {
+            otherContentHeight = 310;
+        }
+        if (Opencast.Player.getShowSections() === false)
+        {
+            otherContentHeight = 200;
+        }
+  
+        var contentHeight = newHeight + otherContentHeight;
+        
+        if (contentHeight > myHeight)
+        {
+            newHeight = newHeight - (contentHeight - myHeight);
+            
+            
+        }
+  
+        if (newHeight < 300)
+        {
+            newHeight = 300;
+            
+            
+        }
+        
+        return newHeight + 10;
+    }
+
+    
+    
+    
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the new height of the flash component
+     */
     function doResize()
     {
         reportSize();
        
         size = Opencast.Player.getCurrentVideoSize();
+        
         var newHeight = 0;
         
         switch (size) {
@@ -789,7 +854,7 @@ Opencast.Initialize = (function ()
             newHeight = 200;
             break;
         case VIDEOSIZESINGLE:
-            newHeight = 600;
+            newHeight = getNewHeightSingle();
             break;
         case VIDEOSIZEBIGRIGHT:
             newHeight = getNewHeight(33.333333333333, 66.666666666);
@@ -821,28 +886,49 @@ Opencast.Initialize = (function ()
         $('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
     }
 
+    /**
+        @memberOf Opencast.Player
+        @description init function
+     */
     function init()
     {
         window.onresize = doResize;
         doResize();
     }
     
+
+    /**
+        @memberOf Opencast.Player
+        @description Set media resuliton of the videos
+        @param Number mediaResolutionOne, Number mediaResolutionTwo
+     */
     function setMediaResolution(mediaResolutionOne, mediaResolutionTwo)
     {
-        var mediaResolutionOneString = mediaResolutionOne;
+    	var mediaResolutionOneString = mediaResolutionOne;
         var mediaResolutionTwoString = mediaResolutionTwo;
         var mediaResolutionOneArray = mediaResolutionOneString.split('x');
-        var mediaResolutionTwoArray = mediaResolutionTwoString.split('x');
-        var mediaOneWidth = parseInt(mediaResolutionOneArray[0], 10);
-        var mediaOneHeight = parseInt(mediaResolutionOneArray[1], 10);
-        var mediaTwoWidth = parseInt(mediaResolutionTwoArray[0], 10);
-        var mediaTwoHeight = parseInt(mediaResolutionTwoArray[1], 10);
         
-        formatOne = mediaOneWidth / mediaOneHeight;
-        formatTwo = mediaTwoWidth / mediaTwoHeight;
+    	if (mediaResolutionTwoString !== '')
+        {
+        	var mediaResolutionTwoArray = mediaResolutionTwoString.split('x');
+            var mediaOneWidth = parseInt(mediaResolutionOneArray[0], 10);
+            var mediaOneHeight = parseInt(mediaResolutionOneArray[1], 10);
+            var mediaTwoWidth = parseInt(mediaResolutionTwoArray[0], 10);
+            var mediaTwoHeight = parseInt(mediaResolutionTwoArray[1], 10);
+            
+            formatOne = mediaOneWidth / mediaOneHeight;
+            formatTwo = mediaTwoWidth / mediaTwoHeight;
+        }
+    	else
+        {
+        	
+        	var mediaSingleWidth = parseInt(mediaResolutionOneArray[0], 10);
+            var mediaSingleHeight = parseInt(mediaResolutionOneArray[1], 10);
+            formatSingle = mediaSingleWidth / mediaSingleHeight;
+        	
+        }
+    	
     }
-    
-    
     return {
         doResize : doResize,
         dropdownVideo_open : dropdownVideo_open,

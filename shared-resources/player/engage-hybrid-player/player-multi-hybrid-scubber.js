@@ -31,8 +31,7 @@ Opencast.Scrubber = (function ()
         {
             $("#scrubber").css("left", $(this).css("left"));
             var newPosition = Math.round(($("#draggable").position().left / $("#scubber-channel").width()) * Opencast.Player.getDuration());
-            Videodisplay.seek(newPosition);
-   
+            //Videodisplay.seek(newPosition);
         });
 
         $('#draggable').bind('dragstop', function (event, ui)         {

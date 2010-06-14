@@ -581,7 +581,7 @@ Opencast.Player = (function () {
             hideSlides();
             setShowSections(false);
         }
-        Opencast.Initialize.doTest();
+        Opencast.Initialize.doResize();
     }
 
     /**
@@ -672,7 +672,7 @@ Opencast.Player = (function () {
             hideEmbed();
             setShowSections(false);
         }
-        Opencast.Initialize.doTest();
+        Opencast.Initialize.doResize();
     }
     
     /**
@@ -693,7 +693,7 @@ Opencast.Player = (function () {
             hideBookmarks();
             setShowSections(false);
         }
-        Opencast.Initialize.doTest();
+        Opencast.Initialize.doResize();
     }
     
     /**
@@ -1127,12 +1127,14 @@ Opencast.Player = (function () {
      */
     function videoSizeControlAudioDisplay()
     {
-        if (getDisplayMode() === MULTIPLAYER)
+     
+    	if (getDisplayMode() === MULTIPLAYER)
         {
             Videodisplay.videoSizeControl(100, 0);
         }
         $("#oc_btn-dropdown").attr("className", "oc_btn-audioDisplay");
         setCurrentVideoSize(VIDEOSIZEAUDIO);
+        
     }
     
     /**
@@ -1498,6 +1500,7 @@ Opencast.Player = (function () {
             $('#oc_video-size-dropdown-div').css("width", '90px');
             $('#oc_video-size-dropdown-div').css("margin-left", '-22px');
             setDisplayMode(displayMode);
+            setCurrentVideoSize(VIDEOSIZESINGLE);
         }
         else if (displayMode === SINGLEPLAYERWITHSLIDES)
         {
@@ -1516,6 +1519,7 @@ Opencast.Player = (function () {
         {
             $("#oc_btn-dropdown").attr("className", "oc_btn-audioDisplay");
             setDisplayMode(displayMode);
+            setCurrentVideoSize(VIDEOSIZEAUDIO);
         }
     }
     
