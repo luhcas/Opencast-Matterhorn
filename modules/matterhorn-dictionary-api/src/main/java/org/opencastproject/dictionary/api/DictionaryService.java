@@ -20,6 +20,8 @@ package org.opencastproject.dictionary.api;
  * Api for dictionary service, aimed at correcting textual information in catalogs.
  */
 public interface DictionaryService {
+  
+  // TODO add methods: DictToken[] clean(string[]); void generateStopWords(string[])
 
   /**
    * Takes the given element and returns a receipt that can be used to get the resulting
@@ -60,6 +62,20 @@ public interface DictionaryService {
    *          language for which the word will be added
    * @param count
    *          occurrence of the word being added
+   * @param weight
+   *          percentage of occurrences of the word being added
+   */
+  public void addWord(String word, String language, Integer count, Double weight);
+  
+  /**
+   * Adds a specified word to the dictionary for the specified language
+   * 
+   * @param word
+   *          word that will be added to the dictionary
+   * @param language
+   *          language for which the word will be added
+   * @param count
+   *          occurrence of the word being added
    */
   public void addWord(String word, String language, Integer count);
 
@@ -71,7 +87,7 @@ public interface DictionaryService {
    * @param language
    *          language in which the stop word is being added
    */
-  public void addStopWord(String word, String language);
+  public void markStopWord(String word, String language);
 
   /**
    * Gets a normalized value of word frequency for a given language

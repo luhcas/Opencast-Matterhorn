@@ -15,14 +15,18 @@
  */
 package org.opencastproject.dictionary.impl.parser;
 
+//import org.apache.commons.csv.CSVParser;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URI;
@@ -75,6 +79,7 @@ public class PopulateDictionary {
     /** Timer for statistics */
     private long measureTime = 0;
     private long docParsed = 0;
+    private long numAllW = 0;
 
     /** The element content */
     private StringBuffer content = new StringBuffer();
@@ -154,7 +159,6 @@ public class PopulateDictionary {
 
     @Override
     public void endDocument() {
-
       System.out.println("-------------------------------------");
       SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
       format.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -164,6 +168,23 @@ public class PopulateDictionary {
       System.out.println("Number of unique words:" + wordCount.size());
 
       try {
+        // csv
+        wordlist.close();
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(lang + ".csv"), "UTF8"));
+        bw.write("#numDoc:"+docParsed);bw.newLine();
+        bw.write("#numUniqueW:"+wordCount.size());bw.newLine();
+        bw.write("#numAllW:"+numAllW);bw.newLine();
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(lang + ".wordlist.csv"),
+                "UTF8"), BUFFER_LENGTH);
+//        CSVParser csvP = new CSVParser(br);
+        String w;
+//        while ((w = csvP.nextValue()) != null) {
+//          bw.write(w);
+//          bw.write(',');
+//          bw.write(getCount(w).toString());
+//          bw.newLine();
+//        }
+        bw.close();
 
         // dict object
         FileOutputStream fos = new FileOutputStream(lang + ".dict");
@@ -187,6 +208,8 @@ public class PopulateDictionary {
         outStats.write("All documents parsed:" + docParsed);
         outStats.newLine();
         outStats.write("Number of unique words:" + wordCount.size());
+        outStats.newLine();
+        outStats.write("Number of all words:" + numAllW);
         outStats.newLine();
         outStats.newLine();
         outStats.close();
@@ -232,6 +255,7 @@ public class PopulateDictionary {
       for (String word : getWords(str)) {
         if (word.length() == 0)
           continue;
+        numAllW++;
         String w = word.toUpperCase();
 
         Long hash = StringUtil.hash(w);
@@ -309,6 +333,23 @@ public class PopulateDictionary {
           sb.append(line);
       }
       return sb.toString();
+    }
+    
+    private Integer getCount(String word) {
+      word = word.toUpperCase();
+      Long hash = StringUtil.hash(word);
+      return getCount(hash);
+    }
+
+    private Integer getCount(Long hash) {
+      try {
+        int count = wordCount.get(hash);
+        // System.out.println(count);
+        return count;
+      } catch (Exception e) {
+        // System.out.println("Not found");
+      }
+      return 0;
     }
 
   }
