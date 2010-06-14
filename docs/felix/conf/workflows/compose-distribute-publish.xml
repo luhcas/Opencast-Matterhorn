@@ -79,7 +79,7 @@
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">flash.http</configuration>
+        <configuration key="encoding-profile">flash.vga</configuration>
       </configurations>
     </operation>
     <operation
@@ -106,6 +106,34 @@
         <configuration key="encoding-profile">flash.http</configuration>
       </configurations>
     </operation>
+    <operation
+      id="compose"
+      fail-on-error="false"
+      exception-handler-workflow="error"
+      description="Encode presenter audio to mp3 download">
+      <configurations>
+        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="source-video-flavor">*/source</configuration>
+        <configuration key="target-flavor">presenter/delivery</configuration>
+        <configuration key="target-tags">engage, rss, atom</configuration>
+        <configuration key="encoding-profile">mp3.http</configuration>
+      </configurations>
+    </operation>    
+    
+<!--    <operation-->
+<!--      id="compose"-->
+<!--      fail-on-error="false"-->
+<!--      exception-handler-workflow="error"-->
+<!--      description="Encode presenter audio to Flash download">-->
+<!--      <configurations>-->
+<!--        <configuration key="source-audio-flavor">*/source</configuration>-->
+<!---->
+<!--        <configuration key="source-video-flavor">*/source</configuration>-->
+<!--        <configuration key="target-flavor">presenter/delivery</configuration>-->
+<!--        <configuration key="target-tags">engage, rss, atom</configuration>-->
+<!--        <configuration key="encoding-profile">mp3.http</configuration>-->
+<!--      </configurations>-->
+<!--    </operation>-->
 
     <!-- encode to quicktime download -->
 
@@ -286,16 +314,16 @@
     </operation>
     
     <!-- hold for review -->
-    <operation
-      id="review"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Waiting for user to review recording">
-      <configurations>
-        <configuration key="source-tag">preview</configuration>
-        <configuration key="required-property">${review.hold}</configuration>
-      </configurations>
-    </operation>
+<!--    <operation-->
+<!--      id="review"-->
+<!--      fail-on-error="true"-->
+<!--      exception-handler-workflow="error"-->
+<!--      description="Waiting for user to review recording">-->
+<!--      <configurations>-->
+<!--        <configuration key="source-tag">preview</configuration>-->
+<!--        <configuration key="required-property">${review.hold}</configuration>-->
+<!--      </configurations>-->
+<!--    </operation>-->
 
     <operation
       id="distribute-download"
@@ -307,6 +335,18 @@
         <configuration key="target-tags">publish,engage</configuration>
       </configurations>
     </operation>
+    
+<!--    <operation-->
+<!--    id="distribute-streaming"-->
+<!--    fail-on-error="true"-->
+<!--    exception-handler-workflow="error"-->
+<!--    description="Distribute media to the local streaming server">-->
+<!--  	<configurations>-->
+<!--    	<configuration key="source-tags">engage,atom,rss</configuration>-->
+<!--    	<configuration key="target-tags">publish</configuration>-->
+<!--  	</configurations>-->
+<!--	</operation>-->
+    
 
     <operation
       id="publish"
