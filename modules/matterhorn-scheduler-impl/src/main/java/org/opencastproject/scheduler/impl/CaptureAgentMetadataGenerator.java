@@ -72,8 +72,8 @@ public class CaptureAgentMetadataGenerator {
     }
     
     Properties caCatalog = new Properties();
-    
-    caCatalog.setProperty("capture.device.names", event.getValue("resources"));
+    if (event.containsKey("resources"))
+      caCatalog.setProperty("capture.device.names", event.getValue("resources"));
     for (Entry<String, String> e : caMetadata.entrySet()) {
       caCatalog.put (e.getKey(), e.getValue());
     }       

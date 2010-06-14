@@ -100,6 +100,7 @@ public class CalendarGenerator {
     DateTime endDate = new DateTime(e.getEnddate());
     startDate.setUtc(true);
     endDate.setUtc(true);
+    
     VEvent event = new VEvent(startDate, endDate, e.getValue("title"));
     try {
       ParameterList pl = new ParameterList();
@@ -141,10 +142,9 @@ public class CalendarGenerator {
         caParameters.add(new FmtType("application/text"));        
         caParameters.add(Value.BINARY);
         caParameters.add(Encoding.BASE64);
-        caParameters.add(new XParameter("X-APPLE-FILENAME", "org.opencastproject.capture.agent.properties"));
+        caParameters.add(new XParameter("X-APPLE-FILENAME", "org.opencastproject.capture.agent.properties"));    
         Attach agentsAttachment = new Attach(caParameters, caGenerator.generateAsString(e).getBytes("UTF-8"));
         event.getProperties().add(agentsAttachment);
-
         
     } catch (Exception e1) {
       logger.error("could not create Calendar entry for Event {}. Reason : {} ", e.toString(), e1.getMessage());
