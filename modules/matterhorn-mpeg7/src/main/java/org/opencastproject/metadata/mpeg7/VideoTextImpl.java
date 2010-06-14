@@ -236,31 +236,29 @@ public class VideoTextImpl implements VideoText {
     if (locator != null)
       videoText.appendChild(locator.toXml(document));
 
-    // Boundary
+    // Temporal Mask (Boundary)
     Element temporalMask = document.createElement("SpatioTemporalMask");
+    videoText.appendChild(temporalMask);
+
     Element subRegion = document.createElement("SubRegion");
     temporalMask.appendChild(subRegion);
     Element parameterTrajectory = document.createElement("ParameterTrajectory");
     subRegion.appendChild(parameterTrajectory);
 
-    parameterTrajectory.appendChild(new MediaTimeImpl(new MediaTimePointImpl(0), null).toXml(document));
+    parameterTrajectory.appendChild(new MediaTimeImpl(new MediaTimePointImpl(), null).toXml(document));
     Element initialRegion = document.createElement("InitialRegion");
     parameterTrajectory.appendChild(initialRegion);
 
-    // FIXME: boundaries should not be null.  Fix the mpeg7 parser so it does not ignore videotext boundaries while
-    // parsing mpeg7 documents.
-    if(boundary != null) {
-      StringBuffer coordinates = new StringBuffer();
-      coordinates.append(boundary.getX()).append(" ");
-      coordinates.append(boundary.getY()).append(" ");
-      coordinates.append(boundary.getX() + boundary.getWidth()).append(" ");
-      coordinates.append(boundary.getY() + boundary.getHeight());
+    StringBuffer coordinates = new StringBuffer();
+    coordinates.append(boundary.getX()).append(" ");
+    coordinates.append(boundary.getY()).append(" ");
+    coordinates.append(boundary.getX() + boundary.getWidth()).append(" ");
+    coordinates.append(boundary.getY() + boundary.getHeight());
 
-      Element box = document.createElement("Box");
-      box.setAttribute("dim", "2 2");
-      box.appendChild(document.createTextNode(coordinates.toString()));
-      initialRegion.appendChild(box);
-    }
+    Element box = document.createElement("Box");
+    box.setAttribute("dim", "2 2");
+    box.appendChild(document.createTextNode(coordinates.toString()));
+    initialRegion.appendChild(box);
 
     // Text
     videoText.appendChild(text.toXml(document));

@@ -24,11 +24,12 @@ import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class represents an ocropus output frame that holds a number of words found on an image along with several
+ * This class represents an ocropus output frame that holds a number of lines found on an image along with several
  * formatting information for priority calculation.
  */
 public class OcropusTextFrame {
@@ -37,7 +38,7 @@ public class OcropusTextFrame {
   private static final Logger logger = LoggerFactory.getLogger(OcropusTextFrame.class);
 
   /** Words found on an output frame */
-  protected ArrayList<OcropusWord> words = new ArrayList<OcropusWord>();
+  protected ArrayList<OcropusLine> lines = new ArrayList<OcropusLine>();
 
   /**
    * Parses the ocropus output file and extracts the text information contained therein.
@@ -69,7 +70,7 @@ public class OcropusTextFrame {
         continue;
       }
 
-      // Note: this box is per line (instead of per word). 
+      // Note: this box is per line (instead of per text). 
       Rectangle textBoundaries = new Rectangle(
         Integer.parseInt(values[0]), 
         Integer.parseInt(values[1]),
@@ -77,21 +78,17 @@ public class OcropusTextFrame {
         Integer.parseInt(values[3]) - Integer.parseInt(values[1])
       );
 
-      // for every word:
+      // remove beginning and tailing whitespace and punctuation from every text
+      List<String> words = new ArrayList<String>();
       for (String word : line.split(" ")) {
-
-        // remove beginning and tailing whitespace and punctuation from every word
         word = word.replaceAll("^[\\W]*|[\\W]*$", "");
-
-        // if word is not empty string
         if (!word.equals("")) {
-
-          // add the word an the hints to the item list
-          OcropusWord item = new OcropusWord(word, textBoundaries);
-
-          textFrame.words.add(item);
+          words.add(word);
         }
       }
+      if(words.size() == 0) continue;
+      OcropusLine ocrLine = new OcropusLine(words.toArray(new String[words.size()]), textBoundaries);
+      textFrame.lines.add(ocrLine);
     }
 
     return textFrame;
@@ -103,16 +100,16 @@ public class OcropusTextFrame {
    * @return <code>true</code> if there is text
    */
   public boolean hasText() {
-    return words.size() > 0;
+    return lines.size() > 0;
   }
   
   /**
-   * Returns the words found on the frame or an empty array if no words have been found at all.
+   * Returns the lines found on the frame or an empty array if no lines have been found at all.
    * 
-   * @return the words
+   * @return the lines
    */
-  public OcropusWord[] getWords() {
-    return words.toArray(new OcropusWord[words.size()]);
+  public OcropusLine[] getLines() {
+    return lines.toArray(new OcropusLine[lines.size()]);
   }
 
 }

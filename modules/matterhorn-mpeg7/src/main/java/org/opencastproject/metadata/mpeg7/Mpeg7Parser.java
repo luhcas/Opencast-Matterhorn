@@ -223,6 +223,7 @@ public class Mpeg7Parser extends DefaultHandler {
     if ("VideoText".equals(localName)) {
       String id = attributes.getValue("id");
       videoText = new VideoTextImpl(id);
+      state = ParserState.VideoText;
     }
 
     // Textual
@@ -331,8 +332,8 @@ public class Mpeg7Parser extends DefaultHandler {
         throw new IllegalStateException("Box coordinates '" + tagContent + "' is malformatted");
       int[] coordsL = new int[4];
       for (int i=0; i < 4; i++)
-        coordsL[i] = Integer.parseInt(coords[i]);
-      videoText.setBoundary(new Rectangle(coordsL[0], coordsL[1], coordsL[2], coordsL[3]));
+        coordsL[i] = (int)Float.parseFloat(coords[i]);
+      videoText.setBoundary(new Rectangle(coordsL[0], coordsL[1], (coordsL[2] - coordsL[0]), coordsL[3] - coordsL[1]));
     }
 
   }

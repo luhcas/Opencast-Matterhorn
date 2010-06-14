@@ -281,13 +281,17 @@ public class MediaTimePointImpl implements MediaTimePoint {
    * @param date
    *          the date
    */
-  private void parseDate(String date) {
+  protected void parseDate(String date) {
     int firstDateSeparator = date.indexOf(DateSeparator);
     int lastDateSeparator = date.lastIndexOf(DateSeparator);
     if (firstDateSeparator > -1) {
       year = Integer.parseInt(date.substring(0, firstDateSeparator));
       month = Short.parseShort(date.substring(firstDateSeparator + 1, lastDateSeparator));
       day = Short.parseShort(date.substring(lastDateSeparator + 1));
+    } else {
+      year = 0;
+      month = 0;
+      day = 0;
     }
   }
 
@@ -297,7 +301,7 @@ public class MediaTimePointImpl implements MediaTimePoint {
    * @param time
    *          the time
    */
-  private void parseTime(String time) {
+  protected void parseTime(String time) {
     int firstTimeSeparator = time.indexOf(TimeSeparator);
     int lastTimeSeparator = time.lastIndexOf(TimeSeparator);
     if (firstTimeSeparator > -1) {

@@ -47,7 +47,7 @@ public class OcropusTextAnalyzerTest {
   protected OcropusTextAnalyzer analyzer = null;
   
   /** The text without punctuation */
-  protected String text = "Land and Vegetation Key players on the Climate Scene";
+  protected String text = "Land and Vegetation Key players on the";
 
   /**
    * @throws java.lang.Exception
@@ -77,7 +77,7 @@ public class OcropusTextAnalyzerTest {
       return;
     OcropusTextFrame frame = analyzer.analyze(testFile);
     assertTrue(frame.hasText());
-    assertEquals(text.split(" ")[0], frame.getWords()[0].getWord());
+    assertEquals(text, frame.getLines()[0].getText());
   }
 
 }

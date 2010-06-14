@@ -27,7 +27,7 @@ public class TextualImpl implements Textual {
 
   /** The default phonetic alphabet */
   public static final String DEFAULT_PHONETIC_ALPHABET = "sampa";
-  
+
   /** The text */
   protected String text = null;
 
@@ -43,7 +43,8 @@ public class TextualImpl implements Textual {
   /**
    * Creates a new textual base element.
    */
-  public TextualImpl() {}
+  public TextualImpl() {
+  }
 
   /**
    * Creates a new textual base element.
@@ -55,6 +56,16 @@ public class TextualImpl implements Textual {
    */
   public TextualImpl(String text) {
     this(text, null);
+  }
+
+  /**
+   * Creates a new Textual element from a number of words.
+   * 
+   * @param words
+   *          the words
+   */
+  public TextualImpl(String[] words) {
+    this(words, null);
   }
 
   /**
@@ -70,6 +81,18 @@ public class TextualImpl implements Textual {
       throw new IllegalArgumentException("The text cannot be empty");
     this.text = text;
     this.language = language;
+  }
+
+  /**
+   * Creates a new textual base element.
+   * 
+   * @param words
+   *          the words
+   * @throws IllegalArgumentException
+   *           if the words is <code>null</code> or empty
+   */
+  public TextualImpl(String[] words, String language) {
+    this(StringUtils.join(words, ' '), null);
   }
 
   /**
@@ -104,13 +127,14 @@ public class TextualImpl implements Textual {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.mpeg7.Textual#setText(java.lang.String)
    */
   @Override
   public void setText(String text) {
     this.text = text;
   }
-  
+
   /**
    * {@inheritDoc}
    * 

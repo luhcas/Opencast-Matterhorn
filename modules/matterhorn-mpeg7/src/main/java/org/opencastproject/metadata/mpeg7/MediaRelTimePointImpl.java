@@ -116,23 +116,8 @@ public class MediaRelTimePointImpl extends MediaTimePointImpl implements MediaTi
       fractions = fractions.substring(0, fractions.length() - 7);
     }
     parseTime(time);
+    parseDate(time);
     parseFractions(fractions);
-  }
-
-  /**
-   * Parses the time portion of a time point
-   * 
-   * @param time
-   *          the time
-   */
-  private void parseTime(String time) {
-    int firstTimeSeparator = time.indexOf(TimeSeparator);
-    int lastTimeSeparator = time.lastIndexOf(TimeSeparator);
-    if (firstTimeSeparator > -1) {
-      hour = Short.parseShort(time.substring(0, firstTimeSeparator));
-      minute = Short.parseShort(time.substring(firstTimeSeparator + 1, lastTimeSeparator));
-      second = Short.parseShort(time.substring(lastTimeSeparator + 1));
-    }
   }
 
   /**

@@ -63,7 +63,7 @@
                   <SubRegion>
                     <ParameterTrajectory>
                       <InitialRegion>
-                        <Box>10 20 150 35</Box>
+                        <Box>10.0 20.0 160.0 35.0</Box>
                       </InitialRegion>
                     </ParameterTrajectory>
                   </SubRegion>
@@ -74,7 +74,7 @@
           </VideoSegment>
           <VideoSegment id="track-2.segment-2">
             <MediaTime>
-              <MediaRelTimePoint>T01:07:35,0F25</MediaRelTimePoint>
+              <MediaRelTimePoint>T01:07:35:0F25</MediaRelTimePoint>
               <MediaDuration>PT0H22M25S</MediaDuration>
             </MediaTime>
             <TextAnnotation confidence="1.0" relevance="1.0">
@@ -97,7 +97,7 @@
           <MediaUri>file:tracks/presenter.mpg</MediaUri>
         </MediaLocator>
         <MediaTime>
-          <MediaTimePoint>T00:00:00,0F25</MediaTimePoint>
+          <MediaTimePoint>T00:00:00:0F25</MediaTimePoint>
           <MediaDuration>PT01H30M</MediaDuration>
         </MediaTime>
       </Video>

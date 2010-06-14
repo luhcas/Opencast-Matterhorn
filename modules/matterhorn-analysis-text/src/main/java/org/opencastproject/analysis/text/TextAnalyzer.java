@@ -19,7 +19,7 @@ import org.opencastproject.analysis.api.MediaAnalysisException;
 import org.opencastproject.analysis.api.MediaAnalysisServiceSupport;
 import org.opencastproject.analysis.text.ocropus.OcropusTextAnalyzer;
 import org.opencastproject.analysis.text.ocropus.OcropusTextFrame;
-import org.opencastproject.analysis.text.ocropus.OcropusWord;
+import org.opencastproject.analysis.text.ocropus.OcropusLine;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -200,7 +200,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
             spatioTemporalDecomposition.addVideoText(videoText);
           }
 
-          logger.info("Text extraction of {} finished, {} words found", attachment.getURI(), videoTexts.length);
+          logger.info("Text extraction of {} finished, {} lines found", attachment.getURI(), videoTexts.length);
 
           URI uri = uploadMpeg7(mpeg7);
           Catalog catalog = (Catalog)MediaPackageElementBuilderFactory.newInstance().newElementBuilder().newElement(
@@ -289,10 +289,10 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
     OcropusTextAnalyzer analyzer = new OcropusTextAnalyzer(ocropusbinary);
     OcropusTextFrame textFrame = analyzer.analyze(imageFile);
     int i = 1;
-    for (OcropusWord word : textFrame.getWords()) {
-      VideoText videoText = new VideoTextImpl(id + "-" + i);
-      videoText.setBoundary(word.getBoundaries());
-      Textual text = new TextualImpl(word.getWord());
+    for (OcropusLine line : textFrame.getLines()) {
+      VideoText videoText = new VideoTextImpl(id + "-" + i++);
+      videoText.setBoundary(line.getBoundaries());
+      Textual text = new TextualImpl(line.getText());
       videoText.setText(text);
       videoTexts.add(videoText);
     }

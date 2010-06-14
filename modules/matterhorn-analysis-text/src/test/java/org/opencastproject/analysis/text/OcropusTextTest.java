@@ -17,7 +17,7 @@ package org.opencastproject.analysis.text;
 
 import static org.junit.Assert.assertEquals;
 
-import org.opencastproject.analysis.text.ocropus.OcropusWord;
+import org.opencastproject.analysis.text.ocropus.OcropusLine;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,12 +25,12 @@ import org.junit.Test;
 import java.awt.Rectangle;
 
 /**
- * Test case for class {@link OcropusWord}.
+ * Test case for class {@link OcropusLine}.
  */
 public class OcropusTextTest {
 
   /** The text item */
-  protected OcropusWord textItem = null;
+  protected OcropusLine textItem = null;
   
   /** The text */
   protected String text = "Hello world";
@@ -55,19 +55,19 @@ public class OcropusTextTest {
    */
   @Before
   public void setUp() throws Exception {
-    textItem = new OcropusWord(text, textBoundaries);
+    textItem = new OcropusLine(text, textBoundaries);
   }
 
   /**
-   * Test method for {@link org.opencastproject.analysis.text.ocropus.OcropusWord#getWord()}.
+   * Test method for {@link org.opencastproject.analysis.text.ocropus.OcropusLine#getText()}.
    */
   @Test
   public void testGetText() {
-    assertEquals(text, textItem.getWord());
+    assertEquals(text, textItem.getText());
   }
 
   /**
-   * Test method for {@link org.opencastproject.analysis.text.ocropus.OcropusWord#getBoundaries()}.
+   * Test method for {@link org.opencastproject.analysis.text.ocropus.OcropusLine#getBoundaries()}.
    */
   @Test
   public void testGetBoundaries() {

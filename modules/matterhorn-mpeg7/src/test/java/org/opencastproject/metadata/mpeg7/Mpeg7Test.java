@@ -29,6 +29,7 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
@@ -207,13 +208,12 @@ public class Mpeg7Test {
     assertNotNull(textual);
     assertEquals("Text", textual.getText());
     assertEquals("en", textual.getLanguage());
-    // TODO Re-enable the bounding box tests
-//    Rectangle boundingBox = videoText.getBoundary();
-//    assertNotNull(boundingBox);
-//    assertEquals(10, (int)boundingBox.getX());
-//    assertEquals(150, (int)boundingBox.getWidth());
-//    assertEquals(20, (int)boundingBox.getY());
-//    assertEquals(35, (int)boundingBox.getHeight());
+    Rectangle boundingBox = videoText.getBoundary();
+    assertNotNull(boundingBox);
+    assertEquals(10, (int)boundingBox.getX());
+    assertEquals(150, (int)boundingBox.getWidth());
+    assertEquals(20, (int)boundingBox.getY());
+    assertEquals(15, (int)boundingBox.getHeight());
 
     //
     // Check video track (track-3)

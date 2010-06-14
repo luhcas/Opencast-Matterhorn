@@ -39,10 +39,10 @@ public class OcropusTextFrameTest {
   protected OcropusTextFrame textFrame = null;
   
   /** The text without punctuation */
-  protected String text = "Land and Vegetation Key players on the Climate Scene";
+  protected String text = "Land and Vegetation Key players on the";
   
-  /** Number of words on the frame */
-  protected int wordsOnFrame = 9;
+  /** Number of lines on the frame */
+  protected int linesOnFrame = 2;
   
   /** Top boundary coordinate */
   protected int top = 46;
@@ -69,13 +69,13 @@ public class OcropusTextFrameTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.analysis.text.ocropus.OcropusTextFrame#getWords()}.
+   * Test method for {@link org.opencastproject.analysis.text.ocropus.OcropusTextFrame#getLines()}.
    */
   @Test
   public void testGetText() {
-    assertEquals(wordsOnFrame, textFrame.getWords().length);
-    assertEquals(text.split(" ")[0], textFrame.getWords()[0].getWord());
-    assertEquals(textBoundaries, textFrame.getWords()[0].getBoundaries());
+    assertEquals(linesOnFrame, textFrame.getLines().length);
+    assertEquals(text, textFrame.getLines()[0].getText());
+    assertEquals(textBoundaries, textFrame.getLines()[0].getBoundaries());
   }
 
   /**

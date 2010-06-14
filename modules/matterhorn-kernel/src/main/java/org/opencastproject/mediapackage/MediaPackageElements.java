@@ -67,4 +67,7 @@ public interface MediaPackageElements {
   /** A flavor for chapters */
   MediaPackageElementFlavor CHAPTER_FLAVOR = new MediaPackageElementFlavor("mpeg-7", "chapter", "MPEG-7 chapters catalog");
 
+  /** A flavor for DFXP caption files */
+  MediaPackageElementFlavor CAPTION_DFXP_FLAVOR = new MediaPackageElementFlavor("caption", "dfxp", "DFXP Captions catalog");
+
 }

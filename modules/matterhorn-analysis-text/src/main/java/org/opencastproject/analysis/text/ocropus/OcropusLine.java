@@ -15,15 +15,17 @@
  */
 package org.opencastproject.analysis.text.ocropus;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.awt.Rectangle;
 
 /**
- * Representation of text extracted from an image.
+ * Representation of a line of text extracted from an image.
  */
-public class OcropusWord {
+public class OcropusLine {
 
-  /** The word */
-  protected String word = null;
+  /** The text */
+  protected String text = null;
 
   /** Text bounding box */
   protected Rectangle boundingBox = null;
@@ -31,14 +33,26 @@ public class OcropusWord {
   /**
    * Creates a representation for a piece of text along with it's bounding box.
    * 
-   * @param word
+   * @param text
    *          the extracted text
    * @param box
    *          the text's location and boundaries
    */
-  public OcropusWord(String word, Rectangle box) {
-    this.word = word;
+  public OcropusLine(String word, Rectangle box) {
+    this.text = word;
     this.boundingBox = box;
+  }
+
+  /**
+   * Creates a representation for a collection of lines along with its bounding box.
+   * 
+   * @param lines
+   *          the extracted lines
+   * @param box
+   *          the line's location and boundaries
+   */
+  public OcropusLine(String[] words, Rectangle box) {
+    this(StringUtils.join(words, ' '), box);
   }
 
   /**
@@ -46,14 +60,14 @@ public class OcropusWord {
    * 
    * @return the text
    */
-  public String getWord() {
-    return word;
+  public String getText() {
+    return text;
   }
 
   /**
-   * Returns the text's bounding box. Note that the box was calculated from the line of text that contained this word,
+   * Returns the text's bounding box. Note that the box was calculated from the line of text that contained this text,
    * so while the vertical position as well as the height will be ok, the box will most probably be much wider than this
-   * single word.
+   * single text.
    * 
    * @return the boundaries
    */
