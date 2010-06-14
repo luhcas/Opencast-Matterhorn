@@ -57,6 +57,7 @@ function handleWorkflow(workflowDoc){
     eventDoc.documentElement.appendChild(duration);
 
     var track = rootEl.find("media>track[type='presentation/source']");
+    if(track.text() ==='') track = rootEl.find("media>track[type='presenter/source']");
     if (track) {
       var filename = track.find("url").text().split(/\//);
       filename = filename[filename.length - 1];
