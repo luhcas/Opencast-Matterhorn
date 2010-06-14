@@ -362,7 +362,7 @@ public class Mpeg7Parser extends DefaultHandler {
    */
   @Override
   public void error(SAXParseException e) throws SAXException {
-    Mpeg7CatalogImpl.log_.warn("Error while parsing mpeg-7 catalog: " + e.getMessage());
+    Mpeg7CatalogImpl.logger.warn("Error while parsing mpeg-7 catalog: " + e.getMessage());
     super.error(e);
   }
 
@@ -371,7 +371,7 @@ public class Mpeg7Parser extends DefaultHandler {
    */
   @Override
   public void fatalError(SAXParseException e) throws SAXException {
-    Mpeg7CatalogImpl.log_.warn("Fatal error while parsing mpeg-7 catalog: " + e.getMessage());
+    Mpeg7CatalogImpl.logger.warn("Fatal error while parsing mpeg-7 catalog: " + e.getMessage());
     super.fatalError(e);
   }
 
@@ -380,7 +380,7 @@ public class Mpeg7Parser extends DefaultHandler {
    */
   @Override
   public void warning(SAXParseException e) throws SAXException {
-    Mpeg7CatalogImpl.log_.warn("Warning while parsing mpeg-7 catalog: " + e.getMessage());
+    Mpeg7CatalogImpl.logger.warn("Warning while parsing mpeg-7 catalog: " + e.getMessage());
     super.warning(e);
   }
 

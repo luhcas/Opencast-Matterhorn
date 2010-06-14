@@ -31,7 +31,7 @@ import java.io.InputStreamReader;
 public class IoSupport {
 
   /** the logging facility provided by log4j */
-  private static Logger log_ = LoggerFactory.getLogger(IoSupport.class
+  private static Logger logger = LoggerFactory.getLogger(IoSupport.class
       .getName());
 
   public static String getSystemTmpDir() {
@@ -100,7 +100,7 @@ public class IoSupport {
           process.getOutputStream().close();
         return true;
       } catch (Throwable t) {
-        log_.trace("Error closing process streams: " + t.getMessage());
+        logger.trace("Error closing process streams: " + t.getMessage());
       }
     }
     return false;

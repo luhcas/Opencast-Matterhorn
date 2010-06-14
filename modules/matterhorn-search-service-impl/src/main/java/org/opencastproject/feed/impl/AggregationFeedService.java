@@ -36,7 +36,7 @@ import java.util.Properties;
 public class AggregationFeedService extends AbstractFeedService implements FeedGenerator {
 
   /** Logging facility */
-  private static Logger log_ = LoggerFactory.getLogger(AggregationFeedService.class);
+  private static Logger logger = LoggerFactory.getLogger(AggregationFeedService.class);
 
   /** Property key for the series */
   private static final String PROP_SERIES = "feed.series";
@@ -51,7 +51,7 @@ public class AggregationFeedService extends AbstractFeedService implements FeedG
    */
   public boolean accept(String[] query) {
     if (solrQuery == null) {
-      log_.warn("{} denies to handle request for {} since query is still undefined", this, query);
+      logger.warn("{} denies to handle request for {} since query is still undefined", this, query);
       return false;
     }
     return super.accept(query);
@@ -67,7 +67,7 @@ public class AggregationFeedService extends AbstractFeedService implements FeedG
     try {
       return searchService.getByQuery(solrQuery, limit, offset);
     } catch (Exception e) {
-      log_.error("Cannot retrieve result for aggregated feed", e);
+      logger.error("Cannot retrieve result for aggregated feed", e);
       return null;
     }
   }
@@ -104,7 +104,7 @@ public class AggregationFeedService extends AbstractFeedService implements FeedG
     String series = (String) properties.get(PROP_SERIES);
     if (series != null && !"".equals(series)) {
       setSeries(series.split("\\W"));
-      log_.debug("Configuring aggregation feed with series {}", series);
+      logger.debug("Configuring aggregation feed with series {}", series);
     }
     super.initialize(properties);
   }

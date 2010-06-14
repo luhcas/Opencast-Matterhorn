@@ -98,7 +98,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
   protected String description = null;
 
   /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory.getLogger(AbstractFeedGenerator.class);
+  private final static Logger logger = LoggerFactory.getLogger(AbstractFeedGenerator.class);
 
   /**
    * Creates a new abstract feed generator.
@@ -284,7 +284,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     try {
       result = loadFeedData(type, query, DEFAULT_LIMIT, DEFAULT_OFFSET);
     } catch (Exception e) {
-      log_.error("Cannot retrieve solr result for feed '" + type.toString() + "' with query '" + query + "'.");
+      logger.error("Cannot retrieve solr result for feed '" + type.toString() + "' with query '" + query + "'.");
       return null;
     }
 
@@ -313,7 +313,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
         else
           addEpisode(f, query, resultItem);
       } catch (Throwable t) {
-        log_.error("Error creating entry with id " + resultItem.getId() + " for feed " + this + ": " + t.getMessage(),
+        logger.error("Error creating entry with id " + resultItem.getId() + " for feed " + this + ": " + t.getMessage(),
                 t);
       }
     }
@@ -662,7 +662,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
 
     // Did we find any distribution formats?
     if (trackIds.size() == 0) {
-      log_.debug("No media formats found for feed entry {}", entry);
+      logger.debug("No media formats found for feed entry {}", entry);
       return enclosedFormats;
     }
 
@@ -678,7 +678,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
         entry.addEnclosure(enclosure);
         enclosedFormats.add(track);
       } catch (MalformedURLException e) {
-        log_.error("Error converting {} to string", trackUrl, e);
+        logger.error("Error converting {} to string", trackUrl, e);
       }
     }
 
@@ -736,12 +736,12 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     }
 
     if (Feed.Type.RSS.equals(feed.getType()) && s.size() > 1) {
-      log_.warn("More than one distributed media item found for rss feed entry, keeping only the first one");
+      logger.warn("More than one distributed media item found for rss feed entry, keeping only the first one");
       String idToKeep = s.iterator().next();
       s.clear();
       s.add(idToKeep);
     } else if (s.size() == 0) {
-      log_.warn("No distributed media found for feed entry");
+      logger.warn("No distributed media found for feed entry");
     }
     
     return s;

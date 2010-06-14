@@ -64,7 +64,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
   private static final long serialVersionUID = -4240831568101931784L;
 
   /** the logging facility provided by log4j */
-  static final Logger log_ = LoggerFactory
+  static final Logger logger = LoggerFactory
           .getLogger(DublinCoreCatalogImpl.class);
 
   /** Opencast namespace uri */
@@ -700,19 +700,19 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
 
     @Override
     public void error(SAXParseException e) throws SAXException {
-      log_.warn("Error parsing dublincore catalog: " + e.getMessage());
+      logger.warn("Error parsing dublincore catalog: " + e.getMessage());
       super.error(e);
     }
 
     @Override
     public void fatalError(SAXParseException e) throws SAXException {
-      log_.warn("Fatal error parsing dublincore catalog: " + e.getMessage());
+      logger.warn("Fatal error parsing dublincore catalog: " + e.getMessage());
       super.fatalError(e);
     }
 
     @Override
     public void warning(SAXParseException e) throws SAXException {
-      log_.warn("Warning parsing dublincore catalog: " + e.getMessage());
+      logger.warn("Warning parsing dublincore catalog: " + e.getMessage());
       super.warning(e);
     }
   }

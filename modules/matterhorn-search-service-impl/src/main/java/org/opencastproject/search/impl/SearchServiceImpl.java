@@ -51,7 +51,7 @@ import java.util.logging.Level;
 public class SearchServiceImpl implements SearchService {
 
   /** Log facility */
-  private static final Logger log_ = LoggerFactory.getLogger(SearchServiceImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(SearchServiceImpl.class);
 
   public static final String CONFIG_SOLR_ROOT = "search.searchindexdir";
 
@@ -121,10 +121,10 @@ public class SearchServiceImpl implements SearchService {
     if (cc != null && cc.getBundleContext().getProperty(CONFIG_SOLR_ROOT) != null) {
       // use CONFIG
       this.solrRoot = cc.getBundleContext().getProperty(CONFIG_SOLR_ROOT);
-      log_.info("CONFIG " + CONFIG_SOLR_ROOT + ": " + this.solrRoot);
+      logger.info("CONFIG " + CONFIG_SOLR_ROOT + ": " + this.solrRoot);
     } else {
       // DEFAULT
-      log_.info("DEFAULT " + CONFIG_SOLR_ROOT + ": " + this.solrRoot);
+      logger.info("DEFAULT " + CONFIG_SOLR_ROOT + ": " + this.solrRoot);
     }
     serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     setupSolr(this.solrRoot);
@@ -139,7 +139,7 @@ public class SearchServiceImpl implements SearchService {
       // FIXME Not ideal solution
       Thread.sleep(3000);
     } catch (Throwable t) {
-      log_.error("Error closing the solr connection");
+      logger.error("Error closing the solr connection");
     }
   }
 
@@ -151,14 +151,14 @@ public class SearchServiceImpl implements SearchService {
    */
   protected void setupSolr(String solrRoot) {
     try {
-      log_.info("Setting up solr search index at {}", solrRoot);
+      logger.info("Setting up solr search index at {}", solrRoot);
       File solrConfigDir = new File(solrRoot, "conf");
 
       // Create the config directory
       if (solrConfigDir.exists()) {
-        log_.info("solr search index found at {}", solrConfigDir);
+        logger.info("solr search index found at {}", solrConfigDir);
       } else {
-        log_.info("solr config directory doesn't exist.  Creating {}", solrConfigDir);
+        logger.info("solr config directory doesn't exist.  Creating {}", solrConfigDir);
         FileUtils.forceMkdir(solrConfigDir);
       }
 
@@ -195,7 +195,7 @@ public class SearchServiceImpl implements SearchService {
     } catch (IOException e) {
       throw new RuntimeException("Error setting up solr index at " + solrRoot, e);
     } catch (InterruptedException e) {
-      log_.error("Interupted while setting up solr index");
+      logger.error("Interupted while setting up solr index");
     }
   }
 
@@ -203,7 +203,7 @@ public class SearchServiceImpl implements SearchService {
     InputStream in = SearchServiceImpl.class.getResourceAsStream(classpath);
     try {
       File file = new File(dir, FilenameUtils.getName(classpath));
-      log_.debug("copying inputstream " + in + " to file to " + file);
+      logger.debug("copying inputstream " + in + " to file to " + file);
       IOUtils.copy(in, new FileOutputStream(file));
     } catch (IOException e) {
       throw new RuntimeException("Error copying solr classpath resource to the filesystem", e);
@@ -217,7 +217,7 @@ public class SearchServiceImpl implements SearchService {
 //   */
 //  public SearchResult getEpisodeAndSeriesById(String seriesId) throws SearchException {
 //    try {
-//      log_.debug("Searching index for episodes and series details of series " + seriesId);
+//      logger.debug("Searching index for episodes and series details of series " + seriesId);
 //      return solrRequester.getEpisodeAndSeriesById(seriesId);
 //    } catch (SolrServerException e) {
 //      throw new SearchException(e);
@@ -231,7 +231,7 @@ public class SearchServiceImpl implements SearchService {
 //   */
 //  public SearchResult getEpisodeById(String episodeId) throws SearchException {
 //    try {
-//      log_.debug("Searching index for episode " + episodeId);
+//      logger.debug("Searching index for episode " + episodeId);
 //      return solrRequester.getEpisodeById(episodeId);
 //    } catch (SolrServerException e) {
 //      throw new SearchException(e);
@@ -245,7 +245,7 @@ public class SearchServiceImpl implements SearchService {
 //   */
 //  public SearchResult getEpisodesAndSeriesByText(String text, int limit, int offset) throws SearchException {
 //    try {
-//      log_.debug("Searching index for episodes and series matching '" + text + "'");
+//      logger.debug("Searching index for episodes and series matching '" + text + "'");
 //      return solrRequester.getEpisodesAndSeriesByText(text, limit, offset);
 //    } catch (SolrServerException e) {
 //      throw new SearchException(e);
@@ -259,7 +259,7 @@ public class SearchServiceImpl implements SearchService {
 //   */
 //  public SearchResult getEpisodesByDate(int limit, int offset) throws SearchException {
 //    try {
-//      log_.debug("Asking index for episodes by date");
+//      logger.debug("Asking index for episodes by date");
 //      return solrRequester.getEpisodesByDate(limit, offset);
 //    } catch (SolrServerException e) {
 //      throw new SearchException(e);
@@ -273,7 +273,7 @@ public class SearchServiceImpl implements SearchService {
 //   */
 //  public SearchResult getEpisodesBySeries(String seriesId) throws SearchException {
 //    try {
-//      log_.debug("Searching index for episodes in series " + seriesId);
+//      logger.debug("Searching index for episodes in series " + seriesId);
 //      return solrRequester.getEpisodesBySeries(seriesId);
 //    } catch (SolrServerException e) {
 //      throw new SearchException(e);
@@ -287,7 +287,7 @@ public class SearchServiceImpl implements SearchService {
 //   */
 //  public SearchResult getSeriesByDate(int limit, int offset) throws SearchException {
 //    try {
-//      log_.debug("Asking index for series by date");
+//      logger.debug("Asking index for series by date");
 //      return solrRequester.getSeriesByDate(limit, offset);
 //    } catch (SolrServerException e) {
 //      throw new SearchException(e);
@@ -301,7 +301,7 @@ public class SearchServiceImpl implements SearchService {
 //   */
 //  public SearchResult getSeriesById(String seriesId) throws SearchException {
 //    try {
-//      log_.debug("Searching index for series " + seriesId);
+//      logger.debug("Searching index for series " + seriesId);
 //      return solrRequester.getSeriesById(seriesId);
 //    } catch (SolrServerException e) {
 //      throw new SearchException(e);
@@ -315,7 +315,7 @@ public class SearchServiceImpl implements SearchService {
 //   */
 //  public SearchResult getSeriesByText(String text, int limit, int offset) throws SearchException {
 //    try {
-//      log_.debug("Searching index for series matching '" + text + "'");
+//      logger.debug("Searching index for series matching '" + text + "'");
 //      return solrRequester.getSeriesByText(text, limit, offset);
 //    } catch (SolrServerException e) {
 //      throw new SearchException(e);
@@ -329,7 +329,7 @@ public class SearchServiceImpl implements SearchService {
    */
   public SearchResult getByQuery(String query, int limit, int offset) throws SearchException {
     try {
-      log_.debug("Searching index using custom query '" + query + "'");
+      logger.debug("Searching index using custom query '" + query + "'");
       return solrRequester.getByQuery(query, limit, offset);
     } catch (SolrServerException e) {
       throw new SearchException(e);
@@ -343,11 +343,11 @@ public class SearchServiceImpl implements SearchService {
    */
   public void add(MediaPackage mediaPackage) throws SearchException {
     try {
-      log_.debug("Attempting to add mediapackage {} to search index", mediaPackage.getIdentifier());
+      logger.debug("Attempting to add mediapackage {} to search index", mediaPackage.getIdentifier());
       if(solrIndexManager.add(mediaPackage)) {
-        log_.info("Added mediapackage {} to the search index", mediaPackage.getIdentifier());
+        logger.info("Added mediapackage {} to the search index", mediaPackage.getIdentifier());
       } else {
-        log_.warn("Failed to add mediapackage {} to the search index", mediaPackage.getIdentifier());
+        logger.warn("Failed to add mediapackage {} to the search index", mediaPackage.getIdentifier());
       }
     } catch (SolrServerException e) {
       throw new SearchException(e);
@@ -361,7 +361,7 @@ public class SearchServiceImpl implements SearchService {
    */
   public void delete(String mediaPackageId) throws SearchException {
     try {
-      log_.info("Removing mediapackage {} from search index", mediaPackageId);
+      logger.info("Removing mediapackage {} from search index", mediaPackageId);
       solrIndexManager.delete(mediaPackageId);
     } catch (SolrServerException e) {
       throw new SearchException(e);
@@ -376,7 +376,7 @@ public class SearchServiceImpl implements SearchService {
   @Override
   public void clear() throws SearchException {
     try {
-      log_.info("Clearing the search index");
+      logger.info("Clearing the search index");
       solrIndexManager.clear();
     } catch (SolrServerException e) {
       throw new SearchException(e);
@@ -390,7 +390,7 @@ public class SearchServiceImpl implements SearchService {
    */
   public SearchResult getByQuery(SearchQuery q) throws SearchException {
     try {
-      log_.debug("Searching index using query object '" + q + "'");
+      logger.debug("Searching index using query object '" + q + "'");
       return solrRequester.getByQuery(q);
     } catch (SolrServerException e) {
       throw new SearchException(e);

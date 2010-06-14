@@ -37,8 +37,8 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 /**
- * This class represents the mime type registry that is responsible for
- * providing resolving mime types through all system components.
+ * This class represents the mime type registry that is responsible for providing resolving mime types through all
+ * system components.
  * <p>
  * The registry is initialized from the file <code>org.opencastproject.util.MimeTypes.xml</code>.
  */
@@ -51,7 +51,7 @@ public class MimeTypes {
   private static List<MimeType> mimeTypes_ = null;
 
   /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory.getLogger(MimeType.class);
+  private final static Logger logger = LoggerFactory.getLogger(MimeType.class);
 
   /** Common mime types */
   public static MimeType XML = null;
@@ -119,21 +119,19 @@ public class MimeTypes {
       DefaultHandler handler = new MimeTypeParser(mimeTypes_);
       parser.parse(new InputSource(new StringReader(definitions)), handler);
     } catch (FileNotFoundException e) {
-      log_
-          .error("Error initializing mime type registry: definition file not found!");
+      logger.error("Error initializing mime type registry: definition file not found!");
     } catch (IOException e) {
-      log_.error("Error initializing mime type registry: " + e.getMessage());
+      logger.error("Error initializing mime type registry: " + e.getMessage());
     } catch (ParserConfigurationException e) {
-      log_.error("Configuration error while parsing mime type registry: "
-          + e.getMessage());
+      logger.error("Configuration error while parsing mime type registry: " + e.getMessage());
     } catch (SAXException e) {
-      log_.error("Error parsing mime type registry: " + e.getMessage());
+      logger.error("Error parsing mime type registry: " + e.getMessage());
     }
   }
 
   /**
-   * Initializes the mime type registry with those types that are relevant for
-   * matterhorn, e. g. <code>video/dv</code> and <code>video/mj2</code>.
+   * Initializes the mime type registry with those types that are relevant for matterhorn, e. g. <code>video/dv</code>
+   * and <code>video/mj2</code>.
    */
   static void initFromDefaults() {
     MimeType mimeType = null;
@@ -175,11 +173,9 @@ public class MimeTypes {
   }
 
   /**
-   * Returns a mime type for the given type and subtype, e. g.
-   * <code>video/mj2</code>.
+   * Returns a mime type for the given type and subtype, e. g. <code>video/mj2</code>.
    * <p>
-   * If no mime type can be derived a <code>UnknownFileTypeException</code> is
-   * thrown.
+   * If no mime type can be derived a <code>UnknownFileTypeException</code> is thrown.
    * 
    * @param mimeType
    *          the mime type
@@ -210,7 +206,7 @@ public class MimeTypes {
         }
     }
 
-    log_.debug("Discovered previously unknown mime type '" + mimeType + "'");
+    logger.debug("Discovered previously unknown mime type '" + mimeType + "'");
     MimeType m = new MimeType(t[0], t[1]);
     mimeTypes_.add(m);
     return m;
@@ -219,11 +215,9 @@ public class MimeTypes {
   /**
    * Returns a mime type for the provided file suffix.
    * <p>
-   * For example, if the suffix is <code>mj2</code>, the mime type will be that
-   * of a ISO Motion JPEG 2000 document.
+   * For example, if the suffix is <code>mj2</code>, the mime type will be that of a ISO Motion JPEG 2000 document.
    * <p>
-   * If no mime type is found for the suffix, a
-   * <code>UnknownFileTypeException</code> is thrown.
+   * If no mime type is found for the suffix, a <code>UnknownFileTypeException</code> is thrown.
    * 
    * @param suffix
    *          the file suffix
@@ -231,8 +225,7 @@ public class MimeTypes {
    * @throws UnknownFileTypeException
    *           if the suffix does not map to a mime type
    */
-  public static MimeType fromSuffix(String suffix)
-      throws UnknownFileTypeException {
+  public static MimeType fromSuffix(String suffix) throws UnknownFileTypeException {
     if (suffix == null)
       throw new IllegalArgumentException("Argument 'suffix' was null!");
 
@@ -249,18 +242,16 @@ public class MimeTypes {
           // clone() is implemented, so this will never happen.
         }
     }
-    throw new UnknownFileTypeException("File suffix '" + suffix
-        + "' cannot be matched to any mime type");
+    throw new UnknownFileTypeException("File suffix '" + suffix + "' cannot be matched to any mime type");
   }
 
   /**
    * Returns a mime type for the provided file.
    * <p>
-   * This method tries various ways to extract mime type information from the
-   * files name or its contents.
+   * This method tries various ways to extract mime type information from the files name or its contents.
    * <p>
-   * If no mime type can be derived from either the file name or its contents, a
-   * <code>UnknownFileTypeException</code> is thrown.
+   * If no mime type can be derived from either the file name or its contents, a <code>UnknownFileTypeException</code>
+   * is thrown.
    * 
    * @param url
    *          the file
@@ -301,13 +292,11 @@ public class MimeTypes {
     // }
     // }
 
-    throw new UnknownFileTypeException("File '" + url
-        + "' cannot be matched to any mime type");
+    throw new UnknownFileTypeException("File '" + url + "' cannot be matched to any mime type");
   }
 
   /**
-   * Reads the mime type definitions from the xml file comming with this
-   * distribution.
+   * Reads the mime type definitions from the xml file comming with this distribution.
    */
   private static class MimeTypeParser extends DefaultHandler {
 
@@ -337,8 +326,7 @@ public class MimeTypes {
     }
 
     @Override
-    public void characters(char[] ch, int start, int length)
-        throws SAXException {
+    public void characters(char[] ch, int start, int length) throws SAXException {
       super.characters(ch, start, length);
       content.append(ch, start, length);
     }
@@ -355,8 +343,7 @@ public class MimeTypes {
     }
 
     @Override
-    public void endElement(String uri, String localName, String name)
-        throws SAXException {
+    public void endElement(String uri, String localName, String name) throws SAXException {
       super.endElement(uri, localName, name);
 
       if ("Type".equals(name)) {
@@ -372,8 +359,7 @@ public class MimeTypes {
       } else if ("MimeType".equals(name)) {
         String[] t = type.split("/");
         String[] exts = extensions.split(",");
-        MimeType mimeType = new MimeType(t[0].trim(), t[1].trim(), exts[0]
-            .trim());
+        MimeType mimeType = new MimeType(t[0].trim(), t[1].trim(), exts[0].trim());
         if (description != null)
           mimeType.setDescription(description);
         registry.add(mimeType);

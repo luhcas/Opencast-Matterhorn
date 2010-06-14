@@ -52,7 +52,7 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
   /**
    * the logging facility provided by log4j
    */
-  private final static Logger log_ = LoggerFactory.getLogger(TrackBuilderPlugin.class);
+  private final static Logger logger = LoggerFactory.getLogger(TrackBuilderPlugin.class);
 
   public TrackBuilderPlugin() throws IllegalStateException {
     setPriority(0);
@@ -90,7 +90,7 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
    * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#elementFromURI(URI)
    */
   public MediaPackageElement elementFromURI(URI uri) throws UnsupportedElementException {
-    log_.trace("Creating track from " + uri);
+    logger.trace("Creating track from " + uri);
     Track track = TrackImpl.fromURI(uri);
     return track;
   }

@@ -58,7 +58,7 @@ import java.util.StringTokenizer;
 public abstract class AbstractFeedService extends AbstractFeedGenerator {
 
   /** Logging facility */
-  private static Logger log_ = LoggerFactory.getLogger(AbstractFeedService.class);
+  private static Logger logger = LoggerFactory.getLogger(AbstractFeedService.class);
 
   /** Property key for the feed uri */
   public static final String PROP_URI = "feed.uri";
@@ -138,19 +138,19 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
    */
   public boolean accept(String[] query) {
     if (searchService == null) {
-      log_.warn("{} denies to handle request for {} due to missing search service", this, query);
+      logger.warn("{} denies to handle request for {} due to missing search service", this, query);
       return false;
     } else if (selector == null) {
-      log_.warn("{} denies to handle request for {} since no selector is defined", this);
+      logger.warn("{} denies to handle request for {} since no selector is defined", this);
       return false;
     } else if (query.length == 0) {
-      log_.debug("{} denies to handle unknown request", this);
+      logger.debug("{} denies to handle unknown request", this);
       return false;
     } else if (!query[0].toLowerCase().equals(selector)) {
-      log_.debug("{} denies to handle request for {}", this, query);
+      logger.debug("{} denies to handle request for {}", this, query);
       return false;
     }
-    log_.debug("{} accepts to handle request for {}", this, query);
+    logger.debug("{} accepts to handle request for {}", this, query);
     return true;
   }
 

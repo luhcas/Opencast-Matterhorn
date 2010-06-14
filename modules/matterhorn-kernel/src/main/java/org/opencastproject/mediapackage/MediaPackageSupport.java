@@ -43,7 +43,7 @@ public class MediaPackageSupport {
   };
 
   /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory.getLogger(MediaPackageSupport.class.getName());
+  private final static Logger logger = LoggerFactory.getLogger(MediaPackageSupport.class.getName());
 
   /**
    * Merges the contents of media package located at <code>sourceDir</code> into the media package located at
@@ -69,14 +69,14 @@ public class MediaPackageSupport {
           dest.add(e);
         else {
           if (MergeMode.Replace == mode) {
-            log_.debug("Replacing element " + e.getIdentifier() + " while merging " + dest + " with " + src);
+            logger.debug("Replacing element " + e.getIdentifier() + " while merging " + dest + " with " + src);
             dest.remove(dest.getElementById(e.getIdentifier()));
             dest.add(e);
           } else if (MergeMode.Skip == mode) {
-            log_.debug("Skipping element " + e.getIdentifier() + " while merging " + dest + " with " + src);
+            logger.debug("Skipping element " + e.getIdentifier() + " while merging " + dest + " with " + src);
             continue;
           } else if (MergeMode.Merge == mode) {
-            log_.debug("Renaming element " + e.getIdentifier() + " while merging " + dest + " with " + src);
+            logger.debug("Renaming element " + e.getIdentifier() + " while merging " + dest + " with " + src);
             e.setIdentifier(null);
             dest.add(e);
           } else if (MergeMode.Fail == mode) {

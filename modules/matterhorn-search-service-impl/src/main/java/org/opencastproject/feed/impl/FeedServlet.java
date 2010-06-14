@@ -59,7 +59,7 @@ public class FeedServlet extends HttpServlet {
   private static final long serialVersionUID = -4623160106007127801L;
 
   /** Logging facility */
-  private static Logger log_ = LoggerFactory.getLogger(FeedServlet.class);
+  private static Logger logger = LoggerFactory.getLogger(FeedServlet.class);
 
   /** List of feed generators */
   private List<FeedGenerator> feeds = new ArrayList<FeedGenerator>();
@@ -111,7 +111,7 @@ public class FeedServlet extends HttpServlet {
     try {
       output.output(new RomeFeed(feed, feedInfo), responseWriter);
     } catch (Exception e) {
-      log_.error("Error serializing feed", e);
+      logger.error("Error serializing feed", e);
       response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     }
   }
@@ -164,7 +164,7 @@ public class FeedServlet extends HttpServlet {
     try {
       HttpContext httpContext = httpService.createDefaultHttpContext();
       httpService.registerServlet("/feeds", FeedServlet.this, null, httpContext);
-      log_.debug("Feed servlet registered");
+      logger.debug("Feed servlet registered");
     } catch (ServletException e) {
       e.printStackTrace();
     } catch (NamespaceException e) {
@@ -178,7 +178,7 @@ public class FeedServlet extends HttpServlet {
    * @param generator the generator
    */
   public void addFeedGenerator(FeedGenerator generator) {
-    log_.info("Registering '{}' feed", generator.getIdentifier());
+    logger.info("Registering '{}' feed", generator.getIdentifier());
     feeds.add(generator);
   }
 
@@ -188,7 +188,7 @@ public class FeedServlet extends HttpServlet {
    * @param generator the feed generator
    */
   public void removeFeedGenerator(FeedGenerator generator) {
-    log_.info("Removing '{}' feed", generator.getIdentifier());
+    logger.info("Removing '{}' feed", generator.getIdentifier());
     feeds.remove(generator);
   }
 

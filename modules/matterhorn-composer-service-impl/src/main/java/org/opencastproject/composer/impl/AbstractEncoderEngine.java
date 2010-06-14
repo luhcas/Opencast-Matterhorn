@@ -49,7 +49,7 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
   protected Map<String, EncodingProfile> supportedProfiles = null;
 
   /** the logging facility provided by log4j */
-  private static Logger log_ = LoggerFactory.getLogger(AbstractEncoderEngine.class.getName());
+  private static Logger logger = LoggerFactory.getLogger(AbstractEncoderEngine.class.getName());
 
   /**
    * Creates a new abstract encoder engine with or without support for multiple job submission.
@@ -143,7 +143,7 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
 
     // The file does not seem to be inside the local filesystem.
     // Let's download it and log a warning, since this shouldn't happen.
-    log_.warn("Downloading track " + track + " to temp directory");
+    logger.warn("Downloading track " + track + " to temp directory");
     File f = File.createTempFile(track.getURI().toString(), null);
     FileOutputStream fos = new FileOutputStream(f);
     InputStream is = track.getURI().toURL().openStream();
@@ -175,7 +175,7 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
       try {
         l.fileEncoded(engine, profile, sourceFiles);
       } catch (Throwable t) {
-        log_.error("Encoder listener " + l + " threw exception while handling callback");
+        logger.error("Encoder listener " + l + " threw exception while handling callback");
       }
     }
   }
@@ -197,7 +197,7 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
       try {
         l.fileEncodingFailed(engine, profile, cause, sourceFiles);
       } catch (Throwable t) {
-        log_.error("Encoder listener {} threw exception while handling callback", l);
+        logger.error("Encoder listener {} threw exception while handling callback", l);
       }
     }
   }
@@ -219,7 +219,7 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
       try {
         l.fileEncodingProgressed(engine, sourceFile, profile, progress);
       } catch (Throwable t) {
-        log_.error("Encoder listener " + l + " threw exception while handling callback");
+        logger.error("Encoder listener " + l + " threw exception while handling callback");
       }
     }
   }

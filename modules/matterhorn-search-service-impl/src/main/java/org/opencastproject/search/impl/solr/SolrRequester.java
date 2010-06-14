@@ -48,7 +48,7 @@ import java.util.Map.Entry;
 public class SolrRequester {
 
   /** Logging facility */
-  private static Logger log_ = LoggerFactory.getLogger(SolrRequester.class);
+  private static Logger logger = LoggerFactory.getLogger(SolrRequester.class);
 
   /** The connection to the solr database */
   private SolrConnection solrConnection = null;
@@ -138,7 +138,7 @@ public class SolrRequester {
           mediaPackage = builder.loadFromXml(mediaPackageFieldValue.toString());
           item.setMediaPackage(mediaPackage);
         } catch (Exception e) {
-          log_.warn("Unable to read media package from search result", e);
+          logger.warn("Unable to read media package from search result", e);
         }
       }
 
@@ -162,13 +162,13 @@ public class SolrRequester {
             item.setDcExtent(Long.parseLong(toString(doc.getFieldValue(SolrFields.DC_EXTENT))));
           } catch (NumberFormatException e) {
             item.setDcExtent(-1);
-            log_.warn("Cannot parse duration from solr response document. Setting duration to -1.");
+            logger.warn("Cannot parse duration from solr response document. Setting duration to -1.");
           }
         }
 
         // Add the list of most important keywords
         String kw[] = toString(doc.getFieldValue(SolrFields.OC_KEYWORDS)).split(" ");
-        log_.trace(toString(doc.getFieldValue(SolrFields.OC_KEYWORDS)));
+        logger.trace(toString(doc.getFieldValue(SolrFields.OC_KEYWORDS)));
         for (String keyword : kw) {
           item.addKeyword(keyword);
         }
@@ -189,7 +189,7 @@ public class SolrRequester {
               Object hintFieldValue = doc.getFieldValue(hintFieldName);
               segmentHints.load(new ByteArrayInputStream(hintFieldValue.toString().getBytes()));
             } catch (IOException e) {
-              log_.warn("Cannot load hint properties.");
+              logger.warn("Cannot load hint properties.");
             }
 
             // get segment time

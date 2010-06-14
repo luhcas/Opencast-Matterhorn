@@ -74,7 +74,7 @@ import java.util.Map.Entry;
 public class SolrIndexManager {
 
   /** Logging facility */
-  static Logger log_ = LoggerFactory.getLogger(SolrIndexManager.class);
+  static Logger logger = LoggerFactory.getLogger(SolrIndexManager.class);
 
   /** Connection to the database */
   private SolrConnection solrConnection = null;
@@ -131,7 +131,7 @@ public class SolrIndexManager {
     try {
       solrConnection.update(solrRequest);
     } catch (Exception e) {
-      log_.error("Cannot clear solr index", e);
+      logger.error("Cannot clear solr index", e);
     }
   }
 
@@ -151,7 +151,7 @@ public class SolrIndexManager {
       solrConnection.update(solrRequest);
       return true;
     } catch (Exception e) {
-      log_.error("Cannot clear solr index");
+      logger.error("Cannot clear solr index");
       return false;
     }
   }
@@ -184,7 +184,7 @@ public class SolrIndexManager {
     // If neither an episode nor a series was contained, there is no point in
     // trying to update
     if (episodeDocument == null && seriesDocument == null) {
-      log_.warn("Neither episode nor series metadata found");
+      logger.warn("Neither episode nor series metadata found");
       return false;
     }
 
@@ -204,7 +204,7 @@ public class SolrIndexManager {
       solrConnection.update(solrRequest);
       return true;
     } catch (Exception e) {
-      log_.error("Cannot clear solr index");
+      logger.error("Cannot clear solr index");
       return false;
     }
   }
@@ -262,10 +262,10 @@ public class SolrIndexManager {
     }
 
     // Add mpeg7
-    log_.debug("Looking for mpeg-7 catalogs containing segment texts");
+    logger.debug("Looking for mpeg-7 catalogs containing segment texts");
     Catalog mpeg7Catalogs[] = mediaPackage.getCatalogs(MediaPackageElements.TEXTS_FLAVOR);
     if(mpeg7Catalogs.length == 0) {
-      log_.debug("No text catalogs found, trying segments only");
+      logger.debug("No text catalogs found, trying segments only");
       mpeg7Catalogs = mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS_FLAVOR);
     }
     // TODO: merge the segments from each mpeg7 if there is more than one mpeg7 catalog
@@ -273,7 +273,7 @@ public class SolrIndexManager {
       Mpeg7Catalog mpeg7Catalog = mpeg7Service.load(mpeg7Catalogs[0]);
       addMpeg7Metadata(solrEpisodeDocument, mediaPackage, mpeg7Catalog);
     } else {
-      log_.debug("No segmentation catalog found");
+      logger.debug("No segmentation catalog found");
     }
     return solrEpisodeDocument;
   }
@@ -290,7 +290,7 @@ public class SolrIndexManager {
 
     // Check if there is a dublin core for series
     if (mediaPackage.getCatalogs(MediaPackageElements.DUBLINCORE_SERIES).length == 0) {
-      log_.debug("No series dublincore found in media package " + mediaPackage);
+      logger.debug("No series dublincore found in media package " + mediaPackage);
       return null;
     }
 
@@ -311,7 +311,7 @@ public class SolrIndexManager {
         }
       }
     } catch (Exception e) {
-      log_.error("Error trying to load series " + seriesId, e);
+      logger.error("Error trying to load series " + seriesId, e);
     }
 
     // Set common fields
@@ -360,7 +360,7 @@ public class SolrIndexManager {
       dc = dcService.load(dcCatalogs[0]);
     } else {
       dc = dcService.newInstance();
-      log_.info("No episode dublincore metadata found in media package {}", mediaPackage);
+      logger.info("No episode dublincore metadata found in media package {}", mediaPackage);
     }
 
     // If this is the case, try to get a hold on it
@@ -506,7 +506,7 @@ public class SolrIndexManager {
 
     // Check for multimedia content
     if (!mpeg7.multimediaContent().hasNext()) {
-      log_.warn("Mpeg-7 doesn't contain  multimedia content");
+      logger.warn("Mpeg-7 doesn't contain  multimedia content");
       return;
     }
 
@@ -620,7 +620,7 @@ public class SolrIndexManager {
             }
           }
 
-          log_.trace("Adding segment: " + timepoint.toString());
+          logger.trace("Adding segment: " + timepoint.toString());
           solrInput.addField(SolrFields.SEGMENT_HINTS + segmentCount, hintField.toString());
 
           // increase segment counter

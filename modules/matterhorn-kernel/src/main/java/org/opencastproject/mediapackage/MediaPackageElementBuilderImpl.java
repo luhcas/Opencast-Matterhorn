@@ -46,7 +46,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
   private List<Class<? extends MediaPackageElementBuilderPlugin>> plugins = null;
 
   /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory.getLogger(MediaPackageElementBuilderImpl.class.getName());
+  private final static Logger logger = LoggerFactory.getLogger(MediaPackageElementBuilderImpl.class.getName());
 
   // Create the list of available element builder pugins
   public MediaPackageElementBuilderImpl() {
@@ -93,7 +93,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
           buf.append(", ");
         buf.append(plugin.toString());
       }
-      log_.debug("More than one element builder plugin with the same priority claims responsibilty for " + uri + ": "
+      logger.debug("More than one element builder plugin with the same priority claims responsibilty for " + uri + ": "
               + buf.toString());
     }
 
@@ -138,7 +138,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
       } catch (XPathExpressionException e) {
         elementFlavor = "(unknown)";
       }
-      log_.debug("More than one element builder plugin claims responsability for " + name + " of flavor "
+      logger.debug("More than one element builder plugin claims responsability for " + name + " of flavor "
               + elementFlavor + ": " + buf.toString());
     }
 
@@ -174,7 +174,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
           buf.append(", ");
         buf.append(plugin.toString());
       }
-      log_.debug("More than one element builder plugin claims responsibilty for " + flavor + ": " + buf.toString());
+      logger.debug("More than one element builder plugin claims responsibilty for " + flavor + ": " + buf.toString());
     }
 
     // Create a new media package element

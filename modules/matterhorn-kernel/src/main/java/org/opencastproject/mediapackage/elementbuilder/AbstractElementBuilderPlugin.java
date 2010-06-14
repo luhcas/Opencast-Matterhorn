@@ -49,7 +49,7 @@ public abstract class AbstractElementBuilderPlugin implements MediaPackageElemen
   protected int priority = -1;
 
   /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory.getLogger(AbstractElementBuilderPlugin.class);
+  private final static Logger logger = LoggerFactory.getLogger(AbstractElementBuilderPlugin.class);
 
   /**
    * Creates a new abstract element builder plugin.
@@ -100,7 +100,7 @@ public abstract class AbstractElementBuilderPlugin implements MediaPackageElemen
     MimeType m = MimeTypes.parseMimeType(mimeType);
     m.setDescription(description);
     this.mimeTypes.add(m);
-    log_.debug("Processing of documents of type " + description + "(" + m + ") enabled");
+    logger.debug("Processing of documents of type " + description + "(" + m + ") enabled");
   }
 
   /**

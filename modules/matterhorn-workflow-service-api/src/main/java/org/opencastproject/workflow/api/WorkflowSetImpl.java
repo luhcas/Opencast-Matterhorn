@@ -37,7 +37,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 public class WorkflowSetImpl implements WorkflowSet {
 
   /** Logging facility */
-  static Logger log_ = LoggerFactory.getLogger(WorkflowSetImpl.class);
+  static Logger logger = LoggerFactory.getLogger(WorkflowSetImpl.class);
 
   /** A list of search items. */
   @XmlElement(name="workflow")

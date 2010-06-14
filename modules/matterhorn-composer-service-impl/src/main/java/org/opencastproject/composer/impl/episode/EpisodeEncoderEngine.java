@@ -93,7 +93,7 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
   private XmlRpcEngineController xmlrpcController = null;
 
   /** the logging facility provided by log4j */
-  static Logger log_ = LoggerFactory.getLogger(EpisodeEncoderEngine.class.getName());
+  static Logger logger = LoggerFactory.getLogger(EpisodeEncoderEngine.class.getName());
 
   /**
    * Creates a new instance of the episode telestream engine wrapper.
@@ -124,7 +124,7 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
     try {
       // Xmlrpc hostname
       xmlrpcHostname = (String) properties.get(OPT_XMLRPC_HOST);
-      log_.debug("Episode xmlrpc host is " + xmlrpcHostname);
+      logger.debug("Episode xmlrpc host is " + xmlrpcHostname);
 
       // Xmlrpc port
       String port = (String) properties.get(OPT_XMLRPC_PORT);
@@ -135,21 +135,21 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
           throw new ConfigurationException("Episode sdk port number '" + port + "' is malformed: " + e.getMessage());
         }
       }
-      log_.debug("Episode xmlrpc port number is " + xmlrpcPort);
+      logger.debug("Episode xmlrpc port number is " + xmlrpcPort);
 
       // Xmlrpc mountpoint
       xmlrpcPath = (String) properties.get(OPT_XMLRPC_PATH);
       if (xmlrpcPath == null)
         throw new ConfigurationException("Episode sdk path not specified");
-      log_.debug("Episode xmlrpc path is " + xmlrpcPath);
+      logger.debug("Episode xmlrpc path is " + xmlrpcPath);
 
       // Xmlrpc password
       xmlrpcPassword = (String) properties.get(OPT_XMLRPC_PASSWORD);
       if (xmlrpcPath == null) { // FIXME This can never occur, since a config exception would be thrown earlier
         xmlrpcPassword = XMLRPC_DEFAULT_PASSWORD;
-        log_.debug("Episode xmlrpc password was not set, using default");
+        logger.debug("Episode xmlrpc password was not set, using default");
       } else {
-        log_.debug("Episode xmlrpc password was set to custom value");
+        logger.debug("Episode xmlrpc password was set to custom value");
       }
 
       // Set monitor frequency
@@ -157,7 +157,7 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
         monitorFrequency = Long.parseLong((String) properties.get(OPT_EPISODE_MONITOR_FREQUENCY));
       } catch (Exception e) {
       }
-      log_.debug("Engine updates are gathered every " + monitorFrequency + " s");
+      logger.debug("Engine updates are gathered every " + monitorFrequency + " s");
 
       // Start the monitor
       xmlrpcController = new XmlRpcEngineController(this, xmlrpcHostname, xmlrpcPort, xmlrpcPath, xmlrpcPassword,

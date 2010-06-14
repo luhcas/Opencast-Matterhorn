@@ -55,7 +55,7 @@ public class EncodingProfileScanner implements ArtifactInstaller {
   private Map<String, EncodingProfile> profiles = new HashMap<String, EncodingProfile>();
 
   /** The logging instance */
-  private static final Logger log_ = LoggerFactory.getLogger(EncodingProfileScanner.class);
+  private static final Logger logger = LoggerFactory.getLogger(EncodingProfileScanner.class);
 
   /**
    * Returns the list of profiles.
@@ -131,7 +131,7 @@ public class EncodingProfileScanner implements ArtifactInstaller {
     // Load the formats
     Map<String, EncodingProfile> profiles = new HashMap<String, EncodingProfile>();
     for (String profileId : profileNames) {
-      log_.debug("Enabling media format " + profileId);
+      logger.debug("Enabling media format " + profileId);
       EncodingProfile profile = loadProfile(profileId, properties, artifact);
       profiles.put(profileId, profile);
     }
@@ -240,15 +240,15 @@ public class EncodingProfileScanner implements ArtifactInstaller {
    */
   @Override
   public void install(File artifact) throws Exception {
-    log_.info("Registering encoding profiles from {}", artifact);
+    logger.info("Registering encoding profiles from {}", artifact);
     try {
       Map<String, EncodingProfile> profileMap = loadFromProperties(artifact);
       for(Entry<String, EncodingProfile> entry : profileMap.entrySet()) {
-        log_.info("Installed profile {}", entry.getValue().getIdentifier());
+        logger.info("Installed profile {}", entry.getValue().getIdentifier());
         profiles.put(entry.getKey(), entry.getValue());
       }
     } catch (Exception e) {
-      log_.error("Encoding profiles could not be read from " + artifact, e);
+      logger.error("Encoding profiles could not be read from " + artifact, e);
     }
   }
 
@@ -262,7 +262,7 @@ public class EncodingProfileScanner implements ArtifactInstaller {
     for (Iterator<EncodingProfile> iter = profiles.values().iterator(); iter.hasNext();) {
       EncodingProfile profile = iter.next();
       if (artifact.equals(profile.getSource())) {
-        log_.info("Uninstalling profile {}", profile.getIdentifier());
+        logger.info("Uninstalling profile {}", profile.getIdentifier());
         iter.remove();
       }
     }

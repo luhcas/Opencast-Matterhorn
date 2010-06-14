@@ -65,7 +65,7 @@ public abstract class AbstractCmdlineEncoderEngine extends
   private Map<String, String> params = new HashMap<String, String>();
 
   /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory
+  private final static Logger logger = LoggerFactory
           .getLogger(AbstractCmdlineEncoderEngine.class.getName());
 
   /**
@@ -158,7 +158,7 @@ public abstract class AbstractCmdlineEncoderEngine extends
         sb.append(cmd);
         sb.append(" ");
       }
-      log_.info("Executing encoding command: {}", sb);
+      logger.info("Executing encoding command: {}", sb);
       ProcessBuilder pbuilder = new ProcessBuilder(command);
       pbuilder.redirectErrorStream(REDIRECT_ERROR_STREAM);
       encoderProcess = pbuilder.start();
@@ -180,7 +180,7 @@ public abstract class AbstractCmdlineEncoderEngine extends
       }
 
       if (audioSource != null) {
-        log_.info(
+        logger.info(
                 "Audio track {} and video track {} successfully encoded using profile '{}'",
                 new String[] {
                         (audioSource == null ? "N/A" : audioSource.getName()),
@@ -188,7 +188,7 @@ public abstract class AbstractCmdlineEncoderEngine extends
                         profile.getIdentifier() }
         );
       } else {
-        log_.info(
+        logger.info(
                 "Video track {} successfully encoded using profile '{}'",
                 new String[] { videoSource.getName(), profile.getIdentifier() }
         );
@@ -197,14 +197,14 @@ public abstract class AbstractCmdlineEncoderEngine extends
       return new File(parentFile.getParent(), FilenameUtils.getBaseName(parentFile.getCanonicalPath()) + processParameters(profile.getSuffix()));
     } catch (EncoderException e) {
       if (audioSource != null) {
-        log_.warn("Error while encoding audio track {} and video track {} using '{}': {}",
+        logger.warn("Error while encoding audio track {} and video track {} using '{}': {}",
                 new String[] {
                 (audioSource == null ? "N/A" : audioSource.getName()),
                 (videoSource == null ? "N/A" : videoSource.getName()),
                 profile.getIdentifier(),
                 e.getMessage()});
       } else {
-        log_.warn("Error while encoding video track {} using '{}': {}",
+        logger.warn("Error while encoding video track {} using '{}': {}",
                 new String[] {
                 (videoSource == null ? "N/A" : videoSource.getName()),
                 profile.getIdentifier(),
@@ -213,7 +213,7 @@ public abstract class AbstractCmdlineEncoderEngine extends
       fireEncodingFailed(this, profile, e, audioSource, videoSource);
       throw e;
     } catch (Exception e) {
-      log_.warn("Error while encoding audio {} and video {} to {}:{}, {}", new Object[] {
+      logger.warn("Error while encoding audio {} and video {} to {}:{}, {}", new Object[] {
               (audioSource == null ? "N/A" : audioSource.getName()),
               (videoSource == null ? "N/A" : videoSource.getName()),
               profile.getName(), e.getMessage()});
@@ -362,7 +362,7 @@ public abstract class AbstractCmdlineEncoderEngine extends
           ((CmdlineEncoderListener) l).notifyEncoderOutput(format, message,
                   sourceFiles);
         } catch (Throwable th) {
-          log_.error("EncoderListener " + l
+          logger.error("EncoderListener " + l
                   + " threw exception while processing callback", th);
         }
       }

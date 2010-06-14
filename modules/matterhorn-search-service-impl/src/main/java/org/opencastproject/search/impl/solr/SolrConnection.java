@@ -50,7 +50,7 @@ import java.util.List;
 public class SolrConnection {
 
   /** Logging facility */
-  static Logger log_ = LoggerFactory.getLogger(SolrConnection.class);
+  static Logger logger = LoggerFactory.getLogger(SolrConnection.class);
 
   /** The solr core */
   private SolrCore core = null;
@@ -120,7 +120,7 @@ public class SolrConnection {
       core.execute(handler, req, rsp);
 
       if (rsp.getException() != null) {
-        log_.warn(rsp.getException().toString());
+        logger.warn(rsp.getException().toString());
         throw rsp.getException();
       }
 

@@ -47,12 +47,11 @@ public class FileSupport {
   private static File tmpDir = null;
 
   /** Logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory.getLogger(FileSupport.class);
+  private final static Logger logger = LoggerFactory.getLogger(FileSupport.class);
 
   /**
-   * Moves the specified file or directory from <code>sourceLocation</code> to
-   * <code>targetDirectory</code>. If <code>targetDirectory</code> does not
-   * exist, it will be created.
+   * Moves the specified file or directory from <code>sourceLocation</code> to <code>targetDirectory</code>. If
+   * <code>targetDirectory</code> does not exist, it will be created.
    * 
    * @param sourceLocation
    *          the source file or directory
@@ -60,8 +59,7 @@ public class FileSupport {
    *          the target directory
    * @return the moved file
    */
-  public static File move(File sourceLocation, File targetDirectory)
-      throws IOException {
+  public static File move(File sourceLocation, File targetDirectory) throws IOException {
     if (!targetDirectory.isDirectory())
       throw new IllegalArgumentException("Target location must be a directory");
 
@@ -79,18 +77,16 @@ public class FileSupport {
   }
 
   /**
-   * Copies the specified file from <code>sourceLocation</code> to
-   * <code>targetLocation</code> and returns a reference to the newly created
-   * file or directory.
+   * Copies the specified file from <code>sourceLocation</code> to <code>targetLocation</code> and returns a reference
+   * to the newly created file or directory.
    * <p/>
-   * If <code>targetLocation</code> is an existing directory, then the source
-   * file or directory will be copied into this directory, otherwise the source
-   * file will be copied to the file identified by <code>targetLocation</code>.
+   * If <code>targetLocation</code> is an existing directory, then the source file or directory will be copied into this
+   * directory, otherwise the source file will be copied to the file identified by <code>targetLocation</code>.
    * <p/>
    * Note that existing files and directories will be overwritten.
    * <p/>
-   * Also note that if <code>targetLocation</code> is a directory than the
-   * directory itself, not only its content is copied.
+   * Also note that if <code>targetLocation</code> is a directory than the directory itself, not only its content is
+   * copied.
    * 
    * @param sourceLocation
    *          the source file or directory
@@ -100,25 +96,21 @@ public class FileSupport {
    * @throws IOException
    *           if copying of the file or directory failed
    */
-  public static File copy(File sourceLocation, File targetLocation)
-      throws IOException {
+  public static File copy(File sourceLocation, File targetLocation) throws IOException {
     return copy(sourceLocation, targetLocation, true);
   }
 
   /**
-   * Copies the specified <code>sourceLocation</code> to
-   * <code>targetLocation</code> and returns a reference to the newly created
-   * file or directory.
+   * Copies the specified <code>sourceLocation</code> to <code>targetLocation</code> and returns a reference to the
+   * newly created file or directory.
    * <p/>
-   * If <code>targetLocation</code> is an existing directory, then the source
-   * file or directory will be copied into this directory, otherwise the source
-   * file will be copied to the file identified by <code>targetLocation</code>.
+   * If <code>targetLocation</code> is an existing directory, then the source file or directory will be copied into this
+   * directory, otherwise the source file will be copied to the file identified by <code>targetLocation</code>.
    * <p/>
-   * If <code>overwrite</code> is set to <code>false</code>, this method throws
-   * an {@link IOException} if the target file already exists.
+   * If <code>overwrite</code> is set to <code>false</code>, this method throws an {@link IOException} if the target
+   * file already exists.
    * <p/>
-   * Note that if <code>targetLocation</code> is a directory than the directory
-   * itself, not only its content is copied.
+   * Note that if <code>targetLocation</code> is a directory than the directory itself, not only its content is copied.
    * 
    * @param sourceLocation
    *          the source file or directory
@@ -130,8 +122,7 @@ public class FileSupport {
    * @throws IOException
    *           if copying of the file or directory failed
    */
-  public static File copy(File sourceLocation, File targetLocation,
-      boolean overwrite) throws IOException {
+  public static File copy(File sourceLocation, File targetLocation, boolean overwrite) throws IOException {
     File dest = determineDestination(targetLocation, sourceLocation, overwrite);
 
     // We are copying a directory
@@ -162,10 +153,9 @@ public class FileSupport {
         if (destination != null)
           destination.close();
       }
-            
+
       if (sourceLocation.length() != dest.length()) {
-        log_.warn("Source " + sourceLocation + " and target " + dest
-            + " do not have the same length");
+        logger.warn("Source " + sourceLocation + " and target " + dest + " do not have the same length");
         // TOOD: Why would this happen?
         // throw new IOException("Source " + sourceLocation + " and target " +
         // dest + " do not have the same length");
@@ -175,34 +165,30 @@ public class FileSupport {
   }
 
   /**
-   * Copies recursively the <em>content</em> of the specified
-   * <code>sourceDirectory</code> to <code>targetDirectory</code>.
+   * Copies recursively the <em>content</em> of the specified <code>sourceDirectory</code> to
+   * <code>targetDirectory</code>.
    * <p/>
-   * If <code>overwrite</code> is set to <code>false</code>, this method throws
-   * an {@link IOException} if the target file already exists.
+   * If <code>overwrite</code> is set to <code>false</code>, this method throws an {@link IOException} if the target
+   * file already exists.
    * 
    * @param sourceDirectory
    *          the source directory
    * @param targetDirectory
-   *          the target directory to copy the content of the source directory
-   *          to
+   *          the target directory to copy the content of the source directory to
    * @param overwrite
    *          <code>true</code> to overwrite existing files
    * @throws IOException
    *           if copying fails
    */
-  public static void copyContent(File sourceDirectory, File targetDirectory,
-      boolean overwrite) throws IOException {
+  public static void copyContent(File sourceDirectory, File targetDirectory, boolean overwrite) throws IOException {
     if (sourceDirectory == null)
       throw new IllegalArgumentException("Source directory must not by null");
     if (!sourceDirectory.isDirectory())
-      throw new IllegalArgumentException(sourceDirectory.getAbsolutePath()
-          + " is not a directory");
+      throw new IllegalArgumentException(sourceDirectory.getAbsolutePath() + " is not a directory");
     if (targetDirectory == null)
       throw new IllegalArgumentException("Target directory must not by null");
     if (!targetDirectory.isDirectory())
-      throw new IllegalArgumentException(targetDirectory.getAbsolutePath()
-          + " is not a directory");
+      throw new IllegalArgumentException(targetDirectory.getAbsolutePath() + " is not a directory");
 
     for (File content : sourceDirectory.listFiles()) {
       copy(content, targetDirectory, overwrite);
@@ -210,88 +196,77 @@ public class FileSupport {
   }
 
   /**
-   * Copies recursively the <em>content</em> of the specified
-   * <code>sourceDirectory</code> to <code>targetDirectory</code>.
+   * Copies recursively the <em>content</em> of the specified <code>sourceDirectory</code> to
+   * <code>targetDirectory</code>.
    * <p/>
    * Note that existing files and directories will be overwritten.
    * 
    * @param sourceDirectory
    *          the source directory
    * @param targetDirectory
-   *          the target directory to copy the content of the source directory
-   *          to
+   *          the target directory to copy the content of the source directory to
    * @throws IOException
    *           if copying fails
    */
-  public static void copyContent(File sourceDirectory, File targetDirectory)
-      throws IOException {
+  public static void copyContent(File sourceDirectory, File targetDirectory) throws IOException {
     copyContent(sourceDirectory, targetDirectory, false);
   }
 
   /**
-   * Links recursively the <em>content</em> of the specified
-   * <code>sourceDirectory</code> to <code>targetDirectory</code>.
+   * Links recursively the <em>content</em> of the specified <code>sourceDirectory</code> to
+   * <code>targetDirectory</code>.
    * <p/>
-   * If <code>overwrite</code> is set to <code>false</code>, this method throws
-   * an {@link IOException} if the target file already exists.
+   * If <code>overwrite</code> is set to <code>false</code>, this method throws an {@link IOException} if the target
+   * file already exists.
    * 
    * @param sourceDirectory
    *          the source directory
    * @param targetDirectory
-   *          the target directory to link the content of the source directory
-   *          to
+   *          the target directory to link the content of the source directory to
    * @param overwrite
    *          <code>true</code> to overwrite existing files
    * @throws IOException
    *           if copying fails
    */
-  public static void linkContent(File sourceDirectory, File targetDirectory,
-      boolean overwrite) throws IOException {
+  public static void linkContent(File sourceDirectory, File targetDirectory, boolean overwrite) throws IOException {
     if (sourceDirectory == null)
       throw new IllegalArgumentException("Source directory must not by null");
     if (!sourceDirectory.isDirectory())
-      throw new IllegalArgumentException(sourceDirectory.getAbsolutePath()
-          + " is not a directory");
+      throw new IllegalArgumentException(sourceDirectory.getAbsolutePath() + " is not a directory");
     if (targetDirectory == null)
       throw new IllegalArgumentException("Target directory must not by null");
     if (targetDirectory.exists() && !targetDirectory.isDirectory())
-      throw new IllegalArgumentException(targetDirectory.getAbsolutePath()
-          + " is not a directory");
+      throw new IllegalArgumentException(targetDirectory.getAbsolutePath() + " is not a directory");
 
     // Create the target directory if it doesn't exist yet
     if (!targetDirectory.exists()) {
       targetDirectory.mkdir();
     }
 
-    log_
-        .trace("Linking files in " + sourceDirectory + " to " + targetDirectory);
+    logger.trace("Linking files in " + sourceDirectory + " to " + targetDirectory);
     Process p = null;
     StreamHelper stdout = null;
     StreamHelper stderr = null;
     StringBuffer error = new StringBuffer();
     try {
       if (overwrite) {
-        p = new ProcessBuilder("find", sourceDirectory.getAbsolutePath(),
-            "-maxdepth", "1", "-type", "f", "-follow", "-exec", "ln", "-fF",
-            "{}", targetDirectory.getAbsolutePath() + File.separator, ";")
-            .start();
+        p = new ProcessBuilder("find", sourceDirectory.getAbsolutePath(), "-maxdepth", "1", "-type", "f", "-follow",
+                "-exec", "ln", "-fF", "{}", targetDirectory.getAbsolutePath() + File.separator, ";").start();
       } else {
-        p = new ProcessBuilder("find", sourceDirectory.getAbsolutePath(),
-            "-maxdepth", "1", "-type", "f", "-follow", "-exec", "ln", "{}",
-            targetDirectory.getAbsolutePath() + File.separator, ";").start();
+        p = new ProcessBuilder("find", sourceDirectory.getAbsolutePath(), "-maxdepth", "1", "-type", "f", "-follow",
+                "-exec", "ln", "{}", targetDirectory.getAbsolutePath() + File.separator, ";").start();
       }
       stdout = new StreamHelper(p.getInputStream());
       stderr = new LinkErrorStreamHelper(p.getErrorStream(), error);
       p.waitFor();
       // Find does not return with an error if -exec fails
       if (p.exitValue() != 0 || error.length() > 0) {
-        log_.debug("Unable to link files from " + sourceDirectory + " to "
-            + targetDirectory + ": " + error);
+        logger.debug("Unable to link files from " + sourceDirectory + " to " + targetDirectory + ": " + error);
         copyContent(sourceDirectory, targetDirectory);
       }
     } catch (InterruptedException e) {
-      throw new IOException("Interrupted while creating links from "
-          + sourceDirectory + " to " + targetDirectory + ": " + e.getMessage());
+      throw new IOException("Interrupted while creating links from " + sourceDirectory + " to " + targetDirectory
+              + ": " + e.getMessage());
     } finally {
       IoSupport.closeQuietly(stdout);
       IoSupport.closeQuietly(stderr);
@@ -308,32 +283,28 @@ public class FileSupport {
   }
 
   /**
-   * Links recursively the <em>content</em> of the specified
-   * <code>sourceDirectory</code> to <code>targetDirectory</code>.
+   * Links recursively the <em>content</em> of the specified <code>sourceDirectory</code> to
+   * <code>targetDirectory</code>.
    * <p/>
    * Note that existing files and directories will be overwritten.
    * 
    * @param sourceDirectory
    *          the source directory
    * @param targetDirectory
-   *          the target directory to link the content of the source directory
-   *          to
+   *          the target directory to link the content of the source directory to
    * @throws IOException
    *           if copying fails
    */
-  public static void linkContent(File sourceDirectory, File targetDirectory)
-      throws IOException {
+  public static void linkContent(File sourceDirectory, File targetDirectory) throws IOException {
     linkContent(sourceDirectory, targetDirectory, false);
   }
 
   /**
-   * Links the specified file or directory from <code>sourceLocation</code> to
-   * <code>targetLocation</code>. If <code>targetLocation</code> does not exist,
-   * it will be created, if the target file already exists, an
+   * Links the specified file or directory from <code>sourceLocation</code> to <code>targetLocation</code>. If
+   * <code>targetLocation</code> does not exist, it will be created, if the target file already exists, an
    * {@link IOException} will be thrown.
    * <p>
-   * If this fails (because linking is not supported on the current filesystem,
-   * then a copy is made.
+   * If this fails (because linking is not supported on the current filesystem, then a copy is made.
    * </p>
    * 
    * @param sourceLocation
@@ -344,21 +315,18 @@ public class FileSupport {
    * @throws IOException
    *           if linking of the file or directory failed
    */
-  public static File link(File sourceLocation, File targetLocation)
-      throws IOException {
+  public static File link(File sourceLocation, File targetLocation) throws IOException {
     return link(sourceLocation, targetLocation, false);
   }
 
   /**
-   * Links the specified file or directory from <code>sourceLocation</code> to
-   * <code>targetLocation</code>. If <code>targetLocation</code> does not exist,
-   * it will be created.
+   * Links the specified file or directory from <code>sourceLocation</code> to <code>targetLocation</code>. If
+   * <code>targetLocation</code> does not exist, it will be created.
    * <p>
-   * If this fails (because linking is not supported on the current filesystem,
-   * then a copy is made.
+   * If this fails (because linking is not supported on the current filesystem, then a copy is made.
    * </p>
-   * If <code>overwrite</code> is set to <code>false</code>, this method throws
-   * an {@link IOException} if the target file already exists.
+   * If <code>overwrite</code> is set to <code>false</code>, this method throws an {@link IOException} if the target
+   * file already exists.
    * 
    * @param sourceLocation
    *          the source file or directory
@@ -370,8 +338,7 @@ public class FileSupport {
    * @throws IOException
    *           if linking of the file or directory failed
    */
-  public static File link(File sourceLocation, File targetLocation,
-      boolean overwrite) throws IOException {
+  public static File link(File sourceLocation, File targetLocation, boolean overwrite) throws IOException {
     if (sourceLocation == null)
       throw new IllegalArgumentException("Source location must not by null");
     if (targetLocation == null)
@@ -386,33 +353,30 @@ public class FileSupport {
       if (!dest.exists()) {
         dest.mkdir();
       }
-      log_.trace("Linking files in " + sourceLocation + " to " + dest);
+      logger.trace("Linking files in " + sourceLocation + " to " + dest);
       Process p = null;
       StreamHelper stdout = null;
       StreamHelper stderr = null;
       StringBuffer error = new StringBuffer();
       try {
         if (overwrite) {
-          p = new ProcessBuilder("find", sourceLocation.getAbsolutePath(),
-              "-maxdepth", "1", "-type", "f", "-follow", "-exec", "ln", "-fF",
-              "{}", dest.getAbsolutePath() + File.separator, ";").start();
+          p = new ProcessBuilder("find", sourceLocation.getAbsolutePath(), "-maxdepth", "1", "-type", "f", "-follow",
+                  "-exec", "ln", "-fF", "{}", dest.getAbsolutePath() + File.separator, ";").start();
         } else {
-          p = new ProcessBuilder("find", sourceLocation.getAbsolutePath(),
-              "-maxdepth", "1", "-type", "f", "-follow", "-exec", "ln", "{}",
-              dest.getAbsolutePath() + File.separator, ";").start();
+          p = new ProcessBuilder("find", sourceLocation.getAbsolutePath(), "-maxdepth", "1", "-type", "f", "-follow",
+                  "-exec", "ln", "{}", dest.getAbsolutePath() + File.separator, ";").start();
         }
         stdout = new StreamHelper(p.getInputStream());
         stderr = new LinkErrorStreamHelper(p.getErrorStream(), error);
         p.waitFor();
         // Find does not return with an error if -exec fails
         if (p.exitValue() != 0 || error.length() > 0) {
-          log_.debug("Unable to link files from " + sourceLocation + " to "
-              + dest + ": " + error);
+          logger.debug("Unable to link files from " + sourceLocation + " to " + dest + ": " + error);
           copy(sourceLocation, dest);
         }
       } catch (InterruptedException e) {
-        throw new IOException("Interrupted while creating links from "
-            + sourceLocation + " to " + dest + ": " + e.getMessage());
+        throw new IOException("Interrupted while creating links from " + sourceLocation + " to " + dest + ": "
+                + e.getMessage());
       } finally {
         IoSupport.closeQuietly(stdout);
         IoSupport.closeQuietly(stderr);
@@ -429,38 +393,33 @@ public class FileSupport {
 
     // Normal file
     else {
-      log_.trace("Creating link from " + sourceLocation + " to " + dest);
+      logger.trace("Creating link from " + sourceLocation + " to " + dest);
       Process p = null;
       StreamHelper stdout = null;
       StreamHelper stderr = null;
       StringBuffer error = new StringBuffer();
       try {
         if (overwrite) {
-          p = new ProcessBuilder("ln", "-f", sourceLocation.getAbsolutePath(),
-              dest.getAbsolutePath()).start();
+          p = new ProcessBuilder("ln", "-f", sourceLocation.getAbsolutePath(), dest.getAbsolutePath()).start();
         } else {
-          p = new ProcessBuilder("ln", sourceLocation.getAbsolutePath(), dest
-              .getAbsolutePath()).start();
+          p = new ProcessBuilder("ln", sourceLocation.getAbsolutePath(), dest.getAbsolutePath()).start();
         }
         stdout = new StreamHelper(p.getInputStream());
         stderr = new LinkErrorStreamHelper(p.getErrorStream(), error);
         p.waitFor();
         // Find does not return with an error if -exec fails
         if (p.exitValue() != 0 || error.length() > 0) {
-          log_.debug("Unable to create a link from " + sourceLocation + " to "
-              + dest + ": " + error);
+          logger.debug("Unable to create a link from " + sourceLocation + " to " + dest + ": " + error);
           copy(sourceLocation, dest);
         }
         if (sourceLocation.length() != dest.length()) {
-          log_.warn("Source " + sourceLocation + " and target " + dest
-              + " do not have the same length");
+          logger.warn("Source " + sourceLocation + " and target " + dest + " do not have the same length");
           // TOOD: Why would this happen?
           // throw new IOException("Source " + sourceLocation + " and target " +
           // dest + " do not have the same length");
         }
       } catch (InterruptedException e) {
-        throw new IOException("Interrupted while creating a link from "
-            + sourceLocation + " to " + dest + ": " + error);
+        throw new IOException("Interrupted while creating a link from " + sourceLocation + " to " + dest + ": " + error);
       } finally {
         IoSupport.closeQuietly(stdout);
         IoSupport.closeQuietly(stderr);
@@ -470,8 +429,8 @@ public class FileSupport {
     return dest;
   }
 
-  private static File determineDestination(File targetLocation,
-      File sourceLocation, boolean overwrite) throws IOException {
+  private static File determineDestination(File targetLocation, File sourceLocation, boolean overwrite)
+          throws IOException {
     File dest = null;
 
     // Is the source file/directory readable
@@ -479,13 +438,13 @@ public class FileSupport {
       throw new IOException(dest + " cannot be read");
 
     if (!targetLocation.exists() && targetLocation.getParentFile().exists()
-        && targetLocation.getParentFile().isDirectory()
-        && !targetLocation.getName().equals(sourceLocation.getName())) {
+            && targetLocation.getParentFile().isDirectory()
+            && !targetLocation.getName().equals(sourceLocation.getName())) {
 
       dest = targetLocation;
-      targetLocation = targetLocation.getParentFile(); // FIXME targetLocation is never read, so setting this does nothing
-    } else if (targetLocation.exists() && sourceLocation.isFile()
-        && targetLocation.isFile()) {
+      targetLocation = targetLocation.getParentFile(); // FIXME targetLocation is never read, so setting this does
+                                                       // nothing
+    } else if (targetLocation.exists() && sourceLocation.isFile() && targetLocation.isFile()) {
       dest = targetLocation;
     } else if (!targetLocation.getName().equals(sourceLocation.getName())) {
       dest = new File(targetLocation, sourceLocation.getName());
@@ -501,12 +460,10 @@ public class FileSupport {
   }
 
   /**
-   * Deletes the specified file and returns <code>true</code> if the file was
-   * deleted.
+   * Deletes the specified file and returns <code>true</code> if the file was deleted.
    * <p>
-   * If <code>f</code> is a directory, it will only be deleted if it doesn't
-   * contain any other files or directories. To do a recursive delete, you may
-   * use {@link #delete(File, boolean)}.
+   * If <code>f</code> is a directory, it will only be deleted if it doesn't contain any other files or directories. To
+   * do a recursive delete, you may use {@link #delete(File, boolean)}.
    * 
    * @param f
    *          the file or directory
@@ -517,12 +474,10 @@ public class FileSupport {
   }
 
   /**
-   * Deletes the specified file and returns <code>true</code> if the file was
-   * deleted.
+   * Deletes the specified file and returns <code>true</code> if the file was deleted.
    * <p>
-   * In the case that <code>f</code> references a directory, it will only be
-   * deleted if it doesn't contain other files or directories, unless
-   * <code>recurse</code> is set to <code>true</code>.
+   * In the case that <code>f</code> references a directory, it will only be deleted if it doesn't contain other files
+   * or directories, unless <code>recurse</code> is set to <code>true</code>.
    * </p>
    * 
    * @param f
@@ -545,9 +500,8 @@ public class FileSupport {
   }
 
   /**
-   * Deletes the content of directory <code>dir</code> and, if specified, the
-   * directory itself. If <code>dir</code> is a normal file it will always be
-   * deleted.
+   * Deletes the content of directory <code>dir</code> and, if specified, the directory itself. If <code>dir</code> is a
+   * normal file it will always be deleted.
    * 
    * @return true everthing was deleted, false otherwise
    */
@@ -564,9 +518,8 @@ public class FileSupport {
   }
 
   /**
-   * Deletes the content of directory <code>dir</code> and, if specified, the
-   * directory itself. If <code>dir</code> is a normal file it will be deleted
-   * always.
+   * Deletes the content of directory <code>dir</code> and, if specified, the directory itself. If <code>dir</code> is a
+   * normal file it will be deleted always.
    */
   private static boolean _delete(File[] files, boolean deleteDir) {
     boolean ok = true;
@@ -584,8 +537,7 @@ public class FileSupport {
   }
 
   /**
-   * Sets the webapp's temporary directory. Make sure that directory exists and
-   * has write permissions turned on.
+   * Sets the webapp's temporary directory. Make sure that directory exists and has write permissions turned on.
    * 
    * @param tmpDir
    *          the new temporary directory
@@ -594,8 +546,7 @@ public class FileSupport {
    * @throws IllegalStateException
    *           if the directory is write protected
    */
-  public static void setTempDirectory(File tmpDir)
-      throws IllegalArgumentException, IllegalStateException {
+  public static void setTempDirectory(File tmpDir) throws IllegalArgumentException, IllegalStateException {
     if (tmpDir == null || !tmpDir.isDirectory())
       throw new IllegalArgumentException(tmpDir + " is not a directory");
     if (!tmpDir.canWrite())
@@ -616,8 +567,7 @@ public class FileSupport {
   }
 
   /**
-   * Returns a directory <code>subdir</code> inside the webapp's temporary work
-   * directory.
+   * Returns a directory <code>subdir</code> inside the webapp's temporary work directory.
    * 
    * @param subdir
    *          name of the subdirectory
@@ -630,11 +580,9 @@ public class FileSupport {
     if (!tmp.isDirectory())
       throw new IllegalStateException(tmp + " is not a directory!");
     if (!tmp.canRead())
-      throw new IllegalStateException("Temp directory " + tmp
-          + " is not readable!");
+      throw new IllegalStateException("Temp directory " + tmp + " is not readable!");
     if (!tmp.canWrite())
-      throw new IllegalStateException("Temp directory " + tmp
-          + " is not writable!");
+      throw new IllegalStateException("Temp directory " + tmp + " is not writable!");
     return tmp;
   }
 
@@ -648,22 +596,20 @@ public class FileSupport {
    */
   public static boolean equals(File a, File b) {
     try {
-      return a != null && b != null
-          && a.getCanonicalPath().equals(b.getCanonicalPath());
+      return a != null && b != null && a.getCanonicalPath().equals(b.getCanonicalPath());
     } catch (IOException e) {
       return false;
     }
   }
 
   /**
-   * Special implementation of the stream helper that will swallow some of the
-   * videosegmenter's output erroneously written to stderr.
+   * Special implementation of the stream helper that will swallow some of the videosegmenter's output erroneously
+   * written to stderr.
    */
   private static class LinkErrorStreamHelper extends StreamHelper {
 
     /**
-     * Creates a new stream helper that will swallow some well known error
-     * messages while linking.
+     * Creates a new stream helper that will swallow some well known error messages while linking.
      * 
      * @param stream
      *          the content stream

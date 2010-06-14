@@ -79,7 +79,7 @@ public class XmlRpcEngineController implements Runnable {
   private long timeout = EpisodeEncoderEngine.DEFAULT_MONITOR_FREQUENCY * 1000L;
 
   /** the logging facility provided by log4j */
-  final static Logger log_ = LoggerFactory.getLogger(XmlRpcEngineController.class.getName());
+  final static Logger logger = LoggerFactory.getLogger(XmlRpcEngineController.class.getName());
 
   /**
    * Creates a new monitor for the given engine.
@@ -185,7 +185,7 @@ public class XmlRpcEngineController implements Runnable {
         synchronized (joblist) { // FIXME CopyOnWriteArrayList should never be externally synchronized
           joblist.add(new XmlRpcJob(jobId, track, format, setting));
         }
-        log_.trace("Submitted track " + track + " to episode engine with settings " + setting.getName());
+        logger.trace("Submitted track " + track + " to episode engine with settings " + setting.getName());
       } else {
         throw new EncoderException(engine, "Unexpected reply from episode engine at " + xmlrpcHostname
                 + ": expected job identifier, got " + result);
@@ -246,7 +246,7 @@ public class XmlRpcEngineController implements Runnable {
   private List<EpisodeSettings> getSettings(File sourceFile, EncodingProfile profile) throws EncoderException {
     String settingsPath = PathSupport.concat(new String[] { "Opencast", profile.getIdentifier() });
 
-    log_.trace("Looking for episode settings at " + settingsPath);
+    logger.trace("Looking for episode settings at " + settingsPath);
 
     // Prepare the call
     Vector<Object> arguments = new Vector<Object>(1);
@@ -286,7 +286,7 @@ public class XmlRpcEngineController implements Runnable {
   private boolean fileIsProcessed(File file, EncodingProfile profile) {
     List<XmlRpcJob> jobs = getJobs(file, profile);
     if (jobs.size() > 0)
-      log_.trace("File " + file + " is still being processed");
+      logger.trace("File " + file + " is still being processed");
     return jobs.size() > 0;
   }
 
@@ -340,24 +340,24 @@ public class XmlRpcEngineController implements Runnable {
           if (!job.getState().equals(newState)) {
 
             if (newState == null) {
-              log_.error("Lost job state for " + job);
+              logger.error("Lost job state for " + job);
               continue;
             }
 
             else if (newState.equals(XmlRpcJobState.Created)) {
               // TODO: Process state change
-              log_.trace("Episode job " + job + " was created");
+              logger.trace("Episode job " + job + " was created");
             }
 
             else if (newState.equals(XmlRpcJobState.Queued)) {
               // TODO: Process state change
-              log_.debug("Enqueued encoding of " + track + " to " + encodingProfile
+              logger.debug("Enqueued encoding of " + track + " to " + encodingProfile
                       + " " + settings);
             }
 
             else if (newState.equals(XmlRpcJobState.Running)) {
               // TODO: Process state change
-              log_.debug("Started encoding of " + track + " to " + encodingProfile
+              logger.debug("Started encoding of " + track + " to " + encodingProfile
                       + " " + settings);
             }
 
@@ -372,7 +372,7 @@ public class XmlRpcEngineController implements Runnable {
               }
 
               // Tell engine
-              log_.debug("Finished encoding of " + track + " to " + encodingProfile
+              logger.debug("Finished encoding of " + track + " to " + encodingProfile
                       + " " + settings);
               if (!trackIsProcessed) {
                 engine.fileEncoded(track, encodingProfile);
@@ -391,10 +391,10 @@ public class XmlRpcEngineController implements Runnable {
               }
 
               // Tell engine
-              log_.warn("Encoding of " + track + " to " + encodingProfile + " " + settings
+              logger.warn("Encoding of " + track + " to " + encodingProfile + " " + settings
                       + " was stopped");
               if (associatedJobs.size() > 0)
-                log_.warn(associatedJobs.size() + " associated jobs have been canceled");
+                logger.warn(associatedJobs.size() + " associated jobs have been canceled");
               engine.fileEncodingFailed(track, encodingProfile, "Canceled");
             }
 
@@ -411,13 +411,13 @@ public class XmlRpcEngineController implements Runnable {
               }
 
               // Tell engine
-              log_.debug("Encoding of " + track + " to " + encodingProfile + " " + settings
+              logger.debug("Encoding of " + track + " to " + encodingProfile + " " + settings
                       + " failed: " + reason);
               if (associatedJobs.size() > 0)
-                log_.trace(associatedJobs.size() + " associated jobs have been canceled");
+                logger.trace(associatedJobs.size() + " associated jobs have been canceled");
               engine.fileEncodingFailed(track, encodingProfile, reason.toString());
             } else {
-              log_.error("Episode engine discovered job with unkown state '" + newState + "'");
+              logger.error("Episode engine discovered job with unkown state '" + newState + "'");
             }
 
             // Remember the new state
@@ -430,7 +430,7 @@ public class XmlRpcEngineController implements Runnable {
             if (progress - job.getProgress() >= 10) {
               job.setProgress((progress / 10) * 10);
               engine.fileEncodingProgressed(track, encodingProfile, job.getProgress());
-              log_.trace("Encoding of " + track + " to " + encodingProfile + " progressed to "
+              logger.trace("Encoding of " + track + " to " + encodingProfile + " progressed to "
                       + job.getProgress() + "%");
             }
           }
@@ -438,7 +438,7 @@ public class XmlRpcEngineController implements Runnable {
         }
       } catch (Throwable t) {
         // TODO: Think about what to do here.
-        log_.error("Episode encoder monitor encountered an exception: " + t.getMessage(), t);
+        logger.error("Episode encoder monitor encountered an exception: " + t.getMessage(), t);
       }
 
       // Sleep for a few seconds
@@ -446,7 +446,7 @@ public class XmlRpcEngineController implements Runnable {
         Thread.sleep(timeout);
       } catch (InterruptedException e) {
         // TODO: Think about what to do here.
-        log_.trace("Episode encoder monitor interrupted");
+        logger.trace("Episode encoder monitor interrupted");
       }
 
     }
@@ -476,7 +476,7 @@ public class XmlRpcEngineController implements Runnable {
 
       // Log this incident
       if (!commWarningIssued) {
-        log_.warn(msg);
+        logger.warn(msg);
         commWarningIssued = true;
       }
 

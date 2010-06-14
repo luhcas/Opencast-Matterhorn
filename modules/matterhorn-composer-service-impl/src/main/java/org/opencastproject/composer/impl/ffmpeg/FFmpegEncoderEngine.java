@@ -43,7 +43,7 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
   private static final String CONFIG_FFMPEG_PATH = "composer.ffmpegpath";
 
   /** the logging facility provided by log4j */
-  private static final Logger log_ = LoggerFactory.getLogger(FFmpegEncoderEngine.class);
+  private static final Logger logger = LoggerFactory.getLogger(FFmpegEncoderEngine.class);
 
   /**
    * Creates the ffmpeg encoder engine.
@@ -57,10 +57,10 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
     String path = (String) cc.getBundleContext().getProperty(CONFIG_FFMPEG_PATH);
     if (path == null) {
       // DEFAULT - https://issues.opencastproject.org/jira/browse/MH-2158
-      log_.info("DEFAULT " + CONFIG_FFMPEG_PATH + ": " + FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
+      logger.info("DEFAULT " + CONFIG_FFMPEG_PATH + ": " + FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
     } else {
       setBinary(path);
-      log_.info("FFmpegEncoderEngine config binary: {}", path);
+      logger.info("FFmpegEncoderEngine config binary: {}", path);
     }
   }
 
@@ -131,7 +131,7 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
     if (message.startsWith("FFmpeg version") || message.startsWith("configuration") || message.startsWith("lib")
             || message.startsWith("size=") || message.startsWith("frame=") || message.startsWith("built on"))
 
-      log_.trace(message);
+      logger.trace(message);
 
     // Some to debug
     else if (message.startsWith("Input #") || message.startsWith("Duration:") || message.startsWith("Stream #")
@@ -140,11 +140,11 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
             || message.startsWith("Last message repeated")
             || message.startsWith("PIX_FMT_YUV420P will be used as an intermediate format for rescaling"))
 
-      log_.debug(message);
+      logger.debug(message);
 
     // And the rest is likely to deserve at least info
     else
-      log_.info(message);
+      logger.info(message);
   }
 
   /**

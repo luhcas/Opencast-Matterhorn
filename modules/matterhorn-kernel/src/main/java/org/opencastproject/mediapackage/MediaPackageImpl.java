@@ -68,7 +68,7 @@ import javax.xml.transform.stream.StreamSource;
 public final class MediaPackageImpl implements MediaPackage {
 
   /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory.getLogger(MediaPackageImpl.class.getName());
+  private final static Logger logger = LoggerFactory.getLogger(MediaPackageImpl.class.getName());
 
   /** Context for serializing and deserializing */
   static JAXBContext context;
@@ -193,7 +193,7 @@ public final class MediaPackageImpl implements MediaPackage {
       try {
         manifest.setStartDate(DateTimeSupport.fromUTC(startTime));
       } catch (Exception e) {
-        log_.info("Unable to parse start time {}", startTime);
+        logger.info("Unable to parse start time {}", startTime);
       }
     } else {
       manifest.setStartDate(0);
@@ -828,7 +828,7 @@ public final class MediaPackageImpl implements MediaPackage {
         try {
           o.elementAdded(element);
         } catch (Throwable th) {
-          log_.error("MediaPackageOberserver " + o + " throw exception while processing callback", th);
+          logger.error("MediaPackageOberserver " + o + " throw exception while processing callback", th);
         }
       }
     }
@@ -846,7 +846,7 @@ public final class MediaPackageImpl implements MediaPackage {
         try {
           o.elementRemoved(element);
         } catch (Throwable th) {
-          log_.error("MediaPackageObserver " + o + " threw exception while processing callback", th);
+          logger.error("MediaPackageObserver " + o + " threw exception while processing callback", th);
         }
       }
     }

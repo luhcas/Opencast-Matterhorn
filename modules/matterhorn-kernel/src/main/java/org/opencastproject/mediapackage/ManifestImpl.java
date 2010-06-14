@@ -56,7 +56,7 @@ import javax.xml.xpath.XPathFactory;
 final class ManifestImpl {
 
   /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory.getLogger(ManifestImpl.class.getName());
+  private final static Logger logger = LoggerFactory.getLogger(ManifestImpl.class.getName());
 
   /** id builder, for internal use only */
   private static final IdBuilder idBuilder = new UUIDIdBuilderImpl();
@@ -1006,7 +1006,7 @@ final class ManifestImpl {
       }
     } else {
       manifest.identifier = IdBuilderFactory.newInstance().newIdBuilder().createNew();
-      log_.info("Created handle {} for manifest", manifest.identifier);
+      logger.info("Created handle {} for manifest", manifest.identifier);
     }
 
     // Start time
@@ -1034,16 +1034,16 @@ final class ManifestImpl {
             throw new MediaPackageException("Track file " + elementUrl + " is missing");
         }
       } catch (IllegalStateException e) {
-        log_.warn("Unable to create tracks from manifest: " + e.getMessage());
+        logger.warn("Unable to create tracks from manifest: " + e.getMessage());
         throw e;
       } catch (MediaPackageException e) {
         if (!ignoreMissingElements) {
-          log_.warn("Error while creating track from manifest:" + e.getMessage());
+          logger.warn("Error while creating track from manifest:" + e.getMessage());
           throw e;
         }
       } catch (Throwable t) {
         if (!ignoreMissingElements) {
-          log_.warn("Error reading track: " + t.getMessage());
+          logger.warn("Error reading track: " + t.getMessage());
           throw new IllegalStateException(t);
         }
       }
@@ -1051,13 +1051,13 @@ final class ManifestImpl {
 
     // Read catalogs
     NodeList catalogNodes = (NodeList) xPath.evaluate("/mediapackage/metadata/catalog", doc, XPathConstants.NODESET);
-    log_.debug("{} catalog nodes found", catalogNodes.getLength());
+    logger.debug("{} catalog nodes found", catalogNodes.getLength());
     for (int i = 0; i < catalogNodes.getLength(); i++) {
       try {
         MediaPackageElement catalog = elementBuilder.elementFromManifest(catalogNodes.item(i), serializer);
-        log_.debug("catalog node {} (#{} of {}) parsed to {}", new Object[] {catalogNodes.item(i), i+1, catalogNodes.getLength(), catalog});
+        logger.debug("catalog node {} (#{} of {}) parsed to {}", new Object[] {catalogNodes.item(i), i+1, catalogNodes.getLength(), catalog});
         if (catalog != null) {
-          log_.debug("catalog flavor={}", catalog.getFlavor());
+          logger.debug("catalog flavor={}", catalog.getFlavor());
           URI elementUrl = catalog.getURI();
           if (elementUrl != null) // TODO: Check existence
             manifest.add(catalog);
@@ -1066,16 +1066,16 @@ final class ManifestImpl {
         }
       } catch (IllegalStateException e) {
         if (!ignoreMissingElements) {
-          log_.warn("Unable to load catalog from manifest: " + e.getMessage());
+          logger.warn("Unable to load catalog from manifest: " + e.getMessage());
           throw e;
         }
       } catch (MediaPackageException e) {
         if (!ignoreMissingElements) {
-          log_.warn("Error while loading catalog from manifest:" + e.getMessage());
+          logger.warn("Error while loading catalog from manifest:" + e.getMessage());
           throw e;
         }
       } catch (Throwable t) {
-        log_.warn("Error reading catalog: " + t.getMessage());
+        logger.warn("Error reading catalog: " + t.getMessage());
         t.printStackTrace();
         throw new IllegalStateException(t);
       }
@@ -1096,16 +1096,16 @@ final class ManifestImpl {
         }
       } catch (IllegalStateException e) {
         if (!ignoreMissingElements) {
-          log_.warn("Unable to load attachment from manifest: " + e.getMessage());
+          logger.warn("Unable to load attachment from manifest: " + e.getMessage());
           throw e;
         }
       } catch (MediaPackageException e) {
         if (!ignoreMissingElements) {
-          log_.warn("Error while loading attachment from manifest:" + e.getMessage());
+          logger.warn("Error while loading attachment from manifest:" + e.getMessage());
           throw e;
         }
       } catch (Throwable t) {
-        log_.warn("Error reading attachment: " + t.getMessage());
+        logger.warn("Error reading attachment: " + t.getMessage());
         throw new IllegalStateException(t);
       }
     }

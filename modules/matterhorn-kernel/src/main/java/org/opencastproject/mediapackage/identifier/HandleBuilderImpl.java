@@ -60,7 +60,7 @@ public class HandleBuilderImpl implements HandleBuilder {
   private URL defaultURL = null;
 
   /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory.getLogger(HandleBuilderImpl.class);
+  private final static Logger logger = LoggerFactory.getLogger(HandleBuilderImpl.class);
 
   /**
    * Creates a new handle builder.
@@ -84,7 +84,7 @@ public class HandleBuilderImpl implements HandleBuilder {
       }
 
     } catch (MalformedURLException e) {
-      log_.error("Unable to create default " + DEFAULT_URL + " url for handle builder");
+      logger.error("Unable to create default " + DEFAULT_URL + " url for handle builder");
     }
   }
 

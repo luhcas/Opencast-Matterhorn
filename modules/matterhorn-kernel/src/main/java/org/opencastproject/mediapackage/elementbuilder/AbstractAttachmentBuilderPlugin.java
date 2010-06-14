@@ -46,7 +46,7 @@ import javax.xml.xpath.XPathExpressionException;
 public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBuilderPlugin {
 
   /** the logging facility provided by log4j */
-  private final static Logger log_ = LoggerFactory.getLogger(AbstractAttachmentBuilderPlugin.class);
+  private final static Logger logger = LoggerFactory.getLogger(AbstractAttachmentBuilderPlugin.class);
 
   /** The candidate type */
   protected MediaPackageElement.Type type = MediaPackageElement.Type.Attachment;
@@ -122,7 +122,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
 
       return true;
     } catch (XPathExpressionException e) {
-      log_.warn("Error while reading attachment flavor from manifest: " + e.getMessage());
+      logger.warn("Error while reading attachment flavor from manifest: " + e.getMessage());
       return false;
     }
   }
@@ -198,7 +198,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
           MediaPackageElementFlavor flavor = MediaPackageElementFlavor.parseFlavor(attachmentFlavor);
           attachment.setFlavor(flavor);
         } catch (IllegalArgumentException e) {
-          log_.warn("Unable to read attachment flavor: " + e.getMessage());
+          logger.warn("Unable to read attachment flavor: " + e.getMessage());
         }
       }
 
@@ -245,7 +245,7 @@ public abstract class AbstractAttachmentBuilderPlugin extends AbstractElementBui
    *           if the attachment cannto be read
    */
   public MediaPackageElement elementFromURI(URI uri) throws UnsupportedElementException {
-    log_.trace("Creating attachment from " + uri);
+    logger.trace("Creating attachment from " + uri);
     return specializeAttachment(AttachmentImpl.fromURI(uri));
   }
 

@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 public class LatestFeedService extends AbstractFeedService implements FeedGenerator {
 
   /** Logging facility */
-  private static Logger log_ = LoggerFactory.getLogger(LatestFeedService.class);
+  private static Logger logger = LoggerFactory.getLogger(LatestFeedService.class);
 
   /**
    * {@inheritDoc}
@@ -42,7 +42,7 @@ public class LatestFeedService extends AbstractFeedService implements FeedGenera
     try {
       return searchService.getByQuery(new SearchQueryImpl().includeEpisodes(true).includeSeries(false).withLimit(limit).withOffset(offset));
     } catch (Exception e) {
-      log_.error("Cannot retrieve result for feed 'recent episodes'", e);
+      logger.error("Cannot retrieve result for feed 'recent episodes'", e);
       return null;
     }
   }

@@ -47,7 +47,7 @@ public class Mpeg7CatalogImpl implements Mpeg7Catalog {
   public static final String NS = "mpeg7";
   
   /** the logging facility provided by log4j */
-  final static Logger log_ = LoggerFactory.getLogger(Mpeg7CatalogImpl.class.getName());
+  final static Logger logger = LoggerFactory.getLogger(Mpeg7CatalogImpl.class.getName());
 
   /**
    * Creates a new mpeg-7 metadata container.

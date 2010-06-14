@@ -55,7 +55,7 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
   public static final String CONFIG_MEDIAINFO_BINARY = "mediainfo.binary";
   public static final String DEFAULT_MEDIAINFO_PATH = "/usr/local/bin/mediainfo";
 
-  private static final Logger log_ = LoggerFactory.getLogger(MediaInfoAnalyzer.class);
+  private static final Logger logger = LoggerFactory.getLogger(MediaInfoAnalyzer.class);
 
   private static final Map<String, Setter> CommonStreamProperties = new HashMap<String, Setter>();
 
@@ -127,7 +127,7 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
       if (config.containsKey(CONFIG_MEDIAINFO_BINARY)) {
         String binary = (String) config.get(CONFIG_MEDIAINFO_BINARY);
         setBinary(binary);
-        log_.info("MediaInfoAnalyzer config binary: " + binary);
+        logger.info("MediaInfoAnalyzer config binary: " + binary);
       }
     }
   }
@@ -147,7 +147,7 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
     for (StreamSection section : StreamSection.values()) {
       if (isNewSection(section, line)) {
         streamSection = section;
-        log_.debug("New section " + streamSection);
+        logger.debug("New section " + streamSection);
         switch (streamSection) {
         case general:
           currentMetadata = metadata;
@@ -161,7 +161,7 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
           metadata.getAudioStreamMetadata().add((AudioStreamMetadata) currentMetadata);
           break;
         default:
-          log_.warn("Bug: Unknown stream section {}", streamSection);
+          logger.warn("Bug: Unknown stream section {}", streamSection);
         }
         return; // LEAVE
       }

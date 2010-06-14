@@ -44,7 +44,7 @@ import javax.xml.transform.stream.StreamSource;
 public class SearchResultImpl implements SearchResult {
 
   /** Logging facility */
-  static Logger log_ = LoggerFactory.getLogger(SearchResultImpl.class);
+  static Logger logger = LoggerFactory.getLogger(SearchResultImpl.class);
 
   /** Context for serializing and deserializing */
   static JAXBContext context;
