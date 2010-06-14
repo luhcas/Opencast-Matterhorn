@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
- name="workflowsamples" immediate="true" activate="activate" deactivate="deactivate">
+ name="org.opencastproject.workflow.samples" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.http.StaticResource" />
   <property name="service.description" value="Workflow Samples" />
   <property name="alias" value="/workflow/samples" />
