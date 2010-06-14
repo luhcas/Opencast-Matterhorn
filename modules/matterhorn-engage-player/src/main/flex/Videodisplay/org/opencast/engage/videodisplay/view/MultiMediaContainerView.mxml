@@ -24,7 +24,6 @@
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
     resize = "{ resizeVideodisplay() }"
     xmlns:osmf="com.osmf.*"
-   
     >
 
     <mx:Script>
@@ -80,38 +79,69 @@
                 Swiz.dispatchEvent( new ResizeVideodisplayEvent() );
               
                 Swiz.autowire(this);
+                
+            }
+            
+            public function setMediaContainers( percentOne:Number, percentTwo:Number ):void
+            {
+               mediaContainerLeftUIComponent.percentWidth = percentOne;
+               mediaContainerLeftUIComponent.percentHeight = 100;
+               mediaContainerRightUIComponent.percentWidth = percentTwo;
+               mediaContainerRightUIComponent.percentHeight = 100;
             }
         ]]>
     </mx:Script>
+     <mx:states>
+
+        <mx:State 
+            name = "onlyleft"
+            enterState="{setMediaContainers(100,0)}"
+            />
+        
+        <mx:State 
+            name = "bigleft"
+            enterState="{setMediaContainers(100,50)}"
+            />
+            
+        <mx:State 
+            name = "center"
+            enterState="{setMediaContainers(100,100)}"
+            />
+        
+        <mx:State 
+            name = "bigright"
+            enterState="{setMediaContainers(50,100)}"
+            />
+            
+        <mx:State 
+            name = "onlyright"
+            enterState="{setMediaContainers(0,100)}"
+            />
+
+     </mx:states>
+   
     
     <mx:HBox
-    	id="test"
-    	height="100%"
+    	id="hb_media"
+    	width="100%"
     	horizontalGap="0"
-    	horizontalAlign="center"
-    	
-    	horizontalCenter="0"
+    	height="100%"
+    	left="{model.multiMediaContainerLeft}"
+    	right="{ model.multiMediaContainerRight }"
+    	bottom="{ model.multiMediaContainerBottom }"
     	>
     	
-    	
-    		
     	   <osmf:MediaContainerUIComponent
 		        id = "mediaContainerLeftUIComponent"
 		        addedToStage = "initPlayerLeft()"
-		        width="100%"
-		        height="100%"
 		        
 		        />   
 	  
-            
-	        <osmf:MediaContainerUIComponent
+            <osmf:MediaContainerUIComponent
 		        id = "mediaContainerRightUIComponent"
 		        addedToStage = "initPlayerRight()"
-		        width="100%"
-		        height="100%"
+		        
 		        />   
-    	
-    	
     	
     </mx:HBox>
           

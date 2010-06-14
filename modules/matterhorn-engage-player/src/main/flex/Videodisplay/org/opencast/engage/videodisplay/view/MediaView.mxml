@@ -95,27 +95,6 @@
         
     </mx:states>
     
-    
-    
-    
-    
-    <mx:HBox
-    	width="100%"
-    	height="100%"
-    	horizontalAlign="center"
-    	verticalAlign="middle"
-    	>
-    	
-        <mx:SWFLoader 
-	        source="@Embed(source='../../../../../style/oc_logo_loader.swf')" 
-	        scaleContent="true" 
-	        autoLoad="true"
-	        visible="{ model.loader }"
-	        includeInLayout="{ model.loader }"
-	        />
-        
-    </mx:HBox>
-    
     <view:SingleMediaContainerView
         id = "bx_single"
         visible = "false"
@@ -130,6 +109,7 @@
         includeInLayout = "false"
         width = "100%"
         height = "100%"
+        currentState="{model.videoSizeState}"
     	/>
     	
     <view:CoverView

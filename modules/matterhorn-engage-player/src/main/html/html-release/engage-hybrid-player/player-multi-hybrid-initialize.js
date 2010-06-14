@@ -18,8 +18,19 @@ Opencast.Initialize = (function ()
     VIDEOSIZE = 'videosize',
     divId = '',
     OPTIONMYCLASSNAME      = "oc_option-myBookmark",
+    VIDEOSIZESINGLE        = "vidoSizeSingle",
+    VIDEOSIZEBIGRIGHT      = "videoSizeBigRight",
+    VIDEOSIZEBIGLEFT       = "videoSizeBigLeft",
+    VIDEOSIZEMULTI         = "videoSizeMulti",
+    VIDEOSIZEONLYRIGHT     = "videoSizeOnlyRight",
+    VIDEOSIZEONLYLEFT      = "videoSizeOnlyLeft",
+    VIDEOSIZEAUDIO         = "videoSizeAudio",
     clickMatterhornSearchField = false,
-    clickLecturerSearchField = false;
+    clickLecturerSearchField = false,
+    formatOne = 0,
+    formatTwo = 0,
+    formatSingle = 0,
+    size = "";
     
     /**
         @memberOf Opencast.Initialize
@@ -27,7 +38,7 @@ Opencast.Initialize = (function ()
      */
     function setDivId(id)
     {
-    	divId = id;
+        divId = id;
     }
     
     /**
@@ -36,7 +47,7 @@ Opencast.Initialize = (function ()
      */
     function getDivId()
     {
-    	return divId;
+        return divId;
     }
     
     /**
@@ -110,20 +121,20 @@ Opencast.Initialize = (function ()
         dropdown_canceltimer();
         dropdown_close();
        
-	    if(getDivId() === VOLUME)
+        if (getDivId() === VOLUME)
         {
             ddmenuitem = $('#oc_volume-menue').css('visibility', 'visible');
 
         }
-	    else if(getDivId() === VIDEOSIZE)
-	    {
+        else if (getDivId() === VIDEOSIZE)
+        {
             ddmenuitem = $('#oc_video-size-menue').css('visibility', 'visible');
         }
         else
         {
             ddmenuitem = $(this).find('ul').eq(0).css('visibility', 'visible');
         }
-	    setDivId('');
+        setDivId('');
     }
     
     /**
@@ -132,7 +143,7 @@ Opencast.Initialize = (function ()
      */
     function dropdownVideo_open()
     {
-    	setDivId(VIDEOSIZE);
+        setDivId(VIDEOSIZE);
         dropdown_open();
     }
     
@@ -190,14 +201,14 @@ Opencast.Initialize = (function ()
         
         // Handler focus
         $('#oc_btn-dropdown').focus(function () 
-        {	
-        	setDivId(VIDEOSIZE);
-        	dropdown_open();
+        {
+            setDivId(VIDEOSIZE);
+            dropdown_open();
         });
         
         // Handler blur
         $('#oc_btn-dropdown').blur(function () 
-        {	
+        {
             dropdown_timer();
         });
         
@@ -207,27 +218,27 @@ Opencast.Initialize = (function ()
 
         // Handler focus
         $('#oc_btn-volume').focus(function () 
-        {	
-        	setDivId(VOLUME);
-        	dropdown_open();
-        })
+        {
+            setDivId(VOLUME);
+            dropdown_open();
+        });
         
         $('#slider_volume_Thumb').focus(function () 
         {
-        	setDivId(VOLUME);
-        	dropdown_open();
-        })
+            setDivId(VOLUME);
+            dropdown_open();
+        });
         
         // Handler blur
         $('#oc_btn-volume').blur(function () 
-        {	
+        {
             dropdown_timer();
-        })
+        });
         
         $('#slider_volume_Thumb').blur(function () 
         {
             dropdown_timer();
-        })
+        });
      
         // init the aria slider for the volume
         Opencast.ariaSlider.init();
@@ -298,81 +309,78 @@ Opencast.Initialize = (function ()
         });
         $('#oc_btn-addBookmark').click(function () 
         {
-        	var value = $('#oc_current-time').attr('value');
-        	var text = $('#oc_addBookmark').attr('value');
-        	var name = 'Stefan Altevogt'; 
-        	Opencast.Player.addBookmark(value, name, text);
+            var value = $('#oc_current-time').attr('value');
+            var text = $('#oc_addBookmark').attr('value');
+            var name = 'Stefan Altevogt'; 
+            Opencast.Player.addBookmark(value, name, text);
         });
         $('#oc_btn-removeBookmark').click(function () 
         {
-        	Opencast.Player.removeBookmark();	
+            Opencast.Player.removeBookmark();	
         });
         
         $('#oc_bookmarkSelect').click(function () 
         {
-        	var className = '';
-        	$('#oc_bookmarkSelect option:selected').each(function() 
+            var className = '';
+            $('#oc_bookmarkSelect option:selected').each(function () 
             {
-        		className = $(this).attr('class');
+                className = $(this).attr('class');
             });
-        	
-        	Opencast.Player.playBookmark($('#oc_bookmarkSelect').val()); 
-        	
-        	if(className == OPTIONMYCLASSNAME)
-        	{
-        		
-        		$('#oc_btn-removeBookmark').css('display', 'inline' ); 
-        	}
-        	else
-        	{
-        		$('#oc_btn-removeBookmark').css('display', 'none' ); 
-        		
-        	}
+        
+            Opencast.Player.playBookmark($('#oc_bookmarkSelect').val()); 
+        
+            if (className === OPTIONMYCLASSNAME)
+            {
+                $('#oc_btn-removeBookmark').css('display', 'inline'); 
+            }
+            else
+            {
+                $('#oc_btn-removeBookmark').css('display', 'none'); 
+       
+            }
         });
       
         $('#oc_myBookmarks-checkbox').click(function () 
         {
-           if ($("#oc_myBookmarks-checkbox").attr('aria-checked') === 'true')
-           {
-        	   
-        	   $("#oc_myBookmarks-checkbox").attr('aria-checked', 'false');
-        	   $('.oc_option-myBookmark').css('display', 'none' ); 
-        	   $('.oc_option-myBookmark').css('visibility', 'hidden' ); 
-        	   $('#oc_btn-removeBookmark').css('display', 'none' );
-        	   $('.oc_boomarkPoint').css('display', 'none' );
-        	   
-        	   
-           }
-           else
-           {
-        	   $("#oc_myBookmarks-checkbox").attr('aria-checked', 'true');
-        	   $('.oc_option-myBookmark').css('display', 'block' ); 
-        	   $('.oc_option-myBookmark').css('visibility', 'visible' ); 
-        	   $('.oc_boomarkPoint').css('display', 'inline' );
-           }
+            if ($("#oc_myBookmarks-checkbox").attr('aria-checked') === 'true')
+            {
+                $("#oc_myBookmarks-checkbox").attr('aria-checked', 'false');
+                $('.oc_option-myBookmark').css('display', 'none'); 
+                $('.oc_option-myBookmark').css('visibility', 'hidden'); 
+                $('#oc_btn-removeBookmark').css('display', 'none');
+                $('.oc_boomarkPoint').css('display', 'none');
+            }
+            else
+            {
+                $("#oc_myBookmarks-checkbox").attr('aria-checked', 'true');
+                $('.oc_option-myBookmark').css('display', 'block'); 
+                $('.oc_option-myBookmark').css('visibility', 'visible'); 
+                $('.oc_boomarkPoint').css('display', 'inline');
+            }
         });
+        
         $('#oc_publicBookmarks-checkbox').click(function () 
         {
             if ($("#oc_publicBookmarks-checkbox").attr('aria-checked') === 'true')
             {
                 $("#oc_publicBookmarks-checkbox").attr('aria-checked', 'false');
-                $('.oc_option-publicBookmark').css('display', 'none' );
-                $('.oc_option-publicBookmark').css('visibility', 'hidden' ); 
+                $('.oc_option-publicBookmark').css('display', 'none');
+                $('.oc_option-publicBookmark').css('visibility', 'hidden'); 
             }
             else
             {
-               $("#oc_publicBookmarks-checkbox").attr('aria-checked', 'true');
-               $('.oc_option-publicBookmark').css('display', 'block' );
-               $('.oc_option-publicBookmark').css('visibility', 'visible' ); 
+                $("#oc_publicBookmarks-checkbox").attr('aria-checked', 'true');
+                $('.oc_option-publicBookmark').css('display', 'block');
+                $('.oc_option-publicBookmark').css('visibility', 'visible'); 
             }
         });
         $('#oc_searchField').click(function () 
         {
-        	if (clickMatterhornSearchField === false)
-        	{
-        		$("#oc_searchField").attr('value', '');
-        		clickMatterhornSearchField = true;
-        	}
+            if (clickMatterhornSearchField === false)
+            {
+                $("#oc_searchField").attr('value', '');
+                clickMatterhornSearchField = true;
+            }
         });
         $('#oc_lecturer-search-field').click(function () 
         {
@@ -499,24 +507,33 @@ Opencast.Initialize = (function ()
         });
         
         // Handler keypress
+        $('#oc_current-time').keypress(function (event) 
+        {
+            if (event.keyCode === 13) 
+            {
+                Opencast.Player.showEditTime();
+            }        
+        });
+        
         $('#oc_edit-time').keypress(function (event) 
         {
             if (event.keyCode === 13) 
             {
                 Opencast.Player.editTime();
             }
-        })
+        });
+        
         // Handler keypress
         $('#oc_addBookmark').keypress(function (event) 
         {
             if (event.keyCode === 13) 
             {
-            	var value = $('#oc_current-time').attr('value');
-            	var text = $('#oc_addBookmark').attr('value');
-            	var name = 'Stefan Altevogt'; 
-            	Opencast.Player.addBookmark(value, name, text);
+                var value = $('#oc_current-time').attr('value');
+                var text = $('#oc_addBookmark').attr('value');
+                var name = 'Stefan Altevogt'; 
+                Opencast.Player.addBookmark(value, name, text);
             }
-        })
+        });
         
         // Handler keydown
         $('#oc_btn-rewind').keydown(function (event) 
@@ -527,12 +544,13 @@ Opencast.Initialize = (function ()
                 this.className = 'oc_btn-rewind-clicked';
                 Opencast.Player.doRewind();
             }
-            else if(event.keyCode === 9)
+            else if (event.keyCode === 9)
             {
                 this.className = 'oc_btn-rewind-over';
                 Opencast.Player.stopRewind();
             }
         });
+        
         $('#oc_btn-fast-forward').keydown(function (event) 
         {
             if (event.keyCode === 13 || event.keyCode === 32) 
@@ -540,22 +558,23 @@ Opencast.Initialize = (function ()
                 this.className = 'oc_btn-fast-forward-clicked';
                 Opencast.Player.doFastForward();
             }
-            else if(event.keyCode === 9)
+            else if (event.keyCode === 9)
             {
                 this.className = 'oc_btn-fast-forward-over';
                 Opencast.Player.stopFastForward();
             }
         });
+        
         $('#oc_current-time').keydown(function (event) 
         {
-        	if (event.keyCode === 37) 
+            if (event.keyCode === 37) 
             {
-        		Opencast.Player.doRewind();
+                Opencast.Player.doRewind();
             }
-        	else if(event.keyCode === 39)
-        	{
-        		Opencast.Player.doFastForward();
-        	}
+            else if (event.keyCode === 39)
+            {
+                Opencast.Player.doFastForward();
+            }
         });
         
         // Handler keyup
@@ -579,21 +598,18 @@ Opencast.Initialize = (function ()
         $('#oc_current-time').keyup(function (event) 
         {
             if (event.keyCode === 37) 
-    	    {
-    	        Opencast.Player.stopRewind();
-    	    }
-    	    else if(event.keyCode === 39)
-    	    {
-    	        Opencast.Player.stopFastForward();
-    	    }
+            {
+                Opencast.Player.stopRewind();
+            }
+            else if (event.keyCode === 39)
+            {
+                Opencast.Player.stopFastForward();
+            }
         });
-        
-        
-        
         
         var content = '';
         
-        content = content +'<li class="oc_bookmarks-list-myBookmarks">';
+        content = content + '<li class="oc_bookmarks-list-myBookmarks">';
         content = content + '<div class="oc_bookmarks-list-myBookmarks-div-left" type="text">Funny joke! He said: Lorem ipsum dolor sit amet...</div>';
         content = content + '<div class="oc_bookmarks-list-myBookmarks-div-right" type="text">00:15:20 Alicia Valls</div>';
         content = content + '</li>';
@@ -603,7 +619,7 @@ Opencast.Initialize = (function ()
         content = content + '<div class="oc_bookmarks-list-publicBookmarks-div-right" type="text">00:20:02 Justin Ratcliffe</div>';
         content = content + '</li>';
         
-        content = content +'<li class="oc_bookmarks-list-myBookmarks">';
+        content = content + '<li class="oc_bookmarks-list-myBookmarks">';
         content = content + '<div class="oc_bookmarks-list-myBookmarks-div-left" type="text">Funny joke! He said: Lorem ipsum dolor sit amet...</div>';
         content = content + '<div class="oc_bookmarks-list-myBookmarks-div-right" type="text">00:15:20 Alicia Valls</div>';
         content = content + '</li>';
@@ -618,6 +634,8 @@ Opencast.Initialize = (function ()
         $('#oc_bookmarks-list').prepend(content);
        
     });
+    
+   
     
     /*
      * 
@@ -656,22 +674,211 @@ Opencast.Initialize = (function ()
         }
         Opencast.Player.setBrowserWidth(myWidth);
         
+        $('#oc_title').html($('#oc-title').html() + " by " + $('#oc-creator').html());
+        
     }
-    
-    function doTest()
+
+    /**
+        @memberOf Opencast.Player
+        @description Get the new height of the flash component.
+        @param Number mediaPercentOne, Number mediaPercentTwo
+     */
+    function getNewHeight(mediaPercentOne, mediaPercentTwo)
     {
-        reportSize();
-        if (myHeight > 500)
+        var newHeight = 0;
+        var flashContainerWidth = $('#oc_flash-player').width() - 10;
+        var newHeightMediaOne = ((flashContainerWidth) * (mediaPercentOne / 100)) / formatOne;
+        var newHeightMediaTwo = ((flashContainerWidth) * (mediaPercentTwo / 100)) / formatTwo;
+        var newWidthMediaOne = newHeightMediaOne * formatOne;
+        var newWidthMediaTwo = newHeightMediaTwo * formatTwo;
+        
+        if (newHeightMediaOne > newHeightMediaTwo)
         {
-            if (Opencast.Player.getShowSections() === false)
+            newHeight = newHeightMediaOne;
+        }
+        else
+        {
+            newHeight = newHeightMediaTwo;
+        }
+        
+        var otherContentHeight = 0;
+        
+        if (Opencast.Player.getShowSections() === true)
+        {
+            otherContentHeight = 310;
+        }
+        if (Opencast.Player.getShowSections() === false)
+        {
+            otherContentHeight = 200;
+        }
+  
+        var contentHeight = newHeight + otherContentHeight;
+        
+        if (contentHeight > myHeight)
+        {
+            newHeight = newHeight - (contentHeight - myHeight);
+            
+            switch (size) 
             {
-                $('#oc_flash-player').css("height", (myHeight - 196 + "px"));
-            }
-            else
-            {
-                $('#oc_flash-player').css("height", (myHeight - 310 + "px"));
+            case VIDEOSIZEBIGRIGHT:
+                newHeightMediaTwo = newHeight;
+                newWidthMediaTwo = (newHeight) * formatTwo;
+                break;
+            case VIDEOSIZEBIGLEFT:
+                newHeightMediaOne = newHeight;
+                newWidthMediaOne = (newHeight) * formatOne;
+                break;
+            case VIDEOSIZEONLYRIGHT:
+                newHeightMediaOne = 0;
+                newWidthMediaOne = 0;
+                newHeightMediaTwo = newHeight;
+                newWidthMediaTwo = (newHeight) * formatTwo;
+                break;
+            case VIDEOSIZEONLYLEFT:
+                newHeightMediaOne = newHeight;
+                newWidthMediaOne = (newHeight) * formatOne;
+                newHeightMediaTwo = 0;
+                newWidthMediaTwo = 0;
+                break;
             }
         }
+  
+        if (newHeight < 300)
+        {
+            newHeight = 300;
+            switch (size) 
+            {
+            case VIDEOSIZEBIGRIGHT:
+                newHeightMediaTwo = newHeight;
+                newWidthMediaTwo = (newHeight) * formatTwo;
+                break;
+            case VIDEOSIZEBIGLEFT:
+                newHeightMediaOne = newHeight;
+                newWidthMediaOne = (newHeight) * formatOne;
+                break;
+            case VIDEOSIZEONLYRIGHT:
+                newHeightMediaOne = 0;
+                newWidthMediaOne = 0;
+                newHeightMediaTwo = newHeight;
+                newWidthMediaTwo = (newHeight) * formatTwo;
+                break;
+            case VIDEOSIZEONLYLEFT:
+                newHeightMediaOne = newHeight;
+                newWidthMediaOne = (newHeight) * formatOne;
+                newHeightMediaTwo = 0;
+                newWidthMediaTwo = 0;
+                break;
+            }
+        }
+        var multiMediaContainerLeft = ((flashContainerWidth) - (newWidthMediaOne + newWidthMediaTwo)) / 2;
+        
+        Videodisplay.setMediaResolution(newWidthMediaOne, newHeightMediaOne, newWidthMediaTwo, newHeightMediaTwo, multiMediaContainerLeft);
+        
+        return newHeight + 10;
+    }
+
+    
+    
+    
+
+    /**
+        @memberOf Opencast.Player
+        @description Get the new height of the flash component.
+        @param Number mediaPercentOne, Number mediaPercentTwo
+     */
+    function getNewHeightSingle()
+    {
+    	
+    	var newHeight = 0;
+    	
+    	
+        var flashContainerWidth = $('#oc_flash-player').width() - 10;
+        
+       
+        var newHeight = flashContainerWidth / formatSingle;
+        
+        
+        
+        var newWidth = newHeight * formatSingle;
+        
+        
+   
+        var otherContentHeight = 0;
+        
+        if (Opencast.Player.getShowSections() === true)
+        {
+            otherContentHeight = 310;
+        }
+        if (Opencast.Player.getShowSections() === false)
+        {
+            otherContentHeight = 200;
+        }
+  
+        var contentHeight = newHeight + otherContentHeight;
+        
+        if (contentHeight > myHeight)
+        {
+            newHeight = newHeight - (contentHeight - myHeight);
+            
+            
+        }
+  
+        if (newHeight < 300)
+        {
+            newHeight = 300;
+            
+            
+        }
+        
+        return newHeight + 10;
+    }
+
+    
+    
+    
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the new height of the flash component
+     */
+    function doResize()
+    {
+        reportSize();
+       
+        size = Opencast.Player.getCurrentVideoSize();
+        
+        var newHeight = 0;
+        
+        switch (size) {
+        case VIDEOSIZEAUDIO:
+            newHeight = 200;
+            break;
+        case VIDEOSIZESINGLE:
+            newHeight = getNewHeightSingle();
+            break;
+        case VIDEOSIZEBIGRIGHT:
+            newHeight = getNewHeight(33.333333333333, 66.666666666);
+            break;
+        case VIDEOSIZEBIGLEFT:
+            newHeight = getNewHeight(66.666666666, 33.333333333333);
+            break;
+        case VIDEOSIZEONLYRIGHT:
+            newHeight = getNewHeight(0, 100);
+            break;
+        case VIDEOSIZEONLYLEFT:
+            newHeight = getNewHeight(100, 0);
+            break;
+        case VIDEOSIZEMULTI:
+            newHeight = getNewHeight(50, 50);
+            break;
+        default:
+            newHeight = getNewHeight(50, 50);
+            break;
+        }
+        
+        // set the new height
+        $('#oc_flash-player').css("height", (newHeight + "px"));
+        
         //
         var margin = 0;
         margin = $('#oc_video-controls').width();
@@ -679,17 +886,55 @@ Opencast.Initialize = (function ()
         $('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
     }
 
+    /**
+        @memberOf Opencast.Player
+        @description init function
+     */
     function init()
     {
-        window.onresize = doTest;
-        doTest();
-       
+        window.onresize = doResize;
+        doResize();
+    }
+    
+
+    /**
+        @memberOf Opencast.Player
+        @description Set media resuliton of the videos
+        @param Number mediaResolutionOne, Number mediaResolutionTwo
+     */
+    function setMediaResolution(mediaResolutionOne, mediaResolutionTwo)
+    {
+    	var mediaResolutionOneString = mediaResolutionOne;
+        var mediaResolutionTwoString = mediaResolutionTwo;
+        var mediaResolutionOneArray = mediaResolutionOneString.split('x');
+        
+    	if (mediaResolutionTwoString !== '')
+        {
+        	var mediaResolutionTwoArray = mediaResolutionTwoString.split('x');
+            var mediaOneWidth = parseInt(mediaResolutionOneArray[0], 10);
+            var mediaOneHeight = parseInt(mediaResolutionOneArray[1], 10);
+            var mediaTwoWidth = parseInt(mediaResolutionTwoArray[0], 10);
+            var mediaTwoHeight = parseInt(mediaResolutionTwoArray[1], 10);
+            
+            formatOne = mediaOneWidth / mediaOneHeight;
+            formatTwo = mediaTwoWidth / mediaTwoHeight;
+        }
+    	else
+        {
+        	
+        	var mediaSingleWidth = parseInt(mediaResolutionOneArray[0], 10);
+            var mediaSingleHeight = parseInt(mediaResolutionOneArray[1], 10);
+            formatSingle = mediaSingleWidth / mediaSingleHeight;
+        	
+        }
+    	
     }
     return {
-        doTest : doTest,
+        doResize : doResize,
         dropdownVideo_open : dropdownVideo_open,
         dropdown_timer : dropdown_timer,
-        init : init
+        init : init,
+        setMediaResolution : setMediaResolution
     };
 }());
 

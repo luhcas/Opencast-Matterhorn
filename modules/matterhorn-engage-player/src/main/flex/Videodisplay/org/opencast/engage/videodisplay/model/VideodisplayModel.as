@@ -80,6 +80,12 @@ package org.opencast.engage.videodisplay.model
         // Current Duration
         public var currentDuration:Number = 0;
         
+        // durationPlayerOne
+        public var durationPlayerOne:Number;
+        
+        // durationPlayerTwo
+        public var durationPlayerTwo:Number;
+        
         // Current Duration String
         public var currentDurationString:String = '';
 
@@ -88,6 +94,12 @@ package org.opencast.engage.videodisplay.model
 
         // Current Playhead
         public var currentPlayhead:Number = 0;
+        
+        // currentPlayheadPlayerOne
+        public var currentPlayheadPlayerOne:Number = 0;
+        
+        // currentPlayheadPlayerTwo
+        public var currentPlayheadPlayerTwo:Number = 0;
 
         // The current Subtitle
         public var currentSubtitle:String = '';
@@ -185,18 +197,25 @@ package org.opencast.engage.videodisplay.model
         // progress
         public var progress:Number = 0;
         
+        // progressMediaOne
+        public var progressMediaOne:Number = 0;
+        
+        // progressMediaTwo
+        public var progressMediaTwo:Number = 0;
+        
         // soundState
         public var soundState:String = SoundState.VOLUMEMAX;
         
-        
-        
         // loader
-        public var loader:Boolean = true;
+        public var loader:Boolean = false;
         
-        //
+        // mediaTypeSingle
+        public var mediaTypeSingle:String;
+        
+        // mediaTypeOne
         public var mediaTypeOne:String;
         
-        //
+        // mediaTypeTwo
         public var mediaTypeTwo:String;
         
         // mediaContainerLeftWidth
@@ -208,6 +227,73 @@ package org.opencast.engage.videodisplay.model
         // coverURL
         public var coverURL:String = '';
         
+        // mediaOneWidth
+        public var mediaOneWidth:int = 0;
+        
+        // mediaOneHeight
+        public var mediaOneHeight:int = 0;
+        
+        // mediaTwoWidth
+        public var mediaTwoWidth:int = 0;
+        
+        // mediaTwoHeight
+        public var mediaTwoHeight:int = 0;
+        
+        // mediaWidth
+        public var mediaWidth:int = 0;
+        
+        // multiMediaContainerLeft
+        public var multiMediaContainerLeft:int = 0;
+        
+        // multiMediaContainerRight
+        public var multiMediaContainerRight:int = 0;
+        
+        // multiMediaContainerBottom
+        public var multiMediaContainerBottom:int = 0;
+        
+        // stateSinglePlayer
+        public var stateSinglePlayer:String = '';
+        
+        // statePlayerOne
+        public var statePlayerOne:String = '';
+        
+        // statePlayerOne
+        public var statePlayerTwo:String = '';
+        
+        
+        // startPlay
+        public var startPlay:Boolean = false;
+        
+        // startPlayOne
+        public var startPlayOne:Boolean = false;
+        
+        // startPlayTwo
+        public var startPlayTwo:Boolean = false;
+        
+        // startPlaySingle
+        public var startPlaySingle:Boolean = false;
+        
+        
+        
+        
+        //
+        public var onBufferingChangeMediaOne:Boolean;
+        
+        
+        
+        public var onBufferChangeMediaOneTime:Number;
+        
+         public var onBufferingChangeMediaTwo:Boolean;
+        
+        
+        
+        public var onBufferChangeMediaTwoTime:Number;
+        
+        public var singleState:String ='';
+        
+        public var seekOne:String = '';
+        
+        public var seekTwo:String = '';
         
     }
 }

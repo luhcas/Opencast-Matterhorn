@@ -41,7 +41,7 @@ package org.opencast.engage.videodisplay.view
         {
         	
             var bytes:ByteArray = new ByteArray();
-            const PLOT_HEIGHT:int = 200; //200
+            const PLOT_HEIGHT:int = 80; //200
             const CHANNEL_LENGTH:int = 256;//256
             SoundMixer.computeSpectrum( bytes, false, 0 );
 

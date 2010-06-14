@@ -368,14 +368,22 @@ Opencast.Initialize = (function ()
             Opencast.Player.hideEditTime(); 	
         });
         
-     // Handler keypress
+        // Handler keypress
+        $('#oc_current-time').keypress(function (event) 
+        {
+            if (event.keyCode === 13) 
+            {
+                Opencast.Player.showEditTime();
+            }
+        });
+        
         $('#oc_edit-time').keypress(function (event) 
         {
             if (event.keyCode === 13) 
             {
                 Opencast.Player.editTime();
             }
-        })
+        });
         
         // Handler keydown
         $('#oc_btn-rewind').keydown(function (event) 
@@ -463,7 +471,7 @@ Opencast.Initialize = (function ()
             
            
         marginleft = Math.round( (flashWidth * 0.4) - controlsWidth ) / 2;
-        $('.oc_btn-skip-backward').css("margin-left", marginleft + 'px');
+        $('.oc_btn-play').css("margin-left", marginleft + 'px');
    
         // create watch.html link
         var embedUrl = window.location.href;

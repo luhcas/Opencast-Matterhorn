@@ -26,7 +26,7 @@ package org.opencast.engage.videodisplay.business
     import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
     import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
-    import org.osmf.layout.HorizontalAlign;
+    import org.opencast.engage.videodisplay.state.VideoSizeState;
     import org.swizframework.Swiz;
 
     public class FlexAjaxBridge
@@ -200,43 +200,50 @@ package org.opencast.engage.videodisplay.business
          */
         public function videoSizeControl( sizeLeft:Number, sizeRight:Number ):void
         {
-			
-			
-            
-            if( sizeLeft == 50 &&  sizeRight == 100 )
+            if(sizeLeft == sizeRight)
+			{
+			    model.videoSizeState = VideoSizeState.CENTER;
+			}
+			else if(sizeLeft > sizeRight && sizeRight > 0)
+			{
+			    model.videoSizeState = VideoSizeState.BIGLEFT;
+			}
+			else if(sizeLeft < sizeRight && sizeLeft > 0)
             {
-            
-                        
-            
+                model.videoSizeState = VideoSizeState.BIGRIGHT;
             }
-            else if( sizeLeft == 100 &&  sizeRight == 50 )
+            else if(sizeRight == 0)
             {
-            
+                model.videoSizeState = VideoSizeState.ONLYLEFT;
             }
-            else if( sizeLeft == 100 &&  sizeRight == 100 )
+            else if(sizeLeft == 0)
             {
-               
-            
+                model.videoSizeState = VideoSizeState.ONLYRIGHT;
             }
-            else if( sizeLeft == 0 &&  sizeRight == 100 )
-            {
-                
-            
-            }
-            else if( sizeLeft == 100 &&  sizeRight == 0 )
-            {
-               
-            
-            }
-            
-            
-            
-            
-            
-            
-            
 		}
-        
+		
+		/**
+         * setMediaResolution
+         *
+         * Set the resolution
+         */
+        public function setMediaResolution(newWidthMediaOne:Number, newHeightMediaOne:Number, newWidthMediaTwo:Number, newHeightMediaTwo:Number, multiMediaContainerLeft:Number):void
+        {
+           model.mediaOneWidth = parseInt( newWidthMediaOne.toString() );
+           model.mediaOneHeight = parseInt( newHeightMediaOne.toString() );
+           model.mediaTwoWidth = parseInt( newWidthMediaTwo.toString() );
+           model.mediaTwoHeight = parseInt( newHeightMediaTwo.toString() );
+           model.mediaWidth = parseInt( ( newWidthMediaOne + newWidthMediaTwo ).toString() );
+           model.multiMediaContainerLeft = parseInt( multiMediaContainerLeft.toString() );
+           model.multiMediaContainerRight = 0;
+           
+           if(model.videoSizeState == VideoSizeState.ONLYLEFT || model.videoSizeState == VideoSizeState.BIGLEFT )
+           {
+               model.multiMediaContainerRight = multiMediaContainerLeft;
+               model.multiMediaContainerLeft = 0;
+           }
+        }
+		
         /**
          * getViewState
          *

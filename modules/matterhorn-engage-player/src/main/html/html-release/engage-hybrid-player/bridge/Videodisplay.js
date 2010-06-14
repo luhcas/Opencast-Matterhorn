@@ -30,7 +30,7 @@ function VideodisplayReady() {
 
 	// Initialize the "root" object. This represents the actual 
 	// "Videodisplay.mxml" flex application.
-	b_Videodisplay_root = FABridge["b_Videodisplay"].root().getFlexAjaxBridge();
+	var b_Videodisplay_root = FABridge["b_Videodisplay"].root().getFlexAjaxBridge();
 	
 	// Global functions in the "Videodisplay.mxml" application
 
@@ -86,7 +86,7 @@ function VideodisplayReady() {
 		b_Videodisplay_root.closedCaptions();
 	};
 	
-	Videodisplay.setMediaURL = function ( argCover, argStringOne, argStringTwo) {
+	Videodisplay.setMediaURL = function (argCover, argStringOne, argStringTwo) {
 		b_Videodisplay_root.setMediaURL(argCover, argStringOne, argStringTwo);
 	};
 	
@@ -101,6 +101,13 @@ function VideodisplayReady() {
 	Videodisplay.getViewState = function () {
 		return b_Videodisplay_root.getViewState();
 	};
+	
+	Videodisplay.setMediaResolution = function (argWidthMediaOne, argHeightMediaOne, argWidthMediaTwo, argHeightMediaTwo, argMultiMediaContainerLeft) {
+		return b_Videodisplay_root.setMediaResolution(argWidthMediaOne, argHeightMediaOne, argWidthMediaTwo, argHeightMediaTwo, argMultiMediaContainerLeft);
+	};
+	
+	
+	
 	
 	b_Videodisplay_root.onBridgeReady();
 }

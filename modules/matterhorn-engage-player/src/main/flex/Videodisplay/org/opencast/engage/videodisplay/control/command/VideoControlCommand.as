@@ -19,12 +19,11 @@ package org.opencast.engage.videodisplay.control.command
     
     import flash.external.ExternalInterface;
     
-    import mx.controls.Alert;
-    
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
     import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
     import org.opencast.engage.videodisplay.state.PlayerState;
+    import org.opencast.engage.videodisplay.state.VideoState;
     import org.swizframework.Swiz;
 
     public class VideoControlCommand
@@ -55,12 +54,40 @@ package org.opencast.engage.videodisplay.control.command
             switch ( event.videoControlType )
             {
                 case VideoControlEvent.PLAY:
-                	if( !model.mediaPlayer.playing() )
+                
+                    if( model.startPlaySingle == true )
+	                {
+	                    if( model.startPlay == false)
+	                    {
+	                        model.mediaPlayer.seek(0);
+	                        model.mediaPlayer.setVolume(1);
+	                       model.startPlay = true;  
+	                    }
+	                    
+	                    ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );   
+	                }
+	                
+	                if( model.startPlayOne == true && model.startPlayTwo == true)
+	                {
+	                    if( model.startPlay == false)
+	                    {
+	                        model.mediaPlayer.seek(0);
+	                        model.mediaPlayer.setVolume(1);
+	                        model.startPlay = true; 
+	                    }
+	                    ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );  
+	                }
+                    if( model.videoState == VideoState.COVER )
+	                {
+	                    model.videoState = model.mediaPlayer.getVideoState();
+	                }
+                
+                    if( !model.mediaPlayer.playing() )
                 	{
                 		model.mediaPlayer.play();
                 	}
                 	model.currentPlayerState = PlayerState.PLAYING;
-                    currentPlayPauseState = PlayerState.PAUSING;
+                    currentPlayPauseState = PlayerState.PAUSED;
                     ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
                 	break;
 
@@ -69,7 +96,7 @@ package org.opencast.engage.videodisplay.control.command
                     {
                         model.mediaPlayer.pause();
                     }
-                    model.currentPlayerState = PlayerState.PAUSING;
+                    model.currentPlayerState = PlayerState.PAUSED;
                     currentPlayPauseState = PlayerState.PLAYING;
                     ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
                     break;
@@ -79,7 +106,7 @@ package org.opencast.engage.videodisplay.control.command
                     {
                         model.mediaPlayer.pause();
                         model.mediaPlayer.seek( 0 );
-                        model.currentPlayerState = PlayerState.PAUSING;
+                        model.currentPlayerState = PlayerState.PAUSED;
                         currentPlayPauseState = PlayerState.PLAYING;
                         ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
                     }

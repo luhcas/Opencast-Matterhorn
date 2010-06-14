@@ -53,7 +53,7 @@ package org.opencast.engage.videodisplay.control.command
          * */
         public function execute( event:InitMediaPlayerEvent ):void
         {
-			model.currentPlayerState = PlayerState.PAUSING;
+			model.currentPlayerState = PlayerState.PAUSED;
             ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PLAYING );
             
             // set the cover URL
@@ -76,14 +76,23 @@ package org.opencast.engage.videodisplay.control.command
                     case "mp4":
                         var mediaElementVideo:MediaElement =  new VideoElement ( new URLResource( event.mediaURLOne ) );
                         model.mediaPlayer.setSingleMediaElement( mediaElementVideo );
+                        if( event.mediaURLOne.charAt(0) == 'h' || event.mediaURLOne.charAt(0) == 'H' )
+		                {
+		                   model.mediaTypeSingle = model.HTML;
+		                }
+		                else if( event.mediaURLOne.charAt(0) == 'r' || event.mediaURLOne.charAt(0) == 'R' )
+		                {
+		                    model.mediaTypeSingle = model.RTMP;
+		                }
                         break;
 
                     case "mp3":
                         var mediaElementAudio:MediaElement = new AudioElement( new URLResource( event.mediaURLOne ) );
-                        model.mediaPlayer.setSingleMediaElement( mediaElementVideo );
+                        model.mediaPlayer.setSingleMediaElement( mediaElementAudio );
                         var position:int = event.mediaURLOne.lastIndexOf( '/' );
                         model.audioURL = event.mediaURLOne.substring( position + 1 );
                         Application.application.bx_audio.startVisualization();
+                        model.mediaState = MediaState.AUDIO;
                         break;
 
                     default:
@@ -110,16 +119,59 @@ package org.opencast.engage.videodisplay.control.command
                 {
                     model.mediaTypeTwo = model.RTMP;
                 }
+                
             	
             	model.mediaPlayer = new OpencastMediaPlayer( VideoState.MULTI );
+            	
+            	
+            	
+            	
+            	
+            	
+            	
+            	
+            	
+            	
+            	
+            /*	
+            	
+            	       var REMOTE_MBR_STREAM_HOST:String      = "rtmp://cp67126.edgefcs.net/ondemand";
+            	var MBR_STREAM_ITEMS:Array =
+            [ new DynamicStreamingItem("mp4:mediapm/ovp/content/demo/video/elephants_dream/elephants_dream_768x428_24.0fps_408kbps.mp4", 408, 768, 428)
+            , new DynamicStreamingItem("mp4:mediapm/ovp/content/demo/video/elephants_dream/elephants_dream_768x428_24.0fps_608kbps.mp4", 608, 768, 428)
+            , new DynamicStreamingItem("mp4:mediapm/ovp/content/demo/video/elephants_dream/elephants_dream_1024x522_24.0fps_908kbps.mp4", 908, 1024, 522)
+            , new DynamicStreamingItem("mp4:mediapm/ovp/content/demo/video/elephants_dream/elephants_dream_1024x522_24.0fps_1308kbps.mp4", 1308, 1024, 522)
+            , new DynamicStreamingItem("mp4:mediapm/ovp/content/demo/video/elephants_dream/elephants_dream_1280x720_24.0fps_1708kbps.mp4", 1708, 1280, 720)
+            ];
+    
+           	
+            	
+            	
+            	
+            	var dsResource:DynamicStreamingResource = new DynamicStreamingResource(REMOTE_MBR_STREAM_HOST);
+                            for (var i:int = 0; i < 5; i++)
+                            {
+                                dsResource.streamItems.push(MBR_STREAM_ITEMS[i]);
+                            }
+                            
+                            var mediaElementVideoOne:MediaElement =  new VideoElement ( dsResource );
+                model.mediaPlayer.setMediaElementOne( mediaElementVideoOne );
+                
+                //
+                var mediaElementVideoTwo:MediaElement =  new VideoElement ( dsResource );
+                model.mediaPlayer.setMediaElementTwo( mediaElementVideoTwo );
+            	
+            	*/
+            	
             	
             	//
             	var mediaElementVideoOne:MediaElement =  new VideoElement ( new URLResource( event.mediaURLOne ) );
                 model.mediaPlayer.setMediaElementOne( mediaElementVideoOne );
             	
             	//
-            	var mediaElementVideoTwo:MediaElement =  new VideoElement ( new URLResource( event.mediaURLTwo ) );
+            	var mediaElementVideoTwo:MediaElement =  new VideoElement ( new URLResource( event.mediaURLTwo) );
                 model.mediaPlayer.setMediaElementTwo( mediaElementVideoTwo );
+               
             }
             else
             {

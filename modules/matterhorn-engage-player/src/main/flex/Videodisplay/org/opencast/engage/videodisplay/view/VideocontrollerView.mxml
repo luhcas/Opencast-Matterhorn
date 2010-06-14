@@ -198,8 +198,8 @@
         <mx:Button 
             width = "40"
             height = "40"
-            toolTip = "{ model.currentPlayerState == PlayerState.PAUSING ? 'Play Button' : 'Pause Button' }"
-            styleName = "{ model.currentPlayerState == PlayerState.PAUSING ? 'Play' : 'Pause' }"
+            toolTip = "{ model.currentPlayerState == PlayerState.PAUSED ? 'Play Button' : 'Pause Button' }"
+            styleName = "{ model.currentPlayerState == PlayerState.PAUSED ? 'Play' : 'Pause' }"
             click = "{ ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' ) }"
             />
 

@@ -22,7 +22,10 @@ package org.opencast.engage.videodisplay.state
      */
     public class PlayerState
     {
-        public static const PAUSING:String = 'pausing';
+        public static const PAUSED:String = 'paused';
         public static const PLAYING:String = 'playing';
+        public static const READY:String = 'ready';
+        public static const LOADING:String = 'loading';
+        public static const BUFFERING:String = 'buffering';
     }
 }

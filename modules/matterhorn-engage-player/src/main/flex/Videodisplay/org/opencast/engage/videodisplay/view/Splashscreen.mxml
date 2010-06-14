@@ -27,6 +27,8 @@
 
     <mx:Script>
         <![CDATA[
+        	import org.opencast.engage.videodisplay.state.DefaultPlayerState;
+        	import org.osmf.media.MediaPlayer;
         	import org.opencast.engage.videodisplay.state.VideoState;
         	import org.osmf.layout.VerticalAlign;
         	import bridge.ExternalFunction;
@@ -41,6 +43,8 @@
             [Autowire]
             [Bindable]
             public var model:VideodisplayModel;
+            
+            private var startMultiPlayer:Boolean = false;
 
                         /**
              * showButton
@@ -97,12 +101,15 @@
             
             private function play():void
             {
-                ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );
-                if( model.videoState == VideoState.COVER )
+                if( model.startPlaySingle == true )
                 {
-                    model.videoState = model.mediaPlayer.getVideoState();
+                    ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );   
                 }
-            
+                
+                if( model.startPlayOne == true && model.startPlayTwo == true)
+                {
+                    ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );  
+                }
             }
             
         ]]>
@@ -128,7 +135,7 @@
         </mx:State>
 
         <mx:State 
-            name = "{PlayerState.PAUSING}"
+            name = "{PlayerState.PAUSED}"
             >
 
             <mx:SetProperty 
@@ -150,7 +157,7 @@
         <mx:Transition 
             id = "fadeOut"
             fromState = "{PlayerState.PLAYING}"
-            toState = "{PlayerState.PAUSING}"
+            toState = "{PlayerState.PAUSED}"
             >
 
             <mx:Parallel 
@@ -160,7 +167,7 @@
 
         <mx:Transition 
             id = "fadeIn"
-            fromState = "{PlayerState.PAUSING}"
+            fromState = "{PlayerState.PAUSED}"
             toState = "{PlayerState.PLAYING}"
             >
 
@@ -221,6 +228,48 @@
     	height="100%"
     	>
     	
+            <!--
+            <mx:TextInput 
+            text="model.onBufferingChangeMediaOne {model.onBufferingChangeMediaOne.toString()}"
+            />
+            
+             <mx:TextInput 
+            text="model.onBufferingChangeMediaTwo {model.onBufferingChangeMediaTwo.toString()}"
+            />
+            
+            <mx:TextInput 
+            text="model.statePlayerOne {model.statePlayerOne.toString()}"
+            />
+            
+             <mx:TextInput 
+            text="model.statePlayerTwo {model.statePlayerTwo.toString()}"
+            />
+            
+            <mx:TextInput 
+            text="model.currentPlayheadPlayerOne {model.currentPlayheadPlayerOne.toString()}"
+            />
+            
+             <mx:TextInput 
+            text="model.currentPlayheadPlayerTwo {model.currentPlayheadPlayerTwo.toString()}"
+            />
+            
+            
+            <mx:TextInput 
+            text="model.singleState {model.singleState.toString()}"
+            />
+          
+             <mx:TextInput 
+            text="model.seekOne {model.seekOne.toString()}"
+            />
+            
+              <mx:TextInput 
+            text="model.seekTwo {model.seekTwo.toString()}"
+            />
+           -->
+            
+           
+           
+    	
     	<mx:HBox 
     		width="100%"
     		horizontalAlign="right"
@@ -269,5 +318,22 @@
 	     </mx:VBox>
      
     </mx:VBox>
+    
+    <mx:HBox
+        width="100%"
+        height="100%"
+        horizontalAlign="center"
+        verticalAlign="middle"
+        >
+        
+        <mx:SWFLoader 
+            source="@Embed(source='../../../../../style/oc_logo_loader.swf')" 
+            scaleContent="true" 
+            autoLoad="true"
+            visible="{ model.loader }"
+            includeInLayout="{ model.loader }"
+            />
+        
+    </mx:HBox>
 
 </mx:Canvas>
