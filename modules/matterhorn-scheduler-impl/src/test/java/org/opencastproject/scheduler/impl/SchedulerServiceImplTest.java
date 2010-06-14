@@ -63,8 +63,9 @@ import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
-
+@Ignore
 public class SchedulerServiceImplTest {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImplTest.class);
   
