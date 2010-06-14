@@ -49,8 +49,8 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
    */
   protected ComponentContext componentContext;  
   
-  DublinCoreGenerator dcGenerator;
-  CaptureAgentMetadataGenerator caGenerator;
+  protected DublinCoreGenerator dcGenerator;
+  protected CaptureAgentMetadataGenerator caGenerator;
  
   /**
    * Sets a DublinCoreGenerator
@@ -91,7 +91,7 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
    * @param captureAgentID The ID as provided by the capture agent 
    * @return the Filter for this capture Agent.
    */
-  private SchedulerFilter getFilterForCaptureAgent(String captureAgentID) {
+  protected SchedulerFilter getFilterForCaptureAgent(String captureAgentID) {
     SchedulerFilter filter = new SchedulerFilterImpl();
     filter.setDeviceFilter(captureAgentID);
     filter.setOrderBy("time-desc");

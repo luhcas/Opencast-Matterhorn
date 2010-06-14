@@ -20,8 +20,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
 
+import org.opencastproject.scheduler.impl.jpa.Metadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,6 +91,17 @@ public class MetadataMapper {
       }
     }
 
+    return updatedMetadata;
+  }
+  
+  public Hashtable<String, String> convert (List<Metadata> list) {
+    Hashtable<String, String> updatedMetadata = new Hashtable<String, String>();
+    for (Metadata m : list) {
+     if (m.getKey() != null && mappingAvailable(m.getKey()) && m.getValue() != null) {
+       logger.debug("Mapping {} on {} value: {}", new Object[] {m.getKey(), resolveKey(m.getKey()), m.getValue()});
+       updatedMetadata.put(resolveKey(m.getKey()), m.getValue());
+     }
+    }
     return updatedMetadata;
   }
 }

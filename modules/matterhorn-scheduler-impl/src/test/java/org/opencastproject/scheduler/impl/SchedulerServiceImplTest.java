@@ -23,6 +23,7 @@ import java.io.StringReader;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -359,7 +360,65 @@ public class SchedulerServiceImplTest {
       }
       oldEvent = e;
     }
+     
+  }
+  
+  @Test 
+  public void test5000Events () {
+    //Adding Events
+    long time = System.currentTimeMillis();
+    for (int i = 0; i < 5000; i++) {
+      time += 2000000;
+      event.createID();
+      event.setEnddate(new Date(time + 1000000));
+      event.setStartdate(new Date(time));
+      
+      serviceJPA.addEvent(event);
+    }
     
+    //get upcoming Events
+    long start = System.currentTimeMillis();
+    SchedulerEvent [] events = serviceJPA.getUpcomingEvents();
+    Assert.assertNotNull(events);
+    long stop = System.currentTimeMillis();
+    logger.info("Getting {} upcoming events took {} ms.", events.length, (stop-start));
+    Assert.assertTrue((stop-start) < 30000);
+    
+    //get All Events
+    start = System.currentTimeMillis();
+    Event[] events2 = serviceJPA.getEventsJPA(null);
+    Assert.assertNotNull(events);
+    stop = System.currentTimeMillis();
+    logger.info("Getting all {} events took {} ms.", events2.length, (stop-start));
+    Assert.assertTrue((stop-start) < 30000);
+    
+    //getIcal
+    start = System.currentTimeMillis();
+    Assert.assertNotNull(serviceJPA.getCalendarForCaptureAgent("testrecorder"));
+    stop = System.currentTimeMillis();
+    logger.info("Getting calendar took {} ms.", (stop-start));
+    Assert.assertTrue((stop-start) < 60000);
+    
+    //getIcal again testing cache
+    start = System.currentTimeMillis();
+    Assert.assertNotNull(serviceJPA.getCalendarForCaptureAgent("testrecorder"));
+    stop = System.currentTimeMillis();
+    logger.info("Getting calendar again took {} ms.", (stop-start));
+    Assert.assertTrue((stop-start) < 10);
+    
+    //adding additional event 
+    time += 2000000;
+    event.createID();
+    event.setEnddate(new Date(time + 1000000));
+    event.setStartdate(new Date(time));
+    serviceJPA.addEvent(event);
+    // make sure that this is no longer cached
+    start = System.currentTimeMillis();
+    Assert.assertNotNull(serviceJPA.getCalendarForCaptureAgent("testrecorder"));
+    stop = System.currentTimeMillis();
+    logger.info("Getting calendar after update took {} ms.", (stop-start));
+    Assert.assertTrue((stop-start) < 60000);
+    Assert.assertTrue((stop-start) > 2); // make sure it is not cached
     
   }
   

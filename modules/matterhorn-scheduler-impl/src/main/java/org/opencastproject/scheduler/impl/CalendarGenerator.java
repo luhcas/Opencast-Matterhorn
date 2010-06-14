@@ -16,6 +16,7 @@
 package org.opencastproject.scheduler.impl;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
+import org.opencastproject.scheduler.impl.jpa.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,29 +85,35 @@ public class CalendarGenerator {
     this.cal = cal;
   }
 
+  public boolean addEvent (SchedulerEvent e) {
+    return addEvent (((SchedulerEventImpl)e).toEvent());
+  }
+  
   /**
    * adds an SchedulerEvent as a new entry to this iCalendar 
    * @param e the event to add 
    * @return true if the event could be added. 
    */
-  public boolean addEvent (SchedulerEvent e) {
+  public boolean addEvent (Event e) {
     logger.debug("creating iCal VEvent from SchedulerEvent: {}", e.toString());
     DateTime startDate = new DateTime(e.getStartdate());
     DateTime endDate = new DateTime(e.getEnddate());
     startDate.setUtc(true);
     endDate.setUtc(true);
-    VEvent event = new VEvent(startDate, endDate, e.getTitle());
+    VEvent event = new VEvent(startDate, endDate, e.getValue("title"));
     try {
       ParameterList pl = new ParameterList();
-      pl.add(new Cn(e.getCreator()));
-      event.getProperties().add(new Uid(e.getID()));
+      pl.add(new Cn(e.getValue("creator")));
+      event.getProperties().add(new Uid(e.getEventId()));
       
       // TODO Organizer should be URI (email-address?) created fake adress
-      if (e.getCreator() != null && ! e.getCreator().equalsIgnoreCase("null")) event.getProperties().add(new Organizer(pl ,e.getCreator().replace(" ", "_")+"@matterhorn.opencast"));
-      if (e.getAbstract() != null && ! e.getAbstract().equalsIgnoreCase("null")) event.getProperties().add(new Description(e.getAbstract()));
-      if (e.getLocation() != null && ! e.getLocation().equalsIgnoreCase("null")) event.getProperties().add(new Location(e.getLocation()));
-      if (e.getSeriesID() != null && ! e.getSeriesID().equalsIgnoreCase("null")) event.getProperties().add(new RelatedTo(e.getSeriesID()));
-      if (e.getAttendees() != null) {
+      if (e.containsKey("creator") && ! e.getValue("creator").equalsIgnoreCase("null")) event.getProperties().add(new Organizer(pl ,e.getValue("creator").replace(" ", "_")+"@matterhorn.opencast"));
+      if (e.containsKey("abstract") && ! e.getValue("abstract").equalsIgnoreCase("null")) event.getProperties().add(new Description(e.getValue("abstract")));
+      if (e.containsKey("location") && ! e.getValue("location").equalsIgnoreCase("null")) event.getProperties().add(new Location(e.getValue("location")));
+      if (e.containsKey("seriesid") && ! e.getValue("seriesid").equalsIgnoreCase("null")) event.getProperties().add(new RelatedTo(e.getValue("seriesid")));
+      
+// Not used anyway, so skip it
+/*      if (e.getAttendees() != null) {
         String [] attendees = e.getAttendees();
         for (int i = 0; i < attendees.length; i++) {
           ParameterList plAtt = new ParameterList();
@@ -114,13 +121,14 @@ public class CalendarGenerator {
           // TODO Organizer should be URI (email-address?) created fake adress
           if ( ! attendees[i].equals(e.getDevice())) event.getProperties().add(new Attendee(plAtt, attendees[i].replace(" ","_")+"@matterhorn.opencast"));
         }
-      }
-      if (e.getResources() != null) {
+      }*/
+/*      if (e.getResources() != null) {
         String [] resources = e.getResources();
         ResourceList resList = new ResourceList();
         for (int i = 0; i < resources.length; i++) resList.add(resources[i]);     
         event.getProperties().add(new Resources(resList));
-      }
+      }*/
+
         ParameterList dcParameters = new ParameterList();
         dcParameters.add(new FmtType("application/xml"));
         dcParameters.add(Value.BINARY);
@@ -136,16 +144,14 @@ public class CalendarGenerator {
         caParameters.add(new XParameter("X-APPLE-FILENAME", "org.opencastproject.capture.agent.properties"));
         Attach agentsAttachment = new Attach(caParameters, caGenerator.generateAsString(e).getBytes("UTF-8"));
         event.getProperties().add(agentsAttachment);
+
+        
     } catch (Exception e1) {
       logger.error("could not create Calendar entry for Event {}. Reason : {} ", e.toString(), e1.getMessage());
       return false;
     }
     cal.getComponents().add(event);
-    try {
-      cal.validate();
-    } catch (ValidationException e1) {
-      logger.error("Could not validate Calendar, after event {} was added.", e.getID());
-    }
+    
     logger.debug("new VEvent = {} ", event.toString() );
     return true;
   }

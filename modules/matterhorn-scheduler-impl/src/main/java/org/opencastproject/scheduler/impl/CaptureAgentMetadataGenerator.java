@@ -17,6 +17,8 @@
 package org.opencastproject.scheduler.impl;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
+import org.opencastproject.scheduler.impl.jpa.Event;
+import org.opencastproject.scheduler.impl.jpa.Metadata;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,42 +58,38 @@ public class CaptureAgentMetadataGenerator {
    * @param event The SchedulerEvent from which the metadata should be generated as Capture Agent specific data 
    * @return A  Properties List with Capture Agent specific Data
    */
-  public Properties generate (SchedulerEvent event) {
+  public Properties generate (Event event) {
     logger.debug("generating Capture Agent metadata");
     
     Hashtable<String, String> caMetadata =  mapper.convert(event.getMetadata());
     
     // pass through all workflow metadata to capture agent 
-    for (String key : event.getMetadata().keySet()) {
+    for (Metadata m : event.getMetadata()) {
+      String key = m.getKey();
       if (key.startsWith("org.opencastproject.workflow.")) {
-        caMetadata.put(key, event.getMetadata().get(key));
+        caMetadata.put(key, m.getValue());
       }
     }
     
     Properties caCatalog = new Properties();
     
-    String [] res = event.getResources();
-    if(res != null && res.length > 0){
-      logger.debug("resources: " + res.length);
-      StringBuilder resList = new StringBuilder();
-      for (int i = 0; i < res.length; i++) {
-        if (i > 0) resList.append(","); //skip "," in front of first value
-        resList.append(res[i]);
-      }
-      caCatalog.setProperty("capture.device.names", resList.toString());
-    }
+    caCatalog.setProperty("capture.device.names", event.getValue("resources"));
     for (Entry<String, String> e : caMetadata.entrySet()) {
       caCatalog.put (e.getKey(), e.getValue());
     }       
     return caCatalog;
   }
   
+  
+  public String generateAsString (SchedulerEvent event) {
+    return generateAsString(((SchedulerEventImpl)event).toEvent());
+  }
   /**
    * Generates a Properties list with the Capture Agent metadata from the provided event 
    * @param event The SchedulerEvent from which the metadata should be generated as Capture Agent specific data 
    * @return A String with a Properties List with Capture Agent specific Data
    */
-  public String generateAsString (SchedulerEvent event) {
+  public String generateAsString (Event event) {
     StringWriter writer = new StringWriter();
     try {
       generate(event).store(writer, "Capture Agent specific data");

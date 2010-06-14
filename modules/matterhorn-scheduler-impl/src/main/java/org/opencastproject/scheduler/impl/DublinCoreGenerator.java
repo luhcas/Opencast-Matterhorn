@@ -22,6 +22,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreValue;
 import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
 import org.opencastproject.metadata.dublincore.Precision;
 import org.opencastproject.scheduler.api.SchedulerEvent;
+import org.opencastproject.scheduler.impl.jpa.Event;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,22 +82,24 @@ public class DublinCoreGenerator {
     mapper = new MetadataMapper(dcMappingFile);   
   }
   
+  public DublinCoreCatalog generate (SchedulerEvent event) {
+    return generate(((SchedulerEventImpl)event).toEvent());
+  }
+  
   /**
    * Generates a DublinCoreCatalog with the metadata from the provided event
    * @param event The SchedulerEvent from which the metadata should be generated as Dublin Core 
    * @return The DublinCoreCatalog
    */
-  public DublinCoreCatalog generate (SchedulerEvent event) {
-    logger.debug("creating Dublin Core  information for event {}", event.getID());
+  public DublinCoreCatalog generate (Event event) {
+    logger.debug("creating Dublin Core  information for event {}", event.getEventId());
     Hashtable<String, String> dcMetadata =  mapper.convert(event.getMetadata());
     
     DublinCoreCatalog dcCatalog = DublinCoreCatalogImpl.newInstance();
 
-    dcCatalog.add(DublinCoreCatalog.PROPERTY_IDENTIFIER, new DublinCoreValue(event.getID()));
+    dcCatalog.add(DublinCoreCatalog.PROPERTY_IDENTIFIER, new DublinCoreValue(event.getEventId()));
     dcCatalog.add(DublinCoreCatalog.PROPERTY_CREATED, EncodingSchemeUtils.encodeDate(event.getStartdate(), Precision.Second));
-    Enumeration<String> keys = dcMetadata.keys();
-    while (keys.hasMoreElements()) {
-      String key = keys.nextElement();
+    for (String key : dcMetadata.keySet()) {  
       if (validDcKey(key)) {
         DublinCoreValue value = new DublinCoreValue(dcMetadata.get(key));
         EName property = new EName("http://purl.org/dc/terms/", key);
@@ -109,20 +112,30 @@ public class DublinCoreGenerator {
 
   }
   
+  public String generateAsString (SchedulerEvent event) {
+    return generateAsString(((SchedulerEventImpl)event).toEvent());   
+  }
+  
+  
   /**
    * Generates a XML with the Dublin Core metadata from the provided event
    * @param event The SchedulerEvent from which the metadata should be generated as Dublin Core 
    * @return A String with a XML representation of the Dublin Core metadata
    */
-  public String generateAsString (SchedulerEvent event) {
+  public String generateAsString (Event event) {
     try {
-      Document doc = generate(event).toXml();
+      DublinCoreCatalog dccat = generate(event);
+      Document doc = dccat.toXml();
+      
       Source source = new DOMSource(doc);
       StringWriter stringWriter = new StringWriter();
       Result result = new StreamResult(stringWriter);
       TransformerFactory factory = TransformerFactory.newInstance();
       Transformer transformer = factory.newTransformer();
       transformer.transform(source, result);
+      
+
+      
       return stringWriter.getBuffer().toString().trim(); 
     } catch (ParserConfigurationException e) {
       logger.error("Could not parse DublinCoreCatalog: {}", e.getMessage());

@@ -17,6 +17,7 @@ package org.opencastproject.scheduler.impl.jpa;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +28,11 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.spi.PersistenceProvider;
 
+import net.fortuna.ical4j.model.ValidationException;
+
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerFilter;
+import org.opencastproject.scheduler.impl.CalendarGenerator;
 import org.opencastproject.scheduler.impl.SchedulerEventImpl;
 import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
 import org.osgi.service.component.ComponentContext;
@@ -46,6 +50,13 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
   protected PersistenceProvider persistenceProvider;
   protected Map<String, Object> persistenceProperties;
   protected EntityManagerFactory emf = null;
+  
+  private long updated = System.currentTimeMillis();
+  private long updatedCalendar = 0;
+  private long updatedAllEvents = 0;
+  
+  private Hashtable<String, String> calendars;
+  private Event [] cachedEvents;
   
   public Map<String, Object> getPersistenceProperties() {
     return persistenceProperties;
@@ -113,6 +124,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
       tx.commit();
     } finally {
       em.close();
+      updated = System.currentTimeMillis();
     }
     
     return e;
@@ -130,6 +142,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
       tx.commit();
     } finally {
       em.close();
+      updated = System.currentTimeMillis();
     }
     
     return e;
@@ -177,6 +190,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
   }
   
   public Event [] getEventsJPA (SchedulerFilter filter) {
+    if (updatedCalendar < updated) calendars = new Hashtable<String, String>(); // reset all calendars, if data has been changed 
     if (filter == null) {
       logger.debug("returning all events");
       return getAllEvents();
@@ -327,6 +341,9 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
   
   @SuppressWarnings("unchecked")
   public Event [] getAllEvents () {
+    if (updatedAllEvents > updated && cachedEvents != null) {
+      return cachedEvents;
+    }
     EntityManager em = emf.createEntityManager();
     Query query = em.createNamedQuery("Event.getAll");
     List<Event> events = null;
@@ -336,7 +353,9 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
       em.close();
     }
     for (Event e : events) e.setEntityManagerFactory(emf);
-    return events.toArray(new Event[0]);
+    cachedEvents = events.toArray(new Event[0]);
+    updatedAllEvents = System.currentTimeMillis();
+    return cachedEvents;
   }
   
   public RecurringEvent [] getAllRecurringEvents () {
@@ -401,6 +420,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
       em.getTransaction().commit();
     } finally {
       em.close();
+      updated = System.currentTimeMillis();
     }
     return true; 
   }
@@ -417,6 +437,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
       em.getTransaction().commit();
     } finally {
       em.close();
+      updated = System.currentTimeMillis();
     }
     return true; 
   }
@@ -430,6 +451,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
   }
   
   public boolean updateEvent(Event e) {
+    
     EntityManager em = emf.createEntityManager();
     try {
       em.getTransaction().begin();
@@ -444,6 +466,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
       return false;
     } finally {
       em.close();
+      updated = System.currentTimeMillis();
     }
     return true;
   }  
@@ -460,6 +483,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
       em.getTransaction().commit();
     } finally {
       em.close();
+      updated = System.currentTimeMillis();
     }
     return true;
   }  
@@ -481,6 +505,36 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
   
   public void destroy() {
     emf.close();
+  }  
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.scheduler.api.SchedulerService#getCalendarForCaptureAgent(java.lang.String)
+   */
+  public String getCalendarForCaptureAgent(String captureAgentID) {
+    if (updatedCalendar > updated && calendars.containsKey(captureAgentID) && calendars.get(captureAgentID) != null) {
+      logger.debug("Using cached calendar for {}", captureAgentID);
+      return calendars.get(captureAgentID);
+    } 
+    if (updatedCalendar < updated) calendars = new Hashtable<String, String>(); // reset all calendars, if data has been changed 
+    
+    SchedulerFilter filter = getFilterForCaptureAgent (captureAgentID); 
+    CalendarGenerator cal = new CalendarGenerator(dcGenerator, caGenerator);
+    Event[] events = getEventsJPA(filter);
+    
+    for (int i = 0; i < events.length; i++) cal.addEvent(events[i]);
+    
+    try {
+      cal.getCalendar().validate();
+    } catch (ValidationException e1) {
+      logger.error("Could not validate Calendar: {}", e1.getMessage());
+    }
+    
+    String result = cal.getCalendar().toString(); // CalendarOutputter performance sucks (jmh)
+    
+    updatedCalendar = System.currentTimeMillis();
+    calendars.put(captureAgentID, result);
+    return result;
   }  
   
 }
