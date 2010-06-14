@@ -40,9 +40,9 @@ public class Main {
   public static void main(String[] args) {
     Options options = new Options();
     options.addOption(new Option("help", false, "print this message"));
-    options.addOption(new Option("noperf", false, "ignore the performance tests"));
-    options.addOption(new Option("noserver", false, "ignore the tests for the server side components"));
-    options.addOption(new Option("nocapture", false, "ignore the tests for the capture agent"));
+    options.addOption(new Option("withperf", false, "run the performance tests"));
+    options.addOption(new Option("withserver", false, "run the tests for the server side components"));
+    options.addOption(new Option("withcapture", false, "run the tests for the capture agent"));
     options.addOption(new Option("url", true, "run tests against the Matterhorn installation at this URL"));
     options.addOption(new Option("username", true, "the username to use when accessing the Matterhorn installation"));
     options.addOption(new Option("password", true, "the password to use when accessing the Matterhorn installation"));
@@ -64,18 +64,28 @@ public class Main {
       System.exit(0);
     }
     // should we run the server-side tests
-    if( ! line.hasOption("noserver")) {
+    if(line.hasOption("withserver")) {
+      System.out.println("Running with the 'server' test suite enabled");
       testClasses.add(ServerTests.class);
-      if( ! line.hasOption("noperf")) {
+      if(line.hasOption("withperf")) {
+        System.out.println("Running with the server performance test suite enabled");
         testClasses.add(ServerPerformanceTests.class);
       }
     }
-    if( ! line.hasOption("nocapture")) {
+    if(line.hasOption("withcapture")) {
+      System.out.println("Running 'capture' test suite");
       testClasses.add(CaptureAgentTests.class);
-      if( ! line.hasOption("noperf")) {
+      if(line.hasOption("withperf")) {
         // TODO: Add capture agent performance tests
+        //System.out.println("Running with the 'capture' performance test suite enabled");
       }
     }
+    // if we don't have any test classes, add the server (not performance) tests... just so we have *something* to do
+    if(testClasses.size() ==0) {
+      System.out.println("No test suites specified... running server (not including performance) tests");
+      testClasses.add(ServerTests.class);
+    }
+    
     if(line.hasOption("url")) {
       BASE_URL = line.getOptionValue("url");
     }
