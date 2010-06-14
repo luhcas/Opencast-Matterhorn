@@ -18,6 +18,10 @@
                     <input id="review.hold" name="review.hold" type="checkbox" checked="checked" class="configField" value="true" style="width: inherit !important;">
                     <span id="i18n_hold_for_review">&nbsp;Hold for review</span>
                   </span>
+                  <span id="captionconfig">
+                    <input id="caption.hold" name="caption.hold" type="checkbox" checked="checked" class="configField" value="true" style="width: inherit !important;">
+                    <span id="i18n_hold_for_caption">&nbsp;Hold for caption</span>
+                  </span>
                   <span id="dist" style="float:left;">
                     <input id="distribution" name="distribution" type="checkbox" checked="checked" disabled="disabled" class="configField" value="Matterhorn Media Module" style="width: inherit !important;">
                     <span id="i18n_dist_mmm">&nbsp;Matterhorn Media Module</span>
@@ -310,6 +314,18 @@
         <configuration key="source-flavor">presentation/source</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-tags">engage</configuration>
+      </configurations>
+    </operation>
+    
+    <!-- hold for captions -->
+    <operation
+      id="caption"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Waiting for user to upload captions">
+      <configurations>
+        <configuration key="caption-flavor">caption/dfxp</configuration>
+        <configuration key="required-property">${caption.hold}</configuration>
       </configurations>
     </operation>
     
