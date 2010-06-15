@@ -86,6 +86,7 @@
       <modules>
         <module>modules/matterhorn-db</module>
         <module>modules/matterhorn-distribution-service-api</module>
+        <module>modules/matterhorn-distribution-service-remote</module>
         <module>modules/matterhorn-distribution-service-download-remote</module>
         <module>modules/matterhorn-distribution-service-itunesu-remote</module>
         <module>modules/matterhorn-distribution-service-streaming-remote</module>
