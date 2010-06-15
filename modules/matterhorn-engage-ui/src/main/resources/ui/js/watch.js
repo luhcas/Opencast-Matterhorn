@@ -56,7 +56,7 @@ Opencast.Watch = (function ()
           // set the media URLs
           mediaUrlOne = $('#oc-video-presenter-delivery-x-flv-rtmp').html();
           mediaUrlTwo = $('#oc-video-presentation-delivery-x-flv-rtmp').html();
-          
+
           mediaResolutionOne = $('#oc-resolution-presenter-delivery-x-flv-rtmp').html();
           mediaResolutionTwo = $('#oc-resolution-presentation-delivery-x-flv-rtmp').html();
 
@@ -121,7 +121,7 @@ Opencast.Watch = (function ()
             {
               Opencast.Player.setVideoSizeList(AUDIOPLAYER);
             }
-            else
+              else
             {
               Opencast.Player.setVideoSizeList(SINGLEPLAYER);
             }
@@ -158,6 +158,8 @@ Opencast.Watch = (function ()
           });
           
           Opencast.segments.initialize();
+
+          Opencast.Bookmarks.initialize();
           
           getClientShortcuts();
           
