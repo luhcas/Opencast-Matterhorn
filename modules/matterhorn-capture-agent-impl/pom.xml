@@ -71,8 +71,8 @@
     </dependency>
     <dependency>
       <groupId>org.gstreamer</groupId>
-      <artifactId>gstreamer-java</artifactId>
-      <version>1.2</version>
+      <artifactId>gstreamer-java-notests</artifactId>
+      <version>1.4</version>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
