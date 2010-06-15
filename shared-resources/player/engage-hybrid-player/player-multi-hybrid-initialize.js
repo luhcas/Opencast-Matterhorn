@@ -307,8 +307,8 @@ Opencast.Initialize = (function ()
         {
             Opencast.Player.showEditTime();
         });
-
-       
+        
+        
         $('#oc_searchField').click(function () 
         {
             if (clickMatterhornSearchField === false)
@@ -458,6 +458,7 @@ Opencast.Initialize = (function ()
             }
         });
         
+      
         
         // Handler keydown
         $('#oc_btn-rewind').keydown(function (event) 
@@ -531,6 +532,8 @@ Opencast.Initialize = (function ()
             }
         });
         
+       
+       
     });
     
    
@@ -620,21 +623,21 @@ Opencast.Initialize = (function ()
             {
             case VIDEOSIZEBIGRIGHT:
                 newHeightMediaTwo = newHeight;
-                newWidthMediaTwo = (newHeight) * formatTwo;
+                newWidthMediaTwo = newHeight * formatTwo;
                 break;
             case VIDEOSIZEBIGLEFT:
                 newHeightMediaOne = newHeight;
-                newWidthMediaOne = (newHeight) * formatOne;
+                newWidthMediaOne = newHeight * formatOne;
                 break;
             case VIDEOSIZEONLYRIGHT:
                 newHeightMediaOne = 0;
                 newWidthMediaOne = 0;
                 newHeightMediaTwo = newHeight;
-                newWidthMediaTwo = (newHeight) * formatTwo;
+                newWidthMediaTwo = newHeight * formatTwo;
                 break;
             case VIDEOSIZEONLYLEFT:
                 newHeightMediaOne = newHeight;
-                newWidthMediaOne = (newHeight) * formatOne;
+                newWidthMediaOne = newHeight * formatOne;
                 newHeightMediaTwo = 0;
                 newWidthMediaTwo = 0;
                 break;
@@ -648,21 +651,21 @@ Opencast.Initialize = (function ()
             {
             case VIDEOSIZEBIGRIGHT:
                 newHeightMediaTwo = newHeight;
-                newWidthMediaTwo = (newHeight) * formatTwo;
+                newWidthMediaTwo = newHeight * formatTwo;
                 break;
             case VIDEOSIZEBIGLEFT:
                 newHeightMediaOne = newHeight;
-                newWidthMediaOne = (newHeight) * formatOne;
+                newWidthMediaOne = newHeight * formatOne;
                 break;
             case VIDEOSIZEONLYRIGHT:
                 newHeightMediaOne = 0;
                 newWidthMediaOne = 0;
                 newHeightMediaTwo = newHeight;
-                newWidthMediaTwo = (newHeight) * formatTwo;
+                newWidthMediaTwo = newHeight * formatTwo;
                 break;
             case VIDEOSIZEONLYLEFT:
                 newHeightMediaOne = newHeight;
-                newWidthMediaOne = (newHeight) * formatOne;
+                newWidthMediaOne = newHeight * formatOne;
                 newHeightMediaTwo = 0;
                 newWidthMediaTwo = 0;
                 break;

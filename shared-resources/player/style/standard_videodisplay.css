@@ -200,10 +200,18 @@ Button.ccOff
 
 .HSliderSeek
 {
-   thumb-skin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_scrubber');
-   trackSkin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_scrubber');
-   track-highlight-skin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_scrubber_highlight');
-   showTrackHighlight:true;
+    thumb-skin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_scrubber');
+    trackSkin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_scrubber');
+    track-highlight-skin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_scrubber_highlight');
+    showTrackHighlight:true;
+}
+
+.HSliderProgress
+{
+    
+   
+    showTrackHighlight:true;
+
 }
 
 .HSliderVolume

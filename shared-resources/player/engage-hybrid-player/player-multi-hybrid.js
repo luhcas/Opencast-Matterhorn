@@ -775,7 +775,10 @@ Opencast.Player = (function () {
         return (playheadHour * 60 * 60) + (playheadMinutes * 60) + (playheadSeconds); 
     }
     
-   
+    
+    
+    
+    
     
     /**
      * 
@@ -805,7 +808,8 @@ Opencast.Player = (function () {
      */
     function setCaptionsURL(captionsURL)
     {
-        if (captionsURL !== undefined) {
+    	if (captionsURL !== null) 
+        {
             $('#oc_video-cc').css('visibility', 'visible');
         }
         Videodisplay.setCaptionsURL(captionsURL);
@@ -1068,7 +1072,7 @@ Opencast.Player = (function () {
         }
         $("#oc_btn-dropdown").attr("className", "oc_btn-audioDisplay");
         setCurrentVideoSize(VIDEOSIZEAUDIO);
-        
+        Opencast.Initialize.doResize();
     }
     
     /**
@@ -1306,8 +1310,8 @@ Opencast.Player = (function () {
     {
         return curPosition;
     }
-
-    /**
+    
+     /**
     @memberOf Opencast.Player
     @description Get the current sessionId
      */
@@ -1324,9 +1328,7 @@ Opencast.Player = (function () {
     {
         return mediaPackageId;
     }
-
-
-
+    
     /**
     @memberOf Opencast.Player
     @description Set the mediaPackageId

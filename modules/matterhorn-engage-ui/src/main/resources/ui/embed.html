@@ -3,18 +3,19 @@
 <html>
   <head>
     <title>Opencast Matterhorn - Media Player</title>
-       
+
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        
+
     <link rel="shortcut icon" href="shared_img/favicon.ico"> 
- 
+
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/embed-hybrid-player.css" />
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/player-multi-hybrid-icons.css" />
-    <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/opencast-reset.css" />
-   
     <link rel="stylesheet" type="text/css" href="shared_css/jquery-ui-1.8.1.custom.css" />
+    <link rel="stylesheet" type="text/css" href="shared_css/shared.css" />
+    <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/opencast-reset.css" />
+    <link rel="stylesheet" type="text/css" href="jquery/plugins/jwysiwyg/jquery.wysiwyg.css"  />
+    <link rel="stylesheet" type="text/css" href="css/oc.segments.css">
 
-    
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.hotkeys-0.7.9.js"></script>
@@ -25,29 +26,31 @@
     <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-scubber.js"></script>
     <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid.js"></script> 
     <script type="text/javascript" src="engage-hybrid-player/aria/js/ariaSlider.js"></script>     
-    <script type="text/javascript" src="engage-hybrid-player/embed-hybrid-initialize.js"></script>  
+    <script type="text/javascript" src="jquery/plugins/jwysiwyg/jquery.wysiwyg.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.client.js"></script>
     <script type="text/javascript" src="js/engage-ui.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/embed-hybrid-initialize.js"></script>
+    <script type="text/javascript" src="shared_js/version.js"></script>  
+
+    <script type="text/javascript" src="js/segments.js"></script>
     <script type="text/javascript" src="js/embed.js"></script>
-    
-    
   </head>
 
   <body>
-    
   <noscript>
     <p style="color:red;">JavaScript is turned off in your web browser. So this site wouldn't work properly! <br />
       <strong>Please turn JavaScript on to use this site, then refresh the page.</strong>
     </p>
   </noscript>
-     
-  <div id="oc_embed-title-bar">
-    <div id="oc_embed-title">
-      <a href="#" target="_blank" title="View Advanced Player">Matterhorn - View Advanced Player</a>
-    </div>
-  </div>
-    
+  
+  
   <div id="oc_body">
-      
+    <div id="oc_embed-title-bar">
+      <div id="oc_embed-title">
+        <a href="#" target="_blank" title="View Advanced Player">Matterhorn - View Advanced Player</a>
+      </div>
+    </div>  
+    
     <div id="oc_flash-player">
       <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-flash.js"></script> 
     </div>
@@ -56,7 +59,7 @@
       
       <div id="oc_video-time">
         <div id="simpleEdit">    
-          <input id="oc_current-time" class="oc_current-time" type=""text"" name="Current Time" title="Current Time" value="00:00:00" tabIndex="0"></input>
+          <input id="oc_current-time" class="oc_current-time" type="text" name="Current Time" title="Current Time" value="00:00:00" tabIndex="0"></input>
           <input id="oc_edit-time" class="oc_edit-time-hide" type="text" maxlength="8" size="8" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="00:00:00"></input> 
           of
           <span id="oc_duration" class="oc_duration" name="Duration" title="Duration" tabIndex="0">00:00:00</span>
@@ -64,6 +67,10 @@
       </div>
  
       <div id="oc_video-controls">
+  <span id="skip">
+    <a name="controls"></a>
+    <h2>Video Player Controls</h2>
+  </span>
         <input id="oc_btn-skip-backward" class="oc_btn-skip-backward" type="submit" name="Jump To The Previous Slide" alt="Jump To The Previous Slide" title="Jump To The Previous Slide" value=""></input>
         <input id="oc_btn-rewind" class="oc_btn-rewind" type="submit" name="Jump Back: Control + Alt + R" alt="Jump Back: Control + Alt + R" title="Jump Back: Control + Alt + R" value=""></input>
         <input id="oc_btn-play-pause" class="oc_btn-play" type="submit" name="Play: Control + Alt + P"  alt="Play: Control + Alt + P" title="Play: Control + Alt + P" value=""></input>
@@ -71,7 +78,6 @@
         <input id="oc_btn-skip-forward" class="oc_btn-skip-forward" type="submit" name="Jump To The Next Slide"  alt="Jump To The Next Slide" title="Jump To The Next Slide" value=""></input>
       </div> 
      
-          
       <div id="oc_sound">
         <ul id="oc_volume-dropdown">
           <li>
@@ -80,9 +86,9 @@
               <li>
                 <div id="oc_volume-dropdown-div">
                   <div id="oc_volume-slider">
-                    <div id="slider_volume_Rail" class="oc-slider-volume-Rail" title="Volume">
+                    <div id="slider_volume_Rail" class="oc_slider-volume-Rail" title="Volume" alt="Volume">
                       <label id="volumeLabel" for="slider_volume_Rail" class="oc_offScreen-hidden">Volume</label>
-                      <input id="slider_volume_Thumb" class="oc-slider-volume-Thumb" type="submit" value=""></input>
+                      <input id="slider_volume_Thumb" class="oc_slider-volume-Thumb" type="submit" value=""></input>
                     </div>
                   </div>
                 </div>
@@ -91,23 +97,25 @@
           </li>
         </ul>
       </div>
-         
+          
       <div id="oc_video-cc">
         <input id="oc_btn-cc" class="oc_btn-cc-off" type="submit" name="Closed Caption Off: Control + Alt + C" alt="Closed Caption Off: Control + Alt + C" title="Closed Caption Off: Control + Alt + C" value=""></input>
       </div>
-    
+
       <div id="oc_video-size-controls" >
         <ul id="oc_video-size-dropdown">
           <li>
-            <input id="oc_btn-dropdown" class="oc_btn-singleDisplay" type="submit" name="Video Size Controls"  alt="Video Size Controls" title="Video Size Controls" value=""></input>
+            <input id="oc_btn-dropdown" class="oc_btn-centerDisplay" type="submit" name="Video Size Controls" alt="Video Size Controls" title="Video Size Controls" value=""></input>
             <ul id="oc_video-size-menue"></ul>
           </li>
         </ul>
       </div>
-      
     </div>
-     
+
+
+
     <div id="data"></div>
+
 
   </body>
   

@@ -11,6 +11,7 @@ var Opencast = Opencast || {};
 */
 Opencast.Scrubber = (function () 
 {
+   var locked = false;
    
     function init()
     {
@@ -29,9 +30,15 @@ Opencast.Scrubber = (function ()
 
         $('#draggable').bind('drag', function (event, ui) 
         {
-            $("#scrubber").css("left", $(this).css("left"));
-            var newPosition = Math.round(($("#draggable").position().left / $("#scubber-channel").width()) * Opencast.Player.getDuration());
-            //Videodisplay.seek(newPosition);
+           if (!locked){
+              locked = true;
+              setTimeout(function(){ 
+                  locked = false;
+              }, 200);
+              $("#scrubber").css("left", $(this).css("left"));
+              var newPosition = Math.round(($("#draggable").position().left / $("#scubber-channel").width()) * Opencast.Player.getDuration());
+              Videodisplay.seek(newPosition);
+            }
         });
 
         $('#draggable').bind('dragstop', function (event, ui)         {
