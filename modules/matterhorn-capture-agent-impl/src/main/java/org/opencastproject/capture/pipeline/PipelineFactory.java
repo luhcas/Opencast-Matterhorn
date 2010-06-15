@@ -197,6 +197,7 @@ public class PipelineFactory {
     String codecProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_CODEC;
     String containerProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_CONTAINER;
     String bitrateProperty = codecProperty + CaptureParameters.CAPTURE_DEVICE_BITRATE;
+    String quantizerProperty = codecProperty + CaptureParameters.CAPTURE_DEVICE_QUANTIZER;
     String bufferProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_BUFFER;
     String bufferCountProperty = bufferProperty + CaptureParameters.CAPTURE_DEVICE_BUFFER_MAX_BUFFERS;
     String bufferByteProperty = bufferProperty + CaptureParameters.CAPTURE_DEVICE_BUFFER_MAX_BYTES;
@@ -204,6 +205,7 @@ public class PipelineFactory {
     String codec = properties.getProperty(codecProperty);
     String container = properties.getProperty(containerProperty);
     String bitrate = properties.getProperty(bitrateProperty);
+    String quantizer = properties.getProperty(quantizerProperty);
     String bufferCount = properties.getProperty(bufferCountProperty);
     String bufferBytes = properties.getProperty(bufferByteProperty);
     String bufferTime = properties.getProperty(bufferTimeProperty);
@@ -212,6 +214,8 @@ public class PipelineFactory {
       capdev.properties.setProperty("codec", codec);
     if (bitrate != null)
       capdev.properties.setProperty("bitrate", bitrate);
+    if (quantizer != null)
+      capdev.properties.setProperty("quantizer", quantizer);
     if (container != null)
       capdev.properties.setProperty("container", container);
     if (bufferCount != null)
@@ -424,10 +428,12 @@ public class PipelineFactory {
     }
     
     // Must set H.264 encoding to use constant quantizer or else it will not start
-    // Pass 0 is CBR (default), Pass 4 is constant quantizer, Pass 4 is constant quality
-    if (codec != null && codec.equalsIgnoreCase("x264enc"))
+    // Pass 0 is CBR (default), Pass 4 is constant quantizer, Pass 5 is constant quality
+    if (codec != null && codec.equalsIgnoreCase("x264enc")) {
       enc.set("pass", "4");
-    
+      if (captureDevice.properties.contains("quantizer"))
+        enc.set("quantizer", captureDevice.properties.getProperty("quantizer"));
+    }
     if (container != null) {
       logger.debug("{} muxing to: {}", captureDevice.getName(), container);
       muxer = ElementFactory.make(container, null);
