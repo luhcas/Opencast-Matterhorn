@@ -27,9 +27,6 @@ SET UTIL_LOGGING_OPTS=-Djava.util.logging.config.file=%FELIX_HOME%\conf\services
 SET FELIX_CACHE=%FELIX_HOME%\felix-cache
 SET GRAPHICS_OPTS="-Djava.awt.headless=true -Dawt.toolkit=sun.awt.HeadlessToolkit"
 
-REM # Clear felix cache dir
-del /F /Q %FELIX_CACHE%
-
 REM # Finally start felix
 java %DEBUG_OPTS% %GRAPHICS_OPTS% %MAVEN_ARG% %FELIX_FILEINSTALL_OPTS% %PAX_CONFMAN_OPTS% %PAX_LOGGING_OPTS% %UTIL_LOGGING_OPTS% -jar %FELIX_HOME%\bin\felix.jar %FELIX_CACHE%  
 ENDLOCAL
