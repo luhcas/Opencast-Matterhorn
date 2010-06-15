@@ -168,8 +168,6 @@ Opencast.Watch = (function ()
           
           getClientShortcuts();
           
-          // init
-          Opencast.Initialize.init();
        });
     }
   
