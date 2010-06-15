@@ -15,13 +15,9 @@ Opencast.engage = (function () {
 
   function getSearchServiceEpisodeIdURL() 
   {
-
-
-     var restEndpoint = "../../search/rest/episode?id=";
-      //var restEndpoint = "episode.xml?id="; // Activate for testing purposes
-    // var restEndpoint = "xml/episode.xml?id="; // Activate for testing purposes
-
-
+    var restEndpoint = "../../search/rest/episode?id=";
+    //var restEndpoint = "episode.xml?id="; // Activate for testing purposes
+    //var restEndpoint = "xml/episode.xml?id="; // Activate for testing purposes
       return restEndpoint;
    }
 
@@ -34,7 +30,8 @@ Opencast.engage = (function () {
     if ( start == -1 ) return null;
     
     var end = document.cookie.indexOf( ';', len );
-    if ( end == -1 ) end = document.cookie.length;
+    if ( end == -1 ) 
+      end = document.cookie.length;
     return unescape( document.cookie.substring( len, end ) );
   }
   

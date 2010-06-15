@@ -18,6 +18,7 @@ package org.opencastproject.feedback.impl;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -31,8 +32,10 @@ import org.opencastproject.feedback.api.Annotation;
 import org.opencastproject.feedback.api.AnnotationList;
 import org.opencastproject.feedback.api.FeedbackService;
 import org.opencastproject.feedback.api.Report;
+import org.opencastproject.feedback.api.ReportItem;
 import org.opencastproject.feedback.endpoint.AnnotationListImpl;
 import org.opencastproject.feedback.endpoint.ReportImpl;
+import org.opencastproject.feedback.endpoint.ReportItemImpl;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -201,6 +204,27 @@ public class FeedbackServiceImpl implements FeedbackService {
     return ((Long) q.getSingleResult()).intValue();
   }
 
+  public AnnotationList getAnnotationsByKeyAndMediapackageId(String key, String mediapackageId, int offset, int limit) {
+    AnnotationList result = new AnnotationListImpl();
+
+    result.setTotal(getTotal(key, mediapackageId));
+    result.setOffset(offset);
+    result.setLimit(limit);
+
+    Query q = em.createNamedQuery("findAnnotationsByKeyAndMediapackageId");
+    q.setParameter("key", key);
+    q.setParameter("mediapackageId", mediapackageId);
+    q.setFirstResult(offset);
+    q.setMaxResults(limit);
+    Collection<Annotation> annotations = q.getResultList();
+
+    for (Annotation a : annotations) {
+      result.add(a);
+    }
+
+    return result;
+  }
+  
   @SuppressWarnings("unchecked")
   public AnnotationList getAnnotationsByKeyAndDay(String key, String day, int offset, int limit) {
     AnnotationList result = new AnnotationListImpl();
@@ -242,6 +266,14 @@ public class FeedbackServiceImpl implements FeedbackService {
     return ((Long) q.getSingleResult()).intValue();
   }
 
+  private int getTotal(String key, String mediapackageId) {
+
+    Query q = em.createNamedQuery("findTotalByKeyAndMediapackageId");
+    q.setParameter("key", key);
+    q.setParameter("mediapackageId", mediapackageId);
+    return ((Long) q.getSingleResult()).intValue();
+  }
+
   @SuppressWarnings("unchecked")
   public AnnotationList getAnnotationsByDay(String day, int offset, int limit) {
     AnnotationList result = new AnnotationListImpl();
@@ -269,7 +301,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     for (Annotation a : annotations) {
       result.add(a);
     }
-
+ 
     return result;
   }
 
@@ -280,10 +312,64 @@ public class FeedbackServiceImpl implements FeedbackService {
     return ((Long) q.getSingleResult()).intValue();
   }
 
+  public Report getReport(int offset, int limit){
+    Report report = new ReportImpl();
+    report.setLimit(limit);
+    report.setOffset(offset);
+
+    Query q = em.createNamedQuery("countSessionsGroupByMediapackage");
+    q.setFirstResult(offset);
+    q.setMaxResults(limit);
+
+    List<Object[]> result = q.getResultList();
+    ReportItem item;
+
+    for (Object[] a : result) {
+      item = new ReportItemImpl();
+      item.setEpisodeId((String)a[0]);
+      item.setViews((Long)a[1]);
+      item.setPlayed((Long)a[2]);
+      report.add(item);
+    }
+
+    return report;
+  }
+
   public Report getReport(String from, String to, int offset, int limit){
-    Report r = new ReportImpl();
-    r.setLimit(limit);
-    r.setOffset(offset);
-    return r;
+    Report report = new ReportImpl();
+    report.setLimit(limit);
+    report.setOffset(offset);
+
+    int year = Integer.parseInt(from.substring(0, 4));
+    int month = Integer.parseInt(from.substring(4, 6)) - 1;
+    int date = Integer.parseInt(from.substring(6, 8));
+    Calendar calBegin = new GregorianCalendar();
+    calBegin.set(year, month, date, 0, 0);
+
+    year = Integer.parseInt(to.substring(0, 4));
+    month = Integer.parseInt(to.substring(4, 6)) - 1;
+    date = Integer.parseInt(to.substring(6, 8));
+    Calendar calEnd = new GregorianCalendar();
+    calEnd.set(year, month, date, 23, 59);
+
+    report.setTotal(getTotal(calBegin, calEnd));
+    Query q = em.createNamedQuery("countSessionsGroupByMediapackageByIntervall");
+    q.setParameter("begin", calBegin, TemporalType.TIMESTAMP);
+    q.setParameter("end", calEnd, TemporalType.TIMESTAMP);
+    q.setFirstResult(offset);
+    q.setMaxResults(limit);
+
+    List<Object[]> result = q.getResultList();
+    ReportItem item;
+
+    for (Object[] a : result) {
+      item = new ReportItemImpl();
+      item.setEpisodeId((String)a[0]);
+      item.setViews((Long)a[1]);
+      item.setPlayed((Long)a[2]);
+      report.add(item);
+    }
+
+    return report;
   }
 }

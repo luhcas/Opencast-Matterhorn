@@ -43,13 +43,17 @@ import org.opencastproject.feedback.api.Annotation;
 @Table(name = "MH_ANNOTATION_IMPL")
 @NamedQueries( {
         @NamedQuery(name = "findAnnotations", query = "SELECT a FROM AnnotationImpl a"),
+        @NamedQuery(name = "countSessionsGroupByMediapackage", query = "SELECT a.mediapackageId, COUNT(distinct a.sessionId), SUM(a.length) FROM AnnotationImpl a GROUP BY a.mediapackageId"),
+        @NamedQuery(name = "countSessionsGroupByMediapackageByIntervall", query = "SELECT a.mediapackageId, COUNT(distinct a.sessionId), SUM(a.length) FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end GROUP BY a.mediapackageId"),
         @NamedQuery(name = "countSessionsOfMediapackage", query = "SELECT COUNT(distinct a.sessionId) FROM AnnotationImpl a WHERE a.mediapackageId = :mediapackageId"),
         @NamedQuery(name = "findLastAnnotationsOfSession", query = "SELECT a FROM AnnotationImpl a  WHERE a.sessionId = :sessionId ORDER BY a.created DESC"),
         @NamedQuery(name = "findAnnotationsByKey", query = "SELECT a FROM AnnotationImpl a WHERE a.key = :key"),
+        @NamedQuery(name = "findAnnotationsByKeyAndMediapackageId", query = "SELECT a FROM AnnotationImpl a WHERE a.mediapackageId = :mediapackageId AND a.key = :key"),
         @NamedQuery(name = "findAnnotationsByIntervall", query = "SELECT a FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end"),
         @NamedQuery(name = "findAnnotationsByKeyAndIntervall", query = "SELECT a FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end AND a.key = :key"),
         @NamedQuery(name = "findTotal", query = "SELECT COUNT(a) FROM AnnotationImpl a"),
         @NamedQuery(name = "findTotalByKey", query = "SELECT COUNT(a) FROM AnnotationImpl a WHERE a.key = :key"),
+        @NamedQuery(name = "findTotalByKeyAndMediapackageId", query = "SELECT COUNT(a) FROM AnnotationImpl a WHERE a.mediapackageId = :mediapackageId AND a.key = :key"),
         @NamedQuery(name = "findTotalByIntervall", query = "SELECT COUNT(a) FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end"),
         @NamedQuery(name = "findTotalByKeyAndIntervall", query = "SELECT COUNT(a) FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end AND a.key = :key") })
 @XmlType(name = "annotation", namespace = "http://feedback.opencastproject.org/")

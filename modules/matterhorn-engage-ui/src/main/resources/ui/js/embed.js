@@ -53,7 +53,11 @@ Opencast.Watch = (function ()
         $('#abstract').html($('#oc-abstract').html());
 
         // set the media URLs
-        var mediaUrlOne = $('#oc-video-presenter-delivery-x-flv-rtmp').html();
+        var mediaUrlOne = Opencast.engage.getVideoUrl();
+
+        if(mediaUrlOne === null)
+          mediaUrlOne = $('#oc-video-presenter-delivery-x-flv-rtmp').html();
+
         var mediaUrlTwo = $('#oc-video-presentation-delivery-x-flv-rtmp').html();
 
         if(mediaUrlOne === null)

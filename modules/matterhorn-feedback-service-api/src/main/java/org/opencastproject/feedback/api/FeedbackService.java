@@ -83,6 +83,21 @@ public interface FeedbackService {
   AnnotationList getAnnotationsByKeyAndDay(String key, String day, int offset, int limit);
 
   /**
+   * Returns annotations of a given key and mediapackage id
+   * 
+   * @param key
+   *          the annotation key
+   * @param mediapackageId
+   *          the mediapackage id
+   * @param offset
+   *          the offset
+   * @param limit
+   *          the limit
+   * @return the annotation list
+   */
+  AnnotationList getAnnotationsByKeyAndMediapackageId(String key, String mediapackageId, int offset, int limit);
+
+  /**
    * Returns the views of a mediapackage
    * 
    * @param mediapackageId
@@ -102,7 +117,18 @@ public interface FeedbackService {
    *          the offset
    * @param limit
    *          the limit
-   * @return the annotation list
+   * @return the report
    */
   Report getReport(String from, String to, int offset, int limit);
+
+  /**
+   * Returns a report
+   * 
+   * @param offset
+   *          the offset
+   * @param limit
+   *          the limit
+   * @return the report
+   */
+  Report getReport(int offset, int limit);
 }

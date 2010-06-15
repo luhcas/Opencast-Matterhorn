@@ -775,73 +775,7 @@ Opencast.Player = (function () {
         return (playheadHour * 60 * 60) + (playheadMinutes * 60) + (playheadSeconds); 
     }
     
-    /**
-        @memberOf Opencast.Player
-        @description Add a bookmark
-        @param String value, String name, String text
-     */
-    function addBookmark(value, name, text)
-    {
-        var unencoded = value + ' ' + name + ': ' + text,
-        encoded = $('<div/>').text(unencoded).html();
-        var option = $('<option/>').val(encoded).addClass("oc_option-myBookmark").attr("title", encoded).text(unencoded);
-    
-        $('#oc_bookmarkSelect').prepend(option);
-        if ($("#oc_myBookmarks-checkbox").attr('aria-checked') === 'false')
-        {
-            $("#oc_myBookmarks-checkbox").attr('aria-checked', 'true');
-            $('#oc_myBookmarks-checkbox').attr('checked', 'true'); 
-            $('option.oc_option-myBookmark').css('display', 'block');
-            $('.oc_option-myBookmark').css('visibility', 'visible'); 
-        }
-    
-        //
-        var posLeft = 0;
-        var windowWidth = getBrowserWidth();
-        var playhead = getPlayhead(value);
-        var duration = getDuration();
-      
-        posLeft = (playhead * 100) / duration;
-  
-        var btn = $('<input/>')
-            .addClass("oc_boomarkPoint")
-            .attr(
-            {
-                onClick: "Opencast.Player.playBookmark(this.name)",
-                style: 'left:' + posLeft + '%; width: 5px; height: 10px; margin-left: 5px; position: absolute; background-color: #90ee90 !important;',
-                name: value,
-                alt: encoded,
-                title: encoded
-            });
-
-        $('#oc_bookmarksPoints').append(btn);
-    }
-    
-    /**
-        @memberOf Opencast.Player
-        @description remove a bookmark
-     */
-    function removeBookmark()
-    {
-        $('#oc_bookmarkSelect option:selected').remove();
-        $('#oc_btn-removeBookmark').css('display', 'none'); 
-    }
-    
-    /**
-        @memberOf Opencast.Player
-        @description play a bookmark
-        @param String playheadString
-     */
-    function playBookmark(playheadString)
-    {
-        var newPlayhead = getPlayhead(playheadString);
-        Videodisplay.seek(newPlayhead);
-    }
-    
-    
-    
-    
-    
+   
     
     /**
      * 
@@ -1361,8 +1295,38 @@ Opencast.Player = (function () {
     var sessionId;
     var inPosition = 0;
     var outPosition = 0;
+    var curPosition = 0;
     var INTERVAL_LENGTH = 5;
     
+    /**
+    @memberOf Opencast.Player
+    @description Get the current position
+     */
+    function getCurrentPosition() 
+    {
+        return curPosition;
+    }
+
+    /**
+    @memberOf Opencast.Player
+    @description Get the current sessionId
+     */
+    function getSessionId() 
+    {
+        return sessionId;
+    }
+
+    /**
+    @memberOf Opencast.Player
+    @description Get the current sessionId
+     */
+    function getMediaPackageId() 
+    {
+        return mediaPackageId;
+    }
+
+
+
     /**
     @memberOf Opencast.Player
     @description Set the mediaPackageId
@@ -1415,6 +1379,7 @@ Opencast.Player = (function () {
      */
     function setPlayhead(newPosition) 
     {
+        curPosition = newPosition;
         var fullPosition = Math.round(newPosition);
         
         if (inPosition <= fullPosition && fullPosition <= inPosition + INTERVAL_LENGTH)
@@ -1569,6 +1534,9 @@ Opencast.Player = (function () {
         doSkipForward : doSkipForward,
         doTogglePlayPause : doTogglePlayPause,
         doToggleMute : doToggleMute,
+        getCurrentPosition : getCurrentPosition,
+        getMediaPackageId : getMediaPackageId,
+        getSessionId : getSessionId,
         setPlayerVolume : setPlayerVolume,
         doToogleClosedCaptions : doToogleClosedCaptions,
         videoSizeControlSingleDisplay : videoSizeControlSingleDisplay,
@@ -1588,10 +1556,7 @@ Opencast.Player = (function () {
         showEditTime : showEditTime,
         hideEditTime : hideEditTime,
         editTime : editTime,
-        addBookmark : addBookmark,
-        removeBookmark : removeBookmark,
         setOptionClassName : setOptionClassName,
-        playBookmark : playBookmark,
         setDuration : setDuration,
         setPlayhead : setPlayhead,
         setProgress : setProgress,

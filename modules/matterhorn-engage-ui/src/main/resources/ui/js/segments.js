@@ -16,11 +16,12 @@ Opencast.segments = ( function() {
    */
   function initialize() {
 
-    if ($panels !== undefined){
-      totalPanels     = $(".scrollContainer").children().size();
+    totalPanels     = $(".scrollContainer").children().size();
 
-      var $panels       = $('#slider .scrollContainer > div');
-      var $container      = $('#slider .scrollContainer');
+    var $panels       = $('#slider .scrollContainer > div');
+    var $container      = $('#slider .scrollContainer');
+
+    if ($panels !== undefined){
 
       $panels.css({'float' : 'left','position' : 'relative'});
 

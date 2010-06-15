@@ -23,7 +23,7 @@ package org.opencastproject.feedback.api;
 public interface ReportItem {
   void setEpisodeId(String episodeId);
 
-  void setViews(int views);
+  void setViews(long views);
 
-  void setPlayed(String played);
+  void setPlayed(long played);
 }

@@ -119,6 +119,9 @@
            <div id="oc-video-presenter-delivery-x-flv-rtmp" style="display: none">
               <xsl:value-of select="url" />
             </div>
+            <div id="oc-resolution-presenter-delivery-x-flv-rtmp" style="display: none">
+              <xsl:value-of select="video/resolution" />
+            </div>
           </xsl:if>
         </xsl:if>
       </xsl:if>

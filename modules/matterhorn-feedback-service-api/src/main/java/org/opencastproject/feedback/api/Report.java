@@ -29,7 +29,7 @@ public interface Report {
 
   void setViews(int views);
 
-  void setPlayed(String played);
+  void setPlayed(long played);
 
   void setTotal(int total);
 

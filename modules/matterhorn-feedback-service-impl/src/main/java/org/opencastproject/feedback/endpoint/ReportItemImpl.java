@@ -35,10 +35,10 @@ public class ReportItemImpl implements ReportItem {
   private String episodeId;
 
   @XmlElement(name = "views")
-  private int views;
+  private long views;
 
   @XmlElement(name = "played")
-  private String played;
+  private long played;
 
   /**
    * A no-arg constructor needed by JAXB
@@ -54,19 +54,19 @@ public class ReportItemImpl implements ReportItem {
     this.episodeId = episodeId;
   }
 
-  public int getViews() {
+  public long getViews() {
     return views;
   }
 
-  public void setViews(int views) {
+  public void setViews(long views) {
     this.views = views;
   }
 
-  public String getPlayed() {
+  public long getPlayed() {
     return played;
   }
 
-  public void setPlayed(String played) {
+  public void setPlayed(long played) {
     this.played = played;
   }
 

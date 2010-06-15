@@ -47,7 +47,7 @@ public class ReportImpl implements Report {
   protected int views;
   
   @XmlAttribute(name = "played")
-  protected String played;
+  protected long played;
   
   @XmlAttribute(name = "total")
   protected int total;
@@ -108,11 +108,11 @@ public class ReportImpl implements Report {
     this.views = views;
   }
 
-  public String getPlayed() {
+  public long getPlayed() {
     return played;
   }
 
-  public void setPlayed(String played) {
+  public void setPlayed(long played) {
     this.played = played;
   }
 

@@ -96,7 +96,7 @@ public class FeedbackRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("annotation")
-  public Response getAnnotations(@QueryParam("key") String key, @QueryParam("day") String day,
+  public Response getAnnotations(@QueryParam("id") String id, @QueryParam("key") String key, @QueryParam("day") String day,
           @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
 
     // Are the values of offset and limit valid?
@@ -107,7 +107,9 @@ public class FeedbackRestService {
     if (limit == 0)
       limit = 10;
 
-    if (!StringUtils.isEmpty(key) && !StringUtils.isEmpty(day))
+    if (!StringUtils.isEmpty(id) && !StringUtils.isEmpty(key))
+      return Response.ok(feedbackService.getAnnotationsByKeyAndMediapackageId(key, id, offset, limit)).build();
+    else if (!StringUtils.isEmpty(key) && !StringUtils.isEmpty(day))
       return Response.ok(feedbackService.getAnnotationsByKeyAndDay(key, day, offset, limit)).build();
     else if (!StringUtils.isEmpty(key))
       return Response.ok(feedbackService.getAnnotationsByKey(key, offset, limit)).build();
@@ -133,7 +135,19 @@ public class FeedbackRestService {
   @Path("report")
   public Response report(@QueryParam("from") String from, @QueryParam("to") String to,
           @QueryParam("offset") int offset, @QueryParam("limit") int limit) {
-    return Response.ok(feedbackService.getReport(from, to, offset, limit)).build();
+
+    // Are the values of offset and limit valid?
+    if (offset < 0 || limit < 0)
+      return Response.status(Status.BAD_REQUEST).build();
+
+    // Set default value of limit (max result value)
+    if (limit == 0)
+      limit = 10;
+
+    if(from == null && to == null)
+      return Response.ok(feedbackService.getReport(offset, limit)).build();
+    else
+      return Response.ok(feedbackService.getReport(from, to, offset, limit)).build();
   }
 
   @GET
