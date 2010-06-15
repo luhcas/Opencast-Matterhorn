@@ -128,22 +128,23 @@ public class AdminuiRestService {
       out.addAll(getRecordingsFromWorkflowService(WorkflowState.FAILED));
       out.addAll(getRecordingsFromWorkflowService(WorkflowState.FAILING));
     }
-//    if (pageNumber < 0) {
-//      pageNumber = 0;
-//    }
-//    if (out.size() <= pageSize) {     // if # of items <= page size irgnore pageNumber jsut return the whole result set
+    if (pageNumber < 0) {
+      pageNumber = 0;
+    }
+    if (out.size() <= pageSize) {     // if # of items <= page size irgnore pageNumber jsut return the whole result set
       return out;
-//    }
-//    RecordingDataViewListImpl page = new RecordingDataViewListImpl();
-//    int first = pageNumber * pageSize;
-//    for (int i = first; i < first + pageSize; i++) {
-//      try {
-//        page.add(out.get(i));
-//      } catch (IndexOutOfBoundsException e) {
-//        break;
-//      }
-//    }
-//    return page;
+    }
+    RecordingDataViewListImpl page = new RecordingDataViewListImpl();
+    int first = pageNumber * pageSize;
+    logger.info("Returning results items " + first + " - " + (first + pageSize - 1));
+    for (int i = first; i < first + pageSize; i++) {
+      try {
+        page.add(out.get(i));
+      } catch (IndexOutOfBoundsException e) {
+        break;
+      }
+    }
+    return page;
   }
 
   /**

@@ -29,13 +29,32 @@ Recordings.lastCount = null;
  */
 Recordings.init = function() {
   //Do internationalization of text
-  jQuery.i18n.properties({name:'recordings',path:'i18n/'});
+  jQuery.i18n.properties({
+    name:'recordings',
+    path:'i18n/'
+  });
   AdminUI.internationalize(i18n, 'i18n');
   
   // Event: clicked somewhere
-//  $('body').click( function() {
-//    $('#holdActionPanel-container').fadeOut('fast');
-//  });
+  //  $('body').click( function() {
+  //    $('#holdActionPanel-container').fadeOut('fast');
+  //  });
+
+  // Buttons style
+  $("button").hover(function(){
+    $(this).css({
+      'background-color': 'white',
+      'border-top': '1px solid #ccc',
+      'border-left': '1px solid #ccc'
+    });
+  },
+  function(){
+    $(this).css({
+      'background-color': '',
+      'border-top': '',
+      'border-left': ''
+    })
+  });
 
   /* Event: Scheduler button clicked */
   $('#button_schedule').click( function() {
@@ -52,7 +71,7 @@ Recordings.init = function() {
     var state = $(this).attr('state');
     window.location.href = 'recordings.html?show='+state;
     return false;
-  })
+  });
 
   // register custom table cell value parser for Date/Time column
   $.tablesorter.addParser({
@@ -66,33 +85,19 @@ Recordings.init = function() {
     type: 'numeric'
   });
 
-  // request and display statistics
-  Recordings.displayRecordingStats();
-
-  // init update interval for recording stats
-  Recordings.statsInterval = window.setInterval( 'Recordings.displayRecordingStats();', 3000 );
-
   var show = '';
   show = Recordings.getURLParam('show');
   if (show == '') {
     show='upcoming';
   }
-  Recordings.displayRecordings(show);
+  Recordings.currentState = show;
 
-  $("button").hover(function(){
-    $(this).css({
-      'background-color': 'white',
-      'border-top': '1px solid #ccc',
-      'border-left': '1px solid #ccc'
-    });
-  },
-  function(){
-    $(this).css({
-      'background-color': '',
-      'border-top': '',
-      'border-left': ''
-    })
-  });
+  ocPager.init();
+  Recordings.displayRecordingStats();
+
+  // init update interval for recording stats
+  Recordings.statsInterval = window.setInterval( 'Recordings.displayRecordingStats();', 3000 );
+
 }
 
 /** get and display recording statistics. If the number of recordings in the
@@ -106,10 +111,14 @@ Recordings.displayRecordingStats = function() {
         Recordings.updateRequested = false;
         for (key in data) {
           if (Recordings.currentState == key) {
-            if ((Recordings.lastCount !== null) && (Recordings.lastCount !== data[key])) {
+            if (Recordings.lastCount !== data[key]) {
+              //alert(Recordings.lastCount + " " + data[key])
+              Recordings.lastCount = data[key];
+              ocPager.update(ocPager.pageSize, ocPager.currentPageIdx);
               Recordings.displayRecordings(Recordings.currentState, true);
+            } else {
+              Recordings.lastCount = data[key];
             }
-            Recordings.lastCount = data[key];
           }
           var elm = $('#count-' + key);
           if (elm) {
@@ -126,13 +135,14 @@ Recordings.displayRecordingStats = function() {
  */
 Recordings.displayRecordings = function(state, reload) {
   Recordings.currentState = state;
-  Recordings.lastCount = null;
   $('.state-selector').removeClass('state-selector-active');
   $('.selector-'+state).addClass('state-selector-active');
-  if (!reload) {
+  if (!reload) {        
     Recordings.injectLoadingAnimation($('#recordings-table-container'));
   }
-  $('#recordings-table-container').xslt("rest/recordings/"+state, "xsl/recordings_"+state+".xsl", function() {
+  var page = ocPager.currentPageIdx;
+  var psize = ocPager.pageSize;
+  $('#recordings-table-container').xslt("rest/recordings/"+state+"?ps="+psize+"&pn="+page, "xsl/recordings_"+state+".xsl", function() {
     $('.processingStatus').each( function() {
       var items = $(this).text().split(';');
       for (key=0; key < items.length-1; key++) {
@@ -205,7 +215,9 @@ Recordings.displayRecordings = function(state, reload) {
         cssDesc: 'sortable-desc',
         sortList: [[3,0]],
         headers: {
-          3: {sorter: 'date'}
+          3: {
+            sorter: 'date'
+          }
         }
       });
     } else {  // if no date/time column is present, init tablesorter the default way
@@ -293,7 +305,7 @@ Recordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
 Recordings.adjustHoldActionPanelHeight = function() {
   var height = $("#holdActionPanel-iframe").contents().find("html").height();
   $('#holdActionPanel-iframe').height(height+10);
-  //alert("Hold action panel height: " + height);
+//alert("Hold action panel height: " + height);
 }
 
 /** Calls workflow endpoint to end hold operation and continue the workflow

@@ -349,6 +349,20 @@ select { font-size:1.15em; }
   padding-right:5px;
 }
 
+/* Paging Navigation */
+.paging-nav-container {
+  float:right;
+}
+
+.paging-nav-goto {
+  width:50px;
+}
+
+.paging-nav-mocklink {
+  color: gray;
+  font-weight: bold;
+}
+
 /* Fluid Skinning System Overrides */
 
 .fl-theme-coal h1 {

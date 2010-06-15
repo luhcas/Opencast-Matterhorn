@@ -19,6 +19,7 @@
     <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
     <script type="text/javascript" src="shared_js/version.js"></script>
+    <script type="text/javascript" src="js/oc.pager.js"></script>
     <script type="text/javascript" src="js/recordings.js"></script>
     <script type="text/javascript" src="js/adminui.js"></script>
     <script type="text/javascript">
@@ -63,67 +64,128 @@
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix">
 
-        <!-- Add/Schedule Buttons -->
-        <div id="add-buttons-container">
-          <button type="button" id="button_schedule" style="height:2.1em;cursor:pointer;margin-right:1em;font-size:0.9em;vertical-align: middle;">
-            <span class="icon icon-add">&nbsp;</span>
-            <span style="font-weight: bold; font-size:1em;" id="i18n_button_schedule">&nbsp; Schedule Recording</span>
-          </button>
-          <button type="button" id="button_upload" style="height:2.1em;cursor:pointer;font-size:0.9em;vertical-align: middle;">
-            <span class="icon icon-add">&nbsp;</span>
-            <span style="font-weight: bold; font-size:1em;" id="i18n_button_upload">&nbsp; Upload Recording</span>
-          </button>
+        <div class="fl-fix">
+          <!-- Add/Schedule Buttons -->
+          <div id="add-buttons-container">
+            <button type="button" id="button_schedule" style="height:2.1em;cursor:pointer;margin-right:1em;font-size:0.9em;vertical-align: middle;">
+              <span class="icon icon-add">&nbsp;</span>
+              <span style="font-weight: bold; font-size:1em;" id="i18n_button_schedule">&nbsp; Schedule Recording</span>
+            </button>
+            <button type="button" id="button_upload" style="height:2.1em;cursor:pointer;font-size:0.9em;vertical-align: middle;">
+              <span class="icon icon-add">&nbsp;</span>
+              <span style="font-weight: bold; font-size:1em;" id="i18n_button_upload">&nbsp; Upload Recording</span>
+            </button>
+          </div>
+
+          <!-- recording state selector -->
+          <div id="category-selector-container" class="fl-fix">
+            <ul class="category-selector">
+              <li class="category-selector-item">
+                <span class="state-selector selector-all clickable" state="all"><span id="i18n_view_all">All</span> <span id="count-total"></span></span>
+              </li>
+              <li class="category-selector-spacer">
+                &#124;
+              </li>
+              <li class="category-selector-item">
+                <span class="state-selector selector-upcoming clickable" state="upcoming"><span id="i18n_view_upcoming">Upcoming</span> <span id="count-upcoming"></span></span>
+              </li>
+              <li class="category-selector-spacer">
+                &#124;
+              </li>
+              <li class="category-selector-item">
+                <span class="state-selector selector-capturing clickable" state="capturing"><span id="i18n_view_capturing">Capturing</span> <span id="count-capturing"></span></span>
+              </li>
+              <li class="category-selector-spacer">
+                &#124;
+              </li>
+              <li class="category-selector-item">
+                <span class="state-selector selector-processing clickable" state="processing"><span id="i18n_view_processing">Processing</span> <span id="count-processing"></span></span>
+              </li>
+              <li class="category-selector-spacer">
+                &#124;
+              </li>
+              <li class="category-selector-item">
+                <span class="state-selector selector-finished clickable" state="finished"><span id="i18n_view_finished">Finished</span> <span id="count-finished"></span></span>
+              </li>
+              <li class="category-selector-spacer" style="width:30px;">
+                &nbsp;
+              </li>
+              <li class="category-selector-item">
+                <span class="state-selector selector-hold clickable" state="hold"><span id="i18n_view_onhold">On Hold</span> <span id="count-hold">()</span></span>
+              </li>
+              <li class="category-selector-spacer">
+                &#124;
+              </li>
+              <li class="category-selector-item">
+                <span class="state-selector selector-failed clickable" state="failed"><span id="i18n_view_failed">Failed</span> <span id="count-errors">()</span></span>
+              </li>
+            </ul>
+          </div>
         </div>
 
-        <!-- recording state selector -->
-        <div id="category-selector-container" class="fl-fix">
-          <ul class="category-selector">
-            <li class="category-selector-item">
-              <span class="state-selector selector-all clickable" state="all"><span id="i18n_view_all">All</span> <span id="count-total"></span></span>
-            </li>
-            <li class="category-selector-spacer">
-              &#124;
-            </li>
-            <li class="category-selector-item">
-              <span class="state-selector selector-upcoming clickable" state="upcoming"><span id="i18n_view_upcoming">Upcoming</span> <span id="count-upcoming"></span></span>
-            </li>
-            <li class="category-selector-spacer">
-              &#124;
-            </li>
-            <li class="category-selector-item">
-              <span class="state-selector selector-capturing clickable" state="capturing"><span id="i18n_view_capturing">Capturing</span> <span id="count-capturing"></span></span>
-            </li>
-            <li class="category-selector-spacer">
-              &#124;
-            </li>
-            <li class="category-selector-item">
-              <span class="state-selector selector-processing clickable" state="processing"><span id="i18n_view_processing">Processing</span> <span id="count-processing"></span></span>
-            </li>
-            <li class="category-selector-spacer">
-              &#124;
-            </li>
-            <li class="category-selector-item">
-              <span class="state-selector selector-finished clickable" state="finished"><span id="i18n_view_finished">Finished</span> <span id="count-finished"></span></span>
-            </li>
-            <li class="category-selector-spacer" style="width:30px;">
-              &nbsp;
-            </li>
-            <li class="category-selector-item">
-              <span class="state-selector selector-hold clickable" state="hold"><span id="i18n_view_onhold">On Hold</span> <span id="count-hold">()</span></span>
-            </li>
-            <li class="category-selector-spacer">
-              &#124;
-            </li>
-            <li class="category-selector-item">
-              <span class="state-selector selector-failed clickable" state="failed"><span id="i18n_view_failed">Failed</span> <span id="count-errors">()</span></span>
-            </li>
-          </ul>
+        <!-- paging navigation -->
+        <div class="paging-nav-container" style="margin-bottom: 8px;">
+          <span>
+            Show
+            <select class="paging-nav-pagesize-selector">
+              <option value="3">3</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+            </select>
+            Recordings per page
+          </span>
+          &nbsp;&nbsp;
+          <span>
+            Go to page
+            <input type="text" class="paging-nav-goto" style="width:50px;">
+          </span>
+          &nbsp;&nbsp;
+          <a href="#" class="paging-nav-go-previous">&lt; Previous</a>
+          <span class="paging-mocklink-prev">&lt; Previous</span>
+          <span>
+            Page
+            <span class="paging-nav-current">0</span>
+            of
+            <span class="paging-nav-total">0</span>
+          </span>
+          <a href="#" class="paging-nav-go-next">Next &gt;</a>
+          <span class="paging-mocklink-next">Next &gt;</span>
         </div>
 
         <!-- recordings table -->
         <div id="recordings-table-container" style="clear:both;">
           <!-- This is where the rendered table goes -->
         </div>
+
+        <!-- paging navigation -->
+        <div class="paging-nav-container">
+          <span>
+            Show
+            <select class="paging-nav-pagesize-selector">
+              <option value="3">3</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+            </select>
+            Recordings per page
+          </span>
+          &nbsp;&nbsp;
+          <span>
+            Go to page
+            <input type="text" class="paging-nav-goto" style="width:50px;">
+          </span>
+          &nbsp;&nbsp;
+          <a href="#" class="paging-nav-go-previous">&lt; Previous</a>
+          <span class="paging-mocklink-prev">&lt; Previous</span>
+          <span>
+            Page
+            <span class="paging-nav-current">0</span>
+            of
+            <span class="paging-nav-total">0</span>
+          </span>
+          <a href="#" class="paging-nav-go-next">Next &gt;</a>
+          <span class="paging-mocklink-next">Next &gt;</span>
+        </div>
+
       </div>
     </div>
     <!-- p>
