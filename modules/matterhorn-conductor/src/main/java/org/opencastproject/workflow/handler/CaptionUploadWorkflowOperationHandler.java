@@ -114,15 +114,17 @@ public class CaptionUploadWorkflowOperationHandler extends AbstractResumableWork
    */
   @Override
   public WorkflowOperationResult resume(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    MediaPackageElementFlavor flavor = getFlavor(workflowInstance.getCurrentOperation());
-    boolean hasCaptions = hasCaptions(workflowInstance.getMediaPackage(), flavor);
-    if (hasCaptions) {
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
-    } else {
-      // The user should have verified the existence of a caption file in, or if necessary added one to, the mediapackage
-      logger.info("No DFXP caption file attached, keeping workflow {} in the hold state", workflowInstance);
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
-    }
+    return super.resume(workflowInstance);
+// FIXME: enable this logic once the caotion upload UI has been implemented
+//    MediaPackageElementFlavor flavor = getFlavor(workflowInstance.getCurrentOperation());
+//    boolean hasCaptions = hasCaptions(workflowInstance.getMediaPackage(), flavor);
+//    if (hasCaptions) {
+//      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+//    } else {
+//      // The user should have verified the existence of a caption file in, or if necessary added one to, the mediapackage
+//      logger.info("No DFXP caption file attached, keeping workflow {} in the hold state", workflowInstance);
+//      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
+//    }
   }
 
   protected boolean hasCaptions(MediaPackage mp, MediaPackageElementFlavor flavor) {
