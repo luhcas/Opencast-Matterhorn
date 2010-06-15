@@ -17,14 +17,10 @@ package org.opencastproject.scheduler.impl;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.impl.jpa.Event;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.ParameterList;
-import net.fortuna.ical4j.model.ResourceList;
-import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.parameter.Cn;
 import net.fortuna.ical4j.model.parameter.Encoding;
@@ -32,16 +28,17 @@ import net.fortuna.ical4j.model.parameter.FmtType;
 import net.fortuna.ical4j.model.parameter.Value;
 import net.fortuna.ical4j.model.parameter.XParameter;
 import net.fortuna.ical4j.model.property.Attach;
-import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.CalScale;
 import net.fortuna.ical4j.model.property.Description;
 import net.fortuna.ical4j.model.property.Location;
 import net.fortuna.ical4j.model.property.Organizer;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.RelatedTo;
-import net.fortuna.ical4j.model.property.Resources;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *Create an iCalendar from the provided SchedulerEvents

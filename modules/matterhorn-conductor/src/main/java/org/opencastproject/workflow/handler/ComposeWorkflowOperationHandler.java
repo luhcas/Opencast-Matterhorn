@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
@@ -225,16 +226,6 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
       }
     }
 
-    // choose composer service with least running jobs
-    // listAllComposerServices();
-    // ComposerService cs = allComposerServices[0];
-    // for (ComposerService c : allComposerServices) {
-    // if (c.countJobs() < cs.countJobs()) {
-    // cs = c;
-    // }
-    // }
-    // logger.debug("Media will be encoded on {}", cs.toString());
-
     // Start encoding and wait for the result
     final Receipt receipt = composerService.encode(mediaPackage, sourceVideoTrackId, sourceAudioTrackId, profile
             .getIdentifier(), true);
@@ -256,12 +247,9 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
       composedTrack.setFlavor(audioTrack.getFlavor());
 
     // Add the tags
-    if (targetTrackTags != null) {
-      String[] tags = targetTrackTags.split("\\W");
-      if (tags.length > 0)
-        for (String tag : tags)
-          composedTrack.addTag(tag);
-    }
+    List<String> targetTags = asList(targetTrackTags);
+    for (String tag : targetTags)
+      composedTrack.addTag(tag);
     return mediaPackage;
   }
 
@@ -285,13 +273,10 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
       composedTrack.setMimeType(MimeTypes.parseMimeType(profile.getMimeType()));
 
     // Add tags
-    if (targetTrackTags != null) {
-      for (String tag : targetTrackTags.split("\\W")) {
-        if (StringUtils.trimToNull(tag) == null)
-          continue;
-        logger.trace("Tagging composed track with '{}'", tag);
-        composedTrack.addTag(tag);
-      }
+    List<String> targetTags = asList(targetTrackTags);
+    for (String tag : targetTags) {
+      logger.trace("Tagging composed track with '{}'", tag);
+      composedTrack.addTag(tag);
     }
   }
 

@@ -18,8 +18,12 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
+import org.apache.commons.lang.StringUtils;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Abstract base implementation for an operation handler, which implements a simple start operation that returns a
@@ -57,6 +61,26 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
    */
   @Override
   public void destroy(WorkflowInstance workflowInstance) throws WorkflowOperationException {}
+  
+  /**
+   * Converts a comma separated string into a set of values.  Useful for converting operation configuration strings into
+   * multi-valued sets.
+   * 
+   * @param commaSeparated The comma separated string
+   * @return the set of values
+   */
+  protected List<String> asList(String commaSeparated) {
+    commaSeparated = StringUtils.trimToNull(commaSeparated);
+    List<String> list = new ArrayList<String>();
+    if (commaSeparated != null) {
+      for(String s : commaSeparated.split("\\W")) {
+        if(StringUtils.trimToNull(s) != null) {
+          list.add(s.trim());
+        }
+      }
+    }
+    return list;
+  }
   
   /**
    * {@inheritDoc}

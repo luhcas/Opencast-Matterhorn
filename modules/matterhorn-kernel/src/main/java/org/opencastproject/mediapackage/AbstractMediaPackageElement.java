@@ -27,7 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.net.URI;
-import java.util.Set;
+import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -221,10 +221,10 @@ public abstract class AbstractMediaPackageElement implements
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.mediapackage.MediaPackageElement#containsTag(java.util.Set)
+   * @see org.opencastproject.mediapackage.MediaPackageElement#containsTag(java.util.Collection)
    */
   @Override
-  public boolean containsTag(Set<String> tags) {
+  public boolean containsTag(Collection<String> tags) {
     if (tags == null || tags.size() == 0)
       return true;
     for (String tag : tags) {

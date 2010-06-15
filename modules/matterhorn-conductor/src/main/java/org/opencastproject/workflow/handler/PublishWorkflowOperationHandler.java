@@ -77,7 +77,7 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
     this.searchService = searchService;
   }
 
-  protected MediaPackage getMediaPackageForSearchIndex(MediaPackage current, Set<String> tags) throws MediaPackageException {
+  protected MediaPackage getMediaPackageForSearchIndex(MediaPackage current, List<String> tags) throws MediaPackageException {
     MediaPackage mp = (MediaPackage)current.clone();
 
     Set<MediaPackageElement> keep = new HashSet<MediaPackageElement>();
@@ -164,11 +164,7 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackageFromWorkflow, Action.CONTINUE);
     }
 
-    Set<String> tagSet = new HashSet<String>();
-    for (String tag : tags.split("\\W")) {
-      if(StringUtils.trimToNull(tag) == null) continue;
-      tagSet.add(tag);
-    }
+    List<String> tagSet = asList(tags);
 
     try {
       MediaPackage mediaPackageForSearch = getMediaPackageForSearchIndex(mediaPackageFromWorkflow, tagSet);

@@ -58,12 +58,10 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Map.Entry;
@@ -186,22 +184,8 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
           IOException {
 
     String sourceFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
-
-    // Prepare the set of source tags
-    String sourceTags = StringUtils.trimToNull(operation.getConfiguration("source-tags"));
-    Set<String> sourceTagSet = null;
-    if (sourceTags != null) {
-      sourceTagSet = new HashSet<String>();
-      sourceTagSet.addAll(Arrays.asList(sourceTags.split("\\W")));
-    }
-
-    // Prepare the set of target tages
-    String targetTags = StringUtils.trimToNull(operation.getConfiguration("target-tags"));
-    Set<String> targetTagSet = null;
-    if (targetTags != null) {
-      targetTagSet = new HashSet<String>();
-      targetTagSet.addAll(Arrays.asList(targetTags.split("\\W")));
-    }
+    List<String> sourceTagSet = asList(operation.getConfiguration("source-tags"));
+    List<String> targetTagSet = asList(operation.getConfiguration("target-tags"));
 
     // Select the catalogs according to the tags
     Map<Catalog, Mpeg7Catalog> catalogs = new HashMap<Catalog, Mpeg7Catalog>();
@@ -244,7 +228,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
     // Was there at least one matching catalog
     if (catalogs.size() == 0) {
       logger.debug("Mediapackage {} has no suitable mpeg-7 catalogs based on tags {} to to run text analysis",
-              mediaPackage, sourceTags);
+              mediaPackage, sourceTagSet);
       return mediaPackage;
     }
 

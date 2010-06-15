@@ -314,16 +314,26 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>2.3</version>
-        <!--
-          must use version 2.3 because of the xml schema for our config file
-        -->
         <configuration>
-          <configLocation>checkstyle.xml</configLocation>
+          <configLocation>${settings.localRepository}/org/opencastproject/matterhorn-checkstyle/1.0/matterhorn-checkstyle-1.0.xml</configLocation>
           <logViolationsToConsole>true</logViolationsToConsole>
-          <headerLocation>header.txt</headerLocation>
+          <headerLocation>${settings.localRepository}/org/opencastproject/matterhorn-header/1.0/matterhorn-header-1.0.txt</headerLocation>
           <excludes>**/package-info.java</excludes>
         </configuration>
-        <!--
+        <dependencies>
+          <dependency>
+            <groupId>org.opencastproject</groupId>
+            <artifactId>matterhorn-checkstyle</artifactId>
+            <version>1.0</version>
+            <type>xml</type>
+          </dependency>
+          <dependency>
+            <groupId>org.opencastproject</groupId>
+            <artifactId>matterhorn-header</artifactId>
+            <version>1.0</version>
+            <type>txt</type>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
             <goals>
@@ -331,7 +341,6 @@
             </goals>
           </execution>
         </executions>
-        -->
       </plugin>
     </plugins>
 

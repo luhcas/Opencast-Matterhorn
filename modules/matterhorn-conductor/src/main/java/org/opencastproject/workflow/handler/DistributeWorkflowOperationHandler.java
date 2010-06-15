@@ -100,7 +100,7 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
       
       // Look for elements matching any tag
       Set<String> elementIds = new HashSet<String>();
-      for (String tag : sourceTags.split("\\W")) {
+      for (String tag : asList(sourceTags)) {
         if(StringUtils.trimToNull(tag) == null) continue;
         MediaPackageElement[] elts = currentMediaPackage.getElementsByTag(tag);
         for (MediaPackageElement e : elts) {
@@ -121,10 +121,9 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
       }
       
       // Tag the distributed elements
-      String[] tags = targetTags.split("\\W");
       for (MediaPackageElement element : resultingMediaPackage.getElements()) {
         if (currentMediaPackage.getElementById(element.getIdentifier()) == null) {
-          for (String tag : tags) {
+          for (String tag : asList(targetTags)) {
             if(StringUtils.trimToNull(tag) == null) continue;
             element.addTag(tag);
           }

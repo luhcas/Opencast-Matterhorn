@@ -38,8 +38,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -139,11 +139,7 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
     if (profile == null)
       throw new IllegalStateException("Encoding profile '" + encodingProfileName + "' was not found");
 
-    Set<String> sourceTagSet = null;
-    if (sourceTags != null) {
-      sourceTagSet = new HashSet<String>();
-      sourceTagSet.addAll(Arrays.asList(sourceTags.split("\\W")));
-    }
+    List<String> sourceTagSet = asList(sourceTags);
 
     // Select the tracks based on source flavors and tags
     Set<Track> videoTracks = new HashSet<Track>();
@@ -181,7 +177,7 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
       
       // Add tags
       if (targetImageTags != null) {
-        for (String tag : targetImageTags.split("\\W")) {
+        for (String tag : asList(targetImageTags)) {
           logger.trace("Tagging image with '{}'", tag);
           if (StringUtils.trimToNull(tag) != null) composedImage.addTag(tag);
         }

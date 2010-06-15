@@ -49,9 +49,10 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -175,11 +176,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
     if (profile == null)
       throw new IllegalStateException("Encoding profile '" + encodingProfileName + "' was not found");
 
-    Set<String> sourceTagSet = null;
-    if (StringUtils.trimToNull(sourceTags) != null) {
-      sourceTagSet = new HashSet<String>();
-      sourceTagSet.addAll(Arrays.asList(sourceTags.split("\\W")));
-    }
+    List<String> sourceTagSet = asList(sourceTags);
 
     // Select the tracks based on the flavors
     Set<Track> videoTracks = new HashSet<Track>();
@@ -209,11 +206,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
     } else {
 
       // Determine the tagset for the reference
-      Set<String> referenceTagSet = null;
-      if (StringUtils.trimToNull(referenceTags) != null) {
-        referenceTagSet = new HashSet<String>();
-        referenceTagSet.addAll(Arrays.asList(referenceTags.split("\\W")));
-      }
+      List<String> referenceTagSet = asList(referenceTags);
 
       // Determine the reference master
 
@@ -285,12 +278,9 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
               composedImage.setMimeType(MimeTypes.parseMimeType(profile.getMimeType()));
 
             // Add tags
-            if (targetImageTags != null) {
-              for (String tag : targetImageTags.split("\\W")) {
-                logger.trace("Tagging image with '{}'", tag);
-                if (StringUtils.trimToNull(tag) != null)
-                  composedImage.addTag(tag);
-              }
+            for (String tag : asList(targetImageTags)) {
+              logger.trace("Tagging image with '{}'", tag);
+              composedImage.addTag(tag);
             }
 
             // Refer to the original track including a timestamp
@@ -323,7 +313,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
    * @return the reference master
    */
   private MediaPackageElement getReferenceMaster(MediaPackage mediaPackage, Track t, String referenceFlavor,
-          Set<String> referenceTagSet) {
+          Collection<String> referenceTagSet) {
     MediaPackageElement referenceMaster = t;
     if (referenceFlavor != null) {
       MediaPackageElementFlavor flavor = MediaPackageElementFlavor.parseFlavor(referenceFlavor);
