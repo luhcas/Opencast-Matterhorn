@@ -29,7 +29,7 @@ if [[ -n "$(echo "${keep:-Y}" | grep -i '^n')" ]]; then
 	read -p "Enter the branch or tag you would like to download [${SRC_DEFAULT##*/}]: " response
 	: ${response:=${SRC_DEFAULT##*/}}
 
-	if [[ "$response" == "$TRUNK_EXT" ]]; then
+	if [[ "$response" == "${TRUNK_URL##*/}" ]]; then
 	    address=$TRUNK_URL
 	else
 	    # Check the branches first
