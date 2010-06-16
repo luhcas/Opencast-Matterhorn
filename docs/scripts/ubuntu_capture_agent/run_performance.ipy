@@ -4,8 +4,8 @@ import sys
 !sudo mkdir -p /oc_perf
 !sudo mount -t tmpfs -o size=512M,mode=0777 tmpfs /oc_perf
 
-felixDir = "/home/matterhorn/felix-framework-2.0.4"
-matterhornTrunk = "/home/matterhorn/matterhorn-trunk"
+felixDir = "/home/matterhorn/capture-agent/felix-framework-2.0.4"
+matterhornTrunk = "/home/matterhorn/capture-agent/matterhorn-source"
 
 datafiles = !ls performance_tests
 for file in datafiles:
@@ -47,7 +47,7 @@ for file in datafiles:
 
         #Start dstat in the new dir and block for 60 seconds
         dstat_output="/oc_perf/" + props["capture.recording.id"].strip("\n") + "/dstat.log"
-        !sudo dstat -cdm --load --output $dstat_output 1 60
+        !sudo dstat -cdm --load --output $dstat_output 1 900
 
 	time.sleep(1) # make sure the headers and such are written out
 
