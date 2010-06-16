@@ -24,7 +24,6 @@ Opencast.Watch = (function ()
           mediaResolutionOne      = "",
           mediaResolutionTwo      = "";
 
-
         var mediaPackageId = Opencast.engage.getMediaPackageId();
 
         var restEndpoint = Opencast.engage.getSearchServiceEpisodeIdURL() + mediaPackageId;
@@ -34,18 +33,18 @@ Opencast.Watch = (function ()
 
         $('#data').xslt(restEndpoint, "xsl/player-hybrid-download.xsl", function () 
         {
-          
           $('#oc-segments').html("");
-
 
           // set the media URLs
           var mediaUrlOne = Opencast.engage.getVideoUrl();
 
           if(mediaUrlOne === null)
+            $('#oc-link-advanced-player').css("display", "inline");
+
+          if(mediaUrlOne === null)
             mediaUrlOne = $('#oc-video-presenter-delivery-x-flv-rtmp').html();
 
           var mediaUrlTwo = $('#oc-video-presentation-delivery-x-flv-rtmp').html();
-
 
           if(mediaUrlOne === null)
           {
@@ -102,9 +101,6 @@ Opencast.Watch = (function ()
             coverUrl = $('#oc-cover-feed').html();
           }
           coverUrl = coverUrl === null ? '' : coverUrl;
-          
-          
-
 
           Opencast.Player.setMediaURL(coverUrl, mediaUrlOne, mediaUrlTwo);
 
