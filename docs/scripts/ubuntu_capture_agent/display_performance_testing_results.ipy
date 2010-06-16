@@ -1,3 +1,5 @@
+import re
+
 runs=!ls oc_perf
 cd oc_perf
 for run in runs:
@@ -7,7 +9,23 @@ for run in runs:
 
 	!rm -rf graph.gp
 	!rm -rf graph2
-	
+
+	log=!cat opencast.log
+	devices = {}
+	pattern = re.compile("(\d+:\d+:\d+) \w+ \(\w+:\d+\) - (\w+),(\d+,\d+,\d+)")
+	for line in log:
+		match = pattern.search(line)
+		time = match.group(1)
+		name = match.group(2)
+		stats = match.group(3)
+		if name not in devices:
+			device = {}
+			device[time] = stats
+			devices[name] = device
+		else:
+			device = devices[name]
+			device[time] = stats
+
 	graph=!cat dstat.log
 	
 	while graph[0]!= '':
