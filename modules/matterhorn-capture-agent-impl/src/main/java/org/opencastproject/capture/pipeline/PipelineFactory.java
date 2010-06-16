@@ -61,6 +61,26 @@ public class PipelineFactory {
     properties = props;
     ArrayList<CaptureDevice> devices = new ArrayList<CaptureDevice>();
 
+    String[] friendlyNames = getDeviceNames();
+    if (friendlyNames == null) {
+      return null;
+    }
+
+    String outputDirectory = properties.getProperty(CaptureParameters.RECORDING_ROOT_URL);
+
+    devices = initDevices(friendlyNames, outputDirectory, confidence);
+    if (devices == null) {
+      return null;
+    }
+
+    return startPipeline(devices, confidence);
+  }
+
+  /**
+   * Splits the device names from the pipeline's properties.
+   * @return The device names to capture from.
+   */
+  private static String[] getDeviceNames() {
     // Setup pipeline for all the devices specified
     String deviceNames = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
     if (deviceNames == null) {
@@ -80,13 +100,24 @@ public class PipelineFactory {
         return null;
       }
     }
-    String outputDirectory = properties.getProperty(CaptureParameters.RECORDING_ROOT_URL);
+
+    return friendlyNames;
+  }
+
+  /**
+   * Returns an {@code ArrayList} of {@code CaptureDevice}s which contain everything the rest of this class needs to start the pipeline
+   * @param friendlyNames  The list of friendly names we will be capturing from.
+   * @param outputDirectory  The destination directory of the captures.
+   * @param confidence  True to enable confidence monitoring, false otherwise.
+   * @return A list of {@code CaptureDevice}s which can be captured from.
+   */
+  private static ArrayList<CaptureDevice> initDevices(String[] friendlyNames, String outputDirectory, boolean confidence) {
+    ArrayList<CaptureDevice> devices = new ArrayList<CaptureDevice>();
 
     for (String name : friendlyNames) {
-
       name = name.trim();
       DeviceName devName;
-
+    
       // Get properties from the configuration
       String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
       String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
@@ -101,7 +132,7 @@ public class PipelineFactory {
       File outputFile = new File(outputDirectory, properties.getProperty(outputProperty));
       logger.debug("Device {} has source at {}.", name, srcLoc);
       logger.debug("Device {} has output at {}.", name, outputFile);
-
+    
       //Only try and create an output file if this pipeline will *not* be used for confidence monitoring
       if (!confidence) {
         try {
@@ -115,13 +146,13 @@ public class PipelineFactory {
         }
       }
       String outputLoc = outputFile.getAbsolutePath();
-      
-
+          
+    
       if (srcLoc == null) {
         logger.error("Unable to create pipeline for {} because its source file/device does not exist!", name);
         return null;
       }
-
+    
       if (new File(srcLoc).isFile()) {
         // Non-V4L file. If it exists, assume it is ingestable
         // TODO: Fix security risk. Any file on CaptureAgent filesytem could be ingested
@@ -158,13 +189,25 @@ public class PipelineFactory {
           }
         }
       }
-
+    
       // devices will store the CaptureDevice list arbitrary order
       CaptureDevice capdev = createCaptureDev(srcLoc, devName, name, outputLoc);
-      if (!devices.add(capdev))
+      if (!devices.add(capdev)) {
         logger.error("Unable to add device: {}.", capdev);
+      }
     }
 
+    return devices;
+  }
+
+  /**
+   * Initializes the pipeline itself, but does not start capturing
+   * 
+   * @param devices  The list of devices to capture from.
+   * @param confidence  True to enable confidence monitoring.
+   * @return The created {@code Pipeline}, or null in the case of an error.
+   */
+  private static Pipeline startPipeline(ArrayList<CaptureDevice> devices, boolean confidence) {
     logger.info("Successfully initialised {} devices.", devices.size());
     for (int i = 0; i < devices.size(); i++)
       logger.debug("Device #{}: {}.", i, devices.get(i));
@@ -187,7 +230,7 @@ public class PipelineFactory {
           logger.error("Failed to create pipeline for {}.", c);
       }
     }
-    
+
     return pipeline;
   }
 
@@ -709,6 +752,7 @@ public class PipelineFactory {
   /**
    * Adds a pipeline specifically designed to captured from a DV Camera attached by firewire to the main pipeline
    * 
+   * @deprecated  This function has not been maintained in a long time and has many problems.  If you need DV support let the list know.
    * @param captureDevice
    *          DV Camera attached to firewire {@code CaptureDevice} to create pipeline around
    * @param pipeline
@@ -800,7 +844,7 @@ class BufferThread extends Thread {
     while (run) {
       log.trace(queue.getName() + "," + queue.get("current-level-buffers") + "," + queue.get("current-level-bytes") + "," + queue.get("current-level-time"));
       try {
-        this.sleep(1000);
+        Thread.sleep(1000);
       } catch (InterruptedException e) {}
     }
   }

@@ -99,7 +99,13 @@ public class ResourceServlet extends HttpServlet {
   
   public void deactivate() {
     try {
-      httpService.unregister(serverAlias);
+      if (httpService != null && serverAlias != null) {
+        httpService.unregister(serverAlias);
+      } else if (httpService == null) {
+        logger.info("HTTP service is already null, can't unregister alias!");
+      } else if (serverAlias == null) {
+        logger.info("Alias was already null, can't unregister null alias!");
+      }
     } catch (IllegalArgumentException e) {}
   }
 

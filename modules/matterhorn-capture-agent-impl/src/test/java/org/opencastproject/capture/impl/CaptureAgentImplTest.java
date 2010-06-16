@@ -41,8 +41,6 @@ import java.util.Properties;
 @Ignore
 public class CaptureAgentImplTest {
   
-  private static Logger logger = LoggerFactory.getLogger(CaptureAgentImplTest.class);
-  
   /** The single instance of CaptureAgentImpl needed */
   private static CaptureAgentImpl agent = null;
 
