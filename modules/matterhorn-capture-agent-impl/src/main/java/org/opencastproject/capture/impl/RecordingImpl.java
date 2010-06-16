@@ -128,7 +128,7 @@ public class RecordingImpl implements AgentRecording {
       out.write("</dublincore>");
       out.close();
 
-      mPkg.add(metadataFile.toURI(), MediaPackageElement.Type.Catalog, MediaPackageElements.DUBLINCORE_EPISODE);
+      mPkg.add(metadataFile.toURI(), MediaPackageElement.Type.Catalog, MediaPackageElements.EPISODE);
     }
   }
 

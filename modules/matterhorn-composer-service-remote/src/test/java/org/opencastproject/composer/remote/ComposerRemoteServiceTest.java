@@ -65,7 +65,7 @@ public class ComposerRemoteServiceTest {
             new URI("https://opencast.jira.com/svn/MH/trunk/modules/matterhorn-media/src/test/resources/av.mov"),
             Track.TYPE, MediaPackageElements.PRESENTER_SOURCE);
     mp.add(track);
-    Receipt r = service.encode(mp, track.getIdentifier(), "m4a.http");
+    Receipt r = service.encode(mp, track.getIdentifier(), "feed-m4a.http.http");
     Assert.assertNotNull(service.getReceipt(r.getId()));
     Assert.assertNull(service.getReceipt("badId"));
   }

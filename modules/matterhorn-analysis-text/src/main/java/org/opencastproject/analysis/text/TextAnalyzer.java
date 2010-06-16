@@ -17,9 +17,9 @@ package org.opencastproject.analysis.text;
 
 import org.opencastproject.analysis.api.MediaAnalysisException;
 import org.opencastproject.analysis.api.MediaAnalysisServiceSupport;
+import org.opencastproject.analysis.text.ocropus.OcropusLine;
 import org.opencastproject.analysis.text.ocropus.OcropusTextAnalyzer;
 import org.opencastproject.analysis.text.ocropus.OcropusTextFrame;
-import org.opencastproject.analysis.text.ocropus.OcropusLine;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -69,6 +69,9 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
  */
 public class TextAnalyzer extends MediaAnalysisServiceSupport {
 
+  /** The logging facility */
+  private static final Logger logger = LoggerFactory.getLogger(TextAnalyzer.class);
+
   /** Receipt type */
   public static final String RECEIPT_TYPE = "org.opencastproject.analysis.text";
 
@@ -80,9 +83,6 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
 
   /** The default worker thread pool size to use if no configuration is specified */
   public static final int DEFAULT_THREADS = 2;
-
-  /** The logging facility */
-  private static final Logger logger = LoggerFactory.getLogger(TextAnalyzer.class);
 
   /** Reference to the receipt service */
   private RemoteServiceManager remoteServiceManager = null;
@@ -109,7 +109,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
    * Creates a new text analzer.
    */
   public TextAnalyzer() {
-    super(MediaPackageElements.TEXTS_FLAVOR);
+    super(MediaPackageElements.TEXTS);
   }
 
   protected void activate(ComponentContext cc) {
@@ -203,8 +203,8 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
           logger.info("Text extraction of {} finished, {} lines found", attachment.getURI(), videoTexts.length);
 
           URI uri = uploadMpeg7(mpeg7);
-          Catalog catalog = (Catalog)MediaPackageElementBuilderFactory.newInstance().newElementBuilder().newElement(
-                  Catalog.TYPE, MediaPackageElements.TEXTS_FLAVOR);
+          Catalog catalog = (Catalog) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().newElement(
+                  Catalog.TYPE, MediaPackageElements.TEXTS);
           catalog.setURI(uri);
           catalog.setReference(new MediaPackageReferenceImpl(element));
 
@@ -348,4 +348,5 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   public void setMpeg7CatalogService(Mpeg7CatalogService mpeg7CatalogService) {
     this.mpeg7CatalogService = mpeg7CatalogService;
   }
+
 }

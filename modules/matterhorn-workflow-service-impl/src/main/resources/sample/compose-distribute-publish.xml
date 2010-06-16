@@ -114,7 +114,7 @@
         <configuration key="source-video-flavor">presenter/source</configuration>
         <configuration key="source-audio-flavor">presenter/source</configuration>
         <configuration key="target-tags">atom</configuration>
-        <configuration key="encoding-profile">avi-low.http</configuration>
+        <configuration key="encoding-profile">feed-avi.http</configuration>
       </configurations>
     </operation>
     <operation
@@ -126,7 +126,7 @@
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="source-audio-flavor">presenter/source</configuration>
         <configuration key="target-tags">rss, atom</configuration>
-        <configuration key="encoding-profile">avi-low.http</configuration>
+        <configuration key="encoding-profile">feed-avi.http</configuration>
       </configurations>
     </operation>
  
@@ -140,7 +140,7 @@
         <configuration key="source-video-flavor">presenter/source</configuration>
         <configuration key="source-audio-flavor">presenter/source</configuration>
         <configuration key="target-tags">rss, atom</configuration>
-        <configuration key="encoding-profile">m4a.http</configuration>
+        <configuration key="encoding-profile">feed-m4a.http</configuration>
       </configurations>
     </operation>
     <operation
@@ -152,7 +152,7 @@
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="source-audio-flavor">presentation/source</configuration>
         <configuration key="target-tags">atom</configuration>
-        <configuration key="encoding-profile">m4a.http</configuration>
+        <configuration key="encoding-profile">feed-m4a.http</configuration>
       </configurations>
     </operation>
  
@@ -181,7 +181,7 @@
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">cover/source</configuration>
         <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">engage-cover.http</configuration>
+        <configuration key="encoding-profile">player-preview.http</configuration>
         <configuration key="time">1</configuration>
       </configurations>
     </operation>
@@ -210,7 +210,7 @@
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">cover/source</configuration>
         <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">engage-cover.http</configuration>
+        <configuration key="encoding-profile">player-preview.http</configuration>
         <configuration key="time">1</configuration>
       </configurations>
     </operation>

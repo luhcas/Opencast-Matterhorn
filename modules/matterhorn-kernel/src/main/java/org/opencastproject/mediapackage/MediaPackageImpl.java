@@ -658,37 +658,6 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * @see org.opencastproject.mediapackage.MediaPackage#getCover()
-   */
-  public Attachment getCover() {
-    Attachment[] covers = getAttachments(MediaPackageElements.COVER_FLAVOR);
-    if (covers.length > 0) {
-      return covers[0];
-    }
-    return null;
-  }
-
-  /**
-   * @see org.opencastproject.mediapackage.MediaPackage#setCover(org.opencastproject.mediapackage.Attachment)
-   */
-  public void setCover(Attachment cover) throws MediaPackageException, UnsupportedElementException {
-    Attachment oldCover = getCover();
-    if (oldCover != null)
-      remove(oldCover);
-    add(cover);
-  }
-
-  /**
-   * @see org.opencastproject.mediapackage.MediaPackage#removeCover()
-   */
-  public void removeCover() {
-    Attachment[] covers = getAttachments(MediaPackageElements.COVER_FLAVOR);
-    if (covers.length > 0) {
-      remove(covers[0]);
-    }
-  }
-
-  /**
    * @see org.opencastproject.mediapackage.MediaPackage#removeObserver(MediaPackageObserver)
    */
   public void removeObserver(MediaPackageObserver observer) {

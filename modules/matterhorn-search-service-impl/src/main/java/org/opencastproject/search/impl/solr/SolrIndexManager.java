@@ -230,7 +230,7 @@ public class SolrIndexManager {
     solrEpisodeDocument.setField(SolrFields.OC_MODIFIED, dateFormat.format((new Date()).getTime()));
 
     // Add standard dublin core fields
-    addStandardDublincCoreFields(solrEpisodeDocument, mediaPackage, MediaPackageElements.DUBLINCORE_EPISODE);
+    addStandardDublincCoreFields(solrEpisodeDocument, mediaPackage, MediaPackageElements.EPISODE);
 
     // Add media package
     solrEpisodeDocument.setField(SolrFields.OC_MEDIAPACKAGE, mediaPackage.toXml());
@@ -256,17 +256,17 @@ public class SolrIndexManager {
     solrEpisodeDocument.addField(SolrFields.OC_ELEMENTFLAVORS, sb.toString());
 
     // Add cover
-    Attachment cover = mediaPackage.getCover();
-    if (cover != null) {
-      solrEpisodeDocument.addField(SolrFields.OC_COVER, cover.getURI().toString());
+    Attachment[] cover = mediaPackage.getAttachments(MediaPackageElements.MEDIAPACKAGE_COVER_FLAVOR);
+    if (cover != null && cover.length > 0) {
+      solrEpisodeDocument.addField(SolrFields.OC_COVER, cover[0].getURI().toString());
     }
 
     // Add mpeg7
     logger.debug("Looking for mpeg-7 catalogs containing segment texts");
-    Catalog mpeg7Catalogs[] = mediaPackage.getCatalogs(MediaPackageElements.TEXTS_FLAVOR);
+    Catalog mpeg7Catalogs[] = mediaPackage.getCatalogs(MediaPackageElements.TEXTS);
     if(mpeg7Catalogs.length == 0) {
       logger.debug("No text catalogs found, trying segments only");
-      mpeg7Catalogs = mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS_FLAVOR);
+      mpeg7Catalogs = mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS);
     }
     // TODO: merge the segments from each mpeg7 if there is more than one mpeg7 catalog
     if (mpeg7Catalogs.length > 0) {
@@ -289,13 +289,13 @@ public class SolrIndexManager {
     SolrUpdateableInputDocument solrSeriesDocument = new SolrUpdateableInputDocument();
 
     // Check if there is a dublin core for series
-    if (mediaPackage.getCatalogs(MediaPackageElements.DUBLINCORE_SERIES).length == 0) {
+    if (mediaPackage.getCatalogs(MediaPackageElements.SERIES).length == 0) {
       logger.debug("No series dublincore found in media package " + mediaPackage);
       return null;
     }
 
     // If this is the case, try to get a hold on it
-    Catalog dcCatalogs[] = mediaPackage.getCatalogs(MediaPackageElements.DUBLINCORE_SERIES);
+    Catalog dcCatalogs[] = mediaPackage.getCatalogs(MediaPackageElements.SERIES);
     DublinCoreCatalog dublinCore = (DublinCoreCatalog) dcCatalogs[0];
     String seriesId = dublinCore.getFirst(DublinCore.PROPERTY_IDENTIFIER);
 
@@ -318,7 +318,7 @@ public class SolrIndexManager {
     solrSeriesDocument.setField(SolrFields.ID, seriesId);
     solrSeriesDocument.setField(SolrFields.OC_MEDIATYPE, SearchResultItemType.Series);
     solrSeriesDocument.setField(SolrFields.OC_MODIFIED, dateFormat.format((new Date()).getTime()));
-    addStandardDublincCoreFields(solrSeriesDocument, mediaPackage, MediaPackageElements.DUBLINCORE_SERIES);
+    addStandardDublincCoreFields(solrSeriesDocument, mediaPackage, MediaPackageElements.SERIES);
 
     return solrSeriesDocument;
   }
@@ -608,7 +608,7 @@ public class SolrIndexManager {
           // Look for preview images. Their characteristics are that they are
           // attached as attachments with a flavor of preview/<something>.
           String time = timepoint.toString();
-          for (Attachment slide : mediaPackage.getAttachments(MediaPackageElements.SLIDE_PREVIEW_FLAVOR)) {
+          for (Attachment slide : mediaPackage.getAttachments(MediaPackageElements.PRESENTATION_SEGMENT_PREVIEW)) {
             MediaPackageReference ref = slide.getReference();
             if (ref != null && time.equals(ref.getProperty("time"))) {
               hintField.append("preview");

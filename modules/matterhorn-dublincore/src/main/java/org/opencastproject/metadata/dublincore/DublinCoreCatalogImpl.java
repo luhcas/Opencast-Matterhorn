@@ -129,7 +129,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
   }
 
   /**
-   * Creates a new dublin core metadata container, defaulting the flavor to {@link MediaPackageElements#DUBLINCORE_EPISODE}.
+   * Creates a new dublin core metadata container, defaulting the flavor to {@link MediaPackageElements#EPISODE}.
    * 
    * @param uri
    *          the document location
@@ -139,7 +139,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
    *          the catalog checksum
    */
   protected DublinCoreCatalogImpl(URI uri, long size, Checksum checksum) {
-    this(null, uri, MediaPackageElements.DUBLINCORE_EPISODE, size, checksum);
+    this(null, uri, MediaPackageElements.EPISODE, size, checksum);
   }
 
   /**
@@ -149,14 +149,14 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
    *          the element identifier withing the package
    */
   protected DublinCoreCatalogImpl(String id) {
-    this(id, null, MediaPackageElements.DUBLINCORE_EPISODE, 0, null);
+    this(id, null, MediaPackageElements.EPISODE, 0, null);
   }
 
   /**
    * Creates a new dublin core metadata container.
    */
   protected DublinCoreCatalogImpl() {
-    this(null, null, MediaPackageElements.DUBLINCORE_EPISODE, 0, null);
+    this(null, null, MediaPackageElements.EPISODE, 0, null);
   }
 
   /**

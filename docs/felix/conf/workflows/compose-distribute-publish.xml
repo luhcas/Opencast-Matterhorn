@@ -1,4 +1,5 @@
 <definition>
+
   <id>full</id>
   <title>Full encoding and distribution workflow (default)</title>
   <description>
@@ -7,7 +8,7 @@
   </description>
 
   <configuration_panel>
-<![CDATA[
+  <![CDATA[
     <fieldset>
       <legend>Distribution</legend>
       <ul class="no-bullets formField-list fl-controls-right">
@@ -36,11 +37,13 @@
                 </li>
               </ul>
     </fieldset>
-]]>
+  ]]>
   </configuration_panel>
 
-<operations>
+  <operations>
+    
     <!-- inspect the media -->
+    
     <operation
       id="inspect"
       fail-on-error="true"
@@ -49,6 +52,7 @@
     </operation>
  
     <!-- run the videosegmentation -->
+    
     <operation
       id="segment"
       fail-on-error="true"
@@ -59,7 +63,8 @@
       </configurations>
     </operation>
  
-    <!-- encode to flash download -->
+    <!-- encode to engage player formats -->
+
     <operation
       id="compose"
       fail-on-error="true"
@@ -83,7 +88,7 @@
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">flash.vga</configuration>
+        <configuration key="encoding-profile">flash-vga.http</configuration>
       </configurations>
     </operation>
     <operation
@@ -110,69 +115,97 @@
         <configuration key="encoding-profile">flash.http</configuration>
       </configurations>
     </operation>
+ 
+    <!-- encode to engage player preview images -->
+ 
     <operation
-      id="compose"
-      fail-on-error="false"
+      id="image"
+      fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presenter audio to mp3 download">
+      description="Encode presenter (camera) to player preview image">
       <configurations>
-        <configuration key="source-audio-flavor">presenter/source</configuration>
-        <configuration key="source-video-flavor">*/source</configuration>
-        <configuration key="target-flavor">presenter/delivery</configuration>
-        <configuration key="target-tags">engage, rss, atom</configuration>
-        <configuration key="encoding-profile">mp3.http</configuration>
+        <configuration key="source-flavor">presenter/source</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">presenter/player+preview</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">player-preview.http</configuration>
+        <configuration key="time">1</configuration>
       </configurations>
-    </operation>    
-    
-<!--    <operation-->
-<!--      id="compose"-->
-<!--      fail-on-error="false"-->
-<!--      exception-handler-workflow="error"-->
-<!--      description="Encode presenter audio to Flash download">-->
-<!--      <configurations>-->
-<!--        <configuration key="source-audio-flavor">*/source</configuration>-->
-<!---->
-<!--        <configuration key="source-video-flavor">*/source</configuration>-->
-<!--        <configuration key="target-flavor">presenter/delivery</configuration>-->
-<!--        <configuration key="target-tags">engage, rss, atom</configuration>-->
-<!--        <configuration key="encoding-profile">mp3.http</configuration>-->
-<!--      </configurations>-->
-<!--    </operation>-->
+    </operation>
+    <operation
+      id="image"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encode presentation (screen) to player preview image">
+      <configurations>
+        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">presentation/player+preview</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">player-preview.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
 
-    <!-- encode to quicktime download -->
+    <!-- encode to engage search result preview images -->
 
-<!--
+    <operation
+      id="image"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encode presenter (camera) to search result preview image">
+      <configurations>
+        <configuration key="source-flavor">presenter/source</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">presenter/search+preview</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">search-cover.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
+    <operation
+      id="image"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encode presentation (vga) to search result preview image">
+      <configurations>
+        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">presentation/search+preview</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">search-cover.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
+
+    <!--  encode to feed distribution formats -->
 
     <operation
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presenter (camera) to quicktime/mp4 download">
+      description="Encode presentation (screen) to mpeg4 audio download">
       <configurations>
         <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">presenter/source</configuration>
         <configuration key="target-flavor">presenter/delivery</configuration>
-        <configuration key="target-tags">atom, captioning</configuration>
-        <configuration key="encoding-profile">mov-low.http</configuration>
+        <configuration key="target-tags">rss, atom</configuration>
+        <configuration key="encoding-profile">feed-m4a.http</configuration>
       </configurations>
     </operation>
     <operation
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presentation (screen) to quicktime/mpeg4 download">
+      description="Encode presentation (screen) to mpeg4 audio download">
       <configurations>
         <configuration key="source-audio-flavor">*/source</configuration>
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="target-flavor">presentation/delivery</configuration>
-        <configuration key="target-tags">rss, atom, captioning</configuration>
-        <configuration key="encoding-profile">mov-low.http</configuration>
+        <configuration key="target-tags">atom</configuration>
+        <configuration key="encoding-profile">feed-m4a.http</configuration>
       </configurations>
     </operation>
--->
-    
-    <!-- encode to avi download -->
-<!--
     <operation
       id="compose"
       fail-on-error="true"
@@ -183,7 +216,7 @@
         <configuration key="source-video-flavor">presenter/source</configuration>
         <configuration key="target-flavor">presenter/delivery</configuration>
         <configuration key="target-tags">atom</configuration>
-        <configuration key="encoding-profile">avi-low.http</configuration>
+        <configuration key="encoding-profile">feed-avi.http</configuration>
       </configurations>
     </operation>
     <operation
@@ -196,77 +229,21 @@
         <configuration key="source-video-flavor">presentation/source</configuration>
         <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">rss, atom</configuration>
-        <configuration key="encoding-profile">avi-low.http</configuration>
+        <configuration key="encoding-profile">feed-avi.http</configuration>
       </configurations>
     </operation>
---> 
-     <!-- encode to m4a download -->
-<!--
-    <operation
-      id="compose"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Encode presenter (camera) to m4a/aac download">
-      <configurations>
-        <configuration key="source-audio-flavor">presenter/source</configuration>
-        <configuration key="target-flavor">presenter/delivery</configuration>
-        <configuration key="target-tags">rss, atom</configuration>
-        <configuration key="encoding-profile">m4a.http</configuration>
-      </configurations>
-    </operation>
-    <operation
-      id="compose"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Encode presentation (screen) to m4a/aac download">
-      <configurations>
-        <configuration key="source-audio-flavor">presentation/source</configuration>
-        <configuration key="target-flavor">presentation/delivery</configuration>
-        <configuration key="target-tags">atom</configuration>
-        <configuration key="encoding-profile">m4a.http</configuration>
-      </configurations>
-    </operation>
--->
- 
-    <!-- encode to cover image -->
-    <operation
-      id="image"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Encode presenter (camera) to cover image">
-      <configurations>
-        <configuration key="source-flavor">presenter/source</configuration>
-        <configuration key="source-tags"></configuration>
-        <configuration key="target-flavor">cover/source</configuration>
-        <configuration key="target-tags">rss, atom</configuration>
-        <configuration key="encoding-profile">feed-cover.http</configuration>
-        <configuration key="time">1</configuration>
-      </configurations>
-    </operation>
-    <operation
-      id="image"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Encode presentation (screen) to cover image">
-      <configurations>
-        <configuration key="source-flavor">presenter/source</configuration>
-        <configuration key="source-tags"></configuration>
-        <configuration key="target-flavor">cover/source</configuration>
-        <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">engage-cover.http</configuration>
-        <configuration key="time">1</configuration>
-      </configurations>
-    </operation>
+    
+    <!-- encode to feed preview images -->
 
     <operation
       id="image"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presenter (camera) to cover image">
+      description="Encode presenter (camera) to feed preview image">
       <configurations>
-        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="source-flavor">presenter/source</configuration>
         <configuration key="source-tags"></configuration>
-        <configuration key="target-flavor">cover/source</configuration>
+        <configuration key="target-flavor">presenter/feed+preview</configuration>
         <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">feed-cover.http</configuration>
         <configuration key="time">1</configuration>
@@ -276,18 +253,19 @@
       id="image"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presentation (screen) to cover image">
+      description="Encode presentation (vga) to feed preview image">
       <configurations>
         <configuration key="source-flavor">presentation/source</configuration>
         <configuration key="source-tags"></configuration>
-        <configuration key="target-flavor">cover/source</configuration>
-        <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">engage-cover.http</configuration>
+        <configuration key="target-flavor">presentation/feed+preview</configuration>
+        <configuration key="target-tags">rss, atom</configuration>
+        <configuration key="encoding-profile">feed-cover.http</configuration>
         <configuration key="time">1</configuration>
       </configurations>
     </operation>
 
     <!-- Generate segment previews -->
+    
     <operation
       id="segmentpreviews"
       fail-on-error="true"
@@ -296,15 +274,16 @@
       <configurations>
         <configuration key="source-flavor">presentation/source</configuration>
         <configuration key="source-tags"></configuration>
-        <configuration key="target-flavor">slide/source</configuration>
+        <configuration key="target-flavor">presentation/segment+preview</configuration>
         <configuration key="reference-flavor">presentation/delivery</configuration>
         <configuration key="reference-tags">engage</configuration>
         <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">engage-slides.http</configuration>
+        <configuration key="encoding-profile">player-slides.http</configuration>
       </configurations>
     </operation>
 
     <!-- Run text analysis -->
+
     <operation
       id="textanalysis"
       fail-on-error="true"
@@ -318,6 +297,7 @@
     </operation>
     
     <!-- hold for captions -->
+ 
     <operation
       id="caption"
       fail-on-error="true"
@@ -351,19 +331,7 @@
         <configuration key="target-tags">publish,engage</configuration>
       </configurations>
     </operation>
-    
-<!--    <operation-->
-<!--    id="distribute-streaming"-->
-<!--    fail-on-error="true"-->
-<!--    exception-handler-workflow="error"-->
-<!--    description="Distribute media to the local streaming server">-->
-<!--  	<configurations>-->
-<!--    	<configuration key="source-tags">engage,atom,rss</configuration>-->
-<!--    	<configuration key="target-tags">publish</configuration>-->
-<!--  	</configurations>-->
-<!--	</operation>-->
-    
-
+ 
     <operation
       id="publish"
       fail-on-error="true"
@@ -373,6 +341,7 @@
         <configuration key="source-tags">publish</configuration>
       </configurations>
     </operation>
+ 
   </operations>
 
 </definition>

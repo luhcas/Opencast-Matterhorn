@@ -18,7 +18,6 @@ package org.opencastproject.mediapackage;
 
 import org.opencastproject.mediapackage.elementbuilder.AttachmentBuilderPlugin;
 import org.opencastproject.mediapackage.elementbuilder.CatalogBuilderPlugin;
-import org.opencastproject.mediapackage.elementbuilder.CoverBuilderPlugin;
 import org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin;
 import org.opencastproject.mediapackage.elementbuilder.TrackBuilderPlugin;
 
@@ -53,7 +52,6 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
     plugins = new ArrayList<Class<? extends MediaPackageElementBuilderPlugin>>();
     plugins.add(AttachmentBuilderPlugin.class);
     plugins.add(CatalogBuilderPlugin.class);
-    plugins.add(CoverBuilderPlugin.class);
     plugins.add(TrackBuilderPlugin.class);
   }
 

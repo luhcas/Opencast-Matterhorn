@@ -65,7 +65,7 @@ public class MediaPackageBuilderTest extends AbstractMediaPackageTest {
 
       // Test presence of catalogs
       assertEquals(3, mediaPackage.getCatalogs().length);
-      assertNotNull(mediaPackage.getCatalogs(MediaPackageElements.DUBLINCORE_EPISODE));
+      assertNotNull(mediaPackage.getCatalogs(MediaPackageElements.EPISODE));
 
       // Test presence of attachments
       assertEquals(2, mediaPackage.getAttachments().length);

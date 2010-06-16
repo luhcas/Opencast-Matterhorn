@@ -111,7 +111,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
   public static final String FRAME_GRABBING = "javax.media.control.FrameGrabbingControl";
 
   /** Name of the encoding profile that transcodes video tracks into a segmentable format */
-  public static final String MJPEG_ENCODING_PROFILE = "mjpeg.http";
+  public static final String MJPEG_ENCODING_PROFILE = "video-segmentation.http";
 
   /** The number of seconds that need to resemble until a scene is considered "stable" */
   public static final int STABILITY_THRESHOLD = 5;
@@ -156,7 +156,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
    * Creates a new video segmenter.
    */
   public VideoSegmenter() {
-    super(MediaPackageElements.SEGMENTS_FLAVOR);
+    super(MediaPackageElements.SEGMENTS);
     super.requireVideo(true);
   }
 
@@ -357,7 +357,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
           logger.info("Segmentation of {} yields {} segments", mediaUrl, segments.size());
 
           MediaPackageElement mpeg7Catalog = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-            .newElement(Catalog.TYPE, MediaPackageElements.SEGMENTS_FLAVOR);
+            .newElement(Catalog.TYPE, MediaPackageElements.SEGMENTS);
           URI uri = uploadMpeg7(mpeg7);
           mpeg7Catalog.setURI(uri);
           mpeg7Catalog.setReference(new MediaPackageReferenceImpl(element));

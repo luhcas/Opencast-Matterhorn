@@ -621,30 +621,6 @@ public interface MediaPackage extends Cloneable {
   MediaPackageElement[] getDerived(MediaPackageElement sourceElement, MediaPackageElementFlavor derivateFlavor);
 
   /**
-   * Returns the media package's cover or <code>null</code> if no cover is defined.
-   * 
-   * @return the cover
-   */
-  Attachment getCover();
-
-  /**
-   * Adds a cover to this media package.
-   * 
-   * @param cover
-   *          the cover
-   * @throws MediaPackageException
-   *           if the cover cannot be accessed
-   * @throws UnsupportedElementException
-   *           if the cover is of an unsupported format
-   */
-  void setCover(Attachment cover) throws MediaPackageException, UnsupportedElementException;
-
-  /**
-   * Removes the cover from the media package.
-   */
-  void removeCover();
-
-  /**
    * Adds <code>observer</code> to the list of observers of this media package.
    * 
    * @param observer

@@ -35,8 +35,8 @@ import java.net.URI;
 public class MediaAnalaysisServiceSupportTest extends TestCase {
 
   MediaAnalysisServiceSupport analyzer = null;
-  MediaPackageElementFlavor resultingFlavor = MediaPackageElements.TEXTS_FLAVOR;
-  MediaPackageElementFlavor[] requiredFlavors = new MediaPackageElementFlavor[] { MediaPackageElements.SEGMENTS_FLAVOR };
+  MediaPackageElementFlavor resultingFlavor = MediaPackageElements.TEXTS;
+  MediaPackageElementFlavor[] requiredFlavors = new MediaPackageElementFlavor[] { MediaPackageElements.SEGMENTS };
   MediaPackage mediaPackage = null;
   Track track = null;
   String trackId = "track-1";
@@ -68,7 +68,7 @@ public class MediaAnalaysisServiceSupportTest extends TestCase {
    */
   public void testProduces() {
     assertNotNull(analyzer.produces());
-    assertEquals(MediaPackageElements.TEXTS_FLAVOR, analyzer.produces());
+    assertEquals(MediaPackageElements.TEXTS, analyzer.produces());
   }
 
   /**
@@ -77,7 +77,7 @@ public class MediaAnalaysisServiceSupportTest extends TestCase {
   public void testRequires() {
     assertNotNull(analyzer.requires());
     assertEquals(1, analyzer.requires().length);
-    assertEquals(MediaPackageElements.SEGMENTS_FLAVOR, analyzer.requires()[0]);
+    assertEquals(MediaPackageElements.SEGMENTS, analyzer.requires()[0]);
   }
 
   /**
@@ -95,7 +95,7 @@ public class MediaAnalaysisServiceSupportTest extends TestCase {
     assertFalse(analyzer.isSupported(track));
 
     Catalog catalog = (Catalog) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().newElement(
-            Catalog.TYPE, MediaPackageElements.SEGMENTS_FLAVOR);
+            Catalog.TYPE, MediaPackageElements.SEGMENTS);
     mediaPackage.add(catalog);
     assertTrue(analyzer.isSupported(track));
   }

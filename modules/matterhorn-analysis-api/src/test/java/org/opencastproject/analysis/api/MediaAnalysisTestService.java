@@ -61,7 +61,7 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
     ReceiptStub receipt = new ReceiptStub();
     try {
       receipt.element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder().newElement(Catalog.TYPE,
-              MediaPackageElements.SEGMENTS_FLAVOR);
+              MediaPackageElements.SEGMENTS);
     } catch (Exception e) {
       throw new MediaAnalysisException(e.getMessage());
     }

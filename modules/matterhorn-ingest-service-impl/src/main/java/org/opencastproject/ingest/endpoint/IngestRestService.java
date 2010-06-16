@@ -325,7 +325,7 @@ public class IngestRestService {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         dcc.toXml(out, true);
         InputStream in = new ByteArrayInputStream(out.toByteArray());
-        ingestService.addCatalog(in, "dublincore.xml", MediaPackageElements.DUBLINCORE_EPISODE, mp);
+        ingestService.addCatalog(in, "dublincore.xml", MediaPackageElements.EPISODE, mp);
         WorkflowInstance workflow;
         if (wdID == null) {
           workflow = ingestService.ingest(mp);
@@ -596,7 +596,7 @@ public class IngestRestService {
       // mp
       // yields
       // Exception
-      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc), "dublincore.xml", MediaPackageElements.DUBLINCORE_EPISODE, mediaPackage);
+      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc), "dublincore.xml", MediaPackageElements.EPISODE, mediaPackage);
       return Response.ok(mediaPackage).build();
     } catch (Exception e) {
       logger.error(e.getMessage());

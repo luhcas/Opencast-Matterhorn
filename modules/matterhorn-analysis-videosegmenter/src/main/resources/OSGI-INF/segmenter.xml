@@ -9,12 +9,12 @@
     <provide interface="org.opencastproject.remote.api.Maintainable" />
     <provide interface="org.opencastproject.analysis.api.MediaAnalysisService" />
   </service>
-  <reference cardinality="1..1" interface="org.opencastproject.composer.api.ComposerService" name="composer"
-    policy="static" bind="setComposerService" />
   <reference name="remoteServiceManager" interface="org.opencastproject.remote.api.RemoteServiceManager" cardinality="1..1"
     policy="static" bind="setRemoteServiceManager" />
   <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace" cardinality="1..1"
     policy="static" bind="setWorkspace" />
   <reference name="Mpeg7Service" interface="org.opencastproject.metadata.mpeg7.Mpeg7CatalogService"
     cardinality="1..1" policy="static" bind="setMpeg7CatalogService" />
+  <reference name="ComposerService" interface="org.opencastproject.composer.api.ComposerService"
+    cardinality="1..1" policy="static" bind="setComposerService"/>
 </scr:component>

@@ -274,7 +274,7 @@ public class ComposerRestService {
             "The number of seconds into the video to extract the image"));
     imageEndpoint.addRequiredParam(new Param("sourceTrackId", Type.STRING, "track-2",
             "The track ID containing the video stream"));
-    imageEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "engage-cover.http",
+    imageEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "player-preview.http",
             "The encoding profile to use"));
     imageEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, imageEndpoint);
