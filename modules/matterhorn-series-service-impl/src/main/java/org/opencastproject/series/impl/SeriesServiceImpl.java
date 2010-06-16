@@ -71,6 +71,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    */
   @Override
   public boolean addSeries(Series s) {
+    if (s == null) return false;
     s = makeIdUnique(s);
     
     EntityManager em = emf.createEntityManager();
@@ -139,7 +140,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   public Series getSeries(String seriesID) {
     logger.debug("loading series with the ID {}", seriesID);
     if (seriesID == null || emf == null) {
-      logger.warn("could not find series {}. Null Pointer exeption");
+      logger.warn("could not find series {}. Null Pointer exeption", seriesID);
       return null;
     }
     EntityManager em = emf.createEntityManager();
