@@ -1,6 +1,6 @@
 capture.device.bt878.buffer.bytes=512000000
 capture.device.bt878.buffer.size=200
-capture.device.bt878.buffer.time=18446744073709551615
+capture.device.bt878.buffer.time=2000000000
 capture.device.bt878.codec.bitrate=750
 capture.device.bt878.codec=theoraenc
 capture.device.bt878.container=oggmux
@@ -15,7 +15,7 @@ capture.device.microphone.src=hw:0
 capture.device.names=bt878,vga,microphone
 capture.device.vga.buffer.bytes=512000000
 capture.device.vga.buffer.size=200
-capture.device.vga.buffer.time=18446744073709551615
+capture.device.vga.buffer.time=2000000000
 capture.device.vga.codec.bitrate=750
 capture.device.vga.codec=theoraenc
 capture.device.vga.flavor=presenter/source
