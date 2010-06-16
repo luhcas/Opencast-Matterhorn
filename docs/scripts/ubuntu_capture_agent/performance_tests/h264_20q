@@ -1,3 +1,6 @@
+capture.device.bt878.buffer.bytes=512000000
+capture.device.bt878.buffer.size=200
+capture.device.bt878.buffer.time=18446744073709551615
 capture.device.bt878.codec.quantizer=20
 capture.device.bt878.codec=x264enc
 capture.device.bt878.container=mp4mux
@@ -10,6 +13,9 @@ capture.device.microphone.flavor=presenter/source
 capture.device.microphone.outputfile=microphone.mp3
 capture.device.microphone.src=hw:0
 capture.device.names=bt878,vga,microphone
+capture.device.vga.buffer.bytes=512000000
+capture.device.vga.buffer.size=200
+capture.device.vga.buffer.time=18446744073709551615
 capture.device.vga.codec.quantizer=20
 capture.device.vga.codec=x264enc
 capture.device.vga.container=mp4mux
