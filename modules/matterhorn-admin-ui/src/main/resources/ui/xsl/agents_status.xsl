@@ -31,7 +31,7 @@
                           </a>
                         </td>
                         <td>
-                          Audio, Video, Screen
+                          <xsl:value-of select="capabilities" />
                         </td>
                         <td>
                             <span>
