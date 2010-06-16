@@ -8,7 +8,7 @@
 			<div class="oc-search-result-item">
 				<div class="table-row">
 					<div class="left-container13">
-						<img height="72">
+						<img class="thumb" height="72">
 				    <xsl:for-each select="mediapackage/attachments/attachment">
 				      <xsl:choose>
 				        <xsl:when test="@type='presenter/search+preview'">
