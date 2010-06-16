@@ -20,20 +20,29 @@ package org.opencastproject.dictionary.api;
  * Api for dictionary service, aimed at correcting textual information in catalogs.
  */
 public interface DictionaryService {
-  
-  // TODO add methods: DictToken[] clean(string[]); void generateStopWords(string[])
+
+  public static enum DICT_TOKEN {
+    NONE, WORD, STOPWORD
+  }
 
   /**
-   * Takes the given element and returns a receipt that can be used to get the resulting
-   * {@link org.opencastproject.metadata.mpeg7.Mpeg7Catalog}.
+   * Takes a given text represented as array of words and returns weather each word exist in the specified language
    * 
-   * @param mediaPackageElement
-   *          element to analyze
-   * @param block
-   *          whether to block the calling thread until the analysis is complete
-   * @return the metadata
+   * @param text
+   *          text represented as array of its words
+   * @param language
+   *          language for which the word will be added
+   * @return for each word a dictionary token is returned in array
    */
+  public DICT_TOKEN[] cleanText(String[] text, String language);
 
+  /**
+   * Returns an array of all the languages installed
+   * 
+   * @return all the language codes of installed dictionaries
+   */
+  public String[] getLanguages();
+  
   /**
    * Returns an array of all the language codes that contain a specified word
    * 
@@ -42,6 +51,13 @@ public interface DictionaryService {
    * @return all the language codes that contain the specified word
    */
   public String[] getLanguages(String word);
+  
+  /**
+   * For a given text returns the most similar language of the dictionaries installed
+   * @param text Text being analyzed - represented as array of words
+   * @return language code of the detected language
+   */
+  public String detectLanguage(String[] text);
 
   /**
    * Adds a specified word to the dictionary for the specified language
@@ -66,7 +82,7 @@ public interface DictionaryService {
    *          percentage of occurrences of the word being added
    */
   public void addWord(String word, String language, Integer count, Double weight);
-  
+
   /**
    * Adds a specified word to the dictionary for the specified language
    * 
@@ -88,6 +104,17 @@ public interface DictionaryService {
    *          language in which the stop word is being added
    */
   public void markStopWord(String word, String language);
+  
+  /**
+   * Automatically parses dictionary and marks all stop words found
+   * 
+   * @param threshold
+   *          all words that appear more frequently than the specified threshold will be marked as stopwords
+   *          frequency is percentage of the word occurrence in all the text
+   * @param language
+   *          language in which the stop word is being added
+   */
+  public void parseStopWords(Double threshold, String language);
 
   /**
    * Gets a normalized value of word frequency for a given language
@@ -109,7 +136,7 @@ public interface DictionaryService {
    *          language in which the word is being tested
    * @return count of the occurrences of the word in specified language
    */
-  public Integer getWordCount(String word, String language);
+  public Long getWordCount(String word, String language);
 
   /**
    * Tests weather the word exists in any of the languages

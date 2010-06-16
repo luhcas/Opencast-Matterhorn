@@ -15,7 +15,6 @@
  */
 package org.opencastproject.dictionary.impl.parser;
 
-//import org.apache.commons.csv.CSVParser;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -177,7 +176,7 @@ public class PopulateDictionary {
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(lang + ".wordlist.csv"),
                 "UTF8"), BUFFER_LENGTH);
 //        CSVParser csvP = new CSVParser(br);
-        String w;
+//        String w;
 //        while ((w = csvP.nextValue()) != null) {
 //          bw.write(w);
 //          bw.write(',');

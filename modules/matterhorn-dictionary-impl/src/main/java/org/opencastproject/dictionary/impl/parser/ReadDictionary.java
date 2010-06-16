@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class ReadDictionary {
   private static HashMap<Long, Integer> dict;
@@ -37,31 +38,57 @@ public class ReadDictionary {
   static Console c = System.console();
 
   public static void main(String args[]) throws Exception {
-    String lang = "sl";
-    c.printf("\n\n-----------------------\n");
-    c.printf("Loading %s dictionary \n", lang);
-    String root = "./results/" + lang + "/";
+    String lang = "en";
+    String root = "/opt/matterhorn/bp/ParseWiki/results/" + lang + "/";
     String dictPath = root + lang + ".dict";
     String wlPath = root + lang + ".wordlist.csv";
+    System.out.println("-----------------------");
+    System.out.println("Loading " + lang + " dictionary");
     dict = loadDictionary(dictPath);
-    wordList = loadWordList(wlPath);
-    c.printf("Dictionary loaded!\n");
-    c.printf("-----------------------\n\n");
-
-    // check words
-    while (true) {
-      c.printf("Check word: ");
-      String w = c.readLine().toUpperCase();
-      long hash = StringUtil.hash(w);
-      if (dict.containsKey(hash))
-        c.printf("%s found %d times\n", w, dict.get(hash));
-      else
-        c.printf("%s was not found!\n", w);
-      if (w.equals("EXIT")) {
-        c.printf("Exiting program!\n\n");
-        break;
-      }
+    //wordList = loadWordList(wlPath);
+    System.out.println("Dictionary loaded!");
+    System.out.println("-----------------------");
+    
+    Integer allW = 0;
+    for(Entry<Long, Integer> e : dict.entrySet()){
+      allW+=e.getValue();
     }
+    System.out.println(allW);
+//    // csv
+//    BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(
+//        new FileOutputStream(lang + ".csv"), "UTF8"));
+//    int i = 0;
+//    for (String w : wordList) {
+//      if (++i % 100000 == 0)
+//        System.out.println(i);
+//      Integer count = getCount(w);
+//      if (count > 0) {
+//        bw.write(w);
+//        bw.write(',');
+//        bw.write(count.toString());
+//        bw.newLine();
+//      } else{
+//        int a = 23;
+//        a++;
+//      }
+//    }
+//    bw.close();
+
+
+//    // check words
+//    while (true) {
+//      c.printf("Check word: ");
+//      String w = c.readLine().toUpperCase();
+//      long hash = StringUtil.hash(w);
+//      if (dict.containsKey(hash))
+//        c.printf("%s found %d times\n", w, dict.get(hash));
+//      else
+//        c.printf("%s was not found!\n", w);
+//      if (w.equals("EXIT")) {
+//        c.printf("Exiting program!\n\n");
+//        break;
+//      }
+//    }
 
     // // get stopwords
     // long allCount = 0l;
