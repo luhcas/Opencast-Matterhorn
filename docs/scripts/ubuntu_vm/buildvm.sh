@@ -46,7 +46,7 @@ if [ "$1" = "clean" ]; then
   sudo rm -rf vmbackup/
   sudo rm -rf m2/
   sudo rm -rf matterhorn_trunk/
-  sudo rm -rf red5*
+  sudo rm -rf red5-*
   sudo rm -rf matterhorn-engage-streaming/
   sudo rm -rf felix-framework*
 fi
@@ -85,10 +85,10 @@ if [ ! -e vmbackup ]; then
 
   echo "change the vm to use nat networking instead of bridged"
   sed -i 's/bridged/nat/g' ubuntu-vmw6/opencast.vmx
-  cp ubuntu-vmw6 vmbackup
+  cp -r ubuntu-vmw6 vmbackup
 else 
   #restore from copy
-  cp vmbackup ubuntu-vmw6
+  cp -r vmbackup ubuntu-vmw6
 fi
 
 echo "change matterhorn_setup.sh to use the correct svn repo path"
@@ -277,6 +277,7 @@ echo "================================="
 
 #archive it all for download
 echo "Building archive opencast-$OC_REV.zip."
+sed -i "s/ide0:0.fileName =.*/ide0:0.fileName = \"disk0.vmdk\"/" ubuntu-vmw6/opencast.vmx
 mv ubuntu-vmw6 opencast-$OC_REV
 zip -db -r -9 opencast-$OC_REV.zip opencast-$OC_REV
 rm -rf opencast-$OC_REV
