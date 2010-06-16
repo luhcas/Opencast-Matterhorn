@@ -41,193 +41,194 @@ input:hover
 
 .oc_btn-skip-backward
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      0 -36px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      0 -30px;
+  width:                    16px;
+  height:                   15px;
   
 }
 
 .oc_btn-skip-backward-over
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -29px -36px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -30px -30px;
+  width:                    16px;
+  height:                   15px;
   
 }
 
 .oc_btn-skip-backward-clicked
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -57px -36px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -60px -30px;
+  width:                    21px;
+  height:                   14px;
  
 }
 
 
 .oc_btn-rewind
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      0 -72px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      0 -60px;
+  width:                    21px;
+  height:                   14px;
   
 }
 
 .oc_btn-rewind-over
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -27px -72px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -30px -60px;
+  width:                    21px;
+  height:                   14px;
   
 }
 
 .oc_btn-rewind-clicked
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -52px -72px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -60px -60px;
+  width:                    21px;
+  height:                   14px;
  
 }
 
 .oc_btn-play
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      0px -252px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      0px -210px;
+  width:                    16px;
+  height:                   18px;
   
 }
 
 .oc_btn-play-over
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -29px -252px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -30px -210px;
+  width:                    16px;
+  height:                   18px;
   
 }
 
 .oc_btn-pause
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      0px -108px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      0px -90px;
+  width:                    18px;
+  height:                   20px;
 }
 
 .oc_btn-pause-over
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -29px -108px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -30px -90px;
+  width:                    18px;
+  height:                   20px;
 }
 
 .oc_btn-fast-forward
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      0px -144px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      0px -120px;
+  width:                    21px;
+  height:                   14px;
 }
 
 .oc_btn-fast-forward-over
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -25px -144px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -30px -120px;
+  width:                    21px;
+  height:                   14px;
 }
 .oc_btn-fast-forward-clicked
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -46px -144px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -60px -120px;
+  width:                    21px;
+  height:                   14px;
 }
 .oc_btn-skip-forward
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      0px -180px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      0px -150px;
+  width:                    16px;
+  height:                   14px;
 }
 
 .oc_btn-skip-forward-over
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -28px -180px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -30px -150px;
+  width:                    16px;
+  height:                   14px;
 }
 
 .oc_btn-skip-forward-clicked
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -57px -180px;
-  width:                    30px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -60px -150px;
+  width:                    16px;
+  height:                   14px;
 }
+
 
 .oc_btn-volume-high
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -6px -288px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -0px -240px;
+  width:                    18px;
+  height:                   18px;
 }
 
 .oc_btn-volume-mute
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      0px -360px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -90px -240px;
+  width:                    18px;
+  height:                   18px;
 }
 
 .oc_btn-volume-low
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -6px -324px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -30px -240px;
+  width:                    18px;
+  height:                   18px;
 }
 
 .oc_btn-volume-none
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -107px -324px;
-  width:                    29px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -90px -240px;
+  width:                    18px;
+  height:                   18px;
 }
 
 .oc_btn-cc-off
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -3px -216px;
-  width:                    33px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -0px -180px;
+  width:                    22px;
+  height:                   17px;
 }
 
 .oc_btn-cc-over
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -39px -216px;
-  width:                    33px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -30px -180px;
+  width:                    22px;
+  height:                   17px;
 }
 
 .oc_btn-cc-on
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -111px -216px;
-  width:                    33px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -60px -180px;
+  width:                    22px;
+  height:                   17px;
 }
 
 #oc_btn-dropdown
@@ -240,38 +241,38 @@ input:hover
 
 .oc_btn-singleDisplay
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -76px -466px;
-  width:                    30px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -180px -330px;
+  width:                    44px;
+  height:                   18px;
   margin-right:             5px;
   margin-left:              5px;
 }
 
 .oc_btn-bigLeftDisplay
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -120px -466px;
-  width:                    40px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -120px -330px;
+  width:                    44px;
+  height:                   18px;
   margin-right:             5px;
   margin-left:              5px;
 }
 
 .oc_btn-centerDisplay
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -18px -466px;
-  width:                    46px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -0px -330px;
+  width:                    44px;
+  height:                   18px;
   margin-right:             5px;
   margin-left:              5px;
 }
 
 .oc_btn-bigRightDisplay
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -180px -466px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -60px -330px;
   width:                    40px;
   height:                   36px;
   margin-right:             5px;
@@ -280,10 +281,10 @@ input:hover
 
 .oc_btn-audioDisplay
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      -260px -466px;
-  width:                    28px;
-  height:                   36px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      0px -240px;
+  width:                    18px;
+  height:                   16px;
   margin-right:             5px;
   margin-left:              5px; 
 }

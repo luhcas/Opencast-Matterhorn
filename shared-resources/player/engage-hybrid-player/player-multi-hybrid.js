@@ -572,8 +572,10 @@ Opencast.Player = (function () {
         if ($("#oc_btn-slides").attr("title") === SLIDES)
         {
             showSlides();
+            hideDescription();
+            hideSlideText();
+            hideShortcuts();
             hideEmbed();
-            hideBookmarks();
             setShowSections(true);
         }
         else
@@ -611,12 +613,18 @@ Opencast.Player = (function () {
         if ($("#oc_btn-slidetext").attr("title") === SLIDETEXT)
         {
             showSlideText();
-            hideTranscript();
+            hideSlides();
+            hideDescription();
+            hideShortcuts();
+            hideEmbed();
+            setShowSections(true);       
         }
         else
         {
             hideSlideText();
+            setShowSections(false)
         }
+        Opencast.Initialize.doResize();
     }
     
     /**
@@ -645,13 +653,18 @@ Opencast.Player = (function () {
         if ($("#oc_btn-shortcuts").attr("title") === SHORTCUTS)
         {
             showShortcuts();
-            hideNotes(); 
+            hideSlideText();
+            hideSlides();
             hideDescription();
+            hideEmbed();
+            setShowSections(true);
         }
         else
         {
             hideShortcuts();
+            setShowSections(false)
         }
+        Opencast.Initialize.doResize();
     }
 
     /**
@@ -663,8 +676,10 @@ Opencast.Player = (function () {
         if ($("#oc_btn-embed").attr("title") === EMBED)
         {
             showEmbed();
+            hideShortcuts();
+            hideSlideText();
             hideSlides();
-            hideBookmarks();
+            hideDescription();
             setShowSections(true);
         }
         else
@@ -705,13 +720,18 @@ Opencast.Player = (function () {
         if ($("#oc_btn-description").attr("title") === DESCRIPTION)
         {
             showDescription();
-            hideNotes(); 
+            hideSlides();
+            hideSlideText();
             hideShortcuts();
+            hideEmbed();
+            setShowSections(true);
         }
         else
         {
             hideDescription();
+            setShowSections(false);
         }
+        Opencast.Initialize.doResize();
     }
     
     /**
@@ -1446,44 +1466,47 @@ Opencast.Player = (function () {
     
         if (displayMode === MULTIPLAYER)
         {
-            content = '<li><div id="oc_video-size-dropdown-div">';
+            content = '<span id="oc_video-size-dropdown-div">';
             content = content + '<input id="oc_btn-singleDisplay" class="oc_btn-singleDisplay" type="submit" name="Show presenter video" alt="Show presenter video" title="Show presenter video" value="" onclick="Opencast.Player.videoSizeControlMultiOnlyLeftDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
             content = content + '<input id="oc_btn-bigLeftDisplay" class="oc_btn-bigLeftDisplay" type="submit" name="Show large presenter / Small presentation" alt="Show large presenter / Small presentation" title="Show large presenter / Small presentation" value="" onclick="Opencast.Player.videoSizeControlMultiBigLeftDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
             content = content + '<input id="oc_btn-centerDisplay" class="oc_btn-centerDisplay" type="submit" name="Show presenter and presentation equal" alt="Show presenter and presentation equal" title="Show presenter and presentation equal" value="" onclick="Opencast.Player.videoSizeControlMultiDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
             content = content + '<input id="oc_btn-bigRightDisplay" class="oc_btn-bigRightDisplay" type="submit" name="Show small presenter / Large presentation" alt="Show small presenter / Large presentation" title="Show small presenter / Large presentation" value="" onclick="Opencast.Player.videoSizeControlMultiBigRightDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
             content = content + '<input id="oc_btn-singleDisplay" class="oc_btn-singleDisplay" type="submit" name="Show presentation only " alt="Show presentation only " title="Show presentation only " value="" onclick="Opencast.Player.videoSizeControlMultiOnlyRightDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
             //content = content + '<input id="oc_btn-audioDisplay" class="oc_btn-audioDisplay" type="submit" name="Audio" alt="Audio" title="Audio" value="" onclick="Opencast.Player.videoSizeControlAudioDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
-            content = content + '</div> </li>';
+            content = content + '</span>';
             $('#oc_video-size-menue').prepend(content);
             $("#oc_btn-dropdown").attr("className", "oc_btn-centerDisplay");
-            $('#oc_video-size-dropdown-div').css("width", '290px');
-            $('#oc_video-size-dropdown-div').css("margin-left", '-223px');
+            $('#oc_video-size-dropdown-div').css("width", '0%');
+            $('#oc_video-size-dropdown-div').css("display", 'none');
+            $('#oc_video-size-dropdown-div').css("margin-left", '-22px');
             setDisplayMode(displayMode);
         }
         else if (displayMode === SINGLEPLAYER)
         {
-            content = '<li><div id="oc_video-size-dropdown-div">';
+            content = '<span id="oc_video-size-dropdown-div">';
             content = content + '<input id="oc_btn-singleDisplay" class="oc_btn-singleDisplay" type="submit" name="Show presenter video " alt="Show presenter video " title="Show presenter video " value="" onclick="Opencast.Player.videoSizeControlSingleDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
             //content = content + '<input id="oc_btn-audioDisplay" class="oc_btn-audioDisplay" type="submit" name="Audio" alt="Audio" title="Audio" value="" onclick="Opencast.Player.videoSizeControlAudioDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
-            content = content + '</div> </li>';
+            content = content + '</span>';
             $('#oc_video-size-menue').prepend(content);
             $("#oc_btn-dropdown").attr("className", "oc_btn-singleDisplay");
-            $('#oc_video-size-dropdown-div').css("width", '90px');
+            $('#oc_video-size-dropdown-div').css("width", '0%');
+            $('#oc_video-size-dropdown-div').css("display", 'none');
             $('#oc_video-size-dropdown-div').css("margin-left", '-22px');
             setDisplayMode(displayMode);
             setCurrentVideoSize(VIDEOSIZESINGLE);
         }
         else if (displayMode === SINGLEPLAYERWITHSLIDES)
         {
-            content = '<li><div id="oc_video-size-dropdown-div">';
+            content = '<span id="oc_video-size-dropdown-div">';
             content = content + '<input id="oc_btn-singleDisplay" class="oc_btn-singleDisplay" type="submit" name="Show presenter video " alt="Show presenter video" title="Show presenter video" value="" onclick="Opencast.Player.videoSizeControlMultiOnlyLeftDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
             content = content + '<input id="oc_btn-singleDisplay" class="oc_btn-singleDisplay" type="submit" name="Show presentation only " alt="Show presentation only " title="Show presentation only " value="" onclick="Opencast.Player.videoSizeControlMultiOnlyRightDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
             //content = content + '<input id="oc_btn-audioDisplay" class="oc_btn-audioDisplay" type="submit" name="Audio" alt="Audio" title="Audio" value="" onclick="Opencast.Player.videoSizeControlAudioDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
-            content = content + '</div> </li>';
+            content = content + '</span>';
             $('#oc_video-size-menue').prepend(content);
             $("#oc_btn-dropdown").attr("className", "oc_btn-singleDisplay");
-            $('#oc_video-size-dropdown-div').css("width", '135px');
-            $('#oc_video-size-dropdown-div').css("margin-left", '-67px');
+            $('#oc_video-size-dropdown-div').css("width", '0%');
+            $('#oc_video-size-dropdown-div').css("display", 'none');
+            $('#oc_video-size-dropdown-div').css("margin-left", '-20px');
             setDisplayMode(displayMode);
         }
         else if (displayMode === AUDIOPLAYER)

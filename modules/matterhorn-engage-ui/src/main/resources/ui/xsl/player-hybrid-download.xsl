@@ -6,6 +6,14 @@
 	<xsl:template match="/">
 
 		<div id="oc_seek-slider" >
+					   <div class="progress-list">
+		            <span class="load-progress" value="0"></span>
+		            <span id="play-progress" class="play-progress" value="0" style="width: 0%;"></span>
+		            <span id="scubber-channel" class="scrubber-channel">
+		              <button id="scrubber" class="scrubber-button" ></button>
+		              <div id="draggable" class="ui-widget-content" style="left: 0%;"></div>
+		            </span>
+		          </div>
 		  <table width="100%">
 		    <tbody>
 		      <tr class="player-chrome">
@@ -36,14 +44,7 @@
       </xsl:choose>
 		     </tr>
 		   </table>
-		   <div class="progress-list">
-		            <span class="load-progress" value="0"></span>
-		            <span id="play-progress" class="play-progress" value="0" style="width: 0%;"></span>
-		            <span id="scubber-channel" class="scrubber-channel">
-		              <button id="scrubber" class="scrubber-button" ></button>
-		              <div id="draggable" class="ui-widget-content" style="left: 0%;"></div>
-		            </span>
-		          </div>
+
 		        </td>
 		      </tr>
 		    </tbody>

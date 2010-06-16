@@ -95,23 +95,19 @@
       </div> 
      
       <div id="oc_sound">
-        <ul id="oc_volume-dropdown">
-          <li>
+        <span id="oc_volume-dropdown">
             <input id="oc_btn-volume" class="oc_btn-volume-high" type="submit" name="Unmute: Control + Alt + M" alt="Unmute: Control + Alt + M" title="Unmute: Control + Alt + M" value=""></input>
-            <ul id="oc_volume-menue">
-              <li>
-                <div id="oc_volume-dropdown-div">
-                  <div id="oc_volume-slider">
+        </span>
+        <span id="oc_volume-menue" style="visibility:hidden;">
+            <div id="oc_volume-dropdown-div">
+                <div id="oc_volume-slider">
                     <div id="slider_volume_Rail" class="oc_slider-volume-Rail" title="Volume" alt="Volume">
-                      <label id="volumeLabel" for="slider_volume_Rail" class="oc_offScreen-hidden">Volume</label>
-                      <input id="slider_volume_Thumb" class="oc_slider-volume-Thumb" type="submit" value=""></input>
+                        <label id="volumeLabel" for="slider_volume_Rail" class="oc_offScreen-hidden">Volume</label>
+                        <input id="slider_volume_Thumb" class="oc_slider-volume-Thumb" type="submit" value=""></input>
                     </div>
-                  </div>
                 </div>
-              </li>
-            </ul>
-          </li>
-        </ul>
+            </div>
+        </span>
       </div>
           
       <div id="oc_video-cc">
@@ -119,27 +115,20 @@
       </div>
 
       <div id="oc_video-size-controls" >
-        <ul id="oc_video-size-dropdown">
-          <li>
+        <span id="oc_video-size-dropdown">
             <input id="oc_btn-dropdown" class="oc_btn-centerDisplay" type="submit" name="Video Size Controls" alt="Video Size Controls" title="Video Size Controls" value=""></input>
-            <ul id="oc_video-size-menue"></ul>
-          </li>
-        </ul>
+        </span>
+        <span id="oc_video-size-menue" style="float:right;visibility:hidden;">
       </div>
     </div>
 
     <div id="data"></div>
 
-    <div id="oc_bookmarksPoints"></div>
-
-    <div >
-      <div id="oc_tabs" class="oc_tabs-input">
-        <input id="oc_btn-slides" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Hide Slides" value="Hide Slides" alt="Hide Slides" title="Hide Slides"></input>
-        <input id="oc_btn-bookmarks" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleBookmarks()" name="Bookmarks" value="Bookmarks" alt="Bookmarks" title="Bookmarks"></input>
-        <input id="oc_btn-embed" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleEmbed()" name="Embed" value="Embed" alt="Embed" title="Embed"></input>
-      </div>
 
       <div class="clear"></div>
+      <div id="oc_description" class="oc_DisplayNone fl-fix">
+        <h4>Description</h4>
+      </div>
 
       <div id="oc_slides" class="oc_DisplayBlock">
         <div id="segments-holder" class="oc-segments-holder">
@@ -148,21 +137,28 @@
         </div>
       </div>
 
-      <div id="oc_bookmarks" class="oc_DisplayNone fl-fix">
+      <div id="oc_slidetext" class="oc_DisplayNone fl-fix">
 
         <div id="oc_bookmarks-container-left">
 
-          <input id="oc_addBookmark" class="oc_addBookmark"  type="text" value="Add a bookmark..."></input>
-          <input id="oc_btn-addBookmark" type="submit" name="Add Bookmark" alt="Add Bookmark" title="Add Bookmark" value="+"> </input>
-          <input id="oc_btn-removeBookmark" class="oc_btn-removeBookmark" type="submit" name="Remove Bookmark" alt="Remove Bookmark" title="Remove Bookmark" value="-"> </input>
+            Slide Text
 
-          <div>
-            <select id="oc_bookmarkSelect" size="5">
-            </select>
-          </div>
+        </div>
+
+
+        <div id="oc_bookmarks-container-right">
+            <input id="oc_lecturer-search-field" class="oc_search-Field" type="text" value="Search this Recording"></input>
+        </div>
+
+      </div>
+      <div id=oc_shortcuts class="oc_DisplayNone fl-fix" >
+            <span id="skip">
+                <a name="shortcuts"></a>
+            </span>
+            <h4>Player-Shortcuts</h4>
+            <div id="oc_client_shortcuts">
         </div>
       </div>
-
       <div id="oc_embed" class="oc_DisplayNone fl-fix">
         <input id="oc_embed-720x545" class="oc_embed-720x545" type="submit" name="720 x 545" alt="720 x 545" title="720 x 545" value="720x545" onclick="Opencast.Player.embedIFrame(720,545);"> </input>
         <input id="oc_embed-640x500" class="oc_embed-640x500" type="submit" name="640 x 500" alt="640 x 500" title="640 x 500" value="640x500" onclick="Opencast.Player.embedIFrame(640,500);"> </input>
@@ -172,55 +168,18 @@
         Choose your embed size. Copy the text and paste it in your html page. 
         <textarea id="oc_embed-textarea" class="oc_embed-textarea" rows="2" cols="1"></textarea>
       </div>
-
+        <div >
+      <div id="oc_tabs" class="oc_tabs-input">
+        <input id="oc_btn-description" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleDescription()" name="Description" value="Description" alt="Description" title="Description"></input>
+        <input id="oc_btn-slides" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Hide Slides" value="Hide Slides" alt="Hide Slides" title="Hide Slides"></input>
+        <input id="oc_btn-slidetext" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlideText()" name="Slide Text" value="Slide Text" alt="Slide Text" title="Slide Text"></input>
+        <input id="oc_btn-shortcuts" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleShortcuts()" name="Shortcuts" value="Shortcuts" alt="Shortcuts" title="Shortcuts"></input>
+        <input id="oc_btn-embed" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleEmbed()" name="Embed" value="Embed" alt="Embed" title="Embed"></input>
+      </div>
     </div>
 
     <div>
-
-      <div class="oc_tabTableLeft">
-
-        <input id="oc_btn-description" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleDescription()" name="Description" value="Description" alt="Description" title="Description"></input>
-        <input id="oc_btn-notes" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleNotes()" name="Notes" value="Notes" alt="Notes" title="Notes"></input>
-        <input id="oc_btn-shortcuts" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleShortcuts()" name="Shortcuts" value="Shortcuts" alt="Shortcuts" title="Shortcuts"></input>
-
-        <div class="clear"></div>
-        
-        <div id="oc_description" class="oc_DisplayNone fl-fix">
-          <h4>Description</h4>
-        </div>
-
-        <div id="oc_notes" class="oc_DisplayNone fl-fix">
-          <textarea name="wysiwyg" id="wysiwyg" rows="5" cols="60"></textarea>
-        </div>
-
-        <div id=oc_shortcuts class="oc_DisplayNone fl-fix" >
-          <span id="skip">
-          	<a name="shortcuts"></a>
-          </span>
-            <h4>Player-Shortcuts</h4>
-            <div id="oc_client_shortcuts">
-            </div>
-          </div>
-      </div>
-
-      <div class="oc_tabTableRight">
-
-        <input id="oc_btn-slidetext" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlideText()" name="Slide Text" value="Slide Text" alt="Slide Text" title="Slide Text"></input>
-        <input id="oc_btn-transcript" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleTranscript()" name="Transcript" value="Transcript" alt="Transcript" title="Transcript"></input>
-        
-        <div id="oc_tabs-search">
-          <input id="oc_lecturer-search-field" class="oc_search-Field" type="text" value="Search this Recording"></input>
-        </div>
-        
-        <div class="clear"></div>
-        
-        <div id="oc_slidetext" class="oc_DisplayNone fl-fix">slide text</div>
-        
-        <div id="oc_transcript" class="oc_DisplayNone fl-fix">transcript</div>
-        
-      </div>
-    
-     
+ 
     
     </div>
   </body>

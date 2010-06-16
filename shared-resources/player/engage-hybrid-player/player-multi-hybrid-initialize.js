@@ -121,25 +121,34 @@ Opencast.Initialize = (function ()
         dropdown_canceltimer();
         dropdown_close();
        
-        if (getDivId() === VOLUME)
-        {
-            ddmenuitem = $('#oc_volume-menue').css('visibility', 'visible');
 
-        }
-        else if (getDivId() === VIDEOSIZE)
+        if (getDivId() === VIDEOSIZE)
         {
+            $('#oc_sound').css('width', '5%');
+            $('#oc_video-size-controls').css('width', '20%');
+            $('#oc_video-size-dropdown-div').css('width', '15%')
+            $('#oc_video-size-dropdown-div').css("display", 'inline');
             ddmenuitem = $('#oc_video-size-menue').css('visibility', 'visible');
+            ddmenuitem = $('#oc_volume-menue').css('visibility', 'hidden');
         }
         else
         {
-            ddmenuitem = $(this).find('ul').eq(0).css('visibility', 'visible');
+            $('#oc_sound').css('width', '20%');
+            $('#oc_video-size-controls').css('width', '5%');
+            $('#oc_video-size-dropdown-div').css('width', '0%');
+            $('#oc_video-size-dropdown-div').css("display", 'none');
+            ddmenuitem = $('#oc_volume-menue').css('visibility', 'visible');
+            ddmenuitem = $('#oc_video-size-menue').css('visibility', 'hidden');
+
+            
+
         }
         setDivId('');
     }
     
     /**
         @memberOf Opencast.Initialize
-        @description open the drop down meneue video.
+        @description open the drop down menu video.
      */
     function dropdownVideo_open()
     {
@@ -195,9 +204,9 @@ Opencast.Initialize = (function ()
         });
         
         
-        $('#oc_video-size-dropdown > li').bind('mouseover', dropdown_open);
+        $('#oc_video-size-controls').bind('mouseover', dropdownVideo_open);
         //$('#oc_video-size-dropdown > li').bind('click', dropdown_open);
-        $('#oc_video-size-dropdown > li').bind('mouseout',  dropdown_timer);
+        $('#oc_video-size-controls').bind('mouseout',  dropdown_timer);
         
         // Handler focus
         $('#oc_btn-dropdown').focus(function () 
@@ -212,9 +221,9 @@ Opencast.Initialize = (function ()
             dropdown_timer();
         });
         
-        $('#oc_volume-dropdown > li').bind('mouseover', dropdown_open);
+        $('#oc_sound').bind('mouseover', dropdown_open);
         //$('#oc_video-size-dropdown > li').bind('click', dropdown_open);
-        $('#oc_volume-dropdown > li').bind('mouseout',  dropdown_timer);
+        $('#oc_sound').bind('mouseout',  dropdown_timer);
 
         // Handler focus
         $('#oc_btn-volume').focus(function () 

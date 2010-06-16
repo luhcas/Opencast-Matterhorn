@@ -106,29 +106,29 @@ table
 
 #oc_video-player-controls
 {
-  height:                   36px;
+  height:                   30px;
   width:                    100%;
-  background-image:         url("../img/icons.png");
+  background-image:         url("../img/oc_icons.png");
   background-position:      0 0px;
-  margin-top:               5px;
-  margin-bottom:            5px;
+  /*margin-top:               5px;
+  margin-bottom:            5px;*/
 }
 
 #oc_video-time
 {
+  margin-top:               5px;
   float:                    left;
   text-align:               left;
   font-size:                0.8em;
   color:                    #FFFFFF;
-  background-image:         url("../img/icons.png");
-  background-position:      0 0;
+  /*background-image:         url("../img/oc_icons.png"); 
+  background-position:      0 0; */
   width:                    30%;
-  height:                   36px;
+  height:                   30px;
 }
 
 #simpleEdit 
 {
-  margin-top:               12px;
   margin-left:              10px;
   font-size:                1.2em;
 }
@@ -167,6 +167,7 @@ table
 
 #oc_video-controls
 {
+  margin-top:               5px;
   float:                    left;
   width:                    40%;
   text-align:               right;
@@ -174,6 +175,7 @@ table
 
 #oc_sound
 {
+  margin-top:               5px;
   float:                    left;
   width:                    5%;
   text-align:               center;
@@ -181,9 +183,10 @@ table
 
 #oc_volume-dropdown
 {
+   
   margin:                   0;
   padding:                  0;
-  float:                    right;
+  float:                    left;
   margin-right:             10px;
 }
 
@@ -200,8 +203,8 @@ table
   position:                 absolute;
   visibility:               hidden;
   border-top:               1px solid white
-}   
-        
+}
+       
 #oc_volume-dropdown li ul li
 {   
   float:                    none;
@@ -211,9 +214,9 @@ table
 #oc_volume-dropdown-div
 {   
   height:                   28px;
-  padding-top:              4px;
-  background-image:         url("../img/icons.png");
-  background-position:      0 -4px;
+  /*padding-top:              4px;
+  background-image:         url("../img/icons.png"); 
+  background-position:      0 -4px; */
   text-align:               center;
   margin-left:              -50px;
 }
@@ -221,10 +224,10 @@ table
 #oc_volume-slider
 {
   width:                    8%;
-  height:                   36px;
+  height:                   30px;
   float:                    left;
-  margin-right:             15px;
-  margin-left:              15px;
+  /*margin-right:             15px;
+  margin-left:              15px;*/
 }
 
 .oc_slider-volume-Rail 
@@ -234,7 +237,7 @@ table
   border:                   1px solid #999999;
   position:                 relative;
   background:               #fff;
-  margin-top:               12px;
+  margin-top:               8px;
 }
 
 .oc_slider-volume-Thumb:focus
@@ -245,12 +248,12 @@ table
 
 .oc_slider-volume-Thumb
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      0 -396px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -30px -270px;
   margin:                   0px;
   padding:                  0px;
-  width:                    15px; 
-  height:                   9px;
+  width:                    10px; 
+  height:                   10px;
   position:                 absolute;
   margin-top:               -3px;
 }
@@ -273,8 +276,8 @@ table
 
 .oc-slider-volume-Thumb
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      0 -396px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -30px -270px;
   margin:                   0px;
   padding:                  0px;
   width:                    15px; 
@@ -285,6 +288,7 @@ table
 
 #oc_video-cc
 {
+  padding-top:              5px;
   float:                    left;
   width:                    5%;
   text-align:               center;
@@ -293,8 +297,9 @@ table
 
 #oc_video-size-controls
 {
+  margin-top:               5px;
   float:                    right;
-  width:                    12%;
+  width:                    5%;
 }
 
 .oc_tabs
@@ -472,9 +477,9 @@ option:hover
 #oc_video-size-dropdown-div
 {   
   height:                   28px;
-  padding-top:              4px;
+  /*padding-top:              4px;
   background-image:         url("../img/icons.png");
-  background-position:      0 -4px;
+  background-position:      0 -4px;*/
   text-align:               center;
 }
 
@@ -608,29 +613,29 @@ option:hover
 
 .scrubber-button 
 {
-  background:               transparent url("../img/icons.png");
-  background-position:      0 -445px;
-  height:                   15px;
-  width:                    13px;
-  margin-top:               -4px;
-  margin-left:              -6px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -60px -360px;
+  height:                   19px;
+  width:                    9px;
+  /*margin-top:               -4px;
+  margin-left:              -6px;*/
   position:                 relative; 
   border:                   0px;
-  top:                      -11px; 
+  top:                      5px; 
   z-index:                  2;
 }
 
 #draggable 
 { 
-  background:               transparent url("../img/icons.png");
-  background-position:      0 -445px;
-  height:                   15px;
-  width:                    13px;
-  margin-top:               -14px;
-  margin-left:              -6px;
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -60px -360px;
+  height:                   19px;
+  width:                    9px;
+  /*margin-top:               -4px;
+  margin-left:              -6px;*/
   position:                 relative; 
   border:                   0px;
-  top:                      -12px; 
+  top:                      -14px;
   z-index:                  3;
 }
 
@@ -687,15 +692,17 @@ option:hover
 
 .progress-list 
 {
-  background-image:url("../img/icons.png");
-  background-position: 0 -432px;
+  /*background-image:url("../img/icons.png");
+  background-position: 0 -432px;*/
+  background-color:                    #FFFFFF;
   height: 7px;
 }
 
 .load-progress 
 {
-  background-image:url("../img/icons.png");
-  background-position: 0 -419px;
+  /*background-image:url("../img/icons.png");
+  background-position: 0 -419px;*/
+  background-color:                    #E99A8F;
   height: 7px;
   display:block;
   margin-top:0;
@@ -705,8 +712,9 @@ option:hover
 
 .play-progress 
 {
-  background-image:url("../img/icons.png");
-  background-position: 0 -405px;
+  /*background-image:url("../img/icons.png");
+  background-position: 0 -405px;*/
+  background-color:                    #DE6555;
   display:block;
   height:7px;
   margin-top:-7px;
@@ -720,6 +728,7 @@ option:hover
   padding-right:0px;
   position:relative;
   top: -12px;
+  height: 7px;
 }
 
 .progress-text 
