@@ -48,7 +48,6 @@ ocWorkflow.getConfiguration = function(container) {
   $(container).find('.configField').each( function(idx, elm) {
     if ($(elm).is('[type=checkbox]')) {
       if ($(elm).is(':checked')) {
-        alert('adding ' + $(elm).attr('id') + " = " +  $(elm).val());
         out[$(elm).attr('id')] = $(elm).val();
       }
     } else {
