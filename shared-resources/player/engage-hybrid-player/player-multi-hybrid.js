@@ -1402,13 +1402,17 @@ Opencast.Player = (function () {
 
         if (getDragging() === false)
         {
-            var newPos = Math.round((newPosition / getDuration()) *  $("#scubber-channel").width());
-            $("#draggable").css("left", newPos);
-            $("#scrubber").css("left", newPos);
-            $("#play-progress").css("width", newPos);
+          refreshScrubberPosition();
         }
     }
     
+    
+    function refreshScrubberPosition() {
+      var newPos = Math.round((curPosition / getDuration()) *  $("#scubber-channel").width());
+      $("#draggable").css("left", newPos);
+      $("#scrubber").css("left", newPos);
+      $("#play-progress").css("width", newPos);
+    }
     
     
     /**
@@ -1515,6 +1519,7 @@ Opencast.Player = (function () {
         doToggleBookmarks : doToggleBookmarks,
         doToggleDescription : doToggleDescription,
         removeOldAlert : removeOldAlert,
+        refreshScrubberPosition : refreshScrubberPosition,
         addAlert : addAlert,
         embedIFrame : embedIFrame,
         setMediaURL : setMediaURL,

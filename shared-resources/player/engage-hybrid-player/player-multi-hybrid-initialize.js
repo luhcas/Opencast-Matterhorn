@@ -581,7 +581,8 @@ Opencast.Initialize = (function ()
            creatorPostfix = " by " + $('#oc-creator').html();
        
        $('#oc_title').html($('#oc-title').html() + creatorPostfix);
-        
+       
+       Opencast.Player.refreshScrubberPosition();
     }
 
     /**
