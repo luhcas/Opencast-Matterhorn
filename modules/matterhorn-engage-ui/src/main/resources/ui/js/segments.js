@@ -27,10 +27,12 @@ Opencast.segments = ( function() {
 
       $("#slider").data("currentlyMoving", false);
 
-      $container
-        .css('width', ($panels[0].offsetWidth * $panels.length))
-        .css('left', "0px");
-
+        
+       if($panels[0] !== undefined){
+          $container
+            .css('width', ($panels[0].offsetWidth * $panels.length))
+            .css('left', "0px");
+       }
       var scroll = $('#slider .scroll').css('overflow', 'hidden');
 
       //when the left/right arrows are clicked

@@ -575,7 +575,12 @@ Opencast.Initialize = (function ()
         }
         Opencast.Player.setBrowserWidth(myWidth);
         
-        $('#oc_title').html($('#oc-title').html() + " by " + $('#oc-creator').html());
+       var creatorPostfix = "";
+       var creator = $('#oc-creator').html();
+       if(creator !== "")
+           creatorPostfix = " by " + $('#oc-creator').html();
+       
+       $('#oc_title').html($('#oc-title').html() + creatorPostfix);
         
     }
 
