@@ -119,8 +119,8 @@ ocIngest.addTrack = function(mediaPackage, jobId, flavor) {
 
 ocIngest.startIngest = function(mediaPackage) {
   Upload.log("Starting Ingest on MediaPackage with Workflow " + $('#workflow-selector').val());
-  Upload.setProgress('100%','starting Ingest',' ', ' ');
-  var data = Upload.collectWorkflowConfig();
+  Upload.setProgress('100%','starting Ingest ++',' ', ' ');
+  var data = ocWorkflow.getConfiguration($('#workflow-config-container'));
   data['mediaPackage'] = ocUtils.xmlToString(mediaPackage);
   $.ajax({
     url        : '../ingest/rest/ingest/' + $('#workflow-selector').val(),

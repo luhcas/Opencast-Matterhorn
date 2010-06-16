@@ -46,7 +46,14 @@ ocWorkflow.definitionSelected = function(defId, container, callback) {
 ocWorkflow.getConfiguration = function(container) {
   var out = new Object();
   $(container).find('.configField').each( function(idx, elm) {
-    out[$(elm).attr('id')] = $(elm).val();
+    if ($(elm).is('[type=checkbox]')) {
+      if ($(elm).is(':checked')) {
+        alert('adding ' + $(elm).attr('id') + " = " +  $(elm).val());
+        out[$(elm).attr('id')] = $(elm).val();
+      }
+    } else {
+      out[$(elm).attr('id')] = $(elm).val();
+    }
   });
   return out;
 }
