@@ -298,5 +298,26 @@
         </xsl:if>
       </xsl:if>
     </xsl:for-each>
+    
+    <div id="oc-segments-text">
+      <table cellspacing="0" cellpadding="0">
+           <xsl:for-each select="ns2:search-results/result/segments/segment">
+           <xsl:if test="(../../mediapackage/@duration) > ./@time">
+           <tr>
+            <td class="oc-segments-time">
+            <a class="segments-time">
+            <xsl:attribute name="onclick">Opencast.Watch.seekSegment(<xsl:value-of select="floor(./@time div 1000)" />)</xsl:attribute>
+              <xsl:value-of select="floor(./@time div 1000)" />
+            </a>
+           </td>
+           <td>
+             <xsl:value-of select="text" />
+           </td>
+            </tr>
+           </xsl:if>
+           </xsl:for-each>
+       </table>
+    </div>
+    
   </xsl:template>
 </xsl:stylesheet>

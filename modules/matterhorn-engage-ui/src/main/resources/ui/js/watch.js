@@ -209,6 +209,17 @@ Opencast.Watch = (function ()
           
           // init
           Opencast.Initialize.init();
+          
+          // **************************************
+          // Segments Text View
+          $('.segments-time').each( function() {
+            var seconds= $(this).html();
+            $(this).html(Opencast.engage.formatSeconds(seconds));
+          });
+          
+          $('#oc_slidetext').html($('#oc-segments-text').html());
+
+          $('#oc-segments-text').html("");
        });
     }
   

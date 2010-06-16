@@ -18,6 +18,7 @@ Opencast.engage = (function () {
     var restEndpoint = "../../search/rest/episode?id=";
     // var restEndpoint = "episode.xml?id="; // Activate for testing purposes
     //var restEndpoint = "xml/episode.xml?id="; // Activate for testing purposes
+    //restEndpoint = "episode-segments.xml?id=";
       return restEndpoint;
    }
 
@@ -35,7 +36,27 @@ Opencast.engage = (function () {
     return unescape( document.cookie.substring( len, end ) );
   }
   
-   /**
+  function formatSeconds(seconds) {
+    var result = "";
+
+    if(parseInt(seconds / 3600) < 10)
+      result += "0";
+    result += parseInt(seconds / 3600);
+    result += ":";
+
+    if((parseInt(seconds/60) - parseInt(seconds/3600) * 60) < 10)
+      result += "0";
+    result += parseInt(seconds/60) - parseInt(seconds/3600) * 60;
+    result += ":";
+
+    if(seconds % 60 < 10)
+      result += "0";
+    result += seconds % 60;
+
+    return result;
+  }
+
+  /**
      * @memberOf Opencast.engage
      * @description Gets the current media package id
      * @return The current media package id
@@ -74,6 +95,7 @@ Opencast.engage = (function () {
 
     return {
       getCookie : getCookie,
+      formatSeconds : formatSeconds,
       getMediaPackageId : getMediaPackageId,
       getVideoUrl : getVideoUrl,
       getSearchServiceEpisodeIdURL :  getSearchServiceEpisodeIdURL
