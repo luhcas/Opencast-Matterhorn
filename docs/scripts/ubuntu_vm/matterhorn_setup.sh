@@ -114,7 +114,7 @@ install_3p ()
     #ocr support
     echo "ocr support"
     sudo apt-get -y --force-yes install libpng12-dev libjpeg62-dev libtiff4-dev
-    sudo apt-get -y --force-yes install tesserat-ocr
+    sudo apt-get -y --force-yes install tesseract-ocr
     cd /usr/share/tesseract-ocr
     #install english language file
     sudo curl http://tesseract-ocr.googlecode.com/files/tesseract-2.00.eng.tar.gz | sudo tar xz
