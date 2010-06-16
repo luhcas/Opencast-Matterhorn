@@ -54,6 +54,9 @@ public class AgentStateUpdate {
   @XmlElement(name="time-since-last-update")
   public Long time_since_last_update;
 
+  @XmlElement(name="capabilities")
+  public String capabilities;
+
   /**
    * Required zero-arg. constructor. Do not use.
    */
@@ -68,6 +71,7 @@ public class AgentStateUpdate {
     name = a.getName();
     state = a.getState();
     url = a.getUrl();
+    capabilities = "";
     time_since_last_update = System.currentTimeMillis() - a.getLastHeardFrom();
   }
 }
