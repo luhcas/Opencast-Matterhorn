@@ -23,7 +23,7 @@ import java.io.StringReader;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 
@@ -50,6 +50,12 @@ import org.opencastproject.scheduler.impl.jpa.IncompleteDataException;
 import org.opencastproject.scheduler.impl.jpa.Metadata;
 import org.opencastproject.scheduler.impl.jpa.RecurringEvent;
 import org.opencastproject.scheduler.impl.jpa.SchedulerServiceImplJPA;
+import org.opencastproject.series.api.Series;
+import org.opencastproject.series.api.SeriesMetadata;
+import org.opencastproject.series.api.SeriesService;
+import org.opencastproject.series.impl.SeriesImpl;
+import org.opencastproject.series.impl.SeriesMetadataImpl;
+import org.opencastproject.series.impl.SeriesServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -65,7 +71,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-@Ignore
+
 public class SchedulerServiceImplTest {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImplTest.class);
   
@@ -76,6 +82,8 @@ public class SchedulerServiceImplTest {
   
   private SchedulerEvent event;
   private DataSource datasource;
+  
+  private String seriesID;
 
   private DataSource connectToDatabase(File storageDirectory) {
     if (storageDirectory == null) {
@@ -101,15 +109,46 @@ public class SchedulerServiceImplTest {
     props.put("javax.persistence.nonJtaDataSource", datasource);
     props.put("eclipselink.ddl-generation", "create-tables");
     props.put("eclipselink.ddl-generation.output-mode", "database");
-//    
+    
     serviceJPA = new SchedulerServiceImplJPA();
     serviceJPA.setPersistenceProvider(new PersistenceProvider());
     serviceJPA.setPersistenceProperties(props);
-//    try {
-//      serviceJPA.setDataSource(datasource);
-//    } catch (SQLException e1) {
-//      Assert.fail("Could not connect to Database");
-//    }
+    
+    SeriesServiceImpl seriesService = new SeriesServiceImpl ();
+    seriesService.setPersistenceProvider(new PersistenceProvider());
+    seriesService.setPersistenceProperties(props);
+    seriesService.activate(null);
+    serviceJPA.setSeriesService(seriesService);
+    Series series = new SeriesImpl();
+    
+    LinkedList<SeriesMetadata> metadata = new LinkedList<SeriesMetadata>();
+    
+    metadata.add(new SeriesMetadataImpl("title", "demo title"));
+    metadata.add(new SeriesMetadataImpl("license", "demo"));
+    metadata.add(new SeriesMetadataImpl("valid", ""+System.currentTimeMillis()));
+    metadata.add(new SeriesMetadataImpl("publisher", "demo"));
+    metadata.add(new SeriesMetadataImpl("creator", "demo"));
+    metadata.add(new SeriesMetadataImpl("subject", "demo"));
+    metadata.add(new SeriesMetadataImpl("temporal", "demo"));
+    metadata.add(new SeriesMetadataImpl("audience", "demo"));
+    metadata.add(new SeriesMetadataImpl("spatial", "demo"));
+    metadata.add(new SeriesMetadataImpl("rightsHolder", "demo"));
+    metadata.add(new SeriesMetadataImpl("extent", "3600000"));
+    metadata.add(new SeriesMetadataImpl("created", ""+System.currentTimeMillis()));
+    metadata.add(new SeriesMetadataImpl("language", "demo"));
+    metadata.add(new SeriesMetadataImpl("isReplacedBy", "demo"));
+    metadata.add(new SeriesMetadataImpl("type", "demo"));
+    metadata.add(new SeriesMetadataImpl("available", ""+System.currentTimeMillis()));
+    metadata.add(new SeriesMetadataImpl("modified", ""+System.currentTimeMillis()));
+    metadata.add(new SeriesMetadataImpl("replaces", "demo"));
+    metadata.add(new SeriesMetadataImpl("contributor", "demo"));
+    metadata.add(new SeriesMetadataImpl("description", "demo"));
+    metadata.add(new SeriesMetadataImpl("issued", ""+System.currentTimeMillis()));
+    
+    seriesID = series.generateSeriesId();
+    series.setMetadata(metadata);
+    Assert.assertTrue(seriesService.addSeries(series));
+
     serviceJPA.activate(null);    
     
     service = serviceJPA;
@@ -133,7 +172,7 @@ public class SchedulerServiceImplTest {
     event.addResource("vga");
     event.setAbstract("a test description");
     event.setChannelID("unittest");
-    event.setSeriesID("testevents");    
+    event.setSeriesID(seriesID);    
   }
 
   @After
@@ -315,7 +354,7 @@ public class SchedulerServiceImplTest {
     try {
       p.load(new StringReader(ca));
       Assert.assertTrue(p.get("event.title").equals("new recording"));
-      Assert.assertTrue(p.get("event.series").equals("testevents"));
+      Assert.assertTrue(p.get("event.series").equals(seriesID));
       Assert.assertTrue(p.get("event.source").equals("unittest"));
       Assert.assertTrue(p.get("capture.device.location").equals("testlocation"));
     } catch (IOException e) {
@@ -366,6 +405,7 @@ public class SchedulerServiceImplTest {
      
   }
   
+  @Ignore
   @Test 
   public void test5000Events () {
     //Adding Events
@@ -470,6 +510,5 @@ public class SchedulerServiceImplTest {
     stop = System.currentTimeMillis();
     logger.info("Getting calendar took {} ms.", (stop-start));
     Assert.assertTrue((stop-start) < 60000);
-    
   }
 }

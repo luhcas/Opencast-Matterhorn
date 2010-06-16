@@ -18,6 +18,7 @@ package org.opencastproject.scheduler.impl;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.SchedulerService;
+import org.opencastproject.series.api.SeriesService;
 
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -51,6 +52,7 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
   
   protected DublinCoreGenerator dcGenerator;
   protected CaptureAgentMetadataGenerator caGenerator;
+  protected SeriesService seriesService;
  
   /**
    * Sets a DublinCoreGenerator
@@ -80,7 +82,7 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
    */
   public String getCalendarForCaptureAgent(String captureAgentID) {
     SchedulerFilter filter = getFilterForCaptureAgent (captureAgentID); 
-    CalendarGenerator cal = new CalendarGenerator(dcGenerator, caGenerator);
+    CalendarGenerator cal = new CalendarGenerator(dcGenerator, caGenerator, seriesService);
     SchedulerEvent[] events = getEvents(filter);
     for (int i = 0; i < events.length; i++) cal.addEvent(events[i]);
     return cal.getCalendar().toString(); // CalendarOutputter performance sucks (jmh)
@@ -214,5 +216,9 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
     }
     return caGenerator.generateAsString(event);
   }  
+  
+  public void setSeriesService (SeriesService s) {
+    seriesService = s;
+  }
   
 }

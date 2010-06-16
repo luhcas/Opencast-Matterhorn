@@ -519,7 +519,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
     if (updatedCalendar < updated) calendars = new Hashtable<String, String>(); // reset all calendars, if data has been changed 
     
     SchedulerFilter filter = getFilterForCaptureAgent (captureAgentID); 
-    CalendarGenerator cal = new CalendarGenerator(dcGenerator, caGenerator);
+    CalendarGenerator cal = new CalendarGenerator(dcGenerator, caGenerator, seriesService);
     Event[] events = getEventsJPA(filter);
     
     for (int i = 0; i < events.length; i++) cal.addEvent(events[i]);

@@ -15,8 +15,23 @@
  */
 package org.opencastproject.scheduler.impl;
 
+import java.io.IOException;
+import java.io.StringWriter;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.impl.jpa.Event;
+import org.opencastproject.series.api.Series;
+import org.opencastproject.series.api.SeriesService;
 
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.DateTime;
@@ -39,6 +54,7 @@ import net.fortuna.ical4j.model.property.Version;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 /**
  *Create an iCalendar from the provided SchedulerEvents
@@ -50,6 +66,7 @@ public class CalendarGenerator {
   Calendar cal;
   DublinCoreGenerator dcGenerator;
   CaptureAgentMetadataGenerator caGenerator;
+  SeriesService seriesService;
   
   
   /**
@@ -57,13 +74,14 @@ public class CalendarGenerator {
    * @param dcGenerator A DublinCoreGenerator is needed but cannot be constructed in this object
    * @param caGenerator A CaptureAgentMetadataGenerator is needed but cannot be constructed in this object
    */
-  public CalendarGenerator (DublinCoreGenerator dcGenerator, CaptureAgentMetadataGenerator caGenerator) {
+  public CalendarGenerator (DublinCoreGenerator dcGenerator, CaptureAgentMetadataGenerator caGenerator, SeriesService seriesService) {
     cal = new Calendar();
     cal.getProperties().add(new ProdId("Opencast Matterhorn Calendar File 0.5"));
     cal.getProperties().add(Version.VERSION_2_0);
     cal.getProperties().add(CalScale.GREGORIAN);
     this.dcGenerator = dcGenerator;
     this.caGenerator = caGenerator;
+    this.seriesService = seriesService;
   }
   
   /**
@@ -97,6 +115,7 @@ public class CalendarGenerator {
     DateTime endDate = new DateTime(e.getEnddate());
     startDate.setUtc(true);
     endDate.setUtc(true);
+    String seriesID = null;
     
     VEvent event = new VEvent(startDate, endDate, e.getValue("title"));
     try {
@@ -108,24 +127,10 @@ public class CalendarGenerator {
       if (e.containsKey("creator") && ! e.getValue("creator").equalsIgnoreCase("null")) event.getProperties().add(new Organizer(pl ,e.getValue("creator").replace(" ", "_")+"@matterhorn.opencast"));
       if (e.containsKey("abstract") && ! e.getValue("abstract").equalsIgnoreCase("null")) event.getProperties().add(new Description(e.getValue("abstract")));
       if (e.containsKey("location") && ! e.getValue("location").equalsIgnoreCase("null")) event.getProperties().add(new Location(e.getValue("location")));
-      if (e.containsKey("seriesid") && ! e.getValue("seriesid").equalsIgnoreCase("null")) event.getProperties().add(new RelatedTo(e.getValue("seriesid")));
-      
-// Not used anyway, so skip it
-/*      if (e.getAttendees() != null) {
-        String [] attendees = e.getAttendees();
-        for (int i = 0; i < attendees.length; i++) {
-          ParameterList plAtt = new ParameterList();
-          plAtt.add(new Cn(attendees[i]));
-          // TODO Organizer should be URI (email-address?) created fake adress
-          if ( ! attendees[i].equals(e.getDevice())) event.getProperties().add(new Attendee(plAtt, attendees[i].replace(" ","_")+"@matterhorn.opencast"));
-        }
-      }*/
-/*      if (e.getResources() != null) {
-        String [] resources = e.getResources();
-        ResourceList resList = new ResourceList();
-        for (int i = 0; i < resources.length; i++) resList.add(resources[i]);     
-        event.getProperties().add(new Resources(resList));
-      }*/
+      if (e.containsKey("series-id") && ! e.getValue("series-id").equalsIgnoreCase("null")) {
+        seriesID = e.getValue("series-id");
+        event.getProperties().add(new RelatedTo(seriesID));
+      }
 
         ParameterList dcParameters = new ParameterList();
         dcParameters.add(new FmtType("application/xml"));
@@ -134,6 +139,20 @@ public class CalendarGenerator {
         dcParameters.add(new XParameter("X-APPLE-FILENAME", "metadata.xml"));
         Attach metadataAttachment = new Attach(dcParameters, dcGenerator.generateAsString(e).getBytes("UTF-8"));
         event.getProperties().add(metadataAttachment);
+
+        String seriesDC = getSeriesDublinCoreString(seriesID);
+        if (seriesDC != null) {
+          logger.debug("Attaching series {} information to event {}",seriesID, e.getEventId());
+          ParameterList sDcParameters = new ParameterList();
+          sDcParameters.add(new FmtType("application/xml"));
+          sDcParameters.add(Value.BINARY);
+          sDcParameters.add(Encoding.BASE64);
+          sDcParameters.add(new XParameter("X-APPLE-FILENAME", "series.xml"));
+          Attach seriesAttachment = new Attach(sDcParameters, seriesDC.getBytes("UTF-8"));
+          event.getProperties().add(seriesAttachment);
+        } else {
+          logger.debug("No series provided for event {}.", e.getEventId());
+        }
         
         ParameterList caParameters = new ParameterList(); 
         caParameters.add(new FmtType("application/text"));        
@@ -151,5 +170,34 @@ public class CalendarGenerator {
     
     logger.debug("new VEvent = {} ", event.toString() );
     return true;
+  }
+  
+  private String getSeriesDublinCoreString (String seriesID) {
+    if (seriesID == null || seriesID.length() == 0) return null;
+    if (seriesService == null) {
+      logger.warn("No SeriesService available");
+      return null;
+    }
+    Series series = seriesService.getSeries(seriesID); 
+    
+    try {
+      Document doc = ((DublinCoreCatalog) series.getDublinCore()).toXml();
+      
+      Source source = new DOMSource(doc);
+      StringWriter stringWriter = new StringWriter();
+      Result result = new StreamResult(stringWriter);
+      TransformerFactory factory = TransformerFactory.newInstance();
+      Transformer transformer = factory.newTransformer();
+      transformer.transform(source, result);
+    
+      return stringWriter.getBuffer().toString().trim(); 
+    } catch (ParserConfigurationException e) {
+      logger.error("Could not parse DublinCoreCatalog for Series: {}", e.getMessage());
+    } catch (IOException e) {
+      logger.error("Could not open DublinCoreCatalog for Series to parse it: {}", e.getMessage());
+    } catch (TransformerException e) {
+      logger.error("Could not transform DublinCoreCatalog for Series: {}", e.getMessage());
+    }
+    return null;
   }
 }
