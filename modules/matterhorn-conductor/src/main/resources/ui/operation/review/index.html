@@ -54,7 +54,7 @@
               var videoUrl = $(previewTag).parent().parent().find('url').text();
               //alert("videoUrl: " + videoUrl);
               $('#video-url-container').attr('href',videoUrl).text(videoUrl);
-              var url = '../../../engage/ui/preview.html?videoUrl=' + videoUrl;
+              var url = '../../../engage/ui/embed.html?videoUrl=' + videoUrl;
               $('#player-container').attr('src', url);
             } else {
               $('#player-container').text('No preview encoded track found in MediaPackage');
