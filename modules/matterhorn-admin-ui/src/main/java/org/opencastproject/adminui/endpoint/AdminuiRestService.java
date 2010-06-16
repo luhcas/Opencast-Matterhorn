@@ -253,22 +253,6 @@ public class AdminuiRestService {
     HashMap<String, Integer> out = new HashMap<String, Integer>();
     Integer total = new Integer(0);
 
-    // get number of upcoming recordings if scheduler is present
-    if (schedulerService != null) {
-      int upcoming = 0;
-      SchedulerEvent[] events = schedulerService.getUpcomingEvents();
-      Date current = new Date(System.currentTimeMillis());
-      for (SchedulerEvent event : events) {
-        if (current.before(event.getStartdate())) {
-          upcoming++;
-        }
-      }
-      out.put("upcoming", new Integer(upcoming));
-      total += events.length;
-    } else {
-      logger.warn("scheduler service not present, unable to retreive number of upcoming events");
-    }
-
     // get capturing statistics from scheduler if present
     /*if (schedulerService != null) {
       int capturing = 0;
@@ -293,14 +277,13 @@ public class AdminuiRestService {
         if ( (r.getState().equals(RecordingState.CAPTURING)) ||
              (r.getState().equals(RecordingState.UPLOADING)) ) {   // FIXME also take into account RecordingState.UNKNOWN ??
           capturing++;
+          total++;
         }
       }
       out.put("capturing", new Integer(capturing));
-      total += capturing;
     } else {
       logger.warn("CaptureAdmin service not present, unable to retrieve capture statistics");
     }
-
 
     // get statistics from workflowService if present
     if (workflowService != null) {
@@ -312,21 +295,26 @@ public class AdminuiRestService {
           case FAILED:
           case FAILING:
             errors++;
+            total++;
             break;
           case INSTANTIATED:
           case RUNNING:
             processing++;
+            total++;
             break;
           case PAUSED:
             if (workflows[i].getCurrentOperation().getState() == OperationState.PAUSED) {
               paused++;
+              total++;
             }
             break;
           case STOPPED:
             inactive++;
+            total++;
             break;
           case SUCCEEDED:
             finished++;
+            total++;
             break;
         }
       }
@@ -335,10 +323,26 @@ public class AdminuiRestService {
       out.put("errors", Integer.valueOf(errors));
       out.put("finished", Integer.valueOf(finished));
       out.put("hold", Integer.valueOf(paused));
-      total += i;
     } else {
       logger.warn("workflow service not present, unable to retrieve workflow statistics");
     }
+
+    // get number of upcoming recordings if scheduler is present
+    if (schedulerService != null) {
+      int upcoming = 0;
+      SchedulerEvent[] events = schedulerService.getUpcomingEvents();
+      Date current = new Date(System.currentTimeMillis());
+      for (SchedulerEvent event : events) {
+        if (current.before(event.getStartdate())) {
+          upcoming++;
+          total++;
+        }
+      }
+      out.put("upcoming", new Integer(upcoming));
+    } else {
+      logger.warn("scheduler service not present, unable to retreive number of upcoming events");
+    }
+
     out.put("total", total);
     return out;
   }
