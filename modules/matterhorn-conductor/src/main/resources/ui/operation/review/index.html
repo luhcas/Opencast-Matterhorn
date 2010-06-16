@@ -49,11 +49,11 @@
               }
             });
             // get neccessary data to call the preview player
-            var previewTag = $(data.documentElement).find("mediapackage > media > track > tags > tag:contains('preview')").first();
+            var previewTag = $(data.documentElement).find("mediapackage > media > track > tags > tag:contains('engage')").first();
             if (previewTag != null) {
               var videoUrl = $(previewTag).parent().parent().find('url').text();
               //alert("videoUrl: " + videoUrl);
-              $('#video-url-container').attr('href',videoUrl).text(videoUrl);
+              //$('#video-url-container').attr('href',videoUrl).text(videoUrl);
               var url = '../../../engage/ui/embed.html?videoUrl=' + videoUrl;
               $('#player-container').attr('src', url);
             } else {
@@ -62,7 +62,8 @@
             // show links to source media
             var singleFile = true;
             $(data.documentElement).find("mediapackage > media > track").each(function(index, elm) {
-              if (($(elm).attr('type').split(/\//)[1] == 'source') && ($(elm).find("tags > tag:contains('preview')").empty())) {
+              //if (($(elm).attr('type').split(/\//)[1] == 'source') && ($(elm).find("tags > tag:contains('preview')").empty())) {
+              if ($(elm).attr('type').split(/\//)[1] == 'source') {
                 var link = document.createElement('a');
                 var url = $(elm).find('url').text();
                 $(link).attr('href', url);
@@ -88,7 +89,7 @@
       <iframe id="player-container"></iframe>
     </center>
     <center>
-      <span>Video URL:<a id="video-url-container" href=""></a></span>
+      <!-- span>Video URL:<a id="video-url-container" href=""></a></span -->
       <br>
     </center>
     <div id="metadata-container">
