@@ -251,7 +251,7 @@ public class AdminuiRestService {
    */
   public HashMap<String, Integer> getRecordingsStatistic() {
     HashMap<String, Integer> out = new HashMap<String, Integer>();
-    Integer total = new Integer(0);
+    Integer total = 0;
 
     // get capturing statistics from scheduler if present
     /*if (schedulerService != null) {
@@ -320,7 +320,7 @@ public class AdminuiRestService {
       }
       out.put("processing", Integer.valueOf(processing));
       out.put("inactive", Integer.valueOf(inactive));
-      out.put("errors", Integer.valueOf(errors));
+      out.put("failed", Integer.valueOf(errors));
       out.put("finished", Integer.valueOf(finished));
       out.put("hold", Integer.valueOf(paused));
     } else {
@@ -343,7 +343,7 @@ public class AdminuiRestService {
       logger.warn("scheduler service not present, unable to retreive number of upcoming events");
     }
 
-    out.put("total", total);
+    out.put("all", new Integer(total));
     return out;
   }
 
