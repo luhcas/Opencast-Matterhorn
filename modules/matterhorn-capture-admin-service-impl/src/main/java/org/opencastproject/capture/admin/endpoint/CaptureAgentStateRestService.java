@@ -34,11 +34,14 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
@@ -149,7 +152,22 @@ public class CaptureAgentStateRestService {
       logger.debug("Agents: {}", data);
       //Run through and build a map of updates (rather than states)
       for (Entry<String, Agent> e : data.entrySet()) {
-        update.add(new AgentStateUpdate(e.getValue()));
+        AgentStateUpdate updateItem = new AgentStateUpdate(e.getValue());
+        Properties props = service.getAgentCapabilities(updateItem.name);
+        Iterator<String> propKeys = props.stringPropertyNames().iterator();
+        Set<String> devices = new HashSet<String>();
+        while (propKeys.hasNext()) {
+          String key = propKeys.next();
+          String[] parts = key.split("\\.");
+          if ((parts[1].equalsIgnoreCase("device")) && (!parts[2].equalsIgnoreCase("timezone"))) {  // FIXME not nice the whole thing here
+            devices.add(parts[2]);
+          }
+        }
+        Iterator<String> deviceIter = devices.iterator();
+        while (deviceIter.hasNext()) {
+          updateItem.capabilities += deviceIter.next() + " "; // FIXME should be joined corretly
+        }
+        update.add(updateItem);
       }
     } else {
       logger.info("Service was null for getKnownAgents");
