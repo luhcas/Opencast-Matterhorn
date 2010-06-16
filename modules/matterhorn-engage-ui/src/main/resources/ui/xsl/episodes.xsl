@@ -8,13 +8,17 @@
 			<div class="oc-search-result-item">
 				<div class="table-row">
 					<div class="left-container13">
-						<img height="54">
-							<xsl:attribute name="src"><xsl:value-of
-								select="cover" /></xsl:attribute>
-						</img>
+						<img height="72">
+				    <xsl:for-each select="mediapackage/attachments/attachment">
+				      <xsl:choose>
+				        <xsl:when test="@type='presenter/search+preview'">
+				          <xsl:attribute name="src"><xsl:value-of select="url" /></xsl:attribute>
+				        </xsl:when>
+				      </xsl:choose>
+				    </xsl:for-each>
+           </img>
 					</div>
 					<div class="left-container23">
-
 						<xsl:choose>
 							<xsl:when test="mediapackage/media/track/mimetype[.='video/x-flv']">
 								<b>

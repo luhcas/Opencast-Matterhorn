@@ -227,20 +227,17 @@
       </xsl:choose>
     </div>
 
-    <div id="oc-cover-feed" style="display: none">
-      <xsl:choose>
-        <xsl:when test="ns2:search-results/result/cover">
-          <xsl:value-of select="ns2:search-results/result/cover" />
-        </xsl:when>
-        <xsl:otherwise>
-        </xsl:otherwise>
-      </xsl:choose>
-    </div>
-
     <xsl:for-each select="ns2:search-results/result/mediapackage/attachments/attachment">
       <xsl:choose>
-        <xsl:when test="contains(url, 'engage')">
+        <xsl:when test="@type='presenter/player+preview'">
           <div id="oc-cover-engage" style="display: none">
+            <xsl:value-of select="url"/>
+          </div>
+        </xsl:when>
+      </xsl:choose>
+      <xsl:choose>
+        <xsl:when test="@type='presenter/search+preview'">
+          <div id="oc-cover-feed" style="display: none">
             <xsl:value-of select="url"/>
           </div>
         </xsl:when>
