@@ -299,7 +299,7 @@
       </xsl:if>
     </xsl:for-each>
     
-    <div id="oc-segments-text">
+    <div id="oc-segments-text" style="display: none">
       <table cellspacing="0" cellpadding="0">
            <xsl:for-each select="ns2:search-results/result/segments/segment">
            <xsl:if test="(../../mediapackage/@duration) > ./@time">

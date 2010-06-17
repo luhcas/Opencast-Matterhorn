@@ -9,7 +9,6 @@ var Opencast = Opencast || {};
 Opencast.segments = ( function() {
 
   var totalPanels;
-
   /**
    * @memberOf Opencast.segments
    * @description Initializes the segments view
@@ -39,6 +38,11 @@ Opencast.segments = ( function() {
       $(".right").click(function(){ change(true); }); 
       $(".left").click(function(){ change(false); });
     }
+    
+    $(document).everyTime(500, function(i) {
+    //  $('#oc_title').html(i);
+    }, 10);
+
   }
 
   /**

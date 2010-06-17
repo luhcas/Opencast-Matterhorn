@@ -133,6 +133,7 @@ table
   float:                    left;
   width:                    40%;
   text-align:               right;
+  margin-top:               12px;
 }
 
 #oc_sound
@@ -344,7 +345,7 @@ table
   margin-left:              -6px;
   position:                 relative; 
   border:                   0px;
-  top:                      -11px; 
+  top:                      4px; 
   z-index:                  2;
 }
 
@@ -358,7 +359,7 @@ table
   margin-left:              -6px;
   position:                 relative; 
   border:                   0px;
-  top:                      -12px; 
+  top:                      3px; 
   z-index:                  3;
 }
 
