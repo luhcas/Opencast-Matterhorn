@@ -291,15 +291,17 @@ Opencast.Initialize = (function ()
         // Handler for .click()
         $('#oc_btn-skip-backward').click(function () 
         {
-            Opencast.Player.doSkipBackward();
+            var sec = Opencast.segments.getSecondsBeforeSlide();
+            Opencast.Watch.seekSegment(sec);
+        });
+        $('#oc_btn-skip-forward').click(function () 
+        {
+          var sec = Opencast.segments.getSecondsNextSlide();
+          Opencast.Watch.seekSegment(sec);
         });
         $('#oc_btn-play-pause').click(function () 
         {
             Opencast.Player.doTogglePlayPause();
-        });
-        $('#oc_btn-skip-forward').click(function () 
-        {
-            Opencast.Player.doSkipForward();
         });
         $('#oc_btn-volume').click(function () 
         {

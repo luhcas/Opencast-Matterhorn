@@ -9,6 +9,19 @@ var Opencast = Opencast || {};
 Opencast.segments = ( function() {
 
   var totalPanels;
+  var segmentTimes;
+  var beforeSlide = 0;
+  var currentSlide = 0;
+  var nextSlide = 0;
+
+  function getSecondsBeforeSlide(){
+    return beforeSlide;
+  }
+
+  function getSecondsNextSlide(){
+    return nextSlide;
+  }
+
   /**
    * @memberOf Opencast.segments
    * @description Initializes the segments view
@@ -26,7 +39,6 @@ Opencast.segments = ( function() {
 
       $("#slider").data("currentlyMoving", false);
 
-        
        if($panels[0] !== undefined){
           $container
             .css('width', ($panels[0].offsetWidth * $panels.length))
@@ -38,10 +50,40 @@ Opencast.segments = ( function() {
       $(".right").click(function(){ change(true); }); 
       $(".left").click(function(){ change(false); });
     }
-    
-    $(document).everyTime(500, function(i) {
-    //  $('#oc_title').html(i);
-    }, 10);
+
+    var segmentTimes = new Array(); 
+    $('.segments-time').each( function(i) {
+      var seconds= $(this).html();
+      segmentTimes[i] = seconds;
+    });
+
+    $(document).everyTime(500, function(index) {
+      var currentPosition = parseInt(Opencast.Player.getCurrentPosition());
+      var last = 0;
+      var cur = 0;
+      var ibefore = 0;
+
+      // last segment
+      if (segmentTimes[segmentTimes.length-1] <= currentPosition){
+        var ibefore = Math.max(segmentTimes.length-2,0);
+        beforeSlide = segmentTimes[ibefore];
+        currentSlide = segmentTimes[segmentTimes.length-1];;
+        nextSlide = currentSlide;
+      } else{
+        for (i in segmentTimes)
+        {
+          cur = segmentTimes[i];
+          if (last <= currentPosition && currentPosition < cur){
+            ibefore = Math.max(parseInt(i)-2,0);
+            beforeSlide = segmentTimes[ibefore];
+            currentSlide = last;
+            nextSlide = segmentTimes[i];
+            break;
+          }
+          last = cur;
+        }
+      }
+    }, 0);
 
   }
 
@@ -76,6 +118,8 @@ Opencast.segments = ( function() {
   }
 
   return {
+    getSecondsBeforeSlide : getSecondsBeforeSlide,
+    getSecondsNextSlide : getSecondsNextSlide,
     initialize : initialize
   };
 }());

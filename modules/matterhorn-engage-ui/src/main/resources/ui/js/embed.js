@@ -163,8 +163,10 @@ Opencast.Watch = (function ()
           
           
           getClientShortcuts();
-          
-       });
+
+          Opencast.segments.initialize();
+
+        });
     }
   
     /**
