@@ -145,16 +145,20 @@ public class ConfidenceMonitorRestService {
       return Response.serverError().build();
     }
     
-    List<Double> rmsValues = service.getRMSValues(device, timestamp);
-    for (int i = 0; i < rmsValues.size(); i++) {
-      double value = rmsValues.get(i);
-      value = Math.round(value * 100.00) / 100.00;
-      rmsValues.set(i, value);
+    try {
+      List<Double> rmsValues = service.getRMSValues(device, timestamp);
+      for (int i = 0; i < rmsValues.size(); i++) {
+        double value = rmsValues.get(i);
+        value = Math.round(value * 100.00) / 100.00;
+        rmsValues.set(i, value);
+      }
+      jsonOutput.put("start", timestamp);
+      jsonOutput.put("interval", "100000000");
+      jsonOutput.put("samples", rmsValues);
+      return Response.ok(jsonOutput.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
+    } catch (NullPointerException e) {
+      return Response.ok("Device " + device + " does not exist.").build();
     }
-    jsonOutput.put("start", timestamp);
-    jsonOutput.put("interval", "100000000");
-    jsonOutput.put("samples", rmsValues);
-    return Response.ok(jsonOutput.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
   }
   
   @GET
