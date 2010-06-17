@@ -9,6 +9,7 @@ capture.device.bt878.outputfile=bt878.ogg
 capture.device.bt878.src=/dev/bt878
 capture.device.microphone.codec.bitrate=192000
 capture.device.microphone.codec=vorbisenc
+capture.device.microphone.container=oggmux
 capture.device.microphone.flavor=presenter/source
 capture.device.microphone.outputfile=microphone.ogg
 capture.device.microphone.src=hw:0
