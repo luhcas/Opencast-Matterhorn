@@ -63,6 +63,11 @@ flavors=($FLAVORS)
 
 unset allDevices
 unset cleanName
+
+# Log statement to explain the log syntax
+echo >> $LOG_FILE
+echo "Installed devices (Clean Name ; Device Name ; Symbolic Link)" >> $LOG_FILE
+
 for (( i = 0; i < ${#device[@]}; i++ )); do
 
     # Ask the user whether or not they want to configure this device
@@ -213,6 +218,9 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     echo "capture.device.${cleanName[$i]}.outputfile=${cleanName[$i]}" >> $CAPTURE_PROPS
     echo "capture.device.${cleanName[$i]}.flavor=$flavor" >> $CAPTURE_PROPS
     allDevices="${allDevices}${cleanName[$i]},"
+    
+    # Log this device
+    echo "${cleanName[$i]} ; ${devName[$i]} ; $symlinkName" >> $LOG_FILE
 
     echo
 done
@@ -313,8 +321,11 @@ if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
 
     allDevices="${allDevices}${cleanName[$i]}"
 
+    # Log this device
+    echo "${cleanName[$i]} ; ${audioDevName[$i]} ; $audioDevice" >> $LOG_FILE
+
     echo
 fi
 
-
+# Add the list of installed names
 echo "capture.device.names=${allDevices}" >> $CAPTURE_PROPS

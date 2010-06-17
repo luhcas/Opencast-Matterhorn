@@ -129,6 +129,11 @@ echo "Done"
 export JAVA_HOME=$JAVA_PREFIX/`ls $JAVA_PREFIX | grep ^$JAVA_PATTERN$`
 export PKG_LIST=${noinst[@]}
 
+# Log the list of installed packages
+echo >> $LOG_FILE
+echo "# Installed packages" >> $LOG_FILE
+echo "$PKG_LIST" >> $LOG_FILE
+
 # Setup felix
 echo -n "Downloading Felix... "
 while [[ true ]]; do 

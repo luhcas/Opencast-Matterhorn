@@ -30,18 +30,18 @@ if [[ -n "$(echo "${keep:-Y}" | grep -i '^n')" ]]; then
 	: ${response:=${SRC_DEFAULT##*/}}
 
 	if [[ "$response" == "${TRUNK_URL##*/}" ]]; then
-	    address=$TRUNK_URL
+	    url=$TRUNK_URL
 	else
 	    # Check the branches first
-	    address=$BRANCHES_URL/$response
-	    svn info $address &> /dev/null
-	    # If $address does not exist, try the tags
-	    [[ $? -ne 0 ]] && address=$TAGS_URL/$response
+	    url=$BRANCHES_URL/$response
+	    svn info $url &> /dev/null
+	    # If $url does not exist, try the tags
+	    [[ $? -ne 0 ]] && url=$TAGS_URL/$response
 	fi
 
 	rm -rf $SOURCE
-	echo -n "Attempting to download matterhorn source from $address... "
-	svn co --force $address $SOURCE &> /dev/null	
+	echo -n "Attempting to download matterhorn source from $url... "
+	svn co --force $url $SOURCE &> /dev/null	
 
 	if [[ $? -eq 0 ]]; then
 	    #### Exit the loop ####
@@ -54,6 +54,11 @@ if [[ -n "$(echo "${keep:-Y}" | grep -i '^n')" ]]; then
     done
     echo "Done"
 fi
+
+# Log the URL downloaded -or already present-
+echo >> $LOG_FILE
+echo "# Source code URL" >> $LOG_FILE
+echo "$url" >> $LOG_FILE
 
 # Setup felix configuration
 echo -n "Applying matterhorn configuration files to felix... "

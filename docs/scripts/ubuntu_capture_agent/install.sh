@@ -58,6 +58,9 @@ export DEFAULT_SECURITY=http://security.ubuntu.com/ubuntu
 # URL of the default Ubuntu 'partner' mirror
 export DEFAULT_PARTNER=http://archive.canonical.com/ubuntu
 
+# Logging file                                                                                                                                               
+export LOG_FILE=$START_PATH/install_info.txt
+
 # The subsidiary scripts will check for this variable to check they are being run from here
 export INSTALL_RUN=true
 
@@ -163,6 +166,22 @@ rm -rf $WORKING_DIR
 mkdir -p $WORKING_DIR
 cd $WORKING_DIR
 
+# Log the technical outputs                                                                                                                                  
+echo "# Output of uname -a" > $LOG_FILE
+uname -a >> $LOG_FILE
+echo >> $LOG_FILE
+echo "# Total memory" >> $LOG_FILE
+echo $(cat /proc/meminfo | grep -m 1 . | cut -d ':' -f 2) >> $LOG_FILE
+echo >> $LOG_FILE
+echo "# Processor(s) model name(s)"
+IFS='                                                                                                                                                        
+'
+models=$(cat /proc/cpuinfo | sed -e '/model name/!d' -e 's/^.*: *//g')
+unset IFS
+for name in $models; do
+    echo $name >> $LOG_FILE
+done
+
 # If wget isn't installed, get it from the ubuntu software repo
 wget foo &> /dev/null
 if [ $? -eq 127 ]; then
@@ -248,6 +267,11 @@ cd $WORKING_DIR
 
 # Set up the file to run matterhorn automatically on startup
 ${SETUP_BOOT}
+
+# Log the contents of /etc/issue
+echo >> $LOG_FILE
+echo "# Contents in /etc/issue" >> $LOG_FILE
+cat /etc/issue >> $LOG_FILE
 
 echo -e "\n\n\nCapture Agent succesfully installed\n\n\n"
 
