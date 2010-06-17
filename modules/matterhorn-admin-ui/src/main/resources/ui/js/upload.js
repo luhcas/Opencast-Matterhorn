@@ -134,7 +134,7 @@ Upload.init = function() {
   // test if we upload a new recording or want to retry a workflow
   Upload.retryId = Upload.getURLParam("retry");
   if (Upload.retryId != '') {
-    $('#i18n_page_title').text("Edit Recording");
+    $('#i18n_page_title').text("Edit Recording for Retry");
     Upload.initRetry(Upload.retryId);
   } else {                                             // FIXME well this has to be cleaned up, agile...
     Upload.retryId = Upload.getURLParam("edit");
@@ -246,12 +246,16 @@ Upload.checkRequiredFields = function(submit) {
       if ((submit) || ($('#container-missingFields').is(':visible'))) {
         $(this).prev('.fl-label').css('color','red');
       }
+      if ((submit) && $('#track').val() == '') {
+        $('#i18n_upload_file').css('color','red');
+      }
       missing = true;
     } else {
       $('#notification-' + $(this).attr('id')).hide();
       $(this).prev('.fl-label').css('color','black');
     }
   });
+
   // check for right file extension
   /*
   if ($('#track').val() != '') {
@@ -330,6 +334,8 @@ Upload.showSuccessScreen = function() {
         }
       }
     }
+    $('#field-filename').children('.fieldValue').text(UploadListener.shortFilename);
+    
   });
 }
 
@@ -342,6 +348,8 @@ Upload.showFailedScreen = function(message) {
     if (message) {
       $('#error-message').text(message).show();
     }
+    $('#field-filename').children('.fieldValue').text(UploadListener.shortFilename);
+    
   });
 }
 

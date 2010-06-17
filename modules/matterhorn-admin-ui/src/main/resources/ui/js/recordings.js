@@ -155,11 +155,12 @@ Recordings.displayRecordings = function(state, reload) {
         item = item.replace(/SUCCEEDED/,'Succeeded')
         .replace(/FAILED/,'Failed')
         .replace(/RUNNING: /,'')
+        .replace(/INSTANTIATED:/,'Instantiated')
         .replace(/inspect/,'Inspecting media')
         .replace(/compose/,'Encoding media')
         .replace(/image/,'Creating cover image')
-        .replace(/distribute_local/,'Distributing')
-        .replace(/publish/,'Distributing');
+        .replace(/distribute_local/,'Distributed')
+        .replace(/publish/,'Distributed');
         $(this).text(item);
         if ( items[key].match(/FAILED/) ) {
           return;
