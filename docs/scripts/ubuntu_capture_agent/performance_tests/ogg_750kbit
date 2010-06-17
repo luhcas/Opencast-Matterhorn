@@ -19,6 +19,7 @@ capture.device.vga.buffer.size=200
 capture.device.vga.buffer.time=2000000000
 capture.device.vga.codec.bitrate=750
 capture.device.vga.codec=theoraenc
+capture.device.vga.container=oggmux
 capture.device.vga.flavor=presenter/source
 capture.device.vga.outputfile=vga.ogg
 capture.device.vga.src=/dev/vga
