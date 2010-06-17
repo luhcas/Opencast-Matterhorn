@@ -465,6 +465,7 @@ public class SchedulerServiceImplTest {
     
   }
   
+  @Ignore
   @Test 
   public void test5RecurringEvents () {
     
