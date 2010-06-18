@@ -40,6 +40,7 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
@@ -86,6 +87,7 @@ public class Event extends AbstractEvent {
   protected String eventId;
   
   @Transient 
+  @XmlTransient
   RecurringEvent recurringEvent = null;
   
   @XmlElementWrapper(name="metadata_list")
