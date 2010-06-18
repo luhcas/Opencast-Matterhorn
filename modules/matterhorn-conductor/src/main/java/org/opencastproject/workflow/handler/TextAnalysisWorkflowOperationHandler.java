@@ -251,7 +251,8 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         Attachment image = null;
         try {
           MediaTimePoint tp = videoSegment.getMediaTime().getMediaTimePoint();
-          image = extractImage(sourceTrack, tp.getTimeInMilliseconds()/1000); //quick fix rrolf
+          long seconds = tp.getTimeInMilliseconds()/1000;
+          image = extractImage(sourceTrack, seconds);
         } catch (EncoderException e) {
           logger.error("Error creating still image from {}", sourceTrack);
           throw e;
