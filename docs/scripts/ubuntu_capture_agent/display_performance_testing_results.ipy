@@ -9,12 +9,16 @@ for run in runs:
 
 	!rm -rf graph.gp
 	!rm -rf graph2
-
+	print("Starting log parse")
+	#Create a dictionary of dictionaries of timestamp:buffer value pairs
 	log=!cat opencast.log
 	devices = {}
+	#                       HH:MM:SS   dbglvl  class:line  dev   val,val,val
 	pattern = re.compile("(\d+:\d+:\d+) \w+ \(\w+:\d+\) - (\w+),(\d+,\d+,\d+)")
 	for line in log:
 		match = pattern.search(line)
+		if match == None:
+			continue
 		time = match.group(1)
 		name = match.group(2)
 		stats = match.group(3)
@@ -26,6 +30,34 @@ for run in runs:
 			device = devices[name]
 			device[time] = stats
 
+	print("Ripping frames")
+	capturedFrames = []
+	#Create the snapshots of each video
+	#                                N/A    HH:MM:SS.MS
+	pattern = re.compile("Duration: (N/A|\d+:\d+:\d+\.\d+)")
+	videos = !ls
+	for video in videos:
+		ffmpeg_output = !ffmpeg -i $video 2>&1
+		for line in ffmpeg_output:
+			match = pattern.search(line)
+			#This is None in the case where the line doesn't contain a Duration...
+			if match == None:
+				continue
+			duration = match.group(1)
+			if duration == "N/A":
+				print(video + " has N/A in the duration field...")
+			else:
+				print(video + " has a duration of " + duration)
+				times = duration.split(":")
+				time = int(duration[0]) * 60 * 60
+				time = time + int(times[1]) * 60
+				time = time + float(times[2])
+				outputfilename = video + ".png"
+				!ffmpeg -i $video -t ${time/2} $outputfilename 2>&1
+				if ".mp3" not in video:
+					capturedFrames.append(outputfilename)
+
+	print("Working...")
 	graph=!cat dstat.log
 	
 	while graph[0]!= '':
@@ -71,6 +103,8 @@ for run in runs:
 	!gnuplot -persist graph.gp
 	
 	output="<html><body>\n"
+	for frame in capturedFrames:
+		output = output + "<img src='" + frame + "'/><p>\n"
 	for i in range(0,len(plot_cmds)):
 		output = output + "<img src='" + str(i) + ".png'/><p>\n"
 	
