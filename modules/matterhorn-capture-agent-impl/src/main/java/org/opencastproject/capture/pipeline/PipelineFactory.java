@@ -338,12 +338,18 @@ public class PipelineFactory {
     Element dec, enc, muxer;
     Element filesrc = ElementFactory.make("filesrc", null);
     Element queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
-    if (bufferCount != null)
+    if (bufferCount != null) {
+      logger.debug("{} bufferCount set to {}.", captureDevice.getName(), bufferCount);
       queue.set("max-size-buffers", bufferCount);
-    if (bufferBytes != null)
+    }
+    if (bufferBytes != null) {
+      logger.debug("{} bufferBytes set to {}.", captureDevice.getName(), bufferBytes);
       queue.set("max-size-bytes", bufferBytes);
-    if (bufferTime != null)
+    }
+    if (bufferTime != null) {
+      logger.debug("{} bufferTime set to {}.", captureDevice.getName(), bufferTime);
       queue.set("max-size-time", bufferTime);
+    }
 
     Element mpegpsdemux = ElementFactory.make("mpegpsdemux", null);
     final Element mpegvideoparse = ElementFactory.make("mpegvideoparse", null);
@@ -450,12 +456,18 @@ public class PipelineFactory {
     Element enc, muxer;
     Element v4lsrc = ElementFactory.make("v4lsrc", null);
     Element queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
-    if (bufferCount != null)
+    if (bufferCount != null) {
+      logger.debug("{} bufferCount set to {}.", captureDevice.getName(), bufferCount);
       queue.set("max-size-buffers", bufferCount);
-    if (bufferBytes != null)
+    }
+    if (bufferBytes != null) {
+      logger.debug("{} bufferBytes set to {}.", captureDevice.getName(), bufferBytes);
       queue.set("max-size-bytes", bufferBytes);
-    if (bufferTime != null)
+    }
+    if (bufferTime != null) {
+      logger.debug("{} bufferTime set to {}.", captureDevice.getName(), bufferTime);
       queue.set("max-size-time", bufferTime);
+    }
 
     Element videoscale = ElementFactory.make("videoscale", null);
     Element videorate = ElementFactory.make("videorate", null);
@@ -563,12 +575,18 @@ public class PipelineFactory {
     Element alsasrc = ElementFactory.make("alsasrc", null);
     Element queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
     Element audioconvert = ElementFactory.make("audioconvert", null);
-    if (bufferCount != null)
+    if (bufferCount != null) {
+      logger.debug("{} bufferCount set to {}.", captureDevice.getName(), bufferCount);
       queue.set("max-size-buffers", bufferCount);
-    if (bufferBytes != null)
+    }
+    if (bufferBytes != null) {
+      logger.debug("{} bufferBytes set to {}.", captureDevice.getName(), bufferBytes);
       queue.set("max-size-bytes", bufferBytes);
-    if (bufferTime != null)
+    }
+    if (bufferTime != null) {
+      logger.debug("{} bufferTime set to {}.", captureDevice.getName(), bufferTime);
       queue.set("max-size-time", bufferTime);
+    }
 
     if (codec != null) {
       logger.debug("{} encoder set to: {}", captureDevice.getName(), codec);
@@ -657,12 +675,18 @@ public class PipelineFactory {
     Element enc, muxer;
     Element v4l2src = ElementFactory.make("v4l2src", null);
     Element queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
-    if (bufferCount != null)
+    if (bufferCount != null) {
+      logger.debug("{} bufferCount set to {}.", captureDevice.getName(), bufferCount);
       queue.set("max-size-buffers", bufferCount);
-    if (bufferBytes != null)
+    }
+    if (bufferBytes != null) {
+      logger.debug("{} bufferBytes set to {}.", captureDevice.getName(), bufferBytes);
       queue.set("max-size-bytes", bufferBytes);
-    if (bufferTime != null)
+    }
+    if (bufferTime != null) {
+      logger.debug("{} bufferTime set to {}.", captureDevice.getName(), bufferTime);
       queue.set("max-size-time", bufferTime);
+    }
 
     if (codec != null) {
       logger.debug("{} encoder set to: {}", captureDevice.getName(), codec);
