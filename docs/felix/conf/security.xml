@@ -10,9 +10,9 @@
   <sec:http create-session="ifRequired" servlet-api-provision="true" realm="Opencast Matterhorn" entry-point-ref="matterhornEntryPoint">
     <sec:intercept-url  pattern="/favicon.ico" filters="none"/>
     <sec:intercept-url  pattern="/shared_img/**" filters="none"/>
-    <sec:intercept-url  pattern="/engage/ui/**" filters="none"/>
+    <sec:intercept-url pattern='/engage/ui/**' access='ROLE_ANONYMOUS, ROLE_USER'/>
     <sec:intercept-url pattern='/style.css' access='ROLE_ANONYMOUS, ROLE_USER, ROLE_ADMIN'/>
-    <sec:intercept-url pattern='/images/**' access='ROLE_ANONYMOUS, ROLE_USER, ROLE_ADMIN '/>
+    <sec:intercept-url pattern='/images/**' access='ROLE_ANONYMOUS, ROLE_USER, ROLE_ADMIN'/>
     <sec:intercept-url pattern='/login.html' access='ROLE_ANONYMOUS'/>
     <sec:intercept-url pattern='/**' access='ROLE_USER, ROLE_ADMIN'/>
     <sec:x509 subject-principal-regex="CN=(.*?)," user-service-ref="userDetailsService"/>
