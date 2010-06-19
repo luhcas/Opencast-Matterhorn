@@ -6,8 +6,8 @@
   <service>
     <provide interface="org.apache.felix.fileinstall.ArtifactInstaller" />
   </service>
-  <reference name="repository" interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository"
-    cardinality="1..1" policy="static" bind="setFileRepository"/>
   <reference name="ingest" interface="org.opencastproject.ingest.api.IngestService"
     cardinality="1..1" policy="static" bind="setIngestService" />
+  <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
+    cardinality="1..1" policy="static" bind="setWorkspace" />
 </scr:component>

@@ -546,6 +546,51 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     return uris;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#hashMediaPackageElement(java.lang.String,
+   *      java.lang.String)
+   */
+  @Override
+  public String hashMediaPackageElement(String mediaPackageID, String mediaPackageElementID) throws IOException {
+    return md5(getFile(mediaPackageID, mediaPackageElementID));
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#hashCollectionElement(java.lang.String,
+   *      java.lang.String)
+   */
+  @Override
+  public String hashCollectionElement(String collectionId, String fileName) throws IOException {
+    return md5(getFileFromCollection(collectionId, fileName));
+  }
+
+  /**
+   * Returns the md5 of a file
+   * 
+   * @param file
+   *          the source file
+   * @return the md5 hash
+   */
+  protected String md5(File file) throws IOException {
+    if(file == null) {
+      throw new IllegalArgumentException("File must not be null");
+    }
+    if( ! file.exists() || ! file.isFile()) {
+      throw new IllegalArgumentException("File " + file.getAbsolutePath() + " can not be read");
+    }
+    InputStream in = null;
+    try {
+      in = new FileInputStream(file);
+      return DigestUtils.md5Hex(in);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+  }
+
   public long getTotalSpace() {
     File f = new File(rootDirectory);
     return f.getTotalSpace();

@@ -16,7 +16,7 @@
 package org.opencastproject.ingest.scanner;
 
 import org.opencastproject.ingest.api.IngestService;
-import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
+import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -36,16 +36,22 @@ import java.io.IOException;
 public class InboxScanner implements ArtifactInstaller {
   private static final Logger logger = LoggerFactory.getLogger(InboxScanner.class);
 
-  protected WorkingFileRepository fileRepository;
+  protected Workspace workspace = null;
   
-  public void setFileRepository(WorkingFileRepository fileRepository) {
-    this.fileRepository = fileRepository;
-  }
-
   protected IngestService ingestService;
   
   public void setIngestService(IngestService ingestService) {
     this.ingestService = ingestService;
+  }
+
+  /**
+   * Sets the workspace
+   * 
+   * @param workspace
+   *          an instance of the workspace
+   */
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
   }
 
   /**
@@ -72,7 +78,7 @@ public class InboxScanner implements ArtifactInstaller {
       FileInputStream in = null;
       try {
         in = new FileInputStream(artifact);
-        fileRepository.putInCollection("inbox", artifact.getName(), in);
+        workspace.putInCollection("inbox", artifact.getName(), in);
         logger.info("Ingested '{}' as an inbox file", artifact.getAbsolutePath());
       } catch(IOException e) {
         logger.warn("Unable to process inbox file '{}', {}", artifact.getAbsolutePath(), e);

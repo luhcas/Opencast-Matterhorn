@@ -41,7 +41,6 @@ import org.opencastproject.metadata.mpeg7.VideoTextImpl;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
-import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.component.ComponentContext;
@@ -86,9 +85,6 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
 
   /** Reference to the receipt service */
   private RemoteServiceManager remoteServiceManager = null;
-
-  /** The repository to store the mpeg7 catalogs */
-  private WorkingFileRepository repository = null;
 
   /** The workspace to ue when retrieving remote media files */
   private Workspace workspace = null;
@@ -259,7 +255,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   protected URI uploadMpeg7(Mpeg7CatalogImpl catalog) throws TransformerFactoryConfigurationError,
           TransformerException, ParserConfigurationException, IOException, URISyntaxException {
     InputStream in = mpeg7CatalogService.serialize(catalog);
-    return repository.putInCollection(COLLECTION_ID, UUID.randomUUID().toString(), in);
+    return workspace.putInCollection(COLLECTION_ID, UUID.randomUUID().toString(), in);
   }
 
   /**
@@ -317,16 +313,6 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
    */
   public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
-  }
-
-  /**
-   * Sets the file repository
-   * 
-   * @param repository
-   *          an instance of the working file repository
-   */
-  public void setFileRepository(WorkingFileRepository repository) {
-    this.repository = repository;
   }
 
   /**

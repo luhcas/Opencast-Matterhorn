@@ -31,11 +31,12 @@ import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
-import org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryImpl;
+import org.opencastproject.workspace.api.Workspace;
 
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
+import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -43,6 +44,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -65,7 +67,7 @@ public class WorkflowServiceImplTest {
   private WorkflowOperationHandler failingOperationHandler = null;
   private WorkflowServiceImplDaoFileImpl dao = null;
   private Set<HandlerRegistration> handlerRegistrations = null;
-  private WorkingFileRepositoryImpl repo = null;
+  private Workspace workspace = null;
 
   @Before
   public void setup() throws Exception {
@@ -92,9 +94,12 @@ public class WorkflowServiceImplTest {
         return handlerRegistrations;
       }
     };
-    repo = new WorkingFileRepositoryImpl(storageRoot, sRoot.toURI().toString());
+    workspace = EasyMock.createNiceMock(Workspace.class);
+    EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);
+    EasyMock.replay(workspace);
+    
     dao = new WorkflowServiceImplDaoFileImpl();
-    dao.setRepository(repo);
+    dao.setWorkspace(workspace);
     dao.setStorageRoot(storageRoot + File.separator + "lucene." + System.currentTimeMillis());
     dao.activate();
     service.setDao(dao);

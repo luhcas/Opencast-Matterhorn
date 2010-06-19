@@ -18,14 +18,15 @@ package org.opencastproject.metadata.mpeg7;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.metadata.api.CatalogService;
-import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.workspace.api.NotFoundException;
+import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -40,10 +41,10 @@ import javax.xml.transform.stream.StreamResult;
  */
 public class Mpeg7CatalogService implements CatalogService<Mpeg7Catalog> {
 
-  protected TrustedHttpClient trustedHttpClient;
+  protected Workspace workspace = null;
   
-  public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
-    this.trustedHttpClient = trustedHttpClient;
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
   }
 
   /**
@@ -84,14 +85,16 @@ public class Mpeg7CatalogService implements CatalogService<Mpeg7Catalog> {
     if(catalog == null) throw new IllegalArgumentException("Catalog must not be null");
     URI uri = catalog.getURI();
     if(uri == null) throw new IllegalStateException("Found catalog without a URI");
-    HttpGet get = new HttpGet(uri);
-    HttpResponse response = trustedHttpClient.execute(get);
-    int httpStatus = response.getStatusLine().getStatusCode();
-    if(httpStatus != HttpStatus.SC_OK) {
-      throw new IOException("Unable to load mpeg7 catalog from uri " + uri + ", HTTP status " + httpStatus);
+    FileInputStream is = null;
+    try {
+      File file = workspace.get(uri);
+      is = new FileInputStream(file);
+      return new Mpeg7CatalogImpl(is);
+    } catch (NotFoundException e) {
+      throw new IOException(e);
+    } finally {
+      IOUtils.closeQuietly(is);
     }
-    InputStream in = response.getEntity().getContent();
-    return new Mpeg7CatalogImpl(in);
   }
 
   /**

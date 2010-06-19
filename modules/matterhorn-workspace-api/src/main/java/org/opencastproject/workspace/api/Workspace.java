@@ -70,6 +70,20 @@ public interface Workspace {
   URI putInCollection(String collectionId, String fileName, InputStream in) throws URISyntaxException;
   
   /**
+   * Gets the URIs of the members of this collection
+   * @param collectionId the collection identifier
+   * @return the URIs for each member of the collection
+   */
+  URI[] getCollectionContents(String collectionId);
+
+  /**
+   * Removes a file from a collection
+   * @param collectionId the collection identifier
+   * @param fileName the filename to remove
+   */
+  void deleteFromCollection(String collectionId, String fileName);
+
+  /**
    * Delete the file stored at the given media package and element IDs.
    * @param mediaPackageID
    * @param mediaPackageElementID

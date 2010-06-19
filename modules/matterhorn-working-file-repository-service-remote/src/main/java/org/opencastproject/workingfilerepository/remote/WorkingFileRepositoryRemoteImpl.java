@@ -19,10 +19,12 @@ import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ContentBody;
@@ -33,9 +35,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.osgi.service.component.ComponentContext;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import javax.ws.rs.core.Response;
 
 /**
  * A remote service proxy for a working file repository
@@ -288,5 +293,50 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
     if(response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) return;
     throw new RuntimeException("Error removing file: " + response.getStatusLine().getReasonPhrase());
   }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#hashCollectionElement(java.lang.String, java.lang.String)
+   */
+  @Override
+  public String hashCollectionElement(String collectionId, String fileName) throws IOException {
+    String url = UrlSupport.concat(new String[] {remoteHost, "files", "collection", collectionId, fileName});
+    HttpHead head = new HttpHead(url);
+    HttpResponse response = client.execute(head);
+    try {
+      if(response.getStatusLine().getStatusCode() == Response.Status.NOT_FOUND.getStatusCode()) {
+        return null;
+      } else {
+        Header[] etags = response.getHeaders("ETag");
+        if(etags.length != 1) throw new IllegalStateException("File repository is not returning etags");
+        return etags[0].getValue();
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#hashMediaPackageElement(java.lang.String, java.lang.String)
+   */
+  @Override
+  public String hashMediaPackageElement(String mediaPackageID, String mediaPackageElementID) throws IOException {
+    String url = UrlSupport.concat(new String[] {remoteHost, "files", mediaPackageID, mediaPackageElementID});
+    HttpHead head = new HttpHead(url);
+    HttpResponse response = client.execute(head);
+    try {
+      if(response.getStatusLine().getStatusCode() == Response.Status.NOT_FOUND.getStatusCode()) {
+        return null;
+      } else {
+        Header[] etags = response.getHeaders("ETag");
+        if(etags.length != 1) throw new IllegalStateException("File repository is not returning etags");
+        return etags[0].getValue();
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+  
   
 }

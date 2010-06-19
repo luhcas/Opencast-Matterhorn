@@ -24,14 +24,8 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-working-file-repository-service-api</artifactId>
+      <artifactId>matterhorn-workspace-api</artifactId>
       <version>0.9-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-working-file-repository-service-impl</artifactId>
-      <version>0.9-SNAPSHOT</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>

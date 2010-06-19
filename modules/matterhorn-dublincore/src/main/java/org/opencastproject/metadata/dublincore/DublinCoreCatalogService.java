@@ -22,16 +22,17 @@ import org.opencastproject.mediapackage.MediaPackageMetadata;
 import org.opencastproject.mediapackage.MediapackageMetadataImpl;
 import org.opencastproject.metadata.api.CatalogService;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
-import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.workspace.api.NotFoundException;
+import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -51,10 +52,11 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
 
   protected int priority = 0;
 
-  protected TrustedHttpClient trustedHttpClient;
+  protected Workspace workspace = null;
   
-  public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
-    this.trustedHttpClient = trustedHttpClient;
+  public void setWorkspace(Workspace workspace) {
+    this.workspace
+    = workspace;
   }
   
   @SuppressWarnings("unchecked")
@@ -166,14 +168,16 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
     if(catalog == null) throw new IllegalArgumentException("Catalog must not be null");
     URI uri = catalog.getURI();
     if(uri == null) throw new IllegalStateException("Found catalog without a URI");
-    HttpGet get = new HttpGet(uri);
-    HttpResponse response = trustedHttpClient.execute(get);
-    int httpStatus = response.getStatusLine().getStatusCode();
-    if(httpStatus != HttpStatus.SC_OK) {
-      throw new IOException("Unable to load dublin core catalog from uri " + uri + ", HTTP status " + httpStatus);
+    FileInputStream is = null;
+    try {
+      File file = workspace.get(uri);
+      is = new FileInputStream(file);
+      return new DublinCoreCatalogImpl(is);
+    } catch (NotFoundException e) {
+      throw new IOException(e);
+    } finally {
+      IOUtils.closeQuietly(is);
     }
-    InputStream in = response.getEntity().getContent();
-    return new DublinCoreCatalogImpl(in);
   }
   
   /**

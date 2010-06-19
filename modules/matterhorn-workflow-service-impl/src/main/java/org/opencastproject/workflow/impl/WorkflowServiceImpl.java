@@ -36,7 +36,6 @@ import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
-import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -86,9 +85,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /** The metadata services */
   private SortedSet<MediaPackageMetadataService> metadataServices;
-
-  /** The file repository */
-  protected WorkingFileRepository repo;
 
   /**
    * A tuple of a workflow operation handler and the name of the operation it handles
@@ -165,14 +161,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public void setDao(WorkflowServiceImplDao dao) {
     this.dao = dao;
-  }
-
-  /**
-   * Sets the file repository.
-   * @param repo
-   */
-  public void setRepository(WorkingFileRepository repo) {
-    this.repo = repo;
   }
 
   public void addMetadataService(MediaPackageMetadataService service) {

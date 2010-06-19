@@ -35,7 +35,6 @@ import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.MimeTypes;
-import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
@@ -106,24 +105,6 @@ public class VideoSegmenterTest {
   @Before
   public void setUp() throws Exception {
     mpeg7Service = new Mpeg7CatalogService();
-    WorkingFileRepository fileRepo = EasyMock.createNiceMock(WorkingFileRepository.class);
-    EasyMock.expect(
-            fileRepo.putInCollection((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
-                    (InputStream) EasyMock.anyObject())).andAnswer(new IAnswer<URI>() {
-      public URI answer() throws Throwable {
-        Object[] args = EasyMock.getCurrentArguments();
-        collection = (String) args[0];
-        filename = (String) args[1] + ".xml";
-        InputStream in = (InputStream) args[2];
-        File file = new File("target", filename);
-        FileOutputStream out = new FileOutputStream(file);
-        IOUtils.copy(in, out);
-        IOUtils.closeQuietly(out);
-        IOUtils.closeQuietly(in);
-        return file.toURI();
-      }
-    });
-    EasyMock.replay(fileRepo);
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(workspace.get((URI) EasyMock.anyObject())).andReturn(new File(track.getURI()));
     final File tempFile = File.createTempFile(getClass().getName(), "xml");

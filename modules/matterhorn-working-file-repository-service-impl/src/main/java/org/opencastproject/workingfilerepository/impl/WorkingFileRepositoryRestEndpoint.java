@@ -46,6 +46,7 @@ import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -187,7 +188,8 @@ public class WorkingFileRepositoryRestEndpoint {
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
     // URI
-    endpoint = new RestEndpoint("uriWithoutFilename", RestEndpoint.Method.GET, "/uri/{mediaPackageID}/{mediaPackageElementID}",
+    endpoint = new RestEndpoint("uriWithoutFilename", RestEndpoint.Method.GET,
+            "/uri/{mediaPackageID}/{mediaPackageElementID}",
             "Retrieve the URI for this mediaPackageID and MediaPackageElementID");
     endpoint.addPathParam(new Param("mediaPackageID", Param.Type.STRING, null,
             "ID of the media package with desired element"));
@@ -196,7 +198,8 @@ public class WorkingFileRepositoryRestEndpoint {
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
     // URI
-    endpoint = new RestEndpoint("uriWithFilename", RestEndpoint.Method.GET, "/uri/{mediaPackageID}/{mediaPackageElementID}/{fileName}",
+    endpoint = new RestEndpoint("uriWithFilename", RestEndpoint.Method.GET,
+            "/uri/{mediaPackageID}/{mediaPackageElementID}/{fileName}",
             "Retrieve the URI for this mediaPackageID, MediaPackageElementID, and filename");
     endpoint.addPathParam(new Param("mediaPackageID", Param.Type.STRING, null,
             "ID of the media package with desired element"));
@@ -281,17 +284,26 @@ public class WorkingFileRepositoryRestEndpoint {
   @GET
   @Path("/mp/{mediaPackageID}/{mediaPackageElementID}")
   public Response get(@PathParam("mediaPackageID") String mediaPackageID,
-          @PathParam("mediaPackageElementID") String mediaPackageElementID) {
+          @PathParam("mediaPackageElementID") String mediaPackageElementID,
+          @HeaderParam("If-None-Match") String ifNoneMatch) {
     checkService();
     String contentType = null;
     InputStream in = null;
     try {
+      String md5 = repo.hashMediaPackageElement(mediaPackageID, mediaPackageElementID);
+      if(md5.equals(ifNoneMatch)) {
+        return Response.notModified().build();
+      }
       in = repo.get(mediaPackageID, mediaPackageElementID);
-      if(in == null) {
-        return Response.status(404).build();
+      if (in == null) {
+        return Response.status(Response.Status.NOT_FOUND).build();
       }
       contentType = extractContentType(in);
       return Response.ok(repo.get(mediaPackageID, mediaPackageElementID)).header("Content-Type", contentType).build();
+    } catch (IllegalStateException e) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    } catch (IOException e) {
+      return Response.status(500).build();
     } finally {
       IOUtils.closeQuietly(in);
     }
@@ -301,7 +313,8 @@ public class WorkingFileRepositoryRestEndpoint {
    * Determines the content type of an input stream. This method reads part of the stream, so it is typically best to
    * close the stream immediately after calling this method.
    * 
-   * @param in the input stream
+   * @param in
+   *          the input stream
    * @return the content type
    */
   protected String extractContentType(InputStream in) {
@@ -318,26 +331,34 @@ public class WorkingFileRepositoryRestEndpoint {
       return MediaType.APPLICATION_OCTET_STREAM;
     }
   }
-  
+
   @GET
   @Path("/mp/{mediaPackageID}/{mediaPackageElementID}/{fileName}")
   public Response get(@PathParam("mediaPackageID") String mediaPackageID,
-          @PathParam("mediaPackageElementID") String mediaPackageElementID, @PathParam("fileName") String fileName) {
-    InputStream in = repo.get(mediaPackageID, mediaPackageElementID);
-    if(in == null) {
-      return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
-    }
-    String contentType = mimeMap.getContentType(fileName);
-    int contentLength = 0;
+          @PathParam("mediaPackageElementID") String mediaPackageElementID, @PathParam("fileName") String fileName,
+          @HeaderParam("If-None-Match") String ifNoneMatch) {
+    checkService();
     try {
-      contentLength = in.available();
+      String md5 = repo.hashMediaPackageElement(mediaPackageID, mediaPackageElementID);
+      if(md5.equals(ifNoneMatch)) {
+        return Response.notModified().build();
+      }
+      InputStream in = repo.get(mediaPackageID, mediaPackageElementID);
+      if (in == null) {
+        return Response.status(Response.Status.NOT_FOUND).build();
+      }
+      String contentType = mimeMap.getContentType(fileName);
+      int contentLength = 0;
+      contentLength = in.available(); // FIXME: this won't always work, depending on the implementation of the service
+      return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type",
+              contentType).header("Content-length", contentLength).entity(in).build();
+    } catch(IllegalStateException e) {
+      return Response.status(Response.Status.NOT_FOUND).build();
     } catch (IOException e) {
       logger.info("unable to get the content length for {}/{}/{}", new Object[] { mediaPackageElementID,
               mediaPackageElementID, fileName });
-    } // FIXME: this won't always work, depending on the implementation of the service
-    checkService();
-    return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type",
-            contentType).header("Content-length", contentLength).entity(in).build();
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   @GET
@@ -368,8 +389,7 @@ public class WorkingFileRepositoryRestEndpoint {
   @GET
   @Path("/uri/{mediaPackageID}/{mediaPackageElementID}/{fileName}")
   public Response getUri(@PathParam("mediaPackageID") String mediaPackageID,
-          @PathParam("mediaPackageElementID") String mediaPackageElementID,
-          @PathParam("fileName") String fileName) {
+          @PathParam("mediaPackageElementID") String mediaPackageElementID, @PathParam("fileName") String fileName) {
     URI uri = repo.getURI(mediaPackageID, mediaPackageElementID, fileName);
     return Response.ok(uri.toString()).build();
   }

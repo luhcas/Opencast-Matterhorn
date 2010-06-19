@@ -393,4 +393,22 @@ public class WorkspaceImpl implements Workspace {
     }
 
   }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workspace.api.Workspace#getCollectionContents(java.lang.String)
+   */
+  @Override
+  public URI[] getCollectionContents(String collectionId) {
+    return repo.getCollectionContents(collectionId);
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workspace.api.Workspace#deleteFromCollection(java.lang.String, java.lang.String)
+   */
+  @Override
+  public void deleteFromCollection(String collectionId, String fileName) {
+    repo.removeFromCollection(collectionId, fileName);
+  }
 }

@@ -30,13 +30,14 @@ public class WorkingFileRepositoryRestEndpointTest {
     String image = "element1";
 
     WorkingFileRepository repo = EasyMock.createMock(WorkingFileRepository.class);
+    EasyMock.expect(repo.hashMediaPackageElement(mediaPackageId, image)).andReturn("foo");
     EasyMock.expect(repo.get(mediaPackageId, image)).andReturn(getClass().getResourceAsStream("/opencast_header.gif"));
     EasyMock.expect(repo.get(mediaPackageId, image)).andReturn(getClass().getResourceAsStream("/opencast_header.gif"));
     EasyMock.replay(repo);
     endpoint.setRepository(repo);
 
     // execute gets, and ensure that the content types are correct
-    Response response = endpoint.get(mediaPackageId, image);
+    Response response = endpoint.get(mediaPackageId, image, null);
 
     Assert.assertEquals("Gif content type", "image/gif", response.getMetadata().getFirst("Content-Type"));
         
@@ -58,13 +59,14 @@ public class WorkingFileRepositoryRestEndpointTest {
     String dc = "element1";
 
     WorkingFileRepository repo = EasyMock.createMock(WorkingFileRepository.class);
+    EasyMock.expect(repo.hashMediaPackageElement(mediaPackageId, dc)).andReturn("foo");
     EasyMock.expect(repo.get(mediaPackageId, dc)).andReturn(getClass().getResourceAsStream("/dublincore.xml"));
     EasyMock.expect(repo.get(mediaPackageId, dc)).andReturn(getClass().getResourceAsStream("/dublincore.xml"));
     EasyMock.replay(repo);
     endpoint.setRepository(repo);
 
     // execute gets, and ensure that the content types are correct
-    Response response = endpoint.get(mediaPackageId, dc);
+    Response response = endpoint.get(mediaPackageId, dc, null);
 
     Assert.assertEquals("Gif content type", "application/xml", response.getMetadata().getFirst("Content-Type"));
         
@@ -76,6 +78,28 @@ public class WorkingFileRepositoryRestEndpointTest {
 
     // Make sure the repo method(s) were called as expected
     EasyMock.verify(repo);
+  }
+  
+  public void testEtag() throws Exception {
+    WorkingFileRepositoryRestEndpoint endpoint = new WorkingFileRepositoryRestEndpoint();
+
+    String mediaPackageId = "mp";
+    String dc = "element1";
+    String md5 = "foo";
+
+    WorkingFileRepository repo = EasyMock.createNiceMock(WorkingFileRepository.class);
+    EasyMock.expect(repo.hashMediaPackageElement(mediaPackageId, dc)).andReturn(md5).anyTimes();
+    EasyMock.expect(repo.get(mediaPackageId, dc)).andReturn(getClass().getResourceAsStream("/dublincore.xml")).anyTimes();
+    EasyMock.replay(repo);
+    endpoint.setRepository(repo);
+
+    Response response = endpoint.get(mediaPackageId, dc, "foo");
+    Assert.assertEquals(Response.Status.NOT_MODIFIED.getStatusCode(), response.getStatus());
+    Assert.assertNull(response.getEntity());
+
+    response = endpoint.get(mediaPackageId, dc, "bar");
+    Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    Assert.assertNotNull(response.getEntity());
   }
 
 }
