@@ -71,7 +71,7 @@ public class AdminProxyRestEndpointTest {
     Assert.assertEquals(adminJSON.get("processing"), workflowStats.get("INSTANTIATED") + workflowStats.get("RUNNING"));
     Assert.assertEquals(adminJSON.get("inactive"), workflowStats.get("STOPPED"));
     //Assert.assertEquals(adminJSON.get("hold"), workflowStats.get("PAUSED"));  // TODO only count WFs that are PAUSED when they are in a HoldOperation
-    Assert.assertEquals(adminJSON.get("errors"), workflowStats.get("FAILED") + workflowStats.get("FAILING"));
+    Assert.assertEquals(adminJSON.get("failed"), workflowStats.get("FAILED") + workflowStats.get("FAILING"));
     Assert.assertEquals(adminJSON.get("finished"), workflowStats.get("SUCCEEDED"));
   }
 
