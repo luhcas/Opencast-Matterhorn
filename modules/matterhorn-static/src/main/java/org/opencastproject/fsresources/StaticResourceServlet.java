@@ -83,7 +83,11 @@ public class StaticResourceServlet extends HttpServlet {
   }
 
   public void deactivate() {
-    httpService.unregister("/static");
+    try {
+      httpService.unregister("/static");
+    } catch (Exception e) {
+      logger.warn("Deactivation problem: {}", e);
+    }
   }
 
   /**

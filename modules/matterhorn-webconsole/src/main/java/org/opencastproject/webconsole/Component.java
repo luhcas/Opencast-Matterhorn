@@ -21,6 +21,8 @@ import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Hashtable;
 
@@ -29,6 +31,8 @@ import java.util.Hashtable;
  * Registers the web management console
  */
 public class Component {
+  private static final Logger logger = LoggerFactory.getLogger(Component.class);
+  
   protected ComponentContext componentContext;
   protected HttpService httpService;
   protected HttpContext httpContext;
@@ -49,9 +53,14 @@ public class Component {
   }
 
   public void deactivate() {
-    staticResource.deactivate(componentContext);
-    httpService.unregister("/system/console");
-    manager.destroy();
+    try {
+      staticResource.deactivate(componentContext);
+      httpService.unregister("/system/console");
+      manager.destroy();
+    } catch (Exception e) {
+      logger.warn("Deactivation problem: {}", e);
+    }
+
   }
   
   public void setHttpService(HttpService service) {

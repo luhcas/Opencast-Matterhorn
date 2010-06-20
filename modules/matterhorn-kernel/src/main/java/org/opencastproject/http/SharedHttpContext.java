@@ -36,12 +36,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Matterhorn's shared {@link HttpContext}. This delegates resource lookups in the configured /static URL space to the
- * filesystem. All Servlet and {@link StaticResource} registrations should use the {@link HttpContext} that is
- * registered with the OSGi service registry.
+ * Matterhorn's shared {@link HttpContext}. All Servlet and {@link StaticResource} registrations should use the
+ * {@link HttpContext} that is registered with the OSGi service registry.
  */
-public class DelegatingHttpContext implements HttpContext {
-  private static final Logger logger = LoggerFactory.getLogger(DelegatingHttpContext.class);
+public class SharedHttpContext implements HttpContext {
+  private static final Logger logger = LoggerFactory.getLogger(SharedHttpContext.class);
 
   protected BundleContext bundleContext = null;
   protected HttpService httpService;
@@ -55,7 +54,7 @@ public class DelegatingHttpContext implements HttpContext {
   }
 
   public void deactivate() {
-    httpService.unregister("/static");
+    logger.debug("Shared http context deactivated");
   }
 
   /**

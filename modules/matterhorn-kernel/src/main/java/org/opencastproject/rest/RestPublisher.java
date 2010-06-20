@@ -144,7 +144,7 @@ public class RestPublisher {
       httpService.unregister(alias);
       logger.info("Unregistered rest endpoint {}" + alias);
     } catch(Exception e) {
-      logger.debug("Unable to unregister " + alias, e);
+      logger.info("Unable to unregister {}", alias, e);
     }
     // Shut down the CXF servlet for this endpoint
     GenericServlet servlet = servletMap.remove(alias);

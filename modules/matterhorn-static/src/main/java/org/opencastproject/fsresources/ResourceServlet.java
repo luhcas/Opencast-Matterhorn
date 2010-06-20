@@ -106,7 +106,9 @@ public class ResourceServlet extends HttpServlet {
       } else if (serverAlias == null) {
         logger.info("Alias was already null, can't unregister null alias!");
       }
-    } catch (IllegalArgumentException e) {}
+    } catch (Exception e) {
+      logger.warn("Deactivation problem: {}", e);
+    }
   }
 
   /**
