@@ -34,7 +34,8 @@ public class ReceiptHandler {
   
   @Column
   protected String host;
-  @Column
+
+  @Column(name="JOB_TYPE")
   protected String receiptType;
   
   public ReceiptHandler() {}

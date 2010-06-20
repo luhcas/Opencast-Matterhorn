@@ -15,6 +15,44 @@
  */
 package org.opencastproject.scheduler.impl;
 
+import org.opencastproject.scheduler.api.SchedulerEvent;
+import org.opencastproject.scheduler.api.SchedulerFilter;
+import org.opencastproject.scheduler.api.SchedulerService;
+import org.opencastproject.scheduler.endpoint.SchedulerRestService;
+import org.opencastproject.scheduler.impl.jpa.Event;
+import org.opencastproject.scheduler.impl.jpa.IncompleteDataException;
+import org.opencastproject.scheduler.impl.jpa.Metadata;
+import org.opencastproject.scheduler.impl.jpa.RecurringEvent;
+import org.opencastproject.scheduler.impl.jpa.SchedulerServiceImplJPA;
+import org.opencastproject.series.api.Series;
+import org.opencastproject.series.api.SeriesMetadata;
+import org.opencastproject.series.impl.SeriesImpl;
+import org.opencastproject.series.impl.SeriesMetadataImpl;
+import org.opencastproject.series.impl.SeriesServiceImpl;
+
+import junit.framework.Assert;
+
+import net.fortuna.ical4j.data.CalendarBuilder;
+import net.fortuna.ical4j.data.ParserException;
+import net.fortuna.ical4j.model.Calendar;
+import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.component.VEvent;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.eclipse.persistence.jpa.PersistenceProvider;
+import org.h2.jdbcx.JdbcConnectionPool;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -32,45 +70,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
-
-import net.fortuna.ical4j.data.CalendarBuilder;
-import net.fortuna.ical4j.data.ParserException;
-import net.fortuna.ical4j.model.Calendar;
-import net.fortuna.ical4j.model.ComponentList;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.PropertyList;
-import net.fortuna.ical4j.model.component.VEvent;
-
-import org.opencastproject.scheduler.api.SchedulerEvent;
-import org.opencastproject.scheduler.api.SchedulerFilter;
-import org.opencastproject.scheduler.api.SchedulerService;
-import org.opencastproject.scheduler.endpoint.SchedulerRestService;
-import org.opencastproject.scheduler.impl.jpa.Event;
-import org.opencastproject.scheduler.impl.jpa.IncompleteDataException;
-import org.opencastproject.scheduler.impl.jpa.Metadata;
-import org.opencastproject.scheduler.impl.jpa.RecurringEvent;
-import org.opencastproject.scheduler.impl.jpa.SchedulerServiceImplJPA;
-import org.opencastproject.series.api.Series;
-import org.opencastproject.series.api.SeriesMetadata;
-import org.opencastproject.series.api.SeriesService;
-import org.opencastproject.series.impl.SeriesImpl;
-import org.opencastproject.series.impl.SeriesMetadataImpl;
-import org.opencastproject.series.impl.SeriesServiceImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-
-import junit.framework.Assert;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.eclipse.persistence.jpa.PersistenceProvider;
-import org.h2.jdbcx.JdbcConnectionPool;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 
 public class SchedulerServiceImplTest {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImplTest.class);
@@ -123,27 +122,27 @@ public class SchedulerServiceImplTest {
     
     LinkedList<SeriesMetadata> metadata = new LinkedList<SeriesMetadata>();
     
-    metadata.add(new SeriesMetadataImpl("title", "demo title"));
-    metadata.add(new SeriesMetadataImpl("license", "demo"));
-    metadata.add(new SeriesMetadataImpl("valid", ""+System.currentTimeMillis()));
-    metadata.add(new SeriesMetadataImpl("publisher", "demo"));
-    metadata.add(new SeriesMetadataImpl("creator", "demo"));
-    metadata.add(new SeriesMetadataImpl("subject", "demo"));
-    metadata.add(new SeriesMetadataImpl("temporal", "demo"));
-    metadata.add(new SeriesMetadataImpl("audience", "demo"));
-    metadata.add(new SeriesMetadataImpl("spatial", "demo"));
-    metadata.add(new SeriesMetadataImpl("rightsHolder", "demo"));
-    metadata.add(new SeriesMetadataImpl("extent", "3600000"));
-    metadata.add(new SeriesMetadataImpl("created", ""+System.currentTimeMillis()));
-    metadata.add(new SeriesMetadataImpl("language", "demo"));
-    metadata.add(new SeriesMetadataImpl("isReplacedBy", "demo"));
-    metadata.add(new SeriesMetadataImpl("type", "demo"));
-    metadata.add(new SeriesMetadataImpl("available", ""+System.currentTimeMillis()));
-    metadata.add(new SeriesMetadataImpl("modified", ""+System.currentTimeMillis()));
-    metadata.add(new SeriesMetadataImpl("replaces", "demo"));
-    metadata.add(new SeriesMetadataImpl("contributor", "demo"));
-    metadata.add(new SeriesMetadataImpl("description", "demo"));
-    metadata.add(new SeriesMetadataImpl("issued", ""+System.currentTimeMillis()));
+    metadata.add(new SeriesMetadataImpl(series, "title", "demo title"));
+    metadata.add(new SeriesMetadataImpl(series, "license", "demo"));
+    metadata.add(new SeriesMetadataImpl(series, "valid", ""+System.currentTimeMillis()));
+    metadata.add(new SeriesMetadataImpl(series, "publisher", "demo"));
+    metadata.add(new SeriesMetadataImpl(series, "creator", "demo"));
+    metadata.add(new SeriesMetadataImpl(series, "subject", "demo"));
+    metadata.add(new SeriesMetadataImpl(series, "temporal", "demo"));
+    metadata.add(new SeriesMetadataImpl(series, "audience", "demo"));
+    metadata.add(new SeriesMetadataImpl(series, "spatial", "demo"));
+    metadata.add(new SeriesMetadataImpl(series, "rightsHolder", "demo"));
+    metadata.add(new SeriesMetadataImpl(series, "extent", "3600000"));
+    metadata.add(new SeriesMetadataImpl(series, "created", ""+System.currentTimeMillis()));
+    metadata.add(new SeriesMetadataImpl(series, "language", "demo"));
+    metadata.add(new SeriesMetadataImpl(series, "isReplacedBy", "demo"));
+    metadata.add(new SeriesMetadataImpl(series, "type", "demo"));
+    metadata.add(new SeriesMetadataImpl(series, "available", ""+System.currentTimeMillis()));
+    metadata.add(new SeriesMetadataImpl(series, "modified", ""+System.currentTimeMillis()));
+    metadata.add(new SeriesMetadataImpl(series, "replaces", "demo"));
+    metadata.add(new SeriesMetadataImpl(series, "contributor", "demo"));
+    metadata.add(new SeriesMetadataImpl(series, "description", "demo"));
+    metadata.add(new SeriesMetadataImpl(series, "issued", ""+System.currentTimeMillis()));
     
     seriesID = series.generateSeriesId();
     series.setMetadata(metadata);

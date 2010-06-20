@@ -16,30 +16,32 @@
 
 package org.opencastproject.series.impl;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
 
 @Entity(name="SeriesMetadataImpl")
-@Table(name="SeriesMetadataImpl")
+@Table(name="SERIES_METADATA")
 public class SeriesMetadataImpl implements SeriesMetadata {
-  @Id
-  @GeneratedValue
-  protected long id;
   
-  @Column(name="key")
+  @Id
+  @Column(name="METADATA_KEY", length=128)
   protected String key;
-  @Column(name="value")
+
+  @Column(name="METADATA_VAL", length=256)
   protected String value;
   
-  @ManyToOne
+  @Id
+  @JoinColumn(name="SERIES_ID")
+  @ManyToOne(cascade=CascadeType.ALL)
   protected SeriesImpl series;
   
   public SeriesImpl getSeries() {
@@ -54,26 +56,18 @@ public class SeriesMetadataImpl implements SeriesMetadata {
   public SeriesMetadataImpl () {
     super();
   }
-  
+
   public SeriesMetadataImpl (String key, String value) {
     this.key = key;
     this.value = value;
   }
+
+  public SeriesMetadataImpl (Series series, String key, String value) {
+    this.key = key;
+    this.value = value;
+    setSeries(series);
+  }
   
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.series.api.SeriesMetadata#getId()
-   */
-  public long getId() {
-    return id;
-  }
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.series.api.SeriesMetadata#setId(long)
-   */
-  public void setId(long id) {
-    this.id = id;
-  }
   /**
    * {@inheritDoc}
    * @see org.opencastproject.series.api.SeriesMetadata#getKey()
@@ -108,7 +102,7 @@ public class SeriesMetadataImpl implements SeriesMetadata {
    * @see org.opencastproject.series.api.SeriesMetadata#toString()
    */
   public String toString () {
-    return "("+id+") "+key+":"+value;
+    return "("+ series +") "+key+":"+value;
   }
   
   /**

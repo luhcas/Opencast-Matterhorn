@@ -27,16 +27,17 @@ import javax.xml.bind.annotation.XmlType;
 import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
 
 @Entity(name="Metadata")
-@Table(name="Metadata")
+@Table(name="SCHED_METADATA")
 @XmlType(name="Metadata")
 public class Metadata {
   @Id
+  @Column(name = "ID", length=128)
   @GeneratedValue
   protected long id;
   
-  @Column(name="key")
+  @Column(name="MD_KEY")
   protected String key;
-  @Column(name="value")
+  @Column(name="MD_VAL")
   protected String value;
   
   public Metadata () {

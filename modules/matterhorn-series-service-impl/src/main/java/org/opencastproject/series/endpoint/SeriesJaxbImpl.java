@@ -30,6 +30,8 @@ import javax.xml.bind.annotation.XmlType;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.impl.SeriesImpl;
+import org.opencastproject.series.impl.SeriesMetadataImpl;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +87,9 @@ public class SeriesJaxbImpl {
     
     List<SeriesMetadata> list = new LinkedList<SeriesMetadata>(); 
     for (SeriesMetadataJaxbImpl m : metadata) {
-      list.add(m.getSeriesMetadata());
+      SeriesMetadataImpl metadata = m.getSeriesMetadata();
+      metadata.setSeries(s);
+      list.add(metadata);
     }
     s.setMetadata(list);
     return s;

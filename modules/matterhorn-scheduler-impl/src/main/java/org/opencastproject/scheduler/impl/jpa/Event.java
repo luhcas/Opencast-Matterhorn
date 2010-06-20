@@ -15,6 +15,13 @@
  */
 package org.opencastproject.scheduler.impl.jpa;
 
+import org.opencastproject.scheduler.api.SchedulerEvent;
+import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
+import org.opencastproject.scheduler.impl.SchedulerEventImpl;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -23,12 +30,14 @@ import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.MapKey;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -43,59 +52,54 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
-import org.opencastproject.scheduler.api.SchedulerEvent;
-import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
-import org.opencastproject.scheduler.impl.SchedulerEventImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
- * An Event has a unique ID, a relation to the recurring event from which it was created and a set of metadata.
- * Even the start- and end-time is stored in the set of metadata, with the keys "time.start" and "time.end" as long value converted to string.
- * Resources and Attendees are store in the metadata too, as 
+ * An Event has a unique ID, a relation to the recurring event from which it was created and a set of metadata. Even the
+ * start- and end-time is stored in the set of metadata, with the keys "time.start" and "time.end" as long value
+ * converted to string. Resources and Attendees are store in the metadata too, as
  */
 
-@NamedQueries( {
-  @NamedQuery(name = "Event.getAll", query = "SELECT e FROM Event e")
-})
-
-@XmlType(name="Event", namespace="http://scheduler.opencastproject.org")
-@XmlRootElement(name="Event", namespace="http://scheduler.opencastproject.org")
+@NamedQueries( { @NamedQuery(name = "Event.getAll", query = "SELECT e FROM Event e") })
+@XmlType(name = "Event", namespace = "http://scheduler.opencastproject.org")
+@XmlRootElement(name = "Event", namespace = "http://scheduler.opencastproject.org")
 @XmlAccessorType(XmlAccessType.FIELD)
 @Entity
-@Table(name="Event")
+@Table(name = "SCHED_EVENT")
 public class Event extends AbstractEvent {
 
   public Event() {
-    
+
   }
-  
-  public Event (String xml) {
+
+  public Event(String xml) {
     try {
-      Event e =  Event.valueOf(xml);
+      Event e = Event.valueOf(xml);
       this.setEventId(e.getEventId());
       this.setMetadata(e.getCompleteMetadata());
     } catch (Exception e) {
-      logger.warn ("Could not parse Event XML {}", xml);
+      logger.warn("Could not parse Event XML {}", xml);
     }
   }
-  
+
   private static final Logger logger = LoggerFactory.getLogger(Event.class);
-  
+
   @XmlID
   @Id
+  @Column(name = "ID", length = 128)
   protected String eventId;
-  
-  @Transient 
+
+  @Transient
   @XmlTransient
   RecurringEvent recurringEvent = null;
-  
-  @XmlElementWrapper(name="metadata_list")
-  @XmlElement(name="metadata")
-  @OneToMany (fetch=FetchType.EAGER, cascade=CascadeType.ALL)
-  @MapKey(name="metadata")
-  protected List<Metadata> metadata = new LinkedList<Metadata>();  
-  
+
+  // FIXME: Do we really need a join table here? How about a composite key (event id + metadata key) in the metadata
+  // table?
+  @XmlElementWrapper(name = "metadata_list")
+  @XmlElement(name = "metadata")
+  @OneToMany(fetch = FetchType.EAGER, targetEntity = Metadata.class, cascade = CascadeType.ALL)
+  @JoinTable(name = "SCHED_EVENT_METADATA", joinColumns = { @JoinColumn(name = "EVENT_ID") },
+          inverseJoinColumns = { @JoinColumn(name = "METADATA_ID") })
+  protected List<Metadata> metadata = new LinkedList<Metadata>();
+
   public String getRecurringEventId() {
     Metadata m = findMetadata("recurrence.id");
     if (m == null) {
@@ -108,8 +112,8 @@ public class Event extends AbstractEvent {
   public void setRecurringEventId(String recurringEventId) {
     updateMetadata(new Metadata("recurrence.id", recurringEventId));
   }
-  
-  protected void updateMetadata (Metadata data) {
+
+  protected void updateMetadata(Metadata data) {
     if (containsKey(data.getKey())) {
       for (Metadata olddata : getCompleteMetadata()) {
         if (olddata.getKey().equals(data.getKey())) {
@@ -124,7 +128,8 @@ public class Event extends AbstractEvent {
   }
 
   public int getPositionInRecurrence() {
-    if (! containsKey("recurrence.position")) return 0;
+    if (!containsKey("recurrence.position"))
+      return 0;
     try {
       return Integer.parseInt(getValue("recurrence.position"));
     } catch (NumberFormatException e) {
@@ -144,13 +149,13 @@ public class Event extends AbstractEvent {
   public void setEventId(String eventId) {
     this.eventId = eventId;
   }
-  
+
   public String generateId() {
     return eventId = super.generateId();
   }
 
   public RecurringEvent getRecurringEvent() {
-    if (getRecurringEventId()!= null && recurringEvent == null) {
+    if (getRecurringEventId() != null && recurringEvent == null) {
       recurringEvent = RecurringEvent.find(getRecurringEventId(), emf);
       metadataTable = null;
     }
@@ -163,56 +168,61 @@ public class Event extends AbstractEvent {
       setRecurringEventId(recurringEvent.getRecurringEventId());
   }
 
-  @XmlElementWrapper(name="complete_metadata")
-  @XmlElement(name="metadata")
+  @XmlElementWrapper(name = "complete_metadata")
+  @XmlElement(name = "metadata")
   public List<Metadata> getCompleteMetadata() {
     Hashtable<String, Metadata> m = new Hashtable<String, Metadata>();
     if (getRecurringEvent() != null) {
       for (Metadata data : getRecurringEvent().getMetadata()) {
         m.put(data.getKey(), data);
       }
-      m.put("time.start", new Metadata("time.start", ""+getStartdate().getTime()));
-      m.put("time.end", new Metadata("time.end", ""+getEnddate().getTime()));
+      m.put("time.start", new Metadata("time.start", "" + getStartdate().getTime()));
+      m.put("time.end", new Metadata("time.end", "" + getEnddate().getTime()));
       for (Metadata data : getMetadata()) {
         m.put(data.getKey(), data);
       }
-    } else return getMetadata();
+    } else
+      return getMetadata();
     return new LinkedList<Metadata>(m.values());
   }
 
   public List<Metadata> getMetadata() {
     return metadata;
-  }  
-  
+  }
+
   public void setMetadata(List<Metadata> metadata) {
     metadataTable = null;
     this.metadata = metadata;
   }
-  
-  protected void buildMetadataTable () {
-    RecurringEvent rEvent = getRecurringEvent(); // if recurring event is not yet set, this method has the sideeffect that the metadata table is nulled
-    if (metadataTable == null) metadataTable = new Hashtable<String, String>();
-    if (rEvent != null ) {
+
+  protected void buildMetadataTable() {
+    RecurringEvent rEvent = getRecurringEvent(); // if recurring event is not yet set, this method has the sideeffect
+                                                 // that the metadata table is nulled
+    if (metadataTable == null)
+      metadataTable = new Hashtable<String, String>();
+    if (rEvent != null) {
       for (Metadata data : rEvent.getMetadata()) {
-        if (data != null && data.getKey() != null && data.getValue() != null) 
+        if (data != null && data.getKey() != null && data.getValue() != null)
           metadataTable.put(data.getKey(), data.getValue()); // Inherit values
       }
     }
     super.buildMetadataTable(metadata);
   }
-  
-  public String getValue (String key) {
-   if (metadataTable == null) buildMetadataTable();
-   try {
-    return super.getValue(key);
-   } catch (IncompleteDataException e) {
-     logger.warn("MetadataTable could not be build");
-     return null;
-   }
+
+  public String getValue(String key) {
+    if (metadataTable == null)
+      buildMetadataTable();
+    try {
+      return super.getValue(key);
+    } catch (IncompleteDataException e) {
+      logger.warn("MetadataTable could not be build");
+      return null;
+    }
   }
-  
-  public Set<String> getKeySet () {
-    if (metadataTable == null) buildMetadataTable();
+
+  public Set<String> getKeySet() {
+    if (metadataTable == null)
+      buildMetadataTable();
     try {
       return super.getKeySet();
     } catch (IncompleteDataException e) {
@@ -220,29 +230,33 @@ public class Event extends AbstractEvent {
       return null;
     }
   }
-  
-  public SchedulerEvent toSchedulerEvent () {
+
+  public SchedulerEvent toSchedulerEvent() {
     SchedulerEventImpl e = new SchedulerEventImpl();
-    if (metadataTable == null) buildMetadataTable();
+    if (metadataTable == null)
+      buildMetadataTable();
     e.setMetadata(metadataTable);
     e.setID(eventId);
-    e.setStartdate(getStartdate()); 
+    e.setStartdate(getStartdate());
     e.setEnddate(getEnddate());
     String attendeeString = metadataTable.get("attendees");
     if (attendeeString != null) {
-      StringTokenizer attendees =  new StringTokenizer(attendeeString,",");
-      while (attendees.hasMoreTokens()) e.addAttendee(attendees.nextToken());     
+      StringTokenizer attendees = new StringTokenizer(attendeeString, ",");
+      while (attendees.hasMoreTokens())
+        e.addAttendee(attendees.nextToken());
     }
     String resourcesString = metadataTable.get("resources");
     if (resourcesString != null) {
-      StringTokenizer resources =  new StringTokenizer(resourcesString,",");
-      while (resources.hasMoreTokens()) e.addResource(resources.nextToken());
+      StringTokenizer resources = new StringTokenizer(resourcesString, ",");
+      while (resources.hasMoreTokens())
+        e.addResource(resources.nextToken());
     }
     return e;
   }
-  
-  public Date getValueAsDate (String key) {
-    if (metadataTable == null) buildMetadataTable();
+
+  public Date getValueAsDate(String key) {
+    if (metadataTable == null)
+      buildMetadataTable();
     try {
       return super.getValueAsDate(key);
     } catch (IncompleteDataException e) {
@@ -250,9 +264,10 @@ public class Event extends AbstractEvent {
       return null;
     }
   }
-  
-  public boolean containsKey (String key) {
-    if (metadataTable == null) buildMetadataTable();
+
+  public boolean containsKey(String key) {
+    if (metadataTable == null)
+      buildMetadataTable();
     try {
       return super.containsKey(key);
     } catch (IncompleteDataException e) {
@@ -263,23 +278,24 @@ public class Event extends AbstractEvent {
       return false;
     }
   }
-  
-  public Metadata findMetadata (String key) {
+
+  public Metadata findMetadata(String key) {
     for (Metadata m : metadata) {
-      if (m.getKey().equals(key)) return m;
+      if (m.getKey().equals(key))
+        return m;
     }
     return null;
   }
-  
+
   public void update(Event e) {
-    //eliminate removed keys
-    for (Metadata m: getMetadata()) {
+    // eliminate removed keys
+    for (Metadata m : getMetadata()) {
       if (e.findMetadata(m.getKey()) == null) {
-          getMetadata().remove(m);
+        getMetadata().remove(m);
       }
     }
-    
-    //update the list
+
+    // update the list
     for (Metadata data : e.getMetadata()) {
       Metadata found = findMetadata(data.getKey());
       if (found != null) {
@@ -288,53 +304,54 @@ public class Event extends AbstractEvent {
         getMetadata().add(data);
       }
     }
-    //metadata = e.getMetadata(); 
+    // metadata = e.getMetadata();
     metadataTable = null;
     // currently there is no reason to assume that ID or the parent recurringEvent can change;
-  } 
-  
-  
-  public Date getStartdate () {
+  }
+
+  public Date getStartdate() {
     if (containsKey("time.start")) {
-     return getValueAsDate("time.start"); 
+      return getValueAsDate("time.start");
     }
     if (getRecurringEventId() != null) {
       return getRecurringEvent().getDateForEventByIndex(getPositionInRecurrence());
     }
-    return null; 
+    return null;
   }
 
-  public Date getEnddate () {
+  public Date getEnddate() {
     if (containsKey("time.end")) {
-     return getValueAsDate("time.end"); 
+      return getValueAsDate("time.end");
     }
     if (getRecurringEventId() != null) {
       try {
-        if (! containsKey("recurrence.duration")){
+        if (!containsKey("recurrence.duration")) {
           logger.error("No default duration set in recurrent event {}.", getRecurringEventId());
-        }          
-        return new Date (getRecurringEvent().getDateForEventByIndex(getPositionInRecurrence()).getTime() + 
-                          Long.parseLong(getValue("recurrence.duration")));
+        }
+        return new Date(getRecurringEvent().getDateForEventByIndex(getPositionInRecurrence()).getTime()
+                + Long.parseLong(getValue("recurrence.duration")));
       } catch (NumberFormatException e) {
         logger.warn("Could not parse recurring event default duration");
         return null;
-      } 
+      }
     }
-    return null; 
+    return null;
   }
-  
-  public String toString () {
+
+  public String toString() {
     String result;
     result = getEventId();
-    if (getRecurringEventId() != null) result += ", Recurring Event: "+getRecurringEventId();
-    else result += ", no recuring event";
+    if (getRecurringEventId() != null)
+      result += ", Recurring Event: " + getRecurringEventId();
+    else
+      result += ", no recuring event";
     for (Metadata data : metadata) {
-      result += ", "+data.toString();
+      result += ", " + data.toString();
     }
     return result;
   }
-  
-  public static Event find (String eventId, EntityManagerFactory emf) {
+
+  public static Event find(String eventId, EntityManagerFactory emf) {
     logger.debug("loading event with the ID {}", eventId);
     if (eventId == null || emf == null) {
       logger.warn("could not find event {}. Null Pointer exeption");
@@ -343,36 +360,41 @@ public class Event extends AbstractEvent {
     EntityManager em = emf.createEntityManager();
     Event e = null;
     try {
-       e = em.find(Event.class, eventId);
+      e = em.find(Event.class, eventId);
     } finally {
       em.close();
     }
-    if (e != null) e.setEntityManagerFactory(emf);
+    if (e != null)
+      e.setEntityManagerFactory(emf);
     return e;
   }
-  
+
   /**
    * valueOf function is called by JAXB to bind values. This function calls the ScheduleEvent factory.
-   *
-   *  @param    xmlString string representation of an event.
-   *  @return   instantiated event SchdeulerEventJaxbImpl.
+   * 
+   * @param xmlString
+   *          string representation of an event.
+   * @return instantiated event SchdeulerEventJaxbImpl.
    */
   public static Event valueOf(String xmlString) throws Exception {
     return (Event) SchedulerBuilder.getInstance().parseEvent(xmlString);
-  }  
-  
-  public boolean equals (Object o) {
-    if (! (o instanceof Event)) return false;
+  }
+
+  public boolean equals(Object o) {
+    if (!(o instanceof Event))
+      return false;
     Event e = (Event) o;
-    if (e.getEventId() != this.getEventId()) return false;
+    if (e.getEventId() != this.getEventId())
+      return false;
     for (Metadata m : metadata) {
-      if (! e.containsKey(m.getKey()) || (! e.getValue(m.getKey()).equals(m.getValue()))) return false;
+      if (!e.containsKey(m.getKey()) || (!e.getValue(m.getKey()).equals(m.getValue())))
+        return false;
     }
     return true;
   }
-  
-  public int hashCode () {
+
+  public int hashCode() {
     return this.getEventId().hashCode();
   }
-  
+
 }

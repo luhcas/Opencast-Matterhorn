@@ -30,7 +30,7 @@ import javax.persistence.Table;
  * An in-memory construct to represent the state of a capture agent, and when it was last heard from.
  */
 @Entity
-@Table(name = "agents")
+@Table(name = "CAPTURE_AGENT")
 @NamedQueries( {
   @NamedQuery(name = "AgentImpl.getAll", query = "SELECT a FROM AgentImpl a")
 })

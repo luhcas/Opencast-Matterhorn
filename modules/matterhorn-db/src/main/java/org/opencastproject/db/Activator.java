@@ -77,10 +77,10 @@ public class Activator implements BundleActivator {
     Dictionary props = new Hashtable();
     props.put("type", "persistence");
     props.put("javax.persistence.nonJtaDataSource", pooledDataSource);
+    props.put("eclipselink.target-database", vendor);
     if("true".equalsIgnoreCase(bundleContext.getProperty("ddl-generation"))) {
       props.put("eclipselink.ddl-generation", "create-tables");
       props.put("eclipselink.ddl-generation.output-mode", "database");
-      props.put("eclipselink.target-database", vendor);
     }
     propertiesRegistration = bundleContext.registerService(Map.class.getName(), props, props);
   }

@@ -40,7 +40,7 @@ import org.opencastproject.feedback.api.Annotation;
  * A JAXB-annotated implementation of {@link Annotation}
  */
 @Entity(name = "AnnotationImpl")
-@Table(name = "MH_ANNOTATION_IMPL")
+@Table(name = "ANNOTATION")
 @NamedQueries( {
         @NamedQuery(name = "findAnnotations", query = "SELECT a FROM AnnotationImpl a"),
         @NamedQuery(name = "countSessionsGroupByMediapackage", query = "SELECT a.mediapackageId, COUNT(distinct a.sessionId), SUM(a.length) FROM AnnotationImpl a GROUP BY a.mediapackageId"),
@@ -62,40 +62,41 @@ import org.opencastproject.feedback.api.Annotation;
 public class AnnotationImpl implements Annotation {
 
   @Id
+  @Column(name="ID")
   @GeneratedValue(strategy = GenerationType.AUTO)
   @XmlElement(name = "annotation-id")
   private int annotationId;
 
-  @Column(name = "mediapackageId")
+  @Column(name = "MEDIA_PACKAGE_ID")
   @XmlElement(name = "mediapackage-id")
   private String mediapackageId;
 
-  @Column(name = "sessionId")
+  @Column(name = "SESSION_ID")
   @XmlElement(name = "session-id")
   private String sessionId;
 
-  @Column(name = "inpoint")
+  @Column(name = "INPOINT")
   @XmlElement(name = "inpoint")
   private int inpoint;
 
-  @Column(name = "outpoint")
+  @Column(name = "OUTPOINT")
   @XmlElement(name = "outpoint")
   private int outpoint;
 
-  @Column(name = "length")
+  @Column(name = "LENGTH")
   @XmlElement(name = "length")
   private int length;
 
-  @Column(name = "key")
+  @Column(name = "ANNOTATION_KEY")
   @XmlElement(name = "key")
   private String key;
 
-  @Column(name = "value")
+  @Column(name = "ANNOTATION_VAL")
   @XmlElement(name = "value")
   private String value;
 
   @Basic(optional = false)
-  @Column(name = "created")
+  @Column(name = "CREATED")
   @Temporal(TemporalType.TIMESTAMP)
   @XmlElement(name = "created")
   private Date created = new Date();

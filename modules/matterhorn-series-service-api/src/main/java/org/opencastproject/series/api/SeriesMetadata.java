@@ -18,10 +18,6 @@ package org.opencastproject.series.api;
 
 public interface SeriesMetadata {
 
-  public abstract long getId();
-
-  public abstract void setId(long id);
-
   public abstract String getKey();
 
   public abstract void setKey(String key);

@@ -16,6 +16,17 @@
 
 package org.opencastproject.series.impl;
 
+import org.opencastproject.mediapackage.EName;
+import org.opencastproject.metadata.dublincore.DublinCore;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
+import org.opencastproject.metadata.dublincore.DublinCoreValue;
+import org.opencastproject.series.api.Series;
+import org.opencastproject.series.api.SeriesMetadata;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -26,23 +37,13 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
-import org.opencastproject.mediapackage.EName;
-import org.opencastproject.metadata.dublincore.DublinCore;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
-import org.opencastproject.metadata.dublincore.DublinCoreValue;
-import org.opencastproject.series.api.Series;
-import org.opencastproject.series.api.SeriesMetadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Data type for a Series that stores the metadata that belongs to the series
@@ -50,18 +51,18 @@ import org.slf4j.LoggerFactory;
  */
  
 @Entity
-@Table(name="SeriesImpl")
+@Table(name="SERIES")
 public class SeriesImpl implements Series {
   private static final Logger logger = LoggerFactory.getLogger(SeriesImpl.class);
   
   @Id
+  @Column(name="ID", length=128)
   String seriesId;
   
   @Transient
   DublinCoreCatalog dublinCore;
   
-  @OneToMany (fetch=FetchType.EAGER, cascade=CascadeType.ALL)
-  @MapKey(name="metadata")
+  @OneToMany (fetch=FetchType.EAGER, cascade=CascadeType.ALL, mappedBy="series")
   List<SeriesMetadataImpl> metadata;
   
   /**
@@ -90,7 +91,7 @@ public class SeriesImpl implements Series {
     boolean updated = false;
     if (getMetadata() == null) {
       LinkedList<SeriesMetadataImpl> metadata = new LinkedList<SeriesMetadataImpl>();
-      metadata.add(new SeriesMetadataImpl(key, value));
+      metadata.add(new SeriesMetadataImpl(this, key, value));
       return;
     }
     for (SeriesMetadata m : getMetadata()) {
@@ -101,7 +102,7 @@ public class SeriesImpl implements Series {
       }
     }
     if (! updated) {
-      metadata.add(new SeriesMetadataImpl(key, value));
+      metadata.add(new SeriesMetadataImpl(this, key, value));
     }
   }
   

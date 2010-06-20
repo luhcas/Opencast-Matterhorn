@@ -365,28 +365,28 @@ public class SeriesRestService {
       
       LinkedList<SeriesMetadata> metadata = new LinkedList<SeriesMetadata>();
       
-      metadata.add(new SeriesMetadataImpl("title", "demo title"));
-      metadata.add(new SeriesMetadataImpl("license", "demo"));
-      metadata.add(new SeriesMetadataImpl("valid", ""+System.currentTimeMillis()));
-      metadata.add(new SeriesMetadataImpl("publisher", "demo"));
-      metadata.add(new SeriesMetadataImpl("creator", "demo"));
-      metadata.add(new SeriesMetadataImpl("subject", "demo"));
-      metadata.add(new SeriesMetadataImpl("temporal", "demo"));
-      metadata.add(new SeriesMetadataImpl("audience", "demo"));
-      metadata.add(new SeriesMetadataImpl("spatial", "demo"));
-      metadata.add(new SeriesMetadataImpl("rightsHolder", "demo"));
-      metadata.add(new SeriesMetadataImpl("extent", "3600000"));
-      metadata.add(new SeriesMetadataImpl("created", ""+System.currentTimeMillis()));
-      metadata.add(new SeriesMetadataImpl("language", "demo"));
-      metadata.add(new SeriesMetadataImpl("identifier", "demo"));
-      metadata.add(new SeriesMetadataImpl("isReplacedBy", "demo"));
-      metadata.add(new SeriesMetadataImpl("type", "demo"));
-      metadata.add(new SeriesMetadataImpl("available", ""+System.currentTimeMillis()));
-      metadata.add(new SeriesMetadataImpl("modified", ""+System.currentTimeMillis()));
-      metadata.add(new SeriesMetadataImpl("replaces", "demo"));
-      metadata.add(new SeriesMetadataImpl("contributor", "demo"));
-      metadata.add(new SeriesMetadataImpl("description", "demo"));
-      metadata.add(new SeriesMetadataImpl("issued", ""+System.currentTimeMillis()));
+      metadata.add(new SeriesMetadataImpl(series, "title", "demo title"));
+      metadata.add(new SeriesMetadataImpl(series, "license", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "valid", ""+System.currentTimeMillis()));
+      metadata.add(new SeriesMetadataImpl(series, "publisher", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "creator", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "subject", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "temporal", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "audience", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "spatial", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "rightsHolder", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "extent", "3600000"));
+      metadata.add(new SeriesMetadataImpl(series, "created", ""+System.currentTimeMillis()));
+      metadata.add(new SeriesMetadataImpl(series, "language", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "identifier", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "isReplacedBy", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "type", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "available", ""+System.currentTimeMillis()));
+      metadata.add(new SeriesMetadataImpl(series, "modified", ""+System.currentTimeMillis()));
+      metadata.add(new SeriesMetadataImpl(series, "replaces", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "contributor", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "description", "demo"));
+      metadata.add(new SeriesMetadataImpl(series, "issued", ""+System.currentTimeMillis()));
       
       series.generateSeriesId();
       

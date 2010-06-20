@@ -217,7 +217,7 @@ public class ReceiptImpl implements Receipt {
   }
 
   @Lob
-  @Column(name="element")
+  @Column(name="ELEMENT_XML")
   public String getElementAsXml() throws Exception {
     if(element == null) return null;
     return ((AbstractMediaPackageElement)element).getAsXml();

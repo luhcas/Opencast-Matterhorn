@@ -29,7 +29,7 @@ import javax.persistence.Table;
  *
  */
 @Entity
-@Table(name="UploadJob")
+@Table(name="UPLOAD")
 @NamedQueries( {
     @NamedQuery(name = "UploadJob.getByID", query = "SELECT o FROM UploadJob o WHERE o.id = :id")  // FIXME @NamedQueries neccessary with only one NamedQuery
 })
