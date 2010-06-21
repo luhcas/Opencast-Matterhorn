@@ -19,8 +19,6 @@ Opencast.Watch = (function ()
           AUDIOPLAYER             = "Audioplayer",
           ADVANCEDPLAYER          = "advancedPlayer",
           EMBEDPLAYER             = "embedPlayer",
-          mediaUrlOne             = "",
-          mediaUrlTwo             = "",
           mediaResolutionOne      = "",
           mediaResolutionTwo      = "";
 
@@ -37,14 +35,22 @@ Opencast.Watch = (function ()
 
           // set the media URLs
           var mediaUrlOne = Opencast.engage.getVideoUrl();
+          var mediaUrlTwo = Opencast.engage.getVideoUrl2();
 
           if(mediaUrlOne === null)
             $('#oc-link-advanced-player').css("display", "inline");
 
           if(mediaUrlOne === null)
+          {
             mediaUrlOne = $('#oc-video-presenter-delivery-x-flv-rtmp').html();
+            mediaResolutionOne = $('#oc-resolution-presenter-delivery-x-flv-rtmp').html();
+          }
 
-          var mediaUrlTwo = $('#oc-video-presentation-delivery-x-flv-rtmp').html();
+          if(mediaUrlTwo === null)
+          {
+            mediaUrlTwo = $('#oc-video-presentation-delivery-x-flv-rtmp').html();
+            mediaResolutionTwo = $('#oc-resolution-presentation-delivery-x-flv-rtmp').html();
+          }
 
           if(mediaUrlOne === null)
           {

@@ -19,7 +19,7 @@ Opencast.engage = (function () {
     //var restEndpoint = "episode.xml?id="; // Activate for testing purposes
     //var restEndpoint = "xml/episode.xml?id="; // Activate for testing purposes
     //restEndpoint = "episode-segments.xml?id=";
-      return restEndpoint;
+    return restEndpoint;
    }
 
   function getCookie(name) {
@@ -78,6 +78,16 @@ Opencast.engage = (function () {
 
     /**
      * @memberOf Opencast.engage
+     * @description Gets the current video url 2
+     * @return The video url 2
+     */
+    function getVideoUrl2() {
+      var value = getGETParameter("videoUrl2");
+      return value;
+    }
+
+    /**
+     * @memberOf Opencast.engage
      * @description Get the value of the GET parameter with the passed "name"
      * @param string name
      * @return The value of the GET parameter
@@ -98,6 +108,7 @@ Opencast.engage = (function () {
       formatSeconds : formatSeconds,
       getMediaPackageId : getMediaPackageId,
       getVideoUrl : getVideoUrl,
+      getVideoUrl2 : getVideoUrl2,
       getSearchServiceEpisodeIdURL :  getSearchServiceEpisodeIdURL
     };
 }());
