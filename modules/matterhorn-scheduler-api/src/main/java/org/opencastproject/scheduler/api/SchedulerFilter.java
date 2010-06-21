@@ -189,4 +189,5 @@ public interface SchedulerFilter {
    * @return eventID | seriesID | channelID | deviceID | location | creator | contributor | date
    */
   public String getOrderBy ();
+  
 }

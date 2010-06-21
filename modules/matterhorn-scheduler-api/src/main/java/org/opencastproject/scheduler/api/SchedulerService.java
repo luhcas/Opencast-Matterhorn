@@ -94,5 +94,17 @@ public interface SchedulerService {
    * @return All events that are in conflict.
    */  
   public SchedulerEvent [] findConflictingEvents (SchedulerEvent e);  
+  
+  /**
+   * creates a new SchedulerFilter
+   * @return a schedulerFilter without any filters activated
+   */
+  public SchedulerFilter getNewSchedulerFilter ();
+  
+  /**
+   * creates a new empty SchedulerEvent
+   * @return an new SchedulerEvent
+   */
+  public SchedulerEvent getNewSchedulerEvent ();
 }
 
