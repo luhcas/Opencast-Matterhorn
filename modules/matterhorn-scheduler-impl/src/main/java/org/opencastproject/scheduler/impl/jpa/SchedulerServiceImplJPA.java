@@ -527,7 +527,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
     try {
       cal.getCalendar().validate();
     } catch (ValidationException e1) {
-      logger.error("Could not validate Calendar: {}", e1.getMessage());
+      logger.warn("Could not validate Calendar: {}", e1.getMessage());
     }
     
     String result = cal.getCalendar().toString(); // CalendarOutputter performance sucks (jmh)
