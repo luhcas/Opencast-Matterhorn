@@ -61,6 +61,8 @@ CREATE TABLE sequence (
     seq_count numeric(38,0)
 );
 
+INSERT INTO SEQUENCE VALUES('SEQ_GEN', 50);
+
 CREATE TABLE series (
     id character varying(128) NOT NULL
 );
