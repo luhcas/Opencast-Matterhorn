@@ -144,7 +144,7 @@ public class ConfidenceMonitorRestService {
     if (service == null) {
       return Response.serverError().build();
     }
-    
+    // Attempt to grab audio information, if exception is thrown the device does not exist
     try {
       List<Double> rmsValues = service.getRMSValues(device, timestamp);
       for (int i = 0; i < rmsValues.size(); i++) {
@@ -153,7 +153,7 @@ public class ConfidenceMonitorRestService {
         rmsValues.set(i, value);
       }
       jsonOutput.put("start", timestamp);
-      jsonOutput.put("interval", "100000000");
+      jsonOutput.put("interval", "100");
       jsonOutput.put("samples", rmsValues);
       return Response.ok(jsonOutput.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
     } catch (NullPointerException e) {
