@@ -26,4 +26,4 @@ capture.device.vga.src=/dev/vga
 capture.ingest.endpoint.url=
 capture.max.length=900
 capture.recording.id=ogg_250kbit
-media.zip=ogg_1mbit.zip
+media.zip=ogg_250kbit.zip

@@ -47,7 +47,7 @@ for file in datafiles:
 
         #Start dstat in the new dir and block for 60 seconds
         dstat_output="/oc_perf/" + props["capture.recording.id"].strip("\n") + "/dstat.log"
-        !sudo dstat -cdm --load --output $dstat_output 1 900
+        !sudo dstat -cdm --load --output $dstat_output 1 1200
 
 	time.sleep(1) # make sure the headers and such are written out
 

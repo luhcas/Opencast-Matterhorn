@@ -24,4 +24,4 @@ capture.device.vga.src=/dev/vga
 capture.ingest.endpoint.url=
 capture.max.length=900
 capture.recording.id=mpeg2_750kbit
-media.zip=mpeg2_1mbit.zip
+media.zip=mpeg2_750kbit.zip

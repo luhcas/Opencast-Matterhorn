@@ -25,4 +25,4 @@ capture.device.vga.src=/dev/vga
 capture.ingest.endpoint.url=
 capture.max.length=900
 capture.recording.id=h264_30q
-media.zip=h264_1mbit.zip
+media.zip=h264_30q.zip
