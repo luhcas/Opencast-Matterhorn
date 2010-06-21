@@ -298,16 +298,8 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
 
         // Have the encoded track inspected and return the result
         Receipt inspectionReceipt = inspectionService.inspect(returnURL, true);
-        while (inspectionReceipt.getStatus() != Receipt.Status.FINISHED) {
-          logger.debug("Waiting for mediainspection to finish");
-          if(inspectionReceipt.getStatus() == Receipt.Status.FAILED) throw new RuntimeException("Media inspection failed");
-          try {
-            Thread.sleep(5000);
-          } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-          }
-          inspectionReceipt = inspectionService.getReceipt(inspectionReceipt.getId());
-        }
+        if(inspectionReceipt.getStatus() == Receipt.Status.FAILED)
+          throw new RuntimeException("Media inspection failed");
         Track inspectedTrack = (Track)inspectionReceipt.getElement();
         inspectedTrack.setIdentifier(targetTrackId);
 

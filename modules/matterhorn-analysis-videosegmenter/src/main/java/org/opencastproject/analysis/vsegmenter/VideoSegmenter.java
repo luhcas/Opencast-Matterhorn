@@ -341,9 +341,10 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
             throw new MediaAnalysisException("Java media framework is unable to detect movie duration");
           }
 
+          long durationInSeconds = Math.min(track.getDuration()/1000, (long)duration.getSeconds());
           logger.info("Track {} loaded, duration is {} s", mediaUrl, duration.getSeconds());
 
-          MediaTime contentTime = new MediaRelTimeImpl(0, (long) duration.getSeconds() * 1000);
+          MediaTime contentTime = new MediaRelTimeImpl(0, (long) durationInSeconds*1000);
           MediaLocator contentLocator = new MediaLocatorImpl(mjpegTrack.getURI());
           Video videoContent = mpeg7.addVideoContent("videosegment", contentTime, contentLocator);
 

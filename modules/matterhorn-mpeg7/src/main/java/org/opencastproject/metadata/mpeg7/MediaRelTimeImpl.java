@@ -28,7 +28,7 @@ public class MediaRelTimeImpl extends MediaTimeImpl {
    * @param time
    *          the time point relative to referenceTimePoint
    * @param duration
-   *          the duration
+   *          the duration in miliseconds
    */
   public MediaRelTimeImpl(long time, long duration) {
     super(new MediaRelTimePointImpl(time), new MediaDurationImpl(duration));
