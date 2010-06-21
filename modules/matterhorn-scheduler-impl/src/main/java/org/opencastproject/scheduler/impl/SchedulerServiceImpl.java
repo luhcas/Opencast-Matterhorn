@@ -221,4 +221,14 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
     seriesService = s;
   }
   
+  @Override
+  public SchedulerFilter getNewSchedulerFilter () {
+    return new SchedulerFilterImpl();
+  }
+  
+  @Override
+  public SchedulerEvent getNewSchedulerEvent () {
+    return new SchedulerEventImpl();
+  }
+  
 }
