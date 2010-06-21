@@ -245,6 +245,7 @@ public class PipelineFactory {
     String bufferCountProperty = bufferProperty + CaptureParameters.CAPTURE_DEVICE_BUFFER_MAX_BUFFERS;
     String bufferByteProperty = bufferProperty + CaptureParameters.CAPTURE_DEVICE_BUFFER_MAX_BYTES;
     String bufferTimeProperty = bufferProperty + CaptureParameters.CAPTURE_DEVICE_BUFFER_MAX_TIME;
+    String framerateProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_FRAMERATE;
     String codec = properties.getProperty(codecProperty);
     String container = properties.getProperty(containerProperty);
     String bitrate = properties.getProperty(bitrateProperty);
@@ -252,6 +253,7 @@ public class PipelineFactory {
     String bufferCount = properties.getProperty(bufferCountProperty);
     String bufferBytes = properties.getProperty(bufferByteProperty);
     String bufferTime = properties.getProperty(bufferTimeProperty);
+    String framerate = properties.getProperty(framerateProperty);
 
     if (codec != null)
       capdev.properties.setProperty("codec", codec);
@@ -267,6 +269,8 @@ public class PipelineFactory {
       capdev.properties.setProperty("bufferBytes", bufferBytes);
     if (bufferTime != null)
       capdev.properties.setProperty("bufferTime", bufferTime);
+    if (framerate != null)
+      capdev.properties.setProperty("framerate", framerate);
 
     return capdev;
   }
@@ -330,6 +334,7 @@ public class PipelineFactory {
     String codec =  captureDevice.properties.getProperty("codec");
     String container = captureDevice.properties.getProperty("container");
     String bitrate = captureDevice.properties.getProperty("bitrate");
+    String framerate = captureDevice.properties.getProperty("framerate");
     String bufferCount = captureDevice.properties.getProperty("bufferCount");
     String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
     String bufferTime = captureDevice.properties.getProperty("bufferTime");
@@ -350,9 +355,21 @@ public class PipelineFactory {
       logger.debug("{} bufferTime set to {}.", captureDevice.getName(), bufferTime);
       queue.set("max-size-time", bufferTime);
     }
-
     Element mpegpsdemux = ElementFactory.make("mpegpsdemux", null);
     final Element mpegvideoparse = ElementFactory.make("mpegvideoparse", null);
+    
+    // Elements that allow for change in fps
+    Element videorate = ElementFactory.make("videorate", null);
+    Element fpsfilter = ElementFactory.make("capsfilter", null);
+    Caps fpsCaps;
+    if (framerate != null) {
+      fpsCaps = new Caps("video/x-raw-yuv, framerate=" + framerate + "/1");
+      logger.debug("{} fps = {}", captureDevice.getName(), framerate);
+    }
+    else
+      fpsCaps = new Caps();
+    fpsfilter.setCaps(fpsCaps);
+    
     
     if (codec != null) {
       logger.debug("{} using encoder: {}", captureDevice.getName(), codec);
@@ -360,8 +377,8 @@ public class PipelineFactory {
       enc = ElementFactory.make(codec, null);
     }
     else {
-      dec = ElementFactory.make("capsfilter", null);
-      enc = ElementFactory.make("capsfilter", null);
+      dec = ElementFactory.make("mpeg2dec", null);
+      enc = ElementFactory.make("mpeg2enc", null);
     }
     
     if (container != null) {
@@ -380,8 +397,7 @@ public class PipelineFactory {
       logger.debug("{} bitrate set to: {}", captureDevice.getName(), bitrate);
       enc.set("bitrate", bitrate);
     }
-    queue.set("leaky", "1");
-    pipeline.addMany(filesrc, queue, mpegpsdemux, mpegvideoparse, dec, enc, muxer, filesink);
+    pipeline.addMany(filesrc, queue, mpegpsdemux, mpegvideoparse, dec, videorate, fpsfilter, enc, muxer, filesink);
 
     /*
      * mpegpsdemux source pad is only available sometimes, therefore we need to add a listener to accept dynamic pads
@@ -400,13 +416,17 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, mpegpsdemux, mpegvideoparse);
     else if (!mpegvideoparse.link(dec))
       error = formatPipelineError(captureDevice, mpegvideoparse, dec);
+    else if (!dec.link(videorate))
+      error = formatPipelineError(captureDevice, dec, videorate);
+    else if (!videorate.link(fpsfilter))
+      error = formatPipelineError(captureDevice, videorate, fpsfilter);
     if (confidence) {
       boolean trace = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG));
-      if (!VideoMonitoring.addVideoMonitor(pipeline, dec, enc, interval, imageloc, device, trace))
-        error = formatPipelineError(captureDevice, dec, enc);
+      if (!VideoMonitoring.addVideoMonitor(pipeline, fpsfilter, enc, interval, imageloc, device, trace))
+        error = formatPipelineError(captureDevice, fpsfilter, enc);
     } else {
-      if (!dec.link(enc))
-        error = formatPipelineError(captureDevice, dec, enc);
+      if (!fpsfilter.link(enc))
+        error = formatPipelineError(captureDevice, fpsfilter, enc);
     }
     if (!enc.link(muxer))
       error = formatPipelineError(captureDevice, enc, muxer);
@@ -414,7 +434,7 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, muxer, filesink);
 
     if (error != null) {
-      pipeline.removeMany(filesrc, queue, mpegpsdemux, mpegvideoparse, muxer, filesink);
+      pipeline.removeMany(filesrc, queue, mpegpsdemux, mpegvideoparse, dec, videorate, fpsfilter, enc, muxer, filesink);
       logger.error(error);
       return false;
     }
@@ -446,6 +466,7 @@ public class PipelineFactory {
     String codec = captureDevice.properties.getProperty("codec");
     String container = captureDevice.properties.getProperty("container");
     String bitrate = captureDevice.properties.getProperty("bitrate");
+    String framerate = captureDevice.properties.getProperty("framerate");
     String bufferCount = captureDevice.properties.getProperty("bufferCount");
     String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
     String bufferTime = captureDevice.properties.getProperty("bufferTime");
@@ -469,11 +490,19 @@ public class PipelineFactory {
       queue.set("max-size-time", bufferTime);
     }
 
-    Element videoscale = ElementFactory.make("videoscale", null);
+    // Elements that allow for change in fps
     Element videorate = ElementFactory.make("videorate", null);
-    Element filter = ElementFactory.make("capsfilter", null);
+    Element fpsfilter = ElementFactory.make("capsfilter", null);
+    Caps fpsCaps;
+    if (framerate != null) {
+      fpsCaps = new Caps("video/x-raw-yuv, framerate=" + framerate + "/1");
+      logger.debug("{} fps = {}", captureDevice.getName(), framerate);
+    }
+    else
+      fpsCaps = new Caps();
+    fpsfilter.setCaps(fpsCaps);
+
     Element ffmpegcolorspace = ElementFactory.make("ffmpegcolorspace", null);
-    
     if (codec != null) {
       logger.debug("{} encoder set to: {}", captureDevice.getName(), codec);
       enc = ElementFactory.make(codec, null);
@@ -500,7 +529,6 @@ public class PipelineFactory {
     Element filesink = ElementFactory.make("filesink", null);
 
     v4lsrc.set("device", captureDevice.getLocation());
-    filter.setCaps(Caps.fromString("video/x-raw-yuv"));
     filesink.set("location", captureDevice.getOutputPath());
     if (bitrate != null) {
       logger.debug("{} bitrate set to: {}", captureDevice.getName(), bitrate);      
@@ -509,24 +537,21 @@ public class PipelineFactory {
     else
       enc.set("bitrate", "2000000");
 
-    pipeline.addMany(v4lsrc, queue, videoscale, videorate, filter, ffmpegcolorspace, enc, muxer, filesink);
-    queue.set("leaky", "1");
+    pipeline.addMany(v4lsrc, queue, videorate, fpsfilter, ffmpegcolorspace, enc, muxer, filesink);
 
     if (!v4lsrc.link(queue))
       error = formatPipelineError(captureDevice, v4lsrc, queue);
-    else if (!queue.link(videoscale))
-      error = formatPipelineError(captureDevice, queue, videoscale);
-    else if (!videoscale.link(videorate))
-      error = formatPipelineError(captureDevice, videoscale, videorate);
-    else if (!videorate.link(filter))
-      error = formatPipelineError(captureDevice, videorate, filter);
+    else if (!queue.link(videorate))
+      error = formatPipelineError(captureDevice, queue, videorate);
+    else if (!videorate.link(fpsfilter))
+      error = formatPipelineError(captureDevice, videorate, fpsfilter);
     if (confidence) {
       boolean trace = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG));
-      if (!VideoMonitoring.addVideoMonitor(pipeline, filter, ffmpegcolorspace, interval, imageloc, device, trace))
-        error = formatPipelineError(captureDevice, filter, ffmpegcolorspace);
+      if (!VideoMonitoring.addVideoMonitor(pipeline, fpsfilter, ffmpegcolorspace, interval, imageloc, device, trace))
+        error = formatPipelineError(captureDevice, fpsfilter, ffmpegcolorspace);
     } else {
-      if (!filter.link(ffmpegcolorspace))
-        error = formatPipelineError(captureDevice, filter, ffmpegcolorspace);
+      if (!fpsfilter.link(ffmpegcolorspace))
+        error = formatPipelineError(captureDevice, fpsfilter, ffmpegcolorspace);
     }
     if (!ffmpegcolorspace.link(enc))
       error = formatPipelineError(captureDevice, ffmpegcolorspace, enc);
@@ -536,7 +561,7 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, muxer, filesink);
 
     if (error != null) {
-      pipeline.removeMany(v4lsrc, queue, videoscale, videorate, filter, ffmpegcolorspace, enc, muxer, filesink);
+      pipeline.removeMany(v4lsrc, queue, videorate, fpsfilter, ffmpegcolorspace, enc, muxer, filesink);
       logger.error(error);
       return false;
     }
@@ -666,6 +691,7 @@ public class PipelineFactory {
     String codec = captureDevice.properties.getProperty("codec");
     String container = captureDevice.properties.getProperty("container");
     String bitrate = captureDevice.properties.getProperty("bitrate");
+    String framerate = captureDevice.properties.getProperty("framerate");
     String bufferCount = captureDevice.properties.getProperty("bufferCount");
     String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
     String bufferTime = captureDevice.properties.getProperty("bufferTime");
@@ -713,19 +739,34 @@ public class PipelineFactory {
     }
     else
       enc.set("bitrate", "2000000");
-    queue.set("leaky", "1");
+    
+    // Elements that allow for change in fps
+    Element videorate = ElementFactory.make("videorate", null);
+    Element fpsfilter = ElementFactory.make("capsfilter", null);
+    Caps fpsCaps;
+    if (framerate != null) {
+      fpsCaps = new Caps("video/x-raw-yuv, framerate=" + framerate + "/1");
+      logger.debug("{} fps = {}", captureDevice.getName(), framerate);
+    }
+    else
+      fpsCaps = new Caps();
+    fpsfilter.setCaps(fpsCaps);
 
-    pipeline.addMany(v4l2src, queue, enc, muxer, filesink);
+    pipeline.addMany(v4l2src, queue, videorate, fpsfilter, enc, muxer, filesink);
 
     if (!v4l2src.link(queue))
       error = formatPipelineError(captureDevice, v4l2src, queue);
+    else if (!queue.link(videorate))
+      error = formatPipelineError(captureDevice, queue, videorate);
+    else if (!videorate.link(fpsfilter))
+      error = formatPipelineError(captureDevice, videorate, fpsfilter);
     if (confidence) {
       boolean trace = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG));
-      if (!VideoMonitoring.addVideoMonitor(pipeline, queue, enc, interval, imageloc, device, trace))
-        error = formatPipelineError(captureDevice, queue, enc);
+      if (!VideoMonitoring.addVideoMonitor(pipeline, fpsfilter, enc, interval, imageloc, device, trace))
+        error = formatPipelineError(captureDevice, fpsfilter, enc);
     } else {
-      if (!queue.link(enc))
-        error = formatPipelineError(captureDevice, queue, enc);
+      if (!fpsfilter.link(enc))
+        error = formatPipelineError(captureDevice, fpsfilter, enc);
     }
     if (!enc.link(muxer))
       error = formatPipelineError(captureDevice, enc, muxer);
@@ -733,7 +774,7 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, muxer, filesink);
 
     if (error != null) {
-      pipeline.removeMany(v4l2src, queue, enc, muxer, filesink);
+      pipeline.removeMany(v4l2src, queue, videorate, fpsfilter, enc, muxer, filesink);
       logger.error(error);
       return false;
     }

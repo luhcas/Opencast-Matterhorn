@@ -155,6 +155,9 @@ public interface CaptureParameters {
   
   /** Property appended to CAPTURE_DEVICE_CODEC to specify that codec's quantizer value (codec=x264enc only) */
   String CAPTURE_DEVICE_QUANTIZER = ".bitrate";
+  
+  /** The framerate in frames per second to force on the video */
+  String CAPTURE_DEVICE_FRAMERATE = ".framerate";
 
   /** Property prefixing properties involving the capture buffers */
   String CAPTURE_DEVICE_BUFFER = ".buffer";
