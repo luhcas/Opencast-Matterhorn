@@ -86,7 +86,7 @@ public class StaticResourceServlet extends HttpServlet {
     try {
       httpService.unregister("/static");
     } catch (Exception e) {
-      logger.warn("Deactivation problem: {}", e);
+      logger.warn("Deactivation problem: {}", e.getMessage());
     }
   }
 
