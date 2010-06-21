@@ -102,7 +102,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
   /** The agent's pipeline. **/
   private Pipeline pipe = null;
-  
+
   /** Pipeline for confidence monitoring while agent is idle */
   private Pipeline confidencePipe = null;
 
@@ -121,7 +121,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   /** The scheduler the agent will use to schedule any recurring events */
   private Scheduler agentScheduler = null;
 
-  /** The configuration manager for the agent. */ 
+  /** The configuration manager for the agent. */
   private ConfigurationManager configService = null;
 
   /** The http client used to communicate with the core */
@@ -129,7 +129,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
   /** Indicates the ID of the recording currently being recorded. **/
   private String currentRecID = null;
-  
+
   /** Is confidence monitoring enabled? */
   private boolean confidence = false;
 
@@ -160,7 +160,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see org.opencastproject.capture.api.CaptureAgent#startCapture()
    */
   @Override
@@ -185,7 +185,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see org.opencastproject.capture.api.CaptureAgent#startCapture(MediaPackage)
    */
   @Override
@@ -199,7 +199,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
   /**
    * {@inheritDoc}
-   * 
+   *
    * @see org.opencastproject.capture.api.CaptureAgent#startCapture(Properties)
    */
   @Override
@@ -221,8 +221,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
   /**
    * {@inheritDoc}
-   * 
-   * @see 
+   *
+   * @see
    *      org.opencastproject.capture.api.CaptureAgent#startCapture(MediaPackage, Properties)
    */
   @Override
@@ -352,7 +352,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         stopCapture(false);
       }
     });
-    
+
     // Grab time to wait for pipeline to start
     int wait;
     String waitProp = newRec.getProperty(CaptureParameters.CAPTURE_START_WAIT);
@@ -397,7 +397,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         length = Long.parseLong(maxLength);
       } catch (NumberFormatException e) {
         configService.setItem(CaptureParameters.CAPTURE_MAX_LENGTH, String.valueOf(CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH));
-        length = CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH; 
+        length = CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH;
       }
     } else {
       configService.setItem(CaptureParameters.CAPTURE_MAX_LENGTH, String.valueOf(CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH));
@@ -505,16 +505,18 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   /**
    * Generates the manifest.xml file from the files specified in the properties
    * @param recID The ID for the recording whose manifest will be created
-   * @return A state boolean 
+   * @return A state boolean
    */
   public boolean createManifest(String recID) {
 
-    AgentRecording recording = pendingRecordings.get(recID);    
+    AgentRecording recording = pendingRecordings.get(recID);
     if (recording == null) {
       logger.error("[createManifest] Recording {} not found!", recID);
+      setRecordingState(recID, RecordingState.MANIFEST_ERROR);
       return false;
     } else {
       logger.debug("Generating manifest for recording {}", recID);
+      setRecordingState(recording.getID(), RecordingState.MANIFEST);
     }
 
     //Get the list of device names so we can attach all the files appropriately (re: flavours, etc)
@@ -526,7 +528,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
 
     MediaPackageElementBuilder elemBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-    MediaPackageElementFlavor flavor = null; 
+    MediaPackageElementFlavor flavor = null;
     // Includes the tracks in the MediaPackage
     try {
 
@@ -536,7 +538,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       for (String name : friendlyNames) {
         name = name.trim();
 
-        String flavorPointer = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_FLAVOR; 
+        String flavorPointer = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_FLAVOR;
         String flavorString = recording.getProperty(flavorPointer);
         flavor = MediaPackageElementFlavor.parseFlavor(flavorString);
 
@@ -549,17 +551,19 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
                   baseURI.relativize(outputFile.toURI()),
                   MediaPackageElement.Type.Track,
                   flavor));
-        else { 
+        else {
           // FIXME: Is the admin reading the agent logs? (jt)
           // FIXME: Who will find out why one of the tracks is missing from the media package? (jt)
           // FIXME: Think about a notification scheme, this looks like an emergency to me (jt)
           logger.error("Required file {} not found, aborting manifest creation!", outputFile.getName());
+          setRecordingState(recording.getID(), RecordingState.MANIFEST_ERROR);
           return false;
         }
-      } 
+      }
 
     } catch (UnsupportedElementException e) {
       logger.error("Unsupported Element Exception: {}.", e.getMessage());
+      setRecordingState(recording.getID(), RecordingState.MANIFEST_ERROR);
       return false;
     }
 
@@ -568,16 +572,18 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     try {
       logger.debug("Serializing metadata and MediaPackage...");
       // Gets the manifest.xml as a Document object
-      
+
       File manifestFile = new File(recording.getDir(), CaptureParameters.MANIFEST_NAME);
       fos = new FileOutputStream(manifestFile);
       recording.getMediaPackage().toXml(fos, true);
 
     } catch (MediaPackageException e) {
       logger.error("MediaPackage Exception: {}.", e.getMessage());
+      setRecordingState(recording.getID(), RecordingState.MANIFEST_ERROR);
       return false;
     } catch (IOException e) {
       logger.error("I/O Exception: {}.", e.getMessage());
+      setRecordingState(recording.getID(), RecordingState.MANIFEST_ERROR);
       return false;
     } finally {
       IOUtils.closeQuietly(fos);
@@ -588,8 +594,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
   /**
    * Compresses the files contained in the output directory
-   * 
-   * @param recID 
+   *
+   * @param recID
    *      The ID for the recording whose files are going to be zipped
    * @return A File reference to the file zip created
    */
@@ -598,8 +604,11 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     logger.debug("Compressing files...");
     AgentRecording recording = pendingRecordings.get(recID);
     if (recording == null) {
-      logger.error("[createManifest] Recording {} not found!", recID);
+      logger.error("[zipFiles] Recording {} not found!", recID);
+      setRecordingState(recID, RecordingState.COMPRESSING_ERROR);
       return null;
+    } else {
+      setRecordingState(recording.getID(), RecordingState.COMPRESSING);
     }
 
     Iterable<MediaPackageElement> mpElements = recording.getMediaPackage().elements();
@@ -978,7 +987,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     //Setup the agent state push jobs
     try {
       long statePushTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL)) * 1000L;
-      
+
       //Setup the push job
       JobDetail stateJob = new JobDetail("agentStateUpdate", JobParameters.RECURRING_TYPE, AgentStateJob.class);
 
@@ -989,7 +998,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
       //Create a new trigger                          Name              Group name               Start       End   # of times to repeat               Repeat interval
       SimpleTrigger stateTrigger = new SimpleTrigger("state_push", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, statePushTime);
-      
+
       //Schedule the update
       agentScheduler.scheduleJob(stateJob, stateTrigger);
     } catch (NumberFormatException e) {
@@ -1001,17 +1010,17 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     //Setup the agent capabilities push jobs
     try {
       long capbsPushTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_CAPABILITIES_REMOTE_POLLING_INTERVAL)) * 1000L;
-      
+
       //Setup the push job
       JobDetail capbsJob = new JobDetail("agentCapabilitiesUpdate", JobParameters.RECURRING_TYPE, AgentCapabilitiesJob.class);
 
       capbsJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
-      capbsJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);   
+      capbsJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
       capbsJob.getJobDataMap().put(JobParameters.TRUSTED_CLIENT, client);
-      
+
       //Create a new trigger                    Name              Group name               Start       End   # of times to repeat               Repeat interval
       SimpleTrigger capbsTrigger = new SimpleTrigger("capabilities_polling", JobParameters.RECURRING_TYPE, new Date(), null, SimpleTrigger.REPEAT_INDEFINITELY, capbsPushTime);
-      
+
       //Schedule the update
       agentScheduler.scheduleJob(capbsJob, capbsTrigger);
     } catch (NumberFormatException e) {
@@ -1019,7 +1028,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     } catch (SchedulerException e) {
       logger.error("SchedulerException in StateServiceImpl while trying to schedule capability push jobs: {}.", e.getMessage());
     }
-    
   }
 
   /**
@@ -1047,9 +1055,9 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
     return null;
   }
-  
+
   /**
-   * 
+   *
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.ConfidenceMonitor#getFriendlyNames()
    */
@@ -1069,14 +1077,14 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
     return deviceList;
   }
-  
+
   /**
-   * 
+   *
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.ConfidenceMonitor#getRMSValues(java.lang.String, double)
    */
   public List<Double> getRMSValues(String friendlyName, double timestamp) {
     return AudioMonitoring.getRMSValues(friendlyName, timestamp);
   }
-  
+
 }
