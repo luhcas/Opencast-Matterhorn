@@ -23,7 +23,6 @@ import org.opencastproject.mediapackage.UnsupportedElementException;
 
 import org.w3c.dom.Node;
 
-import java.io.IOException;
 import java.net.URI;
 
 /**
@@ -106,24 +105,6 @@ public interface MediaPackageElementBuilderPlugin {
   boolean accept(Node elementNode);
 
   /**
-   * Returns the priority of this builder. If more than one builder claim responsibility for a certain element, the one
-   * with the highest priority is chosen.
-   * <p/>
-   * Implementations are free to return any integer value here, but it is a recommended best practice to regard -1 the
-   * least priority, which should be the default.
-   */
-  int getPriority();
-
-  /**
-   * Sets the priority of this builder. If more than one builder claim responsibility for a certain element, the one
-   * with the highest priority is chosen.
-   * <p/>
-   * Implementations are free to return any integer value here, but it is a recommended best practice to regard -1 the
-   * least priority, which should be the default.
-   */
-  void setPriority(int priority);
-
-  /**
    * Creates a media package element from the given url that was previously accepted.
    * 
    * @param uri
@@ -155,9 +136,7 @@ public interface MediaPackageElementBuilderPlugin {
    * @param flavor
    *          the element flavor
    * @return the new media package element
-   * @throws IOException
-   *           if the media package element's file cannot be created
    */
-  MediaPackageElement newElement(MediaPackageElement.Type type, MediaPackageElementFlavor flavor) throws IOException;
+  MediaPackageElement newElement(MediaPackageElement.Type type, MediaPackageElementFlavor flavor);
 
 }

@@ -25,11 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.xml.xpath.XPath;
@@ -96,7 +93,6 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
     }
 
     // Create media package element depending on mime type flavor
-    Collections.sort(candidates, PriorityComparator.INSTANCE);
     MediaPackageElementBuilderPlugin builderPlugin = candidates.get(0);
     MediaPackageElement element = builderPlugin.elementFromURI(uri);
     element.setFlavor(flavor);
@@ -141,7 +137,6 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
     }
 
     // Create a new media package element
-    Collections.sort(candidates, PriorityComparator.INSTANCE);
     MediaPackageElementBuilderPlugin builderPlugin = candidates.get(0);
     MediaPackageElement element = builderPlugin.elementFromManifest(node, serializer);
     builderPlugin.cleanup();
@@ -152,8 +147,7 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
    * @see org.opencastproject.mediapackage.MediaPackageElementBuilder#newElement(org.opencastproject.mediapackage.MediaPackageElement.Type
    *      , org.opencastproject.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement newElement(MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
-          throws IOException {
+  public MediaPackageElement newElement(MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
     List<MediaPackageElementBuilderPlugin> candidates = new ArrayList<MediaPackageElementBuilderPlugin>();
     for (Class<? extends MediaPackageElementBuilderPlugin> pluginClass : plugins) {
       MediaPackageElementBuilderPlugin plugin = createPlugin(pluginClass);
@@ -176,7 +170,6 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
     }
 
     // Create a new media package element
-    Collections.sort(candidates, PriorityComparator.INSTANCE);
     MediaPackageElementBuilderPlugin builderPlugin = candidates.get(0);
     MediaPackageElement element = builderPlugin.newElement(type, flavor);
     builderPlugin.cleanup();
@@ -202,19 +195,6 @@ public class MediaPackageElementBuilderImpl implements MediaPackageElementBuilde
       throw new RuntimeException("An error occured while setting up media package element builder plugin " + plugin);
     }
     return plugin;
-  }
-
-  /**
-   * Comperator used to sort plugins by priority.
-   */
-  private static final class PriorityComparator implements Comparator<MediaPackageElementBuilderPlugin> {
-
-    static final PriorityComparator INSTANCE = new PriorityComparator();
-
-    public int compare(MediaPackageElementBuilderPlugin o1, MediaPackageElementBuilderPlugin o2) {
-      return o2.getPriority() - o1.getPriority();
-    }
-
   }
 
 }

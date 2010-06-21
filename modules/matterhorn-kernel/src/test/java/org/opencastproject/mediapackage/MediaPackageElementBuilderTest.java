@@ -16,24 +16,19 @@
 
 package org.opencastproject.mediapackage;
 
+import static org.junit.Assert.assertTrue;
+
+import static org.junit.Assert.assertNotNull;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import org.opencastproject.mediapackage.Catalog;
-import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.mediapackage.MediaPackageElementBuilder;
-import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.mediapackage.MediaPackageElementBuilderImpl;
-import org.opencastproject.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.mediapackage.MediaPackageElement.Type;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -80,11 +75,9 @@ public class MediaPackageElementBuilderTest {
    */
   @Test
   public void testNewElement() {
-    try {
-      mediaPackageElementBuilder.newElement(MediaPackageElement.Type.Catalog, MediaPackageElements.EPISODE);
-    } catch (IOException e) {
-      fail(e.getMessage());
-    }
+    Object e = mediaPackageElementBuilder.newElement(MediaPackageElement.Type.Catalog, MediaPackageElements.EPISODE);
+    assertNotNull(e);
+    assertTrue(e instanceof Catalog);
   }
 
 }

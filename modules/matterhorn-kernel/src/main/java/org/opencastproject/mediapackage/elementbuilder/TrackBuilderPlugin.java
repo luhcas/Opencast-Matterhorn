@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
@@ -53,10 +52,6 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
    * the logging facility provided by log4j
    */
   private final static Logger logger = LoggerFactory.getLogger(TrackBuilderPlugin.class);
-
-  public TrackBuilderPlugin() throws IllegalStateException {
-    setPriority(0);
-  }
 
   /**
    * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#accept(org.opencastproject.mediapackage.MediaPackageElement.Type,
@@ -99,8 +94,7 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
    * @see org.opencastproject.mediapackage.elementbuilder.MediaPackageElementBuilderPlugin#newElement(org.opencastproject.mediapackage.MediaPackageElement.Type
    *      ,org.opencastproject.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement newElement(MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
-          throws IOException {
+  public MediaPackageElement newElement(MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
     throw new IllegalStateException("Unable to create track from scratch");
   }
 

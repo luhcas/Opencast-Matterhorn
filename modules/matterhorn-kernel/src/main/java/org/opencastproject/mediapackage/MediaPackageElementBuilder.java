@@ -18,7 +18,6 @@ package org.opencastproject.mediapackage;
 
 import org.w3c.dom.Node;
 
-import java.io.IOException;
 import java.net.URI;
 
 /**
@@ -87,9 +86,7 @@ public interface MediaPackageElementBuilder {
    * @param flavor
    *          the element flavor
    * @return the new media package element
-   * @throws IOException
-   *           if the media package element's file cannot be created
    */
-  MediaPackageElement newElement(MediaPackageElement.Type type, MediaPackageElementFlavor flavor) throws IOException;
+  MediaPackageElement newElement(MediaPackageElement.Type type, MediaPackageElementFlavor flavor);
 
 }
