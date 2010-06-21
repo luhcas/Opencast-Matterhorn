@@ -17,7 +17,7 @@ package org.opencastproject.workspace.impl;
 
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.PathSupport;
-import org.opencastproject.util.UrlSupport;
+import org.opencastproject.workingfilerepository.api.PathMappable;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
@@ -40,12 +40,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
-import java.util.Map.Entry;
 
 /**
  * Implements a simple cache for remote URIs. Delegates methods to {@link WorkingFileRepository} wherever possible.
@@ -55,12 +52,12 @@ import java.util.Map.Entry;
 public class WorkspaceImpl implements Workspace {
   public static final String WORKSPACE_ROOTDIR_KEY = "org.opencastproject.workspace.rootdir";
   private static final Logger logger = LoggerFactory.getLogger(WorkspaceImpl.class);
-
   protected WorkingFileRepository repo;
+  protected String repoRoot = null;
+  protected String repoUrl = null;
   protected TrustedHttpClient trustedHttpClient;
   protected String rootDirectory = null;
   protected String collectionsDir = null;
-  protected Map<String, String> filesystemMappings;
   protected long maxAgeInSeconds = -1;
   protected long garbageCollectionPeriodInSeconds = -1;
   protected Timer garbageFileCollector;
@@ -90,23 +87,6 @@ public class WorkspaceImpl implements Workspace {
     }
 
     createRootDirectory();
-
-    filesystemMappings = new HashMap<String, String>();
-    String filesUrl;
-    if (cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
-      filesUrl = UrlSupport.DEFAULT_BASE_URL + "/files/mp";
-    } else {
-      filesUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url") + "/files/mp";
-    }
-
-    // Find the working file repository's root directory
-    // Note: we only map mediapackage elements, not collections. FIXME?
-    String repoRoot;
-    if (cc != null && cc.getBundleContext().getProperty("org.opencastproject.file.repo.path") != null) {
-      repoRoot = cc.getBundleContext().getProperty("org.opencastproject.file.repo.path");
-      logger.info("Workspace filesystem mapping " + filesUrl + " => " + repoRoot + "/mp");
-      filesystemMappings.put(filesUrl, repoRoot + "/mp");
-    }
 
     // Set up the garbage file collection timer
     if (cc != null && cc.getBundleContext().getProperty("org.opencastproject.workspace.gc.period") != null) {
@@ -163,70 +143,44 @@ public class WorkspaceImpl implements Workspace {
     deactivateGarbageFileCollectionTimer();
   }
 
-  /**
-   * If this URL is available on a mounted filesystem, return the file handle (otherwise, null).
-   * 
-   * @param urlString
-   *          The URL as a string
-   * @return The file, or null if the file is not on a configured mount.
-   */
-  protected File getLocallyMountedFile(String urlString) {
-    if (urlString.startsWith("file")) {
-      try {
-        File f = new File(new URI(urlString));
-        if (f.exists() && f.canRead())
-          return f;
-      } catch (URISyntaxException e) {
-      }
-    }
-    for (Entry<String, String> entry : filesystemMappings.entrySet()) {
-      String baseUrl = entry.getKey();
-      String baseFilesystemPath = entry.getValue();
-      if (urlString.startsWith(baseUrl)) {
-        String pathExtraInfo = urlString.substring(baseUrl.length());
-        File f = new File(baseFilesystemPath + pathExtraInfo);
-        if (f.exists() && f.isFile() && f.canRead()) {
-          logger.debug("found local file {} for URL {}", f.getAbsolutePath(), urlString);
-          return f;
-        }
-      }
-    }
-    return null;
-  }
-
   public File get(URI uri) throws NotFoundException {
     String urlString = uri.toString();
-
-    // If any local filesystem mappings match this uri, just return the file handle
-    File localFile = getLocallyMountedFile(urlString);
-    if (localFile != null)
-      return localFile;
-
     String safeFilename = toFilesystemSafeName(urlString);
     String fullPath = rootDirectory + File.separator + safeFilename;
     // See if there's a matching file under the root directory
     File f = new File(fullPath);
-    if (f.exists()) {
+    if (f.isFile()) {
       return f;
-    } else {
-      logger.info("Copying {} to {}", urlString, f.getAbsolutePath());
-      HttpGet get = new HttpGet(urlString);
-      InputStream in = null;
-      OutputStream out = null;
-      try {
-        HttpResponse response = trustedHttpClient.execute(get);
-        in = response.getEntity().getContent();
-        out = new FileOutputStream(f);
-        IOUtils.copyLarge(in, out);
-      } catch (Exception e) {
-        logger.warn("Could not copy {} to {}", urlString, f.getAbsolutePath());
-        throw new NotFoundException(e);
-      } finally {
-        IOUtils.closeQuietly(in);
-        IOUtils.closeQuietly(out);
+    } else if (repoRoot != null && repoUrl != null) {
+      if (uri.toString().startsWith(repoUrl)) {
+        String localPath = uri.toString().substring(repoUrl.length());
+        if (localPath.startsWith(WorkingFileRepository.COLLECTION_PATH_PREFIX) || localPath.startsWith(WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX)) {
+          f = new File(PathSupport.concat(repoRoot, localPath));
+          if (f.isFile()) {
+            logger.debug("Getting {} directly from working file repository root at {}", uri, f);
+            return f;
+          }
+        }
       }
-      return f;
     }
+
+    logger.info("Downloading {} to {}", urlString, f.getAbsolutePath());
+    HttpGet get = new HttpGet(urlString);
+    InputStream in = null;
+    OutputStream out = null;
+    try {
+      HttpResponse response = trustedHttpClient.execute(get);
+      in = response.getEntity().getContent();
+      out = new FileOutputStream(f);
+      IOUtils.copyLarge(in, out);
+    } catch (Exception e) {
+      logger.warn("Could not copy {} to {}", urlString, f.getAbsolutePath());
+      throw new NotFoundException(e);
+    } finally {
+      IOUtils.closeQuietly(in);
+      IOUtils.closeQuietly(out);
+    }
+    return f;
   }
 
   protected String toFilesystemSafeName(String urlString) {
@@ -253,7 +207,9 @@ public class WorkspaceImpl implements Workspace {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workspace.api.Workspace#put(java.lang.String, java.lang.String, java.lang.String, java.io.InputStream)
+   * 
+   * @see org.opencastproject.workspace.api.Workspace#put(java.lang.String, java.lang.String, java.lang.String,
+   *      java.io.InputStream)
    */
   @Override
   public URI put(String mediaPackageID, String mediaPackageElementID, String fileName, InputStream in) {
@@ -262,22 +218,17 @@ public class WorkspaceImpl implements Workspace {
             .substring(safeFileName.lastIndexOf("_") + 1) : safeFileName;
     URI uri = repo.getURI(mediaPackageID, mediaPackageElementID, shortSafeFileName);
 
-    //  if this isn't a locally mounted file, branch the file to the workspace where it would be placed by get(URI)
-    File localFile = getLocallyMountedFile(uri.toString());
+    // Write the file to the working file repository as well as to the local workspace
     InputStream tee = null;
-    if (localFile == null) {
-      File tempFile = null;
-      FileOutputStream out = null;
-      try {
-        tempFile = new File(rootDirectory, toFilesystemSafeName(uri.toString()));
-        out = new FileOutputStream(tempFile);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-      tee = new TeeInputStream(in, out, true);
-    } else {
-      tee = in;
+    File tempFile = null;
+    FileOutputStream out = null;
+    try {
+      tempFile = new File(rootDirectory, toFilesystemSafeName(uri.toString()));
+      out = new FileOutputStream(tempFile);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+    tee = new TeeInputStream(in, out, true);
     repo.put(mediaPackageID, mediaPackageElementID, shortSafeFileName, tee);
     try {
       tee.close();
@@ -286,9 +237,10 @@ public class WorkspaceImpl implements Workspace {
     }
     return uri;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workspace.api.Workspace#getFromCollection(java.lang.String, java.lang.String)
    */
   @Override
@@ -296,7 +248,7 @@ public class WorkspaceImpl implements Workspace {
     File collectionDirectory = new File(collectionsDir, collectionId);
     try {
       FileUtils.forceMkdir(collectionDirectory);
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new IllegalStateException("unable to create directory " + collectionDirectory.getAbsolutePath());
     }
     File outFile = new File(collectionDirectory, fileName);
@@ -306,7 +258,7 @@ public class WorkspaceImpl implements Workspace {
       in = repo.getFromCollection(collectionId, fileName);
       out = new FileOutputStream(outFile);
       IOUtils.copy(in, out);
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw new NotFoundException(e);
     } finally {
       IOUtils.closeQuietly(in);
@@ -317,16 +269,21 @@ public class WorkspaceImpl implements Workspace {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workspace.api.Workspace#putInCollection(java.lang.String, java.lang.String, java.io.InputStream)
+   * 
+   * @see org.opencastproject.workspace.api.Workspace#putInCollection(java.lang.String, java.lang.String,
+   *      java.io.InputStream)
    */
   @Override
   public URI putInCollection(String collectionId, String fileName, InputStream in) throws URISyntaxException {
     return repo.putInCollection(collectionId, fileName, in);
   }
 
-
   public void setRepository(WorkingFileRepository repo) {
     this.repo = repo;
+    if (repo instanceof PathMappable) {
+      this.repoRoot = ((PathMappable) repo).getPathPrefix();
+      logger.info("Mapping workspace to working file repository using {}", repoRoot);
+    }
   }
 
   public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
@@ -393,18 +350,20 @@ public class WorkspaceImpl implements Workspace {
     }
 
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workspace.api.Workspace#getCollectionContents(java.lang.String)
    */
   @Override
   public URI[] getCollectionContents(String collectionId) {
     return repo.getCollectionContents(collectionId);
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workspace.api.Workspace#deleteFromCollection(java.lang.String, java.lang.String)
    */
   @Override

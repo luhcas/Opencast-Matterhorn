@@ -142,7 +142,7 @@ public class RestPublisher {
   protected void destroyEndpoint(String alias) {
     try {
       httpService.unregister(alias);
-      logger.info("Unregistered rest endpoint {}" + alias);
+      logger.info("Unregistered rest endpoint {}", alias);
     } catch(Exception e) {
       logger.info("Unable to unregister {}", alias, e);
     }

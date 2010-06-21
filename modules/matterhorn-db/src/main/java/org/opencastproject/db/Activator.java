@@ -80,7 +80,9 @@ public class Activator implements BundleActivator {
     props.put("eclipselink.target-database", vendor);
     if("true".equalsIgnoreCase(bundleContext.getProperty("ddl-generation"))) {
       props.put("eclipselink.ddl-generation", "create-tables");
-      props.put("eclipselink.ddl-generation.output-mode", "database");
+      props.put("eclipselink.ddl-generation.output-mode", "both");
+      props.put("eclipselink.application-location", "/Users/wunden/Desktop");
+      props.put("eclipselink.create-ddl-jdbc-file-name", "create_tables.sql");
     }
     propertiesRegistration = bundleContext.registerService(Map.class.getName(), props, props);
   }

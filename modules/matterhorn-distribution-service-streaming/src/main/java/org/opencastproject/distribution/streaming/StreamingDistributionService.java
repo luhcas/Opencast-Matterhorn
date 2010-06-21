@@ -53,37 +53,30 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
   /* the configured id for this distribution channel */
   protected String distChannelId = null;
 
-  /**
-   * Creates a streaming distribution service publishing to the default directory {@link #DEFAULT_DISTRIBUTION_DIR} located
-   * in <code>java.io.tmmpdir</code>.
-   */
-  public StreamingDistributionService() {
-    this(new File(System.getProperty("java.io.tmpdir") + File.separator + DEFAULT_DISTRIBUTION_DIR));
-  }
-
-  /**
-   * Creates a streaming distribution service that will move files to the given directory.
-   * 
-   * @param distributionRoot
-   *          the distribution directory
-   */
-  public StreamingDistributionService(File distributionRoot) {
-    this.distributionDirectory = distributionRoot;
-  }
-
   public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
 
   protected void activate(ComponentContext cc) {
     // Get the configured streaming and server URLs
-    streamingUrl = cc.getBundleContext().getProperty("org.opencastproject.streaming.url");
-    serverUrl = (String)cc.getBundleContext().getProperty("org.opencastproject.server.url");
-    distributionDirectory = new File(cc.getBundleContext().getProperty("org.opencastproject.streaming.directory"));
-    logger.info("streaming url is {}", streamingUrl);
-    logger.info("distributionDirectory is {}", distributionDirectory);
-    distChannelId = (String)cc.getProperties().get("distribution.channel");
-    remoteServiceManager.registerService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
+    if (cc != null) {
+      streamingUrl = cc.getBundleContext().getProperty("org.opencastproject.streaming.url");
+      if (streamingUrl == null)
+        throw new IllegalStateException("Stream url must be set (org.opencastproject.streaming.url)");
+      logger.info("streaming url is {}", streamingUrl);
+
+      serverUrl = (String)cc.getBundleContext().getProperty("org.opencastproject.server.url");
+      if (serverUrl == null)
+        throw new IllegalStateException("Server url must be set (org.opencastproject.server.url)");
+      
+      distributionDirectory = new File(cc.getBundleContext().getProperty("org.opencastproject.streaming.directory"));
+      if (distributionDirectory == null)
+        throw new IllegalStateException("Distribution directory must be set (org.opencastproject.streaming.directory)");
+      logger.info("Streaming distribution directory is {}", distributionDirectory);
+
+      distChannelId = (String)cc.getProperties().get("distribution.channel");
+      remoteServiceManager.registerService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
+    }
   }
 
   protected void deactivate() {

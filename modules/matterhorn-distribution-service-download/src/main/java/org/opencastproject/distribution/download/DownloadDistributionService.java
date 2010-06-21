@@ -45,43 +45,24 @@ public class DownloadDistributionService extends AbstractLocalDistributionServic
 
   /* the configured id for this distribution channel */
   protected String distChannelId = null;
-
-  /**
-   * Creates a download distribution service publishing to the default directory {@link #DEFAULT_DISTRIBUTION_DIR} located
-   * in <code>java.io.tmmpdir</code>.
-   */
-  public DownloadDistributionService() {
-    this(new File(System.getProperty("java.io.tmpdir") + File.separator + DEFAULT_DISTRIBUTION_DIR));
-  }
   
   public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
 
-  /**
-   * Creates a download distribution service that will move files to the given directory.
-   * 
-   * @param distributionRoot
-   *          the distribution directory
-   */
-  public DownloadDistributionService(File distributionRoot) {
-    this.distributionDirectory = distributionRoot;
-  }
-
   protected void activate(ComponentContext cc) {
-    // Get the configured server URL
-    if (cc == null) {
-      serverUrl = UrlSupport.DEFAULT_BASE_URL;
-    } else {
-      serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
-      String ccDistributionDirectory = cc.getBundleContext().getProperty("org.opencastproject.download.directory");
-      logger.info("configured download directory is {}", ccDistributionDirectory);
-      if(ccDistributionDirectory != null) {
-        this.distributionDirectory = new File(ccDistributionDirectory);
-      }
-      distChannelId = (String)cc.getProperties().get("distribution.channel");
-      remoteServiceManager.registerService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
-    }
+    serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
+    if (serverUrl == null)
+      throw new IllegalStateException("Server url must be set (org.opencastproject.server.url)");
+
+    String ccDistributionDirectory = cc.getBundleContext().getProperty("org.opencastproject.download.directory");
+    if (ccDistributionDirectory == null)
+      throw new IllegalStateException("Distribution directory must be set (org.opencastproject.download.directory)");
+    this.distributionDirectory = new File(ccDistributionDirectory);
+    logger.info("Download distribution directory is {}", distributionDirectory);
+    
+    distChannelId = (String)cc.getProperties().get("distribution.channel");
+    remoteServiceManager.registerService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
   }
 
   protected void deactivate() {

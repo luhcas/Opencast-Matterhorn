@@ -53,23 +53,6 @@ public class WorkspaceImplTest {
     FileUtils.deleteDirectory(new File(workspaceRoot));
     FileUtils.deleteDirectory(new File(repoRoot));
   }
-
-  @Test
-  public void testGetRemoteFile() throws Exception {
-    URL fileURL = getClass().getClassLoader().getResource("opencast_header.gif");
-    File f = null;
-    f = workspace.get(fileURL.toURI());
-    Assert.assertTrue(f.exists());
-  }
-
-  @Test
-  public void testLocalFileUrls() throws Exception {
-    File source1 = new File("target/test-classes/opencast_header.gif");
-    File source2 = new File("target/test-classes/opencast_header2.gif");
-    File fromWorkspace1 = workspace.get(source1.toURI());
-    File fromWorkspace2 = workspace.get(source2.toURI());
-    Assert.assertFalse(fromWorkspace1.getAbsolutePath().equals(fromWorkspace2.getAbsolutePath()));
-  }
   
   @Test
   public void testLongFilenames() throws Exception {
@@ -88,14 +71,12 @@ public class WorkspaceImplTest {
   @Test
   public void testPutCachingWithFilesystemMapping() throws Exception {
     // First, mock up the collaborating working file repository
-    WorkingFileRepository repo = EasyMock.createMock(WorkingFileRepository.class);
-    EasyMock.expect(repo.getURI((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files/mp/foo/bar/header.gif"));
-    EasyMock.expect(repo.put((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (InputStream)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files/mp/foo/bar/header.gif"));
+    WorkingFileRepository repo = EasyMock.createNiceMock(WorkingFileRepository.class);
+    EasyMock.expect(repo.getURI((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files" + WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "foo/bar/header.gif"));
+    EasyMock.expect(repo.put((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (InputStream)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files" + WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "foo/bar/header.gif"));
     EasyMock.replay(repo);
 
     workspace.setRepository(repo);
-    workspace.filesystemMappings.clear();
-    workspace.filesystemMappings.put("http://localhost:8080/files/mp", repoRoot);
 
     // Put a stream into the workspace (and hence, the repository)
     InputStream in = getClass().getResourceAsStream("/opencast_header.gif");
@@ -117,11 +98,10 @@ public class WorkspaceImplTest {
   public void testPutCachingWithoutFilesystemMapping() throws Exception {
     // First, mock up the collaborating working file repository
     WorkingFileRepository repo = EasyMock.createMock(WorkingFileRepository.class);
-    EasyMock.expect(repo.getURI((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files/mp/foo/bar/header.gif"));
-    EasyMock.expect(repo.put((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (InputStream)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files/mp/foo/bar/header.gif"));
+    EasyMock.expect(repo.getURI((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files" + WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "foo/bar/header.gif"));
+    EasyMock.expect(repo.put((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (InputStream)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files" + WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "foo/bar/header.gif"));
     EasyMock.replay(repo);
     workspace.setRepository(repo);
-    workspace.filesystemMappings.clear();
 
     // Put a stream into the workspace (and hence, the repository)
     InputStream in = getClass().getResourceAsStream("/opencast_header.gif");
@@ -133,7 +113,7 @@ public class WorkspaceImplTest {
     EasyMock.verify(repo);
 
     // Ensure that the file was cached in the workspace (since there is no configured filesystem mapping)
-    File file = new File(workspaceRoot, "http___localhost_8080_files_mp_foo_bar_header.gif");
+    File file = new File(workspaceRoot, "http___localhost_8080_files" + WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX.replaceAll("/", "_") + "foo_bar_header.gif");
     Assert.assertTrue(file.exists());
   }
   
@@ -141,10 +121,10 @@ public class WorkspaceImplTest {
   public void testGarbageCollection() throws Exception {
     // First, mock up the collaborating working file repository
     WorkingFileRepository repo = EasyMock.createMock(WorkingFileRepository.class);
-    EasyMock.expect(repo.getURI((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files/mp/mediapackage/element/sample.txt"));
+    EasyMock.expect(repo.getURI((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files" + WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "mediapackage/element/sample.txt"));
     EasyMock.expect(repo.put((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject(),
             (InputStream)EasyMock.anyObject())).andReturn(
-                    new URI("http://localhost:8080/files/mp/mediapackage/element/sample.txt"));
+                    new URI("http://localhost:8080/files" + WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "mediapackage/element/sample.txt"));
     EasyMock.replay(repo);
     workspace.setRepository(repo);
     TrustedHttpClient httpClient = EasyMock.createNiceMock(TrustedHttpClient.class);
@@ -152,7 +132,6 @@ public class WorkspaceImplTest {
     EasyMock.expect(httpClient.execute((HttpUriRequest)EasyMock.anyObject())).andThrow(new RuntimeException());
     EasyMock.replay(httpClient);
     workspace.trustedHttpClient = httpClient;
-    workspace.filesystemMappings.clear();
 
     // Put a file in the workspace
     ByteArrayInputStream in = new ByteArrayInputStream("sample".getBytes());

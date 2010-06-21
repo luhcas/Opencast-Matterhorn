@@ -26,6 +26,10 @@ import java.net.URISyntaxException;
  */
 public interface WorkingFileRepository {
 
+  String COLLECTION_PATH_PREFIX = "/collection/";
+  
+  String MEDIAPACKAGE_PATH_PREFIX = "/mediapackage/";
+
   /**
    * Store the data stream under the given media package and element IDs with filename as name of the file.
    * 

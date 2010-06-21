@@ -15,7 +15,8 @@
  */
 package org.opencastproject.workingfilerepository.impl;
 
-import org.opencastproject.util.UrlSupport;
+import org.opencastproject.util.PathSupport;
+import org.opencastproject.workingfilerepository.api.PathMappable;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -44,7 +45,7 @@ import java.util.Dictionary;
  * A very simple (read: inadequate) implementation that stores all files under a root directory using the media package
  * ID as a subdirectory and the media package element ID as the file name.
  */
-public class WorkingFileRepositoryImpl implements WorkingFileRepository, ManagedService {
+public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMappable, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryImpl.class);
 
   /** The character encoding used for URLs */
@@ -58,30 +59,22 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   };
 
   /* The root directory for storing files */
-  private String rootDirectory = null;
+  String rootDirectory = null;
 
   /** The Base URL for this server */
-  private String serverUrl = null;
-
-  /** No arg constructor */
-  public WorkingFileRepositoryImpl() {
-  }
-
-  public WorkingFileRepositoryImpl(String rootDirectory, String serverUrl) {
-    this.rootDirectory = rootDirectory;
-    this.serverUrl = serverUrl;
-  }
+  String serverUrl = null;
 
   public void activate(ComponentContext cc) {
     if (rootDirectory != null)
       return; // If the root directory was set by the constructor, respect that setting
-    if (cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
-      serverUrl = UrlSupport.DEFAULT_BASE_URL;
-    } else {
-      serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
-    }
-    if (cc == null || cc.getBundleContext().getProperty("org.opencastproject.file.repo.path") == null) {
-      rootDirectory = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator
+    serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
+    if(serverUrl == null)
+      throw new IllegalStateException("Server URL must be set");
+    if (cc.getBundleContext().getProperty("org.opencastproject.file.repo.path") == null) {
+      String storageDir = cc.getBundleContext().getProperty("org.opencastproject.storage.dir");
+      if (storageDir == null)
+        throw new IllegalStateException("Storage directory must be set");
+      rootDirectory = storageDir + File.separator + "opencast" + File.separator
               + "workingfilerepo";
     } else {
       rootDirectory = cc.getBundleContext().getProperty("org.opencastproject.file.repo.path");
@@ -146,14 +139,14 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   public URI getURI(String mediaPackageID, String mediaPackageElementID, String fileName) {
     if (fileName == null) {
       try {
-        return new URI(serverUrl + "/files/mp/" + mediaPackageID + "/" + mediaPackageElementID);
+        return new URI(serverUrl + "/files" + MEDIAPACKAGE_PATH_PREFIX + mediaPackageID + "/" + mediaPackageElementID);
       } catch (URISyntaxException e) {
         throw new RuntimeException(e);
       }
     } else {
       try {
-        return new URI(serverUrl + "/files/mp/" + mediaPackageID + "/" + mediaPackageElementID + "/"
-                + URLEncoder.encode(fileName, CHAR_ENCODING));
+        return new URI(serverUrl + "/files" + MEDIAPACKAGE_PATH_PREFIX + mediaPackageID + "/" + mediaPackageElementID
+                + "/" + URLEncoder.encode(fileName, CHAR_ENCODING));
       } catch (UnsupportedEncodingException e) {
         throw new IllegalStateException("Can not encode to " + CHAR_ENCODING);
       } catch (URISyntaxException e) {
@@ -300,12 +293,13 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
   }
 
   private File getElementDirectory(String mediaPackageID, String mediaPackageElementID) {
-    return new File(rootDirectory + File.separator + "mp" + File.separator + mediaPackageID + File.separator
-            + mediaPackageElementID);
+    return new File(PathSupport.concat(new String[] { rootDirectory, MEDIAPACKAGE_PATH_PREFIX, mediaPackageID,
+            mediaPackageElementID }));
   }
 
   private File getCollectionDirectory(String collectionId) {
-    File collectionDir = new File(rootDirectory + File.separator + collectionId);
+    File collectionDir = new File(PathSupport
+            .concat(new String[] { rootDirectory, COLLECTION_PATH_PREFIX, collectionId }));
     if (!collectionDir.exists()) {
       try {
         FileUtils.forceMkdir(collectionDir);
@@ -333,7 +327,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     }
   }
 
-  private void createRootDirectory() {
+  void createRootDirectory() {
     File f = new File(rootDirectory);
     if (!f.exists()) {
       try {
@@ -394,8 +388,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     checkPathSafe(fileName);
     File f = null;
     try {
-      f = new File(rootDirectory + File.separator + collectionId + File.separator
-              + URLEncoder.encode(fileName, CHAR_ENCODING));
+      f = new File(PathSupport.concat(new String[] { rootDirectory, COLLECTION_PATH_PREFIX, collectionId, URLEncoder.encode(fileName, CHAR_ENCODING)}));
     } catch (UnsupportedEncodingException e) {
       throw new IllegalStateException("Can not encode to " + CHAR_ENCODING);
     }
@@ -423,7 +416,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     }
     addMd5(f);
     try {
-      return new URI(serverUrl + "/files/collection/" + collectionId + "/" + URLEncoder.encode(fileName, CHAR_ENCODING));
+      return new URI(serverUrl + "/files" + COLLECTION_PATH_PREFIX + collectionId + "/"
+              + URLEncoder.encode(fileName, CHAR_ENCODING));
     } catch (UnsupportedEncodingException e) {
       throw new IllegalStateException("Can not encode to " + CHAR_ENCODING);
     }
@@ -535,7 +529,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     URI[] uris = new URI[files.length];
     for (int i = 0; i < files.length; i++) {
       try {
-        uris[i] = new URI(serverUrl + "/files/collection/" + collectionId + "/"
+        uris[i] = new URI(serverUrl + "/files" + COLLECTION_PATH_PREFIX + collectionId + "/"
                 + URLEncoder.encode(getSourceFile(files[i]).getName(), CHAR_ENCODING));
       } catch (URISyntaxException e) {
         throw new IllegalStateException("Invalid URI for " + files[i]);
@@ -576,10 +570,10 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
    * @return the md5 hash
    */
   protected String md5(File file) throws IOException {
-    if(file == null) {
+    if (file == null) {
       throw new IllegalArgumentException("File must not be null");
     }
-    if( ! file.exists() || ! file.isFile()) {
+    if (!file.exists() || !file.isFile()) {
       throw new IllegalArgumentException("File " + file.getAbsolutePath() + " can not be read");
     }
     InputStream in = null;
@@ -607,4 +601,25 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, Managed
     long percent = Math.round(100.0 * getUsableSpace() / (1 + getTotalSpace()));
     return "Usable space " + usable + " Gb out of " + total + " Gb (" + percent + "%)";
   }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workingfilerepository.api.PathMappable#getPathPrefix()
+   */
+  @Override
+  public String getPathPrefix() {
+    return rootDirectory;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workingfilerepository.api.PathMappable#getUrlPrefix()
+   */
+  @Override
+  public String getUrlPrefix() {
+    return serverUrl;
+  }
+
 }

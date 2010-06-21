@@ -38,6 +38,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,13 +69,16 @@ public class IngestServiceImpl implements IngestService {
   private String fs;
 
   public IngestServiceImpl() {
-    logger.info("Ingest Service started.");
     builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     fs = File.separator;
-    tempFolder = System.getProperty("java.io.tmpdir");
-    if (!tempFolder.endsWith(fs))
-      tempFolder += fs;
-    tempFolder += "opencast" + fs + "ingest-temp" + fs;
+  }
+  
+  protected void activate(ComponentContext cc) {
+    logger.info("Ingest Service started.");
+    tempFolder = cc.getBundleContext().getProperty("org.opencastproject.storage.dir");
+    if (tempFolder == null)
+      throw new IllegalStateException("Storage directory must be set (org.opencastproject.storage.dir)");
+    tempFolder += fs + "ingest-temp" + fs;
   }
 
   /**

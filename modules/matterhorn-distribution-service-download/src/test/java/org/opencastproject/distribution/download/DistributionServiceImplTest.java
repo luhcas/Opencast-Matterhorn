@@ -20,6 +20,7 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.Workspace;
 
 import junit.framework.Assert;
@@ -47,8 +48,9 @@ public class DistributionServiceImplTest {
     mp = builder.loadFromXml(this.getClass().getResourceAsStream("/mediapackage.xml"));
     
     distributionRoot = new File("./target/static");
-    service = new DownloadDistributionService(distributionRoot);
-    service.activate(null);
+    service = new DownloadDistributionService();
+    service.distributionDirectory = distributionRoot;
+    service.serverUrl = UrlSupport.DEFAULT_BASE_URL;
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
     service.setWorkspace(workspace);
 

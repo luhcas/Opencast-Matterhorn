@@ -1,5 +1,7 @@
 package org.opencastproject.workingfilerepository.impl;
 
+import org.opencastproject.util.UrlSupport;
+
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
@@ -21,11 +23,14 @@ public class WorkingFileRepositoryTest {
   private String mediaPackageElementID = "working-file-test-element-1";
   private String collectionId = "collection-1";
   private String filename = "file.gif";
-  private WorkingFileRepositoryImpl repo = new WorkingFileRepositoryImpl("target/working-file-repo-root", "http://localhost:8080");
+  private WorkingFileRepositoryImpl repo = new WorkingFileRepositoryImpl();
   
   @Before
   public void setup() throws Exception {
-    repo.activate(null);
+    repo.rootDirectory = "target" + File.separator + "repotest";
+    repo.serverUrl = UrlSupport.DEFAULT_BASE_URL;
+    repo.createRootDirectory();
+    
     // Put an image file into the repository using the mediapackage / element storage
     InputStream in = getClass().getClassLoader().getResourceAsStream("opencast_header.gif");
     repo.put(mediaPackageID, mediaPackageElementID, "opencast_header.gif", in);
@@ -39,7 +44,7 @@ public class WorkingFileRepositoryTest {
   
   @After
   public void tearDown() throws Exception {
-    FileUtils.forceDelete(new File("target/working-file-repo-root"));
+    FileUtils.forceDelete(new File(repo.rootDirectory));
   }
   
   @Test
