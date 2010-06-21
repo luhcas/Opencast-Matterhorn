@@ -41,6 +41,14 @@ GRAPHICS_OPTS="-Djava.awt.headless=true -Dawt.toolkit=sun.awt.HeadlessToolkit"
 
 FELIX_CACHE="$FELIX/felix-cache"
 
+# Make sure matterhorn bundles are reloaded
+if [ -d "$FELIX_CACHE" ]; then
+  echo "Removing cached matterhorn bundles from $FELIX_CACHE"
+  for bundle in `find "$FELIX_CACHE" -type f -name bundle.location | xargs grep --files-with-match -e "file:" | sed -e s/bundle.location// `; do
+    rm -r $bundle
+  done
+fi
+
 # Finally start felix
 cd $FELIX
 java $DEBUG_OPTS $GRAPHICS_OPTS $MAVEN_ARG $FELIX_FILEINSTALL_OPTS $PAX_CONFMAN_OPTS $PAX_LOGGING_OPTS $UTIL_LOGGING_OPTS $CXF_OPTS -jar $FELIX/bin/felix.jar $FELIX_CACHE
