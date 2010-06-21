@@ -81,7 +81,7 @@
         <xsl:value-of select="captureAgent" />
       </td>
       <td>
-        <xsl:value-of select="distributionStatus" />
+        <xsl:value-of select="processingStatus" />
       </td>
     </tr>
   </xsl:template>

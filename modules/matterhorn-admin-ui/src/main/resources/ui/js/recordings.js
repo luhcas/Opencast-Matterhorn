@@ -143,45 +143,6 @@ Recordings.displayRecordings = function(state, reload) {
   var page = ocPager.currentPageIdx;
   var psize = ocPager.pageSize;
   $('#recordings-table-container').xslt("rest/recordings/"+state+"?ps="+psize+"&pn="+page, "xsl/recordings_"+state+".xsl", function() {
-    $('.processingStatus').each( function() {
-      var items = $(this).text().split(';');
-      for (key=0; key < items.length-1; key++) {
-        var item = items[key];
-        if (state == 'finished') {
-          item = item.replace(/SUCCEEDED: /,'')
-          .replace(/distribute_local/,'Distributed')
-          .replace(/publish/,'Distributed');
-        }
-        item = item.replace(/SUCCEEDED/,'Succeeded')
-        .replace(/FAILED/,'Failed')
-        .replace(/RUNNING: /,'')
-        .replace(/INSTANTIATED:/,'Instantiated')
-        .replace(/inspect/,'Inspecting media')
-        .replace(/compose/,'Encoding media')
-        .replace(/image/,'Creating cover image')
-        .replace(/distribute_local/,'Distributed')
-        .replace(/publish/,'Distributed');
-        $(this).text(item);
-        if ( items[key].match(/FAILED/) ) {
-          return;
-        }
-      }
-    /*for (key=0; key < items.length-1; key++) {
-              $(this).empty();
-              var item = items[key].split(':');
-              if (item[0] == 'SUCCEEDED') {
-                $(document.createElement('span')).addClass('icon icon-check').appendTo($(this));
-              } else if (item[0] == 'RUNNING') {
-                $(document.createElement('span')).addClass('icon icon-running').appendTo($(this));
-              } else if ((item[0] == 'FAILED') || (item[0] == 'FAILING')) {
-                $(document.createElement('span')).addClass('icon icon-error').appendTo($(this));
-              }
-              $(document.createElement('span')).css('margin-left','3px').text(item[1]).appendTo($(this));
-              if ((item[0] == 'FAILED') || (item[0] == 'FAILING')) {
-                return;
-              }
-            }*/
-    });
     if ($('.date-column').length > 0) {
       // if date date/time column is present
       $('.td-TimeDate').each( function() {     // format date/time

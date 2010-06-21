@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.ListIterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -127,6 +127,7 @@ public class AdminuiRestService {
     if ((state.toUpperCase().equals("FAILED")) || (state.toUpperCase().equals("ALL"))) {
       out.addAll(getRecordingsFromWorkflowService(WorkflowState.FAILED));
       out.addAll(getRecordingsFromWorkflowService(WorkflowState.FAILING));
+      // TODO get failed recordings from captureAdmin/scheduler
     }
     if (pageNumber < 0) {
       pageNumber = 0;
@@ -177,23 +178,23 @@ public class AdminuiRestService {
           item.setEndTime("0");
         }
         item.setCaptureAgent(null); //FIXME get capture agent from where...?
-        WorkflowOperationInstance operation = null;
-        ListIterator<WorkflowOperationInstance> instances = workflows[i].getOperations().listIterator();
-        StringBuffer sb = new StringBuffer();
-        while (instances.hasNext()) {
-          operation = instances.next();
-          sb.append(operation.getState().toString() + ": " + operation.getId() + ";");
-        }
-        item.setProcessingStatus(sb.toString());
         // TODO get distribution status #openquestion is there a way to find out if a workflowOperation does distribution?
-
+        WorkflowOperationInstance currentOperation = workflows[i].getCurrentOperation();
+        if (currentOperation == null) {
+          List<WorkflowOperationInstance> operationsList = workflows[i].getOperations();
+          currentOperation = operationsList.get(operationsList.size()-1);
+        }
+        if (currentOperation != null) {               // there always should be operation, just to make sure
+          item.setProcessingStatus(currentOperation.getDescription());
+        } else {
+          item.setProcessingStatus("unknown");
+        }
         // get Title and ActionTitle/ActionPanelURL from HoldOperation
         if (state == WorkflowState.PAUSED) {
-          WorkflowOperationInstance instance = workflows[i].getCurrentOperation();
-          if (instance.getState() == OperationState.PAUSED) {       // take only those WFInstances into account that have been paused by a HoldOperation
-            item.setHoldOperationTitle(instance.getDescription());
-            item.setHoldActionTitle(instance.getHoldActionTitle());
-            item.setHoldActionPanelURL(instance.getHoldStateUserInterfaceUrl().toString());
+          if (currentOperation.getState() == OperationState.PAUSED) {       // take only those WFInstances into account that have been paused by a HoldOperation
+            item.setHoldOperationTitle(currentOperation.getDescription());
+            item.setHoldActionTitle(currentOperation.getHoldActionTitle());
+            item.setHoldActionPanelURL(currentOperation.getHoldStateUserInterfaceUrl().toString());
             out.add(item);
           }
         } else {
@@ -339,6 +340,13 @@ public class AdminuiRestService {
         }
       }
       out.put("upcoming", new Integer(upcoming));
+
+      // get number of recordings that have never been captured
+      if (this.captureAdminService != null) {
+        // TODO find recording that have never been captured
+      } else {
+        logger.warn("CaptureAdmin service not present, not able to count recordings that haven't been captured.");
+      }
     } else {
       logger.warn("scheduler service not present, unable to retreive number of upcoming events");
     }
@@ -403,9 +411,9 @@ public class AdminuiRestService {
         if (r != null) {
           recordingState = r.getState();
         }
+        // FIXME show state CAPTURE_ERROR, UPLOAD_ERROR as failed
         item.setRecordingStatus(recordingState);
-        item.setProcessingStatus("Capturing");
-        item.setDistributionStatus("not distributed");
+        item.setProcessingStatus(recordingState);
         out.add(item);
       }
     } else {
