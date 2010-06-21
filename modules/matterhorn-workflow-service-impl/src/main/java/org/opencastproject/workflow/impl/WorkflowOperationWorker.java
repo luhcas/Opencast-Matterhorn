@@ -69,7 +69,6 @@ final class WorkflowOperationWorker implements Runnable {
     } catch(WorkflowOperationException e) {
       logger.error("Workflow operation '{}' failed with error: {}", new Object[] {handler, e.getMessage(), e});
       e.printStackTrace();
-      operation.setState(OperationState.FAILED);
       service.handleOperationException(workflow, e);
     }
   }

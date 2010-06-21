@@ -450,6 +450,13 @@ public class WorkflowServiceImplTest {
     // The second operation should have failed
     Assert.assertEquals(OperationState.FAILED, service.getWorkflowById(instance.getId()).getOperations().get(1).getState());
     
+    // Make sure the error handler has been added
+    Assert.assertEquals(4, instance.getOperations().size());
+    Assert.assertEquals("op1", instance.getOperations().get(0).getId());
+    Assert.assertEquals("op3", instance.getOperations().get(1).getId());
+    Assert.assertEquals("op1", instance.getOperations().get(2).getId());
+    Assert.assertEquals("op2", instance.getOperations().get(3).getId());
+    
     // cleanup the database
     service.removeFromDatabase(instance.getId());
   }

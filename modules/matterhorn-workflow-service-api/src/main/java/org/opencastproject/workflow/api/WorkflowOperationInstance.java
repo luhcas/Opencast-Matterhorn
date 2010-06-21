@@ -54,4 +54,13 @@ public interface WorkflowOperationInstance extends Configurable {
    * @return title to be displayed
    */
   String getHoldActionTitle();
+  
+  /** The workflow to run if an exception is thrown while this operation is running. */
+  String getExceptionHandlingWorkflow();
+
+  /**
+   * If true, this workflow will be put into a failed (or failing, if getExceptionHandlingWorkflow() is not null) state
+   * when exceptions are thrown during an operation.
+   */
+  boolean isFailWorkflowOnException();
 }

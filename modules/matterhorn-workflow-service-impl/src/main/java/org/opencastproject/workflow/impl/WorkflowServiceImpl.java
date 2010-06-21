@@ -35,6 +35,7 @@ import org.opencastproject.workflow.api.WorkflowSelectionStrategy;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.osgi.framework.InvalidSyntaxException;
@@ -94,15 +95,17 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       this.operationName = operationName;
       this.handler = handler;
     }
+
     WorkflowOperationHandler handler;
     String operationName;
-    
+
     public WorkflowOperationHandler getHandler() {
       return handler;
     }
-    
+
     /**
      * {@inheritDoc}
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -113,8 +116,10 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       result = prime * result + ((operationName == null) ? 0 : operationName.hashCode());
       return result;
     }
+
     /**
      * {@inheritDoc}
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
@@ -139,7 +144,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       return true;
     }
   }
-  
+
   /** The data access object responsible for storing and retrieving workflow instances */
   protected WorkflowServiceImplDao dao;
 
@@ -154,10 +159,12 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       }
     });
   }
-  
+
   /**
    * Sets the DAO implementation to use in this service.
-   * @param dao The dao to use for persistence
+   * 
+   * @param dao
+   *          The dao to use for persistence
    */
   public void setDao(WorkflowServiceImplDao dao) {
     this.dao = dao;
@@ -183,7 +190,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public void deactivate() {
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -256,8 +263,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       if (catchWorkflow != null) {
         WorkflowDefinition catchWorkflowDefinition = getWorkflowDefinitionById(catchWorkflow);
         if (catchWorkflowDefinition == null) {
-          logger.info("{} is not runnable due to missing catch workflow {} on operation {}",
-                  new Object[] {workflowDefinition, catchWorkflow, op});
+          logger.info("{} is not runnable due to missing catch workflow {} on operation {}", new Object[] {
+                  workflowDefinition, catchWorkflow, op });
           return false;
         }
         if (!isRunnable(catchWorkflowDefinition, availableOperations, checkedWorkflows))
@@ -280,25 +287,25 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     Set<HandlerRegistration> set = new HashSet<HandlerRegistration>();
     ServiceReference[] refs;
     try {
-      refs = componentContext.getBundleContext().getServiceReferences(
-              WorkflowOperationHandler.class.getName(), null);
+      refs = componentContext.getBundleContext().getServiceReferences(WorkflowOperationHandler.class.getName(), null);
     } catch (InvalidSyntaxException e) {
       throw new RuntimeException(e);
     }
     for (ServiceReference ref : refs) {
-      WorkflowOperationHandler handler = (WorkflowOperationHandler)componentContext.getBundleContext().getService(ref);
-      set.add(new HandlerRegistration((String)ref.getProperty(WORKFLOW_OPERATION_PROPERTY), handler));
+      WorkflowOperationHandler handler = (WorkflowOperationHandler) componentContext.getBundleContext().getService(ref);
+      set.add(new HandlerRegistration((String) ref.getProperty(WORKFLOW_OPERATION_PROPERTY), handler));
     }
     return set;
   }
 
   protected WorkflowOperationHandler getWorkflowOperationHandler(String operationId) {
-    for(HandlerRegistration reg : getRegisteredHandlers()) {
-      if(reg.operationName.equals(operationId)) return reg.handler;
+    for (HandlerRegistration reg : getRegisteredHandlers()) {
+      if (reg.operationName.equals(operationId))
+        return reg.handler;
     }
     return null;
   }
-  
+
   /**
    * Lists the names of each workflow operation. Operation names are availalbe for use if there is a registered
    * {@link WorkflowOperationHandler} with an equal {@link WorkflowServiceImpl#WORKFLOW_OPERATION_PROPERTY} property.
@@ -307,7 +314,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   protected List<String> listAvailableOperationNames() {
     List<String> list = new ArrayList<String>();
-    for(HandlerRegistration reg : getRegisteredHandlers()) {
+    for (HandlerRegistration reg : getRegisteredHandlers()) {
       list.add(reg.operationName);
     }
     return list;
@@ -342,32 +349,38 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition, org.opencastproject.mediapackage.MediaPackage, java.lang.String, java.util.Map)
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition,
+   *      org.opencastproject.mediapackage.MediaPackage, java.lang.String, java.util.Map)
    */
   @Override
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
           String parentWorkflowId, Map<String, String> properties) {
-    if(workflowDefinition == null) throw new IllegalArgumentException("workflow definition must not be null");
-    if(mediaPackage == null) throw new IllegalArgumentException("mediapackage must not be null");
-    if(parentWorkflowId != null && getWorkflowById(parentWorkflowId) == null) throw new IllegalArgumentException("Parent workflow " + parentWorkflowId + " not found");
+    if (workflowDefinition == null)
+      throw new IllegalArgumentException("workflow definition must not be null");
+    if (mediaPackage == null)
+      throw new IllegalArgumentException("mediapackage must not be null");
+    if (parentWorkflowId != null && getWorkflowById(parentWorkflowId) == null)
+      throw new IllegalArgumentException("Parent workflow " + parentWorkflowId + " not found");
 
     String id = UUID.randomUUID().toString();
     logger.info("Starting a new workflow instance with ID={}", id);
-    
-    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage, parentWorkflowId, properties);
+
+    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage,
+            parentWorkflowId, properties);
     workflowInstance.setId(id);
     workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
-    
+
     WorkflowInstance configuredInstance = updateConfiguration(workflowInstance, properties);
-    
+
     // Before we persist this, extract the metadata
     populateMediaPackageMetadata(configuredInstance.getMediaPackage());
-    
+
     dao.update(configuredInstance);
     run(configuredInstance);
     return configuredInstance;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -378,25 +391,26 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
           Map<String, String> properties) {
     return start(workflowDefinition, mediaPackage, null, properties);
   }
-  
+
   protected WorkflowInstance updateConfiguration(WorkflowInstance instance, Map<String, String> properties) {
-    if(properties == null) return instance;
+    if (properties == null)
+      return instance;
     try {
       String xml = replaceVariables(WorkflowBuilder.getInstance().toXml(instance), properties);
-      WorkflowInstanceImpl workflow = (WorkflowInstanceImpl)WorkflowBuilder.getInstance().parseWorkflowInstance(xml);
+      WorkflowInstanceImpl workflow = (WorkflowInstanceImpl) WorkflowBuilder.getInstance().parseWorkflowInstance(xml);
       workflow.init(); // needed to keep the current operation setting intact
       return workflow;
-    } catch(Exception e) {
+    } catch (Exception e) {
       throw new IllegalStateException("Unable to replace workflow instance variables", e);
     }
   }
 
   // TODO: this could be far more efficient, consider using e.g. velocity or freemarker
   protected String replaceVariables(String source, Map<String, String> properties) {
-    if(properties == null) {
+    if (properties == null) {
       return source;
     } else {
-      for(Entry<String, String> prop : properties.entrySet()) {
+      for (Entry<String, String> prop : properties.entrySet()) {
         String key = "\\$\\{" + prop.getKey() + "\\}";
         source = source.replaceAll(key, prop.getValue());
       }
@@ -428,10 +442,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   }
 
   Executor ex = Executors.newCachedThreadPool();
-  
+
   protected void run(final WorkflowInstance wfi) {
     WorkflowOperationInstance operation = wfi.getCurrentOperation();
-    if(operation == null) operation = wfi.next();
+    if (operation == null)
+      operation = wfi.next();
     WorkflowOperationHandler operationHandler = selectOperationHandler(operation);
     // If there is no handler for the operation, mark this workflow as failed
     if (operationHandler == null) {
@@ -490,8 +505,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#resume(java.lang.String)
    */
   public void resume(String workflowInstanceId, Map<String, String> properties) {
-    WorkflowInstanceImpl workflowInstance =
-      (WorkflowInstanceImpl) updateConfiguration(getWorkflowById(workflowInstanceId), properties);
+    WorkflowInstanceImpl workflowInstance = (WorkflowInstanceImpl) updateConfiguration(
+            getWorkflowById(workflowInstanceId), properties);
     workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
     dao.update(workflowInstance);
     run(workflowInstance);
@@ -518,6 +533,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowService#countWorkflowInstances()
    */
   public long countWorkflowInstances() {
@@ -530,45 +546,65 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowService#newWorkflowQuery()
    */
   public WorkflowQuery newWorkflowQuery() {
     return new WorkflowQueryImpl();
   }
-  
+
   public void handleOperationException(WorkflowInstance workflow, WorkflowOperationException e) {
-    workflow.setState(WorkflowState.FAILED);
+    WorkflowOperationInstance currentOperation = workflow.getCurrentOperation();
+    if (currentOperation.isFailWorkflowOnException()) {
+      String errorDefId = currentOperation.getExceptionHandlingWorkflow();
+      if (errorDefId != null) {
+        int currentOperationPosition = workflow.getOperations().indexOf(currentOperation);
+        List<WorkflowOperationInstance> operations = new ArrayList<WorkflowOperationInstance>();
+        operations.addAll(workflow.getOperations().subList(0, currentOperationPosition + 1));
+        WorkflowDefinition errorDef = getWorkflowDefinitionById(errorDefId);
+        if (errorDef == null) {
+          throw new IllegalStateException("Unable to run error workflow " + errorDefId);
+        }
+        for (WorkflowOperationDefinition def : errorDef.getOperations()) {
+          operations.add(new WorkflowOperationInstanceImpl(def));
+        }
+        workflow.getOperations().clear();
+        workflow.getOperations().addAll(operations);
+      }
+    }
+    currentOperation.setState(OperationState.FAILED);
     dao.update(workflow);
+    handleOperationResult(workflow, new WorkflowOperationResultImpl(workflow.getMediaPackage(), null, Action.CONTINUE));
   }
-  
+
   /**
    */
   void handleOperationResult(WorkflowInstance workflow, WorkflowOperationResult result) {
-    if(result == null) {
+    if (result == null) {
       // Just continue using the workflow's current mediapackage, but log a warning
       logger.warn("Handling a null operation result for workflow {}", workflow);
       result = new WorkflowOperationResultImpl(workflow.getMediaPackage(), null, Action.CONTINUE);
     } else {
       // Update the workflow's mediapackage if a new one was produced in this operation
       MediaPackage mp = result.getMediaPackage();
-      if(mp != null) {
+      if (mp != null) {
         workflow.setMediaPackage(mp);
       }
     }
     WorkflowOperationHandler handler = null;
-    if(Action.PAUSE.equals(result.getAction())) {
+    if (Action.PAUSE.equals(result.getAction())) {
       WorkflowOperationInstance currentOperation = workflow.getCurrentOperation();
       handler = getWorkflowOperationHandler(currentOperation.getId());
-      if(! (handler instanceof ResumableWorkflowOperationHandler)) {
+      if (!(handler instanceof ResumableWorkflowOperationHandler)) {
         throw new IllegalStateException("Operation " + currentOperation.getId() + " is not resumable");
       }
-      ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler)handler;
+      ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler) handler;
       try {
         URL url = resumableHandler.getHoldStateUserInterfaceURL(workflow);
-        if(url != null) {
+        if (url != null) {
           String holdActionTitle = resumableHandler.getHoldActionTitle();
-          ((WorkflowOperationInstanceImpl)currentOperation).setHoldActionTitle(holdActionTitle);
-          ((WorkflowOperationInstanceImpl)currentOperation).setHoldStateUserInterfaceUrl(url);
+          ((WorkflowOperationInstanceImpl) currentOperation).setHoldActionTitle(holdActionTitle);
+          ((WorkflowOperationInstanceImpl) currentOperation).setHoldStateUserInterfaceUrl(url);
         }
       } catch (WorkflowOperationException e) {
         logger.warn("unable to replace workflow ID in the hold state URL", e);
@@ -578,12 +614,12 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       dao.update(workflow);
       return;
     }
-    
+
     WorkflowState dbState = getWorkflowById(workflow.getId()).getState();
 
     // If the workflow was paused while the operation was still working, accept the updated mediapackage
     // and properties, but do not continue on.
-    if(result.getAction().equals(Action.CONTINUE) && WorkflowState.PAUSED.equals(dbState)) {
+    if (result.getAction().equals(Action.CONTINUE) && WorkflowState.PAUSED.equals(dbState)) {
       workflow.setState(WorkflowState.PAUSED);
       workflow = updateConfiguration(workflow, result.getProperties());
       dao.update(workflow);
@@ -592,7 +628,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
     // If the workflow was stopped while the operation was still working, accept the updated mediapckage
     // and properties, but do not continue on.
-    if(WorkflowState.STOPPED.equals(dbState)) {
+    if (WorkflowState.STOPPED.equals(dbState)) {
       workflow.setState(WorkflowState.STOPPED);
       workflow = updateConfiguration(workflow, result.getProperties());
       dao.update(workflow);
@@ -600,21 +636,29 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     }
 
     WorkflowOperationInstance nextOperation = workflow.next(); // Be careful... this increments the current operation
-    if(nextOperation == null) {
-      if(Action.CONTINUE.equals(result.getAction())) {
+    if (nextOperation == null) {
+      if (Action.CONTINUE.equals(result.getAction())) {
         workflow.setState(WorkflowState.SUCCEEDED);
+        for (WorkflowOperationInstance op : workflow.getOperations()) {
+          if (op.getState().equals(WorkflowOperationInstance.OperationState.FAILED)) {
+            if (op.isFailWorkflowOnException()) {
+              workflow.setState(WorkflowState.FAILED);
+              break;
+            }
+          }
+        }
       } else {
         workflow.setState(WorkflowState.PAUSED);
       }
       dao.update(workflow);
     } else {
-      if(Action.CONTINUE.equals(result.getAction())) {
+      if (Action.CONTINUE.equals(result.getAction())) {
         workflow.setState(WorkflowState.RUNNING);
       } else {
         workflow.setState(WorkflowState.PAUSED);
       }
       dao.update(workflow);
-      if(Action.CONTINUE.equals(result.getAction())) {
+      if (Action.CONTINUE.equals(result.getAction())) {
         this.run(workflow);
       }
     }
@@ -622,35 +666,44 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition, org.opencastproject.mediapackage.MediaPackage)
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition,
+   *      org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage) {
-    if(workflowDefinition == null) throw new IllegalArgumentException("workflow definition must not be null");
-    if(mediaPackage == null) throw new IllegalArgumentException("mediapackage must not be null");
+    if (workflowDefinition == null)
+      throw new IllegalArgumentException("workflow definition must not be null");
+    if (mediaPackage == null)
+      throw new IllegalArgumentException("mediapackage must not be null");
     Map<String, String> properties = new HashMap<String, String>();
     return start(workflowDefinition, mediaPackage, properties);
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.mediapackage.MediaPackage, java.util.Map)
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.mediapackage.MediaPackage,
+   *      java.util.Map)
    */
   @Override
   public WorkflowInstance start(MediaPackage mediaPackage, Map<String, String> properties) {
-    if(mediaPackage == null) throw new IllegalArgumentException("mediapackage must not be null");
+    if (mediaPackage == null)
+      throw new IllegalArgumentException("mediapackage must not be null");
     WorkflowDefinition def = getWorkflowDefinition(mediaPackage, properties);
     return start(def, mediaPackage, properties);
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public WorkflowInstance start(MediaPackage mediaPackage) {
-    if(mediaPackage == null) throw new IllegalArgumentException("mediapackage must not be null");
-    Map<String, String> properties = new HashMap<String, String>(); 
+    if (mediaPackage == null)
+      throw new IllegalArgumentException("mediapackage must not be null");
+    Map<String, String> properties = new HashMap<String, String>();
     WorkflowDefinition def = getWorkflowDefinition(mediaPackage, properties);
     return start(def, mediaPackage, properties);
   }
@@ -661,59 +714,62 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @param mediaPackage
    * @param properties
    * @return The workflow definition
-   * @throws IllegalStateException if no acceptable workflow definition can be found
+   * @throws IllegalStateException
+   *           if no acceptable workflow definition can be found
    */
   protected WorkflowDefinition getWorkflowDefinition(MediaPackage mediaPackage, Map<String, String> properties) {
     // Get the default workflow, either from a WorkflowSelectionStrategy or from the bundle context
     WorkflowDefinition def = null;
-    ServiceReference ref = componentContext.getBundleContext().getServiceReference(WorkflowSelectionStrategy.class.getName());
-    if(ref != null) {
-      WorkflowSelectionStrategy strategy = (WorkflowSelectionStrategy)componentContext.getBundleContext().getService(ref);
+    ServiceReference ref = componentContext.getBundleContext().getServiceReference(
+            WorkflowSelectionStrategy.class.getName());
+    if (ref != null) {
+      WorkflowSelectionStrategy strategy = (WorkflowSelectionStrategy) componentContext.getBundleContext().getService(
+              ref);
       def = strategy.getWorkflowDefinition(mediaPackage, properties);
     }
-    // Still no definition?  Try finding the default workflow definition ID in the bundle context
-    if(def == null) {
+    // Still no definition? Try finding the default workflow definition ID in the bundle context
+    if (def == null) {
       String defaultId = componentContext.getBundleContext().getProperty(WORKFLOW_DEFINITION_DEFAULT);
-      if(defaultId != null) {
+      if (defaultId != null) {
         def = getWorkflowDefinitionById(defaultId);
       }
     }
     // If there is still no definition defined, we can not continue
-    if(def == null) throw new IllegalStateException("Unable to determine the default workflow definition");
+    if (def == null)
+      throw new IllegalStateException("Unable to determine the default workflow definition");
     return def;
   }
 
   /**
-   * Reads the available metadata from the dublin core catalog (if there is
-   * one).
+   * Reads the available metadata from the dublin core catalog (if there is one).
    * 
    * @param mp
    *          the media package
    */
   protected void populateMediaPackageMetadata(MediaPackage mp) {
-    if(metadataServices.size() == 0) {
+    if (metadataServices.size() == 0) {
       logger.warn("No metadata services are registered, so no mediapackage metadata can be extracted from catalogs");
       return;
     }
-    for(MediaPackageMetadataService metadataService : metadataServices) {
+    for (MediaPackageMetadataService metadataService : metadataServices) {
       MediaPackageMetadata metadata = metadataService.getMetadata(mp);
-      if(metadata != null) {
-        if(mp.getDate().getTime() == 0) {
+      if (metadata != null) {
+        if (mp.getDate().getTime() == 0) {
           mp.setDate(metadata.getDate());
         }
-        if(mp.getLanguage() == null || mp.getLanguage().isEmpty()) {
+        if (mp.getLanguage() == null || mp.getLanguage().isEmpty()) {
           mp.setLanguage(metadata.getLanguage());
         }
-        if(mp.getLicense() == null || mp.getLicense().isEmpty()) {
+        if (mp.getLicense() == null || mp.getLicense().isEmpty()) {
           mp.setLicense(metadata.getLicense());
         }
-        if(mp.getSeries() == null || mp.getSeries().isEmpty()) {
+        if (mp.getSeries() == null || mp.getSeries().isEmpty()) {
           mp.setSeries(metadata.getSeriesIdentifier());
         }
-        if(mp.getSeriesTitle() == null || mp.getSeriesTitle().isEmpty()) {
+        if (mp.getSeriesTitle() == null || mp.getSeriesTitle().isEmpty()) {
           mp.setSeriesTitle(metadata.getSeriesTitle());
         }
-        if(mp.getTitle() == null || mp.getTitle().isEmpty()) {
+        if (mp.getTitle() == null || mp.getTitle().isEmpty()) {
           mp.setTitle(metadata.getTitle());
         }
       }

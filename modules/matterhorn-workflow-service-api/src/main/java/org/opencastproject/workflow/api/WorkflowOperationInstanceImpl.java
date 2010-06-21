@@ -58,6 +58,12 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   @XmlElement(name = "hold-action-title")
   protected String holdActionTitle;
 
+  @XmlAttribute(name="fail-on-error")
+  protected boolean failWorkflowOnException;
+
+  @XmlAttribute(name="exception-handler-workflow")
+  protected String exceptionHandlingWorkflow;
+
   /**
    * No-arg constructor needed for JAXB serialization
    */
@@ -71,6 +77,8 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
     this.id = def.getId();
     this.state = OperationState.INSTANTIATED;
     this.description = def.getDescription();
+    this.failWorkflowOnException = def.isFailWorkflowOnException();
+    this.exceptionHandlingWorkflow = def.getExceptionHandlingWorkflow();
     Set<String> defConfigs = def.getConfigurationKeys();
     this.configurations = new TreeSet<WorkflowConfiguration>();
     if (defConfigs != null) {
@@ -239,4 +247,36 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
     return holdActionTitle;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getExceptionHandlingWorkflow()
+   */
+  @Override
+  public String getExceptionHandlingWorkflow() {
+    return exceptionHandlingWorkflow;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#isFailWorkflowOnException()
+   */
+  @Override
+  public boolean isFailWorkflowOnException() {
+    return failWorkflowOnException;
+  }
+
+  /**
+   * @param failWorkflowOnException the failWorkflowOnException to set
+   */
+  public void setFailWorkflowOnException(boolean failWorkflowOnException) {
+    this.failWorkflowOnException = failWorkflowOnException;
+  }
+
+  /**
+   * @param exceptionHandlingWorkflow the exceptionHandlingWorkflow to set
+   */
+  public void setExceptionHandlingWorkflow(String exceptionHandlingWorkflow) {
+    this.exceptionHandlingWorkflow = exceptionHandlingWorkflow;
+  }
+  
 }
