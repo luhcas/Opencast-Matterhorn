@@ -136,6 +136,11 @@ public class ReceiptTest {
 
   @Test
   public void testGetHostsCount() throws Exception {
+    remoteServiceManager.registerService(RECEIPT_TYPE_1, HOST_1);
+    remoteServiceManager.registerService(RECEIPT_TYPE_1, HOST_2);
+    remoteServiceManager.registerService(RECEIPT_TYPE_2, HOST_1);
+    remoteServiceManager.registerService(RECEIPT_TYPE_2, HOST_2);
+    
     ReceiptImpl localRunning1 = (ReceiptImpl)remoteServiceManager.createReceipt(RECEIPT_TYPE_1);
     localRunning1.setHost(HOST_1);
     localRunning1.setStatus(Status.RUNNING);
@@ -171,10 +176,18 @@ public class ReceiptTest {
     otherTypeFinished.setStatus(Status.FINISHED);
     remoteServiceManager.updateReceipt(otherTypeFinished);
 
-    Map<String, Long> type1Counts = remoteServiceManager.getHostsCount(RECEIPT_TYPE_1, new Status[] {Status.RUNNING});
+    List<String> type1Hosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE_1);
+    List<String> type2Hosts = remoteServiceManager.getRemoteHosts(RECEIPT_TYPE_2);
 
-    Assert.assertEquals(2L, type1Counts.get(HOST_1).longValue());
-    Assert.assertEquals(1L, type1Counts.get(HOST_2).longValue());
+    // Host 1 has more jobs than host 2
+    Assert.assertEquals(2, type1Hosts.size());
+    Assert.assertEquals(HOST_2, type1Hosts.get(0));
+    Assert.assertEquals(HOST_1, type1Hosts.get(1));
+
+    // The same order applies regardless of job type
+    Assert.assertEquals(2, type2Hosts.size());
+    Assert.assertEquals(HOST_2, type1Hosts.get(0));
+    Assert.assertEquals(HOST_1, type1Hosts.get(1));
   }
 
   @Test

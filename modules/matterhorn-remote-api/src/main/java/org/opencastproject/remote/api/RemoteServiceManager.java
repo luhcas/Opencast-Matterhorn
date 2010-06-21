@@ -94,7 +94,7 @@ public interface RemoteServiceManager {
   long count(String type, Status status, String host);
 
   /**
-   * Finds the remote services, ordered by their load (lightest to heaviest).
+   * Finds the servers registered to handle this kind of job, ordered by their load (lightest to heaviest).
    * 
    * @param jobType The type of job that must be handled by the hosts
    * @return A list of hosts that handle this job type, in order of their running and queued job load

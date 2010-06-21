@@ -28,8 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -49,23 +48,37 @@ import javax.persistence.spi.PersistenceProvider;
 public class RemoteServiceManagerImpl implements RemoteServiceManager {
   private static final Logger logger = LoggerFactory.getLogger(RemoteServiceManagerImpl.class);
 
+  /**
+   * A static list of statuses that influence how load balancing is calculated
+   */
+  protected static List<Status> STATUSES_INFLUINCING_LOAD_BALANCING;
+
+  static {
+    STATUSES_INFLUINCING_LOAD_BALANCING = new ArrayList<Status>();
+    STATUSES_INFLUINCING_LOAD_BALANCING.add(Status.QUEUED);
+    STATUSES_INFLUINCING_LOAD_BALANCING.add(Status.RUNNING);
+  }
+
   /** The JPA provider */
   protected PersistenceProvider persistenceProvider;
 
+  /** This host's base URL */
   protected String hostName;
-  
+
   /**
-   * @param persistenceProvider the persistenceProvider to set
+   * @param persistenceProvider
+   *          the persistenceProvider to set
    */
   public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
     this.persistenceProvider = persistenceProvider;
   }
-  
+
   @SuppressWarnings("unchecked")
   protected Map persistenceProperties;
 
   /**
-   * @param persistenceProperties the persistenceProperties to set
+   * @param persistenceProperties
+   *          the persistenceProperties to set
    */
   @SuppressWarnings("unchecked")
   public void setPersistenceProperties(Map persistenceProperties) {
@@ -74,11 +87,11 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
 
   /** The factory used to generate the entity manager */
   protected EntityManagerFactory emf = null;
-  
+
   public void activate(ComponentContext cc) {
     logger.debug("activate");
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.remote", persistenceProperties);
-    if(cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
+    if (cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
       hostName = UrlSupport.DEFAULT_BASE_URL;
     } else {
       hostName = cc.getBundleContext().getProperty("org.opencastproject.server.url");
@@ -92,6 +105,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.remote.api.RemoteServiceManager#parseReceipt(java.io.InputStream)
    */
   @Override
@@ -105,6 +119,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.remote.api.RemoteServiceManager#parseReceipt(java.lang.String)
    */
   @Override
@@ -115,10 +130,12 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
       throw new RuntimeException(e);
     }
   }
-  
+
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.RemoteServiceManager#count(java.lang.String, org.opencastproject.remote.api.Receipt.Status)
+   * 
+   * @see org.opencastproject.remote.api.RemoteServiceManager#count(java.lang.String,
+   *      org.opencastproject.remote.api.Receipt.Status)
    */
   @Override
   public long count(String type, Status status) {
@@ -136,13 +153,16 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.RemoteServiceManager#count(java.lang.String, org.opencastproject.remote.api.Receipt.Status, java.lang.String)
+   * 
+   * @see org.opencastproject.remote.api.RemoteServiceManager#count(java.lang.String,
+   *      org.opencastproject.remote.api.Receipt.Status, java.lang.String)
    */
   @Override
   public long count(String type, Status status, String host) {
     EntityManager em = emf.createEntityManager();
     try {
-      Query query = em.createQuery("SELECT COUNT(r) FROM Receipt r where r.status = :status and r.type = :type and r.host = :host");
+      Query query = em
+              .createQuery("SELECT COUNT(r) FROM Receipt r where r.status = :status and r.type = :type and r.host = :host");
       query.setParameter("status", status);
       query.setParameter("type", type);
       query.setParameter("host", host);
@@ -154,33 +174,8 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   }
 
   /**
-   * Gets a map of hosts to the number of jobs that are in the specified statuses.  For instance, a call such as
-   * getHostscount("org.opencastproject.composer", new Status[] {RUNNING}) would return map where the keys are the hosts
-   * that are currently running composer jobs, and the value is the number of running jobs on that host.
-   * 
-   * @param type The job type
-   * @param statuses The statuses to query
-   * @return
-   */
-  protected Map<String, Long> getHostsCount(String type, Status... statuses) {
-    EntityManager em = emf.createEntityManager();
-    try {
-      Query query = em.createQuery("SELECT r.host, COUNT(r) FROM Receipt r where r.status in :statuses and r.type = :type group by r.host");
-      query.setParameter("statuses", Arrays.asList(statuses));
-      query.setParameter("type", type);
-      Map<String, Long> map = new HashMap<String, Long>();
-      for(Object result : query.getResultList()) {
-        Object[] oa = (Object[]) result;
-        map.put((String)oa[0], (Long)oa[1]);
-      }
-      return map;
-    } finally {
-      em.close();
-    }
-  }
-  
-  /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.remote.api.RemoteServiceManager#createReceipt(java.lang.String)
    */
   @Override
@@ -194,7 +189,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
       em.persist(receipt);
       tx.commit();
       return receipt;
-    } catch(RollbackException e) {
+    } catch (RollbackException e) {
       tx.rollback();
       throw e;
     } finally {
@@ -204,6 +199,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.remote.api.RemoteServiceManager#getReceipt(java.lang.String)
    */
   @Override
@@ -215,9 +211,10 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
       em.close();
     }
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.remote.api.RemoteServiceManager#updateReceipt(org.opencastproject.remote.api.Receipt)
    */
   @Override
@@ -237,7 +234,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
       fromDb.setType(receipt.getType());
       fromDb.setHost(receipt.getHost());
       tx.commit();
-    } catch(RollbackException e) {
+    } catch (RollbackException e) {
       if (tx.isActive())
         tx.rollback();
       throw e;
@@ -245,14 +242,15 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
       em.close();
     }
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.remote.api.RemoteServiceManager#registerService(java.lang.String, java.lang.String)
    */
   @Override
   public void registerService(String receiptType, String baseUrl) {
-    if(StringUtils.trimToNull(receiptType) == null || StringUtils.trimToNull(baseUrl) == null) {
+    if (StringUtils.trimToNull(receiptType) == null || StringUtils.trimToNull(baseUrl) == null) {
       throw new IllegalArgumentException("receiptType and baseUrl must not be empty or null");
     }
     ReceiptHandler rh = new ReceiptHandler(baseUrl, receiptType);
@@ -262,16 +260,17 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
       tx.begin();
       em.persist(rh);
       tx.commit();
-    } catch(RollbackException e) {
+    } catch (RollbackException e) {
       tx.rollback();
       throw e;
     } finally {
       em.close();
     }
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.remote.api.RemoteServiceManager#unRegisterService(java.lang.String, java.lang.String)
    */
   @Override
@@ -285,7 +284,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
       q.setParameter("receiptType", receiptType);
       q.executeUpdate();
       tx.commit();
-    } catch(RollbackException e) {
+    } catch (RollbackException e) {
       if (tx.isActive())
         tx.rollback();
       throw e;
@@ -296,44 +295,80 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
 
   /**
    * Get the lists of hosts that can handle this jobType
-   * @param jobType The job type
+   * 
+   * @param jobType
+   *          The job type
    * @return the list of hosts that can handle this kind of job
    */
   @SuppressWarnings("unchecked")
   protected List<String> getHosts(String jobType) {
     EntityManager em = emf.createEntityManager();
     try {
-      Query query = em.createQuery("SELECT DISTINCT rh.host FROM ReceiptHandler rh where rh.receiptType = :receiptType");
+      Query query = em
+              .createQuery("SELECT DISTINCT rh.host FROM ReceiptHandler rh where rh.receiptType = :receiptType");
       query.setParameter("receiptType", jobType);
       return query.getResultList();
     } finally {
       em.close();
     }
   }
-  
+
+//  public List<String> getHostByLoad(String jobType) {
+//    EntityManager em = emf.createEntityManager();
+//    String jpql = "SELECT rh FROM ReceiptHandler rh left join Receipt r " +
+//      "on (rh.host = r.host)";
+//    
+//    try {
+//      Query query = em.createQuery(jpql);
+//      query.setParameter("statuses", STATUSES_INFLUINCING_LOAD_BALANCING);
+//      query.setParameter("receiptType", jobType);
+//      List<?> results = query.getResultList();
+//      for(Object result : results) {
+//        logger.info("Result: {}", result);
+//      }
+//      return null;
+//    } finally {
+//      em.close();
+//    }
+//  }
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.remote.api.RemoteServiceManager#getRemoteHosts(java.lang.String)
    */
   @Override
   public List<String> getRemoteHosts(String jobType) {
-    Map<String, Long> runningComposerJobs = getHostsCount(jobType, new Status[] { Status.QUEUED,
-            Status.RUNNING });
+    EntityManager em = emf.createEntityManager();
+    // Get a list of hosts, sorted by the number of running jobs
     List<String> hosts = getHosts(jobType);
-    TreeBidiMap bidiMap = new TreeBidiMap(runningComposerJobs);
-
-    LinkedList<String> sortedRemoteHosts = new LinkedList<String>();
-    MapIterator iter = bidiMap.inverseOrderedBidiMap().orderedMapIterator();
-    while (iter.hasNext()) {
-      iter.next();
-      sortedRemoteHosts.add((String) iter.getValue());
-    }
-    // If some of the hosts have no jobs, they are not in the list yet. Add them at the front of the list.
-    for (String host : hosts) {
-      if (!sortedRemoteHosts.contains(host)) {
-        sortedRemoteHosts.add(0, host);
+    TreeBidiMap runningJobsMap = new TreeBidiMap();
+    try {
+      Query query = em.createQuery("SELECT r.host, COUNT(r) FROM Receipt r where r.status in :statuses and "
+              + "r.host in :hosts group by r.host");
+      query.setParameter("statuses", STATUSES_INFLUINCING_LOAD_BALANCING);
+      query.setParameter("hosts", hosts);
+      for (Object result : query.getResultList()) {
+        Object[] oa = (Object[]) result;
+        runningJobsMap.put((String) oa[0], (Long) oa[1]);
       }
+      // if a host wasn't returned because it doesn't have any jobs, add it here with a count of zero
+      for (String host : hosts) {
+        if (!runningJobsMap.containsKey(host)) {
+          runningJobsMap.put(host, 0L);
+        }
+      }
+
+      // now build a list of hosts, sorted by the job count
+      LinkedList<String> sortedRemoteHosts = new LinkedList<String>();
+      MapIterator iter = runningJobsMap.inverseOrderedBidiMap().orderedMapIterator();
+      while (iter.hasNext()) {
+        iter.next();
+        sortedRemoteHosts.add((String) iter.getValue());
+      }
+      return sortedRemoteHosts;
+    } finally {
+      em.close();
     }
-    return sortedRemoteHosts;
   }
 }
