@@ -141,7 +141,7 @@ public class OcropusTextAnalyzer {
    */
   protected void onAnalysis(String line) {
     logger.trace(line);
-    ocrocmdOutput.append(line);
+    ocrocmdOutput.append(line).append('\n');
   }
 
   /**
@@ -153,6 +153,7 @@ public class OcropusTextAnalyzer {
   protected void onFinished(int exitCode) {
     // Windows binary will return -1 when queried for options
     if (exitCode != -1 && exitCode != 0 && exitCode != 255) {
+      logger.error(ocrocmdOutput.toString());
       throw new MediaAnalysisException("Text analyzer " + binary + " exited with code " + exitCode);
     }
   }
