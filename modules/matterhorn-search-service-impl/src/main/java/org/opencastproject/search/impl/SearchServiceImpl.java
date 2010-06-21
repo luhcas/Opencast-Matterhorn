@@ -27,7 +27,6 @@ import org.opencastproject.search.api.SearchService;
 import org.opencastproject.search.impl.solr.SolrConnection;
 import org.opencastproject.search.impl.solr.SolrIndexManager;
 import org.opencastproject.search.impl.solr.SolrRequester;
-import org.opencastproject.util.IoSupport;
 import org.opencastproject.util.PathSupport;
 
 import org.apache.commons.io.FileUtils;
@@ -65,7 +64,7 @@ public class SearchServiceImpl implements SearchService {
   private SolrIndexManager solrIndexManager = null;
 
   /** The solr root directory */
-  private String solrRoot = null;
+  String solrRoot = null;
 
   private DublinCoreCatalogService dcService;
 
@@ -92,40 +91,22 @@ public class SearchServiceImpl implements SearchService {
   }
 
   /**
-   * Creates a search service that places solr into a subdirectory of <code>java.io.tmpdir</code> called
-   * <code>opencast/searchindex</code>.
-   */
-  public SearchServiceImpl() {
-    // DEFAULT TMP DIR
-    this(IoSupport.getSystemTmpDir() + "opencast" + File.separator + "searchindex");
-  }
-
-  /**
-   * Creates a search service that puts solr into the given root directory. If the directory doesn't exist, it will be
-   * created by the service.
-   * 
-   * @param solrRoot
-   *          the solr root directory
-   */
-  public SearchServiceImpl(String solrRoot) {
-    this.solrRoot = solrRoot;
-  }
-
-  /**
    * Service activator, called via declarative services configuration.
    * 
    * @param componentContext
    *          the component context
    */
   public void activate(ComponentContext cc) {
-    if (cc != null && cc.getBundleContext().getProperty(CONFIG_SOLR_ROOT) != null) {
-      // use CONFIG
+    if (cc.getBundleContext().getProperty(CONFIG_SOLR_ROOT) != null) {
       this.solrRoot = cc.getBundleContext().getProperty(CONFIG_SOLR_ROOT);
-      logger.info("CONFIG " + CONFIG_SOLR_ROOT + ": " + this.solrRoot);
     } else {
-      // DEFAULT
-      logger.info("DEFAULT " + CONFIG_SOLR_ROOT + ": " + this.solrRoot);
+      String storageDir = cc.getBundleContext().getProperty("org.opencastproject.storage.dir");
+      if (storageDir == null)
+        throw new IllegalStateException("Storage dir must be set (org.opencastproject.storage.dir)");
+      this.solrRoot = PathSupport.concat(storageDir, "searchindex");
     }
+    logger.info("DEFAULT " + CONFIG_SOLR_ROOT + ": " + this.solrRoot);
+
     serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     setupSolr(this.solrRoot);
     remoteServiceManager.registerService(JOB_TYPE, serverUrl);

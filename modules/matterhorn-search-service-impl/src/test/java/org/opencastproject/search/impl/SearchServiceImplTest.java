@@ -32,6 +32,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
+import org.opencastproject.util.IoSupport;
 
 import org.apache.commons.io.FileUtils;
 import org.easymock.EasyMock;
@@ -63,7 +64,8 @@ public class SearchServiceImplTest {
     org.easymock.classextension.EasyMock.expect(dcService.load((Catalog) EasyMock.anyObject())).andReturn(dcCatalog);
     org.easymock.classextension.EasyMock.replay(dcService);
     
-    service = new SearchServiceImpl(solrRoot);
+    service = new SearchServiceImpl();
+    service.solrRoot = IoSupport.getSystemTmpDir() + "opencast" + File.separator + "searchindex";
     service.setDublincoreService(dcService);
     service.setupSolr(solrRoot);
     RemoteServiceManager remote = EasyMock.createNiceMock(RemoteServiceManager.class);
