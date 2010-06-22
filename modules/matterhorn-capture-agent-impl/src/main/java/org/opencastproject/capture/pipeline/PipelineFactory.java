@@ -364,10 +364,10 @@ public class PipelineFactory {
     Caps fpsCaps;
     if (framerate != null) {
       fpsCaps = new Caps("video/x-raw-yuv, framerate=" + framerate + "/1");
-      logger.debug("{} fps = {}", captureDevice.getName(), framerate);
+      logger.debug("{} fps: {}", captureDevice.getName(), framerate);
     }
     else
-      fpsCaps = new Caps();
+      fpsCaps = Caps.anyCaps();
     fpsfilter.setCaps(fpsCaps);
     
     
@@ -496,10 +496,10 @@ public class PipelineFactory {
     Caps fpsCaps;
     if (framerate != null) {
       fpsCaps = new Caps("video/x-raw-yuv, framerate=" + framerate + "/1");
-      logger.debug("{} fps = {}", captureDevice.getName(), framerate);
+      logger.debug("{} fps: {}", captureDevice.getName(), framerate);
     }
     else
-      fpsCaps = new Caps();
+      fpsCaps = Caps.anyCaps();
     fpsfilter.setCaps(fpsCaps);
 
     Element ffmpegcolorspace = ElementFactory.make("ffmpegcolorspace", null);
@@ -745,8 +745,8 @@ public class PipelineFactory {
     Element fpsfilter = ElementFactory.make("capsfilter", null);
     Caps fpsCaps;
     if (framerate != null) {
-      fpsCaps = new Caps("video/x-raw-yuv, framerate=" + framerate + "/1");
-      logger.debug("{} fps = {}", captureDevice.getName(), framerate);
+      fpsCaps = Caps.fromString("video/x-raw-yuv, framerate=" + framerate + "/1");
+      logger.debug("{} fps: {}", captureDevice.getName(), framerate);
     }
     else
       fpsCaps = Caps.anyCaps();
