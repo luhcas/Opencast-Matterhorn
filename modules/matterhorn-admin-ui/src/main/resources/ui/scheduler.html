@@ -604,7 +604,7 @@
                 <ul class="fl-controls-right wu-reset field-list">
                   <li>
                     <label class="fl-label">&nbsp;</label>
-                    <input type="button" value="Submit" id="submitButton" class="mouseover-pointer control-button">
+                    <input type="button" value="Submit" id="submitButton" class="mouseover-pointer control-button" onclick="this.disabled=true;this.form.submit();this.value='Submitting...';">
                     <input type="button" value="Cancel" id="cancelButton" class="mouseover-pointer control-button">
                     <div id="delete-recording" style="float: right; margin-right: 160px; display: none;">
                       <input type="button" value="Delete Recording" id="deleteButton" class="mouseover-pointer control-button">
