@@ -5,13 +5,13 @@
 if [ ! -z $FELIX_HOME ]; then
   FELIX=$FELIX_HOME
 else
-  FELIX="/Applications/Matterhorn"
+  FELIX="/home/wulff/Servers/felix"
 fi
 
 if [ ! -z $M2_REPO ]; then
   M2_REPO=$M2_REPO
 else
-  M2_REPO="/Users/johndoe/.m2/repository"
+  M2_REPO="/home/wulff/.m2/repository"
 fi
 
 if [ ! -z $OPENCAST_LOGDIR ]; then

@@ -1,7 +1,7 @@
 <definition>
 
   <id>full</id>
-  <title>Full encoding and distribution workflow (default)</title>
+  <title>Standard Processing</title>
   <description>
     A simple workflow that transcodes the media into distribution formats, then sends the resulting distribution files,
     along with their associated metadata, to the distribution channels.
@@ -18,6 +18,10 @@
                   <span id="dist" style="float:left;">
                     <input id="distribution" name="distribution" type="checkbox" checked="checked" disabled="disabled" class="configField" value="Matterhorn Media Module" style="width: inherit !important;">
                     <span id="i18n_dist_mmm">&nbsp;Matterhorn Media Module</span>
+                    <input id="youtube" name="youtube" type="checkbox" disabled="disabled" class="configField" value="Youtube" style="width: inherit !important;">
+                    <span id="i18n_dist_mmm">&nbsp;Youtube</span>
+                    <input id="itunesu" name="itunesu" type="checkbox" disabled="disabled" class="configField" value="iTunesU" style="width: inherit !important;">
+                    <span id="i18n_dist_mmm">&nbsp;iTunesU</span>
                   </span>
                   <!-- span class="helpIcon" title="Click for help">&nbsp;</span -->
                 </li>
