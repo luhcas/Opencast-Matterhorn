@@ -130,7 +130,7 @@ public class LoadBalancingTest {
 
     ReceiptImpl host3Queued = (ReceiptImpl)remoteServiceManager.createReceipt(ComposerService.JOB_TYPE);
     host3Queued.setHost(HOST_3);
-    host3Queued.setStatus(Status.RUNNING);
+    host3Queued.setStatus(Status.QUEUED);
     remoteServiceManager.updateReceipt(host3Queued);
     
     // Now that host3 is loaded, host 2 is the lightest, since it has only 1 running and no queued receipts

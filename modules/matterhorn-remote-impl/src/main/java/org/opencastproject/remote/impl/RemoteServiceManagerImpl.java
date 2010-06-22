@@ -337,8 +337,8 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
     EntityManager em = emf.createEntityManager();
     try {
       Query query = em
-              .createQuery("SELECT DISTINCT rh.host FROM ServiceRegistrationImpl rh where rh.receiptType = :receiptType and rh.inMaintenanceMode = false");
-      query.setParameter("receiptType", jobType);
+              .createQuery("SELECT DISTINCT rh.host FROM ServiceRegistrationImpl rh where rh.receiptType = :jobType and rh.inMaintenanceMode = false");
+      query.setParameter("jobType", jobType);
       return query.getResultList();
     } finally {
       em.close();
@@ -357,18 +357,17 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
     List<String> hosts = getHosts(jobType);
     TreeBidiMap runningJobsMap = new TreeBidiMap();
     try {
-      Query query = em.createQuery("SELECT r.host, COUNT(r) FROM Receipt r where r.status in :statuses and "
-              + "r.host in (SELECT DISTINCT rh.host FROM ServiceRegistrationImpl rh where rh.receiptType = :receiptType and "
-              + "rh.inMaintenanceMode = false) group by r.host");
+      Query query = em.createQuery("SELECT r.host, COUNT(r) FROM Receipt r where r.status in :statuses and r.type = :jobType group by r.host");
       query.setParameter("statuses", STATUSES_INFLUINCING_LOAD_BALANCING);
-      query.setParameter("receiptType", jobType);
+      query.setParameter("jobType", jobType);
       for (Object result : query.getResultList()) {
         Object[] oa = (Object[]) result;
         runningJobsMap.put((String) oa[0], (Long) oa[1]);
       }
       // if a host wasn't returned because it doesn't have any jobs, add it here with a count of zero
       for (String host : hosts) {
-        if (!runningJobsMap.containsKey(host)) {
+        // There seems to be a bug in the TreeBidiMap.containsKey() method, so work around it
+        if(runningJobsMap.get(host) == null) {
           runningJobsMap.put(host, 0L);
         }
       }

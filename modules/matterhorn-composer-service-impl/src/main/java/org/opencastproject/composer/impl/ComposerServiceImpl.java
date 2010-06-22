@@ -79,12 +79,15 @@ public class ComposerServiceImpl implements ComposerService {
   private final IdBuilder idBuilder = IdBuilderFactory.newInstance().newIdBuilder();
 
   /** Thread pool */
-  ExecutorService executor = null;
+  private ExecutorService executor = null;
 
   /** The server's base URL */
-  protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
+  private String serverUrl = UrlSupport.DEFAULT_BASE_URL;
   
+  /** The configuration property containing the number of concurrent encoding threads to run */
   public static final String CONFIG_THREADS = "composer.threads";
+
+  /** The default number of concurrent encoding threads to run */
   public static final int DEFAULT_THREADS = 2;
   
   /**
