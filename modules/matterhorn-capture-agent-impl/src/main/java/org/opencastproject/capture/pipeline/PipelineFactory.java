@@ -749,7 +749,7 @@ public class PipelineFactory {
       logger.debug("{} fps = {}", captureDevice.getName(), framerate);
     }
     else
-      fpsCaps = new Caps();
+      fpsCaps = Caps.anyCaps();
     fpsfilter.setCaps(fpsCaps);
 
     pipeline.addMany(v4l2src, queue, videorate, fpsfilter, enc, muxer, filesink);
