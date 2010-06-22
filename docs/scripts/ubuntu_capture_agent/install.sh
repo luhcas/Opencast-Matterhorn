@@ -176,14 +176,14 @@ echo >> $LOG_FILE
 echo "# Total memory" >> $LOG_FILE
 echo $(cat /proc/meminfo | grep -m 1 . | cut -d ':' -f 2) >> $LOG_FILE
 echo >> $LOG_FILE
-echo "# Processor(s) model name(s)"
-IFS='                                                                                                                                                        
+echo "# Processor(s) model name(s)" >> $LOG_FILE
+IFS='
 '
 models=$(cat /proc/cpuinfo | sed -e '/model name/!d' -e 's/^.*: *//g')
-unset IFS
 for name in $models; do
     echo $name >> $LOG_FILE
 done
+unset IFS
 
 # If wget isn't installed, get it from the ubuntu software repo
 wget foo &> /dev/null
