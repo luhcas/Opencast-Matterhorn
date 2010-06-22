@@ -21,6 +21,7 @@
     <sec:custom-filter position="BASIC_AUTH_FILTER" ref="digestFilter" />
     <sec:anonymous />
     <sec:remember-me key="matterhorn" />
+    <sec:logout />
   </sec:http>
 
   <sec:user-service id="userDetailsService">
