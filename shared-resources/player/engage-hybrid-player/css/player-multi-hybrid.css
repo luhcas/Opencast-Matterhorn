@@ -621,8 +621,9 @@ option:hover
   margin-left:              -6px;*/
   position:                 relative; 
   border:                   0px;
-  top:                      5px; 
+  top:                      0px; 
   z-index:                  2;
+  margin-left:              -4px;
 }
 
 #draggable 
@@ -635,8 +636,9 @@ option:hover
   margin-left:              -6px;*/
   position:                 relative; 
   border:                   0px;
-  top:                      -14px;
+  top:                      -19px;
   z-index:                  3;
+  margin-left:              -4px;
 }
 
 .play-segment 
@@ -723,11 +725,11 @@ option:hover
 
 .scrubber-channel 
 {
-   display:block;
+  display:block;
   margin-top:0;
   padding-right:0px;
   position:relative;
-  top: -12px;
+  top: -7px;
   height: 7px;
 }
 

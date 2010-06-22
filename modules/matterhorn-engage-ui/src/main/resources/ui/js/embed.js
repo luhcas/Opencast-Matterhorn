@@ -108,13 +108,19 @@ Opencast.Watch = (function ()
           }
           coverUrl = coverUrl === null ? '' : coverUrl;
 
+          
+         
+          
+          
+          
           Opencast.Player.setMediaURL(coverUrl, mediaUrlOne, mediaUrlTwo);
 
           if (mediaUrlOne !== '' && mediaUrlTwo !== '')
           {
-            Opencast.Player.setVideoSizeList(SINGLEPLAYERWITHSLIDES);
+        	Opencast.Initialize.setMediaResolution(mediaResolutionOne, mediaResolutionTwo);
+        	Opencast.Player.setVideoSizeList(SINGLEPLAYERWITHSLIDES);
             Opencast.Player.videoSizeControlMultiOnlyLeftDisplay();
-            Opencast.Initialize.setMediaResolution(mediaResolutionOne, mediaResolutionTwo);
+            
           }
           else if (mediaUrlOne !== '' && mediaUrlTwo === '')
           {
@@ -128,8 +134,9 @@ Opencast.Watch = (function ()
             }
             else
             {
-              Opencast.Player.setVideoSizeList(SINGLEPLAYER);
+              
               Opencast.Initialize.setMediaResolution(mediaResolutionOne, mediaResolutionTwo);
+              Opencast.Player.setVideoSizeList(SINGLEPLAYER);
               
             }
           }

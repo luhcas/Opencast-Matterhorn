@@ -103,19 +103,34 @@ input:hover
   
 }
 
+.oc_btn-play-clicked
+{
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -60px -210px;
+  width:                    16px;
+  height:                   18px;
+}
+
 .oc_btn-play-over
 {
   background:               transparent url("../img/oc_icons.png");
   background-position:      -30px -210px;
   width:                    16px;
   height:                   18px;
-  
 }
 
 .oc_btn-pause
 {
   background:               transparent url("../img/oc_icons.png");
   background-position:      0px -90px;
+  width:                    18px;
+  height:                   20px;
+}
+
+.oc_btn-pause-clicked
+{
+  background:               transparent url("../img/oc_icons.png");
+  background-position:      -60px -90px;
   width:                    18px;
   height:                   20px;
 }

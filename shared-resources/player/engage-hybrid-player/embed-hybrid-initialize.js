@@ -390,7 +390,7 @@ Opencast.Initialize = (function ()
         
         $('#oc_btn-play-pause').mousedown(function () 
         {
-            Opencast.Player.PlayPauseMouseOut();
+            Opencast.Player.PlayPauseMouseDown();
         });
         $('#oc_btn-fast-forward').mousedown(function () 
         {
@@ -611,29 +611,38 @@ Opencast.Initialize = (function ()
      */
     function setMediaResolution(mediaResolutionOne, mediaResolutionTwo)
     {
-    	var mediaResolutionOneString = mediaResolutionOne;
-        var mediaResolutionTwoString = mediaResolutionTwo;
-        var mediaResolutionOneArray = mediaResolutionOneString.split('x');
+    	if(mediaResolutionOne !== '')
+    	{
+    		var mediaResolutionOneString = mediaResolutionOne;
+            var mediaResolutionTwoString = mediaResolutionTwo;
+            var mediaResolutionOneArray = mediaResolutionOneString.split('x');
         
-    	if (mediaResolutionTwoString !== '')
-        {
-        	var mediaResolutionTwoArray = mediaResolutionTwoString.split('x');
-            mediaOneWidth = parseInt(mediaResolutionOneArray[0], 10);
-            mediaOneHeight = parseInt(mediaResolutionOneArray[1], 10);
-            mediaTwoWidth = parseInt(mediaResolutionTwoArray[0], 10);
-            mediaTwoHeight = parseInt(mediaResolutionTwoArray[1], 10);
+    	    if (mediaResolutionTwoString !== '')
+            {
+        	    var mediaResolutionTwoArray = mediaResolutionTwoString.split('x');
+                mediaOneWidth = parseInt(mediaResolutionOneArray[0], 10);
+                mediaOneHeight = parseInt(mediaResolutionOneArray[1], 10);
+                mediaTwoWidth = parseInt(mediaResolutionTwoArray[0], 10);
+                mediaTwoHeight = parseInt(mediaResolutionTwoArray[1], 10);
             
-            formatOne = mediaOneWidth / mediaOneHeight;
-            formatTwo = mediaTwoWidth / mediaTwoHeight;
-        }
+                formatOne = mediaOneWidth / mediaOneHeight;
+                formatTwo = mediaTwoWidth / mediaTwoHeight;
+            }
+    	    else
+            {
+        	  
+        	    mediaSingleWidth = parseInt(mediaResolutionOneArray[0], 10);
+                mediaSingleHeight = parseInt(mediaResolutionOneArray[1], 10);
+                formatSingle = mediaSingleWidth / mediaSingleHeight;
+            }
+    	    
+    	}
     	else
-        {
-        	
-        	mediaSingleWidth = parseInt(mediaResolutionOneArray[0], 10);
-            mediaSingleHeight = parseInt(mediaResolutionOneArray[1], 10);
-            formatSingle = mediaSingleWidth / mediaSingleHeight;
-        }
+    	{
     	
+    		Videodisplay.setMediaResolution(0, 0, 0, 0, 0);	
+    		
+    	}
     }
    
     return {

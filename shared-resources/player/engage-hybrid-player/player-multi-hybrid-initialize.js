@@ -408,7 +408,7 @@ Opencast.Initialize = (function ()
         
         $('#oc_btn-play-pause').mousedown(function () 
         {
-            Opencast.Player.PlayPauseMouseOut();
+            Opencast.Player.PlayPauseMouseDown();
         });
         $('#oc_btn-fast-forward').mousedown(function () 
         {
