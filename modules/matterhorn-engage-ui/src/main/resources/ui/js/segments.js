@@ -57,6 +57,10 @@ Opencast.segments = ( function() {
       segmentTimes[i] = seconds;
     });
 
+    // Hide Slide Tab, if there are no slides
+    if(segmentTimes.length === 0)
+      Opencast.Player.doToggleSlides();
+
     $(document).everyTime(500, function(index) {
       var currentPosition = parseInt(Opencast.Player.getCurrentPosition());
       var last = 0;
