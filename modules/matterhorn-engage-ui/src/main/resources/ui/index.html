@@ -39,7 +39,7 @@
           // replace all occurences of + by a space
           searchQuery = searchQuery.replace(/\+/g," ");
 
-          keywordString = " for  “" + unescape(searchQuery) +"”";
+          keywordString = " for “" + unescape(searchQuery) +"”";
           
           $('#searchField').attr("value", unescape(searchQuery));
           
@@ -52,7 +52,7 @@
         $('#stage').xslt(restEndpoint, "xsl/episodes.xsl", function() {
           Opencast.pager.renderPager();
 
-          var total =  $('#oc-episodes-total').html()
+          var total =  $('#oc-episodes-total').html();
           var toIndex = parseInt($('#oc-episodes-limit').html()) +  (page - 1) * 10;
           var fromIndex = Math.min(parseInt($('#oc-episodes-offset').html()) + 1, toIndex);
           

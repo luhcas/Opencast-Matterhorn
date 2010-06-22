@@ -35,6 +35,7 @@
 
     <script type="text/javascript" src="js/segments.js"></script>
     <script type="text/javascript" src="js/bookmarks.js"></script>
+    <script type="text/javascript" src="js/search.js"></script>
     <script type="text/javascript" src="js/watch.js"></script>
   </head>
 
@@ -149,15 +150,13 @@
 
       <div id="oc_slidetext" class="oc_DisplayNone fl-fix">
 
-        <div id="oc_bookmarks-container-left">
-
+        <div id="oc_slidetext-left" style="float:left; width: 75%;">
             Slide Text
-
         </div>
 
 
-        <div id="oc_bookmarks-container-right">
-            <input id="oc_lecturer-search-field" class="oc_search-Field" type="text" value="Search this Recording"></input>
+        <div id="oc_slidetext-right" style="float:right;">
+            <input id="oc_lecturer-search-field" class="oc_search-Field" type="text" onkeyup="Opencast.search.showResult(this.value)" size="30" value="Search this Recording"></input>
         </div>
 
       </div>

@@ -220,7 +220,7 @@ Opencast.Watch = (function ()
             $(this).html(Opencast.engage.formatSeconds(seconds));
           });
           
-          $('#oc_slidetext').html($('#oc-segments-text').html());
+          $('#oc_slidetext-left').html($('#oc-segments-text').html());
 
           $('#oc-segments-text').html("");
           
