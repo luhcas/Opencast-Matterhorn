@@ -149,7 +149,7 @@ public class StreamHelper extends Thread {
       isreader = new InputStreamReader(inputStream);
       reader = new BufferedReader(isreader);
       String line = null;
-      while (keepReading && (line = reader.readLine()) != null) {
+      while (keepReading && reader.ready() && (line = reader.readLine()) != null) {
         append(line);
         log(line);
       }

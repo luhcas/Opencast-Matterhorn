@@ -152,7 +152,7 @@ public class IngestServiceDelegatingImpl implements IngestService {
   }
 
   @Override
-  public void discardMediaPackage(MediaPackage mediaPackage) {
+  public void discardMediaPackage(MediaPackage mediaPackage) throws IOException {
     delegate.discardMediaPackage(mediaPackage);
   }
 

@@ -26,11 +26,11 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.mediapackage.identifier.HandleException;
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.ZipUtil;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowService;
-import org.opencastproject.workspace.api.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
@@ -314,7 +314,7 @@ public class IngestServiceImpl implements IngestService {
    * 
    * @see org.opencastproject.ingest.api.IngestService#discardMediaPackage(java.lang.String)
    */
-  public void discardMediaPackage(MediaPackage mp) {
+  public void discardMediaPackage(MediaPackage mp) throws IOException {
     String mediaPackageId = mp.getIdentifier().compact();
     for (MediaPackageElement element : mp.getElements()) {
       try {
@@ -356,7 +356,7 @@ public class IngestServiceImpl implements IngestService {
   }
 
   private URI addContentToRepo(MediaPackage mp, String elementId, String filename, InputStream file)
-          throws UnsupportedElementException {
+          throws IOException {
     return workspace.put(mp.getIdentifier().compact(), elementId, filename, file);
   }
 

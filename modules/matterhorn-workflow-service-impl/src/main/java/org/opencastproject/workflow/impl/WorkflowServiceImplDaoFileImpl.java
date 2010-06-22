@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -25,7 +26,6 @@ import org.opencastproject.workflow.api.WorkflowSetImpl;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -116,11 +116,16 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
     if(countWorkflowInstances() == 0) {
       // this may be a new index, so get all of the existing workflows and index them
       WorkflowBuilder builder = WorkflowBuilder.getInstance();
-      URI[] uris = workspace.getCollectionContents(COLLECTION_ID);
+      URI[] uris = null;
+      try {
+        uris = workspace.getCollectionContents(COLLECTION_ID);
+      } catch (IOException e) {
+        throw new IllegalStateException("Error accessing workspace collection '" + COLLECTION_ID + "'", e);
+      }
       for (URI uri : uris) {
         InputStream in = null;
         try {
-          File file = workspace.getFromCollection(COLLECTION_ID, FilenameUtils.getName(uri.toString()));
+          File file = workspace.get(uri);
           in = new FileInputStream(file);
           WorkflowInstance instance = builder.parseWorkflowInstance(in);
           index(instance);
@@ -352,6 +357,12 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
       indexWriter.deleteDocuments(new Term("id", id));
       indexWriter.expungeDeletes();
       indexWriter.commit();
+      String fileName = getFilename(id);
+      try {
+        workspace.deleteFromCollection(COLLECTION_ID, fileName);
+      } catch (NotFoundException e) {
+        logger.warn("Tried to delete a non existing serialized workflow: " + fileName);
+      }
     } catch (IOException e) {
       throw new RuntimeException(e);
     } finally {
@@ -363,8 +374,6 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
         }
       }
     }
-    String fileName = getFilename(id);
-    workspace.deleteFromCollection(COLLECTION_ID, fileName);
   }
 
   /**

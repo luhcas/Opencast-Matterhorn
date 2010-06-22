@@ -13,12 +13,13 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.workspace.api;
+package org.opencastproject.util;
 
 /**
  * An exception that indicates that the resource could not be loaded by the workspace.
  */
 public class NotFoundException extends Exception {
+
   private static final long serialVersionUID = -6781286820876007809L;
 
   /**
@@ -41,11 +42,12 @@ public class NotFoundException extends Exception {
   public NotFoundException(Throwable cause) {
     super(cause);
   }
-  
+
   /**
    * Constructs a NotFoundException with a detail message and a cause.
    */
   public NotFoundException(String message, Throwable cause) {
     super(message, cause);
   }
+
 }

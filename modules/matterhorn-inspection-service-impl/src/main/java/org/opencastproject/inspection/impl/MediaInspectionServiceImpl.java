@@ -37,9 +37,9 @@ import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.MimeTypes;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UnknownFileTypeException;
 import org.opencastproject.util.UrlSupport;
-import org.opencastproject.workspace.api.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.cm.ConfigurationException;

@@ -18,7 +18,7 @@ package org.opencastproject.metadata.mpeg7;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.metadata.api.CatalogService;
-import org.opencastproject.workspace.api.NotFoundException;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.IOUtils;

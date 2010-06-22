@@ -254,7 +254,7 @@ public interface IngestService {
    * @param mediaPackage
    *          The specific Matterhorn MediaPackage
    */
-  void discardMediaPackage(MediaPackage mediaPackage);
+  void discardMediaPackage(MediaPackage mediaPackage) throws IOException;
 
   /**
    * Get a workflow instance of a asynchronous job.

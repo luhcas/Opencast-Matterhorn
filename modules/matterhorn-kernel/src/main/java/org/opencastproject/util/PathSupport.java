@@ -16,24 +16,29 @@
 
 package org.opencastproject.util;
 
+import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
+import java.util.UUID;
 
 /**
  * <code>PathSupport</code> is a helper class to deal with filesystem paths.
  */
-
 public class PathSupport {
 
+  /** The logging facility */
+  private static final Logger logger = LoggerFactory.getLogger(PathSupport.class);
+
   /**
-   * This class should not be instanciated, since it only provides static
-   * utility methods.
+   * This class should not be instanciated, since it only provides static utility methods.
    */
   private PathSupport() {
   }
 
   /**
-   * Returns the absolute path from a path optionally starting with a tilde
-   * <code>~</code>.
+   * Returns the absolute path from a path optionally starting with a tilde <code>~</code>.
    * 
    * @param path
    *          the path
@@ -48,6 +53,31 @@ public class PathSupport {
       path = concat(homeDir, path);
     }
     return path;
+  }
+
+  /**
+   * Returns the filename translated into a version that can safely be used as part of a file system path.
+   * 
+   * @param fileName
+   *          The file name
+   * @return the safe version
+   */
+  public static String toSafeName(String fileName) {
+    String urlExtension = FilenameUtils.getExtension(fileName);
+    String baseName = fileName.substring(0, fileName.length() - (urlExtension.length() + 1));
+    String safeBaseName = baseName.replaceAll("\\W", "_"); // TODO -- ensure that this filename is safe on all platforms
+    String safeString = null;
+    if ("".equals(urlExtension)) {
+      safeString = safeBaseName;
+    } else {
+      safeString = safeBaseName + "." + urlExtension;
+    }
+    if (safeString.length() < 255)
+      return safeString;
+    String random = UUID.randomUUID().toString();
+    random = random.concat(".").concat(urlExtension);
+    logger.info("using '{}' to represent url '{}', which is too long to store as a filename", random, fileName);
+    return random;
   }
 
   /**
@@ -76,8 +106,7 @@ public class PathSupport {
   }
 
   /**
-   * Concatenates the path elements with respect to leading and trailing
-   * slashes.
+   * Concatenates the path elements with respect to leading and trailing slashes.
    * 
    * @param parts
    *          the parts to concat
@@ -96,9 +125,8 @@ public class PathSupport {
   }
 
   /**
-   * Returns the trimmed url. Trimmed means that the url is free from leading or
-   * trailing whitespace characters, and that a directory url like
-   * <code>/news/</code> is closed by a slash (<code>/</code>).
+   * Returns the trimmed url. Trimmed means that the url is free from leading or trailing whitespace characters, and
+   * that a directory url like <code>/news/</code> is closed by a slash (<code>/</code>).
    * 
    * @param path
    *          the path to trim
@@ -120,8 +148,7 @@ public class PathSupport {
   }
 
   /**
-   * Returns the file extension. If the file does not have an extension, then
-   * <code>null</code> is returned.
+   * Returns the file extension. If the file does not have an extension, then <code>null</code> is returned.
    * 
    * @param path
    *          the file path
@@ -139,12 +166,10 @@ public class PathSupport {
   }
 
   /**
-   * Removes a file extension from the end of the path. If there is no extension
-   * or the file name starts with the extension separator "." <code>path</code>
-   * will be returned untouched.
+   * Removes a file extension from the end of the path. If there is no extension or the file name starts with the
+   * extension separator "." <code>path</code> will be returned untouched.
    * 
-   * @return the path with the extension removed or null if <code>path</code>
-   *         was null
+   * @return the path with the extension removed or null if <code>path</code> was null
    */
   public static String removeFileExtension(String path) {
     if (path != null) {
@@ -159,8 +184,7 @@ public class PathSupport {
   }
 
   /**
-   * Removes any existing file extension from the end of the path and replaces
-   * it with the given one.
+   * Removes any existing file extension from the end of the path and replaces it with the given one.
    * 
    * @param path
    *          path to the file
@@ -181,8 +205,7 @@ public class PathSupport {
   }
 
   /**
-   * Checks that the path only contains the system path separator. If not, wrong
-   * ones are replaced.
+   * Checks that the path only contains the system path separator. If not, wrong ones are replaced.
    */
   private static String adjustSeparator(String path) {
     String sp = File.separator;
@@ -192,8 +215,7 @@ public class PathSupport {
   }
 
   /**
-   * Removes any occurence of double file separators and replaces it with a
-   * single one.
+   * Removes any occurence of double file separators and replaces it with a single one.
    * 
    * @param path
    *          the path to check

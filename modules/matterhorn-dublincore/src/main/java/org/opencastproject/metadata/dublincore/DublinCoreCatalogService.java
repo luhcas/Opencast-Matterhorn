@@ -22,7 +22,7 @@ import org.opencastproject.mediapackage.MediaPackageMetadata;
 import org.opencastproject.mediapackage.MediapackageMetadataImpl;
 import org.opencastproject.metadata.api.CatalogService;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
-import org.opencastproject.workspace.api.NotFoundException;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.IOUtils;

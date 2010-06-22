@@ -35,10 +35,8 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.util.Dictionary;
 
 /**
@@ -47,9 +45,6 @@ import java.util.Dictionary;
  */
 public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMappable, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryImpl.class);
-
-  /** The character encoding used for URLs */
-  private static final String CHAR_ENCODING = "UTF-8";
 
   /** The filename filter matching .md5 files */
   private static final FilenameFilter MD5_FINAME_FILTER = new FilenameFilter() {
@@ -124,6 +119,19 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
       throw new RuntimeException(e);
     }
   }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#getCollectionURI(java.lang.String, java.lang.String)
+   */
+  @Override
+  public URI getCollectionURI(String collectionID, String fileName) {
+    try {
+      return new URI(serverUrl + "/files" + COLLECTION_PATH_PREFIX + collectionID + "/" + PathSupport.toSafeName(fileName));
+    } catch (URISyntaxException e) {
+      throw new IllegalStateException("Unable to create valid uri from " + collectionID + " and " + fileName);
+    }
+  }
 
   public URI getURI(String mediaPackageID, String mediaPackageElementID) {
     return getURI(mediaPackageID, mediaPackageElementID, null);
@@ -146,9 +154,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
     } else {
       try {
         return new URI(serverUrl + "/files" + MEDIAPACKAGE_PATH_PREFIX + mediaPackageID + "/" + mediaPackageElementID
-                + "/" + URLEncoder.encode(fileName, CHAR_ENCODING));
-      } catch (UnsupportedEncodingException e) {
-        throw new IllegalStateException("Can not encode to " + CHAR_ENCODING);
+                + "/" + PathSupport.toSafeName(fileName));
       } catch (URISyntaxException e) {
         throw new RuntimeException(e);
       }
@@ -178,11 +184,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
         throw new RuntimeException(e);
       }
     }
-    try {
-      f = new File(dir, URLEncoder.encode(filename, CHAR_ENCODING));
-    } catch (UnsupportedEncodingException e) {
-      throw new IllegalStateException("Can not encode to " + CHAR_ENCODING);
-    }
+    f = new File(dir, PathSupport.toSafeName(filename));
     logger.debug("Attempting to write a file to {}", f.getAbsolutePath());
     FileOutputStream out = null;
     try {
@@ -383,15 +385,10 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
    *      java.lang.String, java.io.InputStream)
    */
   @Override
-  public URI putInCollection(String collectionId, String fileName, InputStream in) throws URISyntaxException {
+  public URI putInCollection(String collectionId, String fileName, InputStream in) {
     checkPathSafe(collectionId);
     checkPathSafe(fileName);
-    File f = null;
-    try {
-      f = new File(PathSupport.concat(new String[] { rootDirectory, COLLECTION_PATH_PREFIX, collectionId, URLEncoder.encode(fileName, CHAR_ENCODING)}));
-    } catch (UnsupportedEncodingException e) {
-      throw new IllegalStateException("Can not encode to " + CHAR_ENCODING);
-    }
+    File f = new File(PathSupport.concat(new String[] { rootDirectory, COLLECTION_PATH_PREFIX, collectionId, PathSupport.toSafeName(fileName)}));
     logger.debug("Attempting to write a file to {}", f.getAbsolutePath());
     FileOutputStream out = null;
     try {
@@ -415,12 +412,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
       IOUtils.closeQuietly(in);
     }
     addMd5(f);
-    try {
-      return new URI(serverUrl + "/files" + COLLECTION_PATH_PREFIX + collectionId + "/"
-              + URLEncoder.encode(fileName, CHAR_ENCODING));
-    } catch (UnsupportedEncodingException e) {
-      throw new IllegalStateException("Can not encode to " + CHAR_ENCODING);
-    }
+    return getCollectionURI(collectionId, fileName);
   }
 
   /**
@@ -530,11 +522,9 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
     for (int i = 0; i < files.length; i++) {
       try {
         uris[i] = new URI(serverUrl + "/files" + COLLECTION_PATH_PREFIX + collectionId + "/"
-                + URLEncoder.encode(getSourceFile(files[i]).getName(), CHAR_ENCODING));
+                + PathSupport.toSafeName(getSourceFile(files[i]).getName()));
       } catch (URISyntaxException e) {
         throw new IllegalStateException("Invalid URI for " + files[i]);
-      } catch (UnsupportedEncodingException e) {
-        throw new IllegalStateException("Can not encode to " + CHAR_ENCODING);
       }
     }
     return uris;

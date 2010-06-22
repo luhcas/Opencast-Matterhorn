@@ -16,8 +16,8 @@
 package org.opencastproject.workspace.impl;
 
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
-import org.opencastproject.workspace.api.NotFoundException;
 
 import junit.framework.Assert;
 

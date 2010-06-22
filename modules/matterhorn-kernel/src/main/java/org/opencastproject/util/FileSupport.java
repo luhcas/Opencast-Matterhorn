@@ -429,6 +429,58 @@ public class FileSupport {
     return dest;
   }
 
+  /**
+   * Returns <code>true</code> if the operating system as well as the disk layout support creating a hard link from
+   * <code>src</code> to <code>dest</code>. Note that this implementation requires two files rather than directories and
+   * will overwrite any existing file that might already be present at the destination.
+   * 
+   * @param sourceLocation
+   *          the source file
+   * @param targetLocation
+   *          the target file
+   * @return <code>true</code> if the link was created, <code>false</code> otherwhise
+   * @throws IOException
+   *           if linking of the file failed
+   */
+  public static boolean supportsLinking(File sourceLocation, File targetLocation) {
+    if (sourceLocation == null)
+      throw new IllegalArgumentException("Source location must not by null");
+    if (targetLocation == null)
+      throw new IllegalArgumentException("Target location must not by null");
+    if (!sourceLocation.exists())
+      throw new IllegalArgumentException("Source " + sourceLocation + " does not exist");
+
+    logger.trace("Creating link from " + sourceLocation + " to " + targetLocation);
+    Process p = null;
+    StreamHelper stdout = null;
+    StreamHelper stderr = null;
+    StringBuffer error = new StringBuffer();
+    try {
+      p = new ProcessBuilder("ln", "-f", sourceLocation.getAbsolutePath(), targetLocation.getAbsolutePath()).start();
+      stdout = new StreamHelper(p.getInputStream());
+      stderr = new LinkErrorStreamHelper(p.getErrorStream(), error);
+      p.waitFor();
+      // Find does not return with an error if -exec fails
+      if (p.exitValue() != 0 || error.length() > 0) {
+        logger.debug("Unable to create a link from " + sourceLocation + " to " + targetLocation + ": " + error);
+        return false;
+      }
+      if (sourceLocation.length() != targetLocation.length()) {
+        logger.warn("Source " + sourceLocation + " and target " + targetLocation + " do not have the same length");
+        // TOOD: Why would this happen?
+        // throw new IOException("Source " + sourceLocation + " and target " +
+        // dest + " do not have the same length");
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Error creating a link from " + sourceLocation + " to " + targetLocation + ": " + error, e);
+    } finally {
+      IoSupport.closeQuietly(stdout);
+      IoSupport.closeQuietly(stderr);
+      IoSupport.closeQuietly(p);
+    }
+    return true;
+  }
+
   private static File determineDestination(File targetLocation, File sourceLocation, boolean overwrite)
           throws IOException {
     File dest = null;
@@ -443,7 +495,7 @@ public class FileSupport {
 
       dest = targetLocation;
       targetLocation = targetLocation.getParentFile(); // FIXME targetLocation is never read, so setting this does
-                                                       // nothing
+      // nothing
     } else if (targetLocation.exists() && sourceLocation.isFile() && targetLocation.isFile()) {
       dest = targetLocation;
     } else if (!targetLocation.getName().equals(sourceLocation.getName())) {

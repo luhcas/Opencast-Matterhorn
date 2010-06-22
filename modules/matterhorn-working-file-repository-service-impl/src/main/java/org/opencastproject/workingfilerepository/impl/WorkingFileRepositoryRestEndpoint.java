@@ -16,6 +16,7 @@
 package org.opencastproject.workingfilerepository.impl;
 
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
@@ -78,8 +79,6 @@ public class WorkingFileRepositoryRestEndpoint {
 
   private String generateDocs() {
     DocRestData data = new DocRestData("workingfilerepository", "Working file repository", "/files", notes);
-
-    // abstract
     data.setAbstract("This service provides local file access and storage for processes such as encoding.");
 
     // put
@@ -184,6 +183,16 @@ public class WorkingFileRepositoryRestEndpoint {
             .addPathParam(new Param("fileName", Param.Type.STRING, null, "Name under which the file will be retrieved"));
     // endpoint.addFormat(new Format(".*", "Data that is stored in this location", null));
     endpoint.addStatus(Status.OK("Results in a header with retrieved file"));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+
+    // URI
+    endpoint = new RestEndpoint("collectionUriWithFilename", RestEndpoint.Method.GET,
+            "/collectionuri/{collectionID}/{{fileName}",
+            "Retrieve the URI for this collectionID and filename");
+    endpoint.addPathParam(new Param("collectionID", Param.Type.STRING, null,
+            "ID of the collection"));
+    endpoint.addPathParam(new Param("fileName", Param.Type.STRING, null, "The filename"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
@@ -365,7 +374,14 @@ public class WorkingFileRepositoryRestEndpoint {
   @Path(WorkingFileRepository.COLLECTION_PATH_PREFIX + "{collectionId}/{fileName}")
   public Response getFromCollection(@PathParam("collectionId") String collectionId,
           @PathParam("fileName") String fileName) {
-    InputStream in = repo.getFromCollection(collectionId, fileName);
+    InputStream in = null;
+    try {
+      in = repo.getFromCollection(collectionId, fileName);
+    } catch (NotFoundException e) {
+      Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+    } catch (IOException e) {
+      return Response.serverError().entity(e.getMessage()).build();
+    }
     String contentType = mimeMap.getContentType(fileName);
     int contentLength = 0;
     try {
@@ -376,6 +392,14 @@ public class WorkingFileRepositoryRestEndpoint {
     checkService();
     return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type",
             contentType).header("Content-length", contentLength).entity(in).build();
+  }
+
+  @GET
+  @Path("/collectionuri/{collectionID}/{fileName}")
+  public Response getCollectionUri(@PathParam("collectionID") String collectionId,
+          @PathParam("fileName") String fileName) {
+    URI uri = repo.getCollectionURI(collectionId, fileName);
+    return Response.ok(uri.toString()).build();
   }
 
   @GET
@@ -399,12 +423,16 @@ public class WorkingFileRepositoryRestEndpoint {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/list/{collectionId}.json")
   public Response getCollectionContents(@PathParam("collectionId") String collectionId) {
-    URI[] uris = repo.getCollectionContents(collectionId);
-    JSONArray jsonArray = new JSONArray();
-    for (URI uri : uris) {
-      jsonArray.add(uri.toString());
+    try {
+      URI[] uris = repo.getCollectionContents(collectionId);
+      JSONArray jsonArray = new JSONArray();
+      for (URI uri : uris) {
+        jsonArray.add(uri.toString());
+      }
+      return Response.ok(jsonArray.toJSONString()).build();
+    } catch (Exception e) {
+      return Response.serverError().entity(e.getMessage()).build();
     }
-    return Response.ok(jsonArray.toJSONString()).build();
   }
 
   @POST
