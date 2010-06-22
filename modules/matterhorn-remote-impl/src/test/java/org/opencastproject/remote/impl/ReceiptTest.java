@@ -203,11 +203,21 @@ public class ReceiptTest {
     hosts = remoteServiceManager.getHosts("type1");
     Assert.assertEquals(1, hosts.size());
     Assert.assertEquals("http://type1handler:8080", hosts.get(0));
-    
+
+    // set the handler to be in maintenance mode
+    remoteServiceManager.setMaintenanceMode(receiptType, url, true);
+    hosts = remoteServiceManager.getHosts("type1");
+    Assert.assertEquals(0, hosts.size());
+
+    // set it back to normal mode
+    remoteServiceManager.setMaintenanceMode(receiptType, url, false);
+    hosts = remoteServiceManager.getHosts("type1");
+    Assert.assertEquals(1, hosts.size());
+
     // unregister
     remoteServiceManager.unRegisterService(receiptType, url);
     hosts = remoteServiceManager.getHosts("type1");
     Assert.assertEquals(0, hosts.size());
   }
-  
+
 }

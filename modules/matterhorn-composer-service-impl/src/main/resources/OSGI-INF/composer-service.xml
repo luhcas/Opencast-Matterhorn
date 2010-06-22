@@ -8,7 +8,6 @@
     <implementation class="org.opencastproject.composer.impl.ComposerServiceImpl" />
     <property name="service.description" value="Composer (Encoder) Local Service" />
     <service>
-      <provide interface="org.opencastproject.remote.api.Maintainable" />
       <provide interface="org.opencastproject.composer.api.ComposerService" />
     </service>
     <reference name="inspection-service" interface="org.opencastproject.inspection.api.MediaInspectionService"

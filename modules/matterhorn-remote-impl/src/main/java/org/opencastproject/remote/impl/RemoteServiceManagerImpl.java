@@ -17,6 +17,7 @@ package org.opencastproject.remote.impl;
 
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.remote.api.ServiceRegistration;
 import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.util.UrlSupport;
 
@@ -253,7 +254,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
     if (StringUtils.trimToNull(receiptType) == null || StringUtils.trimToNull(baseUrl) == null) {
       throw new IllegalArgumentException("receiptType and baseUrl must not be empty or null");
     }
-    ReceiptHandler rh = new ReceiptHandler(baseUrl, receiptType);
+    ServiceRegistrationImpl rh = new ServiceRegistrationImpl(baseUrl, receiptType, false);
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
@@ -279,10 +280,41 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      Query q = em.createQuery("DELETE from ReceiptHandler rh where rh.host = :host and rh.receiptType = :receiptType");
+      Query q = em.createQuery("DELETE from ServiceRegistrationImpl rh where rh.host = :host and rh.receiptType = :jobType");
       q.setParameter("host", baseUrl);
-      q.setParameter("receiptType", receiptType);
+      q.setParameter("jobType", receiptType);
       q.executeUpdate();
+      tx.commit();
+    } catch (RollbackException e) {
+      if (tx.isActive())
+        tx.rollback();
+      throw e;
+    } finally {
+      em.close();
+    }
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.remote.api.RemoteServiceManager#setMaintenanceMode(java.lang.String, java.lang.String, boolean)
+   */
+  @Override
+  public void setMaintenanceMode(String jobType, String baseUrl, boolean maintenanceMode) throws IllegalStateException {
+    EntityManager em = emf.createEntityManager();
+    EntityTransaction tx = em.getTransaction();
+    try {
+      tx.begin();
+      Query q = em.createQuery("Select rh from ServiceRegistrationImpl rh where rh.host = :host and rh.receiptType = :jobType");
+      q.setParameter("host", baseUrl);
+      q.setParameter("jobType", jobType);
+      ServiceRegistrationImpl rh = null;
+      try {
+        rh = (ServiceRegistrationImpl)q.getSingleResult();
+      } catch(NoResultException e) {
+        throw new IllegalStateException("Can not set maintenance mode on a service that has not been registered");
+      }
+      rh.setInMaintenanceMode(maintenanceMode);
+      em.merge(rh);
       tx.commit();
     } catch (RollbackException e) {
       if (tx.isActive())
@@ -305,32 +337,13 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
     EntityManager em = emf.createEntityManager();
     try {
       Query query = em
-              .createQuery("SELECT DISTINCT rh.host FROM ReceiptHandler rh where rh.receiptType = :receiptType");
+              .createQuery("SELECT DISTINCT rh.host FROM ServiceRegistrationImpl rh where rh.receiptType = :receiptType and rh.inMaintenanceMode = false");
       query.setParameter("receiptType", jobType);
       return query.getResultList();
     } finally {
       em.close();
     }
   }
-
-//  public List<String> getHostByLoad(String jobType) {
-//    EntityManager em = emf.createEntityManager();
-//    String jpql = "SELECT rh FROM ReceiptHandler rh left join Receipt r " +
-//      "on (rh.host = r.host)";
-//    
-//    try {
-//      Query query = em.createQuery(jpql);
-//      query.setParameter("statuses", STATUSES_INFLUINCING_LOAD_BALANCING);
-//      query.setParameter("receiptType", jobType);
-//      List<?> results = query.getResultList();
-//      for(Object result : results) {
-//        logger.info("Result: {}", result);
-//      }
-//      return null;
-//    } finally {
-//      em.close();
-//    }
-//  }
 
   /**
    * {@inheritDoc}
@@ -345,9 +358,10 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
     TreeBidiMap runningJobsMap = new TreeBidiMap();
     try {
       Query query = em.createQuery("SELECT r.host, COUNT(r) FROM Receipt r where r.status in :statuses and "
-              + "r.host in :hosts group by r.host");
+              + "r.host in (SELECT DISTINCT rh.host FROM ServiceRegistrationImpl rh where rh.receiptType = :receiptType and "
+              + "rh.inMaintenanceMode = false) group by r.host");
       query.setParameter("statuses", STATUSES_INFLUINCING_LOAD_BALANCING);
-      query.setParameter("hosts", hosts);
+      query.setParameter("receiptType", jobType);
       for (Object result : query.getResultList()) {
         Object[] oa = (Object[]) result;
         runningJobsMap.put((String) oa[0], (Long) oa[1]);
@@ -367,6 +381,21 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
         sortedRemoteHosts.add((String) iter.getValue());
       }
       return sortedRemoteHosts;
+    } finally {
+      em.close();
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.remote.api.RemoteServiceManager#getServiceRegistrations()
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<ServiceRegistration> getServiceRegistrations() {
+    EntityManager em = emf.createEntityManager();
+    try {
+      return em.createQuery("SELECT rh FROM ServiceRegistrationImpl rh").getResultList();
     } finally {
       em.close();
     }

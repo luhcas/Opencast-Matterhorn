@@ -17,7 +17,6 @@ package org.opencastproject.remote.impl;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -26,23 +25,25 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="SERVICE_REGISTRATION")
-public class ReceiptHandler {
+public class ServiceRegistrationImpl {
 
   @Id
-  @GeneratedValue
-  protected Long id;
-  
-  @Column
+  @Column(name="HOST", nullable=false)
   protected String host;
 
-  @Column(name="JOB_TYPE")
+  @Id
+  @Column(name="JOB_TYPE", nullable=false)
   protected String receiptType;
   
-  public ReceiptHandler() {}
+  @Column(name="MAINTENANCE", nullable=false)
+  protected boolean inMaintenanceMode;
+  
+  public ServiceRegistrationImpl() {}
 
-  public ReceiptHandler(String host, String receiptType) {
+  public ServiceRegistrationImpl(String host, String receiptType, boolean inMaintenanceMode) {
     this.host = host;
     this.receiptType = receiptType;
+    this.inMaintenanceMode = inMaintenanceMode;
   }
 
   /**
@@ -71,18 +72,16 @@ public class ReceiptHandler {
   }
 
   /**
-   * @return the id
+   * @return the inMaintenanceMode
    */
-  public Long getId() {
-    return id;
+  public boolean isInMaintenanceMode() {
+    return inMaintenanceMode;
   }
 
   /**
-   * @param id the id to set
+   * @param inMaintenanceMode the inMaintenanceMode to set
    */
-  public void setId(Long id) {
-    this.id = id;
+  public void setInMaintenanceMode(boolean inMaintenanceMode) {
+    this.inMaintenanceMode = inMaintenanceMode;
   }
-
-  
 }

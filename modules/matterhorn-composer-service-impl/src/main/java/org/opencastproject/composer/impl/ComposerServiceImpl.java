@@ -28,8 +28,6 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.identifier.IdBuilder;
 import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
-import org.opencastproject.remote.api.Maintainable;
-import org.opencastproject.remote.api.MaintenanceException;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
@@ -57,7 +55,7 @@ import java.util.concurrent.Future;
 /**
  * Default implementation of the composer service api.
  */
-public class ComposerServiceImpl implements ComposerService, Maintainable {
+public class ComposerServiceImpl implements ComposerService {
 
   /** The logging instance */
   private static final Logger logger = LoggerFactory.getLogger(ComposerServiceImpl.class);
@@ -83,9 +81,6 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
   /** Thread pool */
   ExecutorService executor = null;
 
-  /** In maintenance mode, this service will not accept new encoding jobs */
-  boolean maintenanceMode = false;
-  
   /** The server's base URL */
   protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
   
@@ -212,7 +207,6 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
   @Override
   public Receipt encode(final MediaPackage mp, final String sourceVideoTrackId, final String sourceAudioTrackId,
           final String profileId, final boolean block) throws EncoderException, MediaPackageException {
-    if(maintenanceMode) throw new MaintenanceException();
     final String targetTrackId = idBuilder.createNew().toString();
     final Receipt composerReceipt = remoteServiceManager.createReceipt(JOB_TYPE);
 
@@ -362,7 +356,6 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
    */
   public Receipt image(final MediaPackage mediaPackage, final String sourceVideoTrackId, final String profileId,
           final long time, boolean block) throws EncoderException, MediaPackageException {
-    if(maintenanceMode) throw new MaintenanceException();
 
     final Receipt receipt = remoteServiceManager.createReceipt(JOB_TYPE);
     final String targetAttachmentId = "attachment-" + (mediaPackage.getAttachments().length + 1);
@@ -487,23 +480,5 @@ public class ComposerServiceImpl implements ComposerService, Maintainable {
   @Override
   public long countJobs(Status status, String host) {
     return remoteServiceManager.count(JOB_TYPE, status, host);
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Maintainable#isInMaintenanceMode()
-   */
-  @Override
-  public boolean isInMaintenanceMode() {
-    return maintenanceMode;
-  }
-  
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Maintainable#setMaintenanceMode(boolean)
-   */
-  @Override
-  public void setMaintenanceMode(boolean maintenanceMode) {
-    this.maintenanceMode = maintenanceMode;
   }
 }

@@ -41,8 +41,6 @@ import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.Video;
-import org.opencastproject.remote.api.Maintainable;
-import org.opencastproject.remote.api.MaintenanceException;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
@@ -96,7 +94,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
  * ffmpeg -i &lt;inputfile&gt; -deinterlace -r 1 -vcodec mjpeg -qscale 1 -an &lt;outputfile&gt;
  * </pre>
  */
-public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maintainable {
+public class VideoSegmenter extends MediaAnalysisServiceSupport {
 
   /** Receipt type */
   public static final String RECEIPT_TYPE = "org.opencastproject.analysis.vsegmenter";
@@ -145,9 +143,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
 
   /** The executor service used to queue and run jobs */
   protected ExecutorService executor;
-
-  /** Whether this service is in maintenance mode */
-  protected boolean maintenanceMode = false;
 
   /** The base URL for this server */
   protected String serverUrl = null;
@@ -250,7 +245,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
    * @throws MediaAnalysisException
    */
   public Receipt analyze(final MediaPackageElement element, boolean block) throws MediaAnalysisException {
-    if(maintenanceMode) throw new MaintenanceException();
     final RemoteServiceManager rs = remoteServiceManager;
     final Receipt receipt = rs.createReceipt(RECEIPT_TYPE);
 
@@ -666,26 +660,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Maint
     composedTrack.addTag("segmentation");
 
     return composedTrack;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.remote.api.Maintainable#isInMaintenanceMode()
-   */
-  @Override
-  public boolean isInMaintenanceMode() {
-    return maintenanceMode;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.remote.api.Maintainable#setMaintenanceMode(boolean)
-   */
-  @Override
-  public void setMaintenanceMode(boolean maintenanceMode) {
-    this.maintenanceMode = maintenanceMode;
   }
 
   /**

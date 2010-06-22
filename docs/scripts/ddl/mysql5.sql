@@ -90,10 +90,10 @@ CREATE TABLE `SERIES_METADATA` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `SERVICE_REGISTRATION` (
-  `ID` bigint(20) NOT NULL,
-  `HOST` varchar(255) collate utf8_unicode_ci default NULL,
-  `JOB_TYPE` varchar(255) collate utf8_unicode_ci default NULL,
-  PRIMARY KEY  (`ID`)
+  `HOST` varchar(255) collate utf8_unicode_ci NOT NULL,
+  `JOB_TYPE` varchar(255) collate utf8_unicode_ci NOT NULL,
+  `MAINTENANCE` tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (`HOST`,`JOB_TYPE`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `UPLOAD` (

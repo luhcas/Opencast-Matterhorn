@@ -6,7 +6,6 @@
   <property name="service.description" value="VideoSegmenter Service" />
   <property name="analysis.type" value="org.opencastproject.analysis.vsegmenter" />
   <service>
-    <provide interface="org.opencastproject.remote.api.Maintainable" />
     <provide interface="org.opencastproject.analysis.api.MediaAnalysisService" />
   </service>
   <reference name="remoteServiceManager" interface="org.opencastproject.remote.api.RemoteServiceManager" cardinality="1..1"

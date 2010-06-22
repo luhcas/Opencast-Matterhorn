@@ -74,9 +74,9 @@ CREATE TABLE series_metadata (
 );
 
 CREATE TABLE service_registration (
-    id bigint NOT NULL,
-    host character varying(255),
-    job_type character varying(255)
+    host character varying(255) NOT NULL,
+    job_type character varying(255) NOT NULL,
+    maintenance bit(1) NOT NULL default '0'
 );
 
 CREATE TABLE upload (
@@ -123,7 +123,7 @@ ALTER TABLE ONLY series
     ADD CONSTRAINT series_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY service_registration
-    ADD CONSTRAINT service_registration_pkey PRIMARY KEY (id);
+    ADD CONSTRAINT service_registration_pkey PRIMARY KEY (host, job_type);
 
 ALTER TABLE ONLY upload
     ADD CONSTRAINT upload_pkey PRIMARY KEY (id);

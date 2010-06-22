@@ -3,7 +3,7 @@
  name="org.opencastproject.remote.command.MaintenanceCommand" immediate="true">
   <implementation class="org.opencastproject.remote.command.MaintenanceCommand" />
   <property name="service.description" value="Maintenance Command (m:set id true|false, m:list)" />
-  <property name="osgi.command.scope" value="m" />
+  <property name="osgi.command.scope" value="maintain" />
   <property name="osgi.command.function">
     set
     list
@@ -11,6 +11,6 @@
   <service>
     <provide interface="org.opencastproject.remote.command.MaintenanceCommand" />
   </service>
-  <reference name="maint" interface="org.opencastproject.remote.api.Maintainable"
-    cardinality="0..n" policy="dynamic" bind="addMaintainable" unbind="removeMaintainable" />
+  <reference name="remoteServiceManager" interface="org.opencastproject.remote.api.RemoteServiceManager"
+    cardinality="1..1" policy="static" bind="setRemoteServiceManager" />
 </scr:component>

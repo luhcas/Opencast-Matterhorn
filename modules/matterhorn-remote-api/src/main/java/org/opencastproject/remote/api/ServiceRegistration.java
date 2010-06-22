@@ -16,18 +16,21 @@
 package org.opencastproject.remote.api;
 
 /**
- * A service that can be placed into maintenance mode.
+ * Manages clustered services and the {@link Receipt}s they may create to enable asynchronous job handling.
  */
-public interface Maintainable {
+public interface ServiceRegistration {
   /**
-   * Sets the service into maintenance mode.
-   * @param maintenanceMode The mode to set
+   * @return the host
    */
-  void setMaintenanceMode(boolean maintenanceMode);
-
+  public String getHost();
+  
   /**
-   * Whether this service is in maintenance mode
-   * @return
+   * @return the receiptType
    */
-  boolean isInMaintenanceMode();
+  public String getReceiptType();
+  
+  /**
+   * @return the inMaintenanceMode
+   */
+  public boolean isInMaintenanceMode();
 }

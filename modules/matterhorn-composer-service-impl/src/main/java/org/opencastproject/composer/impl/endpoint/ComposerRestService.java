@@ -21,7 +21,6 @@ import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
 import org.opencastproject.mediapackage.MediaPackageImpl;
-import org.opencastproject.remote.api.Maintainable;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.util.DocUtil;
@@ -98,9 +97,6 @@ public class ComposerRestService {
           @FormParam("audioSourceTrackId") String audioSourceTrackId,
           @FormParam("videoSourceTrackId") String videoSourceTrackId, @FormParam("profileId") String profileId)
           throws Exception {
-    if(composerService instanceof Maintainable && ((Maintainable)composerService).isInMaintenanceMode()) {
-      return Response.status(503).build();
-    }
     // Ensure that the POST parameters are present
     if (mediaPackage == null || audioSourceTrackId == null || videoSourceTrackId == null || profileId == null) {
       return Response.status(Response.Status.BAD_REQUEST).entity(
@@ -139,9 +135,6 @@ public class ComposerRestService {
   public Response image(@FormParam("mediapackage") MediaPackageImpl mediaPackage,
           @FormParam("sourceTrackId") String sourceTrackId, @FormParam("profileId") String profileId,
           @FormParam("time") long time) throws Exception {
-    if(composerService instanceof Maintainable && ((Maintainable)composerService).isInMaintenanceMode()) {
-      return Response.status(503).build();
-    }
     // Ensure that the POST parameters are present
     if (mediaPackage == null || sourceTrackId == null || profileId == null) {
       return Response.status(Response.Status.BAD_REQUEST).entity("mediapackage, sourceTrackId, and profileId must not be null")

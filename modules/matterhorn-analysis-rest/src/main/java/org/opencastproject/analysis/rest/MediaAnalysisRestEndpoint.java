@@ -19,7 +19,6 @@ import org.opencastproject.analysis.api.MediaAnalysisService;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.remote.api.Maintainable;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
@@ -90,12 +89,6 @@ public class MediaAnalysisRestEndpoint {
   public Response analyze(@PathParam("analysisType") String analysisType, @FormParam("track") String trackAsXml) {
     try {
       MediaAnalysisService service = getMediaAnalysiService(analysisType);
-      if(service instanceof Maintainable) {
-        if(((Maintainable)service).isInMaintenanceMode()) {
-          return Response.status(Status.SERVICE_UNAVAILABLE).build();
-        }
-        
-      }
       DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
       Document doc = docBuilder.parse(IOUtils.toInputStream(trackAsXml));
       MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
