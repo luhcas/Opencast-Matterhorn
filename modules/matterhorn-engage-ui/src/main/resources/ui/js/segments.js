@@ -58,8 +58,12 @@ Opencast.segments = ( function() {
     });
 
     // Hide Slide Tab, if there are no slides
-    if(segmentTimes.length === 0)
+    if(segmentTimes.length === 0) {
       Opencast.Player.doToggleSlides();
+      $(".oc_btn-skip-backward").hide();
+      $(".oc_btn-skip-forward").hide();
+      $(".oc_btn-rewind").css("margin-left", "230px");
+    }
 
     $(document).everyTime(500, function(index) {
       var currentPosition = parseInt(Opencast.Player.getCurrentPosition());
