@@ -10,7 +10,12 @@ if [[ ! $INSTALL_RUN ]]; then
     exit 1
 fi
 
-# Setup opencast directories
+# Setup opencast storage directories
+# TODO: Uncomment the following lines -and remove the next two- once the correct defaults for the directories are set in the config files in svn
+## Read default from the config file
+#default_dir=$(grep "^org\.opencastproject\.storage\.dir=.*$" $GEN_PROPS | cut -d '=' -f 2)
+#read -p "Where would you like the matterhorn directories to be stored [$default_dir]? " oc_dir
+#: ${oc_dir:=$OC_DIR}
 read -p "Where would you like the matterhorn directories to be stored [$OC_DIR]? " oc_dir
 : ${oc_dir:=$OC_DIR}
 echo
@@ -38,10 +43,12 @@ done
 sed -i "s/capture\.agent\.name=.*$/capture\.agent\.name=${agentName:-$hostname}/" $CAPTURE_PROPS
 echo
 
-# Prompt for the URL where the ingestion service lives. Default to localhost:8080
-read -p "Please enter the URL to the root of the machine hosting the ingestion service [$DEFAULT_INGEST_URL]: " core
-#sed -i "s#^capture\.ingest\.endpoint\.url=\(http://\)\?[^/]*\(.*\)\$#capture.ingest.endpoint.url=$core\2#" $CAPTURE_PROPS
-sed -i "s#\(org\.opencastproject\.server\.url=\).*\$#org.opencastproject.server.url=$core#" $GEN_PROPS
+# Prompt for the URL where the core lives.
+# TODO: (or maybe not) Support a distributed core would mean to set different URLs separately, rather than this centralized one
+## Read default from the config file
+#DEFAULT_CORE_URL=$(grep "^org\.opencastproject\.capture\.core\.url=.*$" $CAPTURE_PROPS | cut -d '=' -f 2)
+read -p "Please enter the URL to the root of the machine hosting the ingestion service [$DEFAULT_CORE_URL]: " core
+sed -i "s#org\.opencastproject\.capture\.core\.url=.*\$#org.opencastproject.capture.core.url=${core:-$DEFAULT_CORE_URL}#" $CAPTURE_PROPS
 
 # Set up maven and felix enviroment variables in the user session
 echo -n "Setting up maven and felix enviroment for $USERNAME... "
@@ -88,7 +95,7 @@ sed -i "s#^USER=.*\$#USER=$USERNAME#" "$CLEANUP"
 sed -i "s#^HOME=.*\$#HOME=$HOME#" "$CLEANUP"
 sed -i "s#^SRC_LIST=.*\$#SRC_LIST=$SRC_LIST#" "$CLEANUP"
 sed -i "s#^SRC_LIST_BKP=.*\$#SRC_LIST_BKP=$SRC_LIST_BKP#" "$CLEANUP"
-sed -i "s#^oc_dir=.*\$#OC_DIR=$oc_dir#" "$CLEANUP"
+sed -i "s#^OC_DIR=.*\$#OC_DIR=$oc_dir#" "$CLEANUP"
 sed -i "s#^CA_DIR=.*\$#CA_DIR=$CA_DIR#" "$CLEANUP"
 sed -i "s#^RULES_FILE=.*\$#RULES_FILE=$DEV_RULES#" "$CLEANUP"
 sed -i "s#^CA_DIR=.*\$#CA_DIR=$CA_DIR#" "$CLEANUP"
