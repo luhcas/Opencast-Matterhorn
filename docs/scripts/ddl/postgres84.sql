@@ -76,7 +76,7 @@ CREATE TABLE series_metadata (
 CREATE TABLE service_registration (
     host character varying(255) NOT NULL,
     job_type character varying(255) NOT NULL,
-    maintenance bit(1) NOT NULL default '0'
+    maintenance boolean NOT NULL default 'f'
 );
 
 CREATE TABLE upload (

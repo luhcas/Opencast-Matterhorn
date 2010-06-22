@@ -15,6 +15,8 @@
  */
 package org.opencastproject.remote.impl;
 
+import org.opencastproject.remote.api.ServiceRegistration;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -25,7 +27,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name="SERVICE_REGISTRATION")
-public class ServiceRegistrationImpl {
+public class ServiceRegistrationImpl implements ServiceRegistration {
 
   @Id
   @Column(name="HOST", nullable=false)
@@ -49,6 +51,7 @@ public class ServiceRegistrationImpl {
   /**
    * @return the host
    */
+  @Override
   public String getHost() {
     return host;
   }
@@ -61,6 +64,7 @@ public class ServiceRegistrationImpl {
   /**
    * @return the receiptType
    */
+  @Override
   public String getReceiptType() {
     return receiptType;
   }
@@ -74,6 +78,7 @@ public class ServiceRegistrationImpl {
   /**
    * @return the inMaintenanceMode
    */
+  @Override
   public boolean isInMaintenanceMode() {
     return inMaintenanceMode;
   }

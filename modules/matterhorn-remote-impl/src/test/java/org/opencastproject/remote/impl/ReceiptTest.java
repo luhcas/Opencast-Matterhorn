@@ -220,4 +220,34 @@ public class ReceiptTest {
     Assert.assertEquals(0, hosts.size());
   }
 
+  @Test
+  public void testDuplicateHandlerRegistrations() throws Exception {
+    String url = "http://type1handler:8080";
+    String receiptType = "type1";
+    // we should start with no handlers
+    List<String> hosts = remoteServiceManager.getHosts(receiptType);
+    Assert.assertEquals(0, hosts.size());
+
+    // register a handler
+    remoteServiceManager.registerService(receiptType, url);
+    hosts = remoteServiceManager.getHosts("type1");
+    Assert.assertEquals(1, hosts.size());
+    Assert.assertEquals("http://type1handler:8080", hosts.get(0));
+
+    // set the handler to be in maintenance mode
+    remoteServiceManager.setMaintenanceMode(receiptType, url, true);
+    hosts = remoteServiceManager.getHosts("type1");
+    Assert.assertEquals(0, hosts.size());
+
+    // try to re-register.  this should unset the maintenance mode and log a warning, but should not throw an exception
+    remoteServiceManager.registerService(receiptType, url);
+    Assert.assertEquals(1, remoteServiceManager.getServiceRegistrations().size());
+    Assert.assertFalse(remoteServiceManager.getServiceRegistrations().get(0).isInMaintenanceMode());
+
+    // unregister
+    remoteServiceManager.unRegisterService(receiptType, url);
+    hosts = remoteServiceManager.getHosts("type1");
+    Assert.assertEquals(0, hosts.size());
+  }
+
 }

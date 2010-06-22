@@ -250,22 +250,44 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
    * @see org.opencastproject.remote.api.RemoteServiceManager#registerService(java.lang.String, java.lang.String)
    */
   @Override
-  public void registerService(String receiptType, String baseUrl) {
-    if (StringUtils.trimToNull(receiptType) == null || StringUtils.trimToNull(baseUrl) == null) {
+  public void registerService(String jobType, String baseUrl) {
+    if (StringUtils.trimToNull(jobType) == null || StringUtils.trimToNull(baseUrl) == null) {
       throw new IllegalArgumentException("receiptType and baseUrl must not be empty or null");
     }
-    ServiceRegistrationImpl rh = new ServiceRegistrationImpl(baseUrl, receiptType, false);
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      em.persist(rh);
+      ServiceRegistrationImpl existingRegistration = getServiceRegistration(em, jobType, baseUrl);
+      if (existingRegistration == null) {
+        ServiceRegistrationImpl rh = new ServiceRegistrationImpl(baseUrl, jobType, false);
+        em.persist(rh);
+      } else {
+        logger.warn("An existing service registration exists for {}@{}.  Perhaps there was an unclean shutdown?",
+                jobType, baseUrl);
+        if (existingRegistration.isInMaintenanceMode()) {
+          existingRegistration.setInMaintenanceMode(false);
+          em.merge(existingRegistration);
+        }
+      }
       tx.commit();
     } catch (RollbackException e) {
       tx.rollback();
       throw e;
     } finally {
       em.close();
+    }
+  }
+
+  protected ServiceRegistrationImpl getServiceRegistration(EntityManager em, String jobType, String baseUrl) {
+    try {
+      Query q = em
+              .createQuery("SELECT rh from ServiceRegistrationImpl rh where rh.host = :host and rh.receiptType = :jobType");
+      q.setParameter("host", baseUrl);
+      q.setParameter("jobType", jobType);
+      return (ServiceRegistrationImpl) q.getSingleResult();
+    } catch (NoResultException e) {
+      return null;
     }
   }
 
@@ -280,7 +302,8 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      Query q = em.createQuery("DELETE from ServiceRegistrationImpl rh where rh.host = :host and rh.receiptType = :jobType");
+      Query q = em
+              .createQuery("DELETE from ServiceRegistrationImpl rh where rh.host = :host and rh.receiptType = :jobType");
       q.setParameter("host", baseUrl);
       q.setParameter("jobType", receiptType);
       q.executeUpdate();
@@ -293,10 +316,12 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
       em.close();
     }
   }
-  
+
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.RemoteServiceManager#setMaintenanceMode(java.lang.String, java.lang.String, boolean)
+   * 
+   * @see org.opencastproject.remote.api.RemoteServiceManager#setMaintenanceMode(java.lang.String, java.lang.String,
+   *      boolean)
    */
   @Override
   public void setMaintenanceMode(String jobType, String baseUrl, boolean maintenanceMode) throws IllegalStateException {
@@ -304,13 +329,14 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      Query q = em.createQuery("Select rh from ServiceRegistrationImpl rh where rh.host = :host and rh.receiptType = :jobType");
+      Query q = em
+              .createQuery("Select rh from ServiceRegistrationImpl rh where rh.host = :host and rh.receiptType = :jobType");
       q.setParameter("host", baseUrl);
       q.setParameter("jobType", jobType);
       ServiceRegistrationImpl rh = null;
       try {
-        rh = (ServiceRegistrationImpl)q.getSingleResult();
-      } catch(NoResultException e) {
+        rh = (ServiceRegistrationImpl) q.getSingleResult();
+      } catch (NoResultException e) {
         throw new IllegalStateException("Can not set maintenance mode on a service that has not been registered");
       }
       rh.setInMaintenanceMode(maintenanceMode);
@@ -357,7 +383,8 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
     List<String> hosts = getHosts(jobType);
     TreeBidiMap runningJobsMap = new TreeBidiMap();
     try {
-      Query query = em.createQuery("SELECT r.host, COUNT(r) FROM Receipt r where r.status in :statuses and r.type = :jobType group by r.host");
+      Query query = em
+              .createQuery("SELECT r.host, COUNT(r) FROM Receipt r where r.status in :statuses and r.type = :jobType group by r.host");
       query.setParameter("statuses", STATUSES_INFLUINCING_LOAD_BALANCING);
       query.setParameter("jobType", jobType);
       for (Object result : query.getResultList()) {
@@ -367,7 +394,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
       // if a host wasn't returned because it doesn't have any jobs, add it here with a count of zero
       for (String host : hosts) {
         // There seems to be a bug in the TreeBidiMap.containsKey() method, so work around it
-        if(runningJobsMap.get(host) == null) {
+        if (runningJobsMap.get(host) == null) {
           runningJobsMap.put(host, 0L);
         }
       }
@@ -387,6 +414,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.remote.api.RemoteServiceManager#getServiceRegistrations()
    */
   @SuppressWarnings("unchecked")
