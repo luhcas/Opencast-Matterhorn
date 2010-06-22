@@ -55,6 +55,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowQuery;
 
@@ -64,6 +65,7 @@ import org.opencastproject.workflow.api.WorkflowQuery;
 @Path("/")
 public class AdminuiRestService {
 
+  private final static int CAPTURE_AGENT_DELAY = 5000;
   private static final Logger logger = LoggerFactory.getLogger(AdminuiRestService.class);
   private SchedulerService schedulerService;
   private WorkflowService workflowService;
@@ -127,7 +129,7 @@ public class AdminuiRestService {
     if ((state.toUpperCase().equals("FAILED")) || (state.toUpperCase().equals("ALL"))) {
       out.addAll(getRecordingsFromWorkflowService(WorkflowState.FAILED));
       out.addAll(getRecordingsFromWorkflowService(WorkflowState.FAILING));
-      // TODO get failed recordings from captureAdmin/scheduler
+      out.addAll(getFailedCaptureJobs());
     }
     if (pageNumber < 0) {
       pageNumber = 0;
@@ -182,7 +184,7 @@ public class AdminuiRestService {
         WorkflowOperationInstance currentOperation = workflows[i].getCurrentOperation();
         if (currentOperation == null) {
           List<WorkflowOperationInstance> operationsList = workflows[i].getOperations();
-          currentOperation = operationsList.get(operationsList.size()-1);
+          currentOperation = operationsList.get(operationsList.size() - 1);
         }
         if (currentOperation != null) {               // there always should be operation, just to make sure
           item.setProcessingStatus(currentOperation.getDescription());
@@ -256,18 +258,18 @@ public class AdminuiRestService {
 
     // get capturing statistics from scheduler if present
     /*if (schedulerService != null) {
-      int capturing = 0;
-      SchedulerEvent[] events = schedulerService.getCapturingEvents();
-      Date current = new Date(System.currentTimeMillis());
-      for (SchedulerEvent event : events) {
-        if ( (current.after(event.getStartdate())) && (current.before(event.getEnddate())) ) {   // ..just to be sure
-          capturing++;
-        }
-      }
-      out.put("capturing", new Integer(capturing));
-      total += capturing;
+    int capturing = 0;
+    SchedulerEvent[] events = schedulerService.getCapturingEvents();
+    Date current = new Date(System.currentTimeMillis());
+    for (SchedulerEvent event : events) {
+    if ( (current.after(event.getStartdate())) && (current.before(event.getEnddate())) ) {   // ..just to be sure
+    capturing++;
+    }
+    }
+    out.put("capturing", new Integer(capturing));
+    total += capturing;
     } else {
-      logger.warn("scheduler service not present, unable to retreive number of capturing events");
+    logger.warn("scheduler service not present, unable to retreive number of capturing events");
     }*/
     if (captureAdminService != null) {
       Map<String, Recording> recordings = new HashMap<String, Recording>(captureAdminService.getKnownRecordings());
@@ -275,8 +277,11 @@ public class AdminuiRestService {
       int capturing = 0;
       while (i.hasNext()) {
         Recording r = recordings.get(i.next());
-        if ( (r.getState().equals(RecordingState.CAPTURING)) ||
-             (r.getState().equals(RecordingState.UPLOADING)) ) {   // FIXME also take into account RecordingState.UNKNOWN ??
+        if ((r.getState().equals(RecordingState.CAPTURING))
+                || (r.getState().equals(RecordingState.UPLOADING))
+                || (r.getState().equals(RecordingState.MANIFEST))
+                || (r.getState().equals(RecordingState.UPLOADING)
+                || (r.getState().equals(RecordingState.CAPTURE_FINISHED)))) {   // FIXME also take into account RecordingState.UNKNOWN ??
           capturing++;
           total++;
         }
@@ -340,18 +345,55 @@ public class AdminuiRestService {
         }
       }
       out.put("upcoming", new Integer(upcoming));
-
-      // get number of recordings that have never been captured
-      if (this.captureAdminService != null) {
-        // TODO find recording that have never been captured
-      } else {
-        logger.warn("CaptureAdmin service not present, not able to count recordings that haven't been captured.");
-      }
     } else {
       logger.warn("scheduler service not present, unable to retreive number of upcoming events");
     }
 
+    // Add number of failed capture jobs to failed
+    RecordingDataViewList failedCaptures = getFailedCaptureJobs();
+    total += failedCaptures.size();
+    out.put("failed", out.get("failed").intValue() + failedCaptures.size());
+
     out.put("all", new Integer(total));
+    return out;
+  }
+
+  /** returns the list of capture jobs that haven either failed on the capture
+   *  agent or that where never taken up by the capture agent. If either scheduler
+   *  or capture admin service are not present, an empty list is returned.
+   *
+   * @return list of failed recordings
+   */
+  private RecordingDataViewList getFailedCaptureJobs() {
+    RecordingDataViewList out = new RecordingDataViewListImpl();
+    if ((schedulerService != null) && (captureAdminService != null)) {
+      SchedulerFilter filter = schedulerService.getNewSchedulerFilter();
+      filter.setEnd(new Date(System.currentTimeMillis() + CAPTURE_AGENT_DELAY));
+      SchedulerEvent[] events = schedulerService.getEvents(filter);
+      for (SchedulerEvent event : events) {
+        Recording recording = captureAdminService.getRecordingState(event.getID());
+        if ((recording == null)
+                || (recording.getState().equals(RecordingState.CAPTURE_ERROR))
+                || (recording.getState().equals(RecordingState.COMPRESSING_ERROR))
+                || (recording.getState().equals(RecordingState.MANIFEST_ERROR))
+                || (recording.getState().equals(RecordingState.UPLOAD_ERROR))) {
+          RecordingDataViewImpl item = new RecordingDataViewImpl();
+          item.setTitle(event.getTitle());
+          item.setPresenter(event.getCreator());
+          item.setSeriesTitle(event.getSeriesID());
+          item.setStartTime(Long.toString(event.getStartdate().getTime()));
+          item.setEndTime(Long.toString(event.getEnddate().getTime()));
+          if (recording != null) {
+            item.setProcessingStatus(recording.getState());
+          } else {
+            item.setProcessingStatus("unknown error");
+          }
+          out.add(item);
+        }
+      }
+    } else {
+      logger.warn("Either Scheduler or CaptureAdmin service not present, unable to generate list of failed capture jobs");
+    }
     return out;
   }
 
@@ -372,12 +414,6 @@ public class AdminuiRestService {
         item.setPresenter(events[i].getCreator());
         item.setSeriesTitle(events[i].getSeriesID());    // actually it's the series title
         // FIXME Add the series ID too
-        /*
-        if(events[i].getPositionInRecurrence()){
-          item.isRecurringEvent(true);
-        }else{
-          item.isRecurringEvent(false);
-        }*/
         item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
         item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
         item.setCaptureAgent(events[i].getDevice());
@@ -397,24 +433,24 @@ public class AdminuiRestService {
       logger.info("getting capturing recordings from scheduler");
       SchedulerEvent[] events = schedulerService.getCapturingEvents();
       for (int i = 0; i < events.length; i++) {
-        RecordingDataView item = new RecordingDataViewImpl();
-        item.setId(events[i].getID());
-        item.setTitle(events[i].getTitle());
-        item.setPresenter(events[i].getCreator());
-        item.setSeriesTitle(events[i].getSeriesID());    // actually it's the series title
-        // FIXME Add the series ID too
-        item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
-        item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
-        item.setCaptureAgent(events[i].getDevice());
         Recording r = captureAdminService.getRecordingState(events[i].getID());
-        String recordingState = RecordingState.UNKNOWN;
-        if (r != null) {
-          recordingState = r.getState();
+        if ((r != null)
+                & ((r.getState().equals(RecordingState.CAPTURING))
+                || (r.getState().equals(RecordingState.COMPRESSING))
+                || (r.getState().equals(RecordingState.MANIFEST))
+                || (r.getState().equals(RecordingState.UPLOADING)))) {
+          RecordingDataView item = new RecordingDataViewImpl();
+          item.setId(events[i].getID());
+          item.setTitle(events[i].getTitle());
+          item.setPresenter(events[i].getCreator());
+          item.setSeriesTitle(events[i].getSeriesID());    // actually it's the series title
+          // FIXME Add the series ID too
+          item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
+          item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
+          item.setCaptureAgent(events[i].getDevice());
+          item.setProcessingStatus(r.getState());
+          out.add(item);
         }
-        // FIXME show state CAPTURE_ERROR, UPLOAD_ERROR as failed
-        item.setRecordingStatus(recordingState);
-        item.setProcessingStatus(recordingState);
-        out.add(item);
       }
     } else {
       logger.warn("scheduler or capture admin service not present, returning empty list");

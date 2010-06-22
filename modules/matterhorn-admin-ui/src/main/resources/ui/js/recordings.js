@@ -112,7 +112,6 @@ Recordings.displayRecordingStats = function() {
         for (key in data) {
           if (Recordings.currentState == key) {
             if (Recordings.lastCount !== data[key]) {
-              //alert(Recordings.lastCount + " " + data[key])
               Recordings.lastCount = data[key];
               ocPager.update(ocPager.pageSize, ocPager.currentPageIdx);
               Recordings.displayRecordings(Recordings.currentState, true);
