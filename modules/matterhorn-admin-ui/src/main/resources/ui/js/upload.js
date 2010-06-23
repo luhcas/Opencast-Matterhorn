@@ -125,27 +125,28 @@ Upload.initRetry = function(wfId) {
   $('#retry-file').css('display', 'block');
   $('#regular-file-selection').css('display', 'none');
   $('#regular-file-chooser').css('display', 'none');
+  $('#regular-file-chooser-flavor').css('display', 'none');
   // get failed Workflow
   $.ajax({
     method: 'GET',
     url: '../workflow/rest/instance/'+ wfId +'.xml',
     dataType: 'xml',
     success: function(data) {
+      ocIngest.previousMediaPackage = data;
       var catalogUrl = $(data.documentElement).find("mediapackage > metadata > catalog[type='dublincore/episode'] > url").text();
-      Upload.loadDublinCore(catalogUrl + '/dublincore.xml');  // FIXME workaround for MH-3993
+      Upload.loadDublinCore(catalogUrl);
       // previous file
       $(data.documentElement).find("mediapackage > media > track").each(function(index, elm) {
+        var files = new Array();
         if ($(elm).attr('type').split(/\//)[1] == 'source') {
           var filename = $(elm).find('url').text();
-          $('#previous-file-flavor').val($(elm).attr('type'));
-          $('#flavor').val($(elm).attr('type'));
-          $('#previous-file-link').attr('href', filename);
-          $('#track').val(filename);
-          $('#previous-file-url').val(filename);
+          $('#track').val('reingest');
+          //$('#previous-file-url').val(filename);
           filename = filename.split(/\//);
           filename = filename[filename.length-1];
-          $('#previous-file-link').text(filename);
+          files.push(filename);
         }
+        $('#previous-file-list').text(files.join(', '));
       });
       // previous workflow definition
       var defId = $(data.documentElement).find('template').text();
@@ -190,13 +191,6 @@ Upload.loadDublinCore = function(url) {
   });
 }
 
-
-Upload.populateWorkflowConfig = function(data) {
-  $(data).each( function(elm) {
-    alert($(elm).text());
-  });
-}
-
 /** collect data from workflow configuration panel
  *
  */
@@ -216,7 +210,6 @@ Upload.checkRequiredFields = function(submit) {
   var wrongtype = false;
   $('.requiredField:visible, .requiredField[type|=hidden]').each( function() {
     if (!$(this).val()) {
-      //alert($(this).attr(id) + " = " + $(this).value());
       $('#notification-' + $(this).attr('id')).show();
       if ((submit) || ($('#container-missingFields').is(':visible'))) {
         $(this).prev('.fl-label').css('color','red');

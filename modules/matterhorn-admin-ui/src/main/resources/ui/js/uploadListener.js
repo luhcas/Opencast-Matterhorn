@@ -78,7 +78,6 @@ UploadListener.uploadComplete = function() {
   Upload.log("upload complete");
   var uploadFrame = document.getElementById("filechooser-ajax");
   var mp = uploadFrame.contentWindow.document.getElementById("mp").value;
-  //alert(mp);
   ocIngest.addCatalog(mp, ocIngest.createDublinCoreCatalog(ocIngest.metadata));
 }
 

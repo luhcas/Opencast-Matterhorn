@@ -4,6 +4,7 @@ var ocIngest = ocIngest || {};
 ocIngest.debug = true;
 ocIngest.mediaPackage = null;
 ocIngest.metadata = null;
+ocIngest.previousMediaPackage = null;
 
 ocIngest.createMediaPackage = function() {
   Upload.log("creating MediaPackage")
@@ -18,8 +19,13 @@ ocIngest.createMediaPackage = function() {
     success    : function(data, status) {
       Upload.log("MediaPackage created");
       ocIngest.mediaPackage = data;
-      if ( (Upload.retryId != '') && ($('.use-file:checked').val() == 'previous-file') ) {
-        ocIngest.copyPreviousMediaFile();
+      if (Upload.retryId != '') {
+        // add tracks from old mediaPackage to the new one
+        Upload.log("adding files from previous mediaPackge");
+        $(ocIngest.previousMediaPackage.documentElement).find("mediapackage > media > track").each( function(idx, elm) {
+          $(ocIngest.mediaPackage.documentElement).find("mediapackage > media").append(elm);
+        });
+        ocIngest.addCatalog(ocUtils.xmlToString(ocIngest.mediaPackage), ocIngest.createDublinCoreCatalog(ocIngest.metadata));
       } else {
         var uploadFrame = document.getElementById("filechooser-ajax");
         uploadFrame.contentWindow.document.uploadForm.flavor.value = $('#flavor').val();
@@ -31,6 +37,7 @@ ocIngest.createMediaPackage = function() {
   });
 }
 
+/* not needed for now
 ocIngest.copyPreviousMediaFile = function() {
   var flavor = $('#previous-file-flavor').val();
   var url = $('#previous-file-url').val();
@@ -51,7 +58,7 @@ ocIngest.copyPreviousMediaFile = function() {
       ocIngest.addCatalog(ocUtils.xmlToString(ocIngest.mediaPackage), ocIngest.createDublinCoreCatalog(ocIngest.metadata));
     }
   });
-}
+}*/
 
 ocIngest.createDublinCoreCatalog = function(data) {
   var dc = ocUtils.createDoc('dublincore','http://www.opencastproject.org/xsd/1.0/dublincore/');
