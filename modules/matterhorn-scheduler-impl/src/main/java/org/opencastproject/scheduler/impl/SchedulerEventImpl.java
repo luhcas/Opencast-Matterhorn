@@ -430,8 +430,8 @@ public class SchedulerEventImpl implements SchedulerEvent {
     for (String key : metadata.keySet()) {
       metadataList.add(new Metadata(key, metadata.get(key)));
     }
-    metadataList.add(new Metadata("time.start", new Long(getStartdate().getTime()).toString()));
-    metadataList.add(new Metadata("time.end", new Long(getEnddate().getTime()).toString()));
+    metadataList.add(new Metadata("timeStart", new Long(getStartdate().getTime()).toString()));
+    metadataList.add(new Metadata("timeEnd", new Long(getEnddate().getTime()).toString()));
     String attendeeString = new String();
     for (String attendee : attendees) attendeeString += attendee + ",";
     metadataList.add(new Metadata("attendees", attendeeString));

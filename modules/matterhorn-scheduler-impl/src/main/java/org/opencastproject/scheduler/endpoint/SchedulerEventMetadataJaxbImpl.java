@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlType;
  * JaxB implementation of metadata fields in the Scheduler Event 
  *
  */
-@XmlType(name="metadata", namespace="http://scheduler.opencastproject.org")
+@XmlType(name="metadata")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SchedulerEventMetadataJaxbImpl {
   @XmlAttribute(name="key")

@@ -26,7 +26,6 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
@@ -38,8 +37,7 @@ import org.slf4j.LoggerFactory;
  * JaxB implementation of the SchedulerEvent
  *
  */
-@XmlType(name="SchedulerEvent", namespace="http://scheduler.opencastproject.org")
-@XmlRootElement(name="SchedulerEvent", namespace="http://scheduler.opencastproject.org")
+@XmlRootElement(name="schedulerEvent")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SchedulerEventJaxbImpl {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerEventJaxbImpl.class);
@@ -48,9 +46,9 @@ public class SchedulerEventJaxbImpl {
   String id;
   @XmlJavaTypeAdapter(value=HashtableAdapter.class)
   Hashtable<String, String> metadata;
-  @XmlElement(name="startdate")
+  @XmlElement(name="startDate")
   long start;
-  @XmlElement(name="enddate")
+  @XmlElement(name="endDate")
   long end;
   /**
    * Duration can be alternative to enddate. If duration is given enddate will be ignored.

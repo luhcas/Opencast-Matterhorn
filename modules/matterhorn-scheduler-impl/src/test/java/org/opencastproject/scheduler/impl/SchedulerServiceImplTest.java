@@ -194,7 +194,7 @@ public class SchedulerServiceImplTest {
     
     eventModified.getCompleteMetadata().add(new Metadata("stupid.unused.key","no matter what"));
     for (int i = 0; i < eventModified.getCompleteMetadata().size(); i++) {
-      if (eventModified.getCompleteMetadata().get(i).getKey().equals("creator") || eventModified.getCompleteMetadata().get(i).getKey().equals("series-id")) 
+      if (eventModified.getCompleteMetadata().get(i).getKey().equals("creator") || eventModified.getCompleteMetadata().get(i).getKey().equals("seriesId")) 
         eventModified.getCompleteMetadata().remove(i);
     }
     
@@ -369,9 +369,9 @@ public class SchedulerServiceImplTest {
     GregorianCalendar now = new GregorianCalendar();
     GregorianCalendar start = new GregorianCalendar(now.get(GregorianCalendar.YEAR)+1, 1, 1);
     GregorianCalendar end = new GregorianCalendar(now.get(GregorianCalendar.YEAR)+1, 6, 1);
-    recurringEvent.getMetadata().add(new Metadata("recurrence.start", ""+start.getTimeInMillis()));
-    recurringEvent.getMetadata().add(new Metadata("recurrence.end", ""+end.getTimeInMillis()));
-    recurringEvent.getMetadata().add(new Metadata("recurrence.duration", "900000"));
+    recurringEvent.getMetadata().add(new Metadata("recurrenceStart", ""+start.getTimeInMillis()));
+    recurringEvent.getMetadata().add(new Metadata("recurrenceEnd", ""+end.getTimeInMillis()));
+    recurringEvent.getMetadata().add(new Metadata("recurrenceDuration", "900000"));
     recurringEvent.getMetadata().add(new Metadata("title", "recurrence test title"));
     
     RecurringEvent storedEvent = serviceJPA.addRecurringEvent(recurringEvent);
@@ -382,7 +382,7 @@ public class SchedulerServiceImplTest {
     RecurringEvent loadedEvent = serviceJPA.getRecurringEvent(storedEvent.getRecurringEventId());
     
     Assert.assertNotNull(loadedEvent);
-    Assert.assertEquals(storedEvent.getValueAsDate("recurrence.start"), loadedEvent.getValueAsDate("recurrence.start"));
+    Assert.assertEquals(storedEvent.getValueAsDate("recurrenceStart"), loadedEvent.getValueAsDate("recurrenceStart"));
     
     Assert.assertNotNull(loadedEvent.getEvents());
     
@@ -479,9 +479,9 @@ public class SchedulerServiceImplTest {
     for (String pattern : patterns) {
       RecurringEvent recurringEvent = new RecurringEvent();
       recurringEvent.setRecurrence(pattern);
-      recurringEvent.getMetadata().add(new Metadata("recurrence.start", ""+System.currentTimeMillis()));
-      recurringEvent.getMetadata().add(new Metadata("recurrence.end", ""+end.getTimeInMillis()));
-      recurringEvent.getMetadata().add(new Metadata("recurrence.duration", "60000"));
+      recurringEvent.getMetadata().add(new Metadata("recurrenceStart", ""+System.currentTimeMillis()));
+      recurringEvent.getMetadata().add(new Metadata("recurrenceEnd", ""+end.getTimeInMillis()));
+      recurringEvent.getMetadata().add(new Metadata("recurrenceDuration", "60000"));
       recurringEvent.getMetadata().add(new Metadata("title", "recurrence test title"));
       recurringEvent.getMetadata().add(new Metadata("device", "testrecorder"));
       

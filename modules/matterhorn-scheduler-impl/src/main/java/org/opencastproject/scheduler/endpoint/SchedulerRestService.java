@@ -35,11 +35,14 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.json.simple.JSONObject;
+
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -553,6 +556,21 @@ public class SchedulerRestService {
     String result = service.getCalendarForCaptureAgent(captureAgentID);
     if (result == null) return Response.status(Status.BAD_REQUEST).build();
     return Response.ok(result).build();
+  }
+  
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("uuid")
+  public Response getUniqueId() {
+    try {
+      String id = UUID.randomUUID().toString();
+      JSONObject j = new JSONObject();
+      j.put("id", id);
+      return Response.ok(j.toString()).build();
+    } catch (Exception e) {
+      logger.warn("could not create new seriesID");
+      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+    }
   }
   
   /**

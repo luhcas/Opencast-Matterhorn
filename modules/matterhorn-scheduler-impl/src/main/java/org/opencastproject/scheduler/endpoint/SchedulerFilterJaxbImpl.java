@@ -22,7 +22,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.impl.SchedulerFilterImpl;
@@ -34,13 +33,12 @@ import org.slf4j.LoggerFactory;
  *
  */
 
-@XmlType(name="SchedulerFilter", namespace="http://scheduler.opencastproject.org/")
-@XmlRootElement(name="SchedulerFilter", namespace="http://scheduler.opencastproject.org/")
+@XmlRootElement(name="schedulerFilter")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SchedulerFilterJaxbImpl {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerFilterJaxbImpl.class);
   
-  @XmlElement(name="event-id")
+  @XmlElement(name="eventId")
   String eventID;
   @XmlElement(name="device")
   String device;
@@ -50,15 +48,15 @@ public class SchedulerFilterJaxbImpl {
   String creator;
   @XmlElement(name="abstract")
   String abstr;
-  @XmlElement(name="startdate")
+  @XmlElement(name="startDate")
   long start;
-  @XmlElement(name="enddate")
+  @XmlElement(name="endDate")
   long end;
   @XmlElement(name="contributor")
   String contributor;
-  @XmlElement(name="series-id")
+  @XmlElement(name="seriesId")
   String seriesID;
-  @XmlElement(name="channel-id")
+  @XmlElement(name="channelId")
   String channelID;
   @XmlElement(name="location")
   String location;
@@ -66,7 +64,7 @@ public class SchedulerFilterJaxbImpl {
   String attendee;
   @XmlElement(name="resource")
   String resource;
-  @XmlElement(name="order-by")
+  @XmlElement(name="orderBy")
   String orderBy;
   
   /**

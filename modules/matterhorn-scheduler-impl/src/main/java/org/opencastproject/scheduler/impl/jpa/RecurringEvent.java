@@ -53,13 +53,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
 
 @NamedQueries( { @NamedQuery(name = "RecurringEvent.getAll", query = "SELECT e FROM RecurringEvent e") })
-@XmlType(name = "RecurringEvent", namespace = "http://scheduler.opencastproject.org")
-@XmlRootElement(name = "RecurringEvent", namespace = "http://scheduler.opencastproject.org")
+@XmlRootElement(name = "recurringEvent")
 @XmlAccessorType(XmlAccessType.FIELD)
-@Entity(name = "RecurringEvent")
+@Entity
 @Table(name = "SCHED_R_EVENT")
 public class RecurringEvent extends AbstractEvent {
   private static final Logger logger = LoggerFactory.getLogger(RecurringEvent.class);
@@ -67,14 +65,14 @@ public class RecurringEvent extends AbstractEvent {
   @XmlID
   @Id
   @Column(name = "ID", length=128)
-  @XmlElement(name = "RecurringEventId")
+  @XmlElement(name = "recurringEventId")
   protected String rEventId;
 
   @XmlElement(name = "recurrence")
   @Column(name = "RECURRENCE")
   protected String recurrence;
 
-  @XmlElementWrapper(name = "metadata_list")
+  @XmlElementWrapper(name = "metadataList")
   @XmlElement(name = "metadata")
   @OneToMany(fetch = FetchType.EAGER, targetEntity = Metadata.class, cascade = CascadeType.ALL)
   @JoinTable(
@@ -83,7 +81,7 @@ public class RecurringEvent extends AbstractEvent {
           inverseJoinColumns = { @JoinColumn(name = "MD_ID") })
   protected List<Metadata> metadata = new LinkedList<Metadata>();
 
-  @XmlElementWrapper(name = "Events")
+  @XmlElementWrapper(name = "events")
   @XmlElement(name = "event")
   @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
   @JoinTable(
@@ -92,7 +90,7 @@ public class RecurringEvent extends AbstractEvent {
           inverseJoinColumns = { @JoinColumn(name = "EVENT_ID") })
   protected List<Event> generatedEvents = new LinkedList<Event>();
 
-  @XmlElementWrapper(name = "Dates")
+  @XmlElementWrapper(name = "dates")
   @XmlElement(name = "date")
   @Transient
   List<Date> generatedDates;
@@ -208,11 +206,11 @@ public class RecurringEvent extends AbstractEvent {
     try {
       Recur recur = new RRule(recurrence).getRecur();
       logger.debug("Recur: {}", recur);
-      Date start = getValueAsDate("recurrence.start");
+      Date start = getValueAsDate("recurrenceStart");
       logger.debug("Recur start: {}", start);
       if (start == null)
         start = new Date(System.currentTimeMillis());
-      Date end = getValueAsDate("recurrence.end");
+      Date end = getValueAsDate("recurrenceEnd");
       logger.debug("Recur end: {}", end);
       if (end == null) {
         logger.error("No end date specified for recurring event {}. " + rEventId);

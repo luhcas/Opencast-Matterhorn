@@ -50,7 +50,6 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
 
 /**
  * An Event has a unique ID, a relation to the recurring event from which it was created and a set of metadata. Even the
@@ -59,8 +58,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 
 @NamedQueries( { @NamedQuery(name = "Event.getAll", query = "SELECT e FROM Event e") })
-@XmlType(name = "Event", namespace = "http://scheduler.opencastproject.org")
-@XmlRootElement(name = "Event", namespace = "http://scheduler.opencastproject.org")
+@XmlRootElement(name = "event")
 @XmlAccessorType(XmlAccessType.FIELD)
 @Entity
 @Table(name = "SCHED_EVENT")
@@ -93,7 +91,7 @@ public class Event extends AbstractEvent {
 
   // FIXME: Do we really need a join table here? How about a composite key (event id + metadata key) in the metadata
   // table?
-  @XmlElementWrapper(name = "metadata_list")
+  @XmlElementWrapper(name = "metadataList")
   @XmlElement(name = "metadata")
   @OneToMany(fetch = FetchType.EAGER, targetEntity = Metadata.class, cascade = CascadeType.ALL)
   @JoinTable(name = "SCHED_EVENT_METADATA", joinColumns = { @JoinColumn(name = "EVENT_ID") },
@@ -101,7 +99,7 @@ public class Event extends AbstractEvent {
   protected List<Metadata> metadata = new LinkedList<Metadata>();
 
   public String getRecurringEventId() {
-    Metadata m = findMetadata("recurrence.id");
+    Metadata m = findMetadata("recurrenceId");
     if (m == null) {
       logger.debug("recurring event for event {} not found", getEventId());
       return null;
@@ -110,7 +108,7 @@ public class Event extends AbstractEvent {
   }
 
   public void setRecurringEventId(String recurringEventId) {
-    updateMetadata(new Metadata("recurrence.id", recurringEventId));
+    updateMetadata(new Metadata("recurrenceId", recurringEventId));
   }
 
   protected void updateMetadata(Metadata data) {
@@ -128,18 +126,18 @@ public class Event extends AbstractEvent {
   }
 
   public int getPositionInRecurrence() {
-    if (!containsKey("recurrence.position"))
+    if (!containsKey("recurrencePosition"))
       return 0;
     try {
-      return Integer.parseInt(getValue("recurrence.position"));
+      return Integer.parseInt(getValue("recurrencePosition"));
     } catch (NumberFormatException e) {
-      logger.warn("Could not parse value for recurrence position: {}", getValue("recurrence.position"));
+      logger.warn("Could not parse value for recurrence position: {}", getValue("recurrencePosition"));
       return 0;
     }
   }
 
   public void setPositionInRecurrence(int positionInRecurrence) {
-    updateMetadata(new Metadata("recurrence.position", new Integer(positionInRecurrence).toString()));
+    updateMetadata(new Metadata("recurrencePosition", new Integer(positionInRecurrence).toString()));
   }
 
   public String getEventId() {
@@ -168,21 +166,21 @@ public class Event extends AbstractEvent {
       setRecurringEventId(recurringEvent.getRecurringEventId());
   }
 
-  @XmlElementWrapper(name = "complete_metadata")
+  @XmlElementWrapper(name = "completeMetadata")
   @XmlElement(name = "metadata")
   public List<Metadata> getCompleteMetadata() {
     Hashtable<String, Metadata> m = new Hashtable<String, Metadata>();
+    for (Metadata data : getMetadata()) {
+      m.put(data.getKey(), data);
+    }
     if (getRecurringEvent() != null) {
       for (Metadata data : getRecurringEvent().getMetadata()) {
         m.put(data.getKey(), data);
       }
-      m.put("time.start", new Metadata("time.start", "" + getStartdate().getTime()));
-      m.put("time.end", new Metadata("time.end", "" + getEnddate().getTime()));
-      for (Metadata data : getMetadata()) {
-        m.put(data.getKey(), data);
-      }
-    } else
-      return getMetadata();
+      m.put("timeStart", new Metadata("timeStart", "" + getStartdate().getTime()));
+      m.put("timeEnd", new Metadata("timeEnd", "" + getEnddate().getTime()));
+    }
+    m.put("timeDuration", new Metadata("timeDuration", "" + (getEnddate().getTime() - getStartdate().getTime())));
     return new LinkedList<Metadata>(m.values());
   }
 
@@ -280,6 +278,7 @@ public class Event extends AbstractEvent {
   }
 
   public Metadata findMetadata(String key) {
+    logger.debug("Finding metadata: {}", key);
     for (Metadata m : metadata) {
       if (m.getKey().equals(key))
         return m;
@@ -294,7 +293,7 @@ public class Event extends AbstractEvent {
         getMetadata().remove(m);
       }
     }
-
+    logger.debug("Updating stored event with new metadata.");
     // update the list
     for (Metadata data : e.getMetadata()) {
       Metadata found = findMetadata(data.getKey());
@@ -310,8 +309,8 @@ public class Event extends AbstractEvent {
   }
 
   public Date getStartdate() {
-    if (containsKey("time.start")) {
-      return getValueAsDate("time.start");
+    if (containsKey("timeStart")) {
+      return getValueAsDate("timeStart");
     }
     if (getRecurringEventId() != null) {
       return getRecurringEvent().getDateForEventByIndex(getPositionInRecurrence());
@@ -320,16 +319,16 @@ public class Event extends AbstractEvent {
   }
 
   public Date getEnddate() {
-    if (containsKey("time.end")) {
-      return getValueAsDate("time.end");
+    if (containsKey("timeEnd")) {
+      return getValueAsDate("timeEnd");
     }
     if (getRecurringEventId() != null) {
       try {
-        if (!containsKey("recurrence.duration")) {
+        if (!containsKey("recurrenceDuration")) {
           logger.error("No default duration set in recurrent event {}.", getRecurringEventId());
         }
         return new Date(getRecurringEvent().getDateForEventByIndex(getPositionInRecurrence()).getTime()
-                + Long.parseLong(getValue("recurrence.duration")));
+                + Long.parseLong(getValue("recurrenceDuration")));
       } catch (NumberFormatException e) {
         logger.warn("Could not parse recurring event default duration");
         return null;
