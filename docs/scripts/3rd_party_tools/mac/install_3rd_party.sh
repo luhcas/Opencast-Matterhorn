@@ -42,7 +42,7 @@ tesseract_version="2.01"
 tesseract_lang_version="2.00.eng"
 
 # ocropus
-ocropus_revision="r644"
+ocropus_version="0.1.1"
 
 # ---- 3rd party tools properties ----
 
@@ -62,7 +62,7 @@ mediainfo_url="${thirdparty_repository}/MediaInfo_CLI_${mediainfo_version}_GNU_F
 tesseract_url="${thirdparty_repository}/tesseract${tesseract_version}.tar.gz"
 tesseract_lang_url="${thirdparty_repository}/tesseract${tesseract_lang_version}.tar.gz"
 
-ocropus_url="${thirdparty_repository}/ocropus${ocropus_revision}.tar.gz"
+ocropus_url="${thirdparty_repository}/ocropus${ocropus_version}.tar"
 
 ########################################################
 ######## 3rd party tools installation script ###########
@@ -402,10 +402,10 @@ setup_ocropus ()
 	echo
 	mkdir -p ${working_dir}/ocropus
 	cd ${working_dir}/ocropus
-	if ! [ -f ocropus/generate_version_cc.sh ]
+	if ! [ -f ocropus-${ocropus_version}/generate_version_cc.sh ]
 	then
 		curl --remote-name $ocropus_url &&
-		tar zxfv ocropus${ocropus_revision}.tar.gz
+		tar xfv ocropus${ocropus_version}.tar
 		if ! [ $? -eq 0 ]
 		then
 			cd $working_dir
@@ -413,11 +413,11 @@ setup_ocropus ()
 			return 1
 		fi
 	fi
-	cd ocropus
+	cd ocropus-${ocropus_version}
 	export PATH=$PATH:/usr/local/bin
 	if ! [ -f ./ocr-utils/libocrutils.a ]
 	then
-		./configure CPPFLAGS=-I/opt/local/include CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib &&
+		./configure --without-aspell --without-fst CPPFLAGS=-I/opt/local/include CFLAGS=-I/opt/local/include LDFLAGS=-L/opt/local/lib &&
 		jam
 		if ! [ $? -eq 0 ]
 		then

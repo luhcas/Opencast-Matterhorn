@@ -48,7 +48,7 @@ tesseract_version="2.01"
 tesseract_lang_version="2.00.eng"
 
 # ocropus
-ocropus_revision="r644"
+ocropus_version="0.1.1"
 
 # ---- 3rd party tools properties ----
 
@@ -70,7 +70,7 @@ mediainfo_url="${thirdparty_repository}/MediaInfo_CLI_${mediainfo_version}_GNU_F
 tesseract_url="${thirdparty_repository}/tesseract${tesseract_version}.tar.gz"
 tesseract_lang_url="${thirdparty_repository}/tesseract${tesseract_lang_version}.tar.gz"
 
-ocropus_url="${thirdparty_repository}/ocropus${ocropus_revision}.tar.gz"
+ocropus_url="${thirdparty_repository}/ocropus${ocropus_version}.tar"
 
 ##########################################################
 ############ Third party tools building ##################
