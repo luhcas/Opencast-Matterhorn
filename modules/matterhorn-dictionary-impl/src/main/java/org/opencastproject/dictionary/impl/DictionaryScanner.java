@@ -75,7 +75,11 @@ public class DictionaryScanner implements ArtifactInstaller {
       String word = arr[0];
       Integer count = Integer.valueOf(arr[1]);
       Double weight = 1.0 * count / numAllW;
-      dictionaryService.addWord(word, language, count, weight);
+      try {
+        dictionaryService.addWord(word, language, count, weight);
+      } catch(Exception e) {
+        logger.warn("Unable to add word '{}' to the {} dictionary: {}", new String[] {word, language, e.getMessage()} );
+      }
     }
     logger.info("Finished registering dictionary from {}", artifact);
   }
