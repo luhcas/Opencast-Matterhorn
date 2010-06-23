@@ -111,6 +111,8 @@ public class IngestServiceImpl implements IngestService {
     File tempDir = createDirectory(tempPath);
     File f = new File(tempPath + fs + UUID.randomUUID().toString() + ".zip");
     OutputStream out = new FileOutputStream(f);
+    logger.info("Ingesting zipped media package to {}", f);
+    
     IOUtils.copyLarge(zipStream, out);
     out.close();
     zipStream.close();
@@ -362,6 +364,7 @@ public class IngestServiceImpl implements IngestService {
 
   private MediaPackage addContentToMediaPackage(MediaPackage mp, String elementId, URI uri,
           MediaPackageElement.Type type, MediaPackageElementFlavor flavor) throws UnsupportedElementException {
+    logger.info("Adding element of type {} to mediapackage {}", type, mp);
     MediaPackageElement mpe = mp.add(uri, type, flavor);
     mpe.setIdentifier(elementId);
     return mp;
