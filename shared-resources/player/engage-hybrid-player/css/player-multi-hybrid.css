@@ -279,15 +279,15 @@ table
   background-position:      -30px -270px;
   margin:                   0px;
   padding:                  0px;
-  width:                    15px; 
-  height:                   9px;
+  width:                    10px; 
+  height:                   10px;
   position:                 absolute;
   margin-top:               -3px;
 }
 
 #oc_video-cc
 {
-  padding-top:              5px;
+  margin-top:               5px;
   float:                    left;
   width:                    5%;
   text-align:               center;

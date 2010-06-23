@@ -81,23 +81,19 @@
       </div> 
      
       <div id="oc_sound">
-        <ul id="oc_volume-dropdown">
-          <li>
+        <span id="oc_volume-dropdown">
             <input id="oc_btn-volume" class="oc_btn-volume-high" type="submit" name="Unmute: Control + Alt + M" alt="Unmute: Control + Alt + M" title="Unmute: Control + Alt + M" value=""></input>
-            <ul id="oc_volume-menue">
-              <li>
-                <div id="oc_volume-dropdown-div">
-                  <div id="oc_volume-slider">
+        </span>
+        <span id="oc_volume-menue" style="visibility:hidden;">
+            <div id="oc_volume-dropdown-div">
+                <div id="oc_volume-slider">
                     <div id="slider_volume_Rail" class="oc_slider-volume-Rail" title="Volume" alt="Volume">
-                      <label id="volumeLabel" for="slider_volume_Rail" class="oc_offScreen-hidden">Volume</label>
-                      <input id="slider_volume_Thumb" class="oc_slider-volume-Thumb" type="submit" value=""></input>
+                        <label id="volumeLabel" for="slider_volume_Rail" class="oc_offScreen-hidden">Volume</label>
+                        <input id="slider_volume_Thumb" class="oc_slider-volume-Thumb" type="submit" value=""></input>
                     </div>
-                  </div>
                 </div>
-              </li>
-            </ul>
-          </li>
-        </ul>
+            </div>
+        </span>
       </div>
           
       <div id="oc_video-cc">
@@ -105,13 +101,13 @@
       </div>
 
       <div id="oc_video-size-controls" >
-        <ul id="oc_video-size-dropdown">
-          <li>
+        <span id="oc_video-size-dropdown">
             <input id="oc_btn-dropdown" class="oc_btn-centerDisplay" type="submit" name="Video Size Controls" alt="Video Size Controls" title="Video Size Controls" value=""></input>
-            <ul id="oc_video-size-menue"></ul>
-          </li>
-        </ul>
+        </span>
+        <span id="oc_video-size-menue" style="float:right;visibility:hidden;">
       </div>
+    </div>
+    <div id="oc_player_video-dropdown" style="position:absolute; background-color:black;z-index:10000;visibility:hidden;">
     </div>
 
 

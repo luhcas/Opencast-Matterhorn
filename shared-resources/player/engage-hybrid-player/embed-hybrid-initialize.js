@@ -128,25 +128,34 @@ Opencast.Initialize = (function ()
         dropdown_canceltimer();
         dropdown_close();
        
-        if (getDivId() === VOLUME)
-        {
-            ddmenuitem = $('#oc_volume-menue').css('visibility', 'visible');
 
-        }
-        else if (getDivId() === VIDEOSIZE)
+        if (getDivId() === VIDEOSIZE)
         {
-            ddmenuitem = $('#oc_video-size-menue').css('visibility', 'visible');
+            $('#oc_sound').css('width', '0%');
+            $('#oc_video-size-controls').css('width', '25%');
+            $('#oc_video-size-dropdown-div').css('width', '20%')
+            $('#oc_player_video-dropdown').css('left',$('#oc_video-size-dropdown').offset().left-$('#oc_body').offset().left);
+            $('#oc_player_video-dropdown').css('visibility', 'visible');
+            $('#oc_volume-menue').css('visibility', 'hidden');
+            ddmenuitem = $('#oc_player_video-dropdown');
+
         }
         else
         {
-            ddmenuitem = $(this).find('ul').eq(0).css('visibility', 'visible');
+            $('#oc_sound').css('width', '20%');
+            $('#oc_video-size-controls').css('width', '5%');
+            $('#oc_volume-menue').css('visibility', 'visible');
+            $('#oc_player_video-dropdown').css('visibility', 'hidden');
+            ddmenuitem = $('#oc_volume-menue');
+
+
         }
         setDivId('');
     }
     
     /**
         @memberOf Opencast.Initialize
-        @description open the drop down meneue video.
+        @description open the drop down menu video.
      */
     function dropdownVideo_open()
     {
@@ -202,9 +211,13 @@ Opencast.Initialize = (function ()
         });
         
         
-        $('#oc_video-size-dropdown > li').bind('mouseover', dropdown_open);
-        //$('#oc_video-size-dropdown > li').bind('click', dropdown_open);
-        $('#oc_video-size-dropdown > li').bind('mouseout',  dropdown_timer);
+        $('#oc_video-size-controls').bind('mouseover', dropdownVideo_open);
+        $('#oc_player_video-dropdown').bind('mouseover', dropdownVideo_open);
+        $('#oc_video-size-controls').bind('mouseout',  dropdown_timer);
+        $('#oc_player_video-dropdown').bind('mouseout',  dropdown_timer);
+       
+        
+        
         
         // Handler focus
         $('#oc_btn-dropdown').focus(function () 
@@ -219,9 +232,8 @@ Opencast.Initialize = (function ()
             dropdown_timer();
         });
         
-        $('#oc_volume-dropdown > li').bind('mouseover', dropdown_open);
-        //$('#oc_video-size-dropdown > li').bind('click', dropdown_open);
-        $('#oc_volume-dropdown > li').bind('mouseout',  dropdown_timer);
+        $('#oc_sound').bind('mouseover', dropdown_open);
+        $('#oc_sound').bind('mouseout',  dropdown_timer);
 
         // Handler focus
         $('#oc_btn-volume').focus(function () 
@@ -246,7 +258,7 @@ Opencast.Initialize = (function ()
         {
             dropdown_timer();
         });
-     
+        
         // init the aria slider for the volume
         Opencast.ariaSlider.init();
        

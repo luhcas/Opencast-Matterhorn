@@ -100,7 +100,6 @@ input:hover
   background-position:      0px -210px;
   width:                    16px;
   height:                   18px;
-  
 }
 
 .oc_btn-play-clicked
@@ -117,6 +116,7 @@ input:hover
   background-position:      -30px -210px;
   width:                    16px;
   height:                   18px;
+  
 }
 
 .oc_btn-pause
@@ -196,7 +196,6 @@ input:hover
   background-position:      -0px -240px;
   width:                    18px;
   height:                   18px;
-  margin-top:               12px;
 }
 
 .oc_btn-volume-mute
@@ -205,7 +204,6 @@ input:hover
   background-position:      -90px -240px;
   width:                    18px;
   height:                   18px;
-  margin-top:               12px;
 }
 
 .oc_btn-volume-low
@@ -214,7 +212,6 @@ input:hover
   background-position:      -30px -240px;
   width:                    18px;
   height:                   18px;
-  margin-top:               12px;
 }
 
 .oc_btn-volume-none
@@ -223,7 +220,6 @@ input:hover
   background-position:      -90px -240px;
   width:                    18px;
   height:                   18px;
-  margin-top:               12px;
 }
 
 .oc_btn-cc-off
@@ -255,15 +251,15 @@ input:hover
   width:                    48px;
   text-align:               center;
   margin-right:             5px;
-  margin-top:               12px;
+  /*margin-top:               4px;*/
 }
 
 .oc_btn-singleDisplay
 {
   background:               transparent url("../img/oc_icons.png");
-  background-position:      -180px -330px;
-  width:                    44px;
-  height:                   18px;
+  background-position:      -200px -330px;
+  width:                    25px;
+  /*height:                   18px;*/
   margin-right:             5px;
   margin-left:              5px;
 }
@@ -273,7 +269,7 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -120px -330px;
   width:                    44px;
-  height:                   18px;
+  /*height:                   18px;*/
   margin-right:             5px;
   margin-left:              5px;
 }
@@ -283,7 +279,7 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -0px -330px;
   width:                    44px;
-  height:                   18px;
+  /*height:                   18px;*/
   margin-right:             5px;
   margin-left:              5px;
 }
@@ -291,9 +287,9 @@ input:hover
 .oc_btn-bigRightDisplay
 {
   background:               transparent url("../img/oc_icons.png");
-  background-position:      -60px -330px;
+  background-position:      -64px -330px;
   width:                    40px;
-  height:                   36px;
+  /*height:                   36px;*/
   margin-right:             5px;
   margin-left:              5px;
 }
@@ -303,7 +299,7 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      0px -240px;
   width:                    18px;
-  height:                   16px;
+  /*height:                   16px;*/
   margin-right:             5px;
   margin-left:              5px; 
 }
