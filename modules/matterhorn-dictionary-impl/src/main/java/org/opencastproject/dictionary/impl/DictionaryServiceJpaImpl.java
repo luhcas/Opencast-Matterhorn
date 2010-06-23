@@ -254,7 +254,7 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
   protected Word[] getWords(String text) {
     EntityManager em = emf.createEntityManager();
     try {
-      Query query = em.createQuery("SELECT w FROM Word w where r.text = :text");
+      Query query = em.createQuery("SELECT w FROM Word w where w.text = :text");
       query.setParameter("text", text);
       return (Word[]) query.getResultList().toArray(new Word[0]);
     } finally {
