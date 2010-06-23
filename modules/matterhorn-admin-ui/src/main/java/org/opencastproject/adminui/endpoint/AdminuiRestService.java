@@ -319,8 +319,8 @@ public class AdminuiRestService {
             }
             break;
           case STOPPED:
-            inactive++;
-            total++;
+            //inactive++;
+            //total++;
             break;
           case SUCCEEDED:
             finished++;

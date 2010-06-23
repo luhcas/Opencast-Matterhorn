@@ -126,6 +126,7 @@ Upload.initRetry = function(wfId) {
   $('#regular-file-selection').css('display', 'none');
   $('#regular-file-chooser').css('display', 'none');
   $('#regular-file-chooser-flavor').css('display', 'none');
+  $('#track').val('reingest');
   // get failed Workflow
   $.ajax({
     method: 'GET',
@@ -136,18 +137,20 @@ Upload.initRetry = function(wfId) {
       var catalogUrl = $(data.documentElement).find("mediapackage > metadata > catalog[type='dublincore/episode'] > url").text();
       Upload.loadDublinCore(catalogUrl);
       // previous file
+      var files = new Array();
       $(data.documentElement).find("mediapackage > media > track").each(function(index, elm) {
-        var files = new Array();
-        if ($(elm).attr('type').split(/\//)[1] == 'source') {
+        var type = $(elm).attr('type');
+        if (type.split(/\//)[1] == 'source') {
           var filename = $(elm).find('url').text();
-          $('#track').val('reingest');
+          var fileItem = {url: filename, flavor: type};
+          ocIngest.previousFiles.push(fileItem);
           //$('#previous-file-url').val(filename);
           filename = filename.split(/\//);
           filename = filename[filename.length-1];
           files.push(filename);
         }
-        $('#previous-file-list').text(files.join(', '));
       });
+      $('#previous-file-list').text(files.join(', '));
       // previous workflow definition
       var defId = $(data.documentElement).find('template').text();
       $('#workflow-selector').val(defId);
