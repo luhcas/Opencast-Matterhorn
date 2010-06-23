@@ -16,6 +16,7 @@
 package org.opencastproject.capture.api;
 
 import java.net.URL;
+import java.util.List;
 
 /**
  * Interface to OSGi service for fetching capture schedules and starting captures (MH-1052).
@@ -74,4 +75,10 @@ public interface Scheduler {
    * Stops the scheduling system.  Calling this disables scheduled captures.
    */
   void stopScheduler();
+
+  /**
+   * Returns the current schedule in a {@code List} of {@code ScheduledEvent}s.
+   * @return The current schedule in a {@code List} of {@code ScheduledEvent}s or null in the case of an error.
+   */
+  List<ScheduledEvent> getSchedule();
 }

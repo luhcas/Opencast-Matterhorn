@@ -81,6 +81,7 @@ public class ConfigurationManager implements ManagedService {
       logger.debug("Null properties in updated!");
       return;
     }
+    logger.debug("Merging new properties into in-memory structure.");
     properties.merge(props);
 
     // Attempt to parse the location of the configuration server

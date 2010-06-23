@@ -16,6 +16,8 @@
 package org.opencastproject.capture.endpoint;
 
 import org.opencastproject.capture.api.CaptureAgent;
+import org.opencastproject.capture.api.ScheduledEvent;
+import org.opencastproject.capture.api.ScheduledEventImpl;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -29,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.LinkedList;
 import java.util.Properties;
 
 import javax.ws.rs.FormParam;
@@ -38,6 +41,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.bind.JAXBException;
 
 /**
  * The REST endpoint for the capture agent service on the capture device
@@ -47,8 +51,19 @@ public class CaptureRestService {
   private static final Logger logger = LoggerFactory.getLogger(CaptureRestService.class);
   private CaptureAgent service;
   protected String docs = null;
+/*  protected JAXBContext context = null;
 
-
+  public CaptureRestService() {
+    try {
+      if (context == null) {
+        context = JAXBContext.newInstance(ScheduledEventImpl.class, LinkedList.class);
+      }
+    } catch (JAXBException e) {
+      logger.error("Unable to create JAXBContext, /schedule endpoint will not be functional!");
+      e.printStackTrace();
+    }
+  }
+*/
   protected String generateDocs() {
     DocRestData data = new DocRestData("CaptureAgent", "Capture Agent", "/capture/rest", null);
     //// startCapture signatures
@@ -108,10 +123,18 @@ public class CaptureRestService {
 
     //// configuration()
     RestEndpoint configEndpoint = new RestEndpoint("config", RestEndpoint.Method.GET, "/configuration", "Returns a list with the default agent configuration properties");
-    configEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("the configuration values are returned"));
+    configEndpoint.addStatus(org.opencastproject.util.
+            doc.Status.OK("the configuration values are returned"));
     configEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("the configuration properties could not be retrieved"));
     configEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, configEndpoint);
+
+    //// configuration()
+    RestEndpoint scheduleEndpoint = new RestEndpoint("schedule", RestEndpoint.Method.GET, "/schedule", "Returns an XML formatted list of the capture agent's current schedule");
+    scheduleEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("the agent's schedule is returned"));
+    scheduleEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("the agent's schedule could not be retrieved"));
+    scheduleEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, scheduleEndpoint);
 
     return DocUtil.generate(data);
   }  
@@ -227,6 +250,10 @@ public class CaptureRestService {
   @Produces(MediaType.TEXT_PLAIN)
   @Path("configuration")
   public Response getConfiguration() {
+    if (service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity("Capture Agent is unavailable, please wait...").build();
+    }
+
     try {
       return Response.ok(service.getDefaultAgentPropertiesAsString()).build();
     } catch (Exception e) {
@@ -234,4 +261,15 @@ public class CaptureRestService {
     }
   }
 
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("schedule")
+  public LinkedList<ScheduledEventImpl> getSchedule() throws JAXBException {
+    //FIXME:  This is incredibly lame, but JAXB breaks without this extra copy+cast
+    LinkedList<ScheduledEventImpl> list = new LinkedList<ScheduledEventImpl>();
+    for (ScheduledEvent event : service.getAgentSchedule()) {
+      list.add((ScheduledEventImpl) event);
+    }
+    return list;
+  }
 }

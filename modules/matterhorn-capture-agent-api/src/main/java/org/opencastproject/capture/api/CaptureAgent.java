@@ -17,6 +17,7 @@ package org.opencastproject.capture.api;
 
 import org.opencastproject.mediapackage.MediaPackage;
 
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -100,9 +101,15 @@ public interface CaptureAgent {
   Properties getAgentCapabilities();
   
   /**
-   * Returns a pretty-printed version of the agents default properties
+   * Returns a pretty-printed version of the agent's default properties.
    * @return The agent's default properties
    */
   String getDefaultAgentPropertiesAsString();
+
+  /**
+   * Returns the current schedule in a {@code List} of {@code ScheduledEvent}s.
+   * @return The current schedule in a {@code List} of {@code ScheduledEvent}s or null in the case of an error.
+   */
+  List<ScheduledEvent> getAgentSchedule();
 }
 

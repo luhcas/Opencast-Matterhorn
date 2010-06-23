@@ -91,8 +91,11 @@ public interface CaptureParameters {
   /** A directory which contains a capture */
   String RECORDING_ROOT_URL = "capture.recording.root.url";
 
-  /** Duration to specify for the capture client */
+  /** Time at which to stop the capture */
   String RECORDING_END = "capture.recording.end";
+
+  /** The duration of the recording in seconds */
+  String RECORDING_DURATION = "capture.recording.duration";
 
   /**
    * Settings which control the ingest jobs

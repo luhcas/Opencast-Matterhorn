@@ -22,6 +22,7 @@ import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.ConfidenceMonitor;
+import org.opencastproject.capture.api.ScheduledEvent;
 import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.jobs.AgentCapabilitiesJob;
 import org.opencastproject.capture.impl.jobs.AgentStateJob;
@@ -882,6 +883,19 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
     
     return result.toString();
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.CaptureAgent#getAgentSchedule()
+   */
+  public List<ScheduledEvent> getAgentSchedule() {
+    if (scheduler != null) {
+      return scheduler.getSchedule();
+    } else {
+      logger.info("Scheduler is null, so the agent cannot have a current schedule.");
+    }
+    return null;
   }
 
   /**

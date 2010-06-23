@@ -16,6 +16,8 @@
 package org.opencastproject.capture.impl;
 
 import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.api.ScheduledEvent;
+import org.opencastproject.capture.api.ScheduledEventImpl;
 import org.opencastproject.capture.impl.jobs.CleanCaptureJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.impl.jobs.PollCalendarJob;
@@ -54,6 +56,7 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SchedulerFactory;
 import org.quartz.SimpleTrigger;
+import org.quartz.Trigger;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +75,8 @@ import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Properties;
@@ -106,19 +111,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   /** The capture agent this scheduler is scheduling for */
   private CaptureAgentImpl captureAgent = null;
 
-  /** The maximum duration to schedule something for */
-  private Dur maxDuration = null;
-
   /** The trusted HttpClient used to talk to the core */
   private TrustedHttpClient trustedClient = null;
 
   public void setConfigService(ConfigurationManager svc) {
     configService = svc;
-    int length = Integer.parseInt(svc.getItem(CaptureParameters.CAPTURE_MAX_LENGTH)) * 1000;
-    maxDuration = new Dur(
-            new Date(System.currentTimeMillis()),
-            new Date(System.currentTimeMillis() + length)
-            );
   }
 
   public void unsetConfigService() {
@@ -411,6 +408,29 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.Scheduler#getSchedule()
+   */
+  public List<ScheduledEvent> getSchedule() {
+    List<ScheduledEvent> events = new LinkedList<ScheduledEvent>();
+    String[] jobnames = getCaptureSchedule();
+    if (jobnames != null) {
+      for (String jobname : jobnames) {
+        try {
+          JobDetail job = scheduler.getJobDetail(jobname, JobParameters.CAPTURE_TYPE);
+          Trigger[] triggers = scheduler.getTriggersOfJob(jobname, JobParameters.CAPTURE_TYPE);
+          for (Trigger t : triggers) {
+            events.add(new ScheduledEventImpl(job.getName(), t.getStartTime().getTime(), (Long) job.getJobDataMap().get(CaptureParameters.RECORDING_DURATION)));
+          }
+        } catch (SchedulerException e) {
+          log.warn("Scheduler exception while generating capture schedule: {}.", e.getMessage());
+        }
+      }
+    }
+    return events;
+  }
+
+  /**
    * Prints out the current schedules for both schedules.
    * @throws SchedulerException
    */
@@ -457,6 +477,18 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         scheduler.deleteJob(name, JobParameters.CAPTURE_TYPE);
       }
 
+      Dur maxDuration = null;
+      //Get the maximum duration from the config service
+      try {
+        int length = Integer.parseInt(configService.getItem(CaptureParameters.CAPTURE_MAX_LENGTH)) * 1000;
+        maxDuration = new Dur(
+                new Date(System.currentTimeMillis()),
+                new Date(System.currentTimeMillis() + length)
+                );
+      } catch (NumberFormatException ex) {
+        log.error("NumberFormatException:  Unable to set maximum duration because value set incorrectly");
+      }
+
       Map<String, String> scheduledEvents = new Hashtable<String, String>();
       ComponentList list = newCal.getComponents(Component.VEVENT);
       for (Object item : list) {
@@ -485,7 +517,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         if (event.getEndDate() != null) {
           end = event.getEndDate().getDate();
         } else {
-          log.debug("Event {} has no end time...", uid);
+          log.debug("Event {} has no end time specified but may have a duration, checking...", uid);
         }
 
         //Determine the duration
@@ -493,11 +525,16 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         Duration duration = event.getDuration();
         if (duration == null) {
           if (end != null) {
+            log.debug("Event {} has start and end, calculating duration.", uid);
             duration = new Duration(start, end);
           } else {
             log.warn("Event {} has no duration and no end time, skipping.", uid);
             continue;
           }
+        } else if (end == null) {
+          log.debug("Event {} has start and duration, calculating end time.", uid);
+          //In this case we have a start and a duration, so calculate the stop end value
+          end = duration.getDuration().getTime(start);
         }
 
         //Sanity checks on the duration
@@ -540,6 +577,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         props.put(JobParameters.JOB_POSTFIX, uid);
         String endCronString = getCronString(duration.getDuration().getTime(start)).toString();
         props.put(CaptureParameters.RECORDING_END, endCronString);
+        job.getJobDataMap().put(CaptureParameters.RECORDING_DURATION, end.getTime() - start.getTime());
 
         if (!setupEvent(event, props, job)) {
           log.warn("No capture properties file attached to scheduled capture {}, using default capture settings.", uid);
