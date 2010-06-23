@@ -204,6 +204,7 @@ Button.ccOff
     trackSkin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_scrubber');
     track-highlight-skin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_scrubber_highlight');
     showTrackHighlight:true;
+    themeColor: #f8554e;
 }
 
 .HSliderProgress

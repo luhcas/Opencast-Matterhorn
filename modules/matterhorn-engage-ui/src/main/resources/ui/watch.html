@@ -127,64 +127,52 @@
     <div id="data"></div>
 
 
-      <div class="clear"></div>
+    <div class="clear"></div>
       
-      <div id="oc_tabs" class="oc_tabs-input">
-        <input id="oc_btn-description" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleDescription()" name="Description" value="Description" alt="Description" title="Description"></input>
-        <input id="oc_btn-slides" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Hide Slides" value="Hide Slides" alt="Hide Slides" title="Hide Slides"></input>
-        <input id="oc_btn-slidetext" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlideText()" name="Slide Text" value="Slide Text" alt="Slide Text" title="Slide Text"></input>
-        <input id="oc_btn-shortcuts" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleShortcuts()" name="Shortcuts" value="Shortcuts" alt="Shortcuts" title="Shortcuts"></input>
-        <input id="oc_btn-embed" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleEmbed()" name="Embed" value="Embed" alt="Embed" title="Embed"></input>
-      </div>
+    <div id="oc_tabs" class="oc_tabs-input">
+      <input id="oc_btn-description" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleDescription()" name="Description" value="Description" alt="Description" title="Description"></input>
+      <input id="oc_btn-slides" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Hide Slides" value="Hide Slides" alt="Hide Slides" title="Hide Slides"></input>
+      <input id="oc_btn-slidetext" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlideText()" name="Slide Text" value="Slide Text" alt="Slide Text" title="Slide Text"></input>
+      <input id="oc_btn-shortcuts" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleShortcuts()" name="Shortcuts" value="Shortcuts" alt="Shortcuts" title="Shortcuts"></input>
+      <input id="oc_btn-embed" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleEmbed()" name="Embed" value="Embed" alt="Embed" title="Embed"></input>
+    </div>
       
-      <div id="oc_description" class="oc_DisplayNone fl-fix">
-        <h4>Description</h4>
-      </div>
-
-      <div id="oc_slides" class="oc_DisplayBlock">
-        <div id="segments-holder" class="oc-segments-holder">
-          <div id="oc_segment-table" class="oc-segments">
-          </div>
-        </div>
-      </div>
-
-      <div id="oc_slidetext" class="oc_DisplayNone fl-fix">
-
-        <div id="oc_slidetext-left" style="float:left; width: 75%;">
-            Slide Text
-        </div>
-
-
-        <div id="oc_slidetext-right" style="float:right;">
-            <input id="oc_lecturer-search-field" class="oc_search-Field" type="text" onkeyup="Opencast.search.showResult(this.value)" size="30" value="Search this Recording"></input>
-        </div>
-
-      </div>
-      <div id=oc_shortcuts class="oc_DisplayNone fl-fix" >
-            <span id="skip">
-                <a name="shortcuts"></a>
-            </span>
-            <h4>Player-Shortcuts</h4>
-            <div id="oc_client_shortcuts">
-        </div>
-      </div>
-      <div id="oc_embed" class="oc_DisplayNone fl-fix">
-        <input id="oc_embed-720x545" class="oc_embed-720x545" type="submit" name="720 x 545" alt="720 x 545" title="720 x 545" value="720x545" onclick="Opencast.Player.embedIFrame(720,545);"> </input>
-        <input id="oc_embed-640x500" class="oc_embed-640x500" type="submit" name="640 x 500" alt="640 x 500" title="640 x 500" value="640x500" onclick="Opencast.Player.embedIFrame(640,500);"> </input>
-        <input id="oc_embed-560x455" class="oc_embed-560x455" type="submit" name="560 x 455" alt="560 x 455" title="560 x 455" value="560x455" onclick="Opencast.Player.embedIFrame(560,455);"> </input>
-        <input id="oc_embed-480x410" class="oc_embed-480x410" type="submit" name="480 x 410" alt="480 x 410" title="480 x 410" value="480x410" onclick="Opencast.Player.embedIFrame(480,410);"> </input>
-        <div class="clear"></div>
-        Choose your embed size. Copy the text and paste it in your html page. 
-        <textarea id="oc_embed-textarea" class="oc_embed-textarea" rows="2" cols="1"></textarea>
-      </div>
-        <div >
-      
+    <div id="oc_description" class="oc_DisplayNone fl-fix">
+      <h4>Description</h4>
     </div>
 
-    <div>
- 
+    <div id="oc_slides" class="oc_DisplayBlock">
+      <div id="segments-holder" class="oc-segments-holder">
+        <div id="oc_segment-table" class="oc-segments">
+        </div>
+      </div>
+    </div>
     
+    <div id="oc_slidetext" class="oc_DisplayNone fl-fix">
+      <div id="oc_slidetext-left" class="oc_slidetext-left"></div>
+      <div id="oc_slidetext-right" class="oc_slidetext-right">
+        <input id="oc_lecturer-search-field" class="oc_search-Field" type="text" onkeyup="Opencast.search.showResult(this.value)" size="30" value="Search this Recording"></input>
+      </div>
     </div>
+    
+    <div id=oc_shortcuts class="oc_DisplayNone fl-fix" >
+      <span id="skip">
+        <a name="shortcuts"></a>
+      </span>
+      <h4>Player-Shortcuts</h4>
+      <div id="oc_client_shortcuts"></div>
+    </div>
+    
+    <div id="oc_embed" class="oc_DisplayNone fl-fix">
+      <input id="oc_embed-720x545" class="oc_embed-720x545" type="submit" name="720 x 545" alt="720 x 545" title="720 x 545" value="720x545" onclick="Opencast.Player.embedIFrame(720,545);"> </input>
+      <input id="oc_embed-640x500" class="oc_embed-640x500" type="submit" name="640 x 500" alt="640 x 500" title="640 x 500" value="640x500" onclick="Opencast.Player.embedIFrame(640,500);"> </input>
+      <input id="oc_embed-560x455" class="oc_embed-560x455" type="submit" name="560 x 455" alt="560 x 455" title="560 x 455" value="560x455" onclick="Opencast.Player.embedIFrame(560,455);"> </input>
+      <input id="oc_embed-480x410" class="oc_embed-480x410" type="submit" name="480 x 410" alt="480 x 410" title="480 x 410" value="480x410" onclick="Opencast.Player.embedIFrame(480,410);"> </input>
+      <div class="clear"></div>
+      Choose your embed size. Copy the text and paste it in your html page. 
+      <textarea id="oc_embed-textarea" class="oc_embed-textarea" rows="2" cols="1"></textarea>
+    </div>
+    
   </body>
   
 </html>

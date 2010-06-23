@@ -117,7 +117,9 @@ Opencast.Watch = (function ()
 
           var coverUrl = $('#oc-cover-engage').html();
           if(coverUrl === null)
+          {	  
             coverUrl = $('#oc-cover-feed').html();
+          }
           coverUrl = coverUrl === null ? '' : coverUrl;
           
           

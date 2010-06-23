@@ -58,10 +58,12 @@ Opencast.Player = (function () {
     currentPlayPauseState  = PAUSING,
     backupPlayPauseState   = '',
     currentVideoSize       = '',
+    currentTimeString      = '',
     showSections           = true,
     mouseOverBool          = false,
     captionsBool           = false,
     dragging               = false,
+    htmlBool               = true,
     duration               = 0,
     mediaWith              = 0,
     mediaHeight            = 0,
@@ -70,7 +72,8 @@ Opencast.Player = (function () {
     FLASH_PLAYERSTATE      = "",
     FLASH_VIEWSTATE        = "",
     FLASH_MUTE             = "",
-    intval                 = "",
+    intvalRewind           = "",
+    intvalFastForward      = "",
     displayMode            = "",
     optionClassName        = "",
     seekState              = PAUSING;
@@ -214,6 +217,28 @@ Opencast.Player = (function () {
     function setDragging(bool)
     {
         dragging = bool;
+    }
+    
+
+    /**
+        @memberOf Opencast.Player
+        @description Get the htmlBool.
+     */
+    function getHtmlBool()
+    {
+    	return htmlBool;
+    }
+    
+    
+
+    /**
+        @memberOf Opencast.Player
+        @description Set the htmlBool.
+        @param Booelan bool
+     */
+    function setHtmlBool(bool)
+    {
+    	htmlBool = bool;
     }
     
     /**
@@ -374,7 +399,7 @@ Opencast.Player = (function () {
      */
     function showNotes()
     {
-        $("#oc_notes").attr("className", "oc_DisplayBlockTableLeft");
+        $("#oc_notes").attr("className", "oc_DisplayBlock");
         $("#oc_btn-notes").attr({ 
             alt: NOTESHIDE,
             title: NOTESHIDE,
@@ -404,7 +429,7 @@ Opencast.Player = (function () {
      */
     function showSlideText()
     {
-        $("#oc_slidetext").attr("className", "oc_DisplayBlockTableRight");
+        $("#oc_slidetext").attr("className", "oc_DisplayBlock-textleft");
         $("#oc_btn-slidetext").attr({ 
             alt: SLIDETEXTHIDE,
             title: SLIDETEXTHIDE,
@@ -434,7 +459,7 @@ Opencast.Player = (function () {
      */
     function showTranscript()
     {
-        $("#oc_transcript").attr("className", "oc_DisplayBlockTableRight");
+        $("#oc_transcript").attr("className", "oc_DisplayBlock-textleft");
         $("#oc_btn-transcript").attr({ 
             alt: TRANSCRIPTHIDE,
             title: TRANSCRIPTHIDE,
@@ -464,7 +489,7 @@ Opencast.Player = (function () {
      */
     function showShortcuts()
     {
-        $("#oc_shortcuts").attr("className", "oc_DisplayBlockTableLeft");
+        $("#oc_shortcuts").attr("className", "oc_DisplayBlock-textleft");
         $("#oc_btn-shortcuts").attr({ 
             alt: SHORTCUTSHIDE,
             title: SHORTCUTSHIDE,
@@ -525,7 +550,7 @@ Opencast.Player = (function () {
      */
     function showBookmarks()
     {
-        $("#oc_bookmarks").attr("className", "oc_DisplayBlock");
+        $("#oc_bookmarks").attr("className", "oc_DisplayBlock-textleft");
         $("#oc_btn-bookmarks").attr({ 
             alt: BOOKMARKSHIDE,
             title: BOOKMARKSHIDE,
@@ -558,7 +583,7 @@ Opencast.Player = (function () {
      */
     function showDescription()
     {
-        $("#oc_description").attr("className", "oc_DisplayBlockTableLeft");
+        $("#oc_description").attr("className", "oc_DisplayBlock-textleft");
         $("#oc_btn-description").attr({ 
             alt: DESCRIPTIONHIDE,
             title: DESCRIPTIONHIDE,
@@ -833,9 +858,14 @@ Opencast.Player = (function () {
      */
     function setMediaURL(coverURL, mediaURLOne, mediaURLTwo)
     {
-        if (mediaURLOne[0] === 'h' || mediaURLOne[0] === 'H' && mediaURLOne[2] === 't' || mediaURLOne[2] === 'T')
+        if (mediaURLOne[0] === 'h' || mediaURLOne[0] === 'H' && mediaURLOne[2] === 't' || mediaURLOne[2] === 'T' || mediaURLTwo[0] === 'h' || mediaURLTwo[0] === 'H' && mediaURLTwo[2] === 't' || mediaURLTwo[2] === 'T')
         {
             $("#oc-background-progress").attr('className', 'matterhorn-progress-bar-background');
+            setHtmlBool(true);
+        }
+        else
+        {
+        	setHtmlBool(false);
         }
         Videodisplay.setMediaURL(coverURL, mediaURLOne, mediaURLTwo);
     }
@@ -861,7 +891,8 @@ Opencast.Player = (function () {
      */
     function doSkipBackward() 
     {
-        Videodisplay.skipBackward();
+    	 var sec = Opencast.segments.getSecondsBeforeSlide();
+         Opencast.Watch.seekSegment(sec);
     }
     
     /**
@@ -870,11 +901,11 @@ Opencast.Player = (function () {
      */
     function doRewind()  
     {
-        if (intval === "")
+        if (intvalRewind === "")
         {
             setSeekState(getCurrentPlayPauseState());
             Videodisplay.rewind();
-            intval = window.setInterval("Videodisplay.rewind()", 1000);
+            intvalRewind = window.setInterval("Videodisplay.rewind()", 1000);
         }
     }
     
@@ -893,14 +924,10 @@ Opencast.Player = (function () {
      */
     function stopRewind()
     {
-        if (intval !== "")
+        if (intvalRewind !== "")
         {
-            window.clearInterval(intval);
-            intval = "";
-        }
-        if (getSeekState() === PLAYING)
-        {
-            doPlay();
+            window.clearInterval(intvalRewind);
+            intvalRewind = "";
         }
     }
     
@@ -921,11 +948,11 @@ Opencast.Player = (function () {
      */
     function doFastForward() 
     {
-        if (intval === "")
+        if (intvalFastForward === "")
         {
             setSeekState(getCurrentPlayPauseState());
             Videodisplay.fastForward();
-            intval = window.setInterval("Videodisplay.fastForward()", 1000);
+            intvalFastForward = window.setInterval("Videodisplay.fastForward()", 1000);
         }
     }
     
@@ -935,14 +962,10 @@ Opencast.Player = (function () {
      */
     function stopFastForward() 
     {
-        if (intval !== "")
+        if (intvalFastForward !== "")
         {
-            window.clearInterval(intval);
-            intval = "";
-        }
-        if (getSeekState() === PLAYING)
-        {
-            doPlay();
+            window.clearInterval(intvalFastForward);
+            intvalFastForward = "";
         }
     }  
     
@@ -952,7 +975,8 @@ Opencast.Player = (function () {
      */
     function doSkipForward()  
     {
-        Videodisplay.skipForward();
+    	var sec = Opencast.segments.getSecondsNextSlide();
+        Opencast.Watch.seekSegment(sec);
     }
 
     /**
@@ -1233,9 +1257,23 @@ Opencast.Player = (function () {
      */
     function setCurrentTime(text) 
     {
-        $("#oc_current-time").attr("value", text);
-        $("#oc_edit-time").attr("value", text);
-        $("#slider_seek_Rail").attr("title", "Time " + text);
+        if ( getDragging() == false )
+        {
+    	    $("#oc_current-time").attr("value", text);
+            $("#oc_edit-time").attr("value", text);
+            $("#slider_seek_Rail").attr("title", "Time " + text);
+        }
+        currentTimeString = text;
+    }
+    
+
+    /**
+        @memberOf Opencast.Player
+        @description Get the current time of the video.
+     */
+    function getCurrentTime() 
+    {
+        return currentTimeString;
     }
 
     /**
@@ -1610,8 +1648,10 @@ Opencast.Player = (function () {
         videoSizeControlMultiDisplay : videoSizeControlMultiDisplay,
         getCurrentVideoSize : getCurrentVideoSize,
         getViewState : getViewState,
+        getHtmlBool : getHtmlBool,
         setPlayPauseState : setPlayPauseState,
         setCurrentTime : setCurrentTime,
+        getCurrentTime : getCurrentTime,
         setTotalTime : setTotalTime,
         setMediaPackageId : setMediaPackageId,
         setSessionId : setSessionId,

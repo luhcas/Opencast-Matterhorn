@@ -183,7 +183,6 @@ table
 
 #oc_volume-dropdown
 {
-   
   margin:                   0;
   padding:                  0;
   float:                    left;
@@ -382,7 +381,6 @@ table
   margin-left:              30px;
 }
 
-
 #oc_bookmarkSelect
 {
   width:                    100%;
@@ -390,7 +388,6 @@ table
   background-color:         transparent;
   margin-top:               5px;
 }
-
 
 option
 {
@@ -522,7 +519,7 @@ option:hover
   margin-bottom:            5px;
 }
 
-.oc_DisplayBlockTableLeft
+.oc_DisplayBlock-textleft
 {
   display:                  block;
   text-align:               left;
@@ -530,17 +527,7 @@ option:hover
   overflow:                 auto; 
   border:                   1px solid #000000;
   background-color:         #E3E3D7;
-  margin-right:             5px;
-}
-
-.oc_DisplayBlockTableRight
-{
-  display:                  block;
-  text-align:               left;
-  padding:                  5px;
-  overflow:                 auto; 
-  border:                   1px solid #000000;
-  background-color:         #E3E3D7;
+  margin-bottom:            5px;
 }
 
 .oc_embed-textarea
@@ -548,6 +535,17 @@ option:hover
   width:                    95%;
   overflow:                 auto;
   margin-top:               5px;
+}
+
+.oc_slidetext-left
+{
+  float:                    left; 
+  width:                    75%;
+}
+
+.oc_slidetext-right
+{  
+  float:                    right
 }
 
 .oc_DisplayNone

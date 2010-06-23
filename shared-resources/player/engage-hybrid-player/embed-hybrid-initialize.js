@@ -27,6 +27,7 @@ Opencast.Initialize = (function ()
     VIDEOSIZEAUDIO         = "videoSizeAudio",
     clickMatterhornSearchField = false,
     clickLecturerSearchField = false,
+    locked = false,
     formatOne = 0,
     formatTwo = 0,
     formatSingle = 0,
@@ -384,8 +385,16 @@ Opencast.Initialize = (function ()
         });
         $('#oc_btn-rewind').mousedown(function ()
         {
-            this.className = 'oc_btn-rewind-clicked';
-            Opencast.Player.doRewind();
+        	this.className = 'oc_btn-rewind-clicked';
+            if (!locked)
+            {
+                locked = true;
+                setTimeout(function()
+                { 
+                    locked = false;
+                }, 400);
+                Opencast.Player.doRewind();
+            }
         });
         
         $('#oc_btn-play-pause').mousedown(function () 
@@ -394,8 +403,16 @@ Opencast.Initialize = (function ()
         });
         $('#oc_btn-fast-forward').mousedown(function () 
         {
-            this.className = 'oc_btn-fast-forward-clicked';
-            Opencast.Player.doFastForward();
+        	this.className = 'oc_btn-fast-forward-clicked';
+            if (!locked)
+            {
+                locked = true;
+                setTimeout(function()
+                { 
+                    locked = false;
+                }, 400);
+                Opencast.Player.doFastForward();
+            }
             
         });
         $('#oc_btn-skip-forward').mousedown(function () 
