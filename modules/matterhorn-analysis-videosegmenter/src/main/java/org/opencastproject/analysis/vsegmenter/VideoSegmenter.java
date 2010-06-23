@@ -49,6 +49,8 @@ import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +65,7 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Dictionary;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -94,7 +97,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
  * ffmpeg -i &lt;inputfile&gt; -deinterlace -r 1 -vcodec mjpeg -qscale 1 -an &lt;outputfile&gt;
  * </pre>
  */
-public class VideoSegmenter extends MediaAnalysisServiceSupport {
+public class VideoSegmenter extends MediaAnalysisServiceSupport implements ManagedService {
 
   /** Receipt type */
   public static final String RECEIPT_TYPE = "org.opencastproject.analysis.vsegmenter";
@@ -111,11 +114,17 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   /** Name of the encoding profile that transcodes video tracks into a segmentable format */
   public static final String MJPEG_ENCODING_PROFILE = "video-segmentation.http";
 
-  /** The number of seconds that need to resemble until a scene is considered "stable" */
-  public static final int STABILITY_THRESHOLD = 5;
+  /** Name of the constant used to retreive the stability threshold */
+  public static final String OPT_STABILITY_THRESHOLD = "stabilitythreshold";
 
-  /** Number of pixels that may change between two frames without considering them different */
-  public static final float CHANGES_THRESHOLD = 0.05f; // 5% change
+  /** The number of seconds that need to resemble until a scene is considered "stable" */
+  public static final int DEFAULT_STABILITY_THRESHOLD = 5;
+
+  /** Name of the constant used to retreive the changes threshold */
+  public static final String OPT_CHANGES_THRESHOLD = "changesthreshold";
+
+  /** Default value for the number of pixels that may change between two frames without considering them different */
+  public static final float DEFAULT_CHANGES_THRESHOLD = 0.05f; // 5% change
 
   /** The expected mimetype of the resulting preview encoding */
   public static final MimeType MJPEG_MIMETYPE = MimeTypes.MJPEG;
@@ -129,20 +138,26 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   /** The logging facility */
   protected static final Logger logger = LoggerFactory.getLogger(VideoSegmenter.class);
 
-  /** Reference to the receipt service */
-  protected RemoteServiceManager remoteServiceManager;
+  /** Number of pixels that may change between two frames without considering them different */
+  protected float changesThreshold = DEFAULT_CHANGES_THRESHOLD;
 
-  /**  The mpeg-7 service */
-  protected Mpeg7CatalogService mpeg7CatalogService;
-  
+  /** The number of seconds that need to resemble until a scene is considered "stable" */
+  protected int stabilityThreshold = DEFAULT_STABILITY_THRESHOLD;
+
+  /** Reference to the receipt service */
+  protected RemoteServiceManager remoteServiceManager = null;
+
+  /** The mpeg-7 service */
+  protected Mpeg7CatalogService mpeg7CatalogService = null;
+
   /** The workspace to ue when retrieving remote media files */
-  protected Workspace workspace;
+  protected Workspace workspace = null;
 
   /** The composer service */
-  protected ComposerService composer;
+  protected ComposerService composer = null;
 
   /** The executor service used to queue and run jobs */
-  protected ExecutorService executor;
+  protected ExecutorService executor = null;
 
   /** The base URL for this server */
   protected String serverUrl = null;
@@ -153,6 +168,39 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   public VideoSegmenter() {
     super(MediaPackageElements.SEGMENTS);
     super.requireVideo(true);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  public void updated(Dictionary properties) throws ConfigurationException {
+    logger.debug("Configuring the videosegmenter");
+
+    // Stability threshold
+    if (properties.get(OPT_STABILITY_THRESHOLD) != null) {
+      String threshold = (String) properties.get(OPT_STABILITY_THRESHOLD);
+      try {
+        stabilityThreshold = Integer.parseInt(threshold);
+        logger.info("Stability threshold set to {} consecutive frames", stabilityThreshold);
+      } catch (Exception e) {
+        logger.warn("Found illegal value '{}' for videosegmenter's stability threshold", threshold);
+      }
+    }
+
+    // Changes threshold
+    if (properties.get(OPT_CHANGES_THRESHOLD) != null) {
+      String threshold = (String) properties.get(OPT_CHANGES_THRESHOLD);
+      try {
+        changesThreshold = Float.parseFloat(threshold);
+        logger.info("Changes threshold set to {}", changesThreshold);
+      } catch (Exception e) {
+        logger.warn("Found illegal value '{}' for videosegmenter's changes threshold", threshold);
+      }
+    }
   }
 
   protected void activate(ComponentContext cc) {
@@ -217,7 +265,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   public void setMpeg7CatalogService(Mpeg7CatalogService mpeg7CatalogService) {
     this.mpeg7CatalogService = mpeg7CatalogService;
   }
-  
+
   /**
    * Sets the receipt service
    * 
@@ -335,10 +383,10 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
             throw new MediaAnalysisException("Java media framework is unable to detect movie duration");
           }
 
-          long durationInSeconds = Math.min(track.getDuration()/1000, (long)duration.getSeconds());
+          long durationInSeconds = Math.min(track.getDuration() / 1000, (long) duration.getSeconds());
           logger.info("Track {} loaded, duration is {} s", mediaUrl, duration.getSeconds());
 
-          MediaTime contentTime = new MediaRelTimeImpl(0, (long) durationInSeconds*1000);
+          MediaTime contentTime = new MediaRelTimeImpl(0, (long) durationInSeconds * 1000);
           MediaLocator contentLocator = new MediaLocatorImpl(mjpegTrack.getURI());
           Video videoContent = mpeg7.addVideoContent("videosegment", contentTime, contentLocator);
 
@@ -352,7 +400,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
           logger.info("Segmentation of {} yields {} segments", mediaUrl, segments.size());
 
           MediaPackageElement mpeg7Catalog = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-            .newElement(Catalog.TYPE, MediaPackageElements.SEGMENTS);
+                  .newElement(Catalog.TYPE, MediaPackageElements.SEGMENTS);
           URI uri = uploadMpeg7(mpeg7);
           mpeg7Catalog.setURI(uri);
           mpeg7Catalog.setReference(new MediaPackageReferenceImpl(element));
@@ -405,8 +453,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
    * @throws URISyntaxException
    *           if the working file repository created an invalid uri
    */
-  protected URI uploadMpeg7(Mpeg7Catalog catalog) throws TransformerFactoryConfigurationError,
-          TransformerException, ParserConfigurationException, IOException, URISyntaxException {
+  protected URI uploadMpeg7(Mpeg7Catalog catalog) throws TransformerFactoryConfigurationError, TransformerException,
+          ParserConfigurationException, IOException, URISyntaxException {
     InputStream in = mpeg7CatalogService.serialize(catalog);
     return workspace.putInCollection(COLLECTION_ID, UUID.randomUUID().toString(), in);
   }
@@ -448,10 +496,10 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
     int segmentCount = 1;
     BufferedImage previousImage = null;
     BufferedImage lastStableImage = null;
-    BlockingQueue<Buffer> bufferQueue = new ArrayBlockingQueue<Buffer>(STABILITY_THRESHOLD + 1);
+    BlockingQueue<Buffer> bufferQueue = new ArrayBlockingQueue<Buffer>(stabilityThreshold + 1);
     long durationInSeconds = video.getMediaTime().getMediaDuration().getDurationInMilliseconds() / 1000;
     Segment contentSegment = video.getTemporalDecomposition().createSegment("segment-" + segmentCount);
-    ImageComparator icomp = new ImageComparator(CHANGES_THRESHOLD);
+    ImageComparator icomp = new ImageComparator(changesThreshold);
 
     // icomp.setStatistics(true);
     // String imagesPath = PathSupport.concat(new String[] {
@@ -498,28 +546,28 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
       else if (!sceneChangeImminent) {
         fillLookAheadBuffer(bufferQueue, buf, dsh);
         lastStableImageTime = t;
-        t += STABILITY_THRESHOLD;
+        t += stabilityThreshold;
         previousImage = bufferedImage;
         lastStableImage = bufferedImage;
       }
 
       // Seems to be the same image. If we have just recently detected a new scene, let's see if we are able to
       // confirm that this is scene is stable (>= STABILITY_THRESHOLD)
-      else if (currentSceneStabilityCount < STABILITY_THRESHOLD) {
+      else if (currentSceneStabilityCount < stabilityThreshold) {
         currentSceneStabilityCount++;
         previousImage = bufferedImage;
         t++;
       }
 
       // Did we find a new scene?
-      else if (currentSceneStabilityCount == STABILITY_THRESHOLD) {
+      else if (currentSceneStabilityCount == stabilityThreshold) {
         lastStableImageTime = t;
 
-        long endOfSegment = t - STABILITY_THRESHOLD;
+        long endOfSegment = t - stabilityThreshold;
         long durationms = (endOfSegment - startOfSegment) * 1000L;
 
         // Create a new segment if this wasn't the first one
-        if (endOfSegment > STABILITY_THRESHOLD) {
+        if (endOfSegment > stabilityThreshold) {
           contentSegment.setMediaTime(new MediaRelTimeImpl(startOfSegment * 1000L, durationms));
           contentSegment = video.getTemporalDecomposition().createSegment("segment-" + ++segmentCount);
           segments.add(contentSegment);
@@ -529,7 +577,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
         // After finding a new segment, likelihood of a stable image is good, let's take a look ahead. Since
         // a processor can't seek, we need to store the buffers in between, in case we need to come back.
         fillLookAheadBuffer(bufferQueue, buf, dsh);
-        t += STABILITY_THRESHOLD;
+        t += stabilityThreshold;
         previousImage = bufferedImage;
         lastStableImage = bufferedImage;
         currentSceneStabilityCount++;
@@ -553,7 +601,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
         // equal to looking ahead STABILITY_THRESHOLD seconds.
         lastStableImageTime = t;
         fillLookAheadBuffer(bufferQueue, buf, dsh);
-        t += STABILITY_THRESHOLD;
+        t += stabilityThreshold;
         lastStableImage = bufferedImage;
         previousImage = bufferedImage;
       }
@@ -603,7 +651,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
           throws IOException {
     queue.clear();
     queue.add(currentBuffer);
-    for (int i = 0; i < STABILITY_THRESHOLD - 1; i++) {
+    for (int i = 0; i < stabilityThreshold - 1; i++) {
       Buffer b = dsh.getBuffer();
       if (b != null && !b.isEOM())
         queue.add(b);
@@ -671,4 +719,5 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport {
   public String getAnalysisType() {
     return RECEIPT_TYPE;
   }
+
 }
