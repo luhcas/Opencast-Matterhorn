@@ -65,7 +65,7 @@ UI.Init = function(){
   if(eventId && AdminUI.getURLParams('edit')){
     document.title = i18n.window.prefix + " " + i18n.window.edit;
     $('#i18n_page_title').text(i18n.page.title.edit);
-    //$('#eventId').val(eventId);
+    $('#eventId').val(eventId);
     $('#recording-type').hide();
     $('#deleteButton').click(UI.DeleteForm);
     $('#delete-recording').show();
@@ -352,11 +352,13 @@ UI.LoadEvent = function(doc){
   var metadata = {};
   $.each($('metadataList > metadata',doc), function(i,v){
     metadata[$('key', v).text()] = $('value', v).text();
+    AdminUI.log('mdlist: ', $('key', v).text(), $('value', v).text());
   });
   $.each($('completeMetadata > metadata',doc), function(i,v){
     if(metadata[$('key', v).text()] == undefined){
       //feild not in list, add it.
       metadata[$('key', v).text()] = $('value', v).text();
+      AdminUI.log('cmd: ', $('key', v).text(), $('value', v).text());
     }
   });
   if(metadata['resources']){
@@ -367,6 +369,10 @@ UI.LoadEvent = function(doc){
     $.get(SERIES_URL + '/search?term=' + metadata['seriesId'], function(data){
       Scheduler.components.seriesId.setValue(data[0]);
     });
+  }
+  if(metadata['recurrenceId'] && metadata['recurrencePosition']){
+    Scheduler.components.recurrenceId = new AdminForm.Component(['recurrenceId']);
+    Scheduler.components.recurrencePosition = new AdminForm.Component(['recurrencePosition']);
   }
   Scheduler.FormManager.populate(metadata)
   $('#agent').change(); //update the selected agent's capabilities
@@ -385,11 +391,6 @@ UI.EventSubmitComplete = function(){
 
 UI.RegisterComponents = function(){
   Scheduler.components = {};
-  
-  if(AdminUI.getURLParams('edit')){
-    Scheduler.components.recurrenceId = new AdminForm.Component(['recurrenceId']);
-    Scheduler.components.recurrencePosition = new AdminForm.Component(['recurrencePosition']);
-  }
   
   Scheduler.components.title = new AdminForm.Component(['title'], {label: 'label-title', required: true});
   Scheduler.components.creator = new AdminForm.Component(['creator'], {label: 'label-creator'});
@@ -455,7 +456,7 @@ UI.RegisterComponents = function(){
       }
     });
   if(Scheduler.type === MULTIPLE_EVENTS){
-    Scheduler.components.recurringEventId = new AdminForm.Component(['eventId']);
+    //Scheduler.components.recurringEventId = new AdminForm.Component(['eventId']);
     Scheduler.components.seriesId.required = true; //Series are required for groups of recordings.
     Scheduler.components.recurrenceStart = new AdminForm.Component(['recurStart', 'recurStartTimeHour', 'recurStartTimeMin'],
       { label: 'label-recurrstart', errorField: 'missing-startdate', required: true, nodeKey: 'recurrenceStart' },
