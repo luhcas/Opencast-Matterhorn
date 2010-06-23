@@ -23,12 +23,12 @@
     <script type="text/javascript" src="jquery/jquery-ui-1.8.1.custom.min.js"></script>
     <script type="text/javascript" src="js/popuphelp.js"></script>
     <script type="text/javascript" src="js/scheduler.helptexts.json"></script>
-    <script type="text/javascript" src="js/scheduler.js"></script>
-    <script type="text/javascript" src="shared_js/version.js"></script>
     <script type="text/javascript" src="js/adminui.js"></script>
+    <script type="text/javascript" src="js/sched.js"></script>
+    <script type="text/javascript" src="shared_js/version.js"></script>
     <script type="text/javascript" src="js/oc.workflow.js"></script>
     <script type="text/javascript">
-      $(document).ready(init);
+      $(document).ready(UI.Init);
     </script>
   </head>
   <body>
@@ -69,7 +69,7 @@
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
         <div class="fl-container-800" style="text-align: center;">
           <h2><span id="i18n_page_title"></span></h2>
-          <div style="width:160px; text-align: left; margin-left: auto; margin-right: auto; padding-bottom: 20px;">
+          <div id="recording-type" style="width:160px; text-align: left; margin-left: auto; margin-right: auto; padding-bottom: 20px;">
             <input type="radio" id="singleRecording" name="recordingType" checked="checked"><label for="singleRecording"> Single Recording</label><br />
             <input type="radio" id="multipleRecordings" name="recordingType"><label for="multipleRecordings"> Group of Recordings</label>
           </div>
@@ -103,6 +103,9 @@
                 </li>
                 <li id="error-recurstart-end" class="missing-fields-item multiple-error">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose an end date that occurs after the start date.
+                </li>
+                <li id="error-recurrence" class="missing-fields-item multiple-error">
+                  <span class="fl-icon inline-icon icon-bullet" title=""></span>You must select one day in a week for a group of recordings to occur.
                 </li>
                 <li id="notice-offline" class="missing-fields-item" style="display:none;">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>The <a href="javascript:document.getElementById('attendees').focus();">capture agent</a> you previously selected is currently offline. You may want to select a different capture agent.
@@ -138,7 +141,7 @@
                     <input type="text" class="form-field" name="title" id="title">
                     <span class="fl-icon icon-help" id="help_title" title="Click for help"></span>
                   </li>
-                  <li id="series_container" class="ui-widget">
+                  <li id="series_container">
                     <label class="fl-label" for="series_select"  id="label-series"><span id="i18n_series_label"></span>:</label>
                     <input type="text" class="form-field ui-autocomplete-input" name="series_select" id="series_select">
                     <input type="hidden" id="series">
@@ -604,12 +607,14 @@
                 <ul class="fl-controls-right wu-reset field-list">
                   <li>
                     <label class="fl-label">&nbsp;</label>
-                    <input type="button" value="Submit" id="submitButton" class="mouseover-pointer control-button" onclick="this.disabled=true;this.form.submit();this.value='Submitting...';">
+                    <input type="button" value="Submit" id="submitButton" class="mouseover-pointer control-button">
                     <input type="button" value="Cancel" id="cancelButton" class="mouseover-pointer control-button">
                     <div id="delete-recording" style="float: right; margin-right: 160px; display: none;">
                       <input type="button" value="Delete Recording" id="deleteButton" class="mouseover-pointer control-button">
                     </div>
-                    <input type="hidden" id="eventID">
+                    <input type="hidden" id="eventId">
+                    <input type="hidden" id="recurrenceId">
+                    <input type="hidden" id="recurrencePosition">
                   </li>
                   <li style="margin-top: 0.6em;">
                     <label class="fl-label">&nbsp;</label>
@@ -617,6 +622,105 @@
                   </li>
                 </ul>
               </form>
+            </div>
+          </div>
+        </div>
+        <div class="fl-container-800" id="submission_success" style="display: none;">
+          <div class="notification-header">
+              A Recording with the following information has been scheduled:
+          </div>
+          <div id="data-title" class="data-row">
+              <div class="data-label">
+                Title:
+              </div>
+              <div class="data-value"></div>
+          </div>
+          <div id="data-creator" class="data-row">
+              <div class="data-label">
+                 Presenter:
+              </div>
+              <div class="data-value"></div>
+          </div>
+          <div id="data-contributor" class="data-row">
+              <div class="data-label">
+                 Sponsoring Department:
+              </div>
+              <div class="data-value"></div>
+          </div>
+          <div id="data-series-id" class="data-row">
+              <div class="data-label">
+                 Series:
+              </div>
+              <div class="data-value"></div>
+          </div>
+          <div id="data-subject" class="data-row">
+              <div class="data-label">
+                  Subject:
+              </div>
+              <div class="data-value"></div>
+          </div>
+          <div id="data-language" class="data-row">
+              <div class="data-label">
+                  Language:
+              </div>
+              <div class="data-value" ></div>
+          </div>
+          <div id="data-abstract" class="data-row">
+              <div class="data-label">
+                 Description:
+              </div>
+              <div class="expand-detail">
+                <div id="abstract" class="data-value detail-hide"></div>
+                <div id="detail-switch" onclick="schedulerUI.toggleDetails(this, $('#abstract'))">[more]</div>
+              </div>
+          </div>
+          <div id="data-channel-id" class="data-row">
+              <div class="data-label">
+                 Distribution Channel(s):
+              </div>
+              <div class="data-value"></div>
+          </div>
+          <div id="data-license" class="data-row">
+              <div class="data-label">
+                 License:
+              </div>
+              <div class="data-value"></div>
+          </div>
+          <div id="data-recurrence" class="data-row">
+              <div class="data-label">
+                Repeats:
+              </div>
+              <div class="data-value"></div>
+          </div>
+          <div id="data-startdate" class="data-row">
+              <div class="data-label">
+                 Start Date &amp; Time:
+              </div>
+              <div class="data-value"></div>
+          </div>
+          <div id="data-duration" class="data-row">
+              <div class="data-label">
+                 Duration:
+              </div>
+              <div class="data-value"></div>
+          </div>
+          <div id="data-attendees" class="data-row">
+              <div class="data-label">
+                 Capture Agent:
+              </div>
+              <div class="data-value"></div>
+          </div>
+          <div id="data-resources" class="data-row">
+              <div class="data-label">
+                 Input(s):
+              </div>
+              <div class="data-value"></div>
+          </div>
+          <div id="links" class="data-row" style="display: block;">
+            <div class="data-label"></div>
+            <div class="data-value">
+              <a href="/admin/recordings.html?show=upcoming" style="float: left;">&lt;&lt; Back to Recordings</a>
+              <a href="javascript:location.reload()" style="float: right;">Schedule another Recording &gt;&gt;</a>
             </div>
           </div>
         </div>

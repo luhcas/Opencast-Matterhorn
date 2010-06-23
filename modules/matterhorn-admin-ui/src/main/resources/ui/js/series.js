@@ -38,7 +38,7 @@ UI.Init = function(){
   });
   
   UI.RegisterComponents();
-  Series.FormManager = new AdminForm.Manager('Series', 'http://series.opencastproject.org', Series.components);
+  Series.FormManager = new AdminForm.Manager('Series', '', Series.components);
   $('#submitButton').click(UI.SubmitForm);
   $('#cancelButton').click(function() {
     document.location = 'recordings.html';

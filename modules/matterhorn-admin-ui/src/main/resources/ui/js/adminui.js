@@ -26,6 +26,32 @@ AdminUI.log = function(){
   }
 }
 
+/**
+ *  Function parses the URL for parameters.
+ *  @param {String} Optional. If a name is passed, that parameter's value is returned.
+ *  @return {String|Boolean|Array} If optional parameter is left empty, an array of all params are returned.
+ */
+AdminUI.getURLParams = function(param) {
+  var urlParams = {};
+  if(document.location.search) {
+    params = document.location.search.substr(1).split('&');
+    for(var p in params) {
+      eq = params[p].indexOf('=');
+      if(eq != -1) {
+        urlParams[params[p].substr(0, eq)] = params[p].substr(eq+1);
+      } else {
+        urlParams[params[p]] = true;
+      }
+    }
+  }
+  if(param && urlParams[param]) {
+    return urlParams[param];
+  } else if(urlParams.length > 0) {
+    return urlParams;
+  }
+  return null;
+};
+
 AdminForm.components = {};
 
 AdminForm.Manager = function(rootElm, rootNs, components){
@@ -38,11 +64,13 @@ $.extend(AdminForm.Manager.prototype, {
   serialize: function(){
     if(this.validate()){
       var doc = this.createDoc();
-      AdminUI.log(doc);
-      var mdlist = doc.createElement('metadata_list');
+      var mdlist = doc.createElement('metadataList');
       for(var c in this.components){
-        AdminUI.log(c);
-        this.components[c].toNode(mdlist);
+        if(c === 'recurrence' || c === 'eventId'){
+          this.components[c].toNode(doc.documentElement)
+        } else {
+          this.components[c].toNode(mdlist);
+        }
       }
       doc.documentElement.appendChild(mdlist);
       if(typeof XMLSerializer != 'undefined') {
@@ -55,16 +83,29 @@ $.extend(AdminForm.Manager.prototype, {
     }
     return false;
   },
-  populate: function(){
-
+  populate: function(values){
+    for(var e in this.components){
+      if(values[e] != undefined){
+        this.components[e].setValue(values[e]);
+      }
+    }
   },
   validate: function(){
     var error = false;
+    $('#missingFields-container').hide();
+    $('.missing-fields-item').hide();
     for(var k in this.components){
-      AdminUI.log(k, this.components[k].required, !this.components[k].validate())
       if(this.components[k].required && !this.components[k].validate()){
+        $('#' + this.components[k].errorField).show();
+        $('#' + this.components[k].label).addClass('error');
         error = true;
+      }else{
+        $('#' + this.components[k].errorField).hide();
+        $('#' + this.components[k].label).removeClass('error');
       }
+    }
+    if(error){
+      $('#missingFields-container').show();
     }
     return !error;
   },
@@ -92,6 +133,7 @@ AdminForm.Component = function Component(fields, props, funcs){
   this.properties = [];
   this.required = false;
   this.value = null;
+  this.nodeKey = null;
   
   this.setFields(fields);
   this.setFunctions(funcs);
@@ -108,12 +150,12 @@ $.extend(AdminForm.Component.prototype, {
     if(typeof f == 'string') { //If a single field is specified, wrap in an array.
       fields = [fields];
     }
-    AdminUI.log(fields);
     for(var k in fields) {
       var e = $('#' + fields[k]);
-      AdminUI.log(fields[k],e);
       if(e[0]){
         this.fields[fields[k]] = e;
+        this.label = 'label-' + e[0].id;
+        this.errorField = 'missing-' + e[0].id;
       }
     }
   },
@@ -122,9 +164,7 @@ $.extend(AdminForm.Component.prototype, {
    *  @param {Object} An object literal or instance with which to extend Component
    */
   setFunctions: function(funcs){
-    AdminUI.log(funcs);
     if(funcs && typeof funcs == 'object'){
-      AdminUI.log('test');
       $.extend(this, funcs);
     }
   },
@@ -144,6 +184,9 @@ $.extend(AdminForm.Component.prototype, {
             break;
           case 'required':
             this.required = props[f];
+            break;
+          case 'nodeKey':
+            this.nodeKey = props[f];
             break;
           default:
             this.properties[f] = props[f];
@@ -197,11 +240,16 @@ $.extend(AdminForm.Component.prototype, {
    */
   toNode: function(parent){
     for(var el in this.fields){
-      var container = document.createElement('metadata');
-      var value = document.createElement('value');
-      var key = document.createElement('key');
-      value.appendChild(document.createTextNode(this.getValue()));
-      key.appendChild(document.createTextNode(el));
+      var doc = parent.ownerDocument;
+      var container = doc.createElement('metadata');
+      var value = doc.createElement('value');
+      var key = doc.createElement('key');
+      value.appendChild(doc.createTextNode(this.getValue()));
+      if(this.nodeKey !== null){
+         key.appendChild(doc.createTextNode(this.nodeKey));
+      }else{
+         key.appendChild(doc.createTextNode(el));
+      }
       container.appendChild(value);
       container.appendChild(key);
     }

@@ -229,12 +229,24 @@
                   <ul class="fl-controls-right form-list">
                     <li class="additionalMeta">
                       <label class="fl-label" for="type" id="label-type"><span id="i18n_type_label">Type</span>:</label>
-                      <input type="text" class="form-field" name="type" id="type">
+                      <select class="form-field" name="type" id="type">
+                        <option value="">- Select Type -</option>
+                        <option value="MovingImage">Moving Image</option>
+                        <option value="Sound">Sound</option>
+                      </select>
                       <span class="fl-icon icon-help"  id="help_subject" title="Click for help"></span>
                     </li>
-                    <li class="additionalMeta">
+                    <li class="additionalMeta" id="sub_type">
                       <label class="fl-label" for="sub-type" id="label-sub-type"><span id="i18n_sub_type_label">Sub-Type</span>:</label>
-                      <input type="text" class="form-field" name="subtype" id="sub-type">
+                      <select class="form-field" name="subtype" id="sub-type">
+                        <optgroup>
+                          <option value="">Select Sub-Type</option>
+                          <option>Lecture</option>
+                          <option>Speech</option>
+                        </optgroup>
+                        <optgroup id="sub-type-options">
+                        </optgroup>
+                      </select>
                       <span class="fl-icon icon-help"  id="help_sub_type" title="Click for help"></span>
                     </li>
                     <li class="additionalMeta">
@@ -251,11 +263,6 @@
                       <label class="fl-label" for="publisher" id="label-publisher"><span id="i18n_publisher_label">Publisher</span>:</label>
                       <input type="text" class="form-field" name="publisher" id="publisher">
                       <span class="fl-icon icon-help"  id="help_audience" title="Click for help"></span>
-                    </li>
-                    <li class="additionalMeta">
-                      <label class="fl-label" for="duration" id="label-duration"><span id="i18n_duration_label">Duration</span>:</label>
-                      <input type="text" class="form-field" name="duration" id="duration">
-                      <span class="fl-icon icon-help"  id="help_duration" title="Click for help"></span>
                     </li>
                     <li class="additionalMeta">
                       <label class="fl-label" for="startdate" id="label-startdate"><span id="i18n_startdate_label">Start</span>:</label>
