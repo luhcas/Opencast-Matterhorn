@@ -15,6 +15,7 @@
  */
 package org.opencastproject.adminui.endpoint;
 
+import java.net.URL;
 import org.opencastproject.adminui.api.RecordingDataView;
 import org.opencastproject.adminui.api.RecordingDataViewImpl;
 import org.opencastproject.adminui.api.RecordingDataViewList;
@@ -192,11 +193,14 @@ public class AdminuiRestService {
           item.setProcessingStatus("unknown");
         }
         // get Title and ActionTitle/ActionPanelURL from HoldOperation
-        if (state == WorkflowState.PAUSED) {
+        if (state == WorkflowState.PAUSED && currentOperation != null) {
           if (currentOperation.getState() == OperationState.PAUSED) {       // take only those WFInstances into account that have been paused by a HoldOperation
             item.setHoldOperationTitle(currentOperation.getDescription());
             item.setHoldActionTitle(currentOperation.getHoldActionTitle());
-            item.setHoldActionPanelURL(currentOperation.getHoldStateUserInterfaceUrl().toString());
+            URL holdUrl = currentOperation.getHoldStateUserInterfaceUrl();
+            if (holdUrl != null) {
+              item.setHoldActionPanelURL(holdUrl.toString());
+            }
             out.add(item);
           }
         } else {
@@ -339,7 +343,7 @@ public class AdminuiRestService {
       SchedulerEvent[] events = schedulerService.getUpcomingEvents();
       Date current = new Date(System.currentTimeMillis());
       for (SchedulerEvent event : events) {
-        if (current.before(event.getStartdate())) {
+        if (System.currentTimeMillis() < event.getStartdate().getTime()) {
           upcoming++;
           total++;
         }
@@ -408,18 +412,20 @@ public class AdminuiRestService {
       logger.info("getting upcoming recordings from scheduler");
       SchedulerEvent[] events = schedulerService.getUpcomingEvents();
       for (int i = 0; i < events.length; i++) {
-        RecordingDataView item = new RecordingDataViewImpl();
-        item.setId(events[i].getID());
-        item.setTitle(events[i].getTitle());
-        item.setPresenter(events[i].getCreator());
-        item.setSeriesTitle(events[i].getSeriesID());    // actually it's the series title
-        // FIXME Add the series ID too
-        item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
-        item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
-        item.setCaptureAgent(events[i].getDevice());
-        item.setProcessingStatus("Scheduled");
-        item.setDistributionStatus("not distributed");
-        out.add(item);
+        if (System.currentTimeMillis() < events[i].getStartdate().getTime()) {
+          RecordingDataView item = new RecordingDataViewImpl();
+          item.setId(events[i].getID());
+          item.setTitle(events[i].getTitle());
+          item.setPresenter(events[i].getCreator());
+          item.setSeriesTitle(events[i].getSeriesID());    // actually it's the series title
+          // FIXME Add the series ID too
+          item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
+          item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
+          item.setCaptureAgent(events[i].getDevice());
+          item.setProcessingStatus("Scheduled");
+          item.setDistributionStatus("not distributed");
+          out.add(item);
+        }
       }
     } else {
       logger.warn("scheduler not present, returning empty list");
