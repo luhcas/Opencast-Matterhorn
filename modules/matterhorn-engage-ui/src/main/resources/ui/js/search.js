@@ -13,8 +13,27 @@ Opencast.search = ( function() {
    * @description Does the search
    */
   function showResult(value){
-    var title = "Results for &quot;" + unescape(value) +"&quot;";
-    $('#oc_slidetext-left').html(title);
+    
+    var mediaPackageId = Opencast.engage.getMediaPackageId();
+    $.ajax(
+        {
+          type: 'GET',
+          contentType: 'text/xml',
+          url:"../../search/rest/episode",
+          data: "id=" + mediaPackageId+"&q="+escape(value),
+          dataType: 'xml',
+
+          success: function(xml) 
+          {
+          var parsedTitle = $(xml).find('title').text();
+          var title = "Results for &quot;" + unescape(value) +"&quot;";
+            $('#oc_slidetext-left').html(title +"<br/>" + "Title: " + parsedTitle);
+          },
+          error: function(a, b, c) 
+          {
+            // Some error while trying to get the views
+          }
+        }); 
   }
 
   /**
