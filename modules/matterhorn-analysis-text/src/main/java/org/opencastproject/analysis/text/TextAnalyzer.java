@@ -20,6 +20,8 @@ import org.opencastproject.analysis.api.MediaAnalysisServiceSupport;
 import org.opencastproject.analysis.text.ocropus.OcropusLine;
 import org.opencastproject.analysis.text.ocropus.OcropusTextAnalyzer;
 import org.opencastproject.analysis.text.ocropus.OcropusTextFrame;
+import org.opencastproject.dictionary.api.DictionaryService;
+import org.opencastproject.dictionary.api.DictionaryService.DICT_TOKEN;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -43,6 +45,7 @@ import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,6 +94,9 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
 
   /** The mpeg-7 service */
   protected Mpeg7CatalogService mpeg7CatalogService;
+
+  /** The dictionary service */
+  protected DictionaryService dictionaryService;
 
   /** The executor service used to queue and run jobs */
   private ExecutorService executor = null;
@@ -178,7 +184,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
 
           File imageFile = workspace.get(imageUrl);
           VideoText[] videoTexts = analyze(imageFile, element.getIdentifier());
-
+          
           // Create a temporal decomposition
           MediaTime mediaTime = new MediaTimeImpl(0, 0);
           Video avContent = mpeg7.addVideoContent(element.getIdentifier(), mediaTime, null);
@@ -234,7 +240,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
     }
     return receipt;
   }
-
+  
   /**
    * Stores the mpeg-7 catalog in the working file repository.
    * 
@@ -281,6 +287,14 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
    *           if accessing the image fails
    */
   protected VideoText[] analyze(File imageFile, String id) throws IOException {
+    boolean languagesInstalled;
+    if(dictionaryService.getLanguages().length == 0) {
+      languagesInstalled = false;
+      logger.warn("There are no language packs installed.  All text extracted from video will be considered valid.");
+    } else {
+      languagesInstalled = true;
+    }
+
     List<VideoText> videoTexts = new ArrayList<VideoText>();
     OcropusTextAnalyzer analyzer = new OcropusTextAnalyzer(ocropusbinary);
     OcropusTextFrame textFrame = analyzer.analyze(imageFile);
@@ -288,7 +302,39 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
     for (OcropusLine line : textFrame.getLines()) {
       VideoText videoText = new VideoTextImpl(id + "-" + i++);
       videoText.setBoundary(line.getBoundaries());
-      Textual text = new TextualImpl(line.getText());
+      Textual text = null;
+      if(languagesInstalled) {
+        String[] potentialWords = StringUtils.split(line.getText());
+        String[] languages = dictionaryService.detectLanguage(potentialWords);
+        if(languages.length == 0) {
+          StringBuilder potentialWordsBuilder = new StringBuilder();
+          for(int j=0; j < potentialWords.length; j++) {
+            if(potentialWordsBuilder.length() > 0) {
+              potentialWordsBuilder.append(" ");
+            }
+            potentialWordsBuilder.append(potentialWords[j]);
+          }
+          logger.warn("Unable to determine the language for these words: '{}'.  Perhaps the language pack(s) are missing.",
+                  potentialWordsBuilder.toString());
+          text = new TextualImpl(line.getText());
+        } else {
+          String language = languages[0];
+          DICT_TOKEN[] tokens = dictionaryService.cleanText(potentialWords, language);
+          StringBuilder cleanLine = new StringBuilder();
+          for(int j=0; j< potentialWords.length; j++) {
+            if(tokens[j] == DICT_TOKEN.WORD) {
+              if(cleanLine.length() > 0) {
+                cleanLine.append(" ");
+              }
+              cleanLine.append(potentialWords[j]);
+            }
+          }
+          // TODO: Ensure that the language returned by the dictionary is compatible with the MPEG-7 schema
+          text = new TextualImpl(cleanLine.toString(), language);
+        }
+      } else {
+        text = new TextualImpl(line.getText());
+      }
       videoText.setText(text);
       videoTexts.add(videoText);
     }
@@ -335,4 +381,13 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
     this.mpeg7CatalogService = mpeg7CatalogService;
   }
 
+  /**
+   * Sets the dictionary service
+   * 
+   * @param dictionaryService
+   *          an instance of the dicitonary service
+   */
+  public void setDictionaryService(DictionaryService dictionaryService) {
+    this.dictionaryService = dictionaryService;
+  }
 }

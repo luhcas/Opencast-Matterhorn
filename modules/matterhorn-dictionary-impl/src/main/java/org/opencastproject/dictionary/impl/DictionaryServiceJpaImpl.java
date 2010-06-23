@@ -21,9 +21,12 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -90,8 +93,8 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
    *          The text of the word
    * @param language
    *          The language of the word
-   * @return The word itself, or null if it doesn't exist in this language.  Note that the word might contain text
-   *  that is a transformation of the queried text, since Words store case-normalized text.
+   * @return The word itself, or null if it doesn't exist in this language. Note that the word might contain text that
+   *         is a transformation of the queried text, since Words store case-normalized text.
    */
   protected Word getWord(String text, String language) {
     text = Word.fixCase(text);
@@ -274,7 +277,7 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
    * @see org.opencastproject.dictionary.api.DictionaryService#detectLanguage(java.lang.String[])
    */
   @Override
-  public String detectLanguage(String[] text) {
+  public String[] detectLanguage(String[] text) {
     // FIXME This is not an efficient use of the database
     Map<String, Integer> languageScores = new HashMap<String, Integer>();
     for (String t : text) {
@@ -287,15 +290,42 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
         }
       }
     }
-    int winningScore = 0;
-    String winningLanguage = null;
-    for (Entry<String, Integer> entry : languageScores.entrySet()) {
-      if (entry.getValue() > winningScore) {
-        winningScore = entry.getValue();
-        winningLanguage = entry.getKey();
+    return sortByValue(languageScores).toArray(new String[0]);
+  }
+
+  /**
+   * Sorts map keys by the entry values, high to low
+   */
+  protected static <K, V extends Comparable<? super V>> List<K> sortByValue(Map<K, V> map) {
+    List<Map.Entry<K, V>> list = new ArrayList<Map.Entry<K, V>>(map.entrySet());
+    Collections.sort(list, new Comparator<Map.Entry<K, V>>() {
+      public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2) {
+        return (o2.getValue()).compareTo(o1.getValue());
+      }
+    });
+    List<K> result = new ArrayList<K>();
+    for (Map.Entry<K, V> entry : list) {
+      result.add(entry.getKey());
+    }
+    return result;
+  }
+
+  class ValueComparator implements Comparator<String> {
+    Map<String, Integer> base;
+
+    public ValueComparator(Map<String, Integer> base) {
+      this.base = base;
+    }
+
+    public int compare(String a, String b) {
+      if (base.get(a) < base.get(b)) {
+        return 1;
+      } else if (base.get(a) == base.get(b)) {
+        return 0;
+      } else {
+        return -1;
       }
     }
-    return winningLanguage;
   }
 
   /**

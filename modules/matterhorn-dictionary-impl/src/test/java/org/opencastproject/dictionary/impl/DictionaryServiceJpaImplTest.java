@@ -143,20 +143,23 @@ public class DictionaryServiceJpaImplTest {
   }
 
   @Test
-  public void testDetermineLanguage() throws Exception {
+  public void testDetermineLanguages() throws Exception {
     service.addWord("foo", "en");
     service.addWord("bar", "en");
     service.addWord("bar", "de");
     
     String[] potentialWords = new String[] {"foo", "and", "bar"};
     
-    // Two of the three words are English, only one is German.  So this should be an English phrase
-    Assert.assertEquals("en", service.detectLanguage(potentialWords));
+    // Two of the three words are English, only one is German.  So this should be an English phrase first, and
+    // a German phrase second
+    Assert.assertEquals("en", service.detectLanguage(potentialWords)[0]);
+    Assert.assertEquals("de", service.detectLanguage(potentialWords)[1]);
 
-    // If all three words are in German, while only two are in English, this should become a German phrase
+    // If all three words are in German, while only two are in English, this should become a German phrase first.
     service.addWord("foo", "de");
     service.addWord("and", "de");
-    Assert.assertEquals("de", service.detectLanguage(potentialWords));
+    Assert.assertEquals("de", service.detectLanguage(potentialWords)[0]);
+    Assert.assertEquals("en", service.detectLanguage(potentialWords)[1]);
   }    
 
   @Test

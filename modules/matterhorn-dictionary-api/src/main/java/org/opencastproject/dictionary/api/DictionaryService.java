@@ -53,11 +53,13 @@ public interface DictionaryService {
   public String[] getLanguages(String word);
   
   /**
-   * For a given text returns the most similar language of the dictionaries installed
+   * For a given array of strings, get the possible languages for these words.  The most likely languages are sorted
+   * earlier in the array.
+   * 
    * @param text Text being analyzed - represented as array of words
-   * @return language code of the detected language
+   * @return the detected languages, ordered by confidence
    */
-  public String detectLanguage(String[] text);
+  public String[] detectLanguage(String[] text);
 
   /**
    * Adds a specified word to the dictionary for the specified language
