@@ -90,9 +90,11 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
    *          The text of the word
    * @param language
    *          The language of the word
-   * @return The word itself, or null if it doesn't exist in this language
+   * @return The word itself, or null if it doesn't exist in this language.  Note that the word might contain text
+   *  that is a transformation of the queried text, since Words store case-normalized text.
    */
   protected Word getWord(String text, String language) {
+    text = Word.fixCase(text);
     EntityManager em = emf.createEntityManager();
     try {
       Query query = em.createQuery("SELECT w FROM Word w where w.text = :text and w.language = :language");
@@ -115,6 +117,7 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
    */
   @Override
   public void addWord(String text, String language) {
+    text = Word.fixCase(text);
     Word word = getWord(text, language);
     if (word == null) {
       word = new Word(text, language);
@@ -142,6 +145,7 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
    */
   @Override
   public void addWord(String text, String language, Integer count) {
+    text = Word.fixCase(text);
     Word word = getWord(text, language);
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
@@ -173,6 +177,7 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
    */
   @Override
   public void addWord(String text, String language, Integer count, Double weight) {
+    text = Word.fixCase(text);
     Word word = getWord(text, language);
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
@@ -252,6 +257,7 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
    */
   @SuppressWarnings("unchecked")
   protected Word[] getWords(String text) {
+    text = Word.fixCase(text);
     EntityManager em = emf.createEntityManager();
     try {
       Query query = em.createQuery("SELECT w FROM Word w where w.text = :text");
@@ -317,6 +323,7 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
   @SuppressWarnings("unchecked")
   @Override
   public String[] getLanguages(String text) {
+    text = Word.fixCase(text);
     EntityManager em = emf.createEntityManager();
     try {
       Query q = em.createQuery("SELECT DISTINCT w.language from Word w where w.text = :text");
@@ -415,6 +422,7 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
   @Override
   public void markStopWord(String text, String language) {
     Word word = getWord(text, language);
+    text = Word.fixCase(text);
     if (word == null) {
       word = new Word(text, language);
     }

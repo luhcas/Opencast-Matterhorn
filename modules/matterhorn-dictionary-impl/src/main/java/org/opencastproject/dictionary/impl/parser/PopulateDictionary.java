@@ -15,6 +15,8 @@
  */
 package org.opencastproject.dictionary.impl.parser;
 
+import org.opencastproject.dictionary.impl.Word;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -255,7 +257,7 @@ public class PopulateDictionary {
         if (word.length() == 0)
           continue;
         numAllW++;
-        String w = word.toUpperCase();
+        String w = Word.fixCase(word);
 
         Long hash = StringUtil.hash(w);
 

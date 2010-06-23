@@ -23,7 +23,6 @@ import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -100,15 +99,14 @@ public class DictionaryServiceJpaImplTest {
     Assert.assertEquals(0, service.getLanguages().length);
   }
   
-  @Ignore
   @Test
-  public void testWordsWithPunctuationAndCapitalization() throws Exception {
+  public void testWordCapitalization() throws Exception {
     service.addWord("foo", "en");
-    Assert.assertTrue(service.isWord("foo."));
+    Assert.assertTrue(service.isWord("foo"));
     Assert.assertTrue(service.isWord("FOO"));
-    Assert.assertTrue(service.isWord("FOO "));
-    Assert.assertTrue(service.isWord(" FoO"));
-    Assert.assertTrue(service.isWord(" foO "));
+    Assert.assertTrue(service.isWord("FOO"));
+    Assert.assertTrue(service.isWord("FoO"));
+    Assert.assertTrue(service.isWord("foO"));
   }
 
   @Test
