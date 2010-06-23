@@ -123,9 +123,9 @@ public class VideoStreamImpl extends AbstractStreamImpl implements VideoStream {
 
     // resolution
     String res = (String) xpath.evaluate("resolution/text()", node, XPathConstants.STRING);
-    if (res == null || res.trim().equals(""))
-      throw new IllegalStateException("Video resolution is missing");
-    vs.resolution = res;
+    if (res != null && !res.trim().equals("")) {
+      vs.resolution = res;
+    }
 
     // interlacing
     String scanType = (String) xpath.evaluate("scantype/@type", node, XPathConstants.STRING);
