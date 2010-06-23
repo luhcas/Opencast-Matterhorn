@@ -1,4 +1,4 @@
-# bt878: 20 fps
+# bt878: 25 fps
 # confidence monitoring enabled
 # vga: 1280x1024, 10 fps
 # mpeg2 at 1mbit
@@ -10,7 +10,7 @@ capture.dvice.bt878.codec.bitrate=1000000
 capture.device.bt878.codec=ffenc_mpeg2video
 capture.device.bt878.container=mpegtsmux
 capture.device.bt878.flavor=presenter/source
-capture.device.bt878.framerate=20
+capture.device.bt878.framerate=25
 capture.device.bt878.outputfile=bt878.mpg
 capture.device.bt878.src=/dev/bt878
 capture.device.microphone.codec.bitrate=192
