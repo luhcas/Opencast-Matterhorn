@@ -25,8 +25,8 @@ import javax.xml.bind.annotation.XmlType;
 /**
  * A {@link List} of {@link SeriesJaxbImpl}s
  */
-@XmlType(name="SeriesList", namespace="http://series.opencastproject.org")
-@XmlRootElement(name="SeriesList", namespace="http://series.opencastproject.org")
+@XmlType(name="seriesList", namespace="http://series.opencastproject.org")
+@XmlRootElement(name="seriesList")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SeriesListJaxbImpl {
 

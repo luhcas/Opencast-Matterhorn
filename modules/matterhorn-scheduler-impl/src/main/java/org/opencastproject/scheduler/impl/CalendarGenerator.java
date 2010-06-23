@@ -127,8 +127,8 @@ public class CalendarGenerator {
       if (e.containsKey("creator") && ! e.getValue("creator").equalsIgnoreCase("null")) event.getProperties().add(new Organizer(pl ,e.getValue("creator").replace(" ", "_")+"@matterhorn.opencast"));
       if (e.containsKey("abstract") && ! e.getValue("abstract").equalsIgnoreCase("null")) event.getProperties().add(new Description(e.getValue("abstract")));
       if (e.containsKey("location") && ! e.getValue("location").equalsIgnoreCase("null")) event.getProperties().add(new Location(e.getValue("location")));
-      if (e.containsKey("series-id") && ! e.getValue("series-id").equalsIgnoreCase("null")) {
-        seriesID = e.getValue("series-id");
+      if (e.containsKey("seriesId") && ! e.getValue("seriesId").equalsIgnoreCase("null")) {
+        seriesID = e.getValue("seriesId");
         event.getProperties().add(new RelatedTo(seriesID));
       }
 

@@ -39,15 +39,15 @@ import org.slf4j.LoggerFactory;
  * JaxB implementation of the SchedulerEvent
  *
  */
-@XmlType(name="Series", namespace="http://series.opencastproject.org")
-@XmlRootElement(name="Series", namespace="http://series.opencastproject.org")
+@XmlType(name="series", namespace="http://series.opencastproject.org")
+@XmlRootElement(name="series")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SeriesJaxbImpl {
   private static final Logger logger = LoggerFactory.getLogger(SeriesJaxbImpl.class);
   
   @XmlID
   String seriesId;
-  @XmlElementWrapper(name="metadata_list")
+  @XmlElementWrapper(name="metadataList")
   @XmlElement(name="metadata")
   LinkedList <SeriesMetadataJaxbImpl> metadata;  
   

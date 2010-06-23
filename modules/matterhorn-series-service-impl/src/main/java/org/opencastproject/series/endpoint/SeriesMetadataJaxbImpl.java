@@ -28,8 +28,8 @@ import org.opencastproject.series.impl.SeriesMetadataImpl;
  * TODO: Comment me!
  *
  */
-@XmlType(name="SeriesMetadata", namespace="http://series.opencastproject.org")
-@XmlRootElement(name="Series", namespace="http://series.opencastproject.org")
+@XmlType(name="seriesMetadata", namespace="http://series.opencastproject.org")
+@XmlRootElement(name="series")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SeriesMetadataJaxbImpl {
   String key;

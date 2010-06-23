@@ -51,7 +51,7 @@ UI.Init = function(){
   Scheduler.FormManager = new AdminForm.Manager(SINGLE_EVENT_ROOT_ELM, '', Scheduler.components)
   
   if(Scheduler.type === SINGLE_EVENT){
-    UI.agentList = '#attendees';
+    UI.agentList = '#agent';
     UI.inputList = '#input-list';
     $('#singleRecording').click(); //Initiates Page event cycle
   }else{
@@ -69,10 +69,10 @@ UI.Init = function(){
     $('#recording-type').hide();
     $('#deleteButton').click(UI.DeleteForm);
     $('#delete-recording').show();
-    $('#attendees').change(
+    $('#agent').change(
       function() {
         $('#notice-container').hide();
-        $.get(CAPTURE_ADMIN_URL + '/agents/' + $('#attendees option:selected').val(), UI.CheckAgentStatus);
+        $.get(CAPTURE_ADMIN_URL + '/agents/' + $('#agent option:selected').val(), UI.CheckAgentStatus);
       });
   }else{
     $.get(SCHEDULER_URL + '/uuid', function(data){
@@ -156,7 +156,7 @@ UI.RegisterEventHandlers = function(){
     buttonImageOnly: true
   });
   
-  $('#attendees').change(UI.HandleAgentChange);
+  $('#agent').change(UI.HandleAgentChange);
   
   //multiple recording specific elements
   $('#recurStart').datepicker({
@@ -190,7 +190,7 @@ UI.ChangeRecordingType = function(recType){
   if(Scheduler.type == SINGLE_EVENT){
     $('#recurring_recording').hide();
     $('#single_recording').show();
-    UI.agentList = '#attendees';
+    UI.agentList = '#agent';
     UI.inputList = '#input-list';
     $(UI.inputList).empty();
     $('#series_required').remove(); //Remove series required indicator.
@@ -350,25 +350,26 @@ UI.HandleAgentList = function(data) {
 
 UI.LoadEvent = function(doc){
   var metadata = {};
+  $.each($('metadataList > metadata',doc), function(i,v){
+    metadata[$('key', v).text()] = $('value', v).text();
+  });
   $.each($('completeMetadata > metadata',doc), function(i,v){
-    if($('key', v).text() === 'timeEnd'){
-      //ignore this
-    }else if($('key', v).text() === 'timeDuration'){
-      metadata['timeEnd'] = $('value', v).text();
-    }else if($('key', v).text() === 'resources'){
-      //store the selected inputs for use when getting the capabilities.
-      Scheduler.selectedInputs = $('value', v).text();
-    }else if($('key', v).text() === 'seriesId'){
-      $.get(SERIES_URL + '/search?term=' + $('value', v).text(), function(data){
-        Scheduler.components.seriesId.setValue(data[0]);
-      });
-    }else{
-      AdminUI.log($('key', v).text(), $('value', v).text());
+    if(metadata[$('key', v).text()] == undefined){
+      //feild not in list, add it.
       metadata[$('key', v).text()] = $('value', v).text();
     }
   });
+  if(metadata['resources']){
+    //store the selected inputs for use when getting the capabilities.
+    Scheduler.selectedInputs = metadata['resources'];
+  }
+  if(metadata['seriesId']){
+    $.get(SERIES_URL + '/search?term=' + metadata['seriesId'], function(data){
+      Scheduler.components.seriesId.setValue(data[0]);
+    });
+  }
   Scheduler.FormManager.populate(metadata)
-  $('#attendees').change(); //update the selected agent's capabilities
+  $('#agent').change(); //update the selected agent's capabilities
 }
 
 UI.EventSubmitComplete = function(){
@@ -589,8 +590,8 @@ UI.RegisterComponents = function(){
         }
       });
 
-    Scheduler.components.attendees = new AdminForm.Component(['recurAgent'],
-      { label: 'label-recurAgent', errorField: 'missing-attendees', required: true, nodeKey: 'attendees' },
+    Scheduler.components.device = new AdminForm.Component(['recurAgent'],
+      { label: 'label-recurAgent', errorField: 'missing-agent', required: true, nodeKey: 'device' },
       { getValue: function(){
           if(this.fields.recurAgent) {
             this.value = this.fields.recurAgent.val();
@@ -600,10 +601,10 @@ UI.RegisterComponents = function(){
         setValue: function(value){
           var opts, agentId, found;
           if(typeof value === 'string'){
-            value = { attendees: value };
+            value = { agent: value };
           }
           opts = this.fields.recurAgent.children();
-          agentId = value.attendees;
+          agentId = value.agent;
           if(opts.length > 0) {
             found = false;
             for(var i = 0; i < opts.length; i++) {
@@ -615,7 +616,7 @@ UI.RegisterComponents = function(){
             }
             if(!found){ //Couldn't find the previsouly selected agent, add to list and notifiy user.
               this.fields.recurAgent.append($('<option selected="selected">' + agentId + '</option>').val(agentId));
-              $('#attendees').change();
+              $('#recurAgent').change();
             }
             this.fields.recurAgent.val(agentId);
           }
@@ -810,7 +811,7 @@ UI.RegisterComponents = function(){
         }
       });
 
-    Scheduler.components.timeEnd = new AdminForm.Component(['durationHour', 'durationMin'],
+    Scheduler.components.timeDuration = new AdminForm.Component(['durationHour', 'durationMin'],
       { label: 'label-duration', errorField: 'missing-duration', required: true, nodeKey: 'timeEnd' },
       { getValue: function(){
           if(this.validate()){
@@ -851,21 +852,21 @@ UI.RegisterComponents = function(){
         }
       });
 
-    Scheduler.components.attendees = new AdminForm.Component(['attendees'],
-      { label: 'label-attendees', errorField: 'missing-attendees', required: true },
+    Scheduler.components.device = new AdminForm.Component(['agent'],
+      { label: 'label-agent', errorField: 'missing-agent', required: true, nodeKey: 'device' },
       { getValue: function(){
-          if(this.fields.attendees){
-            this.value = this.fields.attendees.val();
+          if(this.fields.agent){
+            this.value = this.fields.agent.val();
           }
           return this.value;
         },
         setValue: function(value){
           var opts, agentId, found;
           if(typeof value === 'string'){
-            value = { attendees: value };
+            value = { agent: value };
           }
-          opts = this.fields.attendees.children();
-          agentId = value.attendees;
+          opts = this.fields.agent.children();
+          agentId = value.agent;
           if(opts.length > 0){
             found = false;
             for(var i = 0; i < opts.length; i++){
@@ -876,10 +877,10 @@ UI.RegisterComponents = function(){
               }
             }
             if(!found){ //Couldn't find the previsouly selected agent, add to list and notifiy user.
-              this.fields.attendees.append($('<option selected="selected">' + agentId + '</option>').val(agentId));
-              $('#attendees').change();
+              this.fields.agent.append($('<option selected="selected">' + agentId + '</option>').val(agentId));
+              $('#agent').change();
             }
-            this.fields.attendees.val(agentId);
+            this.fields.agent.val(agentId);
           }
         },
         validate: function(){
