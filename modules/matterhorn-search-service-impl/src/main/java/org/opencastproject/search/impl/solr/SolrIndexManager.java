@@ -175,8 +175,7 @@ public class SolrIndexManager {
     SolrUpdateableInputDocument seriesDocument = null;
     try {
       episodeDocument = createEpisodeInputDocument(sourceMediaPackage);
-      // FIXME: SolrUpdateableInputDocument seriesDocument =
-      // createSeriesInputDocument(sourceMediaPackage);
+      seriesDocument = createSeriesInputDocument(sourceMediaPackage);
     } catch (Exception e) {
       throw new SolrServerException(e);
     }
