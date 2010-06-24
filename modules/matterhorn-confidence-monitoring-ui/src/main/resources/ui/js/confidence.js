@@ -7,6 +7,16 @@ Monitor.selectedVideoDevice = null;
 Monitor.selectedAudioDevice = null;
 Monitor.devices = [];
 
+Monitor.init = function(){
+  $.get(CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/core/url", function(data){ 
+    $.each($("#page_tab li a"), function(i,link){
+      var url = data.url + $(link).attr("href");
+      $(link).attr("href", url);
+    });
+  });
+  Monitor.loadDevices(); 
+}
+
 Monitor.loadDevices = function(){
   //load the devices
   $.get(CAPTURE_AGENT_CONFIDENCE_MONITORING_URL + "/devices", function(data){

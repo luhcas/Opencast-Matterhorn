@@ -1101,4 +1101,12 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     return AudioMonitoring.getRMSValues(friendlyName, timestamp);
   }
 
+  /**
+   *
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.ConfidenceMonitor#getCoreUrl()
+   */
+  public String getCoreUrl() {
+    return configService.getItem(CaptureParameters.CAPTURE_CORE_URL);
+  }
 }

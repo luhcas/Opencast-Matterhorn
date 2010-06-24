@@ -162,6 +162,15 @@ public class ConfidenceMonitorRestService {
   }
   
   @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("core/url")
+  public Response getCoreUrl() {
+    JSONObject json = new JSONObject();
+    json.put("url", service.getCoreUrl());
+    return Response.ok(json.toJSONString()).build(); 
+  }
+  
+  @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {

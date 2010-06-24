@@ -22,6 +22,9 @@ package org.opencastproject.capture.api;
  */
 public interface CaptureParameters {
 
+  /** Matterhorn Core URL */
+  String CAPTURE_CORE_URL = "org.opencastproject.capture.core.url";
+
   /**
    * Settings which control the configuration service
    */

@@ -47,4 +47,10 @@ public interface ConfidenceMonitor {
    */
   List<String> getFriendlyNames();
   
+  /**
+   * Retrieves the url of the core stored in the capture properties file.
+   *
+   * @return URL of matterhorn core
+   */
+  String getCoreUrl();
 }

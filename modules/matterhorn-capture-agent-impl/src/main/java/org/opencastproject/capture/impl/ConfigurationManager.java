@@ -173,10 +173,13 @@ public class ConfigurationManager implements ManagedService {
    * @return the value corresponding to the key.
    */
   public String getItem(String key) {
+    logger.info("Looking for property: {}", key);
     if (key == null) {
+      logger.info("key null.");
       return null;
     }
     else {
+      logger.info("Found: {}", properties.getProperty(key));
       return properties.getProperty(key);
     }
   }

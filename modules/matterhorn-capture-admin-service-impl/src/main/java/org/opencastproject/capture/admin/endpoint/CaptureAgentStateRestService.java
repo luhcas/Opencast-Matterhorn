@@ -93,14 +93,20 @@ public class CaptureAgentStateRestService {
   //@Produces(MediaType.TEXT_XML)
   @Path("agents/{name}")
   //Todo: Capture agent may send an optional FormParam containing it's configured address. If this exists don't use request.getRemoteHost() for the URL
-  public Response setAgentState(@Context HttpServletRequest request, @PathParam("name") String agentName, @FormParam("state") String state) {
+  public Response setAgentState(@Context HttpServletRequest request, @FormParam("address") String address, @PathParam("name") String agentName, @FormParam("state") String state) {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
-    logger.debug("Agents URL: {}", request.getRemoteHost());
+    logger.debug("Agents URL: {}", address);
     
     int result = service.setAgentState(agentName, state);
-    if(!service.setAgentUrl(agentName, request.getRemoteHost())){
+    String captureAgentAddress = "";
+    if(address != null && !address.isEmpty()){
+      captureAgentAddress = address;
+    }else{
+      captureAgentAddress = request.getRemoteHost();
+    }
+    if(!service.setAgentUrl(agentName, captureAgentAddress)){
       return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
     switch (result) {
@@ -204,7 +210,7 @@ public class CaptureAgentStateRestService {
   //@Consumes(MediaType.TEXT_XML)
   @Produces(MediaType.TEXT_XML)
   @Path("agents/{name}/capabilities")
-  public Response setCapabilities(@Context HttpServletRequest request, @PathParam("name") String agentName, InputStream reqBody) {
+  public Response setCapabilities(@PathParam("name") String agentName, InputStream reqBody) {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
@@ -213,9 +219,7 @@ public class CaptureAgentStateRestService {
     try {
       caps.loadFromXML(reqBody);
       int result = service.setAgentCapabilities(agentName, caps);
-      if(!service.setAgentUrl(agentName, request.getRemoteHost())){
-        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
-      }
+      
       // Prepares the value to return
       ByteArrayOutputStream buffer = new ByteArrayOutputStream(); 
       caps.storeToXML(buffer, "Capabilities for the agent " + agentName);
