@@ -51,19 +51,7 @@ public class CaptureRestService {
   private static final Logger logger = LoggerFactory.getLogger(CaptureRestService.class);
   private CaptureAgent service;
   protected String docs = null;
-/*  protected JAXBContext context = null;
 
-  public CaptureRestService() {
-    try {
-      if (context == null) {
-        context = JAXBContext.newInstance(ScheduledEventImpl.class, LinkedList.class);
-      }
-    } catch (JAXBException e) {
-      logger.error("Unable to create JAXBContext, /schedule endpoint will not be functional!");
-      e.printStackTrace();
-    }
-  }
-*/
   protected String generateDocs() {
     DocRestData data = new DocRestData("CaptureAgent", "Capture Agent", "/capture/rest", null);
     //// startCapture signatures
@@ -76,7 +64,7 @@ public class CaptureRestService {
     data.addEndpoint(RestEndpoint.Type.READ, startNoParamEndpoint);
     // startCapture(Properties)
     RestEndpoint startPropEndpoint = new RestEndpoint("startMP", RestEndpoint.Method.POST, "/startCapture", "Starts a capture with the default properties and a provided MediaPackage");
-    startPropEndpoint.addFormat(new Format("String", "The recording ID for the capture started", null));
+    startPropEndpoint.addFormat(new Format("String", "The recording ID for the capture started", "http://opencast.jira.com/svn/MH/trunk/docs/felix/conf/services/org.opencastproject.capture.impl.ConfigurationManager.properties"));
     startPropEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("valid request, results returned"));
     startPropEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("couldn't start capture with provided parameters"));
     // This is to get the default value for capture.properties from source.opencastproject.org
