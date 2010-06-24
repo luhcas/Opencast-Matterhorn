@@ -373,7 +373,7 @@ public class ComposerServiceImpl implements ComposerService {
           final long time, boolean block) throws EncoderException, MediaPackageException {
 
     final Receipt receipt = remoteServiceManager.createReceipt(JOB_TYPE);
-    final String targetAttachmentId = "attachment-" + (mediaPackage.getAttachments().length + 1);
+    final String targetAttachmentId = idBuilder.createNew().toString();
 
     final EncodingProfile profile = profileScanner.getProfile(profileId);
     if (profile == null) {
