@@ -5,27 +5,27 @@
   <artifactId>matterhorn-distribution-service-streaming</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-distribution-service-streaming</name>
-  <version>0.9-SNAPSHOT</version>
+  <version>1.1-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-distribution-service-api</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-remote-api</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-workspace-api</artifactId>
-      <version>0.9-SNAPSHOT</version>
+      <version>1.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
