@@ -21,17 +21,21 @@ import com.google.jstestdriver.JsTestDriverServer;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class AdminUiTest {
   @BeforeClass public static void startJsTestDriver(){
 
   }
+  
+  @Ignore
   @Test public void UiTest(){
     String[] args = {"--port", "4224", "--config", "target/test-classes/jsTestDriver.conf", "--testOutput", ".", "--browser", "open", "--tests", "all"};
     JsTestDriverServer.main(args);
     Assert.assertTrue(true);
   }
+  
   @AfterClass public static void stopJsTestDriver(){
     
   }
