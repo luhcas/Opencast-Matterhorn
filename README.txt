@@ -5,7 +5,7 @@ Matterhorn
 -----------------------
  Developer instructions:
 -----------------------
-Test AGAIN 111
+
 
 1) Install an OSGi container, e. g. felix, equinox etc.
 2) Run "mvn install -DdeployTo=<path to your osgi container's load directory>"
