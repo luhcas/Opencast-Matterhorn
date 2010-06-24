@@ -20,6 +20,8 @@ Recordings.statsInterval = null;
 Recordings.updateRequested = false;
 Recordings.currentState = null;
 Recordings.lastCount = null;
+Recordings.tableInterval = null;
+Recordings.tableUpdateRequested = false;
 
 /** Initialize the Recordings page.
  *  Register event handlers.
@@ -73,6 +75,23 @@ Recordings.init = function() {
     return false;
   });
 
+  $('#refresh-enabled').click( function() {
+    if ($(this).is(':checked')) {
+      $('#refresh-interval').removeAttr('disabled');
+      $('.refresh-text').removeClass('refresh-text-disabled').addClass('refresh-text-enabled');
+      Recordings.initTableRefresh($('#refresh-interval').val());
+    } else {
+      $('#refresh-interval').attr('disabled','true');
+      $('.refresh-text').removeClass('refresh-text-enabled').addClass('refresh-text-disabled');
+      window.clearInterval(Recordings.tableInterval);
+      Recordings.tableUpdateRequested = false;
+    }
+  });
+
+  $('#refresh-interval').change(function() {
+    Recordings.initTableRefresh($(this).val());
+  });
+
   // register custom table cell value parser for Date/Time column
   $.tablesorter.addParser({
     id: 'date',
@@ -80,7 +99,7 @@ Recordings.init = function() {
       return false;
     },
     format: function(s) {
-      return s; // FIXME don't need a parser here anymore it seems'
+      return s; 
     },
     type: 'numeric'
   });
@@ -97,7 +116,22 @@ Recordings.init = function() {
 
   // init update interval for recording stats
   Recordings.statsInterval = window.setInterval( 'Recordings.displayRecordingStats();', 3000 );
+  if (show == 'all' || show == 'capturing' || show == 'processing') {
+    $('#refresh-controls-container').css('display','block');
+    if ($('#refresh-enabled').is(':visible') && $('#refresh-enabled').is(':checked')) {
+      $('.refresh-text').removeClass('refresh-text-disabled').addClass('refresh-text-enabled');
+      Recordings.initTableRefresh($('#refresh-interval').val());
+    }
+  } else {
+    $('#refresh-controls-container').css('display','none');
+  }
+}
 
+/** (re-)initialize reloading of recordings table
+ *
+ */
+Recordings.initTableRefresh = function(time) {
+  Recordings.tableInterval = window.setInterval('Recordings.displayRecordings("' + Recordings.currentState + '",true);', time*1000);
 }
 
 /** get and display recording statistics. If the number of recordings in the
@@ -133,68 +167,72 @@ Recordings.displayRecordingStats = function() {
  *  While we are waiting for a response, a a little animation is displayed.
  */
 Recordings.displayRecordings = function(state, reload) {
-  Recordings.currentState = state;
-  $('.state-selector').removeClass('state-selector-active');
-  $('.selector-'+state).addClass('state-selector-active');
-  if (!reload) {        
-    Recordings.injectLoadingAnimation($('#recordings-table-container'));
-  }
-  var page = ocPager.currentPageIdx;
-  var psize = ocPager.pageSize;
-  $('#recordings-table-container').xslt("rest/recordings/"+state+"?ps="+psize+"&pn="+page, "xsl/recordings_"+state+".xsl", function() {
-    if ($('.date-column').length > 0) {
-      // if date date/time column is present
-      $('.td-TimeDate').each( function() {     // format date/time
-        var startTime = $(this).children(".date-start").text();
-        var endTime = $(this).children(".date-end").text();
-        //alert(startTime + " - " + endTime);
-        if (startTime) {
-          var sd = new Date();
-          sd.setTime(startTime);
-          
-          var sday  = sd.getDate();
-          var smon  = sd.getMonth()+1;
-                  
-          if (sday < 10) sday = "0" + sday;
-          if (smon < 10) smon = "0" + smon;
-          
-          startTime = sd.getFullYear() + '-' + smon + '-' + sday + ' ' + sd.getHours() + ':' + Recordings.ensureTwoDigits(sd.getMinutes());
-        } else {
-          startTime = "NA";
-        }
-        if (endTime) {
-          var ed = new Date();
-          ed.setTime(endTime);
-          endTime = ' - ' + ed.getHours() + ':' + Recordings.ensureTwoDigits(ed.getMinutes());
-        } else {
-          endTime = "";
-        }
-        $(this).append($(document.createElement('span')).text(startTime + endTime));
-      });
-      $('#recordingsTable').tablesorter({   // init tablesorter with custom parser for the date column
-        cssAsc: 'sortable-asc',
-        cssDesc: 'sortable-desc',
-        sortList: [[3,0]],
-        headers: {
-          3: {
-            sorter: 'date'
-          }
-        }
-      });
-    } else {  // if no date/time column is present, init tablesorter the default way
-      $('#recordingsTable').tablesorter({
-        cssAsc: 'sortable-asc',
-        cssDesc: 'sortable-desc'
-      });
+  if (!Recordings.tableUpdateRequested) {
+    Recordings.tableUpdateRequested = true;
+    Recordings.currentState = state;
+    $('.state-selector').removeClass('state-selector-active');
+    $('.selector-'+state).addClass('state-selector-active');
+    if (!reload) {
+      Recordings.injectLoadingAnimation($('#recordings-table-container'));
     }
+    var page = ocPager.currentPageIdx;
+    var psize = ocPager.pageSize;
+    $('#recordings-table-container').xslt("rest/recordings/"+state+"?ps="+psize+"&pn="+page, "xsl/recordings_"+state+".xsl", function() {
+      Recordings.tableUpdateRequested = false;
+      if ($('.date-column').length > 0) {
+        // if date date/time column is present
+        $('.td-TimeDate').each( function() {     // format date/time
+          var startTime = $(this).children(".date-start").text();
+          var endTime = $(this).children(".date-end").text();
+          //alert(startTime + " - " + endTime);
+          if (startTime) {
+            var sd = new Date();
+            sd.setTime(startTime);
+          
+            var sday  = sd.getDate();
+            var smon  = sd.getMonth()+1;
+                  
+            if (sday < 10) sday = "0" + sday;
+            if (smon < 10) smon = "0" + smon;
+          
+            startTime = sd.getFullYear() + '-' + smon + '-' + sday + ' ' + sd.getHours() + ':' + Recordings.ensureTwoDigits(sd.getMinutes());
+          } else {
+            startTime = "NA";
+          }
+          if (endTime) {
+            var ed = new Date();
+            ed.setTime(endTime);
+            endTime = ' - ' + ed.getHours() + ':' + Recordings.ensureTwoDigits(ed.getMinutes());
+          } else {
+            endTime = "";
+          }
+          $(this).append($(document.createElement('span')).text(startTime + endTime));
+        });
+        $('#recordingsTable').tablesorter({   // init tablesorter with custom parser for the date column
+          cssAsc: 'sortable-asc',
+          cssDesc: 'sortable-desc',
+          sortList: [[3,0]],
+          headers: {
+            3: {
+              sorter: 'date'
+            }
+          }
+        });
+      } else {  // if no date/time column is present, init tablesorter the default way
+        $('#recordingsTable').tablesorter({
+          cssAsc: 'sortable-asc',
+          cssDesc: 'sortable-desc'
+        });
+      }
 
-    //header underline
-    $(".header").hover(function(){
-      $(this).css('text-decoration', 'underline');
-    }, function(){
-      $(this).css('text-decoration', 'none')
+      //header underline
+      $(".header").hover(function(){
+        $(this).css('text-decoration', 'underline');
+      }, function(){
+        $(this).css('text-decoration', 'none')
+      });
     });
-  });
+  }
 }
 
 Recordings.ensureTwoDigits = function(number) {

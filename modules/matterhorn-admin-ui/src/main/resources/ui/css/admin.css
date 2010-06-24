@@ -363,6 +363,15 @@ select { font-size:1.15em; }
   font-weight: bold;
 }
 
+/* Refresh controls and text */
+.refresh-text-enabled {
+ color: black;
+}
+
+.refresh-text-disabled {
+  color: gray;
+}
+
 /* Fluid Skinning System Overrides */
 
 .fl-theme-coal h1 {
