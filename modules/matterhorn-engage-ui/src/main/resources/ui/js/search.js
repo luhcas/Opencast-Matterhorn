@@ -20,10 +20,9 @@ Opencast.search = ( function() {
         {
           type: 'GET',
           contentType: 'text/xml',
-          url: "episode-segments.xml",
+          url: "../../search/rest/episode",
           data: "id=" + mediaPackageId+"&q="+escape(value),
           dataType: 'xml',
-          url:"../../search/rest/episode",
           success: function(xml) 
           {
             var rows = new Array();
@@ -40,10 +39,12 @@ Opencast.search = ( function() {
               var relevance = parseInt($(this).attr('relevance'));
               // Select only item with a relevanve value greater than zero
               if(relevance !== 0 || value === "") {
-                var text = $(this).find('text').text()
+                var text = $(this).find('text').text();
                 var seconds = parseInt($(this).attr('time')) / 1000;
                 var id = relevance*1000 + index;
                 var row = "";
+
+                text = text.replace(new RegExp(value, 'g'),'<span class="marked">' + value + '</span>');
 
                 row += '<tr>';
                 row += '<td class="oc-segments-time">';

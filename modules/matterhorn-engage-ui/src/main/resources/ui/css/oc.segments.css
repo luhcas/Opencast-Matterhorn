@@ -55,3 +55,7 @@
   padding-right: 5px;
   vertical-align: top;
 }
+
+span.marked {
+  background-color: #FFFF00;
+}
