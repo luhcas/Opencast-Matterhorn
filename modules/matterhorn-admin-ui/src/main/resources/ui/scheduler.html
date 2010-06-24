@@ -137,7 +137,7 @@
               <form action="">
                 <ul class="fl-controls-right form-list">
                   <li class="required">
-                    <label class="fl-label" for="title" id="label-title"><span id="i18n_title_label"></span>:</label>
+                    <label class="fl-label" for="title" id="label-title"><span class="color-red">* </span><span id="i18n_title_label"></span>:</label>
                     <div id="title-cell" style="display: table-cell;">
                         <input type="text" id="title" name="title" class="form-field">
                         <span class="fl-icon icon-help" id="help_title" title="Click for help"></span>
@@ -145,7 +145,7 @@
                     </div>
                   </li>
                   <li id="series_container">
-                    <label class="fl-label" for="series_select"  id="label-series"><span id="i18n_series_label"></span>:</label>
+                    <label class="fl-label" for="series_select"  id="label-series"><span class="color-red">* </span><span id="i18n_series_label"></span>:</label>
                     <input type="text" class="form-field ui-autocomplete-input" name="series_select" id="series_select">
                     <input type="hidden" id="series">
                     <span class="fl-icon icon-help"  id="help_series" title="Click for help"></span>
@@ -213,14 +213,14 @@
                 -->
                   <ul class="fl-controls-right form-list">
                     <li class="required">
-                      <label class="fl-label form-box-label" id="label-startdate"><span id="i18n_startdate_label"></span>:</label>
+                      <label class="fl-label form-box-label" id="label-startdate"><span class="color-red">* </span><span id="i18n_startdate_label"></span>:</label>
                       <input type="text" size="10" name="startDate" id="startDate" style="margin-right:5px;">
                       <span class="fl-icon icon-help" id="help_startdate" title="Click for help"></span>
                     </li>
                   </ul>
                   <ul class="fl-controls-right form-list">
                     <li class="required">
-                      <label class="fl-label form-box-label" id="label-starttime"><span id="i18n_starttime_label"></span>:</label>
+                      <label class="fl-label form-box-label" id="label-starttime"><span class="color-red">* </span><span id="i18n_starttime_label"></span>:</label>
                       <select id="startTimeHour">
                         <option value="0">00</option>
                         <option value="1">01</option>
@@ -312,7 +312,7 @@
                       <span class="fl-icon icon-help" id="help_starttime" title="Click for help"></span>
                     </li>
                     <li class="required">
-                      <label class="fl-label form-box-label" id="label-duration"><span id="i18n_dur_label"></span>:</label>
+                      <label class="fl-label form-box-label" id="label-duration"><span class="color-red">* </span><span id="i18n_dur_label"></span>:</label>
                       <select id="durationHour">
                         <option value="0">0</option>
                         <option value="1">1</option>
@@ -348,7 +348,7 @@
                       <span class="fl-icon icon-help" id="help_duration" title="Click for help"></span>
                     </li>
                     <li class="required" style="clear: both;">
-                      <label class="fl-label"  id="label-agent"><span id="i18n_agent_label"></span>:</label>
+                      <label class="fl-label"  id="label-agent"><span class="color-red">* </span><span id="i18n_agent_label"></span>:</label>
                       <div>
                         <select id="agent" name="agent">
                           <option value="">Choose one:</option>
@@ -357,7 +357,7 @@
                       </div>
                     </li>
                     <li class="required">
-                      <label class="fl-label" id="label-input"><span id="i18n_input_label"></span>:</label>
+                      <label class="fl-label" id="label-input"><span class="color-red">* </span><span id="i18n_input_label"></span>:</label>
                       <div class="form-radio-group" style="float: left; width: 300px;">
                         <div id="input-list"></div>
                         <span class="fl-icon icon-help" id="help_input" title="Click for help" style="vertical-align: middle; margin-left: .8em;"></span>
@@ -396,7 +396,7 @@
                         </select>
                       </li>
                       <li class="required" id="day-select">
-                        <label class="fl-label form-box-label" for="repeat-days"><span id="i18n_sched_days">Days</span>:</label>
+                        <label class="fl-label form-box-label" for="repeat-days"><span class="color-red">* </span><span id="i18n_sched_days">Days</span>:</label>
                         <table>
                           <thead>
                             <tr>
@@ -423,12 +423,12 @@
                         </table>
                       </li>
                       <li class="required">
-                        <label class="fl-label form-box-label" id="label-recurstart"><span id="i18n_recurstart_label">Start Date</span>:</label>
+                        <label class="fl-label form-box-label" id="label-recurstart"><span class="color-red">* </span><span id="i18n_recurstart_label">Start Date</span>:</label>
                         <input type="text" size="10" name="recurStart" id="recurStart" style="margin-right:5px;">
                         <span class="fl-icon icon-help" id="help_recurstart" title="Click for help"></span>
                       </li>
                       <li class="required">
-                        <label class="fl-label form-box-label" id="label-recurend"><span id="i18n_recurend_label">End Date</span>:</label>
+                        <label class="fl-label form-box-label" id="label-recurend"><span class="color-red">* </span><span id="i18n_recurend_label">End Date</span>:</label>
                         <input type="text" size="10" name="recurEnd" id="recurEnd" style="margin-right:5px;">
                         <span class="fl-icon icon-help" id="help_recurend" title="Click for help"></span>
                       </li>
@@ -436,7 +436,7 @@
                   </fieldset>
                   <ul class="fl-controls-right form-list">
                     <li class="required">
-                      <label class="fl-label form-box-label" id="label-recurstarttime"><span id="i18n_recur_start_label">Start Time</span>:</label>
+                      <label class="fl-label form-box-label" id="label-recurstarttime"><span class="color-red">* </span><span id="i18n_recur_start_label">Start Time</span>:</label>
                       <select id="recurStartTimeHour">
                         <option value="0">00</option>
                         <option value="1">01</option>
@@ -528,7 +528,7 @@
                       <span class="fl-icon icon-help" id="help_starttime" title="Click for help"></span>
                     </li>
                     <li class="required">
-                      <label class="fl-label form-box-label" id="label-recurduration"><span id="i18n_recur_dur_label">Duration</span>:</label>
+                      <label class="fl-label form-box-label" id="label-recurduration"><span class="color-red">* </span><span id="i18n_recur_dur_label">Duration</span>:</label>
                       <select id="recurDurationHour">
                         <option value="0">0</option>
                         <option value="1">1</option>
@@ -564,7 +564,7 @@
                       <span class="fl-icon icon-help" id="help_duration" title="Click for help"></span>
                     </li>
                     <li class="required" style="clear: both;">
-                      <label class="fl-label"  id="label-recurAgent"><span id="i18n_agent_label">Agent</span>:</label>
+                      <label class="fl-label"  id="label-recurAgent"><span class="color-red">* </span><span id="i18n_agent_label">Agent</span>:</label>
                       <div>
                         <select id="recurAgent" name="recurAgent">
                           <option value="">Choose one:</option>
@@ -573,7 +573,7 @@
                       </div>
                     </li>
                     <li class="required">
-                      <label class="fl-label" id="label-input"><span id="i18n_input_label">Inputs</span>:</label>
+                      <label class="fl-label" id="label-input"><span class="color-red">* </span><span id="i18n_input_label">Inputs</span>:</label>
                       <div class="form-radio-group" style="float: left; width: 300px;">
                         <div id="recur-input-list"></div>
                         <span class="fl-icon icon-help" id="help_input" title="Click for help" style="vertical-align: middle; margin-left: .8em;"></span>
