@@ -11,7 +11,7 @@
 		            <span id="play-progress" class="play-progress" value="0" style="width: 0%;"></span>
 		            <span id="scubber-channel" class="scrubber-channel">
 		              <button id="scrubber" class="scrubber-button" ></button>
-		              <div id="draggable" class="ui-widget-content" style="left: 0%;"></div>
+		              <div id="draggable" class="ui-widget-content" style="left: 0%;" value="test"></div>
 		            </span>
 		          </div>
 		  <table width="100%">

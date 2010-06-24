@@ -11,15 +11,22 @@ var Opencast = Opencast || {};
 */
 Opencast.Scrubber = (function () 
 {
-   var locked = false,
-   currentScrubberPositon = 0;
-   
-   
+    var locked = false,
+    currentScrubberPositon = 0,
+    tooltipTop = 0;
+    
+    /**
+        @memberOf Opencast.Scrubber
+        @description Initialize the scrubber
+     */
     function init()
     {
         $('#draggable').bind('dragstart', function (event, ui) 
         {
-            Opencast.Player.setDragging(true);
+        	$("#divToolTip").fadeIn();
+        	tooltipTop = event.pageY-35;
+        	
+        	Opencast.Player.setDragging(true);
             
             currentScrubberPositon = parseInt($(this).css("left").replace(/[^0-9:]/g, ''));
             
@@ -39,38 +46,34 @@ Opencast.Scrubber = (function ()
 
         $('#draggable').bind('drag', function (event, ui) 
         {
-           if (!locked)
-           {
-              locked = true;
-              setTimeout(function()
-              { 
-                 locked = false;
-              }, 200);
+            $("#divToolTip").css('top', tooltipTop);
+          	$("#divToolTip").css('left', event.pageX-25);
+          	
+            if (!locked)
+            {
+                locked = true;
+                setTimeout(function()
+                {  
+                    locked = false;
+                }, 200);
               
-            
-              var postion =  $(this).css("left").replace(/[^0-9:]/g, ''); 
-          	  var positionInt = parseInt(postion);
+                var postion =  $(this).css("left").replace(/[^0-9:]/g, ''); 
+          	    var positionInt = parseInt(postion);
               
-          	  if (positionInt <= $('.load-progress').width() && Opencast.Player.getHtmlBool() == true)
-          	  {
-          		
-          		  $("#scrubber").css("left", $(this).css("left"));
-                var newPosition = Math.round(($("#draggable").position().left / $("#scubber-channel").width()) * Opencast.Player.getDuration());
-                Videodisplay.seek(newPosition);
-                
-                
-                
-          		  
-          	  }
-          	  else if(Opencast.Player.getHtmlBool() == false)
-          	  {
+          	    if (positionInt <= $('.load-progress').width() && Opencast.Player.getHtmlBool() == true)
+          	    {
+          		    $("#scrubber").css("left", $(this).css("left"));
+                    var newPosition = Math.round(($("#draggable").position().left / $("#scubber-channel").width()) * Opencast.Player.getDuration());
+                    Videodisplay.seek(newPosition);
+                }
+          	    else if(Opencast.Player.getHtmlBool() == false)
+          	    {
           		 
-          		  $("#scrubber").css("left", $(this).css("left"));
-                var newPosition = Math.round(($("#draggable").position().left / $("#scubber-channel").width()) * Opencast.Player.getDuration());
-                Videodisplay.seek(newPosition);
-               
-          	  }
-           }
+          		    $("#scrubber").css("left", $(this).css("left"));
+                    var newPosition = Math.round(($("#draggable").position().left / $("#scubber-channel").width()) * Opencast.Player.getDuration());
+                    Videodisplay.seek(newPosition);
+                }
+             }
         });
 
         $('#draggable').bind('dragstop', function (event, ui)         
@@ -117,6 +120,9 @@ Opencast.Scrubber = (function ()
                 var newPosition = Math.round(($("#draggable").position().left / $("#scubber-channel").width()) * Opencast.Player.getDuration());
                 Videodisplay.seek(newPosition);
         	}
+        	
+        	// hide tooltip
+        	$("#divToolTip").fadeOut();
         	
         });
 
@@ -172,9 +178,23 @@ Opencast.Scrubber = (function ()
         $("#draggable").click(function (e)
         {
             $("#scrubber").focus();
+            
         }); 
+        
+        // create tooltip
+        oc_tooltip();
     }
     
+    /**
+        @memberOf Opencast.Scrubber
+        @description Create a tooltip div
+     */
+    function oc_tooltip()
+    {
+    	var $tooltip = $('<div id="divToolTip" value="00:00:00">00:00:00</div>');
+    	$('body').append($tooltip);
+		$tooltip.hide();
+    }
 
     return {
         init: init

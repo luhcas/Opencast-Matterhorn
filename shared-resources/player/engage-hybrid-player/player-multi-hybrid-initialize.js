@@ -209,9 +209,6 @@ Opencast.Initialize = (function ()
         $('#oc_player_video-dropdown').bind('mouseover', dropdownVideo_open);
         $('#oc_video-size-controls').bind('mouseout',  dropdown_timer);
         $('#oc_player_video-dropdown').bind('mouseout',  dropdown_timer);
-       
-        
-        
         
         // Handler focus
         $('#oc_btn-dropdown').focus(function () 
@@ -561,8 +558,6 @@ Opencast.Initialize = (function ()
             }
         });
         
-       
-       
     });
     
    

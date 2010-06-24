@@ -527,7 +527,6 @@ option:hover
   overflow:                 auto; 
   border:                   1px solid #000000;
   background-color:         #E3E3D7;
-  margin-bottom:            5px;
 }
 
 .oc_embed-textarea
@@ -637,6 +636,22 @@ option:hover
   top:                      -19px;
   z-index:                  3;
   margin-left:              -4px;
+}
+
+#divToolTip
+{
+  position : absolute;
+  padding:                  2px;
+ text-align:               center;
+  -moz-border-radius :      5px 5px 5px 5px;
+  -webkit-border-radius :    5px 5px 5px 5px;
+  border :                  1px solid #f8bb22;
+  color :                   #000000;
+  background-color:         #fae6a0;
+  font-size :                   14;
+  left:                     120px;
+  top:                      380px;
+  cursor: default !important;
 }
 
 .play-segment 

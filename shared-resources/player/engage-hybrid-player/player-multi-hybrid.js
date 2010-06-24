@@ -1257,11 +1257,18 @@ Opencast.Player = (function () {
      */
     function setCurrentTime(text) 
     {
-        if ( getDragging() == false )
+    	$("#divToolTip").attr("value", text);
+    	$("#divToolTip").html(text);
+    	
+    	if ( getDragging() == false )
         {
     	    $("#oc_current-time").attr("value", text);
             $("#oc_edit-time").attr("value", text);
             $("#slider_seek_Rail").attr("title", "Time " + text);
+            
+          
+            
+            
         }
         currentTimeString = text;
     }
@@ -1555,15 +1562,15 @@ Opencast.Player = (function () {
         }
         else if (displayMode === SINGLEPLAYER)
         {
-            //content = '<span id="oc_video-size-dropdown-div">';
-            //content = content + '<input id="oc_btn-singleDisplay" class="oc_btn-singleDisplay" type="submit" name="Show presenter video " alt="Show presenter video " title="Show presenter video " value="" onclick="Opencast.Player.videoSizeControlSingleDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
+            content = '<span id="oc_video-size-dropdown-div">';
+            content = content + '<input id="oc_btn-singleDisplay" class="oc_btn-singleDisplay" type="submit" name="Show presenter video " alt="Show presenter video " title="Show presenter video " value="" onclick="Opencast.Player.videoSizeControlSingleDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
             //content = content + '<input id="oc_btn-audioDisplay" class="oc_btn-audioDisplay" type="submit" name="Audio" alt="Audio" title="Audio" value="" onclick="Opencast.Player.videoSizeControlAudioDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
-            //content = content + '</span>';
+            content = content + '</span>';
             $('#oc_player_video-dropdown').append(content);
             $("#oc_btn-dropdown").attr("className", "oc_btn-singleDisplay");
-            //$('#oc_video-size-dropdown-div').css("width", '0%');
-            //$('#oc_video-size-dropdown-div').css("display", 'none');
-            //$('#oc_video-size-dropdown-div').css("margin-left", '-22px');
+            $('#oc_video-size-dropdown-div').css("width", '0%');
+            $('#oc_video-size-dropdown-div').css("display", 'none');
+            $('#oc_video-size-dropdown-div').css("margin-left", '-22px');
             setDisplayMode(displayMode);
             setCurrentVideoSize(VIDEOSIZESINGLE);
         }

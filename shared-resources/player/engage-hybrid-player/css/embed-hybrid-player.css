@@ -152,6 +152,7 @@ table
   margin-right:             10px;
 }
 
+
 #oc_volume-dropdown li
 {   
   float:                    left;
@@ -165,14 +166,14 @@ table
   position:                 absolute;
   visibility:               hidden;
   border-top:               1px solid white
-}
-       
+}   
+        
 #oc_volume-dropdown li ul li
 {   
   float:                    none;
   display:                  inline;
 }
-        
+      
 #oc_volume-dropdown-div
 {   
   height:                   28px;
@@ -208,7 +209,7 @@ table
   background-color:         #EEEEEE;
 }
 
-.oc_slider-volume-Thumb
+oc_slider-volume-Thumb
 {
   background:               transparent url("../img/oc_icons.png");
   background-position:      -30px -270px;
@@ -247,7 +248,6 @@ table
   position:                 absolute;
   margin-top:               -3px;
 }
-
 
 #oc_video-cc
 {
@@ -312,7 +312,6 @@ table
   background-position:      0 -4px;*/
   text-align:               center;
 }
-
 
 
 .oc_progress-bar
@@ -433,7 +432,6 @@ table
   top: -7px;
   height: 7px;
 }
-
 .progress-text 
 {
   display:block;

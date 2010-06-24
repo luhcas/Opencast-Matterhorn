@@ -98,13 +98,7 @@ Opencast.Watch = (function ()
             mediaResolutionOne = mediaResolutionTwo;
             mediaResolutionTwo = null;
           }
-
-        
-           
-
-          
          
-          
           mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
           mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
           

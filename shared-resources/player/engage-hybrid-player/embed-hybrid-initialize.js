@@ -155,7 +155,7 @@ Opencast.Initialize = (function ()
     
     /**
         @memberOf Opencast.Initialize
-        @description open the drop down menu video.
+        @description open the drop down menue video.
      */
     function dropdownVideo_open()
     {
@@ -215,9 +215,6 @@ Opencast.Initialize = (function ()
         $('#oc_player_video-dropdown').bind('mouseover', dropdownVideo_open);
         $('#oc_video-size-controls').bind('mouseout',  dropdown_timer);
         $('#oc_player_video-dropdown').bind('mouseout',  dropdown_timer);
-       
-        
-        
         
         // Handler focus
         $('#oc_btn-dropdown').focus(function () 
@@ -234,7 +231,7 @@ Opencast.Initialize = (function ()
         
         $('#oc_sound').bind('mouseover', dropdown_open);
         $('#oc_sound').bind('mouseout',  dropdown_timer);
-
+        
         // Handler focus
         $('#oc_btn-volume').focus(function () 
         {
@@ -258,7 +255,7 @@ Opencast.Initialize = (function ()
         {
             dropdown_timer();
         });
-        
+     
         // init the aria slider for the volume
         Opencast.ariaSlider.init();
        
