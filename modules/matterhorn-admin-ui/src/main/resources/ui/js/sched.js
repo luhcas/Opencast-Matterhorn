@@ -188,6 +188,7 @@ UI.ChangeRecordingType = function(recType){
   d.setMinutes(0);
   
   if(Scheduler.type == SINGLE_EVENT){
+    $('#title-note').hide();  
     $('#recurring_recording').hide();
     $('#single_recording').show();
     UI.agentList = '#agent';
@@ -199,6 +200,7 @@ UI.ChangeRecordingType = function(recType){
   }else{
     // Multiple recordings have some differnt fields and different behaviors
     //show recurring_recording panel, hide single.
+    $('#title-note').show();
     $('#recurring_recording').show();
     $('#single_recording').hide();
     UI.agentList = '#recurAgent';

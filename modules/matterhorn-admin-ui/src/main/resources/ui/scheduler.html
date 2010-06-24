@@ -138,8 +138,11 @@
                 <ul class="fl-controls-right form-list">
                   <li class="required">
                     <label class="fl-label" for="title" id="label-title"><span id="i18n_title_label"></span>:</label>
-                    <input type="text" class="form-field" name="title" id="title">
-                    <span class="fl-icon icon-help" id="help_title" title="Click for help"></span>
+                    <div id="title-cell" style="display: table-cell;">
+                        <input type="text" id="title" name="title" class="form-field">
+                        <span class="fl-icon icon-help" id="help_title" title="Click for help"></span>
+                        <br><div id="title-note" class="form-field" style="display:none;">Titles of individual recordings will be appended by sequential numbers starting with 1</div>
+                    </div>
                   </li>
                   <li id="series_container">
                     <label class="fl-label" for="series_select"  id="label-series"><span id="i18n_series_label"></span>:</label>

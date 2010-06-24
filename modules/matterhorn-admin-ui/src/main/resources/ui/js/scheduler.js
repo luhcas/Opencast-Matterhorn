@@ -162,6 +162,16 @@ SchedulerUI.submitForm = function() {
   var eventXML = null;
   eventXML = SchedulerForm.serialize();
   if(eventXML){
+    inputs = false;
+    $("div#input-list > :checkbox").each(function(index){
+      if($(this).is(':checked') === true){
+       inputs = true
+      }
+    });
+    if(!inputs){
+      alert('You have to select at least one input for the selected capute agent');
+      return false;
+    }    
     if($('#singleRecording')[0].checked){
       if(SchedulerUI.getURLParams('edit')){
         $.post( SCHEDULER_URL + '/event', {
@@ -426,6 +436,7 @@ SchedulerUI.selectRecordingType = function(recType){
   
   if(recType == 'multiple'){ // Multiple recordings have some differnt fields and different behaviors
     //show recurring_recording panel, hide single.
+    $('#title-note').show();
     $('#recurring_recording').show();
     $('#single_recording').hide();
     SchedulerUI.agentList = '#recurAgent';
@@ -488,6 +499,7 @@ SchedulerUI.selectRecordingType = function(recType){
     };
     SchedulerForm.rootEl = 'RecurringEvent';
   }else{
+    $('#title-note').hide();
     $('#recurring_recording').hide();
     $('#single_recording').show();
     SchedulerUI.agentList = '#attendees';
