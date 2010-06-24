@@ -4,6 +4,7 @@ Matterhorn
 -----------------------
  Developer instructions:
 -----------------------
+ 
 
 
 1) Install an OSGi container, e. g. felix, equinox etc.
