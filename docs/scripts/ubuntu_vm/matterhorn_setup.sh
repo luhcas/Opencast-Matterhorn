@@ -51,6 +51,8 @@ cat >&1 <<END
 For a complete list of 3rd party tools, please visit:
   http://wiki.opencastproject.org/iconfluence/display/open/3rd+Party+Licensesi+and+Software
 
+** Install process may take 40-60 minutes, depending on computer configuration and network speed.
+
 ** PLEASE NOTE: You may be prompted for the login password to authorize the installation script.
 END
 }
