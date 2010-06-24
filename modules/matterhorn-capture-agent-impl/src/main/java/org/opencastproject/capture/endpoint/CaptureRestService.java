@@ -110,7 +110,7 @@ public class CaptureRestService {
     data.addEndpoint(RestEndpoint.Type.READ, ingestEndpoint);
 
     //// configuration()
-    RestEndpoint configEndpoint = new RestEndpoint("config", RestEndpoint.Method.GET, "/configuration", "Returns a list with the default agent configuration properties");
+    RestEndpoint configEndpoint = new RestEndpoint("config", RestEndpoint.Method.GET, "/configuration", "Returns a list with the default agent configuration properties.  This is in the same format as the startCapture endpoint.");
     configEndpoint.addStatus(org.opencastproject.util.
             doc.Status.OK("the configuration values are returned"));
     configEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("the configuration properties could not be retrieved"));
