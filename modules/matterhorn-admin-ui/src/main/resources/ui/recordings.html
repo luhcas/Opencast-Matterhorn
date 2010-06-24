@@ -29,10 +29,12 @@
   <body>
     <div id="pageHeader">
       <div id="currentVersion"></div>
-      <div id="logout"><a href="/j_spring_security_logout">logout</a></div>
       <div id="newestVersion" style="text-align: right; float: right;"></div>
     </div>
-
+    <div id="logout" style="text-align: right; left: 0px; width: 100%; position: absolute;">
+        <div style="background-color: rgb(246, 146, 30); float: right; padding: 3px 15px; display: inline-block;"><a href="/j_spring_security_logout">Log out</a></div>
+        <div style="display: inline-block; border-style: solid; border-width: 12px 20px; border-color: rgb(246, 146, 30) rgb(246, 146, 30) white white; width: 0px; float: right;"></div>
+    </div>
     <!-- notification that javaScript is disabled -->
     <noscript>
       <center>
