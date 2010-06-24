@@ -28,6 +28,7 @@ import org.opencastproject.search.impl.solr.SolrConnection;
 import org.opencastproject.search.impl.solr.SolrIndexManager;
 import org.opencastproject.search.impl.solr.SolrRequester;
 import org.opencastproject.util.PathSupport;
+import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -70,9 +71,14 @@ public class SearchServiceImpl implements SearchService {
 
   private Mpeg7CatalogService mpeg7Service;
 
+  /** The local workspace */
+  private Workspace workspace;
+
+  /** The registry of remote services */
+  protected RemoteServiceManager remoteServiceManager;
+
   protected String serverUrl = null;
   
-  protected RemoteServiceManager remoteServiceManager;
 
   public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
@@ -88,6 +94,12 @@ public class SearchServiceImpl implements SearchService {
     this.mpeg7Service = mpeg7Service;
     if (solrIndexManager != null)
       solrIndexManager.setMpeg7Service(mpeg7Service); // In case the dc service is updated
+  }
+
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
+    if (solrIndexManager != null)
+      solrIndexManager.setWorkspace(workspace); // In case the workspace is updated
   }
 
   /**
@@ -167,7 +179,7 @@ public class SearchServiceImpl implements SearchService {
       SolrCore.log.getParent().setLevel(Level.WARNING);
       solrConnection = new SolrConnection(solrRoot, PathSupport.concat(solrRoot,"data"));
       solrRequester = new SolrRequester(solrConnection);
-      solrIndexManager = new SolrIndexManager(solrConnection);
+      solrIndexManager = new SolrIndexManager(solrConnection, workspace);
       solrIndexManager.setDcService(dcService);
       solrIndexManager.setMpeg7Service(mpeg7Service);
       // On windows, the solr index needs some time to setup

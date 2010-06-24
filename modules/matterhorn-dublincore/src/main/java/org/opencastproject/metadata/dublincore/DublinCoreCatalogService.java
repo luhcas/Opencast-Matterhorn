@@ -22,7 +22,6 @@ import org.opencastproject.mediapackage.MediaPackageMetadata;
 import org.opencastproject.mediapackage.MediapackageMetadataImpl;
 import org.opencastproject.metadata.api.CatalogService;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
-import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.IOUtils;
@@ -35,7 +34,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.Map;
 
 import javax.xml.transform.Transformer;
@@ -55,8 +53,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
   protected Workspace workspace = null;
   
   public void setWorkspace(Workspace workspace) {
-    this.workspace
-    = workspace;
+    this.workspace = workspace;
   }
   
   @SuppressWarnings("unchecked")
@@ -103,11 +100,16 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
     Catalog[] dcs = mp.getCatalogs(DublinCoreCatalog.ANY_DUBLINCORE);
     for (Catalog catalog : dcs) {
       DublinCoreCatalog dc;
+      InputStream in = null;
       try {
-        dc = load(catalog);
-      } catch (IOException e) {
+        File f = workspace.get(catalog.getURI());
+        in = new FileInputStream(f);
+        dc = load(in);
+      } catch (Exception e) {
         logger.warn("Unable to load metadata from catalog '{}'", catalog);
         continue;
+      } finally {
+        IOUtils.closeQuietly(in);
       }
       if (catalog.getReference() == null) {
         // Title
@@ -164,20 +166,9 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
    * @see org.opencastproject.metadata.api.CatalogService#load(org.opencastproject.mediapackage.Catalog)
    */
   @Override
-  public DublinCoreCatalog load(Catalog catalog) throws IOException {
-    if(catalog == null) throw new IllegalArgumentException("Catalog must not be null");
-    URI uri = catalog.getURI();
-    if(uri == null) throw new IllegalStateException("Found catalog without a URI");
-    FileInputStream is = null;
-    try {
-      File file = workspace.get(uri);
-      is = new FileInputStream(file);
-      return new DublinCoreCatalogImpl(is);
-    } catch (NotFoundException e) {
-      throw new IOException(e);
-    } finally {
-      IOUtils.closeQuietly(is);
-    }
+  public DublinCoreCatalog load(InputStream in) throws IOException {
+    if(in == null) throw new IllegalArgumentException("Stream must not be null");
+    return new DublinCoreCatalogImpl(in);
   }
   
   /**

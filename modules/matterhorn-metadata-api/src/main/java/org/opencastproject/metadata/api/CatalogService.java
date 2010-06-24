@@ -31,13 +31,13 @@ public interface CatalogService<T extends MetadataCatalog> {
   T newInstance();
   
   /**
-   * Loads the catalog contents from a mediapackage's representation of a catalog
-   * @param catalog the mediapackage's representation of a catalog
-   * @return the catalog contents
-   * @throws IllegalArgumentException if the mediapackage catalog is not readable by this catalog service
+   * Loads the catalog contents from an input stream
+   * 
+   * @param in the catalog data
+   * @return the deserialized catalog contents
    * @throws IOException if the content of the catalog can not be loaded
    */
-  T load(Catalog catalog) throws IllegalArgumentException, IOException;
+  T load(InputStream in) throws IOException;
   
   /**
    * Whether the mediapackage catalog is readable by this catalog service

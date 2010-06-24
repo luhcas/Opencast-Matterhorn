@@ -43,6 +43,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class InspectWorkflowOperationHandlerTest {
   private MediaInspectionService inspectionService = null;
   private DublinCoreCatalogService dcService = null;
   private MediaPackageMetadata metadata = null;
-  
+
   // constant metadata values
   private static final Date DATE = new Date();
   private static final String LANGUAGE = "language";
@@ -75,7 +76,6 @@ public class InspectWorkflowOperationHandlerTest {
   private static final String TITLE = "title";
   private static final String NEW_DC_URL = "http://www.url.org";
 
-  
   @Before
   public void setup() throws Exception {
     MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
@@ -100,7 +100,6 @@ public class InspectWorkflowOperationHandlerTest {
     EasyMock.expect(metadata.getTitle()).andReturn(TITLE);
     EasyMock.replay(metadata);
 
-    
     // set up mock dublin core and dcService providing it
     DublinCoreCatalog dc = EasyMock.createStrictMock(DublinCoreCatalog.class);
     EasyMock.expect(dc.hasValue(DublinCore.PROPERTY_EXTENT)).andReturn(false);
@@ -108,13 +107,14 @@ public class InspectWorkflowOperationHandlerTest {
     EasyMock.expect(dc.hasValue(DublinCore.PROPERTY_CREATED)).andReturn(false);
     dc.set((EName) EasyMock.anyObject(), (DublinCoreValue) EasyMock.anyObject());
     dc.toXml((ByteArrayOutputStream) EasyMock.anyObject(), EasyMock.anyBoolean());
-//    EasyMock.expect(dc.getIdentifier()).andReturn("123");
+    // EasyMock.expect(dc.getIdentifier()).andReturn("123");
     EasyMock.replay(dc);
 
     dcService = org.easymock.classextension.EasyMock.createNiceMock(DublinCoreCatalogService.class);
-    org.easymock.classextension.EasyMock.expect(dcService.getMetadata((MediaPackage) EasyMock.anyObject())).andReturn(metadata);
+    org.easymock.classextension.EasyMock.expect(dcService.getMetadata((MediaPackage) EasyMock.anyObject())).andReturn(
+            metadata);
     org.easymock.classextension.EasyMock.expect(
-           dcService.load((Catalog) org.easymock.classextension.EasyMock.anyObject())).andReturn(dc);
+            dcService.load((InputStream) org.easymock.classextension.EasyMock.anyObject())).andReturn(dc);
     org.easymock.classextension.EasyMock.replay(dcService);
     operationHandler.setDublincoreService(dcService);
 
@@ -133,15 +133,16 @@ public class InspectWorkflowOperationHandlerTest {
 
     // set up mock workspace
     workspace = EasyMock.createNiceMock(Workspace.class);
-    workspace.delete((String) EasyMock.anyObject(), (String) EasyMock.anyObject());
+    // workspace.delete((String) EasyMock.anyObject(), (String) EasyMock.anyObject());
     URI newURI = new URI(NEW_DC_URL);
     EasyMock.expect(
             workspace.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
                     (InputStream) EasyMock.anyObject())).andReturn(newURI);
     EasyMock.expect(workspace.getURI((String) EasyMock.anyObject(), (String) EasyMock.anyObject())).andReturn(newURI);
+    EasyMock.expect(workspace.get((URI) EasyMock.anyObject())).andReturn(
+            new File(getClass().getResource("/dublincore.xml").toURI()));
     EasyMock.replay(workspace);
     operationHandler.setWorkspace(workspace);
-
   }
 
   @Test
@@ -151,7 +152,7 @@ public class InspectWorkflowOperationHandlerTest {
     }
     WorkflowOperationResult result = getWorkflowOperationResult(mp);
     Track trackNew = result.getMediaPackage().getTracks()[0];
-    
+
     // check track metadata
     Assert.assertNotNull(trackNew.getChecksum());
     Assert.assertNotNull(trackNew.getMimeType());
@@ -166,7 +167,6 @@ public class InspectWorkflowOperationHandlerTest {
     // dublincore check: also checked with strict mock calls
     Assert.assertEquals(NEW_DC_URL, cat.getURI().toString());
   }
-  
 
   private WorkflowOperationResult getWorkflowOperationResult(MediaPackage mp) throws WorkflowOperationException {
     // Add the mediapackage to a workflow instance

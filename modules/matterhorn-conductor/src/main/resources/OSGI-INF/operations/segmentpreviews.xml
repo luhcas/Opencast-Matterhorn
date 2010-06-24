@@ -11,4 +11,6 @@
     name="ComposerService" policy="static" bind="setComposerService"/>
   <reference name="Mpeg7Service" interface="org.opencastproject.metadata.mpeg7.Mpeg7CatalogService"
     cardinality="1..1" policy="static" bind="setMpeg7CatalogService" />
+  <reference cardinality="1..1" interface="org.opencastproject.workspace.api.Workspace"
+    name="Workspace" policy="static" bind="setWorkspace"/>
 </scr:component>

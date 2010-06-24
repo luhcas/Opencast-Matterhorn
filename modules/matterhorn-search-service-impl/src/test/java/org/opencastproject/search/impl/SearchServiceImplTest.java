@@ -20,7 +20,6 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.fail;
 
-import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
@@ -33,6 +32,9 @@ import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
 import org.opencastproject.util.IoSupport;
+import org.opencastproject.workspace.api.Workspace;
+
+import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
 import org.easymock.EasyMock;
@@ -43,6 +45,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 
 /**
@@ -61,12 +64,19 @@ public class SearchServiceImplTest {
     DublinCoreCatalog dcCatalog = new DublinCoreCatalogImpl(getClass().getResourceAsStream("/dublincore.xml"));
     DublinCoreCatalogService dcService = org.easymock.classextension.EasyMock
             .createNiceMock(DublinCoreCatalogService.class);
-    org.easymock.classextension.EasyMock.expect(dcService.load((Catalog) EasyMock.anyObject())).andReturn(dcCatalog);
+    org.easymock.classextension.EasyMock.expect(dcService.load((InputStream) EasyMock.anyObject())).andReturn(dcCatalog);
     org.easymock.classextension.EasyMock.replay(dcService);
+
+    Workspace workspace = EasyMock.createNiceMock(Workspace.class);
+    File dcFile = new File(getClass().getResource("/dublincore.xml").toURI());
+    Assert.assertNotNull(dcFile);
+    EasyMock.expect(workspace.get((URI) EasyMock.anyObject())).andReturn(dcFile).anyTimes();
+    EasyMock.replay(workspace);
     
     service = new SearchServiceImpl();
     service.solrRoot = IoSupport.getSystemTmpDir() + "opencast" + File.separator + "searchindex";
     service.setDublincoreService(dcService);
+    service.setWorkspace(workspace);
     service.setupSolr(solrRoot);
     RemoteServiceManager remote = EasyMock.createNiceMock(RemoteServiceManager.class);
     EasyMock.replay(remote);

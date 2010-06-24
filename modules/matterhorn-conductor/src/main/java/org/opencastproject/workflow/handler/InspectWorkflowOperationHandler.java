@@ -29,6 +29,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreValue;
 import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
 import org.opencastproject.metadata.dublincore.Precision;
 import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -38,9 +39,13 @@ import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.SortedMap;
@@ -150,7 +155,7 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
     // Complete episode dublin core catalog (if available)
     Catalog dcCatalogs[] = mediaPackage.getCatalogs(MediaPackageElements.EPISODE, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
     if (dcCatalogs.length > 0) {
-      DublinCoreCatalog dublinCore = dcService.load(dcCatalogs[0]);
+      DublinCoreCatalog dublinCore = loadDublinCoreCatalog(dcCatalogs[0]);
       Date today = new Date();
       
       // Extent
@@ -175,4 +180,24 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
       dcCatalogs[0].setURI(workspace.getURI(mpId, elementId));
     }
   }
+  
+  /**
+   * Loads a dublin core catalog from a mediapackage's catalog reference
+   * @param catalog the mediapackage's reference to this catalog
+   * @return the dublin core
+   * @throws IOException if there is a problem loading or parsing the dublin core object
+   */
+  protected DublinCoreCatalog loadDublinCoreCatalog(Catalog catalog) throws IOException {
+    InputStream in = null;
+    try {
+      File f = workspace.get(catalog.getURI());
+      in = new FileInputStream(f);
+      return dcService.load(in);
+    } catch (NotFoundException e) {
+      throw new IOException("Unable to open catalog " + catalog + ": " + e.getMessage());
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+  }
+
 }

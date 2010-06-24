@@ -12,4 +12,6 @@
     cardinality="1..1" policy="static" bind="setMpeg7Service" />
   <reference name="remoteServiceManager" interface="org.opencastproject.remote.api.RemoteServiceManager"
     cardinality="1..1" policy="static" bind="setRemoteServiceManager" />
+  <reference cardinality="1..1" interface="org.opencastproject.workspace.api.Workspace"
+    name="Workspace" policy="static" bind="setWorkspace"/>
 </scr:component>

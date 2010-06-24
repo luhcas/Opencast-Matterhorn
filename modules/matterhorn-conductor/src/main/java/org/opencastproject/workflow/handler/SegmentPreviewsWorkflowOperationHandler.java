@@ -37,6 +37,7 @@ import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.util.MimeTypes;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -44,11 +45,17 @@ import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
+import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -87,6 +94,9 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
   /** The mpeg7 catalog service */
   private Mpeg7CatalogService mpeg7CatalogService = null;
 
+  /** The local workspace */
+  private Workspace workspace = null;
+
   /**
    * {@inheritDoc}
    * 
@@ -115,6 +125,18 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
    */
   protected void setMpeg7CatalogService(Mpeg7CatalogService catalogService) {
     this.mpeg7CatalogService = catalogService;
+  }
+
+
+  /**
+   * Callback for declarative services configuration that will introduce us to the local workspace service.
+   * Implementation assumes that the reference is configured as being static.
+   * 
+   * @param workspace
+   *          an instance of the workspace
+   */
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
   }
 
   /**
@@ -218,7 +240,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
         Mpeg7Catalog mpeg7 = null;
         if (segmentCatalogs.length > 0) {
           try {
-            mpeg7 = mpeg7CatalogService.load(segmentCatalogs[0]);
+            mpeg7 = loadMpeg7Catalog(segmentCatalogs[0]);
           } catch (Exception e) {
             throw new RuntimeException(e);
           }
@@ -339,6 +361,25 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
       }
     }
     return referenceMaster;
+  }
+
+  /**
+   * Loads an mpeg7 catalog from a mediapackage's catalog reference
+   * @param catalog the mediapackage's reference to this catalog
+   * @return the mpeg7
+   * @throws IOException if there is a problem loading or parsing the mpeg7 object
+   */
+  protected Mpeg7Catalog loadMpeg7Catalog(Catalog catalog) throws IOException {
+    InputStream in = null;
+    try {
+      File f = workspace.get(catalog.getURI());
+      in = new FileInputStream(f);
+      return mpeg7CatalogService.load(in);
+    } catch (NotFoundException e) {
+      throw new IOException("Unable to open catalog " + catalog + ": " + e.getMessage());
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
   }
 
 }

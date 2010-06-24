@@ -18,18 +18,12 @@ package org.opencastproject.metadata.mpeg7;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.metadata.api.CatalogService;
-import org.opencastproject.util.NotFoundException;
-import org.opencastproject.workspace.api.Workspace;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -40,12 +34,6 @@ import javax.xml.transform.stream.StreamResult;
  * Loads {@link Mpeg7Catalog}s
  */
 public class Mpeg7CatalogService implements CatalogService<Mpeg7Catalog> {
-
-  protected Workspace workspace = null;
-  
-  public void setWorkspace(Workspace workspace) {
-    this.workspace = workspace;
-  }
 
   /**
    * {@inheritDoc}
@@ -78,23 +66,12 @@ public class Mpeg7CatalogService implements CatalogService<Mpeg7Catalog> {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.metadata.api.CatalogService#load(org.opencastproject.mediapackage.Catalog)
+   * @see org.opencastproject.metadata.api.CatalogService#load(java.io.InputStream)
    */
   @Override
-  public Mpeg7Catalog load(Catalog catalog) throws IOException, IllegalArgumentException, IllegalStateException {
-    if(catalog == null) throw new IllegalArgumentException("Catalog must not be null");
-    URI uri = catalog.getURI();
-    if(uri == null) throw new IllegalStateException("Found catalog without a URI");
-    FileInputStream is = null;
-    try {
-      File file = workspace.get(uri);
-      is = new FileInputStream(file);
-      return new Mpeg7CatalogImpl(is);
-    } catch (NotFoundException e) {
-      throw new IOException(e);
-    } finally {
-      IOUtils.closeQuietly(is);
-    }
+  public Mpeg7Catalog load(InputStream in) throws IOException {
+    if(in == null) throw new IllegalArgumentException("Stream must not be null");
+    return new Mpeg7CatalogImpl(in);
   }
 
   /**

@@ -46,7 +46,10 @@ import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
+import org.opencastproject.util.NotFoundException;
+import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.UpdateRequest;
@@ -56,7 +59,10 @@ import org.apache.solr.common.SolrDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -98,6 +104,12 @@ public class SolrIndexManager {
 
   private Mpeg7CatalogService mpeg7Service;
 
+  private Workspace workspace;
+  
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
+  }
+
   public void setDcService(DublinCoreCatalogService dcService) {
     this.dcService = dcService;
   }
@@ -112,10 +124,13 @@ public class SolrIndexManager {
    * @param connection
    *          connection to the database
    */
-  public SolrIndexManager(SolrConnection connection) {
+  public SolrIndexManager(SolrConnection connection, Workspace workspace) {
     if (connection == null)
       throw new IllegalArgumentException("Unable to manage solr with null connection");
+    if(workspace == null)
+      throw new IllegalArgumentException("Unable to manager solr without a workspace");
     this.solrConnection = connection;
+    this.workspace = workspace;
   }
 
   /**
@@ -269,12 +284,38 @@ public class SolrIndexManager {
     }
     // TODO: merge the segments from each mpeg7 if there is more than one mpeg7 catalog
     if (mpeg7Catalogs.length > 0) {
-      Mpeg7Catalog mpeg7Catalog = mpeg7Service.load(mpeg7Catalogs[0]);
+      Mpeg7Catalog mpeg7Catalog = loadMpeg7Catalog(mpeg7Catalogs[0]);
       addMpeg7Metadata(solrEpisodeDocument, mediaPackage, mpeg7Catalog);
     } else {
       logger.debug("No segmentation catalog found");
     }
     return solrEpisodeDocument;
+  }
+  
+  protected DublinCoreCatalog loadDublinCoreCatalog(Catalog cat) throws IOException {
+    InputStream in = null;
+    try {
+      File f = workspace.get(cat.getURI());
+      in = new FileInputStream(f);
+      return dcService.load(in);
+    } catch (NotFoundException e) {
+      throw new IOException("Unable to load metadata from dublin core catalog " + cat);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+  }
+
+  protected Mpeg7Catalog loadMpeg7Catalog(Catalog cat) throws IOException {
+    InputStream in = null;
+    try {
+      File f = workspace.get(cat.getURI());
+      in = new FileInputStream(f);
+      return mpeg7Service.load(in);
+    } catch (NotFoundException e) {
+      throw new IOException("Unable to load metadata from mpeg7 catalog " + cat);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
   }
 
   /**
@@ -356,7 +397,7 @@ public class SolrIndexManager {
     DublinCoreCatalog dc = null;
     Catalog dcCatalogs[] = mediaPackage.getCatalogs(flavor);
     if (dcCatalogs != null && dcCatalogs.length > 0) {
-      dc = dcService.load(dcCatalogs[0]);
+      dc = loadDublinCoreCatalog(dcCatalogs[0]);
     } else {
       dc = dcService.newInstance();
       logger.info("No episode dublincore metadata found in media package {}", mediaPackage);
