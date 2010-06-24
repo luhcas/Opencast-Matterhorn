@@ -14,6 +14,9 @@
 				        <xsl:when test="@type='presenter/search+preview'">
 				          <xsl:attribute name="src"><xsl:value-of select="url" /></xsl:attribute>
 				        </xsl:when>
+				        <xsl:when test="@type='presentation/search+preview'">
+                  <xsl:attribute name="src"><xsl:value-of select="url" /></xsl:attribute>
+                </xsl:when>
 				      </xsl:choose>
 				    </xsl:for-each>
            </img>
