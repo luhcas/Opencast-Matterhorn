@@ -33,6 +33,11 @@
       <artifactId>commons-io</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
@@ -107,9 +112,11 @@
               org.opencastproject.remote.impl,
               org.opencastproject.remote.command
             </Export-Package>
+            <Embed-Dependency>json-simple;inline=true</Embed-Dependency>
             <Service-Component>
               OSGI-INF/receipt.xml,
-              OSGI-INF/maintenance_shell.xml
+              OSGI-INF/maintenance_shell.xml,
+              OSGI-INF/remote-service-endpoint.xml
             </Service-Component>
             <JPA-PersistenceUnits>org.opencastproject.remote</JPA-PersistenceUnits>
           </instructions>
