@@ -121,7 +121,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
    *          the feed's home url
    * @param rssFlavor
    *          the flavor identifying the track to be included in rss feeds
-   * @param atomFlavor
+   * @param atomFlavors
    *          the flavors identifying tracks to be included in atom feeds
    * @param entryLinkTemplate
    *          the link template
@@ -323,8 +323,8 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
   /**
    * Adds series information to the feed.
    * 
-   * @param type
-   *          the feed type
+   * @param feed
+   *          the feed
    * @param query
    *          the query that results in the feed
    * @param resultItem
@@ -370,8 +370,8 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
   /**
    * Adds episode information to the feed.
    * 
-   * @param type
-   *          the feed type
+   * @param feed
+   *          the feed
    * @param query
    *          the query that results in the feed
    * @param resultItem
@@ -692,8 +692,8 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
    * This default implementation will include the track identified by the flavor as specified in the constructor for rss
    * feeds and every distribution track for atom feeds.
    * 
-   * @param type
-   *          the feed type
+   * @param feed
+   *          the feed
    * @param resultItem
    *          the result item
    * @return the set of identifier
@@ -791,8 +791,8 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
    * {@link #getLinkTemplate()} to create the url. Overwrite this method to provide your own way of generating links to
    * feed entries.
    * 
-   * @param type
-   *          the feed type
+   * @param feed
+   *          the feed
    * @param solrResultItem
    *          solr search result for this feed entry
    * @return the link to the ui

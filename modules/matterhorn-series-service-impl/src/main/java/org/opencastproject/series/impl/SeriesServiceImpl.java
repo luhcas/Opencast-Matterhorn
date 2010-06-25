@@ -64,10 +64,10 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   public SeriesServiceImpl () {
     logger.info("Series Service instantiated");
   }
-  
+
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.series.api.SeriesService#addSeries(org.opencastproject.series.impl.SeriesImpl)
+   * @see org.opencastproject.series.api.SeriesService#addSeries(org.opencastproject.series.api.Series)
    */
   @Override
   public boolean addSeries(Series s) {
@@ -109,6 +109,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * {@inheritDoc}
    * @see org.opencastproject.series.api.SeriesService#getAllSeries()
    */
+  @SuppressWarnings("unchecked")
   @Override
   public List<Series> getAllSeries() {
     EntityManager em = emf.createEntityManager();
@@ -186,7 +187,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.series.api.SeriesService#updateSeries(org.opencastproject.series.impl.SeriesImpl)
+   * @see org.opencastproject.series.api.SeriesService#updateSeries(org.opencastproject.series.api.Series)
    */
   @Override
   public boolean updateSeries(Series s) {
@@ -237,12 +238,14 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
     return persistenceProvider;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
     this.properties = properties;
     
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public List<Series> searchSeries(String pattern) {
     EntityManager em = emf.createEntityManager();

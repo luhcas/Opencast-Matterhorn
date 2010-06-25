@@ -412,9 +412,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(org.opencastproject.mediapackage.AbstractMediaPackageElement,
-   *      boolean, boolean)
+   * @see org.opencastproject.inspection.api.MediaInspectionService#enrich(org.opencastproject.mediapackage.MediaPackageElement, boolean, boolean)
    */
   @Override
   public Receipt enrich(final MediaPackageElement element, final boolean override, final boolean block) {

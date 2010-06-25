@@ -31,7 +31,6 @@ public interface WorkflowDefinition {
 
   /**
    * The title for this workflow definition
-   * @return
    */
   String getTitle();
   

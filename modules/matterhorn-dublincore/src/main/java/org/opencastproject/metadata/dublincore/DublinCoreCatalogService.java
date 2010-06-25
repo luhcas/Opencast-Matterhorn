@@ -91,7 +91,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.metadata.api.CatalogService#getMetadata(org.opencastproject.mediapackage.MediaPackage)
+   * @see org.opencastproject.metadata.api.MediaPackageMetadataService#getMetadata(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public MediaPackageMetadata getMetadata(MediaPackage mp) {
@@ -162,8 +162,9 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
   }
 
   /**
+   * 
    * {@inheritDoc}
-   * @see org.opencastproject.metadata.api.CatalogService#load(org.opencastproject.mediapackage.Catalog)
+   * @see org.opencastproject.metadata.api.CatalogService#load(java.io.InputStream)
    */
   @Override
   public DublinCoreCatalog load(InputStream in) throws IOException {
@@ -190,10 +191,11 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
   public DublinCoreCatalog newInstance() {
     return new DublinCoreCatalogImpl();
   }
-  
+
   /**
+   * 
    * {@inheritDoc}
-   * @see org.opencastproject.metadata.api.CatalogService#getPriority()
+   * @see org.opencastproject.metadata.api.MediaPackageMetadataService#getPriority()
    */
   @Override
   public int getPriority() {

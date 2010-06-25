@@ -42,7 +42,7 @@ public interface WorkflowServiceImplDao {
   void remove(String id);
 
   /**
-   * Gets a {@link WorkflowInstace} by its ID.
+   * Gets a WorkflowInstace by its ID.
    */
   WorkflowInstance getWorkflowById(String workflowId);
 
@@ -54,8 +54,11 @@ public interface WorkflowServiceImplDao {
   long countWorkflowInstances();
 
   /**
-   * @param query
-   * @return
+   * Gets a set of workflow instances using a custom query
+   * 
+   * @param query the query to use in the search for workflow instances
+   * 
+   * @return the set of matching workflow instances
    */
   WorkflowSet getWorkflowInstances(WorkflowQuery query);
 

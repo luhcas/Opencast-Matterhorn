@@ -28,8 +28,7 @@ public class RecordingImpl implements Recording {
   public String id;
 
   /**
-   * The state of the recording.  This should be defined from {@link org.opencastproject.capture.admin.api.RecordingState}.
-   * @see RecordingState
+   * The state of the recording.  This should be defined from RecordingState.
    */
   public String state;
 
@@ -43,8 +42,7 @@ public class RecordingImpl implements Recording {
    * Builds a representation of the recording.
    *
    * @param recordingID The ID of the recording.
-   * @param recordingState The state of the recording.  This should be defined from {@link org.opencastproject.capture.admin.api.RecordingState}.
-   * @see RecordingState
+   * @param recordingState The state of the recording.  This should be defined from RecordingState.
    */
   public RecordingImpl(String recordingID, String recordingState) {
     id = recordingID;

@@ -126,7 +126,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
 
   /**
    * Sets the title of this workflow instance
-   * @param template
+   * @param title
    */
   public void setTitle(String title) {
     this.title = title;

@@ -43,7 +43,7 @@ public interface MediaPackageBuilder {
    * The name of the media package root folder will be equal to the handle value.
    * </p>
    * 
-   * @param Id
+   * @param identifier
    *          the media package identifier
    * @return the new media package
    * @throws MediaPackageException

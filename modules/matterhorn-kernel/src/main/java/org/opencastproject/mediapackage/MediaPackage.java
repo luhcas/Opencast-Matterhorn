@@ -66,27 +66,27 @@ public interface MediaPackage extends Cloneable {
   void removeCreator(String creator);
 
   /**
-   * TODO: Comment me
+   * Returns the names of the institutions or people who created this mediapackage 
    * 
-   * @return
+   * @return the creators of this mediapackage
    */
   String[] getCreators();
 
   void setSeries(String identifier);
 
   /**
-   * TODO: Comment me
+   * Returns the series, if any, to which this mediapackage belongs
    * 
-   * @return
+   * @return the series
    */
   String getSeries();
 
   void setLicense(String license);
 
   /**
-   * TODO: Comment me
+   * The license for the content in this mediapackage
    * 
-   * @return
+   * @return the license
    */
   String getLicense();
 
@@ -95,18 +95,18 @@ public interface MediaPackage extends Cloneable {
   void removeContributor(String contributor);
 
   /**
-   * TODO: Comment me
+   * Returns the names of the institutions or people who contributed to the content within this mediapackage
    * 
-   * @return
+   * @return the contributors
    */
   String[] getContributors();
 
   void setLanguage(String language);
 
   /**
-   * TODO: Comment me
+   * Returns the language written and/or spoken in the media content of this mediapackage
    * 
-   * @return
+   * @return the language
    */
   String getLanguage();
 
@@ -115,9 +115,9 @@ public interface MediaPackage extends Cloneable {
   void removeSubject(String subject);
 
   /**
-   * TODO: Comment me
+   * The keywords describing the subject(s) or categories describing the content of this mediapackage
    * 
-   * @return
+   * @return the subjects
    */
   String[] getSubjects();
 

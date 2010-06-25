@@ -64,7 +64,7 @@ public class EncodingProfileBuilder {
   /**
    * Loads an encoding profile from the given input stream.
    * 
-   * @param is
+   * @param in
    *          the input stream
    * @return the encoding profile
    * @throws Exception
@@ -79,8 +79,8 @@ public class EncodingProfileBuilder {
   /**
    * Loads an encoding profile from the xml fragement.
    * 
-   * @param definition
-   *          xml fragment of the profile
+   * @param in
+   *          xml stream of the profile
    * @return the profile
    * @throws Exception
    *           if creating the profile fails
@@ -100,7 +100,7 @@ public class EncodingProfileBuilder {
   /**
    * Loads an encoding profile list from the given input stream.
    * 
-   * @param is
+   * @param in
    *          the input stream
    * @return the encoding profile list
    * @throws Exception
@@ -113,10 +113,10 @@ public class EncodingProfileBuilder {
   }
   
   /**
-   * Loads an encoding profile from the xml fragement.
+   * Loads an encoding profile from the xml stream.
    * 
-   * @param definition
-   *          xml fragment of the profile list
+   * @param in
+   *          xml stream of the profile list
    * @return the profile list
    * @throws Exception
    *           if creating the profile list fails

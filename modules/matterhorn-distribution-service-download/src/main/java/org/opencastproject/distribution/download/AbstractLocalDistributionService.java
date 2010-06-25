@@ -68,9 +68,9 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
    * addition, a representation of the distributed element is added to the mediapackage.
    * 
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.mediapackage.MediaPackage)
+   * @see org.opencastproject.distribution.api.DistributionService#distribute(MediaPackage, String...)
    */
+  @Override
   public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException {
     try {
       Map<MediaPackageElement, MediaPackageElement> mappings = new HashMap<MediaPackageElement, MediaPackageElement>();

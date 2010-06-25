@@ -42,7 +42,7 @@ import javax.activation.MimetypesFileTypeMap;
  * <p/>
  * <strong>Note:</strong> Registered {@link EncoderListener}s <em>won't</em> receive a
  * file in method
- * {@link EncoderListener#fileEncoded(EncoderEngine, File, EncodingProfile)}
+ * {@link EncoderListener#fileEncoded(EncoderEngine, EncodingProfile, File...)}
  * because it cannot be guaranteed that only <em>one</em> file will be the
  * result of the encoding. Imagine encoding to an image series.
  */
@@ -92,7 +92,7 @@ public abstract class AbstractCmdlineEncoderEngine extends
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File, org.opencastproject.composer.api.EncodingProfile)
+   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File, org.opencastproject.composer.api.EncodingProfile, java.util.Map)
    */
   @Override
   public File encode(File mediaSource, EncodingProfile format,Map<String, String> properties) throws EncoderException {
@@ -101,9 +101,7 @@ public abstract class AbstractCmdlineEncoderEngine extends
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File,
-   *      java.io.File, org.opencastproject.composer.api.EncodingProfile)
+   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File, java.io.File, org.opencastproject.composer.api.EncodingProfile, java.util.Map)
    */
   @Override
   public File encode(File audioSource, File videoSource, EncodingProfile profile, Map<String, String> properties)
@@ -288,9 +286,7 @@ public abstract class AbstractCmdlineEncoderEngine extends
   /**
    * Creates the arguments for the commandline.
    * 
-   * @param file
-   *          the file that is to be encoded
-   * @param profiles
+   * @param format
    *          the encoding profile
    * @return the argument list
    * @throws EncoderException
@@ -325,8 +321,6 @@ public abstract class AbstractCmdlineEncoderEngine extends
    * Set the commandline options in a single string. Parameters in the form of
    * <code>#{param}</code> will be substituted.
    * 
-   * @see #setInputFile(String)
-   * @see #setOutputDirectory(String)
    * @see #addParam(String, String)
    */
   public void setCmdlineOptions(String cmdlineOptions) {
@@ -347,8 +341,8 @@ public abstract class AbstractCmdlineEncoderEngine extends
    * Tells the registered listeners that the given track has been encoded into
    * <code>file</code>, using the encoding format <code>format</code>.
    * 
-   * @param sourceFile
-   *          the original track
+   * @param sourceFiles
+   *          the original files
    * @param format
    *          the used format
    * @param message

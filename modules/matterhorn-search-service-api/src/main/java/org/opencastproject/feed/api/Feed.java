@@ -107,7 +107,7 @@ public interface Feed {
   /**
    * Set the feed link.
    * 
-   * @param the link
+   * @param link the link to the feed
    */
   void setLink(String link);
 

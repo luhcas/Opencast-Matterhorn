@@ -15,8 +15,6 @@
  */
 package org.opencastproject.workflow.api;
 
-import org.opencastproject.mediapackage.MediaPackage;
-
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
@@ -116,19 +114,9 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getOutput()
-   */
-  public MediaPackage getOutput() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getState()
    */
+  @Override
   public OperationState getState() {
     return state;
   }
@@ -231,8 +219,6 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
 
   /**
    * Set the title for the link to this operations hold state UI, a default String if no title is set.
-   * 
-   * @return title to be displayed
    */
   public void setHoldActionTitle(String title) {
     this.holdActionTitle = title;

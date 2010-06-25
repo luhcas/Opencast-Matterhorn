@@ -181,10 +181,10 @@ public class YoutubeDistributionService implements DistributionService {
   }
 
   /**
-   * Uploads media files to Youtube and inserts into a playlist. {@inheritDoc}
-   * 
-   * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.mediapackage.MediaPackage)
+   * {@inheritDoc}
+   * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.mediapackage.MediaPackage, java.lang.String[])
    */
+  @Override
   public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException {
 
     try {

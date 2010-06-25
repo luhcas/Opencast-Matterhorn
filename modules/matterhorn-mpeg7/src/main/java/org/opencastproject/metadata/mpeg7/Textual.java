@@ -73,7 +73,7 @@ public interface Textual extends XmlElement {
    * 
    * @param transcription
    *          the transcription
-   * @param alhpabet
+   * @param alphabet
    *          the alphabet
    */
   void setPhoneticTranscription(String transcription, String alphabet);

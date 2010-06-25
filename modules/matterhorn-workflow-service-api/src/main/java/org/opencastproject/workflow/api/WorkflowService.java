@@ -41,7 +41,7 @@ public interface WorkflowService {
   WorkflowDefinition getWorkflowDefinitionById(String name);
 
   /**
-   * Gets a {@link WorkflowInstace} by its ID.
+   * Gets a {@link WorkflowInstance} by its ID.
    */
   WorkflowInstance getWorkflowById(String workflowId);
 
@@ -134,7 +134,7 @@ public interface WorkflowService {
   /**
    * Resumes a suspended workflow instance.
    * 
-   * @param workflowInstanceId the workflow to resume
+   * @param id the workflow to resume
    */
   void resume(String id);
 

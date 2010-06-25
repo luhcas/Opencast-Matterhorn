@@ -59,8 +59,9 @@ public class DistributionRestService {
   /**
    * Gets the distribution service that is registered with the specified "distribution.channel" property
    * 
-   * @param id
-   * @return
+   * @param distributionChannel the id of this distribution channel
+   * @return the distribution service for this channel
+   * @throws IllegalArgumentException if there is not service registered for this channel
    */
   protected DistributionService getService(String distributionChannel) {
     ServiceReference[] refs = null;

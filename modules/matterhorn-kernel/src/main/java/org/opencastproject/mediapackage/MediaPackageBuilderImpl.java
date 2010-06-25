@@ -72,6 +72,7 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
   }
 
   /**
+   * {@inheritDoc}
    * @see org.opencastproject.mediapackage.MediaPackageBuilder#createNew()
    */
   public MediaPackage createNew() throws MediaPackageException {
@@ -79,7 +80,8 @@ public class MediaPackageBuilderImpl implements MediaPackageBuilder {
   }
 
   /**
-   * @see org.opencastproject.mediapackage.MediaPackageBuilder#createNew(org.opencastproject.org.opencastproject.mediapackageifier.Id)
+   * {@inheritDoc}
+   * @see org.opencastproject.mediapackage.MediaPackageBuilder#createNew(org.opencastproject.mediapackage.identifier.Id)
    */
   public MediaPackage createNew(Id identifier) throws MediaPackageException {
     return new MediaPackageImpl(identifier);

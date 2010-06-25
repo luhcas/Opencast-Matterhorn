@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.opencastproject.feedback.api.ReportItem;
 
 /**
- * A JAXB-annotated implementation of {@link Annotation}
+ * A JAXB-annotated implementation of ReportItem
  */
 @XmlType(name = "report-item", namespace = "http://feedback.opencastproject.org/")
 @XmlRootElement(name = "report-item", namespace = "http://feedback.opencastproject.org/")

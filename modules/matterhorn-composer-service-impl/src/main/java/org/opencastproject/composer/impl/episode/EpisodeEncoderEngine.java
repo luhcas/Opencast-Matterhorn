@@ -236,7 +236,7 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.impl.AbstractEncoderEngine#encode(java.io.File, org.opencastproject.composer.api.EncodingProfile)
+   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File, java.io.File, org.opencastproject.composer.api.EncodingProfile, java.util.Map)
    */
   public File encode(File audioSource, File videoSource, EncodingProfile format, Map<String, String> properties) throws EncoderException {
     throw new UnsupportedOperationException("Not yet implemented");
@@ -306,8 +306,9 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File, org.opencastproject.composer.api.EncodingProfile)
+   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File, org.opencastproject.composer.api.EncodingProfile, java.util.Map)
    */
+  @Override
   public File encode(File mediaSource, EncodingProfile format, Map<String, String> properties) throws EncoderException {
     return encode(null, mediaSource, format, properties);
   }

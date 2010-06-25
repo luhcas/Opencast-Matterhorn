@@ -86,7 +86,7 @@ public interface MediaPackageReference extends Cloneable {
    *  &lt;/attachment&gt;
    * </pre>
    * 
-   * @return
+   * @return the properties of this reference
    */
   Map<String, String> getProperties();
 

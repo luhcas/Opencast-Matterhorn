@@ -155,11 +155,11 @@ public class EncodingProfileImpl implements EncodingProfile {
   }
 
   /**
-   * Sets the types that are applicable for that profile. For example, an audio
+   * Sets the type that is applicable for that profile. For example, an audio
    * only-track hardly be applicable to a jpeg-slide extraction.
    * 
-   * @param types
-   *          applicable track types
+   * @param type
+   *          applicable track type
    */
   public void setApplicableTo(MediaType type) {
     this.applicableType = type;

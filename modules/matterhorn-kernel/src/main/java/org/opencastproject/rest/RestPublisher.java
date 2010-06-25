@@ -97,7 +97,8 @@ public class RestPublisher {
 
   /**
    * Creates a REST endpoint for the JAX-RS annotated service.
-   * @param alias The endpoint's root URI
+   * 
+   * @param ref the osgi service reference
    * @param service The service itself
    */
   protected void createEndpoint(ServiceReference ref, Object service) {

@@ -116,7 +116,7 @@ public class CatalogImpl extends AbstractMediaPackageElement implements Catalog 
   }
 
   /**
-   * @return
+   * @return a new catalog instance
    */
   public static Catalog newInstance() {
     return new CatalogImpl();

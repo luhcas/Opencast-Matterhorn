@@ -40,41 +40,42 @@ public interface MediaPackageMetadata {
   /**
    * The names of the creators.
    * 
-   * @return
+   * @return the creators for this mediapackage
    */
   String[] getCreators();
 
   /**
    * The series, if any, that this episode belongs to.
-   * @return
+   * 
+   * @return the series for this mediapackage
    */
   String getSeriesIdentifier();
 
   /**
    * The license under which this episode is available
    * 
-   * @return
+   * @return the license for this mediapackage
    */
   String getLicense();
 
   /**
    * The contributors
    * 
-   * @return
+   * @return the contributors for this mediapackage
    */
   String[] getContributors();
 
   /**
    * The language spoken in the media
    * 
-   * @return
+   * @return the language for this mediapackage
    */
   String getLanguage();
 
   /**
    * The subjects
    * 
-   * @return
+   * @return the subjects for this mediapackage
    */
   String[] getSubjects();
 

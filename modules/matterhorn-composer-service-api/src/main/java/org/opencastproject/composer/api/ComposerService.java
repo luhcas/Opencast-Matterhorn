@@ -62,7 +62,7 @@ public interface ComposerService {
           throws EncoderException, MediaPackageException;
 
   /**
-   * Encode the video stream from one track and the audio stream from another, into a new {@link Track}.
+   * Encode the video stream from one track and the audio stream from another, into a new Track.
    * 
    * @param mediaPackage
    *          The media package containing the source track
@@ -80,7 +80,7 @@ public interface ComposerService {
           throws EncoderException, MediaPackageException;
 
   /**
-   * Encode the video stream from one track and the audio stream from another, into a new {@link Track}.
+   * Encode the video stream from one track and the audio stream from another, into a new Track.
    * 
    * @param mediaPackage
    *          The media package containing the source track

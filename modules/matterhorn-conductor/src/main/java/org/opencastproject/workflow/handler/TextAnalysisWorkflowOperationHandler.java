@@ -124,7 +124,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
   /**
    * Callback for the OSGi declarative services configuration that will set the text analysis service.
    * 
-   * @param textAnalyzer
+   * @param analysisService
    *          the text analysis service
    */
   protected void setTextAnalyzer(MediaAnalysisService analysisService) {

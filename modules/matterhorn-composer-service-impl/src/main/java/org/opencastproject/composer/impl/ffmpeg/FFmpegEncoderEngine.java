@@ -67,9 +67,7 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
   /**
    * Creates the arguments for the commandline.
    * 
-   * @param file
-   *          the file that is to be encoded
-   * @param profiles
+   * @param format
    *          the format
    * @return the argument list
    */
@@ -109,8 +107,8 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
   /**
    * Handles the encoder output by analyzing it first and then firing it off to the registered listeners.
    * 
-   * @param track
-   *          the track that is currently being encoded
+   * @param sourceFiles
+   *          the source files that are currently being encoded
    * @param format
    *          the target media format
    * @param message

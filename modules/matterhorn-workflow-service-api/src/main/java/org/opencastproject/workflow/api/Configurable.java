@@ -44,7 +44,7 @@ public interface Configurable {
 
   /**
    * Gets the configuration keys that are currently set for this configurable entity.
-   * @return
+   * @return the configuration keys
    */
   Set<String> getConfigurationKeys();
   

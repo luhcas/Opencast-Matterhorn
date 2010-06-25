@@ -82,7 +82,7 @@ public interface RecordingDataView {
 
   /**
    * sets the series id for this recording
-   * @param seriesTitle
+   * @param seriesId
    */
   void setSeriesId(String seriesId);
   

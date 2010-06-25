@@ -172,9 +172,8 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
    * Reads the metadata from the specified file and returns it encapsulated in a
    * {@link DublinCoreCatalog} object.
    * 
-   * @param uri
-   *          the dublin core metadata container file
-   * @return the dublin core object
+   * @param in
+   *          the stream containing the dublin core metadata
    */
   public DublinCoreCatalogImpl(InputStream in) {
     this();

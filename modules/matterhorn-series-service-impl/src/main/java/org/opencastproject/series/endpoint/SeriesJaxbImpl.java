@@ -60,7 +60,7 @@ public class SeriesJaxbImpl {
   
   /**
    * Constructs a JaxB representations of a SchedulerEvent
-   * @param event
+   * @param series the series
    */
   public SeriesJaxbImpl(Series series) {
     logger.info("Creating a {} from {}", SeriesJaxbImpl.class.getName(), series);

@@ -168,10 +168,10 @@ public class ComposerServiceImpl implements ComposerService {
   }
 
   /**
-   * 
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#encode(java.lang.String, java.lang.String, java.lang.String)
+   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.MediaPackage,
+   *      java.lang.String, java.lang.String)
    */
   @Override
   public Receipt encode(MediaPackage mediaPackage, String sourceTrackId, String profileId) throws EncoderException,
@@ -182,8 +182,8 @@ public class ComposerServiceImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#encode(java.lang.String, java.lang.String, java.lang.String,
-   *      org.opencastproject.composer.api.ReceiptHandler)
+   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.MediaPackage,
+   *      java.lang.String, java.lang.String, boolean)
    */
   @Override
   public Receipt encode(MediaPackage mediaPackage, String sourceTrackId, String profileId, boolean block)
@@ -192,11 +192,10 @@ public class ComposerServiceImpl implements ComposerService {
   }
 
   /**
-   * 
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#encode(java.lang.String, java.lang.String, java.lang.String,
-   *      java.lang.String)
+   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.MediaPackage,
+   *      java.lang.String, java.lang.String, java.lang.String)
    */
   @Override
   public Receipt encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
@@ -205,11 +204,10 @@ public class ComposerServiceImpl implements ComposerService {
   }
 
   /**
-   * 
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#encode(java.lang.String, java.lang.String, java.lang.String,
-   *      java.lang.String, boolean)
+   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.MediaPackage,
+   *      java.lang.String, java.lang.String, java.lang.String, boolean)
    */
   @Override
   public Receipt encode(final MediaPackage mp, final String sourceVideoTrackId, final String sourceAudioTrackId,
@@ -486,7 +484,7 @@ public class ComposerServiceImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#countJobs()
+   * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.remote.api.Receipt.Status)
    */
   @Override
   public long countJobs(Status status) {
@@ -496,7 +494,8 @@ public class ComposerServiceImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#countJobs(java.lang.String, java.lang.String)
+   * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.remote.api.Receipt.Status,
+   *      java.lang.String)
    */
   @Override
   public long countJobs(Status status, String host) {

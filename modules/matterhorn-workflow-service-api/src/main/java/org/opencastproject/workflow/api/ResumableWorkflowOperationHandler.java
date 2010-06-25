@@ -41,7 +41,7 @@ public interface ResumableWorkflowOperationHandler extends WorkflowOperationHand
    * @return The URL for the user interface
    * @throws WorkflowOperationException If the url to the hold state ui can't be created
    */
-  URL getHoldStateUserInterfaceURL(WorkflowInstance wokflowInstance) throws WorkflowOperationException;
+  URL getHoldStateUserInterfaceURL(WorkflowInstance workflowInstance) throws WorkflowOperationException;
 
   /** Returns the title for the link to this operations hold state UI.
    *

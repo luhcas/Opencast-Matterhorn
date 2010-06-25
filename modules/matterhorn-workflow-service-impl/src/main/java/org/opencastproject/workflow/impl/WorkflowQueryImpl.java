@@ -19,7 +19,7 @@ import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
 /**
- * A fluent API for issuing {@link WorkflowInstance} queries.
+ * A fluent API for issuing WorkflowInstance queries.
  */
 public class WorkflowQueryImpl implements WorkflowQuery {
   protected long count;
@@ -64,6 +64,7 @@ public class WorkflowQueryImpl implements WorkflowQuery {
     this.state = state;
     return this;
   }
+
   /**
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowQuery#withSeries(java.lang.String)

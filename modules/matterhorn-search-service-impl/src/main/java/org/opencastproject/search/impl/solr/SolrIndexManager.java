@@ -177,7 +177,7 @@ public class SolrIndexManager {
    * 
    * This implementation of the search service removes all references to non "engage/download" media tracks
    * 
-   * @param mediaPackage
+   * @param sourceMediaPackage
    *          the media package to post
    * @throws SolrServerException
    *           if an errors occurs while talking to solr

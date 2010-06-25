@@ -26,7 +26,7 @@ import java.io.InputStream;
 public interface CatalogService<T extends MetadataCatalog> {
   /**
    * Returns a new, empty instance of the catalog
-   * @return
+   * @return a new catalog
    */
   T newInstance();
   
@@ -40,9 +40,11 @@ public interface CatalogService<T extends MetadataCatalog> {
   T load(InputStream in) throws IOException;
   
   /**
-   * Whether the mediapackage catalog is readable by this catalog service
+   * Whether the mediapackage catalog is readable by this catalog service.  A true value does not indicate that the
+   * catalog will be parsed correctly, only that the catalog's metadata seems to match this service.
+   * 
    * @param catalog the mediapackage catalog
-   * @return
+   * @return whether the catalog is readable
    */
   boolean accepts(Catalog catalog);
   

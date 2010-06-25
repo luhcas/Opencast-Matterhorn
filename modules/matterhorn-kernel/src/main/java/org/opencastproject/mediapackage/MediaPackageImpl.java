@@ -667,7 +667,8 @@ public final class MediaPackageImpl implements MediaPackage {
   }
 
   /**
-   * @see org.opencastproject.mediapackage.MediaPackage#add(uri)
+   * {@inheritDoc}
+   * @see org.opencastproject.mediapackage.MediaPackage#add(java.net.URI)
    */
   public MediaPackageElement add(URI url) throws UnsupportedElementException {
     if (url == null)

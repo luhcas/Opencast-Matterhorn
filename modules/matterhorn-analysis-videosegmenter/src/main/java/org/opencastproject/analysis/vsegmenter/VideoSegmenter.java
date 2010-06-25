@@ -278,15 +278,10 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
 
   /**
    * Starts segmentation on the video track identified by <code>mediapackageId</code> and <code>elementId</code> and
-   * returns a receipt containing the final result in the form of a {@link import
-   * org.opencastproject.metadata.mpeg7.Mpeg7Catalog}.
+   * returns a receipt containing the final result in the form of anMpeg7Catalog.
    * 
    * @param element
    *          the element to analyze
-   * @param mediapackageId
-   *          the media package identifier
-   * @param elementId
-   *          element identifier
    * @param block
    *          <code>true</code> to make this operation synchronous
    * @return a receipt containing the resulting mpeg-7 catalog
@@ -474,8 +469,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
    * 
    * @param video
    *          the mpeg-7 video representation
-   * @param fpc
-   *          the frame positioning control
    * @param dsh
    *          the data source handler
    * @return the list of segments
@@ -662,8 +655,9 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
 
   /**
    * Makes sure that there is version of the track that is compatible with this service implementation. Currently, with
-   * the usage of the <code>JMF 2.1.1e</code> framework, the list is rather limited, see Sun's supported list of formats at
-   * {@link http://java.sun.com/javase/technologies/desktop/media/jmf/2.1.1/formats.html}.
+   * the usage of the <code>JMF 2.1.1e</code> framework, the list is rather limited, see Sun's <a
+   * href="http://java.sun.com/javase/technologies/desktop/media/jmf/2.1.1/formats.html">supported formats in JMF
+   * 2.1.1</a>.
    * 
    * @param track
    *          the track identifier

@@ -66,9 +66,12 @@ public class SolrRequester {
   }
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.search.api.SearchService#getByQuery(java.lang.String, int, int)
+   * Gets search results for a solr query string
+   * @param q the query
+   * @param limit the limit
+   * @param offset the offset
+   * @return the search results
+   * @throws SolrServerException
    */
   public SearchResult getByQuery(String q, int limit, int offset) throws SolrServerException {
     SearchQueryImpl q1 = new SearchQueryImpl();

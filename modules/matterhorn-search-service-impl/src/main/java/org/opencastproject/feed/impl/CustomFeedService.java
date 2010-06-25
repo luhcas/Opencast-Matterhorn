@@ -29,7 +29,7 @@ import java.util.Properties;
 /**
  * This feed generator creates a feed for the episodes returned by the query specified by the service property
  * <code>feed.query</code>. Additional arguments will be passed to the query by means of
- * {@link MessageFormat#format(String, Object...).
+ * {@link MessageFormat#format(String, Object...)}.
  * <p>
  * The service will answer requests matching the service property <code>feed.selector</code> as the first query argument
  * passed to the {@link #accept(String[])} method.

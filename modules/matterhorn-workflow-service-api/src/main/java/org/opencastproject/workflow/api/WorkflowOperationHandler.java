@@ -47,7 +47,7 @@ public interface WorkflowOperationHandler {
    * cause the entire workflow instance to fail.
    * 
    * @param workflowInstance the workflow instance
-   * @return the {@link WorkflowOperationResult} containing a potentially modified {@link MediaPackage} and whether to
+   * @return the {@link WorkflowOperationResult} containing a potentially modified MediaPackage and whether to
    * put the workflow instance into a wait state.
    * 
    * @throws WorkflowOperationException If the workflow operation fails to execute properly, and the default error

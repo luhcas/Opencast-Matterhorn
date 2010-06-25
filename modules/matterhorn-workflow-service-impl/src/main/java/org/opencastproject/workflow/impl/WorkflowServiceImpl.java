@@ -64,12 +64,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 /**
- * Implements {@link WorkflowService} with in-memory data structures to hold {@link WorkflowOperation}s and
- * {@link WorkflowInstance}s. {@link WorkflowOperationHandler}s are looked up in the OSGi service registry based on the
- * "opencast.workflow.operation" property. If the {@link WorkflowOperationHandler}'s "opencast.workflow.operation"
- * service registration property matches {@link WorkflowOperation#getName()}, then the factory returns a
- * {@link WorkflowOperationRunner} to handle that operation. This allows for custom runners to be added or modified
- * without affecting the workflow service itself.
+ * Implements WorkflowService with in-memory data structures to hold WorkflowOperations and WorkflowInstances.
+ * WorkflowOperationHandlers are looked up in the OSGi service registry based on the "workflow.operation" property.
+ * If the WorkflowOperationHandler's "workflow.operation" service registration property matches
+ * WorkflowOperation.getName(), then the factory returns a WorkflowOperationRunner to handle that operation.
+ * This allows for custom runners to be added or modified without affecting the workflow service itself.
  */
 public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
@@ -322,7 +321,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * 
    * @see org.opencastproject.workflow.api.WorkflowService#registerWorkflowDefinition(org.opencastproject.workflow.api.WorkflowDefinition)
    */
   public void registerWorkflowDefinition(WorkflowDefinition workflow) {
@@ -331,8 +329,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowService#unregisterWorkflowDefinition(org.opencastproject.workflow.api.WorkflowDefinition)
+   * @see org.opencastproject.workflow.api.WorkflowService#unregisterWorkflowDefinition(java.lang.String)
    */
   public void unregisterWorkflowDefinition(String workflowDefinitionId) {
     workflowDefinitions.remove(workflowDefinitionId);

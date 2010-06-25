@@ -29,7 +29,7 @@ public interface MediaAnalysisService {
    * Takes the given element and returns a receipt that can be used to get the resulting
    * {@link org.opencastproject.metadata.mpeg7.Mpeg7Catalog}.
    * 
-   * @param mediaPackageElement
+   * @param element
    *          element to analyze
    * @param block
    *          whether to block the calling thread until the analysis is complete

@@ -141,10 +141,10 @@ public abstract class SchedulerServiceImpl implements SchedulerService, ManagedS
     filter.setStart(new Date(System.currentTimeMillis()));
     return getEvents(filter);
   }
-  
+
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.scheduler.api.SchedulerService#getRecordingEvents()
+   * @see org.opencastproject.scheduler.api.SchedulerService#getCapturingEvents()
    */
   public abstract SchedulerEvent [] getCapturingEvents();
   

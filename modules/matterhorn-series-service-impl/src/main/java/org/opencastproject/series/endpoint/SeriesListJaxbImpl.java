@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 /**
- * A {@link List} of {@link SeriesJaxbImpl}s
+ * A List of {@link SeriesJaxbImpl}s
  */
 @XmlType(name="seriesList", namespace="http://series.opencastproject.org")
 @XmlRootElement(name="seriesList")

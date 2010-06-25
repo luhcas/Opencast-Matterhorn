@@ -193,7 +193,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getAgentCapabilities()
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getAgentCapabilities(java.lang.String)
    */
   public Properties getAgentCapabilities(String agentName) {
 

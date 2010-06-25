@@ -163,12 +163,10 @@ public class ITunesUDistributionService implements DistributionService {
   }
 
   /**
-   * Uploads media files to iTunes U under a group. {@inheritDoc}
-   * 
-   * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.mediapackage.MediaPackage)
+   * {@inheritDoc}
+   * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.mediapackage.MediaPackage, java.lang.String[])
    */
   public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException {
-
     try {
       String trackID = "";
       MediaPackageElement element = null;

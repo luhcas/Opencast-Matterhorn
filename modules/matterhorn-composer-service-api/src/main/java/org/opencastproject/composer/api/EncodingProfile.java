@@ -78,7 +78,8 @@ public interface EncodingProfile {
   
   /**
    * Returns the source object that provided this encoding profile
-   * @return
+   * 
+   * @return the source object that provided this profile
    */
   Object getSource();
   

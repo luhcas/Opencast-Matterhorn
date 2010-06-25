@@ -82,19 +82,25 @@ public final class HandleImpl extends IdImpl implements Handle {
   }
 
   /**
-   * @see org.opencastproject.mediapackage.identifier.Id#getLocalName()
+   * {@inheritDoc}
+   * @see org.opencastproject.mediapackage.identifier.Handle#getLocalName()
    */
   public String getLocalName() {
     return localName;
   }
 
   /**
-   * @see org.opencastproject.mediapackage.identifier.Id#getNamingAuthority()
+   * {@inheritDoc}
+   * @see org.opencastproject.mediapackage.identifier.Handle#getNamingAuthority()
    */
   public String getNamingAuthority() {
     return namingAuthority;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.mediapackage.identifier.Handle#getFullName()
+   */
   public String getFullName() {
     StringBuffer buf = new StringBuffer();
     buf.append(namingAuthority);
@@ -104,7 +110,8 @@ public final class HandleImpl extends IdImpl implements Handle {
   }
 
   /**
-   * @see org.opencastproject.mediapackage.identifier.Id#resolve()
+   * {@inheritDoc}
+   * @see org.opencastproject.mediapackage.identifier.Handle#resolve()
    */
   public URL resolve() throws HandleException {
     if (target == null) {
@@ -116,7 +123,7 @@ public final class HandleImpl extends IdImpl implements Handle {
   }
 
   /**
-   * @see org.opencastproject.mediapackage.identifier.Id#update(java.net.URL)
+   * @see org.opencastproject.mediapackage.identifier.Handle#update(java.net.URL)
    */
   public void update(URL target) throws HandleException {
     builder.update(this, target);

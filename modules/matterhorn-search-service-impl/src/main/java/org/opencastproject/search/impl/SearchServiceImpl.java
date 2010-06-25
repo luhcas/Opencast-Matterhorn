@@ -105,7 +105,7 @@ public class SearchServiceImpl implements SearchService {
   /**
    * Service activator, called via declarative services configuration.
    * 
-   * @param componentContext
+   * @param cc
    *          the component context
    */
   public void activate(ComponentContext cc) {

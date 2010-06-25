@@ -43,8 +43,7 @@ public class AgentImpl implements Agent {
   protected String name;
 
   /**
-   * The state of the agent.  This should be defined from the constants in {@link org.opencastproject.capture.admin.api.AgentState}.
-   * @see AgentState
+   * The state of the agent.  This should be defined from the constants in AgentState.
    */
   @Column(name = "state", nullable = false)
   protected String state;
@@ -80,8 +79,7 @@ public class AgentImpl implements Agent {
    * Builds a representation of the agent.
    *
    * @param agentName The name of the agent.
-   * @param agentState The state of the agent.  This should be defined from the constants in {@link org.opencastproject.capture.admin.api.AgentState}.
-   * @see AgentState
+   * @param agentState The state of the agent.  This should be defined from the constants in AgentState
    */
   public AgentImpl(String agentName, String agentState, String agentUrl, Properties capabilities) {
     name = agentName;
@@ -119,7 +117,7 @@ public class AgentImpl implements Agent {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.admin.api.Agent#setUrl()
+   * @see org.opencastproject.capture.admin.api.Agent#setUrl(java.lang.String)
    */
   public void setUrl(String agentUrl){
     url = agentUrl;

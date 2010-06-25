@@ -68,7 +68,7 @@ public class ReceiptBuilder {
   /**
    * Loads a receipt from the given input stream.
    * 
-   * @param is
+   * @param in
    *          the input stream
    * @return the receipt
    * @throws Exception
@@ -81,10 +81,10 @@ public class ReceiptBuilder {
   }
   
   /**
-   * Loads a receipt from the xml fragement.
+   * Loads a receipt from the xml stream.
    * 
-   * @param definition
-   *          xml fragment of the receipt
+   * @param in
+   *          xml stream of the receipt
    * @return the receipt
    * @throws Exception
    *           if creating the receipt fails

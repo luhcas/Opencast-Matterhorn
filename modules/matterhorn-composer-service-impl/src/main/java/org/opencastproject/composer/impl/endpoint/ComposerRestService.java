@@ -120,8 +120,6 @@ public class ComposerRestService {
    * 
    * @param mediaPackage
    *          The MediaPackage referencing the media and metadata
-   * @param audioSourceTrackId
-   *          The ID of the audio source track in the media package to be encoded
    * @param sourceTrackId
    *          The ID of the video source track in the media package to be encoded
    * @param profileId

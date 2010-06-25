@@ -68,7 +68,7 @@ public class WorkflowBuilder {
   /**
    * Loads a workflow definition from the given input stream.
    * 
-   * @param is
+   * @param in
    *          the input stream
    * @return the workflow definition
    * @throws Exception
@@ -81,10 +81,10 @@ public class WorkflowBuilder {
   }
   
   /**
-   * Loads a workflow definition from the xml fragement.
+   * Loads a workflow definition from the xml stream.
    * 
-   * @param definition
-   *          xml fragment of the workflow definition
+   * @param in
+   *          xml stream of the workflow definition
    * @return the workflow definition
    * @throws Exception
    *           if creating the workflow definition fails
@@ -97,7 +97,7 @@ public class WorkflowBuilder {
   /**
    * Loads a workflow instance from the given input stream.
    * 
-   * @param is
+   * @param in
    *          the input stream
    * @return the workflow instance
    * @throws Exception
@@ -112,10 +112,10 @@ public class WorkflowBuilder {
   }
 
   /**
-   * Loads a workflow instance from the xml fragement.
+   * Loads a workflow instance from the xml stream.
    * 
-   * @param instance
-   *          xml fragment of the workflow instance
+   * @param in
+   *          xml stream of the workflow instance
    * @return the workflow definition
    * @throws Exception
    *           if creating the workflow instance fails

@@ -33,11 +33,10 @@ import java.util.StringTokenizer;
  * service activation, reads a default set of properties (see below) and can be configured to track the opencast
  * {@link SearchService} by using {@link #setSearchService(SearchService)}.
  * <p>
- * By using this implementation as the basis for feed services, only the two methods {@link #accept(String[])} and
- * {@link #loadFeedData(Type, String[], int, int)} need to be implemented by subclasses.
+ * By using this implementation as the basis for feed services, only the two methods accept and loadFeedData
+ * need to be implemented by subclasses.
  * <p>
- * In the {@link #activate(ComponentContext)} method, the following properties are being read from the component
- * properties:
+ * The following properties are being read from the component properties:
  * <ul>
  * <li><code>feed.uri</code> - the feed uri</li>
  * <li><code>feed.selector</code> the pattern that is used to determine if the feed implementation wants to handle a
@@ -121,7 +120,7 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
    *          the feed's home url
    * @param rssFlavor
    *          the flavor identifying rss tracks
-   * @param atomFlavor
+   * @param atomFlavors
    *          the flavors identifying tracks to be included in atom feeds
    * @param entryLinkTemplate
    *          the link template
@@ -205,7 +204,7 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
    * Ensures that this string is an absolute URL.  If not, prepend the local serverUrl to the string.
    * 
    * @param string The absolute or relative URL
-   * @param string The base URL to prepend
+   * @param baseUrl The base URL to prepend
    * @return An absolute URL
    */
   protected String ensureUrl(String string, String baseUrl) {

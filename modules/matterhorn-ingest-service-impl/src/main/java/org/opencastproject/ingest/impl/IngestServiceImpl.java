@@ -198,10 +198,9 @@ public class IngestServiceImpl implements IngestService {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageTrack(URI, MediaPackageElementFlavor,
-   *      MediaPackage)
+   * @see org.opencastproject.ingest.api.IngestService#addTrack(java.net.URI, org.opencastproject.mediapackage.MediaPackageElementFlavor, org.opencastproject.mediapackage.MediaPackage)
    */
+  @Override
   public MediaPackage addTrack(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
@@ -211,10 +210,9 @@ public class IngestServiceImpl implements IngestService {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageTrack(InputStream, MediaPackageElementFlavor,
-   *      MediaPackage)
+   * @see org.opencastproject.ingest.api.IngestService#addTrack(java.io.InputStream, java.lang.String, org.opencastproject.mediapackage.MediaPackageElementFlavor, org.opencastproject.mediapackage.MediaPackage)
    */
+  @Override
   public MediaPackage addTrack(InputStream in, String fileName, MediaPackageElementFlavor flavor,
           MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
@@ -224,10 +222,9 @@ public class IngestServiceImpl implements IngestService {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageCatalog(URI, MediaPackageElementFlavor,
-   *      MediaPackage)
+   * @see org.opencastproject.ingest.api.IngestService#addCatalog(java.net.URI, org.opencastproject.mediapackage.MediaPackageElementFlavor, org.opencastproject.mediapackage.MediaPackage)
    */
+  @Override
   public MediaPackage addCatalog(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
@@ -237,10 +234,9 @@ public class IngestServiceImpl implements IngestService {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageCatalog(InputStream, MediaPackageElementFlavor,
-   *      MediaPackage)
+   * @see org.opencastproject.ingest.api.IngestService#addCatalog(java.io.InputStream, java.lang.String, org.opencastproject.mediapackage.MediaPackageElementFlavor, org.opencastproject.mediapackage.MediaPackage)
    */
+  @Override
   public MediaPackage addCatalog(InputStream in, String fileName, MediaPackageElementFlavor flavor,
           MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
@@ -250,9 +246,7 @@ public class IngestServiceImpl implements IngestService {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageAttachment(URI, MediaPackageElementFlavor,
-   *      MediaPackage)
+   * @see org.opencastproject.ingest.api.IngestService#addAttachment(java.net.URI, org.opencastproject.mediapackage.MediaPackageElementFlavor, org.opencastproject.mediapackage.MediaPackage)
    */
   public MediaPackage addAttachment(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
           throws MediaPackageException, UnsupportedElementException, IOException {
@@ -263,9 +257,7 @@ public class IngestServiceImpl implements IngestService {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.ingest.api.IngestService#addMediaPackageAttachment(InputStream, MediaPackageElementFlavor,
-   *      MediaPackage)
+   * @see org.opencastproject.ingest.api.IngestService#addAttachment(java.io.InputStream, java.lang.String, org.opencastproject.mediapackage.MediaPackageElementFlavor, org.opencastproject.mediapackage.MediaPackage)
    */
   public MediaPackage addAttachment(InputStream in, String fileName, MediaPackageElementFlavor flavor,
           MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, IOException {
@@ -275,27 +267,27 @@ public class IngestServiceImpl implements IngestService {
   }
 
   /**
-   * {@inheritDoc}
    * 
-   * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String)
+   * {@inheritDoc}
+   * @see org.opencastproject.ingest.api.IngestService#ingest(org.opencastproject.mediapackage.MediaPackage)
    */
+  @Override
   public WorkflowInstance ingest(MediaPackage mp) throws Exception {
     return workflowService.start(mp);
   }
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String, java.lang.String)
+   * @see org.opencastproject.ingest.api.IngestService#ingest(org.opencastproject.mediapackage.MediaPackage, java.lang.String)
    */
+  @Override
   public WorkflowInstance ingest(MediaPackage mp, String wd) throws Exception {
     return ingest(mp, wd, null);
   }
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.ingest.api.IngestService#ingest(java.lang.String, java.lang.String, java.util.Map)
+   * @see org.opencastproject.ingest.api.IngestService#ingest(org.opencastproject.mediapackage.MediaPackage, java.lang.String, java.util.Map)
    */
   @Override
   public WorkflowInstance ingest(MediaPackage mp, String wd, Map<String, String> properties) throws Exception {
@@ -312,10 +304,11 @@ public class IngestServiceImpl implements IngestService {
   }
 
   /**
-   * {@inheritDoc}
    * 
-   * @see org.opencastproject.ingest.api.IngestService#discardMediaPackage(java.lang.String)
+   * {@inheritDoc}
+   * @see org.opencastproject.ingest.api.IngestService#discardMediaPackage(org.opencastproject.mediapackage.MediaPackage)
    */
+  @Override
   public void discardMediaPackage(MediaPackage mp) throws IOException {
     String mediaPackageId = mp.getIdentifier().compact();
     for (MediaPackageElement element : mp.getElements()) {

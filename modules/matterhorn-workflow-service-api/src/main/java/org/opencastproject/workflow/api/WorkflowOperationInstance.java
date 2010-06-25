@@ -20,8 +20,7 @@ import java.net.URL;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
- * An instance of a {@link WorkflowOperationInstance}.  Instances maintain the {@link MediaPackage} resulting from
- * the execution of {@link WorkflowOperationRunner#start(WorkflowInstance)}.
+ * A workflow operation belonging to a workflow instance.
  */
 @XmlJavaTypeAdapter(WorkflowOperationInstanceImpl.Adapter.class)
 public interface WorkflowOperationInstance extends Configurable {
@@ -38,13 +37,13 @@ public interface WorkflowOperationInstance extends Configurable {
   
   /**
    * Sets the state of this operation
-   * @param state
+   * @param state the state to set
    */
   void setState(OperationState state);
   
   /**
    * Gets the URL for the hold state.
-   * @return
+   * @return the URL of the hold state, if any, for this operation
    */
   URL getHoldStateUserInterfaceUrl();
 

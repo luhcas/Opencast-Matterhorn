@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 public class EncodingSchemeUtils {
 
   private static final Map<Precision, String> formats = new HashMap<Precision, String>();
-  
+
   static {
     formats.put(Precision.Year, "yyyy");
     formats.put(Precision.Month, "yyyy-MM");
@@ -43,15 +43,14 @@ public class EncodingSchemeUtils {
     formats.put(Precision.Second, "yyyy-MM-dd'T'HH:mm:ss'Z'");
     formats.put(Precision.Fraction, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
   }
-  
+
   /**
    * Encode a date with the given precision into a Dublin Core string value, using the recommended W3C-DTF scheme. The
    * UTC timezone is used for all precisions from {@link Precision#Minute} to {@link Precision#Fraction}. For years,
    * months and days the local timezone is used instead to ensure that the given date enters the DublinCore as is. If
    * UTC was used it may happen that you get the previous or next day, month or year respectively
    * <p/>
-   * The language of the returned value is
-   * {@link ch.ethz.replay.core.api.common.metadata.dublincore.DublinCore#LANGUAGE_UNDEFINED}.
+   * The language of the returned value is {@link DublinCore#LANGUAGE_UNDEFINED}.
    * <p/>
    * See <a href="http://www.w3.org/TR/NOTE-datetime">http://www.w3.org/TR/NOTE-datetime</a> for more information about
    * W3C-DTF.
@@ -79,14 +78,11 @@ public class EncodingSchemeUtils {
 
   /**
    * Encode a period with the given precision into a Dublin Core string value using the recommended DCMI Period scheme.
-   * For the usage of the UTC timezone please refer to
-   * {@link #encodeDate(java.util.Date, ch.ethz.replay.core.common.bundle.dublincore.utils.Precision)} for further
-   * information.
+   * For the usage of the UTC timezone please refer to {@link #encodeDate(Date, Precision)} for further information.
    * <p/>
    * One of the dates may be null to create an open interval.
    * <p/>
-   * The language of the returned value is
-   * {@link ch.ethz.replay.core.api.common.metadata.dublincore.DublinCore#LANGUAGE_UNDEFINED}.
+   * The language of the returned value is {@link DublinCore#LANGUAGE_UNDEFINED}.
    * <p/>
    * See <a href="http://dublincore.org/documents/dcmi-period/">http://dublincore.org/documents/dcmi-period/</a> for
    * more information about DCMI Period.
@@ -120,11 +116,9 @@ public class EncodingSchemeUtils {
 
   /**
    * Encode a duration measured in milliseconds into a Dublin Core string using the
-   * {@linkplain ch.ethz.replay.core.api.common.metadata.dublincore.DublinCore#ENC_SCHEME_ISO8601 ISO8601} encoding
-   * scheme <code>PTnHnMnS</code>.
+   * {@link DublinCore#ENC_SCHEME_ISO8601} encoding scheme <code>PTnHnMnS</code>.
    * <p/>
-   * The language of the returned value is
-   * {@link ch.ethz.replay.core.api.common.metadata.dublincore.DublinCore#LANGUAGE_UNDEFINED}.
+   * The language of the returned value is {@link DublinCore#LANGUAGE_UNDEFINED}.
    * <p/>
    * See <a href="http://en.wikipedia.org/wiki/ISO_8601#Durations"> ISO8601 Durations</a> for details.
    * 
@@ -224,9 +218,10 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodeDate(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
-   * {@link IllegalArgumentException} if the value cannot be decoded.
+   * Like {@link #decodeDate(String)}, but throws an {@link IllegalArgumentException} if the value cannot be decoded.
    * 
+   * @param value
+   *          the value
    * @return the date
    * @throws IllegalArgumentException
    *           if the value cannot be decoded
@@ -239,8 +234,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodeDate(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
-   * {@link IllegalArgumentException} if the value cannot be decoded.
+   * Like {@link #decodeDate(String)}, but throws an {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the date
    * @throws IllegalArgumentException
@@ -318,8 +312,7 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodePeriod(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
-   * {@link IllegalArgumentException} if the value cannot be decoded.
+   * Like {@link #decodePeriod(String)}, but throws an {@link IllegalArgumentException} if the value cannot be decoded.
    * 
    * @return the period
    * @throws IllegalArgumentException
@@ -330,8 +323,8 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodePeriod(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
-   * {@link IllegalArgumentException} if the value cannot be decoded.
+   * Like {@link #decodePeriod(DublinCoreValue)}, but throws an {@link IllegalArgumentException} if the value cannot be
+   * decoded.
    * 
    * @return the period
    * @throws IllegalArgumentException
@@ -368,8 +361,8 @@ public class EncodingSchemeUtils {
   }
 
   /**
-   * Like {@link #decodeTemporal(ch.ethz.replay.core.api.common.metadata.dublincore.DublinCoreValue)}, but throws an
-   * {@link IllegalArgumentException} if the value cannot be decoded.
+   * Like {@link #decodeTemporal(DublinCoreValue)}, but throws an {@link IllegalArgumentException} if the value cannot
+   * be decoded.
    * 
    * @return the temporal object of type {@link java.util.Date} or {@link DCMIPeriod}
    * @throws IllegalArgumentException

@@ -60,7 +60,8 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
   /**
    * @param id The unique name of this operation
    * @param description The description of what this operation does
-   * @param failOnError Whether an exception thrown by this operation should fail the entire {@link WorkflowInstance}
+   * @param exceptionHandlingWorkflow The workflow to run when a workflow operation exception is thrown
+   * @param failWorkflowOnException Whether an exception thrown by this operation should fail the entire {@link WorkflowInstance}
    */
   public WorkflowOperationDefinitionImpl(String id, String description, String exceptionHandlingWorkflow, boolean failWorkflowOnException) {
     super();

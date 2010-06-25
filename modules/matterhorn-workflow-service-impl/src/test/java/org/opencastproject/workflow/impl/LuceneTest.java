@@ -28,8 +28,9 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.junit.Ignore;
 import org.junit.Test;
-
+@Ignore
 public class LuceneTest {
   static String ID1 = "123-456";
   static String ID2 = "123-456-abc";

@@ -67,9 +67,9 @@ public class WorkflowSetImpl implements WorkflowSet {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.WorkflowSet.impl.SearchResult#getItems()
+   * @see org.opencastproject.workflow.api.WorkflowSet#getItems()
    */
+  @Override
   public WorkflowInstance[] getItems() {
     return resultSet == null || resultSet.size() == 0 ? new WorkflowInstance[0] :
       resultSet.toArray(new WorkflowInstance[resultSet.size()]);
@@ -91,27 +91,26 @@ public class WorkflowSetImpl implements WorkflowSet {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.WorkflowSet.impl.SearchResult#size()
+   * @see org.opencastproject.workflow.api.WorkflowSet#size()
    */
+  @Override
   public long size() {
     return resultSet != null ? resultSet.size() : 0;
   }
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.WorkflowSet.impl.SearchResult#getStartPage()
+   * @see org.opencastproject.workflow.api.WorkflowSet#getStartPage()
    */
   public long getStartPage() {
     return startPage;
   }
 
   /**
-   * Set the offset.
+   * Set the start page offset.
    * 
-   * @param offset
-   *          The offset.
+   * @param startPage
+   *          The start page offset.
    */
   public void setStartPage(long startPage) {
     this.startPage = startPage;
@@ -119,9 +118,9 @@ public class WorkflowSetImpl implements WorkflowSet {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.WorkflowSet.impl.SearchResult#getPageSize()
+   * @see org.opencastproject.workflow.api.WorkflowSet#getPageSize()
    */
+  @Override
   public long getPageSize() {
     return pageSize;
   }
@@ -138,8 +137,7 @@ public class WorkflowSetImpl implements WorkflowSet {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.WorkflowSet.impl.SearchResult#getSearchTime()
+   * @see org.opencastproject.workflow.api.WorkflowSet#getSearchTime()
    */
   public long getSearchTime() {
     return searchTime;
@@ -155,6 +153,11 @@ public class WorkflowSetImpl implements WorkflowSet {
     this.searchTime = searchTime;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowSet#getTotalCount()
+   */
+  @Override
   public long getTotalCount() {
     return totalCount;
   }

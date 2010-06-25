@@ -114,10 +114,9 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.EncoderEngine#supportsProfile(java.lang.String,
-   *      org.opencastproject.mediapackage.Track)
+   * @see org.opencastproject.composer.api.EncoderEngine#supportsProfile(java.lang.String, org.opencastproject.composer.api.EncodingProfile.MediaType)
    */
+  @Override
   public boolean supportsProfile(String profile, MediaType type) {
     if (supportedProfiles.containsKey(profile)) {
       EncodingProfile p = supportedProfiles.get(profile);
@@ -165,10 +164,10 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
    * 
    * @param engine
    *          the encoding engine
-   * @param track
-   *          the track that was encoded
    * @param profile
    *          the media format
+   * @param sourceFiles
+   *          the source files encoded
    */
   protected void fireEncoded(EncoderEngine engine, EncodingProfile profile, File... sourceFiles) {
     for (EncoderListener l : listeners) {
@@ -185,8 +184,8 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
    * 
    * @param engine
    *          the encoding engine
-   * @param sourceFile
-   *          the file that was encoded
+   * @param sourceFiles
+   *          the files that were encoded
    * @param profile
    *          the media format
    * @param cause

@@ -149,20 +149,17 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   }
 
   /**
-   * Starts text extraction on the image and returns a receipt containing the final result in the form of a {@link
-   * import org.opencastproject.metadata.mpeg7.Mpeg7Catalog}.
+   * Starts text extraction on the image and returns a receipt containing the final result in the form of an
+   * Mpeg7Catalog.
    * 
    * @param element
    *          the element to analyze
-   * @param mediapackageId
-   *          the media package identifier
-   * @param elementId
-   *          element identifier
    * @param block
    *          <code>true</code> to make this operation synchronous
    * @return a receipt containing the resulting mpeg-7 catalog
    * @throws MediaAnalysisException
    */
+  @Override
   public Receipt analyze(final MediaPackageElement element, boolean block) throws MediaAnalysisException {
     final RemoteServiceManager rs = remoteServiceManager;
     final Receipt receipt = rs.createReceipt(RECEIPT_TYPE);
@@ -184,7 +181,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
 
           File imageFile = workspace.get(imageUrl);
           VideoText[] videoTexts = analyze(imageFile, element.getIdentifier());
-          
+
           // Create a temporal decomposition
           MediaTime mediaTime = new MediaTimeImpl(0, 0);
           Video avContent = mpeg7.addVideoContent(element.getIdentifier(), mediaTime, null);
@@ -240,7 +237,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
     }
     return receipt;
   }
-  
+
   /**
    * Stores the mpeg-7 catalog in the working file repository.
    * 
@@ -288,7 +285,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
    */
   protected VideoText[] analyze(File imageFile, String id) throws IOException {
     boolean languagesInstalled;
-    if(dictionaryService.getLanguages().length == 0) {
+    if (dictionaryService.getLanguages().length == 0) {
       languagesInstalled = false;
       logger.warn("There are no language packs installed.  All text extracted from video will be considered valid.");
     } else {
@@ -303,27 +300,28 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
       VideoText videoText = new VideoTextImpl(id + "-" + i++);
       videoText.setBoundary(line.getBoundaries());
       Textual text = null;
-      if(languagesInstalled) {
+      if (languagesInstalled) {
         String[] potentialWords = StringUtils.split(line.getText());
         String[] languages = dictionaryService.detectLanguage(potentialWords);
-        if(languages.length == 0) {
+        if (languages.length == 0) {
           StringBuilder potentialWordsBuilder = new StringBuilder();
-          for(int j=0; j < potentialWords.length; j++) {
-            if(potentialWordsBuilder.length() > 0) {
+          for (int j = 0; j < potentialWords.length; j++) {
+            if (potentialWordsBuilder.length() > 0) {
               potentialWordsBuilder.append(" ");
             }
             potentialWordsBuilder.append(potentialWords[j]);
           }
-          logger.warn("Unable to determine the language for these words: '{}'.  Perhaps the language pack(s) are missing.",
+          logger.warn(
+                  "Unable to determine the language for these words: '{}'.  Perhaps the language pack(s) are missing.",
                   potentialWordsBuilder.toString());
           text = new TextualImpl(line.getText());
         } else {
           String language = languages[0];
           DICT_TOKEN[] tokens = dictionaryService.cleanText(potentialWords, language);
           StringBuilder cleanLine = new StringBuilder();
-          for(int j=0; j< potentialWords.length; j++) {
-            if(tokens[j] == DICT_TOKEN.WORD) {
-              if(cleanLine.length() > 0) {
+          for (int j = 0; j < potentialWords.length; j++) {
+            if (tokens[j] == DICT_TOKEN.WORD) {
+              if (cleanLine.length() > 0) {
                 cleanLine.append(" ");
               }
               cleanLine.append(potentialWords[j]);

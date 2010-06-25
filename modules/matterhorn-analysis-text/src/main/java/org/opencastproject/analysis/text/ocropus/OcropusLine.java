@@ -33,7 +33,7 @@ public class OcropusLine {
   /**
    * Creates a representation for a piece of text along with it's bounding box.
    * 
-   * @param text
+   * @param word
    *          the extracted text
    * @param box
    *          the text's location and boundaries
@@ -46,7 +46,7 @@ public class OcropusLine {
   /**
    * Creates a representation for a collection of lines along with its bounding box.
    * 
-   * @param lines
+   * @param words
    *          the extracted lines
    * @param box
    *          the line's location and boundaries

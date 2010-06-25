@@ -202,7 +202,7 @@ public class SchedulerRestService {
   
   /**
    * Get list of events that belong to the recurring event.
-   * @param recurringEventID The unique ID of the RecurringEvent.
+   * @param eventID The unique ID of the RecurringEvent.
    * @return List of events XML with the data of the events that belong to the recurring event 
    */
   @GET
@@ -222,7 +222,7 @@ public class SchedulerRestService {
   
   /**
    * Delete a recurring event
-   * @param recurringEventID The unique ID of the RecurringEvent.
+   * @param eventID The unique ID of the RecurringEvent.
    * @return List of events XML with the data of the events that belong to the recurring event 
    */
   @DELETE
@@ -558,6 +558,7 @@ public class SchedulerRestService {
     return Response.ok(result).build();
   }
   
+  @SuppressWarnings("unchecked")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("uuid")

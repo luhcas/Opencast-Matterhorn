@@ -19,8 +19,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageMetadata;
 
 /**
- * TODO: Comment me!
- *
+ * A MediaPackageMetadataService can read the contents of a mediapackage and extract common metadata. 
  */
 public interface MediaPackageMetadataService {
 
@@ -30,7 +29,7 @@ public interface MediaPackageMetadataService {
   /**
    * The priority of this MediaPackageMetadataService compared to others when more than one is registered in the system.
    * 
-   * When more than one MediaPackageMetadataService is registered, the {@link #getMetadata(Catalog)} method may be
+   * When more than one MediaPackageMetadataService is registered, the {@link #getMetadata(MediaPackage)} method may be
    * called on each service in order of priority.  MediaPackageMetadata objects returned by higher priority
    * MediaPackageMetadataServices should override those returned by lower priority services.
    * 

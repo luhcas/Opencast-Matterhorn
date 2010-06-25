@@ -887,7 +887,7 @@ public abstract class XMLCatalogImpl extends CatalogImpl implements XMLCatalog {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.mediapackageata.xml.metadata.xml.XMLCatalog#toXml()
+   * @see org.opencastproject.mediapackage.XMLCatalog#toXml()
    */
   @Override
   public abstract Document toXml() throws ParserConfigurationException, TransformerException, IOException;

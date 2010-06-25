@@ -52,7 +52,7 @@ public interface WorkingFileRepository {
    * 
    * @param mediaPackageID
    * @param mediaPackageElementID
-   * @return
+   * @return the data
    * @throws IOException
    *           if there is a problem reading the data
    */
@@ -63,7 +63,7 @@ public interface WorkingFileRepository {
    * 
    * @param mediaPackageID
    * @param mediaPackageElementID
-   * @return
+   * @return the md5 hash of the data
    * @throws IOException
    *           if there is a problem reading or hashing the data
    */
@@ -86,7 +86,7 @@ public interface WorkingFileRepository {
    * 
    * @param mediaPackageID
    * @param mediaPackageElementID
-   * @return
+   * @return the URI to this resource
    */
   URI getURI(String mediaPackageID, String mediaPackageElementID);
 
@@ -97,7 +97,7 @@ public interface WorkingFileRepository {
    * @param mediaPackageID
    * @param mediaPackageElementID
    * @param fileName
-   * @return
+   * @return the URI to this resource
    */
   URI getURI(String mediaPackageID, String mediaPackageElementID, String fileName);
 
@@ -112,8 +112,8 @@ public interface WorkingFileRepository {
   /**
    * Gets the number of files in a collection.
    * 
-   * @param the
-   *          collection identifier
+   * @param id
+   *          the collection identifier
    * @return the number of files in a collection
    * @throws IllegalArgumentException
    *           if the collection does not exist
@@ -123,7 +123,7 @@ public interface WorkingFileRepository {
   /**
    * Puts a file into a collection, overwriting the existing file if present.
    * 
-   * @param collection
+   * @param collectionId
    *          The collection identifier
    * @param fileName
    *          The filename to use in storing the input stream
@@ -158,7 +158,7 @@ public interface WorkingFileRepository {
    * 
    * @param collectionId
    * @param fileName
-   * @return
+   * @return the md5 hash of this resource
    * @throws IOException
    *           if there is a problem reading or hashing the data
    */

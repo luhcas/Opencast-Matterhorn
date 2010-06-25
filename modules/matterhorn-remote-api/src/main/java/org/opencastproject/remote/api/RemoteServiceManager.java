@@ -69,37 +69,42 @@ public interface RemoteServiceManager {
   
   /**
    * Create and store a new receipt in {@link Status#QUEUED}
-   * @return
+   * 
+   * @return the receipt
    */
   Receipt createReceipt(String type);
 
   /**
    * Update the receipt in the database
+   * 
    * @param receipt
    */
   void updateReceipt(Receipt receipt);
 
   /**
    * Gets a receipt by its ID, or null if not found
-   * @param id
-   * @return
+   * 
+   * @param id the receipt id
+   * @return the receipt
    */
   Receipt getReceipt(String id);
   
   /**
    * Count the number of receipts of this type in this {@link Status} across all hosts
+   * 
    * @param type The type of receipts
    * @param status The status of the receipts
-   * @return
+   * @return the number of job receipts
    */
   long count(String type, Status status);
 
   /**
    * Count the number of receipts in this {@link Status} on this host
+   * 
    * @param type The type of receipts
    * @param status The status of the receipts
    * @param host The server that created and will be handling the encoding job
-   * @return
+   * @return the number of job receipts
    */
   long count(String type, Status status, String host);
 
@@ -113,6 +118,8 @@ public interface RemoteServiceManager {
 
   /**
    * Finds all current service registrations, including those in maintenance mode.
+   * 
+   * @return the current service registrations
    */
    List<ServiceRegistration> getServiceRegistrations();
   
