@@ -12,6 +12,7 @@
     <sec:intercept-url  pattern="/shared_img/**" filters="none"/>
     <sec:intercept-url pattern='/remote.json' access='ROLE_ADMIN'/>
     <sec:intercept-url pattern='/engage/ui/**' access='ROLE_ANONYMOUS, ROLE_USER'/>
+    <sec:intercept-url pattern='/search/rest/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER'/>
     <sec:intercept-url pattern='/style.css' access='ROLE_ANONYMOUS, ROLE_USER, ROLE_ADMIN'/>
     <sec:intercept-url pattern='/images/**' access='ROLE_ANONYMOUS, ROLE_USER, ROLE_ADMIN'/>
     <sec:intercept-url pattern='/login.html' access='ROLE_ANONYMOUS'/>
