@@ -31,6 +31,8 @@ public class SolrUtils {
    * @return The cleaned string.
    */
   static String clean(String q) {
+    if (q == null)
+      return null;
     return q.replaceAll(queryCleanerRegex, " ").trim();
   }
 

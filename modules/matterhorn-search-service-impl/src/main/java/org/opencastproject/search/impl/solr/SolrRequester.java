@@ -203,7 +203,7 @@ public class SolrRequester {
             if (segmentDuration == null)
               throw new IllegalStateException("Found segment without duration hint");
             segment.setDuration(Long.parseLong(segmentDuration));
-            
+
             // get preview urls
             for (Entry<Object, Object> entry : segmentHints.entrySet()) {
               if (entry.getKey().toString().startsWith("preview.")) {
@@ -315,19 +315,22 @@ public class SolrRequester {
   }
 
   /**
+   * Converts the query object into a solr query and returns the results.
+   * 
    * @param q
-   * @return
+   *          the query
+   * @return the search results
    */
   public SearchResult getByQuery(SearchQuery q) throws SolrServerException {
     StringBuilder sb = new StringBuilder();
-    
+
     String solrQueryRequest = q.getQuery();
     if (solrQueryRequest != null) {
       sb.append(q.getQuery());
     }
 
-    String solrIdRequest = q.getId();
-    if(q.getId() != null) {
+    String solrIdRequest = StringUtils.trimToNull(q.getId());
+    if (solrIdRequest != null) {
       String cleanSolrIdRequest = SolrUtils.clean(solrIdRequest);
       if (sb.length() > 0)
         sb.append(" AND ");
@@ -335,7 +338,7 @@ public class SolrRequester {
       sb.append(SolrFields.ID);
       sb.append(":");
       sb.append(cleanSolrIdRequest);
-      if(q.isIncludeSeries() && q.isIncludeEpisodes()) {
+      if (q.isIncludeSeries() && q.isIncludeEpisodes()) {
         sb.append(" OR ");
         sb.append(SolrFields.DC_IS_PART_OF);
         sb.append(":");
@@ -344,25 +347,26 @@ public class SolrRequester {
       sb.append(")");
     }
 
-    String solrTextRequest = q.getText();
-    if(solrTextRequest != null) {
+    String solrTextRequest = StringUtils.trimToNull(q.getText());
+    if (solrTextRequest != null) {
       String cleanSolrTextRequest = SolrUtils.clean(q.getText());
-      if(StringUtils.isNotEmpty(cleanSolrTextRequest)) {
+      if (StringUtils.isNotEmpty(cleanSolrTextRequest)) {
         if (sb.length() > 0)
           sb.append(" AND ");
         sb.append("*:");
-        sb.append(boost(cleanSolrTextRequest));      
+        sb.append(boost(cleanSolrTextRequest));
       }
     }
-    
-    if(q.getElementTags() != null && q.getElementTags().length > 0) {
+
+    if (q.getElementTags() != null && q.getElementTags().length > 0) {
       if (sb.length() > 0)
         sb.append(" AND ");
       StringBuilder tagBuilder = new StringBuilder();
-      for(int i=0; i<q.getElementTags().length; i++) {
+      for (int i = 0; i < q.getElementTags().length; i++) {
         String tag = SolrUtils.clean(q.getElementTags()[i]);
-        if(StringUtils.isEmpty(tag)) continue;
-        if(tagBuilder.length() == 0) {
+        if (StringUtils.isEmpty(tag))
+          continue;
+        if (tagBuilder.length() == 0) {
           tagBuilder.append("(");
         } else {
           tagBuilder.append(" OR ");
@@ -371,20 +375,21 @@ public class SolrRequester {
         tagBuilder.append(":");
         tagBuilder.append(tag);
       }
-      if(tagBuilder.length() > 0) {
+      if (tagBuilder.length() > 0) {
         tagBuilder.append(") ");
         sb.append(tagBuilder);
       }
     }
 
-    if(q.getElementFlavors() != null && q.getElementFlavors().length > 0) {
+    if (q.getElementFlavors() != null && q.getElementFlavors().length > 0) {
       if (sb.length() > 0)
         sb.append(" AND ");
       StringBuilder flavorBuilder = new StringBuilder();
-      for(int i=0; i<q.getElementFlavors().length; i++) {
+      for (int i = 0; i < q.getElementFlavors().length; i++) {
         String flavor = SolrUtils.clean(q.getElementFlavors()[i].toString());
-        if(StringUtils.isEmpty(flavor)) continue;
-        if(flavorBuilder.length() == 0) {
+        if (StringUtils.isEmpty(flavor))
+          continue;
+        if (flavorBuilder.length() == 0) {
           flavorBuilder.append("(");
         } else {
           flavorBuilder.append(" OR ");
@@ -393,32 +398,32 @@ public class SolrRequester {
         flavorBuilder.append(":");
         flavorBuilder.append(flavor);
       }
-      if(flavorBuilder.length() > 0) {
+      if (flavorBuilder.length() > 0) {
         flavorBuilder.append(") ");
         sb.append(flavorBuilder);
       }
     }
-    
+
     if (sb.length() == 0)
       sb.append("*:*");
-    
+
     SolrQuery query = new SolrQuery(sb.toString());
-    
+
     if (q.isIncludeSeries()) {
       query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series);
-    } 
-    
+    }
+
     if (q.isIncludeEpisodes()) {
       query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
     }
-        
+
     if (q.getLimit() > 0)
       query.setRows(q.getLimit());
-    
+
     if (q.getOffset() > 0)
       query.setStart(q.getOffset());
-    
-    if(q.isSortByCreationDate()) {
+
+    if (q.isSortByCreationDate()) {
       query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
       query.addSortField(SolrFields.OC_MODIFIED, ORDER.desc);
     }
