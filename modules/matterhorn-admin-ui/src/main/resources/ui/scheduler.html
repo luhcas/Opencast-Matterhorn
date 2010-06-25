@@ -122,8 +122,11 @@
             </div>
             <div class="fl-widget-content warnbox-content">
               <ul>
-                <li id="notice-offline" class="missing-fields-item">
+                <li id="notice-offline" class="missing-fields-item" style="display:none;">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>The <a href="javascript:document.getElementById('agent').focus();">capture agent</a> you previously selected is currently offline. You may want to select a different capture agent.
+                </li>
+                <li id="notice-tzdiff" class="missing-fields-item" style="display:none;">
+                  <span class="fl-icon inline-icon icon-bullet" title=""></span>The timezone for this <a href="javascript:document.getElementById('agent').focus();">capture agent</a> is <span id="tzdiff"></span>. Capture will occur according to the time local to the agent, though when you look at your list of Recordings it will be shown in your local time.
                 </li>
               </ul>
             </div>

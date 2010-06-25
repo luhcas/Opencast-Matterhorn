@@ -314,6 +314,12 @@ UI.HandleAgentTZ = function(tz){
     //Display note of agent TZ difference, all times local to capture agent.
     //update time picker to agent time
     Agent.tzDiff = tz - localTZ;
+    diff = Math.round((Agent.tzDiff/60)*100)/100;
+    if (diff < 0) postfix = " hours earlier"; 
+    else if (diff > 0) postfix = " hours later"; 
+    $('#notice-container').show();
+    $('#notice-tzdiff').show();
+    $('#tzdiff').append(Math.abs(diff) + postfix);
   }
 };
 
@@ -321,6 +327,7 @@ UI.CheckAgentStatus = function(doc){
   var state = $('state', doc).text();
   if(state == '' || state == 'unknown' || state == 'offline') {
     $('#notice-container').show();
+    $('#notice-offline').show();
   }
 };
 
