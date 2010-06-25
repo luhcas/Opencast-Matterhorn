@@ -1,4 +1,4 @@
-﻿Copyright 2009-2010 The Opencast Project. All rights reserved.
+ ﻿Copyright 2009-2010 The Opencast Project. All rights reserved.
 
 Opencast Matterhorn ("Matterhorn") is licensed for use pursuant to the Educational Community License v. 2.0. Portions of Matterhorn are copyrighted by other parties, including the parties listed below. Please refer to the links below for complete copyright and licensing information.
 
