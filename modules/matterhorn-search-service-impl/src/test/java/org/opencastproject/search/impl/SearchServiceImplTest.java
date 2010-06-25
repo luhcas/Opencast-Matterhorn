@@ -25,8 +25,6 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageException;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.search.api.SearchResult;
@@ -38,6 +36,7 @@ import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
 import org.easymock.EasyMock;
+import org.easymock.IAnswer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,21 +60,20 @@ public class SearchServiceImplTest {
 
   @Before
   public void setup() throws Exception {
-    DublinCoreCatalog dcCatalog = new DublinCoreCatalogImpl(getClass().getResourceAsStream("/dublincore.xml"));
-    DublinCoreCatalogService dcService = org.easymock.classextension.EasyMock
-            .createNiceMock(DublinCoreCatalogService.class);
-    org.easymock.classextension.EasyMock.expect(dcService.load((InputStream) EasyMock.anyObject())).andReturn(dcCatalog);
-    org.easymock.classextension.EasyMock.replay(dcService);
-
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
-    File dcFile = new File(getClass().getResource("/dublincore.xml").toURI());
+    final File dcFile = new File(getClass().getResource("/dublincore.xml").toURI());
+    final File dcSeriesFile = new File(getClass().getResource("/series-dublincore.xml").toURI());
     Assert.assertNotNull(dcFile);
-    EasyMock.expect(workspace.get((URI) EasyMock.anyObject())).andReturn(dcFile).anyTimes();
+    EasyMock.expect(workspace.get((URI) EasyMock.anyObject())).andAnswer(new IAnswer<File>() {
+      public File answer() throws Throwable {
+        return EasyMock.getCurrentArguments()[0].toString().contains("series") ? dcSeriesFile : dcFile;
+      }
+    }).anyTimes();
     EasyMock.replay(workspace);
-    
+
     service = new SearchServiceImpl();
     service.solrRoot = IoSupport.getSystemTmpDir() + "opencast" + File.separator + "searchindex";
-    service.setDublincoreService(dcService);
+    service.setDublincoreService(new DublinCoreCatalogService());
     service.setWorkspace(workspace);
     service.setupSolr(solrRoot);
     RemoteServiceManager remote = EasyMock.createNiceMock(RemoteServiceManager.class);
@@ -207,6 +205,38 @@ public class SearchServiceImplTest {
     assertEquals(0, service.getByQuery(q).size());
     q.withId(null); // Clear the ID requirement
     assertEquals(0, service.getByQuery(q).size());
+  }
+
+  /**
+   * Ads a media package with one dublin core for the episode and one for the series.
+   */
+  @Test
+  public void testAddSeriesMediaPackage() {
+    MediaPackageBuilderFactory builderFactory = MediaPackageBuilderFactory.newInstance();
+    MediaPackageBuilder mediaPackageBuilder = builderFactory.newMediaPackageBuilder();
+    URL rootUrl = SearchServiceImplTest.class.getResource("/");
+    mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(rootUrl));
+
+    // Load the simple media package
+    MediaPackage mediaPackage = null;
+    try {
+      InputStream is = SearchServiceImplTest.class.getResourceAsStream("/manifest-full.xml");
+      mediaPackage = mediaPackageBuilder.loadFromXml(is);
+    } catch (MediaPackageException e) {
+      fail("Error loading full media package");
+    }
+
+    // Add the media package to the search index
+    service.add(mediaPackage);
+
+    // Make sure it's properly indexed and returned
+    SearchQueryImpl q = new SearchQueryImpl();
+    q.includeEpisodes(false);
+    q.includeSeries(true);
+    
+    SearchResult result = service.getByQuery(q);
+    assertEquals(1, result.size());
+    assertEquals("foobar-serie", result.getItems()[0].getId());
   }
 
 }

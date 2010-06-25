@@ -336,7 +336,7 @@ public class SolrIndexManager {
 
     // If this is the case, try to get a hold on it
     Catalog dcCatalogs[] = mediaPackage.getCatalogs(MediaPackageElements.SERIES);
-    DublinCoreCatalog dublinCore = (DublinCoreCatalog) dcCatalogs[0];
+    DublinCoreCatalog dublinCore = loadDublinCoreCatalog(dcCatalogs[0]);
     String seriesId = dublinCore.getFirst(DublinCore.PROPERTY_IDENTIFIER);
 
     // Populate document with existing data
