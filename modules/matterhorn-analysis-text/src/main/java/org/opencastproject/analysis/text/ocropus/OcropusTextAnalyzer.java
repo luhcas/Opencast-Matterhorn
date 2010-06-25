@@ -114,7 +114,7 @@ public class OcropusTextAnalyzer {
    */
   protected void postProcess() {
     try {
-      InputStream is = IOUtils.toInputStream(ocrocmdOutput.toString());
+      InputStream is = IOUtils.toInputStream(ocrocmdOutput.toString(), "UTF-8");
       textFrame = OcropusTextFrame.parse(is);
     } catch (IOException e) {
       onError(e);

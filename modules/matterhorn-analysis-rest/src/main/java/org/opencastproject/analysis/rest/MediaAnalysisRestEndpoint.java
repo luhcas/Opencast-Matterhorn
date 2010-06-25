@@ -90,7 +90,7 @@ public class MediaAnalysisRestEndpoint {
     try {
       MediaAnalysisService service = getMediaAnalysiService(analysisType);
       DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document doc = docBuilder.parse(IOUtils.toInputStream(trackAsXml));
+      Document doc = docBuilder.parse(IOUtils.toInputStream(trackAsXml, "UTF-8"));
       MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
               .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
       Receipt receipt = service.analyze(element, false);

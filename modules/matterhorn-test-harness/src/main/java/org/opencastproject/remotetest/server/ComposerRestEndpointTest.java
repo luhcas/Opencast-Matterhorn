@@ -108,7 +108,7 @@ public class ComposerRestEndpointTest {
   }
 
   protected String getSampleMediaPackage() throws Exception {
-    String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("mediapackage-2.xml"));
+    String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("mediapackage-2.xml"), "UTF-8");
     return template.replaceAll("@SAMPLES_URL@", BASE_URL + "/workflow/samples");
   }
   
@@ -116,7 +116,7 @@ public class ComposerRestEndpointTest {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
-    Document doc = builder.parse(IOUtils.toInputStream(xml));
+    Document doc = builder.parse(IOUtils.toInputStream(xml, "UTF-8"));
     return ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("id");
   }
 
@@ -125,7 +125,7 @@ public class ComposerRestEndpointTest {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
-    Document doc = builder.parse(IOUtils.toInputStream(xml));
+    Document doc = builder.parse(IOUtils.toInputStream(xml, "UTF-8"));
     String status = ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("status");
     return status;
   }

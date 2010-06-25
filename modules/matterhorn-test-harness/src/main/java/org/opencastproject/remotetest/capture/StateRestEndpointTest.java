@@ -118,7 +118,7 @@ public class StateRestEndpointTest {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
-    return builder.parse(IOUtils.toInputStream(responseXml));
+    return builder.parse(IOUtils.toInputStream(responseXml, "UTF-8"));
   }
   
   protected Object getXPath(Document document, String path, QName returnType) 

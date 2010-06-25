@@ -106,7 +106,7 @@ public class WorkflowRestEndpointTest {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
-    Document doc = builder.parse(IOUtils.toInputStream(xml));
+    Document doc = builder.parse(IOUtils.toInputStream(xml, "UTF-8"));
     return ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("id");
   }
 
@@ -114,16 +114,16 @@ public class WorkflowRestEndpointTest {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
-    Document doc = builder.parse(IOUtils.toInputStream(xml));
+    Document doc = builder.parse(IOUtils.toInputStream(xml, "UTF-8"));
     return ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("state");
   }
 
   protected String getSampleMediaPackage() throws Exception {
-    String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("mediapackage-1.xml"));
+    String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("mediapackage-1.xml"), "UTF-8");
     return template.replaceAll("@SAMPLES_URL@", BASE_URL + "/workflow/samples");
   }
 
   protected String getSampleWorkflowDefinition() throws Exception {
-    return IOUtils.toString(getClass().getClassLoader().getResourceAsStream("workflow-definition-1.xml"));
+    return IOUtils.toString(getClass().getClassLoader().getResourceAsStream("workflow-definition-1.xml"), "UTF-8");
   }
 }

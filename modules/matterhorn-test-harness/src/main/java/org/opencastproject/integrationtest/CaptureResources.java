@@ -64,7 +64,7 @@ public class CaptureResources {
   }
   
   protected static String captureProperties() throws Exception {
-    return IOUtils.toString(CaptureResources.class.getClassLoader().getResourceAsStream("capture.properties"));
+    return IOUtils.toString(CaptureResources.class.getClassLoader().getResourceAsStream("capture.properties"), "UTF-8");
   }
   
   protected static String captureId(ClientResponse response) throws Exception {

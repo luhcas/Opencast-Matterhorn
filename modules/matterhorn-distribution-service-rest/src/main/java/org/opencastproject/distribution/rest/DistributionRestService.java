@@ -132,7 +132,7 @@ public class DistributionRestService {
 
   private String generateMediaPackage() {
     try {
-      String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("manifest.xml"));
+      String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("manifest.xml"), "UTF-8");
       return template.replaceAll("@SAMPLES_URL@", serverUrl + "/workflow/samples");
     } catch (IOException e) {
       logger.warn("Unable to load the sample mediapackage");

@@ -90,7 +90,7 @@ public class MediaInspectionRestEndpoint {
     checkNotNull(service);
     try {
       DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document doc = docBuilder.parse(IOUtils.toInputStream(mediaPackageElement));
+      Document doc = docBuilder.parse(IOUtils.toInputStream(mediaPackageElement, "UTF-8"));
       MediaPackageElement mpe = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
               .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
       Receipt r = service.enrich(mpe, override, false);

@@ -21,6 +21,9 @@ import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementBuilder;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
@@ -211,7 +214,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
     // Loop over all existing segment catalogs
     for (Entry<Catalog, Mpeg7Catalog> mapEntry : catalogs.entrySet()) {
       Catalog segmentCatalog = mapEntry.getKey();
-      MediaPackageReference catalogRef = mapEntry.getKey().getReference();
+      MediaPackageReference catalogRef = segmentCatalog.getReference();
 
       // Make sure we can figure out the source track
       if (catalogRef == null) {
@@ -222,7 +225,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         logger.info("Skipping catalog {} since it's source was not a track", segmentCatalog);
       }
 
-      logger.info("Analyzing mpeg-7 segments catalog {} for text", mapEntry.getKey());
+      logger.info("Analyzing mpeg-7 segments catalog {} for text", segmentCatalog);
 
       // Create a copy that will contain the segments enriched with the video text elements
       Mpeg7Catalog textCatalog = mapEntry.getValue().clone();
@@ -299,13 +302,15 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
 
       }
 
-      // Add flavor and target tags
-      mapEntry.getKey().setFlavor(MediaPackageElements.TEXTS);
-      for (String tag : targetTagSet)
-        mapEntry.getKey().addTag(tag);
-
       // Store the catalog in the workspace
-      store(mediaPackage, textCatalog, mapEntry.getKey());
+      Catalog catalog = store(mediaPackage, textCatalog);
+      
+      // Add flavor and target tags
+      catalog.setFlavor(MediaPackageElements.TEXTS);
+      for (String tag : targetTagSet) {
+        catalog.addTag(tag);
+      }
+      
     }
 
     logger.debug("Text analysis completed");
@@ -387,23 +392,23 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    * 
    * @param mediaPackage
    *          the media package
-   * @param mpeg7
-   *          the new mpeg-7 catalog
-   * @return the resulting URI
+   * @return the resulting catalog element
    */
-  protected URI store(MediaPackage mediaPackage, Mpeg7Catalog mpeg7, Catalog mediaPackageCatalog) throws IOException {
+  protected Catalog store(MediaPackage mediaPackage, Mpeg7Catalog mpeg7) throws IOException {
     InputStream in = mpeg7CatalogService.serialize(mpeg7);
 
     // Add the catalog to the media package
-    mediaPackageCatalog.setIdentifier(null);
-    mediaPackage.add(mediaPackageCatalog);
+    MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+    Catalog catalog = (Catalog)builder.newElement(MediaPackageElement.Type.Catalog, MediaPackageElements.TEXTS);
+    catalog.setIdentifier(null);
+    mediaPackage.add(catalog);
 
     // Put the result into the workspace
     String mediaPackageId = mediaPackage.getIdentifier().toString();
     String filename = "slidetext.xml";
-    URI workspaceURI = workspace.put(mediaPackageId, mediaPackageCatalog.getIdentifier(), filename, in);
-    mediaPackageCatalog.setURI(workspaceURI);
-    return workspaceURI;
+    URI workspaceURI = workspace.put(mediaPackageId, catalog.getIdentifier(), filename, in);
+    catalog.setURI(workspaceURI);
+    return catalog;
   }
 
   /**

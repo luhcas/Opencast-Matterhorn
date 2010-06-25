@@ -228,7 +228,7 @@ public class ReceiptImpl implements Receipt {
       element = null;
     } else {
       DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document doc = docBuilder.parse(IOUtils.toInputStream(xml));
+      Document doc = docBuilder.parse(IOUtils.toInputStream(xml, "UTF-8"));
       element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
               .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
     }

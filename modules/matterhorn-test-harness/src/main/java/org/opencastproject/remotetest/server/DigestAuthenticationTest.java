@@ -49,7 +49,7 @@ public class DigestAuthenticationTest {
     get.addHeader("X-Requested-Auth", "Digest");
     httpclient.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
     HttpResponse response = httpclient.execute(get);
-    String content = IOUtils.toString(response.getEntity().getContent());
+    String content = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
     Assert.assertTrue(content.contains("Start Climbing"));
   }
 
@@ -69,7 +69,7 @@ public class DigestAuthenticationTest {
     DefaultHttpClient httpclient = new DefaultHttpClient();
     HttpGet get = new HttpGet(BASE_URL + "/welcome.html");
     HttpResponse response = httpclient.execute(get);
-    String content = IOUtils.toString(response.getEntity().getContent());
+    String content = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
     Assert.assertTrue(content.contains("Login Page"));
     Assert.assertTrue( ! content.contains("Start Climbing"));
   }
@@ -111,7 +111,7 @@ public class DigestAuthenticationTest {
 
     // Send the POST
     HttpResponse response = httpclient.execute(post, localContext);
-    String content = IOUtils.toString(response.getEntity().getContent());
+    String content = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
     Assert.assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
     Assert.assertEquals("testagent set to idle", content);
   }

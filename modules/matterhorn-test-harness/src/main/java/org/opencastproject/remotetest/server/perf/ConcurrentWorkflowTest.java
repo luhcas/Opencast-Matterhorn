@@ -115,7 +115,7 @@ public class ConcurrentWorkflowTest {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
-    Document doc = builder.parse(IOUtils.toInputStream(xml));
+    Document doc = builder.parse(IOUtils.toInputStream(xml, "UTF-8"));
     return ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("id");
   }
 
@@ -123,12 +123,12 @@ public class ConcurrentWorkflowTest {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
-    Document doc = builder.parse(IOUtils.toInputStream(xml));
+    Document doc = builder.parse(IOUtils.toInputStream(xml, "UTF-8"));
     return ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("state");
   }
 
   protected String getSampleMediaPackage() throws Exception {
-    String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("mediapackage-1.xml"));
+    String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("mediapackage-1.xml"), "UTF-8");
     // Make a copy of the media file
     File mediaFile = copyStreamToTempFile(getClass().getClassLoader().getResourceAsStream("av.mov"), "media", ".mov");
     String xml = template.replaceFirst("@SAMPLES_URL@/screen.mpg", "file:" + mediaFile.getAbsolutePath());

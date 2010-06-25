@@ -33,7 +33,7 @@ public class LocalHashMap {
   public LocalHashMap(String in) {
     Properties properties = new Properties();
     try {
-      properties.load(IOUtils.toInputStream(in));
+      properties.load(IOUtils.toInputStream(in, "UTF-8"));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

@@ -85,7 +85,7 @@ public class DistributionDownloadRestEndpointTest {
   }
 
   protected String getSampleMediaPackage() throws Exception {
-    String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("mediapackage-1.xml"));
+    String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("mediapackage-1.xml"), "UTF-8");
     return template.replaceAll("@SAMPLES_URL@", BASE_URL + "/workflow/samples");
   }
 }

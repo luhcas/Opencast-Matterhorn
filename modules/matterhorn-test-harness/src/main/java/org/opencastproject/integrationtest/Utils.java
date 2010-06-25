@@ -45,7 +45,7 @@ public class Utils {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setNamespaceAware(true);
       DocumentBuilder builder = factory.newDocumentBuilder();
-      return builder.parse(IOUtils.toInputStream(doc));
+      return builder.parse(IOUtils.toInputStream(doc, "UTF-8"));
    }
   
   public static Object xPath(Document document, String path, QName returnType)
@@ -66,7 +66,7 @@ public class Utils {
   public static String schedulerEvent(Integer duration, String title, String id) throws Exception {
 	Long start = System.currentTimeMillis() + 60000;
 	Long end = start + duration;
-	String event = IOUtils.toString(Utils.class.getResourceAsStream("/scheduler-event.xml"));
+	String event = IOUtils.toString(Utils.class.getResourceAsStream("/scheduler-event.xml"), "UTF-8");
 	return event
 		.replace("@@id@@", id)
 		.replace("@@title@@", title)

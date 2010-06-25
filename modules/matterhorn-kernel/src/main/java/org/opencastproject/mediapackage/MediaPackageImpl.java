@@ -936,7 +936,11 @@ public final class MediaPackageImpl implements MediaPackage {
    * @throws MediaPackageException
    */
   public static MediaPackageImpl valueOf(String xml) throws MediaPackageException {
-    return MediaPackageImpl.valueOf(IOUtils.toInputStream(xml));
+    try {
+      return MediaPackageImpl.valueOf(IOUtils.toInputStream(xml, "UTF-8"));
+    } catch (IOException e) {
+      throw new MediaPackageException(e);
+    }
   }
 
   /**

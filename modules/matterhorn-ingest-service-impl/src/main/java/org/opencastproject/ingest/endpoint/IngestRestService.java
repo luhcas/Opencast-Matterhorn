@@ -364,7 +364,7 @@ public class IngestRestService {
         for (FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
           FileItemStream item = iter.next();
           if (item.isFormField()) {
-            workflowConfig.put(item.getFieldName(), IOUtils.toString(item.openStream()));
+            workflowConfig.put(item.getFieldName(), IOUtils.toString(item.openStream(), "UTF-8"));
             logger.info("Processing form field: " + item.getFieldName());
           } else {
             logger.info("Processing file item");
@@ -459,7 +459,7 @@ public class IngestRestService {
   public Response createUploadJobHtml() {
     try {
       UploadJob job = createUploadJob();
-      String html = IOUtils.toString(getClass().getResourceAsStream("/templates/uploadform.html"));
+      String html = IOUtils.toString(getClass().getResourceAsStream("/templates/uploadform.html"), "UTF-8");
       // String uploadURL = serverURL + "/ingest/rest/addElementMonitored/" + job.getId();
       String uploadURL = "addElementMonitored/" + job.getId();
       html = html.replaceAll("\\{uploadURL\\}", uploadURL);
@@ -478,7 +478,7 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_HTML)
   public Response createInboxHtml() {
     try {
-      String html = IOUtils.toString(getClass().getResourceAsStream("/templates/inboxform.html"));
+      String html = IOUtils.toString(getClass().getResourceAsStream("/templates/inboxform.html"), "UTF-8");
       return Response.ok(html).build();
     } catch (Exception ex) {
       logger.warn(ex.getMessage(), ex);
@@ -541,7 +541,7 @@ public class IngestRestService {
               // TODO add ability to accept the other kinds of elements (Attachment etc..)
 
               mp = ingestService.addTrack(item.openStream(), fileName, flavor, mp);
-              String html = IOUtils.toString(getClass().getResourceAsStream("/templates/complete.html"));
+              String html = IOUtils.toString(getClass().getResourceAsStream("/templates/complete.html"), "UTF-8");
               html = html.replaceAll("\\{mediaPackage\\}", mp.toXml());
               return Response.ok(html).build();
             }
@@ -567,7 +567,7 @@ public class IngestRestService {
    */
   private Response buildUploadFailedRepsonse() {
     try {
-      String html = IOUtils.toString(getClass().getResourceAsStream("/templates/error.html"));
+      String html = IOUtils.toString(getClass().getResourceAsStream("/templates/error.html"), "UTF-8");
       return Response.ok(html).build();
     } catch (IOException ex) {
       logger.error("Unable to build upload failed Response");
@@ -596,7 +596,7 @@ public class IngestRestService {
       // mp
       // yields
       // Exception
-      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc), "dublincore.xml", MediaPackageElements.EPISODE, mediaPackage);
+      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc, "UTF-8"), "dublincore.xml", MediaPackageElements.EPISODE, mediaPackage);
       return Response.ok(mediaPackage).build();
     } catch (Exception e) {
       logger.error(e.getMessage());

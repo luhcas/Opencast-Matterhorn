@@ -135,7 +135,7 @@ public class TrackTest {
     StringWriter writer = new StringWriter();
     marshaller.marshal(track, writer);
     Unmarshaller unmarshaller = context.createUnmarshaller();
-    TrackImpl t1 = unmarshaller.unmarshal(new StreamSource(IOUtils.toInputStream(writer.toString())), TrackImpl.class).getValue();
+    TrackImpl t1 = unmarshaller.unmarshal(new StreamSource(IOUtils.toInputStream(writer.toString(), "UTF-8")), TrackImpl.class).getValue();
     Assert.assertEquals(MediaPackageElements.PRESENTATION_SOURCE, t1.getFlavor());
 
     // Now again without namespaces

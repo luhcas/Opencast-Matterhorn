@@ -244,7 +244,7 @@ public class WorkflowRestService {
   
   protected String generateWorkflowDefinition() {
     try {
-      return IOUtils.toString(getClass().getResourceAsStream("/sample/compose-distribute-publish.xml"));
+      return IOUtils.toString(getClass().getResourceAsStream("/sample/compose-distribute-publish.xml"), "UTF-8");
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

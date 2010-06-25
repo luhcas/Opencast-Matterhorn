@@ -390,7 +390,7 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
       throw new RuntimeException(e);
     }
     try {
-      workspace.putInCollection(COLLECTION_ID, getFilename(instance.getId()), IOUtils.toInputStream(xml));
+      workspace.putInCollection(COLLECTION_ID, getFilename(instance.getId()), IOUtils.toInputStream(xml, "UTF-8"));
       index(instance);
     } catch (Exception e) {
       throw new RuntimeException(e);

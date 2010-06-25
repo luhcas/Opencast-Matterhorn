@@ -229,7 +229,7 @@ public class SchedulerServiceImplTest {
     Calendar cal;
     try {
       String icalString = service.getCalendarForCaptureAgent("testrecorder");
-      cal = calBuilder.build(IOUtils.toInputStream(icalString));
+      cal = calBuilder.build(IOUtils.toInputStream(icalString, "UTF-8"));
       ComponentList vevents = cal.getComponents(VEvent.VEVENT);
       for (int i = 0; i < vevents.size(); i++) {
         PropertyList attachments = ((VEvent)vevents.get(i)).getProperties(Property.ATTACH);
@@ -337,7 +337,7 @@ public class SchedulerServiceImplTest {
     DocumentBuilder builder;
     try {
       builder = factory.newDocumentBuilder();
-      Document doc =  builder.parse(IOUtils.toInputStream(dc));
+      Document doc =  builder.parse(IOUtils.toInputStream(dc, "UTF-8"));
       XPath xPath = XPathFactory.newInstance().newXPath();
       Assert.assertEquals(xPath.evaluate("/dublincore/creator", doc), "test lecturer");
     } catch (Exception e1) {

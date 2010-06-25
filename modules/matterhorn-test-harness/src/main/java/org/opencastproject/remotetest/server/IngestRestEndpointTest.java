@@ -94,7 +94,7 @@ public class IngestRestEndpointTest {
     String mp = "";
     if (entity != null) {
       InputStream instream = entity.getContent();
-      mp = IOUtils.toString(instream);
+      mp = IOUtils.toString(instream, "UTF-8");
       // System.out.println(mp);
     }
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
