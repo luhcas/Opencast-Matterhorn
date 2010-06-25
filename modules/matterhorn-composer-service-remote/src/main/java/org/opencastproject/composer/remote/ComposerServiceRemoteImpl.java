@@ -47,7 +47,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Proxies a set of remote composer services for use as a JVM-local service. Remote services are selected at random.
@@ -112,19 +114,24 @@ public class ComposerServiceRemoteImpl implements ComposerService {
       queryStringParams.add(new BasicNameValuePair("host", host));
     }
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/count?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
       HttpGet get = new HttpGet(url);
       try {
         HttpResponse response = trustedHttpClient.execute(get);
-        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
           return longResponseHandler.handleResponse(response);
+        } else {
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
         }
       } catch (Exception e) {
-        logger.info(e.getMessage(), e);
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+            hostErrors);
     throw new RuntimeException("Unable to execute method, none of the " + remoteHosts.size()
             + " remote hosts are available");
   }
@@ -175,6 +182,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
           String profileId, boolean block) throws EncoderException, MediaPackageException {
     Receipt r = null;
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/encode";
       HttpPost post = new HttpPost(url);
@@ -187,19 +195,22 @@ public class ComposerServiceRemoteImpl implements ComposerService {
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
         post.setEntity(entity);
         HttpResponse response = trustedHttpClient.execute(post);
-        if(response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+        if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
           continue;
         }
         String content = EntityUtils.toString(response.getEntity());
         r = remoteServiceManager.parseReceipt(content);
         break;
       } catch (Exception e) {
-        logger.info(e.getMessage(), e);
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
 
-    if(r == null) {
+    if (r == null) {
+      logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+              hostErrors);
       throw new RuntimeException("Unable to execute method, none of the " + remoteHosts.size()
               + " remote hosts are available");
     }
@@ -218,19 +229,24 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public EncodingProfile getProfile(String profileId) {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/profile/" + profileId + ".xml";
       HttpGet get = new HttpGet(url);
       try {
         HttpResponse response = trustedHttpClient.execute(get);
-        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
           return encodingProfileResponseHandler.handleResponse(response);
+        } else {
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
         }
       } catch (Exception e) {
-        logger.info(e.getMessage(), e);
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+            hostErrors);
     throw new RuntimeException("Unable to execute method, none of the " + remoteHosts.size()
             + " remote hosts are available");
   }
@@ -243,20 +259,25 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public Receipt getReceipt(String id) {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/receipt/" + id + ".xml";
       HttpGet get = new HttpGet(url);
       try {
         HttpResponse response = trustedHttpClient.execute(get);
-        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
           return receiptResponseHandler.handleResponse(response);
+        } else {
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
+          continue;
         }
-        return receiptResponseHandler.handleResponse(response);
       } catch (Exception e) {
-        logger.info(e.getMessage(), e);
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+            hostErrors);
     throw new RuntimeException("Unable to execute method, none of the " + remoteHosts.size()
             + " remote hosts are available");
   }
@@ -297,23 +318,28 @@ public class ComposerServiceRemoteImpl implements ComposerService {
     Receipt r = null;
 
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/composer/rest/image";
       HttpPost post = new HttpPost(url);
       try {
         post.setEntity(entity);
         HttpResponse response = trustedHttpClient.execute(post);
-        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
           r = remoteServiceManager.parseReceipt(response.getEntity().getContent());
           break;
+        } else {
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
         }
       } catch (Exception e) {
-        logger.info(e.getMessage(), e);
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
 
-    if(r == null) {
+    if (r == null) {
+      logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+              hostErrors);
       throw new RuntimeException("Unable to execute method, none of the " + remoteHosts.size()
               + " remote hosts are available");
     }
@@ -332,22 +358,26 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public EncodingProfile[] listProfiles() {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     for (String remoteHost : remoteHosts) {
-      
       String url = remoteHost + "/composer/rest/profiles.xml";
       HttpGet get = new HttpGet(url);
       try {
         HttpResponse response = trustedHttpClient.execute(get);
-        if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
           EncodingProfileList profileList = trustedHttpClient.execute(get, encodingProfileListResponseHandler);
           List<EncodingProfileImpl> list = profileList.getProfiles();
           return list.toArray(new EncodingProfile[list.size()]);
+        } else {
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
         }
-      } catch(Exception e) {
-        logger.info(e.getMessage(), e);
+      } catch (Exception e) {
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+            hostErrors);
     throw new RuntimeException("Unable to execute method, none of the " + remoteHosts.size()
             + " remote hosts are available");
   }

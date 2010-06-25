@@ -44,7 +44,9 @@ import org.w3c.dom.Node;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -92,6 +94,7 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
   @Override
   public Receipt analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(analysisType);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     UrlEncodedFormEntity entity;
     try {
@@ -109,23 +112,25 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
       HttpResponse response = trustedHttpClient.execute(post);
       StatusLine statusLine = response.getStatusLine();
       if(statusLine.getStatusCode() != HttpStatus.SC_OK) {
-        logger.warn("{} returned http status '{}'", remoteHostMethod, statusLine.getStatusCode());
+        hostErrors.put(remoteHost, response.getStatusLine().toString());
         continue;
       }
       try {
         receipt = receiptResponseHandler.handleResponse(response);
         if(receipt == null) {
-          logger.warn("Unable to parse receipt, trying next remote server");
+          hostErrors.put(remoteHost, "Unable to parse receipt");
           continue;
         } else {
           break;
         }
       } catch (Exception e) {
-        logger.warn("{} returned an invalid response, {}", remoteHostMethod, e);
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
     if(receipt == null) {
+      logger.warn("The following errors were encountered while attempting a {} remote service call: {}", analysisType,
+              hostErrors);
       throw new MediaAnalysisException("Unable to analyze element '" + element + "' on any of " + remoteHosts.size() + " remote hosts");
     }
     if(block) {
@@ -174,6 +179,7 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
   @Override
   public Receipt getReceipt(String id) {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(analysisType);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     for(String remoteHost : remoteHosts) {
       logger.debug("Returning a Receipt(" + id + ") from a remote server: " + remoteHost);
       String url = remoteHost + "/analysis/rest/" + analysisType + "/" + id + ".xml";
@@ -181,17 +187,19 @@ public class MediaAnalysisRemoteImpl extends MediaAnalysisServiceSupport impleme
       HttpResponse response = trustedHttpClient.execute(get);
       StatusLine statusLine = response.getStatusLine();
       if(statusLine.getStatusCode() != HttpStatus.SC_OK) {
-        logger.warn("Unable to get receipt '{}' from {}", id, url);
+        hostErrors.put(remoteHost, response.getStatusLine().toString());
         continue;
       }
       try {
         Receipt receipt = receiptResponseHandler.handleResponse(response);
         if(receipt != null) return receipt;
       } catch (Exception e) {
-        logger.warn(e.getMessage(), e);
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", analysisType,
+            hostErrors);
     throw new MediaAnalysisException("Unable to get receipt '" + id + "' from any of " + remoteHosts.size() + " remote hosts");
   }
 

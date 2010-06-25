@@ -78,7 +78,7 @@ public class MediaInspectionRestEndpoint {
       return Response.ok(r.toXml()).build();
     } catch (Exception e) {
       logger.info(e.getMessage());
-      return Response.serverError().status(400).build();
+      return Response.serverError().build();
     }
   }
 
@@ -97,7 +97,7 @@ public class MediaInspectionRestEndpoint {
       return Response.ok(r.toXml()).build();
     } catch (Exception e) {
       logger.info(e.getMessage(), e);
-      return Response.serverError().status(400).build();
+      return Response.serverError().build();
     }
   }
 
@@ -108,10 +108,14 @@ public class MediaInspectionRestEndpoint {
     checkNotNull(service);
     try {
       Receipt r = service.getReceipt(id);
-      return Response.ok(r).build();
+      if (r == null) {
+        return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
+      } else {
+        return Response.ok(r).build();
+      }
     } catch (Exception e) {
       logger.info(e.getMessage());
-      return Response.serverError().status(400).build();
+      return Response.serverError().build();
     }
   }
 
@@ -139,7 +143,7 @@ public class MediaInspectionRestEndpoint {
     inspectEndpoint.addOptionalParam(new Param("uri", Param.Type.STRING, null, "Location of the media file"));
     inspectEndpoint.addFormat(Format.xml());
     inspectEndpoint.addStatus(Status.OK("XML encoded receipt is returned"));
-    inspectEndpoint.addStatus(new Status(400, "Problem retrieving media file or invalid media file or URL"));
+    inspectEndpoint.addStatus(new Status(500, "Problem retrieving media file or invalid media file or URL"));
     inspectEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, inspectEndpoint);
 
@@ -155,7 +159,7 @@ public class MediaInspectionRestEndpoint {
             "Should the existing metadata values remain"));
     enrichEndpoint.addFormat(Format.xml());
     enrichEndpoint.addStatus(Status.OK("XML encoded receipt is returned"));
-    enrichEndpoint.addStatus(new Status(400, "Problem retrieving media file or invalid media file or URL"));
+    enrichEndpoint.addStatus(new Status(500, "Problem retrieving media file or invalid media file or URL"));
     enrichEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, enrichEndpoint);
 
@@ -165,7 +169,8 @@ public class MediaInspectionRestEndpoint {
     receiptEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "ID of the receipt"));
     receiptEndpoint.addFormat(Format.xml());
     receiptEndpoint.addStatus(Status.OK("XML encoded receipt is returned"));
-    receiptEndpoint.addStatus(new Status(400, "Problem retrieving receipt"));
+    receiptEndpoint.addStatus(new Status(javax.ws.rs.core.Response.Status.NOT_FOUND.getStatusCode(),
+            "No receipt with this identifier"));
     receiptEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, receiptEndpoint);
 

@@ -41,7 +41,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Proxies a remote media inspection service for use as a JVM-local service.
@@ -69,34 +71,37 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
   @Override
   public Receipt inspect(URI uri, boolean block) {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
     queryStringParams.add(new BasicNameValuePair("uri", uri.toString()));
 
-    for(String remoteHost : remoteHosts) {
+    for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/inspection/rest/inspect?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
       logger.info("Inspecting a Track(" + uri + ") on a remote server: " + remoteHost);
       HttpGet get = new HttpGet(url);
       try {
         HttpResponse response = trustedHttpClient.execute(get);
         StatusLine statusLine = response.getStatusLine();
-        if(statusLine.getStatusCode() != HttpStatus.SC_OK) {
-          logger.warn("{} returned http status '{}'", url, statusLine.getStatusCode());
+        if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
           continue;
         }
         Receipt receipt = receiptResponseHandler.handleResponse(response);
-        if(receipt == null) {
-          logger.warn("{} returned no entity", url);
+        if (receipt == null) {
+          hostErrors.put(remoteHost, "Unable to parse receipt from response");
           continue;
         }
-        if(block) {
+        if (block) {
           receipt = poll(receipt.getId());
         }
         return receipt;
       } catch (Exception e) {
-        logger.warn("POST to {} returned exception '{}'", url, e);
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+            hostErrors);
     throw new RuntimeException("Unable to inspect " + uri + " on any of " + remoteHosts.size() + " remote services");
   }
 
@@ -109,14 +114,15 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
   @Override
   public Receipt enrich(MediaPackageElement original, boolean override, boolean block) {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     try {
-      params.add(new BasicNameValuePair("mediaPackageElement", ((AbstractMediaPackageElement)original).getAsXml()));
-    } catch (Exception e1) {
-      throw new RuntimeException(e1);
+      params.add(new BasicNameValuePair("mediaPackageElement", ((AbstractMediaPackageElement) original).getAsXml()));
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
     params.add(new BasicNameValuePair("override", new Boolean(override).toString()));
-    for(String remoteHost : remoteHosts) {
+    for (String remoteHost : remoteHosts) {
       logger.info("Enriching a Track(" + original.getIdentifier() + ") on a remote server: " + remoteHost);
       String url = remoteHost + "/inspection/rest/enrich";
       try {
@@ -125,24 +131,26 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
         post.setEntity(entity);
         HttpResponse response = trustedHttpClient.execute(post);
         StatusLine statusLine = response.getStatusLine();
-        if(statusLine.getStatusCode() != HttpStatus.SC_OK) {
-          logger.warn("{} returned http status '{}'", url, statusLine.getStatusCode());
+        if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
           continue;
         }
         Receipt receipt = receiptResponseHandler.handleResponse(response);
-        if(receipt == null) {
-          logger.warn("{} returned no entity", url);
+        if (receipt == null) {
+          hostErrors.put(remoteHost, "Unable to parse response");
           continue;
         }
-        if(block) {
+        if (block) {
           receipt = poll(receipt.getId());
         }
         return receipt;
       } catch (Exception e) {
-        logger.warn("POST to {} returned exception '{}'", url, e);
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+            hostErrors);
     throw new RuntimeException("Unable to enrich " + original + " on any of " + remoteHosts.size() + " remote services");
   }
 
@@ -165,7 +173,7 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
     }
     return r;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -174,27 +182,30 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
   @Override
   public Receipt getReceipt(String id) {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
-    for(String remoteHost : remoteHosts) {
+    Map<String, String> hostErrors = new HashMap<String, String>();
+    for (String remoteHost : remoteHosts) {
       logger.debug("Returning a Receipt(" + id + ") from a remote server: " + remoteHost);
       String url = remoteHost + "/inspection/rest/receipt/" + id + ".xml";
       HttpGet get = new HttpGet(url);
       try {
         HttpResponse response = trustedHttpClient.execute(get);
         StatusLine statusLine = response.getStatusLine();
-        if(statusLine.getStatusCode() != HttpStatus.SC_OK) {
-          logger.warn("{} returned http status '{}'", url, statusLine.getStatusCode());
+        if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
           continue;
         }
         Receipt receipt = receiptResponseHandler.handleResponse(response);
-        if(receipt == null) {
-          logger.warn("{} returned no entity", url);
+        if (receipt == null) {
+          hostErrors.put(remoteHost, "Unable to parse receipt");
           continue;
         }
         return receipt;
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        hostErrors.put(remoteHost, e.getMessage());
       }
     }
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+            hostErrors);
     return null;
   }
 

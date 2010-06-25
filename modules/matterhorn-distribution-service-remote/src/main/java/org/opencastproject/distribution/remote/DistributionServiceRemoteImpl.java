@@ -35,7 +35,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A remote distribution service invoker.
@@ -75,6 +77,7 @@ public class DistributionServiceRemoteImpl implements DistributionService {
       throw new DistributionException("Unable to marshall mediapackage to xml: " + e.getMessage());
     }
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(REMOTE_SERVICE_TYPE_PREFIX + distributionChannel);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("mediapackage", xml));
     if (elementIds != null && elementIds.length > 0) {
@@ -89,15 +92,25 @@ public class DistributionServiceRemoteImpl implements DistributionService {
       try {
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
         post.setEntity(entity);
-        HttpResponse response = trustedHttpClient.execute(post);
-        in = response.getEntity().getContent();
-        return MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(in);
+        try {
+          HttpResponse response = trustedHttpClient.execute(post);
+          if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+            hostErrors.put(remoteHost, response.getStatusLine().toString());
+            continue;
+          }
+          in = response.getEntity().getContent();
+          return MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(in);
+        } catch (Exception e) {
+          hostErrors.put(remoteHost, e.getMessage());
+        }
       } catch (Exception e) {
         continue;
       } finally {
         IOUtils.closeQuietly(in);
       }
     }
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}",
+            REMOTE_SERVICE_TYPE_PREFIX + distributionChannel, hostErrors);
     throw new DistributionException("Unable to distribute mediapackage " + mediaPackage + " to any of "
             + remoteHosts.size() + " remote services.");
   }
@@ -118,7 +131,8 @@ public class DistributionServiceRemoteImpl implements DistributionService {
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("mediapackage", xml));
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(REMOTE_SERVICE_TYPE_PREFIX + distributionChannel);
-    for(String remoteHost : remoteHosts) {
+    Map<String, String> hostErrors = new HashMap<String, String>();
+    for (String remoteHost : remoteHosts) {
       String url = remoteHost + "/distribution/rest/retract/" + distributionChannel;
       HttpPost post = new HttpPost(url);
       try {
@@ -127,13 +141,16 @@ public class DistributionServiceRemoteImpl implements DistributionService {
         HttpResponse response = trustedHttpClient.execute(post);
         int httpStatusCode = response.getStatusLine().getStatusCode();
         if (HttpStatus.SC_NO_CONTENT != httpStatusCode) {
-          logger.debug("Unable to retract using distribution service at {}. Status code = {}", url, httpStatusCode);
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
           continue;
         }
       } catch (Exception e) {
-        logger.debug("Unable to retract using distribution service at {}. {}", url, e);
+        hostErrors.put(remoteHost, e.getMessage());
       }
     }
-    throw new DistributionException("Unable to retract mediapackage " + mediaPackage + " using any of " + remoteHosts.size() + " remote services");
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}",
+            REMOTE_SERVICE_TYPE_PREFIX + distributionChannel, hostErrors);
+    throw new DistributionException("Unable to retract mediapackage " + mediaPackage + " using any of "
+            + remoteHosts.size() + " remote services");
   }
 }

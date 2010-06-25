@@ -37,7 +37,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A proxy to a remote search service.
@@ -63,6 +65,7 @@ public class SearchServiceRemoteImpl implements SearchService {
   @Override
   public void add(MediaPackage mediaPackage) throws SearchException {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     for(String remoteHost : remoteHosts) {
       try {
         HttpPost post = new HttpPost(remoteHost + "/search/rest/add");
@@ -76,14 +79,16 @@ public class SearchServiceRemoteImpl implements SearchService {
           logger.debug("Successfully added mediapackage {} to search service at {}", mediaPackage, remoteHost);
           return;
         } else {
-          logger.info("/add repsonse should have been HTTP 204 but was " + status);
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
           continue;
         }
       } catch (Exception e) {
-        logger.debug(e.getMessage(), e);
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+            hostErrors);
     throw new SearchException("Unable to add mediapackage " + mediaPackage + " to any of " + remoteHosts.size() + " remote search services");
   }
   
@@ -94,23 +99,26 @@ public class SearchServiceRemoteImpl implements SearchService {
   @Override
   public void clear() throws SearchException {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     for(String remoteHost : remoteHosts) {
       try {
         HttpPost post = new HttpPost(remoteHost + "/search/rest/clear");
         HttpResponse response = trustedHttpClient.execute(post);
         int status = response.getStatusLine().getStatusCode();
         if (status == HttpStatus.SC_NO_CONTENT) {
-          logger.debug("Successfully cleared search index at {}", remoteHost);
+          logger.info("Successfully cleared search index at {}", remoteHost);
           return;
         } else {
-          logger.info("/clear repsonse should have been HTTP 204 but was " + status);
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
           continue;
         }
       } catch (Exception e) {
-        logger.debug(e.getMessage(), e);
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+            hostErrors);
     throw new SearchException("Unable to clear search index at any of " + remoteHosts.size() + " remote search services");
   }
 
@@ -121,6 +129,7 @@ public class SearchServiceRemoteImpl implements SearchService {
   @Override
   public void delete(String mediaPackageId) throws SearchException {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     for(String remoteHost : remoteHosts) {
       try {
         String url = remoteHost + "/search/rest/" + mediaPackageId;
@@ -131,14 +140,16 @@ public class SearchServiceRemoteImpl implements SearchService {
           logger.debug("Successfully deleted {} from the search index at {}", mediaPackageId, remoteHost);
           return;
         } else {
-          logger.info("/delete repsonse should have been HTTP 204 but was " + status);
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
           continue;
         }
       } catch (Exception e) {
-        logger.debug(e.getMessage(), e);
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+            hostErrors);
     throw new SearchException("Unable to remove " + mediaPackageId + " from search index at any of " + remoteHosts.size() + " remote search services");
   }
   
@@ -149,6 +160,7 @@ public class SearchServiceRemoteImpl implements SearchService {
   @Override
   public SearchResult getByQuery(SearchQuery q) throws SearchException {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     for(String remoteHost : remoteHosts) {
       StringBuilder url = new StringBuilder(remoteHost);
       List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
@@ -170,15 +182,17 @@ public class SearchServiceRemoteImpl implements SearchService {
         HttpResponse response = trustedHttpClient.execute(get);
         int status = response.getStatusLine().getStatusCode();
         if (status != HttpStatus.SC_OK) {
-          logger.info("Query repsonse from {} should have been HTTP 200 but was ", url, status);
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
           continue;
         }
         return SearchResultImpl.valueOf(response.getEntity().getContent());        
       } catch (Exception e) {
-        logger.debug(e.getMessage(), e);
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+            hostErrors);
     throw new SearchException("Unable to perform getByQuery from search index at any of " + remoteHosts.size() + " remote search services");
   }
   
@@ -189,6 +203,7 @@ public class SearchServiceRemoteImpl implements SearchService {
   @Override
   public SearchResult getByQuery(String query, int limit, int offset) throws SearchException {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    Map<String, String> hostErrors = new HashMap<String, String>();
     for(String remoteHost : remoteHosts) {
       List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
       queryStringParams.add(new BasicNameValuePair("q", query));
@@ -205,15 +220,17 @@ public class SearchServiceRemoteImpl implements SearchService {
         HttpResponse response = trustedHttpClient.execute(get);
         int status = response.getStatusLine().getStatusCode();
         if (status != HttpStatus.SC_OK) {
-          logger.info("Query repsonse from {} should have been HTTP 200 but was ", url, status);
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
           continue;
         }
         return SearchResultImpl.valueOf(response.getEntity().getContent());        
       } catch (Exception e) {
-        logger.debug(e.getMessage(), e);
+        hostErrors.put(remoteHost, e.getMessage());
         continue;
       }
     }
+    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+            hostErrors);
     throw new SearchException("Unable to perform getByQuery from search index at any of " + remoteHosts.size() + " remote search services");
   }
 }
