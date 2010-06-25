@@ -96,6 +96,18 @@ if [ -z $MY_IP ]; then
   echo "lines, and restart the VM.  For more info see Functionality section of FAQ at"
   echo "http://opencast.jira.com/wiki/display/MH/Release+0.5+FAQ"
 else
+  cd /tmp
+  rm -f index.html
+  wget -q http://www.opencastproject.org
+  if [ -f index.html ]; then
+    echo "Network connection verified"
+    rm -f index.html
+  else
+    echo "**** ERROR Could not verify network connectivity.  Please check and then"
+    echo "restart the VM."
+    exit
+  fi
+
   # connected, start main task
   show_stat
   echo "******** OPTIONS HAVE CHANGED, PLEASE READ CAREFULLY *********"
