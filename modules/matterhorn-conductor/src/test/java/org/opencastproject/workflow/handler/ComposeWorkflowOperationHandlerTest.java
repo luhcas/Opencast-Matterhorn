@@ -47,7 +47,6 @@ public class ComposeWorkflowOperationHandlerTest {
 
   // local resources
   private MediaPackage mp;
-  private MediaPackage mpMuxing;
   private MediaPackage mpEncode;
   private Receipt receipt;
   private Track[] encodedTracks;
@@ -61,8 +60,6 @@ public class ComposeWorkflowOperationHandlerTest {
   private static final String PROFILE_ID = "flash.http";
   private static final String SOURCE_TRACK_ID = "compose-workflow-operation-test-source-track-id";
   private static final String ENCODED_TRACK_ID = "compose-workflow-operation-test-encode-track-id";
-  private static final String ENCODED_VIDEO_ID = "compose-workflow-operation-test-encode-muxing-videotrack-id";
-  private static final String ENCODED_AUDIO_ID = "compose-workflow-operation-test-encode-muxing-audiotrack-id";
 
   @Before
   public void setup() throws Exception {
@@ -70,10 +67,8 @@ public class ComposeWorkflowOperationHandlerTest {
 
     // test resources
     URI uriMP = InspectWorkflowOperationHandler.class.getResource("/compose_mediapackage.xml").toURI();
-    URI uriMPMuxing = InspectWorkflowOperationHandler.class.getResource("/compose_muxing_mediapackage.xml").toURI();
     URI uriMPEncode = InspectWorkflowOperationHandler.class.getResource("/compose_encode_mediapackage.xml").toURI();
     mp = builder.loadFromXml(uriMP.toURL().openStream());
-    mpMuxing = builder.loadFromXml(uriMPMuxing.toURL().openStream());
     mpEncode = builder.loadFromXml(uriMPEncode.toURL().openStream());
     encodedTracks = mpEncode.getTracks();
 
@@ -88,7 +83,7 @@ public class ComposeWorkflowOperationHandlerTest {
     profile = EasyMock.createNiceMock(EncodingProfile.class);
     EasyMock.expect(profile.getIdentifier()).andReturn(PROFILE_ID);
     EasyMock.expect(profile.getApplicableMediaType()).andReturn(MediaType.Stream);
-    EasyMock.expect(profile.getOutputType()).andReturn(MediaType.Stream);
+    EasyMock.expect(profile.getOutputType()).andReturn(MediaType.AudioVisual);
     EasyMock.expect(profile.getMimeType()).andReturn(MimeTypes.MPEG4.asString()).times(2);
     profileList = new EncodingProfile[] { profile };
     EasyMock.replay(profile);
@@ -96,23 +91,21 @@ public class ComposeWorkflowOperationHandlerTest {
     // set up mock receipt
     receipt = EasyMock.createNiceMock(Receipt.class);
     EasyMock.expect(receipt.getElement()).andReturn(encodedTracks[0]);
+    EasyMock.expect(receipt.getStatus()).andReturn(Receipt.Status.FINISHED);
     EasyMock.replay(receipt);
 
     // set up mock composer service
     composerService = EasyMock.createNiceMock(ComposerService.class);
     EasyMock.expect(composerService.listProfiles()).andReturn(profileList);
     EasyMock.expect(
-            composerService.encode((MediaPackage) EasyMock.anyObject(), (String) EasyMock.anyObject(),
-                    (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(
-            receipt);
+            composerService.encode((MediaPackage) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(receipt);
     EasyMock.replay(composerService);
     operationHandler.setComposerService(composerService);
 
     // operation configuration
     String targetTags = "engage,rss";
     Map<String, String> configurations = new HashMap<String, String>();
-    configurations.put("source-video-flavor", "presentation/source");
-    configurations.put("source-audio-flavor", "*/source");
+    configurations.put("source-flavor", "presentation/source");
     configurations.put("target-tags", targetTags);
     configurations.put("target-flavor", "presenter/delivery");
     configurations.put("encoding-profile", "flash.http");
@@ -127,63 +120,6 @@ public class ComposeWorkflowOperationHandlerTest {
     Assert.assertArrayEquals(targetTags.split("\\W"), trackEncoded.getTags());
     Assert.assertEquals(MimeTypes.MPEG4, trackEncoded.getMimeType());
     Assert.assertEquals(SOURCE_TRACK_ID, trackEncoded.getReference().getIdentifier());
-  }
-
-  @Test
-  public void testComposeMuxingTracks() throws Exception {
-    // set up mock profile
-    profile = EasyMock.createNiceMock(EncodingProfile.class);
-    EasyMock.expect(profile.getIdentifier()).andReturn(PROFILE_ID);
-    EasyMock.expect(profile.getApplicableMediaType()).andReturn(MediaType.AudioVisual);
-    EasyMock.expect(profile.getOutputType()).andReturn(MediaType.Stream);
-    EasyMock.expect(profile.getMimeType()).andReturn(MimeTypes.MPEG4.asString()).times(2);
-    profileList = new EncodingProfile[] { profile };
-    EasyMock.replay(profile);
-
-    // set up mock receipt
-    receipt = EasyMock.createNiceMock(Receipt.class);
-    EasyMock.expect(receipt.getElement()).andReturn(encodedTracks[1]);
-    EasyMock.expect(receipt.getElement()).andReturn(encodedTracks[2]);
-    EasyMock.expect(receipt.getElement()).andReturn(encodedTracks[0]);
-    EasyMock.replay(receipt);
-
-    // set up mock composer service
-    composerService = EasyMock.createNiceMock(ComposerService.class);
-    EasyMock.expect(composerService.listProfiles()).andReturn(profileList);
-    EasyMock.expect(
-            composerService.encode((MediaPackage) EasyMock.anyObject(), (String) EasyMock.anyObject(),
-                    (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(
-            receipt).times(2);
-    // test the stripped tracks are used for encoding
-    EasyMock.expect(
-            composerService.encode((MediaPackage) EasyMock.anyObject(), (String) EasyMock.matches(ENCODED_VIDEO_ID),
-                    (String) EasyMock.matches(ENCODED_AUDIO_ID), (String) EasyMock.anyObject(), EasyMock.anyBoolean()))
-            .andReturn(receipt);
-    EasyMock.replay(composerService);
-    operationHandler.setComposerService(composerService);
-
-    // operation configuration
-    String targetTags = "engage,rss";
-    Map<String, String> configurations = new HashMap<String, String>();
-    configurations.put("source-video-flavor", "presentation/source");
-    configurations.put("source-audio-flavor", "presenter/source");
-    configurations.put("target-tags", targetTags);
-    configurations.put("target-flavor", "presenter/delivery");
-    configurations.put("encoding-profile", "flash.http");
-
-    // run the operation handler
-    WorkflowOperationResult result = getWorkflowOperationResult(mpMuxing, configurations);
-
-    // check track metadata
-    MediaPackage mpNew = result.getMediaPackage();
-    Track trackVideo = mpNew.getTrack(ENCODED_VIDEO_ID);
-    Track trackAudio = mpNew.getTrack(ENCODED_AUDIO_ID);
-    Assert.assertEquals(5, mpNew.getTracks().length);
-    Assert.assertTrue(trackVideo.hasVideo());
-    Assert.assertFalse(trackVideo.hasAudio());
-    Assert.assertFalse(trackAudio.hasVideo());
-    Assert.assertTrue(trackAudio.hasAudio());
-
   }
 
   @Test
@@ -207,8 +143,7 @@ public class ComposeWorkflowOperationHandlerTest {
     EasyMock.expect(composerService.listProfiles()).andReturn(profileList);
     EasyMock.expect(
             composerService.encode((MediaPackage) EasyMock.anyObject(), (String) EasyMock.anyObject(),
-                    (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(
-            receipt);
+                    (String) EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(receipt);
     EasyMock.replay(composerService);
     operationHandler.setComposerService(composerService);
 
@@ -223,7 +158,7 @@ public class ComposeWorkflowOperationHandlerTest {
 
     try {
       // no source flavour
-      configurations.put("source-video-flavor", "presentation/source");
+      configurations.put("source-flavor", "presentation/source");
       getWorkflowOperationResult(mp, configurations);
       Assert.fail("Since encoding profile is not specified exception should be thrown");
     } catch (WorkflowOperationException e) {
@@ -252,4 +187,5 @@ public class ComposeWorkflowOperationHandlerTest {
     // Run the media package through the operation handler, ensuring that metadata gets added
     return operationHandler.start(workflowInstance);
   }
+
 }

@@ -57,7 +57,7 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
 
   static {
     CONFIG_OPTIONS = new TreeMap<String, String>();
-    CONFIG_OPTIONS.put(PROP_ANALYSIS_TRACK_FLAVOR, "The flavor of the track to analyze.  If multiple tracks match this flavor, the first will be used.");
+    CONFIG_OPTIONS.put(PROP_ANALYSIS_TRACK_FLAVOR, "The flavor of the track to analyze. If multiple tracks match this flavor, the first will be used.");
   }
 
   /** The composer service */
@@ -90,10 +90,6 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
       candidates.addAll(Arrays.asList(mediaPackage.getTracks(MediaPackageElementFlavor.parseFlavor(trackFlavor))));
     else
       candidates.addAll(Arrays.asList(mediaPackage.getTracks(MediaPackageElements.PRESENTATION_SOURCE)));
-    if (candidates.size() == 0) {
-      logger.info("No matching tracks available for video segmentation in workflow {}", workflowInstance);
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
-    }
 
     // Remove unsupported tracks (only those containing video can be segmented)
     Iterator<Track> ti = candidates.iterator();
@@ -103,6 +99,12 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
         ti.remove();
     }
 
+    // Found one?
+    if (candidates.size() == 0) {
+      logger.info("No matching tracks available for video segmentation in workflow {}", workflowInstance);
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+    }
+    
     // More than one left? Let's be pragmatic...
     if (candidates.size() > 1) {
       logger.info("Found more than one track to segment, choosing the first one ({})", candidates.get(0));

@@ -39,6 +39,30 @@
       description="Inspect the media package">
     </operation>
 
+    <!-- prepare audio/video tracks -->
+ 
+    <operation
+      id="prepare-av"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Prepare presenter audio and video work versions">
+      <configurations>
+        <configuration key="source-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/work</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="prepare-av"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Prepare presentation audio and video work version">
+      <configurations>
+        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="target-flavor">presentation/work</configuration>
+      </configurations>
+    </operation>
+
     <!-- encode media to MPEG-2 with resolution depending on targeted TV Norm -->
     <operation
       id="compose"
@@ -46,8 +70,7 @@
       exception-handler-workflow="error"
       description="Encode presenter (camera) to mpeg2 for DVD">
       <configurations>
-        <configuration key="source-video-flavor">presenter/source</configuration>
-        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/dvd</configuration>
         <configuration key="target-tags">dvd</configuration>
         <configuration key="encoding-profile">dvd-${dvd.format}.http</configuration>
@@ -60,8 +83,7 @@
       exception-handler-workflow="error"
       description="Encode presenter (camera) to mpeg2 for DVD">
       <configurations>
-        <configuration key="source-video-flavor">presentation/source</configuration>
-        <configuration key="source-audio-flavor">presentation/source</configuration>
+        <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="target-flavor">presenter/dvd</configuration>
         <configuration key="target-tags">dvd</configuration>
         <configuration key="encoding-profile">dvd-${dvd.format}.http</configuration>

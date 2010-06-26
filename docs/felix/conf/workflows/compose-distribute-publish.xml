@@ -12,42 +12,42 @@
     <fieldset>
       <legend>Distribution</legend>
       <ul class="no-bullets formField-list fl-controls-right">
-                <!-- field: License -->
-                <li class="ui-helper-clearfix">
-                  <label class="fl-label"><span class="color-red">* </span><span id="i18n_dist_label">Distribution Channel(s)</span>:</label
-                  <span id="dist" style="float:left;">
-                    <input id="distribution" name="distribution" type="checkbox" checked="checked" disabled="disabled" class="configField" value="Matterhorn Media Module" style="width: inherit !important;">
-                    <span id="i18n_dist_mmm">&nbsp;Matterhorn Media Module</span>
-                    <input id="youtube" name="youtube" type="checkbox" disabled="disabled" class="configField" value="Youtube" style="width: inherit !important;">
-                    <span id="i18n_dist_mmm">&nbsp;Youtube</span>
-                    <input id="itunesu" name="itunesu" type="checkbox" disabled="disabled" class="configField" value="iTunesU" style="width: inherit !important;">
-                    <span id="i18n_dist_mmm">&nbsp;iTunesU</span>
-                  </span>
-                  <!-- span class="helpIcon" title="Click for help">&nbsp;</span -->
-                </li>
-                <!-- field: License -->
-                <li class="ui-helper-clearfix">
-                  <label class="fl-label"><span id="i18n_license_label">License</span>:</label>
-                  <input type="text" class="configField" id="license" name="license" style="float:left;">
-                  <!-- span class="helpIcon" title="Click for help">&nbsp;</span -->
-                </li>
-              </ul>
+        <!-- field: License -->
+        <li class="ui-helper-clearfix">
+          <label class="fl-label"><span class="color-red">* </span><span id="i18n_dist_label">Distribution Channel(s)</span>:</label
+          <span id="dist" style="float:left;">
+            <input id="distribution" name="distribution" type="checkbox" checked="checked" disabled="disabled" class="configField" value="Matterhorn Media Module" style="width: inherit !important;">
+            <span id="i18n_dist_mmm">&nbsp;Matterhorn Media Module</span>
+            <input id="youtube" name="youtube" type="checkbox" disabled="disabled" class="configField" value="Youtube" style="width: inherit !important;">
+            <span id="i18n_dist_mmm">&nbsp;Youtube</span>
+            <input id="itunesu" name="itunesu" type="checkbox" disabled="disabled" class="configField" value="iTunesU" style="width: inherit !important;">
+            <span id="i18n_dist_mmm">&nbsp;iTunesU</span>
+          </span>
+          <!-- span class="helpIcon" title="Click for help">&nbsp;</span -->
+        </li>
+        <!-- field: License -->
+        <li class="ui-helper-clearfix">
+          <label class="fl-label"><span id="i18n_license_label">License</span>:</label>
+          <input type="text" class="configField" id="license" name="license" style="float:left;">
+          <!-- span class="helpIcon" title="Click for help">&nbsp;</span -->
+        </li>
+      </ul>
     </fieldset>
     <fieldset>
       <legend>Hold for Action</legend>
       <ul class="no-bullets formField-list fl-controls-right">
-                  <li class="ui-helper-clearfix"> 
-                  <span id="holdconfig" style="float:left;">
-                    <input id="review.hold" name="review.hold" type="checkbox" checked="checked" class="configField" value="true" style="width: inherit !important;" style="float:left;">
-                    <span id="i18n_hold_for_review">&nbsp;Hold for review</span>
-                  </span>
-                 </li>
-		  <li class="ui-helper-clearfix">
-                  <span id="captionconfig" style="float:left;">
-                    <input id="caption.hold" name="caption.hold" type="checkbox" checked="checked" class="configField" value="true" style="width: inherit !important;">
-                    <span id="i18n_hold_for_caption">&nbsp;Hold for caption</span>
-                  </span>
-                 </li>
+        <li class="ui-helper-clearfix"> 
+          <span id="holdconfig" style="float:left;">
+            <input id="review.hold" name="review.hold" type="checkbox" checked="checked" class="configField" value="true" style="width: inherit !important;" style="float:left;">
+            <span id="i18n_hold_for_review">&nbsp;Hold for review</span>
+          </span>
+         </li>
+         <li class="ui-helper-clearfix">
+          <span id="captionconfig" style="float:left;">
+            <input id="caption.hold" name="caption.hold" type="checkbox" checked="checked" class="configField" value="true" style="width: inherit !important;">
+            <span id="i18n_hold_for_caption">&nbsp;Hold for caption</span>
+          </span>
+         </li>
       </ul>
     </fieldset>
      
@@ -64,8 +64,30 @@
       exception-handler-workflow="error"
       description="Inspect the media package">
     </operation>
- 
 
+    <!-- prepare audio/video tracks -->
+ 
+    <operation
+      id="prepare-av"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Prepare presenter audio and video work versions">
+      <configurations>
+        <configuration key="source-flavor">presenter/source</configuration>
+        <configuration key="target-flavor">presenter/work</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="prepare-av"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Prepare presentation audio and video work version">
+      <configurations>
+        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="target-flavor">presentation/work</configuration>
+      </configurations>
+    </operation>
 
     <!-- hold for captions -->
  
@@ -80,18 +102,16 @@
       </configurations>
     </operation>
 
-
-
     <!-- encode to hold preview player formats -->
 
-<!--    <operation
+    <!--  UNCOMMENT TO ACTIVATE
+    <operation
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
       description="Encode presenter (camera) video to Flash download">
       <configurations>
-        <configuration key="source-audio-flavor">*/source</configuration>
-        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/preview</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash-preview.http</configuration>
@@ -103,8 +123,7 @@
       exception-handler-workflow="error"
       description="Encode presentation (screen) to Flash download">
       <configurations>
-        <configuration key="source-audio-flavor">*/source</configuration>
-        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="target-flavor">presentation/preview</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash-vga.http</configuration>
@@ -116,28 +135,15 @@
       exception-handler-workflow="error"
       description="Encode presenter audio to Flash download">
       <configurations>
-        <configuration key="source-audio-flavor">presenter/source</configuration>
+        <configuration key="source-audio-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/preview</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash-preview.http</configuration>
       </configurations>
     </operation>
-    <operation
-      id="compose"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Encode presentation audio to Flash download">
-      <configurations>
-        <configuration key="source-audio-flavor">presentation/source</configuration>
-        <configuration key="target-flavor">presentation/preview</configuration>
-        <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">flash-preview.http</configuration>
-      </configurations>
-    </operation>
--->
+    -->
 
-
- <!-- encode to engage player formats -->
+    <!-- encode to engage player formats -->
 
     <operation
       id="compose"
@@ -145,8 +151,7 @@
       exception-handler-workflow="error"
       description="Encode presenter (camera) video to Flash download">
       <configurations>
-        <configuration key="source-audio-flavor">*/source</configuration>
-        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/delivery</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.http</configuration>
@@ -158,51 +163,25 @@
       exception-handler-workflow="error"
       description="Encode presentation (screen) to Flash download">
       <configurations>
-        <configuration key="source-audio-flavor">*/source</configuration>
-        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash-vga.http</configuration>
       </configurations>
     </operation>
-    <operation
-      id="compose"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Encode presenter audio to Flash download">
-      <configurations>
-        <configuration key="source-audio-flavor">presenter/source</configuration>
-        <configuration key="target-flavor">presenter/delivery</configuration>
-        <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">flash.http</configuration>
-      </configurations>
-    </operation>
-    <operation
-      id="compose"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Encode presentation audio to Flash download">
-      <configurations>
-        <configuration key="source-audio-flavor">presentation/source</configuration>
-        <configuration key="target-flavor">presentation/delivery</configuration>
-        <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">flash.http</configuration>
-      </configurations>
-    </operation>
- 
 
-   <!-- hold to review media-->
+    <!-- hold to review media-->
    
     <operation
-    id="review"
-    fail-on-error="true"
-    exception-handler-workflow="error"
-    description="Waiting for user to review recording">
-    <configurations>
-      <configuration key="source-tag">preview</configuration>
-      <configuration key="required-property">${review.hold}</configuration>
-      </configurations>
-   </operation>
+      id="review"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Waiting for user to review recording">
+      <configurations>
+        <configuration key="source-tag">preview</configuration>
+        <configuration key="required-property">${review.hold}</configuration>
+        </configurations>
+    </operation>
 
     <!-- run the videosegmentation -->
     
@@ -212,11 +191,10 @@
       exception-handler-workflow="error"
       description="Extract segments from presentation">
       <configurations>
-        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="source-flavor">presentation/work</configuration>
       </configurations>
     </operation>
  
-   
     <!-- encode to engage player preview images -->
  
     <operation
@@ -225,7 +203,7 @@
       exception-handler-workflow="error"
       description="Encode presenter (camera) to player preview image">
       <configurations>
-        <configuration key="source-flavor">presenter/source</configuration>
+        <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">presenter/player+preview</configuration>
         <configuration key="target-tags">engage</configuration>
@@ -239,7 +217,7 @@
       exception-handler-workflow="error"
       description="Encode presentation (screen) to player preview image">
       <configurations>
-        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">presentation/player+preview</configuration>
         <configuration key="target-tags">engage</configuration>
@@ -256,7 +234,7 @@
       exception-handler-workflow="error"
       description="Encode presenter (camera) to search result preview image">
       <configurations>
-        <configuration key="source-flavor">presenter/source</configuration>
+        <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">presenter/search+preview</configuration>
         <configuration key="target-tags">engage</configuration>
@@ -270,7 +248,7 @@
       exception-handler-workflow="error"
       description="Encode presentation (vga) to search result preview image">
       <configurations>
-        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">presentation/search+preview</configuration>
         <configuration key="target-tags">engage</configuration>
@@ -287,8 +265,7 @@
       exception-handler-workflow="error"
       description="Encode presentation (screen) to mpeg4 audio download">
       <configurations>
-        <configuration key="source-audio-flavor">*/source</configuration>
-        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/delivery</configuration>
         <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">feed-m4a.http</configuration>
@@ -300,8 +277,7 @@
       exception-handler-workflow="error"
       description="Encode presentation (screen) to mpeg4 audio download">
       <configurations>
-        <configuration key="source-audio-flavor">*/source</configuration>
-        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">atom</configuration>
         <configuration key="encoding-profile">feed-m4a.http</configuration>
@@ -313,8 +289,7 @@
       exception-handler-workflow="error"
       description="Encode presenter (camera) to avi/mpeg4 download">
       <configurations>
-        <configuration key="source-audio-flavor">*/source</configuration>
-        <configuration key="source-video-flavor">presenter/source</configuration>
+        <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/delivery</configuration>
         <configuration key="target-tags">atom</configuration>
         <configuration key="encoding-profile">feed-avi.http</configuration>
@@ -326,8 +301,7 @@
       exception-handler-workflow="error"
       description="Encode presentation (screen) to avi/mpeg4 download">
       <configurations>
-        <configuration key="source-audio-flavor">*/source</configuration>
-        <configuration key="source-video-flavor">presentation/source</configuration>
+        <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">feed-avi.http</configuration>
@@ -342,7 +316,7 @@
       exception-handler-workflow="error"
       description="Encode presenter (camera) to feed preview image">
       <configurations>
-        <configuration key="source-flavor">presenter/source</configuration>
+        <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">presenter/feed+preview</configuration>
         <configuration key="target-tags">rss, atom</configuration>
@@ -356,7 +330,7 @@
       exception-handler-workflow="error"
       description="Encode presentation (vga) to feed preview image">
       <configurations>
-        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">presentation/feed+preview</configuration>
         <configuration key="target-tags">rss, atom</configuration>
@@ -373,7 +347,7 @@
       exception-handler-workflow="error"
       description="Encode presentation (screen) to segment preview image">
       <configurations>
-        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">presentation/segment+preview</configuration>
         <configuration key="reference-flavor">presentation/delivery</configuration>
@@ -391,15 +365,14 @@
       exception-handler-workflow="error"
       description="Extracts text from presentation segments">
       <configurations>
-        <configuration key="source-flavor">presentation/source</configuration>
+        <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-tags">engage</configuration>
       </configurations>
     </operation>
-    
-    
 
-
+    <!-- Distribute to download server -->
+    
     <operation
       id="distribute-download"
       fail-on-error="true"
@@ -410,6 +383,8 @@
         <configuration key="target-tags">publish,engage</configuration>
       </configurations>
     </operation>
+ 
+    <!-- Publish to engage search index -->
  
     <operation
       id="publish"

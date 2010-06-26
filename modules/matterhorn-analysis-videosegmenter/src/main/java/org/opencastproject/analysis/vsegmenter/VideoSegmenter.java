@@ -695,7 +695,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
 
     // Looks like we need to do the work ourselves
     logger.info("Requesting {} version of track {}", MJPEG_MIMETYPE, track);
-    final Receipt receipt = composer.encode(mediaPackage, track.getIdentifier(), null, MJPEG_ENCODING_PROFILE, true);
+    final Receipt receipt = composer.mux(mediaPackage, track.getIdentifier(), null, MJPEG_ENCODING_PROFILE, true);
     Track composedTrack = (Track) receipt.getElement();
     composedTrack.setReference(original);
     composedTrack.setMimeType(MJPEG_MIMETYPE);

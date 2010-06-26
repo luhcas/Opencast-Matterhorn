@@ -144,7 +144,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public Receipt encode(MediaPackage mediaPackage, String sourceTrackId, String profileId) throws EncoderException,
           MediaPackageException {
-    return encode(mediaPackage, sourceTrackId, sourceTrackId, profileId, false);
+    return mux(mediaPackage, sourceTrackId, sourceTrackId, profileId, false);
   }
 
   /**
@@ -156,7 +156,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public Receipt encode(MediaPackage mediaPackage, String sourceTrackId, String profileId, boolean block)
           throws EncoderException, MediaPackageException {
-    return encode(mediaPackage, sourceTrackId, sourceTrackId, profileId, block);
+    return mux(mediaPackage, sourceTrackId, sourceTrackId, profileId, block);
   }
 
   /**
@@ -168,17 +168,17 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   @Override
   public Receipt encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
           String profileId) throws EncoderException, MediaPackageException {
-    return encode(mediaPackage, sourceVideoTrackId, sourceAudioTrackId, profileId, false);
+    return mux(mediaPackage, sourceVideoTrackId, sourceAudioTrackId, profileId, false);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#encode(java.lang.String, java.lang.String, java.lang.String,
+   * @see org.opencastproject.composer.api.ComposerService#mux(java.lang.String, java.lang.String, java.lang.String,
    *      java.lang.String, boolean)
    */
   @Override
-  public Receipt encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
+  public Receipt mux(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
           String profileId, boolean block) throws EncoderException, MediaPackageException {
     Receipt r = null;
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);

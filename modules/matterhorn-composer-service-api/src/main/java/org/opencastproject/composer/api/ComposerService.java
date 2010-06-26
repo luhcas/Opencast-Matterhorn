@@ -24,6 +24,7 @@ import org.opencastproject.remote.api.Receipt.Status;
  * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this encoding job.
  */
 public interface ComposerService {
+
   final String JOB_TYPE = "org.opencastproject.composer";
     
   /**
@@ -96,7 +97,7 @@ public interface ComposerService {
    * @throws EncoderException
    * @throws MediaPackageException
    */
-  Receipt encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId, String profileId,
+  Receipt mux(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId, String profileId,
           boolean block) throws EncoderException, MediaPackageException;
 
   /**

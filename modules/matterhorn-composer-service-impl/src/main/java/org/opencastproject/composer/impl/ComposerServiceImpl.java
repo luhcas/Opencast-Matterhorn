@@ -176,7 +176,7 @@ public class ComposerServiceImpl implements ComposerService {
   @Override
   public Receipt encode(MediaPackage mediaPackage, String sourceTrackId, String profileId) throws EncoderException,
           MediaPackageException {
-    return encode(mediaPackage, sourceTrackId, sourceTrackId, profileId, false);
+    return mux(mediaPackage, sourceTrackId, null, profileId, false);
   }
 
   /**
@@ -188,7 +188,7 @@ public class ComposerServiceImpl implements ComposerService {
   @Override
   public Receipt encode(MediaPackage mediaPackage, String sourceTrackId, String profileId, boolean block)
           throws EncoderException, MediaPackageException {
-    return encode(mediaPackage, sourceTrackId, sourceTrackId, profileId, block);
+    return mux(mediaPackage, sourceTrackId, null, profileId, block);
   }
 
   /**
@@ -200,23 +200,28 @@ public class ComposerServiceImpl implements ComposerService {
   @Override
   public Receipt encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
           String profileId) throws EncoderException, MediaPackageException {
-    return encode(mediaPackage, sourceVideoTrackId, sourceAudioTrackId, profileId, false);
+    return mux(mediaPackage, sourceVideoTrackId, sourceAudioTrackId, profileId, false);
   }
 
   /**
    * {@inheritDoc}
    * 
+<<<<<<< .mine
+   * @see org.opencastproject.composer.api.ComposerService#mux(java.lang.String, java.lang.String, java.lang.String,
+   *      java.lang.String, boolean)
+=======
    * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.MediaPackage,
    *      java.lang.String, java.lang.String, java.lang.String, boolean)
+>>>>>>> .r7737
    */
   @Override
-  public Receipt encode(final MediaPackage mp, final String sourceVideoTrackId, final String sourceAudioTrackId,
+  public Receipt mux(final MediaPackage mp, final String sourceTrackA, final String sourceAudioTrackB,
           final String profileId, final boolean block) throws EncoderException, MediaPackageException {
     final String targetTrackId = idBuilder.createNew().toString();
     final Receipt composerReceipt = remoteServiceManager.createReceipt(JOB_TYPE);
 
     // Get the tracks and make sure they exist
-    Track audioTrack = mp.getTrack(sourceAudioTrackId);
+    Track audioTrack = mp.getTrack(sourceAudioTrackB);
     final File audioFile;
     if (audioTrack == null) {
       audioFile = null;
@@ -234,7 +239,7 @@ public class ComposerServiceImpl implements ComposerService {
       }
     }
 
-    Track videoTrack = mp.getTrack(sourceVideoTrackId);
+    Track videoTrack = mp.getTrack(sourceTrackA);
     final File videoFile;
     if (videoTrack == null) {
       videoFile = null;
@@ -269,7 +274,7 @@ public class ComposerServiceImpl implements ComposerService {
     Runnable runnable = new Runnable() {
       public void run() {
         logger.info("encoding track {} for media package {} using source audio track {} and source video track {}",
-                new String[] { targetTrackId, mp.getIdentifier().toString(), sourceAudioTrackId, sourceVideoTrackId });
+                new String[] { targetTrackId, mp.getIdentifier().toString(), sourceAudioTrackB, sourceTrackA });
         composerReceipt.setStatus(Status.RUNNING);
         remoteServiceManager.updateReceipt(composerReceipt);
 
@@ -431,8 +436,11 @@ public class ComposerServiceImpl implements ComposerService {
           throw new RuntimeException(e);
         }
 
-        if (encodingOutput == null || !encodingOutput.isFile())
-          throw new RuntimeException("Encoding output doesn't exist: " + encodingOutput);
+        if (encodingOutput == null || !encodingOutput.isFile()) {
+          receipt.setStatus(Status.FAILED);
+          remoteServiceManager.updateReceipt(receipt);
+          throw new RuntimeException("Image extracttion failed: encoding output doesn't exist at " + encodingOutput);
+        }
 
         // Put the file in the workspace
         URI returnURL = null;
