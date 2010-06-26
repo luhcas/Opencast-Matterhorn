@@ -16,6 +16,7 @@
 package org.opencastproject.workingfilerepository.impl;
 
 import org.opencastproject.util.PathSupport;
+import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workingfilerepository.api.PathMappable;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
@@ -147,14 +148,26 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
   public URI getURI(String mediaPackageID, String mediaPackageElementID, String fileName) {
     if (fileName == null) {
       try {
-        return new URI(serverUrl + "/files" + MEDIAPACKAGE_PATH_PREFIX + mediaPackageID + "/" + mediaPackageElementID);
+        return new URI(UrlSupport.concat(new String[] {
+          serverUrl,
+          URI_PREFIX,
+          MEDIAPACKAGE_PATH_PREFIX,
+          mediaPackageID,
+          mediaPackageElementID
+        }));
       } catch (URISyntaxException e) {
         throw new RuntimeException(e);
       }
     } else {
       try {
-        return new URI(serverUrl + "/files" + MEDIAPACKAGE_PATH_PREFIX + mediaPackageID + "/" + mediaPackageElementID
-                + "/" + PathSupport.toSafeName(fileName));
+        return new URI(UrlSupport.concat(new String[] {
+          serverUrl,
+          URI_PREFIX,
+          MEDIAPACKAGE_PATH_PREFIX,
+          mediaPackageID,
+          mediaPackageElementID,
+          PathSupport.toSafeName(fileName)
+        }));
       } catch (URISyntaxException e) {
         throw new RuntimeException(e);
       }

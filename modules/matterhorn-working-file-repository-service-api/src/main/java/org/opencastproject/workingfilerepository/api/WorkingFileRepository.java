@@ -30,6 +30,9 @@ public interface WorkingFileRepository {
   /** The character encoding used for URLs */
   String CHAR_ENCODING = "UTF-8";
 
+  /** Path prefix for working file repository uris */
+  String URI_PREFIX = "/files/";
+
   /** Path prefix for collection items */
   String COLLECTION_PATH_PREFIX = "/collection/";
 

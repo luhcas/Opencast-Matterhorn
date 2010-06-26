@@ -17,6 +17,8 @@ package org.opencastproject.workspace.impl;
 
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.PathSupport;
+import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
 import junit.framework.Assert;
@@ -98,7 +100,14 @@ public class WorkspaceImplTest {
   public void testPutCachingWithoutFilesystemMapping() throws Exception {
     // First, mock up the collaborating working file repository
     WorkingFileRepository repo = EasyMock.createMock(WorkingFileRepository.class);
-    EasyMock.expect(repo.getURI((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files" + WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "foo/bar/header.gif"));
+    EasyMock.expect(repo.getURI((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(new URI(UrlSupport.concat(new String[] {
+      "http://localhost:8080",
+      WorkingFileRepository.URI_PREFIX,
+      WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX,
+      "foo",
+      "bar",
+      "header.gif"
+    })));
     EasyMock.expect(repo.put((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (InputStream)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files" + WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "foo/bar/header.gif"));
     EasyMock.replay(repo);
     workspace.setRepository(repo);
@@ -113,7 +122,13 @@ public class WorkspaceImplTest {
     EasyMock.verify(repo);
 
     // Ensure that the file was cached in the workspace (since there is no configured filesystem mapping)
-    File file = new File(workspaceRoot, "http___localhost_8080_files" + WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX.replaceAll("/", "_") + "foo_bar_header.gif");
+    File file = new File(PathSupport.concat(new String[] {
+      workspaceRoot, 
+      WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX,
+      "foo",
+      "bar",
+      "header.gif"
+    }));
     Assert.assertTrue(file.exists());
   }
   
@@ -121,10 +136,23 @@ public class WorkspaceImplTest {
   public void testGarbageCollection() throws Exception {
     // First, mock up the collaborating working file repository
     WorkingFileRepository repo = EasyMock.createMock(WorkingFileRepository.class);
-    EasyMock.expect(repo.getURI((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(new URI("http://localhost:8080/files" + WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "mediapackage/element/sample.txt"));
+    EasyMock.expect(repo.getURI((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(new URI(UrlSupport.concat(new String[] {
+      "http://localhost:8080",
+      WorkingFileRepository.URI_PREFIX,
+      WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX,
+      "mediapackage",
+      "element",
+      "sample.txt"
+    })));
     EasyMock.expect(repo.put((String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject(),
-            (InputStream)EasyMock.anyObject())).andReturn(
-                    new URI("http://localhost:8080/files" + WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "mediapackage/element/sample.txt"));
+            (InputStream)EasyMock.anyObject())).andReturn(new URI(UrlSupport.concat(new String[] {
+      "http://localhost:8080",
+      WorkingFileRepository.URI_PREFIX,
+      WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX,
+      "mediapackage",
+      "element",
+      "sample.txt"
+    })));
     EasyMock.replay(repo);
     workspace.setRepository(repo);
     TrustedHttpClient httpClient = EasyMock.createNiceMock(TrustedHttpClient.class);

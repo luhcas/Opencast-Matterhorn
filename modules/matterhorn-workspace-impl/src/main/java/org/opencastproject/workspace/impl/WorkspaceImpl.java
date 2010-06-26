@@ -24,6 +24,7 @@ import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.TeeInputStream;
 import org.apache.http.HttpResponse;
@@ -33,12 +34,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -202,7 +203,7 @@ public class WorkspaceImpl implements Workspace {
   public File get(URI uri) throws NotFoundException, IOException {
     String urlString = uri.toString();
     String safeFilename = PathSupport.toSafeName(urlString);
-    File f = new File(PathSupport.concat(wsRoot, safeFilename));
+    File f = getWorkspaceFile(uri, false);
 
     // Does the file exist and is it up to date?
     if (f.isFile()) {
@@ -277,8 +278,11 @@ public class WorkspaceImpl implements Workspace {
     File workspaceFile = null;
     FileOutputStream out = null;
     try {
-      workspaceFile = new File(wsRoot, PathSupport.toSafeName(uri.toString()));
-      out = new FileOutputStream(workspaceFile);
+      synchronized (wsRoot) {
+        workspaceFile = getWorkspaceFile(uri, true);
+        FileUtils.touch(workspaceFile);
+        out = new FileOutputStream(workspaceFile);
+      }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -323,8 +327,11 @@ public class WorkspaceImpl implements Workspace {
     File tempFile = null;
     FileOutputStream out = null;
     try {
-      tempFile = new File(wsRoot, PathSupport.toSafeName(uri.toString()));
-      out = new FileOutputStream(tempFile);
+      synchronized (wsRoot) {
+        tempFile = getWorkspaceFile(uri, true);
+        FileUtils.touch(tempFile);
+        out = new FileOutputStream(tempFile);
+      }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -384,6 +391,34 @@ public class WorkspaceImpl implements Workspace {
     return wfr.getCollectionURI(collectionID, fileName);
   }
 
+  /**
+   * Transforms a uri as returned by the working file repsoitory into a workspace File. In addition, it creates the
+   * (sub-)directories as needed.
+   * 
+   * @param uri
+   *          the uri
+   * @param createDirectories
+   *          <code>true</code> to have subdirectories created
+   * @return the local file representation
+   */
+  private File getWorkspaceFile(URI uri, boolean createDirectories) {
+    String uriPath = PathSupport.trim(uri.toString());
+    String uriPrefix = WorkingFileRepository.URI_PREFIX;
+    int wfrPrefix = uri.toString().indexOf(uriPrefix) + uriPrefix.length() - 1;
+    String serverPath = FilenameUtils.getPath(uriPath);
+    if (wfrPrefix > 0) {
+      serverPath = serverPath.substring(wfrPrefix);
+    } else {
+      serverPath = serverPath.replaceAll(":(\\d*)", "-\\1");
+    }
+    String wsDirectoryPath = PathSupport.concat(wsRoot, serverPath);
+    File wsDirectory = new File(wsDirectoryPath);
+    wsDirectory.mkdirs();
+
+    String safeFileName = PathSupport.toSafeName(FilenameUtils.getName(uri.toString()));
+    return new File(wsDirectory, safeFileName);
+  }
+
   class GarbageCollectionTimer extends TimerTask {
 
     /**
@@ -395,24 +430,43 @@ public class WorkspaceImpl implements Workspace {
     public void run() {
       logger.info("Running workspace garbage file collection");
       // Remove any file that was created more than maxAge seconds ago
-      File root = new File(wsRoot);
-      File[] oldFiles = root.listFiles(new FileFilter() {
-        public boolean accept(File pathname) {
-          long ageInSeconds = (System.currentTimeMillis() - pathname.lastModified()) / 1000;
-          return ageInSeconds > maxAgeInSeconds;
+      
+      Stack<File> workspaceDirectories = new Stack<File>();
+      workspaceDirectories.push(new File(wsRoot));
+      while (!workspaceDirectories.empty()) {
+        File dir = workspaceDirectories.pop();
+        
+        for (File file : dir.listFiles()) {
+          
+          // Another directory
+          if (file.isDirectory()) {
+            workspaceDirectories.push(file);
+            continue;
+          }
+            
+          // Is this file old enough to be deleted?
+          long ageInSeconds = (System.currentTimeMillis() - file.lastModified()) / 1000;
+          if (ageInSeconds > maxAgeInSeconds) {
+            Object[] loggingArgs = new Object[] { file, ageInSeconds - maxAgeInSeconds, maxAgeInSeconds };
+            if (file.delete()) {
+              logger.info("Deleted {}, since its age was {} seconds older than the maximum age, {}", loggingArgs);
+            } else {
+              logger.warn("Can not delete {}, even though it is {} seconds older than the maximum age, {}", loggingArgs);
+            }
+          }
+          
         }
-      });
-      for (File oldFile : oldFiles) {
-        long ageInSeconds = (System.currentTimeMillis() - oldFile.lastModified()) / 1000;
-        Object[] loggingArgs = new Object[] { oldFile, ageInSeconds - maxAgeInSeconds, maxAgeInSeconds };
-        if (oldFile.delete()) {
-          logger.info("Deleted {}, since its age was {} seconds older than the maximum age, {}", loggingArgs);
-        } else {
-          logger.warn("Can not delete {}, even though it is {} seconds older than the maximum age, {}", loggingArgs);
+        
+        // Remove empty directories
+        synchronized (wsRoot) {
+          if (dir.listFiles().length == 0) {
+            dir.delete();
+          }
         }
+
       }
     }
-
+    
   }
 
   /**
