@@ -26,12 +26,20 @@
 			<id>opencast</id>
 			<url>http://repository.opencastproject.org/nexus/content/groups/public</url>
 		</repository>
+		<repository>
+  			<id>sonatype-flex</id>
+  			<url>http://repository.sonatype.org/service/local/repositories/flex/content</url>
+  		</repository>
 	</repositories>
-	<pluginRepositories>
+		<pluginRepositories>
 		<pluginRepository>
 			<id>opencast</id>
 			<url>http://repository.opencastproject.org/nexus/content/groups/public</url>
 		</pluginRepository>
+		<pluginRepository>
+  			<id>sonatype-flexmojos-snapshots</id>
+  			<url>http://repository.sonatype.org/service/local/repositories/flexmojos-snapshots/content</url>
+  		</pluginRepository>
 	</pluginRepositories>
 
 	<build>
@@ -45,17 +53,16 @@
 					<dependency>
 						<groupId>com.adobe.flex</groupId>
 						<artifactId>compiler</artifactId>
-						<version>3.4.0.9271</version>
+						<version>3.6.0.16321</version>
 						<type>pom</type>
 					</dependency>
 				</dependencies>
-				<version>3.4.2</version>
+				<version>3.7.1</version>
 				<extensions>true</extensions>
 				<configuration>
 					<targetPlayer>10.0.0</targetPlayer>
 					<accessible>true</accessible>
 					<headlessServer>true</headlessServer>
-					<showWarnings>false</showWarnings>
 					<output>${project.build.directory}/hybrid-player/Videodisplay.swf</output>
 					<!--<coverageViewerPath>/Applications/CoverageViewer.app</coverageViewerPath>-->
 				</configuration>
@@ -258,21 +265,15 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.adobe.flex.framework</groupId>
-			<artifactId>flex-framework</artifactId>
-			<version>3.4.0.9271</version>
-			<type>pom</type>
-			<exclusions>
-				<exclusion>
-					<groupId>com.adobe.flex.framework</groupId>
-					<artifactId>playerglobal</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+      		<groupId>com.adobe.flex.framework</groupId>
+     		 <artifactId>flex-framework</artifactId>
+      		<version>3.6.0.16321</version>
+      		<type>pom</type>
+    	</dependency>
 		<dependency>
 			<groupId>com.adobe.flex.framework</groupId>
 			<artifactId>playerglobal</artifactId>
-			<version>3.4.0.9271</version>
+			<version>3.6.0.16321</version>
 			<classifier>10</classifier>
 			<type>swc</type>
 		</dependency>

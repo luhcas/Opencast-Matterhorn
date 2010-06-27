@@ -55,40 +55,51 @@ package org.opencast.engage.videodisplay.control.command
             {
                 case VideoControlEvent.PLAY:
                 
-                    if( model.startPlaySingle == true )
-	                {
-	                    if( model.startPlay == false)
-	                    {
-	                        model.mediaPlayer.seek(0);
-	                        model.mediaPlayer.setVolume(1);
-	                       model.startPlay = true;  
-	                    }
-	                    
-	                    ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );   
-	                }
+                    try
+                    {
+	                    if( model.startPlaySingle == true )
+		                {
+		                   if( model.startPlay == false   )
+		                   {
+		                       model.startPlay = true; 
+	                           model.mediaPlayer.setVolume(1);
+	                           model.mediaPlayer.seek(model.startSeek); 
+		                   }
+		                    
+		                   ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );   
+		                }
+		                
+		                if( model.startPlayOne == true && model.startPlayTwo == true )
+		                {
+		                  if( model.startPlay == false)
+		                  {
+		                      model.mediaPlayer.setVolume(1);
+	                          model.mediaPlayer.seek(model.startSeek);
+	                          model.startPlay = true; 
+		                   }
+		                    ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );  
+		                }
+	                    if( model.videoState == VideoState.COVER )
+		                {
+		                    model.videoState = model.mediaPlayer.getVideoState();
+		                }
 	                
-	                if( model.startPlayOne == true && model.startPlayTwo == true)
-	                {
-	                    if( model.startPlay == false)
-	                    {
-	                        model.mediaPlayer.seek(0);
-	                        model.mediaPlayer.setVolume(1);
-	                        model.startPlay = true; 
-	                    }
-	                    ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );  
-	                }
-                    if( model.videoState == VideoState.COVER )
-	                {
-	                    model.videoState = model.mediaPlayer.getVideoState();
-	                }
-                
-                    if( !model.mediaPlayer.playing() )
-                	{
-                		model.mediaPlayer.play();
-                	}
-                	model.currentPlayerState = PlayerState.PLAYING;
-                    currentPlayPauseState = PlayerState.PAUSED;
-                    ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
+	                    //if( !model.mediaPlayer.playing() )
+	                	//{
+	                		model.mediaPlayer.play();
+	                	//}
+	                	
+	                	
+	                	
+	                	model.currentPlayerState = PlayerState.PLAYING;
+	                    currentPlayPauseState = PlayerState.PAUSED;
+	                    ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
+                    }
+                    catch(error:Error)
+                    {
+                        // do nothing
+                    }
+                    
                 	break;
 
                 case VideoControlEvent.PAUSE:
@@ -135,35 +146,45 @@ package org.opencast.engage.videodisplay.control.command
 
                 case VideoControlEvent.REWIND:
                     
-                    if( model.mediaPlayer.playing() )
+	                if( model.startPlay == true )
                     {
-                        model.mediaPlayer.pause();
-                    }
-                    
-                    if( model.currentPlayhead - model.rewindTime >= 0 )
-                    {
-                        model.mediaPlayer.seek( model.currentPlayhead - model.rewindTime );
-                    }
-                    else
-                    {
-                        model.mediaPlayer.seek( 0 );
+	                    //if( model.mediaPlayer.playing() )
+	                    //{
+	                      //  model.mediaPlayer.pause();
+	                    //}
+	                    
+	                    if( model.currentPlayhead - model.rewindTime > 0 )
+	                    {
+	                        model.mediaPlayer.seek( model.currentPlayhead - model.rewindTime );
+	                    }
+	                    else
+	                    {
+	                        model.mediaPlayer.seek( 0 );
+	                    }
                     }
                     break;
 
                 case VideoControlEvent.FASTFORWARD:
                 
-                	if( model.mediaPlayer.playing() )
-                    {
-                        model.mediaPlayer.pause();
-                    }
-                    if( model.currentPlayhead + model.fastForwardTime > model.currentDuration )
-                    {
-                        model.mediaPlayer.seek( model.currentDuration );
-                    }
-                    else
-                    {
-                        model.mediaPlayer.seek( model.currentPlayhead + model.fastForwardTime );
-                    }
+                    if( model.startPlay == true )
+                	{
+	                	//if( model.mediaPlayer.playing() )
+	                    //{
+	                      //  model.mediaPlayer.pause();
+	                    //}
+	                    
+	                    
+	                    if( ( model.currentPlayhead + model.fastForwardTime ) >= model.currentDuration )
+	                    {
+	                        model.mediaPlayer.seek( model.currentDuration-2 );
+	                    }
+	                    else
+	                    {
+	                        var test:Number = model.currentPlayhead + model.fastForwardTime;
+	                        model.mediaPlayer.seek( test);
+	                    }
+	                    
+	                }
                     break;
 
                 case VideoControlEvent.SKIPFORWARD:

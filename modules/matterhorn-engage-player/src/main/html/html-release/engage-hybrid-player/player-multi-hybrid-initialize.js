@@ -27,6 +27,7 @@ Opencast.Initialize = (function ()
     VIDEOSIZEAUDIO         = "videoSizeAudio",
     clickMatterhornSearchField = false,
     clickLecturerSearchField = false,
+    locked = false,
     formatOne = 0,
     formatTwo = 0,
     formatSingle = 0,
@@ -121,25 +122,34 @@ Opencast.Initialize = (function ()
         dropdown_canceltimer();
         dropdown_close();
        
-        if (getDivId() === VOLUME)
-        {
-            ddmenuitem = $('#oc_volume-menue').css('visibility', 'visible');
 
-        }
-        else if (getDivId() === VIDEOSIZE)
+        if (getDivId() === VIDEOSIZE)
         {
-            ddmenuitem = $('#oc_video-size-menue').css('visibility', 'visible');
+            $('#oc_sound').css('width', '0%');
+            $('#oc_video-size-controls').css('width', '25%');
+            $('#oc_video-size-dropdown-div').css('width', '20%')
+            $('#oc_player_video-dropdown').css('left',$('#oc_video-size-dropdown').offset().left-$('#oc_body').offset().left);
+            $('#oc_player_video-dropdown').css('visibility', 'visible');
+            $('#oc_volume-menue').css('visibility', 'hidden');
+            ddmenuitem = $('#oc_player_video-dropdown');
+
         }
         else
         {
-            ddmenuitem = $(this).find('ul').eq(0).css('visibility', 'visible');
+            $('#oc_sound').css('width', '20%');
+            $('#oc_video-size-controls').css('width', '5%');
+            $('#oc_volume-menue').css('visibility', 'visible');
+            $('#oc_player_video-dropdown').css('visibility', 'hidden');
+            ddmenuitem = $('#oc_volume-menue');
+
+
         }
         setDivId('');
     }
     
     /**
         @memberOf Opencast.Initialize
-        @description open the drop down meneue video.
+        @description open the drop down menu video.
      */
     function dropdownVideo_open()
     {
@@ -195,9 +205,10 @@ Opencast.Initialize = (function ()
         });
         
         
-        $('#oc_video-size-dropdown > li').bind('mouseover', dropdown_open);
-        //$('#oc_video-size-dropdown > li').bind('click', dropdown_open);
-        $('#oc_video-size-dropdown > li').bind('mouseout',  dropdown_timer);
+        $('#oc_video-size-controls').bind('mouseover', dropdownVideo_open);
+        $('#oc_player_video-dropdown').bind('mouseover', dropdownVideo_open);
+        $('#oc_video-size-controls').bind('mouseout',  dropdown_timer);
+        $('#oc_player_video-dropdown').bind('mouseout',  dropdown_timer);
         
         // Handler focus
         $('#oc_btn-dropdown').focus(function () 
@@ -212,9 +223,8 @@ Opencast.Initialize = (function ()
             dropdown_timer();
         });
         
-        $('#oc_volume-dropdown > li').bind('mouseover', dropdown_open);
-        //$('#oc_video-size-dropdown > li').bind('click', dropdown_open);
-        $('#oc_volume-dropdown > li').bind('mouseout',  dropdown_timer);
+        $('#oc_sound').bind('mouseover', dropdown_open);
+        $('#oc_sound').bind('mouseout',  dropdown_timer);
 
         // Handler focus
         $('#oc_btn-volume').focus(function () 
@@ -285,15 +295,17 @@ Opencast.Initialize = (function ()
         // Handler for .click()
         $('#oc_btn-skip-backward').click(function () 
         {
-            Opencast.Player.doSkipBackward();
+            var sec = Opencast.segments.getSecondsBeforeSlide();
+            Opencast.Watch.seekSegment(sec);
+        });
+        $('#oc_btn-skip-forward').click(function () 
+        {
+            var sec = Opencast.segments.getSecondsNextSlide();
+            Opencast.Watch.seekSegment(sec);
         });
         $('#oc_btn-play-pause').click(function () 
         {
             Opencast.Player.doTogglePlayPause();
-        });
-        $('#oc_btn-skip-forward').click(function () 
-        {
-            Opencast.Player.doSkipForward();
         });
         $('#oc_btn-volume').click(function () 
         {
@@ -307,73 +319,7 @@ Opencast.Initialize = (function ()
         {
             Opencast.Player.showEditTime();
         });
-        $('#oc_btn-addBookmark').click(function () 
-        {
-            var value = $('#oc_current-time').attr('value');
-            var text = $('#oc_addBookmark').attr('value');
-            var name = 'Stefan Altevogt'; 
-            Opencast.Player.addBookmark(value, name, text);
-        });
-        $('#oc_btn-removeBookmark').click(function () 
-        {
-            Opencast.Player.removeBookmark();	
-        });
         
-        $('#oc_bookmarkSelect').click(function () 
-        {
-            var className = '';
-            $('#oc_bookmarkSelect option:selected').each(function () 
-            {
-                className = $(this).attr('class');
-            });
-        
-            Opencast.Player.playBookmark($('#oc_bookmarkSelect').val()); 
-        
-            if (className === OPTIONMYCLASSNAME)
-            {
-                $('#oc_btn-removeBookmark').css('display', 'inline'); 
-            }
-            else
-            {
-                $('#oc_btn-removeBookmark').css('display', 'none'); 
-       
-            }
-        });
-      
-        $('#oc_myBookmarks-checkbox').click(function () 
-        {
-            if ($("#oc_myBookmarks-checkbox").attr('aria-checked') === 'true')
-            {
-                $("#oc_myBookmarks-checkbox").attr('aria-checked', 'false');
-                $('.oc_option-myBookmark').css('display', 'none'); 
-                $('.oc_option-myBookmark').css('visibility', 'hidden'); 
-                $('#oc_btn-removeBookmark').css('display', 'none');
-                $('.oc_boomarkPoint').css('display', 'none');
-            }
-            else
-            {
-                $("#oc_myBookmarks-checkbox").attr('aria-checked', 'true');
-                $('.oc_option-myBookmark').css('display', 'block'); 
-                $('.oc_option-myBookmark').css('visibility', 'visible'); 
-                $('.oc_boomarkPoint').css('display', 'inline');
-            }
-        });
-        
-        $('#oc_publicBookmarks-checkbox').click(function () 
-        {
-            if ($("#oc_publicBookmarks-checkbox").attr('aria-checked') === 'true')
-            {
-                $("#oc_publicBookmarks-checkbox").attr('aria-checked', 'false');
-                $('.oc_option-publicBookmark').css('display', 'none');
-                $('.oc_option-publicBookmark').css('visibility', 'hidden'); 
-            }
-            else
-            {
-                $("#oc_publicBookmarks-checkbox").attr('aria-checked', 'true');
-                $('.oc_option-publicBookmark').css('display', 'block');
-                $('.oc_option-publicBookmark').css('visibility', 'visible'); 
-            }
-        });
         $('#oc_searchField').click(function () 
         {
             if (clickMatterhornSearchField === false)
@@ -457,18 +403,33 @@ Opencast.Initialize = (function ()
         $('#oc_btn-rewind').mousedown(function ()
         {
             this.className = 'oc_btn-rewind-clicked';
-            Opencast.Player.doRewind();
+            if (!locked)
+            {
+                locked = true;
+                setTimeout(function()
+                { 
+                    locked = false;
+                }, 400);
+                Opencast.Player.doRewind();
+            }
         });
         
         $('#oc_btn-play-pause').mousedown(function () 
         {
-            Opencast.Player.PlayPauseMouseOut();
+            Opencast.Player.PlayPauseMouseDown();
         });
         $('#oc_btn-fast-forward').mousedown(function () 
         {
             this.className = 'oc_btn-fast-forward-clicked';
-            Opencast.Player.doFastForward();
-            
+            if (!locked)
+            {
+                locked = true;
+                setTimeout(function()
+                { 
+                    locked = false;
+                }, 400);
+                Opencast.Player.doFastForward();
+            }
         });
         $('#oc_btn-skip-forward').mousedown(function () 
         {
@@ -523,17 +484,7 @@ Opencast.Initialize = (function ()
             }
         });
         
-        // Handler keypress
-        $('#oc_addBookmark').keypress(function (event) 
-        {
-            if (event.keyCode === 13) 
-            {
-                var value = $('#oc_current-time').attr('value');
-                var text = $('#oc_addBookmark').attr('value');
-                var name = 'Stefan Altevogt'; 
-                Opencast.Player.addBookmark(value, name, text);
-            }
-        });
+      
         
         // Handler keydown
         $('#oc_btn-rewind').keydown(function (event) 
@@ -607,32 +558,6 @@ Opencast.Initialize = (function ()
             }
         });
         
-        var content = '';
-        
-        content = content + '<li class="oc_bookmarks-list-myBookmarks">';
-        content = content + '<div class="oc_bookmarks-list-myBookmarks-div-left" type="text">Funny joke! He said: Lorem ipsum dolor sit amet...</div>';
-        content = content + '<div class="oc_bookmarks-list-myBookmarks-div-right" type="text">00:15:20 Alicia Valls</div>';
-        content = content + '</li>';
-        
-        content = content + '<li class="oc_bookmarks-list-publicBookmarks">';
-        content = content + '<div class="oc_bookmarks-list-publicBookmarks-div-left" type="text">Multicelled organisms definition</div>';
-        content = content + '<div class="oc_bookmarks-list-publicBookmarks-div-right" type="text">00:20:02 Justin Ratcliffe</div>';
-        content = content + '</li>';
-        
-        content = content + '<li class="oc_bookmarks-list-myBookmarks">';
-        content = content + '<div class="oc_bookmarks-list-myBookmarks-div-left" type="text">Funny joke! He said: Lorem ipsum dolor sit amet...</div>';
-        content = content + '<div class="oc_bookmarks-list-myBookmarks-div-right" type="text">00:15:20 Alicia Valls</div>';
-        content = content + '</li>';
-        
-        content = content + '<li class="oc_bookmarks-list-publicBookmarks">';
-        content = content + '<div class="oc_bookmarks-list-publicBookmarks-div-left" type="text">Multicelled organisms definition</div>';
-        content = content + '<div class="oc_bookmarks-list-publicBookmarks-div-right" type="text">00:20:02 Justin Ratcliffe</div>';
-        content = content + '</li>';
-        
-        
-        
-        $('#oc_bookmarks-list').prepend(content);
-       
     });
     
    
@@ -674,8 +599,14 @@ Opencast.Initialize = (function ()
         }
         Opencast.Player.setBrowserWidth(myWidth);
         
-        $('#oc_title').html($('#oc-title').html() + " by " + $('#oc-creator').html());
-        
+       var creatorPostfix = "";
+       var creator = $('#oc-creator').html();
+       if(creator !== "")
+           creatorPostfix = " by " + $('#oc-creator').html();
+       
+       $('#oc_title').html($('#oc-title').html() + creatorPostfix);
+       
+       Opencast.Player.refreshScrubberPosition();
     }
 
     /**
@@ -722,21 +653,21 @@ Opencast.Initialize = (function ()
             {
             case VIDEOSIZEBIGRIGHT:
                 newHeightMediaTwo = newHeight;
-                newWidthMediaTwo = (newHeight) * formatTwo;
+                newWidthMediaTwo = newHeight * formatTwo;
                 break;
             case VIDEOSIZEBIGLEFT:
                 newHeightMediaOne = newHeight;
-                newWidthMediaOne = (newHeight) * formatOne;
+                newWidthMediaOne = newHeight * formatOne;
                 break;
             case VIDEOSIZEONLYRIGHT:
                 newHeightMediaOne = 0;
                 newWidthMediaOne = 0;
                 newHeightMediaTwo = newHeight;
-                newWidthMediaTwo = (newHeight) * formatTwo;
+                newWidthMediaTwo = newHeight * formatTwo;
                 break;
             case VIDEOSIZEONLYLEFT:
                 newHeightMediaOne = newHeight;
-                newWidthMediaOne = (newHeight) * formatOne;
+                newWidthMediaOne = newHeight * formatOne;
                 newHeightMediaTwo = 0;
                 newWidthMediaTwo = 0;
                 break;
@@ -750,21 +681,21 @@ Opencast.Initialize = (function ()
             {
             case VIDEOSIZEBIGRIGHT:
                 newHeightMediaTwo = newHeight;
-                newWidthMediaTwo = (newHeight) * formatTwo;
+                newWidthMediaTwo = newHeight * formatTwo;
                 break;
             case VIDEOSIZEBIGLEFT:
                 newHeightMediaOne = newHeight;
-                newWidthMediaOne = (newHeight) * formatOne;
+                newWidthMediaOne = newHeight * formatOne;
                 break;
             case VIDEOSIZEONLYRIGHT:
                 newHeightMediaOne = 0;
                 newWidthMediaOne = 0;
                 newHeightMediaTwo = newHeight;
-                newWidthMediaTwo = (newHeight) * formatTwo;
+                newWidthMediaTwo = newHeight * formatTwo;
                 break;
             case VIDEOSIZEONLYLEFT:
                 newHeightMediaOne = newHeight;
-                newWidthMediaOne = (newHeight) * formatOne;
+                newWidthMediaOne = newHeight * formatOne;
                 newHeightMediaTwo = 0;
                 newWidthMediaTwo = 0;
                 break;

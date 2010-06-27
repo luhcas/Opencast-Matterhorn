@@ -18,7 +18,7 @@
 -->
 <mx:Canvas 
     width = "100%"
-    height = "100%"
+    height="100%"
     xmlns:players = "com.adobe.strobe.players.*"
     xmlns:mx = "http://www.adobe.com/2006/mxml"
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
@@ -28,6 +28,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import org.osmf.layout.HorizontalAlign;
         	import mx.core.Application;
             import mx.controls.Alert;
             import mx.core.Container;
@@ -84,10 +85,17 @@
             
             public function setMediaContainers( percentOne:Number, percentTwo:Number ):void
             {
-               mediaContainerLeftUIComponent.percentWidth = percentOne;
-               mediaContainerLeftUIComponent.percentHeight = 100;
-               mediaContainerRightUIComponent.percentWidth = percentTwo;
-               mediaContainerRightUIComponent.percentHeight = 100;
+                mediaContainerLeftUIComponent.percentWidth = percentOne;
+                mediaContainerLeftUIComponent.percentHeight = 100;
+                mediaContainerRightUIComponent.percentWidth = percentTwo;
+                mediaContainerRightUIComponent.percentHeight = 100;
+               
+                if( model.previewPlayer == true )
+                {
+                    model.layoutMetadataTwo.horizontalAlign = HorizontalAlign.CENTER;
+                    model.layoutMetadataOne.horizontalAlign = HorizontalAlign.CENTER;
+                }          
+                            
             }
         ]]>
     </mx:Script>
@@ -120,7 +128,7 @@
 
      </mx:states>
    
-    
+    <!--
     <mx:HBox
     	id="hb_media"
     	width="100%"
@@ -129,20 +137,42 @@
     	left="{model.multiMediaContainerLeft}"
     	right="{ model.multiMediaContainerRight }"
     	bottom="{ model.multiMediaContainerBottom }"
+    	top="0"
     	>
     	
     	   <osmf:MediaContainerUIComponent
 		        id = "mediaContainerLeftUIComponent"
 		        addedToStage = "initPlayerLeft()"
-		        
 		        />   
 	  
             <osmf:MediaContainerUIComponent
 		        id = "mediaContainerRightUIComponent"
 		        addedToStage = "initPlayerRight()"
-		        
 		        />   
     	
+    </mx:HBox>-->
+    
+    <mx:HBox
+        id="hb_media"
+        width="100%"
+        horizontalGap="0"
+        height="100%"
+        left="{ model.previewPlayer == true ? 0 : model.multiMediaContainerLeft}"
+        right="{ model.previewPlayer == true ? 0 : model.multiMediaContainerRight}"
+        bottom="{model.previewPlayer == true ? 0 : model.multiMediaContainerBottom}"
+        top="0"
+        >
+        
+           <osmf:MediaContainerUIComponent
+                id = "mediaContainerLeftUIComponent"
+                addedToStage = "initPlayerLeft()"
+                />   
+      
+            <osmf:MediaContainerUIComponent
+                id = "mediaContainerRightUIComponent"
+                addedToStage = "initPlayerRight()"
+                />   
+        
     </mx:HBox>
           
 </mx:Canvas>

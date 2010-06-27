@@ -21,17 +21,20 @@
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
     horizontalAlign="center"
     horizontalGap="0"
+    verticalGap="0"
     width="70%"
-    height="90%"
+    height="100%"
     backgroundColor="0x000000"
     backgroundAlpha="0.0"
     rollOver="{this.NavigationVisible = true}"
     rollOut="{this.NavigationVisible = false}"
+    mouseOver="{this.NavigationVisible = true}"
     creationComplete="startTimer();"
     >
 
     <mx:Script>
         <![CDATA[
+        	import org.opencast.engage.videodisplay.state.SoundState;
         	import org.osmf.layout.VerticalAlign;
         	import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
             import bridge.ExternalFunction;
@@ -49,6 +52,17 @@
             
             [Bindable]
             private var NavigationVisible:Boolean = true;
+            [Bindable]
+            private var mouseUpBool:Boolean = false;
+            [Bindable]
+            private var mouseDownBool: Boolean = false;
+            [Bindable]
+            private var controlsVisible: Boolean = false;
+            
+            private var startDragValue:Number = 0;
+            
+            private var seekTimer:Timer;
+           
 
              /**
              * starts a timer to hide the navigation elements
@@ -57,14 +71,20 @@
             private function startTimer():void
             {
                 // creates a Timer
-            	var timer:Timer = new Timer(1000, 6);
-            	timer.addEventListener(TimerEvent.TIMER_COMPLETE, onTimerComplete);
-            	timer.start();
+                var timer:Timer = new Timer(1000, 8);
+                timer.addEventListener(TimerEvent.TIMER_COMPLETE, onTimerComplete);
+                timer.start();
+                
+                // initialize the seekTimer
+                seekTimer = new Timer(0);
             }
             
             public function onTimerComplete(event:TimerEvent):void
        		{
-            	this.NavigationVisible = false;
+            	if(controlsVisible == false)
+            	{
+            	   this.NavigationVisible = false;
+            	}
        		}
             
             /**
@@ -86,7 +106,27 @@
              * */
             private function onSeek():void
             {
-                model.mediaPlayer.seek(hs_seek.value);
+                if( model.fullscreenMode == true  )
+                {
+	                var t:Number = hs_seek.value * 100 / model.currentDuration;
+	                
+	                if( model.progress < t && model.mediaType == model.HTML)
+	                {
+	                    model.currentPlayhead = startDragValue;
+	                    hs_seek.value = startDragValue;
+	                }
+	                else
+	                {
+	                    startDragValue = hs_seek.value;
+	                }
+	                
+	                if( model.startPlay == false )
+	                {
+	                    model.startSeek = hs_seek.value;
+	                }
+	                model.mediaPlayer.seek(hs_seek.value);
+	                model.currentPlayhead = hs_seek.value;
+	            }
             }
             
             /**
@@ -131,8 +171,15 @@
              * */
             private function volumeDataTipFunc( val:String ):String
             {
-                var numb:Number = new Number( val );
-                return ( numb * 100 ).toFixed( 0 ) + ' %';
+                var vol:Number = new Number( val );
+                
+                if(vol * 100 < 1  )
+                {
+                    vol = 0;
+                    return 'Volume 0 %'
+                }
+                
+                return 'Volume '+( vol * 100 ).toFixed( 0 ) + ' %';
             }
             
             /**
@@ -143,10 +190,24 @@
              * */
             private function jumpForward():void
             {
-               if( !model.mediaPlayer.seeking() )
-               {
-                model.mediaPlayer.seek( model.currentPlayhead + ( model.currentDuration * 0.2 ) );
-               }
+                if( !seekTimer.running )
+                {
+	                if( !model.mediaPlayer.seeking() )
+	                {
+	                    if( model.currentPlayhead + model.fastForwardTime >= model.currentDuration )
+		                {
+		                     model.mediaPlayer.seek( model.currentDuration - 2 );
+		                }
+		                else
+		                {
+		                   model.mediaPlayer.seek( model.currentPlayhead + model.fastForwardTime );
+		                }
+	                
+	                }
+	                seekTimer = new Timer(400,1);
+	                seekTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onSeekTimerComplete);
+	                seekTimer.start();
+                }
             }
             
             /**
@@ -157,182 +218,249 @@
              * */
             private function jumpBack():void
             {
-               if( !model.mediaPlayer.seeking() )
-               {
-                model.mediaPlayer.seek( model.currentPlayhead - ( model.currentDuration * 0.2 ) );
-               }
+                if( !seekTimer.running )
+                {
+	               if( !model.mediaPlayer.seeking() )
+	               {
+	                  if( model.currentPlayhead - model.rewindTime <= 0 )
+		              {
+		                  model.mediaPlayer.seek( 0 );
+		              }
+		              else
+		              {
+		                  model.mediaPlayer.seek( model.currentPlayhead - model.rewindTime );
+		              }
+	               }
+	               seekTimer = new Timer(400,1);
+                   seekTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onSeekTimerComplete);
+                   seekTimer.start();
+                }
             }
+            
+            /**
+             * onSeekTimerComplete
+             *
+             * Stop the seek timer.
+             *
+             * */
+            private function onSeekTimerComplete():void
+            {
+                seekTimer.stop();
+            }
+            
+            /**
+             * thumbDrag
+             *
+             * When the learner drag the seek slider.
+             *
+             * */
+            private function thumbDrag():void
+            {
+            	model.fullscreenThumbDrag = true;
+            	startDragValue = hs_seek.value;
+            }
+            
            
         ]]>
     </mx:Script>
     
-    <mx:Fade id="fadeOut" duration="1000" alphaFrom="1.0" alphaTo="0.0"/>
-    <mx:Fade id="fadeIn" duration="1000" alphaFrom="0.0" alphaTo="1.0"/>
+    <mx:Fade id="fadeOut" duration="400" alphaFrom="1.0" alphaTo="0.0"/>
+    <mx:Fade id="fadeIn" duration="200" alphaFrom="0.0" alphaTo="1.0"/>
     
-    <mx:HBox
-    	width = "100%"
-        height = "32"
-    	horizontalAlign="center"
-        horizontalGap="0"
+    <mx:Canvas
+    	width = "700"
+        height = "85"
         visible="{this.NavigationVisible}"
         hideEffect="{fadeOut}"
         showEffect="{fadeIn}"
-    	>
+        mouseOver="{this.NavigationVisible = true; controlsVisible = true}"
+        >
     	
-    	<mx:Canvas
-        	width="128"
-        	height="32"
-        	styleName="timeBackground"
-        	>
-        	
-        	<mx:HBox
-        		width="100%"
-        		height="100%"
-        		horizontalAlign="center"
-        		verticalAlign="middle"
-        		verticalGap="0"
-        		horizontalGap="0"
-        		>
-        		
-        		<mx:Label 
-		            id = "lb_currentTime"
-		            textAlign = "center"
-		            text = "{ model.timeCode.getTC(model.currentPlayhead) }"
-		            styleName = "videocontrollerLabel"
-		            toolTip = "Current Time {model.timeCode.getTC(model.currentPlayhead) } "
-		            />
-		
-		        <mx:Label 
-		            textAlign = "center"
-		            text = "of"
-		            styleName = "videocontrollerLabel"
-		            />
-		
-		        <mx:Label 
-		            id = "lb_durationTime"
-		            textAlign = "center"
-		            text = "{ model.timeCode.getTC(model.currentDuration) }"
-		            styleName = "videocontrollerLabel"
-		            toolTip = "Duration {model.timeCode.getTC(model.currentDuration) } "
-		            />
-        		
-            </mx:HBox>
-            
-        </mx:Canvas>
-                
-        <mx:Canvas
-            width="138"
-            height="32"
-            styleName="controlsBackground"
-            >
-            
-            <mx:HBox
-                width="100%"
-                height="100%"
-                horizontalAlign="center"
-                verticalAlign="middle"
-                >
-                
-               <mx:Button 
-               	    id="btn_skipBackward"
-                    toolTip = "Jump To The Back Slide"
-                    styleName = "SkipBackward"
-                    />
-                    
-               <mx:Button 
-               	    id="btn_rewind"
-                    toolTip = "Jump Back"
-                    styleName = "Rewind"
-                    click="{ jumpBack() }"
-                    />
-                
-               <mx:Button 
-               	    id="btn_playpause"
-                    toolTip = "{ model.currentPlayerState == PlayerState.PAUSED ? 'Play Button' : 'Pause Button' }"
-                    styleName = "{ model.currentPlayerState == PlayerState.PAUSED ? 'Play' : 'Pause' }"
-                    click = "{ ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' ) }"
-                    />
-                    
-               <mx:Button 
-               	    id="btn_fastforward"
-                    toolTip = "Jump Forward"
-                    styleName = "FastForward"
-                    click="{ jumpForward() }"
-                    />
-               
-               <mx:Button 
-               	    id="btn_skipforward"
-                    toolTip = "Jump To The Next Slide"
-                    styleName = "SkipForward"
-                    />
-                    
-            </mx:HBox>
-            
-        </mx:Canvas>
-     
-        <mx:Canvas
-            width="100"
-            height="32"
-            styleName="volumeBackground"
-            >
-            <mx:HBox
-                width="100%"
-                height="100%"
-                verticalGap="0"
-                verticalAlign="middle"
-                horizontalAlign="right"
-                right="6"
-                >
-                
-               <mx:Button 
-               	    id="btn_volume"
-               	    toolTip = "{ model.soundState}"
-                    styleName = "{ model.soundState}"
-                    click = "{ toggleMute() }"
-                    />
-                    
-               
-               <mx:HSlider 
-               	    id = "hs_volume"
-                    width = "58"
-                    maximum = "1"
-                    change = "{ changeVolume() }"
-                    value = "{ model.playerVolume }"
-                    toolTip = "Volume:  { (model.playerVolume * 100).toFixed(0) } %"
-                    styleName = "HSliderVolume"
-                    dataTipFormatFunction = "volumeDataTipFunc"
-                    />
-                    
-            </mx:HBox>
-            
-        </mx:Canvas>
-        
-        <mx:Button 
-			toolTip = "{ model.ccButtonBoolean == true ? 'Closed Caption Off' : 'Closed Caption Off'} "
-			styleName = "{ model.captionsURL == '' ? 'ccOff' : 'ccOn' }"
-			click="{ Swiz.dispatchEvent( new ClosedCaptionsEvent() ) }"
-			/>
+    	<mx:VBox 
+            width = "100%"
+            height = "85"
+            horizontalAlign="center"
+    		verticalAlign="top" 
+    		verticalGap="0"
+    		horizontalGap="0"
+    		>
+    
+		    <mx:HBox
+		    	width = "100%"
+		        height = "100%"
+		    	horizontalAlign="center"
+		        horizontalGap="0"
+		        verticalGap="0"
+		        verticalAlign="bottom"
+		    	>
+		    	
+		    	<mx:HBox
+	        		width="166"
+	        		height="48"
+	        		horizontalAlign="center"
+	        		verticalAlign="middle"
+	        		verticalGap="0"
+	        		horizontalGap="0"
+	        		styleName="controlsBackground"
+	        		>
+	        		
+	        		<mx:Label 
+			            id = "lb_currentTime"
+			            textAlign = "center"
+			            text = "{ model.timeCode.getTC(model.currentPlayhead) }"
+			            styleName = "videocontrollerLabel"
+			            toolTip = "Current Time {model.timeCode.getTC(model.currentPlayhead) } "
+			            />
 			
-        <mx:Button 
-			toolTip = "Back To The Player"
-			styleName = "FullscreenOut"
-			click="{ normalscreen() }"
-			/>
+			        <mx:Label 
+			            textAlign = "center"
+			            text = "of"
+			            styleName = "videocontrollerLabel"
+			            />
+			
+			        <mx:Label 
+			            id = "lb_durationTime"
+			            textAlign = "center"
+			            text = "{ model.timeCode.getTC(model.currentDuration) }"
+			            styleName = "videocontrollerLabel"
+			            toolTip = "Duration {model.timeCode.getTC(model.currentDuration) } "
+			            />
+	        		
+	            </mx:HBox>
+		            
+		        <mx:HBox
+	                width="220"
+                    height="48"
+                    verticalGap="0"
+                    horizontalGap="0"
+	                horizontalAlign="center"
+	                verticalAlign="middle"
+	                styleName="controlsBackground"
+	                >
+	                
+	               <mx:Button 
+	               	    id="btn_skipBackward"
+	               	    toolTip = "Jump To The Back Slide"
+	                    styleName = "SkipBackward"
+	                    click="{ExternalInterface.call( ExternalFunction.SKIPBACKWARD, '' )}"
+	                    />
+	                    
+	               <mx:Button 
+	               	    id="btn_rewind"
+	               	    toolTip = "Jump Back"
+	                    styleName = "Rewind"
+	                    click="{ jumpBack() }"
+	                    />
+	                
+	               <mx:Button 
+	               	    id="btn_playpause"
+	               	    toolTip = "{ model.currentPlayerState == PlayerState.PAUSED ? 'Play' : 'Pause' }"
+	                    styleName = "{ model.currentPlayerState == PlayerState.PAUSED ? 'Play' : 'Pause' }"
+	                    click = "{ ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' ) }"
+	                    />
+	                    
+	               <mx:Button 
+	               	    id="btn_fastforward"
+	               	    toolTip = "Jump Forward"
+	                    styleName = "FastForward"
+	                    click="{ jumpForward() }"
+	                    />
+	               
+	               <mx:Button 
+	               	    id="btn_skipforward"
+	               	    toolTip = "Jump To The Next Slide"
+	                    styleName = "SkipForward"
+	                    click="{ExternalInterface.call( ExternalFunction.SKIPFORWARD, '' )}"
+	                    />
+	                    
+	            </mx:HBox>
+		            
+                <mx:HBox
+	                verticalAlign="middle"
+	                horizontalCenter="right"
+	                >
+	                
+	               <mx:Button 
+	               	    id="btn_volume"
+                        toolTip = "{ model.soundState == SoundState.VOLUMEMAX ? 'Volume Maximum' : model.soundState == SoundState.VOLUMEMED ? 'Volume Medium' : model.soundState == SoundState.VOLUMEMIN ? 'Volume Minimum' : model.soundState == SoundState.VOLUMEMUTE ? 'Volume Mute' : ''}"
+	                    styleName = "{ model.soundState}"
+	                    click = "{ toggleMute() }"
+	                    />
+	                    
+                </mx:HBox>
+	               
+	            <mx:HBox
+                    width="60"
+                    height="48"
+                    verticalAlign="middle"
+                    horizontalCenter="center"
+                    styleName="controlsBackground"
+                    >
+	               <mx:HSlider 
+	               	    id = "hs_volume"
+	                    width = "58"
+	                    maximum = "1"
+	                    change = "{ changeVolume() }"
+	                    value = "{ model.playerVolume }"
+	                    styleName = "HSliderVolume"
+	                    dataTipFormatFunction = "volumeDataTipFunc"
+	                    
+	                    />
+	            </mx:HBox>   
+		            
+		        <mx:Button 
+		        	width="48"
+		        	height="48"
+					toolTip = "{ model.captionsURL == '' ? 'No Closed Captons' : model.ccBoolean == true ? 'Closed Captons On' : 'Closed Captons Off' }"
+					styleName = "{ model.captionsURL == '' ? 'ccOff' : 'ccOn' }"
+					click="{ Swiz.dispatchEvent( new ClosedCaptionsEvent() ) }"
+					enabled="{  model.captionsURL == '' ? false : true }"
+					/>
+					
+		        <mx:Button 
+		        	width="48"
+                    height="48"
+					toolTip = "Back To The Player"
+					styleName = "FullscreenOut"
+					click="{ normalscreen() }"
+					/>
+		    
+		    </mx:HBox>
+		    
+		    <mx:Canvas
+		    	>
+		    	
+		    	<mx:Canvas 
+                    height="9"
+                    width = "{model.progressFullscreen}"
+                    backgroundColor="#dfe938c"
+                    toolTip="Progress"
+                    top="6"
+                    left="7"
+                    />
+                    
+                <mx:Canvas>
+	    	
+	    		    <mx:HSlider 
+		                id = "hs_seek"
+		                width = "580"
+		                maximum = "{ model.currentDuration }"
+		                value = "{ model.currentPlayhead }"
+		                change = "{ onSeek() }"
+		                toolTip = "Current Time {model.timeCode.getTC(model.currentPlayhead) } "
+		                dataTipFormatFunction = "seekDataTipFunc"
+		                styleName = "HSliderSeek"
+		                thumbDrag="{ thumbDrag() }"
+		                thumbRelease="{ model.fullscreenThumbDrag = false }"
+		                left="0"
+		                />
+            
+                </mx:Canvas>
+		    		
+		    </mx:Canvas>
+		    
+		 </mx:VBox>
+          
+    </mx:Canvas>
     
-    </mx:HBox>
-    
-    <mx:HSlider 
-        id = "hs_seek"
-        width = "442"
-        maximum = "{ model.currentDuration }"
-        value = "{ model.currentPlayhead }"
-        change = "{ onSeek() }"
-        toolTip = "Current Time {model.timeCode.getTC(model.currentPlayhead) } "
-        dataTipFormatFunction = "seekDataTipFunc"
-        styleName = "HSliderSeek"
-        visible="{this.NavigationVisible}"
-        hideEffect="{fadeOut}"
-        showEffect="{fadeIn}"
-        />
-  
 </mx:VBox>

@@ -87,6 +87,9 @@
                 else
                 {
                     model.fullscreenMode = false;
+                    model.multiMediaContainerLeft = model.multiMediaContainerLeftNormalscreen;
+                    model.multiMediaContainerRight = model.multiMediaContainerRightNormalscreen;
+                    model.multiMediaContainerBottom = 0;
                 }
             }
 

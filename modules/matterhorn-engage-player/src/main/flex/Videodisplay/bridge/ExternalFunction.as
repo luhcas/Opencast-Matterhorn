@@ -64,7 +64,11 @@ package bridge
         
         public static const SETCCICONON:String            = 'Opencast.Player.setCCIconOn'; 
           
-        public static const SETCCICONOFF:String           = 'Opencast.Player.setCCIconOff'; 
+        public static const SETCCICONOFF:String           = 'Opencast.Player.setCCIconOff';
+        
+        public static const SKIPBACKWARD:String           = 'Opencast.Player.doSkipBackward'; 
+          
+        public static const SKIPFORWARD:String           = 'Opencast.Player.doSkipForward'; 
                 
     }
 }

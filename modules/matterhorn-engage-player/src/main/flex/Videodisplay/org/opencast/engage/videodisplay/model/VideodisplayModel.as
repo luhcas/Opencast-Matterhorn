@@ -95,6 +95,9 @@ package org.opencast.engage.videodisplay.model
         // Current Playhead
         public var currentPlayhead:Number = 0;
         
+        // Current PlayheadSingle
+        public var currentPlayheadSingle:Number = 0;
+        
         // currentPlayheadPlayerOne
         public var currentPlayheadPlayerOne:Number = 0;
         
@@ -197,6 +200,9 @@ package org.opencast.engage.videodisplay.model
         // progress
         public var progress:Number = 0;
         
+        // progressFullscreen
+        public var progressFullscreen:Number = 0;
+        
         // progressMediaOne
         public var progressMediaOne:Number = 0;
         
@@ -218,14 +224,20 @@ package org.opencast.engage.videodisplay.model
         // mediaTypeTwo
         public var mediaTypeTwo:String;
         
+        // mediaType
+        public var mediaType:String;
+        
         // mediaContainerLeftWidth
         public var mediaContainerLeftWidth:int = ( Application.application.width - 10 ) / 2;
         
         // mediaContainerRightWidth
         public var mediaContainerRightWidth:int = ( Application.application.width - 10 ) / 2;
         
-        // coverURL
-        public var coverURL:String = '';
+        // coverURLOne
+        public var coverURLOne:String = '';
+        
+         // coverURLTwo
+        public var coverURLTwo:String = '';
         
         // mediaOneWidth
         public var mediaOneWidth:int = 0;
@@ -233,11 +245,17 @@ package org.opencast.engage.videodisplay.model
         // mediaOneHeight
         public var mediaOneHeight:int = 0;
         
+        // formatMediaOne
+        public var formatMediaOne:Number = 0;
+        
         // mediaTwoWidth
         public var mediaTwoWidth:int = 0;
         
         // mediaTwoHeight
         public var mediaTwoHeight:int = 0;
+        
+        // formatMediaTwo
+        public var formatMediaTwo:Number = 0;
         
         // mediaWidth
         public var mediaWidth:int = 0;
@@ -245,8 +263,14 @@ package org.opencast.engage.videodisplay.model
         // multiMediaContainerLeft
         public var multiMediaContainerLeft:int = 0;
         
+        // multiMediaContainerLeftFullscreen
+        public var multiMediaContainerLeftNormalscreen:int = 0;
+        
         // multiMediaContainerRight
         public var multiMediaContainerRight:int = 0;
+        
+        // multiMediaContainerRightFullscreen
+        public var multiMediaContainerRightNormalscreen:int = 0;
         
         // multiMediaContainerBottom
         public var multiMediaContainerBottom:int = 0;
@@ -257,12 +281,17 @@ package org.opencast.engage.videodisplay.model
         // statePlayerOne
         public var statePlayerOne:String = '';
         
+        // previewPlayer
+        public var previewPlayer:Boolean = false;
+        
         // statePlayerOne
         public var statePlayerTwo:String = '';
         
-        
         // startPlay
         public var startPlay:Boolean = false;
+        
+        // startSeek
+        public var startSeek:Number = 0;
         
         // startPlayOne
         public var startPlayOne:Boolean = false;
@@ -273,27 +302,37 @@ package org.opencast.engage.videodisplay.model
         // startPlaySingle
         public var startPlaySingle:Boolean = false;
         
-        
-        
-        
-        //
-        public var onBufferingChangeMediaOne:Boolean;
-        
-        
-        
-        public var onBufferChangeMediaOneTime:Number;
-        
-         public var onBufferingChangeMediaTwo:Boolean;
-        
-        
-        
-        public var onBufferChangeMediaTwoTime:Number;
-        
+        // singleState
         public var singleState:String ='';
         
-        public var seekOne:String = '';
+        // coverState
+        public var coverState:String = '';
         
-        public var seekTwo:String = '';
+        // onBufferingChangeMediaOne
+        public var onBufferingChangeMediaOne:Boolean;
         
+        // onBufferChangeMediaOneTime
+        public var onBufferChangeMediaOneTime:Number;
+        
+        // onBufferingChangeMediaTwo
+        public var onBufferingChangeMediaTwo:Boolean;
+       
+        // onBufferChangeMediaTwoTime
+        public var onBufferChangeMediaTwoTime:Number;
+        
+        // fullscreenThumbDrag
+        public var fullscreenThumbDrag:Boolean = false;
+        
+        // currentSeekPosition
+        public var currentSeekPosition:Number = 0;
+        
+        
+        
+        
+        
+        public var fullscreenProgressWidth:Number = 565;
+        
+       
+        public var testNumber:Number = 0;  
     }
 }

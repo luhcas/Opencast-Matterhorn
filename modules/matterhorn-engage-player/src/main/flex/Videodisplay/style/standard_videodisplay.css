@@ -64,14 +64,14 @@ Button.Play
 {
    font-size: 0; 
   
-  upSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play');
-  overSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play');
+  upSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_up');
+  overSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_up');
   downSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_down');
-  disabledSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play');
-  selectedUpSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play'); 
-  selectedOverSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play');
-  selectedDownSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play');
-  selectedDisabledSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play');  
+  disabledSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_up');
+  selectedUpSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_up'); 
+  selectedOverSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_up');
+  selectedDownSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_up');
+  selectedDisabledSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_up');  
 }
 
 Button.Pause
@@ -182,7 +182,7 @@ Button.ccOff
 .videocontrollerLabel
 {
     color: #ffffff;
-    font-size: 9; 
+    font-size: 14; 
 }
 
 .audioLabel
@@ -200,10 +200,19 @@ Button.ccOff
 
 .HSliderSeek
 {
-   thumb-skin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_scrubber');
-   trackSkin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_scrubber');
-   track-highlight-skin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_scrubber_highlight');
-   showTrackHighlight:true;
+    thumb-skin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_scrubber');
+    trackSkin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_scrubber');
+    track-highlight-skin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_scrubber_highlight');
+    showTrackHighlight:true;
+    themeColor: #f8554e;
+}
+
+.HSliderProgress
+{
+    
+   
+    showTrackHighlight:true;
+
 }
 
 .HSliderVolume
@@ -281,3 +290,5 @@ Button.ccOff
 {
     borderSkin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_scrubber');
 }
+
+

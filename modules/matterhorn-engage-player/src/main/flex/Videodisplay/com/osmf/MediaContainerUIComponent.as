@@ -34,6 +34,12 @@ package com.osmf
      **/
     public class MediaContainerUIComponent extends UIComponent
     {
+         /** Constructor */
+        public function MediaContainerUIComponent():void
+        {
+            // do nothing
+        }
+        
         // Public Interface
         //
         

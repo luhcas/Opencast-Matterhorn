@@ -27,6 +27,7 @@
 
     <mx:Script>
         <![CDATA[
+        	import org.opencast.engage.videodisplay.state.VideoSizeState;
         	import org.opencast.engage.videodisplay.state.DefaultPlayerState;
         	import org.osmf.media.MediaPlayer;
         	import org.opencast.engage.videodisplay.state.VideoState;
@@ -97,19 +98,97 @@
             {
                 Application.application.stage.displayState = StageDisplayState.FULL_SCREEN;
                 model.fullscreenMode = true;
+                
+                model.multiMediaContainerLeftNormalscreen = model.multiMediaContainerLeft;
+                model.multiMediaContainerRightNormalscreen = model.multiMediaContainerRight;
+                
+                var flashWidth:int = Application.application.width - 10;
+                var flashHeight:int = Application.application.height - 10;
+                var newMediaOneHeight:Number = 0;
+                var newMediaOneWidth:Number = 0;
+                var newMediaTwoHeight:Number = 0;
+                var newMediaTwoWidth:Number = 0;
+                var percentOne:Number = 0;
+                var percentTwo:Number = 0;
+                
+                if( model.videoSizeState == VideoSizeState.ONLYLEFT )
+                {
+                
+                    newMediaOneHeight = flashHeight * model.formatMediaOne;
+                    model.multiMediaContainerRight = ( flashWidth - newMediaOneHeight ) / 2 ;
+                    model.multiMediaContainerLeft = 0;
+                }
+                else if( model.videoSizeState == VideoSizeState.ONLYRIGHT )
+                {
+                    newMediaTwoHeight = flashHeight * model.formatMediaTwo;
+                    model.multiMediaContainerLeft = ( flashWidth - newMediaTwoHeight ) / 2 ;
+                    model.multiMediaContainerRight = 0;
+                
+                }
+                else if( model.videoSizeState == VideoSizeState.BIGLEFT)
+                {
+                	percentOne = 66.66666666666;
+                	newMediaOneWidth = flashWidth * ( percentOne / 100 );
+                	newMediaOneHeight = newMediaOneWidth / model.formatMediaOne;
+                	
+                	
+                	model.multiMediaContainerBottom = ( flashHeight - newMediaOneHeight ) / 2;
+                	
+                	model.multiMediaContainerLeft = 0 ;
+                    model.multiMediaContainerRight = 0;
+                }
+                else if( model.videoSizeState == VideoSizeState.BIGRIGHT)
+                {
+                    percentTwo = 66.66666666666;
+                    newMediaTwoWidth = flashWidth * ( percentTwo / 100 );
+                    newMediaTwoHeight = newMediaTwoWidth / model.formatMediaTwo;
+                    
+                    
+                    model.multiMediaContainerBottom = ( flashHeight - newMediaTwoHeight ) / 2;
+                    
+                    model.multiMediaContainerLeft = 0 ;
+                    model.multiMediaContainerRight = 0;
+                }
+                else if( model.videoSizeState == VideoSizeState.CENTER)
+                {
+                    var newHeight:Number = 0;
+                    percentOne = 50;
+                    percentTwo = 50;
+                    
+                    newMediaOneWidth = flashWidth * ( percentOne / 100 );
+                    newMediaOneHeight = newMediaOneWidth / model.formatMediaOne;
+                    
+                    newMediaTwoWidth = flashWidth * ( percentTwo / 100 );
+                    newMediaTwoHeight = newMediaTwoWidth / model.formatMediaTwo;
+                    
+                    if( newMediaOneHeight > newMediaTwoHeight )
+                    {
+                        newHeight = newMediaOneHeight;
+                    }
+                    else
+                    {
+                        newHeight = newMediaTwoHeight;
+                    }
+                    
+                    model.multiMediaContainerBottom = ( flashHeight - newHeight ) / 2;
+                    
+                    model.multiMediaContainerLeft = 0 ;
+                    model.multiMediaContainerRight = 0;
+                }
+                
+              
             }
             
             private function play():void
             {
                 if( model.startPlaySingle == true )
-                {
-                    ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );   
-                }
-                
-                if( model.startPlayOne == true && model.startPlayTwo == true)
-                {
-                    ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );  
-                }
+	            {
+	                ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );   
+	            }
+	            else if( model.startPlayOne == true && model.startPlayTwo == true)
+	            {
+	                ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );  
+	            }
             }
             
         ]]>
@@ -228,47 +307,7 @@
     	height="100%"
     	>
     	
-            <!--
-            <mx:TextInput 
-            text="model.onBufferingChangeMediaOne {model.onBufferingChangeMediaOne.toString()}"
-            />
-            
-             <mx:TextInput 
-            text="model.onBufferingChangeMediaTwo {model.onBufferingChangeMediaTwo.toString()}"
-            />
-            
-            <mx:TextInput 
-            text="model.statePlayerOne {model.statePlayerOne.toString()}"
-            />
-            
-             <mx:TextInput 
-            text="model.statePlayerTwo {model.statePlayerTwo.toString()}"
-            />
-            
-            <mx:TextInput 
-            text="model.currentPlayheadPlayerOne {model.currentPlayheadPlayerOne.toString()}"
-            />
-            
-             <mx:TextInput 
-            text="model.currentPlayheadPlayerTwo {model.currentPlayheadPlayerTwo.toString()}"
-            />
-            
-            
-            <mx:TextInput 
-            text="model.singleState {model.singleState.toString()}"
-            />
-          
-             <mx:TextInput 
-            text="model.seekOne {model.seekOne.toString()}"
-            />
-            
-              <mx:TextInput 
-            text="model.seekTwo {model.seekTwo.toString()}"
-            />
-           -->
-            
-           
-           
+    	
     	
     	<mx:HBox 
     		width="100%"
@@ -276,10 +315,13 @@
     		>
     		
     	<mx:Button 
+    		width="30"
+    		height="30"
             styleName="Fullscreen"
             visible = "{!model.fullscreenMode}"
             includeInLayout = "{!model.fullscreenMode}"
             click = "{ fullscreen() }"
+            toolTip="Fullscreen"
             />
     		
     	</mx:HBox>
@@ -292,13 +334,14 @@
             width = "100%"
             verticalScrollPolicy = "off"
             horizontalScrollPolicy = "off"
-            bottom="10"
+            verticalGap="0"
             >
              
             <view:CaptionsView 
                 id = "captionsView"
                 width = "100%"
                 horizontalAlign = "center"
+                bottom="10"
                 />
 
             <mx:Spacer 
@@ -306,7 +349,7 @@
                 visible = "{model.fullscreenMode}"
                 includeInLayout = "{model.fullscreenMode}"
                 />
-                
+               
             <view:FullscreenVideoControlsView 
                 id = "videocontrollerView"
                 width = "100%"

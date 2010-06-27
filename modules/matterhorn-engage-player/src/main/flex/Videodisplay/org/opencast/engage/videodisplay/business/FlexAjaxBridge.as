@@ -20,11 +20,14 @@ package org.opencast.engage.videodisplay.business
     import flash.events.KeyboardEvent;
     import flash.external.ExternalInterface;
     
+    import mx.controls.Alert;
+    
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
     import org.opencast.engage.videodisplay.control.event.InitMediaPlayerEvent;
     import org.opencast.engage.videodisplay.control.event.LoadDFXPXMLEvent;
     import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
     import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
+    import org.opencast.engage.videodisplay.control.util.TimeCode;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
     import org.opencast.engage.videodisplay.state.VideoSizeState;
     import org.swizframework.Swiz;
@@ -34,6 +37,8 @@ package org.opencast.engage.videodisplay.business
         [Autowire]
         [Bindable]
         public var model:VideodisplayModel;
+        
+        private var _time:TimeCode;
 
         /** Constructor */
         public function FlexAjaxBridge()
@@ -124,6 +129,13 @@ package org.opencast.engage.videodisplay.business
          * */
         public function seek( time:Number ):Number
         {
+            if( model.startPlay == false )
+            {
+                model.startSeek = time;
+                _time = new TimeCode();
+                var newPositionString:String = _time.getTC( time );
+                ExternalInterface.call( ExternalFunction.SETCURRENTTIME, newPositionString );
+            }   
             model.mediaPlayer.seek( time );
             return time;
         }
@@ -170,7 +182,7 @@ package org.opencast.engage.videodisplay.business
          * @param String captionsURL
          */
         public function setCaptionsURL( captionsURL:String ):void
-        {
+        {            
             if ( captionsURL != model.captionsURL )
             {
                 model.captionsURL = captionsURL;
@@ -185,9 +197,9 @@ package org.opencast.engage.videodisplay.business
          * 
          * @param String mediaURLOne, String mediaURLTwo
          */
-        public function setMediaURL(coverURL:String, mediaURLOne:String, mediaURLTwo:String ):void
+        public function setMediaURL(coverURLOne:String, coverURLTwo:String, mediaURLOne:String, mediaURLTwo:String ):void
         {
-            Swiz.dispatchEvent( new InitMediaPlayerEvent(coverURL, mediaURLOne, mediaURLTwo ) );
+            Swiz.dispatchEvent( new InitMediaPlayerEvent(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo ) );
 
         }
         
@@ -229,19 +241,28 @@ package org.opencast.engage.videodisplay.business
          */
         public function setMediaResolution(newWidthMediaOne:Number, newHeightMediaOne:Number, newWidthMediaTwo:Number, newHeightMediaTwo:Number, multiMediaContainerLeft:Number):void
         {
-           model.mediaOneWidth = parseInt( newWidthMediaOne.toString() );
-           model.mediaOneHeight = parseInt( newHeightMediaOne.toString() );
-           model.mediaTwoWidth = parseInt( newWidthMediaTwo.toString() );
-           model.mediaTwoHeight = parseInt( newHeightMediaTwo.toString() );
-           model.mediaWidth = parseInt( ( newWidthMediaOne + newWidthMediaTwo ).toString() );
-           model.multiMediaContainerLeft = parseInt( multiMediaContainerLeft.toString() );
-           model.multiMediaContainerRight = 0;
-           
-           if(model.videoSizeState == VideoSizeState.ONLYLEFT || model.videoSizeState == VideoSizeState.BIGLEFT )
-           {
-               model.multiMediaContainerRight = multiMediaContainerLeft;
-               model.multiMediaContainerLeft = 0;
-           }
+            if(newWidthMediaOne == 0 && newHeightMediaOne == 0 && newWidthMediaTwo == 0 && newHeightMediaTwo == 0 && multiMediaContainerLeft == 0 )
+            {
+	             model.previewPlayer = true;
+            }
+            else
+            {
+                model.mediaOneWidth = parseInt( newWidthMediaOne.toString() );
+			    model.mediaOneHeight = parseInt( newHeightMediaOne.toString() );
+			    model.mediaTwoWidth = parseInt( newWidthMediaTwo.toString() );
+			    model.mediaTwoHeight = parseInt( newHeightMediaTwo.toString() );
+			    model.mediaWidth = parseInt( ( newWidthMediaOne + newWidthMediaTwo ).toString() );
+			    model.multiMediaContainerLeft = parseInt( multiMediaContainerLeft.toString() );
+			    model.multiMediaContainerRight = 0;
+			    model.formatMediaOne = model.mediaOneWidth / model.mediaOneHeight;
+			    model.formatMediaTwo = model.mediaTwoWidth / model.mediaTwoHeight;
+			   
+                if(model.videoSizeState == VideoSizeState.ONLYLEFT || model.videoSizeState == VideoSizeState.BIGLEFT )
+			    {
+                    model.multiMediaContainerRight = multiMediaContainerLeft;
+			        model.multiMediaContainerLeft = 0;
+			    }	
+            }
         }
 		
         /**

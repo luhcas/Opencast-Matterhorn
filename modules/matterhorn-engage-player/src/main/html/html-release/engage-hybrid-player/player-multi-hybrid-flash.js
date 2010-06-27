@@ -393,11 +393,6 @@ Opencast.FlashVersion = (function ()
         document.write(alternateContent);  // insert non-flash content
       }
     
-   function getTest()
-   {
-	   return 400;
-	   
-   }
     
     return {
        
