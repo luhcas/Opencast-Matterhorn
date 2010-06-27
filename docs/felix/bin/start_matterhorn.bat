@@ -1,4 +1,4 @@
-SETLOCAL
+SETLOCAL ENABLEDELAYEDEXPANSION
 REM ##
 REM # Configure these variables to match your environment
 REM # If you have system-wide variables for FELIX_HOME and M2_REPO then you
@@ -26,6 +26,21 @@ SET PAX_LOGGING_OPTS=-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN -Dopen
 SET UTIL_LOGGING_OPTS=-Djava.util.logging.config.file=%FELIX_HOME%\conf\services\java.util.logging.properties
 SET FELIX_CACHE=%FELIX_HOME%\felix-cache
 SET GRAPHICS_OPTS="-Djava.awt.headless=true -Dawt.toolkit=sun.awt.HeadlessToolkit"
+
+REM # Make sure matterhorn bundles are reloaded
+if exist %FELIX_CACHE% (
+	echo "Removing cached matterhorn bundles from %FELIX_CACHE%"
+	for /f %%f in ('dir %FELIX_CACHE%\bundle.location /s /b') do (
+		set linefound=0
+		for /f %%i in ('findstr /b /l "file:" %%f') do (
+			set linefound=1
+		)
+		if !linefound! equ 1 (
+			set file=%%f
+			rmdir /s /q !file:~0,-16!
+		)
+	)
+)
 
 REM # Finally start felix
 java %DEBUG_OPTS% %GRAPHICS_OPTS% %MAVEN_ARG% %FELIX_FILEINSTALL_OPTS% %PAX_CONFMAN_OPTS% %PAX_LOGGING_OPTS% %UTIL_LOGGING_OPTS% -jar %FELIX_HOME%\bin\felix.jar %FELIX_CACHE%  
