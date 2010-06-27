@@ -16,6 +16,7 @@
 package org.opencastproject.workingfilerepository.remote;
 
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 
@@ -39,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response;
 
 /**
@@ -121,10 +123,12 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#get(java.lang.String, java.lang.String)
    */
   @Override
-  public InputStream get(String mediaPackageID, String mediaPackageElementID) {
+  public InputStream get(String mediaPackageID, String mediaPackageElementID) throws NotFoundException {
     String url = UrlSupport.concat(new String[] { remoteHost, "files", mediaPackageID, mediaPackageElementID });
     HttpGet get = new HttpGet(url);
     HttpResponse response = client.execute(get);
+    if (HttpServletResponse.SC_NOT_FOUND == response.getStatusLine().getStatusCode())
+      throw new NotFoundException();
     try {
       return response.getEntity().getContent();
     } catch (Exception e) {
@@ -194,10 +198,12 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    *      java.lang.String)
    */
   @Override
-  public InputStream getFromCollection(String collectionId, String fileName) {
+  public InputStream getFromCollection(String collectionId, String fileName) throws NotFoundException {
     String url = UrlSupport.concat(new String[] { remoteHost, "files", "collection", collectionId, fileName });
     HttpGet get = new HttpGet(url);
     HttpResponse response = client.execute(get);
+    if (HttpServletResponse.SC_NOT_FOUND == response.getStatusLine().getStatusCode())
+      throw new NotFoundException();
     try {
       return response.getEntity().getContent();
     } catch (Exception e) {
@@ -321,11 +327,11 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#removeFromCollection(java.lang.String,
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#deleteFromCollection(java.lang.String,
    *      java.lang.String)
    */
   @Override
-  public void removeFromCollection(String collectionId, String fileName) {
+  public void deleteFromCollection(String collectionId, String fileName) {
     String url = UrlSupport.concat(new String[] { remoteHost, "files", "collection", collectionId });
     HttpDelete del = new HttpDelete(url);
     HttpResponse response = client.execute(del);

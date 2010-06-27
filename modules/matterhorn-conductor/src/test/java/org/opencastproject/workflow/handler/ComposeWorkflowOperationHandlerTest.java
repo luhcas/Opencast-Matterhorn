@@ -30,6 +30,7 @@ import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workspace.api.Workspace;
 
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -55,6 +56,7 @@ public class ComposeWorkflowOperationHandlerTest {
   // mock services and objects
   private EncodingProfile profile = null;
   private ComposerService composerService = null;
+  private Workspace workspace = null;
 
   // constant metadata values
   private static final String PROFILE_ID = "flash.http";
@@ -72,9 +74,13 @@ public class ComposeWorkflowOperationHandlerTest {
     mpEncode = builder.loadFromXml(uriMPEncode.toURL().openStream());
     encodedTracks = mpEncode.getTracks();
 
+    workspace = EasyMock.createNiceMock(Workspace.class);
+    EasyMock.expect(workspace.moveTo((URI)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(uriMP);
+    EasyMock.replay(workspace);
+    
     // set up service
     operationHandler = new ComposeWorkflowOperationHandler();
-
+    operationHandler.setWorkspace(workspace);
   }
 
   @Test
@@ -96,9 +102,10 @@ public class ComposeWorkflowOperationHandlerTest {
 
     // set up mock composer service
     composerService = EasyMock.createNiceMock(ComposerService.class);
-    EasyMock.expect(composerService.listProfiles()).andReturn(profileList);
+    EasyMock.expect(composerService.getProfile(PROFILE_ID)).andReturn(profile);
     EasyMock.expect(
-            composerService.encode((MediaPackage) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(receipt);
+            composerService.encode((Track) EasyMock.anyObject(), (String) EasyMock.anyObject(), EasyMock.anyBoolean()))
+            .andReturn(receipt);
     EasyMock.replay(composerService);
     operationHandler.setComposerService(composerService);
 
@@ -142,8 +149,8 @@ public class ComposeWorkflowOperationHandlerTest {
     composerService = EasyMock.createNiceMock(ComposerService.class);
     EasyMock.expect(composerService.listProfiles()).andReturn(profileList);
     EasyMock.expect(
-            composerService.encode((MediaPackage) EasyMock.anyObject(), (String) EasyMock.anyObject(),
-                    (String) EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(receipt);
+            composerService.encode((Track) EasyMock.anyObject(), (String) EasyMock.anyObject(), EasyMock.anyBoolean()))
+            .andReturn(receipt);
     EasyMock.replay(composerService);
     operationHandler.setComposerService(composerService);
 

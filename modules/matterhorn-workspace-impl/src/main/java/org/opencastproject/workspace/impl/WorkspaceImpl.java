@@ -43,6 +43,8 @@ import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * Implements a simple cache for remote URIs. Delegates methods to {@link WorkingFileRepository} wherever possible.
  * <p>
@@ -85,7 +87,7 @@ public class WorkspaceImpl implements Workspace {
    * @param rootDirectory
    *          the repository root directory
    */
-  protected WorkspaceImpl(String rootDirectory) {
+  public WorkspaceImpl(String rootDirectory) {
     this.wsRoot = rootDirectory;
   }
 
@@ -226,8 +228,6 @@ public class WorkspaceImpl implements Workspace {
           }
           logger.debug("Getting {} directly from working file repository root at {}", uri, f);
           return workspaceCopy;
-        } else {
-          throw new NotFoundException("The file " + uri + " does not exist");
         }
       }
     }
@@ -238,6 +238,9 @@ public class WorkspaceImpl implements Workspace {
     OutputStream out = null;
     try {
       HttpResponse response = trustedHttpClient.execute(get);
+      if (HttpServletResponse.SC_NOT_FOUND == response.getStatusLine().getStatusCode()) {
+        throw new NotFoundException(uri + " does not exist");
+      }
       in = response.getEntity().getContent();
       out = new FileOutputStream(f);
       IOUtils.copyLarge(in, out);
@@ -255,10 +258,50 @@ public class WorkspaceImpl implements Workspace {
   /**
    * {@inheritDoc}
    * 
+   * @see org.opencastproject.workspace.api.Workspace#delete(java.net.URI)
+   */
+  @Override
+  public void delete(URI uri) throws NotFoundException, IOException {
+    String uriPath = uri.toString();
+    if (uriPath.indexOf(WorkingFileRepository.COLLECTION_PATH_PREFIX) > 0) {
+      String[] uriElements = uriPath.split("/");
+      if (uriElements.length > 2) {
+        String collectionId = uriElements[uriElements.length - 2];
+        String filename = uriElements[uriElements.length - 1];
+        wfr.deleteFromCollection(collectionId, filename);
+      }
+    } else if (uriPath.indexOf(WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX) > 0) {
+      String[] uriElements = uriPath.split("/");
+      if (uriElements.length >= 3) {
+        String mediaPackageId = uriElements[uriElements.length - 3];
+        String elementId = uriElements[uriElements.length - 2];
+        wfr.delete(mediaPackageId, elementId);
+      }
+    }
+
+    // Remove the file and optionally its parent directory if empty
+    File f = getWorkspaceFile(uri, false);
+    if (f.isFile()) {
+      synchronized (wsRoot) {
+        FileUtils.forceDelete(f);
+        if (f.getParentFile().list().length == 0) {
+          FileUtils.forceDelete(f.getParentFile());
+        }
+      }
+    }
+
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.workspace.api.Workspace#delete(java.lang.String, java.lang.String)
    */
   public void delete(String mediaPackageID, String mediaPackageElementID) throws NotFoundException, IOException {
     wfr.delete(mediaPackageID, mediaPackageElementID);
+    File f = new File(PathSupport.concat(new String[] { wsRoot, WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX,
+            mediaPackageID, mediaPackageElementID }));
+    FileUtils.deleteQuietly(f);
   }
 
   /**
@@ -364,6 +407,7 @@ public class WorkspaceImpl implements Workspace {
     this.wfr = repo;
     if (repo instanceof PathMappable) {
       this.wfrRoot = ((PathMappable) repo).getPathPrefix();
+      this.wfrUrl = ((PathMappable) repo).getUrlPrefix();
       logger.info("Mapping workspace to working file repository using {}", wfrRoot);
     }
   }
@@ -389,6 +433,78 @@ public class WorkspaceImpl implements Workspace {
   @Override
   public URI getCollectionURI(String collectionID, String fileName) {
     return wfr.getCollectionURI(collectionID, fileName);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workspace.api.Workspace#copyTo(java.net.URI, java.lang.String, java.lang.String)
+   */
+  public URI copyTo(URI collectionURI, String toMediaPackage, String toMediaPackageElement) throws NotFoundException,
+          IOException {
+    String path = collectionURI.toString();
+    String filename = FilenameUtils.getName(path);
+    String collection = getCollection(collectionURI);
+
+    // Copy the local file
+    File original = getWorkspaceFile(collectionURI, false);
+    if (original.isFile()) {
+      URI copyURI = wfr.getURI(toMediaPackage, toMediaPackageElement, filename);
+      File copy = getWorkspaceFile(copyURI, true);
+      FileUtils.forceMkdir(copy.getParentFile());
+      FileSupport.link(original, copy);
+    }
+
+    // Tell working file repository
+    return wfr.copyTo(collection, filename, toMediaPackage, toMediaPackageElement);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workspace.api.Workspace#moveTo(java.net.URI, java.lang.String, java.lang.String)
+   */
+  @Override
+  public URI moveTo(URI collectionURI, String toMediaPackage, String toMediaPackageElement) throws NotFoundException,
+          IOException {
+    String path = collectionURI.toString();
+    String filename = FilenameUtils.getName(path);
+    String collection = getCollection(collectionURI);
+
+    // Copy the local file
+    File original = getWorkspaceFile(collectionURI, false);
+    if (original.isFile()) {
+      URI copyURI = wfr.getURI(toMediaPackage, toMediaPackageElement, filename);
+      File copy = getWorkspaceFile(copyURI, true);
+      FileUtils.forceMkdir(copy.getParentFile());
+      original.renameTo(copy);
+    }
+
+    // Tell working file repository
+    return wfr.moveTo(collection, filename, toMediaPackage, toMediaPackageElement);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workspace.api.Workspace#getCollectionContents(java.lang.String)
+   */
+  @Override
+  public URI[] getCollectionContents(String collectionId) throws IOException {
+    return wfr.getCollectionContents(collectionId);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workspace.api.Workspace#deleteFromCollection(java.lang.String, java.lang.String)
+   */
+  @Override
+  public void deleteFromCollection(String collectionId, String fileName) throws NotFoundException, IOException {
+    wfr.deleteFromCollection(collectionId, fileName);
+    File f = new File(PathSupport.concat(new String[] { wsRoot, WorkingFileRepository.COLLECTION_PATH_PREFIX,
+            collectionId, fileName }));
+    FileUtils.deleteQuietly(f);
   }
 
   /**
@@ -419,6 +535,30 @@ public class WorkspaceImpl implements Workspace {
     return new File(wsDirectory, safeFileName);
   }
 
+  /**
+   * Returns the working file repository collection.
+   * <p>
+   * <pre>
+   * http://localhost:8080/files/collection/&lt;collection&gt;/ -> &lt;collection&gt;
+   * </pre>
+   * 
+   * @param uri
+   *          the working file repository collection uri
+   * @return the collection name
+   */
+  private String getCollection(URI uri) {
+    String path = uri.toString();
+    if (path.indexOf(WorkingFileRepository.COLLECTION_PATH_PREFIX) < 0)
+      throw new IllegalArgumentException(uri + " must point to a working file repository collection");
+
+    String collection = FilenameUtils.getPath(path);
+    if (collection.endsWith("/"))
+      collection = collection.substring(0, collection.length() - 1);
+    collection = collection.substring(collection.lastIndexOf("/"));
+    collection = collection.substring(collection.lastIndexOf("/") + 1, collection.length());
+    return collection;
+  }
+
   class GarbageCollectionTimer extends TimerTask {
 
     /**
@@ -430,20 +570,20 @@ public class WorkspaceImpl implements Workspace {
     public void run() {
       logger.info("Running workspace garbage file collection");
       // Remove any file that was created more than maxAge seconds ago
-      
+
       Stack<File> workspaceDirectories = new Stack<File>();
       workspaceDirectories.push(new File(wsRoot));
       while (!workspaceDirectories.empty()) {
         File dir = workspaceDirectories.pop();
-        
+
         for (File file : dir.listFiles()) {
-          
+
           // Another directory
           if (file.isDirectory()) {
             workspaceDirectories.push(file);
             continue;
           }
-            
+
           // Is this file old enough to be deleted?
           long ageInSeconds = (System.currentTimeMillis() - file.lastModified()) / 1000;
           if (ageInSeconds > maxAgeInSeconds) {
@@ -451,12 +591,14 @@ public class WorkspaceImpl implements Workspace {
             if (file.delete()) {
               logger.info("Deleted {}, since its age was {} seconds older than the maximum age, {}", loggingArgs);
             } else {
-              logger.warn("Can not delete {}, even though it is {} seconds older than the maximum age, {}", loggingArgs);
+              logger
+                      .warn("Can not delete {}, even though it is {} seconds older than the maximum age, {}",
+                              loggingArgs);
             }
           }
-          
+
         }
-        
+
         // Remove empty directories
         synchronized (wsRoot) {
           if (dir.listFiles().length == 0) {
@@ -466,27 +608,7 @@ public class WorkspaceImpl implements Workspace {
 
       }
     }
-    
-  }
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workspace.api.Workspace#getCollectionContents(java.lang.String)
-   */
-  @Override
-  public URI[] getCollectionContents(String collectionId) throws IOException {
-    return wfr.getCollectionContents(collectionId);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workspace.api.Workspace#deleteFromCollection(java.lang.String, java.lang.String)
-   */
-  @Override
-  public void deleteFromCollection(String collectionId, String fileName) throws NotFoundException, IOException {
-    wfr.removeFromCollection(collectionId, fileName);
   }
 
 }

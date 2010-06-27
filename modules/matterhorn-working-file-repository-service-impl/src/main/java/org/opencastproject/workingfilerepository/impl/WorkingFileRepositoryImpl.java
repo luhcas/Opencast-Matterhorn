@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workingfilerepository.impl;
 
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workingfilerepository.api.PathMappable;
@@ -105,13 +106,12 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
     }
   }
 
-  public InputStream get(String mediaPackageID, String mediaPackageElementID) {
+  public InputStream get(String mediaPackageID, String mediaPackageElementID) throws NotFoundException {
     checkPathSafe(mediaPackageID);
     checkPathSafe(mediaPackageElementID);
     File f = getFile(mediaPackageID, mediaPackageElementID);
     if (f == null) {
-      logger.warn("Tried to read from non existing object {}/{}", mediaPackageID, mediaPackageElementID);
-      return null;
+      throw new NotFoundException("Unable to locate " + f + " in the working file repository");
     }
     logger.debug("Attempting to read file {}", f.getAbsolutePath());
     try {
@@ -376,12 +376,11 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
    *      java.lang.String)
    */
   @Override
-  public InputStream getFromCollection(String collectionId, String fileName) {
+  public InputStream getFromCollection(String collectionId, String fileName) throws NotFoundException {
     checkPathSafe(collectionId);
     File f = getFileFromCollection(collectionId, fileName);
-    if (f == null || !f.exists() || !f.isFile()) {
-      logger.warn("Tried to read from non existing object {}/{}", collectionId, fileName);
-      return null;
+    if (f == null || !f.isFile()) {
+      throw new NotFoundException("Unable to locate " + f + " in the working file repository");
     }
     logger.debug("Attempting to read file {}", f.getAbsolutePath());
     try {
@@ -502,11 +501,11 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#removeFromCollection(java.lang.String,
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#deleteFromCollection(java.lang.String,
    *      java.lang.String)
    */
   @Override
-  public void removeFromCollection(String collectionId, String fileName) {
+  public void deleteFromCollection(String collectionId, String fileName) {
     File f = getFileFromCollection(collectionId, fileName);
     if (f == null)
       throw new IllegalArgumentException("Source file " + collectionId + "/" + fileName + " does not exist");

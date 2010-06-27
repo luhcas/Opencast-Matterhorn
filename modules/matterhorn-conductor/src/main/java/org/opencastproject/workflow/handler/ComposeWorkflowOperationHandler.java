@@ -21,10 +21,10 @@ import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfile.MediaType;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.util.MimeTypes;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -32,11 +32,13 @@ import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
+import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -65,6 +67,9 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
   /** The composer service */
   private ComposerService composerService = null;
 
+  /** The local workspace */
+  private Workspace workspace = null;
+
   /**
    * Callback for the OSGi declarative services configuration.
    * 
@@ -73,6 +78,17 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
    */
   protected void setComposerService(ComposerService composerService) {
     this.composerService = composerService;
+  }
+
+  /**
+   * Callback for declarative services configuration that will introduce us to the local workspace service.
+   * Implementation assumes that the reference is configured as being static.
+   * 
+   * @param workspace
+   *          an instance of the workspace
+   */
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
   }
 
   /**
@@ -114,15 +130,17 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
    * @param operation
    *          the current workflow operation
    * @return the updated media package
-   * @throws MediaPackageException
-   *           if reading from or updating the mediapackage fails
    * @throws EncoderException
    *           if encoding fails
    * @throws WorkflowOperationException
    *           if errors occur during processing
+   * @throws IOException
+   *           if the workspace operations fail
+   * @throws NotFoundException
+   *           if the workspace doesn't contain the requested file
    */
   private MediaPackage encode(MediaPackage src, WorkflowOperationInstance operation) throws EncoderException,
-          MediaPackageException, WorkflowOperationException {
+          IOException, NotFoundException, WorkflowOperationException {
     MediaPackage mediaPackage = (MediaPackage) src.clone();
     // Read the configuration properties
     String sourceFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
@@ -136,13 +154,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
       throw new IllegalStateException("Source flavor must be specified");
 
     // Find the encoding profile
-    EncodingProfile profile = null;
-    for (EncodingProfile p : composerService.listProfiles()) {
-      if (p.getIdentifier().equals(encodingProfileName)) {
-        profile = p;
-        break;
-      }
-    }
+    EncodingProfile profile = composerService.getProfile(encodingProfileName);
     if (profile == null) {
       throw new IllegalStateException("Encoding profile '" + encodingProfileName + "' was not found");
     }
@@ -186,7 +198,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
       logger.info("Encoding track {} using encoding profile '{}'", t, profile);
 
       // Start encoding and wait for the result
-      final Receipt receipt = composerService.encode(mediaPackage, t.getIdentifier(), profile.getIdentifier(), true);
+      final Receipt receipt = composerService.encode(t, profile.getIdentifier(), true);
       if (receipt == null || receipt.getStatus().equals(Receipt.Status.FAILED)) {
         throw new WorkflowOperationException("Encoding failed");
       }
@@ -206,6 +218,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
       // store new tracks to mediaPackage
       mediaPackage.addDerived(composedTrack, t);
+      composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(), composedTrack.getIdentifier()));
     }
 
     return mediaPackage;

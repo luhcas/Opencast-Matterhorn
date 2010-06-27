@@ -31,7 +31,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -56,19 +55,13 @@ public class ComposerRestEndpointTest {
     client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
   }
 
-  @After
-  public void teardown() throws Exception {
-  }
-    
   @Test
-  public void testEncodeAudioAndVideoTracks() throws Exception {
+  public void testEncodeVideoTracks() throws Exception {
     // Start an encoding job via the rest endpoint
     HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/encode");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-    formParams.add(new BasicNameValuePair("audioSourceTrackId", "track-1"));
-    formParams.add(new BasicNameValuePair("videoSourceTrackId", "track-2"));
+    formParams.add(new BasicNameValuePair("sourceTrack", generateVideoTrack(BASE_URL)));
     formParams.add(new BasicNameValuePair("profileId", "flash.http"));
-    formParams.add(new BasicNameValuePair("mediapackage", getSampleMediaPackage()));
     postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
 
     // Grab the receipt from the response
@@ -82,7 +75,7 @@ public class ComposerRestEndpointTest {
     while(status == null || "RUNNING".equals(status) || "QUEUED".equals(status)) {
       Thread.sleep(5000); // wait and try again
       HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/receipt/" + receiptId + ".xml");
-      status = getRecepitStatus(client.execute(pollRequest));
+      status = getReceiptStatus(client.execute(pollRequest));
       System.out.println("encoding job " + receiptId + " is " + status);
     }
     if( ! "FINISHED".equals(status)) {
@@ -94,10 +87,9 @@ public class ComposerRestEndpointTest {
   public void testImageExtraction() throws Exception {
     HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/image");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-    formParams.add(new BasicNameValuePair("sourceTrackId", "track-2"));
+    formParams.add(new BasicNameValuePair("sourceTrack", generateVideoTrack(BASE_URL)));
     formParams.add(new BasicNameValuePair("time", "1"));
     formParams.add(new BasicNameValuePair("profileId", "feed-cover.http"));
-    formParams.add(new BasicNameValuePair("mediapackage", getSampleMediaPackage()));
     postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
 
     // Grab the receipt from the response
@@ -107,11 +99,6 @@ public class ComposerRestEndpointTest {
     Assert.assertTrue(postResponseXml.contains("receipt"));
   }
 
-  protected String getSampleMediaPackage() throws Exception {
-    String template = IOUtils.toString(getClass().getClassLoader().getResourceAsStream("mediapackage-2.xml"), "UTF-8");
-    return template.replaceAll("@SAMPLES_URL@", BASE_URL + "/workflow/samples");
-  }
-  
   protected String getReceiptId(String xml) throws Exception {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
@@ -120,7 +107,7 @@ public class ComposerRestEndpointTest {
     return ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("id");
   }
 
-  protected String getRecepitStatus(HttpResponse pollResponse) throws Exception {
+  protected String getReceiptStatus(HttpResponse pollResponse) throws Exception {
     String xml = EntityUtils.toString(pollResponse.getEntity());
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
@@ -128,6 +115,23 @@ public class ComposerRestEndpointTest {
     Document doc = builder.parse(IOUtils.toInputStream(xml, "UTF-8"));
     String status = ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("status");
     return status;
+  }
+
+  protected String generateVideoTrack(String serverUrl) {
+    return "<track id=\"track-1\" type=\"presentation/source\">\n"
+            + "  <mimetype>video/quicktime</mimetype>\n"
+            + "  <url>" + serverUrl + "/workflow/samples/camera.mpg</url>\n"
+            + "  <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n"
+            + "  <duration>14546</duration>\n"
+            + "  <video>\n"
+            + "    <device type=\"UFG03\" version=\"30112007\" vendor=\"Unigraf\" />\n"
+            + "    <encoder type=\"H.264\" version=\"7.4\" vendor=\"Apple Inc\" />\n"
+            + "    <resolution>640x480</resolution>\n"
+            + "    <scanType type=\"progressive\" />\n"
+            + "    <bitrate>540520</bitrate>\n"
+            + "    <frameRate>2</frameRate>\n"
+            + "  </video>\n"
+            + "</track>";
   }
 
 }

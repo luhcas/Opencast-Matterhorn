@@ -21,8 +21,8 @@ import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfileBuilder;
 import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
-import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
@@ -43,13 +43,22 @@ import org.apache.http.util.EntityUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * Proxies a set of remote composer services for use as a JVM-local service. Remote services are selected at random.
@@ -139,47 +148,20 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#encode(java.lang.String, java.lang.String, java.lang.String)
-   */
-  @Override
-  public Receipt encode(MediaPackage mediaPackage, String sourceTrackId, String profileId) throws EncoderException,
-          MediaPackageException {
-    return mux(mediaPackage, sourceTrackId, sourceTrackId, profileId, false);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#encode(java.lang.String, java.lang.String, java.lang.String,
-   *      boolean)
-   */
-  @Override
-  public Receipt encode(MediaPackage mediaPackage, String sourceTrackId, String profileId, boolean block)
-          throws EncoderException, MediaPackageException {
-    return mux(mediaPackage, sourceTrackId, sourceTrackId, profileId, block);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#encode(java.lang.String, java.lang.String, java.lang.String,
+   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.Track,
    *      java.lang.String)
    */
-  @Override
-  public Receipt encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
-          String profileId) throws EncoderException, MediaPackageException {
-    return mux(mediaPackage, sourceVideoTrackId, sourceAudioTrackId, profileId, false);
+  public Receipt encode(Track sourceTrack, String profileId) throws EncoderException {
+    return encode(sourceTrack, profileId, false);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#mux(java.lang.String, java.lang.String, java.lang.String,
+   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.Track,
    *      java.lang.String, boolean)
    */
-  @Override
-  public Receipt mux(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
-          String profileId, boolean block) throws EncoderException, MediaPackageException {
+  public Receipt encode(Track sourceTrack, String profileId, boolean block) throws EncoderException {
     Receipt r = null;
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
     Map<String, String> hostErrors = new HashMap<String, String>();
@@ -188,9 +170,65 @@ public class ComposerServiceRemoteImpl implements ComposerService {
       HttpPost post = new HttpPost(url);
       try {
         List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-        params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
-        params.add(new BasicNameValuePair("videoSourceTrackId", sourceVideoTrackId));
-        params.add(new BasicNameValuePair("audioSourceTrackId", sourceAudioTrackId));
+        params.add(new BasicNameValuePair("sourceTrackId", getXML(sourceTrack)));
+        params.add(new BasicNameValuePair("profileId", profileId));
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+        post.setEntity(entity);
+        HttpResponse response = trustedHttpClient.execute(post);
+        if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+          hostErrors.put(remoteHost, response.getStatusLine().toString());
+          continue;
+        }
+        String content = EntityUtils.toString(response.getEntity());
+        r = remoteServiceManager.parseReceipt(content);
+        break;
+      } catch (Exception e) {
+        hostErrors.put(remoteHost, e.getMessage());
+        continue;
+      }
+    }
+
+    if (r == null) {
+      logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
+              hostErrors);
+      throw new RuntimeException("Unable to execute method, none of the " + remoteHosts.size()
+              + " remote hosts are available");
+    }
+
+    if (block) {
+      r = poll(r.getId());
+    }
+    return r;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#mux(org.opencastproject.mediapackage.Track,
+   *      org.opencastproject.mediapackage.Track, java.lang.String)
+   */
+  public Receipt mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException {
+    return mux(sourceVideoTrack, sourceAudioTrack, profileId, false);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#mux(org.opencastproject.mediapackage.Track,
+   *      org.opencastproject.mediapackage.Track, java.lang.String, boolean)
+   */
+  public Receipt mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId, boolean block)
+          throws EncoderException {
+    Receipt r = null;
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    Map<String, String> hostErrors = new HashMap<String, String>();
+    for (String remoteHost : remoteHosts) {
+      String url = remoteHost + "/composer/rest/mux";
+      HttpPost post = new HttpPost(url);
+      try {
+        List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+        params.add(new BasicNameValuePair("sourceVideoTrack", getXML(sourceVideoTrack)));
+        params.add(new BasicNameValuePair("sourceAudioTrack", getXML(sourceAudioTrack)));
         params.add(new BasicNameValuePair("profileId", profileId));
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
         post.setEntity(entity);
@@ -285,33 +323,29 @@ public class ComposerServiceRemoteImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.MediaPackage,
-   *      java.lang.String, java.lang.String, long)
+   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.Track,
+   *      java.lang.String, long)
    */
-  @Override
-  public Receipt image(MediaPackage mediaPackage, String sourceVideoTrackId, String profileId, long time)
-          throws EncoderException, MediaPackageException {
-    return image(mediaPackage, sourceVideoTrackId, profileId, time, false);
+  public Receipt image(Track sourceTrack, String profileId, long time) throws EncoderException {
+    return image(sourceTrack, profileId, time, false);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.MediaPackage,
-   *      java.lang.String, java.lang.String, long, boolean)
+   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.Track,
+   *      java.lang.String, long, boolean)
    */
-  @Override
-  public Receipt image(MediaPackage mediaPackage, String sourceVideoTrackId, String profileId, long time, boolean block)
-          throws EncoderException, MediaPackageException {
+  public Receipt image(Track sourceTrack, String profileId, long time, boolean block) throws EncoderException {
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-    params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
-    params.add(new BasicNameValuePair("sourceTrackId", sourceVideoTrackId));
-    params.add(new BasicNameValuePair("profileId", profileId));
-    params.add(new BasicNameValuePair("time", Long.toString(time)));
-    UrlEncodedFormEntity entity;
+    UrlEncodedFormEntity entity = null;
+
     try {
+      params.add(new BasicNameValuePair("sourceTrack", getXML(sourceTrack)));
+      params.add(new BasicNameValuePair("profileId", profileId));
+      params.add(new BasicNameValuePair("time", Long.toString(time)));
       entity = new UrlEncodedFormEntity(params);
-    } catch (UnsupportedEncodingException e) {
+    } catch (Exception e) {
       throw new RuntimeException(e);
     }
 
@@ -449,4 +483,20 @@ public class ComposerServiceRemoteImpl implements ComposerService {
       }
     }
   }
+  
+  public String getXML(MediaPackageElement element) throws Exception {
+    if (element == null)
+      return null;
+    DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    Document doc = docBuilder.newDocument();
+    Node node = element.toManifest(doc, null);
+    DOMSource domSource = new DOMSource(node);
+    StringWriter writer = new StringWriter();
+    StreamResult result = new StreamResult(writer);
+    Transformer transformer;
+    transformer = TransformerFactory.newInstance().newTransformer();
+    transformer.transform(domSource, result);
+    return writer.toString();
+  }
+
 }

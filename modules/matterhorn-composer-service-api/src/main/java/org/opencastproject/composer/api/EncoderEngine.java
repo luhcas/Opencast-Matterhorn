@@ -22,7 +22,7 @@ import java.io.File;
 import java.util.Map;
 
 /**
- * Interface for encoding engines like ffmpeg or telestream's episode engine. EncoderEngines are thread unsafe.  Use
+ * Interface for encoding engines like ffmpeg or telestream's episode engine. EncoderEngines are thread unsafe. Use
  * {@link EncoderEngineFactory#newEncoderEngine(EncodingProfile)} for each encoding operation.
  */
 public interface EncoderEngine {
@@ -59,7 +59,8 @@ public interface EncoderEngine {
    * @throws EncoderException
    *           if an error occurs during encoding
    */
-  File encode(File audioSource, File videoSource, EncodingProfile format, Map<String, String> properties) throws EncoderException;
+  File encode(File audioSource, File videoSource, EncodingProfile format, Map<String, String> properties)
+          throws EncoderException;
 
   /**
    * Encodes a file into the specified format.

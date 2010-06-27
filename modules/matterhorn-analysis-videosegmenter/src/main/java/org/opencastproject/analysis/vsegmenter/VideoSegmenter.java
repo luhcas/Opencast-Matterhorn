@@ -24,8 +24,6 @@ import org.opencastproject.analysis.vsegmenter.jmf.PlayerListener;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.mediapackage.Catalog;
-import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
@@ -306,13 +304,13 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
         rs.updateReceipt(receipt);
 
         PlayerListener processorListener = null;
-
+        Track mjpegTrack = null;
         Mpeg7Catalog mpeg7 = mpeg7CatalogService.newInstance();
 
         try {
 
           logger.info("Encoding {} to {}", track, MJPEG_MIMETYPE);
-          Track mjpegTrack = prepare(track);
+          mjpegTrack = prepare(track);
 
           // Create a player
           File mediaFile = workspace.get(mjpegTrack.getURI());
@@ -399,6 +397,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
           URI uri = uploadMpeg7(mpeg7);
           mpeg7Catalog.setURI(uri);
           mpeg7Catalog.setReference(new MediaPackageReferenceImpl(element));
+
+          workspace.delete(mjpegTrack.getURI());
 
           receipt.setElement(mpeg7Catalog);
           receipt.setStatus(Status.FINISHED);
@@ -670,15 +670,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
    *           if the track is not connected to a media package and is not in the correct format
    */
   protected Track prepare(Track track) throws EncoderException, MediaPackageException {
-    MediaPackage mediaPackage = track.getMediaPackage();
-
     if (MJPEG_MIMETYPE.equals(track.getMimeType()))
       return track;
-
-    if (mediaPackage == null) {
-      mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-      mediaPackage.add(track);
-    }
 
     MediaPackageReference original = new MediaPackageReferenceImpl(track);
 
@@ -695,7 +688,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
 
     // Looks like we need to do the work ourselves
     logger.info("Requesting {} version of track {}", MJPEG_MIMETYPE, track);
-    final Receipt receipt = composer.mux(mediaPackage, track.getIdentifier(), null, MJPEG_ENCODING_PROFILE, true);
+    final Receipt receipt = composer.encode(track, MJPEG_ENCODING_PROFILE, true);
     Track composedTrack = (Track) receipt.getElement();
     composedTrack.setReference(original);
     composedTrack.setMimeType(MJPEG_MIMETYPE);

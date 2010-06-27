@@ -24,11 +24,9 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.metadata.mpeg7.MediaTimePoint;
 import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
@@ -90,7 +88,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
 
   /** The composer service */
   private ComposerService composerService = null;
-  
+
   /** The mpeg7 catalog service */
   private Mpeg7CatalogService mpeg7CatalogService = null;
 
@@ -126,7 +124,6 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
   protected void setMpeg7CatalogService(Mpeg7CatalogService catalogService) {
     this.mpeg7CatalogService = catalogService;
   }
-
 
   /**
    * Callback for declarative services configuration that will introduce us to the local workspace service.
@@ -175,14 +172,13 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
    * @param properties
    * @return
    * @throws EncoderException
-   * @throws MediaPackageException
-   * @throws UnsupportedElementException
    * @throws ExecutionException
    * @throws InterruptedException
+   * @throws IOException
+   * @throws NotFoundException
    */
   private MediaPackage createPreviews(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
-          throws EncoderException, MediaPackageException, UnsupportedElementException, InterruptedException,
-          ExecutionException {
+          throws EncoderException, InterruptedException, ExecutionException, NotFoundException, IOException {
 
     // Read the configuration properties
     String sourceVideoFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
@@ -283,8 +279,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
             // Choose a time
             long time = tp.getTimeInMilliseconds() / 1000;
 
-            Receipt receipt = composerService.image(mediaPackage, t.getIdentifier(), profile.getIdentifier(), time,
-                    true);
+            Receipt receipt = composerService.image(t, profile.getIdentifier(), time, true);
             Attachment composedImage = (Attachment) receipt.getElement();
             if (composedImage == null)
               throw new RuntimeException("Unable to compose image");
@@ -312,6 +307,8 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
 
             // store new image in the mediaPackage
             mediaPackage.add(composedImage);
+            composedImage.setURI(workspace.moveTo(composedImage.getURI(), mediaPackage.getIdentifier().toString(), composedImage
+                    .getIdentifier()));
           }
         }
       }
@@ -344,7 +341,8 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
         MediaPackageReference ref = e.getReference();
         while (ref != null) {
           MediaPackageElement tr = mediaPackage.getElementByReference(ref);
-          if(tr == null) break locateReferenceMaster;
+          if (tr == null)
+            break locateReferenceMaster;
           if (tr.equals(t)) {
             boolean matches = true;
             for (String tag : referenceTagSet) {
@@ -365,9 +363,12 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
 
   /**
    * Loads an mpeg7 catalog from a mediapackage's catalog reference
-   * @param catalog the mediapackage's reference to this catalog
+   * 
+   * @param catalog
+   *          the mediapackage's reference to this catalog
    * @return the mpeg7
-   * @throws IOException if there is a problem loading or parsing the mpeg7 object
+   * @throws IOException
+   *           if there is a problem loading or parsing the mpeg7 object
    */
   protected Mpeg7Catalog loadMpeg7Catalog(Catalog catalog) throws IOException {
     InputStream in = null;

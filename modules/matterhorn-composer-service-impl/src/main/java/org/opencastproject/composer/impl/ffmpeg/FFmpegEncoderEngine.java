@@ -56,11 +56,10 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
     // Configure ffmpeg
     String path = (String) cc.getBundleContext().getProperty(CONFIG_FFMPEG_PATH);
     if (path == null) {
-      // DEFAULT - https://issues.opencastproject.org/jira/browse/MH-2158
-      logger.info("DEFAULT " + CONFIG_FFMPEG_PATH + ": " + FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
+      logger.debug("DEFAULT " + CONFIG_FFMPEG_PATH + ": " + FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT);
     } else {
       setBinary(path);
-      logger.info("FFmpegEncoderEngine config binary: {}", path);
+      logger.debug("FFmpegEncoderEngine config binary: {}", path);
     }
   }
 

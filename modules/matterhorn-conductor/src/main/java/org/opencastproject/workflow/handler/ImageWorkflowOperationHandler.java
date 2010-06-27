@@ -21,11 +21,10 @@ import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.util.MimeTypes;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -33,11 +32,13 @@ import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
+import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,6 +70,9 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
   /** The composer service */
   private ComposerService composerService = null;
 
+  /** The local workspace */
+  private Workspace workspace = null;
+
   /**
    * Callback for the OSGi declarative services configuration.
    * 
@@ -77,6 +81,17 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
    */
   protected void setComposerService(ComposerService composerService) {
     this.composerService = composerService;
+  }
+
+  /**
+   * Callback for declarative services configuration that will introduce us to the local workspace service.
+   * Implementation assumes that the reference is configured as being static.
+   * 
+   * @param workspace
+   *          an instance of the workspace
+   */
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
   }
 
   /**
@@ -118,13 +133,12 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
    * @param properties
    * @return
    * @throws EncoderException
-   * @throws MediaPackageException
-   * @throws UnsupportedElementException
    * @throws ExecutionException
-   * @throws InterruptedException
+   * @throws IOException 
+   * @throws NotFoundException 
    */
   private MediaPackage image(final MediaPackage mediaPackage, WorkflowOperationInstance operation) throws EncoderException,
-          MediaPackageException, UnsupportedElementException, InterruptedException, ExecutionException {
+          ExecutionException, NotFoundException, IOException {
 
     // Read the configuration properties
     String sourceVideoFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
@@ -161,7 +175,7 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
       // take the minimum of the specified time and the video track duration
       long time = Math.min(Long.parseLong(timeConfiguration), t.getDuration()/1000L);
       
-      Receipt receipt = composerService.image(mediaPackage, t.getIdentifier(), profile.getIdentifier(), time, true);
+      Receipt receipt = composerService.image(t, profile.getIdentifier(), time, true);
       Attachment composedImage = (Attachment)receipt.getElement();
       if (composedImage == null)
         throw new RuntimeException("Composer service did not return an image");
@@ -184,6 +198,7 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
       }
       // store new image in the mediaPackage
       mediaPackage.addDerived(composedImage, t);
+      composedImage.setURI(workspace.moveTo(composedImage.getURI(), mediaPackage.getIdentifier().toString(), composedImage.getIdentifier()));
     }
 
     return mediaPackage;

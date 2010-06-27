@@ -82,18 +82,16 @@ public interface Workspace {
   URI[] getCollectionContents(String collectionId) throws IOException;
 
   /**
-   * Removes a file from a collection
+   * Delete the file stored at the given uri.
    * 
-   * @param collectionId
-   *          the collection identifier
-   * @param fileName
-   *          the filename to remove
+   * @param uri
+   *          the uri
    * @throws NotFoundException
    *           if there was not file stored under this combination of mediapackage and element IDs.
    * @throws IOException
    *           if deleting the data from the workspace fails
    */
-  void deleteFromCollection(String collectionId, String fileName) throws NotFoundException, IOException;
+  void delete(URI uri) throws NotFoundException, IOException;
 
   /**
    * Delete the file stored at the given media package and element IDs.
@@ -106,6 +104,20 @@ public interface Workspace {
    *           if deleting the data from the workspace fails
    */
   void delete(String mediaPackageID, String mediaPackageElementID) throws NotFoundException, IOException;
+
+  /**
+   * Removes a file from a collection
+   * 
+   * @param collectionId
+   *          the collection identifier
+   * @param fileName
+   *          the filename to remove
+   * @throws NotFoundException
+   *           if there was not file stored under this combination of mediapackage and element IDs.
+   * @throws IOException
+   *           if deleting the data from the workspace fails
+   */
+  void deleteFromCollection(String collectionId, String fileName) throws NotFoundException, IOException;
 
   /**
    * Get the URL for a file stored under the given media package and element IDs. MediaPackages may reference elements
@@ -128,5 +140,31 @@ public interface Workspace {
    * @return the file's uri
    */
   URI getCollectionURI(String collectionID, String fileName);
+
+  /**
+   * Moves a file from a collection into a mediapackage
+   * 
+   * @param collectionURI
+   *          the uri pointing to a workspace collection
+   * @param toMediaPackage
+   *          The media package ID to move the file into
+   * @param toMediaPackageElement
+   *          the media package element ID of the file
+   * @return the URI pointing to the file's new location
+   */
+  URI moveTo(URI collectionURI, String toMediaPackage, String toMediaPackageElement) throws NotFoundException, IOException;
+
+  /**
+   * Copies a file from a collection into a mediapackage
+   * 
+   * @param collectionURI
+   *          The uri pointing to a workspace collection
+   * @param toMediaPackage
+   *          The media package ID to copy the file into
+   * @param toMediaPackageElement
+   *          the media package element ID of the file
+   * @return the URI pointing to the file's new location
+   */
+  URI copyTo(URI collectionURI, String toMediaPackage, String toMediaPackageElement) throws NotFoundException, IOException;
 
 }

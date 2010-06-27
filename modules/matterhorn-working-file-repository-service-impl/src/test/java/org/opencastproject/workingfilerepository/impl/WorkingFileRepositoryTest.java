@@ -1,5 +1,8 @@
 package org.opencastproject.workingfilerepository.impl;
 
+import static org.junit.Assert.fail;
+
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 
 import junit.framework.Assert;
@@ -62,7 +65,12 @@ public class WorkingFileRepositoryTest {
   public void testDelete() throws Exception {
     // Delete the file and ensure that we can no longer get() it
     repo.delete(mediaPackageID, mediaPackageElementID);
-    Assert.assertTrue(repo.get(mediaPackageID, mediaPackageElementID) == null);
+    try {
+      Assert.assertTrue(repo.get(mediaPackageID, mediaPackageElementID) == null);
+      fail("File " + mediaPackageID + "/" + mediaPackageElementID + " was not deleted");
+    } catch (NotFoundException e) {
+      // This is intended
+    }
   }
   
   @Test

@@ -95,7 +95,9 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
    *      ,org.opencastproject.mediapackage.MediaPackageElementFlavor)
    */
   public MediaPackageElement newElement(MediaPackageElement.Type type, MediaPackageElementFlavor flavor) {
-    throw new IllegalStateException("Unable to create track from scratch");
+    Track track = new TrackImpl();
+    track.setFlavor(flavor);
+    return track;
   }
 
   /**

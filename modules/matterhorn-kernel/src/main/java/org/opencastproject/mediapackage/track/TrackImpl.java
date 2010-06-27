@@ -64,7 +64,7 @@ public class TrackImpl extends AbstractMediaPackageElement implements Track {
   protected List<VideoStream> video = new ArrayList<VideoStream>();
 
   /** Needed by JAXB */
-  TrackImpl() {
+  public TrackImpl() {
     this.elementType = Track.TYPE;
   }
 

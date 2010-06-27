@@ -23,6 +23,7 @@ import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -30,11 +31,13 @@ import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
+import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -68,11 +71,15 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     CONFIG_OPTIONS.put("source-flavor", "The \"flavor\" of the track to use as a video source input");
     CONFIG_OPTIONS.put("encoding-profile", "The encoding profile to use (default is 'mux-av.http')");
     CONFIG_OPTIONS.put("target-flavor", "The flavor to apply to the encoded file");
+    CONFIG_OPTIONS.put("reencode", "Indicating whether audio and video tracks should be reencoded");
     CONFIG_OPTIONS.put("target-tags", "The tags to apply to the encoded file");
   }
 
   /** The composer service */
   private ComposerService composerService = null;
+
+  /** The local workspace */
+  private Workspace workspace = null;
 
   /**
    * Callback for the OSGi declarative services configuration.
@@ -82,6 +89,17 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
    */
   protected void setComposerService(ComposerService composerService) {
     this.composerService = composerService;
+  }
+
+  /**
+   * Callback for declarative services configuration that will introduce us to the local workspace service.
+   * Implementation assumes that the reference is configured as being static.
+   * 
+   * @param workspace
+   *          an instance of the workspace
+   */
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
   }
 
   /**
@@ -122,11 +140,13 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
    * @return the mediapackage
    * @throws EncoderException
    *           if encoding fails
-   * @throws MediaPackageException
-   *           if reading from or adding to the mediapackage fails
+   * @throws IOException
+   *           if read/write operations from and to the workspace fail
+   * @throws NotFoundException
+   *           if the workspace does not contain the requested element
    */
   private MediaPackage mux(MediaPackage src, WorkflowOperationInstance operation) throws EncoderException,
-          WorkflowOperationException, MediaPackageException {
+          WorkflowOperationException, MediaPackageException, NotFoundException, IOException {
     MediaPackage mediaPackage = (MediaPackage) src.clone();
 
     // Read the configuration properties
@@ -149,15 +169,15 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
       encodingProfileName = MUX_AV_PROFILE;
 
     // Find the encoding profile
-    EncodingProfile profile = null;
-    for (EncodingProfile p : composerService.listProfiles()) {
-      if (p.getIdentifier().equals(encodingProfileName)) {
-        profile = p;
-        break;
-      }
-    }
+    EncodingProfile profile = composerService.getProfile(encodingProfileName);
     if (profile == null) {
       throw new IllegalStateException("Encoding profile '" + encodingProfileName + "' was not found");
+    }
+
+    // Reencode when there is no need for muxing?
+    boolean reencode = true;
+    if (StringUtils.trimToNull(operation.getConfiguration("reencode")) != null) {
+      reencode = Boolean.parseBoolean(operation.getConfiguration("reencode"));
     }
 
     // Select those tracks that have matching flavors
@@ -167,45 +187,62 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     Track videoTrack = null;
 
     switch (tracks.length) {
-      case 0:
-        logger.info("No audio/video tracks with flavor '{}' found to prepare", sourceFlavor);
-        return mediaPackage;
-      case 1:
-        audioTrack = videoTrack = tracks[0];
-        break;
-      case 2:
-        for (Track track : tracks) {
-          if (track.hasAudio() && !track.hasVideo()) {
-            audioTrack = track;
-          } else if (!track.hasAudio() && track.hasVideo()) {
-            videoTrack = track;
-          }
+    case 0:
+      logger.info("No audio/video tracks with flavor '{}' found to prepare", sourceFlavor);
+      return mediaPackage;
+    case 1:
+      audioTrack = videoTrack = tracks[0];
+      break;
+    case 2:
+      for (Track track : tracks) {
+        if (track.hasAudio() && !track.hasVideo()) {
+          audioTrack = track;
+        } else if (!track.hasAudio() && track.hasVideo()) {
+          videoTrack = track;
         }
-        break;
-      default:
-        logger.error("More than two tracks with flavor {} found. No idea what we should be doing", sourceFlavor);
-        throw new WorkflowOperationException("More than two tracks with flavor '" + sourceFlavor + "' found");
+      }
+      break;
+    default:
+      logger.error("More than two tracks with flavor {} found. No idea what we should be doing", sourceFlavor);
+      throw new WorkflowOperationException("More than two tracks with flavor '" + sourceFlavor + "' found");
     }
+
+    Receipt receipt = null;
+    Track composedTrack = null;
 
     // Make sure we have a matching combination
-    Receipt receipt = null;
     if (audioTrack == null && videoTrack != null) {
-      logger.info("Encoding video only track {} to work version", videoTrack);
-      receipt = composerService.encode(mediaPackage, videoTrack.getIdentifier(), PREPARE_VONLY_PROFILE, true);
+      if (reencode) {
+        logger.info("Encoding video only track {} to work version", videoTrack);
+        receipt = composerService.encode(videoTrack, PREPARE_VONLY_PROFILE, true);
+        composedTrack = (Track) receipt.getElement();
+      } else {
+        composedTrack = (Track) videoTrack.clone();
+        composedTrack.setIdentifier(null);
+      }
     } else if (videoTrack == null && audioTrack != null) {
-      logger.info("Encoding audio only track {} to work version", audioTrack);
-      receipt = composerService.encode(mediaPackage, audioTrack.getIdentifier(), PREPARE_AONLY_PROFILE, true);
+      if (reencode) {
+        logger.info("Encoding audio only track {} to work version", audioTrack);
+        receipt = composerService.encode(audioTrack, PREPARE_AONLY_PROFILE, true);
+        composedTrack = (Track) receipt.getElement();
+      } else {
+        composedTrack = (Track) audioTrack.clone();
+        composedTrack.setIdentifier(null);
+      }
     } else if (audioTrack == videoTrack) {
-      logger.info("Encoding audiovisual track {} to work version", audioTrack);
-      receipt = composerService.encode(mediaPackage, audioTrack.getIdentifier(), PREPARE_AV_PROFILE, true);
+      if (reencode) {
+        logger.info("Encoding audiovisual track {} to work version", videoTrack);
+        receipt = composerService.encode(videoTrack, PREPARE_AV_PROFILE, true);
+        composedTrack = (Track) receipt.getElement();
+      } else {
+        composedTrack = (Track) videoTrack.clone();
+        composedTrack.setIdentifier(null);
+      }
     } else {
       logger.info("Muxing audio and video only track {} to work version", videoTrack);
-      receipt = composerService.mux(mediaPackage, videoTrack.getIdentifier(), audioTrack.getIdentifier(), profile
-              .getIdentifier(), true);
+      receipt = composerService.mux(videoTrack, audioTrack, profile.getIdentifier(), true);
+      composedTrack = (Track) receipt.getElement();
     }
-
-    // Start encoding and wait for the result
-    Track composedTrack = (Track) receipt.getElement();
 
     // Update the track's flavor
     composedTrack.setFlavor(targetFlavor);
@@ -219,6 +256,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     }
 
     mediaPackage.add(composedTrack);
+    composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(), composedTrack.getIdentifier()));
     return mediaPackage;
   }
 

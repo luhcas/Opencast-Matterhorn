@@ -22,9 +22,8 @@ import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.mediapackage.Attachment;
-import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.identifier.IdBuilder;
 import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
@@ -60,6 +59,9 @@ public class ComposerServiceImpl implements ComposerService {
 
   /** The logging instance */
   private static final Logger logger = LoggerFactory.getLogger(ComposerServiceImpl.class);
+
+  /** The collection name */
+  public static final String COLLECTION = "composer";
 
   /** Encoding profile manager */
   private EncodingProfileScanner profileScanner = null;
@@ -170,13 +172,12 @@ public class ComposerServiceImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.MediaPackage,
-   *      java.lang.String, java.lang.String)
+   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.Track,
+   *      java.lang.String)
    */
   @Override
-  public Receipt encode(MediaPackage mediaPackage, String sourceTrackId, String profileId) throws EncoderException,
-          MediaPackageException {
-    return mux(mediaPackage, sourceTrackId, null, profileId, false);
+  public Receipt encode(Track sourceTrack, String profileId) throws EncoderException {
+    return encode(sourceTrack, profileId, false);
   }
 
   /**
@@ -186,42 +187,56 @@ public class ComposerServiceImpl implements ComposerService {
    *      java.lang.String, java.lang.String, boolean)
    */
   @Override
-  public Receipt encode(MediaPackage mediaPackage, String sourceTrackId, String profileId, boolean block)
-          throws EncoderException, MediaPackageException {
-    return mux(mediaPackage, sourceTrackId, null, profileId, block);
+  public Receipt encode(Track sourceTrack, String profileId, boolean block) throws EncoderException {
+    return encode(sourceTrack, null, profileId, block);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.MediaPackage,
-   *      java.lang.String, java.lang.String, java.lang.String)
+   * @see org.opencastproject.composer.api.ComposerService#mux(org.opencastproject.mediapackage.Track,
+   *      org.opencastproject.mediapackage.Track, java.lang.String)
    */
   @Override
-  public Receipt encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId,
-          String profileId) throws EncoderException, MediaPackageException {
-    return mux(mediaPackage, sourceVideoTrackId, sourceAudioTrackId, profileId, false);
+  public Receipt mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException {
+    return encode(sourceVideoTrack, sourceAudioTrack, profileId, false);
   }
 
   /**
    * {@inheritDoc}
    * 
-<<<<<<< .mine
-   * @see org.opencastproject.composer.api.ComposerService#mux(java.lang.String, java.lang.String, java.lang.String,
-   *      java.lang.String, boolean)
-=======
-   * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.MediaPackage,
-   *      java.lang.String, java.lang.String, java.lang.String, boolean)
->>>>>>> .r7737
+   * @see org.opencastproject.composer.api.ComposerService#mux(org.opencastproject.mediapackage.Track,
+   *      org.opencastproject.mediapackage.Track, java.lang.String, boolean)
    */
   @Override
-  public Receipt mux(final MediaPackage mp, final String sourceTrackA, final String sourceAudioTrackB,
-          final String profileId, final boolean block) throws EncoderException, MediaPackageException {
+  public Receipt mux(final Track videoTrack, final Track audioTrack, final String profileId, final boolean block)
+          throws EncoderException {
+    return encode(videoTrack, audioTrack, profileId, block);
+  }
+
+  /**
+   * Encodes audio and video track to a file. If both an audio and a video track are given, they are muxed together into
+   * one movie container.
+   * @param videoTrack
+   *          the video track
+   * @param audioTrack
+   *          the audio track
+   * @param profileId
+   *          the encoding profile
+   * @param block
+   *          <code>true</code> to only return once encoding is finished
+   * 
+   * @return the receipt
+   * @throws EncoderException
+   *           if encoding fails
+   */
+  private Receipt encode(final Track videoTrack, final Track audioTrack, final String profileId, final boolean block)
+          throws EncoderException {
+
     final String targetTrackId = idBuilder.createNew().toString();
     final Receipt composerReceipt = remoteServiceManager.createReceipt(JOB_TYPE);
 
     // Get the tracks and make sure they exist
-    Track audioTrack = mp.getTrack(sourceAudioTrackB);
     final File audioFile;
     if (audioTrack == null) {
       audioFile = null;
@@ -231,15 +246,14 @@ public class ComposerServiceImpl implements ComposerService {
       } catch (NotFoundException e) {
         composerReceipt.setStatus(Status.FAILED);
         remoteServiceManager.updateReceipt(composerReceipt);
-        throw new MediaPackageException("Requested audio track " + audioTrack + " is not found");
+        throw new EncoderException("Requested audio track " + audioTrack + " is not found");
       } catch (IOException e) {
         composerReceipt.setStatus(Status.FAILED);
         remoteServiceManager.updateReceipt(composerReceipt);
-        throw new MediaPackageException("Unable to access audio track " + audioTrack);
+        throw new EncoderException("Unable to access audio track " + audioTrack);
       }
     }
 
-    Track videoTrack = mp.getTrack(sourceTrackA);
     final File videoFile;
     if (videoTrack == null) {
       videoFile = null;
@@ -249,11 +263,11 @@ public class ComposerServiceImpl implements ComposerService {
       } catch (NotFoundException e) {
         composerReceipt.setStatus(Status.FAILED);
         remoteServiceManager.updateReceipt(composerReceipt);
-        throw new MediaPackageException("Requested video track " + videoTrack + " is not found");
+        throw new EncoderException("Requested video track " + videoTrack + " is not found");
       } catch (IOException e) {
         composerReceipt.setStatus(Status.FAILED);
         remoteServiceManager.updateReceipt(composerReceipt);
-        throw new MediaPackageException("Unable to access audio track " + audioTrack);
+        throw new EncoderException("Unable to access audio track " + audioTrack);
       }
     }
 
@@ -273,13 +287,22 @@ public class ComposerServiceImpl implements ComposerService {
 
     Runnable runnable = new Runnable() {
       public void run() {
-        logger.info("encoding track {} for media package {} using source audio track {} and source video track {}",
-                new String[] { targetTrackId, mp.getIdentifier().toString(), sourceAudioTrackB, sourceTrackA });
+        
+        if (audioTrack != null && videoTrack != null)
+          logger.info("Muxing audio track {} and video track {} into {}", new String[] {
+                  audioTrack.getIdentifier(), videoTrack.getIdentifier(), targetTrackId });
+        else if (audioTrack == null)
+          logger.info("Encoding video track {} to {} using profile '{}'", new String[] {
+                  videoTrack.getIdentifier(), targetTrackId, profileId });
+        else if (videoTrack == null)
+          logger.info("Encoding audio track {} to {} using profile '{}'", new String[] {
+                  audioTrack.getIdentifier(), targetTrackId, profileId });
+          
         composerReceipt.setStatus(Status.RUNNING);
         remoteServiceManager.updateReceipt(composerReceipt);
 
         // Do the work
-        File encodingOutput;
+        File encodingOutput = null;
         try {
           encodingOutput = encoderEngine.encode(audioFile, videoFile, profile, null);
         } catch (EncoderException e) {
@@ -293,7 +316,7 @@ public class ComposerServiceImpl implements ComposerService {
         InputStream in = null;
         try {
           in = new FileInputStream(encodingOutput);
-          returnURL = workspace.put(mp.getIdentifier().compact(), targetTrackId, encodingOutput.getName(), in);
+          returnURL = workspace.putInCollection(COLLECTION, encodingOutput.getName(), in);
           logger.debug("Copied the encoded file to the workspace at {}", returnURL);
           encodingOutput.delete();
           logger.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
@@ -356,34 +379,33 @@ public class ComposerServiceImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.MediaPackage,
-   *      java.lang.String, java.lang.String, long)
+   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.Track,
+   *      java.lang.String, long)
    */
-  @Override
-  public Receipt image(MediaPackage mediaPackage, String sourceVideoTrackId, String profileId, long time)
-          throws EncoderException, MediaPackageException {
-    return image(mediaPackage, sourceVideoTrackId, profileId, time, false);
+  public Receipt image(Track sourceTrack, String profileId, long time) throws EncoderException {
+    return image(sourceTrack, profileId, time, false);
   }
 
   /**
-   * 
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.MediaPackage,
-   *      java.lang.String, java.lang.String, long, boolean)
+   * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.Track,
+   *      java.lang.String, long, boolean)
    */
-  public Receipt image(final MediaPackage mediaPackage, final String sourceVideoTrackId, final String profileId,
-          final long time, boolean block) throws EncoderException, MediaPackageException {
+  public Receipt image(final Track sourceTrack, final String profileId, final long time, boolean block)
+          throws EncoderException {
 
     final Receipt receipt = remoteServiceManager.createReceipt(JOB_TYPE);
-    final String targetAttachmentId = idBuilder.createNew().toString();
 
+    // Get the encoding profile
     final EncodingProfile profile = profileScanner.getProfile(profileId);
     if (profile == null) {
       receipt.setStatus(Status.FAILED);
       remoteServiceManager.updateReceipt(receipt);
       throw new EncoderException(null, "Profile '" + profileId + "' is unknown");
     }
+
+    // Create the encoding engine
     final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
     if (encoderEngine == null) {
       receipt.setStatus(Status.FAILED);
@@ -391,36 +413,37 @@ public class ComposerServiceImpl implements ComposerService {
       throw new EncoderException(null, "No encoder engine available for profile '" + profileId + "'");
     }
 
-    // Get the video track and make sure it exists
-    Track videoTrack = mediaPackage.getTrack(sourceVideoTrackId);
-    if (videoTrack != null && !videoTrack.hasVideo()) {
-      throw new RuntimeException("can not extract an image without a video stream");
+    // ake sure there is a video stream in the track
+    if (sourceTrack != null && !sourceTrack.hasVideo()) {
+      throw new RuntimeException("Cannot extract an image without a video stream");
+    } else if (sourceTrack == null) {
+      throw new RuntimeException("SourceTrack cannot be null");
     }
-    if (videoTrack == null) {
-      throw new RuntimeException("videoTrack cannot be null");
-    }
-    if (time < 0 || time > videoTrack.getDuration()) {
+
+    // The time should not be outside of the track's duration
+    if (time < 0 || time > sourceTrack.getDuration()) {
       throw new IllegalArgumentException("Can not extract an image at time " + Long.valueOf(time)
-              + " from a video track with duration " + Long.valueOf(videoTrack.getDuration()));
+              + " from a track with duration " + Long.valueOf(sourceTrack.getDuration()));
     }
+
+    // Finally get the file that needs to be encoded
     final File videoFile;
     try {
-      videoFile = workspace.get(videoTrack.getURI());
+      videoFile = workspace.get(sourceTrack.getURI());
     } catch (NotFoundException e) {
       receipt.setStatus(Status.FAILED);
       remoteServiceManager.updateReceipt(receipt);
-      throw new MediaPackageException("Requested video track " + videoTrack + " was not found", e);
+      throw new EncoderException("Requested video track " + sourceTrack + " was not found", e);
     } catch (IOException e) {
       receipt.setStatus(Status.FAILED);
       remoteServiceManager.updateReceipt(receipt);
-      throw new MediaPackageException("Error accessing video track " + videoTrack, e);
+      throw new EncoderException("Error accessing video track " + sourceTrack, e);
     }
 
     Runnable runnable = new Runnable() {
       @Override
       public void run() {
-        logger.info("creating an image for media package {} using video track {}", new String[] {
-                mediaPackage.getIdentifier().toString(), sourceVideoTrackId });
+        logger.info("creating an image using video track {}", sourceTrack.getIdentifier());
 
         receipt.setStatus(Status.RUNNING);
         remoteServiceManager.updateReceipt(receipt);
@@ -447,8 +470,7 @@ public class ComposerServiceImpl implements ComposerService {
         InputStream in = null;
         try {
           in = new FileInputStream(encodingOutput);
-          returnURL = workspace.put(mediaPackage.getIdentifier().compact(), targetAttachmentId, encodingOutput
-                  .getName(), in);
+          returnURL = workspace.putInCollection(COLLECTION, encodingOutput.getName(), in);
           logger.debug("Copied the encoded file to the workspace at {}", returnURL);
         } catch (Exception e) {
           receipt.setStatus(Status.FAILED);
@@ -457,11 +479,12 @@ public class ComposerServiceImpl implements ComposerService {
         } finally {
           IOUtils.closeQuietly(in);
         }
-        if (encodingOutput != null)
-          encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
-        Attachment attachment = (Attachment) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-                .elementFromURI(returnURL, Attachment.TYPE, null);
+        if (encodingOutput != null) {
+          encodingOutput.delete();
+        }
 
+        MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+        Attachment attachment = (Attachment) builder.elementFromURI(returnURL, Attachment.TYPE, null);
         receipt.setElement(attachment);
         receipt.setStatus(Status.FINISHED);
         remoteServiceManager.updateReceipt(receipt);

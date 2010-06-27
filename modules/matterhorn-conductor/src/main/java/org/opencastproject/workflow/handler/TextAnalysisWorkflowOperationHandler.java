@@ -26,11 +26,9 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.metadata.mpeg7.MediaDuration;
 import org.opencastproject.metadata.mpeg7.MediaRelTimePointImpl;
 import org.opencastproject.metadata.mpeg7.MediaTime;
@@ -189,14 +187,12 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    *          the original mediapackage
    * @param operation
    *          the workflow operation
-   * @throws MediaPackageException
-   * @throws UnsupportedElementException
    * @throws ExecutionException
    * @throws InterruptedException
+   * @throws NotFoundException
    */
   protected MediaPackage extractVideoText(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
-          throws EncoderException, MediaPackageException, UnsupportedElementException, InterruptedException,
-          ExecutionException, IOException {
+          throws EncoderException, InterruptedException, ExecutionException, IOException, NotFoundException {
 
     List<String> sourceTagSet = asList(operation.getConfiguration("source-tags"));
     List<String> targetTagSet = asList(operation.getConfiguration("target-tags"));
@@ -258,8 +254,8 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         // almost at the end of the segment, it should contain the most content and is stable as well.
         Attachment image = null;
         try {
-          long startTimeSeconds = segmentTimePoint.getTimeInMilliseconds()/1000;
-          long durationSeconds = segmentDuration.getDurationInMilliseconds()/1000;
+          long startTimeSeconds = segmentTimePoint.getTimeInMilliseconds() / 1000;
+          long durationSeconds = segmentDuration.getDurationInMilliseconds() / 1000;
           image = extractImage(sourceTrack, startTimeSeconds + durationSeconds - 1);
         } catch (EncoderException e) {
           logger.error("Error creating still image from {}", sourceTrack);
@@ -269,6 +265,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         // If there is a corresponding spaciotemporal decomposition, remove all the videotext elements
         Receipt receipt = analysisService.analyze(image, true);
         Catalog catalog = (Catalog) receipt.getElement();
+        workspace.delete(image.getURI());
         if (catalog == null) {
           logger.warn("Text analysis did not return a valid mpeg7 for segment {}", segment);
           continue;
@@ -304,13 +301,13 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
 
       // Store the catalog in the workspace
       Catalog catalog = store(mediaPackage, textCatalog);
-      
+
       // Add flavor and target tags
       catalog.setFlavor(MediaPackageElements.TEXTS);
       for (String tag : targetTagSet) {
         catalog.addTag(tag);
       }
-      
+
     }
 
     logger.debug("Text analysis completed");
@@ -319,9 +316,12 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
 
   /**
    * Loads an mpeg7 catalog from a mediapackage's catalog reference
-   * @param catalog the mediapackage's reference to this catalog
+   * 
+   * @param catalog
+   *          the mediapackage's reference to this catalog
    * @return the mpeg7
-   * @throws IOException if there is a problem loading or parsing the mpeg7 object
+   * @throws IOException
+   *           if there is a problem loading or parsing the mpeg7 object
    */
   protected Mpeg7Catalog loadMpeg7Catalog(Catalog catalog) throws IOException {
     InputStream in = null;
@@ -335,7 +335,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
       IOUtils.closeQuietly(in);
     }
   }
-  
+
   /**
    * Extracts the catalogs from the media package that match the requirements of flavor and tags specified in the
    * operation handler.
@@ -345,14 +345,16 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    * @param operation
    *          the workflow operation
    * @return a map of catalog elements and their mpeg-7 representations
-   * @throws IOException if there is a problem reading the mpeg7
+   * @throws IOException
+   *           if there is a problem reading the mpeg7
    */
-  protected Map<Catalog, Mpeg7Catalog> loadSegmentCatalogs(MediaPackage mediaPackage, WorkflowOperationInstance operation) throws IOException {
+  protected Map<Catalog, Mpeg7Catalog> loadSegmentCatalogs(MediaPackage mediaPackage,
+          WorkflowOperationInstance operation) throws IOException {
     HashMap<Catalog, Mpeg7Catalog> catalogs = new HashMap<Catalog, Mpeg7Catalog>();
 
     String sourceFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
     List<String> sourceTagSet = asList(operation.getConfiguration("source-tags"));
-    
+
     for (Catalog mediaPackageCatalog : mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS)) {
       if (sourceFlavor != null) {
         if (mediaPackageCatalog.getReference() == null)
@@ -383,7 +385,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
       }
       catalogs.put(mediaPackageCatalog, mpeg7);
     }
-    
+
     return catalogs;
   }
 
@@ -399,7 +401,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
 
     // Add the catalog to the media package
     MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-    Catalog catalog = (Catalog)builder.newElement(MediaPackageElement.Type.Catalog, MediaPackageElements.TEXTS);
+    Catalog catalog = (Catalog) builder.newElement(MediaPackageElement.Type.Catalog, MediaPackageElements.TEXTS);
     catalog.setIdentifier(null);
     mediaPackage.add(catalog);
 
@@ -417,17 +419,12 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    * @param track
    *          the track identifier
    * @return the extracted image
-   * @throws MediaPackageException
-   *           if adding the image to the media package fails
    * @throws EncoderException
    *           if encoding fails
-   * @throws IllegalStateException
-   *           if the track is not connected to a media package and is not in the correct format
    */
-  protected Attachment extractImage(Track track, long time) throws EncoderException, MediaPackageException {
+  protected Attachment extractImage(Track track, long time) throws EncoderException {
     logger.info("Requesting image extration from {} at {} s", track, time);
-    MediaPackage mediaPackage = track.getMediaPackage();
-    Receipt receipt = composer.image(mediaPackage, track.getIdentifier(), IMAGE_EXTRACTION_PROFILE, time, true);
+    Receipt receipt = composer.image(track, IMAGE_EXTRACTION_PROFILE, time, true);
     return (Attachment) receipt.getElement();
   }
 

@@ -31,6 +31,38 @@ public class EncoderException extends Exception {
   private int exitCode = -1;
 
   /**
+   * Creates a new encoder exception with the given error message.
+   * 
+   * @param message
+   *          the error message
+   */
+  public EncoderException(String message) {
+    super(message);
+  }
+
+  /**
+   * Creates a new encoder exception with the given error message, caused by the given exception.
+   * 
+   * @param message
+   *          the error message
+   * @param cause
+   *          the error cause
+   */
+  public EncoderException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  /**
+   * Creates a new encoder exception, caused by the given exception.
+   * 
+   * @param cause
+   *          the error cause
+   */
+  public EncoderException(Throwable cause) {
+    super(cause);
+  }
+
+  /**
    * @param engine
    *          the compression engine
    * @param message

@@ -15,8 +15,8 @@
  */
 package org.opencastproject.composer.api;
 
-import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.Receipt.Status;
 
@@ -26,14 +26,12 @@ import org.opencastproject.remote.api.Receipt.Status;
 public interface ComposerService {
 
   final String JOB_TYPE = "org.opencastproject.composer";
-    
+
   /**
    * Encode one track, using that track's audio and video streams.
    * 
-   * @param mediaPackage
-   *          The media package containing the source track
-   * @param sourceTrackId
-   *          The ID of the source track within the media package
+   * @param sourceTrack
+   *          The source track
    * @param profileId
    *          The profile to use for encoding
    * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getReceipt(String)}
@@ -41,91 +39,77 @@ public interface ComposerService {
    * @throws EncoderException
    * @throws MediaPackageException
    */
-  Receipt encode(MediaPackage mediaPackage, String sourceTrackId, String profileId) throws EncoderException,
-          MediaPackageException;
+  Receipt encode(Track sourceTrack, String profileId) throws EncoderException, MediaPackageException;
 
   /**
    * Encode one track, using that track's audio and video streams.
    * 
-   * @param mediaPackage
-   *          The media package containing the source track
-   * @param sourceTrackId
-   *          The ID of the source track within the media package
+   * @param sourceTrack
+   *          The the source track
    * @param profileId
    *          The profile to use for encoding
    * @param block
    *          Whether this method should block the calling thread (true) or return asynchronously (false)
    * @return The receipt for this encoding job
    * @throws EncoderException
-   * @throws MediaPackageException
+   *           if encoding fails
    */
-  Receipt encode(MediaPackage mediaPackage, String sourceTrackId, String profileId, boolean block)
-          throws EncoderException, MediaPackageException;
+  Receipt encode(Track sourceTrack, String profileId, boolean block) throws EncoderException;
 
   /**
    * Encode the video stream from one track and the audio stream from another, into a new Track.
    * 
-   * @param mediaPackage
-   *          The media package containing the source track
-   * @param sourceVideoTrackId
-   *          The ID of the source video track within the media package
-   * @param sourceAudioTrackId
-   *          The ID of the source audio track within the media package
+   * @param sourceVideoTrack
+   *          The source video track
+   * @param sourceAudioTrack
+   *          The source audio track
    * @param profileId
    *          The profile to use for encoding
    * @return The receipt for this encoding job
    * @throws EncoderException
-   * @throws MediaPackageException
+   *           if encoding fails
    */
-  Receipt encode(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId, String profileId)
-          throws EncoderException, MediaPackageException;
+  Receipt mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException;
 
   /**
    * Encode the video stream from one track and the audio stream from another, into a new Track.
    * 
-   * @param mediaPackage
-   *          The media package containing the source track
-   * @param sourceVideoTrackId
-   *          The ID of the source video track within the media package
-   * @param sourceAudioTrackId
-   *          The ID of the source audio track within the media package
+   * @param sourceVideoTrack
+   *          The source video track
+   * @param sourceAudioTrack
+   *          The source audio track
    * @param profileId
    *          The profile to use for encoding
    * @param block
    *          Whether this method should block the calling thread (true) or return asynchronously (false)
    * @return The receipt for this encoding job
    * @throws EncoderException
-   * @throws MediaPackageException
+   *           if muxing fails
    */
-  Receipt mux(MediaPackage mediaPackage, String sourceVideoTrackId, String sourceAudioTrackId, String profileId,
-          boolean block) throws EncoderException, MediaPackageException;
+  Receipt mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId, boolean block) throws EncoderException;
 
   /**
    * Extracts an image from the media package element identified by <code>sourceVideoTrackId</code>. The image is taken
    * at the timepoint <code>time</code> seconds into the movie.
    * 
-   * @param mediaPackage
-   *          the media package
-   * @param sourceVideoTrackId
-   *          element identifier of the source video track
+   * @param sourceTrack
+   *          the source video track
    * @param profileId
    *          identifier of the encoding profile
    * @param time
    *          number of seconds into the video
    * @return the extracted image as an attachment
    * @throws EncoderException
+   *           if image extraction fails
    */
-  Receipt image(MediaPackage mediaPackage, String sourceVideoTrackId, String profileId, long time)
-          throws EncoderException, MediaPackageException;
+  Receipt image(Track sourceTrack, String profileId, long time) throws EncoderException;
 
   /**
    * Extracts an image from the media package element identified by <code>sourceVideoTrackId</code>. The image is taken
    * at the timepoint <code>time</code> seconds into the movie.
    * 
-   * @param mediaPackage
-   *          the media package
-   * @param sourceVideoTrackId
-   *          element identifier of the source video track
+   * @param sourceTrack
+   *          the source track
    * @param profileId
    *          identifier of the encoding profile
    * @param time
@@ -134,9 +118,9 @@ public interface ComposerService {
    *          Whether this method should block the calling thread (true) or return asynchronously (false)
    * @return the extracted image as an attachment
    * @throws EncoderException
+   *           if image extraction fails
    */
-  Receipt image(MediaPackage mediaPackage, String sourceVideoTrackId, String profileId, long time, boolean block)
-          throws EncoderException, MediaPackageException;
+  Receipt image(Track sourceTrack, String profileId, long time, boolean block) throws EncoderException;
 
   /**
    * @return All registered {@link EncodingProfile}s.

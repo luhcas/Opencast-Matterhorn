@@ -58,8 +58,10 @@ public interface WorkingFileRepository {
    * @return the data
    * @throws IOException
    *           if there is a problem reading the data
+   * @throws NotFoundException
+   *           if the media package element can't be found
    */
-  InputStream get(String mediaPackageID, String mediaPackageElementID) throws IOException;
+  InputStream get(String mediaPackageID, String mediaPackageElementID) throws IOException, NotFoundException;
 
   /**
    * Gets the md5 hash of a file stored under the given media package and element IDs.
@@ -175,7 +177,7 @@ public interface WorkingFileRepository {
    * @param fileName
    *          the filename to remove
    */
-  void removeFromCollection(String collectionId, String fileName) throws NotFoundException, IOException;
+  void deleteFromCollection(String collectionId, String fileName) throws NotFoundException, IOException;
 
   /**
    * Moves a file from a collection into a mediapackage
@@ -190,7 +192,8 @@ public interface WorkingFileRepository {
    *          the media package element ID of the file
    * @return the URI pointing to the file's new location
    */
-  URI moveTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement) throws NotFoundException, IOException;
+  URI moveTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement)
+          throws NotFoundException, IOException;
 
   /**
    * Copies a file from a collection into a mediapackage
@@ -205,7 +208,8 @@ public interface WorkingFileRepository {
    *          the media package element ID of the file
    * @return the URI pointing to the file's new location
    */
-  URI copyTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement) throws NotFoundException, IOException;
+  URI copyTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement)
+          throws NotFoundException, IOException;
 
   /**
    * Gets the total space of storage in Bytes
