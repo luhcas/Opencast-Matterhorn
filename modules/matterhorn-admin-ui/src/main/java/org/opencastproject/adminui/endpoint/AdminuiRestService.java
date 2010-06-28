@@ -15,7 +15,6 @@
  */
 package org.opencastproject.adminui.endpoint;
 
-import java.net.URL;
 import org.opencastproject.adminui.api.RecordingDataView;
 import org.opencastproject.adminui.api.RecordingDataViewImpl;
 import org.opencastproject.adminui.api.RecordingDataViewList;
@@ -25,6 +24,7 @@ import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.scheduler.api.SchedulerEvent;
+import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
@@ -35,13 +35,16 @@ import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Status;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -56,9 +59,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.opencastproject.scheduler.api.SchedulerFilter;
-import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
-import org.opencastproject.workflow.api.WorkflowQuery;
 
 /**
  * REST endpoint for the Admin UI proxy service
@@ -73,32 +73,32 @@ public class AdminuiRestService {
   private CaptureAgentStateService captureAdminService;
 
   public void setSchedulerService(SchedulerService service) {
-    logger.info("binding SchedulerService");
+    logger.debug("binding SchedulerService");
     schedulerService = service;
   }
 
   public void unsetSchedulerService(SchedulerService service) {
-    logger.info("unbinding SchedulerService");
+    logger.debug("unbinding SchedulerService");
     schedulerService = null;
   }
 
   public void setWorkflowService(WorkflowService service) {
-    logger.info("binding WorkflowService");
+    logger.debug("binding WorkflowService");
     workflowService = service;
   }
 
   public void unsetWorkflowService(WorkflowService service) {
-    logger.info("unbinding WorkflowService");
+    logger.debug("unbinding WorkflowService");
     workflowService = null;
   }
 
   public void setCaptureAdminService(CaptureAgentStateService service) {
-    logger.info("binding CaptureAgentStatusService");
+    logger.debug("binding CaptureAgentStatusService");
     captureAdminService = service;
   }
 
   public void unsetCaptureAdminService(CaptureAgentStateService service) {
-    logger.info("unbinding CaptureAgentStatusService");
+    logger.debug("unbinding CaptureAgentStatusService");
     captureAdminService = null;
   }
 
@@ -140,7 +140,7 @@ public class AdminuiRestService {
     }
     RecordingDataViewListImpl page = new RecordingDataViewListImpl();
     int first = pageNumber * pageSize;
-    logger.info("Returning results items " + first + " - " + (first + pageSize - 1));
+    logger.debug("Returning results items " + first + " - " + (first + pageSize - 1));
     for (int i = first; i < first + pageSize; i++) {
       try {
         page.add(out.get(i));
@@ -159,7 +159,7 @@ public class AdminuiRestService {
   private RecordingDataViewList getRecordingsFromWorkflowService(WorkflowState state) {
     RecordingDataViewList out = new RecordingDataViewListImpl();
     if (workflowService != null) {
-      logger.info("getting recordings from workflowService");
+      logger.debug("getting recordings from workflowService");
       WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery().withState(state).withCount(100000)).getItems();
       // next line is for debuging: return all workflowInstaces
       //WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery()).getItems();
@@ -206,7 +206,7 @@ public class AdminuiRestService {
         } else {
           out.add(item);
         }
-        //logger.info("Recording state: " + state.name() + " MediaPackage: " + mediapackage.getTitle() + " - " + joinStringArray(mediapackage.getCreators()) + " - " + mediapackage.getSeries());
+        //logger.debug("Recording state: " + state.name() + " MediaPackage: " + mediapackage.getTitle() + " - " + joinStringArray(mediapackage.getCreators()) + " - " + mediapackage.getSeries());
       }
     } else {
       logger.warn("WorkflowService not present, returning empty list");
@@ -394,7 +394,7 @@ public class AdminuiRestService {
   private RecordingDataViewList getUpcomingRecordings() {
     RecordingDataViewList out = new RecordingDataViewListImpl();
     if (schedulerService != null) {
-      logger.info("getting upcoming recordings from scheduler");
+      logger.debug("getting upcoming recordings from scheduler");
       SchedulerEvent[] events = schedulerService.getUpcomingEvents();
       for (int i = 0; i < events.length; i++) {
         if (System.currentTimeMillis() < events[i].getStartdate().getTime()) {
@@ -421,7 +421,7 @@ public class AdminuiRestService {
   private RecordingDataViewList getCapturingRecordings() {
     RecordingDataViewList out = new RecordingDataViewListImpl();
     if (schedulerService != null && captureAdminService != null) {
-      logger.info("getting capturing recordings from scheduler");
+      logger.debug("getting capturing recordings from scheduler");
       SchedulerEvent[] events = schedulerService.getCapturingEvents();
       for (int i = 0; i < events.length; i++) {
         Recording r = captureAdminService.getRecordingState(events[i].getID());

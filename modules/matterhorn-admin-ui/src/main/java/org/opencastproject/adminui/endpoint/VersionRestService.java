@@ -25,21 +25,21 @@ import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Status; */
 
 /*JaxRS REST endpoint imports */
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
 
-import java.io.StringWriter;
-import java.io.InputStream;
-import org.apache.commons.io.IOUtils;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 @Path("/")
 public class VersionRestService {
@@ -73,21 +73,18 @@ public class VersionRestService {
   @Path("newest")
   @SuppressWarnings("unchecked")
   public Response getNewestVersion() {
-    String etag = "";
+    JSONObject json = new JSONObject();
     try {
       URL url = new URL("http://opencast.jira.com/svn/MH/trunk/");
       URLConnection conn = url.openConnection();
-      etag = conn.getHeaderField("etag");
-    } catch (Exception e) {
+      String etag = conn.getHeaderField("etag");
+      String[] parts = etag.split("\"");
+      parts = parts[1].split("/");
+      json.put("version", parts[0]);
+    } catch (IOException e) {
       logger.debug(e.toString());
-      e.printStackTrace();
-      return Response.status(500).build();
+      json.put("version", "N/A");
     }
-    String[] parts = etag.split("\"");
-    parts = parts[1].split("/");
-    
-    JSONObject json = new JSONObject();
-    json.put("version", parts[0]);
     return Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
   }
 }
