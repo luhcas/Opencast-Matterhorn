@@ -14,18 +14,6 @@
 
       var PLAYER_URL = '../../../engage/ui/embed.html';
 
-      function createDoc(rootEl, rootNS){
-        var doc = null;
-        //Create a DOM Document, methods vary between browsers, e.g. IE and Firefox
-        if(document.implementation && document.implementation.createDocument){ //Firefox, Opera, Safari, Chrome, etc.
-          doc = document.implementation.createDocument(rootNS, rootEl, null);
-        }else{ // IE
-          doc = new ActiveXObject('MSXML2.DOMDocument');
-          doc.loadXML('<' + rootEl + ' xmlns="' + rootNS + '"></' + rootEl + '>');
-        }
-        return doc;
-      }
-
       function xmlToString(doc) {
         if(typeof XMLSerializer != 'undefined'){
           return (new XMLSerializer()).serializeToString(doc);
