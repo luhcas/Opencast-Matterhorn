@@ -90,7 +90,6 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
           MediaPackageElement distributedElement = (MediaPackageElement) element.clone();
           distributedElement.setURI(getDistributionUri(element));
           distributedElement.setIdentifier(null);
-          distributedElement.clearTags();
 
           MediaPackageReference ref = element.getReference();
           if (ref != null && mediaPackage.getElementByReference(ref) != null) {

@@ -48,10 +48,13 @@ import java.util.Dictionary;
 public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMappable, ManagedService {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryImpl.class);
 
+  /** The extension we use for the md5 hash calculated from the file contents */
+  public static final String MD5_EXTENSION = ".md5";
+  
   /** The filename filter matching .md5 files */
   private static final FilenameFilter MD5_FINAME_FILTER = new FilenameFilter() {
     public boolean accept(File dir, String name) {
-      return name.endsWith(".md5");
+      return name.endsWith(MD5_EXTENSION);
     }
   };
 
@@ -65,14 +68,13 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
     if (rootDirectory != null)
       return; // If the root directory was set by the constructor, respect that setting
     serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
-    if(serverUrl == null)
+    if (serverUrl == null)
       throw new IllegalStateException("Server URL must be set");
     if (cc.getBundleContext().getProperty("org.opencastproject.file.repo.path") == null) {
       String storageDir = cc.getBundleContext().getProperty("org.opencastproject.storage.dir");
       if (storageDir == null)
         throw new IllegalStateException("Storage directory must be set");
-      rootDirectory = storageDir + File.separator + "opencast" + File.separator
-              + "workingfilerepo";
+      rootDirectory = storageDir + File.separator + "opencast" + File.separator + "workingfilerepo";
     } else {
       rootDirectory = cc.getBundleContext().getProperty("org.opencastproject.file.repo.path");
     }
@@ -120,15 +122,18 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
       throw new RuntimeException(e);
     }
   }
-  
+
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#getCollectionURI(java.lang.String, java.lang.String)
+   * 
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#getCollectionURI(java.lang.String,
+   *      java.lang.String)
    */
   @Override
   public URI getCollectionURI(String collectionID, String fileName) {
     try {
-      return new URI(serverUrl + "/files" + COLLECTION_PATH_PREFIX + collectionID + "/" + PathSupport.toSafeName(fileName));
+      return new URI(serverUrl + "/files" + COLLECTION_PATH_PREFIX + collectionID + "/"
+              + PathSupport.toSafeName(fileName));
     } catch (URISyntaxException e) {
       throw new IllegalStateException("Unable to create valid uri from " + collectionID + " and " + fileName);
     }
@@ -146,32 +151,33 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
    */
   @Override
   public URI getURI(String mediaPackageID, String mediaPackageElementID, String fileName) {
+    String uri = UrlSupport.concat(new String[] { serverUrl, URI_PREFIX, MEDIAPACKAGE_PATH_PREFIX, mediaPackageID,
+            mediaPackageElementID });
     if (fileName == null) {
-      try {
-        return new URI(UrlSupport.concat(new String[] {
-          serverUrl,
-          URI_PREFIX,
-          MEDIAPACKAGE_PATH_PREFIX,
-          mediaPackageID,
-          mediaPackageElementID
-        }));
-      } catch (URISyntaxException e) {
-        throw new RuntimeException(e);
+      File existingDirectory = getElementDirectory(mediaPackageID, mediaPackageElementID);
+      if (existingDirectory.isDirectory()) {
+        File[] files = existingDirectory.listFiles();
+        boolean md5Exists = false;
+        for(File f : files) {
+          if(f.getName().endsWith(MD5_EXTENSION)) {
+            md5Exists = true;
+          } else {
+            fileName = f.getName();
+          }
+        }
+        if (md5Exists && fileName != null) {
+          uri = UrlSupport.concat(uri, PathSupport.toSafeName(fileName));
+        }
       }
     } else {
-      try {
-        return new URI(UrlSupport.concat(new String[] {
-          serverUrl,
-          URI_PREFIX,
-          MEDIAPACKAGE_PATH_PREFIX,
-          mediaPackageID,
-          mediaPackageElementID,
-          PathSupport.toSafeName(fileName)
-        }));
-      } catch (URISyntaxException e) {
-        throw new RuntimeException(e);
-      }
+      uri = UrlSupport.concat(uri, PathSupport.toSafeName(fileName));
     }
+    try {
+      return new URI(uri);
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
+
   }
 
   public URI put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in) {
@@ -250,7 +256,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
    * @return The md5 file
    */
   protected File getMd5File(File f) {
-    return new File(f.getParent(), f.getName() + ".md5");
+    return new File(f.getParent(), f.getName() + MD5_EXTENSION);
   }
 
   /**
@@ -400,7 +406,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
   public URI putInCollection(String collectionId, String fileName, InputStream in) {
     checkPathSafe(collectionId);
     checkPathSafe(fileName);
-    File f = new File(PathSupport.concat(new String[] { rootDirectory, COLLECTION_PATH_PREFIX, collectionId, PathSupport.toSafeName(fileName)}));
+    File f = new File(PathSupport.concat(new String[] { rootDirectory, COLLECTION_PATH_PREFIX, collectionId,
+            PathSupport.toSafeName(fileName) }));
     logger.debug("Attempting to write a file to {}", f.getAbsolutePath());
     FileOutputStream out = null;
     try {
@@ -495,7 +502,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
     } catch (IOException e) {
       throw new IllegalStateException("unable to copy file" + e);
     }
-    return getURI(toMediaPackage, toMediaPackageElement);
+    return getURI(toMediaPackage, toMediaPackageElement, dest.getName());
   }
 
   /**
