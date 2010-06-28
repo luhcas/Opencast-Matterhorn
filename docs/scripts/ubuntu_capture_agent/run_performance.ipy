@@ -1,11 +1,17 @@
 import sys
+import os.path
 
 !sudo rm -rf oc_perf
 !sudo mkdir -p /oc_perf
 !sudo mount -t tmpfs -o size=512M,mode=0777 tmpfs /oc_perf
 
 felixDir = "/home/matterhorn/capture-agent/felix-framework-2.0.4"
-matterhornTrunk = "/home/matterhorn/capture-agent/matterhorn-source"
+if not os.path.isdir(felixDir):
+	print("Felix home dir not set correctly.  Please change the felixDir property in the script to point at the correct directory.")
+	sys.exit(1)
+if not os.path.isdir("performance_tests"):
+	print("Unable to find performance test descriptions.  Please place them in a directory called \"performance_tests\".  This directory should reside in the current working directory.")
+	sys.exit(1)
 
 datafiles = !ls performance_tests
 for file in datafiles:
@@ -17,11 +23,15 @@ for file in datafiles:
                 pid = lines.grep("DM2").fields(1)[0]
                 !sudo kill -9 $pid
 
-	#Remove any Windows newlines
+	#Remove any Windows newlines and load the properties
         datafile = open("performance_tests/"+file,"r")
         props=dict()
         for line in datafile:
-                props[line.split("=")[0]]=line.replace("\r","").split("=")[1]
+		if line[0] == "#" or line.replace("\r","") == "\n":
+			continue
+		key=line.split("=")[0]
+		value=line.replace("\r","").split("=")[1]
+                props[key]=value
 
         !mkdir /oc_perf/$props["capture.recording.id"]
 
@@ -30,8 +40,9 @@ for file in datafiles:
         !rm -f org.ops4j.pax.logging.properties
         !svn up
         !sed -i "s/log4j.logger.org.opencastproject.*/log4j.logger.org.opencastproject.capture.pipeline=TRACE/g" org.ops4j.pax.logging.properties
-        !$felixDir/bin/start_matterhorn.sh 2> /dev/null &
-        cd $matterhornTrunk/docs/scripts/ubuntu_capture_agent/
+	cd $felixDir/bin
+        !./start_matterhorn.sh 2>&1 > /dev/null &
+	popd
 
         #Wait until Felix starts up
         running=!curl --digest -u admin:opencast -I -H "X-Requested-Auth: Digest" http://localhost:8080/state/rest/state
@@ -41,13 +52,20 @@ for file in datafiles:
                 running=!curl --digest -u admin:opencast -I -H "X-Requested-Auth: Digest" http://localhost:8080/state/rest/state;
         time.sleep(3) # just in case startCapture endpoint not up yet, but soon will be
 
+	config=!curl --digest -u admin:opencast -H "X-Requested-Auth: Digest" http://localhost:8080/capture/rest/configuration
+	configuration=dict()
+	for line in config:
+		key=line.split("=")[0]
+		value=line.split("=")[1]
+		configuration[key]=value
+
 	#Start the test with the appropriate config file
         data_file="performance_tests/" + file
         !curl --digest -u admin:opencast -H "X-Requested-Auth: Digest" --data-urlencode config@$data_file http://localhost:8080/capture/rest/startCapture
 
-        #Start dstat in the new dir and block for 60 seconds
+        #Start dstat in the new dir and block for capture.max.length seconds
         dstat_output="/oc_perf/" + props["capture.recording.id"].strip("\n") + "/dstat.log"
-        !sudo dstat -cdm --load --output $dstat_output 1 1200
+        !sudo dstat -cdm --load --output $dstat_output 1 $props["capture.max.length"] 2>&1 > /dev/null
 
 	time.sleep(1) # make sure the headers and such are written out
 
@@ -57,10 +75,9 @@ for file in datafiles:
                 pid = lines.grep("DM2").fields(1)[0]
                 !sudo kill -9 $pid
         #Copy over the recordings into our tmp dir
-	recordingDir = "/tmp/opencast/cache/captures/" + props["capture.recording.id"].strip("\n")
+	recordingDir = configuration["capture.filesystem.cache.capture.url"] + props["capture.recording.id"].strip("\n")
 	!sudo mv $felixDir/logs/opencast.log $recordingDir
         !sudo cp -r $recordingDir /oc_perf/
-        popd
 
 #Great, we're done.  Move the temp dir onto disk
 !mkdir -p oc_perf
