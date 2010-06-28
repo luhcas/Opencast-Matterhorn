@@ -75,6 +75,7 @@
       <configurations>
         <configuration key="source-flavor">presenter/source</configuration>
         <configuration key="target-flavor">presenter/work</configuration>
+        <configuration key="reencode">true</configuration>
       </configurations>
     </operation>
 
@@ -86,6 +87,7 @@
       <configurations>
         <configuration key="source-flavor">presentation/source</configuration>
         <configuration key="target-flavor">presentation/work</configuration>
+        <configuration key="reencode">true</configuration>
       </configurations>
     </operation>
 
@@ -104,16 +106,14 @@
 
     <!-- encode to hold preview player formats -->
 
-    <!--  UNCOMMENT TO ACTIVATE
     <operation
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presenter (camera) video to Flash download">
+      description="Encode presenter (camera) video for preview">
       <configurations>
         <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/preview</configuration>
-        <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash-preview.http</configuration>
       </configurations>
     </operation>
@@ -121,27 +121,37 @@
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presentation (screen) to Flash download">
+      description="Encode presentation (screen) for preview">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="target-flavor">presentation/preview</configuration>
-        <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">flash-vga.http</configuration>
+        <configuration key="encoding-profile">flash-preview.http</configuration>
       </configurations>
     </operation>
     <operation
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presenter audio to Flash download">
+      description="Encode presenter audio for preview">
       <configurations>
-        <configuration key="source-audio-flavor">presenter/work</configuration>
+        <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/preview</configuration>
-        <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash-preview.http</configuration>
       </configurations>
     </operation>
-    -->
+
+    <!-- hold to review media-->
+   
+    <operation
+      id="review"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Waiting for user to review recording">
+      <configurations>
+        <configuration key="source-tag">preview</configuration>
+        <configuration key="required-property">${review.hold}</configuration>
+        </configurations>
+    </operation>  
 
     <!-- encode to engage player formats -->
 
@@ -168,19 +178,6 @@
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash-vga.http</configuration>
       </configurations>
-    </operation>
-
-    <!-- hold to review media-->
-   
-    <operation
-      id="review"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Waiting for user to review recording">
-      <configurations>
-        <configuration key="source-tag">preview</configuration>
-        <configuration key="required-property">${review.hold}</configuration>
-        </configurations>
     </operation>
 
     <!-- run the videosegmentation -->
