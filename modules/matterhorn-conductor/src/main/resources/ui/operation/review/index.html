@@ -11,6 +11,9 @@
     </style>
     <script type="text/javascript" src="../../../admin/jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript">
+
+      var PLAYER_URL = '../../../engage/ui/embed.html';
+
       $(document).ready(function() {
         var id = parent.document.getElementById("holdWorkflowId").value;
         // Event edit link clicked
@@ -26,7 +29,7 @@
           success : function(data) {    
             // load metadata
             var catalogUrl = $(data.documentElement).find("mediapackage > metadata > catalog[type='dublincore/episode'] > url").text();
-            catalogUrl += '/dublincore.xml';    // FIXME workaround MH-3993
+            //catalogUrl += '/dublincore.xml';    // FIXME workaround MH-3993
             $.ajax({
               url : catalogUrl,
               dataType: 'xml',
@@ -49,8 +52,8 @@
               }
             });
             // get neccessary data to call the preview player
-            var previewTag = $(data.documentElement).find("mediapackage > media > track > tags > tag:contains('engage')").first();
-            if (previewTag != null) {
+            //var previewTag = $(data.documentElement).find("mediapackage > media > track > tags > tag:contains('engage')").first();
+            /*if (previewTag != null) {
               var videoUrl = $(previewTag).parent().parent().find('url').text();
               //alert("videoUrl: " + videoUrl);
               //$('#video-url-container').attr('href',videoUrl).text(videoUrl);
@@ -58,11 +61,30 @@
               $('#player-container').attr('src', url);
             } else {
               $('#player-container').text('No preview encoded track found in MediaPackage');
+            }*/
+            var previewFiles = new Array();
+            $(data.documentElement).find("mediapackage > media > track").each(function(index, elm) {
+              if ($(elm).attr('type').split(/\//)[1] == 'preview') {
+                previewFiles.push($(elm).find('url').text());
+              }
+            });
+            if (previewFiles.length > 0) {
+              var url = PLAYER_URL + '?';
+              for (var i = 0; i < previewFiles.length; i++) {
+                if (i == 0) {
+                  url += 'videoUrl=';
+                } else {
+                  url += '&videoUrl' + (i+1) + '=';
+                }
+                url += previewFiles[i];
+              }
+              $('#player-container').attr('src', url);
+            } else {
+              $('#player-container').text("No preview media files found for this media package.");
             }
             // show links to source media
             var singleFile = true;
             $(data.documentElement).find("mediapackage > media > track").each(function(index, elm) {
-              //if (($(elm).attr('type').split(/\//)[1] == 'source') && ($(elm).find("tags > tag:contains('preview')").empty())) {
               if ($(elm).attr('type').split(/\//)[1] == 'source') {
                 var link = document.createElement('a');
                 var url = $(elm).find('url').text();

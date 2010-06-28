@@ -53,7 +53,7 @@
             if (previewTag != null) {
               var videoUrl = $(previewTag).parent().parent().find('url').text();
               //alert("videoUrl: " + videoUrl);
-              $('#video-url-container').attr('href',videoUrl).text(videoUrl);
+              //$('#video-url-container').attr('href',videoUrl).text(videoUrl);
               var url = '../../../engage/ui/preview.html?videoUrl=' + videoUrl;
               $('#player-container').attr('src', url);
             } else {
@@ -88,8 +88,8 @@
       <iframe id="player-container"></iframe>
     </center>
     <center>
-      <span>Video URL:<a id="video-url-container" href=""></a></span>
-      <br>
+      <!-- span>Video URL:<a id="video-url-container" href=""></a></span>
+      <br -->
     </center>
     <div id="metadata-container">
       <ul class="no-bullets formField-list fl-controls-right">
