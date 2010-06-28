@@ -14,7 +14,7 @@
           success : function(data) {    // get neccessary data to make the link to the DVD image working
             var elms = data.documentElement.getElementsByTagName('track');
             for (i in elms) {
-              if (elms[i].getAttribute('type').match(/dvd/)) {
+              if ((elms[i].getAttribute != undefined) && (elms[i].getAttribute('type').match(/dvd/))) {
                 $('#dvd-image-link').attr('href', elms[i].getElementsByTagName('url')[0].firstChild.data);
               }
             }
