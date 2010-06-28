@@ -461,6 +461,29 @@ public class SchedulerRestService {
   }  
   
   /**
+   * Looks for events that are conflicting with the given event, because they use the same recorder at the same time.
+   * @param e The event that should be checked for conflicts
+   * @return An XML with the list of conflicting events
+   */
+  @POST
+  @Produces(MediaType.TEXT_XML)
+  @Path("events/conflict")
+  public Response findConflictingEvents (@FormParam("event") Event e) {
+    if (e == null) {
+      logger.error("event is null");
+      return Response.status(Status.BAD_REQUEST).build();
+    } 
+    List<Event> events = null;
+    try {
+      events = Arrays.asList(service.findConflictingEvents(e));
+    } catch (Exception e1) {
+      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+    }
+    
+    return Response.ok((new GenericEntity<List<Event>> (events){})).build();
+  }   
+  
+  /**
    * Lists all events in the database, without any filter
    * @return XML with all events 
    */
@@ -705,10 +728,10 @@ public class SchedulerRestService {
     data.addEndpoint(RestEndpoint.Type.READ, getUpcomingEventsEndpoint);    
     
     // Scheduler findConflictingEvents 
-    RestEndpoint findConflictingEventsEndpoint = new RestEndpoint("findConflictingEvents", RestEndpoint.Method.POST, "/findConflictingEvents", "Looks for events that are conflicting with the given event, because they use the same recorder at the same time ");
+    RestEndpoint findConflictingEventsEndpoint = new RestEndpoint("findConflictingEvents", RestEndpoint.Method.POST, "/events/conflict", "Looks for events that are conflicting with the given event, because they use the same recorder at the same time ");
     findConflictingEventsEndpoint.addFormat(new Format("xml", null, null));
-    findConflictingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, List of SchedulerEvents as XML returned"));
-    findConflictingEventsEndpoint.addRequiredParam(new Param("event", Type.TEXT, generateSchedulerEvent(), "The Event that should be checked for conflicts."));
+    findConflictingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, List of Events as XML returned, or an empty list, if no conflicts were found"));
+    findConflictingEventsEndpoint.addRequiredParam(new Param("event", Type.TEXT, generateEvent(), "The Event that should be checked for conflicts."));
     findConflictingEventsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, findConflictingEventsEndpoint);  
 

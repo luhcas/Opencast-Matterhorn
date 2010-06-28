@@ -28,6 +28,7 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.spi.PersistenceProvider;
 
+import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.ValidationException;
 
 import org.opencastproject.scheduler.api.SchedulerEvent;
@@ -495,8 +496,28 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
    */
   @Override
   public SchedulerEvent[] findConflictingEvents(SchedulerEvent e) {
-    // TODO Auto-generated method stub
-    return null;
+    SchedulerEvent[] results = null;
+    Event event = ((SchedulerEventImpl) e).toEvent();
+    Event [] events = findConflictingEvents(event);
+    results = new SchedulerEvent [events.length];
+    for (int i = 0; i < events.length; i++) results[i] = events[i].toSchedulerEvent();
+    return results;
+  }
+  
+  public Event[] findConflictingEvents (Event e) {
+    List<Event> events = new LinkedList<Event>(Arrays.asList(getAllEvents()));
+    //reduce to device first
+    events = filterEventsForExactValue(events, "device", e.getValue("device"));
+    
+    //all events that start at the same time or later
+    long start = e.getStartdate().getTime() -1; // make sure that the same start time is included too;
+    events = filterEventsForAfterDate(events, new DateTime(start));
+    
+    //all events that stop at the same time or earlier
+    long end = e.getStartdate().getTime() +1; // make sure that the same stop time is included too;
+    events = filterEventsForBeforeDate(events, new DateTime(end));
+    
+    return events.toArray(new Event[0]);
   }
   
   public void activate (ComponentContext cc) {
