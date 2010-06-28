@@ -273,28 +273,37 @@ UI.DeleteForm = function(){
 UI.HandleAgentChange = function(elm){
   var agent = elm.target.value;
   $(UI.inputList).empty();
-  $.get('/capture-admin/rest/agents/' + agent + '/capabilities',
-    function(doc){
-      var capabilities = [];
-      $.each($('entry', doc), function(a, i){
-        var s = $(i).attr('key');
-        if(s.indexOf('.src') != -1){
-          var name = s.split('.');
-          capabilities.push(name[2]);
-        } else if(s == 'capture.device.timezone.offset') {
-          var agent_tz = parseInt($(i).text());
-          if(agent_tz !== 'NaN'){
-            UI.HandleAgentTZ(agent_tz);
+  if(agent){
+    $.get('/capture-admin/rest/agents/' + agent + '/capabilities',
+      function(doc){
+        var capabilities = [];
+        $.each($('entry', doc), function(a, i){
+          var s = $(i).attr('key');
+          if(s.indexOf('.src') != -1){
+            var name = s.split('.');
+            capabilities.push(name[2]);
+          } else if(s == 'capture.device.timezone.offset') {
+            var agent_tz = parseInt($(i).text());
+            if(agent_tz !== 'NaN'){
+              UI.HandleAgentTZ(agent_tz);
+            }else{
+              AdminUI.log("Couldn't parse TZ");
+            }
           }
+        });
+        if(capabilities.length){
+          UI.DisplayCapabilities(capabilities);
+        }else{
+          Agent.tzDiff = 0; //No agent timezone could be found, assume local time.
+          $('#input-list').append('Agent defaults will be used.');
         }
       });
-      if(capabilities.length){
-        UI.DisplayCapabilities(capabilities);
-      }else{
-        Agent.tzDiff = 0; //No agent timezone could be found, assume local time.
-        $('#input-list').append('Agent defaults will be used.');
-      }
-    });
+  }else{
+    // no valid agent, change time to local form what ever it was before.
+    var time = Scheduler.components.timeStart.getValue();
+    Agent.tzDiff = 0;
+    Scheduler.components.timeStart.setValue(time);
+  }
 };
 
 UI.DisplayCapabilities = function(capabilities){
@@ -308,18 +317,24 @@ UI.DisplayCapabilities = function(capabilities){
 };
 
 UI.HandleAgentTZ = function(tz){
+  var agentLocalTime = null;
   var localTZ = -(new Date()).getTimezoneOffset(); //offsets in minutes
   Agent.tzDiff = 0;
   if(tz != localTZ){
     //Display note of agent TZ difference, all times local to capture agent.
     //update time picker to agent time
     Agent.tzDiff = tz - localTZ;
+    agentLocalTime = Scheduler.components.timeStart.getValue() + (Agent.tzDiff * 60 * 1000);
+    Scheduler.components.timeStart.setValue(agentLocalTime);
     diff = Math.round((Agent.tzDiff/60)*100)/100;
-    if (diff < 0) postfix = " hours earlier"; 
-    else if (diff > 0) postfix = " hours later"; 
+    if(diff < 0){
+      postfix = " hours earlier";
+    }else if(diff > 0){
+      postfix = " hours later"; 
+    }
     $('#notice-container').show();
     $('#notice-tzdiff').show();
-    $('#tzdiff').append(Math.abs(diff) + postfix);
+    $('#tzdiff').replaceWith(Math.abs(diff) + postfix);
   }
 };
 
@@ -361,13 +376,11 @@ UI.LoadEvent = function(doc){
   var metadata = {};
   $.each($('metadataList > metadata',doc), function(i,v){
     metadata[$('key', v).text()] = $('value', v).text();
-    AdminUI.log('mdlist: ', $('key', v).text(), $('value', v).text());
   });
   $.each($('completeMetadata > metadata',doc), function(i,v){
     if(metadata[$('key', v).text()] == undefined){
       //feild not in list, add it.
       metadata[$('key', v).text()] = $('value', v).text();
-      AdminUI.log('cmd: ', $('key', v).text(), $('value', v).text());
     }
   });
   if(metadata['resources']){
@@ -491,7 +504,9 @@ UI.RegisterComponents = function(){
           }
           date = parseInt(value.startdate);
           if(date != 'NaN') {
+            AdminUI.log('date: ' + date);
             date = new Date(date + (Agent.tzDiff * 60 * 1000));
+            AdminUI.log('date + offset: ' + date);
           } else {
             AdminUI.log('Could not parse date.');
           }
@@ -770,22 +785,17 @@ UI.RegisterComponents = function(){
       { label: 'label-startdate', errorField: 'missing-startdate', required: true, nodeKey: 'timeStart' },
       { getValue: function(){
           var date = 0;
-          if(this.validate()){
-            date = this.fields.startDate.datepicker('getDate').getTime() / 1000; // Get date in milliseconds, convert to seconds.
-            date += this.fields.startTimeHour.val() * 3600; // convert hour to seconds, add to date.
-            date += this.fields.startTimeMin.val() * 60; //convert minutes to seconds, add to date.
-            date -= Agent.tzDiff * 60; //Agent TZ offset
-            date = date * 1000; //back to milliseconds
-            this.value = (new Date(date)).getTime();
-          }
-          return this.value;
+          date = this.fields.startDate.datepicker('getDate').getTime() / 1000; // Get date in milliseconds, convert to seconds.
+          date += this.fields.startTimeHour.val() * 3600; // convert hour to seconds, add to date.
+          date += this.fields.startTimeMin.val() * 60; //convert minutes to seconds, add to date.
+          date -= Agent.tzDiff * 60; //Agent TZ offset
+          date = date * 1000; //back to milliseconds
+          return (new Date(date)).getTime();
         },
         setValue: function(value){
           var date, hour;
-          if(typeof value == 'string'){
-            value = { startdate: value };
-          }
-          date = parseInt(value.startdate);
+          date = parseInt(value);
+          
           if(date != 'NaN') {
             date = new Date(date + (Agent.tzDiff * 60 * 1000));
           } else {
