@@ -134,7 +134,7 @@
       exception-handler-workflow="error"
       description="Encode presenter audio for preview">
       <configurations>
-        <configuration key="source-audio-flavor">presenter/work</configuration>
+        <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/preview</configuration>
         <configuration key="encoding-profile">flash-preview.http</configuration>
       </configurations>
