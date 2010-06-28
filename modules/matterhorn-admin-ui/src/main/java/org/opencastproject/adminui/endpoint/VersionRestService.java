@@ -78,9 +78,13 @@ public class VersionRestService {
       URL url = new URL("http://opencast.jira.com/svn/MH/trunk/");
       URLConnection conn = url.openConnection();
       String etag = conn.getHeaderField("etag");
-      String[] parts = etag.split("\"");
-      parts = parts[1].split("/");
-      json.put("version", parts[0]);
+      if(etag == null) {
+        json.put("version", "N/A");
+      } else {
+        String[] parts = etag.split("\"");
+        parts = parts[1].split("/");
+        json.put("version", parts[0]);
+      }
     } catch (IOException e) {
       logger.debug(e.toString());
       json.put("version", "N/A");
