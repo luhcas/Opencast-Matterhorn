@@ -1,6 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.opencastproject</groupId>
@@ -27,21 +26,26 @@
 			<url>http://repository.opencastproject.org/nexus/content/groups/public</url>
 		</repository>
 		<repository>
-  			<id>sonatype-flex</id>
-  			<url>http://repository.sonatype.org/service/local/repositories/flex/content</url>
-  		</repository>
+			<id>sonatype-flex</id>
+			<url>http://repository.sonatype.org/service/local/repositories/flex/content</url>
+		</repository>
 	</repositories>
-		<pluginRepositories>
+	<pluginRepositories>
 		<pluginRepository>
 			<id>opencast</id>
 			<url>http://repository.opencastproject.org/nexus/content/groups/public</url>
 		</pluginRepository>
 		<pluginRepository>
-  			<id>sonatype-flexmojos-snapshots</id>
-  			<url>http://repository.sonatype.org/service/local/repositories/flexmojos-snapshots/content</url>
-  		</pluginRepository>
+			<id>sonatype-flexmojos-snapshots</id>
+			<url>http://repository.sonatype.org/service/local/repositories/flexmojos-snapshots/content</url>
+		</pluginRepository>
 	</pluginRepositories>
 
+	<!--
+		mvn install
+		Deploys all required files to shared-resources/player 
+		(Only files needed for the matterhorn-engage-ui module)
+	-->
 	<build>
 		<sourceDirectory>src/main/flex/Videodisplay</sourceDirectory>
 		<!--<testSourceDirectory>src/test/flex</testSourceDirectory>-->
@@ -63,8 +67,13 @@
 					<targetPlayer>10.0.0</targetPlayer>
 					<accessible>true</accessible>
 					<headlessServer>true</headlessServer>
-					<output>${project.build.directory}/hybrid-player/Videodisplay.swf</output>
-					<!--<coverageViewerPath>/Applications/CoverageViewer.app</coverageViewerPath>-->
+					<!--
+						<output>${project.build.directory}/player/Videodisplay.swf</output>
+					-->
+					<output>../../shared-resources/player/Videodisplay.swf</output>
+					<!--
+						<coverageViewerPath>/Applications/CoverageViewer.app</coverageViewerPath>
+					-->
 				</configuration>
 			</plugin>
 			<plugin>
@@ -79,11 +88,14 @@
 							<goal>copy-resources</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${basedir}/target/hybrid-player</outputDirectory>
+							<outputDirectory>../../shared-resources/player</outputDirectory>
 							<resources>
 								<resource>
 									<directory>src/main/html/html-release</directory>
 									<filtering>true</filtering>
+									<includes>
+										<include>engage-hybrid-player/</include>
+									</includes>
 								</resource>
 								<resource>
 									<directory>src/main/flex/Videodisplay/</directory>
@@ -142,9 +154,13 @@
 			</build>
 		</profile>
 
-<!-- mvn -P shared-resources , copies only files needed for matterhorn-engage-ui  -->
+		<!--
+			mvn -P testdebug
+			Creates a standalone version of the player component with mockdata
+			Can be used on a standard webserver
+		-->
 		<profile>
-			<id>shared-resources</id>
+			<id>testdebug</id>
 			<build>
 				<plugins>
 					<plugin>
@@ -154,18 +170,18 @@
 							<dependency>
 								<groupId>com.adobe.flex</groupId>
 								<artifactId>compiler</artifactId>
-								<version>3.4.0.9271</version>
+								<version>3.6.0.16321</version>
 								<type>pom</type>
 							</dependency>
 						</dependencies>
-						<version>3.4.2</version>
+						<version>3.7.1</version>
 						<extensions>true</extensions>
 						<configuration>
 							<targetPlayer>10.0.0</targetPlayer>
 							<accessible>true</accessible>
 							<headlessServer>true</headlessServer>
 							<showWarnings>false</showWarnings>
-							<output>${project.build.directory}/shared-resources/player/Videodisplay.swf</output>
+							<output>${project.build.directory}/hybrid-player/player/Videodisplay.swf</output>
 						</configuration>
 					</plugin>
 					<plugin>
@@ -180,7 +196,7 @@
 									<goal>copy-resources</goal>
 								</goals>
 								<configuration>
-									<outputDirectory>${basedir}/target/shared-resources/player</outputDirectory>
+									<outputDirectory>${basedir}/target/hybrid-player</outputDirectory>
 									<resources>
 										<resource>
 											<directory>src/main/html/html-release</directory>
@@ -194,6 +210,27 @@
 											<filtering>true</filtering>
 											<includes>
 												<include>style/</include>
+											</includes>
+										</resource>
+										<resource>
+											<directory>../../shared-resources</directory>
+											<filtering>true</filtering>
+											<excludes>
+												<exclude>player</exclude>
+											</excludes>
+										</resource>
+										<resource>
+											<directory>../matterhorn-engage-ui/src/main/resources/ui</directory>
+											<filtering>true</filtering>
+											<includes>
+												<include>css/</include>
+												<include>img/</include>
+												<include>js/</include>
+												<include>xsl/</include>
+												<include>embed.html</include>
+												<include>watch.html</include>
+												<include>episode-segments.xml</include>
+												<include>episode.xml</include>
 											</includes>
 										</resource>
 									</resources>
@@ -222,7 +259,7 @@
 							<windowTitle>Opencast Matterhorn Videodisplay API Doc</windowTitle>
 							<footer>Opencast Matterhorn</footer>
 							<configFile>
-                    ${basedir}/asdoc-config.xml
+								${basedir}/asdoc-config.xml
                     </configFile>
 						</configuration>
 					</reportSet>
@@ -265,11 +302,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-      		<groupId>com.adobe.flex.framework</groupId>
-     		 <artifactId>flex-framework</artifactId>
-      		<version>3.6.0.16321</version>
-      		<type>pom</type>
-    	</dependency>
+			<groupId>com.adobe.flex.framework</groupId>
+			<artifactId>flex-framework</artifactId>
+			<version>3.6.0.16321</version>
+			<type>pom</type>
+		</dependency>
 		<dependency>
 			<groupId>com.adobe.flex.framework</groupId>
 			<artifactId>playerglobal</artifactId>
