@@ -266,11 +266,11 @@ public class AdminuiRestService {
       int capturing = 0;
       while (i.hasNext()) {
         Recording r = recordings.get(i.next());
-        if ((r.getState().equals(RecordingState.CAPTURING))
-                || (r.getState().equals(RecordingState.UPLOADING))
-                || (r.getState().equals(RecordingState.MANIFEST))
-                || (r.getState().equals(RecordingState.UPLOADING)
-                || (r.getState().equals(RecordingState.CAPTURE_FINISHED)))) {   // FIXME also take into account RecordingState.UNKNOWN ??
+        if ( r.getState().equals(RecordingState.CAPTURING)
+                || r.getState().equals(RecordingState.CAPTURE_FINISHED)
+                || r.getState().equals(RecordingState.MANIFEST)
+                || r.getState().equals(RecordingState.UPLOADING)
+                || r.getState().equals(RecordingState.COMPRESSING) ) {   // FIXME also take into account RecordingState.UNKNOWN ??
           capturing++;
           total++;
         }
@@ -425,11 +425,12 @@ public class AdminuiRestService {
       SchedulerEvent[] events = schedulerService.getCapturingEvents();
       for (int i = 0; i < events.length; i++) {
         Recording r = captureAdminService.getRecordingState(events[i].getID());
-        if ((r != null)
-                & ((r.getState().equals(RecordingState.CAPTURING))
-                || (r.getState().equals(RecordingState.COMPRESSING))
-                || (r.getState().equals(RecordingState.MANIFEST))
-                || (r.getState().equals(RecordingState.UPLOADING)))) {
+        if ( r != null
+                & ( r.getState().equals(RecordingState.CAPTURING)
+                || r.getState().equals(RecordingState.CAPTURE_FINISHED)
+                || r.getState().equals(RecordingState.COMPRESSING)
+                || r.getState().equals(RecordingState.MANIFEST)
+                || r.getState().equals(RecordingState.UPLOADING)) ) {
           RecordingDataView item = new RecordingDataViewImpl();
           item.setId(events[i].getID());
           item.setTitle(events[i].getTitle());

@@ -91,7 +91,13 @@ function handleDCMetadata(metadataDoc){
     var field = fields[i];
     el = eventDoc.createElement(field);
     if(metadataDoc.getElementsByTagNameNS){
-      nodeTxt = $(metadataDoc.getElementsByTagNameNS("*",field)[0]).text();
+      if (field == 'creator') {
+        var creator_elms = metadataDoc.getElementsByTagNameNS("*",field);
+        // todo DISPLAY ALL CREATORS
+        $()
+      } else {
+        nodeTxt = $(metadataDoc.getElementsByTagNameNS("*",field)[0]).text();
+      }
     } else {
       nodeTxt = $("dcterms\\:" + field, metadataDoc).text();
     }
