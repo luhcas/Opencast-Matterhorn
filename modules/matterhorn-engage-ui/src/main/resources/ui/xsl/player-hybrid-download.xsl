@@ -26,8 +26,7 @@
            <xsl:if test="(../../mediapackage/@duration) > ./@time">
            <td 
              class="segment-holder" 
-             style="width: 15px;" 
-             >
+             style="width: 15px;">
              <xsl:attribute name="id">segment<xsl:value-of select="position()" /></xsl:attribute>
              <xsl:attribute name="onmouseover">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
              <xsl:attribute name="onmouseout">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()" />')</xsl:attribute>
@@ -123,6 +122,9 @@
             <div id="oc-resolution-presenter-delivery-x-flv-rtmp" style="display: none">
               <xsl:value-of select="video/resolution" />
             </div>
+            <div id="oc-mimetype-presenter-delivery-x-flv-rtmp" style="display: none">
+              <xsl:value-of select="mimetype" />
+            </div>
           </xsl:if>
         </xsl:if>
       </xsl:if>
@@ -135,6 +137,9 @@
             </div>
             <div id="oc-resolution-presentation-delivery-x-flv-rtmp" style="display: none">
               <xsl:value-of select="video/resolution" />
+            </div>
+            <div id="oc-mimetype-presentation-delivery-x-flv-rtmp" style="display: none">
+              <xsl:value-of select="mimetype" />
             </div>
           </xsl:if>
         </xsl:if>
@@ -151,6 +156,9 @@
             <div id="oc-resolution-presenter-source-x-flv-http" style="display: none">
               <xsl:value-of select="video/resolution" />
             </div>
+            <div id="oc-mimetype-presenter-source-x-flv-http" style="display: none">
+              <xsl:value-of select="mimetype" />
+            </div>
           </xsl:if>
         </xsl:if>
       </xsl:if>
@@ -163,6 +171,9 @@
             </div>
             <div id="oc-resolution-presentation-source-x-flv-http" style="display: none">
               <xsl:value-of select="video/resolution" />
+            </div>
+            <div id="oc-mimetype-presentation-source-x-flv-http" style="display: none">
+              <xsl:value-of select="mimetype" />
             </div>
           </xsl:if>
         </xsl:if>
@@ -177,6 +188,9 @@
             <div id="oc-resolution-presenter-source-x-flv-rtmp" style="display: none">
               <xsl:value-of select="video/resolution" />
             </div>
+            <div id="oc-mimetype-presenter-source-x-flv-rtmp" style="display: none">
+              <xsl:value-of select="mimetype" />
+            </div>
           </xsl:if>
         </xsl:if>
       </xsl:if>
@@ -189,6 +203,9 @@
             </div>
             <div id="oc-resolution-presentation-source-x-flv-rtmp" style="display: none">
               <xsl:value-of select="video/resolution" />
+            </div>
+            <div id="oc-mimetype-presentation-source-x-flv-rtmp" style="display: none">
+              <xsl:value-of select="mimetype" />
             </div>
           </xsl:if>
         </xsl:if>
