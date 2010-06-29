@@ -323,7 +323,7 @@ public class ComposerServiceImpl implements ComposerService {
         } catch (Exception e) {
           composerReceipt.setStatus(Status.FAILED);
           remoteServiceManager.updateReceipt(composerReceipt);
-          logger.error("Unable to put the encoded file into the workspace");
+          logger.error("Unable to put the encoded file into the workspace", e);
           throw new RuntimeException(e);
         } finally {
           IOUtils.closeQuietly(in);

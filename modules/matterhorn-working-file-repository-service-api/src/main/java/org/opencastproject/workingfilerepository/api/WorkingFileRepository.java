@@ -39,6 +39,9 @@ public interface WorkingFileRepository {
   /** Path prefix for mediapackage elements */
   String MEDIAPACKAGE_PATH_PREFIX = "/mediapackage/";
 
+  /**  The job type we use to register with the remote services manager */
+  String JOB_TYPE = "workingfiles";
+
   /**
    * Store the data stream under the given media package and element IDs with filename as name of the file.
    * 

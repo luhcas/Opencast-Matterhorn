@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workingfilerepository.impl;
 
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UrlSupport;
@@ -50,7 +51,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
 
   /** The extension we use for the md5 hash calculated from the file contents */
   public static final String MD5_EXTENSION = ".md5";
-  
+
   /** The filename filter matching .md5 files */
   private static final FilenameFilter MD5_FINAME_FILTER = new FilenameFilter() {
     public boolean accept(File dir, String name) {
@@ -58,12 +59,27 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
     }
   };
 
+  /** The remote service manager */
+  protected RemoteServiceManager remoteServiceManager;
+
+  /**
+   * Sets the remote service manager.
+   * 
+   * @param remoteServiceManager
+   */
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
+  }
+  
   /* The root directory for storing files */
   String rootDirectory = null;
 
   /** The Base URL for this server */
   String serverUrl = null;
 
+  /**
+   * Activate the component
+   */
   public void activate(ComponentContext cc) {
     if (rootDirectory != null)
       return; // If the root directory was set by the constructor, respect that setting
@@ -79,10 +95,17 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
       rootDirectory = cc.getBundleContext().getProperty("org.opencastproject.file.repo.path");
     }
     createRootDirectory();
-
+    remoteServiceManager.registerService(JOB_TYPE, serverUrl);
     logger.info(getDiskSpace());
   }
 
+  /**
+   * Deactivate the component
+   */
+  public void deactivate() {
+    remoteServiceManager.unRegisterService(JOB_TYPE, serverUrl);
+  }
+  
   public void delete(String mediaPackageID, String mediaPackageElementID) {
     checkPathSafe(mediaPackageID);
     checkPathSafe(mediaPackageElementID);

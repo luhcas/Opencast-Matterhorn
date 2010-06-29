@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workingfilerepository.remote;
 
-import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.remote.api.RemoteBase;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
@@ -34,32 +34,26 @@ import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * A remote service proxy for a working file repository
  */
-public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
-  public static final String REMOTE_FILE_REPO = "remote.filerepository";
+public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements WorkingFileRepository {
 
-  protected TrustedHttpClient client;
-  protected String remoteHost;
+  /** the logger */
+  private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryRemoteImpl.class);
 
-  public void setTrustedHttpClient(TrustedHttpClient client) {
-    this.client = client;
+  public WorkingFileRepositoryRemoteImpl() {
+    super(JOB_TYPE);
   }
-
-  public void activate(ComponentContext cc) {
-    this.remoteHost = cc.getBundleContext().getProperty(REMOTE_FILE_REPO);
-  }
-
+  
   /**
    * {@inheritDoc}
    * 
@@ -68,18 +62,20 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public URI copyTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement) {
-    String url = UrlSupport.concat(new String[] { remoteHost, "files", "copy", fromCollection, fromFileName,
+    String urlSuffix = UrlSupport.concat(new String[] {"/files", "copy", fromCollection, fromFileName,
             toMediaPackage, toMediaPackageElement });
-    HttpPost post = new HttpPost(url);
-    HttpResponse response = client.execute(post);
+    HttpPost post = new HttpPost(urlSuffix);
+    HttpResponse response = getResponse(post);
+    if(response == null) {
+      throw new RuntimeException();
+    }
     try {
-      String content = EntityUtils.toString(response.getEntity());
-      return new URI(content);
+      return new URI(EntityUtils.toString(response.getEntity(), "UTF-8"));
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException();
     }
   }
-
+  
   /**
    * {@inheritDoc}
    * 
@@ -88,15 +84,17 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public URI moveTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement) {
-    String url = UrlSupport.concat(new String[] { remoteHost, "files", "move", fromCollection, fromFileName,
+    String urlSuffix = UrlSupport.concat(new String[] { "/files", "move", fromCollection, fromFileName,
             toMediaPackage, toMediaPackageElement });
-    HttpPost post = new HttpPost(url);
-    HttpResponse response = client.execute(post);
+    HttpPost post = new HttpPost(urlSuffix);
+    HttpResponse response = getResponse(post);
+    if(response == null) {
+      throw new RuntimeException();
+    }
     try {
-      String content = EntityUtils.toString(response.getEntity());
-      return new URI(content);
+      return new URI(EntityUtils.toString(response.getEntity(), "UTF-8"));
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException();
     }
   }
 
@@ -107,13 +105,11 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public void delete(String mediaPackageID, String mediaPackageElementID) {
-    String url = UrlSupport.concat(new String[] { remoteHost, "files", mediaPackageID, mediaPackageElementID });
-    HttpDelete del = new HttpDelete(url);
-    HttpResponse response = client.execute(del);
-    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-      return;
-    } else {
-      throw new RuntimeException(response.getStatusLine().getReasonPhrase());
+    String urlSuffix = UrlSupport.concat(new String[] { "/files", mediaPackageID, mediaPackageElementID });
+    HttpPost post = new HttpPost(urlSuffix);
+    HttpResponse response = getResponse(post, HttpStatus.SC_NO_CONTENT);
+    if(response == null) {
+      throw new RuntimeException();
     }
   }
 
@@ -124,15 +120,16 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public InputStream get(String mediaPackageID, String mediaPackageElementID) throws NotFoundException {
-    String url = UrlSupport.concat(new String[] { remoteHost, "files", mediaPackageID, mediaPackageElementID });
-    HttpGet get = new HttpGet(url);
-    HttpResponse response = client.execute(get);
-    if (HttpServletResponse.SC_NOT_FOUND == response.getStatusLine().getStatusCode())
+    String urlSuffix = UrlSupport.concat(new String[] {"/files", mediaPackageID, mediaPackageElementID});
+    HttpGet get = new HttpGet(urlSuffix);
+    HttpResponse response = getResponse(get);
+    if(response == null) {
       throw new NotFoundException();
+    }
     try {
       return response.getEntity().getContent();
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException();
     }
   }
 
@@ -143,9 +140,12 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public URI[] getCollectionContents(String collectionId) {
-    String url = UrlSupport.concat(new String[] { remoteHost, "files", "list", collectionId + ".json" });
-    HttpGet get = new HttpGet(url);
-    HttpResponse response = client.execute(get);
+    String urlSuffix = UrlSupport.concat(new String[] {"/files", "list", collectionId + ".json"});
+    HttpGet get = new HttpGet(urlSuffix);
+    HttpResponse response = getResponse(get);
+    if(response == null) {
+      throw new RuntimeException();
+    }
     try {
       String json = EntityUtils.toString(response.getEntity());
       JSONArray jsonArray = (JSONArray) JSONValue.parse(json);
@@ -155,8 +155,9 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
       }
       return uris;
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException();
     }
+  
   }
 
   /**
@@ -180,9 +181,12 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
   }
 
   protected JSONObject getStorageReport() {
-    String url = UrlSupport.concat(new String[] { remoteHost, "files", "storage" });
+    String url = UrlSupport.concat(new String[] { "/files", "storage" });
     HttpGet get = new HttpGet(url);
-    HttpResponse response = client.execute(get);
+    HttpResponse response = getResponse(get);
+    if(response == null) {
+      throw new RuntimeException();
+    }
     try {
       String json = EntityUtils.toString(response.getEntity());
       return (JSONObject) JSONValue.parse(json);
@@ -199,10 +203,11 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public InputStream getFromCollection(String collectionId, String fileName) throws NotFoundException {
-    String url = UrlSupport.concat(new String[] { remoteHost, "files", "collection", collectionId, fileName });
+    String url = UrlSupport.concat(new String[] {"/files", "collection", collectionId, fileName });
     HttpGet get = new HttpGet(url);
-    HttpResponse response = client.execute(get);
-    if (HttpServletResponse.SC_NOT_FOUND == response.getStatusLine().getStatusCode())
+    HttpResponse response = getResponse(get, HttpStatus.SC_OK, HttpStatus.SC_NOT_FOUND);
+    if(response == null) throw new RuntimeException();
+    if(response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND)
       throw new NotFoundException();
     try {
       return response.getEntity().getContent();
@@ -229,9 +234,10 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public URI getCollectionURI(String collectionID, String fileName) {
-    String url = UrlSupport.concat(new String[] {remoteHost, "files", "collectionuri", collectionID, fileName});
+    String url = UrlSupport.concat(new String[] {"/files", "collectionuri", collectionID, fileName});
     HttpGet get = new HttpGet(url);
-    HttpResponse response = client.execute(get);
+    HttpResponse response = getResponse(get);
+    if(response == null) throw new RuntimeException();
     try {
       return new URI(EntityUtils.toString(response.getEntity()));
     } catch (Exception e) {
@@ -257,10 +263,14 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public URI getURI(String mediaPackageID, String mediaPackageElementID, String fileName) {
-    String url = UrlSupport.concat(new String[] { remoteHost, "files", "uri", mediaPackageID, mediaPackageElementID,
-            fileName });
+    String url = UrlSupport.concat(new String[] {"/files", "uri", mediaPackageID, mediaPackageElementID});
+    if (fileName != null)
+      url = UrlSupport.concat(url, fileName);
     HttpGet get = new HttpGet(url);
-    HttpResponse response = client.execute(get);
+    HttpResponse response = getResponse(get);
+    if(response == null) {
+      throw new RuntimeException();
+    }
     try {
       return new URI(EntityUtils.toString(response.getEntity()));
     } catch (Exception e) {
@@ -286,7 +296,12 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public URI put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in) {
-    String url = UrlSupport.concat(new String[] { remoteHost, "files", "mp", mediaPackageID, mediaPackageElementID });
+    // TODO: generalize this and put it in the base class
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    if(remoteHosts.size() == 0) {
+      throw new IllegalStateException("No remote file repositories are available");
+    }
+    String url = UrlSupport.concat(new String[] { remoteHosts.get(0), "files", "mp", mediaPackageID, mediaPackageElementID });
     HttpPost post = new HttpPost(url);
     MultipartEntity entity = new MultipartEntity();
     ContentBody body = new InputStreamBody(in, filename);
@@ -309,7 +324,12 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public URI putInCollection(String collectionId, String fileName, InputStream in) {
-    String url = UrlSupport.concat(new String[] { remoteHost, "files", "collection", collectionId });
+    // TODO: generalize this and put it in the base class
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    if(remoteHosts.size() == 0) {
+      throw new IllegalStateException("No remote file repositories are available");
+    }
+    String url = UrlSupport.concat(new String[] {remoteHosts.get(0), "/files", "collection", collectionId });
     HttpPost post = new HttpPost(url);
     MultipartEntity entity = new MultipartEntity();
     ContentBody body = new InputStreamBody(in, fileName);
@@ -332,12 +352,11 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public void deleteFromCollection(String collectionId, String fileName) {
-    String url = UrlSupport.concat(new String[] { remoteHost, "files", "collection", collectionId });
+    String url = UrlSupport.concat(new String[] {"/files", "collection", collectionId });
     HttpDelete del = new HttpDelete(url);
-    HttpResponse response = client.execute(del);
-    if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT)
-      return;
-    throw new RuntimeException("Error removing file: " + response.getStatusLine().getReasonPhrase());
+    HttpResponse response = getResponse(del, HttpStatus.SC_NO_CONTENT);
+    if(response == null)
+      throw new RuntimeException("Error removing file");
   }
 
   /**
@@ -348,11 +367,14 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public String hashCollectionElement(String collectionId, String fileName) throws IOException {
-    String url = UrlSupport.concat(new String[] { remoteHost, "files", "collection", collectionId, fileName });
+    String url = UrlSupport.concat(new String[] {"/files", "collection", collectionId, fileName });
     HttpHead head = new HttpHead(url);
-    HttpResponse response = client.execute(head);
+    HttpResponse response = getResponse(head, HttpStatus.SC_OK, HttpStatus.SC_NOT_FOUND);
+    if(response == null) {
+      throw new RuntimeException();
+    }
     try {
-      if (response.getStatusLine().getStatusCode() == Response.Status.NOT_FOUND.getStatusCode()) {
+      if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
         return null;
       } else {
         Header[] etags = response.getHeaders("ETag");
@@ -373,11 +395,14 @@ public class WorkingFileRepositoryRemoteImpl implements WorkingFileRepository {
    */
   @Override
   public String hashMediaPackageElement(String mediaPackageID, String mediaPackageElementID) throws IOException {
-    String url = UrlSupport.concat(new String[] { remoteHost, "files", mediaPackageID, mediaPackageElementID });
+    String url = UrlSupport.concat(new String[] {"/files", mediaPackageID, mediaPackageElementID });
     HttpHead head = new HttpHead(url);
-    HttpResponse response = client.execute(head);
+    HttpResponse response = getResponse(head, HttpStatus.SC_OK, HttpStatus.SC_NOT_FOUND);
+    if(response == null) {
+      throw new RuntimeException();
+    }
     try {
-      if (response.getStatusLine().getStatusCode() == Response.Status.NOT_FOUND.getStatusCode()) {
+      if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
         return null;
       } else {
         Header[] etags = response.getHeaders("ETag");
