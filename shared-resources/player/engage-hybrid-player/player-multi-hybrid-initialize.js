@@ -125,10 +125,10 @@ Opencast.Initialize = (function ()
 
         if (getDivId() === VIDEOSIZE)
         {
-            $('#oc_sound').css('width', '0%');
-            $('#oc_video-size-controls').css('width', '25%');
+            $('#oc_sound').css('width', '20%');
+            $('#oc_video-size-controls').css('width', '5%');
             $('#oc_video-size-dropdown-div').css('width', '20%')
-            $('#oc_player_video-dropdown').css('left',$('#oc_video-size-dropdown').offset().left-$('#oc_body').offset().left);
+            $('#oc_player_video-dropdown').css('left',$('#oc_video-size-dropdown').offset().left - $('#oc_body').offset().left);
             $('#oc_player_video-dropdown').css('visibility', 'visible');
             $('#oc_volume-menue').css('visibility', 'hidden');
             ddmenuitem = $('#oc_player_video-dropdown');
@@ -817,10 +817,23 @@ Opencast.Initialize = (function ()
         
         //
         var margin = 0;
+        var controlswith = 0;
+        
         margin = $('#oc_video-controls').width();
-        margin = (margin - 165) / 2;
-        $('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
-    }
+        
+        if (Opencast.segments.getSlideLength() === 0)
+        {
+        	controlswith = 58;
+        	margin = ((margin - controlswith) / 2 ) - 8;
+        	 $(".oc_btn-rewind").css("margin-left", margin + "px");
+        }
+        else
+        {
+        	controlswith = 90;
+        	margin = ((margin - controlswith) / 2 ) - 8;
+        	$('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
+        }
+     }
 
     /**
         @memberOf Opencast.Player

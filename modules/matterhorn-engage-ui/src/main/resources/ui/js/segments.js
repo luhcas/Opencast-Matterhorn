@@ -8,11 +8,12 @@ var Opencast = Opencast || {};
  */
 Opencast.segments = ( function() {
 
-  var totalPanels;
-  var segmentTimes;
-  var beforeSlide = 0;
-  var currentSlide = 0;
-  var nextSlide = 0;
+  var totalPanels,
+   segmentTimes,
+   beforeSlide = 0,
+   currentSlide = 0,
+   nextSlide = 0,
+   slideLength = 0;
 
   function getSecondsBeforeSlide(){
     return beforeSlide;
@@ -20,6 +21,16 @@ Opencast.segments = ( function() {
 
   function getSecondsNextSlide(){
     return nextSlide;
+  }
+  
+  function getSlideLength()
+  {
+	  return slideLength;
+  }
+  
+  function setSlideLength(length)
+  {
+	  slideLength = length;
   }
 
   /**
@@ -57,13 +68,34 @@ Opencast.segments = ( function() {
       segmentTimes[i] = seconds;
     });
 
+    // set the slide length
+    setSlideLength(segmentTimes.length);
+    
     // Hide Slide Tab, if there are no slides
     if(segmentTimes.length === 0) {
       Opencast.Player.doToggleSlides();
       $(".oc_btn-skip-backward").hide();
       $(".oc_btn-skip-forward").hide();
-      $(".oc_btn-rewind").css("margin-left", "230px");
     }
+    
+    var margin = 0;
+    var controlswith = 0;
+    
+    margin = $('#oc_video-controls').width();
+    
+    if (Opencast.segments.getSlideLength() === 0)
+    {
+    	controlswith = 58;
+    	margin = ((margin - controlswith) / 2 ) - 8;
+    	 $(".oc_btn-rewind").css("margin-left", margin + "px");
+    }
+    else
+    {
+    	controlswith = 90;
+    	margin = ((margin - controlswith) / 2 ) - 8;
+    	$('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
+    }
+
 
     $(document).everyTime(500, function(index) {
       var currentPosition = parseInt(Opencast.Player.getCurrentPosition());
@@ -128,6 +160,7 @@ Opencast.segments = ( function() {
   return {
     getSecondsBeforeSlide : getSecondsBeforeSlide,
     getSecondsNextSlide : getSecondsNextSlide,
+    getSlideLength : getSlideLength,
     initialize : initialize
   };
 }());

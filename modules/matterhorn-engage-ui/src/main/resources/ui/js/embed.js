@@ -124,10 +124,10 @@ Opencast.Watch = (function ()
           }
           
 
+         
 
           var mimetypeOne = "video/x-flv";
           var mimetypeTwo = "video/x-flv";
-
 
 
        

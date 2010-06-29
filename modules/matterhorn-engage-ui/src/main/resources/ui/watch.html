@@ -29,14 +29,13 @@
     <script type="text/javascript" src="jquery/plugins/jquery.client.js"></script>
     <script type="text/javascript" src="js/engage-ui.js"></script>
     <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-flash.js"></script>
-    <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-initialize.js"></script>
     <script type="text/javascript" src="shared_js/version.js"></script>  
     <script type="text/javascript" src="js/jquery.timers-1.2.js"></script>
-
     <script type="text/javascript" src="js/segments.js"></script>
     <script type="text/javascript" src="js/bookmarks.js"></script>
     <script type="text/javascript" src="js/search.js"></script>
     <script type="text/javascript" src="js/watch.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-initialize.js"></script>
   </head>
 
   <body>
@@ -67,7 +66,7 @@
   <div id="skip">
   <a href="#shortcuts" onclick="Opencast.Player.doToggleShortcuts()">Skip to Shortcuts</a>
   </div>    
-  <div id="oc_body" style="padding-top:5px;">
+  <div id="oc_body">
       
     <div id="oc_flash-player">
      
@@ -100,11 +99,11 @@
         <span id="oc_volume-dropdown">
             <input id="oc_btn-volume" class="oc_btn-volume-high" type="submit" name="Unmute: Control + Alt + M" alt="Unmute: Control + Alt + M" title="Unmute: Control + Alt + M" value=""></input>
         </span>
-        <span id="oc_volume-menue" style="visibility:hidden;">
+        <span id="oc_volume-menue">
             <div id="oc_volume-dropdown-div">
                 <div id="oc_volume-slider">
                     <div id="slider_volume_Rail" class="oc_slider-volume-Rail" title="Volume" alt="Volume">
-                        <label id="volumeLabel" for="slider_volume_Rail" class="oc_offScreen-hidden">Volume</label>
+                        <label id="volumeLabel" for="slider_volume_Rail" class="oc_offScreen-hidden"></label>
                         <input id="slider_volume_Thumb" class="oc_slider-volume-Thumb" type="submit" value=""></input>
                     </div>
                 </div>
@@ -120,14 +119,12 @@
         <span id="oc_video-size-dropdown">
             <input id="oc_btn-dropdown" class="oc_btn-centerDisplay" type="submit" name="Video Size Controls" alt="Video Size Controls" title="Video Size Controls" value=""></input>
         </span>
-        <span id="oc_video-size-menue" style="float:right;visibility:hidden;">
+        <span id="oc_video-size-menue">
       </div>
     </div>
-    <div id="oc_player_video-dropdown" style="position:absolute; background-color:black;z-index:10000;visibility:hidden;">
-    </div>
+    <div id="oc_player_video-dropdown"></div>
 
     <div id="data"></div>
-
 
     <div class="clear"></div>
       

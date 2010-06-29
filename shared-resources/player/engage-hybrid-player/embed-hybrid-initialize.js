@@ -132,8 +132,8 @@ Opencast.Initialize = (function ()
 
         if (getDivId() === VIDEOSIZE)
         {
-            $('#oc_sound').css('width', '0%');
-            $('#oc_video-size-controls').css('width', '25%');
+            $('#oc_sound').css('width', '20%');
+            $('#oc_video-size-controls').css('width', '5%');
             $('#oc_video-size-dropdown-div').css('width', '20%')
             $('#oc_player_video-dropdown').css('left',$('#oc_video-size-dropdown').offset().left-$('#oc_body').offset().left);
             $('#oc_player_video-dropdown').css('visibility', 'visible');
@@ -567,26 +567,12 @@ Opencast.Initialize = (function ()
             }
         });
         
-        
-        
-        
         // to calculate the embed flash height
         var iFrameHeight = document.documentElement.clientHeight;
-        var otherDivHeight = 120;
+        var otherDivHeight = 100;
         var flashHeight = iFrameHeight - otherDivHeight;
         $("#oc_flash-player").css('height',flashHeight + 'px'); 
         
-       
-        
-        // to calculate the margin left of the video controls
-        var marginleft    = 0;
-            controlsWidth = 165,
-            flashWidth = document.documentElement.clientWidth;
-            
-           
-        marginleft = Math.round( (flashWidth * 0.4) - controlsWidth ) / 2;
-        $('.oc_btn-skip-backward').css("margin-left", marginleft + 'px');
-   
         // create watch.html link
         var embedUrl = window.location.href;
         var advancedUrl = embedUrl.replace(/embed.html/g, "watch.html");
@@ -600,7 +586,12 @@ Opencast.Initialize = (function ()
     });
     
    
-    
+
+
+    /**
+        @memberOf Opencast.Player
+        @description Do resize the Embed Player
+     */
     function doResize()
     {
     	
@@ -619,41 +610,29 @@ Opencast.Initialize = (function ()
         }
     	
     }
-    
-    
-    
+
+    /**
+        @memberOf Opencast.Player
+        @description Set new media resuliton to the videodisplay
+        @param Number format
+     */
     function setNewResolution(format)
     {
     	var multiMediaContainerLeft = 0;
     	var flashContainerWidth = document.documentElement.clientWidth - 10;
     	var flashContainerHeight = $('#oc_flash-player').height() - 10;
-    	
-    	
-        var newHeight = flashContainerWidth / format;
+    	var newHeight = flashContainerWidth / format;
         var newWidth = newHeight * format;
-        
         
         if( newHeight >  $('#oc_flash-player').height() - 10)
         {
-        	
         	newHeight = $('#oc_flash-player').height() - 10;
         	newWidth = ($('#oc_flash-player').height() - 10) * format;
-        	
-        	
         }
-    	
-    	
     	multiMediaContainerLeft = (flashContainerWidth - newWidth) / 2;
-    	
-    	
-    	
-    	
-    	
     	Videodisplay.setMediaResolution(mediaOneWidth, mediaOneHeight, mediaTwoWidth, mediaTwoHeight, multiMediaContainerLeft);
-        
-    	
-    	
     }
+    
     /**
         @memberOf Opencast.Player
         @description Set media resuliton of the videos
