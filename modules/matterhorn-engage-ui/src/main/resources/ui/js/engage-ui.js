@@ -12,13 +12,12 @@ Opencast.engage = (function () {
    * @description Gets the url to the search service;
    * @return the search service endpoint url
    */
-
   function getSearchServiceEpisodeIdURL() 
   {
 
-    var restEndpoint = "../../search/rest/episode?id=";
+    var restEndpoint = "../../search/rest/episode?id="; // Production 
     //var restEndpoint = "xml/episode.xml?id="; // Activate for testing purposes
-    //var restEndpoint = "episode-segments.xml?id=";
+    //var restEndpoint = "episode-segments.xml?id="; // Activate for testing purposes
     return restEndpoint;
    }
 

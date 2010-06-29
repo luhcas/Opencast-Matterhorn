@@ -13,8 +13,8 @@ Opencast.search = ( function() {
    * @description Does the search
    */
   function showResult(value){
-    // url: "../../search/rest/episode",
-    // url: "episode-segments.xml",
+    // url: "../../search/rest/episode", // Production
+    // url: "episode-segments.xml",      // For Testing
     var mediaPackageId = Opencast.engage.getMediaPackageId();
     $.ajax(
         {

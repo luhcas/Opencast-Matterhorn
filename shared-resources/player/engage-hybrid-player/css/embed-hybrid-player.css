@@ -21,7 +21,6 @@
   width:                    100%;
   background-image:         url("../img/icons.png");
   background-position:      0 -4px;
-  margin-bottom:            5px;
 } 
   
 #oc_embed-title
@@ -73,8 +72,6 @@ table
   width:                    100%;
   background-image:         url("../img/oc_icons.png");
   background-position:      0 0px;
-  /*margin-top:               5px;
-  margin-bottom:            5px; */
 }
 
 #oc_video-time
@@ -191,6 +188,22 @@ table
   float:                    left;
   /*margin-right:             15px;
   margin-left:              15px;*/
+}
+
+#divToolTip
+{
+  position :                absolute;
+  padding:                  2px;
+  text-align:               center;
+  -moz-border-radius :      5px 5px 5px 5px;
+  -webkit-border-radius :    5px 5px 5px 5px;
+  border :                  1px solid #f8bb22;
+  color :                   #000000;
+  background-color:         #fae6a0;
+  font-size :                   14;
+  left:                     120px;
+  top:                      380px;
+  cursor:                   default !important;
 }
 
 .oc_slider-volume-Rail 
@@ -331,12 +344,6 @@ oc_slider-volume-Thumb
    -webkit-border-radius:   0.2em;
     background-color:       #7B7EAE;
 }
-
-
- 
-  
-
- 
 
 .scrubber-button 
 {

@@ -558,6 +558,11 @@ Opencast.Initialize = (function ()
             }
         });
         
+        
+        
+        // init Flash
+        Opencast.FlashVersion.initFlash();
+        
     });
     
    
