@@ -300,6 +300,7 @@
                     <label class="fl-label">&nbsp;</label>
                     <input type="button" value="Add Series" id="submitButton" class="mouseover-pointer control-button">
                     <input type="button" value="Cancel" id="cancelButton" class="mouseover-pointer control-button">
+                    <input type="hidden" id="seriesId">
                   </li>
                   <li style="margin-top: 0.6em;">
                     <label class="fl-label">&nbsp;</label>
@@ -379,7 +380,7 @@
             <div class="data-label"></div>
             <div class="data-value">
               <a href="/admin/series.html" style="float: left;">&lt;&lt; Back to Series</a>
-              <a href="javascript:location.reload()" style="float: right;">Add another Series &gt;&gt;</a>
+              <a id="schedulerLink" href="/admin/scheduler.html" style="float: right;">Scheduler Recordings &gt;&gt;</a>
             </div>
           </div>
         </div>

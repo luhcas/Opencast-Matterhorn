@@ -43,6 +43,7 @@ UI.Init = function(){
   $('#cancelButton').click(function() {
     document.location = 'recordings.html';
   });
+  $.get(SERIES_SERVICE_URL + '/new/id', function(data){ $('#seriesId').val(data.id); });
 }
 
 UI.Internationalize = function(){
@@ -69,6 +70,21 @@ UI.SelectMetaTab = function(elm){
 }
 
 UI.RegisterComponents = function(){
+  Series.components.seriesId = new AdminForm.Component(
+    ['seriesId'],
+    { required: true, nodeKey: 'seriesId' },
+    { toNode: function(parent) {
+        for(var el in this.fields){
+          var container = parent.ownerDocument.createElement(this.nodeKey);
+          container.appendChild(parent.ownerDocument.createTextNode(this.getValue()));
+        }
+        if(parent && parent.nodeType){
+          parent.ownerDocument.documentElement.appendChild(container);
+        }
+        return container;
+      }
+    }
+  );
   //Core Metadata
   Series.components.title = new AdminForm.Component(
     ['title'],
@@ -137,11 +153,13 @@ UI.SubmitForm = function(){
 
 UI.SeriesSubmitComplete = function(){
   for(var k in Series.components){
-    AdminUI.log("#data-" + k, i18n[k].label)
-    $("#data-" + k).show();
-    $("#data-" + k + " > .data-label").text(i18n[k].label + ":");
-    $("#data-" + k + " > .data-value").text(Series.components[k].toString());
+    if(i18n[k]){
+      $("#data-" + k).show();
+      $("#data-" + k + " > .data-label").text(i18n[k].label + ":");
+      $("#data-" + k + " > .data-value").text(Series.components[k].toString());
+    }
   }
+  $("#schedulerLink").attr('href',$("#schedulerLink").attr('href') + '?seriesId=' + Series.components.seriesId.getValue());
   $("#submission_success").siblings().hide();
   $("#submission_success").show();
 }

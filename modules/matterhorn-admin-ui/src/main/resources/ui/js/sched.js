@@ -60,6 +60,18 @@ UI.Init = function(){
     $('#multipleRecordings').click();
   }
   
+  if(AdminUI.getURLParams('seriesId')){
+    $('#series').val(AdminUI.getURLParams('seriesId'));
+    $.get(SERIES_URL + '/series/' + AdminUI.getURLParams('seriesId'), function(doc){
+      $.each($('metadata', doc), function(i, metadata){
+        if($('key', metadata).text() === 'title'){
+          $('#series_select').val($('value',metadata).text());
+          return true;
+        }
+      });
+    });
+  }
+  
   //Editing setup
   var eventId = AdminUI.getURLParams('eventId');
   if(eventId && AdminUI.getURLParams('edit')){
