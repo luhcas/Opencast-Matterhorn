@@ -36,6 +36,9 @@ Opencast.Watch = (function ()
           // set the media URLs
           var mediaUrlOne = Opencast.engage.getVideoUrl();
           var mediaUrlTwo = Opencast.engage.getVideoUrl2();
+          
+          var mimetypeOne = "video/x-flv";
+          var mimetypeTwo = "video/x-flv";
 
           if(mediaUrlOne === null)
             $('#oc-link-advanced-player').css("display", "inline");
@@ -44,47 +47,55 @@ Opencast.Watch = (function ()
           {
             mediaUrlOne = $('#oc-video-presenter-delivery-x-flv-rtmp').html();
             mediaResolutionOne = $('#oc-resolution-presenter-delivery-x-flv-rtmp').html();
+            mimetypeOne = $('#oc-mimetype-presenter-delivery-x-flv-rtmp').html();
           }
 
           if(mediaUrlTwo === null)
           {
             mediaUrlTwo = $('#oc-video-presentation-delivery-x-flv-rtmp').html();
             mediaResolutionTwo = $('#oc-resolution-presentation-delivery-x-flv-rtmp').html();
+            mimetypeTwo = $('#oc-mimetype-presentation-delivery-x-flv-rtmp').html();
           }
 
           if(mediaUrlOne === null)
           {
             mediaUrlOne = $('#oc-video-presenter-delivery-x-flv-http').html();
             mediaResolutionOne = $('#oc-resolution-presenter-delivery-x-flv-http').html();
+            mimetypeOne = $('#oc-mimetype-presenter-delivery-x-flv-http').html();
           }
 
           if(mediaUrlOne === null)
           {
             mediaUrlOne = $('#oc-video-presenter-source-x-flv-rtmp').html();
             mediaResolutionOne = $('#oc-resolution-presenter-source-x-flv-rtmp').html();
+            mimetypeOne = $('#oc-mimetype-presenter-source-x-flv-rtmp').html();
           }
 
           if(mediaUrlOne === null)
           {
             mediaUrlOne = $('#oc-video-presenter-source-x-flv-http').html();
             mediaResolutionOne = $('#oc-resolution-presenter-source-x-flv-http').html();
+            mimetypeOne = $('#oc-mimetype-presenter-source-x-flv-http').html();
           }
 
           if(mediaUrlTwo === null)
           {
             mediaUrlTwo = $('#oc-video-presentation-delivery-x-flv-http').html();
             mediaResolutionTwo = $('#oc-resolution-presentation-delivery-x-flv-http').html();
+            mimetypeTwo = $('#oc-mimetype-presentation-delivery-x-flv-http').html();
           }
 
           if(mediaUrlTwo === null){
             mediaUrlTwo = $('#oc-video-presentation-source-x-flv-rtmp').html();
             mediaResolutionTwo = $('#oc-resolution-presentation-source-x-flv-rtmp').html();
+            mimetypeTwo = $('#oc-mimetype-presentation-source-x-flv-rtmp').html();
           }
 
           if(mediaUrlTwo === null)
           {
             mediaUrlTwo = $('#oc-video-presentation-source-x-flv-http').html();
             mediaResolutionTwo = $('#oc-resolution-presentation-source-x-flv-http').html();
+            mimetypeTwo = $('#oc-mimetype-presentation-source-x-flv-http').html();
           }
 
           if(mediaUrlOne === null) 
@@ -93,6 +104,8 @@ Opencast.Watch = (function ()
             mediaUrlTwo = null;
             mediaResolutionOne = mediaResolutionTwo;
             mediaResolutionTwo = null;
+            mimetypeOne = mimetypeTwo;
+            mimetypeTwo = null;
           }
 
           
@@ -122,16 +135,6 @@ Opencast.Watch = (function ()
           {
         	  coverUrlOne = coverUrlTwo;
           }
-          
-
-         
-
-          var mimetypeOne = "video/x-flv";
-          var mimetypeTwo = "video/x-flv";
-
-
-       
-       
 
           Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo);
 

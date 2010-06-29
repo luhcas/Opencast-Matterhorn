@@ -53,6 +53,9 @@
            <div id="oc-video-presenter-delivery-x-flv-http" style="display: none">
               <xsl:value-of select="url" />
             </div>
+            <div id="oc-mimetype-presenter-delivery-x-flv-http" style="display: none">
+              <xsl:value-of select="mimetype" />
+            </div>
           </xsl:if>
         </xsl:if>
       </xsl:if>
@@ -62,6 +65,9 @@
           <xsl:if test="substring(url, 1, 4)='http'">
            <div id="oc-video-presentation-delivery-x-flv-http" style="display: none">
               <xsl:value-of select="url" />
+            </div>
+            <div id="oc-mimetype-presentation-delivery-x-flv-http" style="display: none">
+              <xsl:value-of select="mimetype" />
             </div>
           </xsl:if>
         </xsl:if>
@@ -73,6 +79,9 @@
            <div id="oc-video-presenter-delivery-x-flv-rtmp" style="display: none">
               <xsl:value-of select="url" />
             </div>
+            <div id="oc-mimetype-presenter-delivery-x-flv-rtmp" style="display: none">
+              <xsl:value-of select="mimetype" />
+            </div>
           </xsl:if>
         </xsl:if>
       </xsl:if>
@@ -82,6 +91,9 @@
           <xsl:if test="substring(url, 1, 4)='rtmp'">
            <div id="oc-video-presentation-delivery-x-flv-rtmp" style="display: none">
               <xsl:value-of select="url" />
+            </div>
+            <div id="oc-mimetype-presentation-delivery-x-flv-rtmp" style="display: none">
+              <xsl:value-of select="mimetype" />
             </div>
           </xsl:if>
         </xsl:if>

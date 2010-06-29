@@ -70,31 +70,37 @@ Opencast.Watch = (function ()
           if(mediaUrlOne === null){
             mediaUrlOne = $('#oc-video-presenter-delivery-x-flv-http').html();
             mediaResolutionOne = $('#oc-resolution-presenter-delivery-x-flv-http').html();
+            mimetypeOne = $('#oc-mimetype-presenter-delivery-x-flv-http').html();            
           }
 
           if(mediaUrlOne === null){
             mediaUrlOne = $('#oc-video-presenter-source-x-flv-rtmp').html();
             mediaResolutionOne = $('#oc-resolution-presenter-source-x-flv-rtmp').html();
+            mimetypeOne = $('#oc-mimetype-presenter-source-x-flv-rtmp').html();
           }
 
           if(mediaUrlOne === null){
             mediaUrlOne = $('#oc-video-presenter-source-x-flv-http').html();
             mediaResolutionOne = $('#oc-resolution-presenter-source-x-flv-http').html();
+            mimetypeOne = $('#oc-mimetype-presenter-source-x-flv-http').html();
           }
 
           if(mediaUrlTwo === null){
             mediaUrlTwo = $('#oc-video-presentation-delivery-x-flv-http').html();
             mediaResolutionTwo = $('#oc-resolution-presentation-delivery-x-flv-http').html();
+            mimetypeTwo = $('#oc-mimetype-presentation-delivery-x-flv-http').html();
           }
 
           if(mediaUrlTwo === null){
             mediaUrlTwo = $('#oc-video-presentation-source-x-flv-rtmp').html();
             mediaResolutionTwo = $('#oc-resolution-presentation-source-x-flv-rtmp').html();
+            mimetypeTwo = $('#oc-mimetype-presentation-source-x-flv-rtmp').html();
           }
 
           if(mediaUrlTwo === null){
             mediaUrlTwo = $('#oc-video-presentation-source-x-flv-http').html();
             mediaResolutionTwo = $('#oc-resolution-presentation-source-x-flv-http').html();
+            mimetypeTwo = $('#oc-mimetype-presentation-source-x-flv-http').html();
           }
 
           if(mediaUrlOne === null) {
@@ -102,6 +108,8 @@ Opencast.Watch = (function ()
             mediaUrlTwo = null;
             mediaResolutionOne = mediaResolutionTwo;
             mediaResolutionTwo = null;
+            mimetypeOne = mimetypeTwo;
+            mimetypeTwo = null;
           }
 
           mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;

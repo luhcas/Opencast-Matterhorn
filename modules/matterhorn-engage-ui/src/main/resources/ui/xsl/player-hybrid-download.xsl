@@ -96,6 +96,9 @@
             <div id="oc-resolution-presenter-delivery-x-flv-http" style="display: none">
               <xsl:value-of select="video/resolution" />
             </div>
+            <div id="oc-mimetype-presenter-delivery-x-flv-http" style="display: none">
+              <xsl:value-of select="mimetype" />
+            </div>
           </xsl:if>
         </xsl:if>
       </xsl:if>
@@ -108,6 +111,9 @@
             </div>
             <div id="oc-resolution-presentation-delivery-x-flv-http" style="display: none">
               <xsl:value-of select="video/resolution" />
+            </div>
+            <div id="oc-mimetype-presentation-delivery-x-flv-http" style="display: none">
+              <xsl:value-of select="mimetype" />
             </div>
           </xsl:if>
         </xsl:if>
