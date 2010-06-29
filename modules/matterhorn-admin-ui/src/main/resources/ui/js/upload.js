@@ -306,6 +306,9 @@ Upload.showSuccessScreen = function() {
           $('#field-'+key).children('.fieldValue').text(Upload.metadata[key]);
         }
       }
+      if (Upload.retryId != "") {
+        $('#heading-metadata').text('Your recording with the following information has been resubmitted');
+      }
     }
     $('#field-filename').children('.fieldValue').text(UploadListener.shortFilename);
     
