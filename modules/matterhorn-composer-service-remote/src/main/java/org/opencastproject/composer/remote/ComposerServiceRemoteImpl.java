@@ -170,7 +170,7 @@ public class ComposerServiceRemoteImpl implements ComposerService {
       HttpPost post = new HttpPost(url);
       try {
         List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-        params.add(new BasicNameValuePair("sourceTrackId", getXML(sourceTrack)));
+        params.add(new BasicNameValuePair("sourceTrack", getXML(sourceTrack)));
         params.add(new BasicNameValuePair("profileId", profileId));
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
         post.setEntity(entity);
