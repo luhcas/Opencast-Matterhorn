@@ -276,7 +276,7 @@
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="target-flavor">presentation/delivery</configuration>
-        <configuration key="target-tags">atom</configuration>
+        <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">feed-m4a.http</configuration>
       </configurations>
     </operation>
@@ -288,7 +288,7 @@
       <configurations>
         <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/delivery</configuration>
-        <configuration key="target-tags">atom</configuration>
+        <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">feed-avi.http</configuration>
       </configurations>
     </operation>
@@ -377,7 +377,7 @@
       description="Distribute media to the local distribution channel">
       <configurations>
         <configuration key="source-tags">engage,atom,rss</configuration>
-        <configuration key="target-tags">publish,engage</configuration>
+        <configuration key="target-tags">publish</configuration>
       </configurations>
     </operation>
  

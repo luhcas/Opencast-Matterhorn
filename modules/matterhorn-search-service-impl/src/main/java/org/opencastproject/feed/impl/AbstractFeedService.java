@@ -84,13 +84,16 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
   public static final String PROP_ENTRY = "feed.entry";
 
   /** Property key for the feed rss media element flavor */
-  public static final String PROP_RSSFLAVOR = "feed.rssflavor";
+  public static final String PROP_RSSFLAVORS = "feed.rssflavors";
 
   /** Property key for the feed atom media element flavor */
   public static final String PROP_ATOMFLAVORS = "feed.atomflavors";
 
   /** Property key for the feed rss media element flavor */
   public static final String PROP_RSSTAGS = "feed.rsstags";
+
+  /** Property key for the feed rss media type */
+  public static final String PROP_RSS_MEDIA_TYPE = "feed.rssmediatype";
 
   /** Property key for the feed atom media element flavor */
   public static final String PROP_ATOMTAGS = "feed.atomtags";
@@ -118,16 +121,16 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
    *          the feed identifier
    * @param feedHome
    *          the feed's home url
-   * @param rssFlavor
-   *          the flavor identifying rss tracks
+   * @param rssFlavors
+   *          the flavors identifying rss tracks
    * @param atomFlavors
    *          the flavors identifying tracks to be included in atom feeds
    * @param entryLinkTemplate
    *          the link template
    */
-  public AbstractFeedService(String uri, String feedHome, MediaPackageElementFlavor rssFlavor,
-          MediaPackageElementFlavor[] atomFlavors, String entryLinkTemplate) {
-    super(uri, feedHome, rssFlavor, atomFlavors, entryLinkTemplate);
+  public AbstractFeedService(String uri, String feedHome, MediaPackageElementFlavor[] rssFlavors,
+          String[] rssMediaTypes, MediaPackageElementFlavor[] atomFlavors, String entryLinkTemplate) {
+    super(uri, feedHome, rssFlavors, rssMediaTypes, atomFlavors, entryLinkTemplate);
   }
 
   /**
@@ -176,9 +179,22 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
     home = ensureUrl(((String) properties.get(PROP_HOME)), serverUrl);
     cover = ensureUrl((String) properties.get(PROP_COVER), serverUrl);
     linkTemplate = ensureUrl((String) properties.get(PROP_ENTRY), serverUrl);
-    String rssFlavor = (String) properties.get(PROP_RSSFLAVOR);
-    if (rssFlavor != null)
-      rssTrackFlavor = MediaPackageElementFlavor.parseFlavor(rssFlavor);
+    String rssFlavors = (String) properties.get(PROP_RSSFLAVORS);
+    if (rssFlavors != null) {
+      StringTokenizer tok = new StringTokenizer(rssFlavors, " ,;");
+      while (tok.hasMoreTokens()) {
+        addRssTrackFlavor(MediaPackageElementFlavor.parseFlavor(tok.nextToken()));
+      }
+    }
+    String rssMediaTypes = (String) properties.get(PROP_RSS_MEDIA_TYPE);
+    if (rssFlavors == null) {
+      this.rssMediaTypes.add(PROP_RSS_MEDIA_TYPE_DEFAULT);
+    } else {
+      StringTokenizer tok = new StringTokenizer(rssMediaTypes, " ,;");
+      while (tok.hasMoreTokens()) {
+        this.rssMediaTypes.add(tok.nextToken());
+      }
+    }
     String atomFlavors = (String) properties.get(PROP_ATOMFLAVORS);
     if (atomFlavors != null) {
       StringTokenizer tok = new StringTokenizer(atomFlavors, " ,;");

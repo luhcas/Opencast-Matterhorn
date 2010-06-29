@@ -63,6 +63,9 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
 
   /** The default feed encoding */
   public static final String ENCODING = "UTF-8";
+  
+  /** Default rss media type */
+  public static final String PROP_RSS_MEDIA_TYPE_DEFAULT = "*";
 
   /** Link to the user interface */
   protected String linkTemplate = null;
@@ -71,7 +74,10 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
   protected String home = null;
 
   /** Default format for rss feeds */
-  protected MediaPackageElementFlavor rssTrackFlavor = null;
+  protected List<MediaPackageElementFlavor> rssTrackFlavors = null;
+
+  /** The */
+  protected List<String> rssMediaTypes = null;
 
   /** Formats for atom feeds */
   protected Set<MediaPackageElementFlavor> atomTrackFlavors = null;
@@ -108,6 +114,8 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
    */
   protected AbstractFeedGenerator() {
     atomTrackFlavors = new HashSet<MediaPackageElementFlavor>();
+    rssTrackFlavors = new ArrayList<MediaPackageElementFlavor>();
+    rssMediaTypes = new ArrayList<String>();
     rssTags = new HashSet<String>();
     atomTags = new HashSet<String>();
   }
@@ -119,19 +127,24 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
    *          the feed identifier
    * @param feedHome
    *          the feed's home url
-   * @param rssFlavor
-   *          the flavor identifying the track to be included in rss feeds
+   * @param rssFlavors
+   *          the ordered list of flavors identifying the track to be included in rss feeds
+   * @param rssMediaTypes
+   *          the ordered list of media types to include in rss feeds
    * @param atomFlavors
    *          the flavors identifying tracks to be included in atom feeds
    * @param entryLinkTemplate
    *          the link template
    */
-  public AbstractFeedGenerator(String uri, String feedHome, MediaPackageElementFlavor rssFlavor,
-          MediaPackageElementFlavor[] atomFlavors, String entryLinkTemplate) {
+  public AbstractFeedGenerator(String uri, String feedHome, MediaPackageElementFlavor[] rssFlavors,
+          String[] rssMediaTypes, MediaPackageElementFlavor[] atomFlavors, String entryLinkTemplate) {
     this();
     this.uri = uri;
     this.home = feedHome;
-    this.rssTrackFlavor = rssFlavor;
+    if (rssFlavors != null)
+      this.rssTrackFlavors.addAll(Arrays.asList(rssFlavors));
+    if (rssMediaTypes != null)
+      this.rssMediaTypes.addAll(Arrays.asList(rssMediaTypes));
     this.linkTemplate = entryLinkTemplate;
     if (atomFlavors != null)
       this.atomTrackFlavors.addAll(Arrays.asList(atomFlavors));
@@ -298,7 +311,6 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     // TODO: Set iTunes tags
     // f.addModule(iTunesFeed);
 
-    
     // TODO: Set feed icon and other metadata
 
     // Check if a default format has been specified
@@ -313,8 +325,8 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
         else
           addEpisode(f, query, resultItem);
       } catch (Throwable t) {
-        logger.error("Error creating entry with id " + resultItem.getId() + " for feed " + this + ": " + t.getMessage(),
-                t);
+        logger.error(
+                "Error creating entry with id " + resultItem.getId() + " for feed " + this + ": " + t.getMessage(), t);
       }
     }
     return f;
@@ -358,12 +370,12 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     if (d != null)
       feed.setPublishedDate(d);
 
-     //Set the cover image
-     String coverUrl = null;
-     if (!StringUtils.isEmpty(resultItem.getCover())) {
-       coverUrl = resultItem.getCover();
-       feed.setImage(new ImageImpl(coverUrl, resultItem.getDcTitle()));
-     }
+    // Set the cover image
+    String coverUrl = null;
+    if (!StringUtils.isEmpty(resultItem.getCover())) {
+      coverUrl = resultItem.getCover();
+      feed.setImage(new ImageImpl(coverUrl, resultItem.getDcTitle()));
+    }
     return feed;
   }
 
@@ -388,7 +400,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     // Add extension modules (itunes, dc, doi)
 
     // iTunes extension
-    
+
     ITunesFeedEntryExtension iTunesEntry = new ITunesFeedEntryExtension();
     iTunesEntry.setDuration(resultItem.getDcExtent());
     // Additional iTunes properties
@@ -467,13 +479,13 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
     // Add the enclosures
     addEnclosures(feed, entry, resultItem);
 
-    //Set the cover image
+    // Set the cover image
     String coverUrl = null;
     if (!StringUtils.isEmpty(resultItem.getCover())) {
       coverUrl = resultItem.getCover();
       setImage(entry, coverUrl);
     }
-    
+
     iTunesEntry.setAuthor("test");
 
     entry.addExtension(iTunesEntry);
@@ -545,12 +557,57 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
   }
 
   /**
-   * Returns the flavor of the track to be included in rss feeds.
+   * Sets the rss media types.
    * 
-   * @return the flavor for rss feed tracks
+   * @param mediaTypes
+   *          The ordered array of media types to choose for RSS feeds.
    */
-  protected MediaPackageElementFlavor getRSSTrackFlavor() {
-    return rssTrackFlavor;
+  protected void setRssMediatypes(String[] mediaTypes) {
+    if (mediaTypes == null || mediaTypes.length == 0) {
+      throw new IllegalArgumentException("mediaTypes are required for an rss feed");
+    }
+    this.rssMediaTypes.clear();
+    this.rssMediaTypes.addAll(Arrays.asList(mediaTypes));
+  }
+
+  /**
+   * Returns an ordered list of media types for the RSS feed. The feed will select the first media type where a track is
+   * available.
+   * 
+   * @return The rss media types
+   */
+  protected List<String> getRssMediaTypes() {
+    return rssMediaTypes;
+  }
+
+  /**
+   * Adds the flavor to the set of flavors of tracks that are to be included in rss feeds.
+   * 
+   * @param flavor
+   *          the flavor to add
+   */
+  protected void addRssTrackFlavor(MediaPackageElementFlavor flavor) {
+    rssTrackFlavors.add(flavor);
+  }
+
+  /**
+   * Removes the flavor from the set of flavors of tracks that are to be included in rss feeds.
+   * 
+   * @param flavor
+   *          the flavor to add
+   */
+  protected void removeRssTrackFlavor(MediaPackageElementFlavor flavor) {
+    rssTrackFlavors.remove(flavor);
+  }
+
+  /**
+   * Returns the ordered list of flavors of the tracks to be included in rss feeds. If the first flavor specified in
+   * this list is not available, we try to use the next flavor, until a track is found or no more flavors are available.
+   * 
+   * @return the flavors for rss feed tracks
+   */
+  protected List<MediaPackageElementFlavor> getRssTrackFlavors() {
+    return rssTrackFlavors;
   }
 
   /**
@@ -652,31 +709,29 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
    *          the result item from the solr index
    * @return the list of formats that have been added
    */
-  protected List<Track> addEnclosures(Feed feed, FeedEntry entry, SearchResultItem resultItem)
+  protected List<MediaPackageElement> addEnclosures(Feed feed, FeedEntry entry, SearchResultItem resultItem)
           throws IllegalStateException {
-    MediaPackage mediaPackage = resultItem.getMediaPackage();
-    List<Track> enclosedFormats = new ArrayList<Track>();
+    List<MediaPackageElement> enclosedFormats = new ArrayList<MediaPackageElement>();
 
     // Assemble formats to add
-    Set<String> trackIds = getTracksForEntry(feed, resultItem);
+    List<MediaPackageElement> elements = getElementsForEntry(feed, resultItem);
 
     // Did we find any distribution formats?
-    if (trackIds.size() == 0) {
+    if (elements.size() == 0) {
       logger.debug("No media formats found for feed entry {}", entry);
       return enclosedFormats;
     }
 
     // Create enclosures
-    for (String trackId : trackIds) {
-      Track track = mediaPackage.getTrack(trackId);
+    for (MediaPackageElement element : elements) {
       String trackUrl = null;
       try {
-        trackUrl = track.getURI().toURL().toExternalForm();
-        String trackMimeType = track.getMimeType().toString();
-        long trackLength = track.getSize();
+        trackUrl = element.getURI().toURL().toExternalForm();
+        String trackMimeType = element.getMimeType().toString();
+        long trackLength = element.getSize();
         Enclosure enclosure = new EnclosureImpl(trackUrl, trackMimeType, trackLength);
         entry.addEnclosure(enclosure);
-        enclosedFormats.add(track);
+        enclosedFormats.add(element);
       } catch (MalformedURLException e) {
         logger.error("Error converting {} to string", trackUrl, e);
       }
@@ -698,53 +753,70 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
    *          the result item
    * @return the set of identifier
    */
-  protected Set<String> getTracksForEntry(Feed feed, SearchResultItem resultItem) {
+  protected List<MediaPackageElement> getElementsForEntry(Feed feed, SearchResultItem resultItem) {
     MediaPackage mediaPackage = resultItem.getMediaPackage();
 
-    Set<String> s = new HashSet<String>();
-    Set<MediaPackageElementFlavor> flavors = new HashSet<MediaPackageElementFlavor>();
+    List<MediaPackageElement> candidateElements = new ArrayList<MediaPackageElement>();
+    List<MediaPackageElementFlavor> flavors = new ArrayList<MediaPackageElementFlavor>();
     Set<String> tags = new HashSet<String>();
 
     switch (feed.getType()) {
-      case RSS:
-        if (rssTrackFlavor != null)
-          flavors.add(rssTrackFlavor);
-        tags.addAll(rssTags);
-        break;
-      case Atom:
-        flavors.addAll(atomTrackFlavors);
-        tags.addAll(atomTags);
-        break;
+    case RSS:
+      flavors.addAll(rssTrackFlavors);
+      tags.addAll(rssTags);
+      break;
+    case Atom:
+      flavors.addAll(atomTrackFlavors);
+      tags.addAll(atomTags);
+      break;
     }
 
     // Collect track id's by flavor
     if (flavors.size() > 0) {
-      for (MediaPackageElementFlavor flavor : flavors) {
+      selectElements: for (MediaPackageElementFlavor flavor : flavors) {
         MediaPackageElement[] elements = mediaPackage.getElementsByFlavor(flavor);
-        for (MediaPackageElement element : elements)
-          s.add(element.getIdentifier());
+        if (feed.getType().equals(Feed.Type.RSS)) {
+          for (String mediaType : rssMediaTypes) {
+            for (MediaPackageElement element : elements) {
+              if(mediaType.equals(PROP_RSS_MEDIA_TYPE_DEFAULT)) {
+                if (element.containsTag(tags)) {
+                  candidateElements.add(element);
+                  break selectElements;
+                }
+              }
+              if (!(element instanceof Track)) {
+                continue;
+              }
+              Track track = (Track)element;
+              if (mediaType.equals("video") && track.hasVideo()) {
+                if (element.containsTag(tags)) {
+                  candidateElements.add(element);
+                  break selectElements;
+                }
+              }
+              if (mediaType.equals("audio") && track.hasAudio() && track.hasVideo()) {
+                if (element.containsTag(tags)) {
+                  candidateElements.add(element);
+                  break selectElements;
+                }
+              }
+            }
+          }
+        } else {
+          for (MediaPackageElement element : elements) {
+            if (element.containsTag(tags)) {
+              candidateElements.add(element);
+            }
+          }
+        }
       }
     }
 
-    // Collect track id's by tag
-    if (tags.size() > 0) {
-      for (String tag : tags) {
-        MediaPackageElement[] elements = mediaPackage.getTracksByTag(tag);
-        for (MediaPackageElement element : elements)
-          s.add(element.getIdentifier());
-      }
+    if (candidateElements.size() == 0) {
+      logger.debug("No distributed media found for feed entry");
     }
 
-    if (Feed.Type.RSS.equals(feed.getType()) && s.size() > 1) {
-      logger.warn("More than one distributed media item found for rss feed entry, keeping only the first one");
-      String idToKeep = s.iterator().next();
-      s.clear();
-      s.add(idToKeep);
-    } else if (s.size() == 0) {
-      logger.warn("No distributed media found for feed entry");
-    }
-    
-    return s;
+    return candidateElements;
   }
 
   /**
