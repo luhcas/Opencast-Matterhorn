@@ -20,6 +20,7 @@ package org.opencast.engage.videodisplay.control.command
     
     import flash.external.ExternalInterface;
     
+    import mx.controls.Alert;
     import mx.core.Application;
     
     import org.opencast.engage.videodisplay.control.event.InitMediaPlayerEvent;
@@ -67,28 +68,27 @@ package org.opencast.engage.videodisplay.control.command
             if( event.coverURLOne != '' && event.coverURLTwo == '')
             {
                 model.coverState = CoverState.ONECOVER;
+                model.coverURLSingle = event.coverURLOne;
             }
             else
             {
                  model.coverState = CoverState.TWOCOVERS;
+                 model.coverURLSingle = event.coverURLOne;
             }
             
            
             // Single Video/Audio
             if( event.mediaURLOne != '' && event.mediaURLTwo == '' )
             {
-                
-                
                 //
                 model.mediaPlayer = new OpencastMediaPlayer( VideoState.SINGLE );
-                
-                var pos:int = event.mediaURLOne.lastIndexOf( "." );
-                var fileType:String = event.mediaURLOne.substring( pos + 1 );
-                
+                var pos:int = event.mimetypeOne.lastIndexOf( "/" );
+             
+                var fileType:String = event.mimetypeOne.substring(0,pos);
+               
                 switch ( fileType )
                 {
-                    case "flv":
-                    case "mp4":
+                    case "video":
                     
                         var newVideoElement:VideoElement = new VideoElement ( new URLResource( event.mediaURLOne ) );
                         newVideoElement.smoothing = true;
@@ -104,9 +104,9 @@ package org.opencast.engage.videodisplay.control.command
 		                {
 		                    model.mediaTypeSingle = model.RTMP;
 		                }
-                        break;
+		                break;
 
-                    case "mp3":
+                    case "audio":
                         var mediaElementAudio:MediaElement = new AudioElement( new URLResource( event.mediaURLOne ) );
                         model.mediaPlayer.setSingleMediaElement( mediaElementAudio );
                         var position:int = event.mediaURLOne.lastIndexOf( '/' );

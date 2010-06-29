@@ -28,6 +28,7 @@ Opencast.Initialize = (function ()
     clickMatterhornSearchField = false,
     clickLecturerSearchField = false,
     locked = false,
+    start = false,
     formatOne = 0,
     formatTwo = 0,
     formatSingle = 0,
@@ -311,7 +312,19 @@ Opencast.Initialize = (function ()
         });
         $('#oc_btn-play-pause').click(function () 
         {
-            Opencast.Player.doTogglePlayPause();
+            if (start == false)
+            {
+            	start = true;
+            	 // init Flash
+                Opencast.FlashVersion.initFlash();
+                $('#oc_image').hide();
+                $("#oc_video-player-controls").show();
+            }
+            else
+            {
+            	Opencast.Player.doTogglePlayPause();
+            }
+        	
         });
         $('#oc_btn-volume').click(function () 
         {
@@ -325,9 +338,14 @@ Opencast.Initialize = (function ()
         {
             Opencast.Player.showEditTime();
         });
-        
-        
-        
+        $('#oc_image').click(function () 
+        {
+        	 // init Flash
+            Opencast.FlashVersion.initFlash();
+            $('#oc_image').hide();
+            $("#oc_video-player-controls").show();
+            start = true;
+        });
         
         // Handler for .mouseover()
         $('#oc_btn-skip-backward').mouseover(function () 
@@ -550,6 +568,8 @@ Opencast.Initialize = (function ()
         });
         
         
+        
+        
         // to calculate the embed flash height
         var iFrameHeight = document.documentElement.clientHeight;
         var otherDivHeight = 120;
@@ -572,6 +592,10 @@ Opencast.Initialize = (function ()
         var advancedUrl = embedUrl.replace(/embed.html/g, "watch.html");
         $("a[href='#']").attr('href', ''+advancedUrl+'');
         
+        $("#oc_image").attr('src', 'engage-hybrid-player/img/embed.png');
+        
+        // hide the controls
+        $("#oc_video-player-controls").hide();
        
     });
     

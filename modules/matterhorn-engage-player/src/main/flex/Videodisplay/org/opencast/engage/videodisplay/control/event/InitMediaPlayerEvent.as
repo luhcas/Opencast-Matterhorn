@@ -28,22 +28,29 @@ package org.opencast.engage.videodisplay.control.event
         private var _mediaURLTwo:String;
         private var _coverURLOne:String;
         private var _coverURLTwo:String;
+        private var _mimetypeOne:String;
+        private var _mimetypeTwo:String;
+        
+        
+       
 
         /** Constructor */
-        public function InitMediaPlayerEvent( coverURLOne:String, coverURLTwo:String, mediaURLOne:String, mediaURLTwo:String, bubbles:Boolean = false, cancelable:Boolean = false )
+        public function InitMediaPlayerEvent( coverURLOne:String, coverURLTwo:String, mediaURLOne:String, mediaURLTwo:String, mimetypeOne:String, mimetypeTwo:String, bubbles:Boolean = false, cancelable:Boolean = false )
         {
             super( EVENT_NAME, bubbles, cancelable );
             _mediaURLOne = mediaURLOne;
             _mediaURLTwo = mediaURLTwo;
             _coverURLOne = coverURLOne;
             _coverURLTwo = coverURLTwo;
+            _mimetypeOne = mimetypeOne;
+            _mimetypeTwo = mimetypeTwo;
             
         }
 
         // Override the inherited clone() method.
         override public function clone():Event
         {
-            return new InitMediaPlayerEvent( coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, bubbles, cancelable );
+            return new InitMediaPlayerEvent( coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, bubbles, cancelable);
         }
         
         /**
@@ -84,6 +91,26 @@ package org.opencast.engage.videodisplay.control.event
         public function get coverURLTwo():String
         {
             return _coverURLTwo;
+        }
+        
+        /**
+         * mimetypeOne
+         *
+         * Get the mimetypeOne.
+         *  */
+        public function get mimetypeOne():String
+        {
+            return _mimetypeOne;
+        }
+        
+        /**
+         * mimetypeTwo
+         *
+         * Get the mimetypeTwo.
+         *  */
+        public function get mimetypeTwo():String
+        {
+            return _mimetypeTwo;
         }
     }
 }

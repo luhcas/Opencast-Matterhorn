@@ -116,6 +116,7 @@
     	id = "bx_cover"
         visible = "false"
         includeInLayout = "false"
+        currentState="{ model.coverState }"
         />	
 
 

@@ -29,6 +29,7 @@ package org.opencast.engage.videodisplay.business
     import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
     import org.opencast.engage.videodisplay.control.util.TimeCode;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
+    import org.opencast.engage.videodisplay.state.CoverState;
     import org.opencast.engage.videodisplay.state.VideoSizeState;
     import org.swizframework.Swiz;
 
@@ -137,6 +138,7 @@ package org.opencast.engage.videodisplay.business
                 ExternalInterface.call( ExternalFunction.SETCURRENTTIME, newPositionString );
             }   
             model.mediaPlayer.seek( time );
+            
             return time;
         }
         
@@ -197,10 +199,9 @@ package org.opencast.engage.videodisplay.business
          * 
          * @param String mediaURLOne, String mediaURLTwo
          */
-        public function setMediaURL(coverURLOne:String, coverURLTwo:String, mediaURLOne:String, mediaURLTwo:String ):void
+        public function setMediaURL(coverURLOne:String, coverURLTwo:String, mediaURLOne:String, mediaURLTwo:String, mimetypeOne:String, mimetypeTwo:String ):void
         {
-            Swiz.dispatchEvent( new InitMediaPlayerEvent(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo ) );
-
+            Swiz.dispatchEvent( new InitMediaPlayerEvent(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo ) );
         }
         
         /**
@@ -227,10 +228,18 @@ package org.opencast.engage.videodisplay.business
             else if(sizeRight == 0)
             {
                 model.videoSizeState = VideoSizeState.ONLYLEFT;
+                model.coverState = CoverState.ONECOVER;
+                if( model.coverURLTwo == '' )
+                {
+                    model.coverURLTwo == model.coverURLOne;
+                }
+                model.coverURLSingle = model.coverURLOne;
             }
             else if(sizeLeft == 0)
             {
                 model.videoSizeState = VideoSizeState.ONLYRIGHT;
+                model.coverState = CoverState.ONECOVER;
+                model.coverURLSingle = model.coverURLTwo;
             }
 		}
 		

@@ -86,8 +86,8 @@ function VideodisplayReady() {
 		b_Videodisplay_root.closedCaptions();
 	};
 	
-	Videodisplay.setMediaURL = function (argCoverOne, argCoverTwo, argStringOne, argStringTwo) {
-		b_Videodisplay_root.setMediaURL(argCoverOne, argCoverTwo, argStringOne, argStringTwo);
+	Videodisplay.setMediaURL = function (argCoverOne, argCoverTwo, argStringOne, argStringTwo, argMimetypeOne, argMimetypeTwo) {
+		b_Videodisplay_root.setMediaURL(argCoverOne, argCoverTwo, argStringOne, argStringTwo, argMimetypeOne, argMimetypeTwo);
 	};
 	
 	Videodisplay.setCaptionsURL = function (argString) {
