@@ -67,9 +67,6 @@
 					<targetPlayer>10.0.0</targetPlayer>
 					<accessible>true</accessible>
 					<headlessServer>true</headlessServer>
-					<!--
-						<output>${project.build.directory}/player/Videodisplay.swf</output>
-					-->
 					<output>../../shared-resources/player/Videodisplay.swf</output>
 					<!--
 						<coverageViewerPath>/Applications/CoverageViewer.app</coverageViewerPath>
@@ -181,7 +178,7 @@
 							<accessible>true</accessible>
 							<headlessServer>true</headlessServer>
 							<showWarnings>false</showWarnings>
-							<output>${project.build.directory}/hybrid-player/player/Videodisplay.swf</output>
+							<output>${project.build.directory}/hybrid-player/Videodisplay.swf</output>
 						</configuration>
 					</plugin>
 					<plugin>
@@ -215,9 +212,11 @@
 										<resource>
 											<directory>../../shared-resources</directory>
 											<filtering>true</filtering>
-											<excludes>
-												<exclude>player</exclude>
-											</excludes>
+											<includes>
+												<include>shared_css/</include>
+												<include>shared_img/</include>
+												<include>jquery/</include>
+											</includes>
 										</resource>
 										<resource>
 											<directory>../matterhorn-engage-ui/src/main/resources/ui</directory>
