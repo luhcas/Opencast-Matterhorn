@@ -477,7 +477,8 @@ public class SchedulerRestService {
     try {
       events = Arrays.asList(service.findConflictingEvents(e));
     } catch (Exception e1) {
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+      logger.error("Find Conflicting Failed: {}", e1);
+      return Response.status(Status.BAD_REQUEST).build();
     }
     
     return Response.ok((new GenericEntity<List<Event>> (events){})).build();

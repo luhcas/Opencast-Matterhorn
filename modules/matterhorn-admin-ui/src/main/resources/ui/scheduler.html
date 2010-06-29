@@ -131,6 +131,11 @@
                 <li id="notice-tzdiff" class="missing-fields-item" style="display:none;">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>The timezone for this <a href="javascript:document.getElementById('agent').focus();">capture agent</a> is <span id="tzdiff"></span>. Capture will occur according to the time local to the agent, though when you look at your list of Recordings it will be shown in your local time.
                 </li>
+                <li id="notice-conflict" class="missing-fields-item" style="display:none;">
+                  <span class="fl-icon inline-icon icon-bullet" title=""></span>The following events conflict with your scheduled time on your selected capture agent:
+                    <ul id="conflicting-events" style="margin-top: 0px;">
+                    </ul>
+                </li>
               </ul>
             </div>
           </div>
@@ -151,7 +156,7 @@
                     </div>
                   </li>
                   <li id="series_container">
-                    <label class="fl-label" for="series_select"  id="label-series"><span class="color-red">* </span><span id="i18n_series_label"></span>:</label>
+                    <label class="fl-label" for="series_select"  id="label-series"><span id="i18n_series_label"></span>:</label>
                     <input type="text" class="form-field ui-autocomplete-input" name="series_select" id="series_select">
                     <input type="hidden" id="series">
                     <span class="fl-icon icon-help"  id="help_series" title="Click for help"></span>

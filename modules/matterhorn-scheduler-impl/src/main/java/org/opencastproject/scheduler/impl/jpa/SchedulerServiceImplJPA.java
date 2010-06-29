@@ -514,7 +514,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
     events = filterEventsForAfterDate(events, new DateTime(start));
     
     //all events that stop at the same time or earlier
-    long end = e.getStartdate().getTime() +1; // make sure that the same stop time is included too;
+    long end = e.getEnddate().getTime() +1; // make sure that the same stop time is included too;
     events = filterEventsForBeforeDate(events, new DateTime(end));
     
     return events.toArray(new Event[0]);

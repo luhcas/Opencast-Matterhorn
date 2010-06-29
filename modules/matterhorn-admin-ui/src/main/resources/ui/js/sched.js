@@ -48,7 +48,7 @@ UI.Init = function(){
   UI.RegisterComponents();
   UI.RegisterEventHandlers();
 
-  Scheduler.FormManager = new AdminForm.Manager(SINGLE_EVENT_ROOT_ELM, '', Scheduler.components)
+  Scheduler.FormManager = new AdminForm.Manager(SINGLE_EVENT_ROOT_ELM, '', Scheduler.components);
   
   if(Scheduler.type === SINGLE_EVENT){
     UI.agentList = '#agent';
@@ -76,11 +76,9 @@ UI.Init = function(){
       });
   }else{
     $.get(SCHEDULER_URL + '/uuid', function(data){
-      AdminUI.log(data);
       $('#eventId').val(data.id);
     });
   }
-
 };
 
 UI.Internationalize = function(){
@@ -134,10 +132,14 @@ UI.RegisterEventHandlers = function(){
   $('#series_select').autocomplete({
     source: SERIES_URL + '/search',
     select: function(event, ui){
-      $("#series").val(ui.item.id);
+      $('#series').val(ui.item.id);
     },
-    minLength: 3
+    search: function(){
+      $('#series').val('');
+    }
   });
+  
+  $('#series_select').blur(function(){if($('#series_select').val() === ''){ $('#series').val(''); }});
   
   $('#submitButton').click(UI.SubmitForm);
   $('#cancelButton').click(UI.CancelForm);
@@ -172,6 +174,23 @@ UI.RegisterEventHandlers = function(){
   });
 
   $('#recurAgent').change(UI.HandleAgentChange);
+  
+  //Check for conflicting events.
+  $('#startDate').change(UI.CheckForConflictingEvents);
+  $('#startTimeHour').change(UI.CheckForConflictingEvents);
+  $('#startTimeMin').change(UI.CheckForConflictingEvents);
+  $('#durationHour').change(UI.CheckForConflictingEvents);
+  $('#durationMin').change(UI.CheckForConflictingEvents);
+  $('#agent').change(UI.CheckForConflictingEvents);
+  
+  $('#recurStart').change(UI.CheckForConflictingEvents);
+  $('#recurEnd').change(UI.CheckForConflictingEvents);
+  $('#recurStartTimeHour').change(UI.CheckForConflictingEvents);
+  $('#recurStartTimeMin').change(UI.CheckForConflictingEvents);
+  $('#recurDurationHour').change(UI.CheckForConflictingEvents);
+  $('#recurDurationMin').change(UI.CheckForConflictingEvents);
+  $('#recurAgent').change(UI.CheckForConflictingEvents);
+  $('#day-select :checkbox').change(UI.CheckForConflictingEvents);
 }
 
 UI.ChangeRecordingType = function(recType){
@@ -206,7 +225,8 @@ UI.ChangeRecordingType = function(recType){
     UI.agentList = '#recurAgent';
     UI.inputList = '#recur-input-list';
     $(UI.inputList).empty();
-    $('#series_container > label').prepend('<span id="series_required" style="color: red;">*</span>'); //series is required, indicate as such.
+    seriesLabel = $('#series_container > label').text();
+    $('#series_container > label').html('<span id="series_required" style="color: red;">*</span>' + seriesLabel); //series is required, indicate as such.
     Scheduler.components.recurrenceStart.setValue(d.getTime().toString());
     Scheduler.FormManager.rootElm = MULTIPLE_EVENT_ROOT_ELM;
   }
@@ -279,6 +299,7 @@ UI.DeleteForm = function(){
 };
 
 UI.HandleAgentChange = function(elm){
+  var time;
   var agent = elm.target.value;
   $(UI.inputList).empty();
   if(agent){
@@ -303,14 +324,22 @@ UI.HandleAgentChange = function(elm){
           UI.DisplayCapabilities(capabilities);
         }else{
           Agent.tzDiff = 0; //No agent timezone could be found, assume local time.
-          $('#input-list').append('Agent defaults will be used.');
+          $('#input-list').replaceWith('Agent defaults will be used.');
         }
       });
   }else{
     // no valid agent, change time to local form what ever it was before.
-    var time = Scheduler.components.timeStart.getValue();
+    if(Scheduler.type === SINGLE_EVENT){
+      time = Scheduler.components.timeStart.getValue();
+    }else if(Scheduler.type === MULTIPLE_EVENTS){
+      time = Scheduler.components.recurrenceStart.getValue();
+    }
     Agent.tzDiff = 0;
-    Scheduler.components.timeStart.setValue(time);
+    if(Scheduler.type === SINGLE_EVENT){
+      Scheduler.components.timeStart.setValue(time);
+    }else if(Scheduler.type === MULTIPLE_EVENTS){
+      Scheduler.components.recurrenceStart.setValue(time);
+    }
   }
 };
 
@@ -332,8 +361,13 @@ UI.HandleAgentTZ = function(tz){
     //Display note of agent TZ difference, all times local to capture agent.
     //update time picker to agent time
     Agent.tzDiff = tz - localTZ;
-    agentLocalTime = Scheduler.components.timeStart.getValue() + (Agent.tzDiff * 60 * 1000);
-    Scheduler.components.timeStart.setValue(agentLocalTime);
+    if(Scheduler.type == SINGLE_EVENT){
+      agentLocalTime = Scheduler.components.timeStart.getValue() + (Agent.tzDiff * 60 * 1000);
+      Scheduler.components.timeStart.setValue(agentLocalTime);
+    }else if(Scheduler.type == MULTIPLE_EVENTS){
+      agentLocalTime = Scheduler.components.recurrenceStart.getValue() + (Agent.tzDiff * 60 * 1000);
+      Scheduler.components.recurrenceStart.setValue(agentLocalTime);
+    }
     diff = Math.round((Agent.tzDiff/60)*100)/100;
     if(diff < 0){
       postfix = " hours earlier";
@@ -411,12 +445,65 @@ UI.LoadEvent = function(doc){
 UI.EventSubmitComplete = function(){
   for(var k in Scheduler.components){
     AdminUI.log("#data-" + k)
-    $("#data-" + k).show();
+    $('#data-'+ k).show();
     //$("#data-" + k + " > .data-label").text(i18n[k].label + ":");
-    $("#data-" + k + " > .data-value").text(Scheduler.components[k].toString());
+    $('#data-' + k + ' > .data-value').text(Scheduler.components[k].toString());
   }
   $("#submission_success").siblings().hide();
   $("#submission_success").show();
+}
+
+UI.CheckForConflictingEvents = function(){
+  var event = "<event><metadataList>";
+  if($("#notice-conflict").siblings(':visible').length === 0){
+    $('#notice-container').hide();
+  }
+  $('#notice-conflict').hide();
+  $('#conflicting-events').empty();
+  if(Scheduler.components.device.validate()){
+    event += "<metadata><key>device</key><value>" + Scheduler.components.device.getValue() + "</value></metadata>";
+  }else{
+    return false;
+  }
+  if(Scheduler.type === SINGLE_EVENT){
+    if(Scheduler.components.timeStart.validate() && Scheduler.components.timeDuration.validate()){
+      event += "<metadata><key>timeStart</key><value>" + Scheduler.components.timeStart.getValue() + "</value></metadata>";
+      event += "<metadata><key>timeEnd</key><value>" + Scheduler.components.timeDuration.getValue() + "</value></metadata>";
+    }else{
+      return false;
+    }
+  }else if(Scheduler.type === MULTIPLE_EVENTS){
+    if(Scheduler.components.recurrenceStart.validate() && Scheduler.components.recurrenceEnd.validate()){
+      event += "<metadata><key>timeStart</key><value>" + Scheduler.components.recurrenceStart.getValue() + "</value></metadata>";
+      event += "<metadata><key>timeEnd</key><value>" + Scheduler.components.recurrenceEnd.getValue() + "</value></metadata>";
+    }else{
+      return false;
+    }
+  }
+  event += "</metadataList></event>";
+  $.post(SCHEDULER_URL + "/events/conflict", { event: event }, function(doc){
+    var conflictingEvent = false;
+    if($('event', doc).length > 0){
+      $.each($('event', doc), function(i,event){
+        var id, title;
+        id = $('eventId', event).text();
+        $.each($('completeMetadata > metadata', event), function(j,metadata){
+          if($('key', metadata).text() === 'title'){
+            title = $('value', metadata).text();
+            return true;
+          }
+        });
+        if(id !== $('#eventId').val()){
+          $('#conflicting-events').append('<li><a href="scheduler.html?eventId=' + id + '&edit" target="_new">' + title + '</a></li>');
+          conflictingEvent = true;
+        }
+      });
+      if(conflictingEvent){
+        $('#notice-container').show();
+        $('#notice-conflict').show();
+      }
+    }
+  });
 }
 
 UI.RegisterComponents = function(){
@@ -426,7 +513,7 @@ UI.RegisterComponents = function(){
   Scheduler.components.creator = new AdminForm.Component(['creator'], {label: 'label-creator'});
   Scheduler.components.contributor = new AdminForm.Component(['contributor'], {label: 'label-contributor'});
   Scheduler.components.seriesId = new AdminForm.Component(['series', 'series_select'],
-    { label: 'label-series', errorField: 'missing-series', nodeKey: 'seriesId' },
+    { label: 'label-series', errorField: 'missing-series', required: true, nodeKey: 'seriesId' },
     { getValue: function(){ 
         if(this.fields.series){
           this.value = this.fields.series.val();
@@ -442,6 +529,35 @@ UI.RegisterComponents = function(){
           return this.fields.series_select.val();
         }
         return this.getValue();
+      },
+      validate: function(){
+        if(this.fields.series_select.val() !== '' && this.fields.series.val() === ''){ //have text and no idea
+          return this.createSeriesFromSearchText();
+        }
+        return true; //nothing, or we have an id.
+      },
+      createSeriesFromSearchText: function(){
+        var series, seriesComponent;
+        var creationSucceeded = false;
+        if(this.fields.series_select !== ''){
+          series = '<series><metadataList><metadata><key>title</key><value>' + this.fields.series_select.val() + '</value></metadata></metadataList></series>';
+          seriesComponent = this;
+          $.ajax({
+            async: false,
+            type: 'PUT',
+            url: SERIES_URL + '/series',
+            data: { series: series },
+            success: function(data){
+              if(data.success){
+                creationSucceeded = true;
+                seriesComponent.fields.series.val(data.id);
+                AdminUI.log('Successfully created new series: ' + data.id);
+                UI.SubmitForm();
+              }
+            }
+          });
+        }
+        return creationSucceeded;
       }
     });
   Scheduler.components.subject = new AdminForm.Component(['subject'], {label: 'label-subject'});
@@ -486,35 +602,35 @@ UI.RegisterComponents = function(){
       }
     });
   if(Scheduler.type === MULTIPLE_EVENTS){
-    //Scheduler.components.recurringEventId = new AdminForm.Component(['eventId']);
-    Scheduler.components.seriesId.required = true; //Series are required for groups of recordings.
+    //Series validation override for recurring events.
+    Scheduler.components.seriesId.validate = function(){
+      if(this.fields.series.val() !== ''){ //Already have an id
+        return true;
+      }else if(this.fields.series_select.val() !== ''){ //have text but no id
+        return this.createSeriesFromSearchText();
+      }
+      return false; //nothing
+    };
     Scheduler.components.recurrenceStart = new AdminForm.Component(['recurStart', 'recurStartTimeHour', 'recurStartTimeMin'],
       { label: 'label-recurrstart', errorField: 'missing-startdate', required: true, nodeKey: 'recurrenceStart' },
       { getValue: function(){
           var date, start;
-          if(this.validate()){
-            date = this.fields.recurStart.datepicker('getDate');
-            if(date && date.constructor == Date){
-              start = date / 1000; // Get date in milliseconds, convert to seconds.
-              start += this.fields.recurStartTimeHour.val() * 3600; // convert hour to seconds, add to date.
-              start += this.fields.recurStartTimeMin.val() * 60; //convert minutes to seconds, add to date.
-              start -= Agent.tzDiff * 60; //Agent TZ offset
-              start = start * 1000; //back to milliseconds
-              this.value = start;
-            }
+          date = this.fields.recurStart.datepicker('getDate');
+          if(date && date.constructor == Date){
+            start = date / 1000; // Get date in milliseconds, convert to seconds.
+            start += this.fields.recurStartTimeHour.val() * 3600; // convert hour to seconds, add to date.
+            start += this.fields.recurStartTimeMin.val() * 60; //convert minutes to seconds, add to date.
+            start -= Agent.tzDiff * 60; //Agent TZ offset
+            start = start * 1000; //back to milliseconds
+            return start;
           }
-          return this.value;
         },
         setValue: function(value){
           var date;
-          if(typeof value === 'string'){
-            value = { startdate: value };
-          }
-          date = parseInt(value.startdate);
+          date = parseInt(value);
+          
           if(date != 'NaN') {
-            AdminUI.log('date: ' + date);
             date = new Date(date + (Agent.tzDiff * 60 * 1000));
-            AdminUI.log('date + offset: ' + date);
           } else {
             AdminUI.log('Could not parse date.');
           }

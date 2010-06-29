@@ -278,7 +278,6 @@ public class Event extends AbstractEvent {
   }
 
   public Metadata findMetadata(String key) {
-    logger.debug("Finding metadata: {}", key);
     for (Metadata m : metadata) {
       if (m.getKey().equals(key))
         return m;

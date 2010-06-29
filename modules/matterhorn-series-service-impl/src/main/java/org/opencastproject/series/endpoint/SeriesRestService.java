@@ -190,7 +190,7 @@ public class SeriesRestService {
    * 
    * @param s
    *          The Series that should be stored.
-   * @return true, if the Series could be stored
+   * @return json object, success: true and uuid if succeeded
    */
   @SuppressWarnings("unchecked")
   @PUT

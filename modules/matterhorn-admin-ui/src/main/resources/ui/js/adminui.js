@@ -240,10 +240,15 @@ $.extend(AdminForm.Component.prototype, {
    */
   toNode: function(parent){
     for(var el in this.fields){
-      var doc = parent.ownerDocument;
-      var container = doc.createElement('metadata');
-      var value = doc.createElement('value');
-      var key = doc.createElement('key');
+      var doc, container, value, key;
+      if(parent){
+        doc = parent.ownerDocument;
+      }else{
+        doc = document;
+      }
+      container = doc.createElement('metadata');
+      value = doc.createElement('value');
+      key = doc.createElement('key');
       value.appendChild(doc.createTextNode(this.getValue()));
       if(this.nodeKey !== null){
          key.appendChild(doc.createTextNode(this.nodeKey));
