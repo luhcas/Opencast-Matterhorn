@@ -129,7 +129,11 @@ Opencast.Watch = (function ()
         	  coverUrlOne = coverUrlTwo;
           }
           
-         
+        
+
+var mimetypeOne = "video/x-flv";
+var mimetypeTwo = "video/x-flv";
+
           
           Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo);
 

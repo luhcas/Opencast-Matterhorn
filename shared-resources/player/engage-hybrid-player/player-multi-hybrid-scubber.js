@@ -23,8 +23,11 @@ Opencast.Scrubber = (function ()
     {
         $('#draggable').bind('dragstart', function (event, ui) 
         {
-        	$("#divToolTip").fadeIn();
+        	
         	tooltipTop = event.pageY-35;
+        	$("#divToolTip").css('top', tooltipTop);
+            $("#divToolTip").css('left', event.pageX-25);
+        	$("#divToolTip").fadeIn();
         	
         	Opencast.Player.setDragging(true);
             
