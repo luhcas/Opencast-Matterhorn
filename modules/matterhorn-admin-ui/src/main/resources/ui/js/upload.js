@@ -116,6 +116,8 @@ Upload.init = function() {
   } else {                                             // FIXME well this has to be cleaned up, agile...
     Upload.retryId = Upload.getURLParam("edit");
     if (Upload.retryId != '') {
+      $('#i18n_submit_instr').text("");
+      $('#BtnSubmit').text("Continue Processing");  
       $('#i18n_page_title').text("Edit Recording Before Continuing");
       Upload.initRetry(Upload.retryId);
     }
