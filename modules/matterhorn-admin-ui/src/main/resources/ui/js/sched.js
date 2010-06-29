@@ -214,6 +214,14 @@ UI.ChangeRecordingType = function(recType){
 };
 
 UI.SubmitForm = function(){
+  // validate inputs
+  if(Scheduler.components.resources == '') {
+      $('#missingFields-container').show();
+      $('#missing-inputs').show();
+      $('#i18n_input_label').css('color','red');
+      
+      return true;
+  } else $('#i18n_input_label').css('color','black');
   var eventXML = null;
   eventXML = Scheduler.FormManager.serialize();
   if(eventXML){
