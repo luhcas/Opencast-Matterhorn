@@ -254,24 +254,12 @@
     <xsl:for-each select="ns2:search-results/result/mediapackage/attachments/attachment">
       <xsl:choose>
         <xsl:when test="@type='presenter/player+preview'">
-          <div id="oc-cover-engage" style="display: none">
+          <div id="oc-cover-presenter" style="display: none">
             <xsl:value-of select="url"/>
           </div>
         </xsl:when>
         <xsl:when test="@type='presentation/player+preview'">
-          <div id="oc-cover-feed" style="display: none">
-            <xsl:value-of select="url"/>
-          </div>
-        </xsl:when>
-      </xsl:choose>
-      <xsl:choose>
-        <xsl:when test="@type='presenter/search+preview'">
-          <div id="oc-cover-feed" style="display: none">
-            <xsl:value-of select="url"/>
-          </div>
-        </xsl:when>
-        <xsl:when test="@type='presentation/search+preview'">
-          <div id="oc-cover-feed" style="display: none">
+          <div id="oc-cover-presentation" style="display: none">
             <xsl:value-of select="url"/>
           </div>
         </xsl:when>
