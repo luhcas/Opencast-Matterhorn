@@ -314,9 +314,10 @@ Recordings.continueWorkflow = function() {
   var workflowId = $('#holdWorkflowId').val();
   $.ajax({
     type       : 'POST',
-    url        : '../workflow/rest/' + workflowId + '/resume',
+    url        : '../workflow/rest/resume/',
+    data       : {id : workflowId},
     error      : function(XHR,status,e){
-      alert('Could not remsume Workflow ' + status);
+      alert('Could not resume Workflow: ' + status);
     },
     success    : function(data) {
       $('#holdActionPanel-container').fadeOut('fast');
