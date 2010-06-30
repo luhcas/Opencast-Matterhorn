@@ -522,11 +522,14 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
   }
   
   public Event[] findConflictingEvents (RecurringEvent rEvent) throws IncompleteDataException {
-    if (rEvent.getRecurrence() == null || rEvent.getValue("recurrence.start") == null || rEvent.getValue("recurrence.end") == null ) 
+    rEvent.buildMetadataTable(rEvent.getMetadata());
+    if (rEvent.getRecurrence() == null || rEvent.getValue("recurrenceStart") == null || rEvent.getValue("device") == null ||
+            rEvent.getValue("recurrenceEnd") == null || rEvent.getValue("recurrenceDuration") == null) 
       throw new IncompleteDataException();
     List<Event> events = rEvent.generatedEvents();
     HashSet<Event> results = new HashSet<Event>();
     for (Event event : events) {
+      event.setRecurringEvent(rEvent);
       Event [] conflicts = findConflictingEvents(event);
       results.addAll(Arrays.asList(conflicts));
     }

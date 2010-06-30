@@ -487,7 +487,7 @@ public class SchedulerRestService {
   
   @POST
   @Produces(MediaType.TEXT_XML)
-  @Path("events/conflict")
+  @Path("recurrence/conflict")
   public Response findConflictingEvents (@FormParam("recurringEvent") RecurringEvent e) {
     if (e == null) {
       logger.error("event is null");
@@ -760,7 +760,7 @@ public class SchedulerRestService {
     data.addEndpoint(RestEndpoint.Type.READ, findConflictingEventsEndpoint);  
     
     // Scheduler findConflictingREvents 
-    RestEndpoint findConflictingREventsEndpoint = new RestEndpoint("findConflictingRecurringEvents", RestEndpoint.Method.POST, "/events/conflict", "Looks for events that are conflicting with the given event, because they use the same recorder at the same time ");
+    RestEndpoint findConflictingREventsEndpoint = new RestEndpoint("findConflictingRecurringEvents", RestEndpoint.Method.POST, "/recurrence/conflict", "Looks for events that are conflicting with the given event, because they use the same recorder at the same time ");
     findConflictingREventsEndpoint.addFormat(new Format("xml", null, null));
     findConflictingREventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, List of Events as XML returned, or an empty list, if no conflicts were found"));
     findConflictingREventsEndpoint.addRequiredParam(new Param("recurringEvent", Type.TEXT, generateEvent(), "The recurring Event that should be checked for conflicts. "));

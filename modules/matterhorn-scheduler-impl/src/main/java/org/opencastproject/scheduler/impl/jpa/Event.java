@@ -153,6 +153,7 @@ public class Event extends AbstractEvent {
   }
 
   public RecurringEvent getRecurringEvent() {
+    if (recurringEvent != null) return recurringEvent;
     if (getRecurringEventId() != null && recurringEvent == null) {
       recurringEvent = RecurringEvent.find(getRecurringEventId(), emf);
       metadataTable = null;
@@ -311,7 +312,7 @@ public class Event extends AbstractEvent {
     if (containsKey("timeStart")) {
       return getValueAsDate("timeStart");
     }
-    if (getRecurringEventId() != null) {
+    if (recurringEvent != null || (getRecurringEventId() != null && getRecurringEventId().length() > 0)) {
       return getRecurringEvent().getDateForEventByIndex(getPositionInRecurrence());
     }
     return null;
