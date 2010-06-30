@@ -17,6 +17,7 @@ package org.opencastproject.scheduler.impl.jpa;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -519,6 +520,19 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
     
     return events.toArray(new Event[0]);
   }
+  
+  public Event[] findConflictingEvents (RecurringEvent rEvent) throws IncompleteDataException {
+    if (rEvent.getRecurrence() == null || rEvent.getValue("recurrence.start") == null || rEvent.getValue("recurrence.end") == null ) 
+      throw new IncompleteDataException();
+    List<Event> events = rEvent.generatedEvents();
+    HashSet<Event> results = new HashSet<Event>();
+    for (Event event : events) {
+      Event [] conflicts = findConflictingEvents(event);
+      results.addAll(Arrays.asList(conflicts));
+    }
+    
+    return results.toArray(new Event [0]);
+  }  
   
   public void activate (ComponentContext cc) {
     super.activate(cc); 

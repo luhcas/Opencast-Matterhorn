@@ -20,6 +20,7 @@ import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.scheduler.impl.SchedulerFilterImpl;
 import org.opencastproject.scheduler.impl.jpa.Event;
+import org.opencastproject.scheduler.impl.jpa.IncompleteDataException;
 import org.opencastproject.scheduler.impl.jpa.Metadata;
 import org.opencastproject.scheduler.impl.jpa.RecurringEvent;
 import org.opencastproject.scheduler.impl.jpa.SchedulerServiceImplJPA;
@@ -484,6 +485,28 @@ public class SchedulerRestService {
     return Response.ok((new GenericEntity<List<Event>> (events){})).build();
   }   
   
+  @POST
+  @Produces(MediaType.TEXT_XML)
+  @Path("events/conflict")
+  public Response findConflictingEvents (@FormParam("recurringEvent") RecurringEvent e) {
+    if (e == null) {
+      logger.error("event is null");
+      return Response.status(Status.BAD_REQUEST).build();
+    } 
+    List<Event> events = null;
+    try {
+      events = Arrays.asList(service.findConflictingEvents(e));
+    } catch (IncompleteDataException e2) {
+      logger.warn("Recurring event incomplete {}", e.toString());
+      return Response.status(Status.BAD_REQUEST).build();
+    } catch (Exception e1) {
+      logger.error("Find Conflicting Failed: {}", e1);
+      return Response.status(Status.BAD_REQUEST).build();
+    }
+    
+    return Response.ok((new GenericEntity<List<Event>> (events){})).build();
+  }  
+  
   /**
    * Lists all events in the database, without any filter
    * @return XML with all events 
@@ -735,6 +758,14 @@ public class SchedulerRestService {
     findConflictingEventsEndpoint.addRequiredParam(new Param("event", Type.TEXT, generateEvent(), "The Event that should be checked for conflicts."));
     findConflictingEventsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, findConflictingEventsEndpoint);  
+    
+    // Scheduler findConflictingREvents 
+    RestEndpoint findConflictingREventsEndpoint = new RestEndpoint("findConflictingRecurringEvents", RestEndpoint.Method.POST, "/events/conflict", "Looks for events that are conflicting with the given event, because they use the same recorder at the same time ");
+    findConflictingREventsEndpoint.addFormat(new Format("xml", null, null));
+    findConflictingREventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, List of Events as XML returned, or an empty list, if no conflicts were found"));
+    findConflictingREventsEndpoint.addRequiredParam(new Param("recurringEvent", Type.TEXT, generateEvent(), "The recurring Event that should be checked for conflicts. "));
+    findConflictingREventsEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, findConflictingREventsEndpoint);      
 
     // Scheduler getDublinCoreMetadata
     RestEndpoint getDublinCoreMetadataEndpoint = new RestEndpoint("getDublinCoreMetadata", RestEndpoint.Method.GET, "/getDublinCoreMetadata/{eventID}", "Gets a XML with the Dublin Core metadata for the specified event. ");
