@@ -46,6 +46,12 @@
         var mp = uploadFrame.contentWindow.document.getElementById("mp").value;
         //alert(mp);
       }
+      UploadListener.uploadFailed = function() {
+        $('#loading-container').css('display','none');
+        $('#upload-container').css('display','table-cell');
+        $('#filechooser-ajax').attr('src','../../../ingest/rest/filechooser-local.html');
+        alert('The captions file could not be added');
+      }
 
       function xmlToString(doc) {
         if(typeof XMLSerializer != 'undefined'){
@@ -93,6 +99,15 @@
                   }
                 });
                 parent.Recordings.adjustHoldActionPanelHeight();
+              }
+            });
+            // look for already uploaded captions file
+            $(data.documentElement).find("mediapackage > metadata > catalog").each(function(index, elm) {
+              if ($(elm).attr('type') == 'captions/timedtext') {
+                var captionsFile = $(elm).find('url').text().split(/\//);
+                captionsFile = captionsFile[captionsFile.length-1];
+                $('#upload-container').css('display','none');
+                $('#filename-container').text(captionsFile).css('display','table-cell');
               }
             });
             // call preview player
