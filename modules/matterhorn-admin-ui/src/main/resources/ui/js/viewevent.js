@@ -94,7 +94,6 @@ function handleDCMetadata(metadataDoc){
     if(metadataDoc.getElementsByTagNameNS){
       var dcFields = metadataDoc.getElementsByTagNameNS("*",field);
       for (var j=0; j < dcFields.length; j++) {           // avoids getting also all memebrs of the Array object (length, etc...)
-        alert('dcFileds[' + j + '] is ' + dcFields[j]);
         values.push($(dcFields[j]).text());
       }
     } else {
