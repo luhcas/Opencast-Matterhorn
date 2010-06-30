@@ -505,6 +505,7 @@ public class IngestRestService {
     MediaPackage mp = null;
     String fileName = null;
     MediaPackageElementFlavor flavor = null;
+    String elementType = "track";
     EntityManager em = emf.createEntityManager();
     try {
       try { // try to get UploadJob, responde 404 if not successful
@@ -515,7 +516,7 @@ public class IngestRestService {
           throw new NoResultException("Job not found");
         }
       } catch (NoResultException e) {
-        logger.warn("UploadJob not found for Id: " + jobId);
+        logger.warn("Upload job not found for Id: " + jobId);
         return buildUploadFailedRepsonse();
       }
       if (ServletFileUpload.isMultipartContent(request)) {
@@ -532,15 +533,22 @@ public class IngestRestService {
             if (flavorString != null) {
               flavor = MediaPackageElementFlavor.parseFlavor(flavorString);
             }
+          } else if (fieldName.equals("elementType")) {
+            String typeString = Streams.asString(item.openStream());
+            if (typeString != null) {
+              elementType = typeString;
+            }
           } else if (fieldName.equals("file")) {
             fileName = item.getName();
-            logger.debug("receiving track");
             job.setFilename(fileName);
             if ((mp != null) && (flavor != null) && (fileName != null)) {
-
-              // TODO add ability to accept the other kinds of elements (Attachment etc..)
-
-              mp = ingestService.addTrack(item.openStream(), fileName, flavor, mp);
+              // decide which element type to add 
+              if (elementType.toUpperCase().equals("TRACK")) {
+                mp = ingestService.addTrack(item.openStream(), fileName, flavor, mp);
+              } else if (elementType.toUpperCase().equals("CATALOG")) {
+                logger.info("Adding Catalog: " + fileName + " - " + flavor);
+                mp = ingestService.addCatalog(item.openStream(), fileName, flavor, mp);
+              }
               String html = IOUtils.toString(getClass().getResourceAsStream("/templates/complete.html"), "UTF-8");
               html = html.replaceAll("\\{mediaPackage\\}", mp.toXml());
               return Response.ok(html).build();
