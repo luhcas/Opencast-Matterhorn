@@ -90,17 +90,20 @@ function handleDCMetadata(metadataDoc){
   for( var i in fields ){
     var field = fields[i];
     el = eventDoc.createElement(field);
+    var values = new Array();
     if(metadataDoc.getElementsByTagNameNS){
-      if (field == 'creator') {
-        var creator_elms = metadataDoc.getElementsByTagNameNS("*",field);
-        // todo DISPLAY ALL CREATORS
-        $()
-      } else {
-        nodeTxt = $(metadataDoc.getElementsByTagNameNS("*",field)[0]).text();
+      var dcFields = metadataDoc.getElementsByTagNameNS("*",field);
+      for (var j=0; j < dcFields.length; j++) {           // avoids getting also all memebrs of the Array object (length, etc...)
+        alert('dcFileds[' + j + '] is ' + dcFields[j]);
+        values.push($(dcFields[j]).text());
       }
     } else {
-      nodeTxt = $("dcterms\\:" + field, metadataDoc).text();
+      var values = new Array();
+      $("dcterms\\:" + field, metadataDoc).each( function(idx, elm) {
+        values.push($(elm).text());
+      });
     }
+    var nodeTxt = values.join(', ');
     el.appendChild(eventDoc.createTextNode(nodeTxt));
     eventDoc.documentElement.appendChild(el);
   }
