@@ -10,31 +10,37 @@ if [[ ! $INSTALL_RUN ]]; then
     exit 1
 fi
 
+# Include the functions script
+. ${FUNCTIONS}
 
 if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
   
-    # List the most recent drivers
-    DRIVER_NR=20
     FILE_NAME=driver_list
     
-    wget -q -O $FILE_NAME $EPIPHAN_URL
-    #FIXME: Add some sort of retry system
-    if [[ $? -ne 0 ]]; then
-	echo "Error. The list of available vga2usb drivers could not be retrieved. Aborting..."
-	exit 1
-    fi
+    while [[ true ]]; do
+	wget -q -O $FILE_NAME $EPIPHAN_URL
+	if [[ $? -eq 0 ]]; then
+            # Kernel base consists of the first three numbers in the kernel version, which are the most relevant
+	    kernel_base=$(uname -r | grep -o "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]")
+	    architecture=$(uname -m)
+	    
+            # Gets the complete list of drivers in the page compatible with the current kernel
+	    # It makes no sense presenting others which are not compatible
+            # First trY to filter by architecture type
+	    drivers=( $(grep "vga2usb" $FILE_NAME | sed 's#^.*<a\s*href="\(.*\)".*>.*</a>.*$#\1#' | grep "$kernel_base" | grep -i $architecture ))
+            # If there's no match, be less strict and not filter by architecture
+	    if [[ ${#drivers[@]} -eq 0 ]]; then
+		drivers=( $(grep "vga2usb" $FILE_NAME | sed 's#^.*<a\s*href="\(.*\)".*>.*</a>.*$#\1#' | grep "$kernel_base" ))
+	    fi
+	    break;
+	fi
 
-    # Kernel base is the first three numbers in the kernel version, which are the most relevant
-    kernel_base=$(uname -r | grep -o "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]")
-    architecture=$(uname -m)
-
-    # Gets the complete list of drivers in the page compatible with the current kernel -- it makes no sense presenting others which are not compatible
-    # First tries to filter by architecture type
-    drivers=( $(grep "vga2usb" $FILE_NAME | sed 's#^.*<a\s*href="\(.*\)".*>.*</a>.*$#\1#' | grep "$kernel_base" | grep -i $architecture ))
-    # If there's not match, be less strict and not filter by architecture
-    if [[ ${#drivers[@]} -eq 0 ]]; then
-	drivers=( $(grep "vga2usb" $FILE_NAME | sed 's#^.*<a\s*href="\(.*\)".*>.*</a>.*$#\1#' | grep "$kernel_base" ))
-    fi
+	echo "The list of available vga2usb drivers could not be retrieved. Please check there is a working internet connection"
+	yesno -d yes "Do you wish to retry?" ok
+	if [[ ! "$ok" ]]; then
+	    break
+	fi
+    done
 
     # Let user choose driver
     # Main loop: if some error happens, the user will be prompted again for another option
@@ -43,34 +49,14 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
 	echo "System information: $(uname -mor)"
 	echo
 	
-	echo "These are the options available for your system:"
-	for ((i = 0; i < ${#drivers[@]}; i++ )); do
-	    echo -e "\t$i)\t${drivers[$i]}"
-	done
-	echo -e "\t$i)\tNot listed here"
-	(( i+=1 ))
-	echo -e "\t$i)\tDo not need driver"
-	
-        # Prompts for an option
-	echo
-	read -p "Choose an option: " opt
-	
-	until [[ -n "$(echo "$opt" | grep -o '^[0-9][0-9]*$')" && $opt -ge 0 && $opt -lt $(( ${#drivers[@]} + 2 )) ]]; do 
-	    read -p "Invalid value. Please enter a value from the list: " opt
-	done
-	
-        # If opt is null or empty, assigns the value $EPIPHAN_DEFAULT to it
-        #: ${opt:=$EPIPHAN_DEFAULT}
-	if [[ $opt -ge 0 && $opt -le ${#drivers[@]} ]]; then
+	choose -t "These are the options available for your system" -? "$VGA2USB_HELP_MSG" -o list -- ${drivers[@]} "Enter URL" "Do not need driver" opt
+	if [[ $opt -le ${#drivers[@]} ]]; then
+	    # The option is one of the drivers or "Enter URL"
  	    if [[ $opt -eq ${#drivers[@]} ]]; then
-	        # Ask the user for the driver url
-		echo "You might want to check $EPIPHAN_URL to see a complete list of the available drivers."
-		echo "If you cannot find a driver that works with your kernel configuration please email Epiphan Systems inc. (info@epiphan.com)"
-		echo " and include the output from the command \"uname -a\" (in this machine this output is $(uname -a)"
+	        # The option is "Enter URL" -- ask the user for the driver url
 		unset DRIVER_URL
-		while [[ -z "$DRIVER_URL" ]]; do
-		    read -p "Please input the URL of the driver you would like to load: " DRIVER_URL
-		done
+		ask -? "$HELP_MSG" "Please input the URL of the driver you would like to load" DRIVER_URL
+	  
 		# Keeps whatever it is after the last / --the file name
   	        EPIPHAN=${DRIVER_URL##*/}
 	    else
@@ -107,18 +93,14 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
 		cd $WORKING_DIR
   	    else
 		echo "Error!"
-		echo "Failed to retrieve the driver from the URL. Please check it is correct and try again."
+		echo "Failed to retrieve the driver from the URL. Please check it is correct and there is a working internet connection."
 	    fi
 	    
 	else
 	    # Skip driver installation
 	    echo "Skipping the vga2usb driver installation. Please note that if no driver is present, the vga2usb card(s) will not be detected."
-	    read -p "Are you sure you want to proceed [y/N]? " answer
-	    while [[ -z "$(echo ${answer:-N} | grep -i '^[yn]')" ]]; do
-		read -p "Please enter [y]es or [N]o: " answer
-		break;
-	    done
-	    if [[ -n "$(echo ${answer:-N} | grep -i '^y')" ]]; then
+	    yesno -d no "Are you sure you want to proceed?" proceed
+	    if [[ "$proceed" ]]; then
 		break
 	    fi
 	fi

@@ -10,11 +10,10 @@ if [[ ! $INSTALL_RUN ]]; then
     exit 1
 fi
 
+. ${FUNCTIONS}
+
 # Prompt for user name
-read -p "Input desired opencast username [$USERNAME]: " input
-if [[ -n "$input" ]]; then
-    USERNAME=$input
-fi
+ask -d "$USERNAME" "Input desired opencast username" input
 
 # Add user and give sudo priveleges and permissions for accessing audio/video devices
 useradd -m -s /bin/bash $USERNAME

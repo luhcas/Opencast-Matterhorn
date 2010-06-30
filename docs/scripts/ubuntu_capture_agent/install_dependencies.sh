@@ -10,29 +10,24 @@ if [[ ! $INSTALL_RUN ]]; then
     exit 1
 fi
 
+# Include the functions
+. ${FUNCTIONS}
+
 # Prompt the user to modify the default repositories
 while [[ true ]]; do
     echo
-    read -p "Do you wish to use a custom software mirror instead of the Ubuntu defaults [y/N]? " answer
-    while [[ -z "$(echo ${answer:-N} | grep -i '^[yn]')" ]]; do
-	read -p "Please answer [y]es or [N]o: " answer
-    done
-    
-    # If 'yes', prompt a menu to modify any of the parameters
-    if [[ -n "$(echo ${answer:-N} | grep -i "^y")" ]]; then
+    yesno -d no -? "These are the locations were the necessary software is downloaded"\
+                   "Do you wish to use a custom software mirror instead of the Ubuntu defaults?" modify
+
+    if [[ "$modify" ]]; then
 	while [[ true ]]; do
 	    echo
-	    echo "Please choose which mirror you want to modify:"
-	    echo -e "\t0)\t Archive Mirror \t(current value: ${mirrors[0]:-$DEFAULT_MIRROR})"
-	    echo -e "\t1)\t Security Mirror \t(current value: ${mirrors[1]:-$DEFAULT_SECURITY})"
-	    echo -e "\t2)\t Partner Mirror \t(current value: ${mirrors[2]:-$DEFAULT_PARTNER})"
-	    read -p "Selection (leave blank to continue installation): " answer
-	    
-	    while [[ -n "$answer" && -z "$(echo "$answer" | grep "^[012]$")" ]]; do
-		read -p "Please choose a value from the list: " answer
-	    done
-	    
-	    if [[ -n "$answer" ]]; then
+	    choose -t "Please choose which mirror you want to modify" -p "Selection (leave blank to continue installation)" -a\
+                       "Archive Mirror\t(current value: ${mirrors[0]:-$DEFAULT_MIRROR})"\
+                       "Security Mirror\t(current value: ${mirrors[1]:-$DEFAULT_SECURITY})"\
+                       "Partner Mirror\t(current value: ${mirrors[2]:-$DEFAULT_PARTNER})"\
+                       answer
+	    if [[ "$answer" ]]; then
 		read -p "Please enter the mirror URL: " mirrors[$answer]
 	    else
 		break;
@@ -82,25 +77,32 @@ EOF
 IFS='
 '
 
-# Gets the list of the packages to install
+# Gets the list of the packages to install --those are delimited by newlines, that's why IFS was previously changed
 pkgs=( $PKG_LIST )
 bad=( $BAD_PKG_LIST )
 reason=( $BAD_PKG_REASON )
 
+# Restore the default array delimiter
+unset IFS
+
 for (( i = 0; i < ${#bad[@]}; i++ )); do
-    read -p "Do you wish to install ${bad[$i]}? ${reason[$i]} [y/N]: " answer
-    while [[ -z "$(echo ${answer:-N} | grep -i '^[yn]')" ]]; do
-        read -p "Please answer [y]es or [N]o: " answer
+    unset exists
+    # Check if the packages are installed before asking the user
+    for item in $(echo "${bad[$i]}" | cut -d ' ' -f 1-); do
+	echo "item=$item"
+	if [[ "$(dpkg -l | grep "$item")" ]]; then
+	    exists=true
+	    break
+	fi
     done
-    if [[ -n "$(echo ${answer:-N} | grep -i '^y')" ]]; then
-	pkgs[${#pkgs[@]}]=${bad[$i]}
+    
+    if [[ ! "$exists" ]]; then
+	yesno -d no -? "${reason[$i]}" -h "? for details" "Do you wish to install ${bad[$i]}?" ok
+	if [[ "$ok" ]]; then
+	    pkgs[${#pkgs[@]}]=${bad[$i]}
+	fi
     fi
 done
-
-# Restore the default array delimiter
-IFS=' '
-
-echo "Installing third party packages from Ubuntu repository, this may take some time... "
 
 # Check which required packages are already installed
 for (( i = 0; i < ${#pkgs[@]}; i++ )); do
@@ -109,16 +111,20 @@ for (( i = 0; i < ${#pkgs[@]}; i++ )); do
     fi
 done
 
+if [[ "${noinst[@]}" ]]; then
 # Install the required 3rd party packages
-apt-get -y -qq --force-yes install ${noinst[@]} > /dev/null
+    echo "Installing third party packages from Ubuntu repository, this may take some time... "
+    apt-get -y --force-yes install ${noinst[@]}
 
-if [[ $? -ne 0 ]]; then
-    echo "Error!"
-    echo "Failed to download the necessary packages. Aborting..."
-    exit 1
+    if [[ $? -ne 0 ]]; then
+	echo "Error!"
+	echo "Failed to download the necessary packages. Aborting..."
+	exit 1
+    fi
+    echo "Done"
+else
+    echo "All the necessary dependencies were already installed"
 fi
-
-echo "Done"
 
 # Set up java-6-sun as the default alternative
 echo -n "Setting up java-6-sun as the default jvm... "
@@ -156,12 +162,9 @@ while [[ true ]]; do
     fi
     # Else, ask for the actions to take
     echo
-    read -p "Error retrieving the Felix files from the web. Retry [Y/n]?" answer
-    while [[ -z "$(echo ${answer:-N} | grep -i '^[yn]')" ]]; do
-	read -p "Please answer [y]es or [N]o: " answer
-    done
-    if [[ -n "$(echo ${answer:-Y} | grep -i "^n")" ]]; then
-	echo "You must download Felix manually and install it under $CA_DIR, in order for matterhorn to work"
+    yesno -d yes "Error retrieving the Felix files from the web. Retry?" ok
+    if [[ "$ok" ]]; then
+	echo "You must download Felix manually and install it under $OC_DIR, in order for matterhorn to work"
 	break;
     else
 	echo -n "Retrying... "
@@ -199,7 +202,7 @@ fi
 
 # Setup ntdp
 echo 
-read -p "Which NTP server would you like to use [ntp.ubuntu.com]? " server
-sed -i "s#^server .*#server ${server:-$DEFAULT_NTP_SERVER}#" $NTP_CONF
-echo "NTP server set to ${server:-$DEFAULT_NTP_SERVER}"
+ask -d "$DEFAULT_NTP_SERVER" "Which NTP server would you like to use?" server
+sed -i "s#^server .*#server $server#" $NTP_CONF
+echo "NTP server set to $server"
 echo "Consider editing the file $NTP_CONF for manually changing the default NTP server or adding more servers to the list"

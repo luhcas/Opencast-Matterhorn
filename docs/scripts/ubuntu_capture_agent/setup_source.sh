@@ -10,24 +10,22 @@ if [[ ! $INSTALL_RUN ]]; then
     exit 1
 fi
 
+. ${FUNCTIONS}
+
 # Detect if the matterhorn source has been already checked out
 url=$(svn info $SOURCE 2> /dev/null | grep URL: | cut -d ' ' -f 2) 
-if [[ -n "$url" ]]; then
+if [[ "$url" ]]; then
     echo
-    read -p "The source $url has been already checked out. Do you wish to keep it [Y/n]? " keep
-    while [[ -z "$(echo "${keep:-Y}" | grep -i '^[yn]')" ]]; do
-	read -p "Please answer [Y]es or [n]o: " keep
-    done  
+    yesno -d yes "The source $url has been already checked out. Do you wish to keep it?" keep
 else
-    keep=no
+    keep=
 fi
 
-if [[ -n "$(echo "${keep:-Y}" | grep -i '^n')" ]]; then
+if [[ -z "$keep" ]]; then
     # Get the necessary matterhorn source code (the whole trunk, as specified in MH-3211)
     while [[ true ]]; do
 	echo
-	read -p "Enter the branch or tag you would like to download [${SRC_DEFAULT##*/}]: " response
-	: ${response:=${SRC_DEFAULT##*/}}
+	ask -d "${SRC_DEFAULT##*/}" "Enter the branch or tag you would like to download" response
 
 	if [[ "$response" == "${TRUNK_URL##*/}" ]]; then
 	    url=$TRUNK_URL
@@ -41,7 +39,7 @@ if [[ -n "$(echo "${keep:-Y}" | grep -i '^n')" ]]; then
 
 	rm -rf $SOURCE
 	echo -n "Attempting to download matterhorn source from $url... "
-	svn co --force $url $SOURCE &> /dev/null	
+	svn co --force $url $SOURCE
 
 	if [[ $? -eq 0 ]]; then
 	    #### Exit the loop ####

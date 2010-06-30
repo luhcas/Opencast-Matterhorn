@@ -10,14 +10,15 @@ if [[ ! $INSTALL_RUN ]]; then
     exit 1
 fi
 
+. ${FUNCTIONS}
+
 # Setup opencast storage directories
 # TODO: Uncomment the following lines -and remove the next two- once the correct defaults for the directories are set in the config files in svn
 ## Read default from the config file
 #default_dir=$(grep "^org\.opencastproject\.storage\.dir=.*$" $GEN_PROPS | cut -d '=' -f 2)
-#read -p "Where would you like the matterhorn directories to be stored [$default_dir]? " oc_dir
+#ask -d "$default_dir" "Where would you like the matterhorn directories to be stored?" oc_dir
 #: ${oc_dir:=$OC_DIR}
-read -p "Where would you like the matterhorn directories to be stored [$OC_DIR]? " oc_dir
-: ${oc_dir:=$OC_DIR}
+ask -d "$OC_DIR" "Where would you like the matterhorn directories to be stored?" oc_dir
 echo
 
 # Create the directories
@@ -35,20 +36,18 @@ sed -i "s#^org\.opencastproject\.storage\.dir=.*\$#org.opencastproject.storage.d
 
 # Define capture agent name by using the hostname
 unset agentName
-hostname=`hostname`
-read -p "Please enter the agent name: [$hostname] " agentName
-while [[ -z $(echo "${agentName:-$hostname}" | grep '^[a-zA-Z0-9_\-][a-zA-Z0-9_\-]*$') ]]; do
-    read - p "Please use only alphanumeric characters, hyphen(-) and underscore(_) [$hostname]: " agentName
-done 
-sed -i "s/capture\.agent\.name=.*$/capture\.agent\.name=${agentName:-$hostname}/" $CAPTURE_PROPS
+ask -d "$(hostname)" -f '^[a-zA-Z0-9_\-][a-zA-Z0-9_\-]*$' -e "Please use only alphanumeric characters, hyphen(-) and underscore(_)"\
+ "Please enter the agent name" agentName
+
+sed -i "s/capture\.agent\.name=.*$/capture\.agent\.name=$agentName/" $CAPTURE_PROPS
 echo
 
 # Prompt for the URL where the core lives.
 # TODO: (or maybe not) Support a distributed core would mean to set different URLs separately, rather than this centralized one
 ## Read default from the config file
 #DEFAULT_CORE_URL=$(grep "^org\.opencastproject\.capture\.core\.url=.*$" $CAPTURE_PROPS | cut -d '=' -f 2)
-read -p "Please enter the URL to the root of the machine hosting the ingestion service [$DEFAULT_CORE_URL]: " core
-sed -i "s#org\.opencastproject\.capture\.core\.url=.*\$#org.opencastproject.capture.core.url=${core:-$DEFAULT_CORE_URL}#" $CAPTURE_PROPS
+ask -d "$DEFAULT_CORE_URL" "Please enter the URL to the root of the machine hosting the ingestion service" core
+sed -i "s#org\.opencastproject\.capture\.core\.url=.*\$#org.opencastproject.capture.core.url=$core#" $CAPTURE_PROPS
 
 # Set up maven and felix enviroment variables in the user session
 echo -n "Setting up maven and felix enviroment for $USERNAME... "
@@ -109,17 +108,13 @@ echo "Done"
 # Prompt for the location of the cleanup script
 echo
 while [[ true ]]; do
-    read -p "Please enter the location to store the cleanup script [$START_PATH]: " location
-    if [[ -d "${location:=$START_PATH}" ]]; then
+    ask -d "$START_PATH" "Please enter the location to store the cleanup script" location
+    if [[ -d "$location" ]]; then
         if [[ ! -e "$location/$CLEANUP" ]]; then
             break;
         fi
-        read -p "File $location/$CLEANUP already exists. Do you wish to overwrite it [y/N]? " response
-	while [[ -z "$(echo ${response:-N} | grep -i '^[yn]')" ]]; do
-	    read -p "Please enter [y]es or [N]o: " response
-	    break;
-	done
-        if [[ -n "$(echo ${response:-N} | grep -i '^y')" ]]; then
+        yesno -d no "File $location/$CLEANUP already exists. Do you wish to overwrite it?" response
+        if [[ "$response" ]]; then
             break;
         fi
     else

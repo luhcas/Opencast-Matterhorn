@@ -58,11 +58,10 @@ export DEFAULT_SECURITY=http://security.ubuntu.com/ubuntu
 # URL of the default Ubuntu 'partner' mirror
 export DEFAULT_PARTNER=http://archive.canonical.com/ubuntu
 
-# Logging file                                                                                                                                               
+# Logging file
 export LOG_FILE=$START_PATH/install_info.txt
-
-# The subsidiary scripts will check for this variable to check they are being run from here
-export INSTALL_RUN=true
+# URL where the log file is sent if the user consent
+export TRACKING_URL=http://www.opencastproject.org/form/tracking
 
 
 # Third-party dependencies variables
@@ -92,10 +91,10 @@ export BAD_PKG_LIST="gstreamer0.10-plugins-bad gstreamer0.10-plugins-bad-multive
 # Reasons why each of the "bad" packages should be installed (one per line, in the same order as the bad packages)
 export BAD_PKG_REASON="These packages provide support for h264 and mpeg2"
 
-# 0-based index default option for the device flavor
-export DEFAULT_FLAVOR=0
+# 1-based index default option for the device flavor
+export DEFAULT_FLAVOR=1
 # Lists of flavors the user can choose from to assign to a certain device
-export FLAVORS="presenter/source presentation/source audience/source indefinite/source"
+export FLAVORS="presenter/source presentation/source"
 
 # URL to download the epiphan driver
 export EPIPHAN_URL=http://www.epiphan.com/downloads/linux
@@ -138,6 +137,16 @@ export JV4LINFO_PATH=/usr/lib
 # Directory where the jv4linfo-related files are stored
 export JV4LINFO_DIR=$CA_DIR/jv4linfo
                                                                          
+## Help messages
+export VGA2USB_HELP_MSG="You might want to check $EPIPHAN_URL to see a complete list of the available drivers.
+If you cannot find a driver that works with your kernel configuration please email Epiphan Systems inc. (info@epiphan.com)
+and include the output from the command \"uname -a\". In this machine this output is:
+$(uname -a))"
+export FRIENDLY_NAMES_HELP="The friendly name (e.g. \"screen\", or \"professor\") will identify the device in the system and will be displayed in the user interfaces for controlling this device.
+It can't contain spaces or punctuation."
+export FLAVORS_HELP="Devices that capture the screen are usually \"Presentation\", while devices that capture the instructor or audience are usually \"Presenter\".
+Setting this value correctly is important to ensure video content is processed and distributed correctly."
+
 
 # Required scripts for installation
 SETUP_USER=./setup_user.sh
@@ -147,11 +156,17 @@ INSTALL_DEPENDENCIES=./install_dependencies.sh
 SETUP_SOURCE=./setup_source.sh
 SETUP_ENVIRONMENT=./setup_environment.sh
 SETUP_BOOT=./setup_boot.sh
+# This one is exported so that the other scripts can include the functions if necessary
+export FUNCTIONS=./functions.sh
 # This one is exported because it has to be modified by another script
 export CLEANUP=./cleanup.sh
 
-SCRIPTS=( "$SETUP_USER" "$INSTALL_VGA2USB" "$SETUP_DEVICES" "$INSTALL_DEPENDENCIES" "$SETUP_ENVIRONMENT" "$SETUP_SOURCE" "$SETUP_BOOT" "$CLEANUP" )
+SCRIPTS=( "$SETUP_USER" "$INSTALL_VGA2USB" "$SETUP_DEVICES" "$INSTALL_DEPENDENCIES" "$SETUP_ENVIRONMENT"\
+          "$SETUP_SOURCE" "$SETUP_BOOT" "$CLEANUP" "$FUNCTIONS" )
 SCRIPTS_EXT=docs/scripts/ubuntu_capture_agent
+
+# The subsidiary scripts will check for this variable to check they are being run from here
+export INSTALL_RUN=true
 
 # End of variables section########################################################################################
 
@@ -169,21 +184,18 @@ rm -rf $WORKING_DIR
 mkdir -p $WORKING_DIR
 cd $WORKING_DIR
 
-# Log the technical outputs                                                                                                                                  
+# Log the technical outputs                                                                                                                                 
 echo "# Output of uname -a" > $LOG_FILE
 uname -a >> $LOG_FILE
 echo >> $LOG_FILE
 echo "# Total memory" >> $LOG_FILE
 echo $(cat /proc/meminfo | grep -m 1 . | cut -d ':' -f 2) >> $LOG_FILE
 echo >> $LOG_FILE
-echo "# Processor(s) model name(s)" >> $LOG_FILE
-IFS='
-'
-models=$(cat /proc/cpuinfo | sed -e '/model name/!d' -e 's/^.*: *//g')
-for name in $models; do
-    echo $name >> $LOG_FILE
-done
-unset IFS
+echo "# Processor(s) model name" >> $LOG_FILE
+model_name="$(cat /proc/cpuinfo | grep -m 1 'model name' | cut -d ':' -f 2)"
+physical="$(cat /proc/cpuinfo | grep -m 1 'cores' | cut -d ':' -f 2)"
+virtual="$(cat /proc/cpuinfo | grep -m 1 'siblings' | cut -d ':' -f 2)"
+echo "$model_name ($physical physical core(s), $virtual virtual cores)" >> $LOG_FILE
 
 # If wget isn't installed, get it from the ubuntu software repo
 wget foo &> /dev/null
@@ -214,6 +226,9 @@ for (( i = 0; i < ${#SCRIPTS[@]}; i++ )); do
 	fi  
     chmod +x $f
 done
+
+# Include the functions
+. ${FUNCTIONS}
 
 # Choose/create the matterhorn user (WARNING: The initial perdiod (.) MUST be there so that the script can export several variables)
 . ${SETUP_USER}
@@ -278,13 +293,25 @@ cat /etc/issue >> $LOG_FILE
 
 echo -e "\n\n\nCapture Agent succesfully installed\n\n\n"
 
-read -p "It is recommended to reboot the system after installation. Do you wish to do it now [Y/n]? " response
+# Prompt the user to send 
+yesno -d yes -? "This feedback includes information about the hardware you have installed Matterhorn on, and the configuration options you have used."\
+      -h "? - more info" "Would you like to provide anonymous feedback about your installation experience to the Matterhorn development team?" send
 
-while [[ -z "$(echo ${response:-Y} | grep -i '^[yn]')" ]]; do
-    read -p "Please enter [Y]es or [n]o: " response
+while [[ "$send" ]]; do
+    curl -F "file=@$LOG_FILE" "$TRACKING_URL" > /dev/null
+    if [[ $? -ne 0 ]]; then
+	echo "Error. The feedback information couldn't be sent."
+	yesno -d yes "Do you wish to retry?" send
+    else
+	echo "Thanks for your input!"
+	break
+    fi
 done
+echo
 
-if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
+yesno -d yes "It is recommended to reboot the system after installation. Do you wish to do it now?" reboot
+
+if [[ "$reboot" ]]; then 
     echo "Rebooting... "
     reboot > /dev/null
 else

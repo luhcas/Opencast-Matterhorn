@@ -17,8 +17,10 @@ supportedDevices[4]="Hauppauge WinTV PVR-150"
 supportedDevices[5]="Hauppauge WinTV-HVR1300 DVB-T/H"
 supportedDevices[6]="WinTV PVR USB2 Model Category 2"
 
+# Include the utility functions
+. ${FUNCTIONS}
 
-# ls the dev directory, then grep for video devices with *only* one number
+# ls the dev directory, then grep for video devices
 for line in `ls /dev/video* | grep '/dev/video[0-9][0-9]*$'`; do
     devlist[${#devlist[@]}]=$line
 done
@@ -66,18 +68,13 @@ unset cleanName
 
 # Log statement to explain the log syntax
 echo >> $LOG_FILE
-echo "Installed devices (Clean Name ; Device Name ; Symbolic Link)" >> $LOG_FILE
+echo "# Installed devices (Clean Name ; Device Name ; Symbolic Link)" >> $LOG_FILE
 
 for (( i = 0; i < ${#device[@]}; i++ )); do
 
     # Ask the user whether or not they want to configure this device
-    read -p "Device \"${devName[$i]}\" (${device[$i]}) has been found. Do you want to configure it for matterhorn [Y/n]? " response
-    while [[ -z "$(echo ${response:-Y} | grep -i '^[yn]')" ]]; do
-	read -p "Please enter [Y]es or [n]o: " response
-    done
-    echo 
-
-    if [[ -n "$(echo ${response:-Y} | grep -i '^n')" ]]; then
+    yesno -d yes "Device \"${devName[$i]}\" (${device[$i]}) has been found. Do you want to configure it for matterhorn?" response
+    if [[ ! "$response" ]]; then
 	echo
 	continue
     fi
@@ -97,21 +94,14 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     fi
     
     # Ask for a user-defined cleanName --the name this device will have in the config files 
-    echo "The friendly name (e.g. \"screen\", or \"professor\") will be displayed in the user interfaces for controlling this device."
-    echo "It can't contain spaces or punctuation."
-    read -p "Please enter the device name for the \"${devName[$i]}\" [$defaultName]: " cleanName[$i]
     while [[ true ]]; do
-	# Check the name doesn't contain parentheses or whitespaces
-	while [[ -z "$(echo ${cleanName[$i]:-$defaultName} | grep -v '[()/ ]')" ]]; do
-	    read -p "Please enter a non-empty name without parentheses, slashes or whitespaces [$defaultName]: " cleanName[$i]
-	done
-	: ${cleanName[$i]:=$defaultName}
+	ask -f '^[a-zA-Z0-9_\-]*$' -d "$defaultName" -e "The friendly name should not contain parentheses, slashes or whitespaces"\
+            -? "$FRIENDLY_NAMES_HELP" "Please enter the friendly name for the \"${devName[$i]}\"" cleanName[$i]
 	# Check the name is not repeated
-        # Already made sure that the defaultName is not repeated
 	if [[ "${cleanName[$i]}" != "$defaultName" ]]; then
 	    for (( t = 0; t < $i; t++ )); do
 		if [[ -n "$(echo ${cleanName[$i]} | grep -i "^${cleanName[$t]}$")" ]]; then
-		    read -p "The name ${cleanName[$t]} is already in use for the device ${device[$t]}. Please choose another [$defaultName]: " cleanName[$i]
+		    echo "The name ${cleanName[$t]} is already in use for the device ${device[$t]}."
 		    break
 		fi
 	    done
@@ -127,7 +117,7 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     # Set up the symbolic link name for this device
     symlinkName=$(echo ${cleanName[$i]} | tr "[:upper:]" "[:lower:]")
 
-    # Setup device info using udevadm info (sed filters the <value> in ATTR{name}="<value>" and escapes the special characters --> []*? <--)
+    # Setup device info using udevadm info (sed filters the <value> in ATTR{name}="<value>" and escapes the special characters --> []*? <-- )
     sysName=$(udevadm info --attribute-walk --name=${device[$i]} | sed -e '/ATTR{name}/!d' -e 's/^[^"]*"\(.*\)".*$/\1/' -e 's/\([][?\*]\)/\\\1/g')
     echo "KERNEL==\"video[0-9]*\", ATTR{name}==\"$sysName\", GROUP=\"video\", SYMLINK+=\"$symlinkName\"" >> $rules
 
@@ -135,28 +125,16 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     if [[ ${#flavors[@]} -eq 0 ]]; then
 	flavor=0
     else
-	echo "Please choose the flavor assigned to ${cleanName[$i]}: "
-	for (( j = 0; j < ${#flavors[@]}; j++ )); do
-	    echo -e "\t$j) ${flavors[$j]}"
-	done
-	echo -e "\t$j) User-defined"
-	read -p "Selection [$DEFAULT_FLAVOR]: " flavor
-	
-	: ${flavor:=$DEFAULT_FLAVOR}
-	until [[ -n "$(echo $flavor | grep -o '^[0-9][0-9]*$')" && $flavor -ge 0 && $flavor -le ${#flavors[@]} ]]; do 
-	    read -p "Please choose one of the numbers in the list [$DEFAULT_FLAVOR]: " flavor
-	    : ${flavor:=DEFAULT_FLAVOR}
-	done
+	choose -t "Please select the flavor assigned to ${cleanName[$i]}" -d $DEFAULT_FLAVOR -? "$FLAVORS_HELP" ${flavors[@]} "User-defined" flavor
     fi
     
     if [[ $flavor -eq ${#flavors[@]} ]]; then
-        # Grep matches anything that has two fields consisting of any characters but slashes, separated by a single slash '/'
-	read -p "Please enter the flavor for ${cleanName[$i]} [${flavors[$DEFAULT_FLAVOR]}]: " flavor
-	while [[ -z $(echo ${flavor:-${flavors[$DEFAULT_FLAVOR]}} | grep '^[^/ ][^/ ]*/[^/ ][^/ ]*$') ]]; do
-	    read -p "Invalid syntax. The flavors follow the pattern <prefix>/<suffix> [${flavor[$DEFAULT_FLAVOR]}]: " flavor
-	done
-	: ${flavor:=${flavors[$DEFAULT_FLAVOR]}}
+	# The user selected the "User-defined" option
+        # The -f flag filters the answers allowing only those consisting of two fields of any characters but slashes, separated by a single slash '/
+	ask -d "${flavors[$DEFAULT_FLAVOR]}" -e "Invalid syntax. The flavors follow the pattern <prefix>/<suffix>" -? "$FLAVORS_HELP"\
+            -f '^[^/ ][^/ ]*/[^/ ][^/ ]*$' "Please enter the flavor for ${cleanName[$i]}" flavor
     else
+	# The user selected any of the flavors in the list
 	flavor=${flavors[$flavor]}
     fi
     echo
@@ -169,16 +147,7 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     standards=( $(v4l-info ${device[$i]} 2> /dev/null | sed -e '/^standards/,/^$/!d' -e '/name/!d' -e 's/^\s*name\s*:\s*\"\(.*\)\"/\1/' -e 's/ /_/g') )
 
     if [[ ${#standards[@]} -gt 1 ]]; then
-	unset std
-	echo "Please choose the output standard for the device ${devName[$i]}:"
-	for (( j = 0; j < ${#standards[@]}; j++ )); do
-	    echo -e "\t$j) ${standards[$j]}"
-	done
-	read -p "Selection: " std
-	
-	until [[ $(echo $std | grep -o '^[0-9][0-9]*$') && $std -ge 0 && $std -lt ${#standards[@]} ]]; do 
-	    read -p "Please choose one of the numbers in the list: " std
-	done
+	choose -t "Please choose the output standard for the device ${devName[$i]}" ${standards[@]} std
 	
 	v4l2-ctl -s $std -d ${device[$i]} > /dev/null
 	if [[ $? -ne 0 ]]; then
@@ -197,19 +166,11 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     # Fourth expression: substitutes the whitespaces in the name by underscores, to avoid problems with arrays in bash
     inputs=( $(v4l-info ${device[$i]} 2> /dev/null | sed -e '/^channels/,/^$/!d' -e '/name/!d' -e 's/^\sname\s*:\s*\"\(.*\)\"/\1/' -e 's/ /_/g') )
     if [[ ${#inputs[@]} -gt 1 ]]; then 
-	echo "Please select the input number to be used with the ${devName[$i]}"
-	for (( j = 0; j < ${#inputs[@]}; j++ )); do
-	    echo -e "\t$j) ${inputs[$j]}"
-	done
-	read -p "Selection: " chosen_input
-	
-	until [[ $(echo $chosen_input | grep -o '^[0-9][0-9]*$') && $chosen_input -ge 0 && $chosen_input -lt ${#inputs[@]} ]]; do 
-	    read -p "Please choose one of the numbers in the list: " chosen_input
-	done
+	choose -t "Please select the input number to be used with the ${devName[$i]}" ${inputs[@]} input
 
-	v4l2-ctl -d ${device[$i]} -i $chosen_input > /dev/null
-	echo "v4l2-ctl -d /dev/${symlinkName} -i $chosen_input" >> $CONFIG_SCRIPT
-	echo "Using input $chosen_input with the ${devName[$i]}."
+	v4l2-ctl -d ${device[$i]} -i $input > /dev/null
+	echo "v4l2-ctl -d /dev/${symlinkName} -i $input" >> $CONFIG_SCRIPT
+	echo "Using ${inputs[$input]} input with the ${devName[$i]}."
 	echo
     fi
 
@@ -238,12 +199,9 @@ audioDevice="hw:$(echo $audioLine | cut -d ':' -f 1 | cut -d ' ' -f 2)"
 audioDevName=$(echo $audioLine | sed 's/^[^[]*\[\([^]]*\)\][^[]*\[\([^]]*\)\]$/\1 \2/')
 
 # Ask the user whether or not they want to configure this device
-read -p "Audio device \"${audioDevName}\" has been found. Do you want to configure it for matterhorn [Y/n]? " response
-while [[ -z "$(echo ${response:-Y} | grep -i '^[yn]')" ]]; do
-    read -p "Please enter [Y]es or [n]o: " response
-done
+yesno -d yes "Audio device \"${audioDevName}\" has been found. Do you want to configure it for matterhorn?" response
 
-if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
+if [[ "$response" ]]; then
 
     defaultName=${audioDevName//[^a-zA-Z0-9]/_}
     # Check this name is not repeated
@@ -257,22 +215,16 @@ if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
 	defaultName=${defaultName}_$suffix
     fi
 
+
     # Ask for a user-defined cleanName --the name this device will have in the config files 
-    echo
-    echo "The friendly name (e.g. \"screen\", or \"professor\") will be displayed in the user interfaces for controlling this device."
-    echo "It can't contain spaces or punctuation."
-    read -p "Please enter the device name for the \"${audioDevName}\" [$defaultName]: " cleanName[$i]
     while [[ true ]]; do
-	# Check the name doesn't contain parentheses or whitespaces
-	while [[ -z "$(echo ${cleanName[$i]:-$defaultName} | grep -v '[()/ ]')" ]]; do
-	    read -p "Please enter a non-empty name without parentheses, slashes or whitespaces [$defaultName]: " cleanName[$i]
-	done
-	: ${cleanName[$i]:=$defaultName}
+	ask -f '^[a-zA-Z0-9_\-]*$' -d "$defaultName" -e "The friendly name should not contain parentheses, slashes or whitespaces"\
+            -? "$FRIENDLY_NAMES_HELP" "Please enter the friendly name for the \"${audioDevName}\"" cleanName[$i]
 	# Check the name is not repeated
 	if [[ "${cleanName[$i]}" != "$defaultName" ]]; then
 	    for (( t = 0; t < $i; t++ )); do
 		if [[ -n "$(echo ${cleanName[$i]} | grep -i "^${cleanName[$t]}$")" ]]; then
-		    read -p "The name ${cleanName[$t]} is already in use for the device ${device[$t]}. Please choose another [$defaultName]: " cleanName[$i]
+		    echo "The name ${cleanName[$t]} is already in use for the device ${device[$t]}."
 		    break
 		fi
 	    done
@@ -289,28 +241,16 @@ if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
     if [[ ${#flavors[@]} -eq 0 ]]; then
 	flavor=0
     else
-	echo "Please choose the flavor assigned to ${cleanName[$i]}: "
-	for (( j = 0; j < ${#flavors[@]}; j++ )); do
-	    echo -e "\t$j) ${flavors[$j]}"
-	done
-	echo -e "\t$j) User-defined"
-	read -p "Selection [$DEFAULT_FLAVOR]: " flavor
-	
-	: ${flavor:=$DEFAULT_FLAVOR}
-	until [[ -n "$(echo $flavor | grep -o '^[0-9][0-9]*$')" && $flavor -ge 0 && $flavor -le ${#flavors[@]} ]]; do 
-	    read -p "Please choose one of the numbers in the list: " flavor
-	    : ${flavor:=$DEFAULT_FLAVOR}
-	done
+	choose -t "Please select the flavor assigned to ${cleanName[$i]}" -d $DEFAULT_FLAVOR -? "$FLAVORS_HELP" ${flavors[@]} "User-defined" flavor
     fi
     
     if [[ $flavor -eq ${#flavors[@]} ]]; then
-        # Grep matches anything that has two fields consisting of any characters but slashes, separated by a single slash '/'
-	read -p "Please enter the flavor for ${cleanName[$i]} [${flavors[$DEFAULT_FLAVOR]}]: " flavor
-	while [[ -z $(echo ${flavor:-${flavors[$DEFAULT_FLAVOR]}} | grep '^[^/ ][^/ ]*/[^/ ][^/ ]*$') ]]; do
-	    read -p "Invalid syntax. The flavors follow the pattern <prefix>/<suffix> [${flavors[$DEFAULT_FLAVOR]}]: " flavor
-	done
-	: ${flavor:=${flavors[$DEFAULT_FLAVOR]}}
+	# The user selected the "User-defined" option
+        # The -f flag filters the answers allowing only those consisting of two fields of any characters but slashes, separated by a single slash '/
+	ask -d "${flavors[$DEFAULT_FLAVOR]}" -e "Invalid syntax. The flavors follow the pattern <prefix>/<suffix>" -? "$FLAVORS_HELP"\
+            -f '^[^/ ][^/ ]*/[^/ ][^/ ]*$' "Please enter the flavor for ${cleanName[$i]}" flavor
     else
+	# The user selected any of the flavors in the list
 	flavor=${flavors[$flavor]}
     fi
     echo
@@ -322,7 +262,7 @@ if [[ -n "$(echo ${response:-Y} | grep -i '^y')" ]]; then
     allDevices="${allDevices}${cleanName[$i]}"
 
     # Log this device
-    echo "${cleanName[$i]} ; ${audioDevName[$i]} ; $audioDevice" >> $LOG_FILE
+    echo "${cleanName[$i]} ; ${audioDevName} ; $audioDevice" >> $LOG_FILE
 
     echo
 fi
