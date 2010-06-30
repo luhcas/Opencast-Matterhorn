@@ -123,14 +123,12 @@
     	id="bx_twocovers"
     	width="100%"
     	height="100%"
-    	verticalAlign="bottom"
-    	horizontalAlign="center"
-    	horizontalGap="1"
-    	 visible = "false"
+    	horizontalGap="0"
+    	visible = "false"
         includeInLayout = "false"
     	>
     	
-        <mx:Image 
+    	<mx:Image 
 	    	id="img_coverOne"
 	        width="100%"
 	        height="100%"
@@ -140,6 +138,7 @@
 	    	updateComplete="{ onResize() }"
 	    	visible="{ model.coverURLOne != '' ? true : false }"
 	        includeInLayout="{ model.coverURLOne != '' ? true : false }"
+	        horizontalAlign="right"
 	        />
 	        
 	    <mx:Image 
@@ -152,8 +151,10 @@
 	        updateComplete="{ onResize() }"
 	        visible="{ model.coverURLTwo != '' ? true : false }"
 	        includeInLayout="{ model.coverURLTwo != '' ? true : false }"
+	        horizontalAlign="left"
 	        />
-	        
+
+
     </mx:HBox>
   
 </mx:Canvas>

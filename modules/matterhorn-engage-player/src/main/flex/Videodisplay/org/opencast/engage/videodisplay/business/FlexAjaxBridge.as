@@ -216,14 +216,17 @@ package org.opencast.engage.videodisplay.business
             if(sizeLeft == sizeRight)
 			{
 			    model.videoSizeState = VideoSizeState.CENTER;
+			    model.coverState = CoverState.TWOCOVERS;
 			}
 			else if(sizeLeft > sizeRight && sizeRight > 0)
 			{
 			    model.videoSizeState = VideoSizeState.BIGLEFT;
+			    model.coverState = CoverState.TWOCOVERS;
 			}
 			else if(sizeLeft < sizeRight && sizeLeft > 0)
             {
                 model.videoSizeState = VideoSizeState.BIGRIGHT;
+                model.coverState = CoverState.TWOCOVERS;
             }
             else if(sizeRight == 0)
             {
