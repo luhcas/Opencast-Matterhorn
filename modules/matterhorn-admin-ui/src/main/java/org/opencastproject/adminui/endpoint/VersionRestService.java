@@ -30,14 +30,12 @@ import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.URL;
-import java.net.URLConnection;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -50,8 +48,8 @@ public class VersionRestService {
    * @returns
    */
   @GET
+  @Produces(MediaType.APPLICATION_JSON)
   @Path("current")
-  @SuppressWarnings("unchecked")
   public Response getCurrentVersion() {
     String curr = "";
     StringWriter writer = new StringWriter();
@@ -66,29 +64,12 @@ public class VersionRestService {
     curr = writer.toString();
     JSONObject json = new JSONObject();
     json.put("version", curr);
-    return Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
+    return Response.ok(json.toJSONString()).build();
   }
   
   @GET
   @Path("newest")
-  @SuppressWarnings("unchecked")
   public Response getNewestVersion() {
-    JSONObject json = new JSONObject();
-    try {
-      URL url = new URL("http://opencast.jira.com/svn/MH/trunk/");
-      URLConnection conn = url.openConnection();
-      String etag = conn.getHeaderField("etag");
-      if(etag == null) {
-        json.put("version", "N/A");
-      } else {
-        String[] parts = etag.split("\"");
-        parts = parts[1].split("/");
-        json.put("version", parts[0]);
-      }
-    } catch (IOException e) {
-      logger.debug(e.toString());
-      json.put("version", "N/A");
-    }
-    return Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
+    return Response.status(Response.Status.SERVICE_UNAVAILABLE).build();
   }
 }

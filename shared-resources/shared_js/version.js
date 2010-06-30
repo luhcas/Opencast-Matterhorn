@@ -18,5 +18,5 @@ matterhornVersion.getNewest = function(elm) {
 
 $(document).ready(function() {
   matterhornVersion.getCurrent("currentVersion");
-  matterhornVersion.getNewest("newestVersion");
+  //matterhornVersion.getNewest("newestVersion");
 });
