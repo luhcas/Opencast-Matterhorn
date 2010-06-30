@@ -29,7 +29,6 @@ input
   float:                    left;
   margin-left:              2px;
   margin-right:             2px;
-  
 }
 
 input:hover
@@ -38,14 +37,12 @@ input:hover
   cursor:                   hand;
 }
 
-
 .oc_btn-skip-backward
 {
   background:               transparent url("../img/oc_icons.png");
   background-position:      0 -30px;
   width:                    16px;
   height:                   15px;
-  
 }
 
 .oc_btn-skip-backward-over
@@ -54,18 +51,15 @@ input:hover
   background-position:      -30px -30px;
   width:                    16px;
   height:                   15px;
-  
 }
 
 .oc_btn-skip-backward-clicked
 {
   background:               transparent url("../img/oc_icons.png");
   background-position:      -60px -30px;
-  width:                    21px;
-  height:                   14px;
- 
+  width:                    16px;
+  height:                   15px;
 }
-
 
 .oc_btn-rewind
 {
@@ -73,7 +67,6 @@ input:hover
   background-position:      0 -60px;
   width:                    21px;
   height:                   14px;
-  
 }
 
 .oc_btn-rewind-over
@@ -82,7 +75,6 @@ input:hover
   background-position:      -30px -60px;
   width:                    21px;
   height:                   14px;
-  
 }
 
 .oc_btn-rewind-clicked
@@ -91,7 +83,6 @@ input:hover
   background-position:      -60px -60px;
   width:                    21px;
   height:                   14px;
- 
 }
 
 .oc_btn-play
@@ -99,7 +90,7 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      0px -210px;
   width:                    16px;
-  height:                   18px;
+  height:                   16px;
 }
 
 .oc_btn-play-clicked
@@ -107,7 +98,7 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -60px -210px;
   width:                    16px;
-  height:                   18px;
+  height:                   16px;
 }
 
 .oc_btn-play-over
@@ -115,32 +106,31 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -30px -210px;
   width:                    16px;
-  height:                   18px;
-  
+  height:                   16px;
 }
 
 .oc_btn-pause
 {
   background:               transparent url("../img/oc_icons.png");
   background-position:      0px -90px;
-  width:                    18px;
-  height:                   20px;
+  width:                    16px;
+  height:                   16px;
 }
 
 .oc_btn-pause-clicked
 {
   background:               transparent url("../img/oc_icons.png");
   background-position:      -60px -90px;
-  width:                    18px;
-  height:                   20px;
+  width:                    16px;
+  height:                   16px;
 }
 
 .oc_btn-pause-over
 {
   background:               transparent url("../img/oc_icons.png");
   background-position:      -30px -90px;
-  width:                    18px;
-  height:                   20px;
+  width:                    16px;
+  height:                   16px;
 }
 
 .oc_btn-fast-forward
@@ -158,6 +148,7 @@ input:hover
   width:                    21px;
   height:                   14px;
 }
+
 .oc_btn-fast-forward-clicked
 {
   background:               transparent url("../img/oc_icons.png");
@@ -165,12 +156,13 @@ input:hover
   width:                    21px;
   height:                   14px;
 }
+
 .oc_btn-skip-forward
 {
   background:               transparent url("../img/oc_icons.png");
   background-position:      0px -150px;
   width:                    16px;
-  height:                   14px;
+  height:                   15px;
 }
 
 .oc_btn-skip-forward-over
@@ -178,7 +170,7 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -30px -150px;
   width:                    16px;
-  height:                   14px;
+  height:                   15px;
 }
 
 .oc_btn-skip-forward-clicked
@@ -186,9 +178,8 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -60px -150px;
   width:                    16px;
-  height:                   14px;
+  height:                   15px;
 }
-
 
 .oc_btn-volume-high
 {
@@ -251,7 +242,6 @@ input:hover
   width:                    48px;
   text-align:               center;
   margin-right:             5px;
-  /*margin-top:               4px;*/
 }
 
 .oc_btn-singleDisplay
@@ -259,7 +249,6 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -190px -330px;
   width:                    48px;
-  /*height:                   18px;*/
   margin-right:             5px;
   margin-left:              5px;
 }
@@ -269,7 +258,6 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -120px -330px;
   width:                    44px;
-  /*height:                   18px;*/
   margin-right:             5px;
   margin-left:              5px;
 }
@@ -279,7 +267,6 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -0px -330px;
   width:                    44px;
-  /*height:                   18px;*/
   margin-right:             5px;
   margin-left:              5px;
 }
@@ -289,7 +276,6 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -64px -330px;
   width:                    40px;
-  /*height:                   36px;*/
   margin-right:             5px;
   margin-left:              5px;
 }
@@ -299,7 +285,6 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      0px -240px;
   width:                    18px;
-  /*height:                   16px;*/
   margin-right:             5px;
   margin-left:              5px; 
 }
@@ -362,8 +347,7 @@ input:hover
   background-color:         #FA6E23;
 }
 
-
 .oc_boomarkPoint
 {
-    display: inline;
+  display:                  inline;
 }

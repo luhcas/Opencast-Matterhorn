@@ -2,6 +2,22 @@
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
 
 /**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+
+/**
     @namespace the global Opencast namespace
 */
 var Opencast = Opencast || {};
@@ -17,7 +33,6 @@ Opencast.Initialize = (function ()
     VOLUME = 'volume',
     VIDEOSIZE = 'videosize',
     divId = '',
-    OPTIONMYCLASSNAME      = "oc_option-myBookmark",
     VIDEOSIZESINGLE        = "vidoSizeSingle",
     VIDEOSIZEBIGRIGHT      = "videoSizeBigRight",
     VIDEOSIZEBIGLEFT       = "videoSizeBigLeft",
@@ -31,7 +46,9 @@ Opencast.Initialize = (function ()
     formatOne = 0,
     formatTwo = 0,
     formatSingle = 0,
-    size = "";
+    size = "",
+    creatorPostfix = "",
+    creator = "";
     
     /**
         @memberOf Opencast.Initialize
@@ -125,24 +142,17 @@ Opencast.Initialize = (function ()
 
         if (getDivId() === VIDEOSIZE)
         {
-            $('#oc_sound').css('width', '20%');
-            $('#oc_video-size-controls').css('width', '5%');
-            $('#oc_video-size-dropdown-div').css('width', '20%')
-            $('#oc_player_video-dropdown').css('left',$('#oc_video-size-dropdown').offset().left - $('#oc_body').offset().left);
+            $('#oc_video-size-dropdown-div').css('width', '20%');
+            $('#oc_player_video-dropdown').css('left', $('#oc_video-size-dropdown').offset().left - $('#oc_body').offset().left);
             $('#oc_player_video-dropdown').css('visibility', 'visible');
             $('#oc_volume-menue').css('visibility', 'hidden');
             ddmenuitem = $('#oc_player_video-dropdown');
-
         }
         else
         {
-            $('#oc_sound').css('width', '20%');
-            $('#oc_video-size-controls').css('width', '5%');
             $('#oc_volume-menue').css('visibility', 'visible');
             $('#oc_player_video-dropdown').css('visibility', 'hidden');
             ddmenuitem = $('#oc_volume-menue');
-
-
         }
         setDivId('');
     }
@@ -406,7 +416,7 @@ Opencast.Initialize = (function ()
             if (!locked)
             {
                 locked = true;
-                setTimeout(function()
+                setTimeout(function ()
                 { 
                     locked = false;
                 }, 400);
@@ -424,7 +434,7 @@ Opencast.Initialize = (function ()
             if (!locked)
             {
                 locked = true;
-                setTimeout(function()
+                setTimeout(function ()
                 { 
                     locked = false;
                 }, 400);
@@ -558,8 +568,6 @@ Opencast.Initialize = (function ()
             }
         });
         
-        
-        
         // init Flash
         Opencast.FlashVersion.initFlash();
         
@@ -602,16 +610,18 @@ Opencast.Initialize = (function ()
                 }
             }
         }
+        
         Opencast.Player.setBrowserWidth(myWidth);
         
-       var creatorPostfix = "";
-       var creator = $('#oc-creator').html();
-       if(creator !== "")
-           creatorPostfix = " by " + $('#oc-creator').html();
+        creator = $('#oc-creator').html();
+        if (creator !== "")
+        {
+            creatorPostfix = " by " + $('#oc-creator').html();
+        }
+        
+        $('#oc_title').html($('#oc-title').html() + creatorPostfix);
        
-       $('#oc_title').html($('#oc-title').html() + creatorPostfix);
-       
-       Opencast.Player.refreshScrubberPosition();
+        Opencast.Player.refreshScrubberPosition();
     }
 
     /**
@@ -724,21 +734,8 @@ Opencast.Initialize = (function ()
      */
     function getNewHeightSingle()
     {
-    	
-    	var newHeight = 0;
-    	
-    	
         var flashContainerWidth = $('#oc_flash-player').width() - 10;
-        
-       
-        var newHeight = flashContainerWidth / formatSingle;
-        
-        
-        
-        var newWidth = newHeight * formatSingle;
-        
-        
-   
+        var newSingleHeight = flashContainerWidth / formatSingle;
         var otherContentHeight = 0;
         
         if (Opencast.Player.getShowSections() === true)
@@ -750,23 +747,19 @@ Opencast.Initialize = (function ()
             otherContentHeight = 200;
         }
   
-        var contentHeight = newHeight + otherContentHeight;
+        var contentHeight = newSingleHeight + otherContentHeight;
         
         if (contentHeight > myHeight)
         {
-            newHeight = newHeight - (contentHeight - myHeight);
-            
-            
+            newSingleHeight = newSingleHeight - (contentHeight - myHeight);
         }
   
-        if (newHeight < 300)
+        if (newSingleHeight < 300)
         {
-            newHeight = 300;
-            
-            
+            newSingleHeight = 300;
         }
         
-        return newHeight + 10;
+        return newSingleHeight + 10;
     }
 
     
@@ -823,17 +816,17 @@ Opencast.Initialize = (function ()
         
         if (Opencast.segments.getSlideLength() === 0)
         {
-        	controlswith = 58;
-        	margin = ((margin - controlswith) / 2 ) - 8;
-        	 $(".oc_btn-rewind").css("margin-left", margin + "px");
+            controlswith = 58;
+            margin = ((margin - controlswith) / 2) - 8;
+            $(".oc_btn-rewind").css("margin-left", margin + "px");
         }
         else
         {
-        	controlswith = 90;
-        	margin = ((margin - controlswith) / 2 ) - 8;
-        	$('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
+            controlswith = 90;
+            margin = ((margin - controlswith) / 2) - 8;
+            $('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
         }
-     }
+    }
 
     /**
         @memberOf Opencast.Player
@@ -853,13 +846,13 @@ Opencast.Initialize = (function ()
      */
     function setMediaResolution(mediaResolutionOne, mediaResolutionTwo)
     {
-    	var mediaResolutionOneString = mediaResolutionOne;
+        var mediaResolutionOneString = mediaResolutionOne;
         var mediaResolutionTwoString = mediaResolutionTwo;
         var mediaResolutionOneArray = mediaResolutionOneString.split('x');
         
-    	if (mediaResolutionTwoString !== '')
+        if (mediaResolutionTwoString !== '')
         {
-        	var mediaResolutionTwoArray = mediaResolutionTwoString.split('x');
+            var mediaResolutionTwoArray = mediaResolutionTwoString.split('x');
             var mediaOneWidth = parseInt(mediaResolutionOneArray[0], 10);
             var mediaOneHeight = parseInt(mediaResolutionOneArray[1], 10);
             var mediaTwoWidth = parseInt(mediaResolutionTwoArray[0], 10);
@@ -868,15 +861,12 @@ Opencast.Initialize = (function ()
             formatOne = mediaOneWidth / mediaOneHeight;
             formatTwo = mediaTwoWidth / mediaTwoHeight;
         }
-    	else
+        else
         {
-        	
-        	var mediaSingleWidth = parseInt(mediaResolutionOneArray[0], 10);
+            var mediaSingleWidth = parseInt(mediaResolutionOneArray[0], 10);
             var mediaSingleHeight = parseInt(mediaResolutionOneArray[1], 10);
             formatSingle = mediaSingleWidth / mediaSingleHeight;
-        	
         }
-    	
     }
     return {
         doResize : doResize,

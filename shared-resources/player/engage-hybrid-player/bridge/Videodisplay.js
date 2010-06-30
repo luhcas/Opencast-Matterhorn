@@ -1,5 +1,21 @@
-/*FABridge*/
+/*FABridge, VideodisplayReady*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
+
+/**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
 
 /**
  * Application "Videodisplay.mxml"
@@ -13,11 +29,6 @@
 var Videodisplay = Videodisplay || {};
 
 
-/**
- * Listen for the instantiation of the Flex application over the bridge
- */
-FABridge.addInitializationCallback("b_Videodisplay", VideodisplayReady);
-
 
 /**
  * Hook here all the code that must run as soon as the "Videodisplay" class
@@ -26,88 +37,96 @@ FABridge.addInitializationCallback("b_Videodisplay", VideodisplayReady);
  * However, using the "VideodisplayReady()" is the safest way, as it will 
  * let Ajax know that involved Flex classes are available for use.
  */
-function VideodisplayReady() {
+function VideodisplayReady() 
+{
 
-	// Initialize the "root" object. This represents the actual 
-	// "Videodisplay.mxml" flex application.
-	var b_Videodisplay_root = FABridge["b_Videodisplay"].root().getFlexAjaxBridge();
-	
-	// Global functions in the "Videodisplay.mxml" application
+    // Initialize the "root" object. This represents the actual 
+    // "Videodisplay.mxml" flex application.
+    var b_Videodisplay_root = FABridge['b_Videodisplay'].root().getFlexAjaxBridge();
+    
+    // Global functions in the "Videodisplay.mxml" application
 
-	Videodisplay.play = function () {
-		return b_Videodisplay_root.play();
-	};
+    Videodisplay.play = function () {
+        return b_Videodisplay_root.play();
+    };
 
-	Videodisplay.stop = function () {
-		b_Videodisplay_root.stop();
-	};
+    Videodisplay.stop = function () {
+        b_Videodisplay_root.stop();
+    };
 
-	Videodisplay.pause = function () {
-		return b_Videodisplay_root.pause();
-	};
-	
-	Videodisplay.skipBackward = function () {
-		b_Videodisplay_root.skipBackward();
-	};
-	
-	Videodisplay.rewind = function () {
-		b_Videodisplay_root.rewind();
-	};
-	
-	Videodisplay.fastForward = function () {
-		b_Videodisplay_root.fastForward();
-	};
-	
-	Videodisplay.skipForward = function () {
-		b_Videodisplay_root.skipForward();
-	};
-	
-	Videodisplay.passCharCode = function (argInt) {
-		b_Videodisplay_root.passCharCode(argInt);
-	};
-	
-	Videodisplay.seek = function (argNumber) {
-		return b_Videodisplay_root.seek(argNumber);
-	};
-	
-	Videodisplay.mute = function () {
-		return b_Videodisplay_root.mute();
-	};
-	
-	Videodisplay.setVolumeSlider = function (argNumber) {
-		b_Videodisplay_root.setVolumeSlider(argNumber);
-	};
-	
-	Videodisplay.setVolumePlayer = function (argNumber) {
-		b_Videodisplay_root.setVolumePlayer(argNumber);
-	};
-	
-	Videodisplay.closedCaptions = function () {
-		b_Videodisplay_root.closedCaptions();
-	};
-	
-	Videodisplay.setMediaURL = function (argCoverOne, argCoverTwo, argStringOne, argStringTwo, argMimetypeOne, argMimetypeTwo) {
-		b_Videodisplay_root.setMediaURL(argCoverOne, argCoverTwo, argStringOne, argStringTwo, argMimetypeOne, argMimetypeTwo);
-	};
-	
-	Videodisplay.setCaptionsURL = function (argString) {
-		b_Videodisplay_root.setCaptionsURL(argString);
-	};
-	
-	Videodisplay.videoSizeControl = function (argSizeLeft, argSizeRight) {
-		b_Videodisplay_root.videoSizeControl(argSizeLeft, argSizeRight);
-	};
-	
-	Videodisplay.getViewState = function () {
-		return b_Videodisplay_root.getViewState();
-	};
-	
-	Videodisplay.setMediaResolution = function (argWidthMediaOne, argHeightMediaOne, argWidthMediaTwo, argHeightMediaTwo, argMultiMediaContainerLeft) {
-		return b_Videodisplay_root.setMediaResolution(argWidthMediaOne, argHeightMediaOne, argWidthMediaTwo, argHeightMediaTwo, argMultiMediaContainerLeft);
-	};
-	
-	
-	
-	
-	b_Videodisplay_root.onBridgeReady();
+    Videodisplay.pause = function () {
+        return b_Videodisplay_root.pause();
+    };
+    
+    Videodisplay.skipBackward = function () {
+        b_Videodisplay_root.skipBackward();
+    };
+    
+    Videodisplay.rewind = function () {
+        b_Videodisplay_root.rewind();
+    };
+    
+    Videodisplay.fastForward = function () {
+        b_Videodisplay_root.fastForward();
+    };
+    
+    Videodisplay.skipForward = function () {
+        b_Videodisplay_root.skipForward();
+    };
+    
+    Videodisplay.passCharCode = function (argInt) {
+        b_Videodisplay_root.passCharCode(argInt);
+    };
+    
+    Videodisplay.seek = function (argNumber) {
+        return b_Videodisplay_root.seek(argNumber);
+    };
+    
+    Videodisplay.mute = function () {
+        return b_Videodisplay_root.mute();
+    };
+    
+    Videodisplay.setVolumeSlider = function (argNumber) {
+        b_Videodisplay_root.setVolumeSlider(argNumber);
+    };
+    
+    Videodisplay.setVolumePlayer = function (argNumber) {
+        b_Videodisplay_root.setVolumePlayer(argNumber);
+    };
+    
+    Videodisplay.closedCaptions = function () {
+        b_Videodisplay_root.closedCaptions();
+    };
+    
+    Videodisplay.setMediaURL = function (argCoverOne, argCoverTwo, argStringOne, argStringTwo, argMimetypeOne, argMimetypeTwo) {
+        b_Videodisplay_root.setMediaURL(argCoverOne, argCoverTwo, argStringOne, argStringTwo, argMimetypeOne, argMimetypeTwo);
+    };
+    
+    Videodisplay.setCaptionsURL = function (argString) {
+        b_Videodisplay_root.setCaptionsURL(argString);
+    };
+    
+    Videodisplay.videoSizeControl = function (argSizeLeft, argSizeRight) {
+        b_Videodisplay_root.videoSizeControl(argSizeLeft, argSizeRight);
+    };
+    
+    Videodisplay.getViewState = function () {
+        return b_Videodisplay_root.getViewState();
+    };
+    
+    Videodisplay.setMediaResolution = function (argWidthMediaOne, argHeightMediaOne, argWidthMediaTwo, argHeightMediaTwo, argMultiMediaContainerLeft) {
+        return b_Videodisplay_root.setMediaResolution(argWidthMediaOne, argHeightMediaOne, argWidthMediaTwo, argHeightMediaTwo, argMultiMediaContainerLeft);
+    };
+    
+    
+    
+    
+    b_Videodisplay_root.onBridgeReady();
 }
+
+
+/**
+ * Listen for the instantiation of the Flex application over the bridge
+ */
+FABridge.addInitializationCallback("b_Videodisplay", VideodisplayReady);
+

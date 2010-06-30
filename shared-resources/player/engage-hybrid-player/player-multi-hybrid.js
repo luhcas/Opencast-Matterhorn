@@ -2,6 +2,22 @@
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
 
 /**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+
+/**
     @namespace the global Opencast namespace
 */
 var Opencast = Opencast || {};
@@ -45,9 +61,6 @@ Opencast.Player = (function () {
     SINGLEPLAYER           = "Singleplayer",
     SINGLEPLAYERWITHSLIDES = "SingleplayerWithSlides",
     AUDIOPLAYER            = "Audioplayer",
-    ADVANCEDPLAYER         = "advancedPlayer",
-    EMBEDPLAYER            = "embedPlayer",
-    OPTIONMYCLASSNAME      = "oc_option-myBookmark",
     VIDEOSIZESINGLE        = "vidoSizeSingle",
     VIDEOSIZEBIGRIGHT      = "videoSizeBigRight",
     VIDEOSIZEBIGLEFT       = "videoSizeBigLeft",
@@ -65,8 +78,6 @@ Opencast.Player = (function () {
     dragging               = false,
     htmlBool               = true,
     duration               = 0,
-    mediaWith              = 0,
-    mediaHeight            = 0,
     browserWidth           = 0,
     FLASH_PLAYERTYPE       = "",
     FLASH_PLAYERSTATE      = "",
@@ -114,15 +125,7 @@ Opencast.Player = (function () {
         currentPlayPauseState = state;
     }
     
-    /**
-        @memberOf Opencast.Player
-        @description Get the seek state before.
-     */
-    function getSeekState()
-    {
-        return seekState;
-    }
-
+    
     /**
         @memberOf Opencast.Player
         @description Set the seek state.
@@ -219,18 +222,15 @@ Opencast.Player = (function () {
         dragging = bool;
     }
     
-
     /**
         @memberOf Opencast.Player
         @description Get the htmlBool.
      */
     function getHtmlBool()
     {
-    	return htmlBool;
+        return htmlBool;
     }
     
-    
-
     /**
         @memberOf Opencast.Player
         @description Set the htmlBool.
@@ -238,7 +238,7 @@ Opencast.Player = (function () {
      */
     function setHtmlBool(bool)
     {
-    	htmlBool = bool;
+        htmlBool = bool;
     }
     
     /**
@@ -280,16 +280,6 @@ Opencast.Player = (function () {
         browserWidth = witdh;
     }
     
-    /**
-        @memberOf Opencast.Player
-        @description Get browserWidth.
-     */
-    function getBrowserWidth()
-    {
-        return browserWidth;
-    }
-        
-
     /**
         @memberOf Opencast.Player
         @description Get the currentVideoSize.
@@ -351,7 +341,7 @@ Opencast.Player = (function () {
      */
     function PlayPauseMouseDown()
     {
-    	if (getCurrentPlayPauseState() === PLAYING) 
+        if (getCurrentPlayPauseState() === PLAYING) 
         {
             $("#oc_btn-play-pause").attr("className", "oc_btn-pause-clicked");
             //setMouseOverBool(false);
@@ -363,6 +353,37 @@ Opencast.Player = (function () {
         }
     }
 
+    /**
+        @memberOf Opencast.Player
+        @description Remove the alert div.
+     */
+    function removeOldAlert()
+    {
+        var oldAlert = $("#alert").get(0);
+
+        if (oldAlert)
+        {
+            document.body.removeChild(oldAlert);
+        }
+    }
+
+    /**
+        @memberOf Opencast.Player
+        @description Remove the old alert div and create an new div with the aria role alert.
+        @param String alertMessage
+     */
+    function addAlert(alertMessage)
+    {
+        removeOldAlert();
+        var newAlert = document.createElement("div");
+        newAlert.setAttribute("role", "alert");
+        newAlert.setAttribute("id", "alert");
+        newAlert.setAttribute("class", "oc_offScreen-hidden");
+        var msg = document.createTextNode(alertMessage);
+        newAlert.appendChild(msg);
+        document.body.appendChild(newAlert);
+    }
+    
     /**
         @memberOf Opencast.Player
         @description Show the slides
@@ -666,7 +687,7 @@ Opencast.Player = (function () {
         else
         {
             hideSlideText();
-            setShowSections(false)
+            setShowSections(false);
         }
         Opencast.Initialize.doResize();
     }
@@ -706,7 +727,7 @@ Opencast.Player = (function () {
         else
         {
             hideShortcuts();
-            setShowSections(false)
+            setShowSections(false);
         }
         Opencast.Initialize.doResize();
     }
@@ -778,36 +799,6 @@ Opencast.Player = (function () {
         Opencast.Initialize.doResize();
     }
     
-    /**
-        @memberOf Opencast.Player
-        @description Remove the alert div.
-     */
-    function removeOldAlert()
-    {
-        var oldAlert = $("#alert").get(0);
-
-        if (oldAlert)
-        {
-            document.body.removeChild(oldAlert);
-        }
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Remove the old alert div and create an new div with the aria role alert.
-        @param String alertMessage
-     */
-    function addAlert(alertMessage)
-    {
-        removeOldAlert();
-        var newAlert = document.createElement("div");
-        newAlert.setAttribute("role", "alert");
-        newAlert.setAttribute("id", "alert");
-        newAlert.setAttribute("class", "oc_offScreen-hidden");
-        var msg = document.createTextNode(alertMessage);
-        newAlert.appendChild(msg);
-        document.body.appendChild(newAlert);
-    }
     
     /**
         @memberOf Opencast.Player
@@ -823,23 +814,6 @@ Opencast.Player = (function () {
         iFrameText = '<iframe src="' + embedUrl + '" style="border:0px #FFFFFF none;" name="Opencast Matterhorn - Media Player" scrolling="no" frameborder="1" marginheight="0px" marginwidth="0px" width="' + width + '" height="' + height + '"></iframe>';
         $('#oc_embed-textarea').val(iFrameText);
     }
-    
-    /**
-        @memberOf Opencast.Player
-        @description get the playhead
-        @param String playheadString
-     */
-    function getPlayhead(playheadString)
-    {
-        var playheadArray = playheadString.split(':');
-        var playheadHour = parseInt(playheadArray[0], 10);
-        var playheadMinutes = parseInt(playheadArray[1], 10);
-        var playheadSeconds = parseInt(playheadArray[2], 10);
-    
-        return (playheadHour * 60 * 60) + (playheadMinutes * 60) + (playheadSeconds); 
-    }
-    
-    
     
     
     
@@ -865,7 +839,7 @@ Opencast.Player = (function () {
         }
         else
         {
-        	setHtmlBool(false);
+            setHtmlBool(false);
         }
         Videodisplay.setMediaURL(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo);
     }
@@ -877,8 +851,7 @@ Opencast.Player = (function () {
      */
     function setCaptionsURL(captionsURL)
     {
-    	
-    	if (captionsURL !== '') 
+        if (captionsURL !== '') 
         {
             $('#oc_video-cc').css('visibility', 'visible');
         }
@@ -891,8 +864,8 @@ Opencast.Player = (function () {
      */
     function doSkipBackward() 
     {
-    	 var sec = Opencast.segments.getSecondsBeforeSlide();
-         Opencast.Watch.seekSegment(sec);
+        var sec = Opencast.segments.getSecondsBeforeSlide();
+        Opencast.Watch.seekSegment(sec);
     }
     
     /**
@@ -975,7 +948,7 @@ Opencast.Player = (function () {
      */
     function doSkipForward()  
     {
-    	var sec = Opencast.segments.getSecondsNextSlide();
+        var sec = Opencast.segments.getSecondsNextSlide();
         Opencast.Watch.seekSegment(sec);
     }
 
@@ -1129,8 +1102,7 @@ Opencast.Player = (function () {
      */
     function videoSizeControlAudioDisplay()
     {
-     
-    	if (getDisplayMode() === MULTIPLAYER)
+        if (getDisplayMode() === MULTIPLAYER)
         {
             Videodisplay.videoSizeControl(100, 0);
         }
@@ -1257,18 +1229,14 @@ Opencast.Player = (function () {
      */
     function setCurrentTime(text) 
     {
-    	$("#divToolTip").attr("value", text);
-    	$("#divToolTip").html(text);
-    	
-    	if ( getDragging() == false )
+        $("#divToolTip").attr("value", text);
+        $("#divToolTip").html(text);
+    
+        if (getDragging() === false)
         {
-    	    $("#oc_current-time").attr("value", text);
+            $("#oc_current-time").attr("value", text);
             $("#oc_edit-time").attr("value", text);
             $("#slider_seek_Rail").attr("title", "Time " + text);
-            
-          
-            
-            
         }
         currentTimeString = text;
     }
@@ -1306,7 +1274,7 @@ Opencast.Player = (function () {
         
         if (backupPlayPauseState === PLAYING)
         {
-        	Videodisplay.pause();
+            Videodisplay.pause();
         }
         
         $("#oc_edit-time").focus();
@@ -1323,8 +1291,8 @@ Opencast.Player = (function () {
         
         if (backupPlayPauseState === PLAYING)
         {
-        	Videodisplay.play();
-        	backupPlayPauseState = '';
+            Videodisplay.play();
+            backupPlayPauseState = '';
         }
     }
     
@@ -1470,6 +1438,19 @@ Opencast.Player = (function () {
         }); 
     }
     
+
+    /**
+        @memberOf Opencast.Player
+        @description Set the scrubber postion
+     */
+    function refreshScrubberPosition() 
+    {
+        var newPos = Math.round((curPosition / getDuration()) *  $("#scubber-channel").width());
+        $("#draggable").css("left", newPos);
+        $("#scrubber").css("left", newPos);
+        $("#play-progress").css("width", newPos);
+    }
+    
     /**
         @memberOf Opencast.Player
         @description Set the new position of the seek slider.
@@ -1498,18 +1479,9 @@ Opencast.Player = (function () {
 
         if (getDragging() === false)
         {
-          refreshScrubberPosition();
+            refreshScrubberPosition();
         }
     }
-    
-    
-    function refreshScrubberPosition() {
-      var newPos = Math.round((curPosition / getDuration()) *  $("#scubber-channel").width());
-      $("#draggable").css("left", newPos);
-      $("#scrubber").css("left", newPos);
-      $("#play-progress").css("width", newPos);
-    }
-    
     
     /**
         @memberOf Opencast.Player
@@ -1542,7 +1514,6 @@ Opencast.Player = (function () {
     
         if (displayMode === MULTIPLAYER)
         {
-            
             content = content + '<input style="margin-top:5px;" id="oc_btn-singleDisplay" class="oc_btn-singleDisplay" type="submit" name="Show presenter video" alt="Show presenter video" title="Show presenter video" value="" onclick="Opencast.Player.videoSizeControlMultiOnlyLeftDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input><br/>';
             content = content + '<input style="margin-top:5px; id="oc_btn-bigLeftDisplay" class="oc_btn-bigLeftDisplay" type="submit" name="Show large presenter / Small presentation" alt="Show large presenter / Small presentation" title="Show large presenter / Small presentation" value="" onclick="Opencast.Player.videoSizeControlMultiBigLeftDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input><br/>';
             content = content + '<input style="margin-top:5px; id="oc_btn-centerDisplay" class="oc_btn-centerDisplay" type="submit" name="Show presenter and presentation equal" alt="Show presenter and presentation equal" title="Show presenter and presentation equal" value="" onclick="Opencast.Player.videoSizeControlMultiDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input><br/>';
@@ -1553,11 +1524,6 @@ Opencast.Player = (function () {
             $('#oc_player_video-dropdown').append(content);
             $("#oc_btn-dropdown").attr("className", "oc_btn-centerDisplay");
         
-            /*$('#oc_video-time').css("width", '12%');
-            $('#oc_video-controls').css("width", '18%');
-            $('#oc_video-size-controls').css("width", '60%');
-            $('#oc_video-size-dropdown-div').css("width", '50%');*/
-            
             setDisplayMode(displayMode);
         }
         else if (displayMode === SINGLEPLAYER)
