@@ -57,11 +57,11 @@ def parseOpencastLogfile(run):
 		deviceData = []
 		for time in devices[device]:
 			deviceData.append(devices[device][time].replace(","," "))
-		filename = device + ".pg"
+		filename = device + ".gp"
 		writeGnuplotDatafile(filename, deviceData)
-		plot_cmds.append(createGnuplotHeader(filename, 2, "current-level-buffers"))
-		plot_cmds.append(createGnuplotHeader(filename, 3, "current-level-bytes"))
-		plot_cmds.append(createGnuplotHeader(filename, 4, "current-level-time"))
+		plot_cmds.append(createGnuplotHeader(filename, 2, "current-level-buffers - " + device))
+		plot_cmds.append(createGnuplotHeader(filename, 3, "current-level-bytes - " + device))
+		plot_cmds.append(createGnuplotHeader(filename, 4, "current-level-time - " + device))
 	return plot_cmds
 
 def parseDstatLogfile(run):
@@ -127,6 +127,8 @@ for run in runs:
 	writeGnuplotHeaderfile("graph.gp", headers)
 
 	!gnuplot -persist graph.gp
+
+	!rm -f *.gp
 	
 	output="<html><body>\n"
 	for frame in capturedFrames:
