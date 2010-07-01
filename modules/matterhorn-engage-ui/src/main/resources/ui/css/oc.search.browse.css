@@ -7,9 +7,7 @@ body
   text-align: left; 
   border:0;
   padding:0;
-  margin: 0 auto;
-  margin-top: 10px;
-  width:980px;
+  margin: 10px 20px 0;
 }
 
 .oc-search-bar-holder {
@@ -44,14 +42,14 @@ body
   position:relative;
   margin-top:2px;
   position:relative;
-  padding:0px;
-  background-color: #EEEEEE;
+  padding:5px 0px;
+  background-color: #EFF7F9;
 }
 
 div.table-row {
   padding:0px;
   width:100%;
-  height:82px;
+  height:140px;
 }
 
 div.left-container13 {
@@ -59,16 +57,15 @@ div.left-container13 {
   float:left;
   border:0px;
   margin:0px;
-  padding-top:5px;
-  width:100px;
+  width:180px;
 }
 
 div.left-container23 {
   float:left;
   border:0px;
   margin:0px;
-  padding:5px;
-  width:690px;
+  padding:5px 0 0 10px;
+  width:auto;
 }
 
 div.right-container13 {
@@ -81,11 +78,74 @@ div.right-container13 {
   width:170px;
 }
 
-.oc-pager{
+.oc-pager {
   text-align:center;
   margin-top:2px;
   margin-bottom:20px;
   width:100%;
   position:relative;
   background-color: #DDDDDD;
+}
+
+img.thumb {
+  width: 160px;
+  height: 120px;
+  padding: 10px;
+}
+
+a.itemtitle {
+  color: #174B49;
+  font-size:16px;
+  font-weight: bold;
+  font-family: arial,helvetica,clean,sans-serif;
+  text-decoration: none;
+}
+
+span.itemdesc {
+  color: #2D8F8B;
+  font-size:14px;
+  font-weight: bold;
+  font-style: italic;
+  font-family: arial,helvetica,clean,sans-serif;
+}
+
+.timedate {
+  font-size: 12px;
+}
+
+#searchSubmit {
+  background-color: #2D8F8B;
+  color: #FFFFFF;
+}
+
+span.title {
+  color: #2D8F8B;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+#searchField {
+  width: 200px;
+  background-color: #E3E3D7;
+  background-image: url('../shared_img/icons/magnifier.png');
+  background-repeat: no-repeat;
+  border: 1px solid #000000;
+  padding-left: 20px;
+  
+}
+h2{
+  font-size: 20px;
+  color: #666666;
+}
+
+#atomLink {
+  color: #666666;
+}
+
+#rsslink {
+  color: #666666;
+}
+
+.subscriptions {
+ float:right;
 }

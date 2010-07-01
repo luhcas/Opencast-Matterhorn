@@ -8,7 +8,7 @@
 			<div class="oc-search-result-item">
 				<div class="table-row">
 					<div class="left-container13">
-						<img class="thumb" height="72">
+						<img class="thumb">
 				    <xsl:for-each select="mediapackage/attachments/attachment">
 				      <xsl:choose>
 				        <xsl:when test="@type='presenter/search+preview'">
@@ -25,7 +25,7 @@
 						<xsl:choose>
 							<xsl:when test="mediapackage/media/track/mimetype[.='video/x-flv']">
 								<b>
-									<a>
+									<a class="itemtitle">
 										<xsl:attribute name="href">watch.html?id=<xsl:value-of
 											select="mediapackage/@id" /></xsl:attribute>
 										<xsl:value-of select='substring(dcTitle, 0, 80)' />
@@ -33,14 +33,15 @@
 											...
 										</xsl:if>
 									</a>
-								</b>
+								</b><br/>
 
-								<xsl:if test="dcCreator!=''">
+								<span class="itemdesc">
+                                <xsl:if test="dcCreator!=''">
 									by
 									<xsl:value-of select="dcCreator" />
 								</xsl:if>
-
-								<br />
+                                </span>
+								<br /><br /><br />
 								<div class="timeDate">
 									<xsl:value-of select="dcCreated"/>
 								</div>

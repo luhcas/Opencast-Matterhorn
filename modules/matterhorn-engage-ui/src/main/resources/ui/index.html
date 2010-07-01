@@ -56,7 +56,7 @@
           var toIndex = parseInt($('#oc-episodes-limit').html()) +  (page - 1) * 10;
           var fromIndex = Math.min(parseInt($('#oc-episodes-offset').html()) + 1, toIndex);
           
-          $('#title').text("Results "+ fromIndex + "-"+ toIndex + " of "+ total + keywordString).html();
+          $('.title').text("Results "+ fromIndex + "-"+ toIndex + " of "+ total + keywordString).html();
 
           $('.timeDate').each( function() {
             var timeDate = $(this).text();
@@ -97,10 +97,19 @@
   <!------------------------- BODY ------------------------->
   <body>
 	<div id="pageHeader">
-      <div id="currentVersion"></div>
-      <div id="newestVersion" style="text-align: right; float: right;"></div>
+    &nbsp;
+      <!--<div id="currentVersion"></div>
+      <div id="newestVersion" style="text-align: right; float: right;"></div>-->
     </div>
-
+    <!-- LOGO -->
+    <div class="oc_headerRow">
+        <a class="oc_headerLink" href="../../welcome.html">
+          <div class="mh-logo"><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn"/></div>
+          <div class="mh-heading"><h1>Media Module</h1></div>
+          <div class="oc-logo"><img src="shared_img/opencast_logo.gif" alt="Opencast Matterhorn"/></div>
+        </a>
+    </div>
+    <hr style="clear:both;border-style: none none solid none;height:5px; color:#CCCCCC"> 
     <noscript>
       <p style="color: red;">JavaScript is turned off in your web browser,
         so this site won't work properly! <br />
@@ -108,30 +117,33 @@
           refresh the page.</strong></p>
     </noscript>
 
+
     <div class="oc-holder">
-      <div style="margin-top: .5em">
-        <a href="../../welcome.html" style="color:#F6921E;text-decoration: none;">
-          <h1><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn">&nbsp;&nbsp;Opencast Matterhorn</h1>
-        </a>
-      </div>
       <div class="oc-search-bar-holder fl-helper-clearfix">&nbsp;
         <div class="oc-search-bar">
-          <form action="index.html"><input id="searchField" type="text"
-                                           name="q" value="" /> <input type="submit" value="Search" /></form>
+        <span class="subscriptions">
           <a id="rsslink" href="/feeds/rss/2.0/latest">RSS</a>&nbsp;|&nbsp;
-          <a id="atomlink" href="/feeds/atom/0.3/latest">ATOM</a>&nbsp;|</div>
-
+          <a id="atomlink" href="/feeds/atom/0.3/latest">ATOM</a>&nbsp;
+         </span>
+          <form action="index.html"><input id="searchField" type="text"
+                                           name="q" value="" /> <input id="searchSubmit" type="submit" value="Search" /></form>
+        </div>
       </div>
       <div class="oc-search-result-header">
-        <h2 id="title">Results</h2>
+        <h2>Media Gallery</h2>
         <div class="oc-sort-controls"></div>
       </div>
-      <div class="oc-search-result-items">
+      <div style="padding-top:20px;">
+        <span class="title">Results</span>
+        <span style="float:right"><ul class="navigation"></span>
+      </div>
+      <div style="clear:both" class="oc-search-result-items">
         <div id="stage">loading results...</div>
-        <div class="oc-pager">
-          <ul id="navigation">
-          </ul>
+        <div>
+          <span class="title">Results</span>
+          <span style="float:right"><ul class="navigation"></span>
         </div>
+      <div>
       </div>
     </div>
   </body>

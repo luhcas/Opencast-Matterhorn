@@ -28,7 +28,7 @@ Opencast.pager = ( function() {
     var spanBeforeSet = false;
     var spanAfterSet = false;
 
-    $('#navigation').empty();
+    $('.navigation').empty();
     
     if(getCurrentSearchQuery() != null)
       LINK_PREFIX = "index.html?q="+getCurrentSearchQuery()   +"&page=";
@@ -42,25 +42,25 @@ Opencast.pager = ( function() {
 
     // take care for the previous page button
     if (currentPageId <= 1) {
-      text = "<span>" + PREVIOUS_TEXT + "</span>";
+      text = '<span style="color:#CCCCCC">' + PREVIOUS_TEXT + "</span>";
 
     } else {
       link = LINK_PREFIX + (currentPageId - 1);
-      text = "<a href='" + link + "'>" + PREVIOUS_TEXT + "</a>";
+      text = "<a href='" + link + "' style='color:#666666'>" + PREVIOUS_TEXT + "</a>";
     }
     li = document.createElement('li');
     li.innerHTML = text;
-    $('#navigation').append(li);
+    $('.navigation').append(li);
 
     // Pipe before page numbers
     li = document.createElement('li');
     li.innerHTML = "<span>" + "|" + "</span>";
-    $('#navigation').append(li);
+    $('.navigation').append(li);
     
     // "Page:
     li = document.createElement('li');
-    li.innerHTML = "<span>" + "<b>Page:</b>" + "</span>";
-    $('#navigation').append(li);
+    li.innerHTML = "<span id='currentPage'>" + "Page:" + "</span>";
+    $('.navigation').append(li);
     
     // take care for the page buttons
     for ( var i = 1; i <= maxPageId; i++) {
@@ -88,32 +88,32 @@ Opencast.pager = ( function() {
       } else {
         link = LINK_PREFIX + i;
         if (i == currentPageId) {
-          text = "<span><b>" + i + "</b></span>";
+          text = '<span id="currentPage">' + i + '</span>';
         } else {
           text = "<a href='" + link + "'>" + i + "</a>";
         }
       }
 
       li.innerHTML = text;
-      $('#navigation').append(li);
+      $('.navigation').append(li);
     }
 
     // Pipe after page numbers
     li = document.createElement('li');
     li.innerHTML = "<span>" + "|" + "</span>";
-    $('#navigation').append(li);
+    $('.navigation').append(li);
     
     // take care for the next page button
     if (parseInt(currentPageId) >= parseInt(maxPageId)) {
-      text = "<span>" + NEXT_TEXT + "</span>";
+      text = "<span style='color:#CCCCCC'>" + NEXT_TEXT + "</span>";
 
     } else {
       link = LINK_PREFIX + (++currentPageId);
-      text = "<a href='" + link + "'>" + NEXT_TEXT + "</a>";
+      text = "<a href='" + link + "' style='color:#666666'>" + NEXT_TEXT + "</a>";
     }
     li = document.createElement('li');
     li.innerHTML = text;
-    $('#navigation').append(li);
+    $('.navigation').append(li);
 
   }
 
