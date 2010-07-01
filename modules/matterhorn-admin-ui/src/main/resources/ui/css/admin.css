@@ -439,9 +439,17 @@ fieldset {
 }
 
 .recording-hold {
-    background-image: url(../shared_img/icons/server_hold.png);
+    background-image: url(../shared_img/icons/server_edit.png);
 }
 
 .recording-failed {
     background-image: url(../shared_img/icons/cross.png);
+}
+.iconCell {
+    display: table-cell;
+    padding-right: 5px;
+}
+
+.statusCell {
+    display: table-cell;
 }
