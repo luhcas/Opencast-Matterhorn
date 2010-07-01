@@ -68,7 +68,7 @@ unset cleanName
 
 # Log statement to explain the log syntax
 echo >> $LOG_FILE
-echo "# Installed devices (Clean Name ; Device Name ; Symbolic Link)" >> $LOG_FILE
+echo "# Installed devices (Clean Name ; Device Name ; Symbolic Link ; Queue Size (MBytes))" >> $LOG_FILE
 
 for (( i = 0; i < ${#device[@]}; i++ )); do
 
@@ -174,14 +174,19 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
 	echo
     fi
 
+    # Prompt the user for the size of the device queue (in megabytes)
+    ask -d "$DEFAULT_QUEUE_SIZE" -f '^0*[1-9][0-9]*$' -? "$QUEUE_HELP" -e "The value must be an integer" -h "? - more info"\
+        "What size of RAM should be reserved for device X (in megabytes)?" q_size
+
     # Writes device to the config file
-    echo "capture.device.${cleanName[$i]}.src=/dev/$symlinkName" >> $CAPTURE_PROPS
-    echo "capture.device.${cleanName[$i]}.outputfile=${cleanName[$i]}" >> $CAPTURE_PROPS
-    echo "capture.device.${cleanName[$i]}.flavor=$flavor" >> $CAPTURE_PROPS
+    echo "$DEVICE_PREFIX.${cleanName[$i]}.$SOURCE_SUFFIX=/dev/$symlinkName" >> $CAPTURE_PROPS
+    echo "$DEVICE_PREFIX.${cleanName[$i]}.$OUT_SUFFIX=${cleanName[$i]}" >> $CAPTURE_PROPS
+    echo "$DEFICE_PREFIX.${cleanName[$i]}.$FLAVOR_SUFFIX=$flavor" >> $CAPTURE_PROPS
+    echo "$DEVICE_PREFIX.${cleanName[$i]}.$QUEUE_SUFFIX=$((q_size*1024))" >> $CAPTURE_PROPS
     allDevices="${allDevices}${cleanName[$i]},"
     
     # Log this device
-    echo "${cleanName[$i]} ; ${devName[$i]} ; $symlinkName" >> $LOG_FILE
+    echo "${cleanName[$i]} ; ${devName[$i]} ; $symlinkName ; $q_size" >> $LOG_FILE
 
     echo
 done
@@ -255,9 +260,15 @@ if [[ "$response" ]]; then
     fi
     echo
     
-    echo "capture.device.${cleanName[$i]}.src=$audioDevice" >> $CAPTURE_PROPS
-    echo "capture.device.${cleanName[$i]}.outputfile=${cleanName[$i]}" >> $CAPTURE_PROPS
-    echo "capture.device.${cleanName[$i]}.flavor=$flavor" >> $CAPTURE_PROPS
+    # Prompt the user for the size of the device queue (in megabytes)
+    ask -d "$DEFAULT_QUEUE_SIZE" -f '^0*[1-9][0-9]*$' -? "$QUEUE_HELP" -e "The value must be an integer" -h "? - more info"\
+        "What size of RAM should be reserved for device X (in megabytes)?" q_size
+
+    # Write the config values to the properties file
+    echo "$DEVICE_PREFIX.${cleanName[$i]}.$SOURCE_SUFFIX=$audioDevice" >> $CAPTURE_PROPS
+    echo "$DEVICE_PREFIX.${cleanName[$i]}.$OUT_SUFFIX=${cleanName[$i]}" >> $CAPTURE_PROPS
+    echo "$DEVICE_PREFIX.${cleanName[$i]}.$FLAVOR_SUFFIX=$flavor" >> $CAPTURE_PROPS
+    echo "$DEVICE_PREFIX.${cleanName[$i]}.$QUEUE_SUFFIX=$((q_size*1024))" >> $CAPTURE_PROPS
 
     allDevices="${allDevices}${cleanName[$i]}"
 
@@ -268,4 +279,4 @@ if [[ "$response" ]]; then
 fi
 
 # Add the list of installed names
-echo "capture.device.names=${allDevices}" >> $CAPTURE_PROPS
+echo "$DEVICE_PREFIX.$LIST_SUFFIX=${allDevices}" >> $CAPTURE_PROPS

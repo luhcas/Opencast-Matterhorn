@@ -55,6 +55,9 @@ ask() {
 		    f)  # Filter
 			filter="$2"
 			;;
+		    h) # Help prompt
+			help_prompt="$2"
+			;;
 		    \?) # Help
 			help="$2"
 			;;
@@ -195,6 +198,9 @@ choose() {
 		    e)  # Error message
 			err_bad_option="$2"
 			;;			
+		    -h) # Help prompt
+			help_prompt="$2"
+			;;
 		    \?)  # Help message
 			help="$2"
 			;;

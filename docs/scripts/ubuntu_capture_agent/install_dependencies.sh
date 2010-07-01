@@ -76,8 +76,7 @@ EOF
 # Changes the default array delimiter: from 'space' to 'newline'
 IFS='
 '
-
-# Gets the list of the packages to install --those are delimited by newlines, that's why IFS was previously changed
+# Gets the list of the ackages to install --those are delimited by newlines, that's why IFS was previously changed
 pkgs=( $PKG_LIST )
 bad=( $BAD_PKG_LIST )
 reason=( $BAD_PKG_REASON )
@@ -89,7 +88,6 @@ for (( i = 0; i < ${#bad[@]}; i++ )); do
     unset exists
     # Check if the packages are installed before asking the user
     for item in $(echo "${bad[$i]}" | cut -d ' ' -f 1-); do
-	echo "item=$item"
 	if [[ "$(dpkg -l | grep "$item")" ]]; then
 	    exists=true
 	    break
@@ -126,19 +124,23 @@ else
     echo "All the necessary dependencies were already installed"
 fi
 
+# Back up the installed packages
+for (( i=0; i < ${#noinst[@]}; i++ )); do
+    echo "${noinst[$i]}" >> $PKG_BACKUP
+done
+
 # Set up java-6-sun as the default alternative
 echo -n "Setting up java-6-sun as the default jvm... "
 update-java-alternatives -s $JAVA_PATTERN 2> /dev/null
 echo "Done"
 
-# Define some enviroment variables
+# Define JAVA_HOME variable
 export JAVA_HOME=$JAVA_PREFIX/`ls $JAVA_PREFIX | grep ^$JAVA_PATTERN$`
-export PKG_LIST=${noinst[@]}
 
 # Log the list of installed packages
 echo >> $LOG_FILE
 echo "# Installed packages" >> $LOG_FILE
-echo "$PKG_LIST" >> $LOG_FILE
+echo "$(cat $PKG_BACKUP)" >> $LOG_FILE
 
 # Setup felix
 echo -n "Downloading Felix... "

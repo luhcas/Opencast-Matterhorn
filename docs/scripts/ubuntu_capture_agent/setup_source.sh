@@ -60,6 +60,8 @@ echo "$url" >> $LOG_FILE
 
 # Setup felix configuration
 echo -n "Applying matterhorn configuration files to felix... "
-cp -rf $SOURCE/docs/felix/bin ${FELIX_HOME}
-cp -rf $SOURCE/docs/felix/conf ${FELIX_HOME}
+cp -rf $SOURCE/$FELIX_DOCS/* ${FELIX_HOME}
+# Remove the .svn folders
+find ${FELIX_HOME} -name "\.svn" -exec rm -rf {} \; 2> /dev/null
+
 echo "Done"

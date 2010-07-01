@@ -19,6 +19,8 @@ export OC_DIR=/opt/matterhorn
 export CA_DIR=$OC_DIR/capture-agent
 # Directory where the source code will be downloaded to
 export SOURCE=$CA_DIR/matterhorn-source
+# Location of the felix docs in the source code
+export FELIX_DOCS="docs/felix"
 
 # Path from where this script is run initially
 export START_PATH=$PWD
@@ -63,7 +65,6 @@ export LOG_FILE=$START_PATH/install_info.txt
 # URL where the log file is sent if the user consent
 export TRACKING_URL=http://www.opencastproject.org/form/tracking
 
-
 # Third-party dependencies variables
 # Packages that are installed by default (one per line --please note the quotation mark at the end!!!)
 export PKG_LIST="alsa-utils
@@ -91,10 +92,16 @@ export BAD_PKG_LIST="gstreamer0.10-plugins-bad gstreamer0.10-plugins-bad-multive
 # Reasons why each of the "bad" packages should be installed (one per line, in the same order as the bad packages)
 export BAD_PKG_REASON="These packages provide support for h264 and mpeg2"
 
+# This is a backup file to preserve the list of installed packages in case something fails and the script is re-launched
+# The name should start with a '.' so that it is a hidden file and it is not erased with the rest of the files when a new execution starts
+export PKG_BACKUP=$WORKING_DIR/.installed_pkgs
+
 # 1-based index default option for the device flavor
 export DEFAULT_FLAVOR=1
 # Lists of flavors the user can choose from to assign to a certain device
 export FLAVORS="presenter/source presentation/source"
+# Default size for a capture device queue (in megabytes)
+export DEFAULT_QUEUE_SIZE=512
 
 # URL to download the epiphan driver
 export EPIPHAN_URL=http://www.epiphan.com/downloads/linux
@@ -138,15 +145,45 @@ export JV4LINFO_PATH=/usr/lib
 export JV4LINFO_DIR=$CA_DIR/jv4linfo
                                                                          
 ## Help messages
+# Help for the driver list choice
 export VGA2USB_HELP_MSG="You might want to check $EPIPHAN_URL to see a complete list of the available drivers.
 If you cannot find a driver that works with your kernel configuration please email Epiphan Systems inc. (info@epiphan.com)
 and include the output from the command \"uname -a\". In this machine this output is:
 $(uname -a))"
+# Help for the device friendly name prompt
 export FRIENDLY_NAMES_HELP="The friendly name (e.g. \"screen\", or \"professor\") will identify the device in the system and will be displayed in the user interfaces for controlling this device.
 It can't contain spaces or punctuation."
+# Help for the device flavor prompt
 export FLAVORS_HELP="Devices that capture the screen are usually \"Presentation\", while devices that capture the instructor or audience are usually \"Presenter\".
 Setting this value correctly is important to ensure video content is processed and distributed correctly."
+# Help for the device queue prompt
+export QUEUE_HELP="This value is used internally by the device pipeline and basically represents the amount of memory reserved for the device buffer.
+A value bigger than the default may be selected, as long as the machine has enough memory to allocate it."
+# Help for the prompt for the time between two schedule polls
+export POLL_HELP="A too short value will cause excessive polls to the core, while a too long value may cause some recordings are not notified to the agent before their expected starting time.
+Testers should choose a value of 1 minute so that they can schedule recordings to start immediately"
 
+## Keys for several properties in the config files
+# Storage dir in the general felix config file (config.properties)
+export STORAGE_KEY="org.opencastproject.storage.dir"
+# Agent name in the capture properties file
+export AGENT_NAME_KEY="capture.agent.name"
+# URL of the core machine inthe capture properties file
+export CORE_URL_KEY="org.opencastproject.capture.core.url"
+# Time between two subsequent updates of the capture schedule in the capture properties file
+export SCHEDULE_POLL_KEY="capture.schedule.remote.polling.interval"
+# Prefix for properties related to a certain device in the capture properties file
+export DEVICE_PREFIX="capture.device"
+# Suffix for the source location of a certain device in the capture properties file
+export SOURCE_SUFFIX="src"
+# Suffix for the output location of a certain device in the capture properties file
+export OUT_SUFFIX="out"
+# Suffix for the flavor of a certain device in the capture properties file
+export FLAVOR_SUFFIX="flavor"
+# Suffix for the size of the queue for a certain device in the capture properties file
+export QUEUE_SUFFIX="buffer.bytes"
+# Suffix for the comma-separated list of all the devices attached to a capture agent in the capture properties file
+export LIST_SUFFIX="names"
 
 # Required scripts for installation
 SETUP_USER=./setup_user.sh
@@ -179,9 +216,9 @@ if [[ `id -u` -ne 0 ]]; then
 fi
 
 # Change the working directory to a temp directory under /tmp
-# Deletes it first, in case it existed previously (MH-3797)
-rm -rf $WORKING_DIR
+# Deletes its contents, in case it existed previously (MH-3797)
 mkdir -p $WORKING_DIR
+rm -f $WORKING_DIR/*
 cd $WORKING_DIR
 
 # Log the technical outputs                                                                                                                                 
