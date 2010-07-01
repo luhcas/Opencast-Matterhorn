@@ -19,14 +19,14 @@
               <xsl:value-of select="title" />
             </li>
             <li>
+              <label class="fl-label">Series:</label>
+              <!-- Series -->
+              <xsl:value-of select="isPartOf" />
+            </li>
+            <li>
               <label class="fl-label">Presenter:</label>
               <!-- Presenter -->
               <xsl:value-of select="creator" />
-            </li>
-            <li>
-              <label class="fl-label">Sponsoring Department:</label>
-              <!-- Sponsoring Department -->
-              <xsl:value-of select="contributor" />
             </li>
           </ul>
         </div>
@@ -42,9 +42,9 @@
         <div class="fl-widget-content folder-content">
           <ul class="fl-controls-right form-list">
             <li class="additionalMeta">
-              <label class="fl-label">Series:</label>
-              <!-- Series -->
-              <xsl:value-of select="isPartOf" />
+              <label class="fl-label">Sponsoring Department:</label>
+              <!-- Sponsoring Department -->
+              <xsl:value-of select="contributor" />
             </li>
             <li class="additionalMeta">
               <label class="fl-label">Subject:</label>
