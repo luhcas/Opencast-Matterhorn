@@ -79,6 +79,12 @@
               $(this).attr("src", "img/thumbnail.png");
             }
           });
+          $(".oc-search-result-item").each(function(index) {
+            if(index % 2 ==1) {
+                $(this).css('background-color','#F7FBFC');
+            }
+          });
+          
         });
 
         if(searchQuery != null && searchQuery != ""){
@@ -89,6 +95,7 @@
           $('#atomlink').attr("href", "/feeds/atom/0.3/latest");
         }
       });
+      
 
     </script>
 
