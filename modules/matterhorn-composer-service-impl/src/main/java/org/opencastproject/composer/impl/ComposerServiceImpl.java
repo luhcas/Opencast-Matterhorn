@@ -317,7 +317,7 @@ public class ComposerServiceImpl implements ComposerService {
         try {
           in = new FileInputStream(encodingOutput);
           returnURL = workspace.putInCollection(COLLECTION, encodingOutput.getName(), in);
-          logger.debug("Copied the encoded file to the workspace at {}", returnURL);
+          logger.info("Copied the encoded file to the workspace at {}", returnURL);
           encodingOutput.delete();
           logger.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
         } catch (Exception e) {
