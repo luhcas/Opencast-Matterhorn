@@ -121,12 +121,17 @@
     <div class="oc-holder">
       <div class="oc-search-bar-holder fl-helper-clearfix">&nbsp;
         <div class="oc-search-bar">
-        <span class="subscriptions">
-          <a id="rsslink" href="/feeds/rss/2.0/latest">RSS</a>&nbsp;|&nbsp;
-          <a id="atomlink" href="/feeds/atom/0.3/latest">ATOM</a>&nbsp;
-         </span>
-          <form action="index.html"><input id="searchField" type="text"
-                                           name="q" value="" /> <input id="searchSubmit" type="submit" value="Search" /></form>
+            <span class="subscriptions">
+                <a id="rsslink" href="/feeds/rss/2.0/latest">RSS</a>&nbsp;|&nbsp;
+                <a id="atomlink" href="/feeds/atom/0.3/latest">ATOM</a>
+            </span>
+            <br />
+            <span style="float:right">
+                <form action="index.html">
+                    <input id="searchField" type="text" name="q" value="" />
+                    <input id="searchSubmit" type="submit" value="Search" />
+                </form>
+            </span>
         </div>
       </div>
       <div class="oc-search-result-header">
@@ -134,16 +139,15 @@
         <div class="oc-sort-controls"></div>
       </div>
       <div style="padding-top:20px;">
-        <span class="title">Results</span>
-        <span style="float:right"><ul class="navigation"></span>
+        <span class="title" style="float:left">Results</span>
+        <span style="float:right"><ul class="navigation"></ul></span>
       </div>
       <div style="clear:both" class="oc-search-result-items">
         <div id="stage">loading results...</div>
-        <div>
-          <span class="title">Results</span>
-          <span style="float:right"><ul class="navigation"></span>
-        </div>
+      </div>
       <div>
+        <span class="title" style="float:left">Results</span>
+        <span style="float:right"><ul class="navigation"></ul></span>
       </div>
     </div>
   </body>
