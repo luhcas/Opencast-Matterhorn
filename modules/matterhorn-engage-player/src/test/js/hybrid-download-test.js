@@ -1,23 +1,7 @@
-module("play/pause state");
+MyTestCase = TestCase("MyTestCase");
 
-test("module without setup/teardown (default)", function() {
-	same(typeof Opencast, "object");
-	same(typeof Opencast.Player, "object");
-});
+MyTestCase.prototype.testA = function(){
+};
 
-
-test("default play/pause state", function() {
-	same(Opencast.Player.getCurrentPlayPauseState(), "pausing");
-});
-
-test("setting and getting play/pause state", function() {
-	Opencast.Player.setCurrentPlayPauseState("playing");
-	same(Opencast.Player.getCurrentPlayPauseState(), "playing");
-});
-
-
-module("mute/unmute");
-
-test("sample test", function () {
-	ok(true);
-});
+MyTestCase.prototype.testB = function(){
+};
