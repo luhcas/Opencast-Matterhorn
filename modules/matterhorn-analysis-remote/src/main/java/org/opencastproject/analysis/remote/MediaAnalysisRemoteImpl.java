@@ -49,7 +49,7 @@ public class MediaAnalysisRemoteImpl extends RemoteBase implements MediaAnalysis
 
   /** The type of analysis this remote service proxy handles */
   protected String analysisType = null;
-  
+
   /** The catalog flavor that is produced by this implementation */
   protected MediaPackageElementFlavor resultingFlavor = null;
 
@@ -57,28 +57,28 @@ public class MediaAnalysisRemoteImpl extends RemoteBase implements MediaAnalysis
   protected MediaPackageElementFlavor[] requiredFlavors = new MediaPackageElementFlavor[] {};
 
   public MediaAnalysisRemoteImpl() {
-    // the service type is not available at construction time.  we need to wait for activation to set this value
+    // the service type is not available at construction time. we need to wait for activation to set this value
     super("waiting for activation");
   }
-  
+
   /** activate the component */
   public void activate(ComponentContext cc) {
-    this.analysisType = (String)cc.getProperties().get("analysis.type");
-    this.resultingFlavor = MediaPackageElementFlavor.parseFlavor((String)cc.getProperties().get("resulting.flavor"));
+    this.analysisType = (String) cc.getProperties().get("analysis.type");
+    this.resultingFlavor = MediaPackageElementFlavor.parseFlavor((String) cc.getProperties().get("resulting.flavor"));
     Object requiredFlavorsObj = cc.getProperties().get("required.flavors");
-    if(requiredFlavorsObj != null) {
-      if(requiredFlavorsObj instanceof String) {
+    if (requiredFlavorsObj != null) {
+      if (requiredFlavorsObj instanceof String) {
         this.requiredFlavors = new MediaPackageElementFlavor[1];
-        this.requiredFlavors[0] = MediaPackageElementFlavor.parseFlavor((String)requiredFlavorsObj);      
-      } else if(requiredFlavorsObj instanceof String[]) {
-        String[] flavorStrings = (String[])requiredFlavorsObj;
+        this.requiredFlavors[0] = MediaPackageElementFlavor.parseFlavor((String) requiredFlavorsObj);
+      } else if (requiredFlavorsObj instanceof String[]) {
+        String[] flavorStrings = (String[]) requiredFlavorsObj;
         this.requiredFlavors = new MediaPackageElementFlavor[flavorStrings.length];
-        for(int i=0; i<flavorStrings.length;i++) {
+        for (int i = 0; i < flavorStrings.length; i++) {
           this.requiredFlavors[i] = MediaPackageElementFlavor.parseFlavor(flavorStrings[i]);
         }
       }
     }
-    this.resultingFlavor = MediaPackageElementFlavor.parseFlavor((String)cc.getProperties().get("resulting.flavor"));
+    this.resultingFlavor = MediaPackageElementFlavor.parseFlavor((String) cc.getProperties().get("resulting.flavor"));
     super.serviceType = analysisType;
   }
 
@@ -100,21 +100,22 @@ public class MediaAnalysisRemoteImpl extends RemoteBase implements MediaAnalysis
     HttpResponse response = null;
     try {
       response = getResponse(post);
-      if(response == null) {
-        throw new MediaAnalysisException("Unable to analyze element '" + element + "' using a remote analysis service");
-      }
-      try {
-        receipt = remoteServiceManager.parseReceipt(response.getEntity().getContent());
-        if(block) {
-          receipt = poll(receipt.getId());
+      if (response != null) {
+        try {
+          receipt = remoteServiceManager.parseReceipt(response.getEntity().getContent());
+          if (block) {
+            receipt = poll(receipt.getId());
+          }
+          return receipt;
+        } catch (Exception e) {
+          throw new MediaAnalysisException("Unable to analyze element '" + element
+                  + "' using a remote analysis service", e);
         }
-        return receipt;
-      } catch (Exception e) {
-        throw new MediaAnalysisException("Unable to analyze element '" + element + "' using a remote analysis service", e);
       }
     } finally {
       closeConnection(response);
     }
+    throw new MediaAnalysisException("Unable to analyze element '" + element + "' using a remote analysis service");
   }
 
   public String getXML(MediaPackageElement element) throws Exception {
@@ -135,15 +136,17 @@ public class MediaAnalysisRemoteImpl extends RemoteBase implements MediaAnalysis
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.remote.api.RemoteBase#getReceipt(java.lang.String)
    */
   @Override
   public Receipt getReceipt(String id) {
     return super.getReceipt(id);
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.analysis.api.MediaAnalysisService#getAnalysisType()
    */
   @Override
@@ -153,6 +156,7 @@ public class MediaAnalysisRemoteImpl extends RemoteBase implements MediaAnalysis
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.analysis.api.MediaAnalysisService#produces()
    */
   @Override
@@ -162,6 +166,7 @@ public class MediaAnalysisRemoteImpl extends RemoteBase implements MediaAnalysis
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.analysis.api.MediaAnalysisService#requires()
    */
   @Override

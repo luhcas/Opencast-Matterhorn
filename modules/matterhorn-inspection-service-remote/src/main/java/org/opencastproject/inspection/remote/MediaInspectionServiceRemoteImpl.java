@@ -65,19 +65,19 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
     try {
       HttpGet get = new HttpGet(url);
       response = getResponse(get);
-      if(response == null) {
-        throw new RuntimeException("Unable to inspect " + uri + " using a remote inspection service");
+      if(response != null) {
+        Receipt receipt = remoteServiceManager.parseReceipt(response.getEntity().getContent());
+        if (block) {
+          receipt = poll(receipt.getId());
+        }
+        return receipt;
       }
-      Receipt receipt = remoteServiceManager.parseReceipt(response.getEntity().getContent());
-      if (block) {
-        receipt = poll(receipt.getId());
-      }
-      return receipt;
     } catch (Exception e) {
       throw new RuntimeException("Unable to inspect " + uri + " using a remote inspection service");
     } finally {
       closeConnection(response);
     }
+    throw new RuntimeException("Unable to inspect " + uri + " using a remote inspection service");
   }
 
   /**
@@ -103,19 +103,19 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
       HttpEntity entity = new UrlEncodedFormEntity(params);
       post.setEntity(entity);
       response = getResponse(post);
-      if(response == null) {
-        throw new RuntimeException("Unable to enrich " + original + " using a remote inspection service");
+      if(response != null) {
+        Receipt receipt = remoteServiceManager.parseReceipt(response.getEntity().getContent());
+        if (block) {
+          receipt = poll(receipt.getId());
+        }
+        return receipt;
       }
-      Receipt receipt = remoteServiceManager.parseReceipt(response.getEntity().getContent());
-      if (block) {
-        receipt = poll(receipt.getId());
-      }
-      return receipt;
     } catch (Exception e) {
       throw new RuntimeException("Unable to enrich " + original + " using a remote inspection service", e);
     } finally {
       closeConnection(response);
     }
+    throw new RuntimeException("Unable to enrich " + original + " using a remote inspection service");
   }
 
   /**

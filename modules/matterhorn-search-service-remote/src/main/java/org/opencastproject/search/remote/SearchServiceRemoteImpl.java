@@ -44,21 +44,22 @@ import java.util.List;
  */
 public class SearchServiceRemoteImpl extends RemoteBase implements SearchService {
   private static final Logger logger = LoggerFactory.getLogger(SearchServiceRemoteImpl.class);
-  
+
   public SearchServiceRemoteImpl() {
     super(JOB_TYPE);
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchService#add(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public void add(MediaPackage mediaPackage) throws SearchException {
-    String urlSuffix = UrlSupport.concat(new String[] {"/search", "rest", "add"});
+    String urlSuffix = UrlSupport.concat(new String[] { "/search", "rest", "add" });
     HttpPost post = new HttpPost(urlSuffix);
     HttpResponse response = getResponse(post, HttpStatus.SC_NO_CONTENT);
-    if(response == null) {
+    if (response == null) {
       throw new SearchException("Unable to add mediapackage " + mediaPackage + " using the remote search services");
     } else {
       closeConnection(response);
@@ -66,9 +67,10 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
     logger.info("Successfully added {} to the search service", mediaPackage);
     return;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchService#clear()
    */
   @Override
@@ -77,7 +79,7 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
     try {
       HttpPost post = new HttpPost("/search/rest/clear");
       response = getResponse(post, HttpStatus.SC_NO_CONTENT);
-      if(response == null)
+      if (response == null)
         throw new SearchException("Unable to clear remote search index");
       StatusLine status = response.getStatusLine();
       if (status.getStatusCode() == HttpStatus.SC_NO_CONTENT) {
@@ -92,6 +94,7 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchService#delete(java.lang.String)
    */
   @Override
@@ -101,36 +104,38 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
     HttpResponse response = null;
     try {
       response = getResponse(del, HttpStatus.SC_NO_CONTENT);
-      if(response == null) {
+      if (response == null) {
         throw new SearchException("Unable to remove " + mediaPackageId + " from a remote search index");
       }
       int status = response.getStatusLine().getStatusCode();
       if (status == HttpStatus.SC_NO_CONTENT) {
         logger.info("Successfully deleted {} from the remote search index", mediaPackageId);
       } else {
-        throw new SearchException("Unable to remove " + mediaPackageId + " from a remote search index, http status=" + status);
+        throw new SearchException("Unable to remove " + mediaPackageId + " from a remote search index, http status="
+                + status);
       }
     } finally {
       closeConnection(response);
     }
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchService#getByQuery(org.opencastproject.search.api.SearchQuery)
    */
   @Override
   public SearchResult getByQuery(SearchQuery q) throws SearchException {
     StringBuilder url = new StringBuilder();
     List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
-    if(q.getText() != null) {
+    if (q.getText() != null) {
       queryStringParams.add(new BasicNameValuePair("q", q.getText()));
     }
     queryStringParams.add(new BasicNameValuePair("limit", Integer.toString(q.getLimit())));
     queryStringParams.add(new BasicNameValuePair("offset", Integer.toString(q.getOffset())));
-    if( ! q.isIncludeEpisodes() && q.isIncludeSeries()) {
+    if (!q.isIncludeEpisodes() && q.isIncludeSeries()) {
       url.append("/search/rest/series?");
-    } else if(q.isIncludeEpisodes() && ! q.isIncludeSeries()) {
+    } else if (q.isIncludeEpisodes() && !q.isIncludeSeries()) {
       url.append("/search/rest/episode?");
     } else {
       url.append("/search/rest/?");
@@ -140,19 +145,20 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
     HttpResponse response = null;
     try {
       response = getResponse(get);
-      if(response == null) {
-        throw new SearchException("Unable to perform getByQuery from remote search index");
+      if (response != null) {
+        return SearchResultImpl.valueOf(response.getEntity().getContent());
       }
-      return SearchResultImpl.valueOf(response.getEntity().getContent());        
     } catch (Exception e) {
       throw new SearchException("Unable to parse results of a getByQuery request from remote search index: ", e);
     } finally {
       closeConnection(response);
     }
+    throw new SearchException("Unable to perform getByQuery from remote search index");
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.search.api.SearchService#getByQuery(java.lang.String, int, int)
    */
   @Override
@@ -165,20 +171,20 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
     StringBuilder url = new StringBuilder();
     url.append("/search/rest/lucene?");
     url.append(URLEncodedUtils.format(queryStringParams, "UTF-8"));
-    
+
     HttpGet get = new HttpGet(url.toString());
     logger.debug("Sending remote query '{}'", get.getRequestLine().toString());
     HttpResponse response = null;
     try {
       response = getResponse(get);
-      if(response == null) {
-        throw new SearchException("Unable to perform getByQuery from remote search index");
+      if (response != null) {
+        return SearchResultImpl.valueOf(response.getEntity().getContent());
       }
-      return SearchResultImpl.valueOf(response.getEntity().getContent());        
     } catch (Exception e) {
       throw new SearchException("Unable to parse getByQuery response from remote search index", e);
     } finally {
       closeConnection(response);
     }
+    throw new SearchException("Unable to perform getByQuery from remote search index");
   }
 }

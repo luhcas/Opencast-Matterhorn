@@ -93,10 +93,7 @@ public class DistributionServiceRemoteImpl extends RemoteBase implements Distrib
       UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
       post.setEntity(entity);
       response = getResponse(post);
-      if (response == null) {
-        throw new DistributionException("Unable to distribute mediapackage " + mediaPackage
-                + " using a remote distribution service proxy.");
-      } else {
+      if (response != null) {
         in = response.getEntity().getContent();
         MediaPackage result = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(in);
         logger.info("distributed {} from {}", mediaPackage, distributionChannel);
@@ -109,6 +106,8 @@ public class DistributionServiceRemoteImpl extends RemoteBase implements Distrib
       IOUtils.closeQuietly(in);
       closeConnection(response);
     }
+    throw new DistributionException("Unable to distribute mediapackage " + mediaPackage
+            + " using a remote distribution service proxy.");
   }
 
   /**
@@ -138,14 +137,14 @@ public class DistributionServiceRemoteImpl extends RemoteBase implements Distrib
     post.setEntity(entity);
     try {
       response = getResponse(post, HttpStatus.SC_NO_CONTENT);
-      if (response == null) {
-        throw new DistributionException("Unable to retract mediapackage " + mediaPackage
-                + " using a remote distribution service proxy");
-      } else {
+      if (response != null) {
         logger.info("retracted {} from {}", mediaPackage, distributionChannel);
+        return;
       }
     } finally {
       closeConnection(response);
     }
+    throw new DistributionException("Unable to retract mediapackage " + mediaPackage
+            + " using a remote distribution service proxy");
   }
 }
