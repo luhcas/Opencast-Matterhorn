@@ -38,18 +38,30 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * An http client that executes secure (though not necessarily encrypted) http requests.
  */
 public class TrustedHttpClientImpl implements TrustedHttpClient {
+  /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(TrustedHttpClientImpl.class);
   
+  /** The configuration property specifying the digest authentication user */
   public static final String DIGEST_AUTH_USER_KEY = "org.opencastproject.security.digest.user";
+  
+  /** The configuration property specifying the digest authentication password */
   public static final String DIGEST_AUTH_PASS_KEY = "org.opencastproject.security.digest.pass";
 
+  /** The configured username to send as part of the digest authenticated request */
   protected String user = null;
+
+  /** The configured password to send as part of the digest authenticated request */
   protected String pass = null;
+
+  /** The map of open responses to their http clients, which need to be closed after we are finished with the response */
+  protected Map<HttpResponse, HttpClient> responseMap = new ConcurrentHashMap<HttpResponse, HttpClient>();
   
   public void activate(ComponentContext cc) {
     logger.debug("activate");
@@ -86,9 +98,18 @@ public class TrustedHttpClientImpl implements TrustedHttpClient {
       httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
 
       // Run the request (the http client handles the multiple back-and-forth requests)
+      HttpResponse response = null;
       try {
-        return httpClient.execute(httpUriRequest);
+        response = httpClient.execute(httpUriRequest);
+        responseMap.put(response, httpClient);
+        return response;
       } catch (IOException e) {
+        // if we have a response, remove it from the map
+        if(response != null) {
+          responseMap.remove(response);
+        }
+        // close the http connection(s)
+        httpClient.getConnectionManager().shutdown();
         throw new TrustedHttpClientException(e);
       }
     }
@@ -101,7 +122,7 @@ public class TrustedHttpClientImpl implements TrustedHttpClient {
       // Set the user/pass
       UsernamePasswordCredentials creds = new UsernamePasswordCredentials(user, pass);
 
-      // Set up the digest authentication with the reqired values
+      // Set up the digest authentication with the required values
       DigestScheme digestAuth = new DigestScheme();
       digestAuth.overrideParamter("realm", realmAndNonce[0]);
       digestAuth.overrideParamter("nonce", realmAndNonce[1]);        
@@ -110,15 +131,41 @@ public class TrustedHttpClientImpl implements TrustedHttpClient {
       try {
         httpUriRequest.addHeader(digestAuth.authenticate(creds, httpUriRequest));
       } catch (Exception e) {
+        // close the http connection(s)
+        httpClient.getConnectionManager().shutdown();
         throw new TrustedHttpClientException(e);
       }
     }
+    HttpResponse response = null;
     try {
-      return httpClient.execute(httpUriRequest);
+      response = httpClient.execute(httpUriRequest);
+      responseMap.put(response, httpClient);
+      return response;
     } catch (Exception e) {
+      // if we have a response, remove it from the map
+      if(response != null) {
+        responseMap.remove(response);
+      }
+      // close the http connection(s)
+      httpClient.getConnectionManager().shutdown();
       throw new TrustedHttpClientException(e);
     }
-
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.security.api.TrustedHttpClient#close(org.apache.http.HttpResponse)
+   */
+  @Override
+  public void close(HttpResponse response) {
+    if(response == null) {
+      logger.debug("Can not close a null response");
+    } else {
+      HttpClient httpClient = responseMap.get(response);
+      if(httpClient != null) {
+        httpClient.getConnectionManager().shutdown();
+      }
+    }
   }
   
   /**

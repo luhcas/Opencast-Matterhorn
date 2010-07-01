@@ -15,6 +15,7 @@
  */
 package org.opencastproject.remote.api;
 
+import org.opencastproject.remote.api.Receipt.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.UrlSupport;
 
@@ -25,6 +26,8 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -104,22 +107,225 @@ public class RemoteBase {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(serviceType);
     Map<String, String> hostErrors = new HashMap<String, String>();
     for (String remoteHost : remoteHosts) {
+      HttpResponse response = null;
       try {
         URI uri = new URI(UrlSupport.concat(remoteHost, httpRequest.getURI().toString()));
         httpRequest.setURI(uri);
-        HttpResponse response = client.execute(httpRequest);
+        response = client.execute(httpRequest);
         StatusLine status = response.getStatusLine();
         if (Arrays.asList(expectedHttpStatus).contains(status.getStatusCode())) {
           return response;
         } else {
           hostErrors.put(remoteHost, status.toString());
+          closeConnection(response);
         }
       } catch (Exception e) {
         hostErrors.put(remoteHost, e.getMessage());
+        closeConnection(response);
       }
     }
     logger.warn(hostErrors.toString());
     return null;
+  }
+
+  /**
+   * Closes any http connections kept open by this http response.
+   */
+  protected void closeConnection(HttpResponse response) {
+    client.close(response);
+  }
+  
+  /**
+   * Polls for receipts until they return a status of {@link Status#FINISHED} or {@link Status#FAILED}
+   * 
+   * @param r
+   *          The receipt id
+   * @return The receipt
+   */
+  protected Receipt poll(String id) {
+    Receipt r = getReceipt(id);
+    while (r.getStatus() != Status.FAILED && r.getStatus() != Status.FINISHED) {
+      try {
+        Thread.sleep(10000);
+      } catch (InterruptedException e) {
+        logger.warn("polling interrupted");
+      }
+      r = getReceipt(id);
+    }
+    return r;
+  }
+  
+  /**
+   * Gets the receipt with this identifier, or null if it does not exist.
+   * 
+   * @param id The receipt identifier
+   * @return the receipt, or null if no receipt with this identifier exists
+   */
+  protected Receipt getReceipt(String id) {
+    return remoteServiceManager.getReceipt(id);
+  }
+
+  /**
+   * Counts the number of jobs in a given status across the cluster
+   * 
+   * @param status the job status
+   * @return the number of jobs currently in this status
+   */
+  protected long countJobs(Status status) {
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
+    return remoteServiceManager.count(serviceType, status);
+  }
+
+  /**
+   * Counts the number of jobs in a given status on a single host
+   * 
+   * @param status the job status
+   * @param host the host responsible for the job
+   * @return the number of jobs
+   */
+  protected long countJobs(Status status, String host) {
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
+    if (host == null)
+      throw new IllegalArgumentException("host must not be null");
+    return remoteServiceManager.count(serviceType, status, host);
+  }
+
+  
+  /**
+   * A stream wrapper that closes the http response when the stream is closed. If a remote service proxy returns an
+   * inputstream, this implementation should be used to ensure that the http connection is closed properly.
+   */
+  public class HttpClientClosingInputStream extends InputStream {
+    /** The input stream delivering the actual data */
+    InputStream delegateStream = null;
+
+    /** The http response to close when the stream is closed */
+    HttpResponse httpResponse = null;
+
+    /**
+     * Constructs an HttpClientClosingInputStream from a source stream and an http response.
+     * 
+     * @throws IOException
+     * @throws IllegalStateException
+     */
+    public HttpClientClosingInputStream(HttpResponse resp) throws IllegalStateException, IOException {
+      this.delegateStream = resp.getEntity().getContent();
+      this.httpResponse = resp;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.io.InputStream#read()
+     */
+    @Override
+    public int read() throws IOException {
+      return delegateStream.read();
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see java.io.InputStream#available()
+     */
+    @Override
+    public int available() throws IOException {
+      return delegateStream.available();
+    }
+
+    /**
+     * @throws IOException
+     * @see java.io.InputStream#close()
+     */
+    public void close() throws IOException {
+      delegateStream.close();
+      closeConnection(httpResponse);
+    }
+
+    /**
+     * @param readlimit
+     * @see java.io.InputStream#mark(int)
+     */
+    public void mark(int readlimit) {
+      delegateStream.mark(readlimit);
+    }
+
+    /**
+     * @return whether this stream supports marking
+     * @see java.io.InputStream#markSupported()
+     */
+    public boolean markSupported() {
+      return delegateStream.markSupported();
+    }
+
+    /**
+     * @param b
+     *          the buffer into which the data is read.
+     * @param off
+     *          the start offset in array <code>b</code> at which the data is written.
+     * @param len
+     *          the maximum number of bytes to read.
+     * @return the total number of bytes read into the buffer, or <code>-1</code> if there is no more data because the
+     *         end of the stream has been reached.
+     * @exception IOException
+     *              If the first byte cannot be read for any reason other than end of file, or if the input stream has
+     *              been closed, or if some other I/O error occurs.
+     * @exception NullPointerException
+     *              If <code>b</code> is <code>null</code>.
+     * @exception IndexOutOfBoundsException
+     *              If <code>off</code> is negative, <code>len</code> is negative, or <code>len</code> is greater than
+     *              <code>b.length - off</code>
+     * @see java.io.InputStream#read(byte[], int, int)
+     */
+    public int read(byte[] b, int off, int len) throws IOException {
+      return delegateStream.read(b, off, len);
+    }
+
+    /**
+     * @param b
+     *          the buffer into which the data is read.
+     * @return the total number of bytes read into the buffer, or <code>-1</code> is there is no more data because the
+     *         end of the stream has been reached.
+     * @exception IOException
+     *              If the first byte cannot be read for any reason other than the end of the file, if the input stream
+     *              has been closed, or if some other I/O error occurs.
+     * @exception NullPointerException
+     *              if <code>b</code> is <code>null</code>.
+     * @see java.io.InputStream#read(byte[])
+     */
+    public int read(byte[] b) throws IOException {
+      return delegateStream.read(b);
+    }
+
+    /**
+     * @throws IOException
+     * @see java.io.InputStream#reset()
+     */
+    public void reset() throws IOException {
+      delegateStream.reset();
+    }
+
+    /**
+     * @param n
+     *          the number of bytes to be skipped.
+     * @return the actual number of bytes skipped.
+     * @exception IOException
+     *              if the stream does not support seek, or if some other I/O error occurs.
+     * @see java.io.InputStream#skip(long)
+     */
+    public long skip(long n) throws IOException {
+      return delegateStream.skip(n);
+    }
+
+    /**
+     * @return
+     * @see java.lang.Object#toString()
+     */
+    public String toString() {
+      return getClass().getName() + " : " + delegateStream.toString();
+    }
   }
 
 }

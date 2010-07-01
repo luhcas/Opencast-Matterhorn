@@ -19,17 +19,11 @@ import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.RemoteServiceManager;
-import org.opencastproject.remote.api.Receipt.Status;
-import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.remote.api.RemoteBase;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -38,31 +32,24 @@ import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Proxies a remote media inspection service for use as a JVM-local service.
  */
-public class MediaInspectionServiceRemoteImpl implements MediaInspectionService {
+public class MediaInspectionServiceRemoteImpl extends RemoteBase implements MediaInspectionService {
+  /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceRemoteImpl.class);
 
-  protected ResponseHandler<Receipt> receiptResponseHandler = new ReceiptResponseHandler();
-  protected RemoteServiceManager remoteServiceManager;
-  protected TrustedHttpClient trustedHttpClient;
-
-  public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
-    this.trustedHttpClient = trustedHttpClient;
+  /**
+   * Constructs a new remote media inspection service proxy
+   */
+  public MediaInspectionServiceRemoteImpl() {
+    super(JOB_TYPE);
   }
-
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
-    this.remoteServiceManager = remoteServiceManager;
-  }
-
+  
   /**
    * {@inheritDoc}
    * 
@@ -70,39 +57,27 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
    */
   @Override
   public Receipt inspect(URI uri, boolean block) {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
-    Map<String, String> hostErrors = new HashMap<String, String>();
     List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
     queryStringParams.add(new BasicNameValuePair("uri", uri.toString()));
-
-    for (String remoteHost : remoteHosts) {
-      String url = remoteHost + "/inspection/rest/inspect?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
-      logger.info("Inspecting a Track(" + uri + ") on a remote server: " + remoteHost);
+    String url = "/inspection/rest/inspect?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
+    logger.info("Inspecting media file at {} using a remote media inspection service", uri);
+    HttpResponse response = null;
+    try {
       HttpGet get = new HttpGet(url);
-      try {
-        HttpResponse response = trustedHttpClient.execute(get);
-        StatusLine statusLine = response.getStatusLine();
-        if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-          hostErrors.put(remoteHost, response.getStatusLine().toString());
-          continue;
-        }
-        Receipt receipt = receiptResponseHandler.handleResponse(response);
-        if (receipt == null) {
-          hostErrors.put(remoteHost, "Unable to parse receipt from response");
-          continue;
-        }
-        if (block) {
-          receipt = poll(receipt.getId());
-        }
-        return receipt;
-      } catch (Exception e) {
-        hostErrors.put(remoteHost, e.getMessage());
-        continue;
+      response = getResponse(get);
+      if(response == null) {
+        throw new RuntimeException("Unable to inspect " + uri + " using a remote inspection service");
       }
+      Receipt receipt = remoteServiceManager.parseReceipt(response.getEntity().getContent());
+      if (block) {
+        receipt = poll(receipt.getId());
+      }
+      return receipt;
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to inspect " + uri + " using a remote inspection service");
+    } finally {
+      closeConnection(response);
     }
-    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
-            hostErrors);
-    throw new RuntimeException("Unable to inspect " + uri + " on any of " + remoteHosts.size() + " remote services");
   }
 
   /**
@@ -113,8 +88,7 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
    */
   @Override
   public Receipt enrich(MediaPackageElement original, boolean override, boolean block) {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
-    Map<String, String> hostErrors = new HashMap<String, String>();
+    String url = "/inspection/rest/enrich";
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     try {
       params.add(new BasicNameValuePair("mediaPackageElement", ((AbstractMediaPackageElement) original).getAsXml()));
@@ -122,56 +96,26 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
       throw new RuntimeException(e);
     }
     params.add(new BasicNameValuePair("override", new Boolean(override).toString()));
-    for (String remoteHost : remoteHosts) {
-      logger.info("Enriching a Track(" + original.getIdentifier() + ") on a remote server: " + remoteHost);
-      String url = remoteHost + "/inspection/rest/enrich";
-      try {
-        HttpPost post = new HttpPost(url);
-        HttpEntity entity = new UrlEncodedFormEntity(params);
-        post.setEntity(entity);
-        HttpResponse response = trustedHttpClient.execute(post);
-        StatusLine statusLine = response.getStatusLine();
-        if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-          hostErrors.put(remoteHost, response.getStatusLine().toString());
-          continue;
-        }
-        Receipt receipt = receiptResponseHandler.handleResponse(response);
-        if (receipt == null) {
-          hostErrors.put(remoteHost, "Unable to parse response");
-          continue;
-        }
-        if (block) {
-          receipt = poll(receipt.getId());
-        }
-        return receipt;
-      } catch (Exception e) {
-        hostErrors.put(remoteHost, e.getMessage());
-        continue;
+    logger.info("Enriching {} using a remote media inspection service", original);
+    HttpResponse response = null;
+    try {
+      HttpPost post = new HttpPost(url);
+      HttpEntity entity = new UrlEncodedFormEntity(params);
+      post.setEntity(entity);
+      response = getResponse(post);
+      if(response == null) {
+        throw new RuntimeException("Unable to enrich " + original + " using a remote inspection service");
       }
-    }
-    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
-            hostErrors);
-    throw new RuntimeException("Unable to enrich " + original + " on any of " + remoteHosts.size() + " remote services");
-  }
-
-  /**
-   * Polls for receipts until they return a status of {@link Status#FINISHED} or {@link Status#FAILED}
-   * 
-   * @param r
-   *          The receipt id
-   * @return The receipt
-   */
-  private Receipt poll(String id) {
-    Receipt r = getReceipt(id);
-    while (r.getStatus() != Status.FAILED && r.getStatus() != Status.FINISHED) {
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        logger.warn("polling interrupted");
+      Receipt receipt = remoteServiceManager.parseReceipt(response.getEntity().getContent());
+      if (block) {
+        receipt = poll(receipt.getId());
       }
-      r = getReceipt(id);
+      return receipt;
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to enrich " + original + " using a remote inspection service", e);
+    } finally {
+      closeConnection(response);
     }
-    return r;
   }
 
   /**
@@ -181,43 +125,7 @@ public class MediaInspectionServiceRemoteImpl implements MediaInspectionService 
    */
   @Override
   public Receipt getReceipt(String id) {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
-    Map<String, String> hostErrors = new HashMap<String, String>();
-    for (String remoteHost : remoteHosts) {
-      logger.debug("Returning a Receipt(" + id + ") from a remote server: " + remoteHost);
-      String url = remoteHost + "/inspection/rest/receipt/" + id + ".xml";
-      HttpGet get = new HttpGet(url);
-      try {
-        HttpResponse response = trustedHttpClient.execute(get);
-        StatusLine statusLine = response.getStatusLine();
-        if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
-          hostErrors.put(remoteHost, response.getStatusLine().toString());
-          continue;
-        }
-        Receipt receipt = receiptResponseHandler.handleResponse(response);
-        if (receipt == null) {
-          hostErrors.put(remoteHost, "Unable to parse receipt");
-          continue;
-        }
-        return receipt;
-      } catch (Exception e) {
-        hostErrors.put(remoteHost, e.getMessage());
-      }
-    }
-    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
-            hostErrors);
-    return null;
-  }
-
-  class ReceiptResponseHandler implements ResponseHandler<Receipt> {
-    public Receipt handleResponse(final HttpResponse response) throws HttpResponseException, IOException {
-      HttpEntity entity = response.getEntity();
-      try {
-        return entity == null ? null : remoteServiceManager.parseReceipt(entity.getContent());
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    }
+    return super.remoteServiceManager.getReceipt(id);
   }
 
 }

@@ -16,18 +16,18 @@
 package org.opencastproject.search.remote;
 
 import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.remote.api.RemoteBase;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultImpl;
 import org.opencastproject.search.api.SearchService;
-import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.util.UrlSupport;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -37,25 +37,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A proxy to a remote search service.
  */
-public class SearchServiceRemoteImpl implements SearchService {
+public class SearchServiceRemoteImpl extends RemoteBase implements SearchService {
   private static final Logger logger = LoggerFactory.getLogger(SearchServiceRemoteImpl.class);
   
-  protected TrustedHttpClient trustedHttpClient;
-
-  public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
-    this.trustedHttpClient = trustedHttpClient;
-  }
-  
-  protected RemoteServiceManager remoteServiceManager;
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
-    this.remoteServiceManager = remoteServiceManager;
+  public SearchServiceRemoteImpl() {
+    super(JOB_TYPE);
   }
 
   /**
@@ -64,32 +55,16 @@ public class SearchServiceRemoteImpl implements SearchService {
    */
   @Override
   public void add(MediaPackage mediaPackage) throws SearchException {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
-    Map<String, String> hostErrors = new HashMap<String, String>();
-    for(String remoteHost : remoteHosts) {
-      try {
-        HttpPost post = new HttpPost(remoteHost + "/search/rest/add");
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
-        params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
-        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
-        post.setEntity(entity);
-        HttpResponse response = trustedHttpClient.execute(post);
-        int status = response.getStatusLine().getStatusCode();
-        if (status == HttpStatus.SC_NO_CONTENT) {
-          logger.debug("Successfully added mediapackage {} to search service at {}", mediaPackage, remoteHost);
-          return;
-        } else {
-          hostErrors.put(remoteHost, response.getStatusLine().toString());
-          continue;
-        }
-      } catch (Exception e) {
-        hostErrors.put(remoteHost, e.getMessage());
-        continue;
-      }
+    String urlSuffix = UrlSupport.concat(new String[] {"/search", "rest", "add"});
+    HttpPost post = new HttpPost(urlSuffix);
+    HttpResponse response = getResponse(post, HttpStatus.SC_NO_CONTENT);
+    if(response == null) {
+      throw new SearchException("Unable to add mediapackage " + mediaPackage + " using the remote search services");
+    } else {
+      closeConnection(response);
     }
-    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
-            hostErrors);
-    throw new SearchException("Unable to add mediapackage " + mediaPackage + " to any of " + remoteHosts.size() + " remote search services");
+    logger.info("Successfully added {} to the search service", mediaPackage);
+    return;
   }
   
   /**
@@ -98,28 +73,21 @@ public class SearchServiceRemoteImpl implements SearchService {
    */
   @Override
   public void clear() throws SearchException {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
-    Map<String, String> hostErrors = new HashMap<String, String>();
-    for(String remoteHost : remoteHosts) {
-      try {
-        HttpPost post = new HttpPost(remoteHost + "/search/rest/clear");
-        HttpResponse response = trustedHttpClient.execute(post);
-        int status = response.getStatusLine().getStatusCode();
-        if (status == HttpStatus.SC_NO_CONTENT) {
-          logger.info("Successfully cleared search index at {}", remoteHost);
-          return;
-        } else {
-          hostErrors.put(remoteHost, response.getStatusLine().toString());
-          continue;
-        }
-      } catch (Exception e) {
-        hostErrors.put(remoteHost, e.getMessage());
-        continue;
+    HttpResponse response = null;
+    try {
+      HttpPost post = new HttpPost("/search/rest/clear");
+      response = getResponse(post, HttpStatus.SC_NO_CONTENT);
+      if(response == null)
+        throw new SearchException("Unable to clear remote search index");
+      StatusLine status = response.getStatusLine();
+      if (status.getStatusCode() == HttpStatus.SC_NO_CONTENT) {
+        logger.info("Successfully cleared remote search index");
+      } else {
+        throw new SearchException("Unable to clear remote search index, http status = " + status);
       }
+    } finally {
+      closeConnection(response);
     }
-    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
-            hostErrors);
-    throw new SearchException("Unable to clear search index at any of " + remoteHosts.size() + " remote search services");
   }
 
   /**
@@ -128,29 +96,23 @@ public class SearchServiceRemoteImpl implements SearchService {
    */
   @Override
   public void delete(String mediaPackageId) throws SearchException {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
-    Map<String, String> hostErrors = new HashMap<String, String>();
-    for(String remoteHost : remoteHosts) {
-      try {
-        String url = remoteHost + "/search/rest/" + mediaPackageId;
-        HttpDelete del = new HttpDelete(url);
-        HttpResponse response = trustedHttpClient.execute(del);
-        int status = response.getStatusLine().getStatusCode();
-        if (status == HttpStatus.SC_NO_CONTENT) {
-          logger.debug("Successfully deleted {} from the search index at {}", mediaPackageId, remoteHost);
-          return;
-        } else {
-          hostErrors.put(remoteHost, response.getStatusLine().toString());
-          continue;
-        }
-      } catch (Exception e) {
-        hostErrors.put(remoteHost, e.getMessage());
-        continue;
+    String urlprefix = "/search/rest/" + mediaPackageId;
+    HttpDelete del = new HttpDelete(urlprefix);
+    HttpResponse response = null;
+    try {
+      response = getResponse(del, HttpStatus.SC_NO_CONTENT);
+      if(response == null) {
+        throw new SearchException("Unable to remove " + mediaPackageId + " from a remote search index");
       }
+      int status = response.getStatusLine().getStatusCode();
+      if (status == HttpStatus.SC_NO_CONTENT) {
+        logger.info("Successfully deleted {} from the remote search index", mediaPackageId);
+      } else {
+        throw new SearchException("Unable to remove " + mediaPackageId + " from a remote search index, http status=" + status);
+      }
+    } finally {
+      closeConnection(response);
     }
-    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
-            hostErrors);
-    throw new SearchException("Unable to remove " + mediaPackageId + " from search index at any of " + remoteHosts.size() + " remote search services");
   }
   
   /**
@@ -159,41 +121,34 @@ public class SearchServiceRemoteImpl implements SearchService {
    */
   @Override
   public SearchResult getByQuery(SearchQuery q) throws SearchException {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
-    Map<String, String> hostErrors = new HashMap<String, String>();
-    for(String remoteHost : remoteHosts) {
-      StringBuilder url = new StringBuilder(remoteHost);
-      List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
-      if(q.getText() != null) {
-        queryStringParams.add(new BasicNameValuePair("q", q.getText()));
-      }
-      queryStringParams.add(new BasicNameValuePair("limit", Integer.toString(q.getLimit())));
-      queryStringParams.add(new BasicNameValuePair("offset", Integer.toString(q.getOffset())));
-      if( ! q.isIncludeEpisodes() && q.isIncludeSeries()) {
-        url.append("/search/rest/series?");
-      } else if(q.isIncludeEpisodes() && ! q.isIncludeSeries()) {
-        url.append("/search/rest/episode?");
-      } else {
-        url.append("/search/rest/?");
-      }
-      url.append(URLEncodedUtils.format(queryStringParams, "UTF-8"));
-      HttpGet get = new HttpGet(url.toString());
-      try {
-        HttpResponse response = trustedHttpClient.execute(get);
-        int status = response.getStatusLine().getStatusCode();
-        if (status != HttpStatus.SC_OK) {
-          hostErrors.put(remoteHost, response.getStatusLine().toString());
-          continue;
-        }
-        return SearchResultImpl.valueOf(response.getEntity().getContent());        
-      } catch (Exception e) {
-        hostErrors.put(remoteHost, e.getMessage());
-        continue;
-      }
+    StringBuilder url = new StringBuilder();
+    List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
+    if(q.getText() != null) {
+      queryStringParams.add(new BasicNameValuePair("q", q.getText()));
     }
-    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
-            hostErrors);
-    throw new SearchException("Unable to perform getByQuery from search index at any of " + remoteHosts.size() + " remote search services");
+    queryStringParams.add(new BasicNameValuePair("limit", Integer.toString(q.getLimit())));
+    queryStringParams.add(new BasicNameValuePair("offset", Integer.toString(q.getOffset())));
+    if( ! q.isIncludeEpisodes() && q.isIncludeSeries()) {
+      url.append("/search/rest/series?");
+    } else if(q.isIncludeEpisodes() && ! q.isIncludeSeries()) {
+      url.append("/search/rest/episode?");
+    } else {
+      url.append("/search/rest/?");
+    }
+    url.append(URLEncodedUtils.format(queryStringParams, "UTF-8"));
+    HttpGet get = new HttpGet(url.toString());
+    HttpResponse response = null;
+    try {
+      response = getResponse(get);
+      if(response == null) {
+        throw new SearchException("Unable to perform getByQuery from remote search index");
+      }
+      return SearchResultImpl.valueOf(response.getEntity().getContent());        
+    } catch (Exception e) {
+      throw new SearchException("Unable to parse results of a getByQuery request from remote search index: ", e);
+    } finally {
+      closeConnection(response);
+    }
   }
   
   /**
@@ -202,35 +157,28 @@ public class SearchServiceRemoteImpl implements SearchService {
    */
   @Override
   public SearchResult getByQuery(String query, int limit, int offset) throws SearchException {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
-    Map<String, String> hostErrors = new HashMap<String, String>();
-    for(String remoteHost : remoteHosts) {
-      List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
-      queryStringParams.add(new BasicNameValuePair("q", query));
-      queryStringParams.add(new BasicNameValuePair("limit", Integer.toString(limit)));
-      queryStringParams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
+    List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
+    queryStringParams.add(new BasicNameValuePair("q", query));
+    queryStringParams.add(new BasicNameValuePair("limit", Integer.toString(limit)));
+    queryStringParams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
 
-      StringBuilder url = new StringBuilder(remoteHost);
-      url.append("/search/rest/lucene?");
-      url.append(URLEncodedUtils.format(queryStringParams, "UTF-8"));
-      
-      HttpGet get = new HttpGet(url.toString());
-      logger.debug("Sending remote query '{}'", get.getRequestLine().toString());
-      try {
-        HttpResponse response = trustedHttpClient.execute(get);
-        int status = response.getStatusLine().getStatusCode();
-        if (status != HttpStatus.SC_OK) {
-          hostErrors.put(remoteHost, response.getStatusLine().toString());
-          continue;
-        }
-        return SearchResultImpl.valueOf(response.getEntity().getContent());        
-      } catch (Exception e) {
-        hostErrors.put(remoteHost, e.getMessage());
-        continue;
+    StringBuilder url = new StringBuilder();
+    url.append("/search/rest/lucene?");
+    url.append(URLEncodedUtils.format(queryStringParams, "UTF-8"));
+    
+    HttpGet get = new HttpGet(url.toString());
+    logger.debug("Sending remote query '{}'", get.getRequestLine().toString());
+    HttpResponse response = null;
+    try {
+      response = getResponse(get);
+      if(response == null) {
+        throw new SearchException("Unable to perform getByQuery from remote search index");
       }
+      return SearchResultImpl.valueOf(response.getEntity().getContent());        
+    } catch (Exception e) {
+      throw new SearchException("Unable to parse getByQuery response from remote search index", e);
+    } finally {
+      closeConnection(response);
     }
-    logger.warn("The following errors were encountered while attempting a {} remote service call: {}", JOB_TYPE,
-            hostErrors);
-    throw new SearchException("Unable to perform getByQuery from search index at any of " + remoteHosts.size() + " remote search services");
   }
 }

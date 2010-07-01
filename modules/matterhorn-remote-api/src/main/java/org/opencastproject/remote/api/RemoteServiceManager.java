@@ -17,6 +17,7 @@ package org.opencastproject.remote.api;
 
 import org.opencastproject.remote.api.Receipt.Status;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -57,7 +58,7 @@ public interface RemoteServiceManager {
    * @param xml The xml string
    * @return The receipt
    */
-  Receipt parseReceipt(String xml);
+  Receipt parseReceipt(String xml) throws IOException;
   
   /**
    * Parses an xml stream representing a Receipt
@@ -65,7 +66,7 @@ public interface RemoteServiceManager {
    * @param in The xml input stream
    * @return The receipt
    */
-  Receipt parseReceipt(InputStream in);
+  Receipt parseReceipt(InputStream in) throws IOException;
   
   /**
    * Create and store a new receipt in {@link Status#QUEUED}

@@ -70,9 +70,13 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
       throw new RuntimeException();
     }
     try {
-      return new URI(EntityUtils.toString(response.getEntity(), "UTF-8"));
+      URI uri = new URI(EntityUtils.toString(response.getEntity(), "UTF-8"));
+      logger.info("Copied collection file {}/{} to {}", new Object[] {fromCollection, fromFileName, uri});
+      return uri;
     } catch (Exception e) {
       throw new RuntimeException();
+    } finally {
+      closeConnection(response);
     }
   }
   
@@ -92,9 +96,13 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
       throw new RuntimeException();
     }
     try {
-      return new URI(EntityUtils.toString(response.getEntity(), "UTF-8"));
+      URI uri = new URI(EntityUtils.toString(response.getEntity(), "UTF-8"));
+      logger.info("Moved collection file {}/{} to {}", new Object[] {fromCollection, fromFileName, uri});
+      return uri;
     } catch (Exception e) {
       throw new RuntimeException();
+    } finally {
+      closeConnection(response);
     }
   }
 
@@ -107,9 +115,16 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   public void delete(String mediaPackageID, String mediaPackageElementID) {
     String urlSuffix = UrlSupport.concat(new String[] { "/files", mediaPackageID, mediaPackageElementID });
     HttpPost post = new HttpPost(urlSuffix);
-    HttpResponse response = getResponse(post, HttpStatus.SC_NO_CONTENT);
-    if(response == null) {
-      throw new RuntimeException();
+    HttpResponse response = null;
+    try {
+      response = getResponse(post, HttpStatus.SC_NO_CONTENT);
+      if(response == null) {
+        throw new RuntimeException();
+      } else {
+        logger.info("deleted mediapackage element {}/{}", mediaPackageID, mediaPackageElementID);
+      }
+    } finally {
+      closeConnection(response);
     }
   }
 
@@ -122,15 +137,17 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   public InputStream get(String mediaPackageID, String mediaPackageElementID) throws NotFoundException {
     String urlSuffix = UrlSupport.concat(new String[] {"/files", mediaPackageID, mediaPackageElementID});
     HttpGet get = new HttpGet(urlSuffix);
-    HttpResponse response = getResponse(get);
-    if(response == null) {
-      throw new NotFoundException();
-    }
+    HttpResponse response = null;
     try {
-      return response.getEntity().getContent();
+      response = getResponse(get);
+      if(response == null) {
+        throw new NotFoundException();
+      }
+      return new HttpClientClosingInputStream(response);
     } catch (Exception e) {
       throw new RuntimeException();
     }
+    // Do not close this response.  It will be closed when the caller closes the input stream
   }
 
   /**
@@ -142,11 +159,12 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   public URI[] getCollectionContents(String collectionId) {
     String urlSuffix = UrlSupport.concat(new String[] {"/files", "list", collectionId + ".json"});
     HttpGet get = new HttpGet(urlSuffix);
-    HttpResponse response = getResponse(get);
-    if(response == null) {
-      throw new RuntimeException();
-    }
+    HttpResponse response = null;
     try {
+      response = getResponse(get);
+      if(response == null) {
+        throw new RuntimeException();
+      }
       String json = EntityUtils.toString(response.getEntity());
       JSONArray jsonArray = (JSONArray) JSONValue.parse(json);
       URI[] uris = new URI[jsonArray.size()];
@@ -156,8 +174,9 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
       return uris;
     } catch (Exception e) {
       throw new RuntimeException();
+    } finally {
+      closeConnection(response);
     }
-  
   }
 
   /**
@@ -183,15 +202,18 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   protected JSONObject getStorageReport() {
     String url = UrlSupport.concat(new String[] { "/files", "storage" });
     HttpGet get = new HttpGet(url);
-    HttpResponse response = getResponse(get);
-    if(response == null) {
-      throw new RuntimeException();
-    }
+    HttpResponse response = null;
     try {
+      response = getResponse(get);
+      if(response == null) {
+        throw new RuntimeException();
+      }
       String json = EntityUtils.toString(response.getEntity());
       return (JSONObject) JSONValue.parse(json);
     } catch (Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      closeConnection(response);
     }
   }
 
@@ -205,15 +227,17 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   public InputStream getFromCollection(String collectionId, String fileName) throws NotFoundException {
     String url = UrlSupport.concat(new String[] {"/files", "collection", collectionId, fileName });
     HttpGet get = new HttpGet(url);
-    HttpResponse response = getResponse(get, HttpStatus.SC_OK, HttpStatus.SC_NOT_FOUND);
-    if(response == null) throw new RuntimeException();
-    if(response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND)
-      throw new NotFoundException();
+    HttpResponse response = null;
     try {
-      return response.getEntity().getContent();
+      response = getResponse(get, HttpStatus.SC_OK, HttpStatus.SC_NOT_FOUND);
+      if(response == null) throw new RuntimeException();
+      if(response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND)
+        throw new NotFoundException();
+      return new HttpClientClosingInputStream(response);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new RuntimeException();
     }
+    // Do not close this response.  It will be closed when the caller closes the input stream
   }
 
   /**
@@ -236,12 +260,15 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   public URI getCollectionURI(String collectionID, String fileName) {
     String url = UrlSupport.concat(new String[] {"/files", "collectionuri", collectionID, fileName});
     HttpGet get = new HttpGet(url);
-    HttpResponse response = getResponse(get);
-    if(response == null) throw new RuntimeException();
+    HttpResponse response = null;
     try {
+      response = getResponse(get);
+      if(response == null) throw new RuntimeException();
       return new URI(EntityUtils.toString(response.getEntity()));
     } catch (Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      closeConnection(response);
     }
   }
 
@@ -267,14 +294,17 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
     if (fileName != null)
       url = UrlSupport.concat(url, fileName);
     HttpGet get = new HttpGet(url);
-    HttpResponse response = getResponse(get);
-    if(response == null) {
-      throw new RuntimeException();
-    }
+    HttpResponse response = null;
     try {
+      response = getResponse(get);
+      if(response == null) {
+        throw new RuntimeException();
+      }
       return new URI(EntityUtils.toString(response.getEntity()));
     } catch (Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      closeConnection(response);
     }
   }
 
@@ -307,12 +337,15 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
     ContentBody body = new InputStreamBody(in, filename);
     entity.addPart("file", body);
     post.setEntity(entity);
-    HttpResponse response = client.execute(post);
+    HttpResponse response = null;
     try {
+      response = client.execute(post);
       String content = EntityUtils.toString(response.getEntity());
       return new URI(content);
     } catch (Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      closeConnection(response);
     }
   }
 
@@ -335,12 +368,15 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
     ContentBody body = new InputStreamBody(in, fileName);
     entity.addPart("file", body);
     post.setEntity(entity);
-    HttpResponse response = client.execute(post);
+    HttpResponse response = null;
     try {
+      response = client.execute(post);
       String content = EntityUtils.toString(response.getEntity());
       return new URI(content);
     } catch (Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      closeConnection(response);
     }
   }
 
@@ -354,9 +390,14 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   public void deleteFromCollection(String collectionId, String fileName) {
     String url = UrlSupport.concat(new String[] {"/files", "collection", collectionId });
     HttpDelete del = new HttpDelete(url);
-    HttpResponse response = getResponse(del, HttpStatus.SC_NO_CONTENT);
-    if(response == null)
-      throw new RuntimeException("Error removing file");
+    HttpResponse response = null;
+    try {
+      response = getResponse(del, HttpStatus.SC_NO_CONTENT);
+      if(response == null)
+        throw new RuntimeException("Error removing file");
+    } finally {
+      closeConnection(response);
+    }
   }
 
   /**
@@ -369,11 +410,12 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   public String hashCollectionElement(String collectionId, String fileName) throws IOException {
     String url = UrlSupport.concat(new String[] {"/files", "collection", collectionId, fileName });
     HttpHead head = new HttpHead(url);
-    HttpResponse response = getResponse(head, HttpStatus.SC_OK, HttpStatus.SC_NOT_FOUND);
-    if(response == null) {
-      throw new RuntimeException();
-    }
+    HttpResponse response = null;
     try {
+      response = getResponse(head, HttpStatus.SC_OK, HttpStatus.SC_NOT_FOUND);
+      if(response == null) {
+        throw new RuntimeException();
+      }
       if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
         return null;
       } else {
@@ -384,6 +426,8 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      closeConnection(response);
     }
   }
 
@@ -397,11 +441,12 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   public String hashMediaPackageElement(String mediaPackageID, String mediaPackageElementID) throws IOException {
     String url = UrlSupport.concat(new String[] {"/files", mediaPackageID, mediaPackageElementID });
     HttpHead head = new HttpHead(url);
-    HttpResponse response = getResponse(head, HttpStatus.SC_OK, HttpStatus.SC_NOT_FOUND);
-    if(response == null) {
-      throw new RuntimeException();
-    }
+    HttpResponse response = null;
     try {
+      response = getResponse(head, HttpStatus.SC_OK, HttpStatus.SC_NOT_FOUND);
+      if(response == null) {
+        throw new RuntimeException();
+      }
       if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
         return null;
       } else {
@@ -412,6 +457,8 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
       }
     } catch (Exception e) {
       throw new RuntimeException(e);
+    } finally {
+      closeConnection(response);
     }
   }
 

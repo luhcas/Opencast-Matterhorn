@@ -20,8 +20,7 @@ import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageException;
-import org.opencastproject.remote.api.RemoteServiceManager;
-import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.remote.api.RemoteBase;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -34,32 +33,35 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A remote distribution service invoker.
  */
-public class DistributionServiceRemoteImpl implements DistributionService {
+public class DistributionServiceRemoteImpl extends RemoteBase implements DistributionService {
+  /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(DistributionServiceRemoteImpl.class);
+
+  /** The service type prefix */
   public static final String REMOTE_SERVICE_TYPE_PREFIX = "org.opencastproject.distribution.";
+
+  /** The property to look up and append to REMOTE_SERVICE_TYPE_PREFIX */
   public static final String REMOTE_SERVICE_CHANNEL = "distribution.channel";
+
+  /** The distribution channel identifier */
   protected String distributionChannel;
-  protected TrustedHttpClient trustedHttpClient;
-  protected RemoteServiceManager remoteServiceManager;
 
-  public void setTrustedHttpClient(TrustedHttpClient trustedHttpClient) {
-    this.trustedHttpClient = trustedHttpClient;
+  public DistributionServiceRemoteImpl() {
+    // the service type is not available at construction time. we need to wait for activation to set this value
+    super("waiting for activation");
   }
 
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
-    this.remoteServiceManager = remoteServiceManager;
-  }
-
+  /** activates the component */
   protected void activate(ComponentContext cc) {
     this.distributionChannel = (String) cc.getProperties().get(REMOTE_SERVICE_CHANNEL);
+    super.serviceType = REMOTE_SERVICE_TYPE_PREFIX + this.distributionChannel;
   }
 
   /**
@@ -76,8 +78,6 @@ public class DistributionServiceRemoteImpl implements DistributionService {
     } catch (MediaPackageException e) {
       throw new DistributionException("Unable to marshall mediapackage to xml: " + e.getMessage());
     }
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(REMOTE_SERVICE_TYPE_PREFIX + distributionChannel);
-    Map<String, String> hostErrors = new HashMap<String, String>();
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("mediapackage", xml));
     if (elementIds != null && elementIds.length > 0) {
@@ -85,34 +85,30 @@ public class DistributionServiceRemoteImpl implements DistributionService {
         params.add(new BasicNameValuePair("elementId", elementId));
       }
     }
-    for (String remoteHost : remoteHosts) {
-      String url = remoteHost + "/distribution/rest/" + distributionChannel;
-      HttpPost post = new HttpPost(url);
-      InputStream in = null;
-      try {
-        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
-        post.setEntity(entity);
-        try {
-          HttpResponse response = trustedHttpClient.execute(post);
-          if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-            hostErrors.put(remoteHost, response.getStatusLine().toString());
-            continue;
-          }
-          in = response.getEntity().getContent();
-          return MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(in);
-        } catch (Exception e) {
-          hostErrors.put(remoteHost, e.getMessage());
-        }
-      } catch (Exception e) {
-        continue;
-      } finally {
-        IOUtils.closeQuietly(in);
+    String url = "/distribution/rest/" + distributionChannel;
+    HttpPost post = new HttpPost(url);
+    InputStream in = null;
+    HttpResponse response = null;
+    try {
+      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+      post.setEntity(entity);
+      response = getResponse(post);
+      if (response == null) {
+        throw new DistributionException("Unable to distribute mediapackage " + mediaPackage
+                + " using a remote distribution service proxy.");
+      } else {
+        in = response.getEntity().getContent();
+        MediaPackage result = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(in);
+        logger.info("distributed {} from {}", mediaPackage, distributionChannel);
+        return result;
       }
+    } catch (Exception e) {
+      throw new DistributionException("Unable to distribute mediapackage " + mediaPackage
+              + " using a remote distribution service proxy.", e);
+    } finally {
+      IOUtils.closeQuietly(in);
+      closeConnection(response);
     }
-    logger.warn("The following errors were encountered while attempting a {} remote service call: {}",
-            REMOTE_SERVICE_TYPE_PREFIX + distributionChannel, hostErrors);
-    throw new DistributionException("Unable to distribute mediapackage " + mediaPackage + " to any of "
-            + remoteHosts.size() + " remote services.");
   }
 
   /**
@@ -130,27 +126,26 @@ public class DistributionServiceRemoteImpl implements DistributionService {
     }
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("mediapackage", xml));
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(REMOTE_SERVICE_TYPE_PREFIX + distributionChannel);
-    Map<String, String> hostErrors = new HashMap<String, String>();
-    for (String remoteHost : remoteHosts) {
-      String url = remoteHost + "/distribution/rest/retract/" + distributionChannel;
-      HttpPost post = new HttpPost(url);
-      try {
-        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
-        post.setEntity(entity);
-        HttpResponse response = trustedHttpClient.execute(post);
-        int httpStatusCode = response.getStatusLine().getStatusCode();
-        if (HttpStatus.SC_NO_CONTENT != httpStatusCode) {
-          hostErrors.put(remoteHost, response.getStatusLine().toString());
-          continue;
-        }
-      } catch (Exception e) {
-        hostErrors.put(remoteHost, e.getMessage());
-      }
+    String url = "/distribution/rest/retract/" + distributionChannel;
+    HttpPost post = new HttpPost(url);
+    HttpResponse response = null;
+    UrlEncodedFormEntity entity = null;
+    try {
+      entity = new UrlEncodedFormEntity(params);
+    } catch (UnsupportedEncodingException e) {
+      throw new DistributionException("Unable to encode mediapackage " + mediaPackage + " for http post", e);
     }
-    logger.warn("The following errors were encountered while attempting a {} remote service call: {}",
-            REMOTE_SERVICE_TYPE_PREFIX + distributionChannel, hostErrors);
-    throw new DistributionException("Unable to retract mediapackage " + mediaPackage + " using any of "
-            + remoteHosts.size() + " remote services");
+    post.setEntity(entity);
+    try {
+      response = getResponse(post, HttpStatus.SC_NO_CONTENT);
+      if (response == null) {
+        throw new DistributionException("Unable to retract mediapackage " + mediaPackage
+                + " using a remote distribution service proxy");
+      } else {
+        logger.info("retracted {} from {}", mediaPackage, distributionChannel);
+      }
+    } finally {
+      closeConnection(response);
+    }
   }
 }
