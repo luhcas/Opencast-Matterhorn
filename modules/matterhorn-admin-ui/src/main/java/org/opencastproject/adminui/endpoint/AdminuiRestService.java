@@ -112,25 +112,26 @@ public class AdminuiRestService {
   @Path("recordings/{state}")
   public RecordingDataViewListImpl getRecordings(@PathParam("state") String state, @QueryParam("pn") int pageNumber, @QueryParam("ps") int pageSize) {
     RecordingDataViewListImpl out = new RecordingDataViewListImpl();
-    if ((state.toUpperCase().equals("UPCOMING")) || (state.toUpperCase().equals("ALL"))) {
-      out.addAll(getUpcomingRecordings());
+    boolean allRecordings = state.toUpperCase().equals("ALL");
+    if ((state.toUpperCase().equals("UPCOMING")) || allRecordings) {
+      out.addAll(addRecordingStatusForAll("upcoming", getUpcomingRecordings()));
     }
-    if ((state.toUpperCase().equals("CAPTURING"))) {
-      out.addAll(getCapturingRecordings());
+    if ((state.toUpperCase().equals("CAPTURING")) || allRecordings) {
+      out.addAll(addRecordingStatusForAll("capturing", getCapturingRecordings()));
     }
-    if ((state.toUpperCase().equals("PROCESSING")) || (state.toUpperCase().equals("ALL"))) {
-      out.addAll(getRecordingsFromWorkflowService(WorkflowState.RUNNING));
+    if ((state.toUpperCase().equals("PROCESSING")) || allRecordings) {
+      out.addAll(addRecordingStatusForAll("processing", getRecordingsFromWorkflowService(WorkflowState.RUNNING)));
     }
-    if ((state.toUpperCase().equals("FINISHED")) || (state.toUpperCase().equals("ALL"))) {
-      out.addAll(getRecordingsFromWorkflowService(WorkflowState.SUCCEEDED));
+    if ((state.toUpperCase().equals("FINISHED")) || allRecordings) {
+      out.addAll(addRecordingStatusForAll("finished", getRecordingsFromWorkflowService(WorkflowState.SUCCEEDED)));
     }
-    if ((state.toUpperCase().equals("HOLD")) || (state.toUpperCase().equals("ALL"))) {
-      out.addAll(getRecordingsFromWorkflowService(WorkflowState.PAUSED));
+    if ((state.toUpperCase().equals("HOLD")) || allRecordings) {
+      out.addAll(addRecordingStatusForAll("hold", getRecordingsFromWorkflowService(WorkflowState.PAUSED)));
     }
-    if ((state.toUpperCase().equals("FAILED")) || (state.toUpperCase().equals("ALL"))) {
-      out.addAll(getRecordingsFromWorkflowService(WorkflowState.FAILED));
-      out.addAll(getRecordingsFromWorkflowService(WorkflowState.FAILING));
-      out.addAll(getFailedCaptureJobs());
+    if ((state.toUpperCase().equals("FAILED")) || allRecordings) {
+      out.addAll(addRecordingStatusForAll("failed", getRecordingsFromWorkflowService(WorkflowState.FAILED)));
+      out.addAll(addRecordingStatusForAll("failed", getRecordingsFromWorkflowService(WorkflowState.FAILING)));
+      out.addAll(addRecordingStatusForAll("failed", getFailedCaptureJobs()));
     }
     if (pageNumber < 0) {
       pageNumber = 0;
@@ -149,6 +150,23 @@ public class AdminuiRestService {
       }
     }
     return page;
+  }
+
+  /** Puts status in recordingStatus field of all items in list.
+   *
+   * @param status
+   * @param in
+   * @return
+   */
+  private RecordingDataViewList addRecordingStatusForAll(String status, RecordingDataViewList in) {
+    Iterator<RecordingDataView> i = in.getRecordings().iterator();
+    RecordingDataViewList out = new RecordingDataViewListImpl();
+    while (i.hasNext()) {
+      RecordingDataView item = i.next();
+      item.setRecordingStatus(status);
+      out.add(item);
+    }
+    return out;
   }
 
   /**

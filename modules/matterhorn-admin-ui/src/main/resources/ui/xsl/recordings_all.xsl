@@ -55,6 +55,9 @@
         <xsl:value-of select="captureAgent" />
       </td> -->
       <td class="processingStatus">
+        <span>
+          <xsl:attribute name="class">icon recording-<xsl:value-of select="recordingStatus" /></xsl:attribute>
+        </span>
         <xsl:value-of select="processingStatus" />
       </td>
     </tr>
