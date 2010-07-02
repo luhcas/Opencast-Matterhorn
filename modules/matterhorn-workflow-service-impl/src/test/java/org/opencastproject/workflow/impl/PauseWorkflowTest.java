@@ -56,8 +56,8 @@ public class PauseWorkflowTest {
   private MediaPackage mp = null;
   private WorkflowServiceImplDaoFileImpl dao = null;
   private Workspace workspace = null;
-  private SlowWorkflowOperationHandler firstHandler = null;
-  private SlowWorkflowOperationHandler secondHandler = null;
+  private SampleWorkflowOperationHandler firstHandler = null;
+  private SampleWorkflowOperationHandler secondHandler = null;
   
   @Before
   public void setup() throws Exception {
@@ -76,8 +76,8 @@ public class PauseWorkflowTest {
 
     // create operation handlers for our workflows
     final Set<HandlerRegistration> handlerRegistrations = new HashSet<HandlerRegistration>();
-    firstHandler = new SlowWorkflowOperationHandler(mp);
-    secondHandler = new SlowWorkflowOperationHandler(mp);
+    firstHandler = new SampleWorkflowOperationHandler(mp);
+    secondHandler = new SampleWorkflowOperationHandler(mp);
     handlerRegistrations.add(new HandlerRegistration("op1", firstHandler));
     handlerRegistrations.add(new HandlerRegistration("op2", secondHandler));
 
@@ -129,11 +129,11 @@ public class PauseWorkflowTest {
     Assert.assertEquals(WorkflowState.PAUSED, service.getWorkflowById(workflow.getId()).getState());
   }
 
-  class SlowWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
+  class SampleWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
     MediaPackage mp;
     boolean called = false;
 
-    SlowWorkflowOperationHandler(MediaPackage mp) {
+    SampleWorkflowOperationHandler(MediaPackage mp) {
       this.mp = mp;
     }
 
@@ -149,10 +149,7 @@ public class PauseWorkflowTest {
     @Override
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
       called = true;
-      try {
-        Thread.sleep(500);
-      } catch(InterruptedException e) {}
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, Action.CONTINUE);
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, Action.PAUSE);
     }
   }
 
