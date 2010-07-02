@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 /**
@@ -460,6 +461,23 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
       throw new RuntimeException(e);
     } finally {
       closeConnection(response);
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#getBaseUri()
+   */
+  @Override
+  public URI getBaseUri() {
+    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    if(remoteHosts.size() == 0) {
+      throw new IllegalStateException("No remote file repositories are available");
+    }
+    try {
+      return new URI(UrlSupport.concat(remoteHosts.get(0), "files"));
+    } catch(URISyntaxException e) {
+      throw new IllegalStateException("service URL is not valid: ", e);
     }
   }
 

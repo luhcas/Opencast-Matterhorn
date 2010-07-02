@@ -77,6 +77,9 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
   /** The Base URL for this server */
   String serverUrl = null;
 
+  /** The URL for the services provided by the working file repository */
+  URI serviceUrl = null;
+  
   /**
    * Activate the component
    */
@@ -86,6 +89,12 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
     serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     if (serverUrl == null)
       throw new IllegalStateException("Server URL must be set");
+    String serviceUrlString = UrlSupport.concat(serverUrl, "files");
+    try {
+      this.serviceUrl = new URI(serviceUrlString);
+    } catch (URISyntaxException e) {
+      throw new IllegalStateException("Service URL must be a valid URI, but is " + serviceUrlString);
+    }
     if (cc.getBundleContext().getProperty("org.opencastproject.file.repo.path") == null) {
       String storageDir = cc.getBundleContext().getProperty("org.opencastproject.storage.dir");
       if (storageDir == null)
@@ -652,6 +661,15 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
   @Override
   public String getUrlPrefix() {
     return serverUrl;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#getBaseUri()
+   */
+  @Override
+  public URI getBaseUri() {
+    return serviceUrl;
   }
 
 }

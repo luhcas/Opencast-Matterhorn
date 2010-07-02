@@ -508,8 +508,9 @@ public class WorkspaceImpl implements Workspace {
   }
 
   /**
-   * Transforms a uri as returned by the working file repsoitory into a workspace File. In addition, it creates the
-   * (sub-)directories as needed.
+   * Transforms a URI into a workspace File. If the file comes from the working file repository, the path in the
+   * workspace mirrors that of the repository. If the file comes from another source, directories are created for each
+   * segment of the URL. Sub-directories may be created as needed.
    * 
    * @param uri
    *          the uri
@@ -517,27 +518,27 @@ public class WorkspaceImpl implements Workspace {
    *          <code>true</code> to have subdirectories created
    * @return the local file representation
    */
-  private File getWorkspaceFile(URI uri, boolean createDirectories) {
-    String uriPath = PathSupport.trim(uri.toString());
-    String uriPrefix = WorkingFileRepository.URI_PREFIX;
-    int wfrPrefix = uri.toString().indexOf(uriPrefix) + uriPrefix.length() - 1;
-    String serverPath = FilenameUtils.getPath(uriPath);
-    if (wfrPrefix > 0) {
-      serverPath = serverPath.substring(wfrPrefix);
+  protected File getWorkspaceFile(URI uri, boolean createDirectories) {
+    String uriString = uri.toString();
+    String wfrPrefix = wfr.getBaseUri().toString();
+    String serverPath = FilenameUtils.getPath(uriString);
+    if (uriString.startsWith(wfrPrefix)) {
+      serverPath = serverPath.substring(wfrPrefix.length());
     } else {
-      serverPath = serverPath.replaceAll(":(\\d*)", "-\\1");
+      serverPath = serverPath.replaceAll(":/*", "_");
     }
     String wsDirectoryPath = PathSupport.concat(wsRoot, serverPath);
     File wsDirectory = new File(wsDirectoryPath);
     wsDirectory.mkdirs();
 
-    String safeFileName = PathSupport.toSafeName(FilenameUtils.getName(uri.toString()));
+    String safeFileName = PathSupport.toSafeName(FilenameUtils.getName(uriString));
     return new File(wsDirectory, safeFileName);
   }
 
   /**
    * Returns the working file repository collection.
    * <p>
+   * 
    * <pre>
    * http://localhost:8080/files/collection/&lt;collection&gt;/ -> &lt;collection&gt;
    * </pre>

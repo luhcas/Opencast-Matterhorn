@@ -43,6 +43,13 @@ public interface WorkingFileRepository {
   String JOB_TYPE = "workingfiles";
 
   /**
+   * Gets the base URI for this service.
+   * 
+   * @return The base URI
+   */
+  URI getBaseUri();
+  
+  /**
    * Store the data stream under the given media package and element IDs with filename as name of the file.
    * 
    * @param mediaPackageID
