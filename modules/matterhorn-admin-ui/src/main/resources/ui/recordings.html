@@ -28,12 +28,7 @@
   </head>
   <body>
     <div id="pageHeader">
-      <div id="currentVersion"></div>
-      <div id="newestVersion" style="text-align: right; float: right;"></div>
-    </div>
-    <div id="logout" style="text-align: right; left: 0px; width: 100%; position: absolute;">
-        <div style="background-color: rgb(246, 146, 30); float: right; padding: 3px 15px; display: inline-block;"><a href="/j_spring_security_logout">Log out</a></div>
-        <div style="display: inline-block; border-style: solid; border-width: 12px 20px; border-color: rgb(246, 146, 30) rgb(246, 146, 30) white white; width: 0px; float: right;"></div>
+      <div style="text-align: right; float: right;"><a href="/j_spring_security_logout" style="color:#FFFFFF">Log out</a></div>
     </div>
     <!-- notification that javaScript is disabled -->
     <noscript>
@@ -52,18 +47,20 @@
         </div>
       </center>
     </noscript>
-
+    <!-- LOGO -->
+    <div class="oc_headerRow">
+        <a class="oc_headerLink" href="../../welcome.html">
+          <div class="mh-logo"><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn"/></div>
+          <div class="mh-heading"><h1>Admin Tools</h1></div>
+          <div class="oc-logo"><img src="shared_img/opencast_logo.gif" alt="Opencast Matterhorn"/></div>
+        </a>
+    </div>
     <!-- fl-centered doesn't work in winXP-IE8 -->
     <div class="fl-container-flex fl-centered fl-theme-coal">
-      <div style="margin-top: .5em">
-        <a href="../../welcome.html" style="text-decoration:none;">
-          <h1><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn">&nbsp;&nbsp;Opencast Matterhorn</h1>
-        </a>
-      </div>
       <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
-        <li class="fl-activeTab"><a href="recordings.html" id="i18n_tab_recording">Recordings</a></li>
-        <li><a href="series.html" id="i18n_tab_series">Series</a></li>
-        <li><a href="agents_status.html" id="i18n_tab_agent">Capture Agents</a></li>
+        <li id="oc_tabs" class="fl-activeTab"><a class="oc_tabs-active" href="recordings.html" id="i18n_tab_recording">Recordings</a></li>
+        <li id="oc_tabs"><a class="oc_tabs" href="series.html" id="i18n_tab_series">Series</a></li>
+        <li id="oc_tabs"><a  class="oc_tabs" href="agents_status.html" id="i18n_tab_agent">Capture Agents</a></li>
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix">
 

@@ -4,8 +4,8 @@
     Author     : wulff
 */
 body {
-    padding-left: 30px;
-    padding-right:30px;
+    padding-left: 20px;
+    padding-right:20px;
     font-size: 1.15em;
 }
 
@@ -53,6 +53,7 @@ select { font-size:1.15em; }
     background-repeat: none;
     background-position: center center;
     float: left;
+    margin-right: 10px;
 }
 
 .icon-check {
@@ -247,8 +248,14 @@ select { font-size:1.15em; }
     /*margin-top:50px;*/
 }
 
+#agentsTable th {
+  padding-right:20px;
+  background-color: #98BBBA !important;
+}
+
 #recordingsTable th {
   padding-right:20px;
+  background-color: #98BBBA !important;
 }
 
 #stage {
@@ -335,6 +342,9 @@ select { font-size:1.15em; }
 .clickable {
   cursor:pointer;
   text-decoration: none;
+}
+span.clickable {
+  color: #A72123;
 }
 
 .clickable:hover {
@@ -452,4 +462,21 @@ fieldset {
 
 .statusCell {
     display: table-cell;
+}
+
+
+#oc_tabs {
+    margin-right:10px;
+    background-color: #2D8F8B !important;
+}
+a.oc_tabs {
+    background-color: #2D8F8B !important;
+}
+
+a.oc_tabs-active {
+    color: #2D8F8B !important;
+}
+
+.fl-tabs-left {
+    padding-left:130px !important;
 }

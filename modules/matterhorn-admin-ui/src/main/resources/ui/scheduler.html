@@ -33,8 +33,7 @@
   </head>
   <body>
     <div id="pageHeader">
-      <div id="currentVersion"></div>
-      <div id="newestVersion" style="text-align: right; float: right;"></div>
+    &nbsp;
     </div>
 
     <!-- notification that javaScript is disabled -->
@@ -54,17 +53,19 @@
         </div>
       </center>
     </noscript>
-
-    <div class="fl-container-850 fl-theme-coal">
-      <div style="margin-top: .5em">
-        <a href="../../welcome.html" style="text-decoration:none;">
-          <h1><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn">&nbsp;&nbsp;Opencast Matterhorn</h1>
+    <!-- LOGO -->
+    <div class="oc_headerRow">
+        <a class="oc_headerLink" href="../../welcome.html">
+          <div class="mh-logo"><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn"/></div>
+          <div class="mh-heading"><h1>Admin Tools</h1></div>
+          <div class="oc-logo"><img src="shared_img/opencast_logo.gif" alt="Opencast Matterhorn"/></div>
         </a>
-      </div>
+    </div>
+    <div class="fl-container-850 fl-theme-coal" style="clear:both;">
       <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
-        <li class="fl-activeTab"><a href="/admin/" id="i18n_tab_recording"></a></li>
-        <li><a href="series.html" id="i18n_tab_series">Series</a></li>
-        <li><a href="/admin/agents_status.html" id="i18n_tab_agent"></a></li>
+        <li id="oc_tabs" class="fl-activeTab"><a class="oc_tabs-active" href="recordings.html" id="i18n_tab_recording">Recordings</a></li>
+        <li id="oc_tabs"><a class="oc_tabs" href="series.html" id="i18n_tab_series">Series</a></li>
+        <li id="oc_tabs"><a  class="oc_tabs" href="agents_status.html" id="i18n_tab_agent">Capture Agents</a></li>
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
         <div class="fl-container-800" style="text-align: center;">
@@ -408,7 +409,7 @@
                       </li>
                       <li class="required" id="day-select">
                         <label class="fl-label form-box-label" for="repeat-days"><span class="color-red">* </span><span id="i18n_sched_days">Days</span>:</label>
-                        <table>
+                        <table id="agentsTable">
                           <thead>
                             <tr>
                               <th id="i18n_day_short_sun">S</th>

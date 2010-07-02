@@ -37,8 +37,7 @@
   </head>
   <body>
     <div id="pageHeader">
-      <div id="currentVersion"></div>
-      <div id="newestVersion" style="text-align: right; float: right;"></div>
+    &nbsp;
     </div>
 
     <!-- notification that javaScript is disabled -->
@@ -58,17 +57,19 @@
         </div>
       </center>
     </noscript>
-
-    <!-- fl-centered doesn't work in winXP-IE8 -->
-    <div class="fl-container-flex fl-centered fl-fix fl-theme-coal">
-      <div style="margin-top: .5em">
-        <a href="../../welcome.html"  style="text-decoration:none">
-          <h1><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn">&nbsp;&nbsp;Opencast Matterhorn</h1>
+    <div class="oc_headerRow">
+        <a class="oc_headerLink" href="../../welcome.html">
+          <div class="mh-logo"><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn"/></div>
+          <div class="mh-heading"><h1>Admin Tools</h1></div>
+          <div class="oc-logo"><img src="shared_img/opencast_logo.gif" alt="Opencast Matterhorn"/></div>
         </a>
-      </div><ul class="fl-tabs fl-tabs-left">
-        <li class=""><a href="recordings.html">Recordings</a></li>
-        <li><a href="series.html" id="i18n_tab_series">Series</a></li>
-        <li class="fl-activeTab"><a href='agents_status.html'>Capture Agents</a></li>
+    </div>
+    <!-- fl-centered doesn't work in winXP-IE8 -->
+    <div class="fl-container-flex fl-centered fl-theme-coal">
+      <ul class="fl-tabs fl-tabs-left">
+        <li id="oc_tabs" class=""><a class="oc_tabs" href="recordings.html">Recordings</a></li>
+        <li id="oc_tabs"><a class="oc_tabs" href="series.html" id="i18n_tab_series">Series</a></li>
+        <li id="oc_tabs" class="fl-activeTab"><a class="oc_tabs-active" href='agents_status.html'>Capture Agents</a></li>
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix">
         <table class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
