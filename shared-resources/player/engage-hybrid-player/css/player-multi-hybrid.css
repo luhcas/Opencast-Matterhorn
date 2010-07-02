@@ -46,6 +46,7 @@ table
 {
   display:                  table-cell; 
   width:                    100%;
+  padding-left:             10px;
 }
 
 #oc_title
@@ -306,6 +307,7 @@ table
   width:                    115px;
   margin-right:             5px;
   margin-top:               2px;
+  border:                   1px solid #2D8F8B;
 }
 
 .oc_tabTableLeft

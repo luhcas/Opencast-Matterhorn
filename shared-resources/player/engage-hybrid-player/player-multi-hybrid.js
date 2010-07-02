@@ -641,11 +641,17 @@ Opencast.Player = (function () {
             hideSlideText();
             hideShortcuts();
             hideEmbed();
+            $(".oc_btn-tabs").css("color", "white");
+            $(".oc_btn-tabs").css("background-color","#2D8F8B");
+            $("#oc_btn-slides").css("color","#2D8F8B");
+            $("#oc_btn-slides").css("background-color","white");
             setShowSections(true);
         }
         else
         {
             hideSlides();
+            $(".oc_btn-tabs").css("color", "white");
+            $(".oc_btn-tabs").css("background-color","#2D8F8B");
             setShowSections(false);
         }
         Opencast.Initialize.doResize();
@@ -682,11 +688,17 @@ Opencast.Player = (function () {
             hideDescription();
             hideShortcuts();
             hideEmbed();
+            $(".oc_btn-tabs").css("color", "white");
+            $(".oc_btn-tabs").css("background-color","#2D8F8B");
+            $("#oc_btn-slidetext").css("color","#2D8F8B");
+            $("#oc_btn-slidetext").css("background-color","white");
             setShowSections(true);       
         }
         else
         {
             hideSlideText();
+            $(".oc_btn-tabs").css("color", "white");
+            $(".oc_btn-tabs").css("background-color","#2D8F8B");
             setShowSections(false);
         }
         Opencast.Initialize.doResize();
@@ -722,11 +734,17 @@ Opencast.Player = (function () {
             hideSlides();
             hideDescription();
             hideEmbed();
+            $(".oc_btn-tabs").css("color", "white");
+            $(".oc_btn-tabs").css("background-color","#2D8F8B");
+            $("#oc_btn-shortcuts").css("color","#2D8F8B");
+            $("#oc_btn-shortcuts").css("background-color","white");
             setShowSections(true);
         }
         else
         {
             hideShortcuts();
+            $(".oc_btn-tabs").css("color", "white");
+            $(".oc_btn-tabs").css("background-color","#2D8F8B");
             setShowSections(false);
         }
         Opencast.Initialize.doResize();
@@ -745,11 +763,17 @@ Opencast.Player = (function () {
             hideSlideText();
             hideSlides();
             hideDescription();
+            $(".oc_btn-tabs").css("color", "white");
+            $(".oc_btn-tabs").css("background-color","#2D8F8B");
+            $("#oc_btn-embed").css("color","#2D8F8B");
+            $("#oc_btn-embed").css("background-color","white");
             setShowSections(true);
         }
         else
         {
             hideEmbed();
+            $(".oc_btn-tabs").css("color", "white");
+            $(".oc_btn-tabs").css("background-color","#2D8F8B");
             setShowSections(false);
         }
         Opencast.Initialize.doResize();
@@ -789,11 +813,17 @@ Opencast.Player = (function () {
             hideSlideText();
             hideShortcuts();
             hideEmbed();
+            $(".oc_btn-tabs").css("color", "white");
+            $(".oc_btn-tabs").css("background-color","#2D8F8B");
+            $("#oc_btn-description").css("color","#2D8F8B");
+            $("#oc_btn-description").css("background-color","white");
             setShowSections(true);
         }
         else
         {
             hideDescription();
+            $(".oc_btn-tabs").css("color", "white");
+            $(".oc_btn-tabs").css("background-color","#2D8F8B");
             setShowSections(false);
         }
         Opencast.Initialize.doResize();
