@@ -13,7 +13,7 @@ a {
 	line-height: 20px;
 	font-size: 0.8em;
 	color: #FFF;
-	background-color: #F6921E;
+	background-color: #A72123;
 	text-align:left;
 }
 
@@ -34,4 +34,29 @@ a {
 #skip a {
 	position: absolute;
 	top: 0;
+}
+
+.oc_headerRow {
+    margin-top: .5em;
+    padding:0 20px 5px 20px;
+}
+
+.oc_headerLink {
+    color:#F6921E;
+    text-decoration: none;
+}
+.mh-logo {
+    float:left;
+    display:table-cell;
+}
+
+.mh-heading {
+    display:table-cell;
+    float:left;
+    padding-left:25px;
+}
+
+.oc-logo {
+    float:right;
+    display:table-cell;
 }
