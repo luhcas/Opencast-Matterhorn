@@ -21,20 +21,17 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.TimeZone;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
@@ -44,23 +41,35 @@ import javax.xml.parsers.SAXParserFactory;
 
 public class PopulateDictionary {
 
-  public static void main(String args[]) throws Exception {
-    // TODO: move the following to the parameters
-    String lang = "sl";
-    String wikiRepo = "file:///Users/bostjanpajntar/data/wiki/";
-    String wikiArticles = lang + "wiki-latest-pages-articles.xml";
-    URI dict = new URI(wikiRepo + wikiArticles);
+  public static void main(String... args) throws Exception {
+    String lang = getInput("Enter language", "en");
+    File dir = null;
+    while (true) {
+      String wikiRepo = getInput("Enter path to expanded wikipedia archive", ".");
+      dir = new File(wikiRepo);  
+      if(dir.isDirectory()) {
+        break;
+      } else {
+        System.out.println(wikiRepo + " is not a directory");
+      }
+    }
+    File wikiArticles = new File(dir, lang + "wiki-latest-pages-articles.xml");
+    populate(lang, wikiArticles, 10, 3);
+  }
 
-    populate(lang, dict, 10, 3);
+  protected static String getInput(String prompt, String defaultValue) {
+    System.out.print(prompt);
+    System.out.print("[" + defaultValue + "] >");
+    Scanner scanner = new Scanner(System.in);
+    String value = scanner.nextLine();
+    return value == null || value.equals("") ? defaultValue : value;
   }
 
   public PopulateDictionary() {
     // populate("slwiki-latest-pages-articles.xml");
   }
 
-  public static void populate(String lang, URI dict, int minWordCount, int minWordLength) {
-    File in = new File(dict);
-
+  public static void populate(String lang, File in, int minWordCount, int minWordLength) {
     // Create the sax parser and start parsing
     WikipediaSAXHandler saxHandler = new WikipediaSAXHandler(lang, minWordCount, minWordLength);
     SAXParserFactory saxFactory = SAXParserFactory.newInstance();
@@ -172,19 +181,22 @@ public class PopulateDictionary {
         // csv
         wordlist.close();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(lang + ".csv"), "UTF8"));
-        bw.write("#numDoc:"+docParsed);bw.newLine();
-        bw.write("#numUniqueW:"+wordCount.size());bw.newLine();
-        bw.write("#numAllW:"+numAllW);bw.newLine();
-        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(lang + ".wordlist.csv"),
-                "UTF8"), BUFFER_LENGTH);
-//        CSVParser csvP = new CSVParser(br);
-//        String w;
-//        while ((w = csvP.nextValue()) != null) {
-//          bw.write(w);
-//          bw.write(',');
-//          bw.write(getCount(w).toString());
-//          bw.newLine();
-//        }
+        bw.write("#numDoc:" + docParsed);
+        bw.newLine();
+        bw.write("#numUniqueW:" + wordCount.size());
+        bw.newLine();
+        bw.write("#numAllW:" + numAllW);
+        bw.newLine();
+//        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(lang + ".wordlist.csv"),
+//                "UTF8"), BUFFER_LENGTH);
+        // CSVParser csvP = new CSVParser(br);
+        // String w;
+        // while ((w = csvP.nextValue()) != null) {
+        // bw.write(w);
+        // bw.write(',');
+        // bw.write(getCount(w).toString());
+        // bw.newLine();
+        // }
         bw.close();
 
         // dict object
@@ -335,24 +347,5 @@ public class PopulateDictionary {
       }
       return sb.toString();
     }
-    
-    private Integer getCount(String word) {
-      word = word.toUpperCase();
-      Long hash = StringUtil.hash(word);
-      return getCount(hash);
-    }
-
-    private Integer getCount(Long hash) {
-      try {
-        int count = wordCount.get(hash);
-        // System.out.println(count);
-        return count;
-      } catch (Exception e) {
-        // System.out.println("Not found");
-      }
-      return 0;
-    }
-
   }
-
 }
