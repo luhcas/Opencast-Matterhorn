@@ -109,7 +109,9 @@
 		</plugins>
 	</build>
 
-	<!-- mvn -P uitests test, run JsTestDriver + FlexUnit  -->
+	<!-- mvn -P uitests test, run JsTestDriver javascript browser tests + FlexUnit test in FlashPlayer 
+	example: mvn -P uitests test -DflashPlayer.command=/Users/ket/dev/debugger/FlashPlayerDebugger.app/Contents/MacOS/FlashPlayerDebugger
+	 -->
 	<profiles>
 		<profile>
 			<id>uitests</id>
