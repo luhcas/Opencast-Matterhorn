@@ -153,8 +153,8 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
     HttpPost post = new HttpPost(url);
     try {
       List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-      params.add(new BasicNameValuePair("sourceVideoTrack", getXML(sourceVideoTrack)));
-      params.add(new BasicNameValuePair("sourceAudioTrack", getXML(sourceAudioTrack)));
+      params.add(new BasicNameValuePair("videoSourceTrack", getXML(sourceVideoTrack)));
+      params.add(new BasicNameValuePair("audioSourceTrack", getXML(sourceAudioTrack)));
       params.add(new BasicNameValuePair("profileId", profileId));
       UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
       post.setEntity(entity);
