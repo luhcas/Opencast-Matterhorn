@@ -150,11 +150,14 @@
                 <ul class="fl-controls-right form-list">
                   <li class="required">
                     <label class="fl-label" for="title" id="label-title"><span class="color-red">* </span><span id="i18n_title_label"></span>:</label>
-                    <div id="title-cell" style="display: table-cell;">
-                        <input type="text" id="title" name="title" class="form-field">
-                        <span class="fl-icon icon-help" id="help_title" title="Click for help"></span>
-                        <br><div id="title-note" class="form-field" style="display:none;">Titles of individual recordings will be appended by sequential numbers starting with 1</div>
-                    </div>
+                    <input type="text" id="title" name="title" class="form-field">
+                    <span class="fl-icon icon-help" id="help_title" title="Click for help"></span>
+                  </li>
+                  <li id="title-note" class="ui-helper-clearfix" style="display:none;">
+                    <label class="fl-label">&nbsp;</label>
+                    <span style="float:left;" title="Click for help" class="instruction-text">
+                        Titles of individual recordings will be appended by sequential numbers starting with 1
+                    </span>
                   </li>
                   <li id="series_container">
                     <label class="fl-label" for="series_select"  id="label-series"><span id="i18n_series_label"></span>:</label>
