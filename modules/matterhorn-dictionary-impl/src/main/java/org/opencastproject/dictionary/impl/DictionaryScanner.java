@@ -47,7 +47,7 @@ public class DictionaryScanner implements ArtifactInstaller {
    */
   @Override
   public boolean canHandle(File artifact) {
-    return artifact.getParentFile().getName().equals("dictionary") && artifact.getName().endsWith(".csv");
+    return artifact.getParentFile().getName().equals("dictionaries") && artifact.getName().endsWith(".csv");
   }
 
   /**
