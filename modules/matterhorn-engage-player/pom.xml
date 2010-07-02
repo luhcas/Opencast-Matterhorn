@@ -47,7 +47,7 @@
 		(Only files needed for the matterhorn-engage-ui module)
 	-->
 	<build>
-		<sourceDirectory>src/main/flex/Videodisplay</sourceDirectory>
+		<sourceDirectory>src/main/flex</sourceDirectory>
 		<!--<testSourceDirectory>src/test/flex</testSourceDirectory>-->
 		<plugins>
 			<plugin>
