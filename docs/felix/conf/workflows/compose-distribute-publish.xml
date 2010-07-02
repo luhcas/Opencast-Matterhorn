@@ -10,6 +10,24 @@
   <configuration_panel>
   <![CDATA[
     <fieldset>
+      <legend>Holds</legend>
+      <span style="padding-left:5px">Processing should be paused to allow for:</span>
+      <ul class="no-bullets formField-list fl-controls-right">
+        <li class="ui-helper-clearfix"> 
+          <span id="holdconfig" style="float:left;">
+            <input id="review.hold" name="review.hold" type="checkbox" class="configField" value="true" style="width: inherit !important;" style="float:left;">
+            <span id="i18n_hold_for_review">&nbsp;Hold for review</span>
+          </span>
+         </li>
+         <li class="ui-helper-clearfix">
+          <span id="captionconfig" style="float:left;">
+            <input id="caption.hold" name="caption.hold" type="checkbox" class="configField" value="true" style="width: inherit !important;">
+            <span id="i18n_hold_for_caption">&nbsp;Hold for caption</span>
+          </span>
+         </li>
+      </ul>
+    </fieldset>
+    <fieldset>
       <legend>Distribution</legend>
       <ul class="no-bullets formField-list fl-controls-right">
         <!-- field: License -->
@@ -33,24 +51,6 @@
         </li>
       </ul>
     </fieldset>
-    <fieldset>
-      <legend>Hold for Action</legend>
-      <ul class="no-bullets formField-list fl-controls-right">
-        <li class="ui-helper-clearfix"> 
-          <span id="holdconfig" style="float:left;">
-            <input id="review.hold" name="review.hold" type="checkbox" class="configField" value="true" style="width: inherit !important;" style="float:left;">
-            <span id="i18n_hold_for_review">&nbsp;Hold for review</span>
-          </span>
-         </li>
-         <li class="ui-helper-clearfix">
-          <span id="captionconfig" style="float:left;">
-            <input id="caption.hold" name="caption.hold" type="checkbox" class="configField" value="true" style="width: inherit !important;">
-            <span id="i18n_hold_for_caption">&nbsp;Hold for caption</span>
-          </span>
-         </li>
-      </ul>
-    </fieldset>
-     
   ]]>
   </configuration_panel>
 
