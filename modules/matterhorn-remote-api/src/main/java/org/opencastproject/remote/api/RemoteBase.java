@@ -101,11 +101,12 @@ public class RemoteBase {
    *          the http request
    * @param expectedHttpStatus
    *          any expected status codes to include in the return.
-   * @return the respomse object
+   * @return the response object
    */
   protected HttpResponse getResponse(HttpRequestBase httpRequest, Integer... expectedHttpStatus) {
     List<String> remoteHosts = remoteServiceManager.getRemoteHosts(serviceType);
     Map<String, String> hostErrors = new HashMap<String, String>();
+    String uriSuffix = httpRequest.getURI().toString();
     for (String remoteHost : remoteHosts) {
       HttpResponse response = null;
       try {
@@ -116,11 +117,11 @@ public class RemoteBase {
         if (Arrays.asList(expectedHttpStatus).contains(status.getStatusCode())) {
           return response;
         } else {
-          hostErrors.put(remoteHost, status.toString());
+          hostErrors.put(httpRequest.getMethod() + " " + uri.toString(), status.toString());
           closeConnection(response);
         }
       } catch (Exception e) {
-        hostErrors.put(remoteHost, e.getMessage());
+        hostErrors.put(httpRequest.getMethod() + " " + remoteHost + uriSuffix , e.getMessage());
         closeConnection(response);
       }
     }

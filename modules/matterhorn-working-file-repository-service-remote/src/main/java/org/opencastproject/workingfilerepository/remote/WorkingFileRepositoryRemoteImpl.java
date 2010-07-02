@@ -389,6 +389,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   @Override
   public void deleteFromCollection(String collectionId, String fileName) {
     String url = UrlSupport.concat(new String[] {"/files", "collection", collectionId, fileName });
+    System.out.println("");
     HttpDelete del = new HttpDelete(url);
     HttpResponse response = null;
     try {

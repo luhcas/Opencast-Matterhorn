@@ -54,6 +54,8 @@ public class SharedHttpContext implements HttpContext {
   }
 
   public void deactivate() {
+    this.httpService = null;
+    this.bundleContext = null;
     logger.debug("Shared http context deactivated");
   }
 
