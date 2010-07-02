@@ -334,7 +334,10 @@ public class SearchServiceImpl implements SearchService {
    * 
    * @see org.opencastproject.search.api.SearchService#add(org.opencastproject.mediapackage.MediaPackage)
    */
-  public void add(MediaPackage mediaPackage) throws SearchException {
+  public void add(MediaPackage mediaPackage) throws SearchException, IllegalArgumentException {
+    if(mediaPackage == null) {
+      throw new IllegalArgumentException("Unable to add a null mediapackage");
+    }
     try {
       logger.debug("Attempting to add mediapackage {} to search index", mediaPackage.getIdentifier());
       if(solrIndexManager.add(mediaPackage)) {

@@ -362,6 +362,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
           receipt.setElement(track);
           receipt.setStatus(Status.FINISHED);
           rs.updateReceipt(receipt);
+          logger.info("Successfully inspected track {}", track);
           return track;
         }
       }
@@ -458,6 +459,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
         receipt.setElement(element);
         receipt.setStatus(Status.FINISHED);
         rs.updateReceipt(receipt);
+        logger.info("Successfully inspected element {}", element);
         return element;
       }
     };

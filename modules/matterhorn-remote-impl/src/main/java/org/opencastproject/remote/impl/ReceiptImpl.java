@@ -53,29 +53,37 @@ import javax.xml.parsers.DocumentBuilderFactory;
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="receipt", namespace="http://receipt.opencastproject.org/")
 public class ReceiptImpl implements Receipt {
+  /** Default constructor needed by jaxb and jpa */
   public ReceiptImpl() {}
 
-  public ReceiptImpl(String id, Status status, String type, String host, MediaPackageElement element) {
+  /** Constructor with everything needed for a newly instantiated receipt. */
+  public ReceiptImpl(String id, Status status, String type, String host, String context) {
     this();
     this.id = id;
     this.status = status;
     this.type = type;
     this.host = host;
-    this.element = element;
   }
 
+  /** The receipt ID */
   String id;
   
+  /** The receipt type */
   String type;
   
+  /** The receipt status */
   Status status;
 
+  /** The host responsible for this receipt */
   String host;
 
+  /** The receipt's context.  Not currently utilized.  See http://opencast.jira.com/browse/MH-4492 */
+  String context;
+
+  /** The element produced by this job, or null if it has not yet been generated (or was not due to an exception) */
   MediaPackageElement element;
 
   /**
-   * 
    * {@inheritDoc}
    * @see org.opencastproject.remote.api.Receipt#getId()
    */
@@ -88,7 +96,6 @@ public class ReceiptImpl implements Receipt {
   }
 
   /**
-   * 
    * {@inheritDoc}
    * @see org.opencastproject.remote.api.Receipt#setId(java.lang.String)
    */
@@ -98,7 +105,6 @@ public class ReceiptImpl implements Receipt {
   }
 
   /**
-   * 
    * {@inheritDoc}
    * @see org.opencastproject.remote.api.Receipt#getStatus()
    */
@@ -110,7 +116,6 @@ public class ReceiptImpl implements Receipt {
   }
 
   /**
-   * 
    * {@inheritDoc}
    * @see org.opencastproject.remote.api.Receipt#setStatus(org.opencastproject.remote.api.Receipt.Status)
    */
@@ -140,7 +145,6 @@ public class ReceiptImpl implements Receipt {
   }
 
   /**
-   * 
    * {@inheritDoc}
    * @see org.opencastproject.remote.api.Receipt#getHost()
    */
@@ -151,13 +155,34 @@ public class ReceiptImpl implements Receipt {
     return host;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.remote.api.Receipt#setHost(java.lang.String)
+   */
   @Override
   public void setHost(String host) {
     this.host = host;
   }
 
   /**
-   * 
+   * {@inheritDoc}
+   * @see org.opencastproject.remote.api.Receipt#getContext()
+   */
+  @Override
+  public String getContext() {
+    return context;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.remote.api.Receipt#setContext(java.lang.String)
+   */
+  @Override
+  public void setContext(String context) {
+    this.context = context;
+  }
+  
+  /**
    * {@inheritDoc}
    * @see org.opencastproject.remote.api.Receipt#getElement()
    */

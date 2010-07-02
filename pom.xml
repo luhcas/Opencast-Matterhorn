@@ -72,6 +72,8 @@
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
         <module>modules/matterhorn-runtime-info-ui</module>
+        <module>modules/matterhorn-remote-api</module>
+        <module>modules/matterhorn-remote-impl</module>
         <module>modules/matterhorn-security-impl</module>
         <module>modules/matterhorn-static</module>
         <module>modules/matterhorn-webconsole</module>
@@ -95,6 +97,8 @@
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>
+        <module>modules/matterhorn-remote-api</module>
+        <module>modules/matterhorn-remote-impl</module>
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-security-impl</module>
         <module>modules/matterhorn-webconsole</module>
@@ -119,6 +123,8 @@
         <module>modules/matterhorn-search-service-api</module>
         <module>modules/matterhorn-search-service-feeds</module>
         <module>modules/matterhorn-search-service-impl</module>
+        <module>modules/matterhorn-remote-api</module>
+        <module>modules/matterhorn-remote-impl</module>
         <module>modules/matterhorn-security-impl</module>
         <module>modules/matterhorn-webconsole</module>
       </modules>
@@ -143,6 +149,8 @@
         <module>modules/matterhorn-runtime-info-ui</module>
         <module>modules/matterhorn-search-service-api</module>
         <module>modules/matterhorn-search-service-remote</module>
+        <module>modules/matterhorn-remote-api</module>
+        <module>modules/matterhorn-remote-impl</module>
         <module>modules/matterhorn-security-impl</module>
         <module>modules/matterhorn-webconsole</module>
       </modules>

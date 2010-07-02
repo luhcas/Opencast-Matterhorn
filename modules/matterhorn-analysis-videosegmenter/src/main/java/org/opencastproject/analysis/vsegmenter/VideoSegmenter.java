@@ -676,13 +676,15 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
     MediaPackageReference original = new MediaPackageReferenceImpl(track);
 
     // See if encoding has already taken place
-    List<Track> derivedTracks = new ArrayList<Track>();
-    derivedTracks.add(track);
-    derivedTracks.addAll(Arrays.asList(track.getMediaPackage().getTracks(original)));
-    for (Track t : derivedTracks) {
-      if (MJPEG_MIMETYPE.equals(t.getMimeType())) {
-        logger.info("Using existing mjpeg track {}", t);
-        return t;
+    if(track.getMediaPackage() != null) {
+      List<Track> derivedTracks = new ArrayList<Track>();
+      derivedTracks.add(track);
+      derivedTracks.addAll(Arrays.asList(track.getMediaPackage().getTracks(original)));
+      for (Track t : derivedTracks) {
+        if (MJPEG_MIMETYPE.equals(t.getMimeType())) {
+          logger.info("Using existing mjpeg track {}", t);
+          return t;
+        }
       }
     }
 

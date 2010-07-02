@@ -21,27 +21,50 @@ import org.opencastproject.mediapackage.MediaPackageElement;
  * A receipt for an long running, asynchronous job.  A Receipt may be used to track any task once it has been queued.
  */
 public interface Receipt {
+  /** The status of the job that this receipt represents */
   public static enum Status {QUEUED, RUNNING, FINISHED, FAILED}
 
+  /** Gets the receipt identifier */
   public String getId();
 
+  /** Sets the receipt identifier */
   public void setId(String id);
 
+  /** Gets the receipt type, which determines the type of service that runs the job */
   public String getType();
   
+  /** Sets the receipt type */
   public void setType(String type);
   
+  /** Gets the receipt's current {@link Status} */
   public Status getStatus();
 
+  /** Sets the receipt's current {@link Status} */
   public void setStatus(Status status);
 
+  /** Gets the host responsible for queuing and running this job */
   public String getHost();
 
+  /** Sets the host responsible for queuing and running this job */
   public void setHost(String host);
+  
+  /** Gets the execution context for this receipt.  This can be a workflow identifier or any other reference. */
+  public String getContext();
+  
+  /** Sets the execution context for this receipt. */
+  public void setContext(String context);
 
+  /**
+   * Gets the mediapackage element that was produced by this job, or null if none was produced, or if it has yet
+   * to be produced.
+   * 
+   * @return the mediapackage element
+   */
   public MediaPackageElement getElement();
 
+  /** Sets the mediapackage element produced by this job. */
   public void setElement(MediaPackageElement element);
-  
+
+  /** Gets an xml representation of this receipt */
   public String toXml();
 }

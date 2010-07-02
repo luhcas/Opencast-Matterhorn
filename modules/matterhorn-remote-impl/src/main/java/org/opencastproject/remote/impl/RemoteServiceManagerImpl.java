@@ -207,7 +207,13 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   public Receipt getReceipt(String id) {
     EntityManager em = emf.createEntityManager();
     try {
-      return em.find(ReceiptImpl.class, id);
+      Receipt receipt = em.find(ReceiptImpl.class, id);
+      if (receipt != null) {
+        // JPA's cachees can be out of date if external changes (e.g. another node in the cluster) have been made to
+        // this row in the database
+        em.refresh(receipt);
+      }
+      return receipt;
     } finally {
       em.close();
     }

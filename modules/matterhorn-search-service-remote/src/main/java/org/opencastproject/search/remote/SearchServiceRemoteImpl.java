@@ -28,6 +28,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -58,6 +59,15 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
   public void add(MediaPackage mediaPackage) throws SearchException {
     String urlSuffix = UrlSupport.concat(new String[] { "/search", "rest", "add" });
     HttpPost post = new HttpPost(urlSuffix);
+    try {
+      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+      params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
+      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+      post.setEntity(entity);
+    } catch (Exception e) {
+      throw new SearchException("Unable to assemble a remote search request for mediapackage " + mediaPackage, e);
+    }
+
     HttpResponse response = getResponse(post, HttpStatus.SC_NO_CONTENT);
     if (response == null) {
       throw new SearchException("Unable to add mediapackage " + mediaPackage + " using the remote search services");

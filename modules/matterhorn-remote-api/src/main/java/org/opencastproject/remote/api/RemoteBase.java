@@ -143,16 +143,17 @@ public class RemoteBase {
    * @return The receipt
    */
   protected Receipt poll(String id) {
-    Receipt r = getReceipt(id);
-    while (r.getStatus() != Status.FAILED && r.getStatus() != Status.FINISHED) {
+    while (true) {
+      Receipt r = getReceipt(id);
+      if(Status.FAILED.equals(r.getStatus()) || Status.FINISHED.equals(r.getStatus())) {
+        return r;
+      }
       try {
-        Thread.sleep(10000);
+        Thread.sleep(1000);
       } catch (InterruptedException e) {
         logger.warn("polling interrupted");
       }
-      r = getReceipt(id);
     }
-    return r;
   }
   
   /**

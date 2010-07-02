@@ -165,5 +165,10 @@ public class MediaInspectionServiceImplTest {
     public String toXml() {
       return null;
     }
+    public String getContext() {
+      return null;
+    }
+    public void setContext(String context) {
+    }
   }
 }

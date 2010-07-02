@@ -49,7 +49,7 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
   public MediaInspectionServiceRemoteImpl() {
     super(JOB_TYPE);
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -65,11 +65,12 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
     try {
       HttpGet get = new HttpGet(url);
       response = getResponse(get);
-      if(response != null) {
+      if (response != null) {
         Receipt receipt = remoteServiceManager.parseReceipt(response.getEntity().getContent());
         if (block) {
           receipt = poll(receipt.getId());
         }
+        logger.info("Completing inspection of media file at {} using a remote media inspection service", uri);
         return receipt;
       }
     } catch (Exception e) {
@@ -103,11 +104,13 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
       HttpEntity entity = new UrlEncodedFormEntity(params);
       post.setEntity(entity);
       response = getResponse(post);
-      if(response != null) {
+      if (response != null) {
         Receipt receipt = remoteServiceManager.parseReceipt(response.getEntity().getContent());
         if (block) {
           receipt = poll(receipt.getId());
         }
+        logger.info("Completing inspection of media file at {} using a remote media inspection service", original
+                .getURI());
         return receipt;
       }
     } catch (Exception e) {

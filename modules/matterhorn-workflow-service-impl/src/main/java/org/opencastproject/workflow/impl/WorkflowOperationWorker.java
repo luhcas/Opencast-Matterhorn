@@ -75,6 +75,8 @@ final class WorkflowOperationWorker implements Runnable {
 
   public WorkflowOperationResult start() throws WorkflowOperationException {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
+    operation.setState(OperationState.RUNNING);
+    service.update(workflow);
     try {
       WorkflowOperationResult result = handler.start(workflow);
       if(result != null && Action.PAUSE.equals(result.getAction())) {
@@ -96,6 +98,8 @@ final class WorkflowOperationWorker implements Runnable {
     }
     ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler) handler;
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
+    operation.setState(OperationState.RUNNING);
+    service.update(workflow);
     try {
       WorkflowOperationResult result = resumableHandler.resume(workflow);
       if(result == null || Action.CONTINUE.equals(result.getAction())) {
