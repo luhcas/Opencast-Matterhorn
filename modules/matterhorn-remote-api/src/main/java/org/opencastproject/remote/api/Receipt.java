@@ -48,11 +48,11 @@ public interface Receipt {
   /** Sets the host responsible for queuing and running this job */
   public void setHost(String host);
   
-  /** Gets the execution context for this receipt.  This can be a workflow identifier or any other reference. */
-  public String getContext();
-  
-  /** Sets the execution context for this receipt. */
-  public void setContext(String context);
+//  /** Gets the execution context for this receipt.  This can be a workflow identifier or any other reference. */
+//  public String getContext();
+//  
+//  /** Sets the execution context for this receipt. */
+//  public void setContext(String context);
 
   /**
    * Gets the mediapackage element that was produced by this job, or null if none was produced, or if it has yet

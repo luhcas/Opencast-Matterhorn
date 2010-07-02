@@ -101,8 +101,15 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
       directory = FSDirectory.getDirectory(storageRoot);
       indexWriter = new IndexWriter(directory, analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
     } catch (Exception e) {
-      logger.warn("unable to initialize lucene", e);
-      throw new RuntimeException(e);
+      logger.warn("unable to initialize lucene, clearing and rebuilding the search index", e);
+      try {
+        FileUtils.forceDelete(new File(storageRoot));
+        FileUtils.forceMkdir(new File(storageRoot));
+        directory = FSDirectory.getDirectory(storageRoot);
+        indexWriter = new IndexWriter(directory, analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
+      } catch(IOException ioe) {
+        logger.warn("Unable to rebuild the search index", ioe);
+      }
     } finally {
       if(indexWriter != null) {
         try {
@@ -122,6 +129,9 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
       } catch (IOException e) {
         throw new IllegalStateException("Error accessing workspace collection '" + COLLECTION_ID + "'", e);
       }
+      if(uris.length > 0) {
+        logger.info("The workflow search index is empty.  Populating it now with {} workflows.", uris.length);
+      }
       for (URI uri : uris) {
         InputStream in = null;
         try {
@@ -135,6 +145,9 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
         } finally {
           IOUtils.closeQuietly(in);
         }
+      }
+      if(uris.length > 0) {
+        logger.info("Finished populating the workflow search index with {} workflows.", uris.length);
       }
     }
   }

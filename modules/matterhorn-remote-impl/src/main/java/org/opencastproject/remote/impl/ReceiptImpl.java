@@ -78,7 +78,7 @@ public class ReceiptImpl implements Receipt {
   String host;
 
   /** The receipt's context.  Not currently utilized.  See http://opencast.jira.com/browse/MH-4492 */
-  String context;
+//  String context;
 
   /** The element produced by this job, or null if it has not yet been generated (or was not due to an exception) */
   MediaPackageElement element;
@@ -164,23 +164,23 @@ public class ReceiptImpl implements Receipt {
     this.host = host;
   }
 
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#getContext()
-   */
-  @Override
-  public String getContext() {
-    return context;
-  }
-  
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#setContext(java.lang.String)
-   */
-  @Override
-  public void setContext(String context) {
-    this.context = context;
-  }
+//  /**
+//   * {@inheritDoc}
+//   * @see org.opencastproject.remote.api.Receipt#getContext()
+//   */
+//  @Override
+//  public String getContext() {
+//    return context;
+//  }
+//  
+//  /**
+//   * {@inheritDoc}
+//   * @see org.opencastproject.remote.api.Receipt#setContext(java.lang.String)
+//   */
+//  @Override
+//  public void setContext(String context) {
+//    this.context = context;
+//  }
   
   /**
    * {@inheritDoc}
