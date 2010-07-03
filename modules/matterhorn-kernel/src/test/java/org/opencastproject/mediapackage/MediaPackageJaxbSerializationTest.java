@@ -60,6 +60,8 @@ public class MediaPackageJaxbSerializationTest {
     Assert.assertEquals(0, mediaPackage.getTracks().length);
     Assert.assertEquals(1, mediaPackage.getCatalogs().length);
     Assert.assertEquals(0, mediaPackage.getAttachments().length);
+    
+    Assert.assertEquals("dublincore/episode", mediaPackage.getCatalogs()[0].getFlavor().toString());
   }
   
   @Test

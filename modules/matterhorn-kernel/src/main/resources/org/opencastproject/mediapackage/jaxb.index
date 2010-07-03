@@ -1,4 +1,4 @@
 AbstractMediaPackageElement
 MediaPackageElementFlavor
 MediaPackageImpl
-XMLCatalogImpl
+CatalogImpl

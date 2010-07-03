@@ -120,6 +120,7 @@ public class CatalogBuilderPlugin implements MediaPackageElementBuilderPlugin {
   public MediaPackageElement elementFromManifest(Node elementNode, MediaPackageSerializer serializer)
           throws UnsupportedElementException {
     String id = null;
+    String flavor = null;
     URI url = null;
     long size = -1;
     Checksum checksum = null;
@@ -132,6 +133,9 @@ public class CatalogBuilderPlugin implements MediaPackageElementBuilderPlugin {
 
       // url
       url = serializer.resolvePath(xpath.evaluate("url/text()", elementNode).trim());
+
+      // flavor
+      flavor = (String) xpath.evaluate("@type", elementNode, XPathConstants.STRING);
 
       // reference
       reference = (String) xpath.evaluate("@ref", elementNode, XPathConstants.STRING);
@@ -160,6 +164,10 @@ public class CatalogBuilderPlugin implements MediaPackageElementBuilderPlugin {
       // Add url
       dc.setURI(url);
 
+      // Add flavor
+      if(flavor != null)
+        dc.setFlavor(MediaPackageElementFlavor.parseFlavor(flavor));
+      
       // Add reference
       if (reference != null && !reference.equals(""))
         dc.referTo(MediaPackageReferenceImpl.fromString(reference));
