@@ -40,7 +40,7 @@ Upload.init = function() {
 
   // Event: Add form filed button clicked
   $('.addFormFieldBtn').click(function() {
-    var toClone = $(this).parent().children('.formField');
+    var toClone = $(".creatorRow").children('.formField');
     var clone = $(toClone).clone(true);
     $(clone).removeAttr('id').val('');
     $(this).parent().children('.additionalFieldsContainer').append(clone);   // .insertBefore() yields exception
