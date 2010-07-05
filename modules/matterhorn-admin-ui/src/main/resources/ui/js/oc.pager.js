@@ -37,7 +37,9 @@ ocPager.init = function() {
     Recordings.displayRecordings(Recordings.currentState, true);
   });
 
-  ocPager.pageSize = $('.paging-nav-pagesize-selector').first().val();
+  $('.paging-nav-pagesize-selector').each( function() {
+    $(this).val(ocPager.pageSize);
+  })
 }
 
 ocPager.update = function(size, current) {

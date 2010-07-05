@@ -316,19 +316,19 @@ select { font-size:1.15em; }
 
 .sortable {
   cursor:pointer;
-  background-image:url(../shared_img/icons/bg.gif);
+  /*background-image:url(../shared_img/icons/bg.gif);*/
   background-position: center right;
   background-repeat:no-repeat;
 }
 
-.sortable-asc {
+.sortable-Ascending {
   cursor:pointer;
   background-image:url(../shared_img/icons/asc.gif);
   background-position: center right;
   background-repeat:no-repeat;
 }
 
-.sortable-desc {
+.sortable-Descending {
   cursor:pointer;
   background-image:url(../shared_img/icons/desc.gif);
   background-position: center right;

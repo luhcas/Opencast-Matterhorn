@@ -15,10 +15,10 @@
  */
 package org.opencastproject.adminui.endpoint;
 
-import org.opencastproject.adminui.api.RecordingDataView;
-import org.opencastproject.adminui.api.RecordingDataViewImpl;
-import org.opencastproject.adminui.api.RecordingDataViewList;
-import org.opencastproject.adminui.api.RecordingDataViewListImpl;
+import org.opencastproject.adminui.api.AdminRecording;
+import org.opencastproject.adminui.api.AdminRecordingImpl;
+import org.opencastproject.adminui.api.AdminRecordingList;
+import org.opencastproject.adminui.api.AdminRecordingListImpl;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
@@ -45,9 +45,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URL;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -110,8 +112,12 @@ public class AdminuiRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("recordings/{state}")
-  public RecordingDataViewListImpl getRecordings(@PathParam("state") String state, @QueryParam("pn") int pageNumber, @QueryParam("ps") int pageSize) {
-    RecordingDataViewListImpl out = new RecordingDataViewListImpl();
+  public AdminRecordingListImpl getRecordings(@PathParam("state") String state,
+          @QueryParam("pn") int pageNumber,
+          @QueryParam("ps") int pageSize,
+          @QueryParam("sb") String sortBy,
+          @QueryParam("so") String sortOrder) {
+    LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
     boolean allRecordings = state.toUpperCase().equals("ALL");
     if ((state.toUpperCase().equals("UPCOMING")) || allRecordings) {
       out.addAll(addRecordingStatusForAll("upcoming", getUpcomingRecordings()));
@@ -136,19 +142,31 @@ public class AdminuiRestService {
     if (pageNumber < 0) {
       pageNumber = 0;
     }
-    if (out.size() <= pageSize) {     // if # of items <= page size irgnore pageNumber jsut return the whole result set
-      return out;
+    AdminRecordingListImpl page;
+    try {
+      AdminRecordingList.Order order = Enum.valueOf(AdminRecordingList.Order.class, sortOrder);
+      AdminRecordingList.Field field = Enum.valueOf(AdminRecordingList.Field.class, sortBy);
+      page = new AdminRecordingListImpl(field, order);
+    } catch (Exception e) {
+      page = new AdminRecordingListImpl();
     }
-    RecordingDataViewListImpl page = new RecordingDataViewListImpl();
-    int first = pageNumber * pageSize;
+    int first,last;
+    if (out.size() <= pageSize) {
+      first = 0;
+      last = out.size();
+    } else {
+      first = pageNumber * pageSize;
+      last = first + pageSize;
+    }
     logger.debug("Returning results items " + first + " - " + (first + pageSize - 1));
-    for (int i = first; i < first + pageSize; i++) {
+    for (int i = first; i < last; i++) {
       try {
         page.add(out.get(i));
       } catch (IndexOutOfBoundsException e) {
         break;
       }
     }
+    logger.debug("List: " + page.sortBy.toString() + " " + page.sortOrder.toString());
     return page;
   }
 
@@ -158,11 +176,11 @@ public class AdminuiRestService {
    * @param in
    * @return
    */
-  private RecordingDataViewList addRecordingStatusForAll(String status, RecordingDataViewList in) {
-    Iterator<RecordingDataView> i = in.getRecordings().iterator();
-    RecordingDataViewList out = new RecordingDataViewListImpl();
+  private LinkedList<AdminRecording> addRecordingStatusForAll(String status, Collection<AdminRecording> in) {
+    Iterator<AdminRecording> i = in.iterator();
+    LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
     while (i.hasNext()) {
-      RecordingDataView item = i.next();
+      AdminRecording item = i.next();
       item.setRecordingStatus(status);
       out.add(item);
     }
@@ -170,12 +188,12 @@ public class AdminuiRestService {
   }
 
   /**
-   * returns a RecordingDataViewList of recordings that are currently begin processed. 
+   * returns a AdminRecordingList of recordings that are currently begin processed.
    * If the WorkflowService is not present an empty list is returned.
-   * @return RecordingDataViewList list of upcoming recordings
+   * @return AdminRecordingList list of upcoming recordings
    */
-  private RecordingDataViewList getRecordingsFromWorkflowService(WorkflowState state) {
-    RecordingDataViewList out = new RecordingDataViewListImpl();
+  private LinkedList<AdminRecording> getRecordingsFromWorkflowService(WorkflowState state) {
+    LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
     if (workflowService != null) {
       logger.debug("getting recordings from workflowService");
       WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery().withState(state).withCount(100000)).getItems();
@@ -183,7 +201,7 @@ public class AdminuiRestService {
       //WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery()).getItems();
       for (int i = 0; i < workflows.length; i++) {
         MediaPackage mediapackage = workflows[i].getMediaPackage();
-        RecordingDataView item = new RecordingDataViewImpl();
+        AdminRecording item = new AdminRecordingImpl();
         item.setId(workflows[i].getId());
         item.setTitle(mediapackage.getTitle());
         item.setPresenter(joinStringArray(mediapackage.getCreators()));
@@ -284,11 +302,11 @@ public class AdminuiRestService {
       int capturing = 0;
       while (i.hasNext()) {
         Recording r = recordings.get(i.next());
-        if ( r.getState().equals(RecordingState.CAPTURING)
+        if (r.getState().equals(RecordingState.CAPTURING)
                 || r.getState().equals(RecordingState.CAPTURE_FINISHED)
                 || r.getState().equals(RecordingState.MANIFEST)
                 || r.getState().equals(RecordingState.UPLOADING)
-                || r.getState().equals(RecordingState.COMPRESSING) ) {   // FIXME also take into account RecordingState.UNKNOWN ??
+                || r.getState().equals(RecordingState.COMPRESSING)) {   // FIXME also take into account RecordingState.UNKNOWN ??
           capturing++;
           total++;
         }
@@ -357,7 +375,7 @@ public class AdminuiRestService {
     }
 
     // Add number of failed capture jobs to failed
-    RecordingDataViewList failedCaptures = getFailedCaptureJobs();
+    LinkedList<AdminRecording> failedCaptures = getFailedCaptureJobs();
     total += failedCaptures.size();
     out.put("failed", out.get("failed").intValue() + failedCaptures.size());
 
@@ -371,8 +389,8 @@ public class AdminuiRestService {
    *
    * @return list of failed recordings
    */
-  private RecordingDataViewList getFailedCaptureJobs() {
-    RecordingDataViewList out = new RecordingDataViewListImpl();
+  private LinkedList<AdminRecording> getFailedCaptureJobs() {
+    LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
     if ((schedulerService != null) && (captureAdminService != null)) {
       SchedulerFilter filter = schedulerService.getNewSchedulerFilter();
       filter.setEnd(new Date(System.currentTimeMillis() + CAPTURE_AGENT_DELAY));
@@ -384,7 +402,7 @@ public class AdminuiRestService {
                 || (recording.getState().equals(RecordingState.COMPRESSING_ERROR))
                 || (recording.getState().equals(RecordingState.MANIFEST_ERROR))
                 || (recording.getState().equals(RecordingState.UPLOAD_ERROR))) {
-          RecordingDataViewImpl item = new RecordingDataViewImpl();
+          AdminRecordingImpl item = new AdminRecordingImpl();
           item.setTitle(event.getTitle());
           item.setPresenter(event.getCreator());
           item.setSeriesTitle(event.getSeriesID());
@@ -405,18 +423,18 @@ public class AdminuiRestService {
   }
 
   /**
-   * returns a RecordingDataViewList of upcoming events. If the schedulerService
+   * returns a AdminRecordingList of upcoming events. If the schedulerService
    * is not present an empty list is returned.
-   * @return RecordingDataViewList list of upcoming recordings
+   * @return AdminRecordingList list of upcoming recordings
    */
-  private RecordingDataViewList getUpcomingRecordings() {
-    RecordingDataViewList out = new RecordingDataViewListImpl();
+  private LinkedList<AdminRecording> getUpcomingRecordings() {
+    LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
     if (schedulerService != null) {
       logger.debug("getting upcoming recordings from scheduler");
       SchedulerEvent[] events = schedulerService.getUpcomingEvents();
       for (int i = 0; i < events.length; i++) {
         if (System.currentTimeMillis() < events[i].getStartdate().getTime()) {
-          RecordingDataView item = new RecordingDataViewImpl();
+          AdminRecording item = new AdminRecordingImpl();
           item.setId(events[i].getID());
           item.setTitle(events[i].getTitle());
           item.setPresenter(events[i].getCreator());
@@ -436,20 +454,20 @@ public class AdminuiRestService {
     return out;
   }
 
-  private RecordingDataViewList getCapturingRecordings() {
-    RecordingDataViewList out = new RecordingDataViewListImpl();
+  private LinkedList<AdminRecording> getCapturingRecordings() {
+    LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
     if (schedulerService != null && captureAdminService != null) {
       logger.debug("getting capturing recordings from scheduler");
       SchedulerEvent[] events = schedulerService.getCapturingEvents();
       for (int i = 0; i < events.length; i++) {
         Recording r = captureAdminService.getRecordingState(events[i].getID());
-        if ( r != null
-                & ( r.getState().equals(RecordingState.CAPTURING)
+        if (r != null
+                & (r.getState().equals(RecordingState.CAPTURING)
                 || r.getState().equals(RecordingState.CAPTURE_FINISHED)
                 || r.getState().equals(RecordingState.COMPRESSING)
                 || r.getState().equals(RecordingState.MANIFEST)
-                || r.getState().equals(RecordingState.UPLOADING)) ) {
-          RecordingDataView item = new RecordingDataViewImpl();
+                || r.getState().equals(RecordingState.UPLOADING))) {
+          AdminRecording item = new AdminRecordingImpl();
           item.setId(events[i].getID());
           item.setTitle(events[i].getTitle());
           item.setPresenter(events[i].getCreator());

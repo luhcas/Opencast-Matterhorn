@@ -19,6 +19,8 @@ var Recordings = Recordings || {};
 Recordings.statsInterval = null;
 Recordings.updateRequested = false;
 Recordings.currentState = null;
+Recordings.sortBy = "startDate";
+Recordings.sortOrder = "Descending";
 Recordings.lastCount = null;
 Recordings.tableInterval = null;
 Recordings.tableUpdateRequested = false;
@@ -71,7 +73,7 @@ Recordings.init = function() {
   /* Event: Recording State selector clicked */
   $('.state-selector').click( function() {
     var state = $(this).attr('state');
-    window.location.href = 'recordings.html?show='+state;
+    window.location.href = 'recordings.html?show='+state+'&sortBy='+Recordings.sortBy+'&sortOrder='+Recordings.sortOrder+'&pageSize='+ocPager.pageSize;
     return false;
   });
 
@@ -92,24 +94,29 @@ Recordings.init = function() {
     Recordings.initTableRefresh($(this).val());
   });
 
-  // register custom table cell value parser for Date/Time column
-  $.tablesorter.addParser({
-    id: 'date',
-    is: function(){
-      return false;
-    },
-    format: function(s) {
-      return s; 
-    },
-    type: 'numeric'
-  });
-
-  var show = '';
-  show = Recordings.getURLParam('show');
+  var show = Recordings.getURLParam('show');
   if (show == '') {
     show='upcoming';
   }
   Recordings.currentState = show;
+
+  var sort = Recordings.getURLParam('sortBy');
+  if (sort == '') {
+    sort='StartDate';
+  }
+  Recordings.sortBy = sort;
+
+  var order = Recordings.getURLParam('sortOrder');
+  if (order == '') {
+    order='Descending';
+  }
+  Recordings.sortOrder = order;
+
+  var psize = Recordings.getURLParam('pageSize');
+  if (psize == '') {
+    psize = 10;
+  }
+  ocPager.pageSize = psize;
 
   ocPager.init();
   Recordings.displayRecordingStats();
@@ -163,7 +170,6 @@ Recordings.displayRecordingStats = function() {
 }
 
 /** Request a list of recordings in a certain state and render the response as a table.
- *  The table cols are made sortable via the JQuery Tablesorter plugin.
  *  While we are waiting for a response, a a little animation is displayed.
  */
 Recordings.displayRecordings = function(state, reload) {
@@ -177,8 +183,25 @@ Recordings.displayRecordings = function(state, reload) {
     }
     var page = ocPager.currentPageIdx;
     var psize = ocPager.pageSize;
-    $('#recordings-table-container').xslt("rest/recordings/"+state+"?ps="+psize+"&pn="+page, "xsl/recordings_"+state+".xsl", function() {
+    var sort = Recordings.sortBy;
+    var order = Recordings.sortOrder;
+    $('#recordings-table-container').xslt("rest/recordings/"+state+"?ps="+psize+"&pn="+page+"&sb="+sort+"&so="+order,
+      "xsl/recordings_"+state+".xsl", function() {
       Recordings.tableUpdateRequested = false;
+      // prepare table heads
+      $('.recording-Table-head').removeClass('sortable-Ascending').removeClass('sortable-Descending');
+      $('#th-'+Recordings.sortBy).addClass('sortable-'+Recordings.sortOrder);
+      $('.recording-Table-head').click(function(){
+        Recordings.sortBy = $(this).attr('id').substr(3);
+        if ($(this).is('.sortable-Descending')) {
+          Recordings.sortOrder = 'Ascending';
+        } else {
+          Recordings.sortOrder = 'Descending';
+        }
+        ocPager.currentPageIdx = 0;
+        Recordings.displayRecordings(Recordings.currentState, true);
+      });
+      // format dates
       if ($('.date-column').length > 0) {
         // if date date/time column is present
         $('.td-TimeDate').each( function() {     // format date/time
@@ -207,21 +230,6 @@ Recordings.displayRecordings = function(state, reload) {
             endTime = "";
           }
           $(this).append($(document.createElement('span')).text(startTime + endTime));
-        });
-        $('#recordingsTable').tablesorter({   // init tablesorter with custom parser for the date column
-          cssAsc: 'sortable-asc',
-          cssDesc: 'sortable-desc',
-          sortList: [[3,0]],
-          headers: {
-            3: {
-              sorter: 'date'
-            }
-          }
-        });
-      } else {  // if no date/time column is present, init tablesorter the default way
-        $('#recordingsTable').tablesorter({
-          cssAsc: 'sortable-asc',
-          cssDesc: 'sortable-desc'
         });
       }
 
