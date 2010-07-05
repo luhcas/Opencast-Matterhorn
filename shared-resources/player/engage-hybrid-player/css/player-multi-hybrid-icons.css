@@ -249,6 +249,7 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -190px -330px;
   width:                    48px;
+  height:                   18px;
   margin-right:             5px;
   margin-left:              5px;
 }
@@ -267,6 +268,7 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -0px -330px;
   width:                    44px;
+  height:                   18px;
   margin-right:             5px;
   margin-left:              5px;
 }
@@ -276,6 +278,7 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -64px -330px;
   width:                    40px;
+  height:                   18px;  
   margin-right:             5px;
   margin-left:              5px;
 }
@@ -284,6 +287,7 @@ input:hover
 {
   background:               transparent url("../img/oc_icons.png");
   background-position:      0px -240px;
+  height:                   18px;
   width:                    18px;
   margin-right:             5px;
   margin-left:              5px; 
