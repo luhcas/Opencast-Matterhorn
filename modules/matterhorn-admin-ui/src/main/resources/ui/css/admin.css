@@ -480,3 +480,7 @@ a.oc_tabs-active {
 .fl-tabs-left {
     padding-left:130px !important;
 }
+
+#oc_recordingmenu {
+     overflow: hidden !important;
+}
