@@ -20,6 +20,7 @@ import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.ConfigurationManager;
 import org.opencastproject.security.api.TrustedHttpClient;
 
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.quartz.Job;
@@ -71,15 +72,24 @@ public class AgentCapabilitiesJob implements Job {
     }
 
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+    HttpResponse resp = null;
     try {
       agent.getAgentCapabilities().storeToXML(baos, "Capabilities for the agent " + agent.getAgentName());
       HttpPost remoteServer = new HttpPost(url);
       remoteServer.setEntity(new StringEntity(baos.toString()));
-      client.execute(remoteServer);
+      resp = client.execute(remoteServer);
+      if (resp.getStatusLine().getStatusCode() != 200) {
+        logger.info("Capabilities push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
+      }
     } catch (IOException e) {
       logger.error ("Unexpected I/O exception: {}", e.getMessage());
     } catch (Exception e) {
       logger.error("Unable to push update to remote server: {}.", e.getMessage());
+    } finally {
+      if (resp != null) {
+        client.close(resp);
+      }
     }
   }
 }
