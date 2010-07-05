@@ -59,3 +59,21 @@
 span.marked {
   background-color: #FFFF00;
 }
+
+div.segment-tooltip
+{
+  position :                absolute;
+  padding:                  2px;
+  text-align:               center;
+  -moz-border-radius :      5px 5px 5px 5px;
+  -webkit-border-radius :   5px 5px 5px 5px;
+  border :                  1px solid #f8bb22;
+  color :                   #000000;
+  background-color:         #fae6a0;
+  font-size :               14;
+  cursor:                   default !important;
+}
+
+.oc-segments-preview {
+  display: none;
+}

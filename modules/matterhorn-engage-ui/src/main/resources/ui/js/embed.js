@@ -213,6 +213,17 @@ Opencast.Watch = (function ()
   
     /**
      * @memberOf Opencast.Watch
+     * @description Toggles the class segment-holder-over
+     * @param String segmentId the id of the segment
+     */
+    function hoverOutSegment(segmentId)
+    {
+      $("#" + segmentId).toggleClass("segment-holder");
+      $("#" + segmentId).toggleClass("segment-holder-over");
+    }
+
+    /**
+     * @memberOf Opencast.Watch
      * @description Seeks the video to the passed position. Is called when the user clicks on a segment
      * @param int seconds the position in the video
      */
@@ -255,6 +266,7 @@ Opencast.Watch = (function ()
     return {
       onPlayerReady : onPlayerReady,
       hoverSegment : hoverSegment,
+      hoverOutSegment : hoverOutSegment,
       seekSegment : seekSegment,
       getClientShortcuts : getClientShortcuts
     };

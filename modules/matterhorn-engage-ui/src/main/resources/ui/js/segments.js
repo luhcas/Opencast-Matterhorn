@@ -14,7 +14,14 @@ Opencast.segments = ( function() {
    currentSlide = 0,
    nextSlide = 0,
    slideLength = 0;
+  
+  var segmentPreviews;
 
+  function getSegmentPreview(segmentId)
+  {
+    return segmentPreviews[segmentId];
+  }
+  
   function getSecondsBeforeSlide(){
     return beforeSlide;
   }
@@ -62,27 +69,35 @@ Opencast.segments = ( function() {
       $(".left").click(function(){ change(false); });
     }
 
-    var segmentTimes = new Array(); 
+    var segmentTimes = new Array();
+    var seconds;
     $('.segments-time').each( function(i) {
-      var seconds= $(this).html();
+      seconds = $(this).html();
       segmentTimes[i] = seconds;
+    });
+
+    segmentPreviews= new Array(); 
+    var url;
+    $('.oc-segments-preview').each( function(i) {
+      url = $(this).html();
+      segmentPreviews[i] = url;
     });
 
     // set the slide length
     setSlideLength(segmentTimes.length);
-    
+
     // Hide Slide Tab, if there are no slides
     if(segmentTimes.length === 0) {
       Opencast.Player.doToggleSlides();
       $(".oc_btn-skip-backward").hide();
       $(".oc_btn-skip-forward").hide();
     }
-    
+
     var margin = 0;
     var controlswith = 0;
-    
+
     margin = $('#oc_video-controls').width();
-    
+
     if (Opencast.segments.getSlideLength() === 0)
     {
     	controlswith = 58;
@@ -158,6 +173,7 @@ Opencast.segments = ( function() {
   }
 
   return {
+    getSegmentPreview : getSegmentPreview,
     getSecondsBeforeSlide : getSecondsBeforeSlide,
     getSecondsNextSlide : getSecondsNextSlide,
     getSlideLength : getSlideLength,

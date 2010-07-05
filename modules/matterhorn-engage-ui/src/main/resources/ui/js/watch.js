@@ -212,22 +212,20 @@ Opencast.Watch = (function ()
               // Some error while trying to get the views
             }
           }); 
-          
+
           // init
           Opencast.Initialize.init();
-          
+
           // **************************************
           // Segments Text View
           $('.segments-time').each( function() {
             var seconds= $(this).html();
             $(this).html(Opencast.engage.formatSeconds(seconds));
           });
-          
+
           $('#oc_slidetext-left').html($('#oc-segments-text').html());
 
           $('#oc-segments-text').html("");
-          
-          
        });
     }
   
@@ -240,8 +238,32 @@ Opencast.Watch = (function ()
     {
       $("#" + segmentId).toggleClass("segment-holder");
       $("#" + segmentId).toggleClass("segment-holder-over");
+
+      var index = parseInt(segmentId.substr(7)) - 1;
+      $("#segment-tooltip").html('<img src="' + Opencast.segments.getSegmentPreview(index) + '" height="30"/>');
+
+      var segmentLeft = $("#" + segmentId).offset().left;
+      var segmentTop = $("#" + segmentId).offset().top;
+      var segmentWidth = $("#" + segmentId).width();
+      var tooltipWidth = $("#segment-tooltip").width();
+      $("#segment-tooltip").css("left", (segmentLeft + segmentWidth/2 - tooltipWidth/2) + "px");
+      $("#segment-tooltip").css("top", segmentTop-37 + "px");
+      $("#segment-tooltip").show();
     }
-  
+    
+    /**
+     * @memberOf Opencast.Watch
+     * @description Toggles the class segment-holder-over
+     * @param String segmentId the id of the segment
+     */
+    function hoverOutSegment(segmentId)
+    {
+      $("#" + segmentId).toggleClass("segment-holder");
+      $("#" + segmentId).toggleClass("segment-holder-over");
+
+      $("#segment-tooltip").hide();
+    }
+
     /**
      * @memberOf Opencast.Watch
      * @description Seeks the video to the passed position. Is called when the user clicks on a segment
@@ -287,6 +309,7 @@ Opencast.Watch = (function ()
     return {
       onPlayerReady : onPlayerReady,
       hoverSegment : hoverSegment,
+      hoverOutSegment : hoverOutSegment,
       seekSegment : seekSegment,
       getClientShortcuts : getClientShortcuts
     };
