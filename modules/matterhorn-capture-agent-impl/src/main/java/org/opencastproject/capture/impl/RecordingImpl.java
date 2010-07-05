@@ -47,12 +47,12 @@ public class RecordingImpl implements AgentRecording {
 
   /** Date formatter for the metadata file */
   private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
-  
-  /** Directory in the filesystem where the files related with this recording are */
-  private File baseDir = null;
- 
+
   /** Unique identifier for this ID   */
   private String id = null;
+
+  /** Directory in the filesystem where the files related with this recording are */
+  private File baseDir = null;
 
   /** The recording's state */
   private String state = RecordingState.UNKNOWN;
@@ -75,7 +75,7 @@ public class RecordingImpl implements AgentRecording {
    * @param mp    The {@code MediaPackage} with this recording files
    * @throws IOException If the base directory could not be fetched
    */
-  public RecordingImpl(MediaPackage mp, Properties properties) throws IOException, IllegalArgumentException {
+  public RecordingImpl(MediaPackage mp, Properties properties) throws IOException {
     // Stores the MediaPackage
     this.mPkg = mp;
 

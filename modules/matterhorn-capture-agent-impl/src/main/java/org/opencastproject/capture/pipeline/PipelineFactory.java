@@ -910,8 +910,11 @@ class BufferThread extends Thread {
       log.trace(queue.getName() + "," + queue.get("current-level-buffers") + "," + queue.get("current-level-bytes") + "," + queue.get("current-level-time"));
       try {
         Thread.sleep(1000);
-      } catch (InterruptedException e) {}
+      } catch (InterruptedException e) {
+        log.trace(queue.getName() + "'s buffer monitor thread caught an InterruptedException but is continuing.");
+      }
     }
+    log.trace(queue.getName() + "'s buffer monitor thread hit the end of the run() function.");
   }
 
   public void shutdown() {

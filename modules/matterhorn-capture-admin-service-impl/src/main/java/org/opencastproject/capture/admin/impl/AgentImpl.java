@@ -30,7 +30,7 @@ import javax.persistence.Table;
  * An in-memory construct to represent the state of a capture agent, and when it was last heard from.
  */
 @Entity
-@Table(name = "CAPTURE_AGENT")
+@Table(name = "CAPTURE_AGENT_STATE")
 @NamedQueries( {
   @NamedQuery(name = "AgentImpl.getAll", query = "SELECT a FROM AgentImpl a")
 })
@@ -45,21 +45,21 @@ public class AgentImpl implements Agent {
   /**
    * The state of the agent.  This should be defined from the constants in AgentState.
    */
-  @Column(name = "state", nullable = false)
+  @Column(name = "STATE", nullable = false)
   protected String state;
   
   /**
    * The URL of the agent. This is determined from the referer header parameter when the agent is registered.
    *
    */
-  @Column(name = "url")
+  @Column(name = "URL")
   protected String url;
 
   /**
    * The time at which the agent last checked in with this service.
    * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in). 
    */
-  @Column(name = "lastHeardFrom", nullable = false)
+  @Column(name = "LAST_HEARD_FROM", nullable = false)
   protected Long lastHeardFrom;
 
   /**
@@ -67,7 +67,7 @@ public class AgentImpl implements Agent {
    * Capabilities are the devices this agent can record from, with a friendly name associated
    * to determine their nature (e.g. PRESENTER --> dev/video0)
    */
-  @Column(name = "capabilities", nullable = true)
+  @Column(name = "CAPABILITIES", nullable = true)
   protected Properties capabilities;
 
   /**
