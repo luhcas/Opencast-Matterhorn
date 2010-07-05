@@ -111,6 +111,7 @@ table
   height:                   30px;
   background-image:         url("../img/oc_icons.png");
   background-position:      0px 0px;
+  visibility:               hidden;
 }
 
 #oc_video-time
@@ -120,7 +121,7 @@ table
   text-align:               left;
   font-size:                0.8em;
   color:                    #FFFFFF;
-  width:                    30%;
+  width:                    35%;
   height:                   30px;
 }
 
@@ -166,7 +167,7 @@ table
 {
   margin-top:               5px;
   float:                    left;
-  width:                    40%;
+  width:                    30%;
   text-align:               right;
 }
 
@@ -278,10 +279,10 @@ table
 
 #oc_video-cc
 {
-  margin-top:               5px;
+  margin-top:               7px;
   float:                    left;
   width:                    5%;
-  text-align:               center;
+  text-align:               left;
   visibility:               hidden;
 }
 
@@ -289,7 +290,7 @@ table
 {
   margin-top:               7px;
   float:                    right;
-  width:                    5%;
+  width:                    10%;
 }
 
 .oc_tabs

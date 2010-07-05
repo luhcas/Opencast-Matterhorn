@@ -35,6 +35,11 @@
   margin-top:               2px;
 }
 
+#oc-link-advanced-player
+{
+  display:                  none;
+}
+
 #oc_embed-title a
 {
   color:                    #FA6E23;
@@ -89,8 +94,8 @@ table
   font-size:                0.8em;
   color:                    #FFFFFF;
   margin-top:               7px;
-  width:                    35%;
-  height:                   30px;
+  width:                    37%;
+  height:                   32px;
 }
 
 #simpleEdit 
@@ -103,7 +108,7 @@ table
 {
   cursor:                   pointer;
   cursor:                   hand;
-  width:                    60px !important;
+  width:                    60px;
   background-color:         transparent !important;
   color:                    #FFFFFF;
   text-align:               right;
@@ -116,7 +121,7 @@ table
 
 .oc_edit-time
 {
-  width:                    60px !important;
+  width:                    60px;
   background-color:         #E3E3D7 !important;
   color:                    #000000;
   text-align:               right;
@@ -124,7 +129,7 @@ table
 
 .oc_edit-time-error
 {
-  width:                    60px !important;
+  width:                    60px;
   background-color:         #ff0000;  
   color:                    #ffffff; 
   text-align:               right;
@@ -137,7 +142,7 @@ table
 #oc_video-controls
 {
   float:                    left;
-  width:                    30%;
+  width:                    26%;
   text-align:               right;
   margin-top:               7px;
 }
@@ -146,7 +151,7 @@ table
 {
   margin-top:               5px;
   float:                    left;
-  width:                    25%;
+  width:                    18%;
   text-align:               right;
 }
 
@@ -182,7 +187,7 @@ table
 {   
   height:                   28px;
   text-align:               center;
-  margin-left:              -50px;
+  margin-left:              -5px;
 }
 
 #oc_volume-slider
@@ -266,9 +271,9 @@ table
 
 #oc_video-cc
 {
-  margin-top:               5px;
+  margin-top:               7px;
   float:                    left;
-  width:                    5%;
+  width:                    9%;
   text-align:               center;
   visibility:               hidden;
 }
@@ -277,7 +282,7 @@ table
 {
   margin-top:               5px;
   float:                    right;
-  width:                    5%;
+  width:                    10%;
 }
 
 #oc_video-size-dropdown
@@ -293,7 +298,6 @@ table
   height:                   28px;
   text-align:               center;
 }
-
 
 .oc_progress-bar
 {
@@ -319,7 +323,7 @@ table
   background-position:      -60px -360px;
   height:                   19px;
   width:                    9px;
-  position:                 relative; 
+  position:                 absolute; 
   border:                   0px;
   top:                      0px; 
   z-index:                  2;
@@ -334,7 +338,7 @@ table
   width:                    9px;
   position:                 relative; 
   border:                   0px;
-  top:                      -19px;
+  top:                      0px;
   z-index:                  3;
   margin-left:              -4px;
 }

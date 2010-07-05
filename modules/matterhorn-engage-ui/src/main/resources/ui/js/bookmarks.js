@@ -1,4 +1,4 @@
-/*global $, Opencast*/
+/*global $ */
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
 
 var Opencast = Opencast || {};
@@ -6,20 +6,23 @@ var Opencast = Opencast || {};
 /**
  * @namespace the global Opencast namespace bookmarks
  */
-Opencast.Bookmarks = ( function() {
+Opencast.Bookmarks = (function () {
 
-  /**
-   * @memberOf Opencast.Bookmarks
-   * @description Initializes the segments view
-   */
-  function initialize() {
-    $('#oc_btn-addBookmark').click(function () 
-      {
-          var value = $('#oc_addBookmark').attr('value');
-          Opencast.Bookmarks.addBookmark( Opencast.Player.getMediaPackageId(), Opencast.Player.getSessionId(), parseInt(Opencast.Player.getCurrentPosition()), value);
-      });
+    /**
+        @memberOf Opencast.Bookmarks
+        @description Initializes the segments view
+     */
+    function initialize() 
+    {
+        var OPTIONMYCLASSNAME = '';
+        
+        $('#oc_btn-addBookmark').click(function () 
+        {
+            var value = $('#oc_addBookmark').attr('value');
+            Opencast.Bookmarks.addBookmark(Opencast.Player.getMediaPackageId(), Opencast.Player.getSessionId(), parseInt(Opencast.Player.getCurrentPosition(), 10), value);
+        });
     
-    $('#oc_btn-removeBookmark').click(function () 
+        $('#oc_btn-removeBookmark').click(function ()
         {
             Opencast.Bookmarks.removeBookmark(); 
         });
@@ -114,112 +117,119 @@ Opencast.Bookmarks = ( function() {
         content = content + '<div class="oc_bookmarks-list-publicBookmarks-div-right" type="text">00:20:02 Justin Ratcliffe</div>';
         content = content + '</li>';
         
-        
-        
         $('#oc_bookmarks-list').prepend(content);
-  }
+    }
 
     /**
-    @memberOf Opencast.Bookmarks
-    @description Add a bookmark
-    @param String value, String name, String text
-  */
-  function addBookmark(mediaPackageId, sessionId, curPosition, value)
-  {
-    
-    
-    
-    
-    $.ajax({
-      type: 'GET',
-      contentType: 'text/xml',
-      url: "../../feedback/rest/add",
-      data: "id=" + mediaPackageId + "&session=" + sessionId + "&in=" + curPosition + "&out=" + curPosition + "&key=BOOKMARK&value=" + value,
-      dataType: 'xml',
-      success: function (xml){
-        // The BOOKMARK has been saved
-        var unencoded = formatSeconds(curPosition) + " " + value;
-        encoded = $('<div/>').text(unencoded).html();
-        var option = $('<option/>').val(encoded).addClass("oc_option-myBookmark").attr("title", encoded).text(unencoded);
-        
-        $('#oc_bookmarkSelect').prepend(option);
-        if ($("#oc_myBookmarks-checkbox").attr('aria-checked') === 'false'){
-            $("#oc_myBookmarks-checkbox").attr('aria-checked', 'true');
-            $('#oc_myBookmarks-checkbox').attr('checked', 'true'); 
-            $('option.oc_option-myBookmark').css('display', 'block');
-            $('.oc_option-myBookmark').css('visibility', 'visible'); 
+        @memberOf Opencast.Bookmarks
+        @description Format the seconds in a time string
+        @param Number seconds
+     */
+    function formatSeconds(seconds) 
+    {
+        var result = "";
+
+        if (parseInt(seconds / 3600, 10) < 10)
+        {        
+            result += "0";
         }
+        result += parseInt(seconds / 3600, 10);
+        result += ":";
 
-        var unencoded = value;
-        encoded = $('<div/>').text(unencoded).html();
-        //
-        var currentPosition = Opencast.Player.getCurrentPosition();
+        if ((parseInt(seconds / 60, 10) - parseInt(seconds / 3600, 10) * 60) < 10)
+        {
+            result += "0";
+        }
+        result += parseInt(seconds / 60, 10) - parseInt(seconds / 3600, 10) * 60;
+        result += ":";
 
-        var btn = $('<input/>')
-            .addClass("oc_boomarkPoint")
-            .attr(
+        if (seconds % 60 < 10)
+        {
+            result += "0";
+        }
+        result += seconds % 60;
+
+        return result;
+    }
+    
+    /**
+        @memberOf Opencast.Bookmarks
+        @description Add a bookmark
+        @param String value, String name, String text
+     */
+    function addBookmark(mediaPackageId, sessionId, curPosition, value)
+    {
+        var encoded = '';
+        $.ajax({
+            type: 'GET',
+            contentType: 'text/xml',
+            url: "../../feedback/rest/add",
+            data: "id=" + mediaPackageId + "&session=" + sessionId + "&in=" + curPosition + "&out=" + curPosition + "&key=BOOKMARK&value=" + value,
+            dataType: 'xml',
+            success: function (xml)
             {
-                onClick: "Opencast.Player.playBookmark(this.name)",
-                style: 'left:' + currentPosition + '%; width: 5px; height: 10px; margin-left: 5px; position: absolute; background-color: #90ee90 !important;',
-                name: value,
-                alt: encoded,
-                title: encoded
-            });
-        $('#oc_bookmarksPoints').append(btn);
-      },
-      error: function (a, b, c){
-         // Some error while adding the BOOKMARK
-      }
-    });
-  }
+                // The BOOKMARK has been saved
+                var unencoded = formatSeconds(curPosition) + " " + value;
+                encoded = $('<div/>').text(unencoded).html();
+                var option = $('<option/>').val(encoded).addClass("oc_option-myBookmark").attr("title", encoded).text(unencoded);
+        
+                $('#oc_bookmarkSelect').prepend(option);
+                if ($("#oc_myBookmarks-checkbox").attr('aria-checked') === 'false')
+                {
+                    $("#oc_myBookmarks-checkbox").attr('aria-checked', 'true');
+                    $('#oc_myBookmarks-checkbox').attr('checked', 'true'); 
+                    $('option.oc_option-myBookmark').css('display', 'block');
+                    $('.oc_option-myBookmark').css('visibility', 'visible'); 
+                }
+
+                unencoded = value;
+                encoded = $('<div/>').text(unencoded).html();
+        
+                var currentPosition = Opencast.Player.getCurrentPosition();
+
+                var btn = $('<input/>')
+                .addClass("oc_boomarkPoint")
+                .attr(
+                {
+                    onClick: "Opencast.Player.playBookmark(this.name)",
+                    style: 'left:' + currentPosition + '%; width: 5px; height: 10px; margin-left: 5px; position: absolute; background-color: #90ee90 !important;',
+                    name: value,
+                    alt: encoded,
+                    title: encoded
+                });
+                $('#oc_bookmarksPoints').append(btn);
+            },
+            error: function (a, b, c)
+            {
+                // Some error while adding the BOOKMARK
+            }
+        });
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description remove a bookmark
+     */
+    function removeBookmark()
+    {
+        $('#oc_bookmarkSelect option:selected').remove();
+        $('#oc_btn-removeBookmark').css('display', 'none'); 
+    }
   
-  function formatSeconds(seconds) {
-    var result = "";
-
-    if(parseInt(seconds / 3600) < 10)
-      result += "0";
-    result += parseInt(seconds / 3600);
-    result += ":";
-
-    if((parseInt(seconds/60) - parseInt(seconds/3600) * 60) < 10)
-      result += "0";
-    result += parseInt(seconds/60) - parseInt(seconds/3600) * 60;
-    result += ":";
-
-    if(seconds % 60 < 10)
-      result += "0";
-    result += seconds % 60;
-
-    return result;
-  }
-  
-  
-  /**
-    @memberOf Opencast.Player
-    @description remove a bookmark
-  */
-  function removeBookmark()
-  {
-    $('#oc_bookmarkSelect option:selected').remove();
-    $('#oc_btn-removeBookmark').css('display', 'none'); 
-  }
-  
-  /**
-    @memberOf Opencast.Player
-    @description play a bookmark
-    @param String playheadString
-  */
-  function playBookmark(playheadString)
-  {
-    var newPlayhead = getPlayhead(playheadString);
-    Videodisplay.seek(newPlayhead);
-  }
-
-
-  return {
-    initialize : initialize,
-    addBookmark : addBookmark,
-    removeBookmark : removeBookmark,
-    playBookmark : playBookmark
-  };
+    /**
+        @memberOf Opencast.Player
+        @description play a bookmark
+        @param String playheadString
+     */
+    function playBookmark(playheadString)
+    {
+        //var newPlayhead = getPlayhead(playheadString);
+        //Videodisplay.seek(newPlayhead);
+    }
+    return {
+        initialize : initialize,
+        addBookmark : addBookmark,
+        removeBookmark : removeBookmark,
+        playBookmark : playBookmark
+    };
 }());

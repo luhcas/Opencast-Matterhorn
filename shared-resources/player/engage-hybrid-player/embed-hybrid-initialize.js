@@ -95,7 +95,7 @@ Opencast.Initialize = (function ()
     
     // http://javascript-array.com/scripts/jquery_simple_drop_down_menu/
     var timeout         = 200;
-    var closetimer		= 0;
+    var closetimer      = 0;
     var ddmenuitem      = 0;
     
     /**
@@ -175,6 +175,8 @@ Opencast.Initialize = (function ()
         
         // set the video size list
         Opencast.Player.setVideoSizeList(SINGLEPLAYER);
+        
+        
      
         //
         $('#wysiwyg').wysiwyg({
@@ -320,18 +322,7 @@ Opencast.Initialize = (function ()
         });
         $('#oc_btn-play-pause').click(function () 
         {
-            if (start === false)
-            {
-                start = true;
-                 // init Flash
-                Opencast.FlashVersion.initFlash();
-                $('#oc_image').hide();
-                $("#oc_video-player-controls").show();
-            }
-            else
-            {
-                Opencast.Player.doTogglePlayPause();
-            }
+            Opencast.Player.doTogglePlayPause();
         });
         $('#oc_btn-volume').click(function () 
         {
@@ -350,7 +341,6 @@ Opencast.Initialize = (function ()
             // init Flash
             Opencast.FlashVersion.initFlash();
             $('#oc_image').hide();
-            $("#oc_video-player-controls").css('visibility', 'visible');
             start = true;
         });
         
@@ -382,7 +372,7 @@ Opencast.Initialize = (function ()
                 this.className = 'oc_btn-cc-over';
             }
         });
-        
+       
         // Handler for .mouseout()
         $('#oc_btn-skip-backward').mouseout(function () 
         {
@@ -578,6 +568,8 @@ Opencast.Initialize = (function ()
         iFrameHeight = document.documentElement.clientHeight;
         otherDivHeight = 100;
         flashHeight = iFrameHeight - otherDivHeight;
+        
+       
         $("#oc_flash-player").css('height', flashHeight + 'px'); 
         
         // create watch.html link
@@ -586,6 +578,9 @@ Opencast.Initialize = (function ()
         $("a[href='#']").attr('href', '' + advancedUrl + '');
         
         $("#oc_image").attr('src', 'engage-hybrid-player/img/embed.png');
+        
+       
+        
     });
     
 
@@ -629,6 +624,7 @@ Opencast.Initialize = (function ()
             setNewResolution(formatOne);
             break;
         }
+       
     }
 
     /**
@@ -671,6 +667,7 @@ Opencast.Initialize = (function ()
     return {
         dropdownVideo_open : dropdownVideo_open,
         dropdown_timer : dropdown_timer,
+        dropdown_close : dropdown_close,
         doResize : doResize,
         setNewResolution : setNewResolution,
         setMediaResolution : setMediaResolution

@@ -1,4 +1,4 @@
-/*global $, Videodisplay, Opencast, fluid*/
+/*global $, Videodisplay, window*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
 
 var Opencast = Opencast || {};
@@ -7,83 +7,80 @@ var Opencast = Opencast || {};
 @namespace the global Opencast namespace engage
 */
 Opencast.engage = (function () {
-  /**
-   * @memberOf Opencast.engage
-   * @description Gets the url to the search service;
-   * @return the search service endpoint url
-   */
-  function getSearchServiceEpisodeIdURL() 
-  {
 
-    var restEndpoint = "../../search/rest/episode?id="; // Production 
-    //var restEndpoint = "xml/episode.xml?id="; // Activate for testing purposes
-    //var restEndpoint = "episode-segments.xml?id="; // Activate for testing purposes
-    return restEndpoint;
-   }
-
-  function getCookie(name) {
-    var start = document.cookie.indexOf( name + "=" );
-    var len = start + name.length + 1;
-    if ( ( !start ) && ( name != document.cookie.substring( 0, name.length ) ) ) {
-      return null;
+    /**
+        @memberOf Opencast.engage
+        @description Gets the url to the search service;
+        @return the search service endpoint url
+     */
+    function getSearchServiceEpisodeIdURL() 
+    {
+        var restEndpoint = "../../search/rest/episode?id="; // Production 
+        //var restEndpoint = "xml/episode.xml?id="; // Activate for testing purposes
+        //var restEndpoint = "episode-segments.xml?id="; // Activate for testing purposes
+        return restEndpoint;
     }
-    if ( start == -1 ) return null;
+
+    /**
+        @memberOf Opencast.engage
+        @description Get the cookie
+        @param String:name
+        @return String
+     */
+    function getCookie(name) 
+    {
+        var start = document.cookie.indexOf(name + "=");
+        var len = start + name.length + 1;
+        if ((!start) && (name != document.cookie.substring(0, name.length)))
+        {
+            return null;
+        }
+        if (start == -1)
+        {
+            return null;
+        }
+        var end = document.cookie.indexOf(';', len);
+        if (end == -1) 
+        {
+            end = document.cookie.length;
+        }
+        return unescape(document.cookie.substring(len, end));
+    }
+
+    /**
+        @memberOf Opencast.engage
+        @description Format the seconds in a time string
+        @param Number:seconds
+        @return String:result
+     */
+    function formatSeconds(seconds) 
+    {
+        var result = "";
+
+        if (parseInt(seconds / 3600, 10) < 10)
+        {
+            result += "0";
+        }
+        result += parseInt(seconds / 3600, 10);
+        result += ":";
+
+        if ((parseInt(seconds / 60, 10) - parseInt(seconds / 3600, 10) * 60) < 10)
+        {
+            result += "0";
+        }
     
-    var end = document.cookie.indexOf( ';', len );
-    if ( end == -1 ) 
-      end = document.cookie.length;
-    return unescape( document.cookie.substring( len, end ) );
-  }
-  
-  function formatSeconds(seconds) {
-    var result = "";
+        result += parseInt(seconds / 60, 10) - parseInt(seconds / 3600, 10) * 60;
+        result += ":";
 
-    if(parseInt(seconds / 3600) < 10)
-      result += "0";
-    result += parseInt(seconds / 3600);
-    result += ":";
-
-    if((parseInt(seconds/60) - parseInt(seconds/3600) * 60) < 10)
-      result += "0";
-    result += parseInt(seconds/60) - parseInt(seconds/3600) * 60;
-    result += ":";
-
-    if(seconds % 60 < 10)
-      result += "0";
-    result += seconds % 60;
-
-    return result;
-  }
-
-  /**
-     * @memberOf Opencast.engage
-     * @description Gets the current media package id
-     * @return The current media package id
-     */
-    function getMediaPackageId() {
-      var value = getGETParameter("id");
-      return value;
+        if (seconds % 60 < 10)
+        {
+            result += "0";
+        }
+    
+        result += seconds % 60;
+        return result;
     }
 
-    /**
-     * @memberOf Opencast.engage
-     * @description Gets the current video url
-     * @return The video url
-     */
-    function getVideoUrl() {
-      var value = getGETParameter("videoUrl");
-      return value;
-    }
-
-    /**
-     * @memberOf Opencast.engage
-     * @description Gets the current video url 2
-     * @return The video url 2
-     */
-    function getVideoUrl2() {
-      var value = getGETParameter("videoUrl2");
-      return value;
-    }
 
     /**
      * @memberOf Opencast.engage
@@ -91,23 +88,63 @@ Opencast.engage = (function () {
      * @param string name
      * @return The value of the GET parameter
      */
-    function getGETParameter(name) {
-      name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-      var regexS = "[\\?&]" + name + "=([^&#]*)";
-      var regex = new RegExp(regexS);
-      var results = regex.exec(window.location.href);
-      if (results == null)
-        return null;
-      else
-        return results[1];
+    function getGETParameter(name) 
+    {
+        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+        var regexS = "[\\?&]" + name + "=([^&#]*)";
+        var regex = new RegExp(regexS);
+        var results = regex.exec(window.location.href);
+        if (results === null)
+        {
+            return null;
+        }
+        else
+        {
+            return results[1];
+        }
+    }
+
+    /**
+        @memberOf Opencast.engage
+        @description Gets the current media package id
+       @return The current media package id
+     */
+    function getMediaPackageId() 
+    {
+        var value = getGETParameter("id");
+        return value;
+    }
+
+
+     
+    /**
+     * @memberOf Opencast.engage
+     * @description Gets the current video url
+     * @return The video url
+     */
+    function getVideoUrl()
+    {
+        var value = getGETParameter("videoUrl");
+        return value;
+    }
+
+    /**
+     * @memberOf Opencast.engage
+     * @description Gets the current video url 2
+     * @return The video url 2
+     */
+    function getVideoUrl2()
+    {
+        var value = getGETParameter("videoUrl2");
+        return value;
     }
 
     return {
-      getCookie : getCookie,
-      formatSeconds : formatSeconds,
-      getMediaPackageId : getMediaPackageId,
-      getVideoUrl : getVideoUrl,
-      getVideoUrl2 : getVideoUrl2,
-      getSearchServiceEpisodeIdURL :  getSearchServiceEpisodeIdURL
+        getCookie : getCookie,
+        formatSeconds : formatSeconds,
+        getMediaPackageId : getMediaPackageId,
+        getVideoUrl : getVideoUrl,
+        getVideoUrl2 : getVideoUrl2,
+        getSearchServiceEpisodeIdURL :  getSearchServiceEpisodeIdURL
     };
 }());
