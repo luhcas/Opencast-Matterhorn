@@ -59,7 +59,9 @@
             <li class="additionalMeta">
               <label class="fl-label">Description:</label>
               <!-- Description -->
-              <xsl:value-of select="description" />
+              <span style="display:table-cell">
+                <xsl:value-of select="description" />
+              </span>
             </li>
           </ul>
         </div>
