@@ -212,6 +212,30 @@ Opencast.Watch = (function ()
     {
       $("#" + segmentId).toggleClass("segment-holder");
       $("#" + segmentId).toggleClass("segment-holder-over");
+
+      var index = parseInt(segmentId.substr(7)) - 1;
+      
+      var imageHeight = 120;
+      
+      if ($.browser.msie) {
+        imageHeight = 30;
+      }
+
+      $("#segment-tooltip").html('<img src="' + Opencast.segments.getSegmentPreview(index) + '" height="' + imageHeight + '"/>');
+
+      var segmentLeft = $("#" + segmentId).offset().left;
+      var segmentTop = $("#" + segmentId).offset().top;
+      var segmentWidth = $("#" + segmentId).width();
+      var tooltipWidth = $("#segment-tooltip").width();
+
+      var posLeft = segmentLeft + segmentWidth/2 - tooltipWidth/2;
+
+      posLeft = posLeft < 0 ? 0 : posLeft;
+      posLeft = posLeft > ($("#oc_seek-slider").width() - tooltipWidth - 10) ? ($("#oc_seek-slider").width() - tooltipWidth - 10) : posLeft;
+
+      $("#segment-tooltip").css("left", posLeft + "px");
+      $("#segment-tooltip").css("top", segmentTop - (imageHeight + 7) + "px");
+      $("#segment-tooltip").show();
     }
   
     /**
@@ -223,6 +247,8 @@ Opencast.Watch = (function ()
     {
       $("#" + segmentId).toggleClass("segment-holder");
       $("#" + segmentId).toggleClass("segment-holder-over");
+
+      $("#segment-tooltip").hide();
     }
 
     /**
