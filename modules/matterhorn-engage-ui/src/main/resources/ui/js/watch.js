@@ -124,7 +124,13 @@ Opencast.Watch = (function ()
 
           mediaUrlOne = mediaUrlOne === null ? '' : mediaUrlOne;
           mediaUrlTwo = mediaUrlTwo === null ? '' : mediaUrlTwo;
-          
+
+          coverUrlOne = coverUrlOne === null ? '' : coverUrlOne;
+          coverUrlTwo = coverUrlTwo === null ? '' : coverUrlTwo;
+
+          mimetypeOne = mimetypeOne === null ? '' : mimetypeOne;
+          mimetypeTwo = mimetypeTwo === null ? '' : mimetypeTwo;
+
           mediaResolutionOne = mediaResolutionOne === null ? '' : mediaResolutionOne;
           mediaResolutionTwo = mediaResolutionTwo === null ? '' : mediaResolutionTwo;
 
