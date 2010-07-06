@@ -148,9 +148,10 @@ public class ConfidenceMonitorRestService {
     try {
       List<Double> rmsValues = service.getRMSValues(device, timestamp);
       for (int i = 0; i < rmsValues.size(); i++) {
-        double value = rmsValues.get(i);
-        value = Math.round(value * 100.00) / 100.00;
-        rmsValues.set(i, value);
+        double value_db = rmsValues.get(i);
+        double rms = Math.pow(10, value_db / 20);
+        rms = Math.round(rms * 100.00) / 100.00;
+        rmsValues.set(i, rms);
       }
       jsonOutput.put("start", timestamp);
       jsonOutput.put("interval", "100");
