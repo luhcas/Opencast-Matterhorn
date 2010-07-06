@@ -7,18 +7,20 @@
     <style type="text/css">
       #player-container {clear:both; border:none; width:90%; height:300;}
       #edit-link {float:right;margin-top:3px; margin-bottom:5px; margin-right:50px;}
-      .hidden-initialy {display:none;}
+      .hidden {display:none;}
       #loading-container {
         width:225px;
         height:20px;
         background-image: url(../../../admin/shared_img/loading.gif);
         background-repeat: no-repeat;
       }
+      .spandiv {display:table-cell;float:left;}
     </style>
     <script type="text/javascript" src="../../../admin/jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript">
 
       var PLAYER_URL = '../../../engage/ui/embed.html';
+      var currentFile = null;
       
       // Captions upload
       var UploadListener = {};
@@ -40,8 +42,9 @@
         UploadListener.filename = filename;
       }
       UploadListener.uploadComplete = function () {
-        $('#loading-container').css('display','none');
-        $('#filename-container').text(UploadListener.filename).css('display','table-cell');
+        $('#file-upload-container').css('display','none');
+        $('#file-display-container').removeClass('hidden');
+        $('#filename-container').text(UploadListener.filename);
         var uploadFrame = document.getElementById("filechooser-ajax");
         var mp = uploadFrame.contentWindow.document.getElementById("mp").value;
         parent.Recordings.changedMediaPackage = mp;
@@ -106,9 +109,11 @@
             $(data.documentElement).find("mediapackage > metadata > catalog").each(function(index, elm) {
               if ($(elm).attr('type') == 'captions/timedtext') {
                 var captionsFile = $(elm).find('url').text().split(/\//);
+                currentFile = captionsFile;
                 captionsFile = captionsFile[captionsFile.length-1];
-                $('#upload-container').css('display','none');
-                $('#filename-container').text(captionsFile).css('display','table-cell');
+                $('#file-upload-container').css('display','none');
+                $('#file-display-container').css('display','table-cell');
+                $('#filename-container').text(captionsFile);
               }
             });
             // call preview player
@@ -156,23 +161,29 @@
   </head>
   <body>
     <!-- control buttons in the upper right -->
-    <a href="javascript: return false;" id="edit-link">Edit before continuing</a>
+    <div class="spandiv">
+      <h1>Upload Captions file</h1>
+    </div>
+    <div id="file-display-container" class="spandiv hidden" style="padding-top:26px;padding-left:40px;">
+      <div class="spandiv" id="i18n_captions_upload_label">Captions file:&nbsp;</div>
+      <div id="filename-container" class="spandiv"></div>
+    </div>
+    <div id="file-upload-container" class="spandiv" style="padding-top:26px;padding-left:40px;">
+      <div id="i18n_captions_upload_label" class="spandiv">Captions file to upload:&nbsp;</div>
+      <div id="loading-container" class="spandiv hidden"></div>
+      <div id="upload-container" style="display:table-cell;float:left;">
+        <iframe name="filechooserAjax" id="filechooser-ajax" frameborder="0" scrolling="no" src="../../../ingest/rest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
+        </iframe>
+        <button type="button" id="btn-start-upload" onclick="UploadListener.startUpload();">Upload</button>
+      </div>
+    </div>
+    <!-- <a href="javascript: return false;" id="edit-link">Edit before continuing</a> -->
     <center>
       <iframe id="player-container"></iframe>
     </center>
     <div id="metadata-container">
       <ul class="no-bullets formField-list fl-controls-right">
         <!-- captions files upload -->
-        <li class="ui-helper-clearfix">
-          <label class="fl-label"><span id="i18n_captions_upload_label">Captions file</span>:</label>
-          <div id="filename-container" class="hidden-initialy"></div>
-          <div id="loading-container" class="hidden-initialy"></div>
-          <div id="upload-container" style="display:table-cell;">
-            <iframe name="filechooserAjax" id="filechooser-ajax" frameborder="0" scrolling="no" src="../../../ingest/rest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
-            </iframe>
-            <button type="button" id="btn-start-upload" onclick="UploadListener.startUpload();">Upload</button>
-          </div>
-        </li>
         <!-- field: File -->
         <li class="ui-helper-clearfix">
           <label class="fl-label"><span id="i18n_files_label">File(s)</span>:</label>
