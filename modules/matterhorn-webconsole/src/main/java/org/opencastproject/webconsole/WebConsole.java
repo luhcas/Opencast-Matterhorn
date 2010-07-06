@@ -30,7 +30,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 /**
- *
+ * The web console servlet, which uses a custom branding plugin and the shared http context, which integrates the
+ * console's authentication with that of the rest of matterhorn.
  */
 public class WebConsole extends OsgiManager {
   private static final long serialVersionUID = 1L;
@@ -38,7 +39,7 @@ public class WebConsole extends OsgiManager {
   
   public WebConsole(BundleContext bundleContext) {
     super(bundleContext);
-    AbstractWebConsolePlugin.setBrandingPlugin(new MatterhornBrandingPlugin());
+    AbstractWebConsolePlugin.setBrandingPlugin(new MatterhornBrandingPlugin(bundleContext.getProperty("org.opencastproject.server.url")));
     logger.info("The matterhorn web console will use the {} branding plugin", AbstractWebConsolePlugin.getBrandingPlugin());
   }
 
@@ -50,31 +51,51 @@ public class WebConsole extends OsgiManager {
   protected synchronized void bindHttpService(HttpService httpService) {}
   protected synchronized void unbindHttpService(HttpService httpService) {}
 
+  /**
+   * Local implementation of the webconsole branding plugin
+   */
   static class MatterhornBrandingPlugin implements BrandingPlugin {
-    public String getBrandName() {
-      return "Opencast Matterhorn";
+    /** The local server URL */
+    protected String serverUrl = null;
+
+    /** Constructs the branding plugin using the local server's base URL */
+    public MatterhornBrandingPlugin(String serverUrl) {
+      this.serverUrl = serverUrl;
     }
+
+    @Override
+    public String getBrandName() {
+      return "Opencast Matterhorn on " + serverUrl;
+    }
+    @Override
     public String getFavIcon() {
       return "/res/imgs/favicon.ico";
     }
+    @Override
     public String getMainStyleSheet() {
       return "/res/ui/webconsole.css";
     }
+    @Override
     public String getProductImage() {
       return "/res/imgs/logo.png";
     }
+    @Override
     public String getProductName() {
       return "Matterhorn";
     }
+    @Override
     public String getProductURL() {
       return "http://www.opencastproject.org/matterhorn";
     }
+    @Override
     public String getVendorImage() {
       return "/res/imgs/logo.png";
     }
+    @Override
     public String getVendorName() {
       return "The Opencast Project";
     }
+    @Override
     public String getVendorURL() {
       return "http://www.opencastproject.org";
     }
