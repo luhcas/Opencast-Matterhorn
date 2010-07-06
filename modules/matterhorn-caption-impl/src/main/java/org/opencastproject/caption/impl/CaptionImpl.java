@@ -28,13 +28,10 @@ public class CaptionImpl implements Caption {
   private Time stopTime;
   private String[] captionLines;
 
-  // private HashMap<String, String> textStyles;
-
   public CaptionImpl(Time startTime, Time stopTime, String[] captionLines) {
     this.startTime = startTime;
     this.stopTime = stopTime;
     this.captionLines = captionLines;
-    // this.textStyles = new HashMap<String, String>();
   }
 
   /**
@@ -66,21 +63,4 @@ public class CaptionImpl implements Caption {
   public Time getStopTime() {
     return stopTime;
   }
-
-  // TODO styles (modify interface)
-
-  // public HashMap<String, String> getTextStyles() {
-  // do we make a copy?
-  // return textStyles;
-  // }
-
-  // public String getTextStyleValue(String attribute) {
-  // return null or empty string?
-  // return this.textStyles.get(attribute);
-  // }
-
-  // public void setTextStyles(HashMap<String, String> textStyles) {
-  // add clean new, make a copy?
-  // this.textStyles = textStyles;
-  // }
 }

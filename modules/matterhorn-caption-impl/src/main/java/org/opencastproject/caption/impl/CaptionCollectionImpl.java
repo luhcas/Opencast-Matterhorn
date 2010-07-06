@@ -29,41 +29,21 @@ import java.util.LinkedList;
  */
 public class CaptionCollectionImpl implements CaptionCollection {
 
-  private String collectionName;
-
-  // revise usage of hash map -> maybe enum class would be better (find all text properties)
-  // private HashMap<String, String> globalTextStyles;
-
+  /** LinkedList that stores captions */
   private LinkedList<Caption> captionCollection;
 
+  /**
+   * Created empty caption collection.
+   */
   public CaptionCollectionImpl() {
-    this.collectionName = "";
-    // this.globalTextStyles = new HashMap<String, String>();
-    this.captionCollection = new LinkedList<Caption>();
-  }
-
-  public CaptionCollectionImpl(String collectionName) {
-    this.collectionName = collectionName;
-    // this.globalTextStyles = new HashMap<String, String>();
     this.captionCollection = new LinkedList<Caption>();
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.caption.api.CaptionCollection#getCollectionName()
+   * @see org.opencastproject.caption.api.CaptionCollection#addCaption(org.opencastproject.caption.api.Caption)
    */
-  @Override
-  public String getCollectionName() {
-    return collectionName;
-  }
-
-  // expose (?)
-
-  public void setCollectionName(String collectionName) {
-    this.collectionName = collectionName;
-  }
-
   public void addCaption(Caption caption) {
     this.captionCollection.add(caption);
   }
@@ -96,20 +76,4 @@ public class CaptionCollectionImpl implements CaptionCollection {
       }
     };
   }
-
-  // public HashMap<String, String> getGlobalTextStyles() {
-  // make copy?
-  // return globalTextStyles;
-  // }
-
-  // public void setGlobalTextStyles(HashMap<String, String> globalTextStyles) {
-  // copy ? check? (for null at least)
-  // this.globalTextStyles = globalTextStyles;
-  // }
-
-  // public void setGlobalTextStyle(String attribute, String value) {
-  // check
-  // this.globalTextStyles.put(attribute, value);
-  // }
-
 }

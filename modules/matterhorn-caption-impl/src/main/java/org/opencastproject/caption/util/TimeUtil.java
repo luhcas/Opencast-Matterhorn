@@ -68,8 +68,7 @@ public class TimeUtil {
   // DFXP TT time format
 
   /**
-   * Parse String representation of DFXP time format. Currently it does not support parsing of metrics (for example:
-   * 34.567s).
+   * Parse String representation of DFXP time format. It does not support parsing of metrics (for example: 34.567s).
    * 
    * @param timeDfxp
    *          DFXP time format

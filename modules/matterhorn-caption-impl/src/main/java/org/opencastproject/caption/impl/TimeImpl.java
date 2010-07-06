@@ -65,7 +65,7 @@ public class TimeImpl implements Time {
   public int getSeconds() {
     return this.seconds;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -78,8 +78,11 @@ public class TimeImpl implements Time {
 
   /**
    * Checks if hours are inside the boundaries (between 0 and 99 hours).
-   * @param h number of hours
-   * @throws IllegalTimeFormatException if argument is less than 0 or more than 99.
+   * 
+   * @param h
+   *          number of hours
+   * @throws IllegalTimeFormatException
+   *           if argument is less than 0 or more than 99.
    */
   private void setHours(int h) throws IllegalTimeFormatException {
     if (h < 0 || h > 99)
@@ -89,8 +92,11 @@ public class TimeImpl implements Time {
 
   /**
    * Checks if minutes are inside the boundaries (between 0 and 59).
-   * @param m number of minutes
-   * @throws IllegalTimeFormatException if argument is less than 0 or more than 59.
+   * 
+   * @param m
+   *          number of minutes
+   * @throws IllegalTimeFormatException
+   *           if argument is less than 0 or more than 59.
    */
   private void setMinutes(int m) throws IllegalTimeFormatException {
     if (m < 0 || m > 59)
@@ -100,8 +106,11 @@ public class TimeImpl implements Time {
 
   /**
    * Checks if seconds are inside the boundaries (between 0 and 59).
-   * @param s number of seconds
-   * @throws IllegalTimeFormatException if argument is less than 0 or more than 59.
+   * 
+   * @param s
+   *          number of seconds
+   * @throws IllegalTimeFormatException
+   *           if argument is less than 0 or more than 59.
    */
   private void setSeconds(int s) throws IllegalTimeFormatException {
     if (s < 0 || s > 59)
@@ -111,12 +120,34 @@ public class TimeImpl implements Time {
 
   /**
    * Checks if milliseconds are inside the boundaries (between 0 and 999).
-   * @param ms number of milliseconds
-   * @throws IllegalTimeFormatException if argument is less than 0 or more than 999.
+   * 
+   * @param ms
+   *          number of milliseconds
+   * @throws IllegalTimeFormatException
+   *           if argument is less than 0 or more than 999.
    */
   private void setMilliseconds(int ms) throws IllegalTimeFormatException {
     if (ms < 0 || ms > 999)
       throw new IllegalTimeFormatException("Invalid milisecond time: " + ms);
     this.miliseconds = ms;
+  }
+
+  /**
+   * @see java.lang.Comparable#compareTo(java.lang.Object)
+   */
+  @Override
+  public int compareTo(Time arg0) {
+    return getMilliseconds(this) - getMilliseconds(arg0);
+  }
+
+  /**
+   * Helper function that converts time to milliseconds. Used for time comparing.
+   * 
+   * @param time
+   *          to be converted
+   * @return milliseconds
+   */
+  private static int getMilliseconds(Time time) {
+    return (time.getHours() * 3600 + time.getMinutes() * 60 + time.getSeconds()) * 1000 + time.getMiliseconds();
   }
 }

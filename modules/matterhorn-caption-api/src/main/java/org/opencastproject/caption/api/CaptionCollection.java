@@ -17,7 +17,6 @@ package org.opencastproject.caption.api;
 
 import java.util.Iterator;
 
-
 /**
  * Represents collection of all captions.
  * 
@@ -25,24 +24,17 @@ import java.util.Iterator;
 public interface CaptionCollection {
 
   /**
-   * Returns collection name.
-   * @return collection name
-   */
-  // FIXME needed?
-  String getCollectionName();
-  
-  /**
    * Add single caption to the end of the collection.
+   * 
    * @param caption
    */
   void addCaption(Caption caption);
-  
-  // void setGlobalTextStyles(HashMap<String, String> globalTextStyles);
-  // void setTxtStylesGlobalAtt(key, value)
-  
+
   /**
    * Get iterator over caption collection.
-   * @param iterator over captions
+   * 
+   * @param iterator
+   *          over captions
    */
   Iterator<Caption> getCollectionIterator();
 }

@@ -15,56 +15,55 @@
  */
 package org.opencastproject.caption.api;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+
 /**
  * Imports captions to {@link CaptionCollection} and exports from {@link CaptionCollection} to String presentation.
  */
 public interface CaptionConverter {
+
   /**
-   * Parse captions to the CaptionCollection. If exception is encountered during input parsing
-   * IllegalCaptionFormatException is thrown.
+   * Imports captions to {@link CaptionCollection}. If caption format is capable of containing more than one language,
+   * language parameter is used to define which captions are parsed.
    * 
-   * @param in
-   *          String representation of captions
-   * @return CaptionCollection parsed captions
+   * @param inputStream
+   *          stream from where captions are read
+   * @param language
+   *          (optional) captions' language
+   * @return {@link CaptionCollection} collection of captions
    * @throws IllegalCaptionFormatException
-   *           if exception occurred while parsing captions
+   *           if parser encounters an exception
    */
-  CaptionCollection importCaption(String in) throws IllegalCaptionFormatException;
+  CaptionCollection importCaption(InputStream inputStream, String language) throws IllegalCaptionFormatException;
 
   /**
-   * Export caption collection to string representation.
+   * Exports caption collection. Language parameter is used to set language of the captions for those caption format
+   * that are capable of storing information about language.
    * 
-   * @param {@link CaptionCollection} to be exported
-   * @return string representation of the collection
+   * @param outputStream
+   *          stream to which captions are written
+   * @param captionCollection
+   *          collection to be exported
+   * @param language
+   *          (optional) captions' language
+   * @throws IOException
+   *           if exception occurs writing to output stream
    */
-  String exportCaption(CaptionCollection captionCollection);
-
-  // FIXME -> are they needed
-  /**
-   * Returns the name of the format which is handled by this converter.
-   * 
-   * @return format name
-   */
-  String getName();
-
-  /**
-   * Returns file extension of format which is handled by this converter.
-   * 
-   * @return file extension
-   */
-  String getFileExtension();
+  void exportCaption(OutputStream outputStream, CaptionCollection captionCollection, String language)
+          throws IOException;
 
   /**
-   * Returns unique pattern by which format is recognized.
+   * Reads captions and return information about language if such information is available. Returns empty list
+   * otherwise.
    * 
-   * @return regex pattern
+   * @param inputStream
+   *          stream from where captions are read
+   * @return {@link List} containing languages in captions
+   * @throws IllegalCaptionFormatException
+   *           if parser encounters exception
    */
-  String getIdPattern();
-
-  /**
-   * Whether or not text styles are allowed (will be parsed or will be ignored).
-   * 
-   * @return true/false depending on whether text styles will be parsed
-   */
-  boolean allowsTextStyles();
+  List<String> getLanguageList(InputStream inputStream) throws IllegalCaptionFormatException;
 }

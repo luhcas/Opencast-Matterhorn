@@ -16,31 +16,35 @@
 package org.opencastproject.caption.api;
 
 /**
- * Time representation of single caption (start time, end time, duration,...)
+ * Time representation of single caption (start time, end time, duration,...).
  * 
  */
-public interface Time {
+public interface Time extends Comparable<Time> {
 
   /**
    * Get hours of a caption.
+   * 
    * @return hours
    */
   int getHours();
 
   /**
    * Get minutes of a caption.
+   * 
    * @return minutes
    */
   int getMinutes();
 
   /**
    * Get seconds of a caption.
+   * 
    * @return seconds
    */
   int getSeconds();
 
   /**
    * Get milliseconds of a caption.
+   * 
    * @return milliseconds
    */
   int getMiliseconds();

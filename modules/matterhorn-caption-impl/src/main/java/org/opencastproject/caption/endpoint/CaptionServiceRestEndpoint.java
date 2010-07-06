@@ -27,6 +27,9 @@ import org.opencastproject.util.doc.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -59,15 +62,13 @@ public class CaptionServiceRestEndpoint {
   @Path("convert")
   @Produces(MediaType.TEXT_PLAIN)
   public Response convert(@FormParam("input") String inputType, @FormParam("output") String outputType,
-          @FormParam("captions") String input) {
+          @FormParam("captions") String input, @FormParam("language") String lang) {
     try {
-      String output;
-      if (inputType == null || inputType.equals("")) {
-        output = service.convert(input, outputType);
-      } else {
-        output = service.convert(input, inputType, outputType);
-      }
-      return Response.ok().entity(output).build();
+      ByteArrayOutputStream output = new ByteArrayOutputStream();
+      
+      service.convert(new ByteArrayInputStream(input.getBytes()), inputType, output, outputType, lang);
+      
+      return Response.ok().entity(output.toString("UTF-8")).build();
     } catch (Exception e) {
       logger.error(e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -88,8 +89,9 @@ public class CaptionServiceRestEndpoint {
     convertEndpoint.addFormat(new Format("plaintext", null, null));
     convertEndpoint.addStatus(Status.OK("Conversion successfully completed."));
     convertEndpoint.addRequiredParam(new Param("captions", Param.Type.TEXT, null, "Captions to be converted."));
-    convertEndpoint.addOptionalParam(new Param("input", Param.Type.STRING, null, "Caption input format (for example: DFXP, SubRip,...)."));
+    convertEndpoint.addRequiredParam(new Param("input", Param.Type.STRING, null, "Caption input format (for example: DFXP, SubRip,...)."));
     convertEndpoint.addRequiredParam(new Param("output", Param.Type.STRING, null, "Caption output format (for example: DFXP, SubRip,...)."));
+    convertEndpoint.addOptionalParam(new Param("language", Param.Type.STRING, null, "Caption language (for those formats that store such information)"));
     convertEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, convertEndpoint);
     return DocUtil.generate(data);

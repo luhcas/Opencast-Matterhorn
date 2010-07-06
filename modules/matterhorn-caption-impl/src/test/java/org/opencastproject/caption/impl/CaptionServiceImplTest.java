@@ -24,14 +24,15 @@ import org.opencastproject.caption.converters.SubRipCaptionConverter;
 
 import junit.framework.Assert;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Test for {@link CaptionServiceImpl}.
@@ -42,7 +43,9 @@ public class CaptionServiceImplTest {
   // caption service
   private CaptionService service;
   // DFXP captions sample
-  private String dfxpSample;
+  private InputStream inputStream;
+  // Output stream
+  private ByteArrayOutputStream outputStream;
   // expected srt output
   private String expectedOutput = 
       "1\r\n"
@@ -72,60 +75,39 @@ public class CaptionServiceImplTest {
     };
 
     // loading sample
-    dfxpSample = parseInputStream(CaptionServiceImplTest.class.getResourceAsStream("/sample.dfxp.xml"));
+    inputStream = CaptionServiceImplTest.class.getResourceAsStream("/sample.dfxp.xml");
+    outputStream = new ByteArrayOutputStream();
+  }
+  
+  @Test
+  public void retrieveLanguageList() {
+    try {
+      List<String> langList = service.getLanguageList(inputStream, "DFXP");
+      Assert.assertNotNull(langList);
+      Assert.assertTrue(langList.contains("en"));
+      Assert.assertTrue(langList.contains("fr"));
+    } catch (Exception e) {
+      Assert.fail(e.getMessage());
+    }
   }
 
   @Test
-  public void testCoversionWithSpecifiedInputParameter() {
+  public void testCoversion() {
     try {
-      String result = service.convert(dfxpSample, "DFXP", "SubRip");
-      Assert.assertTrue(result.startsWith(expectedOutput));
+      service.convert(inputStream, "DFXP", outputStream, "SubRip", "en");
+      Assert.assertTrue(outputStream.toString("UTF-8").startsWith(expectedOutput));
     } catch (UnsupportedCaptionFormatException e) {
       Assert.fail(e.getMessage());
     } catch (IllegalCaptionFormatException e) {
       Assert.fail(e.getMessage());
-    }
-  }
-
-  @Test
-  public void testConversionWithAutoFind() {
-    try {
-      String result = service.convert(dfxpSample, "SubRip");
-      Assert.assertTrue(result.startsWith(expectedOutput));
-    } catch (UnsupportedCaptionFormatException e) {
-      Assert.fail(e.getMessage());
-    } catch (IllegalCaptionFormatException e) {
+    } catch (IOException e) {
       Assert.fail(e.getMessage());
     }
   }
-
-  /**
-   * Loading sample from {@link InputStream}.
-   * 
-   * @param is
-   * @return
-   * @throws IOException
-   */
-  private String parseInputStream(InputStream is) throws IOException {
-    if (is != null) {
-      // initialize StringBuffer
-      StringBuffer buffer = new StringBuffer();
-      String line;
-      BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-      try {
-        while ((line = reader.readLine()) != null) {
-          buffer.append(line).append(System.getProperty("line.separator"));
-        }
-        reader.close();
-      } catch (IOException e) {
-        throw e;
-      } finally {
-        reader.close();
-        is.close();
-      }
-      return buffer.toString();
-    } else {
-      return "";
-    }
+  
+  @After
+  public void tear() throws IOException {
+    inputStream.close();
+    outputStream.close();
   }
 }

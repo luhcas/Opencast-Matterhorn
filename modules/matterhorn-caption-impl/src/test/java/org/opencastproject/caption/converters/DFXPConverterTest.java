@@ -16,18 +16,16 @@
 package org.opencastproject.caption.converters;
 
 import org.opencastproject.caption.api.CaptionCollection;
-import org.opencastproject.caption.converters.DFXPCaptionConverter;
 
 import junit.framework.Assert;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.regex.Pattern;
 
 /**
  * 
@@ -37,62 +35,37 @@ import java.util.regex.Pattern;
 public class DFXPConverterTest {
 
   // converter
-  private DFXPCaptionConverter DFXPConverter;
+  private DFXPCaptionConverter dfxpConverter;
   // sample
-  private String dfxpSample;
+  private InputStream inputStream;
+  // resulting output stream
+  private ByteArrayOutputStream outputStream;
   // expected output
   private String expectedOutput = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 
   @Before
   public void setup() throws IOException {
-    DFXPConverter = new DFXPCaptionConverter();
-    InputStream input = DFXPConverterTest.class.getResourceAsStream("/sample.dfxp.xml");
-    // load sample as string
-    dfxpSample = parseInputStream(input);
+    dfxpConverter = new DFXPCaptionConverter();
+    inputStream = DFXPConverterTest.class.getResourceAsStream("/sample.dfxp.xml");
+    outputStream = new ByteArrayOutputStream();
   }
 
   @Test
   public void testDFXPConversion() {
     try {
-      // verify pattern matching
-      Assert.assertTrue(Pattern.compile(DFXPConverter.getIdPattern()).matcher(dfxpSample).find());
       // verify conversion parsing and exporting without exception
-      CaptionCollection collection = DFXPConverter.importCaption(dfxpSample);
-      String dfxp = DFXPConverter.exportCaption(collection);
-      Assert.assertTrue(dfxp.startsWith(expectedOutput));
+      CaptionCollection collection = dfxpConverter.importCaption(inputStream, "en");
+      dfxpConverter.exportCaption(outputStream, collection, "en");
+      Assert.assertTrue(outputStream.toString("UTF-8").startsWith(expectedOutput));
     } catch (Exception e) {
       e.printStackTrace();
       Assert.fail(e.getMessage());
     }
   }
-
-  /**
-   * Loading sample from {@link InputStream} as String.
-   * 
-   * @param is
-   * @return
-   * @throws IOException
-   */
-  private String parseInputStream(InputStream is) throws IOException {
-    if (is != null) {
-      // initialize StringBuffer
-      StringBuffer buffer = new StringBuffer();
-      String line;
-      BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-      try {
-        while ((line = reader.readLine()) != null) {
-          buffer.append(line).append(System.getProperty("line.separator"));
-        }
-        reader.close();
-      } catch (IOException e) {
-        throw e;
-      } finally {
-        reader.close();
-        is.close();
-      }
-      return buffer.toString();
-    } else {
-      return "";
-    }
+  
+  @After
+  public void tear() throws IOException {
+    inputStream.close();
+    outputStream.close();
   }
 }

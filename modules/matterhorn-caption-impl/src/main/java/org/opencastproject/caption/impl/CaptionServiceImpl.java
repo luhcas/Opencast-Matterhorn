@@ -27,26 +27,25 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.List;
 
 /**
  * Implementation of {@link CaptionService}. Uses {@link ComponentContext} to get all registered
- * {@link CaptionConverter}s. When trying to determine input format of all {@link CaptionConverter}s is traversed and
- * first regex match of specific format will be set as input format. If format is specified, only those
- * {@link CaptionConverter}s are searched that has <code>caption.format</code> property set to specified name. If none
- * is found or input cannot be determined {@link UnsupportedCaptionException} is thrown.
+ * {@link CaptionConverter}s. Converters are searched based on <code>caption.format</code> property. If there is no
+ * match for specified input or output format {@link UnsupportedCaptionFormatException} is thrown.
  * 
  */
 public class CaptionServiceImpl implements CaptionService {
 
-  // private static final String NEWLINE = System.getProperty("line.separator");
+  /** Logging utility */
   private static final Logger logger = LoggerFactory.getLogger(CaptionServiceImpl.class);
 
+  /** Component context needed for retrieving Converter Engines */
   protected ComponentContext componentContext = null;
-
-  // TODO add reference to working file repository if we will add files as well
 
   /**
    * Activate this service implementation via the OSGI service component runtime
@@ -56,59 +55,48 @@ public class CaptionServiceImpl implements CaptionService {
   }
 
   /**
+   * 
    * {@inheritDoc}
    * 
-   * @throws IOException
-   * @throws IllegalCaptionFormatException
    * @see org.opencastproject.caption.api.CaptionService#convert(java.io.InputStream, java.lang.String,
-   *      java.lang.String)
+   *      java.io.OutputStream, java.lang.String, java.lang.String)
    */
   @Override
-  public String convert(String input, String inputFormat, String outputType) throws UnsupportedCaptionFormatException,
-          IllegalCaptionFormatException {
-    if (inputFormat == null || outputType == null) {
+  public void convert(InputStream input, String inputFormat, OutputStream output, String outputFormat, String language)
+          throws UnsupportedCaptionFormatException, IllegalCaptionFormatException, IOException {
+    if (inputFormat == null || outputFormat == null) {
       // or just spit warning and find format?
-      throw new UnsupportedCaptionFormatException("null");
+      throw new UnsupportedCaptionFormatException("<null>");
     }
 
-    // logger.info("Reading stream...");
-    // String input = parseInputStream(is);
+    // TODO sanitize language
 
-    logger.debug("Atempting to convert from {} to {}...", inputFormat, outputType);
+    logger.debug("Atempting to convert from {} to {}...", inputFormat, outputFormat);
     CaptionCollection collection;
-    collection = importCaptions(input, inputFormat);
+    // FIXME perform language check
+    collection = importCaptions(input, inputFormat, language);
     logger.debug("Parsing to collection succeeded.");
-    String output = exportCaptions(collection, outputType);
-    logger.debug("Conversion succeeded.");
-    return output;
+    exportCaptions(collection, output, outputFormat, language);
   }
 
   /**
+   * 
    * {@inheritDoc}
    * 
-   * @throws IOException
-   * @throws IllegalCaptionFormatException
-   * 
-   * @see org.opencastproject.caption.api.CaptionService#convert(java.io.InputStream, java.lang.String)
+   * @see org.opencastproject.caption.api.CaptionService#getLanguageList(java.io.InputStream, java.lang.String)
    */
   @Override
-  public String convert(String input, String outputType) throws UnsupportedCaptionFormatException,
+  public List<String> getLanguageList(InputStream input, String format) throws UnsupportedCaptionFormatException,
           IllegalCaptionFormatException {
-    if (outputType == null) {
-      throw new UnsupportedCaptionFormatException("null");
+
+    if (format == null) {
+      throw new UnsupportedCaptionFormatException("<null>");
     }
-
-    // logger.info("Reading stream...");
-    // String input = parseInputStream(is);
-
-    logger.debug("Atempting to convert to {}...", outputType);
-    CaptionCollection collection;
-    // directly import captions
-    collection = importCaptions(input);
-    logger.debug("Parsing to collection succeeded.");
-    String output = exportCaptions(collection, outputType);
-    logger.debug("Converting succeeded.");
-    return output;
+    CaptionConverter converter = getCaptionConverter(format);
+    if (converter == null) {
+      throw new UnsupportedCaptionFormatException(format);
+    }
+    return converter.getLanguageList(input);
   }
 
   /**
@@ -168,80 +156,30 @@ public class CaptionServiceImpl implements CaptionService {
   }
 
   /**
-   * Traverses through the {@link CaptionConverter}'s hash map to match input with every format's signature. Returns
-   * first {@link CaptionConverter} whose signature is matched or null if there is no match.
+   * Imports captions using registered converter engine and specified language.
    * 
    * @param input
-   *          String representation of captions
-   * @return corresponding {@link CaptionConverter} or <code>null</code> if format is not recognized
-   */
-  private CaptionConverter autoDetectCaptionFormat(String input) {
-
-    HashMap<String, CaptionConverter> availableConverters = getAvailableCaptionConverters();
-
-    for (CaptionConverter format : availableConverters.values()) {
-      Pattern pattern = Pattern.compile(format.getIdPattern());
-      Matcher matcher = pattern.matcher(input);
-      if (matcher.find()) {
-        // return first matching format
-        return format;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * Imports captions and returns {@link CaptionCollection}. If format cannot be determined from captions,
-   * {@link UnsupportedCaptionFormatException} is thrown. If there is an exception while parsing caption string,
-   * {@link IllegalCaptionFormatException} is thrown.
-   * 
-   * @param input
-   *          String representation of captions
-   * @return {@link CaptionCollection} of captions
-   * @throws UnsupportedCaptionFormatException
-   *           if input format cannot be determined
-   * @throws IllegalCaptionFormatException
-   *           if exception occurs while parsing captions
-   */
-  private CaptionCollection importCaptions(String input) throws UnsupportedCaptionFormatException,
-          IllegalCaptionFormatException {
-    logger.debug("Atempting to recognise input format...");
-    CaptionConverter converter = autoDetectCaptionFormat(input);
-    if (converter == null) {
-      throw new UnsupportedCaptionFormatException("null");
-    }
-    logger.debug("Input format recognised as {}.", converter.getName());
-    return converter.importCaption(input);
-  }
-
-  /**
-   * Imports captions with specified format. Throws {@link UnsupportedCaptionFormatException} if format is not supported
-   * or {@link IllegalCaptionFormatException} if captions fail regex check with format id pattern.
-   * 
-   * @param input
-   *          String representation of captions
+   *          stream from which captions are imported
    * @param inputFormat
-   *          captions format
-   * @return {@link CaptionCollection} of captions
+   *          format of imported captions
+   * @param language
+   *          (optional) captions' language
+   * @return {@link CaptionCollection} of parsed captions
    * @throws UnsupportedCaptionFormatException
-   *           if format is not supported
+   *           if there is no registered engine for given format
    * @throws IllegalCaptionFormatException
-   *           if captions fail regex check for specified format
+   *           if parser encounters exception
    */
-  private CaptionCollection importCaptions(String input, String inputFormat) throws UnsupportedCaptionFormatException,
-          IllegalCaptionFormatException {
+  private CaptionCollection importCaptions(InputStream input, String inputFormat, String language)
+          throws UnsupportedCaptionFormatException, IllegalCaptionFormatException {
     // get input format
     CaptionConverter converter = getCaptionConverter(inputFormat);
     if (converter == null) {
       logger.error("No available caption format found for {}.", inputFormat);
       throw new UnsupportedCaptionFormatException(inputFormat);
     }
-    // check for pattern matching between format and input
-    if (!Pattern.compile(converter.getIdPattern()).matcher(input).find()) {
-      logger.error("Captions do not match format pattern {}.", converter.getIdPattern());
-      throw new IllegalCaptionFormatException("Input does not match format pattern for " + converter.getName());
-    }
-    return converter.importCaption(input);
+    // TODO check if collection is empty
+    return converter.importCaption(input, language);
   }
 
   /**
@@ -250,41 +188,25 @@ public class CaptionServiceImpl implements CaptionService {
    * 
    * @param collection
    *          {@link CaptionCollection} to be exported
+   * @param output
+   *          where to export caption collection
    * @param outputFormat
    *          format of exported collection
-   * @return String representation of exported collection
+   * @param language
+   *          (optional) captions' language
    * @throws UnsupportedCaptionFormatException
-   *           if format is not supported
+   *           if there is no registered engine for given format
+   * @throws IOException
+   *           if exception occurs while writing to output stream
    */
-  private String exportCaptions(CaptionCollection collection, String outputFormat)
-          throws UnsupportedCaptionFormatException {
+  private void exportCaptions(CaptionCollection collection, OutputStream output, String outputFormat, String language)
+          throws UnsupportedCaptionFormatException, IOException {
     CaptionConverter converter = getCaptionConverter(outputFormat);
     if (converter == null) {
       logger.error("No available caption format found for {}.", outputFormat);
-      throw new UnsupportedCaptionFormatException("Unknown caption format: " + outputFormat);
+      throw new UnsupportedCaptionFormatException(outputFormat);
     }
-    return converter.exportCaption(collection);
-  }
 
-  // private String parseInputStream(InputStream is) throws IOException {
-  // if (is != null) {
-  // initialize StringBuffer
-  // StringBuffer buffer = new StringBuffer();
-  // String line;
-  // BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-  // try {
-  // while ((line = reader.readLine()) != null) {
-  // buffer.append(line).append(NEWLINE);
-  // }
-  // reader.close();
-  // } catch (IOException e) {
-  // throw e;
-  // } finally {
-  // reader.close();
-  // }
-  // return buffer.toString();
-  // } else {
-  // return "";
-  // }
-  // }
+    converter.exportCaption(output, collection, language);
+  }
 }

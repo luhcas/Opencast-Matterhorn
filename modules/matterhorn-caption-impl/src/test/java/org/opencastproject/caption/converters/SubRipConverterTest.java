@@ -16,19 +16,16 @@
 package org.opencastproject.caption.converters;
 
 import org.opencastproject.caption.api.CaptionCollection;
-import org.opencastproject.caption.api.IllegalCaptionFormatException;
-import org.opencastproject.caption.converters.SubRipCaptionConverter;
 
 import junit.framework.Assert;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.regex.Pattern;
 
 
 /**
@@ -40,7 +37,9 @@ public class SubRipConverterTest {
   // SubRip converter
   private SubRipCaptionConverter format;
   // srt sample
-  private String srtSample;
+  private InputStream inputStream;
+  // output stream
+  private ByteArrayOutputStream outputStream;
   // expected output
   private String expectedOutput =
       "1\r\n" +
@@ -51,51 +50,26 @@ public class SubRipConverterTest {
   @Before
   public void setup() throws IOException{
     format = new SubRipCaptionConverter();
-    InputStream input = SubRipConverterTest.class.getResourceAsStream("/sample.srt");
-    // loading sample as string
-    srtSample = parseInputStream(input);
+    inputStream = SubRipConverterTest.class.getResourceAsStream("/sample.srt");
+    outputStream = new ByteArrayOutputStream();
   }
   
   @Test
   public void testImportAndExport(){
-    // verify pattern matching
-    Assert.assertTrue(Pattern.compile(format.getIdPattern()).matcher(srtSample).find());
     try {
       // verify parsing and exporting without exceptions
-      CaptionCollection collection = format.importCaption(srtSample);
-      String srt = format.exportCaption(collection);
-      Assert.assertTrue(srt.startsWith(expectedOutput));
-    } catch (IllegalCaptionFormatException e) {
+      CaptionCollection collection = format.importCaption(inputStream, null);
+      format.exportCaption(outputStream, collection, null);
+      Assert.assertTrue(outputStream.toString("UTF-8").startsWith(expectedOutput));
+    } catch (Exception e) {
+      e.printStackTrace();
       Assert.fail(e.getMessage());
     }
   }
   
-  /**
-   * Loading sample from {@link InputStream} as String.
-   * @param is
-   * @return
-   * @throws IOException
-   */
-  private String parseInputStream(InputStream is) throws IOException {
-    if (is != null) {
-      // initialize StringBuffer
-      StringBuffer buffer = new StringBuffer();
-      String line;
-      BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-      try {
-        while ((line = reader.readLine()) != null) {
-          buffer.append(line).append(System.getProperty("line.separator"));
-        }
-        reader.close();
-      } catch (IOException e) {
-        throw e;
-      } finally {
-        reader.close();
-        is.close();
-      }
-      return buffer.toString();
-    } else {
-      return "";
-    }
+  @After
+  public void tear() throws IOException{
+    inputStream.close();
+    outputStream.close();
   }
 }
