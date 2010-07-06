@@ -249,14 +249,21 @@ Opencast.Watch = (function ()
       $("#" + segmentId).toggleClass("segment-holder-over");
 
       var index = parseInt(segmentId.substr(7)) - 1;
-      $("#segment-tooltip").html('<img src="' + Opencast.segments.getSegmentPreview(index) + '" height="30"/>');
+      
+      var imageHeight = 120;
+      
+      if ($.browser.msie) {
+        imageHeight = 30;
+      }
+      
+      $("#segment-tooltip").html('<img src="' + Opencast.segments.getSegmentPreview(index) + '" height="' + imageHeight + '"/>');
 
       var segmentLeft = $("#" + segmentId).offset().left;
       var segmentTop = $("#" + segmentId).offset().top;
       var segmentWidth = $("#" + segmentId).width();
       var tooltipWidth = $("#segment-tooltip").width();
       $("#segment-tooltip").css("left", (segmentLeft + segmentWidth/2 - tooltipWidth/2) + "px");
-      $("#segment-tooltip").css("top", segmentTop-37 + "px");
+      $("#segment-tooltip").css("top", segmentTop - (imageHeight + 7) + "px");
       $("#segment-tooltip").show();
     }
     
