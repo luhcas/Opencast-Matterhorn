@@ -181,7 +181,7 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     # Writes device to the config file
     echo "$DEVICE_PREFIX.${cleanName[$i]}.$SOURCE_SUFFIX=/dev/$symlinkName" >> $CAPTURE_PROPS
     echo "$DEVICE_PREFIX.${cleanName[$i]}.$OUT_SUFFIX=${cleanName[$i]}" >> $CAPTURE_PROPS
-    echo "$DEFICE_PREFIX.${cleanName[$i]}.$FLAVOR_SUFFIX=$flavor" >> $CAPTURE_PROPS
+    echo "$DEVICE_PREFIX.${cleanName[$i]}.$FLAVOR_SUFFIX=$flavor" >> $CAPTURE_PROPS
     echo "$DEVICE_PREFIX.${cleanName[$i]}.$QUEUE_SUFFIX=$((q_size*1024))" >> $CAPTURE_PROPS
     allDevices="${allDevices}${cleanName[$i]},"
     
