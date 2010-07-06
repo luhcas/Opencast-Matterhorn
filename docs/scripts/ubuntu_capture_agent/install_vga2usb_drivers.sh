@@ -55,7 +55,7 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
  	    if [[ $opt -eq ${#drivers[@]} ]]; then
 	        # The option is "Enter URL" -- ask the user for the driver url
 		unset DRIVER_URL
-		ask -? "$HELP_MSG" "Please input the URL of the driver you would like to load" DRIVER_URL
+		ask -? "$VGA2USB_HELP_MSG" "Please input the URL of the driver you would like to load" DRIVER_URL
 	  
 		# Keeps whatever it is after the last / --the file name
   	        EPIPHAN=${DRIVER_URL##*/}
