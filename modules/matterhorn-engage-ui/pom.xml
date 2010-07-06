@@ -53,7 +53,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-search-service-impl</artifactId>
+      <artifactId>matterhorn-search-service-api</artifactId>
       <version>1.1-SNAPSHOT</version>
     </dependency>
   </dependencies>
