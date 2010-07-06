@@ -242,6 +242,16 @@ public class WorkflowServiceImplTest {
       Assert.fail("Workflows should not be started with bad parent IDs");
     } catch(IllegalArgumentException e) {} // the exception is expected
     
+    // Wait for the workflows to finish running
+    while (!service.getWorkflowById(originalInstance.getId()).getState().equals(WorkflowState.SUCCEEDED) &&
+            !service.getWorkflowById(childInstance.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
+      System.out.println("Waiting for workflows to complete...");
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+      }
+    }
+
     // cleanup the database
     service.removeFromDatabase(childInstance.getId());
     service.removeFromDatabase(originalInstance.getId());
