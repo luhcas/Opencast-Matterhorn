@@ -93,77 +93,22 @@ Opencast.segments = ( function() {
       $(".oc_btn-skip-forward").hide();
     }
 
-    
-    // set the center of the controls
-    var margin = $('#oc_video-controls').width();
+    var margin = 0;
     var controlswith = 0;
-    var playerWidth = $('#oc_video-player-controls').width();
-    
-    
-    
+
+    margin = $('#oc_video-controls').width();
+
     if (Opencast.segments.getSlideLength() === 0)
     {
-        controlswith = 58;
-        margin = ((margin - controlswith) / 2 ) - 8;
-        $(".oc_btn-rewind").css("margin-left", margin + "px");
+    	controlswith = 58;
+    	margin = ((margin - controlswith) / 2 ) - 8;
+    	 $(".oc_btn-rewind").css("margin-left", margin + "px");
     }
     else
     {
-        controlswith = 90;
-        margin = ((margin - controlswith) / 2 ) - 8;
-        $('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
-    }
-    
-    // player size
-    if( playerWidth < 450 && playerWidth >= 380)
-    {
-        $(".oc_btn-skip-backward").css('display','none');
-        $(".oc_btn-skip-forward").css('display','none');
-        $('#oc_video-controls').css('width','20%');
-        $('#oc_video-cc').css('width','12%');
-        $('#oc_video-time').css('width','40%');
-        $('.oc_slider-volume-Rail').css('width', '45px');
-        controlswith = 58;
-        margin = $('#oc_video-controls').width();
-        margin = ((margin - controlswith) / 2 ) - 8;
-        $(".oc_btn-rewind").css("margin-left", margin + "px");
-    }
-    else if (playerWidth < 380 && playerWidth >= 300)
-    {
-        $(".oc_btn-skip-backward").css('display','none');
-        $(".oc_btn-skip-forward").css('display','none');
-        
-        $(".oc_btn-rewind").css('display','none');
-        $(".oc_btn-fast-forward").css('display','none');
-        
-        $("#oc_video-cc").css('display','none');
-        $("#oc_video-cc").css('width','0%');
-        
-        
-        
-        $('#simpleEdit').css('font-size','0.8em');
-        $('#simpleEdit').css('margin-left','1px');
-        
-        $('#oc_current-time').css('width','45px');
-        $('#oc_edit-time').css('width','45px');
-        $('#oc_duration').css('width','45px');
-        $('#oc_edit-time-error').css('width','45px');
-        
-        
-        
-        $('#oc_sound').css('width','27%');
-        
-        $('#oc_video-controls').css('width','8%');
-        
-        
-        $('#oc_video-time').css('width','48%');
-        
-        $('.oc_slider-volume-Rail').css('width', '45px');
-        
-        controlswith = 16;
-        margin = $('#oc_video-controls').width();
-        margin = ((margin - controlswith) / 2 ) - 8;
-        $("#oc_btn-play-pause").css("margin-left", margin + "px");
+    	controlswith = 90;
+    	margin = ((margin - controlswith) / 2 ) - 8;
+    	$('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
     }
 
 
