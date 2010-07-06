@@ -59,41 +59,50 @@ public class InboxScanner implements ArtifactInstaller {
    * @see org.apache.felix.fileinstall.ArtifactInstaller#install(java.io.File)
    */
   public void install(File artifact) throws Exception {
-    boolean mediaPackageIngestSuccess = false;
-    if("zip".equals(FilenameUtils.getExtension(artifact.getName()))) {
-      FileInputStream in = null;
-      try {
-        in = new FileInputStream(artifact);
-        ingestService.addZippedMediaPackage(in);
-        logger.info("Ingested '{}' as a mediapackage", artifact.getAbsolutePath());
-        mediaPackageIngestSuccess = true;
-      } catch(IOException e) {
-        logger.debug("Unable to ingest mediapackage '{}', {}", artifact.getAbsolutePath(), e);
-      } finally {
-        IOUtils.closeQuietly(in);
-      }
-    }
-
-    if(!mediaPackageIngestSuccess) {
-      FileInputStream in = null;
-      try {
-        in = new FileInputStream(artifact);
-        workspace.putInCollection("inbox", artifact.getName(), in);
-        logger.info("Ingested '{}' as an inbox file", artifact.getAbsolutePath());
-      } catch(IOException e) {
-        logger.warn("Unable to process inbox file '{}', {}", artifact.getAbsolutePath(), e);
-      } finally {
-        IOUtils.closeQuietly(in);
-      }
-    }
-
-    try {
-      FileUtils.forceDelete(artifact);
-    } catch(IOException e) {
-      logger.warn("Unable to delete file {}, {}", artifact.getAbsolutePath(), e);
-    }
+    new Thread(getInstallRunnable(artifact)).start();
   }
 
+  protected Runnable getInstallRunnable(final File artifact) {
+    final IngestService finalIngestService = ingestService;
+    return new Runnable() {
+      public void run() {
+        boolean mediaPackageIngestSuccess = false;
+        if("zip".equals(FilenameUtils.getExtension(artifact.getName()))) {
+          FileInputStream in = null;
+          try {
+            in = new FileInputStream(artifact);
+            finalIngestService.addZippedMediaPackage(in);
+            logger.info("Ingested '{}' as a mediapackage", artifact.getAbsolutePath());
+            mediaPackageIngestSuccess = true;
+          } catch(Exception e) {
+            logger.debug("Unable to ingest mediapackage '{}', {}", artifact.getAbsolutePath(), e);
+          } finally {
+            IOUtils.closeQuietly(in);
+          }
+        }
+
+        if(!mediaPackageIngestSuccess) {
+          FileInputStream in = null;
+          try {
+            in = new FileInputStream(artifact);
+            workspace.putInCollection("inbox", artifact.getName(), in);
+            logger.info("Ingested '{}' as an inbox file", artifact.getAbsolutePath());
+          } catch(IOException e) {
+            logger.warn("Unable to process inbox file '{}', {}", artifact.getAbsolutePath(), e);
+          } finally {
+            IOUtils.closeQuietly(in);
+          }
+        }
+
+        try {
+          FileUtils.forceDelete(artifact);
+        } catch(IOException e) {
+          logger.warn("Unable to delete file {}, {}", artifact.getAbsolutePath(), e);
+        }
+      }
+    };
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.apache.felix.fileinstall.ArtifactInstaller#uninstall(java.io.File)
