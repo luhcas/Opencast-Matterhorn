@@ -27,6 +27,8 @@ import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 
 /**
@@ -55,7 +57,17 @@ public class SerializeJob implements Job {
     CaptureAgentImpl ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
     
     // Creates manifest
-    boolean manifestCreated = ca.createManifest(recordingID);
+    boolean manifestCreated;
+    try {
+      manifestCreated = ca.createManifest(recordingID);
+    } catch (NoSuchAlgorithmException e1) {
+      logger.error("Unable to create manifest, NoSuchAlgorithmException was thrown: {}.", e1.getMessage());
+      throw new JobExecutionException("Unable to create manifest, NoSuchAlgorithmException was thrown.");
+    } catch (IOException e1) {
+      logger.error("Unable to create manifest, IOException was thrown: {}.", e1.getMessage());
+      throw new JobExecutionException("Unable to create manifest, IOException was thrown.");
+    }
+
     if (!manifestCreated) {
       throw new JobExecutionException("Unable to create manifest properly, serialization job failed but will retry.");
     }

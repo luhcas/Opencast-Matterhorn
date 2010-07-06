@@ -18,6 +18,8 @@ package org.opencastproject.capture.impl;
 import org.opencastproject.capture.admin.api.AgentState;
 
 import java.io.File;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Implementation of shell commands for the capture agent.
@@ -78,8 +80,16 @@ public class CaptureAgentShellCommands {
       return;
     }
 
-    if (!agent.createManifest(recordingId)) {
-      System.out.println("Error creating manifest, aborting!");
+    try {
+      if (!agent.createManifest(recordingId)) {
+        System.out.println("Error creating manifest, aborting!");
+        return;
+      }
+    } catch (NoSuchAlgorithmException e1) {
+      System.err.println("Unable to create manifest, NoSuchAlgorithmException was thrown: " + e1.getMessage());
+      return;
+    } catch (IOException e1) {
+      System.err.println("Unable to create manifest, IOException was thrown: " + e1.getMessage());
       return;
     }
 
