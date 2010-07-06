@@ -77,7 +77,7 @@ Monitor.videoDevice = function(index){
 		Monitor.updateImg();
 		clearInterval(Monitor.intervalImgId);
 	}
-	Monitor.intervalImgId = setInterval(Monitor.updateImg, 30000); //30 Second refresh on image.
+	Monitor.intervalImgId = setInterval(Monitor.updateImg, 5000); //5 Second refresh on image.
 }
 
 Monitor.audioDevice = function(index){
@@ -86,7 +86,7 @@ Monitor.audioDevice = function(index){
 		Monitor.updateAudio();
 		clearInterval(Monitor.intervalAudioId);
 	}
-	Monitor.intervalAudioId = setInterval(Monitor.updateAudio, 5000); //5 Second refresh on audio
+	Monitor.intervalAudioId = setInterval(Monitor.updateAudio, 1000); //1 Second refresh on audio
 }
 
 Monitor.updateImg = function(){
@@ -104,16 +104,16 @@ Monitor.updateAudio = function(){
 		if(dbLevel && dbLevel != 'NaN'){
 			AudioBar.setValue(dbLevel);
 		}else{
-		  AudioBar.setValue(-100); //no audio
+		  AudioBar.setValue(0); //no audio
 			log('Bad audio levels', dbLevel, data);
 		}
 	});
 }
 
 AudioBar.setValue = function(dbLevel){
-	var level_pct = Math.round((1 - Math.pow(10, dbLevel/20)) * 100);
+	var level_pct = Math.round(dbLevel * 100);
 	log(level_pct, dbLevel);
-	$('#dbValue').text(dbLevel + 'dB');
+	$('#dbValue').text(dbLevel + '%');
   $('#left_mask').css('height', level_pct + "%");
   //$('#right_mask').css('height', right_pct + "%");
 }
