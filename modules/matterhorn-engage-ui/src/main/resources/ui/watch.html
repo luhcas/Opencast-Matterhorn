@@ -46,7 +46,10 @@
   </noscript>
   <div id="skip">
   <a href="#controls">Skip to player controls</a>
-  </div>    
+  </div>
+    <div id="skip">
+  <a href="#shortcuts" onclick="Opencast.Player.doToggleShortcuts()">Skip to Shortcuts</a>
+  </div>   
   <div id="oc_title-bar" style="padding-top:5px;">
       <div id="oc_title-bar-container">
       <div id="oc_title-bar-logo">
@@ -57,15 +60,13 @@
     </div>
     <div id="oc_search">    
       <form action="index.html">
+        <label id="skip" for="oc_searchField">Search Field</label>
         <input id="oc_searchField" class="oc_search-Field" type="text" name="q" value="Search Matterhorn" />
         <input id="oc_btn-search" type="submit" name="search" alt="search" title="search" value="Search"></input>
       </form>
     </div>
     </div>  
   </div>
-  <div id="skip">
-  <a href="#shortcuts" onclick="Opencast.Player.doToggleShortcuts()">Skip to Shortcuts</a>
-  </div>    
   <div id="oc_body">
       
     <div id="oc_flash-player">
