@@ -226,6 +226,9 @@ Opencast.Watch = (function ()
           $('#oc_slidetext-left').html($('#oc-segments-text').html());
 
           $('#oc-segments-text').html("");
+          
+          // set the controls visible
+          $('#oc_video-player-controls').css('visibility', 'visible');
        });
     }
   
