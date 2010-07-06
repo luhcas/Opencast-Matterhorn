@@ -150,7 +150,7 @@ public class AdminuiRestService {
     } catch (Exception e) {
       page = new AdminRecordingListImpl();
     }
-    int first,last;
+    int first, last;
     if (out.size() <= pageSize) {
       first = 0;
       last = out.size();
@@ -294,6 +294,13 @@ public class AdminuiRestService {
    */
   public HashMap<String, Integer> getRecordingsStatistic() {
     HashMap<String, Integer> out = new HashMap<String, Integer>();
+    out.put("all", new Integer(0));           // init output data with zeros
+    out.put("capturing", new Integer(0));
+    out.put("processing", Integer.valueOf(0));
+    out.put("inactive", Integer.valueOf(0));
+    out.put("failed", Integer.valueOf(0));
+    out.put("finished", Integer.valueOf(0));
+    out.put("hold", Integer.valueOf(0));
     Integer total = 0;
 
     if (captureAdminService != null) {
