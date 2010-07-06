@@ -44,6 +44,7 @@
         $('#filename-container').text(UploadListener.filename).css('display','table-cell');
         var uploadFrame = document.getElementById("filechooser-ajax");
         var mp = uploadFrame.contentWindow.document.getElementById("mp").value;
+        parent.Recordings.changedMediaPackage = mp;
         //alert(mp);
       }
       UploadListener.uploadFailed = function() {
