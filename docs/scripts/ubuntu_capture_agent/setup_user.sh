@@ -16,31 +16,31 @@ fi
 ask -d "$USERNAME" "Input desired opencast username" input
 
 # Add user and give sudo priveleges and permissions for accessing audio/video devices
-useradd -m -s /bin/bash $USERNAME
+useradd -m -s /bin/bash "$input"
 var=$?
 if [[ $var -eq 0 ]]; then
     # Ask for the user password
     for i in $(seq 1 $MAX_PASSWD_ATTEMPTS); do
-	passwd $USERNAME
-	if [[ $? -eq 0 ]]; then
-	    echo "$USERNAME password updated succesfully"
-	    break
-	elif [[ $i -eq $MAX_PASSWD_ATTEMPTS ]]; then
-	    echo "Error. Too many password attempts. Aborting."
-	    deluser $USERNAME --quiet --remove-home
-	    exit 1
-	fi
-   done
+	    passwd "$input"
+	    if [[ $? -eq 0 ]]; then
+	        echo "$input password updated succesfully"
+	        break
+	    elif [[ $i -eq $MAX_PASSWD_ATTEMPTS ]]; then
+	        echo "Error. Too many password attempts. Aborting."
+	        deluser "$input" --quiet --remove-home
+	        exit 1
+	    fi
+    done
 elif [[ $var -ne 9 ]]; then
-    echo "Error when creating the $USERNAME user"
+    echo "Error when creating the $input user"
     exit 1
 fi
 
 # Setting up user's permissions by including it in the appropriate groups
-usermod -aG admin,video,audio $USERNAME
+usermod -aG admin,video,audio "$input"
 
 # Exports the username, its home and other directories depending on them
-export USERNAME=$USERNAME
+export USERNAME="$input"
 export HOME=$(grep "^${USERNAME}:" /etc/passwd | cut -d: -f 6)
 if [[ -z "$HOME" ]]; then
     echo "Error: the specified user doesn't exist or doesn't have a HOME folder"
