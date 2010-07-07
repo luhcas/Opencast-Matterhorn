@@ -1319,6 +1319,7 @@ Opencast.Player = (function () {
             $("#oc_current-time").attr("title", text);
             $("#oc_edit-time").attr("value", text);
             $("#slider_seek_Rail").attr("title", "Time " + text);
+            $("#scrubber").attr("aria-valuenow", text)
         }
         currentTimeString = text;
     }
@@ -1341,6 +1342,8 @@ Opencast.Player = (function () {
     function setTotalTime(text) 
     {
         $("#oc_duration").text(text);
+        $("#scrubber").attr("aria-valuemin","00:00:00");
+        $("#scrubber").attr("aria-valuemax",text);
         setDurationText(text);
     }
     

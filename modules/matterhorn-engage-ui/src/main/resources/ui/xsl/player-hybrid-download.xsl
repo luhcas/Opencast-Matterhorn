@@ -2,11 +2,12 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:ns2="http://search.opencastproject.org/" version="1.0">
   <xsl:template match="/">
     <div id="oc_seek-slider">
+    <label id="skip" for="srubber">Time Slider</label>
       <div class="progress-list">
         <span class="load-progress" value="0"/>
         <span id="play-progress" class="play-progress" value="0" style="width: 0%;"/>
         <span id="scubber-channel" class="scrubber-channel">
-          <button id="scrubber" class="scrubber-button"/>
+          <button id="scrubber" class="scrubber-button" role="slider"/>
           <div id="draggable" class="ui-widget-content" style="left: 0%;" value="test"/>
         </span>
       </div>
