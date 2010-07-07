@@ -1319,7 +1319,7 @@ Opencast.Player = (function () {
             $("#oc_current-time").attr("title", text);
             $("#oc_edit-time").attr("value", text);
             $("#slider_seek_Rail").attr("title", "Time " + text);
-            $("#scrubber").attr("aria-valuenow", text)
+            $("#scrubber").attr("aria-valuenow", text);
         }
         currentTimeString = text;
     }

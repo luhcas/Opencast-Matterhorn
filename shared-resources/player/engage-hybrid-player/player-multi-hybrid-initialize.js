@@ -838,6 +838,109 @@ Opencast.Initialize = (function ()
         doResize();
     }
     
+    function setEmbed()
+    {
+        var maxFormat = 0;
+        var otherDivHeight = 100;
+        var embedWidhtOne = 620;
+        var embedWidhtTwo = 540;
+        var embedWidhtThree = 460
+        var embedWidhtFour = 380;
+        var embedWidhtFive = 300;
+        
+        
+    	if(formatSingle !== 0)
+        {
+    		maxFormat = formatSingle;
+        }
+        else if(formatOne > formatTwo  )
+        {
+        	maxFormat = formatOne;
+        }
+        else
+        {
+        	maxFormat = formatTwo;
+        }
+    	
+    	var embedHeightOne = (embedWidhtOne / maxFormat) + otherDivHeight;
+    	var embedHeightTwo = (540 / maxFormat) + otherDivHeight;
+    	var embedHeightThree = (460 / maxFormat) + otherDivHeight;
+    	var embedHeightFour = (380 / maxFormat) + otherDivHeight;
+    	var embedHeightFive = (300 / maxFormat) + otherDivHeight;
+    	
+        
+    	
+    	$("#oc_embed-icon-one").css("width", "110px");
+    	$("#oc_embed-icon-one").css("height", "83px");
+    	$("#oc_embed-icon-one").attr({ 
+            alt: embedWidhtOne+' x '+embedHeightOne,
+            title: embedWidhtOne+' x '+embedHeightOne,
+            name: embedWidhtOne+' x '+embedHeightOne,
+            value: embedWidhtOne+' x '+embedHeightOne
+        });
+    	$('#oc_embed-icon-one').click(function () 
+    	{
+    		Opencast.Player.embedIFrame(embedWidhtOne, embedHeightOne);   
+    	});
+    	
+    	$("#oc_embed-icon-two").css("width", "100px");
+    	$("#oc_embed-icon-two").css("height", "75px");
+    	$("#oc_embed-icon-two").attr({ 
+    		alt: embedWidhtTwo+' x '+embedHeightTwo,
+            title: embedWidhtTwo+' x '+embedHeightTwo,
+            name: embedWidhtTwo+' x '+embedHeightTwo,
+            value: embedWidhtTwo+' x '+embedHeightTwo
+        });
+    	$('#oc_embed-icon-two').click(function () 
+    	{
+    	    Opencast.Player.embedIFrame(embedWidhtTwo, embedHeightTwo);   
+    	});
+    	
+    	$("#oc_embed-icon-three").css("width", "90px");
+    	$("#oc_embed-icon-three").css("height", "68px");
+    	$("#oc_embed-icon-three").attr({ 
+    		alt: embedWidhtThree+' x '+embedHeightThree,
+            title: embedWidhtThree+' x '+embedHeightThree,
+            name: embedWidhtThree+' x '+embedHeightThree,
+            value: embedWidhtThree+' x '+embedHeightThree
+        });
+    	$('#oc_embed-icon-three').click(function () 
+    	{
+    	    Opencast.Player.embedIFrame(embedWidhtThree, embedHeightThree);   
+    	});
+    	    	
+    	$("#oc_embed-icon-four").css("width", "80px");
+    	$("#oc_embed-icon-four").css("height", "60px");
+    	$("#oc_embed-icon-four").attr({ 
+    		alt: embedWidhtFour+' x '+embedHeightFour,
+            title: embedWidhtFour+' x '+embedHeightFour,
+            name: embedWidhtFour+' x '+embedHeightFour,
+            value: embedWidhtFour+' x '+embedHeightFour
+        });
+    	$('#oc_embed-icon-four').click(function () 
+    	{
+    	    Opencast.Player.embedIFrame(embedWidhtFour, embedHeightFour);   
+    	});
+    	    	    
+    	
+    	$("#oc_embed-icon-five").css("width", "70px");
+    	$("#oc_embed-icon-five").css("height", "52px");
+    	$("#oc_embed-icon-five").attr({ 
+    		alt: embedWidhtFive+' x '+embedHeightFive,
+            title: embedWidhtFive+' x '+embedHeightFive,
+            name: embedWidhtFive+' x '+embedHeightFive,
+            value: embedWidhtFive+' x '+embedHeightFive
+        });
+    	$('#oc_embed-icon-five').click(function () 
+    	{
+    	    Opencast.Player.embedIFrame(embedWidhtFive, embedHeightFive);   
+    	});
+        
+        
+        
+        
+    }
+    
 
     /**
         @memberOf Opencast.Player
@@ -867,6 +970,9 @@ Opencast.Initialize = (function ()
             var mediaSingleHeight = parseInt(mediaResolutionOneArray[1], 10);
             formatSingle = mediaSingleWidth / mediaSingleHeight;
         }
+        
+        // set the emed section
+        setEmbed();
     }
     return {
         doResize : doResize,

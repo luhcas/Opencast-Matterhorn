@@ -143,7 +143,6 @@ Opencast.Initialize = (function ()
        
         if (getDivId() === VIDEOSIZE)
         {
-            $('#oc_video-size-dropdown-div').css('width', '20%');
             $('#oc_player_video-dropdown').css('left', $('#oc_video-size-dropdown').offset().left - $('#oc_body').offset().left);
             $('#oc_player_video-dropdown').css('visibility', 'visible');
             $('#oc_volume-menue').css('visibility', 'hidden');
@@ -577,7 +576,7 @@ Opencast.Initialize = (function ()
         advancedUrl = embedUrl.replace(/embed.html/g, "watch.html");
         $("a[href='#']").attr('href', '' + advancedUrl + '');
         
-        $("#oc_image").attr('src', 'engage-hybrid-player/img/embed.png');
+        $("#oc_image").attr('src', 'engage-hybrid-player/img/MatterhornEmbedLogo.png');
         
        
         
