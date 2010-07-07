@@ -114,7 +114,7 @@ Opencast.segments = ( function() {
     }
     
  // player size
-    if( playerWidth < 450 && playerWidth >= 380)
+    if( playerWidth < 460 && playerWidth >= 380)
     {
         $(".oc_btn-skip-backward").css('display','none');
         $(".oc_btn-skip-forward").css('display','none');
