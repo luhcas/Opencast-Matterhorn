@@ -18,7 +18,7 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-analysis-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
     <!--  Thirdparty dependencies -->
@@ -84,10 +84,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Export-Package>
-              org.opencastproject.analysis.vsegmenter,
-              org.opencastproject.analysis.vsegmenter.endpoint
+              org.opencastproject.analysis.vsegmenter;version=${project.version},
+              org.opencastproject.analysis.vsegmenter.endpoint;version=${project.version}
             </Export-Package>
             <Embed-Dependency>
               jmf;inline=true

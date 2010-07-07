@@ -14,18 +14,18 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-composer-service-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-security-impl</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-remote-impl</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -81,7 +81,7 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-remote-impl</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -134,8 +134,8 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package>org.opencastproject.composer.remote</Export-Package>
+            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
+            <Export-Package>org.opencastproject.composer.remote;version=${project.version}</Export-Package>
             <Service-Component>OSGI-INF/composer-service-remote.xml</Service-Component>
           </instructions>
         </configuration>

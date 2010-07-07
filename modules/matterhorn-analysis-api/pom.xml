@@ -15,17 +15,17 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-kernel</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-mpeg7</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-remote-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -46,8 +46,8 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
-            <Export-Package>org.opencastproject.analysis.api</Export-Package>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Export-Package>org.opencastproject.analysis.api;version=${project.version}</Export-Package>
           </instructions>
         </configuration>
       </plugin>

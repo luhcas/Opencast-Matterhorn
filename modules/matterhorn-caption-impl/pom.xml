@@ -1,11 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.opencastproject</groupId>
   <artifactId>matterhorn-caption-impl</artifactId>
-  <packaging>bundle</packaging>
   <name>matterhorn-caption-impl</name>
-  <version>1.1-SNAPSHOT</version>
+  <packaging>bundle</packaging>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -15,17 +13,17 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-caption-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-kernel</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-workspace-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -70,15 +68,15 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
+            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Import-Package>
-              org.opencastproject.caption.api,
+              org.opencastproject.caption.api;version=${project.version},
               *;resolution:=optional
             </Import-Package>
             <Export-Package>
-              org.opencastproject.caption.impl,
-              org.opencastproject.caption.endpoint,
-              org.opencastproject.caption.converters
+              org.opencastproject.caption.impl;version=${project.version},
+              org.opencastproject.caption.endpoint;version=${project.version},
+              org.opencastproject.caption.converters;version=${project.version}
             </Export-Package>
             <Private-Package>
               org.opencastproject.caption.util

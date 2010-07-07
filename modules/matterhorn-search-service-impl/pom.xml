@@ -1,11 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.opencastproject</groupId>
   <artifactId>matterhorn-search-service-impl</artifactId>
-  <packaging>bundle</packaging>
   <name>matterhorn-search-service-impl</name>
-  <version>1.1-SNAPSHOT</version>
+  <packaging>bundle</packaging>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -15,22 +13,22 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-search-service-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-dublincore</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-mpeg7</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-remote-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -175,10 +173,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
+            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Import-Package>
-              org.opencastproject.search.api,
-              org.opencastproject.mediapackage.*,
+              org.opencastproject.search.api;version=${project.version},
+              org.opencastproject.mediapackage.*;version=${project.version},
               *;resolution:=optional
             </Import-Package>
             <Private-Package>
@@ -188,9 +186,9 @@
               org.apache.lucene.*;-split-package:=merge-first
             </Private-Package>
             <Export-Package>
-              org.opencastproject.feed.impl.*,
-              org.opencastproject.search.impl.*,
-              org.opencastproject.search.endpoint
+              org.opencastproject.feed.impl.*;version=${project.version},
+              org.opencastproject.search.impl.*;version=${project.version},
+              org.opencastproject.search.endpoint;version=${project.version}
             </Export-Package>
             <Embed-Dependency>
               lucene-analyzers;inline=true,

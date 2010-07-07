@@ -5,7 +5,6 @@
   <artifactId>matterhorn-distribution-service-download</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-distribution-service-download</name>
-  <version>1.1-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -15,17 +14,17 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-distribution-service-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-remote-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-workspace-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -81,8 +80,8 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.distribution.download </Export-Package>
+            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
+            <Export-Package> org.opencastproject.distribution.download;version=${project.version} </Export-Package>
             <Service-Component>
               OSGI-INF/distribution-service-download.xml
             </Service-Component>

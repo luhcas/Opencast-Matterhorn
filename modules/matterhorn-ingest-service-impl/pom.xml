@@ -1,11 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.opencastproject</groupId>
   <artifactId>matterhorn-ingest-service-impl</artifactId>
-  <packaging>bundle</packaging>
   <name>matterhorn-ingest-service-impl</name>
-  <version>1.1-SNAPSHOT</version>
+  <packaging>bundle</packaging>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -15,27 +13,27 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-ingest-service-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-workflow-service-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-metadata-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-dublincore</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-workspace-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -84,7 +82,7 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-workspace-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-fileupload</groupId>
@@ -174,11 +172,11 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
+            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Export-Package>
-              org.opencastproject.ingest.impl,
-              org.opencastproject.ingest.endpoint,
-              org.opencastproject.ingest.scanner
+              org.opencastproject.ingest.impl;version=${project.version},
+              org.opencastproject.ingest.endpoint;version=${project.version},
+              org.opencastproject.ingest.scanner;version=${project.version}
             </Export-Package>
             <Private-Package>
               META-INF.services;-split-package:=merge-first,
@@ -191,9 +189,11 @@
             <Embed-Dependency>
               json_simple;inline=true
             </Embed-Dependency>
-            <Import-Package> org.opencastproject.http,
-              *;resolution:=optional </Import-Package>
-            <Import-Package> javax.persistence, *;resolution:=optional </Import-Package>
+            <Import-Package>
+              org.opencastproject.http;version=${project.version},
+              javax.persistence,
+              *;resolution:=optional
+            </Import-Package>
             <Service-Component>
               OSGI-INF/ingest-service-delegating.xml,
               OSGI-INF/ingest-service-local.xml,

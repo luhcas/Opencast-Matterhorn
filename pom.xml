@@ -413,7 +413,7 @@
               <Bundle-Category>opencastproject</Bundle-Category>
               <Bundle-DocURL>http://opencastproject.org/</Bundle-DocURL>
               <Bundle-Vendor>The Opencast Project</Bundle-Vendor>
-              <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+              <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             </instructions>
           </configuration>
         </plugin>

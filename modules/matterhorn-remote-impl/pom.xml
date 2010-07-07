@@ -1,10 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.opencastproject</groupId>
   <artifactId>matterhorn-remote-impl</artifactId>
-  <packaging>bundle</packaging>
   <name>matterhorn-remote-impl</name>
+  <packaging>bundle</packaging>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -14,7 +13,7 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-remote-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.servicemix.specs</groupId>
@@ -101,16 +100,16 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
+            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Import-Package>
-              org.opencastproject.mediapackage,
-              org.opencastproject.mediapackage.attachment,
-              org.opencastproject.mediapackage.track,
+              org.opencastproject.mediapackage;version=${project.version},
+              org.opencastproject.mediapackage.attachment;version=${project.version},
+              org.opencastproject.mediapackage.track;version=${project.version},
               *;resolution:=optional
             </Import-Package>
             <Export-Package>
-              org.opencastproject.remote.impl,
-              org.opencastproject.remote.command
+              org.opencastproject.remote.impl;version=${project.version},
+              org.opencastproject.remote.command;version=${project.version}
             </Export-Package>
             <Embed-Dependency>json-simple;inline=true</Embed-Dependency>
             <Service-Component>

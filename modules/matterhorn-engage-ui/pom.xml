@@ -171,8 +171,8 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Import-Package> org.opencastproject.http, * </Import-Package>
+            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
+            <Import-Package> org.opencastproject.http;version=${project.version}, * </Import-Package>
             <Private-Package>ui.*</Private-Package>
             <Service-Component>
               OSGI-INF/engage-ui.xml

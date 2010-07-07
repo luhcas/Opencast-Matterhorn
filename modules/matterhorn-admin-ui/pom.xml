@@ -15,17 +15,17 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-scheduler-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-workflow-service-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-capture-admin-service-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -73,7 +73,7 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-kernel</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>${project.version}</version>
       <type>bundle</type>
     </dependency>
     <dependency>
@@ -220,9 +220,9 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Import-Package>org.opencastproject.http, *</Import-Package>
-            <Export-Package> org.opencastproject.adminui.* </Export-Package>
+            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
+            <Import-Package>org.opencastproject.http;version=${project.version}, *</Import-Package>
+            <Export-Package> org.opencastproject.adminui.*;version=${project.version} </Export-Package>
             <Private-Package>org.json.*, ui.*, uitests.*</Private-Package>
             <Service-Component>
               OSGI-INF/adminui-service-rest.xml,

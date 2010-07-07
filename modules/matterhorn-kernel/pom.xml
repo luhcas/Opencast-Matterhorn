@@ -1,11 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.opencastproject</groupId>
   <artifactId>matterhorn-kernel</artifactId>
-  <packaging>bundle</packaging>
   <name>matterhorn-kernel</name>
-  <version>1.1-SNAPSHOT</version>
+  <packaging>bundle</packaging>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -143,7 +141,7 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Import-Package>
               javax.servlet,
               javax.servlet.http,
@@ -182,16 +180,16 @@
               opencast-truezip;inline=true
             </Embed-Dependency>
             <Export-Package>
-              org.opencastproject.util.*;-split-package:=merge-first,
-              org.opencastproject.mediapackage,
-              org.opencastproject.mediapackage.attachment,
-              org.opencastproject.mediapackage.track,
-              org.opencastproject.mediapackage.identifier,
-              org.opencastproject.mediapackage.elementbuilder,
-              org.opencastproject.mediapackage.selector,
-              org.opencastproject.http,
-              org.opencastproject.rest,
-              org.opencastproject.security.api
+              org.opencastproject.util.*;version=${project.version};-split-package:=merge-first,
+              org.opencastproject.mediapackage;version=${project.version},
+              org.opencastproject.mediapackage.attachment;version=${project.version},
+              org.opencastproject.mediapackage.track;version=${project.version},
+              org.opencastproject.mediapackage.identifier;version=${project.version},
+              org.opencastproject.mediapackage.elementbuilder;version=${project.version},
+              org.opencastproject.mediapackage.selector;version=${project.version},
+              org.opencastproject.http;version=${project.version},
+              org.opencastproject.rest;version=${project.version},
+              org.opencastproject.security.api;version=${project.version}
             </Export-Package>
             <!-- 
             <Private-Package>

@@ -15,7 +15,7 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-kernel</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -52,14 +52,14 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
+            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Embed-Dependency>
               json;inline=true,
               org.apache.felix.webconsole;inline=true
             </Embed-Dependency>
             <Export-Package>
                 org.apache.felix.webconsole;version=3.0.0,
-                org.opencastproject.webconsole
+                org.opencastproject.webconsole;version=${project.version}
             </Export-Package>
             <Private-Package>
                 !org.apache.felix.webconsole,

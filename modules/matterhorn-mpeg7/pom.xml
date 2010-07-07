@@ -1,11 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.opencastproject</groupId>
   <artifactId>matterhorn-mpeg7</artifactId>
-  <packaging>bundle</packaging>
   <name>matterhorn-mpeg7</name>
-  <version>1.1-SNAPSHOT</version>
+  <packaging>bundle</packaging>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -15,7 +13,7 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-metadata-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -41,13 +39,13 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Import-Package>
-              org.opencastproject.metadata.api,
+              org.opencastproject.metadata.api;version=${project.version},
               *;resolution:=optional
             </Import-Package>
             <Export-Package>
-              org.opencastproject.metadata.mpeg7
+              org.opencastproject.metadata.mpeg7;version=${project.version}
             </Export-Package>
             <Service-Component>
               OSGI-INF/mpeg7-service.xml

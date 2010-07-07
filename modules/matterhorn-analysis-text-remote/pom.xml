@@ -18,13 +18,13 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-analysis-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-analysis-remote</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
     <!--  Thirdparty dependencies -->
@@ -85,10 +85,10 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName>${pom.artifactId}</Bundle-SymbolicName>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Import-Package>
-              org.opencastproject.analysis.api,
-              org.opencastproject.analysis.remote,
+              org.opencastproject.analysis.api;version=${project.version},
+              org.opencastproject.analysis.remote;version=${project.version},
               *;resolution:=optional
             </Import-Package>
             <Service-Component>

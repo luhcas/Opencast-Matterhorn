@@ -5,7 +5,6 @@
   <artifactId>matterhorn-dictionary-api</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-dictionary-api</name>
-  <version>1.1-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -18,7 +17,7 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-kernel</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
 
     <!--  Thirdparty dependencies -->
@@ -86,7 +85,7 @@
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Export-Package>
-              org.opencastproject.dictionary.api
+              org.opencastproject.dictionary.api;version=${project.version}
             </Export-Package>
           </instructions>
         </configuration>

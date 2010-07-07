@@ -57,13 +57,13 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-capture-admin-service-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>bundle</type>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-kernel</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <type>bundle</type>
     </dependency>
     <dependency>
@@ -110,12 +110,12 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
+            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Import-Package>
               javax.persistence,
               *;resolution:=optional
             </Import-Package>
-            <Export-Package> org.opencastproject.capture.admin.* </Export-Package>
+            <Export-Package> org.opencastproject.capture.admin.*;version=${project.version} </Export-Package>
             <Service-Component>
               OSGI-INF/capture-admin-service.xml,
               OSGI-INF/capture-admin-service-rest.xml

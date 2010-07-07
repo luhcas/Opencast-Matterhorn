@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>org.opencastproject</groupId>
 			<artifactId>matterhorn-dictionary-api</artifactId>
-			<version>1.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<!--  Thirdparty dependencies -->
@@ -147,7 +147,7 @@
 					<instructions>
 						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
 						<Export-Package>
-							org.opencastproject.dictionary
+							org.opencastproject.dictionary;version=${project.version}
             </Export-Package>
 						<Service-Component>
 							OSGI-INF/dictionary-service.xml,

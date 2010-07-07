@@ -5,7 +5,6 @@
   <artifactId>matterhorn-scheduler-impl</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-scheduler-impl</name>
-  <version>1.1-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -15,17 +14,17 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-scheduler-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
      <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-series-service-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>   
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-dublincore</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>    
     <dependency>
       <groupId>commons-io</groupId>
@@ -128,7 +127,7 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-series-service-impl</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency> 
     <dependency>
@@ -146,11 +145,11 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.scheduler.* </Export-Package>
+            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
+            <Export-Package> org.opencastproject.scheduler.*;version=${project.version} </Export-Package>
             <Import-Package>
-              org.opencastproject.http,
-              org.opencastproject.metadata.dublincore,
+              org.opencastproject.http;version=${project.version},
+              org.opencastproject.metadata.dublincore;version=${project.version},
               *;resolution:=optional
             </Import-Package>
             <Private-Package>

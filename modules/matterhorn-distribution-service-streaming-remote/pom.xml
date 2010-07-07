@@ -5,7 +5,6 @@
   <artifactId>matterhorn-distribution-service-streaming-remote</artifactId>
   <packaging>bundle</packaging>
   <name>matterhorn-distribution-service-streaming-remote</name>
-  <version>1.1-SNAPSHOT</version>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -15,17 +14,17 @@
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-distribution-service-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-distribution-service-remote</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-remote-api</artifactId>
-      <version>1.1-SNAPSHOT</version>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -81,9 +80,9 @@
         <extensions>true</extensions>
         <configuration>
           <instructions>
-            <Bundle-SymbolicName> ${pom.artifactId} </Bundle-SymbolicName>
+            <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Import-Package>
-              org.opencastproject.distribution.remote,
+              org.opencastproject.distribution.remote;version=${project.version},
               *;resolution:=optional
             </Import-Package>
             <Service-Component>
