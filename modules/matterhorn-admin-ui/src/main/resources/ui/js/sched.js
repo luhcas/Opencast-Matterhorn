@@ -466,34 +466,42 @@ UI.EventSubmitComplete = function(){
 }
 
 UI.CheckForConflictingEvents = function(){
-  var event = "<event><metadataList>";
+  var event, endpoint, data;
   if($("#notice-conflict").siblings(':visible').length === 0){
     $('#notice-container').hide();
   }
   $('#notice-conflict').hide();
   $('#conflicting-events').empty();
   if(Scheduler.components.device.validate()){
-    event += "<metadata><key>device</key><value>" + Scheduler.components.device.getValue() + "</value></metadata>";
+    event = "<metadata><key>device</key><value>" + Scheduler.components.device.getValue() + "</value></metadata>";
   }else{
     return false;
   }
   if(Scheduler.type === SINGLE_EVENT){
     if(Scheduler.components.timeStart.validate() && Scheduler.components.timeDuration.validate()){
+      event = "<event><metadataList>" + event;
       event += "<metadata><key>timeStart</key><value>" + Scheduler.components.timeStart.getValue() + "</value></metadata>";
-      event += "<metadata><key>timeEnd</key><value>" + Scheduler.components.timeDuration.getValue() + "</value></metadata>";
+      event += "<metadata><key>timeEnd</key><value>" + Scheduler.components.timeDuration.getValue() + "</value></metadata></metadataList></event>";
+      endpoint = "/events/conflict";
+      data = {event: event};
     }else{
       return false;
     }
   }else if(Scheduler.type === MULTIPLE_EVENTS){
-    if(Scheduler.components.recurrenceStart.validate() && Scheduler.components.recurrenceEnd.validate()){
-      event += "<metadata><key>timeStart</key><value>" + Scheduler.components.recurrenceStart.getValue() + "</value></metadata>";
-      event += "<metadata><key>timeEnd</key><value>" + Scheduler.components.recurrenceEnd.getValue() + "</value></metadata>";
+    if(Scheduler.components.recurrenceStart.validate() && Scheduler.components.recurrenceEnd.validate() &&
+       Scheduler.components.recurrence.validate() && Scheduler.components.recurrenceDuration.validate()){
+      event = "<recurringEvent><recurrence>" + Scheduler.components.recurrence.getValue() + "</recurrence><metadataList>" + event;
+      event += "<metadata><key>recurrenceStart</key><value>" + Scheduler.components.recurrenceStart.getValue() + "</value></metadata>";
+      event += "<metadata><key>recurrenceEnd</key><value>" + Scheduler.components.recurrenceEnd.getValue() + "</value></metadata>";
+      event += "<metadata><key>recurrenceDuration</key><value>" + (Scheduler.components.recurrenceDuration.getValue()) + "</value></metadata>";
+      event += "</metadataList></recurringEvent>";
+      endpoint = "/recurrence/conflict";
+      data = {recurringEvent: event};
     }else{
       return false;
     }
   }
-  event += "</metadataList></event>";
-  $.post(SCHEDULER_URL + "/events/conflict", { event: event }, function(doc){
+  $.post(SCHEDULER_URL + endpoint, data, function(doc){
     var conflictingEvent = false;
     if($('event', doc).length > 0){
       $.each($('event', doc), function(i,event){
