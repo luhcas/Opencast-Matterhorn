@@ -127,6 +127,7 @@
             </Export-Package>
             <Service-Component>
               OSGI-INF/workflow-definition-scanner.xml,
+              OSGI-INF/operations/archive.xml,
               OSGI-INF/operations/caption.xml,
               OSGI-INF/operations/compose.xml,
               OSGI-INF/operations/distribute-download.xml,

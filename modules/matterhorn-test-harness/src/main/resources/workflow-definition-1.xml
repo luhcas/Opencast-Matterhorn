@@ -392,7 +392,18 @@
         <configuration key="source-tags">publish</configuration>
       </configurations>
     </operation>
+
+    <!-- Archive the mediapackage -->
  
+    <operation
+      id="archive"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Archive the mediapackage">
+      <configurations>
+        <configuration key="archive.collection">2010.summer.archive</configuration>
+      </configurations>
+    </operation>
   </operations>
 
 </definition>

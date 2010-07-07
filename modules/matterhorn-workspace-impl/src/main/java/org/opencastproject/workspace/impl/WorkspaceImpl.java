@@ -39,9 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.Stack;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -166,35 +164,12 @@ public class WorkspaceImpl implements Workspace {
         }
       }
     }
-    activateGarbageFileCollectionTimer();
-  }
-
-  /**
-   * Activate the garbage collection timer
-   */
-  protected void activateGarbageFileCollectionTimer() {
-    if (garbageCollectionPeriodInSeconds > 0 && maxAgeInSeconds > 0) {
-      logger.info("Workspace garbage collection policy: delete files older than {} seconds, scan every {} seconds.",
-              maxAgeInSeconds, garbageCollectionPeriodInSeconds);
-      garbageFileCollector = new Timer("Workspace Garbage File Collector");
-      garbageFileCollector.schedule(new GarbageCollectionTimer(), 0, garbageCollectionPeriodInSeconds * 1000);
-    }
-  }
-
-  /**
-   * Deactivate the garbage collection timer.
-   */
-  protected void deactivateGarbageFileCollectionTimer() {
-    if (garbageFileCollector != null) {
-      garbageFileCollector.cancel();
-    }
   }
 
   /**
    * Callback from OSGi on service deactivation.
    */
   public void deactivate() {
-    deactivateGarbageFileCollectionTimer();
   }
 
   /**
@@ -559,57 +534,4 @@ public class WorkspaceImpl implements Workspace {
     collection = collection.substring(collection.lastIndexOf("/") + 1, collection.length());
     return collection;
   }
-
-  class GarbageCollectionTimer extends TimerTask {
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @see java.util.TimerTask#run()
-     */
-    @Override
-    public void run() {
-      logger.info("Running workspace garbage file collection");
-      // Remove any file that was created more than maxAge seconds ago
-
-      Stack<File> workspaceDirectories = new Stack<File>();
-      workspaceDirectories.push(new File(wsRoot));
-      while (!workspaceDirectories.empty()) {
-        File dir = workspaceDirectories.pop();
-
-        for (File file : dir.listFiles()) {
-
-          // Another directory
-          if (file.isDirectory()) {
-            workspaceDirectories.push(file);
-            continue;
-          }
-
-          // Is this file old enough to be deleted?
-          long ageInSeconds = (System.currentTimeMillis() - file.lastModified()) / 1000;
-          if (ageInSeconds > maxAgeInSeconds) {
-            Object[] loggingArgs = new Object[] { file, ageInSeconds - maxAgeInSeconds, maxAgeInSeconds };
-            if (file.delete()) {
-              logger.info("Deleted {}, since its age was {} seconds older than the maximum age, {}", loggingArgs);
-            } else {
-              logger
-                      .warn("Can not delete {}, even though it is {} seconds older than the maximum age, {}",
-                              loggingArgs);
-            }
-          }
-
-        }
-
-        // Remove empty directories
-        synchronized (wsRoot) {
-          if (dir.listFiles().length == 0) {
-            dir.delete();
-          }
-        }
-
-      }
-    }
-
-  }
-
 }
