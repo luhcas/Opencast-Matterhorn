@@ -145,58 +145,6 @@ public class WorkspaceImplTest {
   }
 
   @Test
-  public void testGarbageCollection() throws Exception {
-    // First, mock up the collaborating working file repository
-    WorkingFileRepository repo = EasyMock.createMock(WorkingFileRepository.class);
-    EasyMock
-            .expect(
-                    repo.getURI((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock
-                            .anyObject()))
-            .andReturn(
-                    new URI(UrlSupport.concat(new String[] { "http://localhost:8080", WorkingFileRepository.URI_PREFIX,
-                            WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX, "mediapackage", "element", "sample.txt" })));
-    EasyMock.expect(
-            repo.put((String) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
-                    (InputStream) EasyMock.anyObject())).andReturn(
-            new URI(UrlSupport.concat(new String[] { "http://localhost:8080", WorkingFileRepository.URI_PREFIX,
-                    WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX, "mediapackage", "element", "sample.txt" })));
-    EasyMock.expect(repo.getBaseUri()).andReturn(new URI("http://localhost:8080/files")).anyTimes();
-    EasyMock.replay(repo);
-    workspace.setRepository(repo);
-    TrustedHttpClient httpClient = EasyMock.createNiceMock(TrustedHttpClient.class);
-    // Simulate not finding the file
-    EasyMock.expect(httpClient.execute((HttpUriRequest) EasyMock.anyObject())).andThrow(new RuntimeException());
-    EasyMock.replay(httpClient);
-    workspace.trustedHttpClient = httpClient;
-
-    // Put a file in the workspace
-    ByteArrayInputStream in = new ByteArrayInputStream("sample".getBytes());
-    URI uri = workspace.put("mediapackage", "element", "sample.txt", in);
-
-    EasyMock.verify(repo);
-
-    File file = workspace.get(uri);
-    Assert.assertNotNull(file);
-    Assert.assertTrue(file.exists());
-
-    // Activate garbage collection
-    workspace.garbageCollectionPeriodInSeconds = 1;
-    workspace.maxAgeInSeconds = 1;
-
-    // Wait for the garbage collector to delete the file
-    Thread.sleep(3000);
-
-    // The file should have been deleted
-    try {
-      workspace.get(uri);
-      Assert.fail("The file at " + uri + " should have been deleted");
-    } catch (NotFoundException e) {
-    }
-
-    Thread.sleep((workspace.garbageCollectionPeriodInSeconds + 1) * 1000);
-  }
-
-  @Test
   public void testGetWorkspaceFileWithOutPort() throws Exception {
     WorkingFileRepository repo = EasyMock.createNiceMock(WorkingFileRepository.class);
     EasyMock.expect(repo.getBaseUri()).andReturn(new URI("http://localhost/files")).anyTimes();
