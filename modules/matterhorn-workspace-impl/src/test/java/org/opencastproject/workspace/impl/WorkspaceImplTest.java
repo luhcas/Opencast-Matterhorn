@@ -182,7 +182,6 @@ public class WorkspaceImplTest {
     // Activate garbage collection
     workspace.garbageCollectionPeriodInSeconds = 1;
     workspace.maxAgeInSeconds = 1;
-    workspace.activateGarbageFileCollectionTimer();
 
     // Wait for the garbage collector to delete the file
     Thread.sleep(3000);
@@ -194,7 +193,6 @@ public class WorkspaceImplTest {
     } catch (NotFoundException e) {
     }
 
-    workspace.deactivateGarbageFileCollectionTimer();
     Thread.sleep((workspace.garbageCollectionPeriodInSeconds + 1) * 1000);
   }
 
