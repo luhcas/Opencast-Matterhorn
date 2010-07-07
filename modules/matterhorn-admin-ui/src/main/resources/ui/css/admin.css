@@ -223,12 +223,13 @@ select { font-size:1.15em; }
 .date-start { display: none; }
 .date-end {display: none; }
 
-#category-selector-container {float:left;width:auto;margin:10px 0px 10px 10px;}
-.category-selector {margin:0px;margin-bottom:10px;}
-.category-selector li {float:left;list-style:none;}
+#category-selector-container {float:left;width:auto;margin:10px 0px 10px 10px;outline:none}
+.category-selector {margin:0px;margin-bottom:10px;outline:none}
+.category-selector li {float:left;list-style:none;outline:none}
 .category-selector-item {}
-.category-selector-spacer {margin-left:5px; margin-right:5px;}
-.category-selector-item-disabled {color:gray;}
+.category-selector-spacer {margin-left:5px; margin-right:5px;outline:none}
+.category-selector-item-disabled {color:gray;outline:none}
+
 
 .state-selector {color:blue;}
 .state-selector-active {color:black;text-decoration:none !important;font-weight:bold;cursor:default;}
