@@ -21,6 +21,7 @@
           <th width="20%" id="th-StartDate" class="sortable date-column recording-Table-head">Recording Date &amp; Time</th>
           <!-- <th width="10%" class="sortable">Capture Agent</th> -->
           <th width="15%" id="th-ProcessingStatus" class="sortable recording-Table-head">Status</th>
+          <th width="15%" id="th-Action" class="sortable">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -63,6 +64,39 @@
         <span class="statusCell">
             <xsl:value-of select="processingStatus" />
         </span>
+      </td>
+      <td>
+        <xsl:choose>
+            <xsl:when test="recordingStatus = 'hold'">
+                <input type="hidden">
+                </input>
+                <a>
+                    <xsl:attribute name="onclick">
+<xsl:text>Recordings.displayHoldActionPanel('</xsl:text><xsl:value-of select="holdActionPanelURL" /><xsl:text>','</xsl:text><xsl:value-of select="id" /><xsl:text>', this);</xsl:text>
+                    </xsl:attribute>
+                    <xsl:value-of select="holdActionTitle" />
+                </a>
+            </xsl:when>
+            <xsl:when test="recordingStatus = 'failed'">
+                <a>
+                    <xsl:attribute name="onclick">
+                        <xsl:text>Recordings.retryRecording('</xsl:text>
+                        <xsl:value-of select="id" />
+                        <xsl:text>');</xsl:text>
+                    </xsl:attribute>
+                    Re-try
+                </a>
+		        <a>
+		          <xsl:attribute name="onclick">
+		            <xsl:text>Recordings.removeRecording('</xsl:text>
+		            <xsl:value-of select="id" />
+		            <xsl:text>');</xsl:text>
+		          </xsl:attribute>
+		          Delete
+		        </a>
+            </xsl:when>
+            <xsl:otherwise></xsl:otherwise>
+        </xsl:choose>
       </td>
     </tr>
   </xsl:template>
