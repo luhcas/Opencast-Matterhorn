@@ -506,6 +506,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
   }
   
   public Event[] findConflictingEvents (Event e) {
+    logger.debug("finding conflicts for event {}.", e);
     List<Event> events = new LinkedList<Event>(Arrays.asList(getAllEvents()));
     //reduce to device first
     events = filterEventsForExactValue(events, "device", e.getValue("device"));
@@ -526,6 +527,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
     if (rEvent.getRecurrence() == null || rEvent.getValue("recurrenceStart") == null || rEvent.getValue("device") == null ||
             rEvent.getValue("recurrenceEnd") == null || rEvent.getValue("recurrenceDuration") == null) 
       throw new IncompleteDataException();
+    if (rEvent.getRecurringEventId() == null) rEvent.generateId();
     List<Event> events = rEvent.generatedEvents();
     HashSet<Event> results = new HashSet<Event>();
     for (Event event : events) {

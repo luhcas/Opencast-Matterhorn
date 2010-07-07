@@ -41,8 +41,12 @@ public abstract class AbstractEvent {
   
   
   protected void buildMetadataTable (List<Metadata> metadata) {
-    if (metadataTable == null) metadataTable = new Hashtable<String, String>(); // Buffer metadata in Hashtable for quick 
-    for (Metadata data : metadata) metadataTable.put(data.getKey(), data.getValue()); // Overwrite with event specific data
+    if (metadataTable == null) metadataTable = new Hashtable<String, String>(); // Buffer metadata in Hashtable for quick
+    if (metadata == null) return;
+    for (Metadata data : metadata) {
+      if (data.getKey() != null && data.getValue() != null)
+        metadataTable.put(data.getKey(), data.getValue()); // Overwrite with event specific data
+    }
   }
   
   public String getValue (String key) throws IncompleteDataException {
