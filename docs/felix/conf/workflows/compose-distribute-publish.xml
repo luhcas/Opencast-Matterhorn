@@ -62,7 +62,7 @@
       id="inspect"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Inspect the media package">
+      description="Inspecting the media package">
     </operation>
 
     <!-- prepare audio/video tracks -->
@@ -71,7 +71,7 @@
       id="prepare-av"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Prepare presenter audio and video work versions">
+      description="Preparing presenter audio and video work versions">
       <configurations>
         <configuration key="source-flavor">presenter/source</configuration>
         <configuration key="target-flavor">presenter/work</configuration>
@@ -83,7 +83,7 @@
       id="prepare-av"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Prepare presentation audio and video work version">
+      description="Preparing presentation audio and video work version">
       <configurations>
         <configuration key="source-flavor">presentation/source</configuration>
         <configuration key="target-flavor">presentation/work</configuration>
@@ -110,7 +110,7 @@
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presenter (camera) video for preview">
+      description="Encoding presenter (camera) video for preview">
       <configurations>
         <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/preview</configuration>
@@ -121,7 +121,7 @@
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presentation (screen) for preview">
+      description="Encoding presentation (screen) for preview">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="target-flavor">presentation/preview</configuration>
@@ -132,7 +132,7 @@
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presenter audio for preview">
+      description="Encoding presenter audio for preview">
       <configurations>
         <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/preview</configuration>
@@ -159,7 +159,7 @@
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presenter (camera) video to Flash download">
+      description="Encoding presenter (camera) video to Flash download">
       <configurations>
         <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/delivery</configuration>
@@ -171,7 +171,7 @@
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presentation (screen) to Flash download">
+      description="Encoding presentation (screen) to Flash download">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="target-flavor">presentation/delivery</configuration>
@@ -186,7 +186,7 @@
       id="segment"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Extract segments from presentation">
+      description="Extracting segments from presentation">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
       </configurations>
@@ -198,7 +198,7 @@
       id="image"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presenter (camera) to player preview image">
+      description="Encoding presenter (camera) to player preview image">
       <configurations>
         <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="source-tags"></configuration>
@@ -212,7 +212,7 @@
       id="image"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presentation (screen) to player preview image">
+      description="Encoding presentation (screen) to player preview image">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="source-tags"></configuration>
@@ -229,7 +229,7 @@
       id="image"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presenter (camera) to search result preview image">
+      description="Encoding presenter (camera) to search result preview image">
       <configurations>
         <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="source-tags"></configuration>
@@ -243,7 +243,7 @@
       id="image"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presentation (vga) to search result preview image">
+      description="Encoding presentation (vga) to search result preview image">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="source-tags"></configuration>
@@ -260,7 +260,7 @@
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presentation (screen) to mpeg4 audio download">
+      description="Encoding presentation (screen) to mpeg4 audio download">
       <configurations>
         <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/delivery</configuration>
@@ -272,7 +272,7 @@
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presentation (screen) to mpeg4 audio download">
+      description="Encoding presentation (screen) to mpeg4 audio download">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="target-flavor">presentation/delivery</configuration>
@@ -284,7 +284,7 @@
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presenter (camera) to avi/mpeg4 download">
+      description="Encoding presenter (camera) to avi/mpeg4 download">
       <configurations>
         <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/delivery</configuration>
@@ -296,7 +296,7 @@
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presentation (screen) to avi/mpeg4 download">
+      description="Encoding presentation (screen) to avi/mpeg4 download">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="target-flavor">presentation/delivery</configuration>
@@ -311,7 +311,7 @@
       id="image"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presenter (camera) to feed preview image">
+      description="Encoding presenter (camera) to feed preview image">
       <configurations>
         <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="source-tags"></configuration>
@@ -325,7 +325,7 @@
       id="image"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presentation (vga) to feed preview image">
+      description="Encoding presentation (vga) to feed preview image">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="source-tags"></configuration>
@@ -342,7 +342,7 @@
       id="segmentpreviews"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presentation (screen) to segment preview image">
+      description="Encoding presentation (screen) to segment preview image">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="source-tags"></configuration>
@@ -360,7 +360,7 @@
       id="textanalysis"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Extracts text from presentation segments">
+      description="Extracting text from presentation segments">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="source-tags"></configuration>
@@ -374,7 +374,7 @@
       id="distribute-download"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Distribute media to the local distribution channel">
+      description="Distributing media to the local distribution channel">
       <configurations>
         <configuration key="source-tags">engage,atom,rss</configuration>
         <configuration key="target-tags">publish</configuration>
@@ -387,7 +387,7 @@
       id="publish"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Add metadata to the search index">
+      description="Published">
       <configurations>
         <configuration key="source-tags">publish</configuration>
       </configurations>
@@ -399,7 +399,7 @@
       id="archive"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Archive the mediapackage">
+      description="Archiving">
       <configurations>
         <configuration key="archive.collection">2010.summer.archive</configuration>
       </configurations>

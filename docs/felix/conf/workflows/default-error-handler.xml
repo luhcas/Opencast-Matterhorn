@@ -4,7 +4,7 @@
   <operations>
     <operation
       id="log"
-      description="Log this error"/>
+      description="Unsuccessful"/>
     <!-- Add operations to notify users -->
   </operations>
 </definition>

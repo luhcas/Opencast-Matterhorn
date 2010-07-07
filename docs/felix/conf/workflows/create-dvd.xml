@@ -36,7 +36,7 @@
       id="inspect"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Inspect the media package">
+      description="Inspecting the media package">
     </operation>
 
     <!-- prepare audio/video tracks -->
@@ -45,7 +45,7 @@
       id="prepare-av"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Prepare presenter audio and video work versions">
+      description="Preparing presenter audio and video work versions">
       <configurations>
         <configuration key="source-flavor">presenter/source</configuration>
         <configuration key="target-flavor">presenter/work</configuration>
@@ -57,7 +57,7 @@
       id="prepare-av"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Prepare presentation audio and video work version">
+      description="Preparing presentation audio and video work version">
       <configurations>
         <configuration key="source-flavor">presentation/source</configuration>
         <configuration key="target-flavor">presentation/work</configuration>
@@ -70,7 +70,7 @@
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presenter (camera) to mpeg2 for DVD">
+      description="Encoding presenter (camera) to mpeg2 for DVD">
       <configurations>
         <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/dvd</configuration>
@@ -83,7 +83,7 @@
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encode presenter (camera) to mpeg2 for DVD">
+      description="Encoding presenter (camera) to mpeg2 for DVD">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="target-flavor">presenter/dvd</configuration>
@@ -95,7 +95,7 @@
     <!-- hold for download of DVD image -->
     <operation
       id="download-dvd"
-      description="hold for download of DVD image">
+      description="Complete. Holding for download of DVD image">
     </operation>
 
   </operations>
