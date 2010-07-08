@@ -394,6 +394,7 @@ Opencast.FlashVersion = (function ()
                 "flashvars", "bridgeName=b_Videodisplay&amp;autoplay=false",
                 "allowScriptAccess", "sameDomain",
                 "type", "application/x-shockwave-flash",
+                "wmode", "transparent",
                 "pluginspage", "http://www.adobe.com/go/getflashplayer"
             );
        
