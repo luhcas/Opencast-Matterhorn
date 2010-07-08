@@ -127,6 +127,7 @@ public class AdminuiRestService {
     }
     if ((state.toUpperCase().equals("PROCESSING")) || allRecordings) {
       out.addAll(addRecordingStatusForAll("processing", getRecordingsFromWorkflowService(WorkflowState.RUNNING)));
+      out.addAll(addRecordingStatusForAll("processing", getRecordingsFromWorkflowService(WorkflowState.INSTANTIATED)));
     }
     if ((state.toUpperCase().equals("FINISHED")) || allRecordings) {
       out.addAll(addRecordingStatusForAll("finished", getRecordingsFromWorkflowService(WorkflowState.SUCCEEDED)));
@@ -347,8 +348,6 @@ public class AdminuiRestService {
             }
             break;
           case STOPPED:
-            //inactive++;
-            //total++;
             break;
           case SUCCEEDED:
             finished++;
@@ -467,24 +466,35 @@ public class AdminuiRestService {
       logger.debug("getting capturing recordings from scheduler");
       SchedulerEvent[] events = schedulerService.getCapturingEvents();
       for (int i = 0; i < events.length; i++) {
-        Recording r = captureAdminService.getRecordingState(events[i].getID());
-        if (r != null
-                & (r.getState().equals(RecordingState.CAPTURING)
-                || r.getState().equals(RecordingState.CAPTURE_FINISHED)
-                || r.getState().equals(RecordingState.COMPRESSING)
-                || r.getState().equals(RecordingState.MANIFEST)
-                || r.getState().equals(RecordingState.UPLOADING))) {
-          AdminRecording item = new AdminRecordingImpl();
-          item.setId(events[i].getID());
-          item.setTitle(events[i].getTitle());
-          item.setPresenter(events[i].getCreator());
-          item.setSeriesTitle(events[i].getSeriesID());    // actually it's the series title
-          // FIXME Add the series ID too
-          item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
-          item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
-          item.setCaptureAgent(events[i].getDevice());
-          item.setProcessingStatus(r.getState());
-          out.add(item);
+        try {
+          Recording r = captureAdminService.getRecordingState(events[i].getID());
+          if (r != null) {
+            String state = r.getState();
+            logger.info("State = " + state);
+            if (state != null &&
+                    state.equals(RecordingState.CAPTURING)
+                    || state.equals(RecordingState.CAPTURE_FINISHED)
+                    || state.equals(RecordingState.COMPRESSING)
+                    || state.equals(RecordingState.MANIFEST)
+                    || state.equals(RecordingState.UPLOADING)) {
+              AdminRecording item = new AdminRecordingImpl();
+              item.setId(events[i].getID());
+              item.setTitle(events[i].getTitle());
+              item.setPresenter(events[i].getCreator());
+              item.setSeriesTitle(events[i].getSeriesID());    // actually it's the series title
+              // FIXME Add the series ID too
+              item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
+              item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
+              item.setCaptureAgent(events[i].getDevice());
+              item.setProcessingStatus(r.getState());
+              out.add(item);
+            } else {
+              logger.warn("Could not get state from recording: " + r.getID());
+            }
+          }
+        } catch (Exception e) {
+          logger.error("Exception while preparing list of capturing events: " + e.getMessage());
+          e.printStackTrace();
         }
       }
     } else {
