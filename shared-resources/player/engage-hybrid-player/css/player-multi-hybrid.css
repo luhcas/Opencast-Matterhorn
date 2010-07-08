@@ -776,15 +776,14 @@ option:hover
 #oc_embed-left
 {
   float:                    left;
-  margin-left:              5%;
+  width:                    70%;
 }
 
 #oc_embed-right
 {
   float:                    left;
-  margin-right:             5%;
   margin-left:              10px;
-  width:                    200px;
+  width:                    25%;
 }
 #oc_costum-width
 {

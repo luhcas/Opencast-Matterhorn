@@ -28,6 +28,7 @@ var Opencast = Opencast || {};
 Opencast.Scrubber = (function () 
 {
     var locked             = false,
+    EMBED                  = 'embed';
     currentScrubberPositon = 0,
     tooltipTop             = 0,
     offsetX                = 25,
@@ -49,9 +50,11 @@ Opencast.Scrubber = (function ()
         @memberOf Opencast.Scrubber
         @description Initialize the scrubber
      */
-    function init()
+    function init(player)
     {
-        $('#draggable').bind('dragstart', function (event, ui) 
+        var _player = player;
+    	
+    	$('#draggable').bind('dragstart', function (event, ui) 
         {
             tooltipTop = event.pageY - offsetY;
             $("#divToolTip").css('top', tooltipTop);
@@ -79,8 +82,22 @@ Opencast.Scrubber = (function ()
         $('#draggable').bind('drag', function (event, ui) 
         {
             $("#divToolTip").css('top', tooltipTop);
-            $("#divToolTip").css('left', event.pageX - offsetX);
-          
+            
+            var dragLeft = event.pageX - offsetX + $("#divToolTip").width();
+            
+            if(dragLeft > $('#oc_flash-player').width() - 20 && _player === EMBED)
+            {
+            	$("#divToolTip").css('left', $('#oc_flash-player').width() - $("#divToolTip").width() - 10);
+            }
+            else if(event.pageX - offsetX < 0 && _player === EMBED)
+            {
+            	$("#divToolTip").css('left', 5);
+            }
+            else
+            {
+            	$("#divToolTip").css('left', event.pageX - offsetX);
+            }
+           
             if (!locked)
             {
                 locked = true;

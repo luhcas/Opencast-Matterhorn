@@ -1004,11 +1004,11 @@ Opencast.Initialize = (function ()
         	setMaxFormat(formatTwo);
         }
     	
-    	var embedHeightOne = (embedWidhtOne / getMaxFormat()) + OTHERDIVHEIGHT;
-    	var embedHeightTwo = (540 / getMaxFormat()) + OTHERDIVHEIGHT;
-    	var embedHeightThree = (460 / getMaxFormat()) + OTHERDIVHEIGHT;
-    	var embedHeightFour = (380 / getMaxFormat()) + OTHERDIVHEIGHT;
-    	var embedHeightFive = (300 / getMaxFormat()) + OTHERDIVHEIGHT;
+    	var embedHeightOne = Math.round(embedWidhtOne / getMaxFormat()) + OTHERDIVHEIGHT;
+    	var embedHeightTwo = Math.round(540 / getMaxFormat()) + OTHERDIVHEIGHT;
+    	var embedHeightThree = Math.round(460 / getMaxFormat()) + OTHERDIVHEIGHT;
+    	var embedHeightFour = Math.round(380 / getMaxFormat()) + OTHERDIVHEIGHT;
+    	var embedHeightFive = Math.round(300 / getMaxFormat()) + OTHERDIVHEIGHT;
     	
         $("#oc_embed-icon-one").css("width", "110px");
     	$("#oc_embed-icon-one").css("height", "73px");

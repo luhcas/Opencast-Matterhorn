@@ -133,9 +133,6 @@ Opencast.Watch = (function ()
 
           mediaResolutionOne = mediaResolutionOne === null ? '' : mediaResolutionOne;
           mediaResolutionTwo = mediaResolutionTwo === null ? '' : mediaResolutionTwo;
-          
-         
-
 
           Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo);
 
@@ -168,7 +165,7 @@ Opencast.Watch = (function ()
           Opencast.Player.setCaptionsURL(captionsUrl);
 
           // init the volume scrubber
-          Opencast.Scrubber.init();
+          Opencast.Scrubber.init('watch');
 
           // bind handler 
           $('#scrubber').bind('keydown', 'left', function(evt) 
