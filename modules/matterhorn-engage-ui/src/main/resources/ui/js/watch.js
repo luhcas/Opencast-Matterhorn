@@ -251,13 +251,13 @@ Opencast.Watch = (function ()
       $("#" + segmentId).toggleClass("segment-holder-over");
 
       var index = parseInt(segmentId.substr(7)) - 1;
-      
+
       var imageHeight = 120;
-      
-      if ($.browser.msie) {
-        imageHeight = 30;
-      }
-      
+
+      //if ($.browser.msie) {
+      //  imageHeight = 30;
+      //}
+
       $("#segment-tooltip").html('<img src="' + Opencast.segments.getSegmentPreview(index) + '" height="' + imageHeight + '"/>');
 
       var segmentLeft = $("#" + segmentId).offset().left;

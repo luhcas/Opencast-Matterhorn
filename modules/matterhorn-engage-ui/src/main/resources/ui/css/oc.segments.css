@@ -72,6 +72,7 @@ div.segment-tooltip
   background-color:         #fae6a0;
   font-size :               14;
   cursor:                   default !important;
+  z-index:                  1000;
 }
 
 .oc-segments-preview {
