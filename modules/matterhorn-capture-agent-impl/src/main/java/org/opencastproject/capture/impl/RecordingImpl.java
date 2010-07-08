@@ -232,7 +232,11 @@ public class RecordingImpl implements AgentRecording {
    * @see org.opencastproject.capture.admin.api.Recording#setState(java.lang.String)
    */
   public void setState(String state) {
-    this.state = state;
+    if (state == null) {
+      this.state = RecordingState.UNKNOWN;
+    } else {
+      this.state = state;
+    }
     lastHeardFrom = System.currentTimeMillis();
   }
 
