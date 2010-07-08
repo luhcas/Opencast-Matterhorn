@@ -349,8 +349,8 @@ Recordings.retryRecording = function(workflowId) {
 
 Recordings.removeRecording = function(workflowId) {
   $.ajax({
-    url        : '../workflow/rest/remove/'+workflowId,
-    type       : 'GET',
+    url        : '../workflow/rest/stop/'+workflowId,
+    type       : 'POST',
     error      : function(XHR,status,e){
       alert('Could not remove Workflow ' + workflowId);
     },

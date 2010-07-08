@@ -365,6 +365,10 @@ span.clickable {
   float:right;
 }
 
+.paging-font {
+  font-size: 0.8em;
+}
+
 .paging-nav-goto {
   width:50px;
 }
