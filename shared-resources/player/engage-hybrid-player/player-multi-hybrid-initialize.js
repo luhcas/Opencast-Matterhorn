@@ -614,7 +614,6 @@ Opencast.Initialize = (function ()
                 Opencast.Player.stopRewind();
             }
         });
-       
         $('#oc_btn-fast-forward').keyup(function (event) 
         {
             if (event.keyCode === 13 || event.keyCode === 32) 
@@ -636,8 +635,7 @@ Opencast.Initialize = (function ()
         });
         $('#oc_embed-costum-width-textinput').keyup(function (event) 
         {
-           
-        	if((event.keyCode >= 48 && event.keyCode <= 57) || event.keyCode === 8)
+            if((event.keyCode >= 48 && event.keyCode <= 57) || event.keyCode === 8 || event.keyCode === 9 || (event.keyCode >= 96 && event.keyCode <= 105))
            	{
             	setCustomWidth($('#oc_embed-costum-width-textinput').val());
             	setCostumEmbedHeight();
@@ -650,7 +648,7 @@ Opencast.Initialize = (function ()
         });
         $('#oc_embed-costum-height-textinput').keyup(function (event) 
         {
-        	if((event.keyCode >= 48 && event.keyCode <= 57) || event.keyCode === 8)
+        	if((event.keyCode >= 48 && event.keyCode <= 57) || event.keyCode === 8 || event.keyCode === 9 || (event.keyCode >= 96 && event.keyCode <= 105))
            	{
         		setCustomHeight($('#oc_embed-costum-height-textinput').val());
         		setCostumEmbedWidth();
@@ -664,10 +662,6 @@ Opencast.Initialize = (function ()
         
         // init Flash
         Opencast.FlashVersion.initFlash();
-        
-        
-       
-        
     });
     
    
@@ -820,10 +814,6 @@ Opencast.Initialize = (function ()
         return newHeight + 10;
     }
 
-    
-    
-    
-
     /**
         @memberOf Opencast.Player
         @description Get the new height of the flash component.
@@ -859,10 +849,6 @@ Opencast.Initialize = (function ()
         return newSingleHeight + 10;
     }
 
-    
-    
-    
-    
     /**
         @memberOf Opencast.Player
         @description Set the new height of the flash component
@@ -935,13 +921,14 @@ Opencast.Initialize = (function ()
         doResize();
     }
     
-    
+
+    /**
+        @memberOf Opencast.Player
+        @description Set the new custom height
+     */
     function setCostumEmbedHeight()
     {
-        
         var embedWidth = $('#oc_embed-costum-width-textinput').val();
-        
-       
         
         if(embedWidth >= MINWIDTH)
         {
@@ -962,13 +949,15 @@ Opencast.Initialize = (function ()
         	$('#oc_embed-costum-height-textinput').css('background-color','#ffffff');
         }
     }
-    
+
+    /**
+        @memberOf Opencast.Player
+        @description Set the new custom width
+     */
     function setCostumEmbedWidth()
     {
     	var embedHeight = $('#oc_embed-costum-height-textinput').val() - OTHERDIVHEIGHT;
         var embedWidth = Math.round(embedHeight * getMaxFormat());
-        
-        
         
         if(embedWidth >= MINWIDTH)
         {
@@ -1002,8 +991,7 @@ Opencast.Initialize = (function ()
         var embedWidhtFour = 380;
         var embedWidhtFive = 300;
         
-        
-    	if(formatSingle !== 0)
+        if(formatSingle !== 0)
         {
     		setMaxFormat(formatSingle);
         }
@@ -1074,7 +1062,6 @@ Opencast.Initialize = (function ()
     	    Opencast.Player.embedIFrame(embedWidhtFour, embedHeightFour);   
     	});
     	    	    
-    	
     	$("#oc_embed-icon-five").css("width", "70px");
     	$("#oc_embed-icon-five").css("height", "42px");
     	$("#oc_embed-icon-five").attr({ 
@@ -1088,20 +1075,15 @@ Opencast.Initialize = (function ()
     	    Opencast.Player.embedIFrame(embedWidhtFive, embedHeightFive);   
     	});
         
-    	
-         
-         var embedCustomMinHeight = Math.round(MINWIDTH / getMaxFormat()) + OTHERDIVHEIGHT;
+    	var embedCustomMinHeight = Math.round(MINWIDTH / getMaxFormat()) + OTHERDIVHEIGHT;
          	
-         $("#oc_embed-costum-height-textinput").attr({ 
-         	name: 'Custom Height min '+embedCustomMinHeight+'px',
-             alt: 'Custom Height min '+embedCustomMinHeight+'px',
-             title: 'Custom Height min '+embedCustomMinHeight+'px'
+        $("#oc_embed-costum-height-textinput").attr({ 
+            name: 'Custom Height min '+embedCustomMinHeight+'px',
+            alt: 'Custom Height min '+embedCustomMinHeight+'px',
+            title: 'Custom Height min '+embedCustomMinHeight+'px'
          });
-        
-        
     }
     
-
     /**
         @memberOf Opencast.Player
         @description Set media resuliton of the videos
