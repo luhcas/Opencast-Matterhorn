@@ -321,26 +321,6 @@ public class WorkflowRestService {
     }
   }
 
-  @GET
-  // FIXME should be HTTP DELETE (GET for testing with browser)
-  @Produces(MediaType.TEXT_PLAIN)
-  @Path("remove/{workflowId}")
-  public Response removeWorkflowInstance(@PathParam("workflowId") String wfId) {
-    try {
-      WorkflowInstance def = service.getWorkflowById(wfId);
-      if (def != null) {
-        ((WorkflowServiceImpl) service).removeFromDatabase(wfId); // FIXME should be part of the API rather than casting
-                                                                  // to Impl, right?
-        return Response.ok("OK").build();
-      } else {
-        return Response.serverError().status(Status.NOT_FOUND).build();
-      }
-    } catch (Exception e) {
-      logger.error(e.getMessage());
-      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-    }
-  }
-
   /**
    * @param definition
    */
