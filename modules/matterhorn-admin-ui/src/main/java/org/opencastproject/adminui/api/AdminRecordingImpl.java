@@ -75,6 +75,9 @@ public class AdminRecordingImpl implements AdminRecording {
   @XmlElement(name="holdActionPanelURL")
   private String holdActionPanelURL;
 
+  @XmlElement(name="itemType")
+  private ItemType type = ItemType.UNKNOWN;
+
   public AdminRecordingImpl() {}
 
   @Override
@@ -105,6 +108,16 @@ public class AdminRecordingImpl implements AdminRecording {
   @Override
   public String getHoldActionPanelURL() {
     return this.holdActionPanelURL;
+  }
+
+  @Override
+  public void setItemType(ItemType type) {
+    this.type = type;
+  }
+
+  @Override
+  public ItemType getItemType() {
+    return type;
   }
 
   static class Adapter extends XmlAdapter<AdminRecordingImpl, AdminRecording> {

@@ -204,6 +204,7 @@ public class AdminuiRestService {
         MediaPackage mediapackage = workflows[i].getMediaPackage();
         AdminRecording item = new AdminRecordingImpl();
         item.setId(workflows[i].getId());
+        item.setItemType(AdminRecording.ItemType.WORKFLOW);
         item.setTitle(mediapackage.getTitle());
         item.setPresenter(joinStringArray(mediapackage.getCreators()));
         item.setSeriesTitle(mediapackage.getSeries());
@@ -409,6 +410,8 @@ public class AdminuiRestService {
                 || (recording.getState().equals(RecordingState.MANIFEST_ERROR))
                 || (recording.getState().equals(RecordingState.UPLOAD_ERROR))) {
           AdminRecordingImpl item = new AdminRecordingImpl();
+          item.setId(event.getID());
+          item.setItemType(AdminRecording.ItemType.SCHEDULER_EVENT);
           item.setTitle(event.getTitle());
           item.setPresenter(event.getCreator());
           item.setSeriesTitle(event.getSeriesID());

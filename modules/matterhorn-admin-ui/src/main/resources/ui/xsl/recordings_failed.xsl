@@ -34,7 +34,9 @@
     <tr class="highlightable">
       <td>
         <a title="View Recording Info">
-          <xsl:attribute name="href">/admin/viewevent.html?workflow=<xsl:value-of select="id" /></xsl:attribute>
+          <xsl:attribute name="href">/admin/viewevent.html?workflow=
+            <xsl:value-of select="id" />
+          </xsl:attribute>
           <xsl:value-of select="title" />
         </a>
       </td>
@@ -67,14 +69,28 @@
           </xsl:attribute>
           Re-try
         </a>
-        <a>
-          <xsl:attribute name="onclick">
-            <xsl:text>Recordings.removeRecording('</xsl:text>
-            <xsl:value-of select="id" />
-            <xsl:text>');</xsl:text>
-          </xsl:attribute>
+        <xsl:choose>
+          <xsl:when test="itemType='SCHEDULER_EVENT'">
+            <a>
+              <xsl:attribute name="onclick">
+                <xsl:text>Recordings.removeSchedulerEvent('</xsl:text>
+                <xsl:value-of select="id" />
+                <xsl:text>');</xsl:text>
+              </xsl:attribute>
           Delete
-        </a>
+            </a>
+          </xsl:when>
+          <xsl:when test="itemType='WORKFLOW'">
+            <a>
+              <xsl:attribute name="onclick">
+                <xsl:text>Recordings.removeRecording('</xsl:text>
+                <xsl:value-of select="id" />
+                <xsl:text>');</xsl:text>
+              </xsl:attribute>
+          Delete
+            </a>
+          </xsl:when>
+        </xsl:choose>
       </td>
     </tr>
   </xsl:template>

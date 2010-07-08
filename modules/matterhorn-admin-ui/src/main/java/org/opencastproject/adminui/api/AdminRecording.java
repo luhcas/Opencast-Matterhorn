@@ -185,4 +185,12 @@ public interface AdminRecording {
   void setHoldActionPanelURL(String url);
 
   String getHoldActionPanelURL();
+
+  // indicates from which service this item originates
+  public static enum ItemType {UNKNOWN, SCHEDULER_EVENT, CAPTUREAGENT_JOB, WORKFLOW};
+
+  void setItemType(ItemType type);
+  
+  ItemType getItemType();
+  
 }
