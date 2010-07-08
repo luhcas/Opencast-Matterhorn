@@ -16,8 +16,11 @@
             for (i in elms) {
               if ((elms[i].getAttribute != undefined) && (elms[i].getAttribute('type').match(/dvd/))) {
                 $('#dvd-image-link').attr('href', elms[i].getElementsByTagName('url')[0].firstChild.data);
+                $('#error').css('display','none');
+                $('#download').css("display","block");
               }
             }
+            parent.Recordings.adjustHoldActionPanelHeight();
           }
         });
       });
@@ -25,9 +28,14 @@
   </head>
   <body style="padding:10px;">
     <h1>Download DVD image</h1>
-    To download the DVD encoded recording click <a id="dvd-image-link" href="#">here</a>.
+    <div id="download" style="display:none;">
+      To download the DVD encoded recording click <a id="dvd-image-link" href="#">here</a>.
     <p style="color:gray;">
       The recording will remain on the server until you continue.
     </p>
+    </div>
+    <div id="error">
+      Sorry, no DVD encoded track was found in this Media Package.
+    </div>
   </body>
 </html>
