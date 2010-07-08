@@ -86,6 +86,15 @@ CREATE TABLE upload (
     filename character varying(255) NOT NULL
 );
 
+CREATE TABLE dictionary (
+  text character varying(255) NOT NULL,
+  language character varying(255) NOT NULL,
+  weight double precision,
+  count bigint,
+  stopword boolean
+);
+
+
 ALTER TABLE ONLY annotation
     ADD CONSTRAINT annotation_pkey PRIMARY KEY (id);
 
@@ -148,3 +157,9 @@ ALTER TABLE ONLY sched_r_event_metadata
 
 ALTER TABLE ONLY series_metadata
     ADD CONSTRAINT fk_series_metadata_series_id FOREIGN KEY (series_id) REFERENCES series(id);
+
+ALTER TABLE ONLY dictionary
+    ADD CONSTRAINT dictionary_pkey PRIMARY KEY (text, language);
+
+create index dictionary_text on dictionary (text);
+create index dictionary_language on dictionary (language);

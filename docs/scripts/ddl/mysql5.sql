@@ -104,3 +104,14 @@ CREATE TABLE `UPLOAD` (
   PRIMARY KEY  (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE `DICTIONARY` (
+  `TEXT` varchar(255) collate utf8_unicode_ci NOT NULL,
+  `LANGUAGE` varchar(255) collate utf8_unicode_ci NOT NULL,
+  `WEIGHT` double,
+  `COUNT` bigint(20),
+  `STOPWORD` tinyint(1) DEFAULT 0,
+  PRIMARY KEY  (`TEXT`, `LANGUAGE`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+create index dictionary_text on dictionary (text);
+create index dictionary_language on dictionary (language);
