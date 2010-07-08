@@ -158,8 +158,14 @@ Upload.initRetry = function(wfId) {
       $('#workflow-selector').val(defId);
       ocWorkflow.definitionSelected(defId, $('#workflow-config-container'), function() {
         $(data.documentElement).find("> configurations > configuration").each(function(index, elm) {
-          if ($(elm).attr('key')) {
-            $('#'+ $(elm).attr('key')).val($(elm).text());
+          var fieldname = '#' + $(elm).attr('key').replace(/\./g, '\\\\.');
+          var field = $(fieldname);
+          if (field) {
+            if ($(field).is('input[type=checkbox]')) {
+              $(field).attr('checked',$(elm).text());
+            } else {
+              $(field).val($(elm).text());
+            }
           }
         });
       });
