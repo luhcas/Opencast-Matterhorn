@@ -61,14 +61,14 @@
         <xsl:value-of select="processingStatus" />
       </td>
       <td class="td-Action">
-        <a>
+        <!-- a>
           <xsl:attribute name="onclick">
             <xsl:text>Recordings.retryRecording('</xsl:text>
             <xsl:value-of select="id" />
             <xsl:text>');</xsl:text>
           </xsl:attribute>
           Re-try
-        </a>
+        </a -->
         <xsl:choose>
           <xsl:when test="itemType='SCHEDULER_EVENT'">
             <a>
