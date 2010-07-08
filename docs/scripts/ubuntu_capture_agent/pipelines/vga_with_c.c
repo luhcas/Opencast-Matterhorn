@@ -167,6 +167,7 @@ int main(int argc, char *argv[])
 	gchar *container = "mpegtsmux";
 	guint length = 0;
 	gint64 interval = 5;
+	gint quantizer = 21;
 	GOptionContext *context = NULL;
 	GError *err;
 	GOptionEntry entries[] = 
@@ -178,6 +179,7 @@ int main(int argc, char *argv[])
 		{"container", 'c', 0, G_OPTION_ARG_STRING, &container, "GStreamer container element (default: mpegtsmux)", NULL},
 		{"length", 't', 0, G_OPTION_ARG_INT, &length, "Time to run pipeline in seconds.", NULL},
 		{"interval", 'i', 0, G_OPTION_ARG_INT, &interval, "Interval between confidence images in seconds. (default: 5)", NULL},
+		{"quantizer", 'q', 0, G_OPTION_ARG_INT, &quantizer, "Constant quantization value for H.264 encoding (default: 21)", NULL}, 
 		{NULL}
 	};
 	if (!g_thread_supported())
@@ -201,14 +203,6 @@ int main(int argc, char *argv[])
 	loop = g_main_loop_new(NULL, FALSE);
 	
 	mkdir("images", 00777);
-	
-	/* helpful verbosity */
-	g_print("VGA2USB Capture With Confidence Monitoring using %s\n", gst_version_string());
-	g_print(" * capturing from %s\n", source);
-	g_print(" * saving video stream to %s\n", outputfile);
-	g_print(" * using %s to encode with a bitrate of %d\n", enc, bitrate);
-	g_print(" * container for stream is %s\n", container);
-	g_print(" * saving confidence images every %" G_GINT64_FORMAT " seconds\n", interval);
 
 	/* create the elements and construct the pipeline */
 	pipeline = gst_pipeline_new("vga2usb_without_confidence");
@@ -242,10 +236,26 @@ int main(int argc, char *argv[])
 	set_queue_size(queue4);
 	g_object_set(G_OBJECT (v4lsrc), "device", source, NULL);
 	g_object_set(G_OBJECT (capsfilter), "caps", fpsCaps, NULL);
-	g_object_set(G_OBJECT (encode), "bitrate", bitrate, NULL);
+	if (strcmp(enc, "x264enc") == 0)
+	  g_object_set(G_OBJECT (encode), "quantizer", quantizer, NULL);
+	else
+	  g_object_set(G_OBJECT (encode), "bitrate", bitrate, NULL);
 	g_object_set(G_OBJECT (filesink), "location", outputfile, NULL);
 	g_object_set(G_OBJECT (capsfilter1), "caps", rgbCaps, NULL);
 	g_object_set(G_OBJECT (appsink), "emit-signals", TRUE, NULL);
+	
+	
+	/* helpful verbosity */
+	g_print("VGA2USB Capture With Confidence Monitoring using %s\n", gst_version_string());
+	g_print(" * capturing from %s\n", source);
+	g_print(" * saving video stream to %s\n", outputfile);
+	if (strcmp(enc, "x264enc") == 0)
+	  g_print(" * using %s to encode with a quantizer of %d\n", enc, quantizer);
+	else
+	  g_print(" * using %s to encode with a bitrate of %d\n", enc, bitrate);
+	g_print(" * container for stream is %s\n", container);
+	g_print(" * saving confidence images every %" G_GINT64_FORMAT " seconds\n", interval);
+
 
 	
 	bus = gst_element_get_bus(pipeline);
