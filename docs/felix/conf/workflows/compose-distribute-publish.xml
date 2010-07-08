@@ -91,19 +91,6 @@
       </configurations>
     </operation>
 
-    <!-- hold for captions -->
- 
-    <operation
-      id="caption"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Waiting for user to upload captions">
-      <configurations>
-        <configuration key="caption-flavor">caption/dfxp</configuration>
-        <configuration key="required-property">${caption.hold}</configuration>
-      </configurations>
-    </operation>
-
     <!-- encode to hold preview player formats -->
 
     <operation
@@ -128,7 +115,7 @@
         <configuration key="encoding-profile">flash-preview.http</configuration>
       </configurations>
     </operation>
-    <operation
+    <!-- operation     do we need this anymore?
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
@@ -137,6 +124,37 @@
         <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/preview</configuration>
         <configuration key="encoding-profile">flash-preview.http</configuration>
+      </configurations>
+    </operation -->
+
+    <!-- encode to engage player preview images -->
+ 
+    <operation
+      id="image"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encoding presenter (camera) to player preview image">
+      <configurations>
+        <configuration key="source-flavor">presenter/work</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">presenter/player+preview</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">player-preview.http</configuration>
+        <configuration key="time">1</configuration>
+      </configurations>
+    </operation>
+    <operation
+      id="image"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Encoding presentation (screen) to player preview image">
+      <configurations>
+        <configuration key="source-flavor">presentation/work</configuration>
+        <configuration key="source-tags"></configuration>
+        <configuration key="target-flavor">presentation/player+preview</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">player-preview.http</configuration>
+        <configuration key="time">1</configuration>
       </configurations>
     </operation>
 
@@ -152,6 +170,19 @@
         <configuration key="required-property">${review.hold}</configuration>
         </configurations>
     </operation>  
+
+    <!-- hold for captions -->
+ 
+    <operation
+      id="caption"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Waiting for user to upload captions">
+      <configurations>
+        <configuration key="caption-flavor">caption/dfxp</configuration>
+        <configuration key="required-property">${caption.hold}</configuration>
+      </configurations>
+    </operation>
 
     <!-- encode to engage player formats -->
 
@@ -189,37 +220,6 @@
       description="Extracting segments from presentation">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
-      </configurations>
-    </operation>
- 
-    <!-- encode to engage player preview images -->
- 
-    <operation
-      id="image"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Encoding presenter (camera) to player preview image">
-      <configurations>
-        <configuration key="source-flavor">presenter/work</configuration>
-        <configuration key="source-tags"></configuration>
-        <configuration key="target-flavor">presenter/player+preview</configuration>
-        <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">player-preview.http</configuration>
-        <configuration key="time">1</configuration>
-      </configurations>
-    </operation>
-    <operation
-      id="image"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Encoding presentation (screen) to player preview image">
-      <configurations>
-        <configuration key="source-flavor">presentation/work</configuration>
-        <configuration key="source-tags"></configuration>
-        <configuration key="target-flavor">presentation/player+preview</configuration>
-        <configuration key="target-tags">engage</configuration>
-        <configuration key="encoding-profile">player-preview.http</configuration>
-        <configuration key="time">1</configuration>
       </configurations>
     </operation>
 
