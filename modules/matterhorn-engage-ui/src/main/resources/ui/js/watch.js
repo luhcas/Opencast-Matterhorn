@@ -134,7 +134,8 @@ Opencast.Watch = (function ()
           mediaResolutionOne = mediaResolutionOne === null ? '' : mediaResolutionOne;
           mediaResolutionTwo = mediaResolutionTwo === null ? '' : mediaResolutionTwo;
           
-       
+         
+
 
           Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo);
 

@@ -235,9 +235,10 @@ Opencast.FlashVersion = (function ()
                 str += '<param name="allowScriptAccess" value="sameDomain" />';
                 str += '<param name="bgcolor" value="#000000" />';
                 str += '<param name="allowFullScreen" value="true" />';
+                str += '<param name="wmode" value="transparent" />';
                 str += '<param name="flashvars" value="bridgeName=b_Videodisplay&amp;autoplay=false"/>';
             
-            str += '<embed ';
+            str += '<embed style="z-index: 100;"';
               for (var i in embedAttrs)
                   str += i + '="' + embedAttrs[i] + '" ';
               str += '> </embed></object>';
@@ -372,6 +373,7 @@ Opencast.FlashVersion = (function ()
                 "name", "Videodisplay",
                 "allowScriptAccess", "sameDomain",
                 "type", "application/x-shockwave-flash",
+                "wmode", "transparent",
                 "pluginspage", "http://www.adobe.com/go/getflashplayer"
           );
         } 

@@ -772,3 +772,59 @@ option:hover
   border-left-width:        1px;
   width:                    100%;
 }
+
+#oc_embed-left
+{
+  float:                    left;
+  margin-left:              5%;
+}
+
+#oc_embed-right
+{
+  float:                    left;
+  margin-right:             5%;
+  margin-left:              10px;
+  width:                    200px;
+}
+#oc_costum-width
+{
+  flaot:                    left;
+  width:                    50px;
+  text-align:               right;
+  cursor:                   default;
+  color:                    #000000;
+  background-color:         #E3E3D7;
+  margin-bottom:            4px;
+}
+
+#oc_embed-costum-width-textinput
+{
+  flaot:                    left;
+  background-color:         #ffffff;
+  width:                    40px;
+  color:                    #000000;
+}
+
+#oc_costum-height
+{
+  flaot:                    left;
+  width:                    50px;
+  text-align:               right;
+  cursor:                   default;
+  color:                    #000000;
+  background-color:         #E3E3D7;
+}
+
+#oc_embed-costum-height-textinput
+{
+  flaot:                    left;
+  background-color:         #ffffff;
+  width:                    40px;
+  color:                    #000000;
+}
+
+#oc_embed-custom-title
+{
+  text-align:               center;
+  margin-bottom:            4px;
+}

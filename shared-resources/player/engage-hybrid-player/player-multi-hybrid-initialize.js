@@ -30,6 +30,8 @@ Opencast.Initialize = (function ()
     
     var myWidth           = 0,
     myHeight = 0,
+    OTHERDIVHEIGHT = 100,
+    MINWIDTH = 300,
     VOLUME = 'volume',
     VIDEOSIZE = 'videosize',
     divId = '',
@@ -46,6 +48,9 @@ Opencast.Initialize = (function ()
     formatOne = 0,
     formatTwo = 0,
     formatSingle = 0,
+    maxFormat = 0;
+    customHeight = '';
+    customWidth = '';
     size = "",
     creatorPostfix = "",
     creator = "";
@@ -67,6 +72,69 @@ Opencast.Initialize = (function ()
     {
         return divId;
     }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the maxFormat.
+        @param Sring format
+     */
+    function setMaxFormat(format)
+    {
+        maxFormat = format;
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Get the maxFormat.
+        @return Sring maxFormat
+     */
+    function getMaxFormat()
+    {
+        return maxFormat;
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the customHeight.
+        @param Sring height
+     */
+    function setCustomHeight(height)
+    {
+        customHeight = height;
+    }
+    
+
+    /**
+        @memberOf Opencast.Player
+        @description Get the customHeight.
+        @return Sring customHeight
+     */
+    function getCustomHeight()
+    {
+        return customHeight;
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the customWidth.
+        @param Sring height
+     */
+    function setCustomWidth(width)
+    {
+        customWidth = width;
+    }
+    
+
+    /**
+        @memberOf Opencast.Player
+        @description Get the customWidth.
+        @return Sring customWidth
+     */
+    function getCustomWidth()
+    {
+        return customWidth;
+    }
+    
     
     /**
         @memberOf Opencast.Initialize
@@ -346,6 +414,7 @@ Opencast.Initialize = (function ()
                 clickLecturerSearchField = true;
             }
         });
+       
         
         // Handler for .mouseover()
         $('#oc_btn-skip-backward').mouseover(function () 
@@ -494,8 +563,6 @@ Opencast.Initialize = (function ()
             }
         });
         
-      
-        
         // Handler keydown
         $('#oc_btn-rewind').keydown(function (event) 
         {
@@ -567,9 +634,39 @@ Opencast.Initialize = (function ()
                 Opencast.Player.stopFastForward();
             }
         });
+        $('#oc_embed-costum-width-textinput').keyup(function (event) 
+        {
+           
+        	if((event.keyCode >= 48 && event.keyCode <= 57) || event.keyCode === 8)
+           	{
+            	setCustomWidth($('#oc_embed-costum-width-textinput').val());
+            	setCostumEmbedHeight();
+           	}
+            else
+            {
+            	$('#oc_embed-costum-width-textinput').attr('value', getCustomWidth());
+            }
+        	$('#oc_embed-costum-width-textinput').css('background-color','#ffffff');
+        });
+        $('#oc_embed-costum-height-textinput').keyup(function (event) 
+        {
+        	if((event.keyCode >= 48 && event.keyCode <= 57) || event.keyCode === 8)
+           	{
+        		setCustomHeight($('#oc_embed-costum-height-textinput').val());
+        		setCostumEmbedWidth();
+           	}
+        	else
+            {
+            	$('#oc_embed-costum-height-textinput').attr('value', getCustomHeight());
+            }
+        	$('#oc_embed-costum-height-textinput').css('background-color','#ffffff');
+        });
         
         // init Flash
         Opencast.FlashVersion.initFlash();
+        
+        
+       
         
     });
     
@@ -689,9 +786,9 @@ Opencast.Initialize = (function ()
             }
         }
   
-        if (newHeight < 300)
+        if (newHeight < MINWIDTH)
         {
-            newHeight = 300;
+            newHeight = MINWIDTH;
             switch (size) 
             {
             case VIDEOSIZEBIGRIGHT:
@@ -838,10 +935,67 @@ Opencast.Initialize = (function ()
         doResize();
     }
     
+    
+    function setCostumEmbedHeight()
+    {
+        
+        var embedWidth = $('#oc_embed-costum-width-textinput').val();
+        
+       
+        
+        if(embedWidth >= MINWIDTH)
+        {
+            var embedHeight = (Math.round(embedWidth / getMaxFormat())) + OTHERDIVHEIGHT;
+            $('#oc_embed-costum-height-textinput').attr('value', embedHeight);
+            $('#oc_embed-costum-height-textinput').css('background-color','#ffffff');
+            Opencast.Player.embedIFrame(embedWidth, embedHeight); 
+        }
+        else
+        {
+        	$('#oc_embed-costum-height-textinput').css('background-color','#ff0000');
+        	$('#oc_embed-costum-height-textinput').attr('value', '');
+        	$('#oc_embed-textarea').val('');
+        }
+        
+        if($('#oc_embed-costum-width-textinput').val() === '')
+        {
+        	$('#oc_embed-costum-height-textinput').css('background-color','#ffffff');
+        }
+    }
+    
+    function setCostumEmbedWidth()
+    {
+    	var embedHeight = $('#oc_embed-costum-height-textinput').val() - OTHERDIVHEIGHT;
+        var embedWidth = Math.round(embedHeight * getMaxFormat());
+        
+        
+        
+        if(embedWidth >= MINWIDTH)
+        {
+        	$('#oc_embed-costum-width-textinput').attr('value', embedWidth);
+        	$('#oc_embed-costum-width-textinput').css('background-color','#ffffff');
+        	Opencast.Player.embedIFrame(embedWidth, embedHeight); 
+        }
+        else
+        {
+        	$('#oc_embed-costum-width-textinput').css('background-color','#ff0000');
+        	$('#oc_embed-costum-width-textinput').attr('value', '');
+        	$('#oc_embed-textarea').val('');
+        }
+        
+        if($('#oc_embed-costum-height-textinput').val() === '')
+        {
+        	$('#oc_embed-costum-width-textinput').css('background-color','#ffffff');
+        }
+    }
+    
+    
+    /**
+        @memberOf Opencast.Player
+        @description Set the embed height and width
+     */
     function setEmbed()
     {
-        var maxFormat = 0;
-        var otherDivHeight = 100;
         var embedWidhtOne = 620;
         var embedWidhtTwo = 540;
         var embedWidhtThree = 460
@@ -851,27 +1005,25 @@ Opencast.Initialize = (function ()
         
     	if(formatSingle !== 0)
         {
-    		maxFormat = formatSingle;
+    		setMaxFormat(formatSingle);
         }
         else if(formatOne > formatTwo  )
         {
-        	maxFormat = formatOne;
+        	setMaxFormat(formatOne);
         }
         else
         {
-        	maxFormat = formatTwo;
+        	setMaxFormat(formatTwo);
         }
     	
-    	var embedHeightOne = (embedWidhtOne / maxFormat) + otherDivHeight;
-    	var embedHeightTwo = (540 / maxFormat) + otherDivHeight;
-    	var embedHeightThree = (460 / maxFormat) + otherDivHeight;
-    	var embedHeightFour = (380 / maxFormat) + otherDivHeight;
-    	var embedHeightFive = (300 / maxFormat) + otherDivHeight;
+    	var embedHeightOne = (embedWidhtOne / getMaxFormat()) + OTHERDIVHEIGHT;
+    	var embedHeightTwo = (540 / getMaxFormat()) + OTHERDIVHEIGHT;
+    	var embedHeightThree = (460 / getMaxFormat()) + OTHERDIVHEIGHT;
+    	var embedHeightFour = (380 / getMaxFormat()) + OTHERDIVHEIGHT;
+    	var embedHeightFive = (300 / getMaxFormat()) + OTHERDIVHEIGHT;
     	
-        
-    	
-    	$("#oc_embed-icon-one").css("width", "110px");
-    	$("#oc_embed-icon-one").css("height", "83px");
+        $("#oc_embed-icon-one").css("width", "110px");
+    	$("#oc_embed-icon-one").css("height", "73px");
     	$("#oc_embed-icon-one").attr({ 
             alt: embedWidhtOne+' x '+embedHeightOne,
             title: embedWidhtOne+' x '+embedHeightOne,
@@ -884,7 +1036,7 @@ Opencast.Initialize = (function ()
     	});
     	
     	$("#oc_embed-icon-two").css("width", "100px");
-    	$("#oc_embed-icon-two").css("height", "75px");
+    	$("#oc_embed-icon-two").css("height", "65px");
     	$("#oc_embed-icon-two").attr({ 
     		alt: embedWidhtTwo+' x '+embedHeightTwo,
             title: embedWidhtTwo+' x '+embedHeightTwo,
@@ -897,7 +1049,7 @@ Opencast.Initialize = (function ()
     	});
     	
     	$("#oc_embed-icon-three").css("width", "90px");
-    	$("#oc_embed-icon-three").css("height", "68px");
+    	$("#oc_embed-icon-three").css("height", "58px");
     	$("#oc_embed-icon-three").attr({ 
     		alt: embedWidhtThree+' x '+embedHeightThree,
             title: embedWidhtThree+' x '+embedHeightThree,
@@ -910,7 +1062,7 @@ Opencast.Initialize = (function ()
     	});
     	    	
     	$("#oc_embed-icon-four").css("width", "80px");
-    	$("#oc_embed-icon-four").css("height", "60px");
+    	$("#oc_embed-icon-four").css("height", "50px");
     	$("#oc_embed-icon-four").attr({ 
     		alt: embedWidhtFour+' x '+embedHeightFour,
             title: embedWidhtFour+' x '+embedHeightFour,
@@ -924,7 +1076,7 @@ Opencast.Initialize = (function ()
     	    	    
     	
     	$("#oc_embed-icon-five").css("width", "70px");
-    	$("#oc_embed-icon-five").css("height", "52px");
+    	$("#oc_embed-icon-five").css("height", "42px");
     	$("#oc_embed-icon-five").attr({ 
     		alt: embedWidhtFive+' x '+embedHeightFive,
             title: embedWidhtFive+' x '+embedHeightFive,
@@ -936,7 +1088,15 @@ Opencast.Initialize = (function ()
     	    Opencast.Player.embedIFrame(embedWidhtFive, embedHeightFive);   
     	});
         
-        
+    	
+         
+         var embedCustomMinHeight = Math.round(MINWIDTH / getMaxFormat()) + OTHERDIVHEIGHT;
+         	
+         $("#oc_embed-costum-height-textinput").attr({ 
+         	name: 'Custom Height min '+embedCustomMinHeight+'px',
+             alt: 'Custom Height min '+embedCustomMinHeight+'px',
+             title: 'Custom Height min '+embedCustomMinHeight+'px'
+         });
         
         
     }

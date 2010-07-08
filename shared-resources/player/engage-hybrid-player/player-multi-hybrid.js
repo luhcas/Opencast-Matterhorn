@@ -850,6 +850,7 @@ Opencast.Player = (function () {
         Opencast.Initialize.doResize();
     }
     
+   
     
     /**
         @memberOf Opencast.Player
