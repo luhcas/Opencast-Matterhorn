@@ -137,6 +137,8 @@ public class AgentStateJob implements Job {
       formParams.add(new BasicNameValuePair("id", e.getKey()));
       formParams.add(new BasicNameValuePair("state", e.getValue().getState()));
 
+      logger.debug("Sending recording {}'s state: {}.", e.getKey(), e.getValue().getState());
+
       String myURL = url + e.getKey();
       send(formParams, myURL);
     }
