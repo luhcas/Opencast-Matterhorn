@@ -19,12 +19,13 @@
     <table id="recordingsTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
       <thead>
         <tr>
-          <th width="30%" id="th-Title" class="sortable recording-Table-head">Title</th>
+          <th width="25%" id="th-Title" class="sortable recording-Table-head">Title</th>
           <th width="15%" id="th-Presenter" class="sortable recording-Table-head">Presenter</th>
           <th width="20%" id="th-Series" class="sortable recording-Table-head">Course/Series</th>
-          <th width="20%" id="th-StartDate" class="sortable date-column recording-Table-head">Recording Date &amp; Time</th>
+          <th width="15%" id="th-StartDate" class="sortable date-column recording-Table-head">Recording Date &amp; Time</th>
           <th width="10%" id="th-CaptureAgent" class="sortable recording-Table-head">Capture Agent</th>
           <th width="15%" id="th-ProcessingStatus" class="sortable recording-Table-head">Status</th>
+          <th width="10%" id="th-Action" class="recording-Table-head">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -36,10 +37,7 @@
   <xsl:template match="ns1:recording">
     <tr class="highlightable">
       <td>
-        <a title="Edit Recording">
-          <xsl:attribute name="href">/admin/scheduler.html?eventId=<xsl:value-of select="id" />&amp;edit</xsl:attribute>
-          <xsl:value-of select="title" />
-        </a>
+        <xsl:value-of select="title" />
       </td>
       <td>
         <xsl:value-of select="presenter" />
@@ -60,6 +58,22 @@
       </td>
       <td>
         Scheduled for automatic capture
+      </td>
+      <td>
+        <a title="View Recording Info">
+          <xsl:attribute name="href">/admin/scheduler.html?eventId=<xsl:value-of select="id" />&amp;edit</xsl:attribute>
+          Edit
+        </a>
+        <a title="Delete Recording">
+          <xsl:attribute name="onclick">
+            <xsl:text>Recordings.removeScheduledRecording('</xsl:text>
+            <xsl:value-of select="id" />
+            <xsl:text>', '</xsl:text>
+            <xsl:value-of select="title" />
+            <xsl:text>');</xsl:text>
+          </xsl:attribute>
+          Delete
+        </a>
       </td>
     </tr>
   </xsl:template>

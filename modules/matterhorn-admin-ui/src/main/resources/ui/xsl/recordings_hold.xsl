@@ -21,7 +21,7 @@
           <th width="20%" id="th-StartDate" class="sortable date-column recording-Table-head">Recording Date &amp; Time</th>
           <!-- <th width="10%" class="sortable">Capture Agent</th> -->
           <th width="15%" id="th-HoldTitle" class="sortable recording-Table-head">Status</th>
-          <th width="15%" id="th-Action" class="sortable">Action</th>
+          <th width="15%" id="th-Action" class="recording-Table-head">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -33,10 +33,7 @@
   <xsl:template match="ns1:recording">
     <tr class="highlightable">
       <td>
-        <a title="View Recording Info">
-          <xsl:attribute name="href">/admin/viewevent.html?workflow=<xsl:value-of select="id" /></xsl:attribute>
-          <xsl:value-of select="title" />
-        </a>
+        <xsl:value-of select="title" />
       </td>
       <td>
         <xsl:value-of select="presenter" />
@@ -58,6 +55,10 @@
       <td>
         <input type="hidden">
         </input>
+        <a title="View Recording Info">
+          <xsl:attribute name="href">/admin/viewevent.html?workflow=<xsl:value-of select="id" /></xsl:attribute>
+          View
+        </a>
         <a>
           <xsl:attribute name="onclick">
             <xsl:text>Recordings.displayHoldActionPanel('</xsl:text><xsl:value-of select="holdActionPanelURL" /><xsl:text>','</xsl:text><xsl:value-of select="id" /><xsl:text>', this);</xsl:text>

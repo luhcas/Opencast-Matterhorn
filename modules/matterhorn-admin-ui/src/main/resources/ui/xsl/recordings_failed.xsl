@@ -21,7 +21,7 @@
           <th width="20%" id="th-StartDate" class="sortable date-column recording-Table-head">Recording Date &amp; Time</th>
           <!-- <th width="10%" class="sortable">Capture Agent</th> -->
           <th width="15%" id="th-ProcessingStatus" class="sortable recording-Table-head">Status</th>
-          <th width="15%">Actions</th>
+          <th width="15%" id="th-Action" class="recording-Table-head">Actions</th>
         </tr>
       </thead>
       <tbody>

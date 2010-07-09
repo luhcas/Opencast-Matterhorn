@@ -246,14 +246,6 @@ UI.ChangeRecordingType = function(recType){
 };
 
 UI.SubmitForm = function(){
-  // validate inputs
-  if(Scheduler.components.resources == '') {
-      $('#missingFields-container').show();
-      $('#missing-inputs').show();
-      $('#i18n_input_label').css('color','red');
-      
-      return true;
-  } else $('#i18n_input_label').css('color','black');
   var eventXML = null;
   eventXML = Scheduler.FormManager.serialize();
   if(eventXML){
@@ -279,13 +271,11 @@ UI.SubmitForm = function(){
                }, UI.EventSubmitComplete );
       }else{
         $.ajax({
-               type: "PUT",
-               url: SCHEDULER_URL + '/recurrence',
-               data: {
-               recurringEvent: eventXML
-               },
-               success: UI.EventSubmitComplete
-               });
+          type: "PUT",
+          url: SCHEDULER_URL + '/recurrence',
+          data: { recurringEvent: eventXML },
+          success: UI.EventSubmitComplete
+        });
       }
     }
   }
@@ -456,7 +446,6 @@ UI.LoadEvent = function(doc){
 
 UI.EventSubmitComplete = function(){
   for(var k in Scheduler.components){
-    AdminUI.log("#data-" + k)
     $('#data-'+ k).show();
     //$("#data-" + k + " > .data-label").text(i18n[k].label + ":");
     $('#data-' + k + ' > .data-value').text(Scheduler.components[k].toString());
@@ -571,8 +560,6 @@ UI.RegisterComponents = function(){
               if(data.success){
                 creationSucceeded = true;
                 seriesComponent.fields.series.val(data.id);
-                AdminUI.log('Successfully created new series: ' + data.id);
-                UI.SubmitForm();
               }
             }
           });
@@ -583,9 +570,23 @@ UI.RegisterComponents = function(){
   Scheduler.components.subject = new AdminForm.Component(['subject'], {label: 'label-subject'});
   Scheduler.components.language = new AdminForm.Component(['language'], {label: 'label-subject'});
   Scheduler.components.description = new AdminForm.Component(['description'], {label: 'label-description'});
-  Scheduler.components.license = new AdminForm.Component(['license'], {label: 'label-license'});
+  Scheduler.components.license = new AdminForm.Component(['license'], {label: 'i18n_license_label', required: true},
+    { validate: function(){
+        var license;
+        if(this.fields.license){
+          return true;
+        }else{
+          license = $('#license')[0];
+          if(license){
+            this.setFields('license');
+            return this.validate();
+          }
+        }
+        return false;
+      }
+    });
   Scheduler.components.resources = new AdminForm.Component([],
-    { label: 'label-inputs', errorField: 'none', nodeKey: 'resources' },
+    { label: 'i18n_input_label', errorField: 'missing-inputs', nodeKey: 'resources' },
     { getValue: function(){
         var selected = [];
         for(var el in this.fields){
@@ -814,7 +815,6 @@ UI.RegisterComponents = function(){
               if(date.getDay() != date.getUTCDay()){
                 dayOffset = date.getDay() < date.getUTCDay() ? 1 : -1;
               }
-              AdminUI.log(dayOffset);
               if(this.fields.repeat_sun[0].checked){
                 days.push(dotw[(0 + dayOffset) % 7]);
               }

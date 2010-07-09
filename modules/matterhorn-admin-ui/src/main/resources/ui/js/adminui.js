@@ -100,8 +100,10 @@ $.extend(AdminForm.Manager.prototype, {
         $('#' + this.components[k].label).addClass('error');
         error = true;
       }else{
-        $('#' + this.components[k].errorField).hide();
-        $('#' + this.components[k].label).removeClass('error');
+        if(this.components[k].errorField && this.components[k].label){
+          $('#' + this.components[k].errorField).hide();
+          $('#' + this.components[k].label).removeClass('error');
+        }
       }
     }
     if(error){
@@ -147,7 +149,7 @@ $.extend(AdminForm.Component.prototype, {
    *  @param {String[]} Array of element ids
    */
   setFields:  function(fields){
-    if(typeof f == 'string') { //If a single field is specified, wrap in an array.
+    if(typeof fields == 'string') { //If a single field is specified, wrap in an array.
       fields = [fields];
     }
     for(var k in fields) {
@@ -239,8 +241,8 @@ $.extend(AdminForm.Component.prototype, {
    *	@type DOM Node
    */
   toNode: function(parent){
+    var doc, container, value, key;
     for(var el in this.fields){
-      var doc, container, value, key;
       if(parent){
         doc = parent.ownerDocument;
       }else{
@@ -258,8 +260,10 @@ $.extend(AdminForm.Component.prototype, {
       container.appendChild(value);
       container.appendChild(key);
     }
-    if(parent && parent.nodeType){
-      parent.appendChild(container);
+    if(parent && parent.nodeType && container){
+      parent.appendChild(container); //license bug
+    }else{
+      AdminUI.log('Unable to append node to document. ', parent, container);
     }
     return container;
   },

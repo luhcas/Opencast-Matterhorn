@@ -25,6 +25,7 @@
           <th width="20%" id="th-StartDate" class="sortable date-column recording-Table-head">Recording Date &amp; Time</th>
           <!-- <th width="10%" class="sortable">Capture Agent</th> -->
           <th width="15%" id="th-ProcessingStatus" class="sortable recording-Table-head">Status</th>
+          <th width="15%" id="th-Action" class="recording-Table-head">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -36,10 +37,7 @@
   <xsl:template match="ns1:recording">
     <tr class="highlightable">
       <td>
-        <a title="View Recording Info">
-          <xsl:attribute name="href">/admin/viewevent.html?workflow=<xsl:value-of select="id" /></xsl:attribute>
-          <xsl:value-of select="title" />
-        </a>
+        <xsl:value-of select="title" />
       </td>
       <td>
         <xsl:value-of select="presenter" />
@@ -60,6 +58,12 @@
       </td> -->
       <td class="processingStatus">
         <xsl:value-of select="processingStatus" />
+      </td>
+      <td>
+        <a title="View Recording Info">
+          <xsl:attribute name="href">/admin/viewevent.html?workflow=<xsl:value-of select="id" /></xsl:attribute>
+          View
+        </a>
       </td>
     </tr>
   </xsl:template>

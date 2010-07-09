@@ -367,15 +367,17 @@ Recordings.removeRecording = function(workflowId) {
   });
 }
 
-Recordings.removeSchedulerEvent = function(eventId) {
-$.ajax({
-    url        : '../scheduler/rest/event/'+eventId,
-    type       : 'DELETE',
-    error      : function(XHR,status,e){
-      alert('Could not remove Scheduler Event ' + workflowId);
-    },
-    success    : function(data) {
-      location.reload();
-    }
-  });
+Recordings.removeScheduledRecording = function(eventId, title) {
+  if(confirm('Are you sure you wish to delete ' + title + '?')){
+    $.ajax({
+        url        : '/scheduler/rest/event/'+eventId,
+        type       : 'DELETE',
+        error      : function(XHR,status,e){
+          alert('Could not remove Scheduler Event ' + workflowId);
+        },
+        success    : function(data) {
+          location.reload();
+        }
+      });
+  }
 }
