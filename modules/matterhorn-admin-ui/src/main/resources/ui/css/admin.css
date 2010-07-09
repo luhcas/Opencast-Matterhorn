@@ -489,3 +489,13 @@ a.oc_tabs-active {
 #oc_recordingmenu {
      overflow: hidden !important;
 }
+
+/* Autocomplete */
+
+.ui-autocomplete {
+  width: 450px;
+}
+
+.ui-autocomplete li {
+  list-style: none;
+}

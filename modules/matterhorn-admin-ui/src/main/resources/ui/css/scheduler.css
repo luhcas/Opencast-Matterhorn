@@ -103,13 +103,3 @@
   color: blue;
   display: none;
 }
-
-/* Autocomplete */
-
-.ui-autocomplete {
-  width: 450px;
-}
-
-.ui-autocomplete li {
-  list-style: none;
-}

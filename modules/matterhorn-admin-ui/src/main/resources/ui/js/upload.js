@@ -103,6 +103,16 @@ Upload.init = function() {
   $('body').click( function() {
     $('#helpBox').fadeOut('fast');
   });
+  
+  $('#series').autocomplete({
+    source: '/series/rest/search',
+    select: function(event, ui){
+      $('#isPartOf').val(ui.item.id);
+    },
+    search: function(){
+      $('#isPartOf').val('');
+    }
+  });
 
   ocWorkflow.init($('#workflow-selector'), $('#workflow-config-container'));
 
