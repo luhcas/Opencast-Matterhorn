@@ -172,19 +172,31 @@ Opencast.segments = ( function() {
       var last = 0;
       var cur = 0;
       var ibefore = 0;
+      var lastIndex;
 
       // last segment
       if (segmentTimes[segmentTimes.length-1] <= currentPosition){
-        var ibefore = Math.max(segmentTimes.length-2,0);
+        if (segmentTimes[segmentTimes.length-1] <= currentPosition && currentPosition < parseInt(segmentTimes[segmentTimes.length-1]) + 3)
+          lastIndex = 2;
+        else
+          lastIndex = 1;
+        var ibefore = Math.max(segmentTimes.length-lastIndex,0);
         beforeSlide = segmentTimes[ibefore];
-        currentSlide = segmentTimes[segmentTimes.length-1];;
+        currentSlide = segmentTimes[segmentTimes.length-1];
         nextSlide = currentSlide;
       } else{
         for (i in segmentTimes)
         {
           cur = segmentTimes[i];
+          
           if (last <= currentPosition && currentPosition < cur){
-            ibefore = Math.max(parseInt(i)-2,0);
+            
+            if (last <= currentPosition && currentPosition < parseInt(last) + 3)
+              lastIndex = 2;
+            else
+              lastIndex = 1;
+
+            ibefore = Math.max(parseInt(i)-lastIndex,0);
             beforeSlide = segmentTimes[ibefore];
             currentSlide = last;
             nextSlide = segmentTimes[i];
