@@ -58,6 +58,3 @@ ocWorkflow.getConfiguration = function(container) {
   return out;
 }
 
-
-
-

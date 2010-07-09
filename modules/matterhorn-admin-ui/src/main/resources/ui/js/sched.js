@@ -50,6 +50,36 @@ UI.Init = function(){
 
   Scheduler.FormManager = new AdminForm.Manager(SINGLE_EVENT_ROOT_ELM, '', Scheduler.components);
   
+  $.extend(Scheduler.FormManager, {
+    serialize: function(){
+      var doc, mdlist, ocwprops;
+      if(this.validate()){
+        doc = this.createDoc();
+        mdlist = doc.createElement('metadataList');
+        for(var c in this.components){
+          if(c === 'recurrence' || c === 'eventId'){
+            this.components[c].toNode(doc.documentElement)
+          } else {
+            this.components[c].toNode(mdlist);
+          }
+        }
+        //handle OC Workflow specialness
+        ocwprops = ocWorkflow.getConfiguration($('#workflow-config-container'));
+        mdlist.appendChild($('<metadata><key>org.opencastproject.workflow.config.review.hold</key><value>' + ocwprops['review.hold'] + '</value></metadata>')[0]);
+        mdlist.appendChild($('<metadata><key>org.opencastproject.workflow.config.caption.hold</key><value>' + ocwprops['caption.hold'] + '</value></metadata>')[0]);
+        doc.documentElement.appendChild(mdlist);
+        if(typeof XMLSerializer != 'undefined') {
+          return (new XMLSerializer()).serializeToString(doc);
+        } else if(doc.xml) {
+          return doc.xml;
+        } else { 
+          return false;
+        }
+      }
+      return false;
+    }
+  });
+  
   if(Scheduler.type === SINGLE_EVENT){
     UI.agentList = '#agent';
     UI.inputList = '#input-list';
@@ -440,6 +470,16 @@ UI.LoadEvent = function(doc){
     Scheduler.components.recurrenceId = new AdminForm.Component(['recurrenceId']);
     Scheduler.components.recurrencePosition = new AdminForm.Component(['recurrencePosition']);
   }
+  if(metadata['org.opencastproject.workflow.config.review.hold'] === 'true'){
+    document.getElementById('review.hold').checked = true;
+  }else{
+    document.getElementById('review.hold').checked = false;
+  }
+  if(metadata['org.opencastproject.workflow.config.caption.hold'] == 'true'){
+    document.getElementById('caption.hold').checked = true;
+  }else{
+    document.getElementById('caption.hold').checked = false;
+  }
   Scheduler.FormManager.populate(metadata)
   $('#agent').change(); //update the selected agent's capabilities
 }
@@ -456,6 +496,7 @@ UI.EventSubmitComplete = function(){
 
 UI.CheckForConflictingEvents = function(){
   var event, endpoint, data;
+  
   if($("#notice-conflict").siblings(':visible').length === 0){
     $('#notice-container').hide();
   }
