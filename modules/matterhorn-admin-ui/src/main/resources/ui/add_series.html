@@ -140,19 +140,22 @@
         </div>
       </center>
     </noscript>
-
+    <div class="oc_headerRow">
+        <a class="oc_headerLink" href="../../welcome.html">
+          <div class="mh-logo"><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn"/></div>
+          <div class="mh-heading"><h1>Admin Tools</h1></div>
+        </a>
+        <a class="oc_headerLink" href="http://www.opencastproject.org/">
+          <div class="oc-logo"><img src="shared_img/opencast_logo.gif" alt="Opencast Matterhorn"/></div>
+        </a>
+    </div>
     <!-- fl-centered doesn't work in winXP-IE8 -->
     <div class="fl-container-flex fl-centered fl-theme-coal">
-      <div style="margin-top: .5em">
-        <a href="../../welcome.html" style="text-decoration:none;">
-          <h1><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn">&nbsp;&nbsp;Opencast Matterhorn</h1>
-        </a>
-      </div>
-      <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
-        <li><a href="recordings.html" id="i18n_tab_recording">Recordings</a></li>
-        <li class="fl-activeTab"><a href="series.html" id="i18n_tab_series">Series</a></li>
-        <li><a href="agents_status.html" id="i18n_tab_agent">Capture Agents</a></li>
-      </ul>
+        <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
+          <li id="oc_tabs"><a class="oc_tabs" href="recordings.html" id="i18n_tab_recording">Recordings</a></li>
+          <li id="oc_tabs" class="fl-activeTab"><a class="oc_tabs-active" href="series.html" id="i18n_tab_series">Series</a></li>
+          <li id="oc_tabs"><a class="oc_tabs" href="agents_status.html" id="i18n_tab_agent">Capture Agents</a></li>
+        </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix">
         
         <!-- Common Scheduling Information -->
