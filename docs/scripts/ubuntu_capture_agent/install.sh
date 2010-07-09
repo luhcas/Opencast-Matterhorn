@@ -166,6 +166,10 @@ Testers should choose a value of 1 minute so that they can schedule recordings t
 ## Keys for several properties in the config files
 # Storage dir in the general felix config file (config.properties)
 export STORAGE_KEY="org.opencastproject.storage.dir"
+# Own url in the general felix config file (config.properties)
+export SERVER_URL_KEY="org.opencastproject.server.url"
+# Port where felix is running in the felix config file (config.properties)
+export FELIX_PORT_KEY="org.osgi.service.http.port"
 # Agent name in the capture properties file
 export AGENT_NAME_KEY="capture.agent.name"
 # URL of the core machine inthe capture properties file

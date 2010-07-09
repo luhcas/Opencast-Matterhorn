@@ -43,6 +43,27 @@ ask -d "$(hostname)" -f '^[a-zA-Z0-9_\-]*$' -e "Please use only alphanumeric cha
 sed -i "s/^${AGENT_NAME_KEY//./\\.}=.*$/${AGENT_NAME_KEY}=$agentName/" "$CAPTURE_PROPS"
 echo
 
+# Prompt for the agent IP address
+echo "If your network uses a proxy you may have to set the capture agent manually in order to use the Matterhorn confidence monitoring interfaces.
+If you are not using a proxy you do not have to configure the network address, it will be autodetected in normal operation."
+echo
+yesno -d yes "Configure network address now?" config
+
+if [[ "$config" ]]; then
+    # User wants to set up the address
+    default_ip=$(ifconfig | grep -m 1 -o '[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]' | cut -d '
+' -f 1)
+    # Gets the osgi service port, where felix is running
+    service_port=$(grep "^${FELIX_PORT_KEY//./\\.}=.*$" "$GEN_PROPS" | cut -d '=' -f 2)
+    # Asks for the new IP
+    # TODO: this property also admits a URL, rather than an IP. Remove the filter and check this still works for an arbitrary address.
+    # > And how do we check if that URL is correct or not?
+    ask -a -f '^[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]$'\
+        "Detected IP is $default_ip. Press [enter] to accept, or enter new address" ip
+    : ${ip:=$default_ip}
+    sed -i "s#^${SERVER_URL_KEY//./\\.}=.*\$#${SERVER_URL_KEY}=${ip%:$service_port}:$service_port#" "$GEN_PROPS"
+fi
+
 # Prompt for the URL where the core lives.
 # TODO: (or maybe not) Support a distributed core would mean to set different URLs separately, rather than this centralized one
 ## Read default from the config file
