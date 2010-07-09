@@ -28,11 +28,10 @@ var Opencast = Opencast || {};
 Opencast.Scrubber = (function () 
 {
     var locked             = false,
-    EMBED                  = 'embed';
     currentScrubberPositon = 0,
     tooltipTop             = 0,
-    offsetX                = 25,
-    offsetY                = 35;
+    offsetX                = 32,
+    offsetY                = 8;
     
 
     /**
@@ -42,7 +41,7 @@ Opencast.Scrubber = (function ()
     function oc_tooltip()
     {
         var $tooltip = $('<div id="divToolTip" value="00:00:00">00:00:00</div>');
-        $('body').append($tooltip);
+        $('#oc_seek-slider').append($tooltip);
         $tooltip.hide();
     }
     
@@ -50,15 +49,15 @@ Opencast.Scrubber = (function ()
         @memberOf Opencast.Scrubber
         @description Initialize the scrubber
      */
-    function init(player)
+    function init()
     {
-        var _player = player;
+       
     	
     	$('#draggable').bind('dragstart', function (event, ui) 
         {
-            tooltipTop = event.pageY - offsetY;
+            tooltipTop = $('#oc_flash-player').height() + offsetY;
             $("#divToolTip").css('top', tooltipTop);
-            $("#divToolTip").css('left', event.pageX - offsetX);
+            $("#divToolTip").css('left', 0);
             $("#divToolTip").fadeIn();
         
             Opencast.Player.setDragging(true);
@@ -81,24 +80,22 @@ Opencast.Scrubber = (function ()
 
         $('#draggable').bind('drag', function (event, ui) 
         {
-            $("#divToolTip").css('top', tooltipTop);
+            var tooltipLeft = $(this).position().left - offsetX;
             
-            var dragLeft = event.pageX - offsetX + $("#divToolTip").width();
-            
-            if(dragLeft > $('#oc_flash-player').width() - 20 && _player === EMBED)
+            if(tooltipLeft < 0)
             {
-            	$("#divToolTip").css('left', $('#oc_flash-player').width() - $("#divToolTip").width() - 10);
+            	$("#divToolTip").css('left', 0);
             }
-            else if(event.pageX - offsetX < 0 && _player === EMBED)
+            else if($(this).position().left + offsetX + 6 > $('#oc_flash-player').width())
             {
-            	$("#divToolTip").css('left', 5);
+            	$("#divToolTip").css('left', $('#oc_flash-player').width() - $("#divToolTip").width() - 6);
             }
             else
             {
-            	$("#divToolTip").css('left', event.pageX - offsetX);
+            	$("#divToolTip").css('left', tooltipLeft);
             }
-           
-            if (!locked)
+        	
+        	if (!locked)
             {
                 locked = true;
                 setTimeout(function ()

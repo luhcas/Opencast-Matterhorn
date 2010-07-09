@@ -604,9 +604,10 @@ option:hover
   color :                   #000000;
   background-color:         #fae6a0;
   font-size :               14;
-  left:                     120px;
-  top:                      380px;
+  left:                     0px;
+  top:                      0px;
   cursor:                   default !important;
+  width:                    64px;
 }
 
 .play-segment 

@@ -1123,6 +1123,17 @@
       </roles>
       <timezone>+1</timezone>
     </developer>
+     <developer>
+      <id>stefan</id>
+      <name>Stefan Altevogt</name>
+      <email>saltevog@uni-osnabrueck.de</email>
+      <organization>University of Applied Sciences Osnabrueck</organization>
+      <organizationUrl>http://www.fh-osnabrueck.de/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
   </developers>
 
   <contributors><!-- TODO? -->

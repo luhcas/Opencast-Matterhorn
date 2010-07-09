@@ -172,7 +172,7 @@ Opencast.Watch = (function ()
           Opencast.Player.setCaptionsURL(captionsUrl);
 
           // init the volume scrubber
-          Opencast.Scrubber.init('embed');
+          Opencast.Scrubber.init();
 
           
           // bind handler 
