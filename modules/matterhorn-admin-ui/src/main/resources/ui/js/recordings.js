@@ -122,6 +122,11 @@ Recordings.init = function() {
   ocPager.init();
   Recordings.displayRecordingStats();
 
+  if (Recordings.currentState == "upcoming" || Recordings.currentState == "finished") {
+    $('#info-box').css("display", "block");
+    $("#table-info-box-"+Recordings.currentState).css("display","block");
+  }
+
   // init update interval for recording stats
   Recordings.statsInterval = window.setInterval( 'Recordings.displayRecordingStats();', 3000 );
   if (show == 'all' || show == 'capturing' || show == 'processing') {
@@ -189,12 +194,6 @@ Recordings.displayRecordings = function(state, reload) {
     $('#recordings-table-container').xslt("rest/recordings/"+state+"?ps="+psize+"&pn="+page+"&sb="+sort+"&so="+order,
       "xsl/recordings_"+state+".xsl", function() {
       Recordings.tableUpdateRequested = false;
-      // move info box above paging controls
-      var infobox = $("#table-info-box");
-      if (infobox) {
-        $('#recordings-table-container').remove('##table-info-box');
-        $('#info-box').empty().append(infobox).css('display','block');
-      }
       // prepare table heads
       $('.recording-Table-head').removeClass('sortable-Ascending').removeClass('sortable-Descending');
       $('#th-'+Recordings.sortBy).addClass('sortable-'+Recordings.sortOrder);

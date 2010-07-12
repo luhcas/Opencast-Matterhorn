@@ -12,10 +12,6 @@
   <xsl:output method="html"/>
 
   <xsl:template match="ns1:recordingLists">
-    <div id="table-info-box" style="border: 1px solid #cccccc;font-size:0.9em;text-align:center;width:600px;margin-left:auto;margin-right:auto;margin-bottom:0.5em;padding:0.5em;">
-      <img title="Information" alt="Information" src="shared_img/icons/information.png" style="vertical-align: bottom;"></img>
-     Go to the <a href="/engage/ui/" style="text-decoration:underline">Matterhorn Media Module</a> to see any Recordings which have gone through "Encode, Analyze, and Distribute" processing.
-    </div>
     <table id="recordingsTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
       <thead>
         <tr>
