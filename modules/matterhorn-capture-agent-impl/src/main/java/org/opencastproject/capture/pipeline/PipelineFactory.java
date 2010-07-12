@@ -909,7 +909,7 @@ class BufferThread extends Thread {
     while (run) {
       log.trace(queue.getName() + "," + queue.get("current-level-buffers") + "," + queue.get("current-level-bytes") + "," + queue.get("current-level-time"));
       try {
-        Thread.sleep(1000);
+        Thread.sleep(60000);
       } catch (InterruptedException e) {
         log.trace(queue.getName() + "'s buffer monitor thread caught an InterruptedException but is continuing.");
       }
