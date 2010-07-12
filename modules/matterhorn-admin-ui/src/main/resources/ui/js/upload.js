@@ -119,7 +119,7 @@ Upload.init = function() {
   // test if we upload a new recording or want to retry a workflow
   Upload.retryId = Upload.getURLParam("retry");
   if (Upload.retryId != '') {
-    $('#i18n_page_title').text("Edit Recording for Retry");
+    $('#i18n_page_title').text("Edit Recording Before Continuing");
     $('#BtnSubmit').text("Retry");
     Upload.initRetry(Upload.retryId);
   } else {                                             // FIXME well this has to be cleaned up, agile...
