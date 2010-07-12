@@ -393,7 +393,7 @@ public class RecurringEvent extends AbstractEvent {
    */
   public boolean removeEvent(Event e) {
     metadataTable = null;
-    return metadata.remove(e);
+    return generatedEvents.remove(e);
   }
 
   public void setEntityManagerFactory(EntityManagerFactory emf) {

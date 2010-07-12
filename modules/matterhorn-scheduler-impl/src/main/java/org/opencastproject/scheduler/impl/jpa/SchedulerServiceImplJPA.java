@@ -405,7 +405,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
    */
   @Override
   public boolean removeEvent(String eventID) {
-    logger.debug("Removing event with the ID {}", eventID);
+    logger.info("Removing event with the ID {}", eventID);
     Event event;
     EntityManager em = emf.createEntityManager();
     try {
@@ -419,6 +419,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
         em.merge(rEvent);
       }
       em.remove(event);
+      
       em.getTransaction().commit();
     } finally {
       em.close();
@@ -428,7 +429,7 @@ public class SchedulerServiceImplJPA extends SchedulerServiceImpl {
   }
   
   public boolean removeRecurringEvent(String rEventID) {
-    logger.debug("Removing recurring event with the ID {}", rEventID);
+    logger.info("Removing recurring event with the ID {}", rEventID);
     RecurringEvent event;
     EntityManager em = emf.createEntityManager();
     try {
