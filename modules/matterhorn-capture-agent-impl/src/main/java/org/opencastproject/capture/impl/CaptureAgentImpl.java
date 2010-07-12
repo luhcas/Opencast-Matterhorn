@@ -767,6 +767,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
     retValue = response.getStatusLine().getStatusCode();
 
+    client.close(response);
+
     if (retValue == 200) {
       setRecordingState(recID, RecordingState.UPLOAD_FINISHED);
     } else {

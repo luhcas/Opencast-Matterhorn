@@ -32,6 +32,7 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -151,19 +152,17 @@ public class AgentStateJob implements Job {
    */
   private void send(List<NameValuePair> formParams, String url) {
     HttpResponse resp = null;
+    HttpPost remoteServer = new HttpPost(url);
     try {
-      HttpPost remoteServer = new HttpPost(url);
       remoteServer.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
-      resp = client.execute(remoteServer);
-      if (resp.getStatusLine().getStatusCode() != 200) {
-        logger.info("State push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
-      }
-    } catch (Exception e) {
-      logger.error("Unable to push update to remote server: {}.", e.getMessage());
-    } finally {
-      if (resp != null) {
-        client.close(resp);
-      }
+    } catch (UnsupportedEncodingException e) {
+      logger.error("Unable to send agent state because the URL encoding is not supported");
+      return;
     }
+    resp = client.execute(remoteServer);
+    if (resp.getStatusLine().getStatusCode() != 200) {
+      logger.info("State push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
+    }
+    client.close(resp);
   }
 }

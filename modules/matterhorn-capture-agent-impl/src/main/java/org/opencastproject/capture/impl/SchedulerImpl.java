@@ -382,6 +382,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       HttpGet get = new HttpGet(url.toURI());
       HttpResponse response = trustedClient.execute(get);
       in = new DataInputStream(response.getEntity().getContent());
+      trustedClient.close(response);
     }
     int c = 0;
     while ((c = in.read()) != -1) {

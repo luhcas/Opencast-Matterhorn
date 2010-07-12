@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 /**
  * This class is responsible for pushing the agent's state to the remote state service.
@@ -76,20 +77,21 @@ public class AgentCapabilitiesJob implements Job {
     HttpResponse resp = null;
     try {
       agent.getAgentCapabilities().storeToXML(baos, "Capabilities for the agent " + agent.getAgentName());
-      HttpPost remoteServer = new HttpPost(url);
-      remoteServer.setEntity(new StringEntity(baos.toString()));
-      resp = client.execute(remoteServer);
-      if (resp.getStatusLine().getStatusCode() != 200) {
-        logger.info("Capabilities push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
-      }
     } catch (IOException e) {
-      logger.error ("Unexpected I/O exception: {}", e.getMessage());
-    } catch (Exception e) {
-      logger.error("Unable to push update to remote server: {}.", e.getMessage());
-    } finally {
-      if (resp != null) {
-        client.close(resp);
-      }
+      logger.warn("Unable to serialize agent capabilities!");
+      return;
     }
+    HttpPost remoteServer = new HttpPost(url);
+    try {
+      remoteServer.setEntity(new StringEntity(baos.toString()));
+    } catch (UnsupportedEncodingException e) {
+      logger.warn("Unable to send agent capapbillities because correct encoding scheme is not supported!");
+      return;
+    }
+    resp = client.execute(remoteServer);
+    if (resp.getStatusLine().getStatusCode() != 200) {
+      logger.info("Capabilities push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
+    }
+    client.close(resp);
   }
 }
