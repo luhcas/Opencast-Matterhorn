@@ -31,7 +31,7 @@ Opencast.FlashVersion = (function ()
     // Major version of Flash required
     var requiredMajorVersion = 10;
     // Minor version of Flash required
-    var requiredMinorVersion = 0;
+    var requiredMinorVersion = 1;
     // Minor version of Flash required
     var requiredRevision = 0;
     
@@ -405,8 +405,8 @@ Opencast.FlashVersion = (function ()
             var alternateContent = 'Alternate HTML content should be placed here.'
             + 'This content requires the Adobe Flash Player. '
             + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
-            //document.write(alternateContent);  // insert non-flash content
-            $("#oc_flash-player").html(alternateContent);
+            document.write(alternateContent);  // insert non-flash content
+            //$("#oc_flash-player").write(alternateContent);
         }
     }
     

@@ -578,7 +578,8 @@ Opencast.Initialize = (function ()
         
         var coverUrl = Opencast.engage.getCoverUrl();
         coverUrl = coverUrl === null ? 'engage-hybrid-player/img/MatterhornEmbedLogo.png' : coverUrl;
-        $('#oc_image').attr("src", coverUrl);        
+        $('#oc_image').attr("src", coverUrl);  
+        
     });
     
 
