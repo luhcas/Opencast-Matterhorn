@@ -401,7 +401,8 @@
       exception-handler-workflow="error"
       description="Archiving">
       <configurations>
-        <configuration key="archive.collection">2010.summer.archive</configuration>
+        <configuration key="archive-collection">2010.summer.archive</configuration>
+        <configuration key="preserve-flavors">dublincore/episode,dublincore/series</configuration>
       </configurations>
     </operation>
   </operations>

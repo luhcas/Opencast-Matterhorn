@@ -73,7 +73,7 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
     commaSeparated = StringUtils.trimToNull(commaSeparated);
     List<String> list = new ArrayList<String>();
     if (commaSeparated != null) {
-      for(String s : commaSeparated.split("\\W")) {
+      for(String s : commaSeparated.split(",")) {
         if(StringUtils.trimToNull(s) != null) {
           list.add(s.trim());
         }

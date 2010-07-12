@@ -52,6 +52,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -63,9 +64,12 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(ArchiveWorkflowOperationHandler.class);
-  
+
   /** The workflow operation's property to consult to determine the collection to use to store an archive */
-  public static final String ARCHIVE_COLLECTION_PROPERTY = "archive.collection";
+  public static final String ARCHIVE_COLLECTION_PROPERTY = "archive-collection";
+
+  /** The element flavors to maintain in the original mediapackage */
+  public static final String PRESERVE_FLAVOR_PROPERTY = "preserve-flavors";
 
   /** The default collection in the working file repository to store archives */
   public static final String DEFAULT_ARCHIVE_COLLECTION = "archive";
@@ -80,7 +84,18 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
   protected File tempStorageDir = null;
 
   /** The configuration properties */
-  protected SortedMap<String, String> configurationOptions = new TreeMap<String, String>();
+  protected SortedMap<String, String> configurationOptions = null;
+
+  /** The default no-arg constructor builds the configuration options set */
+  public ArchiveWorkflowOperationHandler() {
+    configurationOptions = new TreeMap<String, String>();
+    configurationOptions.put(ARCHIVE_COLLECTION_PROPERTY,
+            "The configuration key that specifies the archive collection.  Defaults to " + DEFAULT_ARCHIVE_COLLECTION);
+    configurationOptions.put(PRESERVE_FLAVOR_PROPERTY,
+            "The configuration key that specifies the element flavors to preserve in the original "
+                    + "mediapackage.  Any flavors not specified here will remain only as part of the zipped "
+                    + "mediapackage archive");
+  }
 
   /**
    * The workspace to use in retrieving and storing files.
@@ -166,13 +181,18 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
       throw new WorkflowOperationException(e);
     }
 
-    // The zip file is safely in the archive, so it's now safe to attempt to remove all mediapackage elements and delete
+    // Parse the flavors to remove
+    List<String> flavorsToKeep = asList(currentOperation.getConfiguration(PRESERVE_FLAVOR_PROPERTY));
+    
+    // The zip file is safely in the archive, so it's now safe to attempt to remove mediapackage elements and delete
     // the files, if possible
     try {
       FileUtils.forceDelete(zip);
       for (MediaPackageElement element : mediaPackage.getElements()) {
-        workspace.delete(mediaPackage.getIdentifier().toString(), element.getIdentifier());
-        mediaPackage.remove(element);
+        if( element.getFlavor() != null && ! flavorsToKeep.contains(element.getFlavor().toString())) {
+          workspace.delete(mediaPackage.getIdentifier().toString(), element.getIdentifier());
+          mediaPackage.remove(element);
+        }
       }
     } catch (Exception e) {
       throw new WorkflowOperationException(e);
