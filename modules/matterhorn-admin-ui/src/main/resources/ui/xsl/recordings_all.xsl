@@ -77,7 +77,7 @@
             <xsl:otherwise>
               <a title="View Recording Info">
                 <xsl:attribute name="href">/admin/viewevent.html?workflow=<xsl:value-of select="id" /></xsl:attribute>
-                View
+                View Info
               </a>
             </xsl:otherwise>
         </xsl:choose>

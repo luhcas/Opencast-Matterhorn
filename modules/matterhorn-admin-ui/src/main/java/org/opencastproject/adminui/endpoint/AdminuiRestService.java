@@ -457,22 +457,29 @@ public class AdminuiRestService {
     LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
     if (schedulerService != null) {
       logger.debug("getting upcoming recordings from scheduler");
-      SchedulerEvent[] events = schedulerService.getUpcomingEvents();
+      SchedulerFilter filter = new SchedulerFilterImpl();
+      filter.setStart(new Date());
+      Event[] events = schedulerService.getEventsJPA(filter);
       for (int i = 0; i < events.length; i++) {
-        if (System.currentTimeMillis() < events[i].getStartdate().getTime()) {
-          AdminRecording item = new AdminRecordingImpl();
-          item.setId(events[i].getID());
-          item.setTitle(events[i].getTitle());
-          item.setPresenter(events[i].getCreator());
-          item.setSeriesTitle(events[i].getSeriesID());    // actually it's the series title
-          // FIXME Add the series ID too
-          item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
-          item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
-          item.setCaptureAgent(events[i].getDevice());
-          item.setProcessingStatus("Scheduled");
-          item.setDistributionStatus("not distributed");
-          out.add(item);
+        AdminRecording item = new AdminRecordingImpl();
+        item.setId(events[i].getEventId());
+        item.setTitle(events[i].getValue("title"));
+        item.setPresenter(events[i].getValue("creator"));
+        logger.debug("Event's Series: {}", events[i].getValue("seriesId"));
+        Series eventSeries = seriesService.getSeries(events[i].getValue("seriesId"));
+        if(eventSeries != null){
+          String seriesTitle = eventSeries.getFromMetadata("title");
+          if(seriesTitle != null){
+            item.setSeriesTitle(seriesTitle);
+            logger.debug("Found Series: {}", seriesTitle);
+          }
         }
+        item.setStartTime(events[i].getValue("timeStart"));
+        item.setEndTime(events[i].getValue("timeEnd"));
+        item.setCaptureAgent(events[i].getValue("device"));
+        item.setProcessingStatus("Scheduled");
+        item.setDistributionStatus("not distributed");
+        out.add(item);
       }
     } else {
       logger.warn("scheduler not present, returning empty list");
