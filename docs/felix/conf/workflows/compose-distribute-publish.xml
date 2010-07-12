@@ -16,13 +16,13 @@
         <li class="ui-helper-clearfix"> 
           <span id="holdconfig" style="float:left;">
             <input id="review.hold" name="review.hold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;" style="float:left;">
-            <span id="i18n_hold_for_review">&nbsp;Hold for review</span>
+            <span id="i18n_hold_for_review">&nbsp;Review before encoding (with option to edit info)</span>
           </span>
          </li>
          <li class="ui-helper-clearfix">
           <span id="captionconfig" style="float:left;">
             <input id="caption.hold" name="caption.hold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;">
-            <span id="i18n_hold_for_caption">&nbsp;Hold for caption</span>
+            <span id="i18n_hold_for_caption">&nbsp;Captions file upload</span>
           </span>
          </li>
       </ul>
