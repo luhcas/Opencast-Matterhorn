@@ -67,6 +67,11 @@ Upload.init = function() {
               Upload.metadata[$(this).attr('name')].push($(this).val());
             }
           } else {
+            if($(this).attr('id') === 'isPartOf'){
+              if($('#series').val() !== '' && $('#isPartOf').val() === ''){ //have text and no id
+                Upload.createSeriesFromSearchText();
+              }
+            }
             Upload.metadata[$(this).attr('name')] = $(this).val();
           }
         }
@@ -343,6 +348,24 @@ Upload.showFailedScreen = function(message) {
     $('#field-filename').children('.fieldValue').text(UploadListener.shortFilename);
     
   });
+}
+
+Upload.createSeriesFromSearchText = function(){
+  var seriesXml = '<series><metadataList><metadata><key>title</key><value>' + $('#series').val() + '</value></metadata></metadataList></series>';
+  var creationSucceeded = false;
+  $.ajax({
+    async: false,
+    type: 'PUT',
+    url: '/series/rest/series',
+    data: { series: seriesXml },
+    success: function(data){
+      if(data.success){
+        creationSucceeded = true;
+        $('#isPartOf').val(data.id);
+      }
+    }
+  });
+  return creationSucceeded;
 }
 
 /** print line to log console

@@ -33,12 +33,7 @@
   <xsl:template match="ns1:recording">
     <tr class="highlightable">
       <td>
-        <a title="View Recording Info">
-          <xsl:attribute name="href">/admin/viewevent.html?workflow=
-            <xsl:value-of select="id" />
-          </xsl:attribute>
-          <xsl:value-of select="title" />
-        </a>
+        <xsl:value-of select="title" />
       </td>
       <td>
         <xsl:value-of select="presenter" />
@@ -77,7 +72,7 @@
                 <xsl:value-of select="id" />
                 <xsl:text>');</xsl:text>
               </xsl:attribute>
-          Delete
+              Delete
             </a>
           </xsl:when>
           <xsl:when test="itemType='WORKFLOW'">
@@ -87,7 +82,7 @@
                 <xsl:value-of select="id" />
                 <xsl:text>');</xsl:text>
               </xsl:attribute>
-          Delete
+              Delete
             </a>
           </xsl:when>
         </xsl:choose>
