@@ -577,11 +577,35 @@ Opencast.Initialize = (function ()
         $("a[href='#']").attr('href', '' + advancedUrl + '');
         
         var coverUrl = Opencast.engage.getCoverUrl();
-        coverUrl = coverUrl === null ? 'engage-hybrid-player/img/MatterhornEmbedLogo.png' : coverUrl;
-        $('#oc_image').attr("src", coverUrl);  
-        
+        if (coverUrl === null) {
+            var coverType;
+            coverUrl = 'engage-hybrid-player/img/MatterhornEmbedLogo.png';
+
+            $.ajax(
+            {
+                type: 'GET',
+                contentType: 'text/xml',
+                url: "../../search/rest/episode",
+                data: "id=" + Opencast.engage.getMediaPackageId(),
+                dataType: 'xml',
+                success: function(xml) 
+                {
+                    $(xml).find('attachment').each( function(){
+                        coverType = $(this).attr('type');
+                        if (coverType.search(/player/) !== -1) {
+                            coverUrl = $(this).find('url').text();
+                        }
+                    }); //close each(
+
+                    $('#oc_image').attr("src", coverUrl);
+                },
+                error: function(a, b, c) 
+                {
+                    // Some error while trying to get the search result
+                }
+            }); //close ajax
+        } // close if
     });
-    
 
     /**
         @memberOf Opencast.Player
