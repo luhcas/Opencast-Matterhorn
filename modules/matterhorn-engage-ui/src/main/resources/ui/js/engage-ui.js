@@ -87,6 +87,16 @@ Opencast.engage = (function () {
 
     /**
      * @memberOf Opencast.engage
+     * @description Gets the current cover url
+     * @return The cover url
+     */
+    function getCoverUrl() {
+      var value = getGETParameter("coverUrl");
+      return value;
+    }
+
+    /**
+     * @memberOf Opencast.engage
      * @description Get the value of the GET parameter with the passed "name"
      * @param string name
      * @return The value of the GET parameter
@@ -108,6 +118,7 @@ Opencast.engage = (function () {
       getMediaPackageId : getMediaPackageId,
       getVideoUrl : getVideoUrl,
       getVideoUrl2 : getVideoUrl2,
+      getCoverUrl : getCoverUrl,
       getSearchServiceEpisodeIdURL :  getSearchServiceEpisodeIdURL
     };
 }());

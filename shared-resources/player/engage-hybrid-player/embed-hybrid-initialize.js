@@ -576,10 +576,9 @@ Opencast.Initialize = (function ()
         advancedUrl = embedUrl.replace(/embed.html/g, "watch.html");
         $("a[href='#']").attr('href', '' + advancedUrl + '');
         
-        $("#oc_image").attr('src', 'engage-hybrid-player/img/MatterhornEmbedLogo.png');
-        
-       
-        
+        var coverUrl = Opencast.engage.getCoverUrl();
+        coverUrl = coverUrl === null ? 'engage-hybrid-player/img/MatterhornEmbedLogo.png' : coverUrl;
+        $('#oc_image').attr("src", coverUrl);        
     });
     
 
