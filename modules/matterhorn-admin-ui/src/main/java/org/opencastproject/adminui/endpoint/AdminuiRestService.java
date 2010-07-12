@@ -19,6 +19,10 @@ import org.opencastproject.adminui.api.AdminRecording;
 import org.opencastproject.adminui.api.AdminRecordingImpl;
 import org.opencastproject.adminui.api.AdminRecordingList;
 import org.opencastproject.adminui.api.AdminRecordingListImpl;
+import org.opencastproject.adminui.api.AdminSeries;
+import org.opencastproject.adminui.api.AdminSeriesImpl;
+import org.opencastproject.adminui.api.AdminSeriesList;
+import org.opencastproject.adminui.api.AdminSeriesListImpl;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
@@ -26,6 +30,9 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.SchedulerService;
+import org.opencastproject.series.api.Series;
+import org.opencastproject.series.api.SeriesMetadata;
+import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -71,6 +78,7 @@ public class AdminuiRestService {
   private final static int CAPTURE_AGENT_DELAY = 5000;
   private static final Logger logger = LoggerFactory.getLogger(AdminuiRestService.class);
   private SchedulerService schedulerService;
+  private SeriesService seriesService;
   private WorkflowService workflowService;
   private CaptureAgentStateService captureAdminService;
 
@@ -81,6 +89,15 @@ public class AdminuiRestService {
 
   public void unsetSchedulerService(SchedulerService service) {
     logger.debug("unbinding SchedulerService");
+    schedulerService = null;
+  }
+  
+  public void setSeriesService(SeriesService service) {
+    seriesService = service;
+  }
+  
+  public void unsetSeriesService() {
+    logger.debug("unbinding SeriesService");
     schedulerService = null;
   }
 
@@ -504,6 +521,66 @@ public class AdminuiRestService {
       logger.warn("scheduler or capture admin service not present, returning empty list");
     }
     return out;
+  }
+  
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("series")
+  public AdminSeriesListImpl getSeries( @QueryParam("pn") int pageNumber,
+                                        @QueryParam("ps") int pageSize,
+                                        @QueryParam("sb") String sortBy,
+                                        @QueryParam("so") String sortOrder) {
+    logger.debug("PageSize, PageNumber: {},{}", pageSize, pageNumber);
+    LinkedList<AdminSeries> seriesList = new LinkedList<AdminSeries>();
+    List<Series> allSeries = seriesService.getAllSeries();
+    for(Series s : allSeries){
+      AdminSeries series = new AdminSeriesImpl();
+      series.setId(s.getSeriesId());
+      List<SeriesMetadata> seriesMetadata = s.getMetadata();
+      for(SeriesMetadata metadata : seriesMetadata){
+        if(metadata.getKey().equals("title")) {
+          series.setTitle(metadata.getValue());
+        }else if(metadata.getKey().equals("creator")) {
+          series.setCreator(metadata.getValue());
+        }else if(metadata.getKey().equals("contributor")){
+          series.setContributor(metadata.getValue());
+        }
+      }
+      logger.debug("Found series {}", series.getTitle());
+      seriesList.add(series);
+    }
+    AdminSeriesListImpl page;
+    try {
+      AdminSeriesList.Order order = Enum.valueOf(AdminSeriesList.Order.class, sortOrder);
+      AdminSeriesList.Field field = Enum.valueOf(AdminSeriesList.Field.class, sortBy);
+      page = new AdminSeriesListImpl(field, order);
+    } catch (Exception e) {
+      page = new AdminSeriesListImpl();
+    }
+    if (pageNumber < 0) {
+      pageNumber = 0;
+    }
+    if(pageSize == 0){
+      pageSize = seriesList.size();
+    }
+    int first, last;
+    if (seriesList.size() <= pageSize) {
+      first = 0;
+      last = seriesList.size();
+    } else {
+      first = pageNumber * pageSize;
+      last = first + pageSize;
+    }
+    logger.debug("Returning results items " + first + " - " + (first + pageSize - 1));
+    for (int i = first; i < last; i++) {
+      try {
+        page.add(seriesList.get(i));
+      } catch (IndexOutOfBoundsException e) {
+        break;
+      }
+    }    
+    logger.debug("List: " + page.sortBy.toString() + " " + page.sortOrder.toString());
+    return page;
   }
 
   /**

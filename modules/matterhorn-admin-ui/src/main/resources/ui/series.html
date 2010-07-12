@@ -20,8 +20,11 @@
     <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
     <script type="text/javascript" src="shared_js/version.js"></script>
-    <script type="text/javascript" src="js/recordings.js"></script>
     <script type="text/javascript" src="js/adminui.js"></script>
+    <script type="text/javascript" src="js/series.list.js"></script>
+    <script type="text/javascript">
+      $(document).ready(SeriesList.init);
+    </script>
   </head>
   <body>
     <div id="pageHeader">
@@ -75,17 +78,7 @@
             <img title="Information" alt="Information" src="shared_img/icons/information.png" style="vertical-align: bottom;"></img>
             This page is under construction. It will contain a list of existing Series.
           </div>
-          <table id="recordingsTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
-            <thead>
-              <tr>
-                <th width="25%" class="sortable">Title</th>
-                <th width="15%" class="sortable">Organizer</th>
-                <th width="20%" class="sortable">Sponsoring Department</th>
-              </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
+          <div id="series-table-container"></div>
         </div>
       </div>
     </div>
