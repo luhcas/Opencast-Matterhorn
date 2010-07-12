@@ -113,8 +113,8 @@ public class AdminRecordingListImpl implements AdminRecordingList {
       } else {
         relation = compCurrent.compareTo(compNew);
       }
-      if (relation < 0) {
-        insertAt(i-1, recording);
+      if (relation > 0) {
+        insertAt(i, recording);
         return;
       }
     }
@@ -137,8 +137,8 @@ public class AdminRecordingListImpl implements AdminRecordingList {
       } else {
         relation = compCurrent.compareTo(compNew);
       }
-      if (relation > 0) {
-        insertAt(i-1, recording);
+      if (relation < 0) {
+        insertAt(i, recording);
         return;
       }
     }
@@ -171,10 +171,13 @@ public class AdminRecordingListImpl implements AdminRecordingList {
     switch (sortBy) {
       case Title:
         out = r.getTitle();
+        break;
       case Presenter:
         out =  r.getPresenter();
+        break;
       case Series:
         out =  r.getSeriesTitle();
+        break;
       case StartDate:
         try {
           return Long.valueOf(r.getStartTime());    // FIXME make startDate a long in AdminRecording
@@ -183,14 +186,19 @@ public class AdminRecordingListImpl implements AdminRecordingList {
         }
       case RecordingStatus:
         out =  r.getRecordingStatus();
+        break;
       case ProcessingStatus:
         out =  r.getProcessingStatus();
+        break;
       case CaptureAgent:
         out =  r.getCaptureAgent();
+        break;
       case HoldTitle:
         out =  r.getHoldOperationTitle();
+        break;
       default:                              // should not happen
         out =  "";
+        break;
     }
     if (out == null) {    // return empty String so comparing doesn't yield Exception
       return "";
