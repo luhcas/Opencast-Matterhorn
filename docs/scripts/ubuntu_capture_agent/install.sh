@@ -349,6 +349,8 @@ while [[ "$send" ]]; do
     fi
 done
 echo
+echo "Due to a known issue, each device must save output files with proper file extensions. Please see issue MH-4523. For more information on how to configure file extensions for output files see the file org.opencastproject.capture.impl.ConfigurationManager.properties."
+echo
 
 yesno -d yes "It is recommended to reboot the system after installation. Do you wish to do it now?" reboot
 
