@@ -1584,7 +1584,11 @@ Opencast.Player = (function () {
      */
     function setProgress(value) 
     {
-        $('.load-progress').css("width", (Math.min(value, 100) + "%"));
+    	var progress =  Math.min(value, 100);
+    	if (progress % 25 == 0) {
+    		addAlert("Current progress" + progress + "%");
+    	}
+        $('.load-progress').css("width", (progress + "%"));
     }
     
     /**
