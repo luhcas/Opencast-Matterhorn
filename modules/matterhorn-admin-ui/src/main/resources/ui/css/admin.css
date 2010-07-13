@@ -271,18 +271,19 @@ select { font-size:1.15em; }
 #holdActionPanel-container {
   display:none;
   background:white;
-  /*height:400px;*/
-  width:600px;
-  z-index:100;
-  position:absolute;
-  top:100px;
-  left:100px;
-  border:1px solid silver;
+  position:relative;
+  clear:both;
 }
 
 #holdActionPanel-iframe {
   border:none;
   width:100%;
+}
+
+#holdActionPanel-submit {
+  width:50%;
+  margin: 0 auto;
+  text-align: center;
 }
 
 #workflow-config-container {

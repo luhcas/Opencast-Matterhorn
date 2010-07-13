@@ -170,6 +170,24 @@
           <!-- This is where the rendered table goes -->
         </div>
 
+      <div id="holdActionPanel-container">
+          <h2>
+            <span id="holdStateHeadRow-title" >&nbsp;</span>
+            <span id="holdStateHeadRow-presenter">&nbsp;</span>
+            <span id="holdStateHeadRow-series">&nbsp;</span>
+            <span id="holdStateHeadRow-date"></span>
+          </h2>
+          <iframe id="holdActionPanel-iframe" src="" height="600px">
+          </iframe>
+          <div id="holdActionPanel-submit">
+            <span>
+                <input type="hidden" id="holdWorkflowId" value="">
+                <button type="button" id="continueBtn" onclick="Recordings.continueWorkflow();" style="float:left;margin-right:16px;width:160px;" title="Move on to next steps in processing this recording">Continue processing</button>
+                <a href="#" onclick="$('#holdActionPanel-container').toggle();$('#recordings-table-container').toggle();$('#oc_recordingmenu').toggle();$('.paging-nav-container').toggle();$('#refresh-controls-container').toggle();" style="float:left;margin-right:16px;margin-bottom:6px;width:160px;">Remain on hold</a>
+            </span>
+          </div>
+        </div>
+
         <div id="refresh-controls-container" style="float:left;">
           <input type="checkbox" id="refresh-enabled" checked="checked">
           <span class="refresh-text">Update table every&nbsp;</span>
@@ -211,29 +229,10 @@
         </div>
 
       </div>
+
     </div>
     <!-- p>
     <button type="button" onclick="Recordings.displayHoldActionPanel('http://outstack.virtuos.uos.de:8080/org.opencastproject.workflow.handler.downloaddvdworkflowoperationhandler/index.html?9cc8c5bf-ce45-493d-974a-e9ec9eb6ead3','9cc8c5bf-ce45-493d-974a-e9ec9eb6ead3');">Display Example of Hold UI</button>
     </p -->
-    <div id="holdActionPanel-container">
-      <table id="holdStateHead" style="background: silver;margin:0px;" width="100%" style="float:left;">
-        <tr id="holdStateHeadRow">
-          <td id="holdStateHeadRow-title" width="25%">Title</td>
-          <td id="holdStateHeadRow-presenter" width="10%">Presenter</td>
-          <td id="holdStateHeadRow-series" width="20%">Course/Series</td>
-          <td id="holdStateHeadRow-date" width="15%">Recording Date &amp; Time</td>
-          <td id="holdStateHeadRow-status" width="15%">Status</td>
-          <td width="15%">
-            <input type="hidden" id="holdWorkflowId" value="">
-            <a onclick="$('#holdActionPanel-container').fadeOut('fast');" style="position:absolute; top:3px; right:3px;"><img src="shared_img/icons/close.png" alt="close" title="close"></a>
-            <a href="#" onclick="$('#holdActionPanel-container').fadeOut('fast');" style="float:left;margin-right:16px;margin-bottom:6px;width:160px;">Remain on hold</a>
-            <br>
-            <button type="button" id="continueBtn" onclick="Recordings.continueWorkflow();" style="float:left;margin-right:16px;width:160px;" title="Move on to next steps in processing this recording">Continue processing</button>
-          </td>
-        </tr>
-      </table>
-      <iframe id="holdActionPanel-iframe" src="" height="600px">
-      </iframe>
-    </div>
   </body>
 </html>
