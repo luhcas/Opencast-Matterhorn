@@ -191,6 +191,8 @@ Opencast.Watch = (function ()
           });
           
           Opencast.segments.initialize();
+          
+          Opencast.search.initialize();
 
           Opencast.Bookmarks.initialize();
           

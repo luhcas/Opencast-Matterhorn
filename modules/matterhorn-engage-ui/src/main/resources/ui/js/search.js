@@ -35,32 +35,43 @@ Opencast.search = ( function() {
               title = "Results for &quot;" + unescape(value) +"&quot;<br/>";
             $('#oc_slidetext-left').html(title );
 
+            // reset background color of scrubber segments
+            $('.segment-holder').each( function(i) {
+              $(this).css("background-color", "#B8B8B8");
+            });
+
             $(xml).find('segment').each(function(){
               var relevance = parseInt($(this).attr('relevance'));
               // Select only item with a relevanve value greater than zero
+              var segmentIndex = parseInt($(this).attr('index')) + 1;
               if(relevance !== 0 || value === "") {
-                var text = $(this).find('text').text();
-                var seconds = parseInt($(this).attr('time')) / 1000;
-                var id = relevance*1000 + index;
-                var row = "";
+                  var seconds = parseInt($(this).attr('time')) / 1000;
+                  var id = relevance*1000 + index;
+                  var row = "";
+                  var text = $(this).find('text').text();
+                  text = text.replace(new RegExp(value, 'g'),'<span class="marked">' + value + '</span>');
 
-                text = text.replace(new RegExp(value, 'g'),'<span class="marked">' + value + '</span>');
+                  row += '<tr>';
+                  row += '<td class="oc-segments-time">';
+                  row += '<a onclick="Opencast.Watch.seekSegment('+ seconds +')" class="segments-time">';
+                  row += Opencast.engage.formatSeconds(seconds);
+                  row += "</a>";
+                  row += "</td>";
+                  row += "<td>";
+                  row += text;
+                  row += "</td>";
+                  row += "</tr>";
 
-                row += '<tr>';
-                row += '<td class="oc-segments-time">';
-                row += '<a onclick="Opencast.Watch.seekSegment('+ seconds +')" class="segments-time">';
-                row += Opencast.engage.formatSeconds(seconds);
-                row += "</a>";
-                row += "</td>";
-                row += "<td>";
-                row +=text;
-                row += "</td>";
-                row += "</tr>";
+                  sortedIds[index] = id;
+                  ids[index] = id;
+                  rows[index] = row;
+                  index++;
 
-                sortedIds[index] = id;
-                ids[index] = id;
-                rows[index] = row;
-                index++;
+                  if (value !== "") {
+                    // Set text inside of the scrubber
+                    var rgbValue = 200*1/relevance;
+                    $('#segment' + segmentIndex).css("background-color", "rgb(" + rgbValue + "," + rgbValue + "," + rgbValue + ")");
+                  }
               }
             }); //close each(
 
@@ -96,6 +107,35 @@ Opencast.search = ( function() {
    */
   function initialize() {
     // initialize
+    var mediaPackageId = Opencast.engage.getMediaPackageId();
+    var factor = 8;
+    $.ajax(
+        {
+          type: 'GET',
+          contentType: 'text/xml',
+          url: "../../search/rest/episode",
+          data: "id=" + mediaPackageId,
+          dataType: 'xml',
+          success: function(xml) 
+          {
+              $(xml).find('segment').each(function(){
+                  var segmentIndex = parseInt($(this).attr('index')) + 1;
+                  var text = $(this).find('text').text();
+                  var segmentWidth = $('#segment' + segmentIndex).width();
+                  var segmentText = text.substring(0, parseInt(segmentWidth/factor));
+                  
+                  if(text.length > parseInt(segmentWidth/factor)) {
+                    segmentText += "...";
+                  }
+                  // Set text inside of the scrubber
+                  $('#segment' + segmentIndex).html(segmentText);
+              }); //close each(
+          },
+          error: function(a, b, c) 
+          {
+            // Some error while trying to get the search result
+          }
+        }); //close ajax(
   }
 
   /**

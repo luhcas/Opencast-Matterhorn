@@ -206,6 +206,8 @@ Opencast.Watch = (function ()
 
           // Autoplay after startup
           Opencast.Player.doTogglePlayPause(); 
+          
+          Opencast.search.initialize();
 
         });
     }
