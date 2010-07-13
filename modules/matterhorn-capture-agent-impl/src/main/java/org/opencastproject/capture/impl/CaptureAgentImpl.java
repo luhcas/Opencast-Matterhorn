@@ -446,11 +446,18 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         setAgentState(AgentState.IDLE);
         return false;
       }
+      long startWait = System.currentTimeMillis();
+      long timeout = Long.parseLong(configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT));
       while (pipe != null) {
         //TODO:  What happens if this loop never exits?
         try {
           Thread.sleep(1000);
         } catch (InterruptedException e) {}
+
+        //If we've timed out then force kill the pipeline
+        if (System.currentTimeMillis() - startWait >= timeout) {
+          pipe.setState(State.NULL);
+        }
       }
 
       // Checks there is a currentRecID defined --should always be

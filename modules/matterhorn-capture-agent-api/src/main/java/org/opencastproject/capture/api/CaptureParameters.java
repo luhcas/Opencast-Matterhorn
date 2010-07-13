@@ -100,6 +100,9 @@ public interface CaptureParameters {
   /** The duration of the recording in seconds */
   String RECORDING_DURATION = "capture.recording.duration";
 
+  /** The number of seconds to wait before force-killing the pipeline*/
+  String RECORDING_SHUTDOWN_TIMEOUT = "capture.recording.shutdown.timeout";
+
   /**
    * Settings which control the ingest jobs
    */
