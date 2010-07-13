@@ -6,7 +6,7 @@
   <xsl:template match="event">
     <div class="fl-container-800">
       <center>
-        <h2>View Recording</h2>
+        <h2>View Recording Info</h2>
       </center>
     </div>
     <div class="fl-container-800">
