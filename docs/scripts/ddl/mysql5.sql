@@ -11,7 +11,7 @@ CREATE TABLE `ANNOTATION` (
   PRIMARY KEY  (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-CREATE TABLE `CAPTURE_AGENT` (
+CREATE TABLE `CAPTURE_AGENT_STATE` (
   `NAME` varchar(255) collate utf8_unicode_ci NOT NULL,
   `state` varchar(255) collate utf8_unicode_ci NOT NULL,
   `capabilities` blob,

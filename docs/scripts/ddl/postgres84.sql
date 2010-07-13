@@ -10,11 +10,11 @@ CREATE TABLE annotation (
     annotation_key character varying(255)
 );
 
-CREATE TABLE capture_agent (
+CREATE TABLE capture_agent_state (
     name character varying(255) NOT NULL,
     state character varying(255) NOT NULL,
     capabilities bytea,
-    lastheardfrom bigint NOT NULL,
+    last_heard_from bigint NOT NULL,
     url character varying(255)
 );
 
@@ -98,7 +98,7 @@ CREATE TABLE dictionary (
 ALTER TABLE ONLY annotation
     ADD CONSTRAINT annotation_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY capture_agent
+ALTER TABLE ONLY capture_agent_state
     ADD CONSTRAINT capture_agent_pkey PRIMARY KEY (name);
 
 ALTER TABLE ONLY job
