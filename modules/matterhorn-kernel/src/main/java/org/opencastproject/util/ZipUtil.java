@@ -43,11 +43,19 @@ public class ZipUtil {
    * @return the resulting zip archive file
    */
   public static java.io.File zip(java.io.File[] sourceFiles, String destination) {
-    return zip(sourceFiles, destination, false);
+    return zip(sourceFiles, destination, false, ZipEntry.DEFLATED);
   }
 
   public static java.io.File zip(java.io.File[] sourceFiles, File destination) {
-    return zip(sourceFiles, destination, false);
+    return zip(sourceFiles, destination, false, ZipEntry.DEFLATED);
+  }
+
+  public static java.io.File zip(java.io.File[] sourceFiles, String destination, int compressionMethod) {
+    return zip(sourceFiles, destination, false, compressionMethod);
+  }
+
+  public static java.io.File zip(java.io.File[] sourceFiles, File destination, int compressionMethod) {
+    return zip(sourceFiles, destination, false, compressionMethod);
   }
 
   /**
@@ -59,10 +67,18 @@ public class ZipUtil {
    * @return the resulting zip archive file
    */
   public static File zip(File[] sourceFiles, String destination, boolean recursively) {
-    return zip(sourceFiles, new File(destination), recursively);
+    return zip(sourceFiles, new File(destination), recursively, ZipEntry.DEFLATED);
+  }
+
+  public static File zip(File[] sourceFiles, String destination, boolean recursively, int compressionMethod) {
+    return zip(sourceFiles, new File(destination), recursively, compressionMethod);
   }
 
   public static File zip(File[] sourceFiles, File destination, boolean recursively) {
+    return zip(sourceFiles, destination, recursively, ZipEntry.DEFLATED);
+  }
+  
+  public static File zip(File[] sourceFiles, File destination, boolean recursively, int compressionMethod) {
     if (sourceFiles == null || sourceFiles.length <= 0) {
       throw new IllegalArgumentException("sourceFiles must include at least 1 file");
     }
@@ -70,6 +86,7 @@ public class ZipUtil {
       throw new IllegalArgumentException("destination must be set");
     }
     ZipOutputStream out = new ZipOutputStream(outputStream(destination));
+    out.setMethod(compressionMethod);
     try {
       _zip(sourceFiles, out, -1, recursively);
       return destination;

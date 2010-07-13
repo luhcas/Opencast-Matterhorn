@@ -91,6 +91,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
+import java.util.zip.ZipEntry;
 
 import javax.activation.MimetypesFileTypeMap;
 
@@ -672,7 +673,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       logger.debug("--> {}", f.getName());
 
     //Return a pointer to the zipped file
-    return ZipUtil.zip(filesToZip.toArray(new File[filesToZip.size()]), new File(recording.getDir(), CaptureParameters.ZIP_NAME).getAbsolutePath());
+    return ZipUtil.zip(filesToZip.toArray(new File[filesToZip.size()]), new File(recording.getDir(), CaptureParameters.ZIP_NAME).getAbsolutePath(), ZipEntry.STORED);
   }
 
   // FIXME: Replace HTTP-based ingest with remote implementation of the Ingest Service. (jt)
