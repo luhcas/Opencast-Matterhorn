@@ -287,10 +287,21 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   private Calendar parseCalendar(URL url) {
 
     String calendarString = null;
+    boolean error = false;
     try {
       calendarString = readCalendar(url);
-    } catch (Exception e) {
-      log.debug("Parsing exception: {}.", e.toString());
+    } catch (IOException e) {
+      log.warn("IOException attempting to get calendar from {}.", url);
+      error = true;
+    } catch (NullPointerException e) {
+      log.warn("Nullpointer attempting to get calendar from {}.", url);
+      error = true;
+    } catch (URISyntaxException e) {
+      log.warn("URI error attempting to get calendar from {}.", url);
+      error = true;
+    }
+
+    if (error) {
       //If the calendar is null, which only happens when the machine has *just* been powered on.
       //This case handles not having a network connection by just reading from the cached copy of the calendar 
       if (calendar == null) {
@@ -375,18 +386,22 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   private String readCalendar(URL url) throws IOException, NullPointerException, URISyntaxException {
     StringBuilder sb = new StringBuilder();
     DataInputStream in = null;
+    HttpResponse response = null;
     //Do different things depending on what we're reading...
     if (url.getProtocol().equals("file")) {
       in = new DataInputStream(url.openStream());
     } else {
       HttpGet get = new HttpGet(url.toURI());
-      HttpResponse response = trustedClient.execute(get);
+      response = trustedClient.execute(get);
       in = new DataInputStream(response.getEntity().getContent());
-      trustedClient.close(response);
     }
     int c = 0;
     while ((c = in.read()) != -1) {
       sb.append((char) c);
+    }
+    if (response != null) {
+      trustedClient.close(response);
+      response = null;
     }
     return sb.toString();
   }
