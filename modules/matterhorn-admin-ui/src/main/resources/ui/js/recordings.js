@@ -19,6 +19,7 @@ var Recordings = Recordings || {};
 Recordings.statsInterval = null;
 Recordings.updateRequested = false;
 Recordings.currentState = null;
+Recordings.currentXSL = null;
 Recordings.sortBy = "startDate";
 Recordings.sortOrder = "Descending";
 Recordings.lastCount = null;
@@ -95,12 +96,6 @@ Recordings.init = function() {
     Recordings.initTableRefresh($(this).val());
   });
 
-  var show = Recordings.getURLParam('show');
-  if (show == '') {
-    show='upcoming';
-  }
-  Recordings.currentState = show;
-
   var sort = Recordings.getURLParam('sortBy');
   if (sort == '') {
     sort='StartDate';
@@ -118,8 +113,13 @@ Recordings.init = function() {
     psize = 10;
   }
   ocPager.pageSize = psize;
-
   ocPager.init();
+
+  var show = Recordings.getURLParam('show');
+  if (show == '') {
+    show='upcoming';
+  }
+  Recordings.currentState = show;
   Recordings.displayRecordingStats();
 
   if (Recordings.currentState == "upcoming" || Recordings.currentState == "finished") {
@@ -153,8 +153,11 @@ Recordings.initTableRefresh = function(time) {
 Recordings.displayRecordingStats = function() {
   if (!Recordings.updateRequested) {
     Recordings.updateRequested = true;
-    $.getJSON("rest/countRecordings",
-      function(data) {
+    $.ajax({
+      url: "rest/countRecordings",
+      type: "GET",
+      cache: false,
+      success: function(data) {
         Recordings.updateRequested = false;
         for (key in data) {
           if (Recordings.currentState == key) {
@@ -171,7 +174,8 @@ Recordings.displayRecordingStats = function() {
             elm.text('(' + data[key] + ')');
           }
         }
-      });
+      }
+    });
   }
 }
 
@@ -187,66 +191,100 @@ Recordings.displayRecordings = function(state, reload) {
     if (!reload) {
       Recordings.injectLoadingAnimation($('#recordings-table-container'));
     }
-    var page = ocPager.currentPageIdx;
-    var psize = ocPager.pageSize;
-    var sort = Recordings.sortBy;
-    var order = Recordings.sortOrder;
-    $('#recordings-table-container').xslt("rest/recordings/"+state+"?ps="+psize+"&pn="+page+"&sb="+sort+"&so="+order,
-      "xsl/recordings_"+state+".xsl", function() {
-      Recordings.tableUpdateRequested = false;
-      // prepare table heads
-      $('.recording-Table-head').removeClass('sortable-Ascending').removeClass('sortable-Descending');
-      $('#th-'+Recordings.sortBy).addClass('sortable-'+Recordings.sortOrder);
-      $('.recording-Table-head').click(function(){
-        Recordings.sortBy = $(this).attr('id').substr(3);
-        if ($(this).is('.sortable-Descending')) {
-          Recordings.sortOrder = 'Ascending';
-        } else {
-          Recordings.sortOrder = 'Descending';
+    if (Recordings.currentXML == null) {
+      $.ajax({
+        type       : 'GET',
+        url        : 'xsl/recordings_'+Recordings.currentState+'.xsl',
+        cache      : false,
+        dataType   : 'text',
+        error      : function(XHR,status,e){
+          alert('Not able to load XSL for ' + Recordings.currentState);
+        },
+        success    : function(data) {
+          Recordings.currentXSL = data;
+          Recordings.loadRecordingsXML();
         }
-        ocPager.currentPageIdx = 0;
-        Recordings.displayRecordings(Recordings.currentState, true);
       });
-      // format dates
-      if ($('.date-column').length > 0) {
-        // if date date/time column is present
-        $('.td-TimeDate').each( function() {     // format date/time
-          var startTime = $(this).children(".date-start").text();
-          var endTime = $(this).children(".date-end").text();
-          //alert(startTime + " - " + endTime);
-          if (startTime) {
-            var sd = new Date();
-            sd.setTime(startTime);
-          
-            var sday  = sd.getDate();
-            var smon  = sd.getMonth()+1;
-                  
-            if (sday < 10) sday = "0" + sday;
-            if (smon < 10) smon = "0" + smon;
-          
-            startTime = sd.getFullYear() + '-' + smon + '-' + sday + ' ' + sd.getHours() + ':' + Recordings.ensureTwoDigits(sd.getMinutes());
-          } else {
-            startTime = "NA";
-          }
-          if (endTime) {
-            var ed = new Date();
-            ed.setTime(endTime);
-            endTime = ' - ' + ed.getHours() + ':' + Recordings.ensureTwoDigits(ed.getMinutes());
-          } else {
-            endTime = "";
-          }
-          $(this).append($(document.createElement('span')).text(startTime + endTime));
-        });
-      }
-
-      //header underline
-      $(".header").hover(function(){
-        $(this).css('text-decoration', 'underline');
-      }, function(){
-        $(this).css('text-decoration', 'none')
-      });
-    });
+    } else {
+      Recordings.loadRecordingsXML();
+    }
   }
+}
+
+Recordings.loadRecordingsXML = function() {
+  var page = ocPager.currentPageIdx;
+  var psize = ocPager.pageSize;
+  var sort = Recordings.sortBy;
+  var order = Recordings.sortOrder;
+  var url = "rest/recordings/"+Recordings.currentState+"?ps="+psize+"&pn="+page+"&sb="+sort+"&so="+order;
+  $.ajax({
+    type       : 'GET',
+    url        : url,
+    cache      : false,
+    dataType   : 'text',
+    error      : function(XHR,status,e){
+      alert('Not able to load recordings list for state ' + Recordings.currentState);
+    },
+    success    : function(data) {
+      Recordings.renderTable(data, Recordings.currentXSL);
+    }
+  });
+}
+
+Recordings.renderTable = function(xml, xsl) {
+  $('#recordings-table-container').xslt(xml, xsl, function() {
+    Recordings.tableUpdateRequested = false;
+    // prepare table heads
+    $('.recording-Table-head').removeClass('sortable-Ascending').removeClass('sortable-Descending');
+    $('#th-'+Recordings.sortBy).addClass('sortable-'+Recordings.sortOrder);
+    $('.recording-Table-head').click(function(){
+      Recordings.sortBy = $(this).attr('id').substr(3);
+      if ($(this).is('.sortable-Descending')) {
+        Recordings.sortOrder = 'Ascending';
+      } else {
+        Recordings.sortOrder = 'Descending';
+      }
+      ocPager.currentPageIdx = 0;
+      Recordings.displayRecordings(Recordings.currentState, true);
+    });
+    // format dates
+    if ($('.date-column').length > 0) {
+      // if date date/time column is present
+      $('.td-TimeDate').each( function() {     // format date/time
+        var startTime = $(this).children(".date-start").text();
+        var endTime = $(this).children(".date-end").text();
+        //alert(startTime + " - " + endTime);
+        if (startTime) {
+          var sd = new Date();
+          sd.setTime(startTime);
+
+          var sday  = sd.getDate();
+          var smon  = sd.getMonth()+1;
+
+          if (sday < 10) sday = "0" + sday;
+          if (smon < 10) smon = "0" + smon;
+
+          startTime = sd.getFullYear() + '-' + smon + '-' + sday + ' ' + sd.getHours() + ':' + Recordings.ensureTwoDigits(sd.getMinutes());
+        } else {
+          startTime = "NA";
+        }
+        if (endTime) {
+          var ed = new Date();
+          ed.setTime(endTime);
+          endTime = ' - ' + ed.getHours() + ':' + Recordings.ensureTwoDigits(ed.getMinutes());
+        } else {
+          endTime = "";
+        }
+        $(this).append($(document.createElement('span')).text(startTime + endTime));
+      });
+    }
+    //header underline
+    $(".header").hover(function(){
+      $(this).css('text-decoration', 'underline');
+    }, function(){
+      $(this).css('text-decoration', 'none')
+    });
+  });
 }
 
 Recordings.ensureTwoDigits = function(number) {
@@ -300,7 +338,7 @@ Recordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
   $('#holdActionPanel-container iframe').attr('src', URL);
   $('#holdWorkflowId').val(wfId);
   var parentRow = $(callerElm).parent().parent();
-  $('#holdStateHeadRow-title').html($($(parentRow).children().get(0)).html());     
+  $('#holdStateHeadRow-title').html($($(parentRow).children().get(0)).html());
   $('#holdStateHeadRow-presenter').html($($(parentRow).children().get(1)).html());
   $('#holdStateHeadRow-series').html($($(parentRow).children().get(2)).html());
   $('#holdStateHeadRow-date').html($($(parentRow).children().get(3)).html());
@@ -326,7 +364,9 @@ Recordings.adjustHoldActionPanelHeight = function() {
  */
 Recordings.continueWorkflow = function() {
   var workflowId = $('#holdWorkflowId').val();
-  var postData = {id : workflowId};
+  var postData = {
+    id : workflowId
+  };
   if (Recordings.changedMediaPackage != null) {
     postData['mediapackage'] = Recordings.changedMediaPackage;
     Recordings.changedMediaPackage = null;
@@ -359,7 +399,9 @@ Recordings.retryRecording = function(workflowId) {
 Recordings.removeRecording = function(workflowId) {
   $.ajax({
     url        : '../workflow/rest/stop',
-    data       : {id: workflowId},
+    data       : {
+      id: workflowId
+    },
     type       : 'POST',
     error      : function(XHR,status,e){
       alert('Could not remove Workflow ' + workflowId);
@@ -373,14 +415,14 @@ Recordings.removeRecording = function(workflowId) {
 Recordings.removeScheduledRecording = function(eventId, title) {
   if(confirm('Are you sure you wish to delete ' + title + '?')){
     $.ajax({
-        url        : '/scheduler/rest/event/'+eventId,
-        type       : 'DELETE',
-        error      : function(XHR,status,e){
-          alert('Could not remove Scheduler Event ' + workflowId);
-        },
-        success    : function(data) {
-          location.reload();
-        }
-      });
+      url        : '/scheduler/rest/event/'+eventId,
+      type       : 'DELETE',
+      error      : function(XHR,status,e){
+        alert('Could not remove Scheduler Event ' + workflowId);
+      },
+      success    : function(data) {
+        location.reload();
+      }
+    });
   }
 }
