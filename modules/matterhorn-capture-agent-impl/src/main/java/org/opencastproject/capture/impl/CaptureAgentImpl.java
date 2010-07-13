@@ -455,7 +455,9 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
         //If we've timed out then force kill the pipeline
         if (System.currentTimeMillis() - startWait >= timeout) {
-          pipe.setState(State.NULL);
+          if (pipe != null) {
+            pipe.setState(State.NULL);
+          }
           pipe = null;
         }
       }
