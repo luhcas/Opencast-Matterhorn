@@ -30,12 +30,13 @@ package org.opencast.engage.videodisplay.control.event
         private var _coverURLTwo:String;
         private var _mimetypeOne:String;
         private var _mimetypeTwo:String;
+        private var _playerMode:String;
         
         
        
 
         /** Constructor */
-        public function InitMediaPlayerEvent( coverURLOne:String, coverURLTwo:String, mediaURLOne:String, mediaURLTwo:String, mimetypeOne:String, mimetypeTwo:String, bubbles:Boolean = false, cancelable:Boolean = false )
+        public function InitMediaPlayerEvent( coverURLOne:String, coverURLTwo:String, mediaURLOne:String, mediaURLTwo:String, mimetypeOne:String, mimetypeTwo:String, playerMode:String, bubbles:Boolean = false, cancelable:Boolean = false )
         {
             super( EVENT_NAME, bubbles, cancelable );
             _mediaURLOne = mediaURLOne;
@@ -44,13 +45,14 @@ package org.opencast.engage.videodisplay.control.event
             _coverURLTwo = coverURLTwo;
             _mimetypeOne = mimetypeOne;
             _mimetypeTwo = mimetypeTwo;
+            _playerMode = playerMode;
             
         }
 
         // Override the inherited clone() method.
         override public function clone():Event
         {
-            return new InitMediaPlayerEvent( coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, bubbles, cancelable);
+            return new InitMediaPlayerEvent( coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerMode, bubbles, cancelable);
         }
         
         /**
@@ -112,5 +114,18 @@ package org.opencast.engage.videodisplay.control.event
         {
             return _mimetypeTwo;
         }
+        
+        /**
+         * playerMode
+         *
+         * Get the playerMode.
+         *  */
+        public function get playerMode():String
+        {
+            return _playerMode;
+        }
+        
+        
+        
     }
 }

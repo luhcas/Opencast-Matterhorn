@@ -55,47 +55,17 @@ package org.opencast.engage.videodisplay.control.command
             {
                 case VideoControlEvent.PLAY:
                 
-                    try
-                    {
-	                    model.mediaPlayer.play();
-	                    
-	                    if( model.startPlaySingle == true )
-		                {
-		                   if( model.startPlay == false   )
-		                   {
-		                       model.startPlay = true; 
-	                           model.mediaPlayer.setVolume(1);
-	                           model.mediaPlayer.seek(model.startSeek); 
-		                   }
-		                    
-		                   ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );   
-		                }
-		                
-		                if( model.startPlayOne == true && model.startPlayTwo == true )
-		                {
-		                  if( model.startPlay == false)
-		                  {
-		                      model.mediaPlayer.setVolume(1);
-	                          model.mediaPlayer.seek(model.startSeek);
-	                          model.startPlay = true; 
-		                   }
-		                    ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );  
-		                }
-	                    if( model.videoState == VideoState.COVER )
-		                {
-		                    model.videoState = model.mediaPlayer.getVideoState();
-		                }
-	                
-	                    model.currentPlayerState = PlayerState.PLAYING;
-	                    currentPlayPauseState = PlayerState.PAUSED;
-	                    ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
-                    }
-                    catch(error:Error)
-                    {
-                        // do nothing
-                    }
-                    
-                	break;
+                     model.mediaPlayer.play();
+                     
+                     model.currentPlayerState = PlayerState.PLAYING;
+                     currentPlayPauseState = PlayerState.PAUSED;
+                     ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
+                     
+                     if( model.videoState == VideoState.COVER )
+                     {
+                        model.videoState = model.mediaPlayer.getVideoState();
+                     }
+                     break;
 
                 case VideoControlEvent.PAUSE:
                     if( model.mediaPlayer.playing() )
@@ -124,29 +94,13 @@ package org.opencast.engage.videodisplay.control.command
                     
                 case VideoControlEvent.SKIPBACKWARD:
                 	
-                	playState = model.mediaPlayer.playing();
-                	
-                	if( model.mediaPlayer.playing() )
-                	{
-                	   model.mediaPlayer.pause();
-                	}
-                	
-                    model.mediaPlayer.seek(0);
-                	
-                	if( playState )
-                	{
-                	   model.mediaPlayer.play();
-                	}
                 	break;
 
                 case VideoControlEvent.REWIND:
                     
 	                if( model.startPlay == true )
                     {
-	                    //if( model.mediaPlayer.playing() )
-	                    //{
-	                      //  model.mediaPlayer.pause();
-	                    //}
+	                    
 	                    
 	                    if( model.currentPlayhead - model.rewindTime > 0 )
 	                    {
@@ -163,39 +117,22 @@ package org.opencast.engage.videodisplay.control.command
                 
                     if( model.startPlay == true )
                 	{
-	                	//if( model.mediaPlayer.playing() )
-	                    //{
-	                      //  model.mediaPlayer.pause();
-	                    //}
+	                	var newPlayhead:Number = model.currentPlayhead + model.fastForwardTime;
 	                    
 	                    
-	                    if( ( model.currentPlayhead + model.fastForwardTime ) >= model.currentDuration )
+	                    if( newPlayhead > model.currentDuration && model.currentPlayhead <= model.currentDuration )
 	                    {
 	                        model.mediaPlayer.seek( model.currentDuration-2 );
 	                    }
 	                    else
 	                    {
-	                        var test:Number = model.currentPlayhead + model.fastForwardTime;
-	                        model.mediaPlayer.seek( test);
+	                        model.mediaPlayer.seek( newPlayhead);
 	                    }
 	                    
 	                }
                     break;
 
                 case VideoControlEvent.SKIPFORWARD:
-                    playState = model.mediaPlayer.playing();
-                    
-                    if( model.mediaPlayer.playing() )
-                    {
-                       model.mediaPlayer.pause();
-                    }
-                    
-                    model.mediaPlayer.seek(0);
-                    
-                    if( playState )
-                    {
-                       model.mediaPlayer.play();
-                    }
                     break;
                     
                 case VideoControlEvent.MUTE:

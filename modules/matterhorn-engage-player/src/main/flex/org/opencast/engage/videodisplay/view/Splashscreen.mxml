@@ -183,11 +183,11 @@
             {
                 if( model.startPlaySingle == true )
 	            {
-	                ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );   
+	               ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );   
 	            }
 	            else if( model.startPlayOne == true && model.startPlayTwo == true)
 	            {
-	                ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );  
+	               ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );  
 	            }
             }
             
@@ -334,20 +334,14 @@
             horizontalScrollPolicy = "off"
             verticalGap="0"
             >
-             
+            
             <view:CaptionsView 
                 id = "captionsView"
                 width = "100%"
                 horizontalAlign = "center"
-                bottom="10"
+                bottom="5"
                 />
-
-            <mx:Spacer 
-                height = "20"
-                visible = "{model.fullscreenMode}"
-                includeInLayout = "{model.fullscreenMode}"
-                />
-               
+                
             <view:FullscreenVideoControlsView 
                 id = "videocontrollerView"
                 width = "100%"

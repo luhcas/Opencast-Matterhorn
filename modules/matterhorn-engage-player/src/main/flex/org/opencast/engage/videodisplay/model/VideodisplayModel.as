@@ -21,6 +21,7 @@ package org.opencast.engage.videodisplay.model
     
     import org.opencast.engage.videodisplay.control.util.OpencastMediaPlayer;
     import org.opencast.engage.videodisplay.control.util.TimeCode;
+    import org.opencast.engage.videodisplay.state.CoverState;
     import org.opencast.engage.videodisplay.state.MediaState;
     import org.opencast.engage.videodisplay.state.SoundState;
     import org.opencast.engage.videodisplay.state.VideoSizeState;
@@ -55,12 +56,15 @@ package org.opencast.engage.videodisplay.model
     	
     	// RTMP
     	public var RTMP:String = 'rtmp';
+    	
+    	// playerMode
+    	public var playerMode:String = '';
     	 	
     	// audioURLaudioURL
         public var audioURL:String = "";
 
         // An Array with different caption data
-        public var captionSets:ArrayCollection = new ArrayCollection();
+        public var captionSets:ArrayCollection;
 
         // Height of the captions
         public var captionsHeight:int = 50;
@@ -106,6 +110,9 @@ package org.opencast.engage.videodisplay.model
 
         // The current Subtitle
         public var currentSubtitle:String = '';
+        
+        // endIndexSubtitle
+        public var endIndexSubtitle:int = 90;
         
         // errorId
         public var errorId:String = ''
@@ -236,6 +243,7 @@ package org.opencast.engage.videodisplay.model
         // coverURLOne
         public var coverURLOne:String = '';
         
+        
          // coverURLTwo
         public var coverURLTwo:String = '';
         
@@ -309,7 +317,7 @@ package org.opencast.engage.videodisplay.model
         public var singleState:String ='';
         
         // coverState
-        public var coverState:String = '';
+        public var coverState:String = CoverState.ONECOVER;
         
         // onBufferingChangeMediaOne
         public var onBufferingChangeMediaOne:Boolean;
@@ -332,7 +340,10 @@ package org.opencast.engage.videodisplay.model
         // fullscreenProgressWidth
         public var fullscreenProgressWidth:Number = 565;
         
-       
+        // playerSeekBool
+        public var playerSeekBool:Boolean = false;
+        
+     
        
     }
 }

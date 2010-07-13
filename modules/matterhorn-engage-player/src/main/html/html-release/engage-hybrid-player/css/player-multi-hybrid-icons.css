@@ -20,8 +20,8 @@ input
   border:                   0 none;
   onfocus:                  none;  
   overflow:                 hidden;
-  background:               #2B2B2B;
-  color:                    #FFFFFF;
+  background:          #2D8F8B;
+  color:                      #FFFFFF;
 }
 
 #oc_video-controls input
@@ -287,54 +287,6 @@ input:hover
   width:                    18px;
   margin-right:             5px;
   margin-left:              5px; 
-}
-
-.oc_embed-720x545
-{
-  width:                    80px;
-  height:                   45px;
-}
-
-.oc_embed-640x500
-{
-  width:                    70px;
-  height:                   40px;
-}
-
-.oc_embed-560x455
-{
-  width:                    60px;
-  height:                   34px;
-}
-
-.oc_embed-480x410
-{
-  width:                    50px;
-  height:                   29px;
-}
-
-.oc_embed-720x680
-{
-  width:                    80px;
-  height:                   60px;
-}
-
-.oc_embed-640x620
-{
-  width:                    70px;
-  height:                   53px;
-}
-
-.oc_embed-560x560
-{
-  width:                    60px;
-  height:                   45px;
-}
-
-.oc_embed-480x500
-{
-  width:                    50px;
-  height:                   38px;
 }
 
 #oc_embed-sections input

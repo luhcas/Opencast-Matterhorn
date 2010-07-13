@@ -58,6 +58,10 @@ package org.opencast.engage.videodisplay.control.command
 			model.currentPlayerState = PlayerState.PAUSED;
             ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PLAYING );
             
+            model.playerMode = event.playerMode;
+            
+           
+            
             // set the cover URL One
             model.coverURLOne = event.coverURLOne;
             
@@ -78,7 +82,7 @@ package org.opencast.engage.videodisplay.control.command
             
            
             // Single Video/Audio
-            if( event.mediaURLOne != '' && event.mediaURLTwo == '' )
+            if( event.mediaURLOne != '' && ( event.mediaURLTwo == '' || event.mediaURLTwo == ' ') )
             {
                 //
                 model.mediaPlayer = new OpencastMediaPlayer( VideoState.SINGLE );

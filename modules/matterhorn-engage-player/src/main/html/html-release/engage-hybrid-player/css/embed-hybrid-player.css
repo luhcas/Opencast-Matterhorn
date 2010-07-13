@@ -15,7 +15,10 @@
  */
 #oc_image
 {
-  width:                    100%;
+  max-width:                100%;
+  max-height:               100%;
+  background-color:         #ffffff;
+  
 } 
 
 #oc_embed-title-bar
@@ -30,9 +33,13 @@
 {
   font-size:                1em;
   text-align:               center;
-  height:                   100%;
   color:                    #FA6E23;
   margin-top:               2px;
+}
+
+#oc-link-advanced-player
+{
+  display:                  none;
 }
 
 #oc_embed-title a
@@ -63,14 +70,13 @@ table
 
 #oc_body
 {
-  height:                   510px;
   position:                 relative; 
 }
 
 #oc_flash-player
 {
   text-align:               center;
-  height:                   100%;
+  height:                   200px;
 }
 
 #oc_video-player-controls
@@ -82,6 +88,17 @@ table
   visibility:               hidden;
 }
 
+#oc_video-player-controls-embed
+{
+  height:                   28px;
+  width:                    100%;
+  background-image:         url("../img/oc_icons.png");
+  background-position:      0 0px;
+  visibility:               visible;
+  text-align:               center;
+  padding-top:              5px;
+}
+
 #oc_video-time
 {
   float:                    left;
@@ -89,8 +106,8 @@ table
   font-size:                0.8em;
   color:                    #FFFFFF;
   margin-top:               7px;
-  width:                    35%;
-  height:                   30px;
+  width:                    37%;
+  height:                   32px;
 }
 
 #simpleEdit 
@@ -103,7 +120,7 @@ table
 {
   cursor:                   pointer;
   cursor:                   hand;
-  width:                    60px !important;
+  width:                    60px;
   background-color:         transparent !important;
   color:                    #FFFFFF;
   text-align:               right;
@@ -116,7 +133,7 @@ table
 
 .oc_edit-time
 {
-  width:                    60px !important;
+  width:                    60px;
   background-color:         #E3E3D7 !important;
   color:                    #000000;
   text-align:               right;
@@ -124,7 +141,7 @@ table
 
 .oc_edit-time-error
 {
-  width:                    60px !important;
+  width:                    60px;
   background-color:         #ff0000;  
   color:                    #ffffff; 
   text-align:               right;
@@ -137,7 +154,7 @@ table
 #oc_video-controls
 {
   float:                    left;
-  width:                    30%;
+  width:                    26%;
   text-align:               right;
   margin-top:               7px;
 }
@@ -168,6 +185,7 @@ table
   z-index:                  10000;
   visibility:               hidden;
   padding-bottom:           5px;
+  width:                    48px;
 }
 
 #oc_volume-dropdown
@@ -182,7 +200,7 @@ table
 {   
   height:                   28px;
   text-align:               center;
-  margin-left:              -50px;
+  margin-left:              -5px;
 }
 
 #oc_volume-slider
@@ -203,9 +221,10 @@ table
   color :                   #000000;
   background-color:         #fae6a0;
   font-size :               14;
-  left:                     120px;
-  top:                      380px;
+  left:                     0px;
+  top:                      0px;
   cursor:                   default !important;
+  width:                    64px;
 }
 
 .oc_slider-volume-Rail 
@@ -268,8 +287,8 @@ table
 {
   margin-top:               7px;
   float:                    left;
-  width:                    7%;
-  text-align:               left;
+  width:                    9%;
+  text-align:               center;
   visibility:               hidden;
 }
 
@@ -293,7 +312,6 @@ table
   height:                   28px;
   text-align:               center;
 }
-
 
 .oc_progress-bar
 {
@@ -319,11 +337,12 @@ table
   background-position:      -60px -360px;
   height:                   19px;
   width:                    9px;
-  position:                 relative; 
+  position:                 absolute; 
   border:                   0px;
   top:                      0px; 
   z-index:                  2;
   margin-left:              -4px;
+  left:                     0;
 }
 
 #draggable 
@@ -334,9 +353,10 @@ table
   width:                    9px;
   position:                 relative; 
   border:                   0px;
-  top:                      -19px;
+  top:                      0px;
   z-index:                  3;
   margin-left:              -4px;
+  left:                     0;
 }
 
 .progress-segment 
@@ -405,53 +425,52 @@ table
 
 .segment-holder 
 {
-  background-image:         url("../img/scrubber.gif");
+  background-color:         #b8b8b8;
   height:                   25px;
   border-bottom-color:      #000000;
   border-bottom-style:      solid;
-  border-bottom-width:      1px;
-  border-right-color:       #000000;
-  border-right-style:       solid;
-  border-right-width:       1px;
-  border-right-color:       #000000;
+  border-bottom-width:      0px;
+  border-right-color:       #ffffff;
   border-right-style:       solid;
   border-right-width:       1px;
   border-top-color:         #000000;
   border-top-style:         solid;
-  border-top-width:         1px;
+  border-top-width:         0px;
   padding-bottom:           0.0em;
   padding-left:             0.0em;
   padding-right:            0.0em;
   padding-top:              0.0em;
+  vertical-align:           bottom;
+  color:                    #ffffff;
+  font-size:                10px;
 }
 
 .segment-holder-over 
 {
-  background-image:         url("../img/scrubber.gif");
-  background-position:      0 -20px;
+  background-color:         #d8d8d8;
   height:                   25px;
   border-bottom-color:      #000000;
   border-bottom-style:      solid;
-  border-bottom-width:      1px;
-  border-right-color:       #000000;
-  border-right-style:       solid;
-  border-right-width:       1px;
-  border-right-color:       #000000;
+  border-bottom-width:      0px;
+  border-right-color:       #ffffff;
   border-right-style:       solid;
   border-right-width:       1px;
   border-top-color:         #000000;
   border-top-style:         solid;
-  border-top-width:         1px;
+  border-top-width:         0px;
   padding-bottom:           0.0em;
   padding-left:             0.0em;
   padding-right:            0.0em;
   padding-top:              0.0em;
+  vertical-align:           bottom;
+  color:                    #000000;
+  font-size:                10px;
 }
 
-.segments 
-{
-  border-left-color:        #000000;
-  border-left-style:        solid;
-  border-left-width:        1px;
+.segments {
+  border-color:             #000000;
+  border-style:             solid;
+  border-width:             1px;
   width:                    100%;
 }
+

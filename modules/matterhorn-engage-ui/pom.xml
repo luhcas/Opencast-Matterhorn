@@ -79,6 +79,7 @@
                     <include>engage-hybrid-player/</include>
                     <include>style/</include>
                     <include>Videodisplay.swf/</include>
+                    <include>playerProductInstall.swf/</include>
                   </includes>                  
                   <filtering>false</filtering>
                 </resource>

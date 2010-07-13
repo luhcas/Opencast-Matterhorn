@@ -30,7 +30,6 @@
 
     <mx:Script>
         <![CDATA[
-        	import mx.controls.Alert;
         	import org.opencast.engage.videodisplay.state.CoverState;
         	import mx.core.Application;
             import org.swizframework.Swiz;
@@ -40,20 +39,20 @@
             [Bindable]
             public var model:VideodisplayModel;
             
-            
+            /**
+             * onResize
+             *
+             * Set the image in the center of the videodisplay
+             *
+             * */
             private function onResize():void
             {
-                if( model.coverState == CoverState.ONECOVER )
+                if( model != null )
                 {
-                    img_coverSingle.x = ( ( Application.application.width - 10 ) / 2 ) - img_coverSingle.contentWidth / 2;
-                   
-                }
-                else
-                {
-                	
-                	
-                	//img_coverOne.x = ( ( Application.application.width - 10 )  ) - ( ( img_coverOne.contentWidth + img_coverTwo.contentWidth )  / 2 );
-                //	img_coverTwo.x =  img_coverOne.contentWidth +1;
+                    if( model.coverState == CoverState.ONECOVER)
+	                {
+	                    img_coverSingle.x = ( ( Application.application.width - 10 ) / 2 ) - img_coverSingle.contentWidth / 2;
+	                }
                 }
             }
         ]]>
@@ -103,7 +102,7 @@
     	height="100%"
     	visible = "false"
         includeInLayout = "false"
-    	>
+        >
     	
     	 <mx:Image 
             id="img_coverSingle"
@@ -126,11 +125,12 @@
     	horizontalGap="0"
     	visible = "false"
         includeInLayout = "false"
+        verticalAlign="bottom"
     	>
     	
     	<mx:Image 
 	    	id="img_coverOne"
-	        width="100%"
+	    	width="100%"
 	        height="100%"
 	        autoLoad="true"
 	    	source="{ model.coverURLOne }"

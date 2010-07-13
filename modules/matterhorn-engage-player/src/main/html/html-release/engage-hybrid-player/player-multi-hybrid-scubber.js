@@ -30,8 +30,8 @@ Opencast.Scrubber = (function ()
     var locked             = false,
     currentScrubberPositon = 0,
     tooltipTop             = 0,
-    offsetX                = 25,
-    offsetY                = 35;
+    offsetX                = 32,
+    offsetY                = 8;
     
 
     /**
@@ -41,7 +41,7 @@ Opencast.Scrubber = (function ()
     function oc_tooltip()
     {
         var $tooltip = $('<div id="divToolTip" value="00:00:00">00:00:00</div>');
-        $('body').append($tooltip);
+        $('#oc_seek-slider').append($tooltip);
         $tooltip.hide();
     }
     
@@ -51,11 +51,13 @@ Opencast.Scrubber = (function ()
      */
     function init()
     {
-        $('#draggable').bind('dragstart', function (event, ui) 
+       
+    	
+    	$('#draggable').bind('dragstart', function (event, ui) 
         {
-            tooltipTop = event.pageY - offsetY;
+            tooltipTop = $('#oc_flash-player').height() + offsetY;
             $("#divToolTip").css('top', tooltipTop);
-            $("#divToolTip").css('left', event.pageX - offsetX);
+            $("#divToolTip").css('left', 0);
             $("#divToolTip").fadeIn();
         
             Opencast.Player.setDragging(true);
@@ -78,10 +80,22 @@ Opencast.Scrubber = (function ()
 
         $('#draggable').bind('drag', function (event, ui) 
         {
-            $("#divToolTip").css('top', tooltipTop);
-            $("#divToolTip").css('left', event.pageX - offsetX);
-          
-            if (!locked)
+            var tooltipLeft = $(this).position().left - offsetX;
+            
+            if(tooltipLeft < 0)
+            {
+            	$("#divToolTip").css('left', 0);
+            }
+            else if($(this).position().left + offsetX + 6 > $('#oc_flash-player').width())
+            {
+            	$("#divToolTip").css('left', $('#oc_flash-player').width() - $("#divToolTip").width() - 6);
+            }
+            else
+            {
+            	$("#divToolTip").css('left', tooltipLeft);
+            }
+        	
+        	if (!locked)
             {
                 locked = true;
                 setTimeout(function ()

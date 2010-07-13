@@ -64,7 +64,7 @@
 				<version>3.7.1</version>
 				<extensions>true</extensions>
 				<configuration>
-					<targetPlayer>10.0.0</targetPlayer>
+					<targetPlayer>10.1.0</targetPlayer>
 					<accessible>true</accessible>
 					<headlessServer>true</headlessServer>
 					<output>../../shared-resources/player/Videodisplay.swf</output>
@@ -176,7 +176,7 @@
 						<version>3.7.1</version>
 						<extensions>true</extensions>
 						<configuration>
-							<targetPlayer>10.0.0</targetPlayer>
+							<targetPlayer>10.1.0</targetPlayer>
 							<accessible>true</accessible>
 							<headlessServer>true</headlessServer>
 							<showWarnings>false</showWarnings>

@@ -53,26 +53,33 @@ package org.opencast.engage.videodisplay.control.command
              *
              * */
             var divisor:int = 50;
+            var fontSize:int = Application.application.width / divisor;
             
-            if ( Application.application.width == 400 )
+            if( fontSize > 16 )
             {
-                model.fontSizeCaptions = 12;
+                model.fontSizeCaptions = 16;
+                model.endIndexSubtitle = 100;
+            }
+            else if( fontSize < 13 && fontSize >= 9 )
+            {
+            	model.endIndexSubtitle = 80;
+            	model.fontSizeCaptions = fontSize;
+            }
+            else if( fontSize < 9 && fontSize > 7 )
+            {
+                model.endIndexSubtitle = 70;
+                model.fontSizeCaptions = 9;
+            }
+            else if( fontSize < 8 )
+            {
+                model.endIndexSubtitle = 50;
+                model.fontSizeCaptions = 9;
             }
             else
             {
-                if ( Application.application.width / divisor < 14 )
-                {
-                    model.fontSizeCaptions = 14;
-                }
-                else if( Application.application.width / divisor >= 14 && Application.application.width / divisor <= 20 )
-                {
-                    model.fontSizeCaptions = (Application.application.width / divisor ) -1;
-                }
-                else if( Application.application.width / divisor > 20 )
-                {
-                	model.fontSizeCaptions = 20;
-                }
+                model.fontSizeCaptions = fontSize;
             }
+            
         }
     }
 }

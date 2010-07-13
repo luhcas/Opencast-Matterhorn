@@ -30,6 +30,8 @@ package org.opencast.engage.videodisplay.control.command
     {
         [Autowire]
         public var model:VideodisplayModel;
+        private var startIndex:Number = 0;
+        private var endIndex:Number = 90;
 
         /** Constructor */
         public function DisplayCaptionCommand()
@@ -49,6 +51,8 @@ package org.opencast.engage.videodisplay.control.command
             var tmpCaption:CaptionVO = new CaptionVO();
             var lastPos:int = 0;
             var subtitle:String = '';
+            var pattern:String = '<br';
+            var patternResult:int = 0;
 
             // Find the captions
             if ( model.currentCaptionSet != null )
@@ -74,11 +78,19 @@ package org.opencast.engage.videodisplay.control.command
                     if ( model.oldSubtitle != subtitle )
                     {
                         model.currentSubtitle = '';
+                        patternResult = subtitle.search(pattern);
+                        
+                        
+                        
+                        if( subtitle.length > model.endIndexSubtitle && patternResult == -1)
+                        {
+                          subtitle = editSubtitle(subtitle);
+                        }
+                        
                         ExternalInterface.call( ExternalFunction.SETCAPTIONS, subtitle );
                         model.currentSubtitle = subtitle;
                         model.oldSubtitle = subtitle;
-
-                    }
+                     }
                 }
                 else
                 {
@@ -87,6 +99,45 @@ package org.opencast.engage.videodisplay.control.command
                     ExternalInterface.call( ExternalFunction.SETCAPTIONS, '');
                 }
             }
+        }
+        
+        /** editSubtitle
+         *
+         * Edit the current Subtitle
+         *
+         * @return String:_subtitle
+         * */
+        private function editSubtitle(subtitle:String):String
+        {
+            
+            var _subtitle:String = '';
+            var editSubtitle:String = '';
+            var editBool:Boolean = false;
+            
+            editSubtitle =  subtitle;
+            
+            while( editBool == false )
+            {
+                endIndex = model.endIndexSubtitle;
+                while( editSubtitle.charAt(endIndex - 1) != ' ' )
+                {
+                    endIndex--;
+                }
+                _subtitle = _subtitle + editSubtitle.substring( startIndex, endIndex);
+                editSubtitle = editSubtitle.substring( endIndex, editSubtitle.length );
+                
+                if(editSubtitle.length > model.endIndexSubtitle )
+                {
+                    _subtitle = _subtitle +'<br>';
+                }
+                else
+                {
+                    _subtitle = _subtitle + '<br>' + editSubtitle;
+                    editBool = true;
+                }
+            }
+            
+            return _subtitle;
         }
     }
 }

@@ -20,8 +20,6 @@ package org.opencast.engage.videodisplay.business
     import flash.events.KeyboardEvent;
     import flash.external.ExternalInterface;
     
-    import mx.controls.Alert;
-    
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
     import org.opencast.engage.videodisplay.control.event.InitMediaPlayerEvent;
     import org.opencast.engage.videodisplay.control.event.LoadDFXPXMLEvent;
@@ -188,7 +186,7 @@ package org.opencast.engage.videodisplay.business
             if ( captionsURL != model.captionsURL )
             {
                 model.captionsURL = captionsURL;
-                Swiz.dispatchEvent( new LoadDFXPXMLEvent( model.captionsURL ) );
+                Swiz.dispatchEvent( new LoadDFXPXMLEvent( captionsURL ));
             }
         }
         
@@ -199,9 +197,9 @@ package org.opencast.engage.videodisplay.business
          * 
          * @param String mediaURLOne, String mediaURLTwo
          */
-        public function setMediaURL(coverURLOne:String, coverURLTwo:String, mediaURLOne:String, mediaURLTwo:String, mimetypeOne:String, mimetypeTwo:String ):void
+        public function setMediaURL(coverURLOne:String, coverURLTwo:String, mediaURLOne:String, mediaURLTwo:String, mimetypeOne:String, mimetypeTwo:String, playerMode:String ):void
         {
-            Swiz.dispatchEvent( new InitMediaPlayerEvent(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo ) );
+            Swiz.dispatchEvent( new InitMediaPlayerEvent(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerMode ) );
         }
         
         /**

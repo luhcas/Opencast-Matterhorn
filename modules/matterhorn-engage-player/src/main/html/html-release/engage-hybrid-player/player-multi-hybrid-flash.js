@@ -27,16 +27,13 @@ var Opencast = Opencast || {};
 */
 Opencast.FlashVersion = (function () 
 {
-	// Globals
+    // Globals
     // Major version of Flash required
     var requiredMajorVersion = 10;
     // Minor version of Flash required
-    var requiredMinorVersion = 0;
+    var requiredMinorVersion = 1;
     // Minor version of Flash required
     var requiredRevision = 0;
-    
-    
-    
     
     var isIE  = (navigator.appVersion.indexOf("MSIE") != -1) ? true : false;
     var isWin = (navigator.appVersion.toLowerCase().indexOf("win") != -1) ? true : false;
@@ -119,12 +116,15 @@ Opencast.FlashVersion = (function ()
     }
 
     // JavaScript helper required to detect Flash Player PlugIn version information
-    function GetSwfVer(){
+    function GetSwfVer ()
+    {
         // NS/Opera version >= 3 check for Flash plugin in plugin array
         var flashVer = -1;
         
-        if (navigator.plugins != null && navigator.plugins.length > 0) {
-            if (navigator.plugins["Shockwave Flash 2.0"] || navigator.plugins["Shockwave Flash"]) {
+        if (navigator.plugins != null && navigator.plugins.length > 0) 
+        {
+            if (navigator.plugins["Shockwave Flash 2.0"] || navigator.plugins["Shockwave Flash"]) 
+            {
                 var swVer2 = navigator.plugins["Shockwave Flash 2.0"] ? " 2.0" : "";
                 var flashDescription = navigator.plugins["Shockwave Flash" + swVer2].description;
                 var descArray = flashDescription.split(" ");
@@ -235,9 +235,10 @@ Opencast.FlashVersion = (function ()
                 str += '<param name="allowScriptAccess" value="sameDomain" />';
                 str += '<param name="bgcolor" value="#000000" />';
                 str += '<param name="allowFullScreen" value="true" />';
+                str += '<param name="wmode" value="transparent" />';
                 str += '<param name="flashvars" value="bridgeName=b_Videodisplay&amp;autoplay=false"/>';
             
-            str += '<embed ';
+            str += '<embed style="z-index: 100;"';
               for (var i in embedAttrs)
                   str += i + '="' + embedAttrs[i] + '" ';
               str += '> </embed></object>';
@@ -248,7 +249,8 @@ Opencast.FlashVersion = (function ()
         
     }
 
-    function AC_FL_RunContent(){
+    function AC_FL_RunContent()
+    {
       var ret = 
         AC_GetArgs
         (  arguments, ".swf", "movie", "clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"
@@ -257,7 +259,8 @@ Opencast.FlashVersion = (function ()
       AC_Generateobj(ret.objAttrs, ret.params, ret.embedAttrs);
     }
 
-    function AC_GetArgs(args, ext, srcParamName, classid, mimeType){
+    function AC_GetArgs(args, ext, srcParamName, classid, mimeType)
+    {
       var ret = new Object();
       ret.embedAttrs = new Object();
       ret.params = new Object();
@@ -340,78 +343,71 @@ Opencast.FlashVersion = (function ()
       return ret;
     }
     
-    
-    
-    
-    
-    
-    
-    
     function initFlash()
     {
+        // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
+        var hasProductInstall = DetectFlashVer(6, 0, 65);
     
+        var testbreite = 233;
     
-    
-    
-
-    // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
-    var hasProductInstall = DetectFlashVer(6, 0, 65);
-    
-    var testbreite = 233;
-    
-    // Version check based upon the values defined in globals
-    var hasRequestedVersion = DetectFlashVer(requiredMajorVersion, requiredMinorVersion, requiredRevision);
-    
-    if (hasProductInstall && !hasRequestedVersion) {
-        // DO NOT MODIFY THE FOLLOWING FOUR LINES
-        // Location visited after installation is complete if installation is required
-        var MMPlayerType = (isIE === true) ? "ActiveX" : "PlugIn";
-        var MMredirectURL = window.location;
-        document.title = document.title.slice(0, 47) + " - Flash Player Installation";
-        var MMdoctitle = document.title;
-        AC_FL_RunContent(
-            "src", "playerProductInstall",
-            "FlashVars", "MMredirectURL="+MMredirectURL+'&MMplayerType='+MMPlayerType+'&MMdoctitle='+MMdoctitle+"",
-            "width", "100%",
-            "height", "100%",
-            "align", "middle",
-            "id", "oc_Videodisplay",
-            "quality", "high",
-            "bgcolor", "#FFFFFF",
-            "name", "Videodisplay",
-            "allowScriptAccess", "sameDomain",
-            "type", "application/x-shockwave-flash",
-            "pluginspage", "http://www.adobe.com/go/getflashplayer"
-        );
-    } 
-    else if (hasRequestedVersion) {
-        // if we've detected an acceptable version
-        // embed the Flash Content SWF when all tests are passed
+        // Version check based upon the values defined in globals
+        var hasRequestedVersion = DetectFlashVer(requiredMajorVersion, requiredMinorVersion, requiredRevision);
+     
+        if (hasProductInstall && !hasRequestedVersion) 
+        {
+            // DO NOT MODIFY THE FOLLOWING FOUR LINES
+            // Location visited after installation is complete if installation is required
+            var MMPlayerType = (isIE === true) ? "ActiveX" : "PlugIn";
+            var MMredirectURL = window.location;
+            document.title = document.title.slice(0, 47) + " - Flash Player Installation";
+            var MMdoctitle = document.title;
+            AC_FL_RunContent(
+                "src", "playerProductInstall",
+                "FlashVars", "MMredirectURL="+MMredirectURL+'&MMplayerType='+MMPlayerType+'&MMdoctitle='+MMdoctitle+"",
+                "width", "100%",
+                "height", "100%",
+                "align", "middle",
+                "id", "oc_Videodisplay",
+                "quality", "high",
+                "bgcolor", "#FFFFFF",
+                "name", "Videodisplay",
+                "allowScriptAccess", "sameDomain",
+                "type", "application/x-shockwave-flash",
+                "wmode", "transparent",
+                "pluginspage", "http://www.adobe.com/go/getflashplayer"
+          );
+        } 
+        else if (hasRequestedVersion) 
+        {
+            // if we've detected an acceptable version
+            // embed the Flash Content SWF when all tests are passed
         
-        AC_FL_RunContent(
-            "src", "Videodisplay.swf",
-            "width", "100%",
-            "height", "100%",
-            "id", "oc_Videodisplay",
-            "quality", "high",
-            "bgcolor", "#FFFFFF",
-            "name", "Videodisplay",
-            "allowfullscreen", "true",
-            "flashvars", "bridgeName=b_Videodisplay&amp;autoplay=false",
-            "allowScriptAccess", "sameDomain",
-            "type", "application/x-shockwave-flash",
-            "pluginspage", "http://www.adobe.com/go/getflashplayer"
-        );
+            AC_FL_RunContent(
+                "src", "Videodisplay.swf",
+                "width", "100%",
+                "height", "100%",
+                "id", "oc_Videodisplay",
+                "quality", "high",
+                "bgcolor", "#FFFFFF",
+                "name", "Videodisplay",
+                "allowfullscreen", "true",
+                "flashvars", "bridgeName=b_Videodisplay&amp;autoplay=false",
+                "allowScriptAccess", "sameDomain",
+                "type", "application/x-shockwave-flash",
+                "wmode", "transparent",
+                "pluginspage", "http://www.adobe.com/go/getflashplayer"
+            );
        
        
-    } 
-    else {  // flash is too old or we can't detect the plugin
-        var alternateContent = 'Alternate HTML content should be placed here.'
-        + 'This content requires the Adobe Flash Player. '
-        + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
-        //document.write(alternateContent);  // insert non-flash content
-        $("#oc_flash-player").html(alternateContent);
-      }
+        } 
+        else 
+        {  // flash is too old or we can't detect the plugin
+            var alternateContent = 'Alternate HTML content should be placed here.'
+            + 'This content requires the Adobe Flash Player. '
+            + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
+            document.write(alternateContent);  // insert non-flash content
+            //$("#oc_flash-player").write(alternateContent);
+        }
     }
     
     return {

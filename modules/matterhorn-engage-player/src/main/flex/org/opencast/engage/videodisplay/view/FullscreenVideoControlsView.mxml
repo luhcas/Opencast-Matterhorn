@@ -269,7 +269,7 @@
     
     <mx:Canvas
     	width = "700"
-        height = "85"
+        height = "80"
         visible="{this.NavigationVisible}"
         hideEffect="{fadeOut}"
         showEffect="{fadeIn}"
@@ -278,7 +278,7 @@
     	
     	<mx:VBox 
             width = "100%"
-            height = "85"
+            height = "80"
             horizontalAlign="center"
     		verticalAlign="top" 
     		verticalGap="0"
@@ -412,7 +412,7 @@
 		        	width="48"
 		        	height="48"
 					toolTip = "{ model.captionsURL == '' ? 'No Closed Captons' : model.ccBoolean == true ? 'Closed Captons On' : 'Closed Captons Off' }"
-					styleName = "{ model.captionsURL == '' ? 'ccOff' : 'ccOn' }"
+					styleName = "{ model.captionsURL == '' ? 'ccOff' : model.ccButtonBoolean == true ? 'ccActivate' :  'ccOn' }"
 					click="{ Swiz.dispatchEvent( new ClosedCaptionsEvent() ) }"
 					enabled="{  model.captionsURL == '' ? false : true }"
 					/>

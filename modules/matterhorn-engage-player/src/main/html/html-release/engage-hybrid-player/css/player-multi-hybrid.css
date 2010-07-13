@@ -46,6 +46,7 @@ table
 {
   display:                  table-cell; 
   width:                    100%;
+  padding-left:             10px;
 }
 
 #oc_title
@@ -110,6 +111,7 @@ table
   width:                    100%;
   background-image:         url("../img/oc_icons.png");
   background-position:      0 0px;
+  visibility:               hidden;
 }
 
 #oc_video-time
@@ -306,6 +308,7 @@ table
   width:                    115px;
   margin-right:             5px;
   margin-top:               2px;
+  border:                   1px solid #2D8F8B;
 }
 
 .oc_tabTableLeft
@@ -601,9 +604,10 @@ option:hover
   color :                   #000000;
   background-color:         #fae6a0;
   font-size :               14;
-  left:                     120px;
-  top:                      380px;
+  left:                     0px;
+  top:                      0px;
   cursor:                   default !important;
+  width:                    64px;
 }
 
 .play-segment 
@@ -660,7 +664,7 @@ option:hover
 .progress-list 
 {
   background-color:         #FFFFFF;
-  height:                   7px;
+  height:                   6px;
 }
 
 .load-progress 
@@ -720,52 +724,106 @@ option:hover
 
 .segment-holder 
 {
-  background-image:         url("../img/scrubber.gif");
+  background-color:         #b8b8b8;
   height:                   25px;
   border-bottom-color:      #000000;
   border-bottom-style:      solid;
-  border-bottom-width:      1px;
-  border-right-color:       #000000;
-  border-right-style:       solid;
-  border-right-width:       1px;
-  border-right-color:       #000000;
+  border-bottom-width:      0px;
+  border-right-color:       #ffffff;
   border-right-style:       solid;
   border-right-width:       1px;
   border-top-color:         #000000;
   border-top-style:         solid;
-  border-top-width:         1px;
+  border-top-width:         0px;
   padding-bottom:           0.0em;
   padding-left:             0.0em;
   padding-right:            0.0em;
   padding-top:              0.0em;
+  vertical-align:           bottom;
+  color:                    #ffffff;
+  font-size:                10px;
 }
 
 .segment-holder-over 
 {
-  background-image:         url("../img/scrubber.gif");
-  background-position:      0 -20px;
+  background-color:         #d8d8d8;
   height:                   25px;
   border-bottom-color:      #000000;
   border-bottom-style:      solid;
-  border-bottom-width:      1px;
-  border-right-color:       #000000;
-  border-right-style:       solid;
-  border-right-width:       1px;
-  border-right-color:       #000000;
+  border-bottom-width:      0px;
+  border-right-color:       #ffffff;
   border-right-style:       solid;
   border-right-width:       1px;
   border-top-color:         #000000;
   border-top-style:         solid;
-  border-top-width:         1px;
+  border-top-width:         0px;
   padding-bottom:           0.0em;
   padding-left:             0.0em;
   padding-right:            0.0em;
   padding-top:              0.0em;
+  vertical-align:           bottom;
+  color:                    #000000;
+  font-size:                10px;
 }
 
 .segments {
-  border-left-color:        #000000;
-  border-left-style:        solid;
-  border-left-width:        1px;
+  border-color:             #000000;
+  border-style:             solid;
+  border-width:             1px;
   width:                    100%;
+}
+
+#oc_embed-left
+{
+  float:                    left;
+  width:                    70%;
+}
+
+#oc_embed-right
+{
+  float:                    left;
+  margin-left:              10px;
+  width:                    25%;
+}
+#oc_costum-width
+{
+  flaot:                    left;
+  width:                    50px;
+  text-align:               right;
+  cursor:                   default;
+  color:                    #000000;
+  background-color:         #E3E3D7;
+  margin-bottom:            4px;
+}
+
+#oc_embed-costum-width-textinput
+{
+  flaot:                    left;
+  background-color:         #ffffff;
+  width:                    40px;
+  color:                    #000000;
+}
+
+#oc_costum-height
+{
+  flaot:                    left;
+  width:                    50px;
+  text-align:               right;
+  cursor:                   default;
+  color:                    #000000;
+  background-color:         #E3E3D7;
+}
+
+#oc_embed-costum-height-textinput
+{
+  flaot:                    left;
+  background-color:         #ffffff;
+  width:                    40px;
+  color:                    #000000;
+}
+
+#oc_embed-custom-title
+{
+  text-align:               center;
+  margin-bottom:            4px;
 }
