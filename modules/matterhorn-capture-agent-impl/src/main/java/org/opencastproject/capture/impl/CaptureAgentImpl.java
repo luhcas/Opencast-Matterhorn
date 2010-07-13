@@ -449,7 +449,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       long startWait = System.currentTimeMillis();
       long timeout = Long.parseLong(configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT));
       while (pipe != null) {
-        //TODO:  What happens if this loop never exits?
         try {
           Thread.sleep(1000);
         } catch (InterruptedException e) {}
