@@ -42,15 +42,27 @@ import javax.xml.parsers.SAXParserFactory;
 public class PopulateDictionary {
 
   public static void main(String... args) throws Exception {
-    String lang = getInput("Enter language", "en");
-    File dir = null;
-    while (true) {
-      String wikiRepo = getInput("Enter path to expanded wikipedia archive", ".");
-      dir = new File(wikiRepo);  
-      if(dir.isDirectory()) {
-        break;
-      } else {
+    String lang;
+    String wikiRepo;
+    File dir;
+    if(args.length == 2) {
+      lang = args[0];
+      wikiRepo = args[1];
+      dir = new File(wikiRepo);
+      if( ! dir.isDirectory()) {
         System.out.println(wikiRepo + " is not a directory");
+        System.exit(1);
+      }
+    } else {
+      lang = getInput("Enter language", "en");
+      while (true) {
+        wikiRepo = getInput("Enter path to expanded wikipedia archive", ".");
+        dir = new File(wikiRepo);  
+        if(dir.isDirectory()) {
+          break;
+        } else {
+          System.out.println(wikiRepo + " is not a directory");
+        }
       }
     }
     File wikiArticles = new File(dir, lang + "wiki-latest-pages-articles.xml");
