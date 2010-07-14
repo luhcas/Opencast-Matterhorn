@@ -15,6 +15,7 @@
  */
 package org.opencastproject.util;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedInputStream;
@@ -50,6 +51,14 @@ public class ZipUtil {
     return zip(sourceFiles, destination, false, ZipEntry.DEFLATED);
   }
 
+  /**
+   * Compresses a files into a zip archive. May add files recursively.
+   *
+   * @param sourceFiles The files to include in the root of the archive
+   * @param destination The path to put the resulting zip archive file.
+   * @param compressionMethod The compression method to use.  Defined in {@code ZipEntry}.
+   * @return the resulting zip archive file
+   */
   public static java.io.File zip(java.io.File[] sourceFiles, String destination, int compressionMethod) {
     return zip(sourceFiles, destination, false, compressionMethod);
   }
@@ -70,6 +79,15 @@ public class ZipUtil {
     return zip(sourceFiles, new File(destination), recursively, ZipEntry.DEFLATED);
   }
 
+  /**
+   * Compresses a files into a zip archive. May add files recursively.
+   *
+   * @param sourceFiles The files to include in the root of the archive
+   * @param destination The path to put the resulting zip archive file.
+   * @param recursively Set true to recursively add directories.
+   * @param compressionMethod The compression method to use.  Defined in {@code ZipEntry}.
+   * @return the resulting zip archive file
+   */
   public static File zip(File[] sourceFiles, String destination, boolean recursively, int compressionMethod) {
     return zip(sourceFiles, new File(destination), recursively, compressionMethod);
   }
@@ -86,9 +104,8 @@ public class ZipUtil {
       throw new IllegalArgumentException("destination must be set");
     }
     ZipOutputStream out = new ZipOutputStream(outputStream(destination));
-//    out.setMethod(compressionMethod);
     try {
-      _zip(sourceFiles, out, -1, recursively);
+      _zip(sourceFiles, out, -1, recursively, compressionMethod);
       return destination;
     } catch (Exception e) {
       throw new RuntimeException(e);
@@ -97,15 +114,18 @@ public class ZipUtil {
     }
   }
 
-  private static void _zip(File[] files, ZipOutputStream out, int basePath, boolean recursively) {
+  private static void _zip(File[] files, ZipOutputStream out, int basePath, boolean recursively, int compressionMethod) {
     for (File file : files) {
       if (file.isDirectory()) {
         if (recursively)
-          _zip(file.listFiles(), out, curBasePath(file, basePath), recursively);
+          _zip(file.listFiles(), out, curBasePath(file, basePath), recursively, compressionMethod);
       } else {
         InputStream in = inputStream(file);
         try {
           ZipEntry z = new ZipEntry(entryName(file, curBasePath(file, basePath)));
+          z.setCrc(FileUtils.checksumCRC32(file.getAbsoluteFile()));
+          z.setSize(file.length());
+          z.setMethod(compressionMethod);
           out.putNextEntry(z);
           IOUtils.copy(in, out);
         } catch (IOException e) {
