@@ -98,7 +98,7 @@
 									</includes>
 								</resource>
 								<resource>
-									<directory>src/main/flex/Videodisplay/</directory>
+									<directory>src/main/flex/</directory>
 									<filtering>true</filtering>
 									<includes>
 										<include>style/</include>

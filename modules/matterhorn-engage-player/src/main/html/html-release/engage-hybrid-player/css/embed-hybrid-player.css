@@ -77,6 +77,7 @@ table
 {
   text-align:               center;
   height:                   200px;
+  background-color:         #000000;  
 }
 
 #oc_video-player-controls
@@ -94,9 +95,22 @@ table
   width:                    100%;
   background-image:         url("../img/oc_icons.png");
   background-position:      0 0px;
-  visibility:               visible;
   text-align:               center;
   padding-top:              5px;
+}
+
+#oc_controlbar-embed
+{
+  visibility:               visible;
+}
+
+#oc_segments-embed
+{
+  width:                    100%;
+  height:                   25px;
+  background-color:         #B8B8B8;
+  border:                   1px solid #000000;
+  margin-top:               -8px;
 }
 
 #oc_video-time
@@ -156,7 +170,7 @@ table
   float:                    left;
   width:                    26%;
   text-align:               right;
-  margin-top:               7px;
+  margin-top:               4px;
 }
 
 #oc_sound

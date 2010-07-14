@@ -423,23 +423,16 @@ package org.opencast.engage.videodisplay.business
             // rewind
             if( charCode == 82 || charCode == 114 ) // R or r
             {
-                var playRewind:Boolean = model.mediaPlayer.playing();
+                
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.REWIND ) );
-                if(playRewind)
-                {
-                    model.mediaPlayer.play();
-                }
+                
             }
 
             // Fast forward
             if( charCode == 70 || charCode == 102 ) // F or f
             {
-                var playForward:Boolean = model.mediaPlayer.playing();
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.FASTFORWARD ) );
-                if(playForward)
-                {
-                    model.mediaPlayer.play();
-                }
+                
             }
 
             // time

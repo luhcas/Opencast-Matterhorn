@@ -342,7 +342,8 @@ package org.opencast.engage.videodisplay.model
         
         // playerSeekBool
         public var playerSeekBool:Boolean = false;
-        
+      
+       
      
        
     }

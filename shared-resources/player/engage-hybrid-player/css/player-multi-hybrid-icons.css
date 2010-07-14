@@ -43,6 +43,7 @@ input:hover
   background-position:      0 -30px;
   width:                    16px;
   height:                   15px;
+  margin-top:               3px;
 }
 
 .oc_btn-skip-backward-over
@@ -51,6 +52,7 @@ input:hover
   background-position:      -30px -30px;
   width:                    16px;
   height:                   15px;
+  margin-top:               3px;
 }
 
 .oc_btn-skip-backward-clicked
@@ -59,6 +61,7 @@ input:hover
   background-position:      -60px -30px;
   width:                    16px;
   height:                   15px;
+  margin-top:               3px;
 }
 
 .oc_btn-rewind
@@ -67,6 +70,7 @@ input:hover
   background-position:      0 -60px;
   width:                    21px;
   height:                   14px;
+  margin-top:               4px;
 }
 
 .oc_btn-rewind-over
@@ -75,6 +79,7 @@ input:hover
   background-position:      -30px -60px;
   width:                    21px;
   height:                   14px;
+  margin-top:               4px;
 }
 
 .oc_btn-rewind-clicked
@@ -83,6 +88,7 @@ input:hover
   background-position:      -60px -60px;
   width:                    21px;
   height:                   14px;
+  margin-top:               4px;
 }
 
 .oc_btn-play
@@ -91,6 +97,7 @@ input:hover
   background-position:      0px -210px;
   width:                    16px;
   height:                   16px;
+  margin-top:               2px;
 }
 
 .oc_btn-play-clicked
@@ -99,6 +106,7 @@ input:hover
   background-position:      -60px -210px;
   width:                    16px;
   height:                   16px;
+  margin-top:               2px;
 }
 
 .oc_btn-play-over
@@ -107,6 +115,7 @@ input:hover
   background-position:      -30px -210px;
   width:                    16px;
   height:                   16px;
+  margin-top:               2px;
 }
 
 .oc_btn-pause
@@ -115,6 +124,7 @@ input:hover
   background-position:      0px -90px;
   width:                    16px;
   height:                   16px;
+  margin-top:               2px;
 }
 
 .oc_btn-pause-clicked
@@ -123,6 +133,7 @@ input:hover
   background-position:      -60px -90px;
   width:                    16px;
   height:                   16px;
+  margin-top:               2px;
 }
 
 .oc_btn-pause-over
@@ -131,6 +142,7 @@ input:hover
   background-position:      -30px -90px;
   width:                    16px;
   height:                   16px;
+  margin-top:               2px;
 }
 
 .oc_btn-fast-forward
@@ -139,6 +151,7 @@ input:hover
   background-position:      0px -120px;
   width:                    21px;
   height:                   14px;
+  margin-top:               4px;
 }
 
 .oc_btn-fast-forward-over
@@ -147,6 +160,7 @@ input:hover
   background-position:      -30px -120px;
   width:                    21px;
   height:                   14px;
+  margin-top:               4px;
 }
 
 .oc_btn-fast-forward-clicked
@@ -155,6 +169,7 @@ input:hover
   background-position:      -60px -120px;
   width:                    21px;
   height:                   14px;
+  margin-top:               4px;
 }
 
 .oc_btn-skip-forward
@@ -163,6 +178,7 @@ input:hover
   background-position:      0px -150px;
   width:                    16px;
   height:                   15px;
+  margin-top:               4px;
 }
 
 .oc_btn-skip-forward-over
@@ -171,6 +187,7 @@ input:hover
   background-position:      -30px -150px;
   width:                    16px;
   height:                   15px;
+  margin-top:               4px;
 }
 
 .oc_btn-skip-forward-clicked
@@ -179,6 +196,7 @@ input:hover
   background-position:      -60px -150px;
   width:                    16px;
   height:                   15px;
+  margin-top:               4px;
 }
 
 .oc_btn-volume-high
