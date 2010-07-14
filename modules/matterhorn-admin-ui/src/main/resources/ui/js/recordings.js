@@ -344,10 +344,10 @@ Recordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
   $('#holdStateHeadRow-date').html($($(parentRow).children().get(3)).html());
   $('#holdStateHeadRow-status').html($($(parentRow).children().get(4)).html());
   $('#holdActionPanel-container').toggle();
-  $('#recordings-table-container').toggle();
-  $('#oc_recordingmenu').toggle();
-  $('.paging-nav-container').toggle();
-  $('#refresh-controls-container').toggle();
+  $('#recordings-table-container').hide();
+  $('#oc_recordingmenu').hide();
+  $('.paging-nav-container').hide();
+  $('#refresh-controls-container').hide();
 }
 
 /** Adjusts the height of the panel holding the Hold Operation UI
