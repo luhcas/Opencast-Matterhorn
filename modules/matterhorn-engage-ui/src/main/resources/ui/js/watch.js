@@ -17,8 +17,7 @@ Opencast.Watch = (function ()
           SINGLEPLAYER            = "Singleplayer",
           SINGLEPLAYERWITHSLIDES  = "SingleplayerWithSlides",
           AUDIOPLAYER             = "Audioplayer",
-          ADVANCEDPLAYER          = "advancedPlayer",
-          EMBEDPLAYER             = "embedPlayer",
+          PLAYERSTYLE             = "advancedPlayer",
           mediaUrlOne             = "",
           mediaUrlTwo             = "",
           mimetypeOne             = "",
@@ -134,9 +133,7 @@ Opencast.Watch = (function ()
           mediaResolutionOne = mediaResolutionOne === null ? '' : mediaResolutionOne;
           mediaResolutionTwo = mediaResolutionTwo === null ? '' : mediaResolutionTwo;
 
-        
-          
-          Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo);
+          Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo, PLAYERSTYLE);
 
           if (mediaUrlOne !== '' && mediaUrlTwo !== '')
           {

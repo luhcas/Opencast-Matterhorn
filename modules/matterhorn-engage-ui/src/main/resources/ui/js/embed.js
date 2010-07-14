@@ -18,7 +18,7 @@ Opencast.Watch = (function ()
           SINGLEPLAYERWITHSLIDES  = "SingleplayerWithSlides",
           AUDIOPLAYER             = "Audioplayer",
           ADVANCEDPLAYER          = "advancedPlayer",
-          EMBEDPLAYER             = "embedPlayer",
+          PLAYERSTYLE             = "embedPlayer",
           mediaResolutionOne      = "",
           mediaResolutionTwo      = "",
           mediaUrlOne             = "",
@@ -131,10 +131,7 @@ Opencast.Watch = (function ()
           mediaResolutionOne = mediaResolutionOne === null ? '' : mediaResolutionOne;
           mediaResolutionTwo = mediaResolutionTwo === null ? '' : mediaResolutionTwo;
 
-          
-        
-           
-          Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo);
+          Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo, PLAYERSTYLE);
 
           if (mediaUrlOne !== '' && mediaUrlTwo !== '')
           {
@@ -203,11 +200,13 @@ Opencast.Watch = (function ()
 
           // set the controls visible
           $('#oc_video-player-controls').css('visibility', 'visible');
+          
+         
 
-          // Autoplay after startup
-          Opencast.Player.doTogglePlayPause(); 
+
           
           Opencast.search.initialize();
+
 
         });
     }

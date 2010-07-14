@@ -882,7 +882,7 @@ Opencast.Player = (function () {
         @description Set the media URL.
         @param String mediaURL
      */
-    function setMediaURL(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo)
+    function setMediaURL(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerstyle)
     {
         if (mediaURLOne[0] === 'h' || mediaURLOne[0] === 'H' && mediaURLOne[2] === 't' || mediaURLOne[2] === 'T' || mediaURLTwo[0] === 'h' || mediaURLTwo[0] === 'H' && mediaURLTwo[2] === 't' || mediaURLTwo[2] === 'T')
         {
@@ -893,7 +893,7 @@ Opencast.Player = (function () {
         {
             setHtmlBool(false);
         }
-        Videodisplay.setMediaURL(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo);
+        Videodisplay.setMediaURL(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerstyle);
     }
     
     /**
@@ -1584,11 +1584,7 @@ Opencast.Player = (function () {
      */
     function setProgress(value) 
     {
-    	var progress =  Math.min(value, 100);
-    	if (progress % 25 == 0) {
-    		addAlert("Current progress" + progress + "%");
-    	}
-        $('.load-progress').css("width", (progress + "%"));
+        $('.load-progress').css("width", (Math.min(value, 100) + "%"));
     }
     
     /**

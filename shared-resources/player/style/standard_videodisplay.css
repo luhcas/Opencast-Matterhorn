@@ -172,6 +172,21 @@ Button.ccOff
   selectedDisabledSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_disable');  
 }
 
+Button.ccActivate
+{
+  font-size: 0; 
+  
+  upSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_down');
+  overSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_down');
+  downSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_down');
+  disabledSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_down');
+  selectedUpSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_down'); 
+  selectedOverSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_down');
+  selectedDownSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_down');
+  selectedDisabledSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_down');  
+}
+
+
 .captions
 {
 	color: #ffffff;
