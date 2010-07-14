@@ -371,14 +371,14 @@ public class PipelineFactory {
     fpsfilter.setCaps(fpsCaps);
     
     
-    if (codec != null) {
+    if (codec != null && codec.equalsIgnoreCase("ffenc_mpeg2video")) {
       logger.debug("{} using encoder: {}", captureDevice.getName(), codec);
       dec = ElementFactory.make("mpeg2dec", null);
       enc = ElementFactory.make(codec, null);
     }
     else {
-      dec = ElementFactory.make("mpeg2dec", null);
-      enc = ElementFactory.make("mpeg2enc", null);
+      dec = ElementFactory.make("capsfilter", null);
+      enc = ElementFactory.make("capsfilter", null);
     }
     
     if (container != null) {

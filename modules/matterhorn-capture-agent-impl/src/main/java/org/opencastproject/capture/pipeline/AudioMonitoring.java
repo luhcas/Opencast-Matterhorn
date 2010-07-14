@@ -179,7 +179,7 @@ public class AudioMonitoring {
               
               // keep the maximum number of pairs stored to be 1000 / interval
               
-              if (deviceRMS.size() > (maxLength / interval)) {
+              if (deviceRMS.size() > (1 / interval)) {
                 deviceRMS.remove(deviceRMS.first());
               }
             }
@@ -293,7 +293,7 @@ public class AudioMonitoring {
             
             // keep the maximum number of pairs stored to be 1000 / interval
             
-            if (deviceRMS.size() > (maxLength / interval)) {
+            if (deviceRMS.size() > (1 / interval)) {
               deviceRMS.remove(deviceRMS.first());
             }
           }
