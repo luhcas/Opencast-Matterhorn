@@ -53,68 +53,72 @@
         <xsl:value-of select="captureAgent" />
       </td> -->
       <td class="processingStatus">
-          <xsl:value-of select="recordingStatus" /> :
-          <xsl:value-of select="processingStatus" />
+        <xsl:value-of select="recordingStatus" /> :
+        <xsl:value-of select="processingStatus" />
       </td>
       <td>
         <xsl:choose>
-            <xsl:when test="recordingStatus = 'upcoming'">
-              <a title="View Recording Info">
-                <xsl:attribute name="href">/admin/scheduler.html?eventId=<xsl:value-of select="id" />&amp;edit</xsl:attribute>
+          <xsl:when test="recordingStatus = 'upcoming'">
+            <a title="View Recording Info">
+              <xsl:attribute name="href">/admin/scheduler.html?eventId=
+                <xsl:value-of select="id" />&amp;edit
+              </xsl:attribute>
                 Edit
-              </a>
-              <a title="Delete Recording">
-                <xsl:attribute name="onclick">
-                  <xsl:text>Recordings.removeScheduledRecording('</xsl:text>
-                  <xsl:value-of select="id" />
-                  <xsl:text>', '</xsl:text>
-                  <xsl:value-of select="title" />
-                  <xsl:text>');</xsl:text>
-                </xsl:attribute>
+            </a>
+            <a title="Delete Recording">
+              <xsl:attribute name="onclick">
+                <xsl:text>Recordings.removeScheduledRecording('</xsl:text>
+                <xsl:value-of select="id" />
+                <xsl:text>', '</xsl:text>
+                <xsl:value-of select="title" />
+                <xsl:text>');</xsl:text>
+              </xsl:attribute>
                 Delete
-              </a>
-            </xsl:when>
-            <xsl:otherwise>
-              <a title="View Recording Info">
-                <xsl:attribute name="href">/admin/viewevent.html?workflow=<xsl:value-of select="id" /></xsl:attribute>
+            </a>
+          </xsl:when>
+          <xsl:otherwise>
+            <a title="View Recording Info">
+              <xsl:attribute name="href">/admin/viewevent.html?workflow=
+                <xsl:value-of select="id" />
+              </xsl:attribute>
                 View Info
-              </a>
-            </xsl:otherwise>
+            </a>
+          </xsl:otherwise>
         </xsl:choose>
         <xsl:choose>
-            <xsl:when test="recordingStatus = 'hold'">
-                <input type="hidden">
-                </input>
-                <a>
-                    <xsl:attribute name="onclick">
-                      <xsl:text>Recordings.displayHoldActionPanel('</xsl:text>
-                      <xsl:value-of select="holdActionPanelURL" />
-                      <xsl:text>','</xsl:text>
-                      <xsl:value-of select="id" />
-                      <xsl:text>', this);</xsl:text>
-                    </xsl:attribute>
-                    <xsl:value-of select="holdActionTitle" />
-                </a>
-            </xsl:when>
-            <xsl:when test="recordingStatus = 'failed'">
-                <a>
-                    <xsl:attribute name="onclick">
-                        <xsl:text>Recordings.retryRecording('</xsl:text>
-                        <xsl:value-of select="id" />
-                        <xsl:text>');</xsl:text>
-                    </xsl:attribute>
+          <xsl:when test="recordingStatus = 'hold'">
+            <input type="hidden">
+            </input>
+            <a>
+              <xsl:attribute name="onclick">
+                <xsl:text>Recordings.displayHoldActionPanel('</xsl:text>
+                <xsl:value-of select="holdActionPanelURL" />
+                <xsl:text>','</xsl:text>
+                <xsl:value-of select="id" />
+                <xsl:text>', this);</xsl:text>
+              </xsl:attribute>
+              <xsl:value-of select="holdActionTitle" />
+            </a>
+          </xsl:when>
+          <xsl:when test="recordingStatus = 'failed'">
+            <!--a>
+              <xsl:attribute name="onclick">
+                <xsl:text>Recordings.retryRecording('</xsl:text>
+                <xsl:value-of select="id" />
+                <xsl:text>');</xsl:text>
+              </xsl:attribute>
                     Re-try
-                </a>
-		        <a>
-		          <xsl:attribute name="onclick">
-		            <xsl:text>Recordings.removeRecording('</xsl:text>
-		            <xsl:value-of select="id" />
-		            <xsl:text>');</xsl:text>
-		          </xsl:attribute>
+            </a-->
+            <a>
+              <xsl:attribute name="onclick">
+                <xsl:text>Recordings.removeRecording('</xsl:text>
+                <xsl:value-of select="id" />
+                <xsl:text>');</xsl:text>
+              </xsl:attribute>
 		          Delete
-		        </a>
-            </xsl:when>
-            <xsl:otherwise></xsl:otherwise>
+            </a>
+          </xsl:when>
+          <xsl:otherwise></xsl:otherwise>
         </xsl:choose>
       </td>
     </tr>
