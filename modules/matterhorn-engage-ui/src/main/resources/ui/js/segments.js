@@ -61,6 +61,19 @@ Opencast.segments = ( function() {
           $container
             .css('width', ($panels[0].offsetWidth * $panels.length))
             .css('left', "0px");
+       } else {
+         // Disable and grey out "Slides" Tab
+         $("#oc_btn-slides").removeClass("oc_btn-tabs");
+         $('#oc_btn-slides').attr("disabled", "true");
+         $("#oc_btn-slides").css("color", "#dddddd");
+         $("#oc_btn-slides").css("background-color", "#aaaaaa");
+
+         // Disable and grey out "Slides Text" Tab
+         $("#oc_btn-slidetext").removeClass("oc_btn-tabs");
+         $('#oc_btn-slidetext').attr("disabled", "true");
+         $("#oc_btn-slidetext").css("color", "#dddddd");
+         $("#oc_btn-slidetext").css("background-color", "#aaaaaa");
+         
        }
       var scroll = $('#slider .scroll').css('overflow', 'hidden');
 
