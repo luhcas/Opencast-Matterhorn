@@ -49,6 +49,8 @@
 
         restEndpoint = restEndpoint + "&offset=" + (page - 1) * 10;
 
+        restEndpoint = restEndpoint + "&_=" + new Date().getTime();   // workaround for IE ajax caching problem
+
         $('#stage').xslt(restEndpoint, "xsl/episodes.xsl", function() {
           Opencast.pager.renderPager();
 
