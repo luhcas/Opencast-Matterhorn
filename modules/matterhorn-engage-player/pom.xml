@@ -71,6 +71,9 @@
 					<!--
 						<coverageViewerPath>/Applications/CoverageViewer.app</coverageViewerPath>
 					-->
+					<sourcePaths>
+					 <path>${basedir}/src/main/flex</path> 
+					</sourcePaths> 
 				</configuration>
 			</plugin>
 			<plugin>
@@ -181,6 +184,9 @@
 							<headlessServer>true</headlessServer>
 							<showWarnings>false</showWarnings>
 							<output>${project.build.directory}/hybrid-player/Videodisplay.swf</output>
+							<sourcePaths>
+					 		<path>${basedir}/src/main/flex</path> 
+							</sourcePaths> 
 						</configuration>
 					</plugin>
 					<plugin>
@@ -307,6 +313,13 @@
 			<artifactId>flex-framework</artifactId>
 			<version>3.6.0.16321</version>
 			<type>pom</type>
+			<exclusions> 
+        <!-- make sure to exclude the default 'playerglobal' transitive dependency -->
+        <exclusion> 
+          <groupId>com.adobe.flex.framework</groupId> 
+          <artifactId>playerglobal</artifactId> 
+        </exclusion> 
+      </exclusions>   
 		</dependency>
 		<dependency>
 			<groupId>com.adobe.flex.framework</groupId>
