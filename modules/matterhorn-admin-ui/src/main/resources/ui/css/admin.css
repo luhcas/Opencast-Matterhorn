@@ -259,6 +259,11 @@ select { font-size:1.15em; }
   background-color: #98BBBA !important;
 }
 
+#seriesTable th {
+  padding-right:20px;
+  background-color: #98BBBA !important;
+}
+
 #stage {
     background:white;
     padding-left: 12px; /**/
