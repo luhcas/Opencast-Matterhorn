@@ -86,7 +86,7 @@ public class ZipUtil {
       throw new IllegalArgumentException("destination must be set");
     }
     ZipOutputStream out = new ZipOutputStream(outputStream(destination));
-    out.setMethod(compressionMethod);
+//    out.setMethod(compressionMethod);
     try {
       _zip(sourceFiles, out, -1, recursively);
       return destination;
@@ -105,7 +105,8 @@ public class ZipUtil {
       } else {
         InputStream in = inputStream(file);
         try {
-          out.putNextEntry(new ZipEntry(entryName(file, curBasePath(file, basePath))));
+          ZipEntry z = new ZipEntry(entryName(file, curBasePath(file, basePath)));
+          out.putNextEntry(z);
           IOUtils.copy(in, out);
         } catch (IOException e) {
           throw new RuntimeException(e);
