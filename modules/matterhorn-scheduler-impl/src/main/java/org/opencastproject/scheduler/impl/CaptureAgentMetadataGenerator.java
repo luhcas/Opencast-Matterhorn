@@ -16,9 +16,8 @@
 
 package org.opencastproject.scheduler.impl;
 
-import org.opencastproject.scheduler.api.SchedulerEvent;
-import org.opencastproject.scheduler.impl.jpa.Event;
-import org.opencastproject.scheduler.impl.jpa.Metadata;
+import org.opencastproject.scheduler.impl.Event;
+import org.opencastproject.scheduler.impl.Metadata;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,10 +79,6 @@ public class CaptureAgentMetadataGenerator {
     return caCatalog;
   }
   
-  
-  public String generateAsString (SchedulerEvent event) {
-    return generateAsString(((SchedulerEventImpl)event).toEvent());
-  }
   /**
    * Generates a Properties list with the Capture Agent metadata from the provided event 
    * @param event The SchedulerEvent from which the metadata should be generated as Capture Agent specific data 

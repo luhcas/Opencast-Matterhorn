@@ -39,5 +39,7 @@ public interface Series extends Comparable<Series> {
   public abstract boolean valid();
   
   public String getDescription();
+  
+  public String getFromMetadata(String key);
 
 }

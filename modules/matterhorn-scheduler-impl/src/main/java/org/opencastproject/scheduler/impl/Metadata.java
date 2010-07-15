@@ -14,8 +14,10 @@
  *
  */
 
-package org.opencastproject.scheduler.impl.jpa;
+package org.opencastproject.scheduler.impl;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -23,11 +25,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
-
 import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
 
 @Entity(name="Metadata")
 @Table(name="SCHED_METADATA")
+@Access(AccessType.FIELD)
 @XmlType(name="Metadata")
 public class Metadata {
   @Id

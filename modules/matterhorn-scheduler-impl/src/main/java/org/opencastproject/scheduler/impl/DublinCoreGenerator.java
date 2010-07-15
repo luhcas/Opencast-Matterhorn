@@ -21,8 +21,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
 import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
 import org.opencastproject.metadata.dublincore.Precision;
-import org.opencastproject.scheduler.api.SchedulerEvent;
-import org.opencastproject.scheduler.impl.jpa.Event;
+import org.opencastproject.scheduler.impl.Event;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +68,6 @@ public class DublinCoreGenerator {
     return dateFormater.format(date);
   }
   
-  
   /**
    * Constructor needs the reference to the metadata mapping information. 
    * @param dcMappingFile Properties File with mapping for Dublin Core metadata. This may come from different resources, so that is must be provided.
@@ -79,10 +77,6 @@ public class DublinCoreGenerator {
   public DublinCoreGenerator (InputStream dcMappingFile) throws FileNotFoundException, IOException {
     logger.debug("Initialising Dublin Core Generator");
     mapper = new MetadataMapper(dcMappingFile);   
-  }
-  
-  public DublinCoreCatalog generate (SchedulerEvent event) {
-    return generate(((SchedulerEventImpl)event).toEvent());
   }
   
   /**
@@ -110,11 +104,6 @@ public class DublinCoreGenerator {
     return dcCatalog;
 
   }
-  
-  public String generateAsString (SchedulerEvent event) {
-    return generateAsString(((SchedulerEventImpl)event).toEvent());   
-  }
-  
   
   /**
    * Generates a XML with the Dublin Core metadata from the provided event

@@ -28,8 +28,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
-import org.opencastproject.scheduler.api.SchedulerEvent;
-import org.opencastproject.scheduler.impl.jpa.Event;
+import org.opencastproject.scheduler.impl.Event;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesService;
 
@@ -98,10 +97,6 @@ public class CalendarGenerator {
    */
   public void setCalendar(Calendar cal) {
     this.cal = cal;
-  }
-
-  public boolean addEvent (SchedulerEvent e) {
-    return addEvent (((SchedulerEventImpl)e).toEvent());
   }
   
   /**

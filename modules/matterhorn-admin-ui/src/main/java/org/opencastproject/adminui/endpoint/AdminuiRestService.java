@@ -27,9 +27,9 @@ import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.scheduler.api.SchedulerEvent;
+import org.opencastproject.scheduler.impl.Event;
+import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
 import org.opencastproject.scheduler.api.SchedulerFilter;
-import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.api.SeriesService;
@@ -77,17 +77,17 @@ public class AdminuiRestService {
 
   private final static int CAPTURE_AGENT_DELAY = 5000;
   private static final Logger logger = LoggerFactory.getLogger(AdminuiRestService.class);
-  private SchedulerService schedulerService;
+  private SchedulerServiceImpl schedulerService;
   private SeriesService seriesService;
   private WorkflowService workflowService;
   private CaptureAgentStateService captureAdminService;
 
-  public void setSchedulerService(SchedulerService service) {
+  public void setSchedulerService(SchedulerServiceImpl service) {
     logger.debug("binding SchedulerService");
     schedulerService = service;
   }
 
-  public void unsetSchedulerService(SchedulerService service) {
+  public void unsetSchedulerService(SchedulerServiceImpl service) {
     logger.debug("unbinding SchedulerService");
     schedulerService = null;
   }
@@ -385,9 +385,8 @@ public class AdminuiRestService {
     // get number of upcoming recordings if scheduler is present
     if (schedulerService != null) {
       int upcoming = 0;
-      SchedulerEvent[] events = schedulerService.getUpcomingEvents();
-      Date current = new Date(System.currentTimeMillis());
-      for (SchedulerEvent event : events) {
+      Event[] events = schedulerService.getUpcomingEvents();
+      for (Event event : events) {
         if (System.currentTimeMillis() < event.getStartdate().getTime()) {
           upcoming++;
           total++;
@@ -418,20 +417,20 @@ public class AdminuiRestService {
     if ((schedulerService != null) && (captureAdminService != null)) {
       SchedulerFilter filter = schedulerService.getNewSchedulerFilter();
       filter.setEnd(new Date(System.currentTimeMillis() + CAPTURE_AGENT_DELAY));
-      SchedulerEvent[] events = schedulerService.getEvents(filter);
-      for (SchedulerEvent event : events) {
-        Recording recording = captureAdminService.getRecordingState(event.getID());
+      Event[] events = schedulerService.getEvents(filter);
+      for (Event event : events) {
+        Recording recording = captureAdminService.getRecordingState(event.getEventId());
         if ((recording == null)
                 || (recording.getState().equals(RecordingState.CAPTURE_ERROR))
                 || (recording.getState().equals(RecordingState.COMPRESSING_ERROR))
                 || (recording.getState().equals(RecordingState.MANIFEST_ERROR))
                 || (recording.getState().equals(RecordingState.UPLOAD_ERROR))) {
           AdminRecordingImpl item = new AdminRecordingImpl();
-          item.setId(event.getID());
+          item.setId(event.getEventId());
           item.setItemType(AdminRecording.ItemType.SCHEDULER_EVENT);
-          item.setTitle(event.getTitle());
-          item.setPresenter(event.getCreator());
-          item.setSeriesTitle(event.getSeriesID());
+          item.setTitle(event.getValue("title"));
+          item.setPresenter(event.getValue("creator"));
+          item.setSeriesTitle(getSeriesNameFromEvent(event));
           item.setStartTime(Long.toString(event.getStartdate().getTime()));
           item.setEndTime(Long.toString(event.getEnddate().getTime()));
           if (recording != null) {
@@ -457,18 +456,17 @@ public class AdminuiRestService {
     LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
     if (schedulerService != null) {
       logger.debug("getting upcoming recordings from scheduler");
-      SchedulerEvent[] events = schedulerService.getUpcomingEvents();
+      Event[] events = schedulerService.getUpcomingEvents();
       for (int i = 0; i < events.length; i++) {
         if (System.currentTimeMillis() < events[i].getStartdate().getTime()) {
           AdminRecording item = new AdminRecordingImpl();
-          item.setId(events[i].getID());
-          item.setTitle(events[i].getTitle());
-          item.setPresenter(events[i].getCreator());
-          item.setSeriesTitle(events[i].getSeriesID());    // actually it's the series title
-          // FIXME Add the series ID too
+          item.setId(events[i].getEventId());
+          item.setTitle(events[i].getValue("title"));
+          item.setPresenter(events[i].getValue("creator"));
+          item.setSeriesTitle(getSeriesNameFromEvent(events[i]));
           item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
           item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
-          item.setCaptureAgent(events[i].getDevice());
+          item.setCaptureAgent(events[i].getValue("device"));
           item.setProcessingStatus("Scheduled");
           item.setDistributionStatus("not distributed");
           out.add(item);
@@ -482,12 +480,13 @@ public class AdminuiRestService {
 
   private LinkedList<AdminRecording> getCapturingRecordings() {
     LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
-    if (schedulerService != null && captureAdminService != null) {
+    if (schedulerService != null && captureAdminService != null && seriesService != null) {
       logger.debug("getting capturing recordings from scheduler");
-      SchedulerEvent[] events = schedulerService.getCapturingEvents();
-      for (int i = 0; i < events.length; i++) {
+      Map<String,Recording> recordings = captureAdminService.getKnownRecordings();
+      for(Entry<String, Recording> recording : recordings.entrySet()){
+        Event event = schedulerService.getEvent(recording.getKey());
         try {
-          Recording r = captureAdminService.getRecordingState(events[i].getID());
+          Recording r = recording.getValue();
           if (r != null) {
             String state = r.getState();
             logger.info("State = " + state);
@@ -498,14 +497,13 @@ public class AdminuiRestService {
                     || state.equals(RecordingState.MANIFEST)
                     || state.equals(RecordingState.UPLOADING)) {
               AdminRecording item = new AdminRecordingImpl();
-              item.setId(events[i].getID());
-              item.setTitle(events[i].getTitle());
-              item.setPresenter(events[i].getCreator());
-              item.setSeriesTitle(events[i].getSeriesID());    // actually it's the series title
-              // FIXME Add the series ID too
-              item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
-              item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
-              item.setCaptureAgent(events[i].getDevice());
+              item.setId(event.getEventId());
+              item.setTitle(event.getValue("title"));
+              item.setPresenter(event.getValue("creator"));
+              item.setSeriesTitle(getSeriesNameFromEvent(event));
+              item.setStartTime(Long.toString(event.getStartdate().getTime()));
+              item.setEndTime(Long.toString(event.getEnddate().getTime()));
+              item.setCaptureAgent(event.getValue("device"));
               item.setProcessingStatus(r.getState());
               out.add(item);
             } else {
@@ -630,6 +628,22 @@ public class AdminuiRestService {
     return DocUtil.generate(data);
   }
 
+  public String getSeriesNameFromEvent(Event event) {
+    String seriesId = event.getValue("seriesId");
+    String seriesName = null;
+    if(!seriesId.isEmpty()){
+        Series series = seriesService.getSeries(seriesId);
+        if(series != null){
+          seriesName = series.getFromMetadata("title");
+        }
+    }
+    if(seriesName != null){
+      return seriesName;
+    }
+    return "";
+  }
+  
   public AdminuiRestService() {
   }
+  
 }

@@ -16,6 +16,7 @@
 package org.opencastproject.capture.admin.api;
 
 import java.util.Map;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -116,4 +117,10 @@ public interface CaptureAgentStateService {
    * @return A map of recording-state pairs.
    */
   public Map<String,Recording> getKnownRecordings();
+  
+  /**
+   * Gets a Set of ids of all known recordings.
+   * @return Set<String> recording ids
+   */
+  public List<String> getKnownRecordingsIds();
 }

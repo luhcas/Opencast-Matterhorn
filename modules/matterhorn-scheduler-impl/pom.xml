@@ -146,7 +146,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.scheduler.*;version=${project.version} </Export-Package>
+            <Export-Package> org.opencastproject.scheduler.*;version=${project.version}</Export-Package>
             <Import-Package>
               org.opencastproject.http;version=${project.version},
               org.opencastproject.metadata.dublincore;version=${project.version},
@@ -164,9 +164,9 @@
               OSGI-INF/scheduler-service.xml,
               OSGI-INF/scheduler-service-rest.xml
             </Service-Component>
-		    <JPA-PersistenceUnits>
-		      org.opencastproject.scheduler.impl
-		    </JPA-PersistenceUnits>            
+            <JPA-PersistenceUnits>
+              org.opencastproject.scheduler.impl
+            </JPA-PersistenceUnits>            
           </instructions>
         </configuration>
       </plugin>

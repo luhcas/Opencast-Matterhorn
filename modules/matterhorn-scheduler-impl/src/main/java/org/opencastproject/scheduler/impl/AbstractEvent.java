@@ -14,7 +14,7 @@
  *
  */
 
-package org.opencastproject.scheduler.impl.jpa;
+package org.opencastproject.scheduler.impl;
 
 import java.util.Date;
 import java.util.Hashtable;
@@ -27,25 +27,28 @@ import javax.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.opencastproject.scheduler.impl.Metadata;
+import org.opencastproject.scheduler.impl.IncompleteDataException;
+
 public abstract class AbstractEvent {
   private static final Logger logger = LoggerFactory.getLogger(AbstractEvent.class);
   
-  protected Hashtable<String, String> metadataTable;
+  public Hashtable<String, String> metadataTable;
   
   protected EntityManagerFactory emf = null;
-
   
   public String generateId() {
     return UUID.randomUUID().toString();
   }
   
   
-  protected void buildMetadataTable (List<Metadata> metadata) {
+  public void buildMetadataTable (List<Metadata> metadata) {
     if (metadataTable == null) metadataTable = new Hashtable<String, String>(); // Buffer metadata in Hashtable for quick
     if (metadata == null) return;
     for (Metadata data : metadata) {
-      if (data.getKey() != null && data.getValue() != null)
+      if (data.getKey() != null && data.getValue() != null){
         metadataTable.put(data.getKey(), data.getValue()); // Overwrite with event specific data
+      }
     }
   }
   
@@ -81,6 +84,13 @@ public abstract class AbstractEvent {
 
   public void setEntityManagerFactory (EntityManagerFactory emf) {
     this.emf = emf;
-  }  
+  }
   
+  public void deleteMetadataTable() {
+    metadataTable = null;
+  }
+  
+  public abstract void addMetadata(Metadata m);
+  
+  public abstract void removeMetadata(Metadata m);
 }

@@ -10,6 +10,6 @@
     <provide interface="org.opencastproject.scheduler.endpoint.SchedulerRestService" />
   </service>
   <reference name="service-impl"
-    interface="org.opencastproject.scheduler.api.SchedulerService"
-    cardinality="1..1" policy="dynamic" bind="setService" unbind="unsetService" />     
+    interface="org.opencastproject.scheduler.impl.SchedulerServiceImpl"
+    cardinality="1..1" policy="dynamic" bind="setService" unbind="unsetService" />
 </scr:component>

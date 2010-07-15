@@ -9,7 +9,7 @@
   </service>
   <reference name="workflow-service" interface="org.opencastproject.workflow.api.WorkflowService"
     cardinality="0..1" policy="dynamic" bind="setWorkflowService" unbind="unsetWorkflowService" />
-  <reference name="scheduler-service" interface="org.opencastproject.scheduler.api.SchedulerService"
+  <reference name="scheduler-service" interface="org.opencastproject.scheduler.impl.SchedulerServiceImpl"
     cardinality="0..1" policy="dynamic" bind="setSchedulerService" unbind="unsetSchedulerService" />
   <reference name="series-service" interface="org.opencastproject.series.api.SeriesService"
     cardinality="0..1" policy="dynamic" bind="setSeriesService" unbind="unsetSeriesService" />

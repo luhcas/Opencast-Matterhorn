@@ -14,9 +14,12 @@
  *
  */
 
-package org.opencastproject.scheduler.impl.jpa;
+package org.opencastproject.scheduler.impl;
 
 import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
+import org.opencastproject.scheduler.impl.Event;
+import org.opencastproject.scheduler.impl.IncompleteDataException;
+import org.opencastproject.scheduler.impl.Metadata;
 
 import net.fortuna.ical4j.model.DateList;
 import net.fortuna.ical4j.model.DateTime;
@@ -33,6 +36,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -57,8 +62,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries( { @NamedQuery(name = "RecurringEvent.getAll", query = "SELECT e FROM RecurringEvent e") })
 @XmlRootElement(name = "recurringEvent")
 @XmlAccessorType(XmlAccessType.FIELD)
-@Entity
+@Entity(name = "RecurringEvent")
 @Table(name = "SCHED_R_EVENT")
+@Access(AccessType.FIELD)
 public class RecurringEvent extends AbstractEvent {
   private static final Logger logger = LoggerFactory.getLogger(RecurringEvent.class);
 
@@ -160,7 +166,7 @@ public class RecurringEvent extends AbstractEvent {
   }
 
   public List<Metadata> getMetadata() {
-    return metadata;
+    return this.metadata;
   }
 
   public void setMetadata(List<Metadata> metadata) {
@@ -169,12 +175,13 @@ public class RecurringEvent extends AbstractEvent {
   }
 
   public List<Event> generatedEvents() {
-    if (generatedEvents != null && generatedEvents.size() > 0)
-      return generatedEvents;
-    generatedEvents = new LinkedList<Event>();
+    if (this.generatedEvents != null && this.generatedEvents.size() > 0){
+      return this.generatedEvents;
+    }
+    this.generatedEvents = new LinkedList<Event>();
     generateDates();
 
-    for (int i = 0; i < generatedDates.size(); i++) {
+    for (int i = 0; i < this.generatedDates.size(); i++) {
       Event event = new Event();
       event.generateId();
       event.setEntityManagerFactory(emf);
@@ -187,18 +194,18 @@ public class RecurringEvent extends AbstractEvent {
       } catch (IncompleteDataException e) {
         logger.warn("Could not get default title for series");
       }
-      event.getMetadata().add(new Metadata("title", title + " " + (i + 1)));
+      event.addMetadata((Metadata)new Metadata("title", title + " " + (i + 1)));
       logger.debug("Recur event: {}", event);
-      generatedEvents.add(event);
+      this.generatedEvents.add((Event)event);
     }
-
-    return generatedEvents;
+    
+    return this.generatedEvents;
   }
 
-  protected void generateDates() {
+  public void generateDates() {
     generatedDates = new LinkedList<Date>();
     if (metadataTable == null)
-      buildMetadataTable(metadata);
+      buildMetadataTable(getMetadata());
     if (recurrence == null) {
       logger.warn("Could not generate events because of missing recurrence pattern");
       return;
@@ -237,8 +244,9 @@ public class RecurringEvent extends AbstractEvent {
 
   public List<Event> getEvents() {
     List<Event> events = generatedEvents();
-    for (Event e : events)
+    for (Event e : events){
       e.setEntityManagerFactory(emf);
+    }
     return events;
   }
 
@@ -253,7 +261,7 @@ public class RecurringEvent extends AbstractEvent {
 
   public Date getValueAsDate(String key) {
     if (metadataTable == null)
-      buildMetadataTable(metadata);
+      buildMetadataTable(getMetadata());
     try {
       return super.getValueAsDate(key);
     } catch (IncompleteDataException e) {
@@ -264,7 +272,7 @@ public class RecurringEvent extends AbstractEvent {
 
   public boolean containsKey(String key) {
     if (metadataTable == null)
-      buildMetadataTable(metadata);
+      buildMetadataTable(getMetadata());
     try {
       return super.containsKey(key);
     } catch (IncompleteDataException e) {
@@ -276,7 +284,7 @@ public class RecurringEvent extends AbstractEvent {
   public void update(RecurringEvent e) {
     // eliminate removed keys
     if (metadataTable == null)
-      buildMetadataTable(metadata);
+      buildMetadataTable(getMetadata());
     try {
       for (String key : getKeySet()) {
         if (!e.containsKey(key)) {
@@ -302,7 +310,7 @@ public class RecurringEvent extends AbstractEvent {
       }
 
       for (Event event : generatedEvents) {
-        event.metadataTable = null; // cached metadata needs to be resetted
+        event.deleteMetadataTable(); // cached metadata needs to be resetted
       }
 
     } catch (IncompleteDataException e1) {
@@ -321,7 +329,7 @@ public class RecurringEvent extends AbstractEvent {
           }
         }
       } else {
-        getMetadata().add(data);
+        this.metadata.add((Metadata)data);
       }
     }
     setRecurrence(e.getRecurrence());
@@ -354,16 +362,16 @@ public class RecurringEvent extends AbstractEvent {
     return result;
   }
 
-  protected void updateMetadata(Metadata data) {
+  public void updateMetadata(Metadata data) {
     if (containsKey(data.getKey())) {
       for (Metadata olddata : getMetadata()) {
         if (olddata.getKey().equals(data.getKey())) {
-          olddata.setValue(data.value);
+          olddata.setValue(data.getValue());
           break;
         }
       }
     } else {
-      metadata.add(data);
+      this.metadata.add((Metadata)data);
     }
     metadataTable = null;
   }
@@ -401,6 +409,14 @@ public class RecurringEvent extends AbstractEvent {
     for (Event e : generatedEvents) {
       e.setEntityManagerFactory(emf);
     }
+  }
+
+  public void addMetadata(Metadata m){
+    this.metadata.add((Metadata)m);
+  }
+  
+  public void removeMetadata(Metadata m){
+    this.metadata.remove((Metadata)m);
   }
 
 }

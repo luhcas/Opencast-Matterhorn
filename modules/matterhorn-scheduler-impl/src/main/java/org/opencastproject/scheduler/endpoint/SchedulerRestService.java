@@ -15,15 +15,13 @@
  */
 package org.opencastproject.scheduler.endpoint;
 
-import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.api.SchedulerFilter;
-import org.opencastproject.scheduler.api.SchedulerService;
+import org.opencastproject.scheduler.impl.Event;
+import org.opencastproject.scheduler.impl.IncompleteDataException;
+import org.opencastproject.scheduler.impl.Metadata;
+import org.opencastproject.scheduler.impl.RecurringEvent;
 import org.opencastproject.scheduler.impl.SchedulerFilterImpl;
-import org.opencastproject.scheduler.impl.jpa.Event;
-import org.opencastproject.scheduler.impl.jpa.IncompleteDataException;
-import org.opencastproject.scheduler.impl.jpa.Metadata;
-import org.opencastproject.scheduler.impl.jpa.RecurringEvent;
-import org.opencastproject.scheduler.impl.jpa.SchedulerServiceImplJPA;
+import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -67,7 +65,7 @@ import javax.xml.bind.Unmarshaller;
 @Path("/")
 public class SchedulerRestService {
   private static final Logger logger = LoggerFactory.getLogger(SchedulerRestService.class);
-  private SchedulerServiceImplJPA service;
+  private SchedulerServiceImpl service;
   
   protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
   
@@ -75,15 +73,15 @@ public class SchedulerRestService {
    * Method to set the service this REST endpoint uses
    * @param service
    */
-  public void setService(SchedulerService service) {
-    this.service = (SchedulerServiceImplJPA) service;
+  public void setService(SchedulerServiceImpl service) {
+    this.service = service;
   }
   
   /**
    * Method to unset the service this REST endpoint uses
    * @param service
    */
-  public void unsetService(SchedulerService service) {
+  public void unsetService(SchedulerServiceImpl service) {
     this.service = null;
   }
   
@@ -109,21 +107,6 @@ public class SchedulerRestService {
   /**
    * Get a specific scheduled event.
    * @param eventID The unique ID of the event.
-   * @return SchedulerEvent XML with the data of the event
-   */
-  @GET
-  @Produces(MediaType.TEXT_XML)
-  @Path("getEvent/{eventID}")
-  public Response getEvent(@PathParam("eventID") String eventID) {
-    logger.debug("Event Lookup: {}", eventID);
-    SchedulerEvent event = service.getEvent(eventID);
-    if (event == null) return Response.status(Status.BAD_REQUEST).build();
-    return Response.ok(new SchedulerEventJaxbImpl(event)).build();
-  }
-  
-  /**
-   * Get a specific scheduled event.
-   * @param eventID The unique ID of the event.
    * @return event XML with the data of the event
    */
   @GET
@@ -132,7 +115,7 @@ public class SchedulerRestService {
   public Response getSingleEvent(@PathParam("eventID") String eventID) {
     logger.debug("Single event Lookup: {}", eventID);
     try {
-      Event event = service.getEventJPA(eventID);
+      Event event = service.getEvent(eventID);
       if (event == null) return Response.status(Status.BAD_REQUEST).build();
       return Response.ok(event).build();
     } catch (Exception e) {
@@ -268,28 +251,6 @@ public class SchedulerRestService {
     return Response.ok(result).build();
   }    
   
-  /**
-   * Stores a new event in the database. As a result the event will be returned, but some fields especially the event-id may have been updated. Within the metadata section it is possible to add any additional metadata as a key-value pair. The information will be stored even if the key is yet unknown.
-   * @param e The SchedulerEvent that should be stored.
-   * @return The same event with some updated fields.
-   */
-  @POST
-  @Produces(MediaType.TEXT_XML)
-  @Path("addEvent")
-  public Response addEvent (@FormParam("event") SchedulerEventJaxbImpl e) {
-    logger.debug("addEvent(e): {}", e);
-    if (e == null) {
-      logger.error("Event that should be added is null");
-      return Response.status(Status.BAD_REQUEST).build();
-    }
-    SchedulerEvent i = e.getEvent();
-    if(i == null){
-      logger.info("Event was null.");
-    }
-    SchedulerEvent j = service.addEvent(i);
-    logger.info("Adding event {} to scheduler",j.getID());
-    return Response.ok(new SchedulerEventJaxbImpl(j)).build();
-  }
 
   /**
    * Stores a new event in the database. As a result the event will be returned, but some fields especially the event-id may have been updated. Within the metadata section it is possible to add any additional metadata as a key-value pair. The information will be stored even if the key is yet unknown.
@@ -335,22 +296,7 @@ public class SchedulerRestService {
   public Response deleteEvent (@PathParam("eventID") String eventID) {
     return Response.ok(service.removeEvent(eventID)).build();
   }  
-  
-  /**
-   * Updates an existing event in the database. The event-id has to be stored in the database already. Will return true, if the event was found and could be updated.
-   * @param e The SchedulerEvent that should be updated 
-   * @return true if the event was found and could be updated.
-   */
-  @POST
-  @Produces(MediaType.TEXT_PLAIN)
-  @Path("updateEvent")
-  public Response updateEvent (@FormParam("event") SchedulerEventJaxbImpl e) {
-    if(service.updateEvent(e.getEvent())) {
-      return Response.ok(true).build();
-    } else {
-      return Response.serverError().build();
-    }
-  }
+
   
   /**
    * Updates an existing event in the database. The event-id has to be stored in the database already. Will return true, if the event was found and could be updated.
@@ -367,44 +313,6 @@ public class SchedulerRestService {
       return Response.serverError().build();
     }
   }  
-  
-  /**
-   * returns scheduled events, that pass the filter. filter: an xml definition of the filter. Tags that are not included will noct be filtered. Possible values for order by are title,creator,series,time-asc,time-desc,contributor,channel,location,device
-   * @param filter exact id to search for pattern to search for pattern to search for A short description of the content of the lecture begin of the period of valid events end of the period of valid events pattern to search for ID of the series which will be filtered ID of the channel that will be filtered pattern to search for pattern to search for pattern to search for title|creator|series|time-asc|time-desc|contributor|channel|location|device">
-   * @return List of SchedulerEvents as XML 
-   */
-  @POST
-  @Produces(MediaType.TEXT_XML)
-  @Path("getEvents")
-  public SchedulerEventJaxbImpl [] getEventsOld (@FormParam("filter") String filter) {
-    if (filter == null) {
-      logger.error("Filter is null");
-      return new SchedulerEventJaxbImpl [0];
-    }
-    logger.debug("Filter: {} ", filter);
-    SchedulerFilterJaxbImpl filterJaxB = null;
-    try {
-      JAXBContext jaxbContext = JAXBContext.newInstance(SchedulerFilterJaxbImpl.class);
-      logger.debug("context created");
-      Unmarshaller m = jaxbContext.createUnmarshaller();
-      logger.debug("unmarshaler ready");
-      filterJaxB =  (SchedulerFilterJaxbImpl) m.unmarshal(new StringReader(filter));      
-      logger.debug("unmarshaler read");      
-    } catch (JAXBException e) {
-      logger.error(e.getMessage());
-      e.printStackTrace();
-    }      
-    if (filterJaxB == null) {
-      logger.error("FilterJaxB is null");
-      return new SchedulerEventJaxbImpl [0];
-    }
-    logger.info("Filter events with "+filterJaxB.getFilter());
-    SchedulerEvent [] events = service.getEvents(filterJaxB.getFilter());
-    if (events == null) return new SchedulerEventJaxbImpl [0];
-    SchedulerEventJaxbImpl [] jaxbEvents = new SchedulerEventJaxbImpl [events.length];
-    for (int i = 0; i < events.length; i++) jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);
-    return jaxbEvents;
-  }
   
  /**
    * returns scheduled events, that pass the filter. filter: an xml definition of the filter. Tags that are not included will noct be filtered. Possible values for order by are title,creator,series,time-asc,time-desc,contributor,channel,location,device
@@ -437,29 +345,10 @@ public class SchedulerRestService {
       return Response.status(Status.BAD_REQUEST).build();
     }
     logger.info("Filter events with "+filterJaxB.getFilter());
-    List<Event> events = Arrays.asList(service.getEventsJPA(filterJaxB.getFilter()));
+    List<Event> events = Arrays.asList(service.getEvents(filterJaxB.getFilter()));
     if (events == null) return Response.status(Status.BAD_REQUEST).build();
     return Response.ok((new GenericEntity<List<Event>> (events){})).build();
-  }  
-  /**
-   * Looks for events that are conflicting with the given event, because they use the same recorder at the same time.
-   * @param e The event that should be checked for conflicts
-   * @return An XML with the list of conflicting events
-   */
-  @POST
-  @Produces(MediaType.TEXT_XML)
-  @Path("findConflictingEvents")
-  public SchedulerEventJaxbImpl [] findConflictingEvents (@FormParam("event") SchedulerEventJaxbImpl e) {
-    if (e == null) {
-      logger.error("event is null");
-      return new SchedulerEventJaxbImpl [0];
-    } 
-    SchedulerEvent [] events = service.findConflictingEvents(e.getEvent());
-    if (events == null) return new SchedulerEventJaxbImpl [0];
-    SchedulerEventJaxbImpl [] jaxbEvents = new SchedulerEventJaxbImpl [events.length];
-    for (int i = 0; i < events.length; i++) jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);
-    return jaxbEvents;
-  }  
+  }
   
   /**
    * Looks for events that are conflicting with the given event, because they use the same recorder at the same time.
@@ -505,24 +394,7 @@ public class SchedulerRestService {
     }
     
     return Response.ok((new GenericEntity<List<Event>> (events){})).build();
-  }  
-  
-  /**
-   * Lists all events in the database, without any filter
-   * @return XML with all events 
-   */
-  @GET
-  @Produces(MediaType.TEXT_XML)
-  @Path("getEvents")
-  public SchedulerEventJaxbImpl [] getEvents () {
-    SchedulerEvent [] events = service.getEvents(null);
-    SchedulerEventJaxbImpl [] jaxbEvents = new SchedulerEventJaxbImpl [events.length];
-    for (int i = 0; i < events.length; i++) { 
-      jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);
-      logger.debug("JaxB version of event {} created", events[i]);
-    }
-    return jaxbEvents;
-  }  
+  }
 
   /**
    * Lists all events in the database, without any filter
@@ -534,7 +406,7 @@ public class SchedulerRestService {
   public Response allEvents () {
     List<Event> events = null;
     try {
-      events = Arrays.asList(service.getEventsJPA(null));
+      events = Arrays.asList(service.getEvents(null));
     } catch (Exception e) {
       return Response.status(Status.SERVICE_UNAVAILABLE).build();
     }
@@ -558,20 +430,6 @@ public class SchedulerRestService {
     }
     if (events == null) return Response.status(Status.BAD_REQUEST).build();
     return Response.ok((new GenericEntity<List<RecurringEvent>> (events){})).build();
-  }     
-  
-  /**
-   * Lists all future events in the database, without any filter
-   * @return XML with all events 
-   */
-  @GET
-  @Produces(MediaType.TEXT_XML)
-  @Path("getUpcomingEvents")
-  public SchedulerEventJaxbImpl [] getUpcomingEventsOld () {
-    SchedulerEvent [] events = service.getUpcomingEvents();
-    SchedulerEventJaxbImpl [] jaxbEvents = new SchedulerEventJaxbImpl [events.length];
-    for (int i = 0; i < events.length; i++) jaxbEvents [i] = new SchedulerEventJaxbImpl(events[i]);
-    return jaxbEvents;
   }
   
   /**
@@ -585,7 +443,7 @@ public class SchedulerRestService {
     SchedulerFilter filter = new SchedulerFilterImpl();
     filter.setStart(new Date(System.currentTimeMillis()));
      
-    List<Event> events = Arrays.asList(service.getEventsJPA(filter));
+    List<Event> events = Arrays.asList(service.getEvents(filter));
     if (events == null) return Response.status(Status.BAD_REQUEST).build();
     return Response.ok((new GenericEntity<List<Event>> (events){})).build();
   }    

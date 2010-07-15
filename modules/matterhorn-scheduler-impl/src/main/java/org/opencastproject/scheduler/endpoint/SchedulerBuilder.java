@@ -16,9 +16,9 @@
 package org.opencastproject.scheduler.endpoint;
 
 import org.apache.commons.io.IOUtils;
-import org.opencastproject.scheduler.impl.jpa.Event;
-import org.opencastproject.scheduler.impl.jpa.Metadata;
-import org.opencastproject.scheduler.impl.jpa.RecurringEvent;
+import org.opencastproject.scheduler.impl.Event;
+import org.opencastproject.scheduler.impl.Metadata;
+import org.opencastproject.scheduler.impl.RecurringEvent;
 
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -35,15 +35,13 @@ public class SchedulerBuilder {
   private static SchedulerBuilder instance = null;
   
   protected JAXBContext jaxbContext = null;
-  protected JAXBContext jaxbContextJPA = null;
   
   /**
    *  Set up the JAXBContext.
    *
    */
   private SchedulerBuilder() throws JAXBException {
-    jaxbContext = JAXBContext.newInstance("org.opencastproject.scheduler.endpoint", SchedulerBuilder.class.getClassLoader());
-    jaxbContextJPA = JAXBContext.newInstance("org.opencastproject.scheduler.impl.jpa", SchedulerBuilder.class.getClassLoader());
+    jaxbContext = JAXBContext.newInstance("org.opencastproject.scheduler.impl", SchedulerBuilder.class.getClassLoader());
   }
   
   /**
@@ -69,7 +67,7 @@ public class SchedulerBuilder {
    * @param   in - the input stream
    * @return  a SchedulerEventJaxImpl
    * @throws   And exception if creation of the event fails.
-   */
+   *
   public SchedulerEventJaxbImpl parseSchedulerEventJaxbImpl(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
@@ -82,10 +80,10 @@ public class SchedulerBuilder {
    * @param   in - a string containing event representation
    * @return  a SchedulerEventJaxbImpl
    * @throws  Exception if creation fails
-   */
+   *
   public SchedulerEventJaxbImpl parseSchedulerEventJaxbImpl(String in) throws Exception {
     return parseSchedulerEventJaxbImpl(IOUtils.toInputStream(in, "UTF8"));
-  }
+  }*/
   
   /**
    * todo: Comment me!
@@ -108,7 +106,7 @@ public class SchedulerBuilder {
   }
   
   public Event parseEvent(InputStream in) throws Exception {
-    Unmarshaller unmarshaller = jaxbContextJPA.createUnmarshaller();
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
                                   Event.class).getValue();
   }
@@ -118,20 +116,20 @@ public class SchedulerBuilder {
   }
   
   public RecurringEvent parseRecurringEvent(InputStream in) throws Exception {
-    Unmarshaller unmarshaller = jaxbContextJPA.createUnmarshaller();
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
                                   RecurringEvent.class).getValue();
   } 
   
   public String marshallRecurringEvent (RecurringEvent e) throws Exception {
-    Marshaller marshaller = jaxbContextJPA.createMarshaller();
+    Marshaller marshaller = jaxbContext.createMarshaller();
     StringWriter writer = new StringWriter();
     marshaller.marshal(e, writer);
     return writer.toString();
   }
   
   public String marshallEvent (Event e) throws Exception {
-    Marshaller marshaller = jaxbContextJPA.createMarshaller();
+    Marshaller marshaller = jaxbContext.createMarshaller();
     StringWriter writer = new StringWriter();
     marshaller.marshal(e, writer);
     return writer.toString();
@@ -142,7 +140,7 @@ public class SchedulerBuilder {
   }
   
   public Metadata parseMetadata(InputStream in) throws Exception {
-    Unmarshaller unmarshaller = jaxbContextJPA.createUnmarshaller();
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
                                   Metadata.class).getValue();
   }   

@@ -19,6 +19,7 @@ import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
+//import org.opencastproject.capture.admin.api.RecordingStateUpdate;
 
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -29,8 +30,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Map.Entry;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -341,6 +344,14 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    */
   public Map<String,Recording> getKnownRecordings() {
     return recordings;
+  }
+  
+  public List<String> getKnownRecordingsIds() {
+    LinkedList<String> ids = new LinkedList<String>();
+    for (Entry<String, Recording> e : recordings.entrySet()) {
+      ids.add(e.getValue().getID());
+    }
+    return ids;
   }
 
   @SuppressWarnings("unchecked")

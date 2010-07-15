@@ -13,11 +13,12 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.scheduler.impl.jpa;
+package org.opencastproject.scheduler.impl;
 
-import org.opencastproject.scheduler.api.SchedulerEvent;
 import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
-import org.opencastproject.scheduler.impl.SchedulerEventImpl;
+import org.opencastproject.scheduler.impl.IncompleteDataException;
+import org.opencastproject.scheduler.impl.RecurringEvent;
+import org.opencastproject.scheduler.impl.Metadata;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +28,9 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.StringTokenizer;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -53,14 +55,15 @@ import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * An Event has a unique ID, a relation to the recurring event from which it was created and a set of metadata. Even the
- * start- and end-time is stored in the set of metadata, with the keys "time.start" and "time.end" as long value
+ * start- and end-time is stored in the set of metadata, with the keys "timeStart" and "timeEnd" as long value
  * converted to string. Resources and Attendees are store in the metadata too, as
  */
 
 @NamedQueries( { @NamedQuery(name = "Event.getAll", query = "SELECT e FROM Event e") })
 @XmlRootElement(name = "event")
 @XmlAccessorType(XmlAccessType.FIELD)
-@Entity
+@Entity(name = "Event")
+@Access(AccessType.FIELD)
 @Table(name = "SCHED_EVENT")
 public class Event extends AbstractEvent {
 
@@ -111,16 +114,16 @@ public class Event extends AbstractEvent {
     updateMetadata(new Metadata("recurrenceId", recurringEventId));
   }
 
-  protected void updateMetadata(Metadata data) {
+  public void updateMetadata(Metadata data) {
     if (containsKey(data.getKey())) {
       for (Metadata olddata : getCompleteMetadata()) {
         if (olddata.getKey().equals(data.getKey())) {
-          olddata.setValue(data.value);
+          olddata.setValue(data.getValue());
           break;
         }
       }
     } else {
-      metadata.add(data);
+      metadata.add((Metadata)data);
     }
     metadataTable = null;
   }
@@ -178,15 +181,15 @@ public class Event extends AbstractEvent {
       for (Metadata data : getRecurringEvent().getMetadata()) {
         m.put(data.getKey(), data);
       }
-      m.put("timeStart", new Metadata("timeStart", "" + getStartdate().getTime()));
-      m.put("timeEnd", new Metadata("timeEnd", "" + getEnddate().getTime()));
+      m.put("timeStart", new Metadata("timeStart", getValue("timeStart")));
+      m.put("timeEnd", new Metadata("timeEnd", getValue("timeEnd")));
     }
     m.put("timeDuration", new Metadata("timeDuration", "" + (getEnddate().getTime() - getStartdate().getTime())));
     return new LinkedList<Metadata>(m.values());
   }
 
   public List<Metadata> getMetadata() {
-    return metadata;
+    return this.metadata;
   }
 
   public void setMetadata(List<Metadata> metadata) {
@@ -194,7 +197,7 @@ public class Event extends AbstractEvent {
     this.metadata = metadata;
   }
 
-  protected void buildMetadataTable() {
+  public void buildMetadataTable() {
     RecurringEvent rEvent = getRecurringEvent(); // if recurring event is not yet set, this method has the sideeffect
                                                  // that the metadata table is nulled
     if (metadataTable == null)
@@ -205,7 +208,7 @@ public class Event extends AbstractEvent {
           metadataTable.put(data.getKey(), data.getValue()); // Inherit values
       }
     }
-    super.buildMetadataTable(metadata);
+    super.buildMetadataTable(getMetadata());
   }
 
   public String getValue(String key) {
@@ -228,29 +231,6 @@ public class Event extends AbstractEvent {
       logger.warn("MetadataTable could not be build");
       return null;
     }
-  }
-
-  public SchedulerEvent toSchedulerEvent() {
-    SchedulerEventImpl e = new SchedulerEventImpl();
-    if (metadataTable == null)
-      buildMetadataTable();
-    e.setMetadata(metadataTable);
-    e.setID(eventId);
-    e.setStartdate(getStartdate());
-    e.setEnddate(getEnddate());
-    String attendeeString = metadataTable.get("attendees");
-    if (attendeeString != null) {
-      StringTokenizer attendees = new StringTokenizer(attendeeString, ",");
-      while (attendees.hasMoreTokens())
-        e.addAttendee(attendees.nextToken());
-    }
-    String resourcesString = metadataTable.get("resources");
-    if (resourcesString != null) {
-      StringTokenizer resources = new StringTokenizer(resourcesString, ",");
-      while (resources.hasMoreTokens())
-        e.addResource(resources.nextToken());
-    }
-    return e;
   }
 
   public Date getValueAsDate(String key) {
@@ -290,7 +270,7 @@ public class Event extends AbstractEvent {
     // eliminate removed keys
     for (Metadata m : getMetadata()) {
       if (e.findMetadata(m.getKey()) == null) {
-        getMetadata().remove(m);
+        removeMetadata(m);
       }
     }
     logger.debug("Updating stored event with new metadata.");
@@ -300,7 +280,7 @@ public class Event extends AbstractEvent {
       if (found != null) {
         found.setValue(data.getValue());
       } else {
-        getMetadata().add(data);
+        addMetadata(data);
       }
     }
     // metadata = e.getMetadata();
@@ -363,8 +343,11 @@ public class Event extends AbstractEvent {
     } finally {
       em.close();
     }
-    if (e != null)
+    if (e != null){
       e.setEntityManagerFactory(emf);
+    }else{
+      logger.warn("No event found for {}", eventId);
+    }
     return e;
   }
 
@@ -395,5 +378,13 @@ public class Event extends AbstractEvent {
   public int hashCode() {
     return this.getEventId().hashCode();
   }
-
+  
+  public void addMetadata(Metadata m){
+    this.metadata.add(m);
+  }
+  
+  public void removeMetadata(Metadata m){
+    this.metadata.remove(m);
+  }
+  
 }

@@ -13,19 +13,31 @@
  *  permissions and limitations under the License.
  *
  */
+package org.opencastproject.scheduler.impl;
 
-package org.opencastproject.scheduler.impl.jpa;
+import java.util.ArrayList;
+import java.util.List;
 
-public class IncompleteDataException extends Exception {
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-  private static final long serialVersionUID = 1L;
-  
-  public IncompleteDataException () {
-    super();
+import org.opencastproject.scheduler.impl.Metadata;
+
+public class ListAdapter extends XmlAdapter<Metadata[], List<Metadata>> {
+
+  public ListAdapter () {
+    
+  }
+
+  @Override
+  public Metadata[] marshal(List<Metadata> arg0) throws Exception {
+    return arg0.toArray(new Metadata [0]);
+  }
+
+  @Override
+  public List<Metadata> unmarshal(Metadata[] arg0) throws Exception {
+    ArrayList<Metadata> list = new ArrayList<Metadata>(arg0.length);
+    for (Metadata data : arg0) list.add(data);
+    return list;
   }
   
-  public IncompleteDataException (String message) {
-    super (message);
-  }
-
 }

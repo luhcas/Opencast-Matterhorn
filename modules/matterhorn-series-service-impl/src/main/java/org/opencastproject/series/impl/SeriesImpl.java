@@ -106,7 +106,7 @@ public class SeriesImpl implements Series {
     }
   }
   
-  private String getFromMetadata (String key) {
+  public String getFromMetadata (String key) {
     for (SeriesMetadata m: getMetadata()) 
       if (m.getKey().equals(key)) return m.getValue();
     return null;
