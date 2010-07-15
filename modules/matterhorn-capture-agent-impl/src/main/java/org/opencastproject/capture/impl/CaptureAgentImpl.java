@@ -359,9 +359,18 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
        * {@inheritDoc}
        * @see org.gstreamer.Bus.ERROR#errorMessage(org.gstreamer.GstObject, int, java.lang.String)
        */
-      public void errorMessage(GstObject arg0, int arg1, String arg2) {
-        logger.error(arg0.getName() + ": " + arg2);
+      public void errorMessage(GstObject obj, int retCode, String msg) {
+        logger.error("{}: {}", obj.getName(), msg);
         stopCapture(false);
+      }
+    });
+    bus.connect(new Bus.WARNING() {
+      /**
+       * {@inheritDoc}
+       * @see org.gstreamer.Bus.WARNING#warningMessage(org.gstreamer.GstObject, int, java.lang.String)
+       */
+      public void warningMessage(GstObject obj, int retCode, String msg) {
+        logger.warn("{}: {}", obj.getName(), msg);
       }
     });
 
