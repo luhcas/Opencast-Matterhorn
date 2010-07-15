@@ -98,6 +98,8 @@ Opencast.segments = ( function() {
 
     // set the slide length
     setSlideLength(segmentTimes.length);
+    
+    $('#oc_video-player-controls').css('display', 'block');
 
     // Hide Slide Tab, if there are no slides
     if(segmentTimes.length === 0) {
@@ -111,7 +113,7 @@ Opencast.segments = ( function() {
     var controlswith = 0;
     var playerWidth = $('#oc_video-player-controls').width();
     
-    
+  
     
     if (Opencast.segments.getSlideLength() === 0)
     {
@@ -125,6 +127,10 @@ Opencast.segments = ( function() {
         margin = ((margin - controlswith) / 2 ) - 8;
         $('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
     }
+    
+    // set the controls visible
+    $('#oc_video-player-controls').css('visibility', 'visible');
+    
     
  // player size
     if( playerWidth < 460 && playerWidth >= 380)

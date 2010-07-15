@@ -198,9 +198,8 @@ Opencast.Watch = (function ()
 
           Opencast.segments.initialize();
 
-          // set the controls visible
-          $('#oc_video-player-controls').css('visibility', 'visible');
           
+         
          
 
 
