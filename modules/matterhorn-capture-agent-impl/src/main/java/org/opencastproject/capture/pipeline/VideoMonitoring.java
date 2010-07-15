@@ -160,6 +160,8 @@ public class VideoMonitoring {
                 graphic.setFont(new Font("Helvetica", Font.BOLD, 16));
                 graphic.drawString(text, 0, 20);
                 graphic.finalize();
+                graphic.dispose();
+             
               }
               if (!ImageIO.write(br, "jpeg", new File(location, device + ".jpg")))
                 logger.error("Unable to save confidence image for device: {}", device);
@@ -167,6 +169,7 @@ public class VideoMonitoring {
               logger.error(e.getMessage());
             }
           }
+          buffer.dispose();
           buffer = null;
         }
       });
