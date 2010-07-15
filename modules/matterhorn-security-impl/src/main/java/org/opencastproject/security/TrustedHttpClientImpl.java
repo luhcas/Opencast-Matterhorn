@@ -37,14 +37,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
 /**
  * An http client that executes secure (though not necessarily encrypted) http requests.
  */
-public class TrustedHttpClientImpl implements TrustedHttpClient {
+public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionMXBean {
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(TrustedHttpClientImpl.class);
   
@@ -68,6 +72,17 @@ public class TrustedHttpClientImpl implements TrustedHttpClient {
     user = cc.getBundleContext().getProperty(DIGEST_AUTH_USER_KEY);
     pass = cc.getBundleContext().getProperty(DIGEST_AUTH_PASS_KEY);
     if(user == null || pass == null) throw new IllegalStateException("trusted communication is not properly configured");
+    
+    // register with jmx
+    try {
+      MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+      ObjectName name;
+      name = new ObjectName("org.opencastproject.security.api.TrustedHttpClient:type=HttpConnections");
+      Object mbean = this;
+      mbs.registerMBean(mbean, name);
+    } catch (Exception e) {
+      logger.warn("Unable to register {} as an mbean: {}", this, e);
+    }
   }
   
   public void deactivate() {
@@ -161,7 +176,7 @@ public class TrustedHttpClientImpl implements TrustedHttpClient {
     if(response == null) {
       logger.debug("Can not close a null response");
     } else {
-      HttpClient httpClient = responseMap.get(response);
+      HttpClient httpClient = responseMap.remove(response);
       if(httpClient != null) {
         httpClient.getConnectionManager().shutdown();
       }
@@ -213,5 +228,14 @@ public class TrustedHttpClientImpl implements TrustedHttpClient {
       }
     }
     return new String[] {realm, nonce};
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.security.HttpConnectionMXBean#getOpenConnections()
+   */
+  @Override
+  public int getOpenConnections() {
+    return responseMap.size();
   }
 }
