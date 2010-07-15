@@ -186,6 +186,12 @@ public interface AdminRecording {
 
   String getHoldActionPanelURL();
 
+  /** The URL to the zipped mediapackage for this recording, if it exists */
+  String getZipUrl();
+
+  /** Sets the URL tot he zipped mediapackage */
+  void setZipUrl(String url);
+  
   // indicates from which service this item originates
   public static enum ItemType {UNKNOWN, SCHEDULER_EVENT, CAPTUREAGENT_JOB, WORKFLOW};
 
@@ -193,4 +199,11 @@ public interface AdminRecording {
   
   ItemType getItemType();
   
+  String[] getErrorMessages();
+  
+  void setErrorMessages(String[] errorMessages);
+
+  String getFailedOperation();
+  
+  void setFailedOperation(String failedOperation);
 }

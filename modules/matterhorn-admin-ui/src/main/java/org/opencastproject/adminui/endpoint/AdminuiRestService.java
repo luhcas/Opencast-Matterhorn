@@ -27,9 +27,11 @@ import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.impl.Event;
 import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
-import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.api.SeriesService;
@@ -235,11 +237,23 @@ public class AdminuiRestService {
           item.setStartTime("0");
           item.setEndTime("0");
         }
+        // if there is a mediapackage zip, set it here
+        MediaPackageElement[] zipArchives = mediapackage.getElementsByFlavor(MediaPackageElementFlavor.parseFlavor("archive/zip"));
+        if(zipArchives.length > 0) {
+          item.setZipUrl(zipArchives[0].getURI().toString());
+        }
+        item.setErrorMessages(workflows[i].getErrorMessages());
         item.setCaptureAgent(null); //FIXME get capture agent from where...?
         // TODO get distribution status #openquestion is there a way to find out if a workflowOperation does distribution?
         WorkflowOperationInstance currentOperation = workflows[i].getCurrentOperation();
         if (currentOperation == null) {
           List<WorkflowOperationInstance> operationsList = workflows[i].getOperations();
+          // Loop through the operations to find the last failed operation, and the current operation
+          for(WorkflowOperationInstance op : operationsList) {
+            if(op.getState().equals(WorkflowOperationInstance.OperationState.FAILED)) {
+              item.setFailedOperation(op.getDescription());
+            }
+          }
           currentOperation = operationsList.get(operationsList.size() - 1);
         }
         if (currentOperation != null) {               // there always should be operation, just to make sure

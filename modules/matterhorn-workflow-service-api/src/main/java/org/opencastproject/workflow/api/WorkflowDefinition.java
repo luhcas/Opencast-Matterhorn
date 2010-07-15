@@ -25,6 +25,12 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlJavaTypeAdapter(WorkflowDefinitionImpl.Adapter.class)
 public interface WorkflowDefinition {
   /**
+   * The variable in a workflow definition that is to be replaced by the reason for an operation's failure.
+   */
+  final String FAILURE_KEY = "failure.message";
+  
+
+  /**
    * The short title of this workflow definition
    */
   String getId();

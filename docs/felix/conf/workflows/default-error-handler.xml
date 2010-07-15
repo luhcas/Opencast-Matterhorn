@@ -2,9 +2,14 @@
   <id>error</id>
   <description>Notifies the logs that an error occurred</description>
   <operations>
+    <!-- Archive the mediapackage -->
     <operation
-      id="log"
-      description="Processing Unsuccessful"/>
-    <!-- Add operations to notify users -->
+      id="archive"
+      description="Cleaning up after failure">
+      <configurations>
+        <configuration key="archive-collection">failed.archive</configuration>
+        <configuration key="preserve-flavors">dublincore/episode,dublincore/series</configuration>
+      </configurations>
+    </operation>
   </operations>
 </definition>

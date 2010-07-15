@@ -399,7 +399,7 @@
       id="archive"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Archiving">
+      description="Cleaning up">
       <configurations>
         <configuration key="archive-collection">2010.summer.archive</configuration>
         <configuration key="preserve-flavors">dublincore/episode,dublincore/series</configuration>

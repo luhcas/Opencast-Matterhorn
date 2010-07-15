@@ -551,6 +551,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   }
 
   public void handleOperationException(WorkflowInstance workflow, WorkflowOperationException e) {
+    // Add the exception's localized message to the workflow instance
+    workflow.addErrorMessage(e.getLocalizedMessage());
+    
     WorkflowOperationInstance currentOperation = workflow.getCurrentOperation();
     if (currentOperation.isFailWorkflowOnException()) {
       String errorDefId = currentOperation.getExceptionHandlingWorkflow();

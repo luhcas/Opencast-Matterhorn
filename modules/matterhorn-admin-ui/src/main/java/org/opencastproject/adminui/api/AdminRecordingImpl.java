@@ -15,11 +15,12 @@
  */
 package org.opencastproject.adminui.api;
 
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
@@ -78,6 +79,16 @@ public class AdminRecordingImpl implements AdminRecording {
   @XmlElement(name="itemType")
   private ItemType type = ItemType.UNKNOWN;
 
+  @XmlElement(name="error")
+  @XmlElementWrapper(name="errors")
+  protected String[] errorMessages;
+
+  @XmlElement(name="failedOperation")
+  protected String failedOperation;
+
+  @XmlElement(name="zip")
+  private String zipUrl;
+  
   public AdminRecordingImpl() {}
 
   @Override
@@ -223,8 +234,32 @@ public class AdminRecordingImpl implements AdminRecording {
     this.distribution_status = status;
   }
 
+  public String getZipUrl() {
+    return zipUrl;
+  }
+
+  public void setZipUrl(String zipUrl) {
+    this.zipUrl = zipUrl;
+  }
+
+  public String[] getErrorMessages() {
+    return errorMessages;
+  }
+
+  public void setErrorMessages(String[] errorMessages) {
+    this.errorMessages = errorMessages;
+  }
+
+  public String getFailedOperation() {
+    return failedOperation;
+  }
+
+  public void setFailedOperation(String failedOperation) {
+    this.failedOperation = failedOperation;
+  }
+
   public String toString() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder sb = new StringBuilder();
     sb.append("ID: " + this.getId() + "\n");
     sb.append("Presenter: " + this.getPresenter() + "\n");
     sb.append("Series ID: " + this.getSeriesId() + "\n");
@@ -233,7 +268,7 @@ public class AdminRecordingImpl implements AdminRecording {
     sb.append("Time: " + this.getStartTime() + "\n");
     sb.append("Proc state: " + this.getProcessingStatus() + "\n");
     sb.append("Dist state: " + this.getDistributionStatus() + "\n");
-
+    sb.append("Zip: " + this.getZipUrl() + "\n");
     return sb.toString();
   }
 }

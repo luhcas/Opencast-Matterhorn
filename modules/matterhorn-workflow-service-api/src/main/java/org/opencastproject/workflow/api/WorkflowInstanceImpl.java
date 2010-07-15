@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -97,6 +98,10 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   @XmlElementWrapper(name="configurations")
   protected Set<WorkflowConfiguration> configurations;
 
+  @XmlElement(name="error")
+  @XmlElementWrapper(name="errors")
+  protected String[] errorMessages = new String[0];
+  
   protected WorkflowOperationInstance currentOperation = null;
 
   /**
@@ -402,5 +407,30 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    */
   public void setTemplate(String template) {
     this.template = template;
+  }
+
+  /**
+   * @return the errorMessages
+   */
+  public String[] getErrorMessages() {
+    return errorMessages;
+  }
+
+  /**
+   * @param errorMessages the errorMessages to set
+   */
+  public void setErrorMessages(String[] errorMessages) {
+    this.errorMessages = errorMessages;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowInstance#addErrorMessage(java.lang.String)
+   */
+  @Override
+  public void addErrorMessage(String localizedMessage) {
+    String[] errors = Arrays.copyOf(this.errorMessages, this.errorMessages.length + 1);
+    errors[errors.length-1] = localizedMessage;
+    this.errorMessages = errors;
   }
 }

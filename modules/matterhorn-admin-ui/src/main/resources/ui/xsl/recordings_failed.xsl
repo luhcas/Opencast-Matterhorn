@@ -53,7 +53,23 @@
         <xsl:value-of select="captureAgent" />
       </td> -->
       <td class="processingStatus">
-        <xsl:value-of select="processingStatus" />
+        <xsl:if test="errors!=''">
+          <a>
+            <xsl:attribute name="onclick">
+              <xsl:text>$('#</xsl:text>
+              <xsl:value-of select="id" />
+              <xsl:text>_error').toggleClass('hidden');</xsl:text>
+            </xsl:attribute>
+            <xsl:text>Error: </xsl:text><xsl:value-of select="failedOperation" />
+          </a>
+          <div>
+          <xsl:attribute name="class">hidden</xsl:attribute>
+          <xsl:attribute name="id"><xsl:value-of select="id" /><xsl:text>_error</xsl:text></xsl:attribute>
+            <xsl:for-each select="errors">
+              <br/><xsl:value-of select="error" />
+            </xsl:for-each>
+          </div>
+        </xsl:if>
       </td>
       <td class="td-Action">
         <!-- a>
@@ -76,6 +92,9 @@
             </a>
           </xsl:when>
           <xsl:when test="itemType='WORKFLOW'">
+            <xsl:if test="zip!=''">
+              <a><xsl:attribute name="href"><xsl:value-of select="zip" /></xsl:attribute>Download</a><br/>
+            </xsl:if>
             <a>
               <xsl:attribute name="onclick">
                 <xsl:text>Recordings.removeRecording('</xsl:text>

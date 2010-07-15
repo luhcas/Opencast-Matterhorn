@@ -98,7 +98,15 @@ public interface WorkflowInstance extends Configurable {
   boolean hasNext();
   
   /**
-   * @param mp
+   * @param mp the mediapackage
    */
   void setMediaPackage(MediaPackage mp);
+  
+  /** Gets the error messages describing what went wrong, if anything, with this mediapackage */
+  String[] getErrorMessages();
+
+  /**
+   * @param localizedMessage
+   */
+  void addErrorMessage(String localizedMessage);
 }
