@@ -9,13 +9,13 @@
     <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css">
     <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css">
     <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css">
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-theme-coal.css">
     <link rel="stylesheet" type="text/css" href="css/admin.css">
     <link rel="stylesheet" type="text/css" href="shared_css/shared.css">
     <link rel="stylesheet" type="text/css" href="css/tablesorter.css">
 
     <!-- scripts -->
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.tablesorter.min.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
     <script type="text/javascript" src="shared_js/version.js"></script>
@@ -28,8 +28,10 @@
   </head>
   <body>
     <div id="pageHeader">
-      <div style="text-align: right; float: right;"><a href="/j_spring_security_logout" style="color:#FFFFFF">Log out</a></div>
+      <div id="currentVersion"></div>
+      <div id="newestVersion" style="text-align: right; float: right;"></div>
     </div>
+
     <!-- notification that javaScript is disabled -->
     <noscript>
       <center>
@@ -47,31 +49,33 @@
         </div>
       </center>
     </noscript>
-    <!-- LOGO -->
-    <div class="oc_headerRow">
-      <a class="oc_headerLink" href="../../welcome.html">
-        <div class="mh-logo"><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn"/></div>
-        <div class="mh-heading"><h1>Admin Tools</h1></div>
-      </a>
-      <a class="oc_headerLink" href="http://www.opencastproject.org/">
-        <div class="oc-logo"><img src="shared_img/opencast_logo.gif" alt="Opencast Matterhorn"/></div>
-      </a>
-    </div>
+
     <!-- fl-centered doesn't work in winXP-IE8 -->
     <div class="fl-container-flex fl-centered fl-theme-coal">
+  <div id="header">
+         <div id="logotitle">
+            <a href="../../welcome.html">
+        	<img src="shared_img/MatterhornLogo.png" alt="Opencast Matterhorn" width="104" height="72" align="left">
+			<h1>Opencast Matterhorn</h1>
+      </a>
+    </div>
+     	<div id="oclogo">
+       	<a href="http://www.opencastproject.org">
+        <img src="shared_img/OpencastLogo.png" width="143" height="38" alt="Opencast Community | Project">        </a>    </div>
+  </div>
       <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
-        <li id="oc_tabs" class="fl-activeTab"><a class="oc_tabs-active" href="recordings.html" id="i18n_tab_recording">Recordings</a></li>
-        <li id="oc_tabs"><a class="oc_tabs" href="series.html" id="i18n_tab_series">Series</a></li>
-        <li id="oc_tabs"><a  class="oc_tabs" href="agents_status.html" id="i18n_tab_agent">Capture Agents</a></li>
+        <li class="fl-activeTab"><a href="recordings.html" id="i18n_tab_recording">Recordings</a></li>
+        <li><a href="series.html" id="i18n_tab_series">Series</a></li>
+        <li><a href="agents_status.html" id="i18n_tab_agent">Capture Agents</a></li>
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix">
 
-        <div id="oc_recordingmenu" class="fl-fix">
+        <div class="fl-fix">
           <!-- Add/Schedule Buttons -->
           <div id="add-buttons-container">
             <button type="button" id="button_schedule" style="height:2.1em;cursor:pointer;margin-right:1em;font-size:0.9em;vertical-align: middle;">
               <span class="icon icon-add">&nbsp;</span>
-              <span style="font-weight: bold; font-size:1em;" id="i18n_button_schedule">&nbsp; Schedule Recordings</span>
+              <span style="font-weight: bold; font-size:1em;" id="i18n_button_schedule">&nbsp; Schedule Recording</span>
             </button>
             <button type="button" id="button_upload" style="height:2.1em;cursor:pointer;font-size:0.9em;vertical-align: middle;">
               <span class="icon icon-add">&nbsp;</span>
@@ -125,18 +129,6 @@
           </div>
         </div>
 
-        <!-- info boxes shown above the table when upcoming or finished filter is selected -->
-        <div id="info-box" style="margin-bottom:18px;display:none;">
-          <div id="table-info-box-finished" style="display:none;border: 1px solid #cccccc;font-size:0.9em;text-align:center;width:600px;margin-left:auto;margin-right:auto;margin-bottom:0.5em;padding:0.5em;">
-            <img title="Information" alt="Information" src="shared_img/icons/information.png" style="vertical-align: bottom;"></img>
-            Go to the <a href="/engage/ui/" style="text-decoration:underline">Matterhorn Media Module</a> to see any Recordings which have gone through "Encode, Analyze, and Distribute" processing.
-          </div>
-          <div id="table-info-box-upcoming" style="display:none;border: 1px solid #cccccc;font-size:0.9em;text-align:center;width:900px;margin-left:auto;margin-right:auto;margin-bottom:0.5em;padding:0.5em;">
-            <img title="Information" alt="Information" src="shared_img/icons/information.png" style="vertical-align: bottom;"></img>
-            All recordings scheduled for the future appear below. (Future versions of Matterhorn will allow you to filter this list to show specific days.)
-          </div>
-        </div>
-
         <!-- paging navigation -->
         <div class="paging-nav-container" style="margin-bottom: 8px;">
           <span>
@@ -155,15 +147,15 @@
           </span>
           &nbsp;&nbsp;
           <a href="#" class="paging-nav-go-previous">&lt; Previous</a>
-          <span class="paging-mocklink-prev paging-nav-mocklink">&lt; Previous</span>
-          <span class="">
+          <span class="paging-mocklink-prev">&lt; Previous</span>
+          <span>
             Page
             <span class="paging-nav-current">0</span>
             of
             <span class="paging-nav-total">0</span>
           </span>
           <a href="#" class="paging-nav-go-next">Next &gt;</a>
-          <span class="paging-mocklink-next paging-nav-mocklink">Next &gt;</span>
+          <span class="paging-mocklink-next">Next &gt;</span>
         </div>
 
         <!-- recordings table -->
@@ -218,7 +210,7 @@
           </span>
           &nbsp;&nbsp;
           <a href="#" class="paging-nav-go-previous">&lt; Previous</a>
-          <span class="paging-mocklink-prev paging-nav-mocklink">&lt; Previous</span>
+          <span class="paging-mocklink-prev">&lt; Previous</span>
           <span>
             Page
             <span class="paging-nav-current">0</span>
@@ -226,11 +218,10 @@
             <span class="paging-nav-total">0</span>
           </span>
           <a href="#" class="paging-nav-go-next">Next &gt;</a>
-          <span class="paging-mocklink-next paging-nav-mocklink">Next &gt;</span>
+          <span class="paging-mocklink-next">Next &gt;</span>
         </div>
 
       </div>
-
     </div>
     <!-- p>
     <button type="button" onclick="Recordings.displayHoldActionPanel('http://outstack.virtuos.uos.de:8080/org.opencastproject.workflow.handler.downloaddvdworkflowoperationhandler/index.html?9cc8c5bf-ce45-493d-974a-e9ec9eb6ead3','9cc8c5bf-ce45-493d-974a-e9ec9eb6ead3');">Display Example of Hold UI</button>

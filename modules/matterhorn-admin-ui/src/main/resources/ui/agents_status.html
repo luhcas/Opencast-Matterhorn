@@ -8,7 +8,6 @@
     <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css">
     <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css">
     <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css">
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-theme-coal.css">
     <link rel="stylesheet" type="text/css" href="css/admin.css">
     <link rel="stylesheet" type="text/css" href="shared_css/shared.css">
 
@@ -37,7 +36,8 @@
   </head>
   <body>
     <div id="pageHeader">
-      <div style="text-align: right; float: right;"><a href="/j_spring_security_logout" style="color:#FFFFFF">Log out</a></div>
+      <div id="currentVersion"></div>
+      <div id="newestVersion" style="text-align: right; float: right;"></div>
     </div>
 
     <!-- notification that javaScript is disabled -->
@@ -57,24 +57,28 @@
         </div>
       </center>
     </noscript>
-    <div class="oc_headerRow">
-        <a class="oc_headerLink" href="../../welcome.html">
-          <div class="mh-logo"><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn"/></div>
-          <div class="mh-heading"><h1>Admin Tools</h1></div>
-        </a>
-        <a class="oc_headerLink" href="http://www.opencastproject.org/">
-          <div class="oc-logo"><img src="shared_img/opencast_logo.gif" alt="Opencast Matterhorn"/></div>
+
+    <!-- fl-centered doesn't work in winXP-IE8 -->
+    <div class="fl-container-flex fl-centered fl-fix fl-theme-coal">
+  <div id="header">
+         <div id="logotitle">
+            <a href="../../welcome.html">
+        	<img src="shared_img/MatterhornLogo.png" alt="Opencast Matterhorn" width="104" height="72" align="left">
+			<h1>Opencast Matterhorn</h1>
         </a>
     </div>
-    <!-- fl-centered doesn't work in winXP-IE8 -->
-    <div class="fl-container-flex fl-centered fl-theme-coal">
+     	<div id="oclogo">
+       	<a href="http://www.opencastproject.org">
+        <img src="shared_img/OpencastLogo.png" width="143" height="38" alt="Opencast Community | Project">        </a>    </div>
+  </div>
+
       <ul class="fl-tabs fl-tabs-left">
-        <li id="oc_tabs" class=""><a class="oc_tabs" href="recordings.html">Recordings</a></li>
-        <li id="oc_tabs"><a class="oc_tabs" href="series.html" id="i18n_tab_series">Series</a></li>
-        <li id="oc_tabs" class="fl-activeTab"><a class="oc_tabs-active" href='agents_status.html'>Capture Agents</a></li>
+        <li class=""><a href="recordings.html">Recordings</a></li>
+        <li><a href="series.html" id="i18n_tab_series">Series</a></li>
+        <li class="fl-activeTab"><a href='agents_status.html'>Capture Agents</a></li>
       </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix">
-        <table class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
+        <table id="capturetable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
           <thead>
             <tr>
               <th width="33%">Agent Name</th>

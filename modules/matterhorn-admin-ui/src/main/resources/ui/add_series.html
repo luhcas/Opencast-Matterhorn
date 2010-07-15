@@ -8,7 +8,6 @@
     <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css">
     <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css">
     <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css">
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-theme-coal.css">
     <link rel="stylesheet" type="text/css" href="css/admin.css">
     <link rel="stylesheet" type="text/css" href="shared_css/shared.css">
     <link rel="stylesheet" type="text/css" href="css/tablesorter.css">
@@ -140,26 +139,30 @@
         </div>
       </center>
     </noscript>
-    <div class="oc_headerRow">
-        <a class="oc_headerLink" href="../../welcome.html">
-          <div class="mh-logo"><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn"/></div>
-          <div class="mh-heading"><h1>Admin Tools</h1></div>
-        </a>
-        <a class="oc_headerLink" href="http://www.opencastproject.org/">
-          <div class="oc-logo"><img src="shared_img/opencast_logo.gif" alt="Opencast Matterhorn"/></div>
-        </a>
-    </div>
+
     <!-- fl-centered doesn't work in winXP-IE8 -->
     <div class="fl-container-flex fl-centered fl-theme-coal">
+  <div id="header">
+         <div id="logotitle">
+            <a href="../../welcome.html">
+        	<img src="shared_img/MatterhornLogo.png" alt="Opencast Matterhorn" width="104" height="72" align="left">
+			<h1>Opencast Matterhorn</h1>
+        </a>
+    </div>
+     	<div id="oclogo">
+       	<a href="http://www.opencastproject.org">
+        <img src="shared_img/OpencastLogo.png" width="143" height="38" alt="Opencast Community | Project">        </a>    </div>
+  </div>
         <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
-          <li id="oc_tabs"><a class="oc_tabs" href="recordings.html" id="i18n_tab_recording">Recordings</a></li>
-          <li id="oc_tabs" class="fl-activeTab"><a class="oc_tabs-active" href="series.html" id="i18n_tab_series">Series</a></li>
-          <li id="oc_tabs"><a class="oc_tabs" href="agents_status.html" id="i18n_tab_agent">Capture Agents</a></li>
+        <li><a href="recordings.html" id="i18n_tab_recording">Recordings</a></li>
+        <li class="fl-activeTab"><a href="series.html" id="i18n_tab_series">Series</a></li>
+        <li><a href="agents_status.html" id="i18n_tab_agent">Capture Agents</a></li>
         </ul>
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix">
         
         <!-- Common Scheduling Information -->
-        <div class="fl-container-800">
+        <div class="fl-container-800" style="text-align: center;">
+          <h2 id="page-title"><span id="i18n_page_title">Add Series</span></h2>
           <div class="fl-widget">
             <div class="fl-widget-content form-box-container">
               <form action="">
@@ -382,8 +385,8 @@
           <div id="links" class="data-row" style="display: block;">
             <div class="data-label"></div>
             <div class="data-value">
-              <a href="/admin/series.html" style="float: left;">&lt;&lt; Back to Series</a>
-              <a id="schedulerLink" href="/admin/scheduler.html" style="float: right;">Schedule Recordings &gt;&gt;</a>
+              <a href="/admin/recordings.html?show=upcoming" style="float: left;">&lt;&lt; Back to Recordings</a>
+              <a href="javascript:location.reload()" style="float: right;">Add another Series &gt;&gt;</a>
             </div>
           </div>
         </div>
