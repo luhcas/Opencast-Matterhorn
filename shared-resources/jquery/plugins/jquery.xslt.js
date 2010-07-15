@@ -43,7 +43,9 @@
                 
                 if (xm.XMLDocument && xm.XMLDocument.readyState == 4 && xs.XMLDocument && xs.XMLDocument.readyState == 4) {
                     target.html(xm.transformNode(xs.XMLDocument));
-                    callback();
+                    if (callback) {
+                      callback();
+                    }
                 }
             };
 

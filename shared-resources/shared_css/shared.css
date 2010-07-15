@@ -1,9 +1,6 @@
 body {
 	padding-top: 20px;
 }
-a {
-	 cursor: pointer;
-}
 
 #pageHeader {
 	position: absolute;
@@ -35,39 +32,3 @@ a {
 	position: absolute;
 	top: 0;
 }
-
-.oc_headerRow {
-    margin-top: 7px;
-    padding:0 20px 5px 20px;
-}
-
-.oc_headerLink {
-    color:#F6921E;
-    text-decoration: none;
-}
-.mh-logo {
-    float:left;
-    display:table-cell;
-}
-
-.mh-heading {
-    display:table-cell;
-    float:left;
-    padding-left:25px;
-}
-
-.oc-logo {
-    float:right;
-    display:table-cell;
-}
-
-.oc_offScreen-hidden 
-{
-  position:                 absolute; 
-  left:                     -10000px; 
-  top:                      auto; 
-  width:                    1px; 
-  height:                   1px; 
-  overflow:                 hidden;
-}
-
