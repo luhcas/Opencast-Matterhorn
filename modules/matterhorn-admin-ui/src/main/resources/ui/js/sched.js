@@ -36,6 +36,7 @@ var Scheduler = Scheduler || {};
 Scheduler.mode = CREATE_MODE;
 Scheduler.type = SINGLE_EVENT;
 Scheduler.selectedInputs = '';
+Scheduler.conflictingEvents = false;
 /* @namespace Scheduluer UI Namespace */
 var UI        = UI || {};
 var Agent     = Agent || {};
@@ -53,6 +54,9 @@ UI.Init = function(){
   $.extend(Scheduler.FormManager, {
     serialize: function(){
       var doc, mdlist, ocwprops;
+      if(Scheduler.conflictingEvents){
+        return false;
+      }
       if(this.validate()){
         doc = this.createDoc();
         mdlist = doc.createElement('metadataList');
@@ -496,7 +500,7 @@ UI.EventSubmitComplete = function(){
 
 UI.CheckForConflictingEvents = function(){
   var event, endpoint, data;
-  
+  Scheduler.conflictingEvents = false;
   if($("#notice-conflict").siblings(':visible').length === 0){
     $('#notice-container').hide();
   }
@@ -532,7 +536,6 @@ UI.CheckForConflictingEvents = function(){
     }
   }
   $.post(SCHEDULER_URL + endpoint, data, function(doc){
-    var conflictingEvent = false;
     if($('event', doc).length > 0){
       $.each($('event', doc), function(i,event){
         var id, title;
@@ -545,10 +548,10 @@ UI.CheckForConflictingEvents = function(){
         });
         if(id !== $('#eventId').val()){
           $('#conflicting-events').append('<li><a href="scheduler.html?eventId=' + id + '&edit" target="_new">' + title + '</a></li>');
-          conflictingEvent = true;
+          Scheduler.conflictingEvents = true;
         }
       });
-      if(conflictingEvent){
+      if(Scheduler.conflictingEvents){
         $('#notice-container').show();
         $('#notice-conflict').show();
       }
