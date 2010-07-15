@@ -270,13 +270,15 @@ select { font-size:1.15em; }
 #holdActionPanel-container {
   display:none;
   background:white;
-  /*height:400px;*/
+  position:relative;
+  clear:both;
+  /*height:400px;
   width:600px;
   z-index:100;
   position:absolute;
   top:100px;
   left:100px;
-  border:1px solid silver;
+  border:1px solid silver;*/
 }
 
 #holdActionPanel-iframe {
