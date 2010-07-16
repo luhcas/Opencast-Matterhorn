@@ -61,7 +61,11 @@
             
             private var startDragValue:Number = 0;
             
-            private var seekTimer:Timer;
+            
+            
+            private var rewindTimer:Timer = new Timer(400,1);
+            
+            private var fastForwardTimer:Timer = new Timer(400,1);
            
 
              /**
@@ -75,8 +79,7 @@
                 timer.addEventListener(TimerEvent.TIMER_COMPLETE, onTimerComplete);
                 timer.start();
                 
-                // initialize the seekTimer
-                seekTimer = new Timer(0);
+                
             }
             
             public function onTimerComplete(event:TimerEvent):void
@@ -161,6 +164,8 @@
             private function changeVolume():void
             {
                model.mediaPlayer.setVolume( hs_volume.value );
+               
+              ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round( 100 * hs_volume.value ) );
             }
             
             /**
@@ -190,7 +195,7 @@
              * */
             private function jumpForward():void
             {
-                if( !seekTimer.running )
+                if( !fastForwardTimer.running )
                 {
 	                if( !model.mediaPlayer.seeking() )
 	                {
@@ -204,9 +209,8 @@
 		                }
 	                
 	                }
-	                seekTimer = new Timer(400,1);
-	                seekTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onSeekTimerComplete);
-	                seekTimer.start();
+	                fastForwardTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onFastForwardTimerComplete);
+	                fastForwardTimer.start();
                 }
             }
             
@@ -218,7 +222,7 @@
              * */
             private function jumpBack():void
             {
-                if( !seekTimer.running )
+                if( !rewindTimer.running )
                 {
 	               if( !model.mediaPlayer.seeking() )
 	               {
@@ -231,22 +235,36 @@
 		                  model.mediaPlayer.seek( model.currentPlayhead - model.rewindTime );
 		              }
 	               }
-	               seekTimer = new Timer(400,1);
-                   seekTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onSeekTimerComplete);
-                   seekTimer.start();
+	               rewindTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onRewindTimerComplete);
+                   rewindTimer.start();
                 }
             }
             
             /**
-             * onSeekTimerComplete
+             * onFastForwardTimerComplete
              *
-             * Stop the seek timer.
+             * Stop the fast forward timer.
              *
              * */
-            private function onSeekTimerComplete():void
+            private function onFastForwardTimerComplete( event:TimerEvent ):void
             {
-                seekTimer.stop();
+                fastForwardTimer.stop();
+                jumpForward();
             }
+            
+            /**
+             * onRewindTimerComplete
+             *
+             * Stop the rewind timer.
+             *
+             * */
+            private function onRewindTimerComplete( event:TimerEvent ):void
+            {
+                rewindTimer.stop();
+                jumpBack();
+            }
+            
+            
             
             /**
              * thumbDrag
@@ -349,7 +367,8 @@
 	               	    id="btn_rewind"
 	               	    toolTip = "Jump Back"
 	                    styleName = "Rewind"
-	                    click="{ jumpBack() }"
+	                    mouseDown="{ jumpBack() }"
+	                    mouseUp="{ rewindTimer.stop(); }"
 	                    />
 	                
 	               <mx:Button 
@@ -363,7 +382,8 @@
 	               	    id="btn_fastforward"
 	               	    toolTip = "Jump Forward"
 	                    styleName = "FastForward"
-	                    click="{ jumpForward() }"
+	                    mouseDown="{ jumpForward() }"
+	                    mouseUp="{ fastForwardTimer.stop() }"
 	                    />
 	               
 	               <mx:Button 
@@ -395,6 +415,7 @@
                     verticalAlign="middle"
                     horizontalCenter="center"
                     styleName="controlsBackground"
+                    backgroundColor="#231645"
                     >
 	               <mx:HSlider 
 	               	    id = "hs_volume"

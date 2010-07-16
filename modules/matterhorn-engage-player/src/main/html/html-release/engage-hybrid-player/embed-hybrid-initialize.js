@@ -625,10 +625,6 @@ Opencast.Initialize = (function ()
 
                     $('#oc_image').attr("src", coverUrl);
                     
-                    var imageSpace = ($("#oc_flash-player").height() - $('#oc_image').height()) / 2;
-                    
-                    $("#oc_image").css('margin-top', imageSpace + 'px'); 
-                    
                 },
                 error: function(a, b, c) 
                 {

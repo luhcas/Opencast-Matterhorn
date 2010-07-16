@@ -6,6 +6,8 @@ package org.opencast.engage.videodisplay.control.util
     import flash.external.ExternalInterface;
     import flash.utils.Timer;
     
+    import mx.controls.Alert;
+    
     import org.opencast.engage.videodisplay.control.event.DisplayCaptionEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
     import org.opencast.engage.videodisplay.state.DefaultPlayerState;
@@ -53,6 +55,7 @@ package org.opencast.engage.videodisplay.control.util
         private var rewindBool:Boolean = false;
         private var count:Number=0;
         private var bufferTimer:Timer = new Timer(500);
+        private var firstStart:Boolean = false;
        
        
         /** Constructor */
@@ -391,8 +394,18 @@ package org.opencast.engage.videodisplay.control.util
                 model.mediaPlayer.setVolume(1);
             } 
             
-	    }
+            if( firstStart == false)
+            {
+                firstStart = true;
+            }
+        }
         
+        /**
+         * startEmbedPlayer
+         * 
+         * Start the embed player media files
+         *
+         * */
         private function startEmbedPlayer():void
         {
             if( model.startPlaySingle == true )
@@ -420,6 +433,36 @@ package org.opencast.engage.videodisplay.control.util
                 
                 model.currentPlayerState = PlayerState.PLAYING;
                 ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PAUSED );
+                model.mediaPlayer.setVolume(1);
+            }            
+        }
+        
+        /**
+         * startAdvancedPlayer
+         * 
+         * Start the advanced player media files
+         *
+         * */
+        private function startAdvancedPlayer():void
+        {
+            if( model.startPlaySingle == true )
+            {
+                if( model.videoState == VideoState.COVER )
+                {
+                    model.videoState = model.mediaPlayer.getVideoState();
+                }
+                model.startPlay = true;
+                mediaPlayerSingle.play();
+                mediaPlayerSingle.pause();
+                model.mediaPlayer.setVolume(1);
+            }
+            if( model.statePlayerOne == PlayerState.READY && model.statePlayerTwo == PlayerState.READY )
+            {
+                model.startPlay = true;
+                mediaPlayerOne.play();
+                mediaPlayerTwo.play();
+                mediaPlayerOne.pause();
+                mediaPlayerTwo.pause();
                 model.mediaPlayer.setVolume(1);
             }            
         }
@@ -538,11 +581,19 @@ package org.opencast.engage.videodisplay.control.util
                     model.currentSeekPosition = model.durationPlayerTwo - 1;
                 }
                 
-                if( mediaPlayerOne.canSeekTo(valueOne) == true && mediaPlayerTwo.canSeekTo(valueTwo) == true)
+                if( mediaPlayerOne.canSeekTo(valueOne) == true )
                 {
                     mediaPlayerOne.seek(valueOne);
+                    
+                }
+                
+                if( mediaPlayerTwo.canSeekTo(valueTwo) == true)
+                {
+                   
                     mediaPlayerTwo.seek(valueTwo);
                 }
+                
+                
             }
         }
          
@@ -721,9 +772,12 @@ package org.opencast.engage.videodisplay.control.util
          * */
         private function onBufferTimerComplete( event:TimerEvent ):void
         {
-        	if( model.singleState == PlayerState.BUFFERING || model.statePlayerOne == PlayerState.BUFFERING || model.statePlayerTwo == PlayerState.BUFFERING || model.singleState == PlayerState.LOADING || model.statePlayerOne == PlayerState.LOADING || model.statePlayerTwo == PlayerState.LOADING )
+        	if( firstStart == true )
         	{
-        		model.loader = true;
+	        	if( model.singleState == PlayerState.BUFFERING || model.statePlayerOne == PlayerState.BUFFERING || model.statePlayerTwo == PlayerState.BUFFERING || model.singleState == PlayerState.LOADING || model.statePlayerOne == PlayerState.LOADING || model.statePlayerTwo == PlayerState.LOADING )
+	        	{
+	        		model.loader = true;
+	        	}
         	}
         	bufferTimer.stop();
         }
@@ -753,6 +807,12 @@ package org.opencast.engage.videodisplay.control.util
         	{
 	        	model.singleState = event.state;
 	        	
+	        	if( event.state == PlayerState.READY )
+                {
+                   model.currentPlayerState = PlayerState.PAUSED;
+                   ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PLAYING );
+                }
+	        	
 	        	if( ( event.state == PlayerState.BUFFERING || event.state == PlayerState.LOADING ) && bufferTimer.running == false )
 	        	{
 	        	   onBuffer();
@@ -770,8 +830,7 @@ package org.opencast.engage.videodisplay.control.util
                     
                     if( model.playerMode == PlayerModeState.ADVANCED)
                     {
-                        mediaPlayerSingle.play();
-                        mediaPlayerSingle.pause();
+                        startAdvancedPlayer();
                     }
                     else
                     {
@@ -916,8 +975,18 @@ package org.opencast.engage.videodisplay.control.util
             
             if( model.startPlay == true)
             {
-                var newPositionString:String = _time.getTC( model.currentPlayheadSingle );
-	            
+                var newPositionString:String = '';
+                    
+                if( model.currentPlayheadSingle <= model.currentDuration)
+                {
+                    newPositionString = _time.getTC( model.currentPlayheadSingle );
+                }
+                else
+                {
+                    newPositionString = _time.getTC( model.currentDuration );
+                }
+	         
+	         
 	            if ( newPositionString != lastNewPositionString )
 	            {
 	                ExternalInterface.call( ExternalFunction.SETCURRENTTIME, newPositionString );
@@ -1069,8 +1138,7 @@ package org.opencast.engage.videodisplay.control.util
                     
                     if( model.playerMode == PlayerModeState.ADVANCED)
                     {
-                        mediaPlayerOne.play();
-                        mediaPlayerOne.pause();
+                        startAdvancedPlayer();
                     }
                     else
                     {
@@ -1214,54 +1282,56 @@ package org.opencast.engage.videodisplay.control.util
             
             if( model.startPlay == true  )
             {
-	            if( model.currentPlayheadPlayerOne <= model.durationPlayerOne && model.currentPlayheadPlayerOne >= 0)
+	            if( maxDurationPlayer == DefaultPlayerState.PLAYERONE )
 	            {
-	               
-	                var newPositionString:String = _time.getTC( model.currentPlayheadPlayerOne );
-		            
-		            if( maxDurationPlayer == DefaultPlayerState.PLAYERONE )
-		            {
-		                if ( newPositionString != lastNewPositionString )
-		                {
-		                    ExternalInterface.call( ExternalFunction.SETCURRENTTIME, newPositionString );
-		                    lastNewPositionString = newPositionString;
-		                }
-		    
-		                if ( !mediaPlayerOne.seeking )
-		                {
-		                   ExternalInterface.call( ExternalFunction.SETPLAYHEAD, model.currentPlayheadPlayerOne );
-		                }
-		                
-		                if ( model.captionsURL != null )
-		                {
-		                    Swiz.dispatchEvent( new DisplayCaptionEvent( model.currentPlayheadPlayerOne ) );
-		                }
-		                if( model.fullscreenThumbDrag == false)
-		                {
-		                   model.currentPlayhead = model.currentPlayheadPlayerOne;
-		                }
-	                    
-	                    if( mediaPlayerOne.playing && mediaPlayerTwo.playing )
-	                    {
-	                        var timeDifference:Number = model.currentPlayheadPlayerOne - model.currentPlayheadPlayerTwo;
-	                       
-	                        if( timeDifference < -1 || timeDifference > 1 )
-	                        {
-	                            if( mediaPlayerTwo.canSeekTo( model.currentPlayheadPlayerOne ) == true)
-				                {
-				                    mediaPlayerTwo.seek(model.currentPlayheadPlayerOne);
-				                }
-	                        }
-	                    }
+	                var newPositionString:String = '';
+                    
+                    if( model.currentPlayheadPlayerOne <= model.durationPlayerOne)
+                    {
+                        newPositionString = _time.getTC( model.currentPlayheadPlayerOne );
+                    }
+                    else
+                    {
+                        newPositionString = _time.getTC( model.durationPlayerOne );
+                    }
+	                
+	                if ( newPositionString != lastNewPositionString )
+	                {
+	                    ExternalInterface.call( ExternalFunction.SETCURRENTTIME, newPositionString );
+	                    lastNewPositionString = newPositionString;
 	                }
+	    
+	                if ( !mediaPlayerOne.seeking )
+	                {
+	                   ExternalInterface.call( ExternalFunction.SETPLAYHEAD, model.currentPlayheadPlayerOne );
+	                }
+	                
+	                if ( model.captionsURL != null )
+	                {
+	                    Swiz.dispatchEvent( new DisplayCaptionEvent( model.currentPlayheadPlayerOne ) );
+	                }
+	                if( model.fullscreenThumbDrag == false)
+	                {
+	                   model.currentPlayhead = model.currentPlayheadPlayerOne;
+	                }
+                    
+                    if( mediaPlayerOne.playing && mediaPlayerTwo.playing )
+                    {
+                        var timeDifference:Number = model.currentPlayheadPlayerOne - model.currentPlayheadPlayerTwo;
+                       
+                        if( timeDifference < -1 || timeDifference > 1 )
+                        {
+                            if( mediaPlayerTwo.canSeekTo( model.currentPlayheadPlayerOne ) == true)
+			                {
+			                    mediaPlayerTwo.seek(model.currentPlayheadPlayerOne);
+			                }
+                        }
+                    }
+                }
 	                
 	           
                 
-                }
-                else
-                {
-                   model.currentPlayheadPlayerOne = model.durationPlayerOne;
-                }
+                
                 
                 /*
 	            // change default player and volume
@@ -1385,46 +1455,40 @@ package org.opencast.engage.videodisplay.control.util
          * */
         private function playerTwoOnStateChange( event:MediaPlayerStateChangeEvent ):void
         {
-        	model.statePlayerTwo = event.state;
-        	
-        	if( model.startPlay == true )
-        	{
-        		        	
-	        	if( event.state == PlayerState.READY && mediaPlayerOne.state == PlayerState.READY )
-	            {
-	               model.currentPlayerState = PlayerState.PAUSED;
-	               ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PLAYING );
-	            }
-	            if( event.state == PlayerState.READY && mediaPlayerOne.state == PlayerState.READY )
-	            {
-	                model.loader = false;
-	            }
-	           
-	            if( ( event.state == PlayerState.BUFFERING || event.state == PlayerState.LOADING ) && bufferTimer.running == false )
-	            {
-	               onBuffer();
-	            }
-	            else
+        	 model.statePlayerTwo = event.state;
+            
+            if( model.startPlay == true )
+            {
+                if( event.state == PlayerState.READY && mediaPlayerOne.state == PlayerState.READY )
+                {
+                   model.currentPlayerState = PlayerState.PAUSED;
+                   ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PLAYING );
+                }
+                
+                if( ( event.state == PlayerState.BUFFERING || event.state == PlayerState.LOADING ) && bufferTimer.running == false )
+                {
+                    onBuffer();
+                }
+                else
                 {
                    model.loader = false;
                 }
-                
-                
             }
             else
             {
                 if( event.state == PlayerState.READY )
                 {
                     model.startPlayTwo = true;
-                    mediaPlayerTwo.play();
+                    
                     if( model.playerMode == PlayerModeState.ADVANCED)
                     {
-                        mediaPlayerTwo.pause();
+                        startAdvancedPlayer();
                     }
                     else
                     {
-                        startEmbedPlayer(); 
+                        startEmbedPlayer();
                     }
+                   
                 }
             }
         }
@@ -1561,40 +1625,58 @@ package org.opencast.engage.videodisplay.control.util
         {
             model.currentPlayheadPlayerTwo = event.time;
             
-            if( model.startPlay == true )
+            if( model.startPlay == true  )
             {
-	            if( model.currentPlayheadPlayerTwo <= model.durationPlayerTwo && model.currentPlayheadPlayerTwo >= 0)
+                if( maxDurationPlayer == DefaultPlayerState.PLAYERTWO )
                 {
-		            var newPositionString:String = _time.getTC( model.currentPlayheadPlayerTwo );
-		             
-		            if( maxDurationPlayer == DefaultPlayerState.PLAYERTWO )
-		            {
-		                if ( newPositionString != lastNewPositionString )
-		                {
-		                    ExternalInterface.call( ExternalFunction.SETCURRENTTIME, newPositionString );
-		                    lastNewPositionString = newPositionString;
-		                }
-		    
-		                if ( !mediaPlayerTwo.seeking )
-		                {
-		                   ExternalInterface.call( ExternalFunction.SETPLAYHEAD, model.currentPlayheadPlayerTwo);
-		                }
-		                
-		                if ( model.captionsURL != null )
-		                {
-		                    Swiz.dispatchEvent( new DisplayCaptionEvent( model.currentPlayheadPlayerTwo ) );
-		                }
-		                
-		                if( model.fullscreenThumbDrag == false)
-		                {
-		                    model.currentPlayhead = model.currentPlayheadPlayerTwo;
-		                }
-		            }
+                    var newPositionString:String = '';
+                    
+                    if( model.currentPlayheadPlayerTwo <= model.durationPlayerTwo)
+                    {
+                        newPositionString = _time.getTC( model.currentPlayheadPlayerTwo );
+                    }
+                    else
+                    {
+                        newPositionString = _time.getTC( model.durationPlayerTwo );
+                    }
+                    
+                    if ( newPositionString != lastNewPositionString )
+                    {
+                        ExternalInterface.call( ExternalFunction.SETCURRENTTIME, newPositionString );
+                        lastNewPositionString = newPositionString;
+                    }
+        
+                    if ( !mediaPlayerTwo.seeking )
+                    {
+                       ExternalInterface.call( ExternalFunction.SETPLAYHEAD, model.currentPlayheadPlayerTwo );
+                    }
+                    
+                    if ( model.captionsURL != null )
+                    {
+                        Swiz.dispatchEvent( new DisplayCaptionEvent( model.currentPlayheadPlayerTwo ) );
+                    }
+                    if( model.fullscreenThumbDrag == false)
+                    {
+                       model.currentPlayhead = model.currentPlayheadPlayerTwo;
+                    }
+                    
+                    if( mediaPlayerOne.playing && mediaPlayerTwo.playing )
+                    {
+                        var timeDifference:Number = model.currentPlayheadPlayerTwo - model.currentPlayheadPlayerOne;
+                       
+                        if( timeDifference < -1 || timeDifference > 1 )
+                        {
+                            if( mediaPlayerOne.canSeekTo( model.currentPlayheadPlayerTwo ) == true)
+                            {
+                                mediaPlayerOne.seek(model.currentPlayheadPlayerTwo);
+                            }
+                        }
+                    }
                 }
-                else
-                {
-                    model.currentPlayheadPlayerTwo = model.durationPlayerTwo;
-                }
+                    
+               
+                
+                
 	            /*
 	            // change default player and volume
 	            if( event.time > model.durationPlayerOne )
