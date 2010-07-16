@@ -3,7 +3,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
 	<link rel="shortcut icon" href="shared_img/favicon.ico" /> 
-    <title>Opencast Matterhorn - Release 0.8: Moving on up!</title>
+    <title>Opencast Matterhorn - Release 1.0: Enjoy the View!</title>
     
     <script type="text/javascript" src="infusion-1.1.2/InfusionAll.js"></script>
     <script type="text/javascript">
@@ -13,11 +13,12 @@
                  $.each(data, function(section) {
                         if("rest" == section) {
                           $.each(data.rest, function(i) {
-                            if(i < Math.floor(data.rest.length / 2)){
+                            /*if(i < Math.floor(data.rest.length / 2)){
                               col = $('#docs1');
                             }else{
                               col = $('#docs2');
-                            }
+                            }*/
+                            var col = $('#docs1');
                             col.append("<li>" + data.rest[i].description + " <a href='" + data.rest[i].docs + "'>Docs</a></li>");
                           })
                         }
@@ -29,38 +30,18 @@
   </head>
   <body>
     <div id="wrapper">
-      <div id="headergraphic"><a href="http://www.opencastproject.org"><img src="images/opencast_logo.gif" alt="Opencast" width="128" height="30" hspace="20" vspace="5" border="0" /></a></div>
       <div id="topbanner">
-        <div id="matterhornlogo"><img src="images/MatterhornLogo.gif" alt="Matterhorn logo" width="415" height="288" class="matterhornlogo" /></div>
-        <h1>Release 0.8: Moving on up!</h1>
+        <div id="matterhornlogo"><img src="shared_img/MatterhornLogo_large.png" alt="Matterhorn logo" width="260" height="182" class="matterhornlogo" /></div>
+        <h1>Release 1.0: Enjoy the View!</h1>
         <div id="promotext">
-          <p>The second public release contains:</p>
-          <ul>
-			<li> Multi-Stream Media Player</li>
-			<li> Video Segmentation and Slide Navigation</li>
-			<li> Scheduling Recurring Events</li>
-			<li> Preview Media Administrative Workflow</li>
-			<li> Retry/Edit Failed Workflows</li>
-			<li> Real Capture Agents</li>
-			<li> Rss/Atom Catalog</li>
-			<li> Confidence Monitoring</li>
-			<li> Authentication/Authorization</li>
-			<li> Distributed Deployment</li>
-			<li> Media Streaming</li>
-            <li> and it&#39;s <span class="emphasis">free</span> and <span class="emphasis">open source!</span></li>
-          </ul>
+          <p>Matterhorn is a free, open-source   system that provides a lecture capture solution and an enterprise media infrastructure for educational audio and video content.</p>
+          <p>Learn more about the features of Matterhorn by taking the <a href="http://www.opencastproject.org/matterhorn_tour">Product Tour</a> or viewing an <a href="http://www.opencastproject.org/matterhorn_features">Overview of Features</a>. </p>
         </div>
+        <div id="opencastlogo"><a href="http://www.opencastproject.org"><img src="shared_img/Opencastlogo.png" alt="Opencast" width="143" height="38" hspace="20" vspace="5" border="0" /></a></div>
       </div>
       <div id="middlebanner">
-        <div id="col1">
-          <h2>Release Notes</h2>
-          <p>Covers &quot;what&#39;s new&quot;, install/build instructions, known issues, and frequently asked questions .  Please read these notes and the bug/feature reporting instructions before reporting any issues.</p>
-          <ul class="links">
-            <li><a href="http://opencast.jira.com/wiki/display/MH/Release+Notes+0.8">Read Notes</a></li>
-            <li><a href="http://www.opencastproject.org/matterhorn_release_08">Release 0.8 Overview</a></li>
-          </ul>
-        </div>
-        <div id="col2">
+        <div id="col1m">
+          <img src="shared_img/clock_icon.png" width="70" height="70" />
           <h2>Administrative Tools</h2>
           <p>These tools enable the capture, ingest, and distribution of lecture recordings:</p>
           <ul>
@@ -69,11 +50,10 @@
               distribution.</li>
             <li> Monitor progress of recording through media pipeline.</li>
           </ul>
-          <ul class="links">
-            <li><a href="/admin/">Go to Admin Tools</a></li>
-          </ul>
+          <a href="/admin/" class="redbutton">Go to Admin Tools</a>
         </div>
-        <div id="col2">
+        <div id="col2m">
+          <img src="shared_img/computer_icon.png" width="85" height="59" />
           <h2>Engage Tools</h2>
           <p>These tools support enagement and discovery of distributed media derived from the admin tools:</p>
           <ul>
@@ -81,52 +61,51 @@
             <li>Search for Video by keyword</li>
             <li>Accessible media player</li>
           </ul>
-          <ul class="links">
-            <li><a href="/engage/ui/"> Go to Matterhorn Media Module</a></li>
-          </ul>
+          
+          <a href="/engage/ui/" class="redbutton"> Go to  Media Module</a>        
         </div>
       </div>
       <div id="bottombanner">
-        <div id="col1-2">
+        <div id="col1b">
           <h2>Services Documentation</h2>
-          <div id="col1">
             <ul id="docs1">
             </ul>
-          </div>
-          <div id="col2">
-            <ul id="docs2">
-            </ul>
-          </div>
         </div>
-        <div id="col3">
-          <div id="dev_links">
-            <h2>Developer Links</h2>
-            <ul class="links">
-			  <!-- TODO update the links-->
-              <li>Install and Configure
-                <ul>
-                  <li><a href="http://opencast.jira.com/wiki/display/MH/Matterhorn+Core+0.8">Matterhorn Core</a></li>
-                  <li><a href="http://opencast.jira.com/wiki/display/MH/Capture+Agent+0.8">Capture Agent</a></li>
-                  <li><a href="http://opencast.jira.com/wiki/display/MH/Install+Source+Across+Multiple+Servers+0.8">Distributed Deployment (experimental)</a></li>
-                </ul>
-              </li>
-              <li><a href="http://opencast.jira.com/wiki/display/MH/Take+a+Look+Under+the+Hood">System Overview</a></li>
-              <li><a href="http://opencast.jira.com/wiki/display/MH/Cookbook">Cookbooks</a></li>
-            </ul>
-          </div>
-          <div id="community">
+        <div id="col2b">
+          <h2>Release Notes</h2>
+          <p>Covers &quot;what&#39;s new&quot;, install/build instructions, known issues, and frequently asked questions .  Please read these notes and the bug/feature reporting instructions before reporting any issues.</p>
+          <ul>
+            <li><a href="http://opencast.jira.com/wiki/x/KgYFAQ">Read Notes</a></li>
+            <li><a href="http://www.opencastproject.org/matterhorn_release_10">Release 1.0 Overview</a></li>
+          </ul>
+
             <h2>Community Resources</h2>
             <ul class="links">
               <li><a href="http://opencast.jira.com/wiki/display/MH/Communication">Mailing Lists and Communication</a></li>
               <li><a href="http://opencast.jira.com/browse/MH">Issue Tracker</a> (report a bug, request a feature)</li>
             </ul>
-          </div>
+
+        </div>
+
+        <div id="col3b">
+            <h2>Developer Links</h2>
+            <p class="emphasis">Install and Configure</p>
+            <ul>
+			  <!-- TODO update the links-->
+               <li><a href="http://opencast.jira.com/wiki/display/MH/Matterhorn+Core+1.0">Matterhorn Core</a></li>
+               <li><a href="http://opencast.jira.com/wiki/display/MH/Capture+Agent+1.0">Capture Agent</a></li>
+               <li><a href="http://opencast.jira.com/wiki/display/MH/Install+Source+Across+Multiple+Servers+1.0">Distributed Deployment (experimental)</a></li>
+             </ul>
+             <ul>
+              <li><a href="http://opencast.jira.com/wiki/display/MH/Take+a+Look+Under+the+Hood">System Overview</a></li>
+              <li><a href="http://opencast.jira.com/wiki/display/MH/Cookbook">Cookbooks</a></li>
+            </ul>
         </div>
       </div>
       <div id="footer">
         <p>Opencast Matterhorn code is licensed under the <a href="http://www.osedu.org/licenses/ECL-2.0/ecl2.txt">Educational Community License, Version 2.0</a>.<br />
-        All other (non-code) intellectual propery is licensed under a <a href="http://creativecommons.org/licenses/by/3.0/us/" rel="license">Creative Commons Attribution 3.0 United States License</a>.<br>Permissions beyond the scope of this license may be available <a href="http://www.opencastproject.org/contact" rel="cc:morePermissions">on request</a>.</p>
+        All other (non-code) intellectual propery is licensed under a <a href="http://creativecommons.org/licenses/by/3.0/us/" rel="license">Creative Commons Attribution 3.0 United States License</a>.<br />Permissions beyond the scope of this license may be available <a href="http://www.opencastproject.org/contact" rel="cc:morePermissions">on request</a>.</p>
       </div>  
     </div>
-  </body>
+</body>
 </html>
