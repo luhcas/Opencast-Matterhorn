@@ -61,7 +61,7 @@ if [[ "$config" ]]; then
     ask -a -f '^[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]$'\
         "Detected IP is $default_ip. Press [enter] to accept, or enter new address" ip
     : ${ip:=$default_ip}
-    sed -i "s#^${SERVER_URL_KEY//./\\.}=.*\$#${SERVER_URL_KEY}=${ip%:$service_port}:$service_port#" "$GEN_PROPS"
+    sed -i "s#^${SERVER_URL_KEY//./\\.}=.*\$#${SERVER_URL_KEY}=http://${ip}#" "$GEN_PROPS"
 fi
 
 # Prompt for the URL where the core lives.
