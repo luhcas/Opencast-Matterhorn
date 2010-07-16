@@ -181,8 +181,8 @@ public class Event extends AbstractEvent {
       for (Metadata data : getRecurringEvent().getMetadata()) {
         m.put(data.getKey(), data);
       }
-      m.put("timeStart", new Metadata("timeStart", getValue("timeStart")));
-      m.put("timeEnd", new Metadata("timeEnd", getValue("timeEnd")));
+      m.put("timeStart", new Metadata("timeStart", "" + getStartdate().getTime()));
+      m.put("timeEnd", new Metadata("timeEnd", "" + getEnddate().getTime()));
     }
     m.put("timeDuration", new Metadata("timeDuration", "" + (getEnddate().getTime() - getStartdate().getTime())));
     return new LinkedList<Metadata>(m.values());
