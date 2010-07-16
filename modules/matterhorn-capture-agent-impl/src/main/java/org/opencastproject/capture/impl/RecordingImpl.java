@@ -126,6 +126,7 @@ public class RecordingImpl implements AgentRecording {
       out.write("<dcterms:identifier>" + id + "</dcterms:identifier>");
       out.write("<dcterms:title>" + id + "</dcterms:title>");
       out.write("</dublincore>");
+      out.flush();
       out.close();
 
       mPkg.add(metadataFile.toURI(), MediaPackageElement.Type.Catalog, MediaPackageElements.EPISODE);

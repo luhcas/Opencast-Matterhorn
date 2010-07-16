@@ -39,6 +39,7 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.mediapackage.track.TrackImpl;
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.security.api.TrustedHttpClientException;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.MimeType;
@@ -560,7 +561,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     if (friendlyNames.length == 1 && friendlyNames[0].equals("")) {
       //Idiot check against blank name lists.
       logger.error("Unable to build mediapackage for recording {} because the device names list is blank!", recID);
-      //TODO:  Return false here?  The above line is an error...
+      return false;
     }
 
     MediaPackageElementBuilder elemBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
@@ -782,11 +783,19 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     postMethod.setEntity(entities);
 
     // Send the file
-    HttpResponse response = client.execute(postMethod);
-
-    retValue = response.getStatusLine().getStatusCode();
-
-    client.close(response);
+    HttpResponse response = null;
+    try {
+      response = client.execute(postMethod);
+    } catch (TrustedHttpClientException e) {
+      logger.error("Unable to ingest recording {}, message reads: {}.", recID, e.getMessage());
+    } finally {
+      if (response != null) {
+        retValue = response.getStatusLine().getStatusCode();
+        client.close(response);
+      } else {
+        retValue = -1;
+      }
+    }
 
     if (retValue == 200) {
       setRecordingState(recID, RecordingState.UPLOAD_FINISHED);
@@ -934,7 +943,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     for (String s : lines) {
       result.append(s);
     }
-    
+
     return result.toString();
   }
 

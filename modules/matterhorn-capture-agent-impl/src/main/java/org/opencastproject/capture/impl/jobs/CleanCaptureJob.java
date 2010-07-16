@@ -117,7 +117,6 @@ public class CleanCaptureJob implements Job {
       }
 
       // Clean up if we are running out of disk space 
-      // TODO: Support Java 1.5 (dir.getFreeSpace() is 1.6 only)
       if (checkDiskSpace) {
         long freeSpace = recDir.getFreeSpace();
         if (freeSpace < minDiskSpace) {

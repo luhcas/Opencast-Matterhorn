@@ -19,6 +19,7 @@ import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.ConfigurationManager;
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.security.api.TrustedHttpClientException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -88,10 +89,17 @@ public class AgentCapabilitiesJob implements Job {
       logger.warn("Unable to send agent capapbillities because correct encoding scheme is not supported!");
       return;
     }
-    resp = client.execute(remoteServer);
-    if (resp.getStatusLine().getStatusCode() != 200) {
-      logger.info("Capabilities push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
+    try {
+      resp = client.execute(remoteServer);
+      if (resp.getStatusLine().getStatusCode() != 200) {
+        logger.info("Capabilities push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
+      }
+    } catch (TrustedHttpClientException e) {
+      logger.warn("Unable to post capabilities to {}, message reads: {}.", url, e.getMessage());
+    } finally {
+      if (resp != null) {
+        client.close(resp);
+      }
     }
-    client.close(resp);
   }
 }

@@ -20,6 +20,7 @@ import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.ConfigurationManager;
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.security.api.TrustedHttpClientException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -159,10 +160,18 @@ public class AgentStateJob implements Job {
       logger.error("Unable to send agent state because the URL encoding is not supported");
       return;
     }
-    resp = client.execute(remoteServer);
-    if (resp.getStatusLine().getStatusCode() != 200) {
-      logger.info("State push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
+    try {
+      resp = client.execute(remoteServer);
+      if (resp.getStatusLine().getStatusCode() != 200) {
+        logger.info("State push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
+      }
+    } catch (TrustedHttpClientException e) {
+      logger.warn("Unable to communicate with server at {}, message reads: {}.", url, e.getMessage());
     }
-    client.close(resp);
+    finally {
+      if (resp != null) {
+        client.close(resp);
+      }
+    }
   }
 }

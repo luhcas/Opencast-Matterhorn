@@ -30,6 +30,7 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.security.api.TrustedHttpClientException;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
@@ -44,6 +45,7 @@ import net.fortuna.ical4j.model.property.Duration;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -83,7 +85,15 @@ import java.util.Properties;
 
 /**
  * Scheduler implementation class.  This class is responsible for retrieving iCal
- * and then scheduling captures from the resulting calendaring data.
+ * and then scheduling captures from the resulting calendaring data.  It expects 
+ * the calendaring data in RFC 2445 form, and makes use of the following fields:
+ * VEVENT
+ *  UID
+ *  DTSTART
+ *  DTEND
+ *  DURATION
+ *  SUMMARY
+ *  ATTACHMENT
  */
 public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler, ManagedService {
 
@@ -102,7 +112,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   /** The time in milliseconds between attempts to fetch the calendar data */
   private long pollTime = 0;
 
-  /** A stored copy of the Calendar at the URI */
+  /** A stored copy of the Calendar */
   private Calendar calendar = null;
 
   /** The configuration for this service */
@@ -288,35 +298,16 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
     String calendarString = null;
     boolean error = false;
-    try {
-      calendarString = readCalendar(url);
-    } catch (IOException e) {
-      log.warn("IOException attempting to get calendar from {}.", url);
-      error = true;
-    } catch (NullPointerException e) {
-      log.warn("Nullpointer attempting to get calendar from {}.", url);
-      error = true;
-    } catch (URISyntaxException e) {
-      log.warn("URI error attempting to get calendar from {}.", url);
-      error = true;
-    }
+    calendarString = readCalendar(url);
 
-    if (error) {
+    if (calendarString == null) {
       //If the calendar is null, which only happens when the machine has *just* been powered on.
       //This case handles not having a network connection by just reading from the cached copy of the calendar 
       if (calendar == null) {
-        try {
-          if (localCalendarCacheURL != null) {
-            calendarString = readCalendar(localCalendarCacheURL);
-          } else {
-            log.warn("Unable to read calendar from local calendar cache because location was null!");
-            return null;
-          }
-        } catch (IOException e1) {
-          log.warn("Unable to read from cached schedule: {}.", e1.getMessage());
-          return null;
-        } catch (URISyntaxException e1) {
-          log.warn("Unable to read from cached schedule: {}.", e1.getMessage());
+        if (localCalendarCacheURL != null) {
+          calendarString = readCalendar(localCalendarCacheURL);
+        } else {
+          log.warn("Unable to read calendar from local calendar cache because location was null!");
           return null;
         }
       } else {
@@ -365,44 +356,65 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     try {
       out = new FileWriter(file.getFile());
       out.write(contents);
+      out.flush();
     } catch (IOException e) {
       log.error("Unable to write to {}: {}.", file, e.getMessage());
     } finally {
-      try {
-        if (out != null) {
-          out.close();
-        }
-      } catch (IOException e) {}
+      IOUtils.closeQuietly(out);
     }
   }
 
   /**
    * Convenience method to read in a file from either a remote or local source.
    * @param url The {@code URL} to read the source data from.
-   * @return A String containing the source data.
+   * @return A String containing the source data or null in the case of an error.
    * @throws IOException
    * @throws URISyntaxException 
    */
-  private String readCalendar(URL url) throws IOException, NullPointerException, URISyntaxException {
+  private String readCalendar(URL url) {
     StringBuilder sb = new StringBuilder();
     DataInputStream in = null;
     HttpResponse response = null;
-    //Do different things depending on what we're reading...
-    if (url.getProtocol().equals("file")) {
-      in = new DataInputStream(url.openStream());
-    } else {
-      HttpGet get = new HttpGet(url.toURI());
-      response = trustedClient.execute(get);
-      in = new DataInputStream(response.getEntity().getContent());
+    try {
+      //Do different things depending on what we're reading...
+      if (url.getProtocol().equals("file")) {
+        in = new DataInputStream(url.openStream());
+      } else {
+        HttpGet get = new HttpGet(url.toURI());
+        try {
+          response = trustedClient.execute(get);
+        } catch (TrustedHttpClientException e) {
+          log.warn("Unable to fetch updated calendar from {}, message reads: {}.", url, e.getMessage());
+          return null;
+        } finally {
+          if (response != null) {
+            trustedClient.close(response);
+          }
+        }
+        in = new DataInputStream(response.getEntity().getContent());
+      }
+      int c = 0;
+      while ((c = in.read()) != -1) {
+        sb.append((char) c);
+      }
+    } catch (IOException e) {
+      log.warn("IOException attempting to get calendar from {}.", url);
+      return null;
+    } catch (URISyntaxException e) {
+      log.warn("URI error attempting to get calendar from {}.", url);
+      return null;
+    } catch (NullPointerException e) {
+      log.warn("Nullpointer attempting to get calendar from {}.", url);
+      return null;
+    } finally {
+      IOUtils.closeQuietly(in);
+ 
+      if (response != null) {
+        trustedClient.close(response);
+        response = null;
+      }
     }
-    int c = 0;
-    while ((c = in.read()) != -1) {
-      sb.append((char) c);
-    }
-    if (response != null) {
-      trustedClient.close(response);
-      response = null;
-    }
+
     return sb.toString();
   }
 
@@ -668,7 +680,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         if (filename.equals("org.opencastproject.capture.agent.properties")) {
           //Load the properties
           Properties jobProps = new Properties();
-          jobProps.load(new StringReader(contents));
+          StringReader s = new StringReader(contents);
+          jobProps.load(s);
+          s.close();
           //Merge them overtop of the system properties
           jobProps.putAll(props);
           //Attach the properties to the job itself
