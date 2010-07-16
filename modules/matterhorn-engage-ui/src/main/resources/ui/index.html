@@ -4,16 +4,11 @@
   <head>
     <title>Opencast Matterhorn Search</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<link rel="shortcut icon" href="shared_img/favicon.ico"> 
+    <link rel="shortcut icon" href="shared_img/favicon.ico">
     <!-- styles -->
     <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css" />
-
-    <link rel="stylesheet" type="text/css"
-          href="infusion-1.1.2/fss/css/fss-layout.css" />
-    <link rel="stylesheet" type="text/css"
-          href="infusion-1.1.2/fss/css/fss-text.css" />
-    <link rel="stylesheet" type="text/css"
-          href="infusion-1.1.2/fss/css/fss-theme-mist.css" />
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css" />
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css" />
     <link rel="stylesheet" type="text/css" href="css/oc.search.browse.css" />
     <link rel="stylesheet" type="text/css" href="css/oc.pager.css" />
     <link rel="stylesheet" type="text/css" href="shared_css/shared.css">
@@ -70,7 +65,7 @@
               sd.setHours(parseInt(timeDate.substring(11,13)));
               sd.setMinutes(parseInt(timeDate.substring(14,16)));
               sd.setSeconds(parseInt(timeDate.substring(17,19)));
-             $(this).html(sd.toLocaleString());
+              $(this).html(sd.toLocaleString());
             } else {
               $(this).html("n.a.");
             }
@@ -83,7 +78,7 @@
           });
           $(".oc-search-result-item").each(function(index) {
             if(index % 2 ==1) {
-                $(this).css('background-color','#F7FBFC');
+              $(this).css('background-color','#F7FBFC');
             }
           });
           
@@ -105,20 +100,24 @@
 
   <!------------------------- BODY ------------------------->
   <body>
-	<div id="pageHeader">
-    &nbsp;
+    <div id="pageHeader">
+      &nbsp;
       <!--<div id="currentVersion"></div>
       <div id="newestVersion" style="text-align: right; float: right;"></div>-->
     </div>
     <!-- LOGO -->
-    <div class="oc_headerRow">
-        <a class="oc_headerLink" href="../../welcome.html">
-          <div class="mh-logo"><img src="shared_img/MatterhornLogo_80x57.png" alt="Opencast Matterhorn"/></div>
-          <div class="mh-heading"><h1>Media Module</h1></div>
+    <div id="header">
+      <div id="logotitle">
+        <a href="../../welcome.html">
+          <img src="shared_img/MatterhornLogo.png" alt="Opencast Matterhorn" width="104" height="72" align="left">
+          <h1>Opencast Matterhorn</h1>
         </a>
-        <a class="oc_headerLink" href="http://www.opencastproject.org/">
-          <div class="oc-logo"><img src="shared_img/opencast_logo.gif" alt="Opencast Matterhorn"/></div>
+      </div>
+     	<div id="oclogo">
+       	<a href="http://www.opencastproject.org">
+          <img src="shared_img/OpencastLogo.png" width="143" height="38" alt="Opencast Community | Project">
         </a>
+      </div>
     </div>
     <hr style="clear:both;border-style: none none solid none;height:5px; color:#CCCCCC"> 
     <noscript>
@@ -132,18 +131,18 @@
     <div class="oc-holder">
       <div class="oc-search-bar-holder fl-helper-clearfix">&nbsp;
         <div class="oc-search-bar">
-            <span class="subscriptions">
-                <a id="rsslink" href="/feeds/rss/2.0/latest">RSS</a>&nbsp;|&nbsp;
-                <a id="atomlink" href="/feeds/atom/0.3/latest">ATOM</a>
-            </span>
-            <br />
-            <span style="float:right">
-                <form action="index.html">
-                    <label id="skip" for="searchField">Search Field</label>
-                    <input id="searchField" type="text" name="q" value="" />
-                    <input id="searchSubmit" type="submit" value="Search" />
-                </form>
-            </span>
+          <span class="subscriptions">
+            <a id="rsslink" href="/feeds/rss/2.0/latest">RSS</a>&nbsp;|&nbsp;
+            <a id="atomlink" href="/feeds/atom/0.3/latest">ATOM</a>
+          </span>
+          <br />
+          <span style="float:right">
+            <form action="index.html">
+              <label id="skip" for="searchField">Search Field</label>
+              <input id="searchField" type="text" name="q" value="" />
+              <input id="searchSubmit" type="submit" value="Search" />
+            </form>
+          </span>
         </div>
       </div>
       <div class="oc-search-result-header">

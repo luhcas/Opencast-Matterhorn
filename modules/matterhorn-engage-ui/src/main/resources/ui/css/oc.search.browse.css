@@ -3,6 +3,27 @@ body
   text-align:center;
 }
 
+#oclogo {
+	position:absolute;
+	right: 0;
+	top: 0;
+  padding-right:20px;
+}
+#header {
+	position:relative;
+  text-align: left;
+  padding-left:20px;
+  padding-right:20px;
+}
+
+#header h1 {
+	padding: 20px 0 0 140px;
+	margin-bottom:20px;
+  color: #F6921E !important;
+  border: none !important;
+  text-decoration: none;
+}
+
 .oc-holder {
   text-align: left; 
   border:0;
