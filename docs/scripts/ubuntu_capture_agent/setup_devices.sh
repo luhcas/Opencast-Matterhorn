@@ -54,11 +54,10 @@ done
 
 sed -i "/capture.device/d" $CAPTURE_PROPS
 
-config=$CONFIG_SCRIPT
 rules=tmp.rules
 
 rm -f $rules
-rm -f $CONFIG_SCRIPT
+echo "#! /bin/bash" > $CONFIG_SCRIPT
 
 # This converts the "$FLAVORS" string in an array, for convenience
 flavors=($FLAVORS)

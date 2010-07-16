@@ -181,7 +181,7 @@ export DEVICE_PREFIX="capture.device"
 # Suffix for the source location of a certain device in the capture properties file
 export SOURCE_SUFFIX="src"
 # Suffix for the output location of a certain device in the capture properties file
-export OUT_SUFFIX="out"
+export OUT_SUFFIX="outputfile"
 # Suffix for the flavor of a certain device in the capture properties file
 export FLAVOR_SUFFIX="flavor"
 # Suffix for the size of the queue for a certain device in the capture properties file

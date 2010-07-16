@@ -58,10 +58,10 @@ if [[ "$config" ]]; then
     # Asks for the new IP
     # TODO: this property also admits a URL, rather than an IP. Remove the filter and check this still works for an arbitrary address.
     # > And how do we check if that URL is correct or not?
-    ask -a -f '^[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]$'\
+    ask -a -f '^[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9](:[0-9]*[0-9]*[0-9]*[0-9]*[0-9])?$'\
         "Detected IP is $default_ip. Press [enter] to accept, or enter new address" ip
     : ${ip:=$default_ip}
-    sed -i "s#^${SERVER_URL_KEY//./\\.}=.*\$#${SERVER_URL_KEY}=http://${ip}#" "$GEN_PROPS"
+    sed -i "s#^${SERVER_URL_KEY//./\\.}=.*\$#${SERVER_URL_KEY}=http://$ip#" "$GEN_PROPS"
 fi
 
 # Prompt for the URL where the core lives.
