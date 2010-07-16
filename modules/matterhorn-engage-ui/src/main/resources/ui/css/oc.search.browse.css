@@ -21,7 +21,7 @@ body
 	margin-bottom:20px;
   color: #F6921E !important;
   border: none !important;
-  text-decoration: none;
+  text-decoration: none !important;
 }
 
 .oc-holder {
