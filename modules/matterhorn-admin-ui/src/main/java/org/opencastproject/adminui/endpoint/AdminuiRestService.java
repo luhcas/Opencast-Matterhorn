@@ -136,7 +136,15 @@ public class AdminuiRestService {
           @QueryParam("ps") int pageSize,
           @QueryParam("sb") String sortBy,
           @QueryParam("so") String sortOrder) {
-    LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
+
+    AdminRecordingListImpl out;
+    try {
+      AdminRecordingList.Order order = Enum.valueOf(AdminRecordingList.Order.class, sortOrder);
+      AdminRecordingList.Field field = Enum.valueOf(AdminRecordingList.Field.class, sortBy);
+      out = new AdminRecordingListImpl(field, order);
+    } catch (Exception e) {
+      out = new AdminRecordingListImpl();
+    }
     boolean allRecordings = state.toUpperCase().equals("ALL");
     if ((state.toUpperCase().equals("UPCOMING")) || allRecordings) {
       out.addAll(addRecordingStatusForAll("upcoming", getUpcomingRecordings()));
@@ -162,14 +170,7 @@ public class AdminuiRestService {
     if (pageNumber < 0) {
       pageNumber = 0;
     }
-    AdminRecordingListImpl page;
-    try {
-      AdminRecordingList.Order order = Enum.valueOf(AdminRecordingList.Order.class, sortOrder);
-      AdminRecordingList.Field field = Enum.valueOf(AdminRecordingList.Field.class, sortBy);
-      page = new AdminRecordingListImpl(field, order);
-    } catch (Exception e) {
-      page = new AdminRecordingListImpl();
-    }
+    AdminRecordingListImpl page = new AdminRecordingListImpl(out.sortBy, out.sortOrder);
     int first, last;
     if (out.size() <= pageSize) {
       first = 0;
@@ -186,7 +187,7 @@ public class AdminuiRestService {
         break;
       }
     }
-    logger.debug("List: " + page.sortBy.toString() + " " + page.sortOrder.toString());
+    logger.debug("List: " + out.sortBy.toString() + " " + out.sortOrder.toString());
     return page;
   }
 
@@ -244,7 +245,7 @@ public class AdminuiRestService {
         }
         item.setErrorMessages(workflows[i].getErrorMessages());
         item.setCaptureAgent(null); //FIXME get capture agent from where...?
-        // TODO get distribution status #openquestion is there a way to find out if a workflowOperation does distribution?
+        // TODO get distribution status #openquestion is there a way to find seriesList if a workflowOperation does distribution?
         WorkflowOperationInstance currentOperation = workflows[i].getCurrentOperation();
         if (currentOperation == null) {
           List<WorkflowOperationInstance> operationsList = workflows[i].getOperations();
@@ -545,7 +546,14 @@ public class AdminuiRestService {
                                         @QueryParam("sb") String sortBy,
                                         @QueryParam("so") String sortOrder) {
     logger.debug("PageSize, PageNumber: {},{}", pageSize, pageNumber);
-    LinkedList<AdminSeries> seriesList = new LinkedList<AdminSeries>();
+    AdminSeriesListImpl seriesList;
+    try {
+      AdminSeriesList.Order order = Enum.valueOf(AdminSeriesList.Order.class, sortOrder);
+      AdminSeriesList.Field field = Enum.valueOf(AdminSeriesList.Field.class, sortBy);
+      seriesList = new AdminSeriesListImpl(field, order);
+    } catch (Exception e) {
+      seriesList = new AdminSeriesListImpl();
+    }
     List<Series> allSeries = seriesService.getAllSeries();
     for(Series s : allSeries){
       AdminSeries series = new AdminSeriesImpl();
@@ -563,14 +571,7 @@ public class AdminuiRestService {
       logger.debug("Found series {}", series.getTitle());
       seriesList.add(series);
     }
-    AdminSeriesListImpl page;
-    try {
-      AdminSeriesList.Order order = Enum.valueOf(AdminSeriesList.Order.class, sortOrder);
-      AdminSeriesList.Field field = Enum.valueOf(AdminSeriesList.Field.class, sortBy);
-      page = new AdminSeriesListImpl(field, order);
-    } catch (Exception e) {
-      page = new AdminSeriesListImpl();
-    }
+    AdminSeriesListImpl page = new AdminSeriesListImpl(seriesList.sortBy, seriesList.sortOrder);
     if (pageNumber < 0) {
       pageNumber = 0;
     }
