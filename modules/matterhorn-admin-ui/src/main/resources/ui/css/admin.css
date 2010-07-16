@@ -272,13 +272,6 @@ select { font-size:1.15em; }
   background:white;
   position:relative;
   clear:both;
-  /*height:400px;
-  width:600px;
-  z-index:100;
-  position:absolute;
-  top:100px;
-  left:100px;
-  border:1px solid silver;*/
 }
 
 #holdActionPanel-iframe {
@@ -370,6 +363,10 @@ select { font-size:1.15em; }
   float:right;
 }
 
+.paging-nav-container span {
+  font-size: 0.9em;
+}
+
 .paging-nav-goto {
   width:50px;
 }
@@ -380,6 +377,10 @@ select { font-size:1.15em; }
 }
 
 /* Refresh controls and text */
+.refresh-text {
+  font-size: 0.9em;
+}
+
 .refresh-text-enabled {
  color: black;
 }

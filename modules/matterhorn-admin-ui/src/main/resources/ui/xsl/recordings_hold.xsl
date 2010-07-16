@@ -56,9 +56,10 @@
         <input type="hidden">
         </input>
         <a title="View Recording Info">
-          <xsl:attribute name="href">/admin/viewevent.html?workflow=<xsl:value-of select="id" /></xsl:attribute>
+          <xsl:attribute name="href">/admin/viewevent.html?id=<xsl:value-of select="id" /><xsl:text>&amp;type=</xsl:text><xsl:value-of select="itemType" /></xsl:attribute>
           View Info
         </a>
+        <br />
         <a>
           <xsl:attribute name="onclick">
             <xsl:text>Recordings.displayHoldActionPanel('</xsl:text><xsl:value-of select="holdActionPanelURL" /><xsl:text>','</xsl:text><xsl:value-of select="id" /><xsl:text>', this);</xsl:text>

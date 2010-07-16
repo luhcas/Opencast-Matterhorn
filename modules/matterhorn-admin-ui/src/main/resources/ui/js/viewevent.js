@@ -74,8 +74,52 @@ function handleWorkflow(workflowDoc){
   }else{
     throw "Unable to parse workflow.";
   }
-  //TODO: Get the extra metadata catalog, we need the Agent's id and the inputs selected.
-  //$.get(caURL, handleCatalogMetadata);
+//TODO: Get the extra metadata catalog, we need the Agent's id and the inputs selected.
+//$.get(caURL, handleCatalogMetadata);
+}
+
+function handleEvent(doc) {
+  var fieldMap = {
+    title : 'title',
+    seriesId : 'isPartOf',
+    creator : 'creator',
+    contributor : 'contributor',
+    subject : "subject",
+    language : "language",
+    description : 'description',
+    timeStart : 'startdate',
+    timeDuration : "duration",
+    device : "agent",
+    resources : "inputs",
+    license : "license"
+  };
+  eventDoc = createDoc();
+  var rootEl = null;
+  if (doc.documentElement) {
+    rootEl = $(doc.documentElement);
+  } else {
+    rootEl = $("event");
+  }
+  if (rootEl) {
+    $(rootEl).find('metadataList > metadata').each(function() {
+      var key = $(this).find('key').text();
+      var val = $(this).find('value').text();
+      if (fieldMap[key]) {
+        var elm = eventDoc.createElement(fieldMap[key]);
+        if (key == 'timeStart') {
+          val = new Date(new Number(val)).toLocaleString();
+        }
+        if (key == 'timeDuration') {
+          val = parseDuration(val);
+        }
+        elm.appendChild(eventDoc.createTextNode(val));
+        eventDoc.documentElement.appendChild(elm);
+      }
+    });
+    $('#stage').xslt(serialize(eventDoc), "xsl/viewevent.xsl", callback);
+  } else {
+    throw "Unable to parse event.";
+  }
 }
 
 /**
@@ -130,13 +174,13 @@ function handleCatalogMetadata(metadataDoc){
  */
 function callback(){
   $('.folder-head').click(
-                          function(){
-                          $(this).children('.fl-icon').toggleClass('icon-arrow-right');
-                          $(this).children('.fl-icon').toggleClass('icon-arrow-down');
-                          $(this).next().toggle('fast');
-                          return false;
-                          }
-                          );
+    function(){
+      $(this).children('.fl-icon').toggleClass('icon-arrow-right');
+      $(this).children('.fl-icon').toggleClass('icon-arrow-down');
+      $(this).next().toggle('fast');
+      return false;
+    }
+    );
   
 }
 

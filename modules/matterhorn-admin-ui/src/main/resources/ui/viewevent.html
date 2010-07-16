@@ -4,42 +4,46 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" >
     <link rel="shortcut icon" href="shared_img/favicon.ico"> 
     <title>Opencast Matterhorn - View Recording Info</title>
-    
+
     <!-- style -->
     <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css">
     <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css">
     <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css">
     <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-theme-coal.css">
-    
+
     <link rel="stylesheet" type="text/css" href="css/admin.css">
     <link rel="stylesheet" type="text/css" href="css/scheduler.css">
     <link rel="stylesheet" type="text/css" href="shared_css/shared.css">
-    
+
     <!-- static library scripts -->
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
-    
+
     <!-- page script -->
     <script type="text/javascript" src="js/viewevent.js"></script>
     <script type="text/javascript">
+      var params = {};
       if(document.location.search){
-        var params = document.location.search.substr(1).split('&');
-        for(var p in params){
-          eq = params[p].indexOf("=");
-          if(params[p].indexOf("workflow") != -1 && eq != -1){
-            workflowID = params[p].substr(eq+1);
-            break;
+        var query = document.location.search.substr(1).split('&');
+        for (var p in query) {
+          var pair = query[p].split('=');
+          if (pair.length > 1) {
+            params[pair[0]] = pair[1];
           }
         }
       }
       
       $(document).ready(
-        function() {
-          if(workflowID){
-            $.get("/workflow/rest/instance/" + workflowID + ".xml", handleWorkflow);
+      function() {
+        if (params.type && params.id) {
+          if (params['type'].toLowerCase() == 'workflow') {
+            $.get("/workflow/rest/instance/" + params.id + ".xml", handleWorkflow);
+          } else if (params['type'].toLowerCase() == 'scheduler_event') {
+            $.get("/scheduler/rest/event/" + params.id , handleEvent);
           }
         }
-      );
+      }
+    );
     </script>
   </head>
   <body>

@@ -198,7 +198,7 @@ Recordings.displayRecordings = function(state, reload) {
         cache      : false,
         dataType   : 'text',
         error      : function(XHR,status,e){
-          alert('Not able to load XSL for ' + Recordings.currentState);
+          //alert('Not able to load XSL for ' + Recordings.currentState);
         },
         success    : function(data) {
           Recordings.currentXSL = data;
@@ -223,7 +223,7 @@ Recordings.loadRecordingsXML = function() {
     cache      : false,
     dataType   : 'text',
     error      : function(XHR,status,e){
-      alert('Not able to load recordings list for state ' + Recordings.currentState);
+      //alert('Not able to load recordings list for state ' + Recordings.currentState);
     },
     success    : function(data) {
       Recordings.renderTable(data, Recordings.currentXSL);

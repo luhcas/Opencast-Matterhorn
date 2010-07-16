@@ -60,13 +60,18 @@
               <xsl:value-of select="id" />
               <xsl:text>_error').toggleClass('hidden');</xsl:text>
             </xsl:attribute>
-            <xsl:text>Error: </xsl:text><xsl:value-of select="failedOperation" />
+            <xsl:text>Error: </xsl:text>
+            <xsl:value-of select="failedOperation" />
           </a>
           <div>
-          <xsl:attribute name="class">hidden</xsl:attribute>
-          <xsl:attribute name="id"><xsl:value-of select="id" /><xsl:text>_error</xsl:text></xsl:attribute>
+            <xsl:attribute name="class">hidden</xsl:attribute>
+            <xsl:attribute name="id">
+              <xsl:value-of select="id" />
+              <xsl:text>_error</xsl:text>
+            </xsl:attribute>
             <xsl:for-each select="errors">
-              <br/><xsl:value-of select="error" />
+              <br/>
+              <xsl:value-of select="error" />
             </xsl:for-each>
           </div>
         </xsl:if>
@@ -80,6 +85,11 @@
           </xsl:attribute>
           Re-try
         </a -->
+        <a title="View Recording Info">
+            <xsl:attribute name="href">/admin/viewevent.html?id=<xsl:value-of select="id" /><xsl:text>&amp;type=</xsl:text><xsl:value-of select="itemType" /></xsl:attribute>
+          View Info
+          </a>
+          <br />
         <xsl:choose>
           <xsl:when test="itemType='SCHEDULER_EVENT'">
             <a>
@@ -93,7 +103,12 @@
           </xsl:when>
           <xsl:when test="itemType='WORKFLOW'">
             <xsl:if test="zip!=''">
-              <a><xsl:attribute name="href"><xsl:value-of select="zip" /></xsl:attribute>Download</a><br/>
+              <a>
+                <xsl:attribute name="href">
+                  <xsl:value-of select="zip" />
+                </xsl:attribute>Download
+              </a>
+              <br/>
             </xsl:if>
             <a>
               <xsl:attribute name="onclick">

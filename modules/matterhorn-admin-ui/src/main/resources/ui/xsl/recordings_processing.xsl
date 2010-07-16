@@ -57,9 +57,10 @@
       </td>
       <td>
         <a title="View Recording Info">
-          <xsl:attribute name="href">/admin/viewevent.html?workflow=<xsl:value-of select="id" /></xsl:attribute>
+          <xsl:attribute name="href">/admin/viewevent.html?id=<xsl:value-of select="id" /><xsl:text>&amp;type=</xsl:text><xsl:value-of select="itemType" /></xsl:attribute>
           View Info
         </a>
+        <br />
       </td>
     </tr>
   </xsl:template>

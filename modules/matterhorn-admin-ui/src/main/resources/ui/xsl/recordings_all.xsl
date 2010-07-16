@@ -57,14 +57,13 @@
         <xsl:value-of select="processingStatus" />
       </td>
       <td>
+        <a title="View Recording Info">
+          <xsl:attribute name="href">/admin/viewevent.html?id=<xsl:value-of select="id" /><xsl:text>&amp;type=</xsl:text><xsl:value-of select="itemType" /></xsl:attribute>
+          View Info
+        </a>
+        <br />
         <xsl:choose>
           <xsl:when test="recordingStatus = 'upcoming'">
-            <a title="View Recording Info">
-              <xsl:attribute name="href">/admin/scheduler.html?eventId=
-                <xsl:value-of select="id" />&amp;edit
-              </xsl:attribute>
-                Edit
-            </a>
             <a title="Delete Recording">
               <xsl:attribute name="onclick">
                 <xsl:text>Recordings.removeScheduledRecording('</xsl:text>
@@ -76,14 +75,6 @@
                 Delete
             </a>
           </xsl:when>
-          <xsl:otherwise>
-            <a title="View Recording Info">
-              <xsl:attribute name="href">/admin/viewevent.html?workflow=
-                <xsl:value-of select="id" />
-              </xsl:attribute>
-                View Info
-            </a>
-          </xsl:otherwise>
         </xsl:choose>
         <xsl:choose>
           <xsl:when test="recordingStatus = 'hold'">
