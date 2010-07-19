@@ -24,7 +24,8 @@ import org.opencastproject.search.api.SearchQuery;
 public class SearchQueryImpl implements SearchQuery {
   boolean includeEpisode = true;
   boolean includeSeries = false;
-  boolean sortByDate = false;
+  boolean sortByCreationDate = false;
+  boolean sortByPublicationDate = false;
   String id;
   String text;
   String query;
@@ -172,7 +173,7 @@ public class SearchQueryImpl implements SearchQuery {
    */
   @Override
   public SearchQuery withCreationDateSort(boolean sortByDate) {
-    this.sortByDate = sortByDate;
+    this.sortByCreationDate = sortByDate;
     return this;
   }
 
@@ -182,7 +183,26 @@ public class SearchQueryImpl implements SearchQuery {
    */
   @Override
   public boolean isSortByCreationDate() {
-    return sortByDate;
+    return sortByCreationDate;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.search.api.SearchQuery#withPublicationDateSort(boolean)
+   */
+  @Override
+  public SearchQuery withPublicationDateSort(boolean sortByDate) {
+    this.sortByPublicationDate = sortByDate;
+    return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.search.api.SearchQuery#isSortByPublicationDate()
+   */
+  @Override
+  public boolean isSortByPublicationDate() {
+    return sortByPublicationDate;
   }
 
   /**

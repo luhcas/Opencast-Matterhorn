@@ -18,6 +18,7 @@ package org.opencastproject.feed.impl;
 
 import org.opencastproject.feed.api.FeedGenerator;
 import org.opencastproject.feed.api.Feed.Type;
+import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.impl.SearchQueryImpl;
 
@@ -40,7 +41,11 @@ public class LatestFeedService extends AbstractFeedService implements FeedGenera
    */
   protected SearchResult loadFeedData(Type type, String query[], int limit, int offset) {
     try {
-      return searchService.getByQuery(new SearchQueryImpl().includeEpisodes(true).includeSeries(false).withLimit(limit).withOffset(offset));
+      SearchQuery q = new SearchQueryImpl();
+      q.includeEpisodes(true).includeSeries(false);
+      q.withLimit(limit).withOffset(offset);
+      q.withPublicationDateSort(true);
+      return searchService.getByQuery(q);
     } catch (Exception e) {
       logger.error("Cannot retrieve result for feed 'recent episodes'", e);
       return null;

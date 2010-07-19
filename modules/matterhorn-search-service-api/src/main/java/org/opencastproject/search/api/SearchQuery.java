@@ -37,6 +37,8 @@ public interface SearchQuery {
   boolean isIncludeEpisodes();
   SearchQuery withCreationDateSort(boolean sortByDate);
   boolean isSortByCreationDate();
+  SearchQuery withPublicationDateSort(boolean sortByDate);
+  boolean isSortByPublicationDate();
   SearchQuery withElementTags(String[] tags);
   String[] getElementTags();
   SearchQuery withElementFlavors(MediaPackageElementFlavor[] flavors);

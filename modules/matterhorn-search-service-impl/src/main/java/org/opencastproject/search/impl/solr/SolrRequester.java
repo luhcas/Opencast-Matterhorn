@@ -426,8 +426,11 @@ public class SolrRequester {
     if (q.getOffset() > 0)
       query.setStart(q.getOffset());
 
-    if (q.isSortByCreationDate()) {
+    if (q.isSortByPublicationDate()) {
+      query.addSortField(SolrFields.OC_MODIFIED, ORDER.desc);
+    } else if (q.isSortByCreationDate()) {
       query.addSortField(SolrFields.DC_CREATED, ORDER.desc);
+      // If the dublin core field dc:created has not been filled in...
       query.addSortField(SolrFields.OC_MODIFIED, ORDER.desc);
     }
 
