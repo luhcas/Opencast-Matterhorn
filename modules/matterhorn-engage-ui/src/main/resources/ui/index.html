@@ -6,9 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="shortcut icon" href="shared_img/favicon.ico">
     <!-- styles -->
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css" />
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css" />
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css" />
+    <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/opencast-reset.css" />
     <link rel="stylesheet" type="text/css" href="css/oc.search.browse.css" />
     <link rel="stylesheet" type="text/css" href="css/oc.pager.css" />
     <link rel="stylesheet" type="text/css" href="shared_css/shared.css">
@@ -76,9 +74,11 @@
               $(this).attr("src", "img/thumbnail.png");
             }
           });
-          $(".oc-search-result-item").each(function(index) {
+          $(".search-item").each(function(index) {
             if(index % 2 ==1) {
               $(this).css('background-color','#F7FBFC');
+            } else {
+              $(this).css('background-color','#EFF7F9;');
             }
           });
           
@@ -108,7 +108,7 @@
     <!-- LOGO -->
     <div id="header">
       <div id="logotitle">
-        <a href="../../welcome.html" style="text-decoration:none;">
+        <a href="../../welcome.html">
           <img src="shared_img/MatterhornLogo.png" alt="Opencast Matterhorn" width="104" height="72" align="left">
           <h1>Opencast Matterhorn</h1>
         </a>

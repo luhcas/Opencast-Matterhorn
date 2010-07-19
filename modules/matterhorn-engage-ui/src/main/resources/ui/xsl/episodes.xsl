@@ -4,10 +4,10 @@
 <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:ns2="http://search.opencastproject.org/">
     <xsl:template match="/">
+      <table width="100%" cellspacing="0">
         <xsl:for-each select="ns2:search-results/result">
-            <div class="oc-search-result-item">
-                <div class="table-row">
-                    <div class="left-container13">
+            <tr class="search-item">
+                    <td style="vertical-align: top;">
                         <a class="itemtitle">
                             <xsl:attribute name="href">watch.html?id=<xsl:value-of
                                 select="mediapackage/@id" /></xsl:attribute>
@@ -24,8 +24,9 @@
                                     </xsl:for-each>
                                 </img>
                             </a>
-                        </div>
-                        <div class="left-container23">
+                        </td>
+                        
+                        <td style="vertical-align: top; text-align:left; padding-top: 10px; padding-right: 10px;">
                             <xsl:choose>
                                 <xsl:when test="mediapackage/media/track/mimetype[.='video/x-flv']">
                                     <b>
@@ -44,12 +45,12 @@
                                             <xsl:value-of select="dcCreator" />
                                         </xsl:if>
                                     </span>
-                                    <br /><br /><br />
+                                    <br />
                                     <div class="timeDate">
                                         <xsl:value-of select="dcCreated"/>
                                     </div>
-                                    <xsl:value-of select='substring(dcDescription, 0, 170)' />
-                                    <xsl:if test='string-length(dcDescription)>170'>
+                                    <xsl:value-of select='substring(dcDescription, 0, 200)' />
+                                    <xsl:if test='string-length(dcDescription)>200'>
                                         ...
                                     </xsl:if>
                                 </xsl:when>
@@ -76,15 +77,15 @@
                 </a>.
                             </xsl:otherwise>
                         </xsl:choose>
-                    </div>
-                    <div class="right-container13">
+                    </td>
+                    <td style="vertical-align: top; text-align:right; padding-top: 10px; padding-right: 10px;">
                         <xsl:value-of select="dcRightsHolder" />
                         <br />
                         <xsl:value-of select="dcContributor" />
-                    </div>
-                </div>
-            </div>
+                    </td>
+          </tr>
         </xsl:for-each>
+        </table>
         <div id="oc-episodes-total" style="display: none">
             <xsl:value-of select="ns2:search-results/@total" />
         </div>
