@@ -457,7 +457,12 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         return false;
       }
       long startWait = System.currentTimeMillis();
-      long timeout = Long.parseLong(configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT));
+      long timeout = 60000l;
+      if (configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT) == null) {
+        logger.warn("Unable to find shutdown timeout value.  Assuming 1 minute.  Missing key is {}.", CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT);
+      } else {
+        timeout = Long.parseLong(configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT)) * 1000l;
+      }
       while (pipe != null) {
         try {
           Thread.sleep(1000);
