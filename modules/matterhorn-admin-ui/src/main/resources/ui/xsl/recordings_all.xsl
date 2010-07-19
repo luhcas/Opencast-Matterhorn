@@ -118,22 +118,38 @@
             </a>
           </xsl:when>
           <xsl:when test="recordingStatus = 'failed'">
-            <!--a>
-              <xsl:attribute name="onclick">
-                <xsl:text>Recordings.retryRecording('</xsl:text>
-                <xsl:value-of select="id" />
-                <xsl:text>');</xsl:text>
-              </xsl:attribute>
-                    Re-try
-            </a-->
-            <a>
-              <xsl:attribute name="onclick">
-                <xsl:text>Recordings.removeRecording('</xsl:text>
-                <xsl:value-of select="id" />
-                <xsl:text>');</xsl:text>
-              </xsl:attribute>
-		          Delete
-            </a>
+            <xsl:choose>
+              <xsl:when test ="processingStatus = 'Failed during capture' or processingStatus = 'Failed to start capture'">
+                <a title="Delete Recording">
+                  <xsl:attribute name="onclick">
+                    <xsl:text>Recordings.removeScheduledRecording('</xsl:text>
+                    <xsl:value-of select="id" />
+                    <xsl:text>', '</xsl:text>
+                    <xsl:value-of select="title" />
+                    <xsl:text>');</xsl:text>
+                  </xsl:attribute>
+                  Delete
+                </a>
+              </xsl:when>
+              <xsl:otherwise>
+                <!--a>
+                  <xsl:attribute name="onclick">
+                    <xsl:text>Recordings.retryRecording('</xsl:text>
+                    <xsl:value-of select="id" />
+                    <xsl:text>');</xsl:text>
+                  </xsl:attribute>
+                        Re-try
+                </a-->
+                <a>
+                  <xsl:attribute name="onclick">
+                    <xsl:text>Recordings.removeRecording('</xsl:text>
+                    <xsl:value-of select="id" />
+                    <xsl:text>');</xsl:text>
+                  </xsl:attribute>
+                  Delete
+                </a>
+              </xsl:otherwise>
+            </xsl:choose>
           </xsl:when>
           <xsl:otherwise></xsl:otherwise>
         </xsl:choose>
