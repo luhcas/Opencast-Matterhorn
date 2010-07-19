@@ -227,7 +227,7 @@ public class AdminuiRestService {
         item.setItemType(AdminRecording.ItemType.WORKFLOW);
         item.setTitle(mediapackage.getTitle());
         item.setPresenter(joinStringArray(mediapackage.getCreators()));
-        item.setSeriesTitle(mediapackage.getSeries());
+        item.setSeriesTitle(getSeriesNameById(mediapackage.getSeries()));
         item.setSeriesId(mediapackage.getSeries());
         Date date = mediapackage.getDate();
         long duration = mediapackage.getDuration();
@@ -647,8 +647,15 @@ public class AdminuiRestService {
 
   public String getSeriesNameFromEvent(Event event) {
     String seriesId = event.getValue("seriesId");
-    String seriesName = null;
     if(!seriesId.isEmpty()){
+      return getSeriesNameById(seriesId);
+    }
+    return "";
+  }
+  
+  public String getSeriesNameById(String seriesId) {
+    String seriesName = null;
+    if(seriesId != null && !seriesId.isEmpty()){
         Series series = seriesService.getSeries(seriesId);
         if(series != null){
           seriesName = series.getFromMetadata("title");
