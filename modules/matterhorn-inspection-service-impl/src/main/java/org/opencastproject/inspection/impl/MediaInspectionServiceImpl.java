@@ -42,6 +42,7 @@ import org.opencastproject.util.UnknownFileTypeException;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.io.FilenameUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
@@ -155,6 +156,16 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
           rs.updateReceipt(receipt);
           throw new RuntimeException(e);
         }
+        
+        // Make sure the file has an extension. Otherwise, tools like ffmpeg will not work.
+        // TODO: Try to guess the extension from the container's metadata
+        if ("".equals(FilenameUtils.getExtension(file.getName()))) {
+          logger.warn("Track " + file + " has no file extension");
+          receipt.setStatus(Status.FAILED);
+          rs.updateReceipt(receipt);
+          throw new UnsupportedElementException("Track " + file + " has no file extension");
+        }
+        
         MediaContainerMetadata metadata = getFileMetadata(file);
         if (metadata == null) {
           logger.warn("Unable to acquire media metadata for " + uri);
@@ -264,6 +275,15 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
           receipt.setStatus(Status.FAILED);
           rs.updateReceipt(receipt);
           throw new RuntimeException(e);
+        }
+
+        // Make sure the file has an extension. Otherwise, tools like ffmpeg will not work.
+        // TODO: Try to guess the extension from the container's metadata
+        if ("".equals(FilenameUtils.getExtension(file.getName()))) {
+          logger.warn("Track " + file + " has no file extension");
+          receipt.setStatus(Status.FAILED);
+          rs.updateReceipt(receipt);
+          throw new UnsupportedElementException("Track " + file + " has no file extension");
         }
 
         MediaContainerMetadata metadata = getFileMetadata(file);
