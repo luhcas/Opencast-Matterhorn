@@ -449,9 +449,9 @@ public class AdminuiRestService {
           item.setStartTime(Long.toString(event.getStartdate().getTime()));
           item.setEndTime(Long.toString(event.getEnddate().getTime()));
           if (recording != null) {
-            item.setProcessingStatus(recording.getState());
+            item.setProcessingStatus("Failed during capture" /*recording.getState()*/);
           } else {
-            item.setProcessingStatus("unknown error");
+            item.setProcessingStatus("Failed to start capture");
           }
           out.add(item);
         }
