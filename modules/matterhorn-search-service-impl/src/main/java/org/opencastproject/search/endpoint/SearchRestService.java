@@ -200,13 +200,16 @@ public class SearchRestService {
           @QueryParam("limit") int limit,
           @QueryParam("offset") int offset) {
     SearchQueryImpl query = new SearchQueryImpl();
+    
     // If id is specified, do a search based on id
-    if(!StringUtils.isEmpty(id)) {
+    if (!StringUtils.isBlank(id)) {
       query.includeEpisodes(includeEpisodes);
       query.withId(id);
-    } else if ( ! StringUtils.isEmpty(text)) {
+    } else if (!StringUtils.isBlank(text)) {
       query.withText(text);
     }
+    
+    query.withPublicationDateSort(true);
     query.withLimit(limit);
     query.withOffset(offset);
     return (SearchResultImpl) searchService.getByQuery(query);
@@ -237,7 +240,11 @@ public class SearchRestService {
     
     SearchQueryImpl search = new SearchQueryImpl();
     search.withId(id).withElementFlavors(flavorSet.toArray(new MediaPackageElementFlavor[flavorSet.size()])).
-    withText(text).withElementTags(tags).withLimit(limit).withOffset(offset);
+    withElementTags(tags).withLimit(limit).withOffset(offset);
+    if (!StringUtils.isBlank(text))
+      search.withText(text);
+    else
+      search.withPublicationDateSort(true);
     return (SearchResultImpl)searchService.getByQuery(search);
   }
 
@@ -252,6 +259,10 @@ public class SearchRestService {
     query.includeSeries(true);
     query.withLimit(limit);
     query.withOffset(offset);
+    if (!StringUtils.isBlank(text))
+      query.withText(text);
+    else
+      query.withPublicationDateSort(true);
     return (SearchResultImpl) searchService.getByQuery(query);
   }
   
@@ -263,7 +274,10 @@ public class SearchRestService {
           @QueryParam("limit") int limit,
           @QueryParam("offset") int offset) {
     SearchQueryImpl query = new SearchQueryImpl();
-    query.withQuery(q);
+    if (!StringUtils.isBlank(q))
+      query.withQuery(q);
+    else
+      query.withPublicationDateSort(true);
     query.withLimit(limit);
     query.withOffset(offset);
     return (SearchResultImpl) searchService.getByQuery(query);
