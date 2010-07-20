@@ -113,5 +113,5 @@ CREATE TABLE `DICTIONARY` (
   PRIMARY KEY  (`TEXT`, `LANGUAGE`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-create index dictionary_text on dictionary (text);
-create index dictionary_language on dictionary (language);
+CREATE INDEX DICTIONARY_TEXT ON DICTIONARY (TEXT);
+CREATE INDEX DICTIONARY_LANGUAGE ON DICTIONARY (LANGUAGE);
