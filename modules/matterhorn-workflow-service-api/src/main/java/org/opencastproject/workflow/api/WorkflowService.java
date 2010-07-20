@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.api;
 
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.util.NotFoundException;
 
 import java.util.List;
 import java.util.Map;
@@ -121,30 +122,34 @@ public interface WorkflowService {
    * Stops a running workflow instance.
    * 
    * @param workflowInstanceId
+   * @throws NotFoundException
    */
-  void stop(String workflowInstanceId);
+  void stop(String workflowInstanceId) throws NotFoundException;
 
   /**
    * Temporarily suspends a started workflow instance.
    * 
    * @param workflowInstanceId
+   * @throws NotFoundException
    */
-  void suspend(String workflowInstanceId);
+  void suspend(String workflowInstanceId) throws NotFoundException;
 
   /**
    * Resumes a suspended workflow instance.
    * 
    * @param id the workflow to resume
+   * @throws NotFoundException
    */
-  void resume(String id);
+  void resume(String id) throws NotFoundException;
 
   /**
    * Resumes a suspended workflow instance, applying new properties to the workflow.
    * 
    * @param workflowInstanceId the workflow to resume
    * @param properties the properties to apply to the resumed workflow
+   * @throws NotFoundException
    */
-  void resume(String workflowInstanceId, Map<String, String> properties);
+  void resume(String workflowInstanceId, Map<String, String> properties) throws NotFoundException;
 
   /**
    * Updates the given workflow instance with regard to the media package, the properties and the operations involved.

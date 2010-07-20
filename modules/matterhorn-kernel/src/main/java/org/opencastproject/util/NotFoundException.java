@@ -16,7 +16,7 @@
 package org.opencastproject.util;
 
 /**
- * An exception that indicates that the resource could not be loaded by the workspace.
+ * An exception that indicates that a resource that was expected to exist does not exist.
  */
 public class NotFoundException extends Exception {
 

@@ -18,6 +18,7 @@ package org.opencastproject.workflow.impl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageMetadata;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -469,8 +470,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * 
    * @see org.opencastproject.workflow.api.WorkflowService#stop(java.lang.String)
    */
-  public void stop(String workflowInstanceId) {
+  public void stop(String workflowInstanceId) throws NotFoundException {
     WorkflowInstanceImpl instance = (WorkflowInstanceImpl) getWorkflowById(workflowInstanceId);
+    if(instance == null) throw new NotFoundException("Workflow ID='" + workflowInstanceId + "' does not exist");
     instance.setState(WorkflowState.STOPPED);
     update(instance);
   }
@@ -480,8 +482,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * 
    * @see org.opencastproject.workflow.api.WorkflowService#suspend(java.lang.String)
    */
-  public void suspend(String workflowInstanceId) {
+  public void suspend(String workflowInstanceId) throws NotFoundException {
     WorkflowInstanceImpl instance = (WorkflowInstanceImpl) getWorkflowById(workflowInstanceId);
+    if(instance == null) throw new NotFoundException("Workflow ID='" + workflowInstanceId + "' does not exist");
     instance.setState(WorkflowState.PAUSED);
     update(instance);
   }
@@ -492,7 +495,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#resume(java.lang.String)
    */
   @Override
-  public void resume(String id) {
+  public void resume(String id) throws NotFoundException {
     resume(id, new HashMap<String, String>());
   }
 
@@ -501,9 +504,10 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * 
    * @see org.opencastproject.workflow.api.WorkflowService#resume(java.lang.String)
    */
-  public void resume(String workflowInstanceId, Map<String, String> properties) {
+  public void resume(String workflowInstanceId, Map<String, String> properties) throws NotFoundException {
     WorkflowInstanceImpl workflowInstance = (WorkflowInstanceImpl) updateConfiguration(
             getWorkflowById(workflowInstanceId), properties);
+    if(workflowInstance == null) throw new NotFoundException("Workflow ID='" + workflowInstanceId + "' does not exist");
     workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
     dao.update(workflowInstance);
     run(workflowInstance);

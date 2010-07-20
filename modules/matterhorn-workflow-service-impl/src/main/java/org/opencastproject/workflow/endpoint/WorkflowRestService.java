@@ -18,6 +18,7 @@ package org.opencastproject.workflow.endpoint;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -410,16 +411,24 @@ public class WorkflowRestService {
   @Path("stop")
   @Produces(MediaType.TEXT_PLAIN)
   public Response stop(@FormParam("id") String workflowInstanceId) {
-    service.stop(workflowInstanceId);
-    return Response.ok("stopped " + workflowInstanceId).build();
+    try {
+      service.stop(workflowInstanceId);
+      return Response.ok("stopped " + workflowInstanceId).build();
+    } catch (NotFoundException e) {
+      return Response.status(Status.NOT_FOUND).build();
+    }
   }
 
   @POST
   @Path("suspend")
   @Produces(MediaType.TEXT_PLAIN)
   public Response suspend(@FormParam("id") String workflowInstanceId) {
-    service.suspend(workflowInstanceId);
-    return Response.ok("suspended " + workflowInstanceId).build();
+    try {
+      service.suspend(workflowInstanceId);
+      return Response.ok("suspended " + workflowInstanceId).build();
+    } catch (NotFoundException e) {
+      return Response.status(Status.NOT_FOUND).build();
+    }
   }
 
   @POST
@@ -438,8 +447,12 @@ public class WorkflowRestService {
       workflow.setMediaPackage(mediaPackage);
       service.update(workflow);
     }
-    service.resume(workflowInstanceId, map);
-    return Response.ok("resumed " + workflowInstanceId).build();
+    try {
+      service.resume(workflowInstanceId, map);
+      return Response.ok("resumed " + workflowInstanceId).build();
+    } catch (NotFoundException e) {
+      return Response.status(Status.NOT_FOUND).build();
+    }
   }
 
   @GET
