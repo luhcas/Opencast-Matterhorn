@@ -25,6 +25,7 @@ Tools that you need to install:
 - subversion
 - patch
 - wget
+- aspell-devel
 
 If possible also install the following packages:
 - libjpeg-devel

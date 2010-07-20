@@ -12,7 +12,7 @@ if
 	# installing prerequisite tools
 	sudo apt-get -y install zlib1g-dev gcc g++ pkg-config byacc subversion patch &&
 	# installing required libraries
-	sudo apt-get -y install libjpeg-dev libpng12-dev libtiff4-dev jam &&
+	sudo apt-get -y install libjpeg-dev libpng12-dev libtiff4-dev jam libaspell-dev &&
 	# installing gstreamer
 	sudo apt-get -y install libgstreamer0.10-0 gstreamer0.10-plugins-base gstreamer0.10-plugins-good
 then
