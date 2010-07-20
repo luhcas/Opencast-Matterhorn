@@ -57,7 +57,7 @@
       </td>
       <td>
         <br />
-        <a title="View Recording Info">
+        <a title="Edit Recording Info">
           <xsl:attribute name="href">/admin/scheduler.html?eventId=<xsl:value-of select="id" />&amp;edit</xsl:attribute>
           Edit
         </a>
