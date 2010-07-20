@@ -385,11 +385,10 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           response = trustedClient.execute(get);
         } catch (TrustedHttpClientException e) {
           log.warn("Unable to fetch updated calendar from {}, message reads: {}.", url, e.getMessage());
-          return null;
-        } finally {
           if (response != null) {
             trustedClient.close(response);
           }
+          return null;
         }
         in = new DataInputStream(response.getEntity().getContent());
       }
