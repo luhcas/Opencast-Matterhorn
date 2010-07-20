@@ -19,6 +19,7 @@ package org.opencastproject.search.impl.solr;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.search.api.MediaSegment;
 import org.opencastproject.search.api.MediaSegmentImpl;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
@@ -38,9 +39,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Class implementing <code>LookupRequester</code> to provide connection to solr indexing facility.
@@ -67,9 +72,13 @@ public class SolrRequester {
 
   /**
    * Gets search results for a solr query string
-   * @param q the query
-   * @param limit the limit
-   * @param offset the offset
+   * 
+   * @param q
+   *          the query
+   * @param limit
+   *          the limit
+   * @param offset
+   *          the offset
    * @return the search results
    * @throws SolrServerException
    */
@@ -177,51 +186,10 @@ public class SolrRequester {
         }
 
         // Loop over the segments
-        for (String fieldName : doc.getFieldNames()) {
-          if (fieldName.startsWith(SolrFields.SEGMENT_TEXT)) {
-
-            // Ceate a new segment
-            int segmentId = Integer.parseInt(fieldName.substring(SolrFields.SEGMENT_TEXT.length()));
-            MediaSegmentImpl segment = new MediaSegmentImpl(segmentId);
-            segment.setText(toString(doc.getFieldValue(fieldName)));
-
-            // Read the hints for this segment
-            Properties segmentHints = new Properties();
-            try {
-              String hintFieldName = SolrFields.SEGMENT_HINTS + segment.getIndex();
-              Object hintFieldValue = doc.getFieldValue(hintFieldName);
-              segmentHints.load(new ByteArrayInputStream(hintFieldValue.toString().getBytes()));
-            } catch (IOException e) {
-              logger.warn("Cannot load hint properties.");
-            }
-
-            // get segment time
-            String segmentTime = segmentHints.getProperty("time");
-            if (segmentTime == null)
-              throw new IllegalStateException("Found segment without time hint");
-            segment.setTime(Long.parseLong(segmentTime));
-
-            // get segment duration
-            String segmentDuration = segmentHints.getProperty("duration");
-            if (segmentDuration == null)
-              throw new IllegalStateException("Found segment without duration hint");
-            segment.setDuration(Long.parseLong(segmentDuration));
-
-            // get preview urls
-            for (Entry<Object, Object> entry : segmentHints.entrySet()) {
-              if (entry.getKey().toString().startsWith("preview.")) {
-                String parts[] = entry.getKey().toString().split("\\.");
-                segment.addPreview(entry.getValue().toString(), parts[1]);
-              }
-            }
-
-            // the relevance
-            // TODO: Add real relevance
-            segment.setRelevance((int) Math.round(Math.random() * 4));
-
-            item.addSegment(segment);
-          }
+        for (MediaSegment segment : createSearchResultSegments(doc, query)) {
+          item.addSegment(segment);
         }
+
       }
 
       // Add the item to the result set
@@ -229,6 +197,101 @@ public class SolrRequester {
     }
 
     return result;
+  }
+
+  /**
+   * Creates a list of <code>MediaSegment</code>s from the given result document.
+   * 
+   * @param doc
+   *          the result document
+   * @param query
+   *          the original query
+   */
+  private List<MediaSegmentImpl> createSearchResultSegments(SolrDocument doc, SolrQuery query) {
+    List<MediaSegmentImpl> segments = new ArrayList<MediaSegmentImpl>();
+    
+    // The maximum number of hits in a segment
+    int maxHits = 0;
+
+    // Loop over every segment
+    for (String fieldName : doc.getFieldNames()) {
+      if (!fieldName.startsWith(SolrFields.SEGMENT_TEXT))
+        continue;
+
+      // Ceate a new segment
+      int segmentId = Integer.parseInt(fieldName.substring(SolrFields.SEGMENT_TEXT.length()));
+      MediaSegmentImpl segment = new MediaSegmentImpl(segmentId);
+      segment.setText(toString(doc.getFieldValue(fieldName)));
+
+      // Read the hints for this segment
+      Properties segmentHints = new Properties();
+      try {
+        String hintFieldName = SolrFields.SEGMENT_HINTS + segment.getIndex();
+        Object hintFieldValue = doc.getFieldValue(hintFieldName);
+        segmentHints.load(new ByteArrayInputStream(hintFieldValue.toString().getBytes()));
+      } catch (IOException e) {
+        logger.warn("Cannot load hint properties.");
+      }
+
+      // get segment time
+      String segmentTime = segmentHints.getProperty("time");
+      if (segmentTime == null)
+        throw new IllegalStateException("Found segment without time hint");
+      segment.setTime(Long.parseLong(segmentTime));
+
+      // get segment duration
+      String segmentDuration = segmentHints.getProperty("duration");
+      if (segmentDuration == null)
+        throw new IllegalStateException("Found segment without duration hint");
+      segment.setDuration(Long.parseLong(segmentDuration));
+
+      // get preview urls
+      for (Entry<Object, Object> entry : segmentHints.entrySet()) {
+        if (entry.getKey().toString().startsWith("preview.")) {
+          String parts[] = entry.getKey().toString().split("\\.");
+          segment.addPreview(entry.getValue().toString(), parts[1]);
+        }
+      }
+
+      // calculate the segment's relevance with respect to the query
+      String queryText = query.getQuery();
+      String segmentText = segment.getText();
+      if (!StringUtils.isBlank(queryText) && !StringUtils.isBlank(segmentText)) {
+        segmentText = segmentText.toLowerCase();
+        Pattern p = Pattern.compile(".*fulltext:\\(([^)]*)\\).*");
+        Matcher m = p.matcher(queryText);
+        if (m.matches()) {
+          String[] queryTerms = StringUtils.split(m.group(1).toLowerCase());
+          int segmentHits = 0;
+          int textLength = segmentText.length();
+          for (String t : queryTerms) {
+            int startIndex = 0;
+            while (startIndex < textLength - 1) {
+              int foundAt = segmentText.indexOf(t, startIndex);
+              if (foundAt < 0)
+                break;
+              segmentHits++;
+              startIndex = foundAt + t.length();
+            }
+          }
+          
+          // for now, just store the number of hits, but keep track of the maximum hit count
+          segment.setRelevance(segmentHits);
+          if (segmentHits > maxHits)
+            maxHits = segmentHits;
+        }
+      }
+
+      segments.add(segment);
+    }
+    
+    for (MediaSegmentImpl segment : segments) {
+      int hitsInSegment = segment.getRelevance();
+      if (hitsInSegment > 0)
+        segment.setRelevance((int)((100 * hitsInSegment) / maxHits));
+    }
+
+    return segments;
   }
 
   /**
