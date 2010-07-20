@@ -22,24 +22,38 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.felix.fileinstall.ArtifactInstaller;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Places a file named "inbox*" from any fileinstall watch directory into the inbox collection.  Fileinstall takes care
  * of installing artifacts only once they are fully copied into the watch directory.
  */
 public class InboxScanner implements ArtifactInstaller {
+  /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(InboxScanner.class);
 
+  /** The workspace */
   protected Workspace workspace = null;
   
+  /** The ingest service */
   protected IngestService ingestService;
   
+  /** The local thread pool */
+  protected ExecutorService executorService;
+
+  /**
+   * Sets the ingest service
+   * 
+   * @param ingestService the ingest service
+   */
   public void setIngestService(IngestService ingestService) {
     this.ingestService = ingestService;
   }
@@ -54,12 +68,24 @@ public class InboxScanner implements ArtifactInstaller {
     this.workspace = workspace;
   }
 
+  protected void activate(ComponentContext cc) {
+    int maxThreads = 1;
+    if(cc != null && cc.getBundleContext().getProperty("inbox.threads") != null) {
+      try {
+        maxThreads = Integer.parseInt(cc.getBundleContext().getProperty("inbox.threads"));
+      } catch(NumberFormatException e) {
+        logger.warn("Illegal value set for inbox.threads.  Using default value of 1 inbox ingest at a time.");
+      }
+    }
+    this.executorService = Executors.newFixedThreadPool(maxThreads);
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.apache.felix.fileinstall.ArtifactInstaller#install(java.io.File)
    */
   public void install(File artifact) throws Exception {
-    new Thread(getInstallRunnable(artifact)).start();
+    executorService.execute(getInstallRunnable(artifact));
   }
 
   protected Runnable getInstallRunnable(final File artifact) {
