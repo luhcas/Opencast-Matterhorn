@@ -9,11 +9,15 @@ body
 	top: 0;
   padding-right:20px;
 }
+
+#logotitle {
+  padding-left:20px;
+}
+
 #header {
 	position:relative;
   text-align: left;
-  padding-left:20px;
-  padding-right:20px;
+  width: 100%;
 }
 
 #header h1 {
@@ -36,8 +40,7 @@ body
 }
 
 .oc-search-bar {
-  position:absolute;
-  float:right;
+  position:relative;
   top: 0;
   right: 0;
 }
