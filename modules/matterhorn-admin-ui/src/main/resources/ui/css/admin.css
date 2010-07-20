@@ -237,6 +237,7 @@ select { font-size:1.15em; }
 #add-buttons-container {
     float:right;
     margin:10px 0;
+    overflow: hidden;
 }
 
 #recordings-table-container {
