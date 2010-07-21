@@ -98,5 +98,16 @@
       description="Complete. Holding for download of DVD image">
     </operation>
 
+    <!-- Cleanup the working file repository -->
+ 
+    <operation
+      id="cleanup"
+      fail-on-error="false"
+      description="Cleaning up">
+      <configurations>
+        <configuration key="preserve-flavors">*/source,dublincore/*</configuration>
+      </configurations>
+    </operation>
+
   </operations>
 </definition>

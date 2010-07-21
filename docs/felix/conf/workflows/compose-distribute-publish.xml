@@ -393,17 +393,14 @@
       </configurations>
     </operation>
  
-    <!-- Archive the mediapackage -->
+    <!-- Cleanup the working file repository -->
  
     <operation
-      id="archive"
-      fail-on-error="true"
-      exception-handler-workflow="error"
+      id="cleanup"
+      fail-on-error="false"
       description="Cleaning up">
       <configurations>
-        <configuration key="archive-collection">2010.summer.archive</configuration>
-        <configuration key="preserve-flavors">dublincore/episode,dublincore/series</configuration>
-        <configuration key="compression">false</configuration>
+        <configuration key="preserve-flavors">*/source,dublincore/*</configuration>
       </configurations>
     </operation>
   </operations>

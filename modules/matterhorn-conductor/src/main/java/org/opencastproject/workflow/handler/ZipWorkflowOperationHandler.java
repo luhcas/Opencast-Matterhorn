@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -66,25 +67,28 @@ import java.util.concurrent.Future;
  * Produces a zipped archive of a mediapackage, places it in the archive collection, and removes the rest of the
  * mediapackage elements from both the mediapackage xml and if possible, from storage altogether.
  */
-public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
+public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
 
   /** The logger */
-  private static final Logger logger = LoggerFactory.getLogger(ArchiveWorkflowOperationHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(ZipWorkflowOperationHandler.class);
 
   /** The workflow operation's property to consult to determine the collection to use to store an archive */
-  public static final String ARCHIVE_COLLECTION_PROPERTY = "archive-collection";
+  public static final String ZIP_COLLECTION_PROPERTY = "zip-collection";
 
-  /** The element flavors to maintain in the original mediapackage */
-  public static final String PRESERVE_FLAVOR_PROPERTY = "preserve-flavors";
+  /** The element flavors to include in the zip file */
+  public static final String INCLUDE_FLAVORS_PROPERTY = "include-flavors";
 
   /** The property indicating whether to apply compression to the archive */
   public static final String COMPRESS_PROPERTY = "compression";
 
   /** The default collection in the working file repository to store archives */
-  public static final String DEFAULT_ARCHIVE_COLLECTION = "archive";
+  public static final String DEFAULT_ZIP_COLLECTION = "zip";
 
   /** The temporary location to use when building an archive */
   public static final String ARCHIVE_TEMP_DIR = "archive-temp";
+
+  /** The bundle context property to consult for determining the number of concurrent threads to use in zipping */
+  public static final String ARCHIVE_THREADS_BUNDLE_CONTEXT_PROPERTY = "archive.threads";
 
   /** The flavor to use for a mediapackage archive */
   public static final MediaPackageElementFlavor ARCHIVE_FLAVOR = MediaPackageElementFlavor.parseFlavor("archive/zip");
@@ -102,21 +106,18 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
   /** The thread pool */
   protected ExecutorService executorService;
-  
+
   /** The default no-arg constructor builds the configuration options set */
-  public ArchiveWorkflowOperationHandler() {
+  public ZipWorkflowOperationHandler() {
     configurationOptions = new TreeMap<String, String>();
-    configurationOptions.put(ARCHIVE_COLLECTION_PROPERTY,
-            "The configuration key that specifies the archive collection.  Defaults to " + DEFAULT_ARCHIVE_COLLECTION);
+    configurationOptions.put(ZIP_COLLECTION_PROPERTY,
+            "The configuration key that specifies the zip archive collection.  Defaults to " + DEFAULT_ZIP_COLLECTION);
     configurationOptions.put(COMPRESS_PROPERTY,
             "The configuration key that specifies whether to compress the zip archive.  Defaults to false.");
-    configurationOptions.put(PRESERVE_FLAVOR_PROPERTY,
-            "The configuration key that specifies the element flavors to preserve in the original "
-                    + "mediapackage.  Any flavors not specified here will remain only as part of the zipped "
-                    + "mediapackage archive");
+    configurationOptions.put(INCLUDE_FLAVORS_PROPERTY,
+            "The configuration key that specifies the element flavors to include in the zipped mediapackage archive");
   }
 
-  
   /**
    * Sets the workspace to use.
    * 
@@ -144,10 +145,10 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
       }
     }
     int maxThreads = 1;
-    if(cc.getBundleContext().getProperty("archive.threads") != null) {
+    if (cc.getBundleContext().getProperty(ARCHIVE_THREADS_BUNDLE_CONTEXT_PROPERTY) != null) {
       try {
-        maxThreads = Integer.parseInt(cc.getBundleContext().getProperty("archive.threads"));
-      } catch(NumberFormatException e) {
+        maxThreads = Integer.parseInt(cc.getBundleContext().getProperty(ARCHIVE_THREADS_BUNDLE_CONTEXT_PROPERTY));
+      } catch (NumberFormatException e) {
         logger.warn("Illegal value set for archive.threads.  Using default value of 1 archive operation at a time.");
       }
     }
@@ -163,6 +164,17 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
   public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     final MediaPackage mediaPackage = workflowInstance.getMediaPackage();
     final WorkflowOperationInstance currentOperation = workflowInstance.getCurrentOperation();
+    String flavors = currentOperation.getConfiguration(INCLUDE_FLAVORS_PROPERTY);
+    final List<MediaPackageElementFlavor> flavorsToZip = new ArrayList<MediaPackageElementFlavor>();
+
+    // If the configuration does not specify flavors, just zip them all
+    if (flavors == null) {
+      flavorsToZip.add(MediaPackageElementFlavor.parseFlavor("*/*"));
+    } else {
+      for(String flavor : asList(flavors)) {
+        flavorsToZip.add(MediaPackageElementFlavor.parseFlavor(flavor));
+      }
+    }
 
     // Callable allows us to throw checked exceptions, where Runnable does not
     Callable<Void> callable = new Callable<Void>() {
@@ -176,14 +188,14 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
         // Zip the contents of the mediapackage
         File zip = null;
         try {
-          zip = zip(mediaPackage, compress);
+          zip = zip(mediaPackage, flavorsToZip, compress);
         } catch (Exception e) {
           throw new WorkflowOperationException("Unable to create a zip archive from mediapackage " + mediaPackage, e);
         }
 
         // Get the collection for storing the archived mediapackage
-        String configuredCollectionId = currentOperation.getConfiguration(ARCHIVE_COLLECTION_PROPERTY);
-        String collectionId = configuredCollectionId == null ? DEFAULT_ARCHIVE_COLLECTION : configuredCollectionId;
+        String configuredCollectionId = currentOperation.getConfiguration(ZIP_COLLECTION_PROPERTY);
+        String collectionId = configuredCollectionId == null ? DEFAULT_ZIP_COLLECTION : configuredCollectionId;
 
         // Add the zip as an attachment to the mediapackage
         logger.info("Adding zipped mediapackage {} to the {} archive", mediaPackage, collectionId);
@@ -212,19 +224,9 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
           throw new WorkflowOperationException(e);
         }
 
-        // Parse the flavors to remove
-        List<String> flavorsToKeep = asList(currentOperation.getConfiguration(PRESERVE_FLAVOR_PROPERTY));
-        
-        // The zip file is safely in the archive, so it's now safe to attempt to remove mediapackage elements and delete
-        // the files, if possible
+        // The zip file is safely in the archive, so it's now safe to attempt to remove the original zip
         try {
           FileUtils.forceDelete(zip);
-          for (MediaPackageElement element : mediaPackage.getElements()) {
-            if( element.getFlavor() != null && ! flavorsToKeep.contains(element.getFlavor().toString())) {
-              workspace.delete(mediaPackage.getIdentifier().toString(), element.getIdentifier());
-              mediaPackage.remove(element);
-            }
-          }
         } catch (Exception e) {
           throw new WorkflowOperationException(e);
         }
@@ -235,9 +237,9 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
     Future<Void> future = executorService.submit(callable);
     try {
       future.get();
-    } catch(Exception e) {
+    } catch (Exception e) {
       if (e instanceof WorkflowOperationException) {
-        throw (WorkflowOperationException)e;
+        throw (WorkflowOperationException) e;
       } else {
         throw new WorkflowOperationException(e);
       }
@@ -260,15 +262,29 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
    * @throws MediaPackageException
    *           If the mediapackage can not be serialized to xml
    */
-  protected File zip(MediaPackage mediaPackage, boolean compress) throws IOException, NotFoundException, MediaPackageException {
+  protected File zip(MediaPackage mediaPackage, List<MediaPackageElementFlavor> flavorsToZip, boolean compress)
+          throws IOException, NotFoundException, MediaPackageException {
+
     // Create the temp directory
     File mediaPackageDir = new File(tempStorageDir, mediaPackage.getIdentifier().compact());
     FileUtils.forceMkdir(mediaPackageDir);
 
-    // Link or copy each file from the workspace to the temp directory
+    // Link or copy each matching element's file from the workspace to the temp directory
     MediaPackageSerializer serializer = new DefaultMediaPackageSerializerImpl(mediaPackageDir);
     MediaPackage clone = (MediaPackage) mediaPackage.clone();
     for (MediaPackageElement element : clone.getElements()) {
+      // remove the element if it doesn't match the flavors to zip
+      boolean remove = true;
+      for(MediaPackageElementFlavor flavor : flavorsToZip) {
+        if(flavor.matches(element.getFlavor())) {
+          remove = false;
+          break;
+        }
+      }
+      if(remove) {
+        clone.remove(element);
+        continue;
+      }
       File elementDir = new File(mediaPackageDir, element.getIdentifier());
       FileUtils.forceMkdir(elementDir);
       File workspaceFile = workspace.get(element.getURI());
@@ -286,13 +302,13 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
     // Zip the directory
     File zip = new File(tempStorageDir, clone.getIdentifier().compact() + ".zip");
     int compressValue = compress ? ZipEntry.DEFLATED : ZipEntry.STORED;
-    
+
     long startTime = System.currentTimeMillis();
     ZipUtil.zip(new File[] { mediaPackageDir }, zip, true, compressValue);
     long stopTime = System.currentTimeMillis();
-    
-    logger.debug("Zip file creation took {} seconds", (stopTime - startTime)/1000);
-    
+
+    logger.debug("Zip file creation took {} seconds", (stopTime - startTime) / 1000);
+
     // Remove the directory
     FileUtils.forceDelete(mediaPackageDir);
 

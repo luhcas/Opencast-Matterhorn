@@ -127,8 +127,8 @@
             </Export-Package>
             <Service-Component>
               OSGI-INF/workflow-definition-scanner.xml,
-              OSGI-INF/operations/archive.xml,
               OSGI-INF/operations/caption.xml,
+              OSGI-INF/operations/cleanup.xml,
               OSGI-INF/operations/compose.xml,
               OSGI-INF/operations/distribute-download.xml,
               OSGI-INF/operations/distribute-streaming.xml,
@@ -141,7 +141,8 @@
               OSGI-INF/operations/review.xml,
               OSGI-INF/operations/segment.xml,
               OSGI-INF/operations/segmentpreviews.xml,
-              OSGI-INF/operations/textanalysis.xml
+              OSGI-INF/operations/textanalysis.xml,
+              OSGI-INF/operations/zip.xml
             </Service-Component>
           </instructions>
         </configuration>

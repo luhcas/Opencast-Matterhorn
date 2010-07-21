@@ -2,15 +2,30 @@
   <id>error</id>
   <description>Notifies the logs that an error occurred</description>
   <operations>
-    <!-- Archive the mediapackage -->
+  
+    <!-- Cleanup the temporary files from the working file repository -->
     <operation
-      id="archive"
+      id="cleanup"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Cleaning up">
+      <configurations>
+        <configuration key="preserve-flavors">*/source,dublincore/*</configuration>
+      </configurations>
+    </operation>
+
+    <!-- Zip the mediapackage -->
+
+    <operation
+      id="zip"
       description="Cleaning up after failure">
       <configurations>
-        <configuration key="archive-collection">failed.archive</configuration>
-        <configuration key="preserve-flavors">dublincore/episode,dublincore/series</configuration>
+        <configuration key="zip-collection">failed.zips</configuration>
+        <configuration key="include-flavors">*/source,dublincore/*</configuration>
         <configuration key="compression">false</configuration>
       </configurations>
     </operation>
+  
   </operations>
+  
 </definition>
