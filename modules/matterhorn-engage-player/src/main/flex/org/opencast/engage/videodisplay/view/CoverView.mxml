@@ -1,4 +1,5 @@
 <?xml version = "1.0" encoding = "utf-8"?>
+
 <!--
      /**
      *  Copyright 2009 The Regents of the University of California
@@ -19,142 +20,123 @@
 <mx:Canvas 
     xmlns:mx = "http://www.adobe.com/2006/mxml"
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
-    top="5"
-    bottom="5"
-    left="5"
-    right="5"
-    width="100%"
-    height="100%"
-    resize="{ onResize() }"
-    >
+    top = "5"
+    bottom = "5"
+    left = "5"
+    right = "5"
+    width = "100%"
+    height = "100%"
+    resize = "{ onResize() }">
 
     <mx:Script>
         <![CDATA[
-        	import org.opencast.engage.videodisplay.state.CoverState;
-        	import mx.core.Application;
+            import org.opencast.engage.videodisplay.state.CoverState;
+            import mx.core.Application;
             import org.swizframework.Swiz;
             import org.opencast.engage.videodisplay.model.VideodisplayModel;
 
             [Autowire]
             [Bindable]
-            public var model:VideodisplayModel;
-            
+            public var model : VideodisplayModel;
+
             /**
              * onResize
-             *
-             * Set the image in the center of the videodisplay
-             *
-             * */
-            private function onResize():void
+             * Set the image in the center of the videodisplay.
+             */
+            private function onResize() : void
             {
                 if( model != null )
                 {
-                    if( model.coverState == CoverState.ONECOVER)
-	                {
-	                    img_coverSingle.x = ( ( Application.application.width - 10 ) / 2 ) - img_coverSingle.contentWidth / 2;
-	                }
+                    if( model.coverState == CoverState.ONECOVER )
+                    {
+                        img_coverSingle.x = ( ( Application.application.width - 10 ) / 2 ) - img_coverSingle.contentWidth / 2;
+                    }
                 }
             }
         ]]>
     </mx:Script>
-    
+
     <mx:states>
 
         <mx:State 
-            name = "onecover"
-            >
+            name = "onecover">
 
             <mx:SetProperty 
                 target = "{ bx_onecover }"
                 name = "visible"
-                value = "true"
-                />
+                value = "true"/>
 
             <mx:SetProperty 
                 target = "{ bx_onecover }"
                 name = "includeInLayout"
-                value = "true"
-                />
+                value = "true"/>
         </mx:State>
 
         <mx:State 
-            name = "twocovers"
-            >
+            name = "twocovers">
 
             <mx:SetProperty 
                 target = "{ bx_twocovers }"
                 name = "visible"
-                value = "true"
-                />
+                value = "true"/>
 
             <mx:SetProperty 
                 target = "{ bx_twocovers }"
                 name = "includeInLayout"
-                value = "true"
-                />
+                value = "true"/>
         </mx:State>
-        
-     </mx:states>
-    
+    </mx:states>
+
     <mx:Canvas 
-    	id="bx_onecover"
-    	width="100%"
-    	height="100%"
-    	visible = "false"
-        includeInLayout = "false"
-        >
-    	
-    	 <mx:Image 
-            id="img_coverSingle"
-            width="100%"
-            height="100%"
-            autoLoad="true"
-            source="{ model.coverURLSingle }"
-            scaleContent="true"
-            updateComplete="{ onResize() }"
-            visible="{ model.coverURLSingle != '' ? true : false }"
-            includeInLayout="{ model.coverURLSingle != '' ? true : false }"
-            />
-    	
+        id = "bx_onecover"
+        width = "100%"
+        height = "100%"
+        visible = "false"
+        includeInLayout = "false">
+
+        <mx:Image 
+            id = "img_coverSingle"
+            width = "100%"
+            height = "100%"
+            autoLoad = "true"
+            source = "{ model.coverURLSingle }"
+            scaleContent = "true"
+            updateComplete = "{ onResize() }"
+            visible = "{ model.coverURLSingle != '' ? true : false }"
+            includeInLayout = "{ model.coverURLSingle != '' ? true : false }"/>
     </mx:Canvas>
-    
+
     <mx:HBox 
-    	id="bx_twocovers"
-    	width="100%"
-    	height="100%"
-    	horizontalGap="0"
-    	visible = "false"
+        id = "bx_twocovers"
+        width = "100%"
+        height = "100%"
+        horizontalGap = "0"
+        visible = "false"
         includeInLayout = "false"
-        verticalAlign="bottom"
-    	>
-    	
-    	<mx:Image 
-	    	id="img_coverOne"
-	    	width="100%"
-	        height="100%"
-	        autoLoad="true"
-	    	source="{ model.coverURLOne }"
-	    	scaleContent="true"
-	    	updateComplete="{ onResize() }"
-	    	visible="{ model.coverURLOne != '' ? true : false }"
-	        includeInLayout="{ model.coverURLOne != '' ? true : false }"
-	        horizontalAlign="right"
-	        />
-	        
-	    <mx:Image 
-	        id="img_coverTwo"
-	        width="100%"
-	        height="100%"
-	        autoLoad="true"
-	        source="{ model.coverURLTwo }"
-	        scaleContent="true"
-	        updateComplete="{ onResize() }"
-	        visible="{ model.coverURLTwo != '' ? true : false }"
-	        includeInLayout="{ model.coverURLTwo != '' ? true : false }"
-	        horizontalAlign="left"
-	        />
+        verticalAlign = "bottom">
 
+        <mx:Image 
+            id = "img_coverOne"
+            width = "100%"
+            height = "100%"
+            autoLoad = "true"
+            source = "{ model.coverURLOne }"
+            scaleContent = "true"
+            updateComplete = "{ onResize() }"
+            visible = "{ model.coverURLOne != '' ? true : false }"
+            includeInLayout = "{ model.coverURLOne != '' ? true : false }"
+            horizontalAlign = "right"/>
 
+        <mx:Image 
+            id = "img_coverTwo"
+            width = "100%"
+            height = "100%"
+            autoLoad = "true"
+            source = "{ model.coverURLTwo }"
+            scaleContent = "true"
+            updateComplete = "{ onResize() }"
+            visible = "{ model.coverURLTwo != '' ? true : false }"
+            includeInLayout = "{ model.coverURLTwo != '' ? true : false }"
+            horizontalAlign = "left"/>
     </mx:HBox>
-  
 </mx:Canvas>

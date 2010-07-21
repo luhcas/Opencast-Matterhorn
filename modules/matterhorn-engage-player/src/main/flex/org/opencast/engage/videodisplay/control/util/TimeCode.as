@@ -18,36 +18,39 @@ package org.opencast.engage.videodisplay.control.util
 
     /**
      *   TimeCode
-     *
      */
     public class TimeCode
     {
 
-        /** Constructor */
+        /**
+         * Constructor
+         */
         public function TimeCode()
         {
             _showHours = true;
         }
-        private var _showHours:Boolean;
+
+        private var _showHours : Boolean;
 
         /**
          * getTC
-         *
          * Get the time, like HH:MM:SS.
-         *
          * @param Number seconds
+         * @return String result
          * */
-        public function getTC( seconds:Number ):String
+        public function getTC( seconds : Number ) : String
         {
-            if ( typeof( seconds ) != "number" )
+            if( typeof( seconds ) != "number" )
+            {
                 return "00:";
-            var result:String = "";
-            var myTime:Date = new Date( 2007, 0, 1, 0, 0, seconds );
+            }
+            var result : String = "";
+            var myTime : Date = new Date( 2007, 0, 1, 0, 0, seconds );
 
             // hours
-            if ( _showHours )
+            if( _showHours )
             {
-                if ( myTime.getHours() < 10 )
+                if( myTime.getHours() < 10 )
                 {
                     result = "0" + myTime.getHours() + ":";
                 }
@@ -58,7 +61,7 @@ package org.opencast.engage.videodisplay.control.util
             }
 
             // minutes
-            if ( myTime.getMinutes() < 10 )
+            if( myTime.getMinutes() < 10 )
             {
                 result += "0" + myTime.getMinutes() + ":";
             }
@@ -68,7 +71,7 @@ package org.opencast.engage.videodisplay.control.util
             }
 
             // seconds
-            if ( myTime.getSeconds() < 10 )
+            if( myTime.getSeconds() < 10 )
             {
                 result += "0" + myTime.getSeconds();
             }
@@ -82,12 +85,10 @@ package org.opencast.engage.videodisplay.control.util
 
         /**
          * showHours
-         *
-         * set the _showHours
-         * 
+         * Set the _showHours Boolean
          * @param Boolean show
-         * */
-        public function showHours( show:Boolean ):void
+         */
+        public function showHours( show : Boolean ) : void
         {
             _showHours = show;
         }

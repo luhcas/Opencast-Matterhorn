@@ -26,65 +26,72 @@ package org.opencast.engage.videodisplay.control.responder
 
     /**
      *   LoadDFXPXMLResponder
-     *
      */
     public class LoadDFXPXMLResponder implements IResponder
     {
 
-        /** Constructor */
+        /**
+         * Constructor
+         */
         public function LoadDFXPXMLResponder()
         {
             Swiz.autowire( this );
         }
-        [Autowire]
-        public var model:VideodisplayModel;
 
-        /** */
-        public function fault( info:Object ):void
+        [Autowire]
+        public var model : VideodisplayModel;
+
+        /**
+         * fault
+         */
+        public function fault( info : Object ) : void
         {
+            // do nothing
         }
 
-        /** 
-        * result 
-        * 
-        * Convert the xml file
-        * 
-        * @param Object data
-        */
-        public function result( data:Object ):void
+        /**
+         * result
+         * Convert the xml file
+         * @param Object data
+         */
+        public function result( data : Object ) : void
         {
             model.captionSets = new ArrayCollection();
             model.languageComboBox = new Array();
-            var xData:XMLList = new XMLList( data.result );
-            var divs:XMLList = xData.children().children();
-            var div:XML;
+            var xData : XMLList = new XMLList( data.result );
+            var divs : XMLList = xData.children().children();
+            var div : XML;
 
-            for each ( div in divs )
+            for each( div in divs )
             {
-                var lang:String = div.attributes()[ 0 ];
-                var style:String = div.attributes()[ 1 ];
+                var lang : String = div.attributes()[ 0 ];
+                var style : String = div.attributes()[ 1 ];
 
-                if ( lang != null )
+                if( lang != null )
                 {
-                    var captionSet:CaptionSetVO = new CaptionSetVO();
+                    var captionSet : CaptionSetVO = new CaptionSetVO();
                     captionSet.lang = lang;
                     captionSet.style = style;
-                    var ps:XMLList = div.children();
-                    var p:XML;
+                    var ps : XMLList = div.children();
+                    var p : XML;
 
-                    for each ( p in ps )
+                    for each( p in ps )
                     {
-                        var begin:String = p.attribute( "begin" );
-                        var end:String = p.attribute( "end" );
-                        var text:String;
+                        var begin : String = p.attribute( "begin" );
+                        var end : String = p.attribute( "end" );
+                        var text : String;
 
-                        if ( p.hasSimpleContent() )
+                        if( p.hasSimpleContent() )
+                        {
                             text = p.toString();
+                        }
                         else
+                        {
                             text = p.children().toString();
+                        }
                         text = text.replace( new RegExp( "\n", "g" ), "" );
                         // Replace All line breaks
-                        var caption:CaptionVO = new CaptionVO();
+                        var caption : CaptionVO = new CaptionVO();
                         caption.begin = stringToNumber( begin );
                         caption.end = stringToNumber( end );
                         caption.text = text;
@@ -94,9 +101,9 @@ package org.opencast.engage.videodisplay.control.responder
                     // Add the captionSet to the array
                     model.captionSets.addItem( captionSet );
 
-                    for ( var i:int = 0; i < model.languages.length; i++ )
+                    for( var i : int = 0; i < model.languages.length; i++ )
                     {
-                        if ( model.languages[ i ].short_name == lang )
+                        if( model.languages[ i ].short_name == lang )
                         {
                             model.languageComboBox.push( model.languages[ i ].long_name );
                         }
@@ -106,34 +113,37 @@ package org.opencast.engage.videodisplay.control.responder
 
             // set current Captions, the first language in dfxp
             Swiz.dispatchEvent( new SetCurrentCaptionsEvent( 'English' ) );
-            //languageComboBox
-            ExternalInterface.call( 'setLangugageComboBox', model.languageComboBox );
         }
 
         /**
-         *  stringToNumber
-         *
+         * stringToNumber
          * Convert the string to a number.
-         * 
          * @param String timestamp
          */
-        public function stringToNumber( timestamp:String ):Number
+        public function stringToNumber( timestamp : String ) : Number
         {
-            var result:Number = 0.0;
-            var parts:Array = timestamp.split( ":" );
+            var result : Number = 0.0;
+            var parts : Array = timestamp.split( ":" );
 
-            for ( var i:int = parts.length - 1; i >= 0; i-- )
+            for( var i : int = parts.length - 1; i >= 0; i-- )
             {
-                switch ( i )
+                switch( i )
                 {
                     case parts.length - 1:
-                        var secondParts:Array = String( parts[ i ] ).split( "." );
+                        var secondParts : Array = String( parts[ i ] ).split( "." );
                         result += secondParts[ 0 ] * 1000;
-                        if ( secondParts[ 1 ] != null )
-                            if ( secondParts[ 1 ] > 10 )
+
+                        if( secondParts[ 1 ] != null )
+                        {
+                            if( secondParts[ 1 ] > 10 )
+                            {
                                 result += secondParts[ 1 ] * 10;
-                            else if ( secondParts[ 1 ] > 0 )
+                            }
+                            else if( secondParts[ 1 ] > 0 )
+                            {
                                 result += secondParts[ 1 ] * 100;
+                            }
+                        }
                         break;
 
                     case parts.length - 2:

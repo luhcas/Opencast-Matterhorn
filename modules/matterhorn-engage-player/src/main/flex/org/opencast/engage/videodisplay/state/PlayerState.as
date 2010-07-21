@@ -18,14 +18,17 @@ package org.opencast.engage.videodisplay.state
 
     /**
      *   PlayerState
-     *
      */
     public class PlayerState
     {
-        public static const PAUSED:String = 'paused';
-        public static const PLAYING:String = 'playing';
-        public static const READY:String = 'ready';
-        public static const LOADING:String = 'loading';
-        public static const BUFFERING:String = 'buffering';
+        public static const PAUSED : String = 'paused';
+
+        public static const PLAYING : String = 'playing';
+
+        public static const READY : String = 'ready';
+
+        public static const LOADING : String = 'loading';
+
+        public static const BUFFERING : String = 'buffering';
     }
 }

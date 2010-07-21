@@ -17,12 +17,12 @@ package org.opencast.engage.videodisplay.state
 {
 
     /**
-     *   PlayerState
-     *
+     *   PlayerModeState
      */
     public class PlayerModeState
     {
-        public static const EMBED:String = 'embedPlayer';
-        public static const ADVANCED:String = 'advancedPlayer';
+        public static const EMBED : String = 'embedPlayer';
+
+        public static const ADVANCED : String = 'advancedPlayer';
     }
 }

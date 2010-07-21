@@ -1,4 +1,5 @@
 <?xml version = "1.0" encoding = "utf-8"?>
+
 <!--
      /**
      *  Copyright 2009 The Regents of the University of California
@@ -20,8 +21,7 @@
     xmlns:mx = "http://www.adobe.com/2006/mxml"
     creationComplete = "{ onCreationComplete() }"
     verticalScrollPolicy = "off"
-    horizontalScrollPolicy = "off"
-    >
+    horizontalScrollPolicy = "off">
 
     <mx:Script>
         <![CDATA[
@@ -35,17 +35,16 @@
 
             [Autowire]
             [Bindable]
-            public var model:VideodisplayModel;
+            public var model : VideodisplayModel;
 
             /**
              * onCreationComplete
-             *
-             * Add a shadow filter to the text.
-             * */
-            private function onCreationComplete():void
+             * Add a shadow text filter around the captions.
+             */
+            private function onCreationComplete() : void
             {
-                var myfilters:Array = [];
-                var dropShadow:DropShadowFilter = new DropShadowFilter();
+                var myfilters : Array = [];
+                var dropShadow : DropShadowFilter = new DropShadowFilter();
                 dropShadow.distance = 0;
                 dropShadow.angle = 25;
                 dropShadow.alpha = 1.0;
@@ -53,19 +52,19 @@
                 dropShadow.blurY = 3;
                 dropShadow.strength = 2;
                 dropShadow.quality = 3;
-
                 myfilters.push( dropShadow );
-
                 txt_captions.filters = myfilters;
             }
-            
-            private function copyToClipboard():void
+
+            /**
+             * copyToClipboard
+             * Copy the text in to the system clipboard.
+             */
+            private function copyToClipboard() : void
             {
-            	System.setClipboard(txt_captions.text);
-            	
-            	
+                System.setClipboard( txt_captions.text );
             }
-         ]]>
+        ]]>
     </mx:Script>
 
     <mx:VBox 
@@ -73,8 +72,7 @@
         backgroundAlpha = "0.5"
         width = "{ txt_captions.width }"
         visible = "{ model.ccBoolean == true ? model.currentSubtitle == '' ? false : true : false }"
-        includeInLayout = "{ model.ccBoolean == true ? model.currentSubtitle == '' ? false : true : false }"
-        >
+        includeInLayout = "{ model.ccBoolean == true ? model.currentSubtitle == '' ? false : true : false }">
 
         <mx:Text 
             id = "txt_captions"
@@ -82,8 +80,7 @@
             htmlText = "{ model.currentSubtitle }"
             styleName = "captions"
             focusOut = "{ txt_captions.setFocus() }"
-            click="{ copyToClipboard() }"
-            toolTip="Click to copy the text."
-            />
+            click = "{ copyToClipboard() }"
+            toolTip = "Click to copy the text."/>
     </mx:VBox>
 </mx:VBox>

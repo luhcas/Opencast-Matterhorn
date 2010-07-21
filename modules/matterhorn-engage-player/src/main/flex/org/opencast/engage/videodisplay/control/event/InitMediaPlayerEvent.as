@@ -19,24 +19,29 @@ package org.opencast.engage.videodisplay.control.event
 
     /**
      *   InitMediaPlayerEvent
-     *
      */
     public class InitMediaPlayerEvent extends Event
     {
-        public static var EVENT_NAME:String = 'InitMediaPlayerEvent';
-        private var _mediaURLOne:String;
-        private var _mediaURLTwo:String;
-        private var _coverURLOne:String;
-        private var _coverURLTwo:String;
-        private var _mimetypeOne:String;
-        private var _mimetypeTwo:String;
-        private var _playerMode:String;
-        
-        
-       
+        public static var EVENT_NAME : String = 'InitMediaPlayerEvent';
 
-        /** Constructor */
-        public function InitMediaPlayerEvent( coverURLOne:String, coverURLTwo:String, mediaURLOne:String, mediaURLTwo:String, mimetypeOne:String, mimetypeTwo:String, playerMode:String, bubbles:Boolean = false, cancelable:Boolean = false )
+        private var _mediaURLOne : String;
+
+        private var _mediaURLTwo : String;
+
+        private var _coverURLOne : String;
+
+        private var _coverURLTwo : String;
+
+        private var _mimetypeOne : String;
+
+        private var _mimetypeTwo : String;
+
+        private var _playerMode : String;
+
+        /**
+         * Constructor
+         */
+        public function InitMediaPlayerEvent( coverURLOne : String, coverURLTwo : String, mediaURLOne : String, mediaURLTwo : String, mimetypeOne : String, mimetypeTwo : String, playerMode : String, bubbles : Boolean = false, cancelable : Boolean = false )
         {
             super( EVENT_NAME, bubbles, cancelable );
             _mediaURLOne = mediaURLOne;
@@ -46,86 +51,86 @@ package org.opencast.engage.videodisplay.control.event
             _mimetypeOne = mimetypeOne;
             _mimetypeTwo = mimetypeTwo;
             _playerMode = playerMode;
-            
         }
 
-        // Override the inherited clone() method.
-        override public function clone():Event
+        /**
+         * clone
+         * Override the inherited clone() method.
+         * @return InitMediaPlayerEvent
+         */
+        override public function clone() : Event
         {
-            return new InitMediaPlayerEvent( coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerMode, bubbles, cancelable);
+            return new InitMediaPlayerEvent( coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerMode, bubbles, cancelable );
         }
-        
+
         /**
          * mediaURLOne
-         *
          * Get the mediaURLOne.
-         *  */
-        public function get mediaURLOne():String
+         * @return String _mediaURLOne
+         */
+        public function get mediaURLOne() : String
         {
             return _mediaURLOne;
         }
-        
+
         /**
          * mediaURLTwo
-         *
          * Get the mediaURLTwo.
-         *  */
-        public function get mediaURLTwo():String
+         * @return String _mediaURLTwo
+         */
+        public function get mediaURLTwo() : String
         {
             return _mediaURLTwo;
         }
-        
+
         /**
          * coverURLOne
-         *
          * Get the coverURLOne.
-         *  */
-        public function get coverURLOne():String
+         * @return String _coverURLOne
+         */
+        public function get coverURLOne() : String
         {
             return _coverURLOne;
         }
-        
+
         /**
          * coverURLTwo
-         *
          * Get the coverURLTwo.
+         * @return _coverURLTwo
          *  */
-        public function get coverURLTwo():String
+        public function get coverURLTwo() : String
         {
             return _coverURLTwo;
         }
-        
+
         /**
          * mimetypeOne
-         *
          * Get the mimetypeOne.
-         *  */
-        public function get mimetypeOne():String
+         * @return _mimetypeOne
+         */
+        public function get mimetypeOne() : String
         {
             return _mimetypeOne;
         }
-        
+
         /**
          * mimetypeTwo
-         *
          * Get the mimetypeTwo.
-         *  */
-        public function get mimetypeTwo():String
+         * @return _mimetypeTwo
+         */
+        public function get mimetypeTwo() : String
         {
             return _mimetypeTwo;
         }
-        
+
         /**
          * playerMode
-         *
          * Get the playerMode.
-         *  */
-        public function get playerMode():String
+         * @return _playerMode
+         */
+        public function get playerMode() : String
         {
             return _playerMode;
         }
-        
-        
-        
     }
 }

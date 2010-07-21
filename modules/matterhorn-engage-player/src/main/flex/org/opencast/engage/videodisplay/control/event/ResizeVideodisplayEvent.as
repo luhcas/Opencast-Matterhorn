@@ -19,20 +19,25 @@ package org.opencast.engage.videodisplay.control.event
 
     /**
      *   ResizeVideodisplayEvent
-     *
      */
     public class ResizeVideodisplayEvent extends Event
     {
-        public static var EVENT_NAME:String = 'ResizeVideodisplayEvent';
+        public static var EVENT_NAME : String = 'ResizeVideodisplayEvent';
 
-        /** Constructor */
-        public function ResizeVideodisplayEvent( bubbles:Boolean = false, cancelable:Boolean = false )
+        /**
+         * Constructor
+         */
+        public function ResizeVideodisplayEvent( bubbles : Boolean = false, cancelable : Boolean = false )
         {
             super( EVENT_NAME, bubbles, cancelable );
         }
 
-        // Override the inherited clone() method.
-        override public function clone():Event
+        /**
+         * clone
+         * Override the inherited clone() method.
+         * @return ResizeVideodisplayEvent
+         */
+        override public function clone() : Event
         {
             return new ResizeVideodisplayEvent( bubbles );
         }

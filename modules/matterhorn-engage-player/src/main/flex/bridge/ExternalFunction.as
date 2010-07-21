@@ -69,6 +69,7 @@ package bridge
         public static const SKIPBACKWARD:String           = 'Opencast.Player.doSkipBackward'; 
           
         public static const SKIPFORWARD:String           = 'Opencast.Player.doSkipForward'; 
+        
                 
     }
 }

@@ -1,4 +1,5 @@
 <?xml version = "1.0" encoding = "utf-8"?>
+
 <!--
      /**
      *  Copyright 2009 The Regents of the University of California
@@ -22,17 +23,16 @@
     currentState = "{model.currentPlayerState}"
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
     verticalScrollPolicy = "off"
-    horizontalScrollPolicy = "off"
-    >
+    horizontalScrollPolicy = "off">
 
     <mx:Script>
         <![CDATA[
-        	import org.opencast.engage.videodisplay.state.VideoSizeState;
-        	import org.opencast.engage.videodisplay.state.DefaultPlayerState;
-        	import org.osmf.media.MediaPlayer;
-        	import org.opencast.engage.videodisplay.state.VideoState;
-        	import org.osmf.layout.VerticalAlign;
-        	import bridge.ExternalFunction;
+            import org.opencast.engage.videodisplay.state.VideoSizeState;
+            import org.opencast.engage.videodisplay.state.DefaultPlayerState;
+            import org.osmf.media.MediaPlayer;
+            import org.opencast.engage.videodisplay.state.VideoState;
+            import org.osmf.layout.VerticalAlign;
+            import bridge.ExternalFunction;
             import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
             import org.opencast.engage.videodisplay.state.PlayerState;
             import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
@@ -43,19 +43,17 @@
 
             [Autowire]
             [Bindable]
-            public var model:VideodisplayModel;
-            
-            private var startMultiPlayer:Boolean = false;
+            public var model : VideodisplayModel;
 
-                        /**
+            private var startMultiPlayer : Boolean = false;
+
+            /**
              * showButton
-             *
              * Show the Button in the middle of the video
-             *
-             * */
-            private function showButton():void
+             */
+            private function showButton() : void
             {
-                if ( this.currentState == PlayerState.PLAYING )
+                if( this.currentState == PlayerState.PLAYING )
                 {
                     pauseButton_up.visible = true;
                 }
@@ -67,13 +65,11 @@
 
             /**
              * hideButton
-             *
              * Hide the Button in the middle of the video
-             *
-             * */
-            private function hideButton():void
+             */
+            private function hideButton() : void
             {
-                if ( this.currentState == PlayerState.PLAYING )
+                if( this.currentState == PlayerState.PLAYING )
                 {
                     pauseButton_up.visible = false;
                 }
@@ -81,86 +77,72 @@
                 {
                     if( model.videoState != VideoState.COVER )
                     {
-                    	 playButton_up.visible = false;
+                        playButton_up.visible = false;
                     }
-                   
                 }
-
             }
 
             /**
              * fullscreen
-             *
-             * Toggle between normal screen and full screen mode
-             *
-             **/
-            private function fullscreen():void
+             * Toggle between normal screen to the fullscreen mode. Set the new heigt and width for the videos.
+             */
+            private function fullscreen() : void
             {
                 Application.application.stage.displayState = StageDisplayState.FULL_SCREEN;
                 model.fullscreenMode = true;
-                
+
                 model.multiMediaContainerLeftNormalscreen = model.multiMediaContainerLeft;
                 model.multiMediaContainerRightNormalscreen = model.multiMediaContainerRight;
-                
-                var flashWidth:int = Application.application.width - 10;
-                var flashHeight:int = Application.application.height - 10;
-                var newMediaOneHeight:Number = 0;
-                var newMediaOneWidth:Number = 0;
-                var newMediaTwoHeight:Number = 0;
-                var newMediaTwoWidth:Number = 0;
-                var percentOne:Number = 0;
-                var percentTwo:Number = 0;
-                
+
+                var flashWidth : int = Application.application.width - 10;
+                var flashHeight : int = Application.application.height - 10;
+                var newMediaOneHeight : Number = 0;
+                var newMediaOneWidth : Number = 0;
+                var newMediaTwoHeight : Number = 0;
+                var newMediaTwoWidth : Number = 0;
+                var percentOne : Number = 0;
+                var percentTwo : Number = 0;
+
                 if( model.videoSizeState == VideoSizeState.ONLYLEFT )
                 {
-                
                     newMediaOneHeight = flashHeight * model.formatMediaOne;
-                    model.multiMediaContainerRight = ( flashWidth - newMediaOneHeight ) / 2 ;
+                    model.multiMediaContainerRight = ( flashWidth - newMediaOneHeight ) / 2;
                     model.multiMediaContainerLeft = 0;
                 }
                 else if( model.videoSizeState == VideoSizeState.ONLYRIGHT )
                 {
                     newMediaTwoHeight = flashHeight * model.formatMediaTwo;
-                    model.multiMediaContainerLeft = ( flashWidth - newMediaTwoHeight ) / 2 ;
+                    model.multiMediaContainerLeft = ( flashWidth - newMediaTwoHeight ) / 2;
                     model.multiMediaContainerRight = 0;
-                
                 }
-                else if( model.videoSizeState == VideoSizeState.BIGLEFT)
+                else if( model.videoSizeState == VideoSizeState.BIGLEFT )
                 {
-                	percentOne = 66.66666666666;
-                	newMediaOneWidth = flashWidth * ( percentOne / 100 );
-                	newMediaOneHeight = newMediaOneWidth / model.formatMediaOne;
-                	
-                	
-                	model.multiMediaContainerBottom = ( flashHeight - newMediaOneHeight ) / 2;
-                	
-                	model.multiMediaContainerLeft = 0 ;
+                    percentOne = 66.66666666666;
+                    newMediaOneWidth = flashWidth * ( percentOne / 100 );
+                    newMediaOneHeight = newMediaOneWidth / model.formatMediaOne;
+                    model.multiMediaContainerBottom = ( flashHeight - newMediaOneHeight ) / 2;
+                    model.multiMediaContainerLeft = 0;
                     model.multiMediaContainerRight = 0;
                 }
-                else if( model.videoSizeState == VideoSizeState.BIGRIGHT)
+                else if( model.videoSizeState == VideoSizeState.BIGRIGHT )
                 {
                     percentTwo = 66.66666666666;
                     newMediaTwoWidth = flashWidth * ( percentTwo / 100 );
                     newMediaTwoHeight = newMediaTwoWidth / model.formatMediaTwo;
-                    
-                    
                     model.multiMediaContainerBottom = ( flashHeight - newMediaTwoHeight ) / 2;
-                    
-                    model.multiMediaContainerLeft = 0 ;
+                    model.multiMediaContainerLeft = 0;
                     model.multiMediaContainerRight = 0;
                 }
-                else if( model.videoSizeState == VideoSizeState.CENTER)
+                else if( model.videoSizeState == VideoSizeState.CENTER )
                 {
-                    var newHeight:Number = 0;
+                    var newHeight : Number = 0;
                     percentOne = 50;
                     percentTwo = 50;
-                    
                     newMediaOneWidth = flashWidth * ( percentOne / 100 );
                     newMediaOneHeight = newMediaOneWidth / model.formatMediaOne;
-                    
                     newMediaTwoWidth = flashWidth * ( percentTwo / 100 );
                     newMediaTwoHeight = newMediaTwoWidth / model.formatMediaTwo;
-                    
+
                     if( newMediaOneHeight > newMediaTwoHeight )
                     {
                         newHeight = newMediaOneHeight;
@@ -169,65 +151,55 @@
                     {
                         newHeight = newMediaTwoHeight;
                     }
-                    
+
                     model.multiMediaContainerBottom = ( flashHeight - newHeight ) / 2;
-                    
-                    model.multiMediaContainerLeft = 0 ;
+                    model.multiMediaContainerLeft = 0;
                     model.multiMediaContainerRight = 0;
                 }
-                
-              
             }
-            
-            private function play():void
+
+            private function play() : void
             {
                 if( model.startPlaySingle == true )
-	            {
-	               ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );   
-	            }
-	            else if( model.startPlayOne == true && model.startPlayTwo == true)
-	            {
-	               ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );  
-	            }
+                {
+                    ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );
+                }
+                else if( model.startPlayOne == true && model.startPlayTwo == true )
+                {
+                    ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );
+                }
             }
-            
         ]]>
     </mx:Script>
 
     <mx:states>
 
         <mx:State 
-            name = "{PlayerState.PLAYING}"
-            >
+            name = "{PlayerState.PLAYING}">
 
             <mx:SetProperty 
                 target = "{playButton_up}"
                 name = "visible"
-                value = "false"
-                />
+                value = "false"/>
 
             <mx:SetProperty 
                 target = "{pauseButton_up}"
                 name = "visible"
-                value = "false"
-                />
+                value = "false"/>
         </mx:State>
 
         <mx:State 
-            name = "{PlayerState.PAUSED}"
-            >
+            name = "{PlayerState.PAUSED}">
 
             <mx:SetProperty 
                 target = "{playButton_up}"
                 name = "visible"
-                value = "true"
-                />
+                value = "true"/>
 
             <mx:SetProperty 
                 target = "{pauseButton_up}"
                 name = "visible"
-                value = "false"
-                />
+                value = "false"/>
         </mx:State>
     </mx:states>
 
@@ -236,27 +208,21 @@
         <mx:Transition 
             id = "fadeOut"
             fromState = "{PlayerState.PLAYING}"
-            toState = "{PlayerState.PAUSED}"
-            >
+            toState = "{PlayerState.PAUSED}">
 
             <mx:Parallel 
-                target = "{curtain}"
-                />
+                target = "{curtain}"/>
         </mx:Transition>
 
         <mx:Transition 
             id = "fadeIn"
             fromState = "{PlayerState.PAUSED}"
-            toState = "{PlayerState.PLAYING}"
-            >
+            toState = "{PlayerState.PLAYING}">
 
             <mx:Parallel 
-                target = "{curtain}"
-                />
+                target = "{curtain}"/>
         </mx:Transition>
     </mx:transitions>
-    
-    
 
     <mx:Canvas 
         id = "curtain"
@@ -269,8 +235,7 @@
         rollOver = "{ showButton(); }"
         rollOut = "{ hideButton(); }"
         verticalScrollPolicy = "off"
-        horizontalScrollPolicy = "off"
-        />
+        horizontalScrollPolicy = "off"/>
 
     <mx:Button 
         id = "playButton_up"
@@ -284,8 +249,7 @@
         buttonMode = "true"
         rollOver = "{ showButton(); }"
         rollOut = "{ hideButton(); }"
-        toolTip = "Play"
-        />
+        toolTip = "Play"/>
 
     <mx:Button 
         id = "pauseButton_up"
@@ -299,76 +263,61 @@
         buttonMode = "true"
         rollOver = "{ showButton(); }"
         rollOut = "{ hideButton(); }"
-        toolTip = "Pause"
-        />
-        
-    <mx:VBox
-    	width="100%"
-    	height="100%"
-    	>
-    	
-    	<mx:HBox 
-    		width="100%"
-    		horizontalAlign="right"
-    		>
-    		
-    	<mx:Button 
-    		width="30"
-    		height="30"
-            styleName="Fullscreen"
-            visible = "{!model.fullscreenMode}"
-            includeInLayout = "{!model.fullscreenMode}"
-            click = "{ fullscreen() }"
-            toolTip="Fullscreen"
-            />
-    		
-    	</mx:HBox>
-   
+        toolTip = "Pause"/>
+
+    <mx:VBox 
+        width = "100%"
+        height = "100%">
+
+        <mx:HBox 
+            width = "100%"
+            horizontalAlign = "right">
+
+            <mx:Button 
+                width = "30"
+                height = "30"
+                styleName = "Fullscreen"
+                visible = "{!model.fullscreenMode}"
+                includeInLayout = "{!model.fullscreenMode}"
+                click = "{ fullscreen() }"
+                toolTip = "Fullscreen"/>
+        </mx:HBox>
+
         <mx:Spacer 
-	       height="100%"
-	       />
+            height = "100%"/>
 
         <mx:VBox 
             width = "100%"
             verticalScrollPolicy = "off"
             horizontalScrollPolicy = "off"
-            verticalGap="0"
-            >
-            
+            verticalGap = "0">
+
             <view:CaptionsView 
                 id = "captionsView"
                 width = "100%"
                 horizontalAlign = "center"
-                bottom="5"
-                />
-                
+                bottom = "5"/>
+
             <view:FullscreenVideoControlsView 
-                id = "videocontrollerView"
+                id = "fullscreenVideoControlsView"
                 width = "100%"
                 height = "100%"
                 visible = "{model.fullscreenMode}"
-                includeInLayout = "{model.fullscreenMode}"
-                />
-	     
-	     </mx:VBox>
-     
+                includeInLayout = "{model.fullscreenMode}"/>
+        </mx:VBox>
     </mx:VBox>
-    
-    <mx:HBox
-        width="100%"
-        height="100%"
-        horizontalAlign="center"
-        verticalAlign="middle"
-        >
-        
-        <mx:SWFLoader 
-            source="@Embed(source='../../../../../style/oc_logo_loader.swf')" 
-            scaleContent="true" 
-            autoLoad="true"
-            visible="{ model.loader }"
-            includeInLayout="{ model.loader }"
-            />
-        
-    </mx:HBox>
 
+    <mx:HBox 
+        width = "100%"
+        height = "100%"
+        horizontalAlign = "center"
+        verticalAlign = "middle">
+
+        <mx:SWFLoader 
+            source = "@Embed(source='../../../../../style/oc_logo_loader.swf')"
+            scaleContent = "true"
+            autoLoad = "true"
+            visible = "{ model.loader }"
+            includeInLayout = "{ model.loader }"/>
+    </mx:HBox>
 </mx:Canvas>

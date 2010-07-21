@@ -1,4 +1,5 @@
 <?xml version = "1.0" encoding = "utf-8"?>
+
 <!--
      /**
      *  Copyright 2009 The Regents of the University of California
@@ -18,18 +19,17 @@
 -->
 <mx:Canvas 
     width = "100%"
-    height="100%"
+    height = "100%"
     xmlns:players = "com.adobe.strobe.players.*"
     xmlns:mx = "http://www.adobe.com/2006/mxml"
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
     resize = "{ resizeVideodisplay() }"
-    xmlns:osmf="com.osmf.*"
-    >
+    xmlns:osmf = "com.osmf.*">
 
     <mx:Script>
         <![CDATA[
-        	import org.osmf.layout.HorizontalAlign;
-        	import mx.core.Application;
+            import org.osmf.layout.HorizontalAlign;
+            import mx.core.Application;
             import mx.controls.Alert;
             import mx.core.Container;
             import org.osmf.layout.ScaleMode;
@@ -41,138 +41,121 @@
 
             [Autowire]
             [Bindable]
-            public var model:VideodisplayModel;
+            public var model : VideodisplayModel;
 
             /**
              * initPlayerLeft
-             *
-             * Init the left Videoplayer.
-             *
-             *  */
-            public function initPlayerLeft():void
+             * Init the left Videoplayer, create a new Media Container, and add the new container to the UI Component.
+             */
+            public function initPlayerLeft() : void
             {
-                // Set up the container
                 model.mediaContainerOne = new MediaContainer();
                 this.mediaContainerLeftUIComponent.container = model.mediaContainerOne;
             }
-            
+
             /**
              * initPlayerRight
-             *
-             * Init the right Videoplayer.
-             *
-             *  */
-            public function initPlayerRight():void
+             * Init the right Videoplayer, create a new Media Container, and add the new container to the UI Component.
+             */
+            public function initPlayerRight() : void
             {
-                // Set up the container
                 model.mediaContainerTwo = new MediaContainer();
                 this.mediaContainerRightUIComponent.container = model.mediaContainerTwo;
             }
-            
+
             /**
              * resizeVideodisplay
-             *
-             * When the learner resize the Videodisplay in the Browser
-             *
-             * */
-            public function resizeVideodisplay():void
+             * When the learner resize the Videodisplay in the Browser call the ResizeVideodisplayEvent.
+             */
+            public function resizeVideodisplay() : void
             {
                 Swiz.dispatchEvent( new ResizeVideodisplayEvent() );
-              
-                Swiz.autowire(this);
-                
+                Swiz.autowire( this );
             }
-            
-            public function setMediaContainers( percentOne:Number, percentTwo:Number ):void
+
+            /**
+             * setMediaContainers
+             * Set the percent height and percent width in the both median containers.
+             * @param Number percentOne, Number percentTwo
+             */
+            public function setMediaContainers( percentOne : Number, percentTwo : Number ) : void
             {
                 mediaContainerLeftUIComponent.percentWidth = percentOne;
                 mediaContainerLeftUIComponent.percentHeight = 100;
                 mediaContainerRightUIComponent.percentWidth = percentTwo;
                 mediaContainerRightUIComponent.percentHeight = 100;
-               
+
                 if( model.previewPlayer == true )
                 {
                     model.layoutMetadataTwo.horizontalAlign = HorizontalAlign.CENTER;
                     model.layoutMetadataOne.horizontalAlign = HorizontalAlign.CENTER;
-                }          
-                            
+                }
             }
         ]]>
     </mx:Script>
-     <mx:states>
+
+    <mx:states>
 
         <mx:State 
             name = "onlyleft"
-            enterState="{setMediaContainers(100,0)}"
-            />
-        
+            enterState = "{setMediaContainers(100,0)}"/>
+
         <mx:State 
             name = "bigleft"
-            enterState="{setMediaContainers(100,50)}"
-            />
-            
+            enterState = "{setMediaContainers(100,50)}"/>
+
         <mx:State 
             name = "center"
-            enterState="{setMediaContainers(100,100)}"
-            />
-        
+            enterState = "{setMediaContainers(100,100)}"/>
+
         <mx:State 
             name = "bigright"
-            enterState="{setMediaContainers(50,100)}"
-            />
-            
+            enterState = "{setMediaContainers(50,100)}"/>
+
         <mx:State 
             name = "onlyright"
-            enterState="{setMediaContainers(0,100)}"
-            />
+            enterState = "{setMediaContainers(0,100)}"/>
+    </mx:states>
 
-     </mx:states>
-   
     <!--
-    <mx:HBox
-    	id="hb_media"
-    	width="100%"
-    	horizontalGap="0"
-    	height="100%"
-    	left="{model.multiMediaContainerLeft}"
-    	right="{ model.multiMediaContainerRight }"
-    	bottom="{ model.multiMediaContainerBottom }"
-    	top="0"
-    	>
-    	
-    	   <osmf:MediaContainerUIComponent
-		        id = "mediaContainerLeftUIComponent"
-		        addedToStage = "initPlayerLeft()"
-		        />   
-	  
-            <osmf:MediaContainerUIComponent
-		        id = "mediaContainerRightUIComponent"
-		        addedToStage = "initPlayerRight()"
-		        />   
-    	
-    </mx:HBox>-->
-    
-    <mx:HBox
-        id="hb_media"
-        width="100%"
-        horizontalGap="0"
-        height="100%"
-        left="{ model.previewPlayer == true ? 0 : model.multiMediaContainerLeft}"
-        right="{ model.previewPlayer == true ? 0 : model.multiMediaContainerRight}"
-        bottom="{model.previewPlayer == true ? 0 : model.multiMediaContainerBottom}"
-        top="0"
-        >
-        
-           <osmf:MediaContainerUIComponent
-                id = "mediaContainerLeftUIComponent"
-                addedToStage = "initPlayerLeft()"
-                />   
-      
-            <osmf:MediaContainerUIComponent
-                id = "mediaContainerRightUIComponent"
-                addedToStage = "initPlayerRight()"
-                />   
-        
+         <mx:HBox
+         id="hb_media"
+         width="100%"
+         horizontalGap="0"
+         height="100%"
+         left="{model.multiMediaContainerLeft}"
+         right="{ model.multiMediaContainerRight }"
+         bottom="{ model.multiMediaContainerBottom }"
+         top="0"
+         >
+
+         <osmf:MediaContainerUIComponent
+         id = "mediaContainerLeftUIComponent"
+         addedToStage = "initPlayerLeft()"
+         />
+
+         <osmf:MediaContainerUIComponent
+         id = "mediaContainerRightUIComponent"
+         addedToStage = "initPlayerRight()"
+         />
+
+         </mx:HBox>-->
+    <mx:HBox 
+        id = "hb_media"
+        width = "100%"
+        horizontalGap = "0"
+        height = "100%"
+        left = "{ model.previewPlayer == true ? 0 : model.multiMediaContainerLeft}"
+        right = "{ model.previewPlayer == true ? 0 : model.multiMediaContainerRight}"
+        bottom = "{model.previewPlayer == true ? 0 : model.multiMediaContainerBottom}"
+        top = "0">
+
+        <osmf:MediaContainerUIComponent 
+            id = "mediaContainerLeftUIComponent"
+            addedToStage = "initPlayerLeft()"/>
+
+        <osmf:MediaContainerUIComponent 
+            id = "mediaContainerRightUIComponent"
+            addedToStage = "initPlayerRight()"/>
     </mx:HBox>
-          
 </mx:Canvas>

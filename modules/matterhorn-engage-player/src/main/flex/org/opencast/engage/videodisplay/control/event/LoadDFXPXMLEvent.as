@@ -19,32 +19,38 @@ package org.opencast.engage.videodisplay.control.event
 
     /**
      *   LoadDFXPXMLEvent
-     *
      */
     public class LoadDFXPXMLEvent extends Event
     {
-        public static var EVENT_NAME:String = 'LoadDFXPXML';
+        public static var EVENT_NAME : String = 'LoadDFXPXML';
 
-        /** Constructor */
-        public function LoadDFXPXMLEvent( source:String )
+        /**
+         * Constructor
+         */
+        public function LoadDFXPXMLEvent( source : String )
         {
             super( EVENT_NAME );
             _source = source;
         }
-        private var _source:String;
 
-        // Override the inherited clone() method.
-        override public function clone():Event
+        private var _source : String;
+
+        /**
+         * clone
+         * Override the inherited clone() method.
+         * @return LoadDFXPXMLEvent
+         */
+        override public function clone() : Event
         {
             return new LoadDFXPXMLEvent( source );
         }
 
         /**
          * source
-         *
          * Get the source.
-         *  */
-        public function get source():String
+         * @return _source
+         */
+        public function get source() : String
         {
             return _source;
         }

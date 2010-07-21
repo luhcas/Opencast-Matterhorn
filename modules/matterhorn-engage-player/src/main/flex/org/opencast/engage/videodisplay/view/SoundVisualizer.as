@@ -26,26 +26,28 @@ package org.opencast.engage.videodisplay.view
 
     public class SoundVisualizer extends Sprite
     {
-        /** Constructor */
+        /**
+         * Constructor
+         * Add a event listener onEnterFrame.
+         */
         public function SoundVisualizer()
         {
             addEventListener( Event.ENTER_FRAME, onEnterFrame );
         }
-        
+
         /**
          * onEnterFrame
-         * 
-         * @eventType event:Event
+         * Create the sound visualization.
+         * @eventType Event event
          */
-        private function onEnterFrame( event:Event ):void
+        private function onEnterFrame( event : Event ) : void
         {
-        	
-            var bytes:ByteArray = new ByteArray();
-            const PLOT_HEIGHT:int = 80; //200
-            const CHANNEL_LENGTH:int = 256;//256
+            var bytes : ByteArray = new ByteArray();
+            const PLOT_HEIGHT : int = 80; //200
+            const CHANNEL_LENGTH : int = 256; //256
             SoundMixer.computeSpectrum( bytes, false, 0 );
 
-            var g:Graphics = this.graphics;
+            var g : Graphics = this.graphics;
 
             g.clear();
 
@@ -53,9 +55,9 @@ package org.opencast.engage.videodisplay.view
             g.beginFill( 0xFA6E23 );
             g.moveTo( 0, PLOT_HEIGHT );
 
-            var n:Number = 0;
+            var n : Number = 0;
 
-            for ( var i:int = 0; i < CHANNEL_LENGTH; i++ )
+            for( var i : int = 0; i < CHANNEL_LENGTH; i++ )
             {
                 n = ( bytes.readFloat() * PLOT_HEIGHT );
                 g.lineTo( i * 2, PLOT_HEIGHT - n );
@@ -68,7 +70,7 @@ package org.opencast.engage.videodisplay.view
             g.beginFill( 0xFDB792, 0.5 );
             g.moveTo( CHANNEL_LENGTH * 2, PLOT_HEIGHT );
 
-            for ( i = CHANNEL_LENGTH; i > 0; i-- )
+            for( i = CHANNEL_LENGTH; i > 0; i-- )
             {
                 n = ( bytes.readFloat() * PLOT_HEIGHT );
                 g.lineTo( i * 2, PLOT_HEIGHT - n );
@@ -76,15 +78,14 @@ package org.opencast.engage.videodisplay.view
 
             g.lineTo( 0, PLOT_HEIGHT );
             g.endFill();
-
         }
-        
+
         /**
          * onPlaybackComplete
-         * 
-         * @eventType event:Event
+         * Remove the listener onEnterFrame.
+         * @eventType Event event
          */
-        private function onPlaybackComplete( event:Event ):void
+        private function onPlaybackComplete( event : Event ) : void
         {
             removeEventListener( Event.ENTER_FRAME, onEnterFrame );
         }

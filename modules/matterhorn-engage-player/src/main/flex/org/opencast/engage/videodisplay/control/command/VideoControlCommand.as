@@ -16,9 +16,9 @@
 package org.opencast.engage.videodisplay.control.command
 {
     import bridge.ExternalFunction;
-    
+
     import flash.external.ExternalInterface;
-    
+
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
     import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
@@ -26,48 +26,53 @@ package org.opencast.engage.videodisplay.control.command
     import org.opencast.engage.videodisplay.state.VideoState;
     import org.swizframework.Swiz;
 
+    /**
+     *   VideoControlCommand
+     */
     public class VideoControlCommand
     {
-        [Autowire]
-        public var model:VideodisplayModel;
 
-        /** Constructor */
+        [Autowire]
+        public var model : VideodisplayModel;
+
+        /**
+         * Constructor
+         */
         public function VideoControlCommand()
         {
             Swiz.autowire( this );
         }
 
-        /** execute
-         *
+        /**
+         * execute
          * When the learner press a button, or use the keyboard shurtcuts.
-         *
-         * @eventType event:VideoControlEvent
+         * @eventType VideoControlEvent event
          * */
-        public function execute( event:VideoControlEvent ):void
+        public function execute( event : VideoControlEvent ) : void
         {
-            var currentPlayPauseState:String;
-            var percent:int = 100;
-            var skipVolume:Number = 0.1;
-            var playState:Boolean = false;
-           
+            var currentPlayPauseState : String;
+            var percent : int = 100;
+            var skipVolume : Number = 0.1;
+            var playState : Boolean = false;
 
-            switch ( event.videoControlType )
+            switch( event.videoControlType )
             {
                 case VideoControlEvent.PLAY:
-                
-                     model.mediaPlayer.play();
-                     
-                     model.currentPlayerState = PlayerState.PLAYING;
-                     currentPlayPauseState = PlayerState.PAUSED;
-                     ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
-                     
-                     if( model.videoState == VideoState.COVER )
-                     {
+
+                    model.mediaPlayer.play();
+
+                    model.currentPlayerState = PlayerState.PLAYING;
+                    currentPlayPauseState = PlayerState.PAUSED;
+                    ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
+
+                    if( model.videoState == VideoState.COVER )
+                    {
                         model.videoState = model.mediaPlayer.getVideoState();
-                     }
-                     break;
+                    }
+                    break;
 
                 case VideoControlEvent.PAUSE:
+
                     if( model.mediaPlayer.playing() )
                     {
                         model.mediaPlayer.pause();
@@ -78,6 +83,7 @@ package org.opencast.engage.videodisplay.control.command
                     break;
 
                 case VideoControlEvent.STOP:
+
                     if( model.mediaPlayer.playing() )
                     {
                         model.mediaPlayer.pause();
@@ -91,80 +97,81 @@ package org.opencast.engage.videodisplay.control.command
                         model.mediaPlayer.seek( 0 );
                     }
                     break;
-                    
+
                 case VideoControlEvent.SKIPBACKWARD:
-                	
-                	break;
+
+                    break;
 
                 case VideoControlEvent.REWIND:
-                    
-	                if( model.startPlay == true )
+
+                    if( model.startPlay == true )
                     {
-	                    if( model.currentSeekPosition - model.rewindTime > 0 )
-	                    {
-	                        model.mediaPlayer.seek( model.currentSeekPosition - model.rewindTime );
-	                    }
-	                    else
-	                    {
-	                        model.mediaPlayer.seek( 0 );
-	                    }
+                        if( model.currentSeekPosition - model.rewindTime > 0 )
+                        {
+                            model.mediaPlayer.seek( model.currentSeekPosition - model.rewindTime );
+                        }
+                        else
+                        {
+                            model.mediaPlayer.seek( 0 );
+                        }
                     }
                     break;
 
                 case VideoControlEvent.FASTFORWARD:
-                
-                    if( model.startPlay == true )
-                	{
-	                	var newPlayhead:Number = model.currentSeekPosition + model.fastForwardTime;
 
-	                    
-	                    if( newPlayhead > model.currentDuration )
-	                    {
-	                        model.mediaPlayer.seek( model.currentDuration );
-	                    }
-	                    else
-	                    {
-	                        model.mediaPlayer.seek( newPlayhead);
-	                    }
-	                }
+                    if( model.startPlay == true )
+                    {
+                        var newPlayhead : Number = model.currentSeekPosition + model.fastForwardTime;
+
+
+                        if( newPlayhead > model.currentDuration )
+                        {
+                            model.mediaPlayer.seek( model.currentDuration );
+                        }
+                        else
+                        {
+                            model.mediaPlayer.seek( newPlayhead );
+                        }
+                    }
                     break;
 
                 case VideoControlEvent.SKIPFORWARD:
                     break;
-                    
+
                 case VideoControlEvent.MUTE:
-                
-                	if( model.mediaPlayer.getMuted() )
-                	{
-                	   model.mediaPlayer.setMuted( false);
-                	}
-                	else
-                	{
-                	    model.mediaPlayer.setMuted( true );
-                	}
-                	break;
+
+                    if( model.mediaPlayer.getMuted() )
+                    {
+                        model.mediaPlayer.setMuted( false );
+                    }
+                    else
+                    {
+                        model.mediaPlayer.setMuted( true );
+                    }
+                    break;
 
                 case VideoControlEvent.VOLUMEUP:
-                
-                	if ( model.mediaPlayer.getVolume() != 1 )
+
+                    if( model.mediaPlayer.getVolume() != 1 )
                     {
                         model.mediaPlayer.setVolume( model.mediaPlayer.getVolume() + skipVolume );
                     }
-                    ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round(model.mediaPlayer.getVolume() * percent) );
-            	    break;
+                    ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round( model.mediaPlayer.getVolume() * percent ) );
+                    break;
 
                 case VideoControlEvent.VOLUMEDOWN:
-                
-                	if ( model.mediaPlayer.getVolume() != 0 )
+
+                    if( model.mediaPlayer.getVolume() != 0 )
                     {
                         model.mediaPlayer.setVolume( model.mediaPlayer.getVolume() - skipVolume );
+
                         if( model.mediaPlayer.getVolume() < 0 )
                         {
                             model.mediaPlayer.setVolume( 0 );
                         }
                     }
-                    ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round(model.mediaPlayer.getVolume() * percent) );
-            	    break;
+                    ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round( model.mediaPlayer.getVolume() * percent ) );
+                    break;
 
                 case VideoControlEvent.SEEKZERO:
                     model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 0 );
@@ -175,12 +182,12 @@ package org.opencast.engage.videodisplay.control.command
                     break;
 
                 case VideoControlEvent.SEEKTWO:
-                    
+
                     model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 2 );
                     break;
 
                 case VideoControlEvent.SEEKTHREE:
-                    
+
                     model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 3 );
                     break;
 
@@ -189,7 +196,7 @@ package org.opencast.engage.videodisplay.control.command
                     break;
 
                 case VideoControlEvent.SEEKFIVE:
-                    
+
                     model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 5 );
                     break;
 
@@ -198,12 +205,12 @@ package org.opencast.engage.videodisplay.control.command
                     break;
 
                 case VideoControlEvent.SEEKSEVEN:
-                   
+
                     model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 7 );
                     break;
 
                 case VideoControlEvent.SEEKEIGHT:
-                    
+
                     model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 8 );
                     break;
 
@@ -212,7 +219,8 @@ package org.opencast.engage.videodisplay.control.command
                     break;
 
                 case VideoControlEvent.CLOSEDCAPTIONS:
-                    if ( model.ccBoolean )
+
+                    if( model.ccBoolean )
                     {
                         Swiz.dispatchEvent( new ClosedCaptionsEvent( false ) );
                         model.ccButtonBool = false;

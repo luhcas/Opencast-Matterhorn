@@ -16,10 +16,10 @@
 package org.opencast.engage.videodisplay.business
 {
     import bridge.ExternalFunction;
-    
+
     import flash.events.KeyboardEvent;
     import flash.external.ExternalInterface;
-    
+
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
     import org.opencast.engage.videodisplay.control.event.InitMediaPlayerEvent;
     import org.opencast.engage.videodisplay.control.event.LoadDFXPXMLEvent;
@@ -33,13 +33,16 @@ package org.opencast.engage.videodisplay.business
 
     public class FlexAjaxBridge
     {
+
         [Autowire]
         [Bindable]
-        public var model:VideodisplayModel;
-        
-        private var _time:TimeCode;
+        public var model : VideodisplayModel;
 
-        /** Constructor */
+        private var _time : TimeCode;
+
+        /**
+         * Constructor
+         */
         public function FlexAjaxBridge()
         {
             Swiz.autowire( this );
@@ -47,11 +50,11 @@ package org.opencast.engage.videodisplay.business
 
         /**
          * play
-         *
-         * When the learnder click on the play button
+         * When the learnder click the play button. Call the event VideoControlEvent.PLAY.
          * The return value is available in the calling javascript
-         * */
-        public function play():String
+         * @return String model.currentPlayerState
+         */
+        public function play() : String
         {
             Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.PLAY ) );
             return model.currentPlayerState;
@@ -59,11 +62,11 @@ package org.opencast.engage.videodisplay.business
 
         /**
          * pause
-         *
-         * When the learnder click on the pause button
-         * The return value is available in the calling javascript
-         * */
-        public function pause():String
+         * When the learnder click the pause button. Call the event VideoControlEvent.PAUSE.
+         * The return value is available in the calling javascript.
+         * @return String model.currentPlayerState
+         */
+        public function pause() : String
         {
             Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.PAUSE ) );
             return model.currentPlayerState;
@@ -71,236 +74,225 @@ package org.opencast.engage.videodisplay.business
 
         /**
          * stop
-         *
-         * When the learnder click on the stop button
-         * */
-        public function stop():void
+         * When the learnder click the stop button. Call the event VideoControlEvent.STOP.
+         */
+        public function stop() : void
         {
             Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.STOP ) );
         }
 
         /**
          * skipBackward
-         *
-         * When the learnder click on the skip backward button
-         * */
-        public function skipBackward():void
+         * When the learnder click the skip backward button. Call the event VideoControlEvent.SKIPBACKWARD.
+         */
+        public function skipBackward() : void
         {
             Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SKIPBACKWARD ) );
         }
 
         /**
          * rewind
-         *
-         * When the learnder click on the rewind button
-         * */
-        public function rewind():void
+         * When the learnder click on the rewind button. Call the event VideoControlEvent.REWIND.
+         */
+        public function rewind() : void
         {
             Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.REWIND ) );
         }
 
         /**
          * fastForward
-         *
-         * When the learnder click on the fast forward button
-         * */
-        public function fastForward():void
+         * When the learnder click on the fast forward button. Call the event VideoControlEvent.FASTFORWARD.
+         */
+        public function fastForward() : void
         {
             Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.FASTFORWARD ) );
         }
 
         /**
          * skipForward
-         *
-         * When the learnder click on the skip forward button
-         * */
-        public function skipForward():void
+         * When the learnder click on the skip forward button. Call the event VideoControlEvent.SKIPFORWARD.
+         */
+        public function skipForward() : void
         {
             Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SKIPFORWARD ) );
         }
 
         /**
          * seek
-         *
-         * When the learner seek the video
-         * 
+         * When the learner seek the video. Set the new postion in the html.
          * @param Number time
-         * */
-        public function seek( time:Number ):Number
+         * @return Number time
+         */
+        public function seek( time : Number ) : Number
         {
             if( model.startPlay == false )
             {
                 model.startSeek = time;
                 _time = new TimeCode();
-                var newPositionString:String = _time.getTC( time );
+                var newPositionString : String = _time.getTC( time );
                 ExternalInterface.call( ExternalFunction.SETCURRENTTIME, newPositionString );
-            }   
+            }
             model.mediaPlayer.seek( time );
-            
+
             return time;
         }
-        
+
         /**
          * mute
-         *
-         * Wehn the learner mutes the video
-         * The return value is available in the calling javascript
-         * */
-        public function mute():Number
+         * When the learner mutes the video.
+         * The return value is available in the calling javascript. Call the event VideoControlEvent.SKIPFORWARD.
+         * @return Number model.playerVolume
+         */
+        public function mute() : Number
         {
             Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.MUTE ) );
             return model.playerVolume;
         }
-        
+
         /**
          * setVolumeSlider
-         *
-         * Set the volume slider
-         * 
+         * Set the volume slider. Call the event SetVolumeEvent.
          * @param Number newVolume
-         * */
-        public function setVolumePlayer( newVolume:Number ):void
+         */
+        public function setVolumePlayer( newVolume : Number ) : void
         {
-            Swiz.dispatchEvent( new SetVolumeEvent( newVolume ));
+            Swiz.dispatchEvent( new SetVolumeEvent( newVolume ) );
         }
-        
+
         /**
          * setClosedCaptions
-         *
-         * To see the captions
-         * */
-        public function closedCaptions():void
+         * To see the captions. Call the event ClosedCaptionsEvent.
+         */
+        public function closedCaptions() : void
         {
             Swiz.dispatchEvent( new ClosedCaptionsEvent() );
         }
 
         /**
          * setCaptionsURL
-         *
-         * Set captions URL and load the file.
-         * 
+         * Set captions URL and load the file. Call the event LoadDFXPXMLEvent.
          * @param String captionsURL
          */
-        public function setCaptionsURL( captionsURL:String ):void
-        {            
-            if ( captionsURL != model.captionsURL )
+        public function setCaptionsURL( captionsURL : String ) : void
+        {
+            if( captionsURL != model.captionsURL )
             {
                 model.captionsURL = captionsURL;
-                Swiz.dispatchEvent( new LoadDFXPXMLEvent( captionsURL ));
+                Swiz.dispatchEvent( new LoadDFXPXMLEvent( captionsURL ) );
             }
         }
-        
+
         /**
          * setMediaURL
-         *
-         * Set media URL and init the player.
-         * 
-         * @param String mediaURLOne, String mediaURLTwo
+         * Set media URL. Call the event InitMediaPlayerEvent.
+         * Developer: You can change your own urls here.
+         * @param String coverURLOne, String coverURLTwo, String mediaURLOne, String mediaURLTwo, String mimetypeOne, String mimetypeTwo, String playerMode
          */
-        public function setMediaURL(coverURLOne:String, coverURLTwo:String, mediaURLOne:String, mediaURLTwo:String, mimetypeOne:String, mimetypeTwo:String, playerMode:String ):void
+        public function setMediaURL( coverURLOne : String, coverURLTwo : String, mediaURLOne : String, mediaURLTwo : String, mimetypeOne : String, mimetypeTwo : String, playerMode : String ) : void
         {
-            Swiz.dispatchEvent( new InitMediaPlayerEvent(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerMode ) );
+            Swiz.dispatchEvent( new InitMediaPlayerEvent( coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerMode ) );
         }
-        
+
         /**
          * videoSizeControl
-         *
-         * When the learner press the video size control button.
-         * 
+         * When the learner press the video size control button. Set the vide size state.
          * @param Number sizeLeft, Number sizeRight
          */
-        public function videoSizeControl( sizeLeft:Number, sizeRight:Number ):void
+        public function videoSizeControl( sizeLeft : Number, sizeRight : Number ) : void
         {
-            if(sizeLeft == sizeRight)
-			{
-			    model.videoSizeState = VideoSizeState.CENTER;
-			    model.coverState = CoverState.TWOCOVERS;
-			}
-			else if(sizeLeft > sizeRight && sizeRight > 0)
-			{
-			    model.videoSizeState = VideoSizeState.BIGLEFT;
-			    model.coverState = CoverState.TWOCOVERS;
-			}
-			else if(sizeLeft < sizeRight && sizeLeft > 0)
+            if( sizeLeft == sizeRight )
+            {
+                model.videoSizeState = VideoSizeState.CENTER;
+                model.coverState = CoverState.TWOCOVERS;
+            }
+            else if( sizeLeft > sizeRight && sizeRight > 0 )
+            {
+                model.videoSizeState = VideoSizeState.BIGLEFT;
+                model.coverState = CoverState.TWOCOVERS;
+            }
+            else if( sizeLeft < sizeRight && sizeLeft > 0 )
             {
                 model.videoSizeState = VideoSizeState.BIGRIGHT;
                 model.coverState = CoverState.TWOCOVERS;
             }
-            else if(sizeRight == 0)
+            else if( sizeRight == 0 )
             {
                 model.videoSizeState = VideoSizeState.ONLYLEFT;
                 model.coverState = CoverState.ONECOVER;
+
                 if( model.coverURLTwo == '' )
                 {
                     model.coverURLTwo == model.coverURLOne;
                 }
                 model.coverURLSingle = model.coverURLOne;
             }
-            else if(sizeLeft == 0)
+            else if( sizeLeft == 0 )
             {
                 model.videoSizeState = VideoSizeState.ONLYRIGHT;
                 model.coverState = CoverState.ONECOVER;
                 model.coverURLSingle = model.coverURLTwo;
             }
-		}
-		
-		/**
+        }
+
+        /**
          * setMediaResolution
-         *
-         * Set the resolution
+         * Set the media resolution.
+         * @param Number newWidthMediaOne, Number newHeightMediaOne, Number newWidthMediaTwo, Number newHeightMediaTwo, Number multiMediaContainerLeft
          */
-        public function setMediaResolution(newWidthMediaOne:Number, newHeightMediaOne:Number, newWidthMediaTwo:Number, newHeightMediaTwo:Number, multiMediaContainerLeft:Number):void
+        public function setMediaResolution( newWidthMediaOne : Number, newHeightMediaOne : Number, newWidthMediaTwo : Number, newHeightMediaTwo : Number, multiMediaContainerLeft : Number ) : void
         {
-            if(newWidthMediaOne == 0 && newHeightMediaOne == 0 && newWidthMediaTwo == 0 && newHeightMediaTwo == 0 && multiMediaContainerLeft == 0 )
+            if( newWidthMediaOne == 0 && newHeightMediaOne == 0 && newWidthMediaTwo == 0 && newHeightMediaTwo == 0 && multiMediaContainerLeft == 0 )
             {
-	             model.previewPlayer = true;
+                model.previewPlayer = true;
             }
             else
             {
                 model.mediaOneWidth = parseInt( newWidthMediaOne.toString() );
-			    model.mediaOneHeight = parseInt( newHeightMediaOne.toString() );
-			    model.mediaTwoWidth = parseInt( newWidthMediaTwo.toString() );
-			    model.mediaTwoHeight = parseInt( newHeightMediaTwo.toString() );
-			    model.mediaWidth = parseInt( ( newWidthMediaOne + newWidthMediaTwo ).toString() );
-			    model.multiMediaContainerLeft = parseInt( multiMediaContainerLeft.toString() );
-			    model.multiMediaContainerRight = 0;
-			    model.formatMediaOne = model.mediaOneWidth / model.mediaOneHeight;
-			    model.formatMediaTwo = model.mediaTwoWidth / model.mediaTwoHeight;
-			   
-                if(model.videoSizeState == VideoSizeState.ONLYLEFT || model.videoSizeState == VideoSizeState.BIGLEFT )
-			    {
+                model.mediaOneHeight = parseInt( newHeightMediaOne.toString() );
+                model.mediaTwoWidth = parseInt( newWidthMediaTwo.toString() );
+                model.mediaTwoHeight = parseInt( newHeightMediaTwo.toString() );
+                model.mediaWidth = parseInt( ( newWidthMediaOne + newWidthMediaTwo ).toString() );
+                model.multiMediaContainerLeft = parseInt( multiMediaContainerLeft.toString() );
+                model.multiMediaContainerRight = 0;
+                model.formatMediaOne = model.mediaOneWidth / model.mediaOneHeight;
+                model.formatMediaTwo = model.mediaTwoWidth / model.mediaTwoHeight;
+
+                if( model.videoSizeState == VideoSizeState.ONLYLEFT || model.videoSizeState == VideoSizeState.BIGLEFT )
+                {
                     model.multiMediaContainerRight = multiMediaContainerLeft;
-			        model.multiMediaContainerLeft = 0;
-			    }	
+                    model.multiMediaContainerLeft = 0;
+                }
             }
         }
-		
+
         /**
          * getViewState
-         *
+         * Get the current media state.
          * The return value is available in the calling javascript.
+         * @return String model.mediaState
          */
-        public function getViewState():String
+        public function getViewState() : String
         {
-        	return model.mediaState;
+            return model.mediaState;
         }
-        
+
         /**
-         * getViewState
-         *
+         * getMediaHeight
+         * Get the current media height.
          * The return value is available in the calling javascript.
+         * @return model.mediaContainer.measuredHeight
          */
-        public function getMediaHeight():Number
+        public function getMediaHeight() : Number
         {
-          return model.mediaContainer.measuredHeight;
+            return model.mediaContainer.measuredHeight;
         }
-        
+
         /**
          * reportKeyDown
-         *
-         * @eventType event:KeyboardEvent
+         * When the learner press a key.
+         * @eventType KeyboardEvent event
          */
-        public function reportKeyUp( event:KeyboardEvent ):void
+        public function reportKeyUp( event : KeyboardEvent ) : void
         {
             if( event.altKey && event.ctrlKey )
             {
@@ -310,12 +302,10 @@ package org.opencast.engage.videodisplay.business
 
         /**
          * passCharCode
-         *
          * When the learner press any key for the mediaplayer
-         * 
-         * @param int charCode
+         * @param Int charCode
          */
-        public function passCharCode( charCode:int ):void
+        public function passCharCode( charCode : int ) : void
         {
             // Play or pause the video
             if( charCode == 80 || charCode == 112 ) // P or p
@@ -339,11 +329,11 @@ package org.opencast.engage.videodisplay.business
             // Mute the video
             if( charCode == 77 || charCode == 109 ) // M or m
             {
-               ExternalInterface.call( ExternalFunction.MUTE, '' )
+                ExternalInterface.call( ExternalFunction.MUTE, '' )
             }
 
             // Volume up
-            if ( charCode == 85 || charCode == 117 ) // U or u
+            if( charCode == 85 || charCode == 117 ) // U or u
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.VOLUMEUP ) );
             }
@@ -423,16 +413,16 @@ package org.opencast.engage.videodisplay.business
             // rewind
             if( charCode == 82 || charCode == 114 ) // R or r
             {
-                
+
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.REWIND ) );
-                
+
             }
 
             // Fast forward
             if( charCode == 70 || charCode == 102 ) // F or f
             {
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.FASTFORWARD ) );
-                
+
             }
 
             // time
@@ -447,13 +437,12 @@ package org.opencast.engage.videodisplay.business
                 Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.SHORTCUTS ) );
             }
         }
-        
+
         /**
          * onBridgeReady
-         *
-         * When the birdge ist ready
+         * When the birdge ist ready call the external function ONPLAYERREADY.
          */
-        public function onBridgeReady():void
+        public function onBridgeReady() : void
         {
             ExternalInterface.call( ExternalFunction.ONPLAYERREADY );
         }

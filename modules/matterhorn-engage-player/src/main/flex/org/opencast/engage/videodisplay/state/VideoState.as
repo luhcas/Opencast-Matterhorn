@@ -18,12 +18,13 @@ package org.opencast.engage.videodisplay.state
 
     /**
      *   VideoState
-     *
      */
     public class VideoState
     {
-        public static const SINGLE:String = 'single';
-        public static const MULTI:String = 'multi';
-        public static const COVER:String = 'cover';
+        public static const SINGLE : String = 'single';
+
+        public static const MULTI : String = 'multi';
+
+        public static const COVER : String = 'cover';
     }
 }

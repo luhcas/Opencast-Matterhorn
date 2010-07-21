@@ -19,32 +19,38 @@ package org.opencast.engage.videodisplay.control.event
 
     /**
      *   SetVolumeEvent
-     *
      */
     public class SetVolumeEvent extends Event
     {
-        public static var EVENT_NAME:String = 'SetVolumeEvent';
+        public static var EVENT_NAME : String = 'SetVolumeEvent';
 
-        /** Constructor */
-        public function SetVolumeEvent( volume:Number, bubbles:Boolean = false, cancelable:Boolean = false )
+        /**
+         * Constructor
+         */
+        public function SetVolumeEvent( volume : Number, bubbles : Boolean = false, cancelable : Boolean = false )
         {
             super( EVENT_NAME, bubbles, cancelable );
             _volume = volume;
         }
-        private var _volume:Number;
 
-        // Override the inherited clone() method.
-        override public function clone():Event
+        private var _volume : Number;
+
+        /**
+         * clone
+         * Override the inherited clone() method.
+         * @return SetVolumeEvent
+         */
+        override public function clone() : Event
         {
             return new SetVolumeEvent( volume, bubbles, cancelable );
         }
 
         /**
          * volume
-         *
          * Get the volume.
-         *  */
-        public function get volume():Number
+         * @return Number _volume
+         */
+        public function get volume() : Number
         {
             return _volume;
         }

@@ -19,26 +19,28 @@ package org.opencast.engage.videodisplay.control.event
 
     /**
      *   DisplayCaptionEvent
-     *
      */
     public class DisplayCaptionEvent extends Event
     {
-        public static var EVENT_NAME:String = 'DisplayCaptionEvent';
+        public static var EVENT_NAME : String = 'DisplayCaptionEvent';
 
-        /** Constructor */
-        public function DisplayCaptionEvent( newPosition:Number, bubbles:Boolean = false, cancelable:Boolean = false )
+        /**
+         * Constructor
+         */
+        public function DisplayCaptionEvent( newPosition : Number, bubbles : Boolean = false, cancelable : Boolean = false )
         {
             super( EVENT_NAME, bubbles, cancelable );
             _newPosition = newPosition;
         }
-        private var _newPosition:Number;
+
+        private var _newPosition : Number;
 
         /**
          * position
-         *
          * Get the position.
+         * @return Number _newPosition
          *  */
-        public function get position():Number
+        public function get position() : Number
         {
             return _newPosition;
         }

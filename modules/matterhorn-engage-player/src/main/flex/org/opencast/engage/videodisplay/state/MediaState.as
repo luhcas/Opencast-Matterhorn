@@ -18,12 +18,13 @@ package org.opencast.engage.videodisplay.state
 
     /**
      *   MediaState
-     *
      */
     public class MediaState
     {
-        public static const AUDIO:String = 'audio';
-        public static const ERROR:String = 'error';
-        public static const MEDIA:String = 'media';
+        public static const AUDIO : String = 'audio';
+
+        public static const ERROR : String = 'error';
+
+        public static const MEDIA : String = 'media';
     }
 }

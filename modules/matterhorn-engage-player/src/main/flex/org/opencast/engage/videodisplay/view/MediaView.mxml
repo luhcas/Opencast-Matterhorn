@@ -1,4 +1,5 @@
 <?xml version = "1.0" encoding = "utf-8"?>
+
 <!--
      /**
      *  Copyright 2009 The Regents of the University of California
@@ -21,109 +22,90 @@
     width = "100%"
     height = "100%"
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
-    top="5"
-    bottom="5"
-    left="5"
-    right="5"
-    >
+    top = "5"
+    bottom = "5"
+    left = "5"
+    right = "5">
+
     <mx:Script>
         <![CDATA[
-        	import org.opencast.engage.videodisplay.model.VideodisplayModel;
+            import org.opencast.engage.videodisplay.model.VideodisplayModel;
             import org.swizframework.Swiz;
-           
+
             [Autowire]
             [Bindable]
-            public var model:VideodisplayModel;
-
-            
-
+            public var model : VideodisplayModel;
         ]]>
     </mx:Script>
-    
+
     <mx:states>
 
         <mx:State 
-            name = "single"
-            >
+            name = "single">
 
             <mx:SetProperty 
                 target = "{ bx_single }"
                 name = "visible"
-                value = "true"
-                />
+                value = "true"/>
 
             <mx:SetProperty 
                 target = "{ bx_single }"
                 name = "includeInLayout"
-                value = "true"
-                />
+                value = "true"/>
         </mx:State>
 
         <mx:State 
-            name = "multi"
-            >
+            name = "multi">
 
             <mx:SetProperty 
                 target = "{ bx_multi }"
                 name = "visible"
-                value = "true"
-                />
+                value = "true"/>
 
             <mx:SetProperty 
                 target = "{ bx_multi }"
                 name = "includeInLayout"
-                value = "true"
-                />
+                value = "true"/>
         </mx:State>
-        
+
         <mx:State 
-            name = "cover"
-            >
+            name = "cover">
 
             <mx:SetProperty 
                 target = "{ bx_cover }"
                 name = "visible"
-                value = "true"
-                />
+                value = "true"/>
 
             <mx:SetProperty 
                 target = "{ bx_cover }"
                 name = "includeInLayout"
-                value = "true"
-                />
+                value = "true"/>
         </mx:State>
-        
     </mx:states>
-    
-    <view:SingleMediaContainerView
+
+    <view:SingleMediaContainerView 
         id = "bx_single"
         visible = "false"
         includeInLayout = "false"
         width = "100%"
-        height = "100%"
-        />
-        
+        height = "100%"/>
+
     <view:MultiMediaContainerView 
-    	 id = "bx_multi"
+        id = "bx_multi"
         visible = "false"
         includeInLayout = "false"
         width = "100%"
         height = "100%"
-        currentState="{model.videoSizeState}"
-    	/>
-    	
-    <view:CoverView
-    	id = "bx_cover"
+        currentState = "{model.videoSizeState}"/>
+
+    <view:CoverView 
+        id = "bx_cover"
         visible = "false"
         includeInLayout = "false"
-        currentState="{ model.coverState }"
-        />	
-
+        currentState = "{ model.coverState }"/>
 
     <view:Splashscreen 
         id = "splashscreen"
         width = "100%"
-        height = "100%"
-        />
-   
+        height = "100%"/>
 </mx:Canvas>

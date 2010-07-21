@@ -17,44 +17,44 @@ package org.opencast.engage.videodisplay.control.command
 {
     import mx.controls.Alert;
     import mx.core.Application;
-    
+
     import org.opencast.engage.videodisplay.control.event.ResizeVideodisplayEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
     import org.swizframework.Swiz;
 
+    /**
+     *   ResizeVideodisplayCommand
+     */
     public class ResizeVideodisplayCommand
     {
-        [Autowire]
-        public var model:VideodisplayModel;
 
-        /** Constructor */
+        [Autowire]
+        public var model : VideodisplayModel;
+
+        /**
+         * Constructor
+         */
         public function ResizeVideodisplayCommand()
         {
             Swiz.autowire( this );
         }
 
-        /** execute
-         *
-         * When the learner resize the Videodisplay in the browser
-         *
-         * @eventType event:ResizeVideodisplayEvent
-         * */
-        public function execute( event:ResizeVideodisplayEvent ):void
+        /**
+         * execute
+         * When the learner resize the Videodisplay in the browser.
+         * @eventType ResizeVideodisplayEvent event
+         */
+        public function execute( event : ResizeVideodisplayEvent ) : void
         {
-             if( model.mediaContainer != null)
-             {
-             	 model.mediaContainer.height = Application.application.height;
-                 model.mediaContainer.width = Application.application.width;
-             }
-           
-            /**
-             * Application max width: 1194px, max Font Size ?, 1194/33 = 36px ( 36 > 20 ) = 20px
-             * Application min widht: 231px, min Font Size ?, 231/33 = 7px
-             *
-             * */
-            var divisor:int = 50;
-            var fontSize:int = Application.application.width / divisor;
-            
+            if( model.mediaContainer != null )
+            {
+                model.mediaContainer.height = Application.application.height;
+                model.mediaContainer.width = Application.application.width;
+            }
+
+            var divisor : int = 50;
+            var fontSize : int = Application.application.width / divisor;
+
             if( fontSize > 16 )
             {
                 model.fontSizeCaptions = 16;
@@ -62,8 +62,8 @@ package org.opencast.engage.videodisplay.control.command
             }
             else if( fontSize < 13 && fontSize >= 9 )
             {
-            	model.endIndexSubtitle = 80;
-            	model.fontSizeCaptions = fontSize;
+                model.endIndexSubtitle = 80;
+                model.fontSizeCaptions = fontSize;
             }
             else if( fontSize < 9 && fontSize > 7 )
             {
@@ -79,7 +79,6 @@ package org.opencast.engage.videodisplay.control.command
             {
                 model.fontSizeCaptions = fontSize;
             }
-            
         }
     }
 }

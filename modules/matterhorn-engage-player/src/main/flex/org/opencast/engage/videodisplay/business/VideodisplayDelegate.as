@@ -20,16 +20,19 @@ package org.opencast.engage.videodisplay.business
 
     /**
      *   VideodisplayDelegate
-     *
      */
     public class VideodisplayDelegate
     {
 
-        /** Constructor */
+        /**
+         * Constructor
+         */
         public function VideodisplayDelegate()
         {
+            // do nothing
         }
+
         [Autowire]
-        public var service:RemoteObject;
+        public var service : RemoteObject;
     }
 }

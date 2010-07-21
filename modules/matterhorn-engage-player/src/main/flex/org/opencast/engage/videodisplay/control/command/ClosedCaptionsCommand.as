@@ -16,31 +16,36 @@
 package org.opencast.engage.videodisplay.control.command
 {
     import bridge.ExternalFunction;
-    
+
     import flash.external.ExternalInterface;
-    
+
     import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
     import org.swizframework.Swiz;
 
+    /**
+     *   ClosedCaptionsCommand
+     */
     public class ClosedCaptionsCommand
     {
-        [Autowire]
-        public var model:VideodisplayModel;
 
-        /** Constructor */
+        [Autowire]
+        public var model : VideodisplayModel;
+
+        /**
+         * Constructor
+         */
         public function ClosedCaptionsCommand()
         {
             Swiz.autowire( this );
         }
 
-        /** execute
-         *
-         * When the learner toggle the cc button
-         *
-         * @eventType event:ClosedCaptionsEvent
-         * */
-        public function execute( event:ClosedCaptionsEvent ):void
+        /**
+         * execute
+         * When the learner toggle the cc button.
+         * @eventType ClosedCaptionsEvent event
+         */
+        public function execute( event : ClosedCaptionsEvent ) : void
         {
             if( model.ccBoolean == true )
             {
@@ -50,9 +55,9 @@ package org.opencast.engage.videodisplay.control.command
             }
             else
             {
-            	model.ccBoolean = true;
-            	model.ccButtonBoolean = true;
-            	ExternalInterface.call( ExternalFunction.SETCCICONON, '' );
+                model.ccBoolean = true;
+                model.ccButtonBoolean = true;
+                ExternalInterface.call( ExternalFunction.SETCCICONON, '' );
             }
         }
     }

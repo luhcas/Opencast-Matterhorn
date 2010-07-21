@@ -18,11 +18,11 @@ package org.opencast.engage.videodisplay.state
 
     /**
      *   DefaultPlayerState
-     *
      */
     public class DefaultPlayerState
     {
-        public static const PLAYERONE:String = 'playerOne';
-        public static const PLAYERTWO:String = 'playerTwo';
+        public static const PLAYERONE : String = 'playerOne';
+
+        public static const PLAYERTWO : String = 'playerTwo';
     }
 }

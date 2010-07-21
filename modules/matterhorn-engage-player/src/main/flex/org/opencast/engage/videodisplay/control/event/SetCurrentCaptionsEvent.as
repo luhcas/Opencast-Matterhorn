@@ -19,32 +19,38 @@ package org.opencast.engage.videodisplay.control.event
 
     /**
      *   SetCurrentCaptionsEvent
-     *
      */
     public class SetCurrentCaptionsEvent extends Event
     {
-        public static var EVENT_NAME:String = 'SetCurrentCaptionsEvent';
+        public static var EVENT_NAME : String = 'SetCurrentCaptionsEvent';
 
-        /** Constructor */
-        public function SetCurrentCaptionsEvent( language:String, bubbles:Boolean = false, cancelable:Boolean = false )
+        /**
+         * Constructor
+         */
+        public function SetCurrentCaptionsEvent( language : String, bubbles : Boolean = false, cancelable : Boolean = false )
         {
             super( EVENT_NAME, bubbles, cancelable );
             _language = language;
         }
-        private var _language:String;
 
-        // Override the inherited clone() method.
-        override public function clone():Event
+        private var _language : String;
+
+        /**
+         * clone
+         * Override the inherited clone() method.
+         * @return SetCurrentCaptionsEvent
+         */
+        override public function clone() : Event
         {
             return new SetCurrentCaptionsEvent( language, bubbles, cancelable );
         }
 
         /**
          * language
-         *
          * Get the language.
-         *  */
-        public function get language():String
+         * @return String _language
+         */
+        public function get language() : String
         {
             return _language;
         }

@@ -16,52 +16,60 @@
 package org.opencast.engage.videodisplay.control.command
 {
     import bridge.ExternalFunction;
-    
+
     import flash.external.ExternalInterface;
-    
+
     import mx.controls.Alert;
-    
+
     import org.opencast.engage.videodisplay.control.event.DisplayCaptionEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
     import org.opencast.engage.videodisplay.vo.CaptionVO;
     import org.swizframework.Swiz;
 
+    /**
+     *   ClosedCaptionsCommand
+     */
     public class DisplayCaptionCommand
     {
-        [Autowire]
-        public var model:VideodisplayModel;
-        private var startIndex:Number = 0;
-        private var endIndex:Number = 90;
 
-        /** Constructor */
+        [Autowire]
+        public var model : VideodisplayModel;
+
+        private var startIndex : Number = 0;
+
+        private var endIndex : Number = 90;
+
+        /**
+         * Constructor
+         */
         public function DisplayCaptionCommand()
         {
             Swiz.autowire( this );
         }
 
-        /** execute
-         *
-         * The event gives the new position in the video. Find the right captions in the currentCaptionSet and display the captions with the help of the ExternalInterface.
-         *
-         * @eventType event:DisplayCaptionEvent
-         * */
-        public function execute( event:DisplayCaptionEvent ):void
+        /**
+         * execute
+         * The event gives the new position in the video.
+         * Find the right captions in the currentCaptionSet and display the captions with the help of the ExternalInterface.
+         * @eventType DisplayCaptionEvent event
+         */
+        public function execute( event : DisplayCaptionEvent ) : void
         {
-            var time:Number = event.position * 1000;
-            var tmpCaption:CaptionVO = new CaptionVO();
-            var lastPos:int = 0;
-            var subtitle:String = '';
-            var pattern:String = '<br';
-            var patternResult:int = 0;
+            var time : Number = event.position * 1000;
+            var tmpCaption : CaptionVO = new CaptionVO();
+            var lastPos : int = 0;
+            var subtitle : String = '';
+            var pattern : String = '<br';
+            var patternResult : int = 0;
 
             // Find the captions
-            if ( model.currentCaptionSet != null )
+            if( model.currentCaptionSet != null )
             {
-                for ( var i:int = 0; i < model.currentCaptionSet.length; i++ )
+                for( var i : int = 0; i < model.currentCaptionSet.length; i++ )
                 {
                     tmpCaption = CaptionVO( model.currentCaptionSet[ ( lastPos + i ) % model.currentCaptionSet.length ] );
 
-                    if ( tmpCaption.begin < time && time < tmpCaption.end )
+                    if( tmpCaption.begin < time && time < tmpCaption.end )
                     {
                         lastPos += i;
 
@@ -72,63 +80,63 @@ package org.opencast.engage.videodisplay.control.command
                 }
 
                 // When the learner will see the captions   
-                if ( model.ccBoolean )
+                if( model.ccBoolean )
                 {
                     // When the capions are different, than send new captions
-                    if ( model.oldSubtitle != subtitle )
+                    if( model.oldSubtitle != subtitle )
                     {
                         model.currentSubtitle = '';
-                        patternResult = subtitle.search(pattern);
-                        
-                        
-                        
-                        if( subtitle.length > model.endIndexSubtitle && patternResult == -1)
+                        patternResult = subtitle.search( pattern );
+
+
+
+                        if( subtitle.length > model.endIndexSubtitle && patternResult == -1 )
                         {
-                          subtitle = editSubtitle(subtitle);
+                            subtitle = editSubtitle( subtitle );
                         }
-                        
+
                         ExternalInterface.call( ExternalFunction.SETCAPTIONS, subtitle );
                         model.currentSubtitle = subtitle;
                         model.oldSubtitle = subtitle;
-                     }
+                    }
                 }
                 else
                 {
                     model.currentSubtitle = '';
                     model.oldSubtitle = 'default';
-                    ExternalInterface.call( ExternalFunction.SETCAPTIONS, '');
+                    ExternalInterface.call( ExternalFunction.SETCAPTIONS, '' );
                 }
             }
         }
-        
-        /** editSubtitle
-         *
+
+        /**
+         * editSubtitle
          * Edit the current Subtitle
-         *
-         * @return String:_subtitle
-         * */
-        private function editSubtitle(subtitle:String):String
+         * @param String subtitle
+         * @return String _subtitle
+         */
+        private function editSubtitle( subtitle : String ) : String
         {
-            
-            var _subtitle:String = '';
-            var editSubtitle:String = '';
-            var editBool:Boolean = false;
-            
-            editSubtitle =  subtitle;
-            
+            var _subtitle : String = '';
+            var editSubtitle : String = '';
+            var editBool : Boolean = false;
+
+            editSubtitle = subtitle;
+
             while( editBool == false )
             {
                 endIndex = model.endIndexSubtitle;
-                while( editSubtitle.charAt(endIndex - 1) != ' ' )
+
+                while( editSubtitle.charAt( endIndex - 1 ) != ' ' )
                 {
                     endIndex--;
                 }
-                _subtitle = _subtitle + editSubtitle.substring( startIndex, endIndex);
+                _subtitle = _subtitle + editSubtitle.substring( startIndex, endIndex );
                 editSubtitle = editSubtitle.substring( endIndex, editSubtitle.length );
-                
-                if(editSubtitle.length > model.endIndexSubtitle )
+
+                if( editSubtitle.length > model.endIndexSubtitle )
                 {
-                    _subtitle = _subtitle +'<br>';
+                    _subtitle = _subtitle + '<br>';
                 }
                 else
                 {
@@ -136,7 +144,7 @@ package org.opencast.engage.videodisplay.control.command
                     editBool = true;
                 }
             }
-            
+
             return _subtitle;
         }
     }

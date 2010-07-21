@@ -19,21 +19,25 @@ package org.opencast.engage.videodisplay.control.event
 
     /**
      *   ClosedCaptionsEvent
-     *
      */
     public class ClosedCaptionsEvent extends Event
     {
-        public static var EVENT_NAME:String = 'ClosedCaptionsEvent';
+        public static var EVENT_NAME : String = 'ClosedCaptionsEvent';
 
-        /** Constructor */
-        public function ClosedCaptionsEvent( bubbles:Boolean = false, cancelable:Boolean = false )
+        /**
+         * Constructor
+         */
+        public function ClosedCaptionsEvent( bubbles : Boolean = false, cancelable : Boolean = false )
         {
             super( EVENT_NAME, bubbles, cancelable );
-            
         }
-        
-        // Override the inherited clone() method.
-        override public function clone():Event
+
+        /**
+         * clone
+         * Override the inherited clone() method.
+         * @return ClosedCaptionsEvent
+         */
+        override public function clone() : Event
         {
             return new ClosedCaptionsEvent( bubbles, cancelable );
         }

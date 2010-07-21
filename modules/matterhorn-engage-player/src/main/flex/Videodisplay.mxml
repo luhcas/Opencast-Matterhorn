@@ -71,6 +71,10 @@
             {
                 /* Set up full screen handler. */
                 Application.application.stage.addEventListener( FullScreenEvent.FULL_SCREEN, fullScreenHandler );
+                
+                
+                
+                
             }
 
             /**

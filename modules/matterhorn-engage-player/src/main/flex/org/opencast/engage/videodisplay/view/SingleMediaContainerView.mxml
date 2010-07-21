@@ -1,4 +1,5 @@
 <?xml version = "1.0" encoding = "utf-8"?>
+
 <!--
      /**
      *  Copyright 2009 The Regents of the University of California
@@ -23,12 +24,11 @@
     xmlns:mx = "http://www.adobe.com/2006/mxml"
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
     resize = "{ resizeVideodisplay() }"
-    xmlns:osmf="com.osmf.*"
-    >
+    xmlns:osmf = "com.osmf.*">
 
     <mx:Script>
         <![CDATA[
-        	import mx.core.Application;
+            import mx.core.Application;
             import mx.controls.Alert;
             import mx.core.Container;
             import org.osmf.layout.ScaleMode;
@@ -40,45 +40,32 @@
 
             [Autowire]
             [Bindable]
-            public var model:VideodisplayModel;
+            public var model : VideodisplayModel;
 
             /**
-             * initPlayer
-             *
-             * Init the Videoplayer.
-             *
-             *  */
-            public function initPlayer():void
+             * initPlayerLeft
+             * Init the single Videoplayer, create a new Media Container, and add the new container to the UI Component.
+             */
+            public function initPlayer() : void
             {
-               
-               
-                // Set up the container
                 model.mediaContainer = new MediaContainer();
-               
-                
                 this.mediaContainerUIComponent.container = model.mediaContainer;
-                
             }
 
             /**
              * resizeVideodisplay
-             *
-             * When the learner resize the Videodisplay in the Browser
-             *
-             * */
-            public function resizeVideodisplay():void
+             * When the learner resize the Videodisplay in the Browser call the ResizeVideodisplayEvent.
+             */
+            public function resizeVideodisplay() : void
             {
                 Swiz.dispatchEvent( new ResizeVideodisplayEvent() );
             }
         ]]>
     </mx:Script>
-    
-    <osmf:MediaContainerUIComponent
+
+    <osmf:MediaContainerUIComponent 
         id = "mediaContainerUIComponent"
         addedToStage = "initPlayer()"
-        width="100%"
-        height="100%"
-        />   
-      
-        
+        width = "100%"
+        height = "100%"/>
 </mx:Canvas>

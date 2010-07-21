@@ -17,7 +17,7 @@ package org.opencast.engage.videodisplay.control
 {
     import mx.rpc.AsyncToken;
     import mx.rpc.http.HTTPService;
-    
+
     import org.opencast.engage.videodisplay.control.command.ClosedCaptionsCommand;
     import org.opencast.engage.videodisplay.control.command.DisplayCaptionCommand;
     import org.opencast.engage.videodisplay.control.command.InitMediaPlayerCommand;
@@ -39,7 +39,10 @@ package org.opencast.engage.videodisplay.control
 
     public class VideodisplayController extends AbstractController
     {
-        /** Constructor */
+        /**
+         * Constructor
+         * Add the listeners.
+         */
         public function VideodisplayController()
         {
             Swiz.addEventListener( LoadDFXPXMLEvent.EVENT_NAME, loadDFXPXML );
@@ -52,88 +55,96 @@ package org.opencast.engage.videodisplay.control
             Swiz.addEventListener( InitMediaPlayerEvent.EVENT_NAME, initMediaPlayer );
         }
 
-            
-        /** initMediaPlayer
-         *
-         * @eventType event:InitMediaPlayerEvent
+
+        /**
+         * initMediaPlayer
+         * Create new InitMediaPlayerCommand and assign him the event.
+         * @eventType InitMediaPlayerEvent event
          * */
-        public function initMediaPlayer( event:InitMediaPlayerEvent ):void
+        public function initMediaPlayer( event : InitMediaPlayerEvent ) : void
         {
-            var initMediaPlayerCommand:InitMediaPlayerCommand = new InitMediaPlayerCommand();
+            var initMediaPlayerCommand : InitMediaPlayerCommand = new InitMediaPlayerCommand();
             initMediaPlayerCommand.execute( event );
         }
 
-       /** closedCaptions
-         *
-         * @eventType event:ClosedCaptionsEvent
+        /**
+         * closedCaptions
+         * Create new ClosedCaptionsCommand and assign him the event.
+         * @eventType ClosedCaptionsEvent event
          * */
-        public function closedCaptions( event:ClosedCaptionsEvent ):void
+        public function closedCaptions( event : ClosedCaptionsEvent ) : void
         {
-            var closedCaptionsCommand:ClosedCaptionsCommand = new ClosedCaptionsCommand();
+            var closedCaptionsCommand : ClosedCaptionsCommand = new ClosedCaptionsCommand();
             closedCaptionsCommand.execute( event );
         }
 
-        /** displayCaption
-         *
-         * @eventType event:DisplayCaptionEvent
+        /**
+         * displayCaption
+         * Create new DisplayCaptionCommand and assign him the event.
+         * @eventType DisplayCaptionEvent event
          * */
-        public function displayCaption( event:DisplayCaptionEvent ):void
+        public function displayCaption( event : DisplayCaptionEvent ) : void
         {
-            var displayCaptionCommand:DisplayCaptionCommand = new DisplayCaptionCommand();
+            var displayCaptionCommand : DisplayCaptionCommand = new DisplayCaptionCommand();
             displayCaptionCommand.execute( event );
         }
 
-        /** loadDFXP.XML
-         *
-         * @eventType event:LoadDFXPXMLEvent
+        /**
+         * loadDFXP.XML
+         * Create new LoadDFXPXMLResponder and new HTTPService, send the serveice to the AsyncToken.
+         * @eventType LoadDFXPXMLEvent event
          * */
-        public function loadDFXPXML( event:LoadDFXPXMLEvent ):void
+        public function loadDFXPXML( event : LoadDFXPXMLEvent ) : void
         {
-            var responder:LoadDFXPXMLResponder = new LoadDFXPXMLResponder();
-            var service:HTTPService = new HTTPService();
+            var responder : LoadDFXPXMLResponder = new LoadDFXPXMLResponder();
+            var service : HTTPService = new HTTPService();
             service.resultFormat = "e4x";
             service.url = event.source;
-            var token:AsyncToken = service.send();
+            var token : AsyncToken = service.send();
             token.addResponder( responder );
         }
 
-        /** resizeVideodisplay
-         *
-         * @eventType event:ResizeVideodisplayEvent
+        /**
+         * resizeVideodisplay
+         * Create new ResizeVideodisplayCommand and assign him the event.
+         * @eventType ResizeVideodisplayEvent event
          * */
-        public function resizeVideodisplay( event:ResizeVideodisplayEvent ):void
+        public function resizeVideodisplay( event : ResizeVideodisplayEvent ) : void
         {
-            var resizeVideodisplayCommand:ResizeVideodisplayCommand = new ResizeVideodisplayCommand();
+            var resizeVideodisplayCommand : ResizeVideodisplayCommand = new ResizeVideodisplayCommand();
             resizeVideodisplayCommand.execute( event );
         }
 
-        /** setCurrentCaptions
-         *
-         * @eventType event:SetCurrentCaptionsEvent
+        /**
+         * setCurrentCaptions
+         * Create new SetCurrentCaptionsCommand and assign him the event.
+         * @eventType SetCurrentCaptionsEvent event
          * */
-        public function setCurrentCaptions( event:SetCurrentCaptionsEvent ):void
+        public function setCurrentCaptions( event : SetCurrentCaptionsEvent ) : void
         {
-            var setCurrentCaptionsCommand:SetCurrentCaptionsCommand = new SetCurrentCaptionsCommand();
+            var setCurrentCaptionsCommand : SetCurrentCaptionsCommand = new SetCurrentCaptionsCommand();
             setCurrentCaptionsCommand.execute( event );
         }
 
-        /** setVolume
-         *
-         * @eventType event:SetVolumeEvent
+        /**
+         * setVolume
+         * Create new SetVolumeCommand and assign him the event.
+         * @eventType SetVolumeEvent event
          * */
-        public function setVolume( event:SetVolumeEvent ):void
+        public function setVolume( event : SetVolumeEvent ) : void
         {
-            var setVolumeCommand:SetVolumeCommand = new SetVolumeCommand();
+            var setVolumeCommand : SetVolumeCommand = new SetVolumeCommand();
             setVolumeCommand.execute( event );
         }
 
-        /** videoControl
-         *
-         * @eventType event:VideoControlEvent
+        /**
+         * videoControl
+         * Create new VideoControlCommand and assign him the event.
+         * @eventType VideoControlEvent event
          * */
-        public function videoControl( event:VideoControlEvent ):void
+        public function videoControl( event : VideoControlEvent ) : void
         {
-            var videoControlCommand:VideoControlCommand = new VideoControlCommand();
+            var videoControlCommand : VideoControlCommand = new VideoControlCommand();
             videoControlCommand.execute( event );
         }
     }
