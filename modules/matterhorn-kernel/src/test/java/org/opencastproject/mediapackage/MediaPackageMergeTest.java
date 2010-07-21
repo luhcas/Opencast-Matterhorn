@@ -32,6 +32,8 @@ import org.opencastproject.mediapackage.MediaPackageSupport;
 import org.opencastproject.mediapackage.MediaPackageSupport.MergeMode;
 import org.opencastproject.util.FileSupport;
 
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,6 +52,10 @@ public class MediaPackageMergeTest {
   /** tmp directory */
   protected File tmpDir = null;
 
+  /** Media package directories  */
+  protected File packageDir1 = null;
+  protected File packageDir2 = null;
+  
   /** The media package builder */
   protected MediaPackageBuilder mediaPackageBuilder = null;
 
@@ -74,6 +80,15 @@ public class MediaPackageMergeTest {
   }
 
   /**
+   * @throws java.io.File.IOException
+   */
+  @After
+  public void tearDown() throws Exception {
+    FileUtils.deleteDirectory(packageDir1);
+    FileUtils.deleteDirectory(packageDir2);
+  }
+
+  /**
    * Creates the source media package.
    * 
    * @throws IOException
@@ -81,14 +96,14 @@ public class MediaPackageMergeTest {
    */
   private void setUpSourceMediaPackage() throws IOException, MediaPackageException {
     // Create the media package directory
-    File packageDir = new File(tmpDir, Long.toString(System.currentTimeMillis()));
+    packageDir1 = new File(tmpDir, Long.toString(System.currentTimeMillis()));
 
     // Create subdirectories
-    File trackDir = new File(packageDir, "tracks");
+    File trackDir = new File(packageDir1, "tracks");
     trackDir.mkdirs();
-    File metadataDir = new File(packageDir, "metadata");
+    File metadataDir = new File(packageDir1, "metadata");
     metadataDir.mkdirs();
-    File attachmentDir = new File(packageDir, "attachments");
+    File attachmentDir = new File(packageDir1, "attachments");
     attachmentDir.mkdirs();
 
     // Setup test files
@@ -101,7 +116,7 @@ public class MediaPackageMergeTest {
     File coverTestFile = new File(MediaPackageBuilderTest.class.getResource("/cover.png").getPath());
 
     // Copy files into place
-    File manifestFile = new File(packageDir, MediaPackageElements.MANIFEST_FILENAME);
+    File manifestFile = new File(packageDir1, MediaPackageElements.MANIFEST_FILENAME);
     FileSupport.copy(sourceManifestFile, manifestFile);
     FileSupport.copy(videoTestFile, trackDir);
     FileSupport.copy(audioTestFile, trackDir);
@@ -126,14 +141,14 @@ public class MediaPackageMergeTest {
    */
   private void setUpTargeMediaPackage() throws IOException, MediaPackageException {
     // Create the media package directory
-    File packageDir = new File(tmpDir, Long.toString(System.currentTimeMillis()));
+    packageDir2 = new File(tmpDir, Long.toString(System.currentTimeMillis()));
 
     // Create subdirectories
-    File trackDir = new File(packageDir, "tracks");
+    File trackDir = new File(packageDir2, "tracks");
     trackDir.mkdirs();
-    File metadataDir = new File(packageDir, "metadata");
+    File metadataDir = new File(packageDir2, "metadata");
     metadataDir.mkdirs();
-    File attachmentDir = new File(packageDir, "attachments");
+    File attachmentDir = new File(packageDir2, "attachments");
     attachmentDir.mkdirs();
 
     // Setup test files
@@ -146,7 +161,7 @@ public class MediaPackageMergeTest {
     File coverTestFile = new File(MediaPackageBuilderTest.class.getResource("/cover.png").getPath());
 
     // Copy files into place
-    File manifestFile = new File(packageDir, MediaPackageElements.MANIFEST_FILENAME);
+    File manifestFile = new File(packageDir2, MediaPackageElements.MANIFEST_FILENAME);
     FileSupport.copy(sourceManifestFile, manifestFile);
     FileSupport.copy(videoTestFile, trackDir);
     FileSupport.copy(audioTestFile, trackDir);

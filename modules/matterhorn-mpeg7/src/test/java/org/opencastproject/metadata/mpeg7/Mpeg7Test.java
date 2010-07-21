@@ -25,7 +25,9 @@ import org.opencastproject.util.FileSupport;
 
 import de.schlichtherle.io.FileOutputStream;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,6 +47,9 @@ public class Mpeg7Test {
   /** The test catalog */
   private File catalogFile = null;
 
+  /** Temp file for mpeg7 catalog contents */
+  private File mpeg7TempFile = null;
+ 
   /**
    * @throws java.lang.Exception
    */
@@ -53,6 +58,14 @@ public class Mpeg7Test {
     catalogFile = new File(this.getClass().getResource(catalogName).getPath());
     if (!catalogFile.exists() || !catalogFile.canRead())
       throw new Exception("Unable to access mpeg-7 test catalog '" + catalogName + "'");
+  }
+
+  /**
+   * @throws java.io.File.IOException
+   */
+  @After
+  public void tearDown() throws Exception {
+    FileUtils.deleteQuietly(mpeg7TempFile);
   }
 
   /**
@@ -73,7 +86,7 @@ public class Mpeg7Test {
     Mpeg7Catalog mpeg7Sample = new Mpeg7CatalogImpl(catalogFile.toURI().toURL().openStream());
 
     // Create a new catalog and fill it with a few fields
-    File mpeg7TempFile = new File(FileSupport.getTempDirectory(), Long.toString(System.currentTimeMillis()));
+    mpeg7TempFile = new File(FileSupport.getTempDirectory(), Long.toString(System.currentTimeMillis()));
 
     // TODO: Add sample tracks to new catalog
     // TODO: Add sample video segments to new catalog

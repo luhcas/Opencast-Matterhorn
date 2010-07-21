@@ -23,6 +23,7 @@ import org.opencastproject.analysis.text.ocropus.OcropusTextAnalyzer;
 import org.opencastproject.analysis.text.ocropus.OcropusTextFrame;
 
 import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,6 +59,14 @@ public class OcropusTextAnalyzerTest {
     testFile = File.createTempFile("ocrtest", ".jpg");
     FileUtils.copyURLToFile(imageUrl, testFile);
     analyzer = new OcropusTextAnalyzer(ocropusbinary);
+  }
+
+  /**
+   * @throws java.io.File.IOException
+   */
+  @After
+  public void tearDown() throws Exception {
+    FileUtils.deleteQuietly(testFile);
   }
 
   /**

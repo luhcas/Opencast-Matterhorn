@@ -41,6 +41,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -76,6 +77,9 @@ public class VideoSegmenterTest {
   /** The media url */
   protected static TrackImpl track = null;
 
+  /** Temp file */
+  private File tempFile = null;
+
   /**
    * Copies test files to the local file system, since jmf is not able to access movies from the resource section of a
    * bundle.
@@ -94,9 +98,6 @@ public class VideoSegmenterTest {
     System.setProperty("awt.toolkit", "sun.awt.HeadlessToolkit");
   }
 
-  static String collection;
-  static String filename;
-
   /**
    * Setup for the video segmenter service, including creation of a mock workspace.
    * 
@@ -108,7 +109,7 @@ public class VideoSegmenterTest {
     mpeg7Service = new Mpeg7CatalogService();
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(workspace.get((URI) EasyMock.anyObject())).andReturn(new File(track.getURI()));
-    final File tempFile = File.createTempFile(getClass().getName(), "xml");
+    tempFile = File.createTempFile(getClass().getName(), "xml");
     EasyMock.expect(
             workspace.putInCollection((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
                     (InputStream) EasyMock.anyObject())).andAnswer(new IAnswer<URI>() {
@@ -132,8 +133,12 @@ public class VideoSegmenterTest {
     vsegmenter.setRemoteServiceManager(remoteServiceManager);
   }
 
+  /**
+   * @throws java.io.File.IOException
+   */
+  @After
   public void tearDown() throws Exception {
-    FileUtils.deleteQuietly(new File("target", filename));
+    FileUtils.deleteQuietly(tempFile);
   }
 
   @Test

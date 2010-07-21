@@ -38,7 +38,9 @@ import org.opencastproject.mediapackage.NamespaceBindingException;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.UnknownFileTypeException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -72,6 +74,10 @@ public class DublinCoreTest {
    */
   private File catalogFile = null;
 
+  /** Temp files for test catalogs */
+  private File dcTempFile1 = null;
+  private File dcTempFile2 = null;
+ 
   /**
    * @throws java.lang.Exception
    */
@@ -80,6 +86,15 @@ public class DublinCoreTest {
     catalogFile = new File(this.getClass().getResource(catalogName).getPath());
     if (!catalogFile.exists() || !catalogFile.canRead())
       throw new Exception("Unable to access test catalog");
+  }
+
+  /**
+   * @throws java.io.File.IOException
+   */
+  @After
+  public void tearDown() throws Exception {
+    FileUtils.deleteQuietly(dcTempFile1);
+    FileUtils.deleteQuietly(dcTempFile2);
   }
 
   /**
@@ -116,7 +131,7 @@ public class DublinCoreTest {
 
       // Create a new catalog and fill it with a few fields
       DublinCoreCatalog dcNew = DublinCoreCatalogImpl.newInstance();
-      File dcTempFile = new File(FileSupport.getTempDirectory(), Long.toString(System.currentTimeMillis()));
+      dcTempFile1 = new File(FileSupport.getTempDirectory(), Long.toString(System.currentTimeMillis()));
 
       // Add the required fields
       dcNew.add(PROPERTY_IDENTIFIER, dcSample.getFirst(PROPERTY_IDENTIFIER));
@@ -152,13 +167,13 @@ public class DublinCoreTest {
       Transformer trans = transfac.newTransformer();
       trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
       trans.setOutputProperty(OutputKeys.METHOD, "xml");
-      FileWriter sw = new FileWriter(dcTempFile);
+      FileWriter sw = new FileWriter(dcTempFile1);
       StreamResult result = new StreamResult(sw);
       DOMSource source = new DOMSource(dcNew.toXml());
       trans.transform(source, result);
 
       // Re-read the saved catalog and test for its content
-      DublinCoreCatalog dcNewFromDisk = new DublinCoreCatalogImpl(dcTempFile.toURI().toURL().openStream());
+      DublinCoreCatalog dcNewFromDisk = new DublinCoreCatalogImpl(dcTempFile1.toURI().toURL().openStream());
       assertEquals(dcSample.getFirst(PROPERTY_IDENTIFIER), dcNewFromDisk.getFirst(PROPERTY_IDENTIFIER));
       assertEquals(dcSample.getFirst(PROPERTY_TITLE, "en"), dcNewFromDisk.getFirst(PROPERTY_TITLE, "en"));
       assertEquals(dcSample.getFirst(PROPERTY_PUBLISHER), dcNewFromDisk.getFirst(PROPERTY_PUBLISHER));
@@ -185,7 +200,7 @@ public class DublinCoreTest {
       IOUtils.closeQuietly(in);
       
       // Create a new catalog and fill it with a few fields
-      File dcTempFile = new File(FileSupport.getTempDirectory(), Long.toString(System.currentTimeMillis()));
+      dcTempFile2 = new File(FileSupport.getTempDirectory(), Long.toString(System.currentTimeMillis()));
       DublinCoreCatalog dcNew = new DublinCoreCatalogImpl();
 
       // Add the required fields but the title
@@ -199,7 +214,7 @@ public class DublinCoreTest {
       Transformer trans = transfac.newTransformer();
       trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
       trans.setOutputProperty(OutputKeys.METHOD, "xml");
-      FileWriter sw = new FileWriter(dcTempFile);
+      FileWriter sw = new FileWriter(dcTempFile2);
       StreamResult result = new StreamResult(sw);
       DOMSource source = new DOMSource(dcNew.toXml());
       trans.transform(source, result);
