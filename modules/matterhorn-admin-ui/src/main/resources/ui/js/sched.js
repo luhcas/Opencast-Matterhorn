@@ -71,6 +71,7 @@ UI.Init = function(){
         ocwprops = ocWorkflow.getConfiguration($('#workflow-config-container'));
         mdlist.appendChild($('<metadata><key>org.opencastproject.workflow.config.review.hold</key><value>' + ocwprops['review.hold'] + '</value></metadata>')[0]);
         mdlist.appendChild($('<metadata><key>org.opencastproject.workflow.config.caption.hold</key><value>' + ocwprops['caption.hold'] + '</value></metadata>')[0]);
+        mdlist.appendChild($('<metadata><key>org.opencastproject.workflow.definition</key><value>' + $('#workflow-selector').val() + '</value></metadata>')[0]);
         doc.documentElement.appendChild(mdlist);
         if(typeof XMLSerializer != 'undefined') {
           return (new XMLSerializer()).serializeToString(doc);
