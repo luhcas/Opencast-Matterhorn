@@ -38,6 +38,8 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workspace.api.Workspace;
 
+import de.schlichtherle.util.zip.ZipEntry;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
@@ -71,6 +73,9 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
   /** The element flavors to maintain in the original mediapackage */
   public static final String PRESERVE_FLAVOR_PROPERTY = "preserve-flavors";
 
+  /** The property indicating whether to apply compression to the archive */
+  public static final String COMPRESS_PROPERTY = "compression";
+
   /** The default collection in the working file repository to store archives */
   public static final String DEFAULT_ARCHIVE_COLLECTION = "archive";
 
@@ -91,6 +96,8 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
     configurationOptions = new TreeMap<String, String>();
     configurationOptions.put(ARCHIVE_COLLECTION_PROPERTY,
             "The configuration key that specifies the archive collection.  Defaults to " + DEFAULT_ARCHIVE_COLLECTION);
+    configurationOptions.put(COMPRESS_PROPERTY,
+            "The configuration key that specifies whether to compress the zip archive.  Defaults to false.");
     configurationOptions.put(PRESERVE_FLAVOR_PROPERTY,
             "The configuration key that specifies the element flavors to preserve in the original "
                     + "mediapackage.  Any flavors not specified here will remain only as part of the zipped "
@@ -138,19 +145,22 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     MediaPackage mediaPackage = workflowInstance.getMediaPackage();
+    WorkflowOperationInstance currentOperation = workflowInstance.getCurrentOperation();
 
     logger.info("Archiving mediapackage {} in workflow {}", mediaPackage, workflowInstance);
+
+    String compressProperty = currentOperation.getConfiguration(COMPRESS_PROPERTY);
+    boolean compress = compressProperty == null ? false : Boolean.valueOf(compressProperty);
 
     // Zip the contents of the mediapackage
     File zip = null;
     try {
-      zip = zip(mediaPackage);
+      zip = zip(mediaPackage, compress);
     } catch (Exception e) {
       throw new WorkflowOperationException("Unable to create a zip archive from mediapackage " + mediaPackage, e);
     }
 
     // Get the collection for storing the archived mediapackage
-    WorkflowOperationInstance currentOperation = workflowInstance.getCurrentOperation();
     String configuredCollectionId = currentOperation.getConfiguration(ARCHIVE_COLLECTION_PROPERTY);
     String collectionId = configuredCollectionId == null ? DEFAULT_ARCHIVE_COLLECTION : configuredCollectionId;
 
@@ -216,7 +226,7 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
    * @throws MediaPackageException
    *           If the mediapackage can not be serialized to xml
    */
-  protected File zip(MediaPackage mediaPackage) throws IOException, NotFoundException, MediaPackageException {
+  protected File zip(MediaPackage mediaPackage, boolean compress) throws IOException, NotFoundException, MediaPackageException {
     // Create the temp directory
     File mediaPackageDir = new File(tempStorageDir, mediaPackage.getIdentifier().compact());
     FileUtils.forceMkdir(mediaPackageDir);
@@ -241,8 +251,14 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
     // Zip the directory
     File zip = new File(tempStorageDir, clone.getIdentifier().compact() + ".zip");
-    ZipUtil.zip(new File[] { mediaPackageDir }, zip, true);
-
+    int compressValue = compress ? ZipEntry.DEFLATED : ZipEntry.STORED;
+    
+    long startTime = System.currentTimeMillis();
+    ZipUtil.zip(new File[] { mediaPackageDir }, zip, true, compressValue);
+    long stopTime = System.currentTimeMillis();
+    
+    logger.debug("Zip file creation took {} seconds", (stopTime - startTime)/1000);
+    
     // Remove the directory
     FileUtils.forceDelete(mediaPackageDir);
 

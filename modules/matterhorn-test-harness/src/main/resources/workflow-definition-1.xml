@@ -403,6 +403,7 @@
       <configurations>
         <configuration key="archive-collection">2010.summer.archive</configuration>
         <configuration key="preserve-flavors">dublincore/episode,dublincore/series</configuration>
+        <configuration key="compression">false</configuration>
       </configurations>
     </operation>
   </operations>
