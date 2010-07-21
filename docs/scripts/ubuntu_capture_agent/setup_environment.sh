@@ -68,7 +68,7 @@ fi
 # TODO: (or maybe not) Support a distributed core would mean to set different URLs separately, rather than this centralized one
 ## Read default from the config file
 #DEFAULT_CORE_URL=$(grep "^${CORE_URL_KEY//./\\.}=.*$" $CAPTURE_PROPS | cut -d '=' -f 2)
-ask -d "$DEFAULT_CORE_URL" "Please enter the URL to the root of the machine hosting the ingestion service" core
+ask -d "$DEFAULT_CORE_URL" "Please enter the URL and port (if ingestion is not on port 80) of the machine hosting the ingestion service" core
 sed -i "s#^${CORE_URL_KEY//./\\.}=.*\$#${CORE_URL_KEY}=$core#" "$CAPTURE_PROPS"
 
 # Prompt for the time between two updates of the recording schedule
