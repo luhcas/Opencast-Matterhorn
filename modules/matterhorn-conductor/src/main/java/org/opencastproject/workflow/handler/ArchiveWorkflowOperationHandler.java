@@ -57,6 +57,10 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Produces a zipped archive of a mediapackage, places it in the archive collection, and removes the rest of the
@@ -91,6 +95,14 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
   /** The configuration properties */
   protected SortedMap<String, String> configurationOptions = null;
 
+  /**
+   * The workspace to use in retrieving and storing files.
+   */
+  protected Workspace workspace;
+
+  /** The thread pool */
+  protected ExecutorService executorService;
+  
   /** The default no-arg constructor builds the configuration options set */
   public ArchiveWorkflowOperationHandler() {
     configurationOptions = new TreeMap<String, String>();
@@ -104,11 +116,7 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
                     + "mediapackage archive");
   }
 
-  /**
-   * The workspace to use in retrieving and storing files.
-   */
-  protected Workspace workspace;
-
+  
   /**
    * Sets the workspace to use.
    * 
@@ -135,6 +143,15 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
         throw new IllegalStateException(e);
       }
     }
+    int maxThreads = 1;
+    if(cc.getBundleContext().getProperty("archive.threads") != null) {
+      try {
+        maxThreads = Integer.parseInt(cc.getBundleContext().getProperty("archive.threads"));
+      } catch(NumberFormatException e) {
+        logger.warn("Illegal value set for archive.threads.  Using default value of 1 archive operation at a time.");
+      }
+    }
+    this.executorService = Executors.newFixedThreadPool(maxThreads);
   }
 
   /**
@@ -143,71 +160,88 @@ public class ArchiveWorkflowOperationHandler extends AbstractWorkflowOperationHa
    * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    MediaPackage mediaPackage = workflowInstance.getMediaPackage();
-    WorkflowOperationInstance currentOperation = workflowInstance.getCurrentOperation();
+  public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    final MediaPackage mediaPackage = workflowInstance.getMediaPackage();
+    final WorkflowOperationInstance currentOperation = workflowInstance.getCurrentOperation();
 
-    logger.info("Archiving mediapackage {} in workflow {}", mediaPackage, workflowInstance);
+    // Callable allows us to throw checked exceptions, where Runnable does not
+    Callable<Void> callable = new Callable<Void>() {
+      @Override
+      public Void call() throws Exception {
+        logger.info("Archiving mediapackage {} in workflow {}", mediaPackage, workflowInstance);
 
-    String compressProperty = currentOperation.getConfiguration(COMPRESS_PROPERTY);
-    boolean compress = compressProperty == null ? false : Boolean.valueOf(compressProperty);
+        String compressProperty = currentOperation.getConfiguration(COMPRESS_PROPERTY);
+        boolean compress = compressProperty == null ? false : Boolean.valueOf(compressProperty);
 
-    // Zip the contents of the mediapackage
-    File zip = null;
-    try {
-      zip = zip(mediaPackage, compress);
-    } catch (Exception e) {
-      throw new WorkflowOperationException("Unable to create a zip archive from mediapackage " + mediaPackage, e);
-    }
-
-    // Get the collection for storing the archived mediapackage
-    String configuredCollectionId = currentOperation.getConfiguration(ARCHIVE_COLLECTION_PROPERTY);
-    String collectionId = configuredCollectionId == null ? DEFAULT_ARCHIVE_COLLECTION : configuredCollectionId;
-
-    // Add the zip as an attachment to the mediapackage
-    logger.info("Adding zipped mediapackage {} to the {} archive", mediaPackage, collectionId);
-
-    InputStream in = null;
-    URI uri = null;
-    try {
-      in = new FileInputStream(zip);
-      uri = workspace.putInCollection(collectionId, mediaPackage.getIdentifier().compact() + ".zip", in);
-    } catch (FileNotFoundException e) {
-      throw new WorkflowOperationException("zip file " + zip + " not found", e);
-    } catch (IOException e) {
-      throw new WorkflowOperationException(e);
-    } finally {
-      IOUtils.closeQuietly(in);
-    }
-    logger.info("Zipped mediapackage {} moved to the {} archive", mediaPackage, collectionId);
-
-    Attachment attachment = (Attachment) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-            .elementFromURI(uri, Type.Attachment, ARCHIVE_FLAVOR);
-    try {
-      attachment.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, zip));
-    } catch (NoSuchAlgorithmException e) {
-      throw new WorkflowOperationException(e);
-    } catch (IOException e) {
-      throw new WorkflowOperationException(e);
-    }
-
-    // Parse the flavors to remove
-    List<String> flavorsToKeep = asList(currentOperation.getConfiguration(PRESERVE_FLAVOR_PROPERTY));
-    
-    // The zip file is safely in the archive, so it's now safe to attempt to remove mediapackage elements and delete
-    // the files, if possible
-    try {
-      FileUtils.forceDelete(zip);
-      for (MediaPackageElement element : mediaPackage.getElements()) {
-        if( element.getFlavor() != null && ! flavorsToKeep.contains(element.getFlavor().toString())) {
-          workspace.delete(mediaPackage.getIdentifier().toString(), element.getIdentifier());
-          mediaPackage.remove(element);
+        // Zip the contents of the mediapackage
+        File zip = null;
+        try {
+          zip = zip(mediaPackage, compress);
+        } catch (Exception e) {
+          throw new WorkflowOperationException("Unable to create a zip archive from mediapackage " + mediaPackage, e);
         }
+
+        // Get the collection for storing the archived mediapackage
+        String configuredCollectionId = currentOperation.getConfiguration(ARCHIVE_COLLECTION_PROPERTY);
+        String collectionId = configuredCollectionId == null ? DEFAULT_ARCHIVE_COLLECTION : configuredCollectionId;
+
+        // Add the zip as an attachment to the mediapackage
+        logger.info("Adding zipped mediapackage {} to the {} archive", mediaPackage, collectionId);
+
+        InputStream in = null;
+        URI uri = null;
+        try {
+          in = new FileInputStream(zip);
+          uri = workspace.putInCollection(collectionId, mediaPackage.getIdentifier().compact() + ".zip", in);
+        } catch (FileNotFoundException e) {
+          throw new WorkflowOperationException("zip file " + zip + " not found", e);
+        } catch (IOException e) {
+          throw new WorkflowOperationException(e);
+        } finally {
+          IOUtils.closeQuietly(in);
+        }
+        logger.info("Zipped mediapackage {} moved to the {} archive", mediaPackage, collectionId);
+
+        Attachment attachment = (Attachment) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+                .elementFromURI(uri, Type.Attachment, ARCHIVE_FLAVOR);
+        try {
+          attachment.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, zip));
+        } catch (NoSuchAlgorithmException e) {
+          throw new WorkflowOperationException(e);
+        } catch (IOException e) {
+          throw new WorkflowOperationException(e);
+        }
+
+        // Parse the flavors to remove
+        List<String> flavorsToKeep = asList(currentOperation.getConfiguration(PRESERVE_FLAVOR_PROPERTY));
+        
+        // The zip file is safely in the archive, so it's now safe to attempt to remove mediapackage elements and delete
+        // the files, if possible
+        try {
+          FileUtils.forceDelete(zip);
+          for (MediaPackageElement element : mediaPackage.getElements()) {
+            if( element.getFlavor() != null && ! flavorsToKeep.contains(element.getFlavor().toString())) {
+              workspace.delete(mediaPackage.getIdentifier().toString(), element.getIdentifier());
+              mediaPackage.remove(element);
+            }
+          }
+        } catch (Exception e) {
+          throw new WorkflowOperationException(e);
+        }
+        mediaPackage.add(attachment);
+        return null;
       }
-    } catch (Exception e) {
-      throw new WorkflowOperationException(e);
+    };
+    Future<Void> future = executorService.submit(callable);
+    try {
+      future.get();
+    } catch(Exception e) {
+      if (e instanceof WorkflowOperationException) {
+        throw (WorkflowOperationException)e;
+      } else {
+        throw new WorkflowOperationException(e);
+      }
     }
-    mediaPackage.add(attachment);
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
   }
 
