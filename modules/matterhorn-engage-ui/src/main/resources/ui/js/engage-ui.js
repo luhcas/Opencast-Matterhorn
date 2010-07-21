@@ -7,19 +7,39 @@ var Opencast = Opencast || {};
 @namespace the global Opencast namespace engage
 */
 Opencast.engage = (function () {
+
+  var loadProgressPercent = 0;
+
   /**
    * @memberOf Opencast.engage
    * @description Gets the url to the search service;
    * @return the search service endpoint url
    */
-  function getSearchServiceEpisodeIdURL() 
-  {
-
+  function getSearchServiceEpisodeIdURL() {
     var restEndpoint = "../../search/rest/episode?id="; // Production 
     //var restEndpoint = "xml/episode.xml?id="; // Activate for testing purposes
     //var restEndpoint = "episode-segments.xml?id="; // Activate for testing purposes
     return restEndpoint;
-   }
+  }
+
+  /**
+   * @memberOf Opencast.engage
+   * @description Gets the current load progress
+   * @return The current load progress
+   */
+  function getLoadProgress() {
+    var duration = Opencast.Player.getDuration();
+    return duration * loadProgressPercent/100;
+  }
+
+  /**
+   * @memberOf Opencast.engage
+   * @description Sets the current load progress
+   * @param The current load progress
+   */
+  function setLoadProgressPercent(value) {
+    loadProgressPercent = value;
+  }
 
   function getCookie(name) {
     var start = document.cookie.indexOf( name + "=" );
@@ -34,7 +54,7 @@ Opencast.engage = (function () {
       end = document.cookie.length;
     return unescape( document.cookie.substring( len, end ) );
   }
-  
+
   function formatSeconds(seconds) {
     var result = "";
 
@@ -119,6 +139,8 @@ Opencast.engage = (function () {
       getVideoUrl : getVideoUrl,
       getVideoUrl2 : getVideoUrl2,
       getCoverUrl : getCoverUrl,
+      getLoadProgress : getLoadProgress,
+      setLoadProgressPercent : setLoadProgressPercent,
       getSearchServiceEpisodeIdURL :  getSearchServiceEpisodeIdURL
     };
 }());

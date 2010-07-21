@@ -1584,6 +1584,7 @@ Opencast.Player = (function () {
      */
     function setProgress(value) 
     {
+        Opencast.engage.setLoadProgressPercent(value);
         $('.load-progress').css("width", (Math.min(value, 100) + "%"));
     }
     
