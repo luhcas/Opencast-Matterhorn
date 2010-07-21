@@ -29,7 +29,12 @@
 var Videodisplay = Videodisplay || {};
 
 
-
+/**
+    @namespace FlashVersion
+*/
+Videodisplay.VideodisplayGo = (function () 
+{
+	
 /**
  * Hook here all the code that must run as soon as the "Videodisplay" class
  * finishes its instantiation over the bridge.
@@ -39,11 +44,9 @@ var Videodisplay = Videodisplay || {};
  */
 function VideodisplayReady() 
 {
-
     // Initialize the "root" object. This represents the actual 
     // "Videodisplay.mxml" flex application.
     var b_Videodisplay_root = FABridge['b_Videodisplay'].root().getFlexAjaxBridge();
-    
     // Global functions in the "Videodisplay.mxml" application
 
     Videodisplay.play = function () {
@@ -118,15 +121,22 @@ function VideodisplayReady()
         return b_Videodisplay_root.setMediaResolution(argWidthMediaOne, argHeightMediaOne, argWidthMediaTwo, argHeightMediaTwo, argMultiMediaContainerLeft);
     };
     
-    
-    
-    
     b_Videodisplay_root.onBridgeReady();
 }
+
+
+
 
 
 /**
  * Listen for the instantiation of the Flex application over the bridge
  */
-FABridge.addInitializationCallback("b_Videodisplay", VideodisplayReady);
+return {
+	VideodisplayReady : VideodisplayReady
+	
 
+};
+
+
+
+}());
