@@ -62,6 +62,7 @@ echo "Done"
 # Remove the configuration that starts matterhorn on boot
 echo -n "Deleting the startup script... "
 rm -f $STARTUP_SCRIPT
+update-rc.d `basename $STARTUP_SCRIPT` remove &> /dev/null
 echo "Done"
 
 # Remove the udev rules that manage the devices

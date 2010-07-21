@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ##
 # Configure these variables to match your environment
 ##

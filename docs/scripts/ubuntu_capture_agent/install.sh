@@ -52,7 +52,7 @@ export SRC_LIST=/etc/apt/sources.list
 # Suffix to be appended to the backup file for sources.list
 export BKP_SUFFIX=backup
 # Path of the script which is set up to configure and run felix upon startup
-export STARTUP_SCRIPT=/etc/init/matterhorn.conf
+export STARTUP_SCRIPT=/etc/init.d/matterhorn
 # URL of the default Ubuntu mirror where the packages will be downloaded from
 export DEFAULT_MIRROR=http://archive.ubuntu.com/ubuntu
 # URL of the default Ubuntu 'security' mirror
