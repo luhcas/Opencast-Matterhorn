@@ -140,6 +140,7 @@ table
   background-color:         transparent !important;
   color:                    #FFFFFF;
   text-align:               right;
+  text-decoration: 			underline;
 }
 
 .oc_current-time-hide

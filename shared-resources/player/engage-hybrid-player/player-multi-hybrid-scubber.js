@@ -80,7 +80,14 @@ Opencast.Scrubber = (function ()
 
         $('#draggable').bind('drag', function (event, ui) 
         {
-            var tooltipLeft = $(this).position().left - offsetX;
+            var toolTipPlayheadPercent = ( $(this).position().left + 4 ) / $('#oc_flash-player').width();
+            var toolTipPlayheadSeconds = Math.round(toolTipPlayheadPercent * Opencast.Player.getDuration());
+            var toolTipPlayhead = Opencast.engage.formatSeconds(toolTipPlayheadSeconds);
+            	        	
+        	$("#divToolTip").attr("value", toolTipPlayhead);
+            $("#divToolTip").html(toolTipPlayhead);
+        	
+        	var tooltipLeft = $(this).position().left - offsetX;
             
             if(tooltipLeft < 0)
             {

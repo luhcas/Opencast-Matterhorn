@@ -138,6 +138,7 @@ table
   width:                    64px !important;
   background-color:         transparent !important;
   color:                    #FFFFFF;
+  text-decoration: 			underline;
 }
 
 .oc_current-time-hide
