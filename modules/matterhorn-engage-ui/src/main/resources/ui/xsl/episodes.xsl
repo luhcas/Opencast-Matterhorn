@@ -4,10 +4,10 @@
 <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:ns2="http://search.opencastproject.org/">
     <xsl:template match="/">
-      <table cellspacing="0">
+      <table cellspacing="0" width="100%">
         <xsl:for-each select="ns2:search-results/result">
             <tr class="search-item">
-                    <td style="vertical-align: top;">
+                    <td style="vertical-align: top; horizontal-align: middle; width: 180px;">
                         <a class="itemtitle">
                             <xsl:attribute name="href">watch.html?id=<xsl:value-of
                                 select="mediapackage/@id" /></xsl:attribute>
