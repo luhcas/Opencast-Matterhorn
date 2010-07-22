@@ -178,9 +178,9 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     }
 
     // Reencode when there is no need for muxing?
-    boolean reencode = true;
+    boolean rewrite = true;
     if (StringUtils.trimToNull(operation.getConfiguration(OPT_REWRITE)) != null) {
-      reencode = Boolean.parseBoolean(operation.getConfiguration("reencode"));
+      rewrite = Boolean.parseBoolean(operation.getConfiguration(OPT_REWRITE));
     }
 
     // Select those tracks that have matching flavors
@@ -215,7 +215,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
 
     // Make sure we have a matching combination
     if (audioTrack == null && videoTrack != null) {
-      if (reencode) {
+      if (rewrite) {
         logger.info("Encoding video only track {} to work version", videoTrack);
         receipt = composerService.encode(videoTrack, PREPARE_VONLY_PROFILE, true);
         if (!receipt.getStatus().equals(Receipt.Status.FINISHED)) {
@@ -227,7 +227,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
         composedTrack.setIdentifier(null);
       }
     } else if (videoTrack == null && audioTrack != null) {
-      if (reencode) {
+      if (rewrite) {
         logger.info("Encoding audio only track {} to work version", audioTrack);
         receipt = composerService.encode(audioTrack, PREPARE_AONLY_PROFILE, true);
         if (!receipt.getStatus().equals(Receipt.Status.FINISHED)) {
@@ -239,7 +239,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
         composedTrack.setIdentifier(null);
       }
     } else if (audioTrack == videoTrack) {
-      if (reencode) {
+      if (rewrite) {
         logger.info("Encoding audiovisual track {} to work version", videoTrack);
         receipt = composerService.encode(videoTrack, PREPARE_AV_PROFILE, true);
         if (!receipt.getStatus().equals(Receipt.Status.FINISHED)) {
