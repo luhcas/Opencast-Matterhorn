@@ -133,10 +133,6 @@ Opencast.Watch = (function ()
           mediaResolutionOne = mediaResolutionOne === null ? '' : mediaResolutionOne;
           mediaResolutionTwo = mediaResolutionTwo === null ? '' : mediaResolutionTwo;
 
-          var mediaUrlOne = 'http://xserve1-1.et.fh-osnabrueck.de/opencast/videos/matterhorn.mp4';
-          var mediaUrlTwo = 'http://xserve1-1.et.fh-osnabrueck.de/opencast/videos/matterhorn.mp4';
-          
-          
           Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo, PLAYERSTYLE);
 
           if (mediaUrlOne !== '' && mediaUrlTwo !== '')
