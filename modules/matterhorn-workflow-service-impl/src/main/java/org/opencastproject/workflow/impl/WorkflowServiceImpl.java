@@ -325,7 +325,14 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * @see org.opencastproject.workflow.api.WorkflowService#registerWorkflowDefinition(org.opencastproject.workflow.api.WorkflowDefinition)
    */
   public void registerWorkflowDefinition(WorkflowDefinition workflow) {
-    workflowDefinitions.put(workflow.getId(), workflow);
+    if(workflow == null || workflow.getId() == null) {
+      throw new IllegalArgumentException("Workflow must not be null, and must contain an ID");
+    }
+    String id = workflow.getId();
+    if(workflowDefinitions.containsKey(id)) {
+      throw new IllegalStateException("A workflow definition with ID '" + id + "' is already registered.");
+    }
+    workflowDefinitions.put(id, workflow);
   }
 
   /**

@@ -57,6 +57,8 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
       WorkflowDefinition def = WorkflowBuilder.getInstance().parseWorkflowDefinition(stream);
       workflowService.registerWorkflowDefinition(def);
       installedWorkflows.put(artifact, def);
+    } catch(Exception e) {
+      logger.warn("Unable to install workflow from {}, {}", artifact, e.getMessage());
     } finally {
       IOUtils.closeQuietly(stream);
     }
