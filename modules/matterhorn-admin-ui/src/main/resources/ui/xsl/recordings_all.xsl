@@ -90,6 +90,11 @@
         <br />
         <xsl:choose>
           <xsl:when test="recordingStatus = 'upcoming'">
+            <a title="Edit Recording Info">
+              <xsl:attribute name="href">/admin/scheduler.html?eventId=<xsl:value-of select="id" />&amp;edit</xsl:attribute>
+              Edit
+            </a>
+            <br />
             <a title="Delete Recording">
               <xsl:attribute name="onclick">
                 <xsl:text>Recordings.removeScheduledRecording('</xsl:text>
