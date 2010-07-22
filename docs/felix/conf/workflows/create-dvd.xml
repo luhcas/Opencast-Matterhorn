@@ -49,7 +49,7 @@
       <configurations>
         <configuration key="source-flavor">presenter/source</configuration>
         <configuration key="target-flavor">presenter/work</configuration>
-        <configuration key="reencode">true</configuration>
+        <configuration key="rewrite">true</configuration>
       </configurations>
     </operation>
 
@@ -61,7 +61,7 @@
       <configurations>
         <configuration key="source-flavor">presentation/source</configuration>
         <configuration key="target-flavor">presentation/work</configuration>
-        <configuration key="reencode">true</configuration>
+        <configuration key="rewrite">true</configuration>
       </configurations>
     </operation>
 

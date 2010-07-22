@@ -62,6 +62,9 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
 
   /** Name of the 'encode to video only work copy' encoding profile */
   public static final String PREPARE_VONLY_PROFILE = "video-only.work";
+  
+  /** Name of the 'rewrite' configuration key */
+  public static final String OPT_REWRITE = "rewrite";
 
   /** The configuration options for this handler */
   private static final SortedMap<String, String> CONFIG_OPTIONS;
@@ -71,7 +74,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     CONFIG_OPTIONS.put("source-flavor", "The \"flavor\" of the track to use as a video source input");
     CONFIG_OPTIONS.put("encoding-profile", "The encoding profile to use (default is 'mux-av.http')");
     CONFIG_OPTIONS.put("target-flavor", "The flavor to apply to the encoded file");
-    CONFIG_OPTIONS.put("reencode", "Indicating whether audio and video tracks should be reencoded");
+    CONFIG_OPTIONS.put(OPT_REWRITE, "Indicating whether the container for audio and video tracks should be rewritten");
     CONFIG_OPTIONS.put("target-tags", "The tags to apply to the encoded file");
   }
 
@@ -176,7 +179,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
 
     // Reencode when there is no need for muxing?
     boolean reencode = true;
-    if (StringUtils.trimToNull(operation.getConfiguration("reencode")) != null) {
+    if (StringUtils.trimToNull(operation.getConfiguration(OPT_REWRITE)) != null) {
       reencode = Boolean.parseBoolean(operation.getConfiguration("reencode"));
     }
 
@@ -215,6 +218,9 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
       if (reencode) {
         logger.info("Encoding video only track {} to work version", videoTrack);
         receipt = composerService.encode(videoTrack, PREPARE_VONLY_PROFILE, true);
+        if (!receipt.getStatus().equals(Receipt.Status.FINISHED)) {
+          throw new WorkflowOperationException("Rewriting container for video track " + videoTrack + " failed");
+        }
         composedTrack = (Track) receipt.getElement();
       } else {
         composedTrack = (Track) videoTrack.clone();
@@ -224,6 +230,9 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
       if (reencode) {
         logger.info("Encoding audio only track {} to work version", audioTrack);
         receipt = composerService.encode(audioTrack, PREPARE_AONLY_PROFILE, true);
+        if (!receipt.getStatus().equals(Receipt.Status.FINISHED)) {
+          throw new WorkflowOperationException("Rewriting container for audio track " + audioTrack + " failed");
+        }
         composedTrack = (Track) receipt.getElement();
       } else {
         composedTrack = (Track) audioTrack.clone();
@@ -233,6 +242,9 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
       if (reencode) {
         logger.info("Encoding audiovisual track {} to work version", videoTrack);
         receipt = composerService.encode(videoTrack, PREPARE_AV_PROFILE, true);
+        if (!receipt.getStatus().equals(Receipt.Status.FINISHED)) {
+          throw new WorkflowOperationException("Rewriting container for a/v track " + videoTrack + " failed");
+        }
         composedTrack = (Track) receipt.getElement();
       } else {
         composedTrack = (Track) videoTrack.clone();
@@ -241,6 +253,9 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     } else {
       logger.info("Muxing audio and video only track {} to work version", videoTrack);
       receipt = composerService.mux(videoTrack, audioTrack, profile.getIdentifier(), true);
+      if (!receipt.getStatus().equals(Receipt.Status.FINISHED)) {
+        throw new WorkflowOperationException("Muxing video track " + videoTrack + " and audio track " + audioTrack + " failed");
+      }
       composedTrack = (Track) receipt.getElement();
     }
 
