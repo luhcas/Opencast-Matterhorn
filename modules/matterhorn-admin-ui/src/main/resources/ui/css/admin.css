@@ -251,7 +251,8 @@ select { font-size:1.15em; }
 }
 
 #recordingsTable th,
-#agentsTable th {
+#agentsTable th,
+#seriesTable th {
   padding-right:20px;
   background-color:#98BBBA;
 }
