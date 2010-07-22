@@ -21,11 +21,13 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -33,23 +35,29 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TimeZone;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * Reads an unzipped wikipedia archive named [lang]wiki-latest-pages-articles.xml, producing a [lang].csv file
+ * containing the words and word counts from the wikipedia archive.
+ * 
+ * This main class may be run from the commandline, passing the language and directory to find the wikipedia archive as
+ * arguments. If these arguments are not passed, the application will request this input on the commandline.
+ */
 public class PopulateDictionary {
 
   public static void main(String... args) throws Exception {
     String lang;
     String wikiRepo;
     File dir;
-    if(args.length == 2) {
+    if (args.length == 2) {
       lang = args[0];
       wikiRepo = args[1];
       dir = new File(wikiRepo);
-      if( ! dir.isDirectory()) {
+      if (!dir.isDirectory()) {
         System.out.println(wikiRepo + " is not a directory");
         System.exit(1);
       }
@@ -57,8 +65,8 @@ public class PopulateDictionary {
       lang = getInput("Enter language", "en");
       while (true) {
         wikiRepo = getInput("Enter path to expanded wikipedia archive", ".");
-        dir = new File(wikiRepo);  
-        if(dir.isDirectory()) {
+        dir = new File(wikiRepo);
+        if (dir.isDirectory()) {
           break;
         } else {
           System.out.println(wikiRepo + " is not a directory");
@@ -75,10 +83,6 @@ public class PopulateDictionary {
     Scanner scanner = new Scanner(System.in);
     String value = scanner.nextLine();
     return value == null || value.equals("") ? defaultValue : value;
-  }
-
-  public PopulateDictionary() {
-    // populate("slwiki-latest-pages-articles.xml");
   }
 
   public static void populate(String lang, File in, int minWordCount, int minWordLength) {
@@ -190,36 +194,30 @@ public class PopulateDictionary {
       System.out.println("Number of unique words:" + wordCount.size());
 
       try {
-        // csv
+        // close the word list buffered writer
         wordlist.close();
+
+        // open a new file (lang.csv) and write the words and their counts to the file
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(lang + ".csv"), "UTF8"));
-        bw.write("#numDoc:" + docParsed);
-        bw.newLine();
-        bw.write("#numUniqueW:" + wordCount.size());
-        bw.newLine();
         bw.write("#numAllW:" + numAllW);
-        bw.newLine();
-//        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(lang + ".wordlist.csv"),
-//                "UTF8"), BUFFER_LENGTH);
-        // CSVParser csvP = new CSVParser(br);
-        // String w;
-        // while ((w = csvP.nextValue()) != null) {
-        // bw.write(w);
-        // bw.write(',');
-        // bw.write(getCount(w).toString());
-        // bw.newLine();
-        // }
-        bw.close();
-
-        // dict object
-        FileOutputStream fos = new FileOutputStream(lang + ".dict");
-        ObjectOutputStream oos = new ObjectOutputStream(fos);
-
-        for (Entry<Long, Integer> word : wordCount.entrySet()) {
-          oos.writeLong(word.getKey());
-          oos.writeInt(word.getValue());
+        bw.write("\n");
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(lang + ".wordlist.csv"),
+                "UTF8"), BUFFER_LENGTH);
+        while (true) {
+          String word = br.readLine();
+          if (word == null)
+            break;
+          Integer count = wordCount.get(hash(word));
+          if(count == null) {
+            count = 1;
+          }
+          bw.write(word);
+          bw.write(",");
+          bw.write(count.toString());
+          bw.write("\n");
         }
-        oos.close();
+        br.close();
+        bw.close();
 
         // stats
         BufferedWriter outStats = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(lang + ".stats"),
@@ -283,7 +281,7 @@ public class PopulateDictionary {
         numAllW++;
         String w = Word.fixCase(word);
 
-        Long hash = StringUtil.hash(w);
+        Long hash = hash(w);
 
         if (wordCount.containsKey(hash)) {
           wordCount.put(hash, wordCount.get(hash) + 1);
@@ -292,7 +290,7 @@ public class PopulateDictionary {
           wordCount.put(hash, 1);
           try {
             bw.write(w);
-            bw.write(",");
+            bw.newLine();
           } catch (IOException e) {
             e.printStackTrace();
           }
@@ -340,9 +338,7 @@ public class PopulateDictionary {
             count--;
           }
         }
-
       }
-
     }
 
     /**
@@ -360,4 +356,15 @@ public class PopulateDictionary {
       return sb.toString();
     }
   }
+
+  public static long hash(String str) {
+    long h = 1125899906842597L; // prime
+    int len = str.length();
+
+    for (int i = 0; i < len; i++) {
+      h = 31 * h + str.charAt(i);
+    }
+    return h;
+  }
+
 }
