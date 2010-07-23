@@ -82,7 +82,9 @@ function VideodisplayReady()
     };
     
     Videodisplay.seek = function (argNumber) {
-        return b_Videodisplay_root.seek(argNumber);
+        var progress = Opencast.engage.getLoadProgress();
+        var seekValue = Math.min(argNumber, progress);
+        return b_Videodisplay_root.seek(seekValue);
     };
     
     Videodisplay.mute = function () {

@@ -1311,9 +1311,6 @@ Opencast.Player = (function () {
      */
     function setCurrentTime(text) 
     {
-        $("#divToolTip").attr("value", text);
-        $("#divToolTip").html(text);
-    
         if (getDragging() === false)
         {
             $("#oc_current-time").attr("value", text);
@@ -1584,6 +1581,7 @@ Opencast.Player = (function () {
      */
     function setProgress(value) 
     {
+        Opencast.engage.setLoadProgressPercent(value);
         $('.load-progress').css("width", (Math.min(value, 100) + "%"));
     }
     

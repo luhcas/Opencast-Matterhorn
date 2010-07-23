@@ -15,9 +15,10 @@
  */
 package org.opencast.engage.videodisplay.control.responder
 {
-    import flash.external.ExternalInterface;
     import mx.collections.ArrayCollection;
+    import mx.controls.Alert;
     import mx.rpc.IResponder;
+    
     import org.opencast.engage.videodisplay.control.event.SetCurrentCaptionsEvent;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
     import org.opencast.engage.videodisplay.vo.CaptionSetVO;
@@ -80,7 +81,18 @@ package org.opencast.engage.videodisplay.control.responder
                         var begin : String = p.attribute( "begin" );
                         var end : String = p.attribute( "end" );
                         var text : String;
-
+                        var posBegin:int = begin.lastIndexOf( "." );
+                        var posEnd:int = end.lastIndexOf( "." );
+                        
+                        if( posBegin != -1 )
+                        {
+                        	begin = begin.substring( 0, posBegin );
+                        }
+                        if( posEnd != -1 )
+                        {
+                        	end = end.substring( 0, posEnd );
+                        }
+                        
                         if( p.hasSimpleContent() )
                         {
                             text = p.toString();
@@ -101,18 +113,16 @@ package org.opencast.engage.videodisplay.control.responder
                     // Add the captionSet to the array
                     model.captionSets.addItem( captionSet );
 
-                    for( var i : int = 0; i < model.languages.length; i++ )
-                    {
-                        if( model.languages[ i ].short_name == lang )
-                        {
-                            model.languageComboBox.push( model.languages[ i ].long_name );
-                        }
-                    }
+                    
                 }
             }
 
             // set current Captions, the first language in dfxp
             Swiz.dispatchEvent( new SetCurrentCaptionsEvent( 'English' ) );
+            
+            
+            
+          
         }
 
         /**

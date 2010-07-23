@@ -429,6 +429,7 @@ package org.opencast.engage.videodisplay.control.util
                 model.currentPlayerState = PlayerState.PLAYING;
                 ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PAUSED );
                 model.mediaPlayer.setVolume( 1 );
+                ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, 100 );
             }
 
             if( model.statePlayerOne == PlayerState.READY && model.statePlayerTwo == PlayerState.READY )
@@ -445,6 +446,7 @@ package org.opencast.engage.videodisplay.control.util
                 model.currentPlayerState = PlayerState.PLAYING;
                 ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PAUSED );
                 model.mediaPlayer.setVolume( 1 );
+                ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, 100 );
             }
         }
 
@@ -730,7 +732,7 @@ package org.opencast.engage.videodisplay.control.util
          */
         public function onBuffer() : void
         {
-            bufferTimer = new Timer( 400, 1 );
+            bufferTimer = new Timer( 3000, 1 );
             bufferTimer.addEventListener( TimerEvent.TIMER_COMPLETE, onBufferTimerComplete );
             bufferTimer.start();
         }
@@ -820,10 +822,10 @@ package org.opencast.engage.videodisplay.control.util
             ExternalInterface.call( ExternalFunction.SETDURATION, event.time );
             ExternalInterface.call( ExternalFunction.SETTOTALTIME, model.currentDurationString );
 
-            if( event.time * 0.1 > 10 )
+            if( event.time * 0.05 > 10 )
             {
-                model.rewindTime = Math.round( event.time * 0.1 );
-                model.fastForwardTime = Math.round( event.time * 0.1 );
+                model.rewindTime = Math.round( event.time * 0.05 );
+                model.fastForwardTime = Math.round( event.time * 0.05 );
             }
             else
             {
@@ -1003,7 +1005,7 @@ package org.opencast.engage.videodisplay.control.util
 
             try
             {
-                progress = Math.round( event.bytes / model.bytesTotal * 100 );
+                progress = Math.floor( event.bytes / model.bytesTotal * 100 );
                 ExternalInterface.call( ExternalFunction.SETPROGRESS, progress );
                 model.progressBar.setProgress( progress, 100 );
                 model.progress = progress;
@@ -1313,7 +1315,7 @@ package org.opencast.engage.videodisplay.control.util
             else
             {
                 model.bytesLoadedOne = event.bytes;
-                model.progressMediaOne = Math.round( event.bytes / model.bytesTotalOne * 100 );
+                model.progressMediaOne = Math.floor( event.bytes / model.bytesTotalOne * 100 );
 
                 if( model.progressMediaOne <= model.progressMediaTwo )
                 {
@@ -1633,7 +1635,7 @@ package org.opencast.engage.videodisplay.control.util
             else
             {
                 model.bytesLoadedTwo = event.bytes;
-                model.progressMediaTwo = Math.round( event.bytes / model.bytesTotalTwo * 100 );
+                model.progressMediaTwo = Math.floor( event.bytes / model.bytesTotalTwo * 100 );
 
                 if( model.progressMediaTwo <= model.progressMediaOne )
                 {

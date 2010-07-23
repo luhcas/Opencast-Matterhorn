@@ -68,6 +68,9 @@
 
             private var fastForwardTimer : Timer = new Timer( 400, 1 );
 
+            [Bindable]
+            private var mute : Boolean = false;
+
 
             /**
              * startTimer
@@ -150,6 +153,15 @@
             private function toggleMute() : void
             {
                 ExternalInterface.call( ExternalFunction.MUTE, '' );
+
+                if( mute == false )
+                {
+                    mute = true;
+                }
+                else
+                {
+                    mute = false;
+                }
             }
 
             /**
@@ -345,7 +357,7 @@
 
                     <mx:Button 
                         id = "btn_skipBackward"
-                        toolTip = "Jump To The Back Slide"
+                        toolTip = "Jump To The Previous Slide"
                         styleName = "SkipBackward"
                         click = "{ExternalInterface.call( ExternalFunction.SKIPBACKWARD, '' )}"/>
 
@@ -409,7 +421,7 @@
                     width = "48"
                     height = "48"
                     toolTip = "{ model.captionsURL == '' ? 'No Closed Captons' : model.ccBoolean == true ? 'Closed Captons On' : 'Closed Captons Off' }"
-                    styleName = "{ model.captionsURL == '' ? 'ccOff' : model.ccButtonBoolean == true ? 'ccActivate' :  'ccOn' }"
+                    styleName = "{ model.captionsURL == '' ? 'ccOff' : model.ccButtonBoolean == true ? 'ccActivate' :  mute == true ? 'ccActivate' :  'ccOn' }"
                     click = "{ Swiz.dispatchEvent( new ClosedCaptionsEvent() ) }"
                     enabled = "{  model.captionsURL == '' ? false : true }"/>
 
