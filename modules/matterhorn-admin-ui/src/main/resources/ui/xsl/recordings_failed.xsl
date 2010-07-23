@@ -54,14 +54,19 @@
       </td> -->
       <td class="processingStatus">
         <xsl:if test="errors!=''">
+          <xsl:value-of select="failedOperation" /><br/>
           <a>
-            <xsl:attribute name="onclick">
-              <xsl:text>$('#</xsl:text>
-              <xsl:value-of select="id" />
-              <xsl:text>_error').toggleClass('hidden');</xsl:text>
+            <xsl:attribute name="onclick">              
+               $(this).text(($(this).text() == 'Show Details') ? 'Hide Details' : 'Show Details');
+               <xsl:text>$('#</xsl:text>
+                    <xsl:value-of select="id" />
+                    <xsl:text>_error').toggleClass('hidden');
+              </xsl:text>
             </xsl:attribute>
-            <xsl:text>Error: </xsl:text>
-            <xsl:value-of select="failedOperation" />
+            <xsl:attribute name="onmouseover">
+                 <xsl:text>this.className='cursor';</xsl:text>
+            </xsl:attribute>
+            <xsl:text>Show Details</xsl:text>
           </a>
           <div>
             <xsl:attribute name="class">hidden</xsl:attribute>
@@ -115,6 +120,9 @@
                 <xsl:text>Recordings.removeRecording('</xsl:text>
                 <xsl:value-of select="id" />
                 <xsl:text>');</xsl:text>
+              </xsl:attribute>
+              <xsl:attribute name="onmouseover">
+                   <xsl:text>this.className='cursor';</xsl:text>
               </xsl:attribute>
               Delete
             </a>

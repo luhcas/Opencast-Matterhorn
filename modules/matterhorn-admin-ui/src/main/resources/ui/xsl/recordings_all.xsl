@@ -55,26 +55,31 @@
       <td class="processingStatus">
         <xsl:choose>
         <xsl:when test="errors!=''">
-          <a>
-            <xsl:attribute name="onclick">
-              <xsl:text>$('#</xsl:text>
-              <xsl:value-of select="id" />
-              <xsl:text>_error').toggleClass('hidden');</xsl:text>
-            </xsl:attribute>
-            <xsl:text>Error: </xsl:text>
-            <xsl:value-of select="failedOperation" />
-          </a>
-          <div>
-            <xsl:attribute name="class">hidden</xsl:attribute>
-            <xsl:attribute name="id">
-              <xsl:value-of select="id" />
-              <xsl:text>_error</xsl:text>
-            </xsl:attribute>
-            <xsl:for-each select="errors">
-              <br/>
-              <xsl:value-of select="error" />
-            </xsl:for-each>
-          </div>
+            <xsl:value-of select="failedOperation" /><br/>
+              <a>
+                <xsl:attribute name="onclick">              
+                   $(this).text(($(this).text() == 'Show Details') ? 'Hide Details' : 'Show Details');
+                   <xsl:text>$('#</xsl:text>
+                        <xsl:value-of select="id" />
+                        <xsl:text>_error').toggleClass('hidden');
+                  </xsl:text>
+                </xsl:attribute>
+                <xsl:attribute name="onmouseover">
+                     <xsl:text>this.className='cursor';</xsl:text>
+                </xsl:attribute>
+                <xsl:text>Show Details</xsl:text>
+              </a>
+              <div>
+                <xsl:attribute name="class">hidden</xsl:attribute>
+                <xsl:attribute name="id">
+                  <xsl:value-of select="id" />
+                  <xsl:text>_error</xsl:text>
+                </xsl:attribute>
+                <xsl:for-each select="errors">
+                  <br/>
+                  <xsl:value-of select="error" />
+                </xsl:for-each>
+              </div>
         </xsl:when>
         <xsl:otherwise>
             <xsl:value-of select="recordingStatus" /> :

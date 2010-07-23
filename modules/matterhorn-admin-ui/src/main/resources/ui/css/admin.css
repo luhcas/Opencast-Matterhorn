@@ -508,3 +508,7 @@ fieldset {
 .ui-autocomplete li {
   list-style: none;
 }
+
+.cursor {
+  cursor: pointer;
+}
