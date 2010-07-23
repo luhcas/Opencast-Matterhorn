@@ -292,14 +292,12 @@ public class WorkspaceImpl implements Workspace {
     URI uri = wfr.getURI(mediaPackageID, mediaPackageElementID, fileName);
 
     // Determine the target location in the workspace
-    InputStream tee = null;
     File workspaceFile = null;
     FileOutputStream out = null;
     try {
       synchronized (wsRoot) {
         workspaceFile = getWorkspaceFile(uri, true);
         FileUtils.touch(workspaceFile);
-        out = new FileOutputStream(workspaceFile);
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -307,23 +305,23 @@ public class WorkspaceImpl implements Workspace {
 
     // Try hard linking first and fall back to tee-ing to both the working file repository and the workspace
     if (linkingEnabled) {
-      tee = in;
-      wfr.put(mediaPackageID, mediaPackageElementID, fileName, tee);
-      FileUtils.forceMkdir(workspaceFile.getParentFile());
+      // The WFR stores an md5 hash along with the file, so we need to use the API and not try to write (link) the file
+      // there ourselves
+      wfr.put(mediaPackageID, mediaPackageElementID, fileName, in);
       File workingFileRepoDirectory = new File(PathSupport.concat(new String[] { wfrRoot,
               WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX, mediaPackageID, mediaPackageElementID }));
       File workingFileRepoCopy = new File(workingFileRepoDirectory, safeFileName);
       FileSupport.link(workingFileRepoCopy, workspaceFile, true);
     } else {
-      tee = new TeeInputStream(in, out, true);
-      wfr.put(mediaPackageID, mediaPackageElementID, fileName, tee);
-    }
-
-    // Cleanup
-    try {
-      tee.close();
-    } catch (IOException e) {
-      logger.warn("Unable to close file stream: " + e.getLocalizedMessage());
+      InputStream tee = null;
+      try {
+        out = new FileOutputStream(workspaceFile);
+        tee = new TeeInputStream(in, out, true);
+        wfr.put(mediaPackageID, mediaPackageElementID, fileName, tee);
+      } finally {
+        IOUtils.closeQuietly(tee);
+        IOUtils.closeQuietly(out);
+      }
     }
 
     return uri;
@@ -446,13 +444,13 @@ public class WorkspaceImpl implements Workspace {
     String filename = FilenameUtils.getName(path);
     String collection = getCollection(collectionURI);
 
-    // Copy the local file
+    // Move the local file
     File original = getWorkspaceFile(collectionURI, false);
     if (original.isFile()) {
       URI copyURI = wfr.getURI(toMediaPackage, toMediaPackageElement, filename);
       File copy = getWorkspaceFile(copyURI, true);
       FileUtils.forceMkdir(copy.getParentFile());
-      original.renameTo(copy);
+      FileUtils.moveFile(original, copy);
     }
 
     // Tell working file repository

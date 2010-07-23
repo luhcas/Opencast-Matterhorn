@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.Arrays;
 
 public class WorkingFileRepositoryTest {
@@ -32,6 +33,7 @@ public class WorkingFileRepositoryTest {
   public void setup() throws Exception {
     repo.rootDirectory = "target" + File.separator + "repotest";
     repo.serverUrl = UrlSupport.DEFAULT_BASE_URL;
+    repo.serviceUrl = new URI(UrlSupport.concat(UrlSupport.DEFAULT_BASE_URL, WorkingFileRepositoryImpl.URI_PREFIX));
     repo.createRootDirectory();
     
     // Put an image file into the repository using the mediapackage / element storage

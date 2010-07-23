@@ -64,7 +64,7 @@ public class PathSupport {
    */
   public static String toSafeName(String fileName) {
     String urlExtension = FilenameUtils.getExtension(fileName);
-    String baseName = fileName.substring(0, fileName.length() - (urlExtension.length() + 1));
+    String baseName = FilenameUtils.getBaseName(fileName);
     String safeBaseName = baseName.replaceAll("\\W", "_"); // TODO -- ensure that this filename is safe on all platforms
     String safeString = null;
     if ("".equals(urlExtension)) {
@@ -75,7 +75,9 @@ public class PathSupport {
     if (safeString.length() < 255)
       return safeString;
     String random = UUID.randomUUID().toString();
-    random = random.concat(".").concat(urlExtension);
+    if (!"".equals(urlExtension)) {
+      random = random.concat(".").concat(urlExtension);
+    }
     logger.info("using '{}' to represent url '{}', which is too long to store as a filename", random, fileName);
     return random;
   }

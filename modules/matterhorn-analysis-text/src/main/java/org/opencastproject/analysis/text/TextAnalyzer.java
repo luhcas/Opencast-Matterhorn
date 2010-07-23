@@ -84,7 +84,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   public static final String CONFIG_THREADS = "textanalyzer.threads";
 
   /** The default worker thread pool size to use if no configuration is specified */
-  public static final int DEFAULT_THREADS = 2;
+  public static final int DEFAULT_THREADS = 1;
 
   /** Reference to the receipt service */
   private RemoteServiceManager remoteServiceManager = null;

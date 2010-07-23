@@ -74,7 +74,7 @@ public class InboxScanner implements ArtifactInstaller {
       try {
         maxThreads = Integer.parseInt(cc.getBundleContext().getProperty("inbox.threads"));
       } catch(NumberFormatException e) {
-        logger.warn("Illegal value set for inbox.threads.  Using default value of 1 inbox ingest at a time.");
+        logger.warn("Illegal value set for inbox.threads. Using default value of 1 inbox ingest at a time.");
       }
     }
     this.executorService = Executors.newFixedThreadPool(maxThreads);
@@ -101,7 +101,7 @@ public class InboxScanner implements ArtifactInstaller {
             logger.info("Ingested '{}' as a mediapackage", artifact.getAbsolutePath());
             mediaPackageIngestSuccess = true;
           } catch(Exception e) {
-            logger.debug("Unable to ingest mediapackage '{}', {}", artifact.getAbsolutePath(), e);
+            logger.warn("Unable to ingest mediapackage '{}', {}", artifact.getAbsolutePath(), e);
           } finally {
             IOUtils.closeQuietly(in);
           }

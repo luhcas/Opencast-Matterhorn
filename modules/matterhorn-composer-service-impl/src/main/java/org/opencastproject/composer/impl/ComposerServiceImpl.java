@@ -91,7 +91,7 @@ public class ComposerServiceImpl implements ComposerService {
   public static final String CONFIG_THREADS = "composer.threads";
 
   /** The default number of concurrent encoding threads to run */
-  public static final int DEFAULT_THREADS = 2;
+  public static final int DEFAULT_THREADS = 1;
 
   /**
    * Sets the media inspection service
@@ -328,8 +328,6 @@ public class ComposerServiceImpl implements ComposerService {
         } finally {
           IOUtils.closeQuietly(in);
         }
-        if (encodingOutput != null)
-          encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
 
         // Have the encoded track inspected and return the result
         Receipt inspectionReceipt = inspectionService.inspect(returnURL, true);

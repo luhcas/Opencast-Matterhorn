@@ -4,7 +4,6 @@
   <implementation class="org.opencastproject.workingfilerepository.impl.WorkingFileRepositoryImpl" />
   <property name="service.description" value="Working File Repository" />
   <service>
-    <provide interface="org.osgi.service.cm.ManagedService" />
     <provide interface="org.opencastproject.workingfilerepository.api.WorkingFileRepository" />
     <provide interface="org.opencastproject.workingfilerepository.api.PathMappable" />
   </service>

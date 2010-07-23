@@ -25,8 +25,6 @@ import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,13 +38,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Dictionary;
 
 /**
  * A very simple (read: inadequate) implementation that stores all files under a root directory using the media package
  * ID as a subdirectory and the media package element ID as the file name.
  */
-public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMappable, ManagedService {
+public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMappable {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryImpl.class);
 
   /** The extension we use for the md5 hash calculated from the file contents */
@@ -86,15 +83,25 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
   public void activate(ComponentContext cc) {
     if (rootDirectory != null)
       return; // If the root directory was set by the constructor, respect that setting
+
+    // server url
     serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     if (serverUrl == null)
       throw new IllegalStateException("Server URL must be set");
+
+    // working file repository 'facade' configuration
     String serviceUrlString = UrlSupport.concat(serverUrl, "files");
+    String canonicalFileRepositoryUrl = cc.getBundleContext().getProperty("org.opencastproject.file.repo.url");
+    if (canonicalFileRepositoryUrl != null) {
+      serviceUrlString = UrlSupport.concat(canonicalFileRepositoryUrl, "files");
+    }
     try {
       this.serviceUrl = new URI(serviceUrlString);
     } catch (URISyntaxException e) {
       throw new IllegalStateException("Service URL must be a valid URI, but is " + serviceUrlString);
     }
+
+    // root directory
     if (cc.getBundleContext().getProperty("org.opencastproject.file.repo.path") == null) {
       String storageDir = cc.getBundleContext().getProperty("org.opencastproject.storage.dir");
       if (storageDir == null)
@@ -114,7 +121,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
   public void deactivate() {
     remoteServiceManager.unRegisterService(JOB_TYPE, serverUrl);
   }
-  
+
   public void delete(String mediaPackageID, String mediaPackageElementID) {
     checkPathSafe(mediaPackageID);
     checkPathSafe(mediaPackageElementID);
@@ -164,7 +171,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
   @Override
   public URI getCollectionURI(String collectionID, String fileName) {
     try {
-      return new URI(serverUrl + "/files" + COLLECTION_PATH_PREFIX + collectionID + "/"
+      return new URI(serviceUrl + COLLECTION_PATH_PREFIX + collectionID + "/"
               + PathSupport.toSafeName(fileName));
     } catch (URISyntaxException e) {
       throw new IllegalStateException("Unable to create valid uri from " + collectionID + " and " + fileName);
@@ -183,7 +190,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
    */
   @Override
   public URI getURI(String mediaPackageID, String mediaPackageElementID, String fileName) {
-    String uri = UrlSupport.concat(new String[] { serverUrl, URI_PREFIX, MEDIAPACKAGE_PATH_PREFIX, mediaPackageID,
+    String uri = UrlSupport.concat(new String[] { serviceUrl.toString(), MEDIAPACKAGE_PATH_PREFIX, mediaPackageID,
             mediaPackageElementID });
     if (fileName == null) {
       File existingDirectory = getElementDirectory(mediaPackageID, mediaPackageElementID);
@@ -362,22 +369,6 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
       }
     }
     return collectionDir;
-  }
-
-  @SuppressWarnings("unchecked")
-  public void updated(Dictionary props) throws ConfigurationException {
-    logger.info("updating properties on {}", this);
-    String newRootDirectory = (String) props.get("root");
-    if (newRootDirectory != null) {
-      logger.info("setting root directory to {}", newRootDirectory);
-      rootDirectory = newRootDirectory;
-      createRootDirectory();
-    }
-    String newServerUrl = (String) props.get("org.opencastproject.server.url");
-    if (newServerUrl != null) {
-      logger.info("setting serverUrl to {}", newServerUrl);
-      serverUrl = newServerUrl;
-    }
   }
 
   void createRootDirectory() {
@@ -572,7 +563,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
     URI[] uris = new URI[files.length];
     for (int i = 0; i < files.length; i++) {
       try {
-        uris[i] = new URI(serverUrl + "/files" + COLLECTION_PATH_PREFIX + collectionId + "/"
+        uris[i] = new URI(serviceUrl + COLLECTION_PATH_PREFIX + collectionId + "/"
                 + PathSupport.toSafeName(getSourceFile(files[i]).getName()));
       } catch (URISyntaxException e) {
         throw new IllegalStateException("Invalid URI for " + files[i]);
@@ -660,7 +651,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
    */
   @Override
   public String getUrlPrefix() {
-    return serverUrl;
+    return serviceUrl.toString();
   }
 
   /**
