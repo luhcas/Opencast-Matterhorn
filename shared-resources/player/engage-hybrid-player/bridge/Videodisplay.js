@@ -69,8 +69,16 @@ function VideodisplayReady()
         b_Videodisplay_root.rewind();
     };
     
+    Videodisplay.stopRewind = function () {
+        b_Videodisplay_root.stopRewind();
+    };
+    
     Videodisplay.fastForward = function () {
         b_Videodisplay_root.fastForward();
+    };
+    
+    Videodisplay.stopFastForward = function () {
+        b_Videodisplay_root.stopFastForward();
     };
     
     Videodisplay.skipForward = function () {
