@@ -37,6 +37,7 @@ td {
 select { font-size:1.15em; }
 
 .wu-tab-content {
+	overflow:hidden;
 }
 
 .force-space-12px {
