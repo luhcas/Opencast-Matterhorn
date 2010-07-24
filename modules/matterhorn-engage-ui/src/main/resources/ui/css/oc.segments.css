@@ -81,6 +81,7 @@ div.segment-tooltip
 
 a.segments-time {
     color:            #2D8F8B;
+    cursor:           pointer;
 }
 
 .segments-time:hover {
