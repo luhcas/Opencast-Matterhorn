@@ -68,9 +68,9 @@
               $(this).html("n.a.");
             }
           });
-          $('.thumb').each( function() {
+          $(".thumb").each( function(index) {
             var src = $(this).attr("src");
-            if(src === undefined){
+            if(src === undefined || src === ""){
               $(this).attr("src", "img/thumbnail.png");
             }
           });
