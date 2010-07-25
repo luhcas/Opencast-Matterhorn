@@ -20,7 +20,6 @@ import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.util.NotFoundException;
@@ -149,7 +148,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
    *           if the workspace does not contain the requested element
    */
   private MediaPackage mux(MediaPackage src, WorkflowOperationInstance operation) throws EncoderException,
-          WorkflowOperationException, MediaPackageException, NotFoundException, IOException {
+          WorkflowOperationException, NotFoundException, IOException {
     MediaPackage mediaPackage = (MediaPackage) src.clone();
 
     // Read the configuration properties
@@ -222,6 +221,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
           throw new WorkflowOperationException("Rewriting container for video track " + videoTrack + " failed");
         }
         composedTrack = (Track) receipt.getElement();
+        composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(), composedTrack.getIdentifier()));
       } else {
         composedTrack = (Track) videoTrack.clone();
         composedTrack.setIdentifier(null);
@@ -234,6 +234,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
           throw new WorkflowOperationException("Rewriting container for audio track " + audioTrack + " failed");
         }
         composedTrack = (Track) receipt.getElement();
+        composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(), composedTrack.getIdentifier()));
       } else {
         composedTrack = (Track) audioTrack.clone();
         composedTrack.setIdentifier(null);
@@ -246,6 +247,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
           throw new WorkflowOperationException("Rewriting container for a/v track " + videoTrack + " failed");
         }
         composedTrack = (Track) receipt.getElement();
+        composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(), composedTrack.getIdentifier()));
       } else {
         composedTrack = (Track) videoTrack.clone();
         composedTrack.setIdentifier(null);
@@ -257,6 +259,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
         throw new WorkflowOperationException("Muxing video track " + videoTrack + " and audio track " + audioTrack + " failed");
       }
       composedTrack = (Track) receipt.getElement();
+      composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(), composedTrack.getIdentifier()));
     }
 
     // Update the track's flavor
@@ -271,7 +274,6 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     }
 
     mediaPackage.add(composedTrack);
-    composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(), composedTrack.getIdentifier()));
     return mediaPackage;
   }
 
