@@ -27,7 +27,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
 /**
- * Loads language files into the dictionary service.
+ * Loads language packs into the dictionary service, deleting the language pack on completion.
  */
 public class DictionaryScanner implements ArtifactInstaller {
   private static final Logger logger = LoggerFactory.getLogger(DictionaryScanner.class);
@@ -57,9 +57,12 @@ public class DictionaryScanner implements ArtifactInstaller {
    */
   @Override
   public void install(File artifact) throws Exception {
-    logger.info("Registering dictionary from {}", artifact);
+    logger.info("Loading language pack from {}", artifact);
     Integer numAllW = 1;
     String language = artifact.getName().split("\\.")[0];
+
+    // clear this language
+    dictionaryService.clear(language);
 
     // read csv file and fill dictionary index
     BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(artifact)), 1024 * 1024);
@@ -81,7 +84,10 @@ public class DictionaryScanner implements ArtifactInstaller {
         logger.warn("Unable to add word '{}' to the {} dictionary: {}", new String[] {word, language, e.getMessage()} );
       }
     }
-    logger.info("Finished registering dictionary from {}", artifact);
+    if(!artifact.delete()) {
+      logger.warn("Unable to delete language pack {}", artifact);
+    }
+    logger.info("Finished loading language pack from {}", artifact);
   }
 
   /**
@@ -101,8 +107,6 @@ public class DictionaryScanner implements ArtifactInstaller {
    */
   @Override
   public void update(File artifact) throws Exception {
-    String language = artifact.getName().split("\\.")[0];
-    dictionaryService.clear(language);
-    install(artifact);
+    // Do nothing
   }
 }
