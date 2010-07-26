@@ -40,13 +40,13 @@ Opencast.Watch = (function ()
         $('#data').xslt(restEndpoint, "xsl/player-hybrid-download.xsl", function () 
         {
           $('#oc-segments').html("");
+          
+          mimetypeOne = "video/x-flv";
+          mimetypeTwo = "video/x-flv";
 
           // set the media URLs
           mediaUrlOne = Opencast.engage.getVideoUrl();
           mediaUrlTwo = Opencast.engage.getVideoUrl2();
-
-          mimetypeOne = "video/x-flv";
-          mimetypeTwo = "video/x-flv";
 
           coverUrlOne = $('#oc-cover-presenter').html();
           coverUrlTwo = $('#oc-cover-presentation').html();
