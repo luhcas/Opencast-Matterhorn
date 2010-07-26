@@ -60,20 +60,20 @@ package org.opencast.engage.videodisplay.view
             for( var i : int = 0; i < CHANNEL_LENGTH; i++ )
             {
                 n = ( bytes.readFloat() * PLOT_HEIGHT );
-                g.lineTo( i * 2, PLOT_HEIGHT - n );
+                g.lineTo( i * 6, PLOT_HEIGHT - n );
             }
 
-            g.lineTo( CHANNEL_LENGTH * 2, PLOT_HEIGHT );
+            g.lineTo( CHANNEL_LENGTH * 6, PLOT_HEIGHT );
             g.endFill();
 
             g.lineStyle( 0, 0xFDB792 );
-            g.beginFill( 0xFDB792, 0.5 );
-            g.moveTo( CHANNEL_LENGTH * 2, PLOT_HEIGHT );
+            g.beginFill( 0xFDB792, 0.5	 );
+            g.moveTo( CHANNEL_LENGTH * 6, PLOT_HEIGHT );
 
             for( i = CHANNEL_LENGTH; i > 0; i-- )
             {
                 n = ( bytes.readFloat() * PLOT_HEIGHT );
-                g.lineTo( i * 2, PLOT_HEIGHT - n );
+                g.lineTo( i * 6, PLOT_HEIGHT - n );
             }
 
             g.lineTo( 0, PLOT_HEIGHT );
