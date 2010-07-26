@@ -44,13 +44,12 @@ Opencast.search = ( function() {
               var relevance = parseInt($(this).attr('relevance'));
               // Select only item with a relevanve value greater than zero
               var segmentIndex = parseInt($(this).attr('index')) + 1;
-              if(relevance !== 0 || value === "") {
+              if(relevance !== -1 || value === "") {
                   var seconds = parseInt($(this).attr('time')) / 1000;
-                  var id = relevance*1000 + index;
+                  var id = relevance*1000 - index;
                   var row = "";
                   var text = $(this).find('text').text();
                   text = text.replace(new RegExp(value, 'g'),'<span class="marked">' + value + '</span>');
-
                   row += '<tr>';
                   row += '<td class="oc-segments-time">';
                   row += '<a onclick="Opencast.Watch.seekSegment('+ seconds +')" class="segments-time">';
