@@ -6,8 +6,9 @@
     <link rel="stylesheet" type="text/css" href="../../../admin/css/admin.css">
     <style type="text/css">
       #player-container {clear:both; border:none; width:90%; height:300;}
-      #edit-link {float:right;margin-top:3px; margin-bottom:5px; margin-right:50px;}
+      #edit-link {margin-right:43%;}
       .hidden {display:none;}
+      #actions{margin: 0 auto; text-align:center; width:100%;}
     </style>
     <script type="text/javascript" src="../../../admin/jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript">
@@ -105,8 +106,7 @@
     </script>
   </head>
   <body>
-    <!-- control buttons in the upper right -->
-    <a href="javascript: return false;" id="edit-link">Edit before continuing</a>
+    <h1>Review Media</h1>
     <center>
       <iframe id="player-container"></iframe>
     </center>
@@ -120,11 +120,6 @@
         <li class="ui-helper-clearfix">
           <label class="fl-label"><span id="i18n_files_label">File(s)</span>:</label>
           <div id="files"></div>
-        </li>
-        <!-- field: Title -->
-        <li id="container-title" class="ui-helper-clearfix" style="display:none;">
-          <label class="fl-label"><span id="i18n_title_label">Title</span>:</label>
-          <span id="meta-title"></span>
         </li>
         <!-- field: Presenter -->
         <li id="container-creator" class="ui-helper-clearfix" style="display:none;">
@@ -147,6 +142,10 @@
           <span id="meta-dist"></span>
         </li>
       </ul>
+    </div>
+    <div id="actions">
+    <!-- control buttons -->
+    <a href="javascript: return false;" id="edit-link">Edit before continuing</a>
     </div>
   </body>
 </html>

@@ -288,6 +288,10 @@ select { font-size:1.15em; }
   text-align: center;
 }
 
+#holdIframe-container {
+  border:1px solid lightgrey;"
+}
+
 #workflow-config-container {
   width: 96%;
   margin-left: 2%;

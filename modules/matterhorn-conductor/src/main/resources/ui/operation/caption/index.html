@@ -159,10 +159,10 @@
       });
     </script>
   </head>
-  <body>
+  <body id="captions-container">
     <!-- control buttons in the upper right -->
+    <h1>Upload Captions file</h1>
     <div class="spandiv">
-      <h1>Upload Captions file</h1>
     </div>
     <div id="file-display-container" class="spandiv hidden" style="padding-top:26px;padding-left:40px;">
       <div class="spandiv" id="i18n_captions_upload_label">Captions file:&nbsp;</div>
@@ -178,10 +178,9 @@
       </div>
     </div>
     <!-- <a href="javascript: return false;" id="edit-link">Edit before continuing</a> -->
-    <center>
-      <iframe id="player-container"></iframe>
-    </center>
-    <div id="metadata-container">
+
+
+    <div id="metadata-container" style="display:none;">
       <ul class="no-bullets formField-list fl-controls-right">
         <!-- captions files upload -->
         <!-- field: File -->
