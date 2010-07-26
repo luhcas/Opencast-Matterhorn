@@ -49,7 +49,23 @@ Opencast.search = ( function() {
                   var id = relevance*1000 - index;
                   var row = "";
                   var text = $(this).find('text').text();
-                  text = text.replace(new RegExp(value, 'g'),'<span class="marked">' + value + '</span>');
+                  var markedText = text.replace(new RegExp(value, 'gi'),'<span class="marked">' + value + '</span>');
+
+                  var isHTML = false;
+                  var j = 0;
+                  for(var i = 0; i < markedText.length; i++) {
+                    if(markedText.charAt(i) === "<")
+                      isHTML = true;
+                    else if(markedText.charAt(i) === ">")
+                      isHTML = false;
+                    else {
+                      if(!isHTML){
+                        markedText = setCharAt(markedText, i, text.charAt(j));
+                        j++;
+                      }
+                    }
+                  }
+
                   row += '<tr>';
                   row += '<td class="oc-segments-time">';
                   row += '<a onclick="Opencast.Watch.seekSegment('+ seconds +')" class="segments-time">';
@@ -57,7 +73,7 @@ Opencast.search = ( function() {
                   row += "</a>";
                   row += "</td>";
                   row += "<td>";
-                  row += text;
+                  row += markedText;
                   row += "</td>";
                   row += "</tr>";
 
@@ -98,6 +114,11 @@ Opencast.search = ( function() {
             // Some error while trying to get the search result
           }
         }); //close ajax(
+  }
+
+  function setCharAt(str,index,ch) {
+    if(index > str.length-1) return str;
+    return str.substr(0,index) + ch + str.substr(index+1);
   }
 
   /**
