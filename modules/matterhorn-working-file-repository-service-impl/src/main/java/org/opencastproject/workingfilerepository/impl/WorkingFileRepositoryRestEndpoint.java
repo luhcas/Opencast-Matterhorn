@@ -126,26 +126,28 @@ public class WorkingFileRepositoryRestEndpoint {
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
 
-    // move
+    // copy
     endpoint = new RestEndpoint("copy", RestEndpoint.Method.POST,
-            "/copy/{fromCollection}/{fromFileName}/{toMediaPackage}/{toMediaPackageElement}",
+            "/copy/{fromCollection}/{fromFileName}/{toMediaPackage}/{toMediaPackageElement}/{toFileName}",
             "Copies a file from a collection to a mediapackage");
     endpoint.addPathParam(new Param("fromCollection", Param.Type.STRING, null, "ID of the source collection"));
     endpoint.addPathParam(new Param("fromFileName", Param.Type.STRING, null, "The source file name"));
     endpoint.addPathParam(new Param("toMediaPackage", Param.Type.STRING, null, "The destination mediapackage"));
     endpoint.addPathParam(new Param("toMediaPackageElement", Param.Type.STRING, null, "The destination element ID"));
+    endpoint.addPathParam(new Param("toFileName", Param.Type.STRING, null, "The destination element file name"));
     endpoint.addStatus(Status.OK("The file was copied to the URL in the response body"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
-    // copy
+    // move
     endpoint = new RestEndpoint("move", RestEndpoint.Method.POST,
-            "/move/{fromCollection}/{fromFileName}/{toMediaPackage}/{toMediaPackageElement}",
+            "/move/{fromCollection}/{fromFileName}/{toMediaPackage}/{toMediaPackageElement}/{toFileName}",
             "Moves a file from a collection to a mediapackage");
     endpoint.addPathParam(new Param("fromCollection", Param.Type.STRING, null, "ID of the source collection"));
     endpoint.addPathParam(new Param("fromFileName", Param.Type.STRING, null, "The source file name"));
     endpoint.addPathParam(new Param("toMediaPackage", Param.Type.STRING, null, "The destination mediapackage"));
     endpoint.addPathParam(new Param("toMediaPackageElement", Param.Type.STRING, null, "The destination element ID"));
+    endpoint.addPathParam(new Param("toFileName", Param.Type.STRING, null, "The destination element file name"));
     endpoint.addStatus(Status.OK("The file was moved to the URL in the response body"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
