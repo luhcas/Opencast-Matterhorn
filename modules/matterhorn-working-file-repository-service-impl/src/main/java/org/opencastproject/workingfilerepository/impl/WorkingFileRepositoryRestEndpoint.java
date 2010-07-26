@@ -80,7 +80,6 @@ public class WorkingFileRepositoryRestEndpoint {
   private String generateDocs() {
     DocRestData data = new DocRestData("workingfilerepository", "Working file repository", "/files", notes);
     data.setAbstract("This service provides local file access and storage for processes such as encoding.");
-
     // put
     RestEndpoint endpoint = new RestEndpoint("put", RestEndpoint.Method.POST,
             WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "{mediaPackageID}/{mediaPackageElementID}",
@@ -225,7 +224,6 @@ public class WorkingFileRepositoryRestEndpoint {
     endpoint.addFormat(new Format("json", null, null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
-
     return DocUtil.generate(data);
   }
 
