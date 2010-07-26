@@ -198,7 +198,9 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
       }
       // store new image in the mediaPackage
       mediaPackage.addDerived(composedImage, t);
-      composedImage.setURI(workspace.moveTo(composedImage.getURI(), mediaPackage.getIdentifier().toString(), composedImage.getIdentifier()));
+      String fileName = getFileNameFromElements(t, composedImage);
+      composedImage.setURI(workspace.moveTo(composedImage.getURI(), mediaPackage.getIdentifier().toString(),
+              composedImage.getIdentifier(), fileName));
     }
 
     return mediaPackage;

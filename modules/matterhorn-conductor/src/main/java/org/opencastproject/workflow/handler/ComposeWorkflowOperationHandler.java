@@ -144,8 +144,6 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
     MediaPackage mediaPackage = (MediaPackage) src.clone();
     // Read the configuration properties
     String sourceFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
-    String targetTrackTags = StringUtils.trimToNull(operation.getConfiguration("target-tags"));
-    String targetTrackFlavor = StringUtils.trimToNull(operation.getConfiguration("target-flavor"));
     String encodingProfileName = StringUtils.trimToNull(operation.getConfiguration("encoding-profile"));
     String audioOnlyConfig = StringUtils.trimToNull(operation.getConfiguration("audio-only"));
     String videoOnlyConfig = StringUtils.trimToNull(operation.getConfiguration("video-only"));
@@ -203,29 +201,20 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
         throw new WorkflowOperationException("Encoding failed");
       }
       Track composedTrack = (Track) receipt.getElement();
-      updateTrack(composedTrack, operation, profile);
-
-      // Set the flavor
-      if (targetTrackFlavor != null) {
-        composedTrack.setFlavor(MediaPackageElementFlavor.parseFlavor(targetTrackFlavor));
-      }
-
-      // Add the tags
-      List<String> targetTags = asList(targetTrackTags);
-      for (String tag : targetTags) {
-        composedTrack.addTag(tag);
-      }
+      updateTrackMetadata(composedTrack, operation, profile);
 
       // store new tracks to mediaPackage
       mediaPackage.addDerived(composedTrack, t);
-      composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(), composedTrack.getIdentifier()));
+      String fileName = getFileNameFromElements(t, composedTrack);
+      composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(),
+              composedTrack.getIdentifier(), fileName));
     }
 
     return mediaPackage;
   }
 
   // Update the newly composed track with metadata
-  private void updateTrack(Track composedTrack, WorkflowOperationInstance operation, EncodingProfile profile) {
+  private void updateTrackMetadata(Track composedTrack, WorkflowOperationInstance operation, EncodingProfile profile) {
     // Read the configuration properties
     String targetTrackTags = StringUtils.trimToNull(operation.getConfiguration("target-tags"));
     String targetTrackFlavor = StringUtils.trimToNull(operation.getConfiguration("target-flavor"));

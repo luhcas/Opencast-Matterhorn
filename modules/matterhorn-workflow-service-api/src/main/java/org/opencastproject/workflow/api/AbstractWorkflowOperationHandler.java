@@ -16,8 +16,10 @@
 package org.opencastproject.workflow.api;
 
 
+import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -80,6 +82,19 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
       }
     }
     return list;
+  }
+  
+  /**
+   * Generates a filename using the base name of a source element and the extension of a derived element.
+   * 
+   * @param source the source mediapackage element
+   * @param derived the derived mediapackage element
+   * @return the filename
+   */
+  protected String getFileNameFromElements(MediaPackageElement source, MediaPackageElement derived) {
+    String fileName = FilenameUtils.getBaseName(source.getURI().toString());
+    String fileExtension = FilenameUtils.getExtension(derived.getURI().toString());
+    return fileName + "." + fileExtension;
   }
   
   /**

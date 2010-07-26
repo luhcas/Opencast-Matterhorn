@@ -52,19 +52,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 
 /**
  * Media analysis service that takes takes an image and returns text as extracted from that image.
@@ -201,7 +194,8 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
 
           logger.info("Text extraction of {} finished, {} lines found", attachment.getURI(), videoTexts.length);
 
-          URI uri = uploadMpeg7(mpeg7);
+          URI uri = workspace.putInCollection(COLLECTION_ID, receipt.getId() + ".xml", mpeg7CatalogService
+                  .serialize(mpeg7));
           Catalog catalog = (Catalog) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().newElement(
                   Catalog.TYPE, MediaPackageElements.TEXTS);
           catalog.setURI(uri);
@@ -236,29 +230,6 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
       }
     }
     return receipt;
-  }
-
-  /**
-   * Stores the mpeg-7 catalog in the working file repository.
-   * 
-   * @param catalog
-   *          the catalog
-   * @return the catalog's URI in the working file repository
-   * @throws TransformerFactoryConfigurationError
-   *           if serializing the catalog to xml fails
-   * @throws IOException
-   *           if writing the catalog to the working file repository fails
-   * @throws ParserConfigurationException
-   *           if the xml parser is not set up correctly
-   * @throws TransformerException
-   *           if creating the xml representation from the dom tree fails
-   * @throws URISyntaxException
-   *           if the working file repository created an invalid uri
-   */
-  protected URI uploadMpeg7(Mpeg7CatalogImpl catalog) throws TransformerFactoryConfigurationError,
-          TransformerException, ParserConfigurationException, IOException, URISyntaxException {
-    InputStream in = mpeg7CatalogService.serialize(catalog);
-    return workspace.putInCollection(COLLECTION_ID, UUID.randomUUID().toString(), in);
   }
 
   /**

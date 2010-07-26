@@ -116,16 +116,18 @@ public class WorkingFileRepositoryTest {
   
   @Test
   public void testCopy() throws Exception {
+    String newFileName = "newfile.gif";
     byte[] bytesFromCollection = IOUtils.toByteArray(repo.getFromCollection(collectionId, filename));
-    repo.copyTo(collectionId, filename, "copied-mediapackage", "copied-element");
+    repo.copyTo(collectionId, filename, "copied-mediapackage", "copied-element", newFileName);
     byte[] bytesFromCopy = IOUtils.toByteArray(repo.get("copied-mediapackage", "copied-element"));
     Assert.assertTrue(Arrays.equals(bytesFromCollection, bytesFromCopy));
   }
 
   @Test
   public void testMove() throws Exception {
+    String newFileName = "newfile.gif";
     byte[] bytesFromCollection = IOUtils.toByteArray(repo.getFromCollection(collectionId, filename));
-    repo.moveTo(collectionId, filename, "moved-mediapackage", "moved-element");
+    repo.moveTo(collectionId, filename, "moved-mediapackage", "moved-element", newFileName);
     byte[] bytesFromMove = IOUtils.toByteArray(repo.get("moved-mediapackage", "moved-element"));
     Assert.assertTrue(Arrays.equals(bytesFromCollection, bytesFromMove));
   }

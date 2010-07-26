@@ -150,9 +150,12 @@ public interface Workspace {
    *          The media package ID to move the file into
    * @param toMediaPackageElement
    *          the media package element ID of the file
+   * @param toFileName
+   *          the name of the resulting file
    * @return the URI pointing to the file's new location
    */
-  URI moveTo(URI collectionURI, String toMediaPackage, String toMediaPackageElement) throws NotFoundException, IOException;
+  URI moveTo(URI collectionURI, String toMediaPackage, String toMediaPackageElement, String toFileName)
+          throws NotFoundException, IOException;
 
   /**
    * Copies a file from a collection into a mediapackage
@@ -163,8 +166,11 @@ public interface Workspace {
    *          The media package ID to copy the file into
    * @param toMediaPackageElement
    *          the media package element ID of the file
+   * @param toFileName
+   *          the name of the resulting file
    * @return the URI pointing to the file's new location
    */
-  URI copyTo(URI collectionURI, String toMediaPackage, String toMediaPackageElement) throws NotFoundException, IOException;
+  URI copyTo(URI collectionURI, String toMediaPackage, String toMediaPackageElement, String toFileName)
+    throws NotFoundException, IOException;
 
 }

@@ -25,8 +25,6 @@ import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.mediapackage.identifier.IdBuilder;
-import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
@@ -34,6 +32,7 @@ import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -77,9 +76,6 @@ public class ComposerServiceImpl implements ComposerService {
 
   /** Reference to the encoder engine factory */
   private EncoderEngineFactory encoderEngineFactory;
-
-  /** Id builder used to create ids for encoded tracks */
-  private final IdBuilder idBuilder = IdBuilderFactory.newInstance().newIdBuilder();
 
   /** Thread pool */
   private ExecutorService executor = null;
@@ -232,8 +228,6 @@ public class ComposerServiceImpl implements ComposerService {
    */
   private Receipt encode(final Track videoTrack, final Track audioTrack, final String profileId, final boolean block)
           throws EncoderException {
-
-    final String targetTrackId = idBuilder.createNew().toString();
     final Receipt composerReceipt = remoteServiceManager.createReceipt(JOB_TYPE);
 
     // Get the tracks and make sure they exist
@@ -289,14 +283,14 @@ public class ComposerServiceImpl implements ComposerService {
       public void run() {
         
         if (audioTrack != null && videoTrack != null)
-          logger.info("Muxing audio track {} and video track {} into {}", new String[] {
-                  audioTrack.getIdentifier(), videoTrack.getIdentifier(), targetTrackId });
+          logger.info("Muxing audio track {} and video track {}", new String[] {
+                  audioTrack.getIdentifier(), videoTrack.getIdentifier() });
         else if (audioTrack == null)
-          logger.info("Encoding video track {} to {} using profile '{}'", new String[] {
-                  videoTrack.getIdentifier(), targetTrackId, profileId });
+          logger.info("Encoding video track {} using profile '{}'", new String[] {
+                  videoTrack.getIdentifier(), profileId });
         else if (videoTrack == null)
-          logger.info("Encoding audio track {} to {} using profile '{}'", new String[] {
-                  audioTrack.getIdentifier(), targetTrackId, profileId });
+          logger.info("Encoding audio track {} using profile '{}'", new String[] {
+                  audioTrack.getIdentifier(), profileId });
           
         composerReceipt.setStatus(Status.RUNNING);
         remoteServiceManager.updateReceipt(composerReceipt);
@@ -316,7 +310,8 @@ public class ComposerServiceImpl implements ComposerService {
         InputStream in = null;
         try {
           in = new FileInputStream(encodingOutput);
-          returnURL = workspace.putInCollection(COLLECTION, encodingOutput.getName(), in);
+          String fileName = composerReceipt.getId() + "." + FilenameUtils.getExtension(encodingOutput.getName());
+          returnURL = workspace.putInCollection(COLLECTION, fileName, in);
           logger.info("Copied the encoded file to the workspace at {}", returnURL);
           encodingOutput.delete();
           logger.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
@@ -334,7 +329,6 @@ public class ComposerServiceImpl implements ComposerService {
         if (inspectionReceipt.getStatus() == Receipt.Status.FAILED)
           throw new RuntimeException("Media inspection failed");
         Track inspectedTrack = (Track) inspectionReceipt.getElement();
-        inspectedTrack.setIdentifier(targetTrackId);
 
         composerReceipt.setElement(inspectedTrack);
         composerReceipt.setStatus(Status.FINISHED);
@@ -468,7 +462,8 @@ public class ComposerServiceImpl implements ComposerService {
         InputStream in = null;
         try {
           in = new FileInputStream(encodingOutput);
-          returnURL = workspace.putInCollection(COLLECTION, encodingOutput.getName(), in);
+          String fileName = receipt.getId() + "." + FilenameUtils.getExtension(encodingOutput.getName());
+          returnURL = workspace.putInCollection(COLLECTION, fileName, in);
           logger.debug("Copied the encoded file to the workspace at {}", returnURL);
         } catch (Exception e) {
           receipt.setStatus(Status.FAILED);

@@ -61,7 +61,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
 
   /** Name of the 'encode to video only work copy' encoding profile */
   public static final String PREPARE_VONLY_PROFILE = "video-only.work";
-  
+
   /** Name of the 'rewrite' configuration key */
   public static final String OPT_REWRITE = "rewrite";
 
@@ -221,10 +221,18 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
           throw new WorkflowOperationException("Rewriting container for video track " + videoTrack + " failed");
         }
         composedTrack = (Track) receipt.getElement();
-        composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(), composedTrack.getIdentifier()));
+        mediaPackage.add(composedTrack);
+        String fileName = getFileNameFromElements(videoTrack, composedTrack);
+
+        // Note that the composed track must have an ID before being moved to the mediapackage in the working file
+        // repository. This ID is generated when the track is added to the mediapackage. So the track must be added
+        // to the mediapackage before attempting to move the file.
+        composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(),
+                composedTrack.getIdentifier(), fileName));
       } else {
         composedTrack = (Track) videoTrack.clone();
         composedTrack.setIdentifier(null);
+        mediaPackage.add(composedTrack);
       }
     } else if (videoTrack == null && audioTrack != null) {
       if (rewrite) {
@@ -234,10 +242,14 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
           throw new WorkflowOperationException("Rewriting container for audio track " + audioTrack + " failed");
         }
         composedTrack = (Track) receipt.getElement();
-        composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(), composedTrack.getIdentifier()));
+        String fileName = getFileNameFromElements(audioTrack, composedTrack);
+        mediaPackage.add(composedTrack);
+        composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(),
+                composedTrack.getIdentifier(), fileName));
       } else {
         composedTrack = (Track) audioTrack.clone();
         composedTrack.setIdentifier(null);
+        mediaPackage.add(composedTrack);
       }
     } else if (audioTrack == videoTrack) {
       if (rewrite) {
@@ -247,19 +259,27 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
           throw new WorkflowOperationException("Rewriting container for a/v track " + videoTrack + " failed");
         }
         composedTrack = (Track) receipt.getElement();
-        composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(), composedTrack.getIdentifier()));
+        mediaPackage.add(composedTrack);
+        String fileName = getFileNameFromElements(videoTrack, composedTrack);
+        composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(),
+                composedTrack.getIdentifier(), fileName));
       } else {
         composedTrack = (Track) videoTrack.clone();
         composedTrack.setIdentifier(null);
+        mediaPackage.add(composedTrack);
       }
     } else {
       logger.info("Muxing audio and video only track {} to work version", videoTrack);
       receipt = composerService.mux(videoTrack, audioTrack, profile.getIdentifier(), true);
       if (!receipt.getStatus().equals(Receipt.Status.FINISHED)) {
-        throw new WorkflowOperationException("Muxing video track " + videoTrack + " and audio track " + audioTrack + " failed");
+        throw new WorkflowOperationException("Muxing video track " + videoTrack + " and audio track " + audioTrack
+                + " failed");
       }
       composedTrack = (Track) receipt.getElement();
-      composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(), composedTrack.getIdentifier()));
+      mediaPackage.add(composedTrack);
+      String fileName = getFileNameFromElements(videoTrack, composedTrack);
+      composedTrack.setURI(workspace.moveTo(composedTrack.getURI(), mediaPackage.getIdentifier().toString(),
+              composedTrack.getIdentifier(), fileName));
     }
 
     // Update the track's flavor
@@ -272,8 +292,6 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
       logger.trace("Tagging composed track with '{}'", tag);
       composedTrack.addTag(tag);
     }
-
-    mediaPackage.add(composedTrack);
     return mediaPackage;
   }
 

@@ -307,8 +307,9 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
 
             // store new image in the mediaPackage
             mediaPackage.add(composedImage);
-            composedImage.setURI(workspace.moveTo(composedImage.getURI(), mediaPackage.getIdentifier().toString(), composedImage
-                    .getIdentifier()));
+            String fileName = getFileNameFromElements(t, composedImage);
+            composedImage.setURI(workspace.moveTo(composedImage.getURI(), mediaPackage.getIdentifier().toString(),
+                    composedImage.getIdentifier(), fileName));
           }
         }
       }

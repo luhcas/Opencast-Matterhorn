@@ -43,8 +43,6 @@ import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FilenameUtils;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +65,7 @@ import java.util.concurrent.Future;
 /**
  * Inspects media via the 3rd party MediaInfo tool by default, and can be configured to use other media analyzers.
  */
-public class MediaInspectionServiceImpl implements MediaInspectionService, ManagedService {
+public class MediaInspectionServiceImpl implements MediaInspectionService {
   // FIXME move this to media info analyzer service
   public static final String CONFIG_ANALYZER_MEDIAINFOPATH = "inspection.analyzer.mediainfopath";
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceImpl.class);
@@ -85,12 +83,6 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
 
   public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
-  }
-
-  @SuppressWarnings("unchecked")
-  public void updated(Dictionary properties) throws ConfigurationException {
-    logger.info("TODO Updating configuration on {}", this.getClass().getName());
-    // FIXME this is doing nothing
   }
 
   public void activate(ComponentContext cc) {

@@ -16,6 +16,7 @@
 package org.opencastproject.workingfilerepository.impl;
 
 import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UrlSupport;
@@ -67,7 +68,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
   public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
-  
+
   /* The root directory for storing files */
   String rootDirectory = null;
 
@@ -76,7 +77,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
 
   /** The URL for the services provided by the working file repository */
   URI serviceUrl = null;
-  
+
   /**
    * Activate the component
    */
@@ -171,8 +172,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
   @Override
   public URI getCollectionURI(String collectionID, String fileName) {
     try {
-      return new URI(serviceUrl + COLLECTION_PATH_PREFIX + collectionID + "/"
-              + PathSupport.toSafeName(fileName));
+      return new URI(serviceUrl + COLLECTION_PATH_PREFIX + collectionID + "/" + PathSupport.toSafeName(fileName));
     } catch (URISyntaxException e) {
       throw new IllegalStateException("Unable to create valid uri from " + collectionID + " and " + fileName);
     }
@@ -197,8 +197,8 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
       if (existingDirectory.isDirectory()) {
         File[] files = existingDirectory.listFiles();
         boolean md5Exists = false;
-        for(File f : files) {
-          if(f.getName().endsWith(MD5_EXTENSION)) {
+        for (File f : files) {
+          if (f.getName().endsWith(MD5_EXTENSION)) {
             md5Exists = true;
           } else {
             fileName = f.getName();
@@ -461,10 +461,11 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#copyTo(java.lang.String, java.lang.String,
-   *      java.lang.String, java.lang.String)
+   *      java.lang.String, java.lang.String, java.lang.String)
    */
   @Override
-  public URI copyTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement) {
+  public URI copyTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement,
+          String toFileName) throws NotFoundException, IOException {
     File source = getFileFromCollection(fromCollection, fromFileName);
     if (source == null)
       throw new IllegalArgumentException("Source file " + fromCollection + "/" + fromFileName + " does not exist");
@@ -478,25 +479,21 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
                 + "' : " + e);
       }
     }
-    InputStream in = null;
-    try {
-      in = new FileInputStream(source);
-      return put(toMediaPackage, toMediaPackageElement, source.getName(), in);
-    } catch (FileNotFoundException e) {
-      throw new IllegalStateException("unable to copy file" + e);
-    } finally {
-      IOUtils.closeQuietly(in);
-    }
+    File destFile = new File(destDir, toFileName);
+    FileSupport.copy(source, destFile);
+    addMd5(destFile);
+    return getURI(toMediaPackage, toMediaPackageElement, toFileName);
   }
 
   /**
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#moveTo(java.lang.String, java.lang.String,
-   *      java.lang.String, java.lang.String)
+   *      java.lang.String, java.lang.String, java.lang.String)
    */
   @Override
-  public URI moveTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement) {
+  public URI moveTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement,
+          String toFileName) throws NotFoundException, IOException {
     File source = getFileFromCollection(fromCollection, fromFileName);
     if (source == null)
       throw new IllegalArgumentException("Source file " + fromCollection + "/" + fromFileName + " does not exist");
@@ -513,7 +510,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
     }
     File dest = getFile(toMediaPackage, toMediaPackageElement);
     if (dest == null) {
-      dest = new File(getElementDirectory(toMediaPackage, toMediaPackageElement), source.getName());
+      dest = new File(getElementDirectory(toMediaPackage, toMediaPackageElement), toFileName);
     }
 
     try {
@@ -656,6 +653,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workingfilerepository.api.WorkingFileRepository#getBaseUri()
    */
   @Override

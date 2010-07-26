@@ -56,16 +56,13 @@ import org.slf4j.LoggerFactory;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -81,9 +78,6 @@ import javax.media.Processor;
 import javax.media.Time;
 import javax.media.protocol.ContentDescriptor;
 import javax.media.protocol.DataSource;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 
 /**
  * Media analysis plugin that takes a video stream and extracts video segments by trying to detect slide and/or scene
@@ -394,7 +388,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
 
           MediaPackageElement mpeg7Catalog = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
                   .newElement(Catalog.TYPE, MediaPackageElements.SEGMENTS);
-          URI uri = uploadMpeg7(mpeg7);
+          URI uri = workspace.putInCollection(COLLECTION_ID, receipt.getId() + ".xml", mpeg7CatalogService
+                  .serialize(mpeg7));
           mpeg7Catalog.setURI(uri);
           mpeg7Catalog.setReference(new MediaPackageReferenceImpl(element));
 
@@ -429,29 +424,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
       }
     }
     return receipt;
-  }
-
-  /**
-   * Stores the mpeg-7 catalog in the working file repository.
-   * 
-   * @param catalog
-   *          the catalog
-   * @return the catalog's URI in the working file repository
-   * @throws TransformerFactoryConfigurationError
-   *           if serializing the catalog to xml fails
-   * @throws IOException
-   *           if writing the catalog to the working file repository fails
-   * @throws ParserConfigurationException
-   *           if the xml parser is not set up correctly
-   * @throws TransformerException
-   *           if creating the xml representation from the dom tree fails
-   * @throws URISyntaxException
-   *           if the working file repository created an invalid uri
-   */
-  protected URI uploadMpeg7(Mpeg7Catalog catalog) throws TransformerFactoryConfigurationError, TransformerException,
-          ParserConfigurationException, IOException, URISyntaxException {
-    InputStream in = mpeg7CatalogService.serialize(catalog);
-    return workspace.putInCollection(COLLECTION_ID, UUID.randomUUID().toString() + ".xml", in);
   }
 
   /**
@@ -676,7 +648,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
     MediaPackageReference original = new MediaPackageReferenceImpl(track);
 
     // See if encoding has already taken place
-    if(track.getMediaPackage() != null) {
+    if (track.getMediaPackage() != null) {
       List<Track> derivedTracks = new ArrayList<Track>();
       derivedTracks.add(track);
       derivedTracks.addAll(Arrays.asList(track.getMediaPackage().getTracks(original)));

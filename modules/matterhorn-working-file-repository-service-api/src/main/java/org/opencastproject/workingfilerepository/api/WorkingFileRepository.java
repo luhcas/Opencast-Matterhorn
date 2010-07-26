@@ -39,7 +39,7 @@ public interface WorkingFileRepository {
   /** Path prefix for mediapackage elements */
   String MEDIAPACKAGE_PATH_PREFIX = "/mediapackage/";
 
-  /**  The job type we use to register with the remote services manager */
+  /** The job type we use to register with the remote services manager */
   String JOB_TYPE = "workingfiles";
 
   /**
@@ -48,7 +48,7 @@ public interface WorkingFileRepository {
    * @return The base URI
    */
   URI getBaseUri();
-  
+
   /**
    * Store the data stream under the given media package and element IDs with filename as name of the file.
    * 
@@ -200,10 +200,12 @@ public interface WorkingFileRepository {
    *          The media package ID to move the file into
    * @param toMediaPackageElement
    *          the media package element ID of the file
+   * @param toFileName
+   *          the name of the resulting file
    * @return the URI pointing to the file's new location
    */
-  URI moveTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement)
-          throws NotFoundException, IOException;
+  URI moveTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement,
+          String toFileName) throws NotFoundException, IOException;
 
   /**
    * Copies a file from a collection into a mediapackage
@@ -216,10 +218,12 @@ public interface WorkingFileRepository {
    *          The media package ID to copy the file into
    * @param toMediaPackageElement
    *          the media package element ID of the file
+   * @param toFileName
+   *          the name of the resulting file
    * @return the URI pointing to the file's new location
    */
-  URI copyTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement)
-          throws NotFoundException, IOException;
+  URI copyTo(String fromCollection, String fromFileName, String toMediaPackage, String toMediaPackageElement,
+          String toFileName) throws NotFoundException, IOException;
 
   /**
    * Gets the total space of storage in Bytes

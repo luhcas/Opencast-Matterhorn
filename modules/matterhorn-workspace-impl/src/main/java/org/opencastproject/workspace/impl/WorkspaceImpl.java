@@ -411,10 +411,11 @@ public class WorkspaceImpl implements Workspace {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workspace.api.Workspace#copyTo(java.net.URI, java.lang.String, java.lang.String)
+   * @see org.opencastproject.workspace.api.Workspace#copyTo(java.net.URI, java.lang.String, java.lang.String,
+   *      java.lang.String)
    */
-  public URI copyTo(URI collectionURI, String toMediaPackage, String toMediaPackageElement) throws NotFoundException,
-          IOException {
+  public URI copyTo(URI collectionURI, String toMediaPackage, String toMediaPackageElement, String toFileName)
+          throws NotFoundException, IOException {
     String path = collectionURI.toString();
     String filename = FilenameUtils.getName(path);
     String collection = getCollection(collectionURI);
@@ -429,17 +430,18 @@ public class WorkspaceImpl implements Workspace {
     }
 
     // Tell working file repository
-    return wfr.copyTo(collection, filename, toMediaPackage, toMediaPackageElement);
+    return wfr.copyTo(collection, filename, toMediaPackage, toMediaPackageElement, toFileName);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workspace.api.Workspace#moveTo(java.net.URI, java.lang.String, java.lang.String)
+   * @see org.opencastproject.workspace.api.Workspace#moveTo(java.net.URI, java.lang.String, java.lang.String,
+   *      java.lang.String)
    */
   @Override
-  public URI moveTo(URI collectionURI, String toMediaPackage, String toMediaPackageElement) throws NotFoundException,
-          IOException {
+  public URI moveTo(URI collectionURI, String toMediaPackage, String toMediaPackageElement, String toFileName)
+          throws NotFoundException, IOException {
     String path = collectionURI.toString();
     String filename = FilenameUtils.getName(path);
     String collection = getCollection(collectionURI);
@@ -454,7 +456,7 @@ public class WorkspaceImpl implements Workspace {
     }
 
     // Tell working file repository
-    return wfr.moveTo(collection, filename, toMediaPackage, toMediaPackageElement);
+    return wfr.moveTo(collection, filename, toMediaPackage, toMediaPackageElement, toFileName);
   }
 
   /**

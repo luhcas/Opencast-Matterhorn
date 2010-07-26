@@ -296,11 +296,19 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
           logger.warn("The mpeg-7 structure returned by the text analyzer is not what is expected", e);
           continue;
         }
-
+        // Since we've enriched and stored the mpeg7 catalog, remove the original
+        workspace.delete(catalog.getURI());
       }
 
-      // Store the catalog in the workspace
-      Catalog catalog = store(mediaPackage, textCatalog);
+      // Put the catalog into the workspace and add it to the media package
+      MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+      Catalog catalog = (Catalog) builder.newElement(MediaPackageElement.Type.Catalog, MediaPackageElements.TEXTS);
+      catalog.setIdentifier(null);
+      mediaPackage.add(catalog); // the catalog now has an ID, so we can store the file properly
+      InputStream in = mpeg7CatalogService.serialize(textCatalog);
+      String filename = "slidetext.xml";
+      URI workspaceURI = workspace.put(mediaPackage.getIdentifier().toString(), catalog.getIdentifier(), filename, in);
+      catalog.setURI(workspaceURI);
 
       // Add flavor and target tags
       catalog.setFlavor(MediaPackageElements.TEXTS);
@@ -387,30 +395,6 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
     }
 
     return catalogs;
-  }
-
-  /**
-   * Adds the mpeg-7 catalog to the media package and stores it in the workspace.
-   * 
-   * @param mediaPackage
-   *          the media package
-   * @return the resulting catalog element
-   */
-  protected Catalog store(MediaPackage mediaPackage, Mpeg7Catalog mpeg7) throws IOException {
-    InputStream in = mpeg7CatalogService.serialize(mpeg7);
-
-    // Add the catalog to the media package
-    MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-    Catalog catalog = (Catalog) builder.newElement(MediaPackageElement.Type.Catalog, MediaPackageElements.TEXTS);
-    catalog.setIdentifier(null);
-    mediaPackage.add(catalog);
-
-    // Put the result into the workspace
-    String mediaPackageId = mediaPackage.getIdentifier().toString();
-    String filename = "slidetext.xml";
-    URI workspaceURI = workspace.put(mediaPackageId, catalog.getIdentifier(), filename, in);
-    catalog.setURI(workspaceURI);
-    return catalog;
   }
 
   /**

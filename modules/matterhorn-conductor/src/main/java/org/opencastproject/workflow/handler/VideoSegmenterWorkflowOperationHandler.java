@@ -29,6 +29,7 @@ import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
+import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -48,8 +49,8 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
 
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(VideoSegmenterWorkflowOperationHandler.class);
-  
-  /** Name of the configuration key that specifies the flavor of the track to analyze */ 
+
+  /** Name of the configuration key that specifies the flavor of the track to analyze */
   private static final String PROP_ANALYSIS_TRACK_FLAVOR = "source-flavor";
 
   /** The configuration options for this handler */
@@ -57,14 +58,19 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
 
   static {
     CONFIG_OPTIONS = new TreeMap<String, String>();
-    CONFIG_OPTIONS.put(PROP_ANALYSIS_TRACK_FLAVOR, "The flavor of the track to analyze. If multiple tracks match this flavor, the first will be used.");
+    CONFIG_OPTIONS.put(PROP_ANALYSIS_TRACK_FLAVOR,
+            "The flavor of the track to analyze. If multiple tracks match this flavor, the first will be used.");
   }
 
   /** The composer service */
   private MediaAnalysisService videosegmenter = null;
 
+  /** The local workspace */
+  private Workspace workspace = null;
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
    */
   @Override
@@ -79,7 +85,7 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
    */
   public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.debug("Running video segmentation on workflow {}", workflowInstance.getId());
-    
+
     WorkflowOperationInstance operation = workflowInstance.getCurrentOperation();
     MediaPackage mediaPackage = workflowInstance.getMediaPackage();
 
@@ -104,13 +110,13 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
       logger.info("No matching tracks available for video segmentation in workflow {}", workflowInstance);
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
     }
-    
+
     // More than one left? Let's be pragmatic...
     if (candidates.size() > 1) {
       logger.info("Found more than one track to segment, choosing the first one ({})", candidates.get(0));
     }
     Track track = candidates.get(0);
-    
+
     // Segment the media package
     Catalog mpeg7Catalog = null;
     try {
@@ -118,8 +124,10 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
       if (receipt.getStatus().equals(Receipt.Status.FAILED)) {
         throw new WorkflowOperationException("Videosegmentation on " + track + " failed");
       }
-      mpeg7Catalog = (Catalog)receipt.getElement();
+      mpeg7Catalog = (Catalog) receipt.getElement();
       mediaPackage.add(mpeg7Catalog);
+      mpeg7Catalog.setURI(workspace.moveTo(mpeg7Catalog.getURI(), mediaPackage.getIdentifier().toString(), mpeg7Catalog
+              .getIdentifier(), "segments.xml"));
     } catch (Exception e) {
       throw new WorkflowOperationException(e);
     }
@@ -139,4 +147,14 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
     this.videosegmenter = videosegmenter;
   }
 
+  /**
+   * Callback for declarative services configuration that will introduce us to the local workspace service.
+   * Implementation assumes that the reference is configured as being static.
+   * 
+   * @param workspace
+   *          an instance of the workspace
+   */
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
+  }
 }
