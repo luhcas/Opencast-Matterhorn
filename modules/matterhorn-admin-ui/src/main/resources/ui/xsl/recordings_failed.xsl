@@ -53,33 +53,39 @@
         <xsl:value-of select="captureAgent" />
       </td> -->
       <td class="processingStatus">
-        <xsl:if test="errors!=''">
-          <xsl:value-of select="failedOperation" /><br/>
-          <a>
-            <xsl:attribute name="onclick">              
-               $(this).text(($(this).text() == 'Show Details') ? 'Hide Details' : 'Show Details');
-               <xsl:text>$('#</xsl:text>
-                    <xsl:value-of select="id" />
-                    <xsl:text>_error').toggleClass('hidden');
-              </xsl:text>
-            </xsl:attribute>
-            <xsl:attribute name="onmouseover">
-                 <xsl:text>this.className='cursor';</xsl:text>
-            </xsl:attribute>
-            <xsl:text>Show Details</xsl:text>
-          </a>
-          <div>
-            <xsl:attribute name="class">hidden</xsl:attribute>
-            <xsl:attribute name="id">
-              <xsl:value-of select="id" />
-              <xsl:text>_error</xsl:text>
-            </xsl:attribute>
-            <xsl:for-each select="errors">
-              <br/>
-              <xsl:value-of select="error" />
-            </xsl:for-each>
-          </div>
-        </xsl:if>
+        <xsl:choose>
+        <xsl:when test="errors!=''">
+            <xsl:value-of select="failedOperation" /><br/>
+              <a>
+                <xsl:attribute name="onclick">
+                   $(this).text(($(this).text() == 'Show Details') ? 'Hide Details' : 'Show Details');
+                   <xsl:text>$('#</xsl:text>
+                        <xsl:value-of select="id" />
+                        <xsl:text>_error').toggleClass('hidden');
+                  </xsl:text>
+                </xsl:attribute>
+                <xsl:attribute name="onmouseover">
+                     <xsl:text>this.className='cursor';</xsl:text>
+                </xsl:attribute>
+                <xsl:text>Show Details</xsl:text>
+              </a>
+              <div>
+                <xsl:attribute name="class">hidden</xsl:attribute>
+                <xsl:attribute name="id">
+                  <xsl:value-of select="id" />
+                  <xsl:text>_error</xsl:text>
+                </xsl:attribute>
+                <xsl:for-each select="errors">
+                  <br/>
+                  <xsl:value-of select="error" />
+                </xsl:for-each>
+              </div>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:value-of select="recordingStatus" /> :
+            <xsl:value-of select="processingStatus" />
+        </xsl:otherwise>
+        </xsl:choose>
       </td>
       <td class="td-Action">
         <!-- a>
