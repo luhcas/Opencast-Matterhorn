@@ -8,7 +8,7 @@ var Opencast = Opencast || {};
 */
 Opencast.engage = (function () {
 
-  var loadProgressPercent = 0;
+  var loadProgressPercent = -1;
 
   /**
    * @memberOf Opencast.engage
@@ -28,8 +28,12 @@ Opencast.engage = (function () {
    * @return The current load progress
    */
   function getLoadProgress() {
-    var duration = Opencast.Player.getDuration();
-    return duration * loadProgressPercent/100;
+    if(loadProgressPercent === -1)
+      return -1;
+    else {
+      var duration = Opencast.Player.getDuration();
+      return duration * loadProgressPercent/100;
+    }
   }
 
   /**
