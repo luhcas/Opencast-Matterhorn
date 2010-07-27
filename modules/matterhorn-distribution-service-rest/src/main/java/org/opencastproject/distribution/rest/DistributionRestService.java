@@ -93,6 +93,11 @@ public class DistributionRestService {
           throws Exception {
     MediaPackage result = null;
     String[] elements = elementIds == null ? new String[0] : elementIds.toArray(new String[elementIds.size()]);
+
+    if (elements == null || elements.length == 0) {
+      return Response.status(Status.BAD_REQUEST).build();
+    }
+    
     try {
       DistributionService service = getService(distChannel);
       result = service.distribute(mediaPackage, elements);
