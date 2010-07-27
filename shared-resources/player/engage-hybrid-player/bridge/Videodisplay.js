@@ -92,7 +92,7 @@ function VideodisplayReady()
     Videodisplay.seek = function (argNumber) {
         var progress = Opencast.engage.getLoadProgress();
         if(progress === -1)
-            return b_Videodisplay_root.seek(seekValue);
+            return b_Videodisplay_root.seek(argNumber);
         else {
             var seekValue = Math.min(argNumber, progress);
             return b_Videodisplay_root.seek(seekValue);
