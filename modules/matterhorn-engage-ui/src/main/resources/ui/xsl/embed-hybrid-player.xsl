@@ -59,20 +59,6 @@
           </xsl:if>
         </xsl:if>
       </xsl:if>
-      
-       <xsl:if test="@type='presenter/delivery'">
-        <xsl:if test="./mimetype='audio/x-flv'">
-          <xsl:if test="substring(url, 1, 4)='http'">
-           <div id="oc-video-presenter-delivery-x-flv-http" style="display: none">
-              <xsl:value-of select="url" />
-            </div>
-            <div id="oc-mimetype-presenter-delivery-x-flv-http" style="display: none">
-              <xsl:value-of select="mimetype" />
-            </div>
-          </xsl:if>
-        </xsl:if>
-      </xsl:if>
-
 
       <xsl:if test="@type='presentation/delivery'">
         <xsl:if test="./mimetype='video/x-flv'">
