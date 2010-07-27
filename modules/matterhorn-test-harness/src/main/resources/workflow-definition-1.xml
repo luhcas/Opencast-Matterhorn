@@ -232,7 +232,7 @@
       id="image"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encoding presentation (vga) to search result preview image">
+      description="Encoding presentation (screen) to search result preview image">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="source-tags"></configuration>
@@ -249,7 +249,7 @@
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encoding presentation (screen) to mpeg4 audio download">
+      description="Encoding presenter (camera) to mpeg4 audio download">
       <configurations>
         <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/delivery</configuration>
@@ -314,7 +314,7 @@
       id="image"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encoding presentation (vga) to feed preview image">
+      description="Encoding presentation (screen) to feed preview image">
       <configurations>
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="source-tags"></configuration>
