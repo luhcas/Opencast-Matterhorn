@@ -65,8 +65,10 @@ Opencast.Watch = (function ()
           mediaResolutionOne = $('#oc-resolution-presenter-delivery-x-flv-rtmp').html();
           mediaResolutionTwo = $('#oc-resolution-presentation-delivery-x-flv-rtmp').html();
 
-          //mimetypeOne             = "video/x-flv";
-          //mimetypeTwo             = "video/x-flv";
+
+		//set default mimetypes
+          mimetypeOne             = "video/x-flv";
+          mimetypeTwo             = "video/x-flv";
           //mimetypeOne             = "audio/x-flv";
           //mimetypeTwo             = "audio/x-flv";
 
