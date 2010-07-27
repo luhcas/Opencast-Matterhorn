@@ -20,19 +20,14 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
     while [[ true ]]; do
 	wget -q -O $FILE_NAME $EPIPHAN_URL
 	if [[ $? -eq 0 ]]; then
-            # Kernel base consists of the first three numbers in the kernel version, which are the most relevant
+		# Kernel base consists of the first three numbers in the kernel version, which are the most relevant
 	    kernel_base=$(uname -r | grep -o "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]")
-	    architecture=$(uname -m)
 	    
-            # Gets the complete list of drivers in the page compatible with the current kernel
-	    # It makes no sense presenting others which are not compatible
-            # First trY to filter by architecture type
-	    drivers=( $(grep "vga2usb" $FILE_NAME | sed 's#^.*<a\s*href="\(.*\)".*>.*</a>.*$#\1#' | grep "$kernel_base" | grep -i $architecture ))
-            # If there's no match, be less strict and not filter by architecture
-	    if [[ ${#drivers[@]} -eq 0 ]]; then
-		drivers=( $(grep "vga2usb" $FILE_NAME | sed 's#^.*<a\s*href="\(.*\)".*>.*</a>.*$#\1#' | grep "$kernel_base" ))
-	    fi
-	    break;
+		# Gets the complete list of drivers in the page compatible with the current kernel
+		# It makes no sense presenting others which are not compatible
+        # Don't filter by 'architecture' --it's to strict and sometimes the suitable drivers may no pass the filter (MH-5033)
+	    drivers=( $(grep "vga2usb" $FILE_NAME | sed 's#^.*<a\s*href="\(.*\)".*>.*</a>.*$#\1#' | grep "$kernel_base") )
+        break;
 	fi
 
 	echo "The list of available vga2usb drivers could not be retrieved. Please check there is a working internet connection"
@@ -76,9 +71,9 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
   		cd $CA_DIR/$VGA2USB_DIR
   		tar jxf $EPIPHAN
   		sed -i '/sudo \/sbin\/insmod/s|$| num_frame_buffers=2|' Makefile
+  		
   		# First "make" is necessary according with MH-3810
-		make &> /dev/null
-  		make load &> /dev/null
+		make &> /dev/null && make load &> /dev/null
   		if [[ $? -ne 0 ]]; then
     		    echo "Error!"
 		    echo "Failed to load Epiphan driver. Maybe your machine kernel or architecture were not compatible?"
