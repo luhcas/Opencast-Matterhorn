@@ -100,7 +100,12 @@ public class StaticResourceServlet extends HttpServlet {
   protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     logger.debug("Looking for static resource '{}'", req.getRequestURI());
     String path = req.getPathInfo();
-    String normalized = path == null ? null : path.trim().replaceAll("/+", "/").replaceAll("\\.\\.", "");
+    if (path == null) {
+      resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+      return;
+    }
+
+    String normalized = path.trim().replaceAll("/+", "/").replaceAll("\\.\\.", "");
     if (normalized != null && normalized.startsWith("/") && normalized.length() > 1) {
       normalized = normalized.substring(1);
     }
