@@ -98,8 +98,12 @@ public class CleanupWorkflowOperationHandler extends AbstractWorkflowOperationHa
         flavorsToPreserve.add(MediaPackageElementFlavor.parseFlavor(flavor));
       }
     }
-    
+
+    String baseUrl = workspace.getBaseUri().toString();
     for (MediaPackageElement element : mediaPackage.getElements()) {
+      if( ! element.getURI().toString().startsWith(baseUrl)) {
+        continue;
+      }
       // remove the element if it doesn't match the flavors to preserve
       boolean remove = true;
       if(element.getFlavor() == null) {
@@ -116,10 +120,10 @@ public class CleanupWorkflowOperationHandler extends AbstractWorkflowOperationHa
       if(remove) {
         try {
           workspace.delete(mediaPackage.getIdentifier().toString(), element.getIdentifier());
+          mediaPackage.remove(element);
         } catch(Exception e) {
-          logger.info("Unable to delete the file for {}", element);
+          logger.warn("Unable to delete the file for {}", element);
         }
-        mediaPackage.remove(element);
       }
     }
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);

@@ -534,4 +534,13 @@ public class WorkspaceImpl implements Workspace {
     collection = collection.substring(collection.lastIndexOf("/") + 1, collection.length());
     return collection;
   }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workspace.api.Workspace#getBaseUri()
+   */
+  @Override
+  public URI getBaseUri() {
+    return wfr.getBaseUri();
+  }
 }

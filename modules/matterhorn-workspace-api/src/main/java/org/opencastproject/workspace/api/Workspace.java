@@ -44,6 +44,13 @@ public interface Workspace {
   File get(URI uri) throws NotFoundException, IOException;
 
   /**
+   * Gets the base URI for files stored using this service.
+   * 
+   * @return The base URI
+   */
+  URI getBaseUri();
+
+  /**
    * Store the data stream under the given media package and element IDs, specifying a filename.
    * 
    * @param mediaPackageID
