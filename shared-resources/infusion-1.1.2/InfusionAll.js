@@ -4897,8 +4897,8 @@ $.ui.mouse.defaults = {
  * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) 
  * and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
  *
- * $LastChangedDate: 2009-05-05 11:14:12 -0400 (Tue, 05 May 2009) $
- * $Rev: 7137 $
+ * $LastChangedDate$
+ * $Rev$
  *
  * Version 2.1
  */
