@@ -115,17 +115,6 @@
         <configuration key="encoding-profile">flash-preview.http</configuration>
       </configurations>
     </operation>
-    <!-- operation     do we need this anymore?
-      id="compose"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Encoding presenter audio for preview">
-      <configurations>
-        <configuration key="source-flavor">presenter/work</configuration>
-        <configuration key="target-flavor">presenter/preview</configuration>
-        <configuration key="encoding-profile">flash-preview.http</configuration>
-      </configurations>
-    </operation -->
 
     <!-- encode to engage player preview images -->
  
