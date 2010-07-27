@@ -45,8 +45,6 @@ import javax.servlet.http.HttpServletResponse;
 public class ServiceInfo {
   private static final long serialVersionUID = 1L;
   private static final Logger logger = LoggerFactory.getLogger(ServiceInfo.class);
-  private static final String WS_CONTEXT = "org.apache.cxf.ws.httpservice.context";
-  private static final String WS_CONTEXT_FILTER = "(" + WS_CONTEXT + "=*)";
   private static final String RS_CONTEXT = "opencast.rest.url";
   private static final String RS_CONTEXT_FILTER = "(" + RS_CONTEXT + "=*)";
   
@@ -55,6 +53,8 @@ public class ServiceInfo {
   private BundleContext bundleContext;
   private boolean testMode;
   private String serverUrl;
+  private String engageBaseUrl;
+  private String adminBaseUrl;
   
   public void setHttpService(HttpService httpService) {
     this.httpService = httpService;
@@ -62,10 +62,6 @@ public class ServiceInfo {
   
   public void setHttpContext(HttpContext httpContext) {
     this.httpContext = httpContext;
-  }
-
-  protected ServiceReference[] getSoapServiceReferences() throws InvalidSyntaxException {
-    return bundleContext.getAllServiceReferences(null, WS_CONTEXT_FILTER);
   }
 
   protected ServiceReference[] getRestServiceReferences() throws InvalidSyntaxException {
@@ -79,6 +75,9 @@ public class ServiceInfo {
   public void activate(ComponentContext cc) {
     logger.debug("start()");
     this.bundleContext = cc.getBundleContext();
+    this.serverUrl = bundleContext.getProperty("org.opencastproject.server.url");
+    this.adminBaseUrl = bundleContext.getProperty("org.opencastproject.admin.ui.url");    
+    this.engageBaseUrl = bundleContext.getProperty("org.opencastproject.engage.ui.url");    
     this.serverUrl = bundleContext.getProperty("org.opencastproject.server.url");    
     this.testMode = "true".equalsIgnoreCase(bundleContext.getProperty("testMode"));
     
@@ -110,32 +109,11 @@ public class ServiceInfo {
       throws IOException, ServletException{
       response.setContentType("application/json");
       JSONObject json = new JSONObject();
+      json.put("engage", engageBaseUrl);
+      json.put("admin", adminBaseUrl);
       json.put("rest", getRestAsJson());
-      json.put("soap", getSoapAsJson());
       json.put("ui", getUserInterfacesAsJson());
       json.writeJSONString(response.getWriter());
-    }
-
-    @SuppressWarnings("unchecked")
-    protected JSONArray getSoapAsJson() {
-      JSONArray json = new JSONArray();
-      ServiceReference[] serviceRefs = null;
-      try {
-        serviceRefs = getSoapServiceReferences();
-      } catch (InvalidSyntaxException e) {
-        e.printStackTrace();
-      }
-      if (serviceRefs == null) return json;
-      for (ServiceReference ref : serviceRefs) {
-        String description = (String)ref.getProperty(Constants.SERVICE_DESCRIPTION);
-        String servletContextPath = (String)ref.getProperty(WS_CONTEXT);
-        JSONObject endpoint = new JSONObject();
-        endpoint.put("description", description);
-        endpoint.put("url", serverUrl + servletContextPath);
-        endpoint.put("wsdl", serverUrl + servletContextPath + "/?wsdl");
-        json.add(endpoint);
-      }
-      return json;
     }
 
     @SuppressWarnings("unchecked")

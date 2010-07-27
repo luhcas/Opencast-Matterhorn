@@ -24,6 +24,7 @@
     <script type="text/javascript" src="js/adminui.js"></script>
     <script type="text/javascript">
       $(document).ready(function(){Recordings.init();})
+      $.getJSON("/info.json", function(data) {$('#engagelink').attr('href', data.engage + '/engage/ui/');});
     </script>
   </head>
   <body>
@@ -133,7 +134,7 @@
         <div id="info-box" style="margin-bottom:18px;display:none;">
             <div id="table-info-box-finished" style="display:none;border: 1px solid #cccccc;font-size:0.9em;text-align:center;width:600px;margin-left:auto;margin-right:auto;margin-bottom:0.5em;padding:0.5em;">
                 <img title="Information" alt="Information" src="shared_img/icons/information.png" style="vertical-align: bottom;"></img>
-                Go to the <a href="/engage/ui/" style="text-decoration:underline">Matterhorn Media Module</a> to see any Recordings which have gone through "Encode, Analyze, and Distribute" processing.
+                Go to the <a id="engagelink" style="text-decoration:underline">Matterhorn Media Module</a> to see any Recordings which have gone through "Encode, Analyze, and Distribute" processing.
             </div>
             <div id="table-info-box-upcoming" style="display:none;border: 1px solid #cccccc;font-size:0.9em;text-align:center;width:900px;margin-left:auto;margin-right:auto;margin-bottom:0.5em;padding:0.5em;">
                 <img title="Information" alt="Information" src="shared_img/icons/information.png" style="vertical-align: bottom;"></img>

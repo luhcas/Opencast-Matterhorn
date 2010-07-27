@@ -21,6 +21,10 @@
                             var col = $('#docs1');
                             col.append("<li>" + data.rest[i].description + " <a href='" + data.rest[i].docs + "'>Docs</a></li>");
                           })
+                        } else if("engage" == section) {
+                          $('#engagelink').attr('href', data.engage + '/engage/ui/');
+                        } else if("admin" == section) {
+                          $('#adminlink').attr('href', data.admin + '/admin/');
                         }
                     });
                  });
@@ -50,7 +54,7 @@
               distribution.</li>
             <li> Monitor progress of recording through media pipeline.</li>
           </ul>
-          <a href="/admin/" class="redbutton">Go to Admin Tools</a>
+          <a class="redbutton" id="adminlink">Go to Admin Tools</a>
         </div>
         <div id="col2m">
           <img src="shared_img/computer_icon.png" width="85" height="59" />
@@ -62,7 +66,7 @@
             <li>Accessible media player</li>
           </ul>
           
-          <a href="/engage/ui/" class="redbutton"> Go to  Media Module</a>        
+          <a class="redbutton" id="engagelink"> Go to  Media Module</a>        
         </div>
       </div>
       <div id="bottombanner">
@@ -94,7 +98,7 @@
 			  <!-- TODO update the links-->
                <li><a href="http://opencast.jira.com/wiki/display/MH/Matterhorn+Core+1.0">Matterhorn Core</a></li>
                <li><a href="http://opencast.jira.com/wiki/display/MH/Capture+Agent+1.0">Capture Agent</a></li>
-               <li><a href="http://opencast.jira.com/wiki/display/MH/Install+Source+Across+Multiple+Servers+1.0">Distributed Deployment (experimental)</a></li>
+               <li><a href="http://opencast.jira.com/wiki/display/MH/Install+Source+Across+Multiple+Servers+1.0">Distributed Deployment</a></li>
              </ul>
              <ul>
               <li><a href="http://opencast.jira.com/wiki/display/MH/Take+a+Look+Under+the+Hood">System Overview</a></li>
