@@ -354,7 +354,7 @@ Opencast.Initialize = (function ()
         });
         $('#oc-link-advanced-player').click(function () 
         {
-        	Opencast.Player.doTogglePlayPause();
+        	Opencast.Player.doPause();
         });
         
         // Handler for .mouseover()

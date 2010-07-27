@@ -42,7 +42,8 @@ Opencast.engage = (function () {
    * @param The current load progress
    */
   function setLoadProgressPercent(value) {
-    loadProgressPercent = value;
+    if(0 <= value && value <= 100)
+      loadProgressPercent = value;
   }
 
   function getCookie(name) {

@@ -349,11 +349,11 @@ Opencast.FlashVersion = (function ()
     {
     	$("#oc_flash-player").html(str);
     	
+    	FABridge.addInitializationCallback("b_Videodisplay", Videodisplay.VideodisplayGo.VideodisplayReady);
+
     	
-    
-             
-            	FABridge.addInitializationCallback("b_Videodisplay", Videodisplay.VideodisplayGo.VideodisplayReady);
-            
+    	//FABridge.addInVideodisplay.VideodisplayGoitializationCallback("b_Videodisplay", Videodisplay.VideodisplayGo.VideodisplayReady);
+
             
         
     	
@@ -366,6 +366,7 @@ Opencast.FlashVersion = (function ()
     	script.type = 'text/javascript';
     	script.src = 'engage-hybrid-player/bridge/Videodisplay.js';
     	document.getElementsByTagName('head')[0].appendChild(script);  
+    	
     	
     	
     }
