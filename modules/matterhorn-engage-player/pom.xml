@@ -221,8 +221,8 @@
 											<directory>../../shared-resources</directory>
 											<filtering>true</filtering>
 											<includes>
-												<include>shared_css/</include>
-												<include>shared_img/</include>
+												<include>css/</include>
+												<include>img/</include>
 												<include>jquery/</include>
 											</includes>
 										</resource>

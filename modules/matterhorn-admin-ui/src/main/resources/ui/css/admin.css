@@ -58,56 +58,56 @@ select { font-size:1.15em; }
 }
 
 .icon-check {
-    background-image: url(../shared_img/icons/tick.png);
+    background-image: url(../img/icons/tick.png);
 }
 
 .icon-error {
-    background-image: url(../shared_img/icons/exclamation.png);
+    background-image: url(../img/icons/exclamation.png);
 }
 
 .icon-info {
-    background-image: url(../shared_img/icons/information.png);
+    background-image: url(../img/icons/information.png);
 }
 
 .icon-running {
-    background-image: url(../shared_img/icons/cog.png);
+    background-image: url(../img/icons/cog.png);
 }
 
 .icon-add {
-    background-image: url(../shared_img/icons/add.png);
+    background-image: url(../img/icons/add.png);
 	margin-right: 10px;
 }
 
 .icon-delete {
-    background-image: url(../shared_img/icons/delete.png);
+    background-image: url(../img/icons/delete.png);
 }
 
 .icon-idle {
-    background-image: url(../shared_img/icons/cup.png);
+    background-image: url(../img/icons/cup.png);
 }
 
 .icon-capturing {
-    background-image: url(../shared_img/icons/camera.png);
+    background-image: url(../img/icons/camera.png);
 }
 
 .icon-arrow-right {
-  background-image: url(../shared_img/icons/arrow-right.png);
+  background-image: url(../img/icons/arrow-right.png);
   background-position: 0 0;
 }
 
 .icon-arrow-down {
-  background-image: url(../shared_img/icons/arrow-down.png);
+  background-image: url(../img/icons/arrow-down.png);
   background-position: 0 0;
 }
 
 .icon-help {
-  background-image: url(../shared_img/icons/help.png);
+  background-image: url(../img/icons/help.png);
   background-position: 0 0;
   vertical-align: top;
 }
 
 .icon-bullet {
-  background-image: url(../shared_img/icons/bullet-arrow.png);
+  background-image: url(../img/icons/bullet-arrow.png);
   background-position: 0 0;
 }
 
@@ -116,7 +116,7 @@ select { font-size:1.15em; }
 }
 
 .loadingAnimation {
-  background-image:url(../shared_img/loading.gif);
+  background-image:url(../img/loading.gif);
   background-position: center;
   background-repeat:no-repeat;
   height:40px;
@@ -124,7 +124,7 @@ select { font-size:1.15em; }
 }
 
 .progressbar {  /* q&d: to be removed after 0.5 */
-  background-image:url(../shared_img/loading.gif);
+  background-image:url(../img/loading.gif);
   background-position: center;
   background-repeat:no-repeat;
   height:40px;
@@ -324,21 +324,21 @@ select { font-size:1.15em; }
 
 .sortable {
   cursor:pointer;
-  background-image:url(../shared_img/icons/bg.gif);
+  background-image:url(../img/icons/bg.gif);
   background-position: center right;
   background-repeat:no-repeat;
 }
 
 .sortable-Ascending {
   cursor:pointer;
-  background-image:url(../shared_img/icons/asc.gif);
+  background-image:url(../img/icons/asc.gif);
   background-position: center right;
   background-repeat:no-repeat;
 }
 
 .sortable-Descending {
   cursor:pointer;
-  background-image:url(../shared_img/icons/desc.gif);
+  background-image:url(../img/icons/desc.gif);
   background-position: center right;
   background-repeat:no-repeat;
 }

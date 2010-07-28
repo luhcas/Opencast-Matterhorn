@@ -1,31 +1,31 @@
 <html>
   <head>
     <title>Hold for review</title>
-    <link rel="stylesheet" type="text/css" href="../../../admin/infusion-1.1.2/fss/css/fss-reset.css">
-    <link rel="stylesheet" type="text/css" href="../../../admin/infusion-1.1.2/fss/css/fss-layout.css">
-    <link rel="stylesheet" type="text/css" href="../../../admin/css/admin.css">
+    <link rel="stylesheet" type="text/css" href="/admin/infusion-1.1.2/fss/css/fss-reset.css">
+    <link rel="stylesheet" type="text/css" href="/admin/infusion-1.1.2/fss/css/fss-layout.css">
+    <link rel="stylesheet" type="text/css" href="/admin/css/admin.css">
     <style type="text/css">
       #player-container {clear:both; border:none; width:90%; height:300;}
       #edit-link {margin-right:43%;}
       .hidden {display:none;}
       #actions{margin: 0 auto; text-align:center; width:100%;}
     </style>
-    <script type="text/javascript" src="../../../admin/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/admin/jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript">
 
-      var PLAYER_URL = '../../../engage/ui/embed.html';
+      var PLAYER_URL = '/admin/embed.html';
 
       $(document).ready(function() {
         var id = parent.document.getElementById("holdWorkflowId").value;
         // Event edit link clicked
         $('#edit-link').click( function() {
           //parent.Recordings.retryRecording(id);
-          parent.location.href = "../../../admin/upload.html?retry=" + id;
+          parent.location.href = "/admin/upload.html?retry=" + id;
           return false;
         });
         // load preview player and metadata
         $.ajax({
-          url : '../../../workflow/rest/instance/' + id + '.xml',
+          url : '/workflow/rest/instance/' + id + '.xml',
           dataType : 'xml',    // or XML..
           success : function(data) {    
             // load metadata
@@ -58,7 +58,7 @@
               var videoUrl = $(previewTag).parent().parent().find('url').text();
               //alert("videoUrl: " + videoUrl);
               //$('#video-url-container').attr('href',videoUrl).text(videoUrl);
-              var url = '../../../engage/ui/embed.html?videoUrl=' + videoUrl;
+              var url = '/admin/embed.html?videoUrl=' + videoUrl;
               $('#player-container').attr('src', url);
             } else {
               $('#player-container').text('No preview encoded track found in MediaPackage');

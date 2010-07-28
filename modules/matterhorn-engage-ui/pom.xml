@@ -78,6 +78,8 @@
                   <includes>
                     <include>engage-hybrid-player/</include>
                     <include>style/</include>
+                    <include>embed.html</include>
+                    <include>preview.xml</include>
                     <include>Videodisplay.swf/</include>
                     <include>playerProductInstall.swf/</include>
                   </includes>                  
@@ -86,7 +88,7 @@
               </resources>
             </configuration>
           </execution>
-            <execution>
+          <execution>
             <id>copy-resources</id>
             <phase>validate</phase>
             <goals>
@@ -106,17 +108,17 @@
               </resources>
             </configuration>
           </execution>
-           <execution>
-            <id>copy-shared_img</id>
+          <execution>
+            <id>copy-img</id>
             <phase>validate</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/classes/ui/shared_img</outputDirectory>
+              <outputDirectory>${basedir}/target/classes/ui/img</outputDirectory>
               <resources>
                 <resource>
-                  <directory>../../shared-resources/shared_img/</directory>
+                  <directory>../../shared-resources/img/</directory>
                   <includes>
                     <include> **/* </include>
                   </includes>
@@ -126,16 +128,16 @@
             </configuration>
           </execution>
           <execution>
-            <id>copy-shared_css</id>
+            <id>copy-css</id>
             <phase>validate</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/classes/ui/shared_css</outputDirectory>
+              <outputDirectory>${basedir}/target/classes/ui/css</outputDirectory>
               <resources>
                 <resource>
-                  <directory>../../shared-resources/shared_css/</directory>
+                  <directory>../../shared-resources/css/</directory>
                   <includes>
                     <include> **/* </include>
                   </includes>
@@ -145,16 +147,35 @@
             </configuration>
           </execution>
           <execution>
-            <id>copy-shared_js</id>
+            <id>copy-js</id>
             <phase>validate</phase>
             <goals>
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/classes/ui/shared_js</outputDirectory>
+              <outputDirectory>${basedir}/target/classes/ui/js</outputDirectory>
               <resources>
                 <resource>
-                  <directory>../../shared-resources/shared_js/</directory>
+                  <directory>../../shared-resources/js/</directory>
+                  <includes>
+                    <include> **/* </include>
+                  </includes>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>copy-xsl</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes/ui/xsl</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>../../shared-resources/xsl/</directory>
                   <includes>
                     <include> **/* </include>
                   </includes>

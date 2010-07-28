@@ -111,7 +111,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
       } finally {
         IOUtils.closeQuietly(in);
       }
-      if (catalog.getReference() == null) {
+      if (catalog.getReference() == null) { // episode catalogs do not contain a reference
         // Title
         metadata.setTitle(dc.getFirst(DublinCore.PROPERTY_TITLE));
 
@@ -153,7 +153,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
         metadata.setLanguage(dc.getFirst(DublinCore.PROPERTY_LANGUAGE));
 
         break;
-      } else {
+      } else { // series catalogs always contain a reference 
         // Series Title
         metadata.setSeriesTitle(dc.getFirst(DublinCore.PROPERTY_TITLE));
       }

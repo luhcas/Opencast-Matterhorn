@@ -195,13 +195,13 @@ UI.RegisterEventHandlers = function(){
   $('#startTimeHour').val(initializerDate.getHours());
   $('#startDate').datepicker({
     showOn: 'both',
-    buttonImage: 'shared_img/icons/calendar.gif',
+    buttonImage: 'img/icons/calendar.gif',
     buttonImageOnly: true
   });
   $('#startDate').datepicker('setDate', initializerDate);
   $('#endDate').datepicker({
     showOn: 'both',
-    buttonImage: 'shared_img/icons/calendar.gif',
+    buttonImage: 'img/icons/calendar.gif',
     buttonImageOnly: true
   });
   
@@ -210,13 +210,13 @@ UI.RegisterEventHandlers = function(){
   //multiple recording specific elements
   $('#recurStart').datepicker({
     showOn: 'both',
-    buttonImage: 'shared_img/icons/calendar.gif',
+    buttonImage: 'img/icons/calendar.gif',
     buttonImageOnly: true
   });
   
   $('#recurEnd').datepicker({
     showOn: 'both',
-    buttonImage: 'shared_img/icons/calendar.gif',
+    buttonImage: 'img/icons/calendar.gif',
     buttonImageOnly: true
   });
 
