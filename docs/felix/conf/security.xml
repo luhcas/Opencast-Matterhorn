@@ -44,8 +44,11 @@
     <!-- Enable and configure the failure URL for form-based logins -->    
     <sec:form-login authentication-failure-url="/login.html?error" />
 
-    <!-- Enable support for openID.  Note that *any* user with an openID can log in to the system -->    
-    <sec:openid-login />
+    <!--
+      Enable support for openID.  Note that *any* URL specified in the user detail service (see below)
+      can log in to the system
+    -->
+    <sec:openid-login authentication-failure-url="/login.html?error" />
     
     <!-- Digest auth is used by capture agents and is used to enable transparent clustering of services -->
     <sec:custom-filter position="BASIC_AUTH_FILTER" ref="digestFilter" />
