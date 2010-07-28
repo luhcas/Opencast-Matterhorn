@@ -116,7 +116,17 @@ function handleEvent(doc) {
         eventDoc.documentElement.appendChild(elm);
       }
     });
-    $('#stage').xslt(serialize(eventDoc), "xsl/viewevent.xsl", callback);
+    var seriesId = $(eventDoc.documentElement).find("isPartOf").text();
+    alert(seriesId);
+    if (seriesId) {
+      $.get('../series/rest/series/' + seriesId, function(data) {
+        var seriesTitle = $(data.documentElement).find("metadata > key:contains('title')").parent().find("value").text();
+        $(eventDoc.documentElement).find("isPartOf").text(seriesTitle + " (" + seriesId + ")");
+        $('#stage').xslt(serialize(eventDoc), "xsl/viewevent.xsl", callback);
+      });
+    } else {
+      $('#stage').xslt(serialize(eventDoc), "xsl/viewevent.xsl", callback);
+    }
   } else {
     throw "Unable to parse event.";
   }
@@ -152,10 +162,15 @@ function handleDCMetadata(metadataDoc){
   }
   
   //Hopefully we've loaded an xml document with the values we want, transform and append this.
-  doc = serialize(eventDoc);
-  if(doc){
-    $('#stage').xslt(doc, "xsl/viewevent.xsl", callback);
-  }
+    var seriesId = $(eventDoc.documentElement).find("isPartOf").text();
+    if (seriesId) {
+      $.get('../series/rest/series/' + seriesId, function(data) {
+        var seriesTitle = $(data.documentElement).find("metadata > key:contains('title')").parent().find("value").text();
+        $('#stage').xslt(serialize(eventDoc), "xsl/viewevent.xsl", callback);
+      });
+    } else {
+      $('#stage').xslt(serialize(eventDoc), "xsl/viewevent.xsl", callback);
+    }
 }
 
 function handleCatalogMetadata(metadataDoc){
