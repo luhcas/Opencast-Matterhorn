@@ -82,7 +82,26 @@
               </div>
         </xsl:when>
         <xsl:otherwise>
-            <xsl:value-of select="recordingStatus" /> :
+            <xsl:choose>
+                <xsl:when test="recordingStatus='upcoming'">
+                    Upcoming:
+                </xsl:when>
+                <xsl:when test="recordingStatus='capturing'">
+                    Capturing:
+                </xsl:when>
+                <xsl:when test="recordingStatus='processing'">
+                    Processing:
+                </xsl:when>
+                <xsl:when test="recordingStatus='finished'">
+                    Finished:
+                </xsl:when>
+                <xsl:when test="recordingStatus='hold'">
+                    On Hold:
+                </xsl:when>
+                <xsl:when test="recordingStatus='failed'">
+                    Failed:
+                </xsl:when>
+            </xsl:choose>
             <xsl:value-of select="processingStatus" />
         </xsl:otherwise>
         </xsl:choose>
