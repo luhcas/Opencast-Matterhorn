@@ -56,7 +56,7 @@
         <xsl:choose>
         <xsl:when test="errors!=''">
             <xsl:value-of select="failedOperation" /><br/>
-              <a>
+              <a style="font-size:x-small;">
                 <xsl:attribute name="onclick">
                    $(this).text(($(this).text() == 'Show Details') ? 'Hide Details' : 'Show Details');
                    <xsl:text>$('#</xsl:text>
