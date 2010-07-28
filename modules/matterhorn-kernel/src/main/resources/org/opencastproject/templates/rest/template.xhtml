@@ -85,6 +85,9 @@
   DIV.spaced {
     margin: 4px 0px;
   }
+  A.hidden {
+    display: none;
+  }
   TD.form_label {
     width: 10%;
     font-size: 1.1em !important;
@@ -227,7 +230,7 @@
         <#elseif endpoint.form.url??><#-- just create a link to the form -->
         <a href="${endpoint.form.url}" target="_new">${endpoint.form.title!"Go to Testing form"}</a>
         <#else>
-        <a href="#" class="form_link">${endpoint.form.title!"Testing form"} (click to reveal)</a>
+        <a href="#" class="show_form_link">${endpoint.form.title!"Testing form"} (click to reveal)</a>
         <div class="hidden_form hidden">
           <form id="form_${endpoint.name}" class="form_test_form" action="${meta.url}${endpoint.path}" 
                 method="${endpoint.method?lower_case}"<#if endpoint.form.fileUpload> enctype="multipart/form-data"</#if>>
@@ -315,10 +318,10 @@
           <div class="test_form_response hidden">
             <div>Response:</div>
             <pre style="width: 100%; border-left: 4px solid #999; padding-left: 10px;"></pre>
-            <input type="button" value="HIDE" />
           </div>
           </#if>
         </div>
+        <a href="#" class="hide_form_link hidden">Hide</a>
         </#if>
       </td>
     </tr>
@@ -355,26 +358,41 @@
 </div>
 
 <!-- JAVASCRIPT below here -->
-<script type="text/javascript"
-  src="/infusion-1.1.2/InfusionAll.js"></script>
+<script type="text/javascript" src="/jquery/jquery-1.4.2.min.js"></script>
 <script type="text/javascript">
 /*global alert, jQuery  */
 (function($) {
-    $("a.form_link").click(
+
+    $("a.show_form_link").click(
         function() {
-            var $this = $(this);
-            var $form = $this.parent().find("div.hidden_form");
-            $form.toggle(400);
-            $this.parent().find("div.form_submit input[type='button']").click(
-                function() {
-                    $form.hide(200);
-                    $this.show();
-                }
-            );
-            $this.hide();
-            return false;
+           var $this = $(this);
+           var $form = $this.parent().find("div.hidden_form");
+           var hidectrl = $this.parent().find("a.hide_form_link");
+           $form.toggle(400);
+           hidectrl.show();
+           $this.parent().find("div.form_submit input[type='button']").click(
+              function() {
+                 $form.hide(200);
+                 $this.show();
+              }
+           );
+           $this.hide();
+           return false;
         }
     );
+
+    $("a.hide_form_link").click(
+        function() {
+           var $this = $(this);
+           var $form = $this.parent().find("div.hidden_form");
+           var show_form_ctrl = $this.parent().find("a.show_form_link");
+           $form.hide(200);
+           show_form_ctrl.show();
+           $this.hide();
+           return false;
+        }
+     );
+
     /**
      * Takes a path and integrates the pathParams values into it
      * @param {String} path the path with keys (e.g. /my/{thing}/{stuff})
@@ -392,6 +410,7 @@
         }
         return newPath;
     }
+ 
     function checkPath($form) {
         var params = [];
         $form.find(".form_param_path").each( function() {
@@ -468,23 +487,32 @@
                       $form.parent().find(".test_form_response input").click(function(){
                           $(this).parent.hide();
                       });
+                      
+                      // clear previous responses
+                      var responseBody = $form.parent().find(".test_form_response");
+                      responseBody.hide();
+                      responseBody.find("pre").text("");
+
+                      // make the request
                       $.ajax({
                           type: method,
                           url: url,
                           processData: true,
                           dataType: 'text',
                           data: submitParams,
-                          success: function(data, textStatus) {
+                          success: function(data, textStatus, request) {
                               $form.parent().find(".test_form_working").hide();
-                              $form.parent().find(".test_form_response").show()
-                                  .find("pre").text(data);
+                              var responseBody = $form.parent().find(".test_form_response");
+                              responseBody.show();
+                              var msg = "Status: " + request.status + " (" + request.statusText + ")\n\n" + data;
+                              responseBody.find("pre").text(msg);
                           },
-                          error: function(xhr, textStatus, errorThrown){
+                          error: function(request, textStatus, errorThrown) {
                               $form.parent().find(".test_form_working").hide();
-                              var msg = textStatus + " : " + errorThrown + "\n" + 
-                                  xhr.status + " " + xhr.statusText + " :\n" + xhr.responseText();
-                              $form.parent().find(".test_form_response").show()
-                                  .find("pre").text(msg);
+                              var responseBody = $form.parent().find(".test_form_response");
+                              var msg = "Status: " + request.status + " (" + request.statusText + ")";
+                              responseBody.show();
+                              responseBody.find("pre").text(msg);
                           }
                       });
                   } else {
