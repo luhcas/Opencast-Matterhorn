@@ -50,6 +50,25 @@
         <artifactId>maven-resources-plugin</artifactId>
         <executions>
           <execution>
+            <id>copy-infusion</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes/ui/infusion-1.1.2</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>../../shared-resources/infusion-1.1.2/</directory>
+                  <includes>
+                    <include> **/* </include>
+                  </includes>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <execution>
             <id>copy-img</id>
             <phase>validate</phase>
             <goals>
