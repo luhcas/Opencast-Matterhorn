@@ -158,7 +158,7 @@ Button.ccOn
   selectedDisabledSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_cc_up');  
 }
 
-Button.ccOff
+Button.disable
 {
   font-size: 0; 
   

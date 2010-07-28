@@ -127,6 +127,8 @@ Opencast.search = ( function() {
    */
   function initialize() {
     // initialize
+
+    /*
     var mediaPackageId = Opencast.engage.getMediaPackageId();
     var factor = 8;
     $.ajax(
@@ -156,6 +158,7 @@ Opencast.search = ( function() {
             // Some error while trying to get the search result
           }
         }); //close ajax(
+        */
   }
 
   /**

@@ -98,6 +98,7 @@ Opencast.segments = ( function() {
 
     // set the slide length
     setSlideLength(segmentTimes.length);
+   
     
     $('#oc_video-player-controls').css('display', 'block');
 
