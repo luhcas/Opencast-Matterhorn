@@ -16,6 +16,8 @@
     <link type="text/css" rel="stylesheet" href="css/upload.css">
     <link type="text/css" rel="stylesheet" href="css/progress.css">
     <link rel="stylesheet" type="text/css" href="shared_css/shared.css">
+    <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.7.2.custom.css">
+
     <style type="text/css">
       .container {margin-bottom: 10px;}
       .color-red {color:red;}
@@ -128,8 +130,8 @@
         <form id="uploadForm" name="uploadForm" action="../ingest/rest/addMediaPackage" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
 
           <!-- basic metadata -->
-          <div id="container-basicData" class="container fl-widget">
-            <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
+          <div id="container-basicData" class="fl-widget">
+            <div id="content-basicData" class="fl-widget-content">
               <ul class="no-bullets formField-list fl-controls-right">
                 <!-- field: Title -->
                 <li class="ui-helper-clearfix">
@@ -155,9 +157,9 @@
           </div>
 
           <!-- additional metadata -->
-          <div id="container-additionalData" class="container fl-widget">
+          <div id="container-additionalData" class="fl-widget">
             <div id="heading-additionalData" class="fl-widget-titlebar collapse-control collapse-control-closed"><span id="i18n_aditional">Additional Description</span></div>
-            <div id="content-basicData" class="fl-widget-content ui-helper-clearfix collapsable" style="display:none;">
+            <div id="content-basicData" class="fl-widget-content collapsable" style="display:none;">
               <ul class="no-bullets formField-list fl-controls-right">
                 <!-- field: Sponsoring Department -->
                 <li class="ui-helper-clearfix">
@@ -190,7 +192,7 @@
           <!-- file upload -->
           <div id="container-additionalData" class="container fl-widget">
             <div id="heading-additionalData" class="fl-widget-titlebar titlebar"><span id="i18n_upload_title">File Upload</span></div>
-            <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
+            <div id="content-basicData" class="fl-widget-content">
               <input type="hidden" name="track" id="track" class="requiredField" value="">
               <ul class="no-bullets formField-list fl-controls-right">
                 <li id="retry-file" class="ui-helper-clearfix" style="display:none;">
@@ -233,7 +235,7 @@
 
           <div id="container-processing" class="container fl-widget">
             <div id="heading-processing" class="fl-widget-titlebar titlebar"><span id="i18n_process_title">Processing</span></div>
-            <div id="content-processing" class="fl-widget-content ui-helper-clearfix">
+            <div id="content-processing" class="fl-widget-content">
               <ul class="no-bullets formField-list fl-controls-right">
                 <li class="ui-helper-clearfix">
                   <label class="fl-label"><span class="color-red">* </span><span id="i18n_process_instr">Processing instructions</span>:</label>
@@ -249,7 +251,7 @@
 
           <!-- submit/cancel controls -->
           <div id="container-additionalData" class="container fl-widget">
-            <div id="content-basicData" class="fl-widget-content ui-helper-clearfix">
+            <div id="content-basicData" class="fl-widget-content">
               <ul class="no-bullets formField-list fl-controls-right">
                 <!-- submit / cancal button -->
                 <li class="ui-helper-clearfix">
