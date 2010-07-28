@@ -52,7 +52,7 @@
     <property name="serviceProperties" ref="serviceProperties" />
     <property name="ticketValidator">
       <bean class="org.jasig.cas.client.validation.Cas20ServiceTicketValidator">
-        <constructor-arg index="0" value="https://auth-test.berkeley.edu/cas/serviceValidate" />
+        <constructor-arg index="0" value="https://auth-test.berkeley.edu/cas" />
       </bean>
     </property>
     <property name="key" value="cas"/>
