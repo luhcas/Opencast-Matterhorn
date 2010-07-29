@@ -327,7 +327,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   private String initPipeline(RecordingImpl newRec) {
     //Create the pipeline
     try {
-      pipe = PipelineFactory.create(newRec.getProperties(), false);
+      pipe = PipelineFactory.create(newRec.getProperties(), false, this);
     } catch (UnsatisfiedLinkError e) {
       logger.error(e.getMessage() + " : please add libjv4linfo.so to /usr/lib to correct this issue.");
       return null;
@@ -361,8 +361,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
        * @see org.gstreamer.Bus.ERROR#errorMessage(org.gstreamer.GstObject, int, java.lang.String)
        */
       public void errorMessage(GstObject obj, int retCode, String msg) {
-        logger.error("{}: {}", obj.getName(), msg);
-        stopCapture(false);
+        logger.warn("{}: {}", obj.getName(), msg);
       }
     });
     bus.connect(new Bus.WARNING() {
@@ -443,8 +442,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   @Override
   public boolean stopCapture(boolean immediateIngest) {
-
     logger.debug("stopCapture() called.");
+    setAgentState(AgentState.SHUTTING_DOWN);
     // If pipe is null and no mock capture is on
     if (pipe == null) {
         logger.warn("Pipeline is null, this is normal if running a mock capture.");
@@ -841,7 +840,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       } else if (state.equalsIgnoreCase(AgentState.IDLE)){
         try {
           while (configService.getAllProperties().size() == 0);
-          confidencePipe = PipelineFactory.create(configService.getAllProperties(), true);
+          confidencePipe = PipelineFactory.create(configService.getAllProperties(), true, this);
           Bus bus = confidencePipe.getBus();
           bus.connect(new Bus.EOS() {
             
@@ -859,6 +858,25 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         }
       }
     }
+    
+    /*
+    // When returning to idle state reload Epiphan driver to prevent problems caused by
+    // too many captures running without reloaded the driver. 
+    if (state.equals(AgentState.IDLE)){
+      try {
+        Process p = Runtime.getRuntime().exec("reload_epiphan");
+        p.waitFor();
+        if (p.exitValue() == 0) {
+          logger.debug("VGA2USB driver successfully reloaded");
+        } else {
+          logger.warn("Unable to reload Epiphan VGA2USB driver.");
+        }
+        p.destroy();
+      } catch (Exception e) {
+        logger.warn("Unable to reload Epiphan VGA2USB driver.");
+      }
+    }
+    */
       
     agentState = state;
   }

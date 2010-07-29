@@ -15,7 +15,9 @@
  */
 package org.opencastproject.capture.pipeline;
 
+import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.impl.CaptureAgentImpl;
 
 import net.luniks.linux.jv4linfo.JV4LInfo;
 import net.luniks.linux.jv4linfo.JV4LInfoException;
@@ -25,12 +27,14 @@ import org.gstreamer.Bus;
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
+import org.gstreamer.Event;
 import org.gstreamer.Gst;
 import org.gstreamer.Message;
 import org.gstreamer.MessageType;
 import org.gstreamer.Pad;
 import org.gstreamer.PadDirection;
 import org.gstreamer.Pipeline;
+import org.gstreamer.event.EOSEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +49,15 @@ import java.util.Properties;
  */
 public class PipelineFactory {
 
-  private static final Logger logger = LoggerFactory.getLogger(PipelineFactory.class);
+  protected static final Logger logger = LoggerFactory.getLogger(PipelineFactory.class);
 
   private static Properties properties;
+  
+  protected static boolean broken;
+  
+  protected static int v4lsrc_index;
+  
+  protected static CaptureAgentImpl captureAgent = null;
 
   /**
    * Create a bin that contains multiple pipelines using each source in the properties object as the gstreamer source
@@ -57,8 +67,9 @@ public class PipelineFactory {
    * @return The {@code Pipeline} to control the pipelines
    * @throws UnsupportedDeviceException
    */
-  public static Pipeline create(Properties props, boolean confidence) {
+  public static Pipeline create(Properties props, boolean confidence, CaptureAgentImpl ca) {
     properties = props;
+    captureAgent = ca;
     ArrayList<CaptureDevice> devices = new ArrayList<CaptureDevice>();
 
     String[] friendlyNames = getDeviceNames();
@@ -447,6 +458,8 @@ public class PipelineFactory {
     return true;
   }
 
+  // TODO: Rid of checkstyle off
+  // CHECKSTYLE:OFF
   /**
    * Adds a pipeline specifically designed to captured from the Epiphan VGA2USB cards to the main pipeline
    * 
@@ -456,7 +469,7 @@ public class PipelineFactory {
    *          The {@code Pipeline} bin to add it to
    * @return True, if successful
    */
-  private static boolean getVGA2USBPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
+  private static boolean getVGA2USBPipeline(final CaptureDevice captureDevice, final Pipeline pipeline) {
     // confidence vars
     String imageloc = properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
     String device = new File(captureDevice.getOutputPath()).getName();
@@ -471,12 +484,97 @@ public class PipelineFactory {
     String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
     String bufferTime = captureDevice.properties.getProperty("bufferTime");
     boolean confidence = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE));
-
-
-    // Create elements, add them to pipeline, then link them 
+    
+    // The codec and container format. Configurable, therefore not initialized. 
     Element enc, muxer;
-    Element v4lsrc = ElementFactory.make("v4lsrc", null);
+    
+    // The Epiphan card
+    v4lsrc_index = 0;
+    Element v4lsrc = ElementFactory.make("v4lsrc", "v4lsrc_" + v4lsrc_index);
+    /* Bus bus = v4lsrc.getBus();
+    bus.connect(new Bus.EOS() {
+      public void endOfStream(GstObject v4lsrc) {
+        logger.debug("Received EOS event from {}", v4lsrc.getName());
+        Element src = (Element) v4lsrc;
+        src.setState(State.NULL);
+      }
+    }); */
+    Element v4l_identity = ElementFactory.make("identity", "v4l_identity");
+    v4l_identity.set("sync", true);
+    
+    // Add an event probe to the v4l_identity elements so that we can catch the
+    // EOS that propagates when the signal is lost and switch it out for the 
+    // backup video source
+    Pad v4l_identity_sink_pad = v4l_identity.getStaticPad("sink");
+    v4l_identity_sink_pad.addEventProbe(new Pad.EVENT_PROBE() {
+      /**
+       * @return true if we should propagate the EOS down the chain, false otherwise
+       */
+      public synchronized boolean eventReceived(Pad pad, Event event) {
+        logger.debug("Event received: {}", event.toString());
+        if (event instanceof EOSEvent) {
+          if (captureAgent.getAgentState().equals(AgentState.SHUTTING_DOWN)) {
+            synchronized (PollEpiphan.enabled) {
+              PollEpiphan.enabled.notify();
+            }
+            //return true;  
+            return false; //TODO: this is insane
+            
+          }
+          logger.debug("EOS event received, state is not shutting down: Lost VGA signal. " );
+          
+          // Sanity check, if we have already identified this as broken no need to unlink the elements
+          if (broken){
+            //return false;  
+            return true; //TODO: this is insane
+          }
+          
+          // An EOS means the Epiphan source has broken (unplugged)
+          broken = true;
+          
+          // Remove the broken v4lsrc
+          Element src = pipeline.getElementByName("v4lsrc_" + v4lsrc_index); 
+          src.unlink(pipeline.getElementByName("v4l_identity"));
+          pipeline.remove(src);
+          
+          // Tell the input-selector to change its active-pad
+          Element selector = pipeline.getElementByName("selector");
+          Pad new_pad = selector.getStaticPad("sink1");
+          selector.set("active-pad", new_pad);
+          
+          // Do not propagate the EOS down the pipeline
+          //return false;  
+          return true; //TODO: this is insane
+        }
+        //return true;  
+        return false; //TODO: this is insane
+      }
+    });
+    
     Element queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
+    
+    // Elements that enable VGA signal hotswapping
+    Element videotestsrc = ElementFactory.make("videotestsrc", null);
+    videotestsrc.set("pattern", 0);
+    
+    // Create a filter to ensure videotestsrc is the same dimensions as the Epiphan card
+    Element capsfilter = ElementFactory.make("capsfilter", null);
+    try {
+      V4LInfo v4linfo = JV4LInfo.getV4LInfo(captureDevice.getLocation());
+      int width = v4linfo.getVideoCapability().getMaxwidth();
+      int height = v4linfo.getVideoCapability().getMaxheight();
+      capsfilter.set("caps", Caps.fromString("video/x-raw-yuv, width=" + width + ", height=" + height));
+    } catch (JV4LInfoException e) {
+      capsfilter.set("caps", Caps.fromString("video/x-raw-yuv, width=1280, height=720"));
+      logger.error(e.getLocalizedMessage());
+    }
+    Element static_identity = ElementFactory.make("identity", "static_identity");
+    
+    // The input-selector which allows us to choose which source we want to capture from
+    Element selector = ElementFactory.make("input-selector", "selector");
+    Element segment = ElementFactory.make("identity", "identity-segment");
+    
+    
     if (bufferCount != null) {
       logger.debug("{} bufferCount set to {}.", captureDevice.getName(), bufferCount);
       queue.set("max-size-buffers", bufferCount);
@@ -537,12 +635,20 @@ public class PipelineFactory {
     else
       enc.set("bitrate", "2000000");
 
-    pipeline.addMany(v4lsrc, queue, videorate, fpsfilter, ffmpegcolorspace, enc, muxer, filesink);
+    pipeline.addMany(v4lsrc, v4l_identity, queue, videotestsrc, capsfilter, 
+            static_identity, selector, segment, videorate, fpsfilter, 
+            ffmpegcolorspace, enc, muxer, filesink);
 
-    if (!v4lsrc.link(queue))
-      error = formatPipelineError(captureDevice, v4lsrc, queue);
-    else if (!queue.link(videorate))
-      error = formatPipelineError(captureDevice, queue, videorate);
+    if (!v4lsrc.link(v4l_identity))
+      error = formatPipelineError(captureDevice, v4lsrc, v4l_identity);
+    else if (!v4l_identity.link(queue))
+      error = formatPipelineError(captureDevice, v4l_identity, queue);
+    else if (!queue.link(selector))
+      error = formatPipelineError(captureDevice, queue, selector);
+    else if (!selector.link(segment))
+      error = formatPipelineError(captureDevice, selector, segment);
+    else if (!segment.link(videorate))
+      error = formatPipelineError(captureDevice, segment, videorate);
     else if (!videorate.link(fpsfilter))
       error = formatPipelineError(captureDevice, videorate, fpsfilter);
     if (confidence) {
@@ -559,12 +665,46 @@ public class PipelineFactory {
       error = formatPipelineError(captureDevice, enc, muxer);
     else if (!muxer.link(filesink))
       error = formatPipelineError(captureDevice, muxer, filesink);
+    
+    // Make the test source live, or images just queue up and reconnecting won't work
+    videotestsrc.set("is-live", true);
+    // Tell identity elements to be false, this shouldn't be required as it is the default
+    v4l_identity.set("sync", false);
+    static_identity.set("sync", false);
+    segment.set("sync", false);
+    
+    // Add backup video source in case we lose the VGA signal
+    if (!videotestsrc.link(capsfilter))
+      error = formatPipelineError(captureDevice, videotestsrc, capsfilter);
+    else if (!capsfilter.link(static_identity))
+      error = formatPipelineError(captureDevice, capsfilter, static_identity);
+    else if (!static_identity.link(selector))
+      error = formatPipelineError(captureDevice, static_identity, selector);
 
     if (error != null) {
-      pipeline.removeMany(v4lsrc, queue, videorate, fpsfilter, ffmpegcolorspace, enc, muxer, filesink);
+      pipeline.removeMany(v4lsrc, v4l_identity, queue, videotestsrc, capsfilter, 
+              static_identity, selector, segment, videorate, fpsfilter, 
+              ffmpegcolorspace, enc, muxer, filesink);
       logger.error(error);
       return false;
     }
+
+    // Check it see if there is a VGA signal on startup
+    if (check_epiphan(captureDevice.getLocation())) {
+      logger.debug("Have signal on startup");
+      Pad new_pad = selector.getStaticPad("sink0");
+      selector.set("active-pad", new_pad);
+    } else {
+      // No VGA signal on start up, remove Epiphan source
+      broken = true;
+      Element src = pipeline.getElementByName("v4lsrc_" + v4lsrc_index);
+      pipeline.remove(src);
+      Pad new_pad = selector.getStaticPad("sink1");
+      selector.set("active-pad", new_pad);
+    }
+
+    Thread poll = new Thread(new PollEpiphan(pipeline, captureDevice.getLocation()));
+    poll.start();
 
     if (logger.isTraceEnabled()) {
       BufferThread t = new BufferThread(queue);
@@ -572,6 +712,27 @@ public class PipelineFactory {
     }
 
     return true;
+  }
+  // CHECKSTYLE:ON
+  
+  /**
+   * When we have lost a VGA signal, this method can be continually executed
+   * to test for a new signal.
+   * 
+   * @param device the absolute path to the device
+   * @return true iff there is a VGA signal
+   */
+  protected static synchronized boolean check_epiphan(String device) {
+    try {
+      V4LInfo v4linfo = JV4LInfo.getV4LInfo(device);
+      String deviceName = v4linfo.getVideoCapability().getName();
+      if (deviceName.equals("Epiphan VGA2USB")) {
+        return true;
+      }
+    } catch (JV4LInfoException e) {
+      return false;
+    }
+    return false;
   }
 
   /**

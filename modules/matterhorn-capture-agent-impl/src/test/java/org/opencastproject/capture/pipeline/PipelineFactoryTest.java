@@ -103,7 +103,7 @@ public class PipelineFactoryTest {
         deviceNames += i + ",";
       }
       props.setProperty(CaptureParameters.CAPTURE_DEVICE_NAMES, deviceNames);
-      testPipeline = PipelineFactory.create(props, false);
+      testPipeline = PipelineFactory.create(props, false, null);
       Assert.assertEquals(testPipeline.getSources().size(), devices.size());
     }
   }
@@ -112,7 +112,7 @@ public class PipelineFactoryTest {
   public void testNullProperties() {
     boolean success = false;
     try {
-      PipelineFactory.create(null, false);
+      PipelineFactory.create(null, false, null);
     } catch (NullPointerException e) {
       success = true;
     }
@@ -122,7 +122,7 @@ public class PipelineFactoryTest {
   @Test 
   public void testEmptyProperties() {
     Properties p = new Properties();
-    Assert.assertNull(PipelineFactory.create(p, false));
+    Assert.assertNull(PipelineFactory.create(p, false, null));
   }
   
   /*
