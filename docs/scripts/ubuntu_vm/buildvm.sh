@@ -12,6 +12,9 @@ if [ "$UBUNTU_MIRROR" = "" ];
 fi
 echo "Using ubuntu mirror at: $UBUNTU_MIRROR"
 
+USERNAME="opencast"
+PASSWORD="matterhorn"
+
 export M2=`pwd`/m2/
 export JAVA_HOME=`mvn --version | grep "Java home" | awk '{print $3}'`
 
@@ -70,8 +73,8 @@ if [ ! -e vmbackup ]; then
   --rootsize '12288' --swapsize '1024' --kernel-flavour='virtual' \
   --hostname 'opencast' --mirror $UBUNTU_MIRROR \
   --components 'main,universe,multiverse' \
-  --name 'opencast' --user 'opencast' \
-  --pass 'matterhorn' --tmpfs - --addpkg zlib1g-dev --addpkg patch \
+  --name 'opencast' --user $USERNAME \
+  --pass $PASSWORD --tmpfs - --addpkg zlib1g-dev --addpkg patch \
   --addpkg byacc --addpkg libcv1 --addpkg libcv-dev --addpkg opencv-doc \
   --addpkg build-essential --addpkg locate --addpkg git-core \
   --addpkg checkinstall --addpkg yasm --addpkg texi2html  --addpkg libsdl1.2-dev \
@@ -130,10 +133,10 @@ sudo chmod 755 mnt/home/opencast/opencaps.sh
 sudo cp opencaps.sh mnt/home/opencast/opencaps_matterhorn_only.sh
 sudo chmod 755 mnt/home/opencast/opencaps_matterhorn_only.sh
 
-sudo ln -s /opt/matterhorn/matterhorn_trunk/docs/felix/bin/start_matterhorn.sh mnt/home/opencast/startup.sh
-sudo ln -s /opt/matterhorn/matterhorn_trunk/docs/felix/bin/shutdown_matterhorn.sh mnt/home/opencast/shutdown.sh
-sudo ln -s /opt/matterhorn/matterhorn_trunk/docs/felix/bin/update_matterhorn.sh mnt/home/opencast/update_matterhorn.sh
-sudo ln -s /opt/matterhorn/matterhorn_trunk/docs/felix/bin/matterhorn_init_d.sh mnt/etc/init.d/matterhorn
+sudo ln -s /opt/matterhorn/felix/bin/start_matterhorn.sh mnt/home/opencast/startup.sh
+sudo ln -s /opt/matterhorn/felix/bin/shutdown_matterhorn.sh mnt/home/opencast/shutdown.sh
+sudo ln -s /opt/matterhorn/felix/bin/update_matterhorn.sh mnt/home/opencast/update_matterhorn.sh
+sudo ln -s /opt/matterhorn/felix/bin/matterhorn_init_d.sh mnt/etc/init.d/matterhorn
 
 sudo mkdir mnt/opt/matterhorn
 
@@ -189,6 +192,9 @@ fi
 sudo cp -r matterhorn_trunk mnt/opt/matterhorn/
 
 sudo cp -rf matterhorn_trunk/docs/felix/* mnt/opt/matterhorn/felix/
+sudo sed -i "s/\$MATTERHORN_HOME/\/opt\/matterhorn/g" mnt/opt/matterhorn/felix/bin/matterhorn_init_d.sh
+sudo sed -i "s/\$FELIX_HOME/\$MATTERHORN\/felix\//g" mnt/opt/matterhorn/felix/bin/matterhorn_init_d.sh
+sudo sed -i "s/\$USERNAME/$USERNAME/g" mnt/opt/matterhorn/felix/bin/matterhorn_init_d.sh
 sudo sed -i "s/conf\/security.xml/\/opt\/matterhorn\/felix\/conf\/security.xml/" mnt/opt/matterhorn/felix/conf/config.properties
 
 export OC_REV=`svn info matterhorn_trunk | awk /Revision/ | cut -d " " -f 2`

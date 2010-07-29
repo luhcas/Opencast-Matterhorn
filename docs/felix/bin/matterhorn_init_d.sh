@@ -12,11 +12,15 @@
 
 set -e
 
-MATTERHORN="/opt/matterhorn"
-FELIX="$MATTERHORN/felix"
-M2_REPO="/home/opencast/.m2/repository"
-LOGDIR=$MATTERHORN/logs
-MATTERHORN_USER="opencast"
+##
+# These variables are set in the configuration scripts.
+##
+#eg:  /opt/matterhorn
+MATTERHORN=$MATTERHORN_HOME
+#eg:  /opt/matterhorn/felix, or $MATTERHORN/felix
+FELIX=$FELIX_HOME
+#eg:  Commonly opencast or matterhorn.  Can also be your normal user if you are testing.
+MATTERHORN_USER=$USERNAME
 
 ##
 # To enable the debugger on the vm, enable all of the following options
@@ -30,6 +34,7 @@ DEBUG_SUSPEND="n"
 # Only change the line below if you want to customize the server
 ##
 
+LOGDIR=$MATTERHORN/logs
 MAVEN_ARG="-DM2_REPO=$M2_REPO"
 FELIX_FILEINSTALL_OPTS="-Dfelix.fileinstall.dir=$FELIX/load"
 PAX_CONFMAN_OPTS="-Dbundles.configuration.location=$FELIX/conf"
