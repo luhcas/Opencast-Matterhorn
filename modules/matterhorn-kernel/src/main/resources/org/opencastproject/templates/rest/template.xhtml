@@ -358,7 +358,7 @@
 </div>
 
 <!-- JAVASCRIPT below here -->
-<script type="text/javascript" src="/jquery/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 <script type="text/javascript">
 /*global alert, jQuery  */
 (function($) {
@@ -367,9 +367,9 @@
         function() {
            var $this = $(this);
            var $form = $this.parent().find("div.hidden_form");
-           var hidectrl = $this.parent().find("a.hide_form_link");
+           var $hidectrl = $this.parent().find("a.hide_form_link");
            $form.toggle(400);
-           hidectrl.show();
+           $hidectrl.show();
            $this.parent().find("div.form_submit input[type='button']").click(
               function() {
                  $form.hide(200);
@@ -385,9 +385,9 @@
         function() {
            var $this = $(this);
            var $form = $this.parent().find("div.hidden_form");
-           var show_form_ctrl = $this.parent().find("a.show_form_link");
+           var $show_form_ctrl = $this.parent().find("a.show_form_link");
            $form.hide(200);
-           show_form_ctrl.show();
+           $show_form_ctrl.show();
            $this.hide();
            return false;
         }
