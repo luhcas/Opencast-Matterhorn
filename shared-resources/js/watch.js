@@ -141,7 +141,6 @@ Opencast.Watch = (function ()
           // init the segements
           Opencast.segments.initialize();
           
-          
           slideLength = Opencast.segments.getSlideLength();
           
           Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo, PLAYERSTYLE, slideLength);

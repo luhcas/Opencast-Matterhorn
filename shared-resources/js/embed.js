@@ -131,8 +131,12 @@ Opencast.Watch = (function ()
           mediaResolutionOne = mediaResolutionOne === null ? '' : mediaResolutionOne;
           mediaResolutionTwo = mediaResolutionTwo === null ? '' : mediaResolutionTwo;
           
-          Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo, PLAYERSTYLE);
-
+          // init the segements
+          Opencast.segments.initialize();
+          
+          slideLength = Opencast.segments.getSlideLength();
+          
+          Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo, PLAYERSTYLE, slideLength);
           if (mediaUrlOne !== '' && mediaUrlTwo !== '')
           {
         	Opencast.Initialize.setMediaResolution(mediaResolutionOne, mediaResolutionTwo);
@@ -196,14 +200,6 @@ Opencast.Watch = (function ()
           
           getClientShortcuts();
 
-          Opencast.segments.initialize();
-
-          
-         
-         
-
-
-          
           Opencast.search.initialize();
 
 

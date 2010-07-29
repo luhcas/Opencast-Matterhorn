@@ -3,11 +3,11 @@
 
 
 /**
-    @namespace the global Opencast namespace ariaSlider
-    
-    http://www.paciellogroup.com/blog/?p=68
-    http://accessify.com/tools-and-wizards/accessibility-tools/aria/slider-generator/
-*/
+ * @namespace the global Opencast namespace ariaSlider
+ *  
+ * http://www.paciellogroup.com/blog/?p=68
+ * http://accessify.com/tools-and-wizards/accessibility-tools/aria/slider-generator/
+ */
 Opencast.ariaSlider = (function () 
 {
     var gDragging    = '',

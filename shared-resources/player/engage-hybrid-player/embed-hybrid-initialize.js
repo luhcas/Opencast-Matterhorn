@@ -48,6 +48,7 @@ Opencast.Initialize = (function ()
     iFrameHeight = 0,
     otherDivHeight = 0,
     flashHeight = 0,
+    flashWidth = 0,
     embedUrl = "",
     advancedUrl = "",
     size = "";
@@ -593,14 +594,54 @@ Opencast.Initialize = (function ()
         iFrameHeight = document.documentElement.clientHeight;
         otherDivHeight = 100;
         flashHeight = iFrameHeight - otherDivHeight;
+        flashWidth = document.documentElement.clientWidth;
         
-       
         $("#oc_flash-player").css('height', flashHeight + 'px'); 
         
         // create watch.html link
         embedUrl = window.location.href;
         advancedUrl = embedUrl.replace(/embed.html/g, "watch.html");
         $("a[href='#']").attr('href', '' + advancedUrl + '');
+        
+        
+        // set preview image size
+        var previewImageHeight = 480;
+        var previewImageWidth = 640;
+        var previewImageFormat = previewImageWidth / previewImageHeight;
+        var newPreviewImageHeight = previewImageHeight;
+        var newPreviewImageWidth = previewImageWidth;
+        var previewFlashWidth = flashWidth - 4;
+        var previewFlashHeigth = flashHeight - 3;
+        var flashFormat = previewFlashWidth / previewFlashHeigth;
+        var previewImageMarginTop = 0;
+        
+        
+        if (previewFlashHeigth < previewImageHeight || previewFlashWidth <  previewImageWidth)
+        {
+        	if (flashFormat > previewImageFormat )
+        	{
+        		newPreviewImageHeight = previewFlashHeigth;
+        		newPreviewImageWidth = Math.round(newPreviewImageHeight * previewImageFormat);
+        	}
+        	else if ( flashFormat < previewImageFormat )
+        	{
+        		newPreviewImageWidth = previewFlashWidth;
+        		newPreviewImageHeight = Math.round(newPreviewImageWidth / previewImageFormat);
+        	}
+        	else if (flashFormat === previewImageFormat)
+        	{
+        		newPreviewImageWidth = previewFlashWidth;
+        		newPreviewImageHeight = previewFlashHeigth;
+        	}
+        }
+        
+        // to calculate the new previewImageMarginTop
+        previewImageMarginTop = Math.round((previewFlashHeigth - newPreviewImageHeight) / 2);
+        
+        // set the new css style
+        $("#oc_image").css('height', newPreviewImageHeight + 'px');
+        $("#oc_image").css('width', newPreviewImageWidth + 'px');
+        $("#oc_image").css('margin-top', previewImageMarginTop + 'px');
         
         var coverUrl = Opencast.engage.getCoverUrl();
         if (coverUrl === null) {
@@ -633,7 +674,7 @@ Opencast.Initialize = (function ()
             }); //close ajax
         } // close if
         
-        
+   
     });
     
     /**
