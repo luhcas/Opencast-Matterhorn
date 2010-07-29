@@ -358,7 +358,7 @@
 </div>
 
 <!-- JAVASCRIPT below here -->
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript" src="/restdocs/jquery-1.4.2.min.js"></script>
 <script type="text/javascript">
 /*global alert, jQuery  */
 (function($) {
@@ -486,6 +486,7 @@
                       $form.parent().find(".test_form_working").show();
                       $form.parent().find(".test_form_response input").click(function(){
                           $(this).parent.hide();
+                          $this.parent().find("a.hide_form_link").hide();
                       });
                       
                       // clear previous responses

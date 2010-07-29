@@ -29,7 +29,7 @@ import java.util.Vector;
  */
 public class DocData {
   private static final Logger logger = LoggerFactory.getLogger(DocData.class);
-  protected static final String TEMPLATE_DEFAULT = "/org/opencastproject/templates/template.txt";
+  protected static final String TEMPLATE_DEFAULT = "/ui/restdocs/template.xhtml";
 
   /**
    * This is the document meta data

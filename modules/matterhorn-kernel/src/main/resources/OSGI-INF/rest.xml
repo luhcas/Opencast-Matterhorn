@@ -1,10 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
- name="org.opencastproject.rest.RestPublisher" immediate="true" activate="activate" deactivate="deactivate">
-  <implementation class="org.opencastproject.rest.RestPublisher" />
-  <property name="service.description" value="Opencast REST Endpoint Publisher" />
-  <reference name="http-service" interface="org.osgi.service.http.HttpService"
-    cardinality="1..1" policy="static" bind="setHttpService" />
-  <reference name="http-context" interface="org.osgi.service.http.HttpContext"
-    cardinality="1..1" policy="static" bind="setHttpContext" />
-</scr:component>
+<scr:components xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0">
+
+  <component name="org.opencastproject.rest.RestPublisher" immediate="true" activate="activate"
+    deactivate="deactivate">
+    <implementation class="org.opencastproject.rest.RestPublisher" />
+    <property name="service.description" value="Opencast REST Endpoint Publisher" />
+    <reference name="http-service" interface="org.osgi.service.http.HttpService" cardinality="1..1" policy="static"
+      bind="setHttpService" />
+    <reference name="http-context" interface="org.osgi.service.http.HttpContext" cardinality="1..1" policy="static"
+      bind="setHttpContext" />
+  </component>
+
+  <component name="org.opencastproject.rest.ui" immediate="true" activate="activate" deactivate="deactivate">
+    <implementation class="org.opencastproject.http.StaticResource" />
+    <property name="service.description" value="Support files for REST documentation" />
+    <property name="alias" value="/restdocs" />
+    <property name="classpath" value="/ui/restdocs" />
+    <property name="welcome.file" value="template.xhtml" />
+    <service>
+      <provide interface="org.opencastproject.http.StaticResource" />
+    </service>
+    <reference name="http-service" interface="org.osgi.service.http.HttpService" cardinality="1..1" policy="static"
+      bind="setHttpService" />
+    <reference name="http-context" interface="org.osgi.service.http.HttpContext" cardinality="1..1" policy="static"
+      bind="setHttpContext" />
+  </component>
+
+</scr:components>

@@ -30,7 +30,6 @@ import java.util.regex.Pattern;
  */
 public class DocRestData extends DocData {
 
-  public static final String TEMPLATE_DEFAULT = "/org/opencastproject/templates/rest/template.xhtml";
   public static final String FORMAT_KEY = "{FORMAT}";
 
   protected List<RestEndpointHolder> holders;
