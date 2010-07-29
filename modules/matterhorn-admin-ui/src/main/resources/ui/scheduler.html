@@ -4,18 +4,18 @@
     <meta http-equiv="content-type" content="text/html;charset=utf-8">
     <link rel="shortcut icon" href="img/favicon.ico"> 
     <title id="window-title">Opencast Matterhorn - Schedule Recording</title>
-    
+
     <!-- style -->
     <link href="infusion-1.1.2/fss/css/fss-reset.css" rel="stylesheet" type="text/css">
     <link href="infusion-1.1.2/fss/css/fss-layout.css" rel="stylesheet" type="text/css">
     <link href="infusion-1.1.2/fss/css/fss-text.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" type="text/css" href="css/shared.css">
-    
+
     <link rel="stylesheet" type="text/css" href="css/admin.css">
     <link rel="stylesheet" type="text/css" href="css/scheduler.css">
     <link rel="stylesheet" type="text/css" href="css/popuphelp.css">
     <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.7.2.custom.css">
-    
+
     <!-- scripts -->
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
@@ -54,23 +54,26 @@
       </center>
     </noscript>
 
-    <div class="fl-container-850 fl-theme-coal">
-  <div id="header">
-         <div id="logotitle">
-            <a href="../../welcome.html">
-            <img src="img/MatterhornLogo.png" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" align="left">
-            <h1>Admin Tools</h1>
-      </a>
-    </div>
-        <div id="oclogo">
+    <div id="header">
+      <div id="logotitle">
+        <a href="recordings.html">
+          <img src="img/MatterhornLogo.png" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" align="left">
+        </a>
+        <a href="recordings.html">
+          <h1>Admin Tools</h1>
+        </a>
+      </div>
+      <div id="oclogo">
         <a href="http://www.opencastproject.org">
-        <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project">        </a>    </div>
-  </div>
-      <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
-        <li class="fl-activeTab"><a href="/admin/" id="i18n_tab_recording"></a></li>
-        <li><a href="series.html" id="i18n_tab_series">Series</a></li>
-        <li><a href="/admin/agents_status.html" id="i18n_tab_agent"></a></li>
-      </ul>
+          <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project">        </a>    </div>
+    </div>
+    <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
+      <li class="fl-activeTab"><a href="/admin/" id="i18n_tab_recording"></a></li>
+      <li><a href="series.html" id="i18n_tab_series">Series</a></li>
+      <li><a href="/admin/agents_status.html" id="i18n_tab_agent"></a></li>
+    </ul>
+
+    <div class="fl-container-850 fl-theme-coal">
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
         <div class="fl-container-800" style="text-align: center;">
           <h2><span id="i18n_page_title"></span></h2>
@@ -79,7 +82,7 @@
             <input type="radio" id="multipleRecordings" name="recordingType"><label for="multipleRecordings"> Group of Recordings</label>
           </div>
         </div>
-        
+
         <!-- missing fields notification -->
         <div class="fl-container-800" id="missingFields-container" style="display:none;">
           <div class="fl-widget">
@@ -122,7 +125,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="fl-container-800" id="notice-container" style="display:none;">
           <div class="fl-widget">
             <div class="fl-widget-titlebar warnbox-title">
@@ -138,14 +141,14 @@
                 </li>
                 <li id="notice-conflict" class="missing-fields-item" style="display:none;">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>The following events conflict with your scheduled time on your selected capture agent:
-                    <ul id="conflicting-events" style="margin-top: 0px;">
-                    </ul>
+                  <ul id="conflicting-events" style="margin-top: 0px;">
+                  </ul>
                 </li>
               </ul>
             </div>
           </div>
         </div>
-        
+
         <!-- Common Scheduling Information -->
         <div class="fl-container-800">
           <div class="fl-widget">
@@ -160,7 +163,7 @@
                   <li id="title-note" class="ui-helper-clearfix" style="display:none;">
                     <label class="fl-label">&nbsp;</label>
                     <span style="float:left;" title="Click for help" class="instruction-text">
-                        Titles of individual recordings will be appended by sequential numbers starting with 1
+                      Titles of individual recordings will be appended by sequential numbers starting with 1
                     </span>
                   </li>
                   <li id="series_container">
@@ -179,7 +182,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Optional Information -->
         <div class="fl-container-800">
           <div class="fl-widget">
@@ -215,7 +218,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Scheduling Specifics (Single Recording) -->
         <div id="single_recording" class="fl-container-800">
           <div class="fl-widget">
@@ -230,165 +233,165 @@
                   <label for="manual-sched"><span id="i18n_sched_manual">Manual</span></label>
                 </div>
                 -->
-                  <ul class="fl-controls-right form-list">
-                    <li class="required">
-                      <label class="fl-label form-box-label" id="label-startdate"><span class="color-red">* </span><span id="i18n_startdate_label"></span>:</label>
-                      <input type="text" size="10" name="startDate" id="startDate" style="margin-right:5px;">
-                      <span class="fl-icon icon-help" id="help_startdate" title="Click for help"></span>
-                    </li>
-                  </ul>
-                  <ul class="fl-controls-right form-list">
-                    <li class="required">
-                      <label class="fl-label form-box-label" id="label-starttime"><span class="color-red">* </span><span id="i18n_starttime_label"></span>:</label>
-                      <select id="startTimeHour">
-                        <option value="0">00</option>
-                        <option value="1">01</option>
-                        <option value="2">02</option>
-                        <option value="3">03</option>
-                        <option value="4">04</option>
-                        <option value="5">05</option>
-                        <option value="6">06</option>
-                        <option value="7">07</option>
-                        <option value="8">08</option>
-                        <option value="9">09</option>
-                        <option value="10">10</option>
-                        <option value="11">11</option>
-                        <option value="12">12</option>
-                        <option value="13">13</option>
-                        <option value="14">14</option>
-                        <option value="15">15</option>
-                        <option value="16">16</option>
-                        <option value="17">17</option>
-                        <option value="18">18</option>
-                        <option value="19">19</option>
-                        <option value="20">20</option>
-                        <option value="21">21</option>
-                        <option value="22">22</option>
-                        <option value="23">23</option>
+                <ul class="fl-controls-right form-list">
+                  <li class="required">
+                    <label class="fl-label form-box-label" id="label-startdate"><span class="color-red">* </span><span id="i18n_startdate_label"></span>:</label>
+                    <input type="text" size="10" name="startDate" id="startDate" style="margin-right:5px;">
+                    <span class="fl-icon icon-help" id="help_startdate" title="Click for help"></span>
+                  </li>
+                </ul>
+                <ul class="fl-controls-right form-list">
+                  <li class="required">
+                    <label class="fl-label form-box-label" id="label-starttime"><span class="color-red">* </span><span id="i18n_starttime_label"></span>:</label>
+                    <select id="startTimeHour">
+                      <option value="0">00</option>
+                      <option value="1">01</option>
+                      <option value="2">02</option>
+                      <option value="3">03</option>
+                      <option value="4">04</option>
+                      <option value="5">05</option>
+                      <option value="6">06</option>
+                      <option value="7">07</option>
+                      <option value="8">08</option>
+                      <option value="9">09</option>
+                      <option value="10">10</option>
+                      <option value="11">11</option>
+                      <option value="12">12</option>
+                      <option value="13">13</option>
+                      <option value="14">14</option>
+                      <option value="15">15</option>
+                      <option value="16">16</option>
+                      <option value="17">17</option>
+                      <option value="18">18</option>
+                      <option value="19">19</option>
+                      <option value="20">20</option>
+                      <option value="21">21</option>
+                      <option value="22">22</option>
+                      <option value="23">23</option>
+                    </select>
+                    <select id="startTimeMin">
+                      <option value="0">00</option>
+                      <option value="1">01</option>
+                      <option value="2">02</option>
+                      <option value="3">03</option>
+                      <option value="4">04</option>
+                      <option value="5">05</option>
+                      <option value="6">06</option>
+                      <option value="7">07</option>
+                      <option value="8">08</option>
+                      <option value="9">09</option>
+                      <option value="10">10</option>
+                      <option value="11">11</option>
+                      <option value="12">12</option>
+                      <option value="13">13</option>
+                      <option value="14">14</option>
+                      <option value="15">15</option>
+                      <option value="16">16</option>
+                      <option value="17">17</option>
+                      <option value="18">18</option>
+                      <option value="19">19</option>
+                      <option value="20">20</option>
+                      <option value="21">21</option>
+                      <option value="22">22</option>
+                      <option value="23">23</option>
+                      <option value="24">24</option>
+                      <option value="25">25</option>
+                      <option value="26">26</option>
+                      <option value="27">27</option>
+                      <option value="28">28</option>
+                      <option value="29">29</option>
+                      <option value="30">30</option>
+                      <option value="31">31</option>
+                      <option value="32">32</option>
+                      <option value="33">33</option>
+                      <option value="34">34</option>
+                      <option value="35">35</option>
+                      <option value="36">36</option>
+                      <option value="37">37</option>
+                      <option value="38">38</option>
+                      <option value="39">39</option>
+                      <option value="40">40</option>
+                      <option value="41">41</option>
+                      <option value="42">42</option>
+                      <option value="43">43</option>
+                      <option value="44">44</option>
+                      <option value="45">45</option>
+                      <option value="46">46</option>
+                      <option value="47">47</option>
+                      <option value="48">48</option>
+                      <option value="49">49</option>
+                      <option value="50">50</option>
+                      <option value="51">51</option>
+                      <option value="52">52</option>
+                      <option value="53">53</option>
+                      <option value="54">54</option>
+                      <option value="55">55</option>
+                      <option value="56">56</option>
+                      <option value="57">57</option>
+                      <option value="58">58</option>
+                      <option value="59">59</option>
+                    </select>
+                    <span class="fl-icon icon-help" id="help_starttime" title="Click for help"></span>
+                  </li>
+                  <li class="required">
+                    <label class="fl-label form-box-label" id="label-duration"><span class="color-red">* </span><span id="i18n_dur_label"></span>:</label>
+                    <select id="durationHour">
+                      <option value="0">0</option>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      <option value="7">7</option>
+                      <option value="8">8</option>
+                      <option value="9">9</option>
+                      <option value="10">10</option>
+                      <option value="11">11</option>
+                      <option value="12">12</option>
+                    </select>
+                    <span id="i18n_dur_hours"></span>
+                    <select id="durationMin">
+                      <option value="0">0</option>
+                      <option value="1">1</option>
+                      <option value="5">5</option>
+                      <option value="10">10</option>
+                      <option value="15">15</option>
+                      <option value="20">20</option>
+                      <option value="25">25</option>
+                      <option value="30">30</option>
+                      <option value="35">35</option>
+                      <option value="40">40</option>
+                      <option value="45">45</option>
+                      <option value="50">50</option>
+                      <option value="55">55</option>
+                    </select>
+                    <span id="i18n_dur_minutes"></span>
+                    <span class="fl-icon icon-help" id="help_duration" title="Click for help"></span>
+                  </li>
+                  <li class="required" style="clear: both;">
+                    <label class="fl-label"  id="label-agent"><span class="color-red">* </span><span id="i18n_agent_label"></span>:</label>
+                    <div>
+                      <select id="agent" name="agent">
+                        <option value="">Choose one:</option>
                       </select>
-                      <select id="startTimeMin">
-                        <option value="0">00</option>
-                        <option value="1">01</option>
-                        <option value="2">02</option>
-                        <option value="3">03</option>
-                        <option value="4">04</option>
-                        <option value="5">05</option>
-                        <option value="6">06</option>
-                        <option value="7">07</option>
-                        <option value="8">08</option>
-                        <option value="9">09</option>
-                        <option value="10">10</option>
-                        <option value="11">11</option>
-                        <option value="12">12</option>
-                        <option value="13">13</option>
-                        <option value="14">14</option>
-                        <option value="15">15</option>
-                        <option value="16">16</option>
-                        <option value="17">17</option>
-                        <option value="18">18</option>
-                        <option value="19">19</option>
-                        <option value="20">20</option>
-                        <option value="21">21</option>
-                        <option value="22">22</option>
-                        <option value="23">23</option>
-                        <option value="24">24</option>
-                        <option value="25">25</option>
-                        <option value="26">26</option>
-                        <option value="27">27</option>
-                        <option value="28">28</option>
-                        <option value="29">29</option>
-                        <option value="30">30</option>
-                        <option value="31">31</option>
-                        <option value="32">32</option>
-                        <option value="33">33</option>
-                        <option value="34">34</option>
-                        <option value="35">35</option>
-                        <option value="36">36</option>
-                        <option value="37">37</option>
-                        <option value="38">38</option>
-                        <option value="39">39</option>
-                        <option value="40">40</option>
-                        <option value="41">41</option>
-                        <option value="42">42</option>
-                        <option value="43">43</option>
-                        <option value="44">44</option>
-                        <option value="45">45</option>
-                        <option value="46">46</option>
-                        <option value="47">47</option>
-                        <option value="48">48</option>
-                        <option value="49">49</option>
-                        <option value="50">50</option>
-                        <option value="51">51</option>
-                        <option value="52">52</option>
-                        <option value="53">53</option>
-                        <option value="54">54</option>
-                        <option value="55">55</option>
-                        <option value="56">56</option>
-                        <option value="57">57</option>
-                        <option value="58">58</option>
-                        <option value="59">59</option>
-                      </select>
-                      <span class="fl-icon icon-help" id="help_starttime" title="Click for help"></span>
-                    </li>
-                    <li class="required">
-                      <label class="fl-label form-box-label" id="label-duration"><span class="color-red">* </span><span id="i18n_dur_label"></span>:</label>
-                      <select id="durationHour">
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                        <option value="8">8</option>
-                        <option value="9">9</option>
-                        <option value="10">10</option>
-                        <option value="11">11</option>
-                        <option value="12">12</option>
-                      </select>
-                      <span id="i18n_dur_hours"></span>
-                      <select id="durationMin">
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                        <option value="15">15</option>
-                        <option value="20">20</option>
-                        <option value="25">25</option>
-                        <option value="30">30</option>
-                        <option value="35">35</option>
-                        <option value="40">40</option>
-                        <option value="45">45</option>
-                        <option value="50">50</option>
-                        <option value="55">55</option>
-                      </select>
-                      <span id="i18n_dur_minutes"></span>
-                      <span class="fl-icon icon-help" id="help_duration" title="Click for help"></span>
-                    </li>
-                    <li class="required" style="clear: both;">
-                      <label class="fl-label"  id="label-agent"><span class="color-red">* </span><span id="i18n_agent_label"></span>:</label>
-                      <div>
-                        <select id="agent" name="agent">
-                          <option value="">Choose one:</option>
-                        </select>
-                        <span class="fl-icon icon-help"  id="help_agent" title="Click for help"></span>
-                      </div>
-                    </li>
-                    <li class="required">
-                      <label class="fl-label" id="label-input"><span class="color-red">* </span><span id="i18n_input_label"></span>:</label>
-                      <div class="form-radio-group" style="float: left; width: 300px;">
-                        <div id="input-list"></div>
-                        <span class="fl-icon icon-help" id="help_input" title="Click for help" style="vertical-align: middle; margin-left: .8em;"></span>
-                      </div>
-                    </li>
-                  </ul>
+                      <span class="fl-icon icon-help"  id="help_agent" title="Click for help"></span>
+                    </div>
+                  </li>
+                  <li class="required">
+                    <label class="fl-label" id="label-input"><span class="color-red">* </span><span id="i18n_input_label"></span>:</label>
+                    <div class="form-radio-group" style="float: left; width: 300px;">
+                      <div id="input-list"></div>
+                      <span class="fl-icon icon-help" id="help_input" title="Click for help" style="vertical-align: middle; margin-left: .8em;"></span>
+                    </div>
+                  </li>
+                </ul>
                 </fieldset>
               </form>
             </div>
           </div>
         </div>
-        
+
         <!-- Scheduling Specifics (Multiple Recordings) -->
         <div id="recurring_recording" class="fl-container-800">
           <div class="fl-widget">
@@ -649,94 +652,94 @@
         </div>
         <div class="fl-container-800" id="submission_success" style="display: none;">
           <div class="notification-header">
-              A Recording with the following information has been scheduled:
+            A Recording with the following information has been scheduled:
           </div>
           <div id="data-title" class="data-row">
-              <div class="data-label">
-                Title:
-              </div>
-              <div class="data-value"></div>
+            <div class="data-label">
+              Title:
+            </div>
+            <div class="data-value"></div>
           </div>
           <div id="data-creator" class="data-row">
-              <div class="data-label">
-                 Presenter:
-              </div>
-              <div class="data-value"></div>
+            <div class="data-label">
+              Presenter:
+            </div>
+            <div class="data-value"></div>
           </div>
           <div id="data-contributor" class="data-row">
-              <div class="data-label">
-                 Sponsoring Department:
-              </div>
-              <div class="data-value"></div>
+            <div class="data-label">
+              Sponsoring Department:
+            </div>
+            <div class="data-value"></div>
           </div>
           <div id="data-series-id" class="data-row">
-              <div class="data-label">
-                 Series:
-              </div>
-              <div class="data-value"></div>
+            <div class="data-label">
+              Series:
+            </div>
+            <div class="data-value"></div>
           </div>
           <div id="data-subject" class="data-row">
-              <div class="data-label">
-                  Subject:
-              </div>
-              <div class="data-value"></div>
+            <div class="data-label">
+              Subject:
+            </div>
+            <div class="data-value"></div>
           </div>
           <div id="data-language" class="data-row">
-              <div class="data-label">
-                  Language:
-              </div>
-              <div class="data-value" ></div>
+            <div class="data-label">
+              Language:
+            </div>
+            <div class="data-value" ></div>
           </div>
           <div id="data-abstract" class="data-row">
-              <div class="data-label">
-                 Description:
-              </div>
-              <div class="expand-detail">
-                <div id="abstract" class="data-value detail-hide"></div>
-                <div id="detail-switch" onclick="schedulerUI.toggleDetails(this, $('#abstract'))">[more]</div>
-              </div>
+            <div class="data-label">
+              Description:
+            </div>
+            <div class="expand-detail">
+              <div id="abstract" class="data-value detail-hide"></div>
+              <div id="detail-switch" onclick="schedulerUI.toggleDetails(this, $('#abstract'))">[more]</div>
+            </div>
           </div>
           <div id="data-channel-id" class="data-row">
-              <div class="data-label">
-                 Distribution Channel(s):
-              </div>
-              <div class="data-value"></div>
+            <div class="data-label">
+              Distribution Channel(s):
+            </div>
+            <div class="data-value"></div>
           </div>
           <div id="data-license" class="data-row">
-              <div class="data-label">
-                 License:
-              </div>
-              <div class="data-value"></div>
+            <div class="data-label">
+              License:
+            </div>
+            <div class="data-value"></div>
           </div>
           <div id="data-recurrence" class="data-row">
-              <div class="data-label">
-                Repeats:
-              </div>
-              <div class="data-value"></div>
+            <div class="data-label">
+              Repeats:
+            </div>
+            <div class="data-value"></div>
           </div>
           <div id="data-startdate" class="data-row">
-              <div class="data-label">
-                 Start Date &amp; Time:
-              </div>
-              <div class="data-value"></div>
+            <div class="data-label">
+              Start Date &amp; Time:
+            </div>
+            <div class="data-value"></div>
           </div>
           <div id="data-duration" class="data-row">
-              <div class="data-label">
-                 Duration:
-              </div>
-              <div class="data-value"></div>
+            <div class="data-label">
+              Duration:
+            </div>
+            <div class="data-value"></div>
           </div>
           <div id="data-agent" class="data-row">
-              <div class="data-label">
-                 Capture Agent:
-              </div>
-              <div class="data-value"></div>
+            <div class="data-label">
+              Capture Agent:
+            </div>
+            <div class="data-value"></div>
           </div>
           <div id="data-resources" class="data-row">
-              <div class="data-label">
-                 Input(s):
-              </div>
-              <div class="data-value"></div>
+            <div class="data-label">
+              Input(s):
+            </div>
+            <div class="data-value"></div>
           </div>
           <div id="links" class="data-row" style="display: block;">
             <div class="data-label"></div>
@@ -747,7 +750,7 @@
           </div>
         </div>
       </div>
-      
+
       <div id="deleteBox" class="fl-tab-content wu-tab-content fl-fix" style="display:none;">
         <!-- Delete Confirm Box -->
         <div id="heading-metadata" style="background-color:#66FF66;font-weight:bold; margin-bottom:1em; margin-left:auto; margin-right:auto; padding:10px; text-align:center;">
@@ -755,7 +758,7 @@
         </div>
         <div style="text-align: center;"><a href="/admin/recordings.html?show=upcoming">&lt;&lt; <span id="i18n_rtrn_recordings"></span></a></div>
       </div>
-      
+
       <!-- template for the popup help box -->
       <div id="helpBox" class="helpbox" style="display:none;">
         <img src="img/icons/lightbulb.png" alt="help">

@@ -9,7 +9,7 @@
         <h2>View Recording Info</h2>
       </center>
     </div>
-    <div class="fl-container-800">
+    <div class="fl-container-800 fl-theme-coal">
       <div class="fl-widget">
         <div class="fl-widget-content form-box-container">
           <ul class="fl-controls-right form-list">
@@ -33,7 +33,7 @@
       </div>
     </div>
     
-    <div class="fl-container-800">
+    <div class="fl-container-800 fl-theme-coal">
       <div class="fl-widget">
         <div class="fl-widget-titlebar folder-head">
           <span class="fl-icon icon-arrow-right folder-icon">Additional Content</span>
@@ -71,7 +71,7 @@
     <xsl:choose>
       <xsl:when test="string-length(startdate) &gt; 0">
       <xsl:if test="string-length(agent) &gt; 0">
-        <div class="fl-container-800" id="captureform">
+        <div class="fl-container-800 fl-theme-coal" id="captureform">
           <div class="fl-widget">
             <div class="fl-widget-titlebar form-box-title">
               <b>Capture</b>
@@ -105,7 +105,7 @@
       </xsl:if>
       </xsl:when>
       <xsl:otherwise>
-        <div class="fl-container-800">
+        <div class="fl-container-800 fl-theme-coal">
           <div class="fl-widget">
             <div class="fl-widget-titlebar form-box-title">
               <b>File Upload</b>
@@ -124,7 +124,7 @@
       </xsl:otherwise>
     </xsl:choose>
     
-    <div class="fl-container-800">
+    <div class="fl-container-800 fl-theme-coal">
       <div class="fl-widget">
         <div class="fl-widget-titlebar form-box-title">
           <b>Distribution</b>
