@@ -127,7 +127,7 @@ Opencast.search = ( function() {
    */
   function initialize() {
     // initialize
-
+    showResult("");
     /*
     var mediaPackageId = Opencast.engage.getMediaPackageId();
     var factor = 8;
