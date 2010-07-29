@@ -76,8 +76,10 @@ public class ServiceInfo {
     logger.debug("start()");
     this.bundleContext = cc.getBundleContext();
     this.serverUrl = bundleContext.getProperty("org.opencastproject.server.url");
-    this.adminBaseUrl = bundleContext.getProperty("org.opencastproject.admin.ui.url");    
-    this.engageBaseUrl = bundleContext.getProperty("org.opencastproject.engage.ui.url");    
+    this.adminBaseUrl = bundleContext.getProperty("org.opencastproject.admin.ui.url");
+    if(adminBaseUrl == null) adminBaseUrl = serverUrl;
+    this.engageBaseUrl = bundleContext.getProperty("org.opencastproject.engage.ui.url");
+    if(engageBaseUrl == null) engageBaseUrl = serverUrl;
     this.serverUrl = bundleContext.getProperty("org.opencastproject.server.url");    
     this.testMode = "true".equalsIgnoreCase(bundleContext.getProperty("testMode"));
     
