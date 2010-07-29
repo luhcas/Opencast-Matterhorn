@@ -14,6 +14,7 @@
         background-image: url(/admin/img/loading.gif);
         background-repeat: no-repeat;
       }
+      #actions{margin: 0 auto; text-align:center; width:100%;padding-top:3em;}
       .spandiv {display:table-cell;float:left;}
     </style>
     <script type="text/javascript" src="/admin/jquery/jquery-1.4.2.min.js"></script>
@@ -169,14 +170,24 @@
       <div id="filename-container" class="spandiv"></div>
     </div>
     <div id="file-upload-container" class="spandiv" style="padding-top:26px;padding-left:40px;">
-      <div id="i18n_captions_upload_label" class="spandiv">Captions file to upload:&nbsp;</div>
+      <div id="i18n_captions_upload_label" class="spandiv">Captions file to upload:&nbsp;
+        <br>
+        <span style="font-size:x-small">
+            (Must be DFXP-File)
+        </span> 
+      </div>
       <div id="loading-container" class="spandiv hidden"></div>
       <div id="upload-container" style="display:table-cell;float:left;">
         <iframe name="filechooserAjax" id="filechooser-ajax" frameborder="0" scrolling="no" src="/ingest/rest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
         </iframe>
         <button type="button" id="btn-start-upload" onclick="UploadListener.startUpload();">Upload</button>
       </div>
+      <div id="actions">
+        <button type="button" id="continueBtn" onclick="parent.Recordings.continueWorkflow();" style="margin-right:16px;width:160px;" title="Move on to next steps in processing this recording">Continue processing</button>
+        <button type="button" "style="margin-right:16px;" title="Cancel" onclick="$('#holdActionPanel-container',top.document).toggle();$('#recordings-table-container',top.document).toggle();$('#oc_recordingmenu' ,top.document).toggle();$('.paging-nav-container',top.document).toggle();$('#refresh-controls-container',top.document).toggle();$('#category-selector-container',top.document).parent().toggle();">Cancel</button>
+      </div>
     </div>
+
     <!-- <a href="javascript: return false;" id="edit-link">Edit before continuing</a> -->
 
 

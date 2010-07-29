@@ -343,7 +343,6 @@ Recordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
   $('#holdStateHeadRow-series').html($($(parentRow).children().get(2)).html());
   $('#holdStateHeadRow-date').html($($(parentRow).children().get(3)).html());
   $('#holdStateHeadRow-status').html($($(parentRow).children().get(4)).html());
-  $('#holdIframe-container').height(450); 
   $('#holdActionPanel-container').toggle();
   $('#recordings-table-container').hide();
   $('#category-selector-container').parent().hide();

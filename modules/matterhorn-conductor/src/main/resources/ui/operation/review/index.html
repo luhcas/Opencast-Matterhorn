@@ -6,7 +6,6 @@
     <link rel="stylesheet" type="text/css" href="/admin/css/admin.css">
     <style type="text/css">
       #player-container {clear:both; border:none; width:90%; height:300;}
-      #edit-link {margin-right:43%;}
       .hidden {display:none;}
       #actions{margin: 0 auto; text-align:center; width:100%;}
     </style>
@@ -144,9 +143,11 @@
       </ul>
     </div>
     <div id="actions">
-    <!-- control buttons -->
-    <a href="javascript: return false;" id="edit-link">Edit before continuing</a>
-    </div>
+         <!-- control buttons -->
+         <button onclick="javascript: return false;" type="button" style="margin-right: 16px;">Edit before continuing</button>
+         <button title="Move on to next steps in processing this recording" style="margin-right: 16px; width: 160px;" onclick="parent.Recordings.continueWorkflow();" id="continueBtn" type="button">Continue processing</button>
+         <button onclick="$('#holdActionPanel-container',top.document).toggle();$('#recordings-table-container',top.document).toggle();$('#oc_recordingmenu' ,top.document).toggle();$('.paging-nav-container',top.document).toggle();$('#refresh-controls-container',top.document).toggle();$('#category-selector-container',top.document).parent().toggle();" title="Cancel" style="margin-right: 16px;" type="button">Cancel</button>
+     </div>
   </body>
 </html>
 
