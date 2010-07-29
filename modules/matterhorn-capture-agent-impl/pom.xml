@@ -65,13 +65,13 @@
     </dependency>
     <dependency>
       <groupId>org.gstreamer</groupId>
-      <artifactId>gstreamer-java</artifactId>
-      <version>1.2</version>
+      <artifactId>gstreamer-java-notests</artifactId>
+      <version>1.4</version>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>3.0.9</version>
+      <version>3.2.4</version>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
@@ -196,7 +196,7 @@
             </Private-Package>
             <Embed-Dependency>
               jv4linfo;inline=true,
-              gstreamer-java;inline=true,
+              gstreamer-java-notests;inline=true,
               jna;inline=true,
               json_simple;inline=true,
               ical4j;inline=true,
