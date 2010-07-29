@@ -139,7 +139,7 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
       } else {
         parentFile = videoSource;
       }
-      params.put("out.dir", parentFile.getParent());
+      params.put("out.dir", parentFile.getAbsoluteFile().getParent());
       params.put("out.name", FilenameUtils.getBaseName(parentFile.getName()));
       params.put("out.suffix", processParameters(profile.getSuffix()));
 
