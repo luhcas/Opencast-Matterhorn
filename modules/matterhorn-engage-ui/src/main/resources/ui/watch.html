@@ -130,8 +130,8 @@
       
     <div id="oc_tabs" class="oc_tabs-input">
       <input id="oc_btn-description" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleDescription()" name="Description" value="Description" alt="Description" title="Description"></input>
-      <input id="oc_btn-slides" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Hide Slides" value="Hide Slides" alt="Hide Slides" title="Hide Slides"></input>
-      <input id="oc_btn-slidetext" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlideText()" name="Slide Text" value="Slide Text" alt="Slide Text" title="Slide Text"></input>
+      <input id="oc_btn-slides" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Hide Segments" value="Hide Segments" alt="Hide Segments" title="Hide Segments"></input>
+      <input id="oc_btn-slidetext" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlideText()" name="Segment Text" value="Segment Text" alt="Segment Text" title="Segment Text"></input>
       <input id="oc_btn-shortcuts" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleShortcuts()" name="Shortcuts" value="Shortcuts" alt="Shortcuts" title="Shortcuts"></input>
       <input id="oc_btn-embed" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleEmbed()" name="Embed" value="Embed" alt="Embed" title="Embed"></input>
     </div>
@@ -148,12 +148,12 @@
     </div>
     
     <div id="oc_slidetext" class="oc_DisplayNone fl-fix">
-      <div id="oc_slidetext-left" class="oc_slidetext-left"></div>
       <div id="oc_slidetext-right" class="oc_slidetext-right">
         <input id="oc_lecturer-search-field" class="oc_search-Field" type="text" onkeyup="Opencast.search.showResult(this.value)" size="30" value="Search this Recording"></input>
       </div>
+      <div id="oc_slidetext-left" class="oc_slidetext-left"></div>
     </div>
-    
+
     <div id=oc_shortcuts class="oc_DisplayNone fl-fix" >
       <span id="skip">
         <a name="shortcuts"></a>
@@ -161,7 +161,7 @@
       <h4>Player-Shortcuts</h4>
       <div id="oc_client_shortcuts"></div>
     </div>
-    
+
     <div id="oc_embed" class="oc_DisplayNone fl-fix">
       <div id="oc_embed-left">
       <input id="oc_embed-icon-one" class="oc_embed-icon-one" type="submit" name="" alt="" title="" value=""> </input>

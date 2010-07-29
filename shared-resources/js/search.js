@@ -70,10 +70,9 @@ Opencast.search = ( function() {
                   row += '<td class="oc-segments-time">';
                   row += '<a onclick="Opencast.Watch.seekSegment('+ seconds +')" class="segments-time">';
                   row += Opencast.engage.formatSeconds(seconds);
-                  row += "</a>";
-                  row += "</td>";
-                  row += "<td>";
+                  row += "</a><br/>";
                   row += markedText;
+                  row += "<br/><br/>";
                   row += "</td>";
                   row += "</tr>";
 
@@ -96,7 +95,7 @@ Opencast.search = ( function() {
 
             // Generate Table
             var table = "";
-            table += '<table cellspacing="0" cellpadding="0"><tbody>';
+            table += '<br/><table cellspacing="0" cellpadding="0"><tbody>';
             for(i = 0; i < sortedIds.length; i++) {
               for(var j = 0; j < ids.length; j++) {
                 if(sortedIds[i] === ids[j])
