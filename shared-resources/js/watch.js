@@ -40,11 +40,10 @@ Opencast.Watch = (function ()
         {
           // some code to run after the mapping
           // set the title of the page
-          document.title = "Opencast Matterhorn - Media Player - " + $('#oc-title').html();
+          document.title = $('#oc-title').html() + " | Opencast Matterhorn - Media Player";
 
           // set the title on the top of the player
           $('#oc_title').html($('#oc-title').html());
-
           // set date
           var timeDate = $('#oc-date').html();
           var sd = new Date();
