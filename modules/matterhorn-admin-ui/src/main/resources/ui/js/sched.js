@@ -110,7 +110,7 @@ UI.Init = function(){
   //Editing setup
   var eventId = AdminUI.getURLParams('eventId');
   if(eventId && AdminUI.getURLParams('edit')){
-    document.title = i18n.window.prefix + " " + i18n.window.edit;
+    document.title = i18n.window.edit + " " + i18n.window.prefix;
     $('#i18n_page_title').text(i18n.page.title.edit);
     $('#eventId').val(eventId);
     $('#recording-type').hide();
@@ -136,7 +136,7 @@ UI.Internationalize = function(){
   });
   AdminUI.internationalize(i18n, 'i18n');
   //Handle special cases like the window title.
-  document.title = i18n.window.prefix + " " + i18n.window.schedule;
+  document.title = i18n.window.schedule + " " + i18n.window.prefix; 
   $('#i18n_page_title').text(i18n.page.title.sched);
 };
 
