@@ -15,8 +15,6 @@
  */
 package org.opencastproject.fsresources;
 
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -30,6 +28,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.StringTokenizer;
+import java.util.zip.CRC32;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
@@ -114,19 +113,12 @@ public class StaticResourceServlet extends HttpServlet {
     String eTag = null;
     if (f.isFile() && f.canRead()) {
       logger.debug("Serving static resource '{}'", f.getAbsolutePath());
-      FileInputStream in = new FileInputStream(f);
-      try {
-        eTag = DigestUtils.md5Hex(in);
-        if (eTag.equals(req.getHeader("If-None-Match"))) {
-          resp.setStatus(304);
-          return;
-        }
-        resp.setHeader("ETag", eTag);
-      } catch (IOException e) {
-        logger.warn("This system can not generate md5 hashes.");
-      } finally {
-        IOUtils.closeQuietly(in);
+      eTag = computeEtag(f);
+      if (eTag.equals(req.getHeader("If-None-Match"))) {
+        resp.setStatus(304);
+        return;
       }
+      resp.setHeader("ETag", eTag);
       String contentType = mimeMap.getContentType(f);
       if (!"application/octet-stream".equals(contentType)) {
         resp.setContentType(contentType);
@@ -195,8 +187,29 @@ public class StaticResourceServlet extends HttpServlet {
     }
   }
 
-  protected void copy(File f, ServletOutputStream out, Iterator<Range> ranges, String contentType)
-          throws IOException {
+  /**
+   * Computes an etag for a file using the filename, last modified, and length of the file.
+   * 
+   * @param file
+   *          the file
+   * @return the etag
+   */
+  protected String computeEtag(File file) {
+    CRC32 crc = new CRC32();
+    crc.update(file.getName().getBytes());
+    checksum(file.lastModified(), crc);
+    checksum(file.length(), crc);
+    return Long.toString(crc.getValue());
+  }
+
+  private static void checksum(long l, CRC32 crc) {
+    for (int i = 0; i < 8; i++) {
+      crc.update((int) (l & 0x000000ff));
+      l >>= 8;
+    }
+  }
+
+  protected void copy(File f, ServletOutputStream out, Iterator<Range> ranges, String contentType) throws IOException {
     IOException exception = null;
     while ((exception == null) && (ranges.hasNext())) {
       Range currentRange = (Range) ranges.next();
