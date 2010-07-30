@@ -22,6 +22,8 @@ package org.opencastproject.capture.admin.api;
 public interface AgentState {
   /** Constant <code>IDLE="idle"</code> */
   public static final String IDLE = "idle";
+  /** Constant <code>SHUTTING_DOWN="shutting_down"</code> */
+  public static final String SHUTTING_DOWN = "shutting_down";
   /** Constant <code>CAPTURING="capturing"</code> */
   public static final String CAPTURING = "capturing";
   /** Constant <code>UPLOADING="uploading"</code> */
