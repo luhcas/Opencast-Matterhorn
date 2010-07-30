@@ -123,6 +123,8 @@ public class InspectWorkflowOperationHandlerTest {
     EasyMock.expect(receipt.getElement()).andReturn(newTrack);
     EasyMock.expect(receipt.getId()).andReturn("123");
     EasyMock.expect(receipt.getStatus()).andReturn(Status.FINISHED);
+    EasyMock.expect(receipt.getDateCreated()).andReturn(new Date());
+    EasyMock.expect(receipt.getDateStarted()).andReturn(new Date());
     EasyMock.replay(receipt);
     inspectionService = EasyMock.createNiceMock(MediaInspectionService.class);
     EasyMock.expect(

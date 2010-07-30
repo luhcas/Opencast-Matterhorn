@@ -39,6 +39,7 @@ import org.junit.Test;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,6 +99,8 @@ public class ComposeWorkflowOperationHandlerTest {
     receipt = EasyMock.createNiceMock(Receipt.class);
     EasyMock.expect(receipt.getElement()).andReturn(encodedTracks[0]);
     EasyMock.expect(receipt.getStatus()).andReturn(Receipt.Status.FINISHED);
+    EasyMock.expect(receipt.getDateCreated()).andReturn(new Date());
+    EasyMock.expect(receipt.getDateStarted()).andReturn(new Date());
     EasyMock.replay(receipt);
 
     // set up mock composer service

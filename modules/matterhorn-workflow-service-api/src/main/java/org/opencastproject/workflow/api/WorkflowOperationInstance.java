@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.api;
 
 import java.net.URL;
+import java.util.Date;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -62,4 +63,13 @@ public interface WorkflowOperationInstance extends Configurable {
    * when exceptions are thrown during an operation.
    */
   boolean isFailWorkflowOnException();
+  
+  /** The timestamp this operation started. If the job was queued, this can be significantly later than the date created. */
+  public Date getDateStarted();
+
+  /** The number of milliseconds this operation waited in a service queue */
+  public long getTimeInQueue();
+  
+  /** The timestamp this operation completed */
+  public Date getDateCompleted();
 }

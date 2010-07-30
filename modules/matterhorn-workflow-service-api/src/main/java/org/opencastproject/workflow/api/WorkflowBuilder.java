@@ -41,14 +41,14 @@ public class WorkflowBuilder {
   private static WorkflowBuilder instance = null;
 
   protected JAXBContext jaxbContext = null;
-  
+
   private WorkflowBuilder() throws JAXBException {
     StringBuilder sb = new StringBuilder();
     sb.append("org.opencastproject.mediapackage");
     sb.append(":org.opencastproject.workflow.api");
-    jaxbContext= JAXBContext.newInstance(sb.toString(), WorkflowBuilder.class.getClassLoader());
+    jaxbContext = JAXBContext.newInstance(sb.toString(), WorkflowBuilder.class.getClassLoader());
   }
-  
+
   /**
    * Returns an instance of the {@link WorkflowBuilder}.
    * 
@@ -79,7 +79,7 @@ public class WorkflowBuilder {
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
             WorkflowDefinitionImpl.class).getValue();
   }
-  
+
   /**
    * Loads a workflow definition from the xml stream.
    * 
@@ -92,8 +92,7 @@ public class WorkflowBuilder {
   public WorkflowDefinition parseWorkflowDefinition(String in) throws Exception {
     return parseWorkflowDefinition(IOUtils.toInputStream(in, "UTF8"));
   }
-  
-  
+
   /**
    * Loads a workflow instance from the given input stream.
    * 
@@ -105,8 +104,8 @@ public class WorkflowBuilder {
    */
   public WorkflowInstance parseWorkflowInstance(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-    WorkflowInstanceImpl workflow = unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-            WorkflowInstanceImpl.class).getValue();
+    WorkflowInstanceImpl workflow = unmarshaller.unmarshal(
+            DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in), WorkflowInstanceImpl.class).getValue();
     workflow.init();
     return workflow;
   }
@@ -151,16 +150,25 @@ public class WorkflowBuilder {
     marshaller.marshal(set, writer);
     return writer.toString();
   }
-  
+
+  public WorkflowOperationResult buildWorkflowOperationResult(MediaPackage mediaPackage, Action action, long timeInQueue) {
+    return buildWorkflowOperationResult(mediaPackage, null, action, timeInQueue);
+  }
+
   public WorkflowOperationResult buildWorkflowOperationResult(MediaPackage mediaPackage, Action action) {
-    return buildWorkflowOperationResult(mediaPackage, null, action);
+    return buildWorkflowOperationResult(mediaPackage, null, action, 0);
+  }
+
+  public WorkflowOperationResult buildWorkflowOperationResult(Action action, long timeInQueue) {
+    return buildWorkflowOperationResult(null, null, action, timeInQueue);
   }
 
   public WorkflowOperationResult buildWorkflowOperationResult(Action action) {
-    return buildWorkflowOperationResult(null, null, action);
+    return buildWorkflowOperationResult(null, null, action, 0);
   }
 
-  public WorkflowOperationResult buildWorkflowOperationResult(MediaPackage mediaPackage, Map<String, String> properties, Action action) {
-    return new WorkflowOperationResultImpl(mediaPackage, properties, action);
+  public WorkflowOperationResult buildWorkflowOperationResult(MediaPackage mediaPackage,
+          Map<String, String> properties, Action action, long timeInQueue) {
+    return new WorkflowOperationResultImpl(mediaPackage, properties, action, timeInQueue);
   }
 }

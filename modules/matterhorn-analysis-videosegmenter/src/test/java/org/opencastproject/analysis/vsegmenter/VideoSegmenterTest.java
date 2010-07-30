@@ -50,6 +50,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Date;
 import java.util.Iterator;
 
 /**
@@ -113,12 +114,12 @@ public class VideoSegmenterTest {
     EasyMock.expect(
             workspace.putInCollection((String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
                     (InputStream) EasyMock.anyObject())).andAnswer(new IAnswer<URI>() {
-                      public URI answer() throws Throwable {
-                        InputStream in = (InputStream)EasyMock.getCurrentArguments()[2];
-                        IOUtils.copy(in, new FileOutputStream(tempFile));
-                        return tempFile.toURI();
-                      }
-                    });
+      public URI answer() throws Throwable {
+        InputStream in = (InputStream) EasyMock.getCurrentArguments()[2];
+        IOUtils.copy(in, new FileOutputStream(tempFile));
+        return tempFile.toURI();
+      }
+    });
     EasyMock.replay(workspace);
     Receipt receipt = new ReceiptStub();
 
@@ -229,14 +230,18 @@ public class VideoSegmenterTest {
     public String toXml() {
       return null;
     }
-    
-    public String getContext() {
+
+    public Date getDateCompleted() {
       return null;
     }
 
-    public void setContext(String context) {
+    public Date getDateCreated() {
+      return null;
     }
 
+    public Date getDateStarted() {
+      return null;
+    }
   }
 
 }

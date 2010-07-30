@@ -121,14 +121,11 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
    */
   public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.debug("Running a/v muxing workflow operation on workflow {}", workflowInstance.getId());
-    MediaPackage resultingMediaPackage = null;
     try {
-      resultingMediaPackage = mux(workflowInstance.getMediaPackage(), workflowInstance.getCurrentOperation());
+      return mux(workflowInstance.getMediaPackage(), workflowInstance.getCurrentOperation());
     } catch (Exception e) {
       throw new WorkflowOperationException(e);
     }
-    logger.debug("Media package tracks muxed");
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, Action.CONTINUE);
   }
 
   /**
@@ -139,7 +136,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
    *          The source media package
    * @param operation
    *          the mux workflow operation
-   * @return the mediapackage
+   * @return the operation result containing the updated mediapackage
    * @throws EncoderException
    *           if encoding fails
    * @throws IOException
@@ -147,7 +144,9 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
    * @throws NotFoundException
    *           if the workspace does not contain the requested element
    */
-  private MediaPackage mux(MediaPackage src, WorkflowOperationInstance operation) throws EncoderException,
+  // FIXME: Refactor so this method isn't so long and complex
+  //CHECKSTYLE:OFF
+  private WorkflowOperationResult mux(MediaPackage src, WorkflowOperationInstance operation) throws EncoderException,
           WorkflowOperationException, NotFoundException, IOException {
     MediaPackage mediaPackage = (MediaPackage) src.clone();
 
@@ -172,9 +171,8 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
 
     // Find the encoding profile
     EncodingProfile profile = composerService.getProfile(encodingProfileName);
-    if (profile == null) {
+    if (profile == null)
       throw new IllegalStateException("Encoding profile '" + encodingProfileName + "' was not found");
-    }
 
     // Reencode when there is no need for muxing?
     boolean rewrite = true;
@@ -191,7 +189,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     switch (tracks.length) {
     case 0:
       logger.info("No audio/video tracks with flavor '{}' found to prepare", sourceFlavor);
-      return mediaPackage;
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
     case 1:
       audioTrack = videoTrack = tracks[0];
       break;
@@ -282,6 +280,12 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
               composedTrack.getIdentifier(), fileName));
     }
 
+    long timeInQueue = 0;
+    if (receipt != null) {
+      // add this receipt's queue time to the total
+      timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
+    }
+
     // Update the track's flavor
     composedTrack.setFlavor(targetFlavor);
     logger.debug("Composed track has flavor '{}'", composedTrack.getFlavor());
@@ -292,7 +296,8 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
       logger.trace("Tagging composed track with '{}'", tag);
       composedTrack.addTag(tag);
     }
-    return mediaPackage;
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, timeInQueue);
   }
+  //CHECKSTYLE:ON
 
 }

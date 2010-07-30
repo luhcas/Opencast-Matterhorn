@@ -26,6 +26,8 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
 
   protected Action action;
 
+  protected long timeInQueue;
+  
   protected boolean wait;
 
   /**
@@ -39,9 +41,10 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
    * @param resultingMediaPackage
    * @param action
    */
-  public WorkflowOperationResultImpl(MediaPackage resultingMediaPackage, Map<String, String> properties, Action action) {
+  public WorkflowOperationResultImpl(MediaPackage resultingMediaPackage, Map<String, String> properties, Action action, long timeInQueue) {
     this.resultingMediaPackage = resultingMediaPackage;
     this.properties = properties;
+    this.timeInQueue = timeInQueue;
     if(action == null) {
       throw new IllegalArgumentException("action must not be null.");
     } else {
@@ -92,4 +95,12 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
     return properties;
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationResult#getTimeInQueue()
+   */
+  @Override
+  public long getTimeInQueue() {
+    return timeInQueue;
+  }
 }

@@ -119,11 +119,13 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
 
     // Segment the media package
     Catalog mpeg7Catalog = null;
+    long timeInQueue = 0;
     try {
       Receipt receipt = videosegmenter.analyze(track, true);
       if (receipt.getStatus().equals(Receipt.Status.FAILED)) {
         throw new WorkflowOperationException("Videosegmentation on " + track + " failed");
       }
+      timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
       mpeg7Catalog = (Catalog) receipt.getElement();
       mediaPackage.add(mpeg7Catalog);
       mpeg7Catalog.setURI(workspace.moveTo(mpeg7Catalog.getURI(), mediaPackage.getIdentifier().toString(), mpeg7Catalog
@@ -133,7 +135,7 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
     }
 
     logger.debug("Video segmentation completed");
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, timeInQueue);
   }
 
   /**

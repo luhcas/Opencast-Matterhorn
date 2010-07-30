@@ -109,17 +109,11 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
   public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.debug("Running compose workflow operation on workflow {}", workflowInstance.getId());
 
-    // Encode the media package
-    MediaPackage resultingMediaPackage = null;
     try {
-      resultingMediaPackage = encode(workflowInstance.getMediaPackage(), workflowInstance.getCurrentOperation());
+      return encode(workflowInstance.getMediaPackage(), workflowInstance.getCurrentOperation());
     } catch (Exception e) {
       throw new WorkflowOperationException(e);
     }
-
-    logger.debug("Compose operation completed");
-
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, Action.CONTINUE);
   }
 
   /**
@@ -129,7 +123,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
    *          The source media package
    * @param operation
    *          the current workflow operation
-   * @return the updated media package
+   * @return the operation result containing the updated media package
    * @throws EncoderException
    *           if encoding fails
    * @throws WorkflowOperationException
@@ -139,7 +133,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
    * @throws NotFoundException
    *           if the workspace doesn't contain the requested file
    */
-  private MediaPackage encode(MediaPackage src, WorkflowOperationInstance operation) throws EncoderException,
+  private WorkflowOperationResult encode(MediaPackage src, WorkflowOperationInstance operation) throws EncoderException,
           IOException, NotFoundException, WorkflowOperationException {
     MediaPackage mediaPackage = (MediaPackage) src.clone();
     // Read the configuration properties
@@ -168,10 +162,11 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
     // Did we get the set of tracks that we need?
     if (tracks.length == 0) {
       logger.info("Skipping encoding of media package to '{}': no suitable input tracks found", profile);
-      return mediaPackage;
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
     }
 
     // Encode all found tracks
+    long totalTimeInQueue = 0;
     for (Track t : tracks) {
 
       // Skip audio/video only mismatches
@@ -201,6 +196,11 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
         throw new WorkflowOperationException("Encoding failed");
       }
       Track composedTrack = (Track) receipt.getElement();
+
+      // add this receipt's queue time to the total
+      long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
+      totalTimeInQueue+=timeInQueue;
+
       updateTrackMetadata(composedTrack, operation, profile);
 
       // store new tracks to mediaPackage
@@ -210,7 +210,9 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
               composedTrack.getIdentifier(), fileName));
     }
 
-    return mediaPackage;
+    WorkflowOperationResult result = WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
+    logger.debug("Compose operation completed");
+    return result;
   }
 
   // Update the newly composed track with metadata

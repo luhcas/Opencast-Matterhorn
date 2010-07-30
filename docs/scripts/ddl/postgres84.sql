@@ -22,6 +22,9 @@ CREATE TABLE job (
     id character varying(255) NOT NULL,
     host character varying(255),
     status integer,
+    datecreated timestamp without time zone,
+    datestarted timestamp without time zone,
+    datecompleted timestamp without time zone,
     element_xml text,
     type character varying(255)
 );

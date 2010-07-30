@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Date;
 
 public class MediaInspectionServiceImplTest {
   private MediaInspectionServiceImpl service = null;
@@ -63,7 +64,7 @@ public class MediaInspectionServiceImplTest {
     EasyMock.expect(rs.createReceipt(MediaInspectionService.JOB_TYPE)).andReturn(new ReceiptStub()).anyTimes();
     EasyMock.replay(rs);
     service.setRemoteServiceManager(rs);
-    
+
     service.activate();
   }
 
@@ -84,7 +85,7 @@ public class MediaInspectionServiceImplTest {
 
     try {
       Receipt receipt = service.inspect(uriTrack, true);
-      Track track = (Track)receipt.getElement();
+      Track track = (Track) receipt.getElement();
       // test the returned values
       Checksum cs = Checksum.create(ChecksumType.fromString("md5"), "9d3523e464f18ad51f59564acde4b95a");
       Assert.assertEquals(track.getChecksum(), cs);
@@ -109,7 +110,7 @@ public class MediaInspectionServiceImplTest {
     try {
       // init a track with inspect
       Receipt receipt = service.inspect(uriTrack, true);
-      Track track = (Track)receipt.getElement();
+      Track track = (Track) receipt.getElement();
       // make changes to metadata
       Checksum cs = track.getChecksum();
       track.setChecksum(null);
@@ -117,13 +118,13 @@ public class MediaInspectionServiceImplTest {
       track.setMimeType(mt);
       // test the enrich scenario
       Receipt newReceipt = service.enrich(track, false, true);
-      Track newTrack = (Track)newReceipt.getElement();
+      Track newTrack = (Track) newReceipt.getElement();
       Assert.assertEquals(newTrack.getChecksum(), cs);
       Assert.assertEquals(newTrack.getMimeType(), mt);
       Assert.assertEquals(newTrack.getDuration(), 14546);
       // test the override scenario
       newReceipt = service.enrich(track, true, true);
-      newTrack = (Track)newReceipt.getElement();
+      newTrack = (Track) newReceipt.getElement();
       Assert.assertEquals(newTrack.getChecksum(), cs);
       Assert.assertNotSame(newTrack.getMimeType(), mt);
       Assert.assertEquals(newTrack.getDuration(), 14546);
@@ -135,40 +136,58 @@ public class MediaInspectionServiceImplTest {
   class ReceiptStub implements Receipt {
     MediaPackageElement element;
     Status status;
+
     public MediaPackageElement getElement() {
       return element;
     }
+
     public String getHost() {
       return null;
     }
+
     public String getId() {
       return null;
     }
+
     public Status getStatus() {
       return status;
     }
+
     public String getType() {
       return MediaInspectionService.JOB_TYPE;
     }
+
     public void setElement(MediaPackageElement element) {
       this.element = element;
     }
+
     public void setHost(String host) {
     }
+
     public void setId(String id) {
     }
+
     public void setStatus(Status status) {
       this.status = status;
     }
+
     public void setType(String type) {
     }
+
     public String toXml() {
       return null;
     }
-    public String getContext() {
+
+    public Date getDateCompleted() {
       return null;
     }
-    public void setContext(String context) {
+
+    public Date getDateCreated() {
+      return null;
+    }
+
+    public Date getDateStarted() {
+      return null;
     }
   }
 }

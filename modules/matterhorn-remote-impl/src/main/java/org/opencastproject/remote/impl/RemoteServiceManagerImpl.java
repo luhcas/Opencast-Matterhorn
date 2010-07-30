@@ -209,7 +209,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
     try {
       Receipt receipt = em.find(ReceiptImpl.class, id);
       if (receipt != null) {
-        // JPA's cachees can be out of date if external changes (e.g. another node in the cluster) have been made to
+        // JPA's caches can be out of date if external changes (e.g. another node in the cluster) have been made to
         // this row in the database
         em.refresh(receipt);
       }

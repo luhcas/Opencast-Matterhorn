@@ -152,17 +152,13 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
     }
 
-    // Create the image
-    MediaPackage resultingMediaPackage = null;
+    // Create the images
     try {
-      resultingMediaPackage = createPreviews(src, workflowInstance.getCurrentOperation());
+      return createPreviews(src, workflowInstance.getCurrentOperation());
     } catch (Exception e) {
       throw new WorkflowOperationException(e);
     }
 
-    logger.debug("Segments preview operation completed");
-
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, Action.CONTINUE);
   }
 
   /**
@@ -170,15 +166,16 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
    * 
    * @param mediaPackage
    * @param properties
-   * @return
+   * @return the operation result containing the updated mediapackage
    * @throws EncoderException
    * @throws ExecutionException
    * @throws InterruptedException
    * @throws IOException
    * @throws NotFoundException
    */
-  private MediaPackage createPreviews(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
+  private WorkflowOperationResult createPreviews(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
           throws EncoderException, InterruptedException, ExecutionException, NotFoundException, IOException {
+    long totalTimeInQueue = 0;
 
     // Read the configuration properties
     String sourceVideoFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
@@ -220,14 +217,13 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
     if (videoTracks.size() == 0) {
       logger.debug("Mediapackage {} has no suitable tracks to extract images based on tags {} and flavor {}",
               new Object[] { mediaPackage, sourceTags, sourceVideoFlavor });
-      return mediaPackage;
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
     } else {
 
       // Determine the tagset for the reference
       List<String> referenceTagSet = asList(referenceTags);
 
       // Determine the reference master
-
       for (Track t : videoTracks) {
 
         // Try to load the segments catalog
@@ -280,6 +276,11 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
             long time = tp.getTimeInMilliseconds() / 1000;
 
             Receipt receipt = composerService.image(t, profile.getIdentifier(), time, true);
+
+            // add this receipt's queue time to the total
+            long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
+            totalTimeInQueue+=timeInQueue;
+            
             Attachment composedImage = (Attachment) receipt.getElement();
             if (composedImage == null)
               throw new RuntimeException("Unable to compose image");
@@ -315,7 +316,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
       }
     }
 
-    return mediaPackage;
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
   }
 
   /**

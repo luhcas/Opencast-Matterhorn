@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.api;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -62,6 +63,15 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   @XmlAttribute(name="exception-handler-workflow")
   protected String exceptionHandlingWorkflow;
 
+  @XmlElement(name="started")
+  protected Date dateStarted;
+
+  @XmlElement(name="completed")
+  protected Date dateCompleted;
+
+  @XmlElement(name="time-in-queue")
+  protected Long timeInQueue;
+
   /**
    * No-arg constructor needed for JAXB serialization
    */
@@ -72,11 +82,11 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
    * Builds a new workflow operation instance based on another workflow operation.
    */
   public WorkflowOperationInstanceImpl(WorkflowOperationDefinition def) {
-    this.id = def.getId();
-    this.state = OperationState.INSTANTIATED;
-    this.description = def.getDescription();
-    this.failWorkflowOnException = def.isFailWorkflowOnException();
-    this.exceptionHandlingWorkflow = def.getExceptionHandlingWorkflow();
+    setId(def.getId());
+    setState(OperationState.INSTANTIATED);
+    setDescription(def.getDescription());
+    setFailWorkflowOnException(def.isFailWorkflowOnException());
+    setExceptionHandlingWorkflow(def.getExceptionHandlingWorkflow());
     Set<String> defConfigs = def.getConfigurationKeys();
     this.configurations = new TreeSet<WorkflowConfiguration>();
     if (defConfigs != null) {
@@ -122,6 +132,14 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   }
 
   public void setState(OperationState state) {
+    Date now = new Date();
+    if(OperationState.RUNNING.equals(state)) {
+      this.dateStarted = now;
+    } else if(OperationState.FAILED.equals(state)) {
+      this.dateCompleted = now;
+    } else if(OperationState.SUCCEEDED.equals(state)) {
+      this.dateCompleted = now;
+    }
     this.state = state;
   }
 
@@ -264,5 +282,48 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   public void setExceptionHandlingWorkflow(String exceptionHandlingWorkflow) {
     this.exceptionHandlingWorkflow = exceptionHandlingWorkflow;
   }
+
+  /**
+   * @return the dateStarted
+   */
+  public Date getDateStarted() {
+    return dateStarted;
+  }
+
+  /**
+   * @param dateStarted the dateStarted to set
+   */
+  public void setDateStarted(Date dateStarted) {
+    this.dateStarted = dateStarted;
+  }
+
+  /**
+   * @return the dateCompleted
+   */
+  public Date getDateCompleted() {
+    return dateCompleted;
+  }
+
+  /**
+   * @param dateCompleted the dateCompleted to set
+   */
+  public void setDateCompleted(Date dateCompleted) {
+    this.dateCompleted = dateCompleted;
+  }
   
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getTimeInQueue()
+   */
+  @Override
+  public long getTimeInQueue() {
+    return timeInQueue;
+  }
+
+  /**
+   * @param timeInQueue the timeInQueue to set
+   */
+  public void setTimeInQueue(long timeInQueue) {
+    this.timeInQueue = timeInQueue;
+  }
 }

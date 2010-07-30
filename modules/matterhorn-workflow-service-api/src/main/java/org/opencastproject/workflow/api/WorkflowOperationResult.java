@@ -41,4 +41,10 @@ public interface WorkflowOperationResult {
    * @return The action that the workflow service should take on this workflow instance.
    */
   Action getAction();
+  
+  /**
+   * The number of milliseconds this operation sat in a queue before finishing.
+   * @return The time spent in a queue
+   */
+  long getTimeInQueue();
 }

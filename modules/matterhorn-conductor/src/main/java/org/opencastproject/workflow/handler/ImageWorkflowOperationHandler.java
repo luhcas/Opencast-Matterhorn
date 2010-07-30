@@ -50,7 +50,7 @@ import java.util.concurrent.ExecutionException;
  * The workflow definition for handling "image" operations
  */
 public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
-  
+
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(ImageWorkflowOperationHandler.class);
 
@@ -60,7 +60,8 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
   static {
     CONFIG_OPTIONS = new TreeMap<String, String>();
     CONFIG_OPTIONS.put("source-flavor", "The \"flavor\" of the track to use as a video source input");
-    CONFIG_OPTIONS.put("source-tags", "The required tags that must exist on the track for the track to be used as a video source");
+    CONFIG_OPTIONS.put("source-tags",
+            "The required tags that must exist on the track for the track to be used as a video source");
     CONFIG_OPTIONS.put("encoding-profile", "The encoding profile to use");
     CONFIG_OPTIONS.put("time", "The number of seconds into the video file to extract the image");
     CONFIG_OPTIONS.put("target-flavor", "The flavor to apply to the extracted image");
@@ -96,6 +97,7 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
    */
   @Override
@@ -111,19 +113,14 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
   public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.debug("Running image workflow operation on {}", workflowInstance);
 
-    MediaPackage src = (MediaPackage)workflowInstance.getMediaPackage().clone();
+    MediaPackage src = (MediaPackage) workflowInstance.getMediaPackage().clone();
 
     // Create the image
-    MediaPackage resultingMediaPackage = null;
     try {
-      resultingMediaPackage = image(src, workflowInstance.getCurrentOperation());
+      return image(src, workflowInstance.getCurrentOperation());
     } catch (Exception e) {
       throw new WorkflowOperationException(e);
     }
-
-    logger.debug("Image operation completed");
-
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, Action.CONTINUE);
   }
 
   /**
@@ -131,14 +128,14 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
    * 
    * @param mediaPackage
    * @param properties
-   * @return
+   * @return the operation result
    * @throws EncoderException
    * @throws ExecutionException
-   * @throws IOException 
-   * @throws NotFoundException 
+   * @throws IOException
+   * @throws NotFoundException
    */
-  private MediaPackage image(final MediaPackage mediaPackage, WorkflowOperationInstance operation) throws EncoderException,
-          ExecutionException, NotFoundException, IOException {
+  private WorkflowOperationResult image(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
+          throws EncoderException, ExecutionException, NotFoundException, IOException {
 
     // Read the configuration properties
     String sourceVideoFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
@@ -157,26 +154,33 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
 
     // Select the tracks based on source flavors and tags
     Set<Track> videoTracks = new HashSet<Track>();
-    for(Track track : mediaPackage.getTracks()) {
-      if (sourceVideoFlavor == null || (track.getFlavor() != null && sourceVideoFlavor.equals(track.getFlavor().toString()))) {
+    for (Track track : mediaPackage.getTracks()) {
+      if (sourceVideoFlavor == null
+              || (track.getFlavor() != null && sourceVideoFlavor.equals(track.getFlavor().toString()))) {
         if (track.hasVideo() && track.containsTag(sourceTagSet)) {
           videoTracks.add(track);
         }
       }
     }
-    
+
     if (videoTracks.size() == 0) {
       logger.debug("Mediapackage {} has no suitable tracks to extract images based on tags {} and flavor {}",
-              new Object[] {mediaPackage, sourceTags, sourceVideoFlavor});
-      return mediaPackage;
+              new Object[] { mediaPackage, sourceTags, sourceVideoFlavor });
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
     }
 
+    long totalTimeInQueue = 0;
     for (Track t : videoTracks) {
       // take the minimum of the specified time and the video track duration
-      long time = Math.min(Long.parseLong(timeConfiguration), t.getDuration()/1000L);
-      
+      long time = Math.min(Long.parseLong(timeConfiguration), t.getDuration() / 1000L);
+
       Receipt receipt = composerService.image(t, profile.getIdentifier(), time, true);
-      Attachment composedImage = (Attachment)receipt.getElement();
+
+      // add this receipt's queue time to the total
+      long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
+      totalTimeInQueue+=timeInQueue;
+
+      Attachment composedImage = (Attachment) receipt.getElement();
       if (composedImage == null)
         throw new RuntimeException("Composer service did not return an image");
 
@@ -188,12 +192,13 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
       // Set the mimetype
       if (profile.getMimeType() != null)
         composedImage.setMimeType(MimeTypes.parseMimeType(profile.getMimeType()));
-      
+
       // Add tags
       if (targetImageTags != null) {
         for (String tag : asList(targetImageTags)) {
           logger.trace("Tagging image with '{}'", tag);
-          if (StringUtils.trimToNull(tag) != null) composedImage.addTag(tag);
+          if (StringUtils.trimToNull(tag) != null)
+            composedImage.addTag(tag);
         }
       }
       // store new image in the mediaPackage
@@ -203,7 +208,7 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
               composedImage.getIdentifier(), fileName));
     }
 
-    return mediaPackage;
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
   }
 
 }

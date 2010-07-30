@@ -24,6 +24,8 @@ import org.opencastproject.remote.api.Receipt;
 
 import org.junit.Ignore;
 
+import java.util.Date;
+
 /**
  * Test implementation for the abstract media analysis support.
  */
@@ -110,10 +112,17 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
     public String toXml() {
       return null;
     }
-    public String getContext() {
+
+    public Date getDateCompleted() {
       return null;
     }
-    public void setContext(String context) {
+
+    public Date getDateCreated() {
+      return null;
+    }
+
+    public Date getDateStarted() {
+      return null;
     }
   }
 

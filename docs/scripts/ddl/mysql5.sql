@@ -24,6 +24,9 @@ CREATE TABLE `JOB` (
   `ID` varchar(255) collate utf8_unicode_ci NOT NULL,
   `HOST` varchar(255) collate utf8_unicode_ci default NULL,
   `STATUS` int(11) default NULL,
+  `DATECREATED` datetime default NULL,
+  `DATESTARTED` datetime default NULL,
+  `DATECOMPLETED` datetime default NULL,
   `ELEMENT_XML` mediumtext collate utf8_unicode_ci,
   `TYPE` varchar(255) collate utf8_unicode_ci default NULL,
   PRIMARY KEY  (`ID`)

@@ -585,7 +585,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     }
     currentOperation.setState(OperationState.FAILED);
     dao.update(workflow);
-    handleOperationResult(workflow, new WorkflowOperationResultImpl(workflow.getMediaPackage(), null, Action.CONTINUE));
+    handleOperationResult(workflow, new WorkflowOperationResultImpl(workflow.getMediaPackage(), null, Action.CONTINUE, 0));
   }
 
   /**
@@ -594,7 +594,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     if (result == null) {
       // Just continue using the workflow's current mediapackage, but log a warning
       logger.warn("Handling a null operation result for workflow {}", workflow);
-      result = new WorkflowOperationResultImpl(workflow.getMediaPackage(), null, Action.CONTINUE);
+      result = new WorkflowOperationResultImpl(workflow.getMediaPackage(), null, Action.CONTINUE, 0);
     } else {
       // Update the workflow's mediapackage if a new one was produced in this operation
       MediaPackage mp = result.getMediaPackage();
@@ -602,9 +602,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         workflow.setMediaPackage(mp);
       }
     }
+    
     WorkflowOperationHandler handler = null;
     if (Action.PAUSE.equals(result.getAction())) {
-      WorkflowOperationInstance currentOperation = workflow.getCurrentOperation();
+      WorkflowOperationInstanceImpl currentOperation = (WorkflowOperationInstanceImpl)workflow.getCurrentOperation();
+      currentOperation.setTimeInQueue(result.getTimeInQueue());
       handler = getWorkflowOperationHandler(currentOperation.getId());
       if (!(handler instanceof ResumableWorkflowOperationHandler)) {
         throw new IllegalStateException("Operation " + currentOperation.getId() + " is not resumable");
@@ -645,6 +647,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       dao.update(workflow);
       return;
     }
+
+    WorkflowOperationInstanceImpl currentOperation = (WorkflowOperationInstanceImpl)workflow.getCurrentOperation();
+    currentOperation.setTimeInQueue(result.getTimeInQueue());
 
     WorkflowOperationInstance nextOperation = workflow.next(); // Be careful... this increments the current operation
     if (nextOperation == null) {

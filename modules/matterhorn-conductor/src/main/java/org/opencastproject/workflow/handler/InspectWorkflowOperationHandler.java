@@ -118,10 +118,16 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
           throws WorkflowOperationException {
     MediaPackage mediaPackage = (MediaPackage)workflowInstance.getMediaPackage().clone();
     // Inspect the tracks
+    long totalTimeInQueue = 0;
     for (Track track : mediaPackage.getTracks()) {
       
       logger.info("Inspecting track '{}' of {}", track.getIdentifier(), mediaPackage);
       Receipt receipt = inspectionService.enrich(track, false, true);
+
+      // add this receipt's queue time to the total
+      long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
+      totalTimeInQueue+=timeInQueue;
+
       Track inspectedTrack = (Track)receipt.getElement();
       if (inspectedTrack == null)
         throw new WorkflowOperationException("Track " + track + " could not be inspected");
@@ -142,7 +148,7 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
       throw new WorkflowOperationException(e.getMessage());
     }
     
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
   }
 
   /**

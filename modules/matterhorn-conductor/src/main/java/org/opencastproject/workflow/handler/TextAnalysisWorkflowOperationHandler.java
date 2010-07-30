@@ -167,17 +167,11 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
     }
 
-    // Create the image
-    MediaPackage resultingMediaPackage = null;
     try {
-      resultingMediaPackage = extractVideoText(src, workflowInstance.getCurrentOperation());
+      return extractVideoText(src, workflowInstance.getCurrentOperation());
     } catch (Exception e) {
       throw new WorkflowOperationException(e);
     }
-
-    logger.debug("Segments preview operation completed");
-
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, Action.CONTINUE);
   }
 
   /**
@@ -191,9 +185,10 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    * @throws InterruptedException
    * @throws NotFoundException
    */
-  protected MediaPackage extractVideoText(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
+  protected WorkflowOperationResult extractVideoText(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
           throws EncoderException, InterruptedException, ExecutionException, IOException, NotFoundException {
-
+    long totalTimeInQueue = 0;
+    
     List<String> sourceTagSet = asList(operation.getConfiguration("source-tags"));
     List<String> targetTagSet = asList(operation.getConfiguration("target-tags"));
 
@@ -204,7 +199,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
     if (catalogs.size() == 0) {
       logger.debug("Mediapackage {} has no suitable mpeg-7 catalogs based on tags {} to to run text analysis",
               mediaPackage, sourceTagSet);
-      return mediaPackage;
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
     }
 
     // Loop over all existing segment catalogs
@@ -264,6 +259,11 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
 
         // If there is a corresponding spaciotemporal decomposition, remove all the videotext elements
         Receipt receipt = analysisService.analyze(image, true);
+        
+        // add this receipt's queue time to the total
+        long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
+        totalTimeInQueue+=timeInQueue;
+
         Catalog catalog = (Catalog) receipt.getElement();
         workspace.delete(image.getURI());
         if (catalog == null) {
@@ -319,7 +319,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
     }
 
     logger.debug("Text analysis completed");
-    return mediaPackage;
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
   }
 
   /**

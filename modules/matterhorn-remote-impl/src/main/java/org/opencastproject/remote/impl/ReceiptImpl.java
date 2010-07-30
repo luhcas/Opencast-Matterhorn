@@ -27,6 +27,8 @@ import org.opencastproject.remote.api.Receipt;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 
+import java.util.Date;
+
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
@@ -34,6 +36,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -53,16 +57,17 @@ import javax.xml.parsers.DocumentBuilderFactory;
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name="receipt", namespace="http://receipt.opencastproject.org/")
 public class ReceiptImpl implements Receipt {
+
   /** Default constructor needed by jaxb and jpa */
   public ReceiptImpl() {}
 
   /** Constructor with everything needed for a newly instantiated receipt. */
   public ReceiptImpl(String id, Status status, String type, String host, String context) {
     this();
-    this.id = id;
-    this.status = status;
-    this.type = type;
-    this.host = host;
+    setId(id);
+    setStatus(status);
+    setType(type);
+    setHost(host);
   }
 
   /** The receipt ID */
@@ -76,6 +81,15 @@ public class ReceiptImpl implements Receipt {
 
   /** The host responsible for this receipt */
   String host;
+
+  /** The date this receipt was created */
+  Date dateCreated;
+  
+  /** The date this receipt was started */
+  Date dateStarted;
+
+  /** The date this receipt was completed */
+  Date dateCompleted;
 
   /** The receipt's context.  Not currently utilized.  See http://opencast.jira.com/browse/MH-4492 */
 //  String context;
@@ -121,6 +135,16 @@ public class ReceiptImpl implements Receipt {
    */
   @Override
   public void setStatus(Status status) {
+    Date now = new Date();
+    if(Status.QUEUED.equals(status)) {
+      this.dateCreated = now;
+    } else if(Status.RUNNING.equals(status)) {
+      this.dateStarted = now;
+    } else if(Status.FAILED.equals(status)) {
+      this.dateCompleted = now;
+    } else if(Status.FINISHED.equals(status)) {
+      this.dateCompleted = now;
+    }
     this.status = status;
   }
 
@@ -162,6 +186,63 @@ public class ReceiptImpl implements Receipt {
   @Override
   public void setHost(String host) {
     this.host = host;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.remote.api.Receipt#getDateCompleted()
+   */
+  @Column
+  @Temporal(TemporalType.TIMESTAMP)
+  @XmlElement
+  @Override
+  public Date getDateCompleted() {
+    return dateCompleted;
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.remote.api.Receipt#getDateCreated()
+   */
+  @Column
+  @Temporal(TemporalType.TIMESTAMP)
+  @XmlElement
+  @Override
+  public Date getDateCreated() {
+    return dateCreated;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.remote.api.Receipt#getDateStarted()
+   */
+  @Column
+  @Temporal(TemporalType.TIMESTAMP)
+  @XmlElement
+  @Override
+  public Date getDateStarted() {
+    return dateStarted;
+  }
+  
+  /**
+   * @param dateCreated the dateCreated to set
+   */
+  public void setDateCreated(Date dateCreated) {
+    this.dateCreated = dateCreated;
+  }
+
+  /**
+   * @param dateStarted the dateStarted to set
+   */
+  public void setDateStarted(Date dateStarted) {
+    this.dateStarted = dateStarted;
+  }
+
+  /**
+   * @param dateCompleted the dateCompleted to set
+   */
+  public void setDateCompleted(Date dateCompleted) {
+    this.dateCompleted = dateCompleted;
   }
 
 //  /**
