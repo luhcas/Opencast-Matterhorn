@@ -201,7 +201,8 @@ Opencast.Watch = (function ()
           getClientShortcuts();
 
           Opencast.search.initialize();
-
+            
+         Opencast.Player.doTogglePlayPause(); 
 
         });
     }

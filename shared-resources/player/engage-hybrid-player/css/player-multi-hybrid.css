@@ -307,7 +307,7 @@ table
 
 .oc_btn-tabs
 {
-  width:                    135px;
+  width:                    115px;
   margin-right:             5px;
   margin-top:               2px;
   border:                   1px solid #2D8F8B;
@@ -500,12 +500,12 @@ option:hover
 .oc_slidetext-left
 {
   float:                    left; 
-  width:                    100%;
+  width:                    75%;
 }
 
 .oc_slidetext-right
 {  
-  float:                    left;
+  float:                    right
 }
 
 .oc_DisplayNone
