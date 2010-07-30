@@ -30,6 +30,4 @@ public interface AgentState {
   public static final String UPLOADING = "uploading";
   /** Constant <code>UNKNOWN="unknown"</code> */
   public static final String UNKNOWN = "unknown";
-  /** Constant <code>=SHUTTING_DOWN="shutting down"</code> */
-  public static final String SHUTTING_DOWN = "shutting down";
 }
