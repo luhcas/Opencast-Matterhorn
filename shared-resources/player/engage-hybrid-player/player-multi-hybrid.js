@@ -1653,7 +1653,8 @@ Opencast.Player = (function () {
         }
         else if (displayMode === AUDIOPLAYER)
         {
-            $("#oc_btn-dropdown").attr("className", "oc_btn-audioDisplay");
+            $('#oc_video-size-controls').css('display','none');
+        	//$("#oc_btn-dropdown").attr("className", "oc_btn-audioDisplay");
             setDisplayMode(displayMode);
             setCurrentVideoSize(VIDEOSIZEAUDIO);
         }
