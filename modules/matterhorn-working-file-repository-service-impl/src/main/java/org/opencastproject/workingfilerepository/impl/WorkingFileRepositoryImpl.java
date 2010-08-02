@@ -131,19 +131,12 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
       logger.info("Unable to delete non existing object {}/{}", mediaPackageID, mediaPackageElementID);
       return;
     }
-    logger.debug("Attempting to delete file {}", f.getAbsolutePath());
-    if (f.canWrite()) {
-      f.delete();
-    } else {
+    File parentDirectory = f.getParentFile();
+    logger.debug("Attempting to delete file {}", parentDirectory.getAbsolutePath());
+    try {
+      FileUtils.forceDelete(parentDirectory);
+    } catch (IOException e) {
       throw new SecurityException("Can not delete file in mediaPackage/mediaElement: " + mediaPackageID + "/"
-              + mediaPackageElementID);
-    }
-    File d = getElementDirectory(mediaPackageID, mediaPackageElementID);
-    logger.debug("Attempting to delete directory {}", d.getAbsolutePath());
-    if (d.canWrite()) {
-      d.delete();
-    } else {
-      throw new SecurityException("Can not delete directory at mediaPackage/mediaElement " + mediaPackageID + "/"
               + mediaPackageElementID);
     }
   }
