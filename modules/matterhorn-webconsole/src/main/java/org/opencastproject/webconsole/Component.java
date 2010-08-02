@@ -18,6 +18,7 @@ package org.opencastproject.webconsole;
 import org.opencastproject.http.StaticResource;
 
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -26,19 +27,18 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Hashtable;
 
-
 /**
  * Registers the web management console
  */
 public class Component {
   private static final Logger logger = LoggerFactory.getLogger(Component.class);
-  
+
   protected ComponentContext componentContext;
   protected HttpService httpService;
   protected HttpContext httpContext;
   protected OsgiManager manager;
-  protected StaticResource staticResource;
-  
+  protected ServiceRegistration staticResourceRegistration;
+
   @SuppressWarnings("unchecked")
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
@@ -48,25 +48,27 @@ public class Component {
     } catch (Exception e) {
       throw new IllegalStateException(e);
     }
-    staticResource = new StaticResource("/res", "/system/console/res", null, httpService, httpContext);
+    StaticResource staticResource = new StaticResource("/res", "/system/console/res", null);
     staticResource.activate(componentContext);
+    staticResourceRegistration = componentContext.getBundleContext().registerService(StaticResource.class.getName(),
+            staticResource, null);
   }
 
   public void deactivate() {
     try {
-      staticResource.deactivate(componentContext);
       httpService.unregister("/system/console");
       manager.destroy();
+      staticResourceRegistration.unregister();
     } catch (Exception e) {
-      logger.warn("Deactivation problem: {}", e);
+      logger.warn("Deactivation problem: {}", e.getMessage());
     }
 
   }
-  
+
   public void setHttpService(HttpService service) {
     this.httpService = service;
   }
-  
+
   public void setHttpContext(HttpContext httpContext) {
     this.httpContext = httpContext;
   }

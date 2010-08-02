@@ -18,8 +18,6 @@ package org.opencastproject.http;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,43 +45,22 @@ public class StaticResource extends HttpServlet {
   String testSuite;
   URL defaultUrl;
   
-  HttpService httpService;
-  HttpContext httpContext;
   ComponentContext componentContext;
 
   public StaticResource() {}
 
   public StaticResource(String classpath, String alias, String welcomeFile) {
-    this(classpath, alias, welcomeFile, null, null, null, null);
+    this(classpath, alias, welcomeFile, null, null);
   }
 
   public StaticResource(String classpath, String alias, String welcomeFile, String testClasspath, String testSuite) {
-    this(classpath, alias, welcomeFile, testClasspath, testSuite, null, null);
-  }
-
-  public StaticResource(String classpath, String alias, String welcomeFile, HttpService httpService, HttpContext httpContext) {
-    this(classpath, alias, welcomeFile, null, null, httpService, httpContext);
-  }
-
-  public StaticResource(String classpath, String alias, String welcomeFile, String testClasspath, String testSuite,
-          HttpService httpService, HttpContext httpContext) {
     this.classpath = classpath;
     this.alias = alias;
     this.welcomeFile = welcomeFile;
     this.testClasspath = testClasspath;
     this.testSuite = testSuite;
-    this.httpService = httpService;
-    this.httpContext = httpContext;
   }
 
-
-  public void setHttpService(HttpService service) {
-    this.httpService = service;
-  }
-  
-  public void setHttpContext(HttpContext httpContext) {
-    this.httpContext = httpContext;
-  }
 
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
@@ -99,11 +76,6 @@ public class StaticResource extends HttpServlet {
     if(testClasspath == null) testClasspath = (String)componentContext.getProperties().get("test.classpath");
     logger.info("registering classpath:{} at {} with welcome file {} {}, test suite: {} from classpath {}",
             new Object[] {classpath, alias, welcomeFile, welcomeFileSpecified ? "" : "(via default)", testSuite, testClasspath});
-    try {
-      httpService.registerServlet(alias, this, null, httpContext);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
     String serverUrl = componentContext.getBundleContext().getProperty("org.opencastproject.server.url");
     try {
       defaultUrl = new URL(serverUrl + alias);
@@ -112,14 +84,6 @@ public class StaticResource extends HttpServlet {
     }
   }
   
-  public void deactivate(ComponentContext context) {
-    try {
-      httpService.unregister(alias);
-    } catch(Exception e) {
-      logger.debug("unable to unregister alias " + alias, e);
-    }
-  }
-
   public URL getDefaultUrl() {
     return defaultUrl;
   }

@@ -19,40 +19,41 @@ import org.opencastproject.http.StaticResource;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.apache.commons.io.FilenameUtils;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 
 import java.net.URL;
 
 /**
- * Abstract base implementation for a resumable operation handler, which implements a simple operations for starting
- * an operation, returning a {@link WorkflowOperationResult} with the current mediapackage and {@link Action#PAUSE} and
+ * Abstract base implementation for a resumable operation handler, which implements a simple operations for starting an
+ * operation, returning a {@link WorkflowOperationResult} with the current mediapackage and {@link Action#PAUSE} and
  * resuming an operation, returning a {@link WorkflowOperationResult} with the current mediapackage and
  * {@link Action#CONTINUE}.
  */
-public abstract class AbstractResumableWorkflowOperationHandler extends AbstractWorkflowOperationHandler
-  implements ResumableWorkflowOperationHandler {
+public abstract class AbstractResumableWorkflowOperationHandler extends AbstractWorkflowOperationHandler implements
+        ResumableWorkflowOperationHandler {
   protected ComponentContext componentContext;
-  protected StaticResource resource;
-  protected HttpService httpService;
-  protected HttpContext httpContext;
+  protected ServiceRegistration staticResourceRegistration;
   protected StaticResource staticResource;
   protected String holdActionTitle;
 
-  private static final String DEFAULT_TITLE = "Action";    // TODO maybe there's a better default action title?
+  private static final String DEFAULT_TITLE = "Action"; // TODO maybe there's a better default action title?
 
   /** Name of the configuration option that determines whether this operation is run at all */
   protected static final String REQUIRED_PROPERTY = "required-property";
-
 
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
     super.activate(componentContext);
   }
+  
+  public void deactivate() {
+    if(staticResourceRegistration != null) staticResourceRegistration.unregister();
+  }
 
   public URL getHoldStateUserInterfaceURL(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    if(staticResource == null) return null;
+    if (staticResource == null)
+      return null;
     return staticResource.getDefaultUrl();
   }
 
@@ -69,35 +70,35 @@ public abstract class AbstractResumableWorkflowOperationHandler extends Abstract
   }
 
   protected URL registerHoldStateUserInterface(final String resourcePath) {
-    if(httpService == null || httpContext == null) {
-      throw new IllegalStateException("HttpService and HttpContext must be set before registering a hold state UI");
-    }
     String alias = "/workflow/hold/" + getClass().getName().toLowerCase();
     if (resourcePath == null)
       throw new IllegalArgumentException("Classpath must not be null");
     String path = FilenameUtils.getPathNoEndSeparator(resourcePath);
     String welcomeFile = FilenameUtils.getName(resourcePath);
-    staticResource = new StaticResource(path, alias, welcomeFile, httpService, httpContext);
+    staticResource = new StaticResource(path, alias, welcomeFile);
     staticResource.activate(componentContext);
+    staticResourceRegistration = componentContext.getBundleContext().registerService(StaticResource.class.getName(),
+            staticResource, null);
     return staticResource.getDefaultUrl();
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
-  public WorkflowOperationResult resume(WorkflowInstance workflowInstance)
-          throws WorkflowOperationException {
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
   }
 

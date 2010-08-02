@@ -20,7 +20,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,18 +42,13 @@ public class SharedHttpContext implements HttpContext {
   private static final Logger logger = LoggerFactory.getLogger(SharedHttpContext.class);
 
   protected BundleContext bundleContext = null;
-  protected HttpService httpService;
-
-  public void setHttpService(HttpService httpService) {
-    this.httpService = httpService;
-  }
 
   public void activate(ComponentContext cc) {
     this.bundleContext = cc.getBundleContext();
+    logger.debug("Shared http context activated with bundle context {}", this.bundleContext);
   }
 
   public void deactivate() {
-    this.httpService = null;
     this.bundleContext = null;
     logger.debug("Shared http context deactivated");
   }

@@ -98,9 +98,9 @@ public class AdminuiRestService {
     seriesService = service;
   }
   
-  public void unsetSeriesService() {
+  public void unsetSeriesService(SeriesService service) {
     logger.debug("unbinding SeriesService");
-    schedulerService = null;
+    seriesService = null;
   }
 
   public void setWorkflowService(WorkflowService service) {

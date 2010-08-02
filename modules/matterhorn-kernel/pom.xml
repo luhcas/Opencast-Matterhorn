@@ -199,6 +199,7 @@
             <Embed-Transitive>true</Embed-Transitive>
             <Service-Component>
               OSGI-INF/httpContext.xml,
+              OSGI-INF/staticResource.xml,
               OSGI-INF/rest.xml
             </Service-Component>
           </instructions>

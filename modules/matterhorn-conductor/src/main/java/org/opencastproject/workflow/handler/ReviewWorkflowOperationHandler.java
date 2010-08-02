@@ -24,8 +24,6 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,13 +89,5 @@ public class ReviewWorkflowOperationHandler extends AbstractResumableWorkflowOpe
     }
     
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
-  }
-
-  public void setHttpService(HttpService service) {
-    super.httpService = service;
-  }
-  
-  public void setHttpContext(HttpContext httpContext) {
-    super.httpContext = httpContext;
   }
 }

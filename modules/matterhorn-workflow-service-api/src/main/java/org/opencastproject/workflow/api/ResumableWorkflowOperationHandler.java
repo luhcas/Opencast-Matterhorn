@@ -18,7 +18,7 @@ package org.opencastproject.workflow.api;
 import java.net.URL;
 
 /**
- * TODO: Comment me!
+ * A {@link WorkflowOperationHandler} that is allowed to return Action.PAUSE to pause (and later resume) a workflow.
  */
 public interface ResumableWorkflowOperationHandler extends WorkflowOperationHandler {
   /**

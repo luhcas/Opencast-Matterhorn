@@ -27,8 +27,6 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,20 +57,6 @@ public class CaptionUploadWorkflowOperationHandler extends AbstractResumableWork
     CONFIG_OPTIONS = new TreeMap<String, String>();
     CONFIG_OPTIONS.put(REQUIRED_PROPERTY, "The configuration key that must be set to true for this operation to run.");
     CONFIG_OPTIONS.put(FLAVOR_PROPERTY, "The configuration key that identifies the required caption flavor.");
-  }
-
-  /** The http service to use in registering the caption upload UI */
-  protected HttpService httpService;
-  
-  /** The http context to use in registering the caption upload UI */
-  protected HttpContext httpContext;
-
-  public void setHttpService(HttpService service) {
-    super.httpService = service;
-  }
-  
-  public void setHttpContext(HttpContext httpContext) {
-    super.httpContext = httpContext;
   }
 
   public void activate(ComponentContext cc) {
