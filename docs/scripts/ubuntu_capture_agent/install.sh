@@ -317,7 +317,7 @@ echo -e "\n\nProceeding to build the capture agent source. This may take a long 
 read -n 1 -s
 
 cd $SOURCE
-su matterhorn -c "mvn clean install -Pcapture -DdeployTo=\${FELIX_HOME}/${DEPLOY_DIR}"
+su $USERNAME -c "mvn clean install -Pcapture -DdeployTo=\${FELIX_HOME}/${DEPLOY_DIR}"
 if [[ "$?" -ne 0 ]]; then
     echo -e "\nError building the matterhorn code. Contact matterhorn@opencastproject.org for assistance."
     exit 1
