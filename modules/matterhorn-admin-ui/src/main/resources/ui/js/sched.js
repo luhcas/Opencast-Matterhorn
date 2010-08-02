@@ -53,7 +53,7 @@ UI.Init = function(){
   
   $.extend(Scheduler.FormManager, {
     serialize: function(){
-      var doc, mdlist, ocwprops;
+      var doc, mdlist, ocwprops, review, caption, workflow, key, value;
       if(Scheduler.conflictingEvents){
         return false;
       }
@@ -69,9 +69,40 @@ UI.Init = function(){
         }
         //handle OC Workflow specialness
         ocwprops = ocWorkflow.getConfiguration($('#workflow-config-container'));
-        mdlist.appendChild($('<metadata><key>org.opencastproject.workflow.config.review.hold</key><value>' + ocwprops['review.hold'] + '</value></metadata>')[0]);
-        mdlist.appendChild($('<metadata><key>org.opencastproject.workflow.config.caption.hold</key><value>' + ocwprops['caption.hold'] + '</value></metadata>')[0]);
-        mdlist.appendChild($('<metadata><key>org.opencastproject.workflow.definition</key><value>' + $('#workflow-selector').val() + '</value></metadata>')[0]);
+        
+        if( ocwprops['review.hold'] ){
+          review = doc.createElement('metadata');
+          key = doc.createElement('key');
+          key.appendChild(doc.createTextNode('org.opencastproject.workflow.config.review.hold'));
+          review.appendChild(key);
+          value = doc.createElement('value');
+          value.appendChild(doc.createTextNode(ocwprops['review.hold']))
+          review.appendChild(value);
+          AdminUI.log(review);
+          mdlist.appendChild(review);
+        }
+        if( ocwprops['caption.hold'] ) {
+          caption = doc.createElement('metadata');
+          key = doc.createElement('key');
+          key.appendChild(doc.createTextNode('org.opencastproject.workflow.config.caption.hold'));
+          caption.appendChild(key);
+          value = doc.createElement('value');
+          value.appendChild(doc.createTextNode(ocwprops['caption.hold']))
+          caption.appendChild(value);
+          AdminUI.log(caption);
+          mdlist.appendChild(caption);
+        }
+        if( $('#workflow-selector').val() ) {
+          workflow = doc.createElement('metadata');
+          key = doc.createElement('key');
+          key.appendChild(doc.createTextNode('org.opencastproject.workflow.definition'));
+          workflow.appendChild(key);
+          value = doc.createElement('value');
+          value.appendChild(doc.createTextNode($('#workflow-selector').val()))
+          workflow.appendChild(value);
+          AdminUI.log(workflow);
+          mdlist.appendChild(workflow);
+        }
         doc.documentElement.appendChild(mdlist);
         if(typeof XMLSerializer != 'undefined') {
           return (new XMLSerializer()).serializeToString(doc);
@@ -273,7 +304,7 @@ UI.ChangeRecordingType = function(recType){
     UI.inputList = '#recur-input-list';
     $(UI.inputList).empty();
     seriesLabel = $('#series_container > label').text();
-    $('#series_container > label').html('<span id="series_required" style="color: red;">*</span>' + seriesLabel); //series is required, indicate as such.
+    $('#series_container > label').replaceWith('<span id="series_required" style="color: red;">*</span>' + seriesLabel); //series is required, indicate as such.
     Scheduler.components.recurrenceStart.setValue(d.getTime().toString());
     Scheduler.FormManager.rootElm = MULTIPLE_EVENT_ROOT_ELM;
   }
@@ -325,9 +356,9 @@ UI.DeleteForm = function(){
   var title, series, creator;
   if(confirm(i18n.del.confirm)){
     $.get(SCHEDULER_URL + '/removeEvent/' + $('#eventId').val(), function(){
-      title = Scheduler.components.title.toString() || 'No Title';
-      series = Scheduler.components.seriesId.toString() || 'No Series';
-      creator = Scheduler.components.creator.toString() || 'No Creator';
+      title = Scheduler.components.title.asString() || 'No Title';
+      series = Scheduler.components.seriesId.asString() || 'No Series';
+      creator = Scheduler.components.creator.asString() || 'No Creator';
       $('#i18n_del_msg').text(i18n.del.msg(title, series, '(' + creator + ')'));
       $('#stage').hide();
       $('#deleteBox').show();
@@ -514,9 +545,11 @@ UI.LoadEvent = function(doc){
 
 UI.EventSubmitComplete = function(){
   for(var k in Scheduler.components){
+    alert(k);
+    alert(Scheduler.components[k].asString());
     $('#data-'+ k).show();
     //$("#data-" + k + " > .data-label").text(i18n[k].label + ":");
-    $('#data-' + k + ' > .data-value').text(Scheduler.components[k].toString());
+    $('#data-' + k + ' > .data-value').text(Scheduler.components[k].asString());
   }
   $("#submission_success").siblings().hide();
   $("#submission_success").show();
@@ -601,11 +634,11 @@ UI.RegisterComponents = function(){
         this.fields.series.val(value.id);
         this.fields.series_select.val(value.label)
       },
-      toString: function(){
+      asString: function(){
         if(this.fields.series_select){
           return this.fields.series_select.val();
         }
-        return this.getValue();
+        return this.getValue() + '';
       },
       validate: function(){
         if(this.fields.series_select.val() !== '' && this.fields.series.val() === ''){ //have text and no idea
@@ -745,7 +778,7 @@ UI.RegisterComponents = function(){
           }
           return false;
         },
-        toString: function(){
+        asString: function(){
           return (new Date(this.getValue())).toLocaleString();
         }
       });
@@ -783,7 +816,7 @@ UI.RegisterComponents = function(){
           }
           return false;
         },
-        toString: function(){
+        asString: function(){
           var dur = this.getValue() / 1000;
           var hours = Math.floor(dur / 3600);
           var min   = Math.floor( ( dur /60 ) % 60 );
@@ -823,7 +856,7 @@ UI.RegisterComponents = function(){
           }
           return false;
         },
-        toString: function(){
+        asString: function(){
           return (new Date(this.getValue())).toLocaleString();
         }
       });
@@ -1038,7 +1071,7 @@ UI.RegisterComponents = function(){
             return false;
           }
         },
-        toString: function(){
+        asString: function(){
           return (new Date(this.getValue())).toLocaleString();
         }
       });
@@ -1076,7 +1109,7 @@ UI.RegisterComponents = function(){
           }
           return false;
         },
-        toString: function(){
+        asString: function(){
           var dur = this.getValue() / 1000;
           var hours = Math.floor(dur / 3600);
           var min   = Math.floor( ( dur /60 ) % 60 );
