@@ -235,6 +235,15 @@ $.extend(AdminForm.Component.prototype, {
     return this.getValue();
   },
   /** 
+   *  Add this because IE seems to use the default toString() of Object instead of the definition above (MH-5097)
+   *
+   *  @return A string of the Components value.
+   *	@type String
+   */
+  asString: function() {
+    return this.getValue();
+  },
+  /** 
    *  Default toNode function
    *  @param {DOM Node} Node to which to attach this Components value
    *  @return DOM Node created from this Component.

@@ -156,7 +156,7 @@ UI.SeriesSubmitComplete = function(){
     if(i18n[k]){
       $("#data-" + k).show();
       $("#data-" + k + " > .data-label").text(i18n[k].label + ":");
-      $("#data-" + k + " > .data-value").text(Series.components[k].toString());
+      $("#data-" + k + " > .data-value").text(Series.components[k].asString());
     }
   }
   $("#schedulerLink").attr('href',$("#schedulerLink").attr('href') + '?seriesId=' + Series.components.seriesId.getValue());
