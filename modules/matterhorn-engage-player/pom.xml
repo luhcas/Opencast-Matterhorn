@@ -157,12 +157,12 @@
 		</profile>
 
 		<!--
-			mvn -P localtest
+			mvn -P testlocal
 			Creates a standalone version of the player component with mockdata
 			Can be used on a standard webserver
 		-->
 		<profile>
-			<id>localtest</id>
+			<id>testlocal</id>
 			<build>
 				<plugins>
 					<plugin>
@@ -224,17 +224,21 @@
 												<include>css/</include>
 												<include>img/</include>
 												<include>jquery/</include>
+												<include>xsl/</include>
+												<include>js/</include>
+											</includes>
+										</resource>
+										<resource>
+											<directory>../../shared-resources/player</directory>
+											<filtering>true</filtering>
+											<includes>
+												<include>embed.html</include>
 											</includes>
 										</resource>
 										<resource>
 											<directory>../matterhorn-engage-ui/src/main/resources/ui</directory>
 											<filtering>true</filtering>
 											<includes>
-												<include>css/</include>
-												<include>img/</include>
-												<include>js/</include>
-												<include>xsl/</include>
-												<include>embed.html</include>
 												<include>watch.html</include>
 												<include>episode-segments.xml</include>
 												<include>episode.xml</include>
