@@ -3,7 +3,7 @@
  name="org.opencastproject.remote.impl.endpoint.RemoteServiceManagerEndpoint" immediate="true">
   <implementation class="org.opencastproject.remote.impl.endpoint.RemoteServiceManagerEndpoint" />
   <property name="service.description" value="Remote Service REST Endpoint" />
-  <property name="opencast.rest.url" value="/remote.json" />
+  <property name="opencast.rest.url" value="/remote/rest" />
   <service>
     <provide interface="org.opencastproject.remote.impl.endpoint.RemoteServiceManagerEndpoint" />
   </service>

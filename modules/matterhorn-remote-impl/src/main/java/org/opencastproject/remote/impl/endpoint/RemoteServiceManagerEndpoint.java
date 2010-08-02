@@ -18,6 +18,11 @@ package org.opencastproject.remote.impl.endpoint;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.ServiceRegistration;
 import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -36,12 +41,40 @@ public class RemoteServiceManagerEndpoint {
   /** The remote service maanger */
   protected RemoteServiceManager service = null;
 
+  /** The runtime documentation for this endpoint */
+  protected String docs = null;
+  
   /**  Sets the remote service manager instance for delegation */
   public void setRemoteServiceManager(RemoteServiceManager service) {
     this.service = service;
   }
 
+  /**
+   * Default, no-arg constructor generates the default rest documentation
+   */
+  public RemoteServiceManagerEndpoint() {
+    DocRestData data = new DocRestData("remote", "Remote Services", "/remote/rest", null);
+    data.setAbstract("This service lists the members of this cluster.");
+
+    RestEndpoint endpoint = new RestEndpoint("list", RestEndpoint.Method.GET, "/services.json",
+            "List the service registrations in the cluster, along with the number of queued and running jobs.");
+    endpoint.addFormat(new Format("json", null, null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the remote services."));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+
+    docs = DocUtil.generate(data);
+  }
+
   @GET
+  @Path("/docs")
+  @Produces(MediaType.TEXT_HTML)
+  public String getDocs() {
+    return docs;
+  }
+
+  @GET
+  @Path("/services.json")
   @Produces(MediaType.APPLICATION_JSON)
   @SuppressWarnings("unchecked")
   public String getRemoteServiceRegistrations() {
@@ -57,4 +90,7 @@ public class RemoteServiceManagerEndpoint {
     }
     return jsonArray.toJSONString();
   }
+  
+
+  
 }
