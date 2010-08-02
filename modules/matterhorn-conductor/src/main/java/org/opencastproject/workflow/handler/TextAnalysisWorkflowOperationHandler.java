@@ -57,6 +57,11 @@ import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +70,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -87,8 +93,20 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
   /** Name of the encoding profile that extracts a still image from a movie */
   public static final String IMAGE_EXTRACTION_PROFILE = "text-analysis.http";
 
+  /** The threshold for scene stability, in seconds */
+  private static final int DEFAULT_STABILITY_THRESHOLD = 5;
+
+  /** Name of the constant used to retreive the stability threshold */
+  public static final String OPT_STABILITY_THRESHOLD = "stabilitythreshold";
+
+  /** Pid of the videosegmenter */
+  private static final String VIDEOSEGMENTER_PID = "org.opencastproject.analysis.vsegmenter.VideoSegmenter";
+
   /** The configuration options for this handler */
   private static final SortedMap<String, String> CONFIG_OPTIONS;
+
+  /** The operation handler's bundle context */
+  private BundleContext bundleContext = null;
 
   static {
     CONFIG_OPTIONS = new TreeMap<String, String>();
@@ -153,6 +171,16 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
   /**
    * {@inheritDoc}
    * 
+   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#activate(org.osgi.service.component.ComponentContext)
+   */
+  public void activate(ComponentContext cc) {
+    super.activate(cc);
+    bundleContext = cc.getBundleContext();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
@@ -185,10 +213,11 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    * @throws InterruptedException
    * @throws NotFoundException
    */
-  protected WorkflowOperationResult extractVideoText(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
-          throws EncoderException, InterruptedException, ExecutionException, IOException, NotFoundException {
+  protected WorkflowOperationResult extractVideoText(final MediaPackage mediaPackage,
+          WorkflowOperationInstance operation) throws EncoderException, InterruptedException, ExecutionException,
+          IOException, NotFoundException {
     long totalTimeInQueue = 0;
-    
+
     List<String> sourceTagSet = asList(operation.getConfiguration("source-tags"));
     List<String> targetTagSet = asList(operation.getConfiguration("target-tags"));
 
@@ -201,6 +230,11 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
               mediaPackage, sourceTagSet);
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
     }
+
+    // We need the videosegmenter's stability threshold in order to do proper work. If we can't get it, the default is
+    // most probably ok, but certainly suboptimal.
+    int stabilityThreshold = getStabilityThreshold();
+    logger.debug("Using stability threshold {}s for slide extraction", stabilityThreshold);
 
     // Loop over all existing segment catalogs
     for (Entry<Catalog, Mpeg7Catalog> mapEntry : catalogs.entrySet()) {
@@ -251,7 +285,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         try {
           long startTimeSeconds = segmentTimePoint.getTimeInMilliseconds() / 1000;
           long durationSeconds = segmentDuration.getDurationInMilliseconds() / 1000;
-          image = extractImage(sourceTrack, startTimeSeconds + durationSeconds - 1);
+          image = extractImage(sourceTrack, startTimeSeconds + durationSeconds - stabilityThreshold + 1);
         } catch (EncoderException e) {
           logger.error("Error creating still image from {}", sourceTrack);
           throw e;
@@ -259,10 +293,10 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
 
         // If there is a corresponding spaciotemporal decomposition, remove all the videotext elements
         Receipt receipt = analysisService.analyze(image, true);
-        
+
         // add this receipt's queue time to the total
         long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
-        totalTimeInQueue+=timeInQueue;
+        totalTimeInQueue += timeInQueue;
 
         Catalog catalog = (Catalog) receipt.getElement();
         workspace.delete(image.getURI());
@@ -395,6 +429,39 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
     }
 
     return catalogs;
+  }
+
+  /**
+   * Determine the stability threshold used to select the slide extraction timepoint.
+   * 
+   * @return the stability threshold in seconds
+   */
+  private int getStabilityThreshold() {
+    logger.debug("Looking up the videosegmenter's service configuration");
+
+    ServiceReference ref = bundleContext.getServiceReference(ConfigurationAdmin.class.getName());
+    if (ref == null)
+      return DEFAULT_STABILITY_THRESHOLD;
+    ConfigurationAdmin configAdmin = (ConfigurationAdmin) bundleContext.getService(ref);
+    if (configAdmin == null)
+      return DEFAULT_STABILITY_THRESHOLD;
+    try {
+      Configuration config = configAdmin.getConfiguration(VIDEOSEGMENTER_PID);
+      if (config == null)
+        return DEFAULT_STABILITY_THRESHOLD;
+      Dictionary<?, ?> properties = config.getProperties();
+      if (properties.get(OPT_STABILITY_THRESHOLD) != null) {
+        String threshold = (String) properties.get(OPT_STABILITY_THRESHOLD);
+        try {
+          return Integer.parseInt(threshold);
+        } catch (Exception e) {
+          logger.warn("Found illegal value '{}' for videosegmenter's stability threshold", threshold);
+        }
+      }
+    } catch (IOException e) {
+      logger.warn("Error reading the videosegmenter's service configuration");
+    }
+    return DEFAULT_STABILITY_THRESHOLD;
   }
 
   /**

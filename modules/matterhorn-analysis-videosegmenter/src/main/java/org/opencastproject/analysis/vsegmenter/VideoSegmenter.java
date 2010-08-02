@@ -528,7 +528,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
       else if (currentSceneStabilityCount == stabilityThreshold) {
         lastStableImageTime = t;
 
-        long endOfSegment = t - stabilityThreshold;
+        long endOfSegment = t - stabilityThreshold - 1;
         long durationms = (endOfSegment - startOfSegment) * 1000L;
 
         // Create a new segment if this wasn't the first one
