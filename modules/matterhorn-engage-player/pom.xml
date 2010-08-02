@@ -64,7 +64,7 @@
 				<version>3.7.1</version>
 				<extensions>true</extensions>
 				<configuration>
-					<targetPlayer>10.1.0</targetPlayer>
+					<targetPlayer>10.0.0</targetPlayer>
 					<accessible>true</accessible>
 					<headlessServer>true</headlessServer>
 					<output>../../shared-resources/player/Videodisplay.swf</output>
@@ -157,12 +157,12 @@
 		</profile>
 
 		<!--
-			mvn -P testdebug
+			mvn -P localtest
 			Creates a standalone version of the player component with mockdata
 			Can be used on a standard webserver
 		-->
 		<profile>
-			<id>testdebug</id>
+			<id>localtest</id>
 			<build>
 				<plugins>
 					<plugin>
@@ -179,7 +179,7 @@
 						<version>3.7.1</version>
 						<extensions>true</extensions>
 						<configuration>
-							<targetPlayer>10.1.0</targetPlayer>
+							<targetPlayer>10.0.0</targetPlayer>
 							<accessible>true</accessible>
 							<headlessServer>true</headlessServer>
 							<showWarnings>false</showWarnings>

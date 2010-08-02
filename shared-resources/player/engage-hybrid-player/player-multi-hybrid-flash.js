@@ -35,6 +35,8 @@ Opencast.FlashVersion = (function ()
     // Minor version of Flash required
     var requiredRevision = 0;
     
+    var str = '';
+    
     var isIE  = (navigator.appVersion.indexOf("MSIE") != -1) ? true : false;
     var isWin = (navigator.appVersion.toLowerCase().indexOf("win") != -1) ? true : false;
     var isOpera = (navigator.userAgent.indexOf("Opera") != -1) ? true : false;
@@ -218,7 +220,7 @@ Opencast.FlashVersion = (function ()
 
     function AC_Generateobj(objAttrs, params, embedAttrs) 
     { 
-        var str = '';
+        
         if (isIE && isWin && !isOpera)
         {
               str += '<object ';
@@ -235,16 +237,17 @@ Opencast.FlashVersion = (function ()
                 str += '<param name="allowScriptAccess" value="sameDomain" />';
                 str += '<param name="bgcolor" value="#000000" />';
                 str += '<param name="allowFullScreen" value="true" />';
+                str += '<param name="wmode" value="transparent" />';
                 str += '<param name="flashvars" value="bridgeName=b_Videodisplay&amp;autoplay=false"/>';
             
-            str += '<embed ';
+            str += '<embed style="z-index: 100;"';
               for (var i in embedAttrs)
                   str += i + '="' + embedAttrs[i] + '" ';
               str += '> </embed></object>';
         }
 
-        document.write(str);
-        //$("#oc_flash-player").html(str);
+        //document.write(str);
+        
         
     }
 
@@ -342,11 +345,34 @@ Opencast.FlashVersion = (function ()
       return ret;
     }
     
+    function initFlash()
+    {
+    	$("#oc_flash-player").html(str);
+    	
+    	
+    
+             
+            	FABridge.addInitializationCallback("b_Videodisplay", Videodisplay.VideodisplayGo.VideodisplayReady);
+            
+            
+        
+    	
+    	
+    }
+    
+    function laodScript()
+    {
+    	var script = document.createElement('script');
+    	script.type = 'text/javascript';
+    	script.src = 'engage-hybrid-player/bridge/Videodisplay.js';
+    	document.getElementsByTagName('head')[0].appendChild(script);  
+    	
+    	
+    }
     
         // Version check for the Flash Player that has the ability to start Player Product Install (6.0r65)
         var hasProductInstall = DetectFlashVer(6, 0, 65);
     
-        var testbreite = 233;
     
         // Version check based upon the values defined in globals
         var hasRequestedVersion = DetectFlashVer(requiredMajorVersion, requiredMinorVersion, requiredRevision);
@@ -371,6 +397,7 @@ Opencast.FlashVersion = (function ()
                 "name", "Videodisplay",
                 "allowScriptAccess", "sameDomain",
                 "type", "application/x-shockwave-flash",
+                "wmode", "transparent",
                 "pluginspage", "http://www.adobe.com/go/getflashplayer"
           );
         } 
@@ -391,6 +418,7 @@ Opencast.FlashVersion = (function ()
                 "flashvars", "bridgeName=b_Videodisplay&amp;autoplay=false",
                 "allowScriptAccess", "sameDomain",
                 "type", "application/x-shockwave-flash",
+                "wmode", "transparent",
                 "pluginspage", "http://www.adobe.com/go/getflashplayer"
             );
        
@@ -398,15 +426,16 @@ Opencast.FlashVersion = (function ()
         } 
         else 
         {  // flash is too old or we can't detect the plugin
-            var alternateContent = 'Alternate HTML content should be placed here.'
-            + 'This content requires the Adobe Flash Player. '
+            var alternateContent = 'Matterhorn requires Adobe Flash Player.<br>'
+            + 'Please install the latest version for your OS<br>(version 10.1 is recommended).'
             + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
             document.write(alternateContent);  // insert non-flash content
-            //$("#oc_flash-player").html(alternateContent);
+            //$("#oc_flash-player").write(alternateContent);
         }
     
     
     return {
+        initFlash : initFlash
     };
     
    
