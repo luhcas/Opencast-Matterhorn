@@ -94,7 +94,7 @@ UI.Init = function(){
     UI.inputList = '#recur-input-list';
     $('#multipleRecordings').click();
   }
-  
+
   if(AdminUI.getURLParams('seriesId')){
     $('#series').val(AdminUI.getURLParams('seriesId'));
     $.get(SERIES_URL + '/series/' + AdminUI.getURLParams('seriesId'), function(doc){
@@ -388,6 +388,29 @@ UI.DisplayCapabilities = function(capabilities){
   if(Scheduler.selectedInputs && AdminUI.getURLParams('edit')){
     Scheduler.components.resources.setValue(Scheduler.selectedInputs);
   }
+  // Validate if an input was chosen
+  UI.inputCount = $(UI.inputList).children('input:checkbox').size();
+  total = UI.inputCount;
+  $(UI.inputList).each(function(){
+        $(this).children("input:checkbox").click(function(){
+          
+          total = (this.checked) ? (total = (total < 3) ? total+=1 : total) : total-=1;
+          if(total < 1) {
+        	  var position = $('#help_input').position();
+        	  $('#inputhelpBox').css('left',position.left + 100 +'px');
+        	  $('#inputhelpBox').css('top',position.top);
+        	  $('#inputhelpTitle').text("Please Note");
+        	  $('#inputhelpText').text("You have to select at least one input in order to schedule a recording.");
+        	  $('#inputhelpBox').show();
+        	  $('#submitButton').attr("disabled", "true");
+          }
+          else {
+        	  $('#inputhelpBox').hide();
+        	  $('#submitButton').removeAttr("disabled");
+          }
+        });
+      });
+  
 };
 
 UI.HandleAgentTZ = function(tz){
