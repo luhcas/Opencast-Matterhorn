@@ -28,10 +28,12 @@ UploadListener.fileSelectedAjax = function(filename,jobId) {
   Upload.checkRequiredFields();
 }
 
-UploadListener.uploadStarted = function() {
+UploadListener.uploadStarted = function(uploadingFile) {
   Upload.log('upload started');
-  if (!UploadListener.appletPresent) {
+  if (uploadingFile) {
     UploadListener.updateInterval = window.setInterval('UploadListener.getProgress()', 1000);
+  } else {
+    Upload.setProgress('0%','moving file form Inbox to MediaPackage',' ', ' ');
   }
 }
 

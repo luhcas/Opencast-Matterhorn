@@ -28,7 +28,8 @@ ocIngest.createMediaPackage = function() {
         var uploadFrame = document.getElementById("filechooser-ajax");
         uploadFrame.contentWindow.document.uploadForm.flavor.value = $('#flavor').val();
         uploadFrame.contentWindow.document.uploadForm.mediaPackage.value = ocUtils.xmlToString(data);
-        UploadListener.uploadStarted();
+        var uploadingFile = $('#ingest-upload').is(':checked');
+        UploadListener.uploadStarted(uploadingFile);
         uploadFrame.contentWindow.document.uploadForm.submit();
       }
     }
