@@ -545,8 +545,6 @@ UI.LoadEvent = function(doc){
 
 UI.EventSubmitComplete = function(){
   for(var k in Scheduler.components){
-    alert(k);
-    alert(Scheduler.components[k].asString());
     $('#data-'+ k).show();
     //$("#data-" + k + " > .data-label").text(i18n[k].label + ":");
     $('#data-' + k + ' > .data-value').text(Scheduler.components[k].asString());
