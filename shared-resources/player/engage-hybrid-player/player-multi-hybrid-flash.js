@@ -235,16 +235,17 @@ Opencast.FlashVersion = (function ()
                 str += '<param name="allowScriptAccess" value="sameDomain" />';
                 str += '<param name="bgcolor" value="#000000" />';
                 str += '<param name="allowFullScreen" value="true" />';
+                str += '<param name="wmode" value="transparent" />'
                 str += '<param name="flashvars" value="bridgeName=b_Videodisplay&amp;autoplay=false"/>';
             
-            str += '<embed ';
+            str += '<embed wmode="transparent" style="z-index: 100;"';
               for (var i in embedAttrs)
                   str += i + '="' + embedAttrs[i] + '" ';
               str += '> </embed></object>';
         }
 
-        document.write(str);
-        //$("#oc_flash-player").html(str);
+        //document.write(str);
+        $("#oc_flash-player").html(str);
         
     }
 
@@ -371,6 +372,7 @@ Opencast.FlashVersion = (function ()
                 "name", "Videodisplay",
                 "allowScriptAccess", "sameDomain",
                 "type", "application/x-shockwave-flash",
+                "wmode", "transparent",
                 "pluginspage", "http://www.adobe.com/go/getflashplayer"
           );
         } 
@@ -391,6 +393,7 @@ Opencast.FlashVersion = (function ()
                 "flashvars", "bridgeName=b_Videodisplay&amp;autoplay=false",
                 "allowScriptAccess", "sameDomain",
                 "type", "application/x-shockwave-flash",
+                "wmode", "transparent",
                 "pluginspage", "http://www.adobe.com/go/getflashplayer"
             );
        
@@ -401,8 +404,8 @@ Opencast.FlashVersion = (function ()
             var alternateContent = 'Matterhorn requires Adobe Flash Player.<br>'
             + 'Please install lates version for your Os.<br>(recommended version 10.1) '
             + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
-            document.write(alternateContent);  // insert non-flash content
-            //$("#oc_flash-player").html(alternateContent);
+            //document.write(alternateContent);  // insert non-flash content
+            $("#oc_flash-player").html(alternateContent);
         }
     
     
