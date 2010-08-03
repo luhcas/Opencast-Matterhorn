@@ -191,11 +191,13 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
   protected void postProcess() {
     // Filter out "strange" streams. These can be e.g. media control streams.
     for (Iterator<VideoStreamMetadata> i = metadata.getVideoStreamMetadata().iterator(); i.hasNext();) {
-      if (i.next().getBitRate() == null)
+      VideoStreamMetadata videoMetadata = i.next();
+      if (videoMetadata.getBitRate() == null && BitRateMode.ConstantBitRate.equals(videoMetadata.getBitRateMode()))
         i.remove();
     }
     for (Iterator<AudioStreamMetadata> i = metadata.getAudioStreamMetadata().iterator(); i.hasNext();) {
-      if (i.next().getBitRate() == null)
+      AudioStreamMetadata audioMetadata = i.next();
+      if (audioMetadata.getBitRate() == null && BitRateMode.ConstantBitRate.equals(audioMetadata.getBitRateMode()))
         i.remove();
     }
   }
