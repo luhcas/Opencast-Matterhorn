@@ -17,6 +17,7 @@ package org.opencastproject.http;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,25 +46,58 @@ public class StaticResource extends HttpServlet {
   String testSuite;
   URL defaultUrl;
   
-  ComponentContext componentContext;
+  BundleContext bundleContext;
 
+  /**
+   * Default no-arg constructor called by OSGI's declarative services.  The static resource will be configured via DS
+   * component properties.
+   */
   public StaticResource() {}
 
-  public StaticResource(String classpath, String alias, String welcomeFile) {
-    this(classpath, alias, welcomeFile, null, null);
+  /**
+   * Constructs a static resource without tests.
+   * 
+   * @param bundleContext the bundle context of this servlet
+   * @param classpath the classpath to the static resources
+   * @param alias the URL alias
+   * @param welcomeFile the default welcome file
+   */
+  public StaticResource(BundleContext bundleContext, String classpath, String alias, String welcomeFile) {
+    this(bundleContext, classpath, alias, welcomeFile, null, null);
   }
 
-  public StaticResource(String classpath, String alias, String welcomeFile, String testClasspath, String testSuite) {
+  /**
+   * Constructs a static resource servlet with a test suite.
+   * 
+   * @param bundleContext the bundle context of this servlet
+   * @param classpath the classpath to the static resources
+   * @param alias the URL alias
+   * @param welcomeFile the default welcome file
+   * @param testClasspath the classpath to the test resources
+   * @param testSuite the file that aggregates all UI unit tests into a suite
+   */
+  public StaticResource(BundleContext bundleContext, String classpath, String alias, String welcomeFile, String testClasspath, String testSuite) {
     this.classpath = classpath;
     this.alias = alias;
     this.welcomeFile = welcomeFile;
     this.testClasspath = testClasspath;
     this.testSuite = testSuite;
+    this.bundleContext = bundleContext;
+    String serverUrl = bundleContext.getProperty("org.opencastproject.server.url");
+    try {
+      defaultUrl = new URL(serverUrl + alias);
+    } catch (MalformedURLException e) {
+      throw new IllegalStateException("unable to construct URL " + serverUrl + "/" + alias, e);
+    }
   }
 
-
+  /**
+   * Activates the static resource when it is instantiated using Declarative Services.
+   * 
+   * @param componentContext the DS component context
+   */
   public void activate(ComponentContext componentContext) {
-    this.componentContext = componentContext;
+    this.bundleContext = componentContext.getBundleContext();
     if(welcomeFile == null) welcomeFile = (String)componentContext.getProperties().get("welcome.file");
     boolean welcomeFileSpecified = true;
     if(welcomeFile == null) {
@@ -98,7 +132,7 @@ public class StaticResource extends HttpServlet {
     String pathInfo = req.getPathInfo();
     String servletPath = req.getServletPath();
     String path = pathInfo == null ? servletPath : servletPath + pathInfo;
-    Boolean testMode = "true".equalsIgnoreCase(componentContext.getBundleContext().getProperty("testMode"));
+    Boolean testMode = "true".equalsIgnoreCase(bundleContext.getProperty("testMode"));
     logger.debug("handling path {}, pathInfo={}, servletPath={}, testMode={}", new Object[] {path, pathInfo, servletPath, testMode});
     
     // If the URL points to a "directory", redirect to the welcome file
@@ -135,7 +169,7 @@ public class StaticResource extends HttpServlet {
       classpathToResource = "/" + classpathToResource;
 
     // Try to load the resource from the regular resources section
-    URL url = componentContext.getBundleContext().getBundle().getResource(classpathToResource);
+    URL url = bundleContext.getBundle().getResource(classpathToResource);
     
     // No luck? Maybe it's part of the test class path?
     if(url == null && testMode && testClasspath != null) {
@@ -150,7 +184,7 @@ public class StaticResource extends HttpServlet {
       }
       if (!classpathToResource.startsWith("/"))
         classpathToResource = "/" + classpathToResource;
-      url = componentContext.getBundleContext().getBundle().getResource(classpathToResource);
+      url = bundleContext.getBundle().getResource(classpathToResource);
     }
       
     if(url == null) {

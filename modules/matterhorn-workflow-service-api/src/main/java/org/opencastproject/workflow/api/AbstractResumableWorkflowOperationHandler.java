@@ -36,7 +36,7 @@ public abstract class AbstractResumableWorkflowOperationHandler extends Abstract
   protected ServiceRegistration staticResourceRegistration;
   protected StaticResource staticResource;
   protected String holdActionTitle;
-
+  
   private static final String DEFAULT_TITLE = "Action"; // TODO maybe there's a better default action title?
 
   /** Name of the configuration option that determines whether this operation is run at all */
@@ -75,8 +75,7 @@ public abstract class AbstractResumableWorkflowOperationHandler extends Abstract
       throw new IllegalArgumentException("Classpath must not be null");
     String path = FilenameUtils.getPathNoEndSeparator(resourcePath);
     String welcomeFile = FilenameUtils.getName(resourcePath);
-    staticResource = new StaticResource(path, alias, welcomeFile);
-    staticResource.activate(componentContext);
+    staticResource = new StaticResource(componentContext.getBundleContext(), path, alias, welcomeFile);
     staticResourceRegistration = componentContext.getBundleContext().registerService(StaticResource.class.getName(),
             staticResource, null);
     return staticResource.getDefaultUrl();

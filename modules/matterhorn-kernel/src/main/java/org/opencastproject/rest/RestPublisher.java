@@ -19,14 +19,12 @@ import org.apache.cxf.Bus;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxrs.lifecycle.SingletonResourceProvider;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,74 +41,49 @@ import javax.ws.rs.Path;
 public class RestPublisher {
   private static final Logger logger = LoggerFactory.getLogger(RestPublisher.class);
   public static final String SERVICE_PROPERTY = "opencast.rest.url";
+  public static final String SERVICE_FILTER = "(" + SERVICE_PROPERTY + "=*)";
 
   protected HttpService httpService;
   protected HttpContext httpContext;
   protected ComponentContext componentContext;
-  protected ServiceListener listener = null;
+  protected ServiceTracker tracker = null;
 
   protected Map<String, GenericServlet> servletMap;
-  
+
   public void activate(ComponentContext componentContext) {
     logger.info("activate()");
     this.componentContext = componentContext;
     this.servletMap = new ConcurrentHashMap<String, GenericServlet>();
-    final BundleContext bundleContext = componentContext.getBundleContext();
-    listener = new ServiceListener() {
-      public void serviceChanged(ServiceEvent event) {
-        ServiceReference ref = event.getServiceReference();
-        Object service = bundleContext.getService(ref);
-        Path pathAnnotation = service.getClass().getAnnotation(Path.class);
-        if(pathAnnotation == null) return;
-        if(ref.getProperty(SERVICE_PROPERTY) == null) return;
-        switch (event.getType()) {
-        case ServiceEvent.REGISTERED:
-          logger.debug("JAX-RS service registered");
-          createEndpoint(ref, service);
-          break;
-        case ServiceEvent.MODIFIED:
-          logger.debug("JAX-RS service modified");
-          break;
-        case ServiceEvent.UNREGISTERING:
-          logger.debug("JAX-RS service unregistered");
-          destroyEndpoint(ref.getProperty(SERVICE_PROPERTY).toString());
-          break;
-        }
-      }
-    };
-    
-    // Register any pre-existing JAX-RS services
-    for(Bundle bundle : componentContext.getBundleContext().getBundles()) {
-      ServiceReference[] refs = bundle.getRegisteredServices();
-      if(refs == null) continue;
-      for(ServiceReference ref : refs) {
-        Object service = bundleContext.getService(ref);
-        if(service == null) continue;
-        Path pathAnnotation = service.getClass().getAnnotation(Path.class);
-        if(pathAnnotation != null) createEndpoint(ref, service);
-      }
+    try {
+      tracker = new RestServiceTracker();
+    } catch (InvalidSyntaxException e) {
+      throw new IllegalStateException(e);
     }
+    tracker.open();
+  }
 
-    // And register any that that appear from now on
-    bundleContext.addServiceListener(listener);
+  public void deactivate() {
+    tracker.close();
   }
 
   /**
    * Creates a REST endpoint for the JAX-RS annotated service.
    * 
-   * @param ref the osgi service reference
-   * @param service The service itself
+   * @param ref
+   *          the osgi service reference
+   * @param service
+   *          The service itself
    */
   protected void createEndpoint(ServiceReference ref, Object service) {
     Object aliasObj = ref.getProperty(SERVICE_PROPERTY);
-    if(aliasObj == null) {
+    if (aliasObj == null) {
       logger.warn("Unable to publish a REST endpoint for {}", service.getClass().getName());
       return;
-    } else if ( ! (aliasObj instanceof String)) {
+    } else if (!(aliasObj instanceof String)) {
       logger.warn("Property '{}' must be a string, but is a {}", SERVICE_PROPERTY, aliasObj.getClass());
       return;
     }
-    String alias = (String)aliasObj;
+    String alias = (String) aliasObj;
     CXFNonSpringServlet cxf = new CXFNonSpringServlet();
     try {
       httpService.registerServlet(alias, cxf, new Hashtable<String, String>(), httpContext);
@@ -138,29 +111,25 @@ public class RestPublisher {
 
   /**
    * Removes an endpoint
-   * @param alias The URL space to reclaim
+   * 
+   * @param alias
+   *          The URL space to reclaim
    */
   protected void destroyEndpoint(String alias) {
     try {
       httpService.unregister(alias);
       logger.info("Unregistered rest endpoint {}", alias);
-    } catch(Exception e) {
+    } catch (Exception e) {
       logger.info("Unable to unregister {}", alias, e);
     }
     // Shut down the CXF servlet for this endpoint
     GenericServlet servlet = servletMap.remove(alias);
-    if(servlet != null) servlet.destroy();
+    if (servlet != null)
+      servlet.destroy();
   }
 
   public void deactivate(ComponentContext componentContext) {
     logger.info("deactivate()");
-    if (listener != null) {
-      componentContext.getBundleContext().removeServiceListener(listener);
-    }
-    for(String alias : servletMap.keySet()) {
-      destroyEndpoint(alias);
-    }
-    servletMap = null;
   }
 
   public void setHttpService(HttpService httpService) {
@@ -169,5 +138,36 @@ public class RestPublisher {
 
   public void setHttpContext(HttpContext httpContext) {
     this.httpContext = httpContext;
+  }
+
+  /**
+   * A custom ServiceTracker that published JAX-RS annotated services with the {@link RestPublisher#SERVICE_PROPERTY}
+   * property set to some non-null value.
+   */
+  class RestServiceTracker extends ServiceTracker {
+    
+    RestServiceTracker() throws InvalidSyntaxException {
+      super(componentContext.getBundleContext(), componentContext.getBundleContext().createFilter(SERVICE_FILTER), null);
+    }
+
+    @Override
+    public void removedService(ServiceReference reference, Object service) {
+      destroyEndpoint(reference.getProperty(SERVICE_PROPERTY).toString());
+      super.removedService(reference, service);
+    }
+
+    @Override
+    public Object addingService(ServiceReference reference) {
+      Object service = componentContext.getBundleContext().getService(reference);
+      Path pathAnnotation = service.getClass().getAnnotation(Path.class);
+      if (pathAnnotation == null) {
+        logger.warn("{} was registered with '{}={}', but the service is not annotated with the JAX-RS "
+                + "@Path annotation",
+                new Object[] { service, SERVICE_PROPERTY, reference.getProperty(SERVICE_PROPERTY) });
+        return null;
+      }
+      createEndpoint(reference, service);
+      return super.addingService(reference);
+    }
   }
 }

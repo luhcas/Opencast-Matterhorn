@@ -53,6 +53,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
+            <Bundle-Activator> org.opencastproject.webconsole.Activator </Bundle-Activator>
             <Embed-Dependency>
               json;inline=true,
               org.apache.felix.webconsole;inline=true

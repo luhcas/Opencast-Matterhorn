@@ -15,10 +15,7 @@
  */
 package org.opencastproject.webconsole;
 
-import org.opencastproject.http.StaticResource;
-
 import org.apache.felix.webconsole.internal.servlet.OsgiManager;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.HttpService;
@@ -37,7 +34,6 @@ public class Component {
   protected HttpService httpService;
   protected HttpContext httpContext;
   protected OsgiManager manager;
-  protected ServiceRegistration staticResourceRegistration;
 
   @SuppressWarnings("unchecked")
   public void activate(ComponentContext componentContext) {
@@ -48,17 +44,12 @@ public class Component {
     } catch (Exception e) {
       throw new IllegalStateException(e);
     }
-    StaticResource staticResource = new StaticResource("/res", "/system/console/res", null);
-    staticResource.activate(componentContext);
-    staticResourceRegistration = componentContext.getBundleContext().registerService(StaticResource.class.getName(),
-            staticResource, null);
   }
 
   public void deactivate() {
     try {
       httpService.unregister("/system/console");
       manager.destroy();
-      staticResourceRegistration.unregister();
     } catch (Exception e) {
       logger.warn("Deactivation problem: {}", e.getMessage());
     }

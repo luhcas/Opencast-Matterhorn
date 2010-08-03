@@ -24,10 +24,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 /**
  * Publishes {@link StaticResource}s with the http service.
  */
@@ -39,63 +35,17 @@ public class StaticResourcePublisher {
   protected ComponentContext componentContext;
   protected ServiceTracker staticResourceTracker = null;
 
-  protected Set<String> staticResourceAliases;
-  
   public void activate(ComponentContext componentContext) {
     logger.info("activate()");
     this.componentContext = componentContext;
-    this.staticResourceAliases = new HashSet<String>();
-    final BundleContext bundleContext = componentContext.getBundleContext();
     
     // Register static resources with the http service
-    staticResourceTracker = new ServiceTracker(bundleContext, StaticResource.class.getName(), null) {
-      @Override
-      public Object addingService(ServiceReference reference) {
-        StaticResource staticResource = (StaticResource)bundleContext.getService(reference);
-        try {
-          httpService.registerServlet(staticResource.alias, staticResource, null, httpContext);
-          staticResourceAliases.add(staticResource.alias);
-          logger.info("Registered static resource  at {}", staticResource.alias);
-        } catch(Exception e) {
-          logger.warn("Can not register resources at alias {}, {}", staticResource.alias, e);
-        }
-        return super.addingService(reference);
-      }
-      @Override
-      public void removedService(ServiceReference reference, Object service) {
-        StaticResource staticResource = (StaticResource)bundleContext.getService(reference);
-        try {
-          httpService.unregister(staticResource.alias);
-          staticResourceAliases.remove(staticResource.alias);
-          logger.info("Unregistered static resource  at {}", staticResource.alias);
-        } catch(Exception e) {
-          logger.warn("Can not unregister resources at alias {}, {}", staticResource.alias, e);
-        }
-        super.removedService(reference, service);
-      }
-      @Override
-      public void modifiedService(ServiceReference reference, Object service) {
-        removedService(reference, service);
-        addingService(reference);
-        super.modifiedService(reference, service);
-      }
-    };
+    staticResourceTracker = new StaticResourceTracker();
     staticResourceTracker.open();
   }
 
   public void deactivate(ComponentContext componentContext) {
-    logger.info("deactivate()");
-    for(Iterator<String> iter = staticResourceAliases.iterator(); iter.hasNext();) {
-      String alias = iter.next();
-      try {
-        httpService.unregister(alias);
-      } catch(Exception e) {
-        logger.warn("Unable to unregister {} from the http service", alias);
-      }
-      iter.remove();
-    }
     staticResourceTracker.close();
-    staticResourceAliases = null;
   }
 
   public void setHttpService(HttpService httpService) {
@@ -106,4 +56,35 @@ public class StaticResourcePublisher {
     this.httpContext = httpContext;
   }
 
+  class StaticResourceTracker extends ServiceTracker {
+    BundleContext bundleContext;
+    
+    StaticResourceTracker() {
+      super(componentContext.getBundleContext(), StaticResource.class.getName(), null);
+      bundleContext = componentContext.getBundleContext();
+    }
+    
+    @Override
+    public Object addingService(ServiceReference reference) {
+      StaticResource staticResource = (StaticResource)bundleContext.getService(reference);
+      try {
+        httpService.registerServlet(staticResource.alias, staticResource, null, httpContext);
+        logger.info("Registered static resource  at {}", staticResource.alias);
+      } catch(Exception e) {
+        logger.warn("Can not register resources at alias {}, {}", staticResource.alias, e);
+      }
+      return super.addingService(reference);
+    }
+    @Override
+    public void removedService(ServiceReference reference, Object service) {
+      StaticResource staticResource = (StaticResource)bundleContext.getService(reference);
+      try {
+        httpService.unregister(staticResource.alias);
+        logger.info("Unregistered static resource  at {}", staticResource.alias);
+      } catch(Exception e) {
+        logger.warn("Can not unregister resources at alias {}, {}", staticResource.alias, e);
+      }
+      super.removedService(reference, service);
+    }
+  }
 }
