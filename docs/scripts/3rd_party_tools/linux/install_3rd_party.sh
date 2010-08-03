@@ -511,8 +511,8 @@ then
 	echo
 	echo "3rd party tools installation was successfully completed."
 	cd $base_dir
-	read -p "Do you want to remove source directories? [y] " choice
-	if ! [ "$choice" = "n" ]
+	read -p "Do you want to remove source directories? [Y/n] " choice
+	if [ "$choice" = "Y" ]
 		then rm -rf $working_dir
 	fi
 	exit 0
