@@ -36,3 +36,25 @@ body {
 	position: absolute;
 	top: 0;
 }
+/* HEADER STYLE */
+
+#header {
+    position:relative;
+    height: 80px;
+}
+
+#header h1 {
+    padding: 4px 0 0 140px;
+    margin-bottom:20px
+}
+
+#oclogo {
+    position:absolute;
+    right: 0;
+    top: 16px;
+}
+
+#logotitle {
+	position: absolute;
+	top: 16px;
+}

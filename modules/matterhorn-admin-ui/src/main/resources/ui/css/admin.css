@@ -474,19 +474,6 @@ fieldset {
   border: 1px solid gray;
 }
 
-#oclogo {
-	position:absolute;
-	right: 0;
-	top: 0;
-}
-#header {
-	position:relative;
-}
-
-#header h1 {
-	padding: 20px 0 0 140px;
-	margin-bottom:20px
-}
 #messages {
 	border: 1px solid #cccccc;
 	font-size:0.9em;
