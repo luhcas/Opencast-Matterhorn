@@ -117,7 +117,6 @@ function handleEvent(doc) {
       }
     });
     var seriesId = $(eventDoc.documentElement).find("isPartOf").text();
-    alert(seriesId);
     if (seriesId) {
       $.get('../series/rest/series/' + seriesId, function(data) {
         var seriesTitle = $(data.documentElement).find("metadata > key:contains('title')").parent().find("value").text();
