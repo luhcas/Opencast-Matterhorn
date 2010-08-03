@@ -20,7 +20,7 @@ input
   border:                   0 none;
   onfocus:                  none;  
   overflow:                 hidden;
-  background:          		#2D8F8B;
+  background:               #2D8F8B;
   color:                    #FFFFFF;
 }
 
@@ -258,6 +258,7 @@ input:hover
 #oc_btn-dropdown
 {
   width:                    48px;
+  height:                   19px;
   text-align:               center;
   margin-right:             5px;
 }
@@ -267,15 +268,36 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -190px -330px;
   width:                    48px;
+  heigth:                   19px;
   margin-right:             5px;
   margin-left:              5px;
 }
+
+#oc_btn-singleDisplay {
+  margin-top:               5px;
+}
+
+#oc_btn-bigLeftDisplay {
+  margin-top:               5px;
+}
+
+#oc_btn-centerDisplay {
+  margin-top:               5px;
+}
+#oc_btn-bigRightDisplay {
+  margin-top:               5px;
+}
+#oc_btn-audioDisplay {
+  margin-top:               5px;
+}
+
 
 .oc_btn-bigLeftDisplay
 {
   background:               transparent url("../img/oc_icons.png");
   background-position:      -120px -330px;
   width:                    44px;
+  heigth:                   19px;
   margin-right:             5px;
   margin-left:              5px;
 }
@@ -285,6 +307,7 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -0px -330px;
   width:                    44px;
+  heigth:                   19px;
   margin-right:             5px;
   margin-left:              5px;
 }
@@ -294,6 +317,7 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      -64px -330px;
   width:                    40px;
+  heigth:                   19px;
   margin-right:             5px;
   margin-left:              5px;
 }
@@ -303,6 +327,7 @@ input:hover
   background:               transparent url("../img/oc_icons.png");
   background-position:      0px -240px;
   width:                    18px;
+  heigth:                   19px;
   margin-right:             5px;
   margin-left:              5px; 
 }
