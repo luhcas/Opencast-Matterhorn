@@ -29,6 +29,7 @@ import org.opencastproject.capture.impl.jobs.AgentStateJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.pipeline.AudioMonitoring;
 import org.opencastproject.capture.pipeline.PipelineFactory;
+import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -36,6 +37,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.mediapackage.track.TrackImpl;
 import org.opencastproject.security.api.TrustedHttpClient;
@@ -67,6 +69,7 @@ import org.quartz.SimpleTrigger;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -76,7 +79,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -95,6 +97,14 @@ import java.util.Vector;
 import java.util.zip.ZipEntry;
 
 import javax.activation.MimetypesFileTypeMap;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines
@@ -573,8 +583,6 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     // Includes the tracks in the MediaPackage
     try {
 
-      URI baseURI = recording.getDir().toURI();
-
       // Adds the files present in the Properties
       for (String name : friendlyNames) {
         name = name.trim();
@@ -590,7 +598,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         if (outputFile.exists()) {
           //TODO:  This should really be Track rather than TrackImpl, but otherwise a bunch of functions we need disappear...
           TrackImpl t = (TrackImpl) elemBuilder.elementFromURI(
-                  baseURI.relativize(outputFile.toURI()),
+                  outputFile.toURI(),
                   MediaPackageElement.Type.Track,
                   flavor);
           t.setSize(outputFile.length());
@@ -628,11 +636,18 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     FileOutputStream fos = null;
     try {
       logger.debug("Serializing metadata and MediaPackage...");
-      // Gets the manifest.xml as a Document object
 
+      // Gets the manifest.xml as a Document object and writes it to a file
+      MediaPackageSerializer serializer = new DefaultMediaPackageSerializerImpl(recording.getDir());
       File manifestFile = new File(recording.getDir(), CaptureParameters.MANIFEST_NAME);
-      fos = new FileOutputStream(manifestFile);
-      recording.getMediaPackage().toXml(fos, true);
+      Result outputFile = new StreamResult(manifestFile);
+      Document manifest = recording.getMediaPackage().toXml(serializer); 
+
+      TransformerFactory tf = TransformerFactory.newInstance();
+      Transformer t = tf.newTransformer();
+      t.setOutputProperty(OutputKeys.INDENT, "yes");
+      t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+      t.transform(new DOMSource(manifest), outputFile);
 
     } catch (MediaPackageException e) {
       logger.error("MediaPackage Exception: {}.", e.getMessage());
@@ -642,6 +657,12 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       logger.error("I/O Exception: {}.", e.getMessage());
       setRecordingState(recording.getID(), RecordingState.MANIFEST_ERROR);
       return false;
+    } catch (TransformerConfigurationException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    } catch (TransformerException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     } finally {
       IOUtils.closeQuietly(fos);
     }

@@ -69,7 +69,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.ParseException;
@@ -688,16 +687,14 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           job.getJobDataMap().put(JobParameters.CAPTURE_PROPS, jobProps);
           hasProperties = true;
           //And attach the properties file to the mediapackage
-          pack.add(new URI(filename));
+          pack.add(new File(filename).toURI());
         } else if (filename.equals("metadata.xml")) {
-          pack.add(new URI(filename), MediaPackageElement.Type.Catalog, MediaPackageElements.EPISODE);
+          pack.add(new File(filename).toURI(), MediaPackageElement.Type.Catalog, MediaPackageElements.EPISODE);
         } else {
-          pack.add(new URI(filename));
+          pack.add(new File(filename).toURI());
         }
       } catch (IOException e) {
         log.error("Unable to read properties file attached to event {}!", props.getProperty(CaptureParameters.RECORDING_ID));
-      } catch (URISyntaxException e) {
-        log.error("Unable to add file {} to mediapackage: {}.", filename, e.getMessage());
       }
       job.getJobDataMap().put(JobParameters.MEDIA_PACKAGE, pack);
       //Note that we overwrite any pre-existing files with this.  In other words, if there is a file called foo.txt in the
