@@ -150,7 +150,6 @@ public class TrackBuilderPlugin extends AbstractElementBuilderPlugin {
       // Build the track
 
       TrackImpl track = TrackImpl.fromURI(url);
-      track.setIdentifier(id);
 
       if (id != null && !id.equals(""))
         track.setIdentifier(id);
