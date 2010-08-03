@@ -192,11 +192,12 @@ public class PipelineFactory {
           } catch (JV4LInfoException e) {
             // The v4l device caused an exception
             if (e.getMessage().equalsIgnoreCase("No medium found")) {
-              logger.error("No VGA signal detected. Unable to start capture.");
+              logger.warn("No VGA signal detected. Trying to start capture regardless...");
+              devName = DeviceName.EPIPHAN_VGA2USB;
             } else {
               logger.error("Unexpected jv4linfo exception: {} for {}.", e.getMessage(), srcLoc);
+              return null;
             }
-            return null;
           }
         }
       }
@@ -566,7 +567,7 @@ public class PipelineFactory {
       capsfilter.set("caps", Caps.fromString("video/x-raw-yuv, width=" + width + ", height=" + height));
     } catch (JV4LInfoException e) {
       capsfilter.set("caps", Caps.fromString("video/x-raw-yuv, width=1280, height=720"));
-      logger.error(e.getLocalizedMessage());
+      logger.error("Could not get resolution Epiphan device is outputting: {}", e.getLocalizedMessage());
     }
     Element static_identity = ElementFactory.make("identity", "static_identity");
     
