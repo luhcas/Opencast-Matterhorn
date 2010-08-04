@@ -101,6 +101,8 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
+            <Bundle-Activator>org.opencastproject.remote.impl.webconsole.Activator</Bundle-Activator>
+            <Private-Package>org.opencastproject.remote.impl.webconsole, ui</Private-Package>
             <Import-Package>
               org.opencastproject.mediapackage;version=${project.version},
               org.opencastproject.mediapackage.attachment;version=${project.version},
@@ -109,6 +111,7 @@
             </Import-Package>
             <Export-Package>
               org.opencastproject.remote.impl;version=${project.version},
+              org.opencastproject.remote.impl.endpoint;version=${project.version},
               org.opencastproject.remote.command;version=${project.version}
             </Export-Package>
             <Embed-Dependency>json-simple;inline=true</Embed-Dependency>

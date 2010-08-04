@@ -1,0 +1,16 @@
+
+<!-- TODO: Design the jobs console -->
+
+<div id='servers'>
+</div>
+
+<script type='text/javascript'>
+  (function($) {
+    $.getJSON('/remote/rest/services.json', function(data) {
+      var serversDiv = $('#servers');
+      $.each(data, function(i, serviceReg) {
+        serversDiv.append("<div id='" + serviceReg.host + '_' + serviceReg.type + "'>" + serviceReg.host + ' ' + serviceReg.type + ': queued=' + serviceReg.queued + ', running=' + serviceReg.running + '</div>');
+      })
+    });
+  })(jQuery);
+</script>
