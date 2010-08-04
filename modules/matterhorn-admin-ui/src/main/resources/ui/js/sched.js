@@ -308,8 +308,9 @@ UI.ChangeRecordingType = function(recType){
     UI.agentList = '#recurAgent';
     UI.inputList = '#recur-input-list';
     $(UI.inputList).empty();
-    seriesLabel = $('#series_container > label').text();
-    $('#series_container > label').replaceWith('<span id="series_required" style="color: red;">*</span>' + seriesLabel); //series is required, indicate as such.
+    if(!$('#series_required')[0]){
+      $('#series_container > label').prepend('<span id="series_required" style="color: red;">* </span>'); //series is required, indicate as such.
+    }
     Scheduler.components.recurrenceStart.setValue(d.getTime().toString());
     Scheduler.FormManager.rootElm = MULTIPLE_EVENT_ROOT_ELM;
   }
