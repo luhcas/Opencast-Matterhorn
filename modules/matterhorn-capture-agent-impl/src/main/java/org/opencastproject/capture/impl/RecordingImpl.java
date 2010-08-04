@@ -23,6 +23,7 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.identifier.IdImpl;
 import org.opencastproject.util.ConfigurationException;
 
 import org.apache.commons.io.FileUtils;
@@ -79,6 +80,12 @@ public class RecordingImpl implements AgentRecording {
     // Stores the MediaPackage
     this.mPkg = mp;
 
+    if (properties != null) {
+      this.props = (Properties) properties.clone();
+    } else {
+      logger.warn("Properties parameter was null, this recording will be in a very weird state!");
+    }
+
     //If the mediapackage is null create a new one
     if (mPkg == null) {
       try {
@@ -90,13 +97,8 @@ public class RecordingImpl implements AgentRecording {
       }
     }
 
-    if (properties != null) {
-      this.props = (Properties) properties.clone();
-    } else {
-      logger.warn("Properties parameter was null, this recording will be in a very weird state!");
-    }
-
     determineRootURLandID();
+    mPkg.setIdentifier(new IdImpl(id));
 
     //Setup the root capture dir, also make sure that it exists.
     if (!baseDir.exists()) {

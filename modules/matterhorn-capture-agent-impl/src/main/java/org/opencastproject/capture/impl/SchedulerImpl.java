@@ -29,6 +29,7 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.identifier.IdImpl;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.security.api.TrustedHttpClientException;
 
@@ -643,6 +644,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   @SuppressWarnings("unchecked")
   private boolean setupEvent(VEvent event, Properties props, JobDetail job) throws org.opencastproject.util.ConfigurationException, MediaPackageException, MalformedURLException, ParseException {
     MediaPackage pack = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
+    pack.setIdentifier(new IdImpl(props.getProperty(CaptureParameters.RECORDING_ID)));
     boolean hasProperties = false;
 
     //Create the directory we'll be capturing into
