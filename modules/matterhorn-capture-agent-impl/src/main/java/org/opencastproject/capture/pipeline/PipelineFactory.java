@@ -374,7 +374,7 @@ public class PipelineFactory {
     Element videorate = ElementFactory.make("videorate", null);
     Element fpsfilter = ElementFactory.make("capsfilter", null);
     Caps fpsCaps;
-    if (framerate != null) {
+    if (framerate != null && codec != null) {
       fpsCaps = new Caps("video/x-raw-yuv, framerate=" + framerate + "/1");
       logger.debug("{} fps: {}", captureDevice.getName(), framerate);
     }
