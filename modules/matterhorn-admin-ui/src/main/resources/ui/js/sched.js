@@ -70,39 +70,44 @@ UI.Init = function(){
         //handle OC Workflow specialness
         ocwprops = ocWorkflow.getConfiguration($('#workflow-config-container'));
         
+        //Review Hold
+        review = doc.createElement('metadata');
+        key = doc.createElement('key');
+        key.appendChild(doc.createTextNode('org.opencastproject.workflow.config.review.hold'));
+        review.appendChild(key);
+        value = doc.createElement('value');
         if( ocwprops['review.hold'] ){
-          review = doc.createElement('metadata');
-          key = doc.createElement('key');
-          key.appendChild(doc.createTextNode('org.opencastproject.workflow.config.review.hold'));
-          review.appendChild(key);
-          value = doc.createElement('value');
-          value.appendChild(doc.createTextNode(ocwprops['review.hold']))
-          review.appendChild(value);
-          AdminUI.log(review);
-          mdlist.appendChild(review);
+          value.appendChild(doc.createTextNode(ocwprops['review.hold']));
+        } else {
+          value.appendChild(doc.createTextNode("false"));
         }
+        review.appendChild(value);
+        mdlist.appendChild(review);
+        
+        //Caption Hold
+        caption = doc.createElement('metadata');
+        key = doc.createElement('key');
+        key.appendChild(doc.createTextNode('org.opencastproject.workflow.config.caption.hold'));
+        caption.appendChild(key);
+        value = doc.createElement('value');
         if( ocwprops['caption.hold'] ) {
-          caption = doc.createElement('metadata');
-          key = doc.createElement('key');
-          key.appendChild(doc.createTextNode('org.opencastproject.workflow.config.caption.hold'));
-          caption.appendChild(key);
-          value = doc.createElement('value');
-          value.appendChild(doc.createTextNode(ocwprops['caption.hold']))
-          caption.appendChild(value);
-          AdminUI.log(caption);
-          mdlist.appendChild(caption);
+          value.appendChild(doc.createTextNode(ocwprops['caption.hold']));
+        } else {
+          value.appendChild(doc.createTextNode("false"));
         }
-        if( $('#workflow-selector').val() ) {
-          workflow = doc.createElement('metadata');
-          key = doc.createElement('key');
-          key.appendChild(doc.createTextNode('org.opencastproject.workflow.definition'));
-          workflow.appendChild(key);
-          value = doc.createElement('value');
-          value.appendChild(doc.createTextNode($('#workflow-selector').val()))
-          workflow.appendChild(value);
-          AdminUI.log(workflow);
-          mdlist.appendChild(workflow);
-        }
+        caption.appendChild(value);
+        mdlist.appendChild(caption);
+        
+        //Workflow selection
+        workflow = doc.createElement('metadata');
+        key = doc.createElement('key');
+        key.appendChild(doc.createTextNode('org.opencastproject.workflow.definition'));
+        workflow.appendChild(key);
+        value = doc.createElement('value');
+        value.appendChild(doc.createTextNode($('#workflow-selector').val()))
+        workflow.appendChild(value);
+        mdlist.appendChild(workflow);
+        
         doc.documentElement.appendChild(mdlist);
         if(typeof XMLSerializer != 'undefined') {
           return (new XMLSerializer()).serializeToString(doc);
@@ -501,7 +506,12 @@ UI.HandleAgentList = function(data) {
     });
   var eventId = AdminUI.getURLParams('eventId');
   if(eventId && AdminUI.getURLParams('edit')) {
-    $.get(SCHEDULER_URL + '/event/' + eventId, UI.LoadEvent);
+    $.ajax({
+      type: "GET",
+      url: SCHEDULER_URL + '/event/' + eventId,
+      success: UI.LoadEvent,
+      cache: false
+    });
   }
 };
 
@@ -511,7 +521,7 @@ UI.LoadEvent = function(doc){
     metadata[$('key', v).text()] = $('value', v).text();
   });
   $.each($('completeMetadata > metadata',doc), function(i,v){
-    if(metadata[$('key', v).text()] == undefined){
+    if(metadata[$('key', v).text()] == undefined){1
       //feild not in list, add it.
       metadata[$('key', v).text()] = $('value', v).text();
     }
