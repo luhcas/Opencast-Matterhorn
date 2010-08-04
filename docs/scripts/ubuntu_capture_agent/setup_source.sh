@@ -25,7 +25,7 @@ if [[ -z "$keep" ]]; then
     # Get the necessary matterhorn source code (the whole trunk, as specified in MH-3211)
     while [[ true ]]; do
 	echo
-	ask -d "${SRC_DEFAULT##*/}" "Enter the branch or tag you would like to download" response
+	ask -d "${SRC_DEFAULT##*/}" "Enter the URL of the trunk, branch or tag you would like to download" response
 
 	if [[ "$response" == "${TRUNK_URL##*/}" ]]; then
 	    url=$TRUNK_URL

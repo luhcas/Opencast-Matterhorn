@@ -158,7 +158,9 @@ export FLAVORS_HELP="Devices that capture the screen are usually \"Presentation\
 Setting this value correctly is important to ensure video content is processed and distributed correctly."
 # Help for the device queue prompt
 export QUEUE_HELP="This value is used internally by the device pipeline and basically represents the amount of memory reserved for the device buffer.
-A value bigger than the default may be selected, as long as the machine has enough memory to allocate it."
+A value bigger than the default may be selected, as long as the machine has enough memory to allocate it.
+Please see Framerates, Bitrates and Queues at http://opencast.jira.com/wiki/display/MH/Tweaking+1.0+(Advanced) for more information."
+
 # Help for the prompt for the time between two schedule polls
 export POLL_HELP="A too short value will cause excessive polls to the core, while a too long value may cause some recordings are not notified to the agent before their expected starting time.
 Testers should choose a value of 1 minute so that they can schedule recordings to start immediately"

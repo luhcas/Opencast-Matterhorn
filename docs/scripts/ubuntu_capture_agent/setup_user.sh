@@ -13,7 +13,7 @@ fi
 . ${FUNCTIONS}
 
 # Prompt for user name
-ask -d "$USERNAME" "Input desired opencast username" input
+ask -d "$USERNAME" "Enter the desired username for this system that will run the capture agent" input
 
 # Add user and give sudo priveleges and permissions for accessing audio/video devices
 useradd -m -s /bin/bash "$input"

@@ -44,7 +44,7 @@ if [[ -z "$(lsmod | grep -e "^vga2usb")" ]]; then
 	echo "System information: $(uname -mor)"
 	echo
 	
-	choose -t "These are the options available for your system" -? "$VGA2USB_HELP_MSG" -o list -- ${drivers[@]} "Enter URL" "Do not need driver" opt
+	choose -t "Please select from the following driver options available for this system for the Epiphan vga2usb device" -? "$VGA2USB_HELP_MSG" -o list -- ${drivers[@]} "Enter URL" "Do not need driver" opt
 	if [[ $opt -le ${#drivers[@]} ]]; then
 	    # The option is one of the drivers or "Enter URL"
  	    if [[ $opt -eq ${#drivers[@]} ]]; then
