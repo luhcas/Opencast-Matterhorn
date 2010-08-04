@@ -150,8 +150,6 @@ UI.Init = function(){
     $('#i18n_page_title').text(i18n.page.title.edit);
     $('#eventId').val(eventId);
     $('#recording-type').hide();
-    $('#deleteButton').click(UI.DeleteForm);
-    $('#delete-recording').show();
     $('#agent').change(
       function() {
         $('#notice-container').hide();
@@ -358,6 +356,7 @@ UI.CancelForm = function(){
   document.location = 'recordings.html';
 };
 
+/*
 UI.DeleteForm = function(){
   var title, series, creator;
   if(confirm(i18n.del.confirm)){
@@ -370,7 +369,7 @@ UI.DeleteForm = function(){
       $('#deleteBox').show();
     });
   }
-};
+};*/
 
 UI.HandleAgentChange = function(elm){
   var time;
