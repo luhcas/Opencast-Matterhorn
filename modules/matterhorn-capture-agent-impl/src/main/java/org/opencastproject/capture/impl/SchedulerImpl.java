@@ -688,8 +688,10 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           hasProperties = true;
           //And attach the properties file to the mediapackage
           pack.add(new File(filename).toURI());
-        } else if (filename.equals("metadata.xml")) {
+        } else if (filename.equals("episode.xml")) {
           pack.add(new File(filename).toURI(), MediaPackageElement.Type.Catalog, MediaPackageElements.EPISODE);
+        } else if (filename.equals("series.xml")) {
+          pack.add(new File(filename).toURI(), MediaPackageElement.Type.Catalog, MediaPackageElements.SERIES);
         } else {
           pack.add(new File(filename).toURI());
         }

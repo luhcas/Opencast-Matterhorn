@@ -131,7 +131,7 @@ public class CalendarGenerator {
         dcParameters.add(new FmtType("application/xml"));
         dcParameters.add(Value.BINARY);
         dcParameters.add(Encoding.BASE64);
-        dcParameters.add(new XParameter("X-APPLE-FILENAME", "metadata.xml"));
+        dcParameters.add(new XParameter("X-APPLE-FILENAME", "episode.xml"));
         Attach metadataAttachment = new Attach(dcParameters, dcGenerator.generateAsString(e).getBytes("UTF-8"));
         event.getProperties().add(metadataAttachment);
 

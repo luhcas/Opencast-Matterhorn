@@ -117,7 +117,7 @@ public class RecordingImpl implements AgentRecording {
 
     //Write out the metadata file needed by the core if it's not present
     //TODO:  make this a constant?
-    File metadataFile = new File(baseDir, "metadata.xml");
+    File metadataFile = new File(baseDir, "episode.xml");
     if (!metadataFile.exists()) {
       FileWriter out = new FileWriter(metadataFile);
       out.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
