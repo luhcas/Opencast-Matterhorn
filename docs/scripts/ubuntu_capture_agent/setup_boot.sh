@@ -17,7 +17,7 @@ ln -s $ACTUAL_SCRIPT $STARTUP_SCRIPT
 sed -i "s/\$MATTERHORN_HOME/$(echo $OC_DIR | sed 's/\//\\\//g')/g" $ACTUAL_SCRIPT
 sed -i "s/\$FELIX_HOME/$(echo $FELIX_HOME | sed 's/\//\\\//g')/g" $ACTUAL_SCRIPT
 sed -i "s/\$USERNAME/$USERNAME/g" $ACTUAL_SCRIPT
-sed -i "s/\$IS_CA=false/\$IS_CA=true/g" $ACTUAL_SCRIPT
+sed -i "s/IS_CA=false/IS_CA=true/g" $ACTUAL_SCRIPT
 
 # Set the appropriate permissions
 chown root:root $STARTUP_SCRIPT
