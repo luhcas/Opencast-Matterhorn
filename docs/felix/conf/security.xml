@@ -17,6 +17,8 @@
     -->
     <sec:intercept-url pattern='/login.html' access='ROLE_ANONYMOUS'/>
     <sec:intercept-url pattern='/style.css' access='ROLE_ANONYMOUS, ROLE_USER, ROLE_ADMIN'/>
+    <sec:intercept-url pattern="/favicon.ico" filters="none"/>
+    <sec:intercept-url pattern="/admin/img/favicon.ico" filters="none"/>
     <sec:intercept-url pattern='/images/**' filters="none"/>
     <sec:intercept-url pattern="/img/**" filters="none"/>
     <sec:intercept-url pattern="/js/**" filters="none"/>
