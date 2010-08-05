@@ -4,6 +4,7 @@ var ocIngest = ocIngest || {};
 ocIngest.debug = true;
 ocIngest.mediaPackage = null;
 ocIngest.metadata = null;
+ocIngest.seriesDC = null;
 ocIngest.previousMediaPackage = null;
 ocIngest.previousFiles = new Array();
 
@@ -105,7 +106,7 @@ ocIngest.createDublinCoreCatalog = function(data) {
 }
 
 ocIngest.addCatalog = function(mediaPackage, dcCatalog) {
-  Upload.log("Creating DublinCore catalog");
+  Upload.log("Adding DublinCore catalog");
   Upload.setProgress('100%','adding Metadata',' ', ' ');
   $.ajax({
     url        : '../ingest/rest/addDCCatalog',
@@ -121,7 +122,29 @@ ocIngest.addCatalog = function(mediaPackage, dcCatalog) {
     success    : function(data, status) {
       Upload.log("DublinCore catalog added");
       ocIngest.mediaPackage = data;
-      ocIngest.startIngest(data);
+      var seriesId = $('#isPartOf').val();
+      if (seriesId && ocIngest.seriesDC == null) {
+        ocIngest.addSeriesCatalog(seriesId);
+      } else {
+        ocIngest.startIngest(data);
+      }
+    }
+  });
+}
+
+ocIngest.addSeriesCatalog = function(seriesId) {
+  Upload.log("Getting sweries DublinCore");
+  Upload.setProgress('100%','Getting series Metadata',' ', ' ');
+  $.ajax({
+    url        : '../series/rest/'+seriesId+'.xml',
+    type       : 'GET',
+    error      : function(XHR,status,e){
+      showFailedScreen('The metadata for the series you selected could not be retrieved.');
+    },
+    success    : function(data, status) {
+      Upload.log("Adding series metadata");
+      ocIngest.seriesDC = data;
+      ocIngest.addCatalog(ocUtils.xmlToString(ocIngest.mediaPackage), data);
     }
   });
 }
