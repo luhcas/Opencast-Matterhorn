@@ -85,24 +85,28 @@
             <xsl:choose>
                 <xsl:when test="recordingStatus='upcoming'">
                     Upcoming:
+                    <xsl:value-of select="processingStatus" />
                 </xsl:when>
                 <xsl:when test="recordingStatus='capturing'">
                     Capturing:
+                    <xsl:value-of select="processingStatus" />
                 </xsl:when>
                 <xsl:when test="recordingStatus='processing'">
                     Processing:
+                    <xsl:value-of select="processingStatus" />
                 </xsl:when>
                 <xsl:when test="recordingStatus='finished'">
-                    Finished:
+                    Finished
                 </xsl:when>
                 <xsl:when test="recordingStatus='hold'">
                     On Hold:
+                    <xsl:value-of select="processingStatus" />
                 </xsl:when>
                 <xsl:when test="recordingStatus='failed'">
                     Failed:
+                    <xsl:value-of select="processingStatus" />
                 </xsl:when>
             </xsl:choose>
-            <xsl:value-of select="processingStatus" />
         </xsl:otherwise>
         </xsl:choose>
       </td>

@@ -53,7 +53,7 @@
         <xsl:value-of select="captureAgent" />
       </td> -->
       <td class="processingStatus">
-        <xsl:value-of select="processingStatus" />
+        Finished
       </td>
       <td>
         <a title="View Recording Info">

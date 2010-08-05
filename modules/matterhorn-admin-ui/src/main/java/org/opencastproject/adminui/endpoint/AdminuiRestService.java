@@ -93,11 +93,11 @@ public class AdminuiRestService {
     logger.debug("unbinding SchedulerService");
     schedulerService = null;
   }
-  
+
   public void setSeriesService(SeriesService service) {
     seriesService = service;
   }
-  
+
   public void unsetSeriesService(SeriesService service) {
     logger.debug("unbinding SeriesService");
     seriesService = null;
@@ -240,7 +240,7 @@ public class AdminuiRestService {
         }
         // if there is a mediapackage zip, set it here
         MediaPackageElement[] zipArchives = mediapackage.getElementsByFlavor(MediaPackageElementFlavor.parseFlavor("archive/zip"));
-        if(zipArchives.length > 0) {
+        if (zipArchives.length > 0) {
           item.setZipUrl(zipArchives[0].getURI().toString());
         }
         item.setErrorMessages(workflows[i].getErrorMessages());
@@ -250,14 +250,14 @@ public class AdminuiRestService {
         if (currentOperation == null) {
           List<WorkflowOperationInstance> operationsList = workflows[i].getOperations();
           // Loop through the operations to find the last failed operation, and the current operation
-          for(WorkflowOperationInstance op : operationsList) {
-            if(op.getState().equals(WorkflowOperationInstance.OperationState.FAILED)) {
+          for (WorkflowOperationInstance op : operationsList) {
+            if (op.getState().equals(WorkflowOperationInstance.OperationState.FAILED)) {
               item.setFailedOperation(op.getDescription());
             }
           }
           currentOperation = operationsList.get(operationsList.size() - 1);
         }
-        if (currentOperation != null) {               // there always should be operation, just to make sure
+        if (currentOperation != null) {
           item.setProcessingStatus(currentOperation.getDescription());
         } else {
           item.setProcessingStatus("unknown");
@@ -497,17 +497,16 @@ public class AdminuiRestService {
   private LinkedList<AdminRecording> getCapturingRecordings() {
     LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
     if (schedulerService != null && captureAdminService != null && seriesService != null) {
-      logger.debug("getting capturing recordings from scheduler");
-      Map<String,Recording> recordings = captureAdminService.getKnownRecordings();
-      for(Entry<String, Recording> recording : recordings.entrySet()){
+      //logger.debug("getting capturing recordings from scheduler");
+      Map<String, Recording> recordings = captureAdminService.getKnownRecordings();
+      for (Entry<String, Recording> recording : recordings.entrySet()) {
         Event event = schedulerService.getEvent(recording.getKey());
         try {
           Recording r = recording.getValue();
           if (r != null) {
             String state = r.getState();
-            logger.info("State = " + state);
-            if (state != null &&
-                    state.equals(RecordingState.CAPTURING)
+            if (state != null
+                    && state.equals(RecordingState.CAPTURING)
                     || state.equals(RecordingState.CAPTURE_FINISHED)
                     || state.equals(RecordingState.COMPRESSING)
                     || state.equals(RecordingState.MANIFEST)
@@ -537,14 +536,14 @@ public class AdminuiRestService {
     }
     return out;
   }
-  
+
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("series")
-  public AdminSeriesListImpl getSeries( @QueryParam("pn") int pageNumber,
-                                        @QueryParam("ps") int pageSize,
-                                        @QueryParam("sb") String sortBy,
-                                        @QueryParam("so") String sortOrder) {
+  public AdminSeriesListImpl getSeries(@QueryParam("pn") int pageNumber,
+          @QueryParam("ps") int pageSize,
+          @QueryParam("sb") String sortBy,
+          @QueryParam("so") String sortOrder) {
     logger.debug("PageSize, PageNumber: {},{}", pageSize, pageNumber);
     AdminSeriesListImpl seriesList;
     try {
@@ -555,16 +554,16 @@ public class AdminuiRestService {
       seriesList = new AdminSeriesListImpl();
     }
     List<Series> allSeries = seriesService.getAllSeries();
-    for(Series s : allSeries){
+    for (Series s : allSeries) {
       AdminSeries series = new AdminSeriesImpl();
       series.setId(s.getSeriesId());
       List<SeriesMetadata> seriesMetadata = s.getMetadata();
-      for(SeriesMetadata metadata : seriesMetadata){
-        if(metadata.getKey().equals("title")) {
+      for (SeriesMetadata metadata : seriesMetadata) {
+        if (metadata.getKey().equals("title")) {
           series.setTitle(metadata.getValue());
-        }else if(metadata.getKey().equals("creator")) {
+        } else if (metadata.getKey().equals("creator")) {
           series.setCreator(metadata.getValue());
-        }else if(metadata.getKey().equals("contributor")){
+        } else if (metadata.getKey().equals("contributor")) {
           series.setContributor(metadata.getValue());
         }
       }
@@ -575,7 +574,7 @@ public class AdminuiRestService {
     if (pageNumber < 0) {
       pageNumber = 0;
     }
-    if(pageSize == 0){
+    if (pageSize == 0) {
       pageSize = seriesList.size();
     }
     int first, last;
@@ -593,7 +592,7 @@ public class AdminuiRestService {
       } catch (IndexOutOfBoundsException e) {
         break;
       }
-    }    
+    }
     logger.debug("List: " + page.sortBy.toString() + " " + page.sortOrder.toString());
     return page;
   }
@@ -647,27 +646,26 @@ public class AdminuiRestService {
 
   public String getSeriesNameFromEvent(Event event) {
     String seriesId = event.getValue("seriesId");
-    if(!seriesId.isEmpty()){
+    if (!seriesId.isEmpty()) {
       return getSeriesNameById(seriesId);
     }
     return "";
   }
-  
+
   public String getSeriesNameById(String seriesId) {
     String seriesName = null;
-    if(seriesId != null && !seriesId.isEmpty()){
-        Series series = seriesService.getSeries(seriesId);
-        if(series != null){
-          seriesName = series.getFromMetadata("title");
-        }
+    if (seriesId != null && !seriesId.isEmpty()) {
+      Series series = seriesService.getSeries(seriesId);
+      if (series != null) {
+        seriesName = series.getFromMetadata("title");
+      }
     }
-    if(seriesName != null){
+    if (seriesName != null) {
       return seriesName;
     }
     return "";
   }
-  
+
   public AdminuiRestService() {
   }
-  
 }
