@@ -98,6 +98,7 @@
               org.jasig.cas.client.session;resolution:=optional,
               org.jasig.cas.client.util;resolution:=optional,
               org.jasig.cas.client.validation;resolution:=optional,
+              org.opencastproject.security.api;version=${project.version},
               org.springframework.dao,
               org.springframework.security,
               org.springframework.security.access,
@@ -117,7 +118,7 @@
               org.springframework.security.web.authentication.www,
               *;resolution:=optional
             </Import-Package>
-            <Export-Package> org.opencastproject.security;${project.version} </Export-Package>
+            <Export-Package> org.opencastproject.security;version=${project.version} </Export-Package>
             <Service-Component>
               OSGI-INF/http-client.xml,
               OSGI-INF/security-config-scanner.xml
