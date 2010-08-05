@@ -12,6 +12,9 @@ fi
 
 . "${FUNCTIONS}"
 
+#Defines the regex we use in this script to determine if a URL is valid
+VALID_URL_REGEX='^http://[a-zA-Z0-9\._\-]+(:[0-9]*[0-9]*[0-9]*[0-9]*[0-9])?$'
+
 # Setup opencast storage directories
 # TODO: Uncomment the following lines -and remove the next two- once the correct defaults for the directories are set in the config files in svn
 ## Read default from the config file
@@ -58,8 +61,8 @@ if [[ "$config" ]]; then
     # Asks for the new IP
     # TODO: this property also admits a URL, rather than an IP. Remove the filter and check this still works for an arbitrary address.
     # > And how do we check if that URL is correct or not?
-    ask -a -f '^[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9]\.[012]*[0-9]*[0-9](:[0-9]*[0-9]*[0-9]*[0-9]*[0-9])?$'\
-        "Detected IP is $default_ip. Press [enter] to accept, or enter a new address including protocol (eg: http://$default_ip)" ip
+    ask -a -f $VALID_URL_REGEX\
+        "Detected IP is $default_ip. Press [enter] to accept, or enter a new address including protocol and optional port (eg: http://$default_ip or http://$default_ip:8080)" ip
     : ${ip:="http://"$default_ip}
     sed -i "s#^${SERVER_URL_KEY//./\\.}=.*\$#${SERVER_URL_KEY}=$ip#" "$GEN_PROPS"
 fi
@@ -68,7 +71,7 @@ fi
 # TODO: (or maybe not) Support a distributed core would mean to set different URLs separately, rather than this centralized one
 ## Read default from the config file
 #DEFAULT_CORE_URL=$(grep "^${CORE_URL_KEY//./\\.}=.*$" $CAPTURE_PROPS | cut -d '=' -f 2)
-ask -d "$DEFAULT_CORE_URL" "Please enter the URL and port (if ingestion is not on port 80) of the machine hosting the ingestion service in the form of URL:PORT" core
+ask -d "$DEFAULT_CORE_URL" -f $VALID_URL_REGEX "Please enter the URL and port (if ingestion is not on port 80) of the machine hosting the ingestion service in the form of http://URL:PORT" core
 sed -i "s#^${CORE_URL_KEY//./\\.}=.*\$#${CORE_URL_KEY}=$core#" "$CAPTURE_PROPS"
 
 # Prompt for the time between two updates of the recording schedule

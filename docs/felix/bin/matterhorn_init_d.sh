@@ -19,6 +19,8 @@ set -e
 MATTERHORN=$MATTERHORN_HOME
 #eg:  /opt/matterhorn/felix, or $MATTERHORN/felix
 FELIX=$FELIX_HOME
+#eg:  /opt/matterhorn/capture-agent, or $MATTERHORN/capture-agent
+CA=$CA_DIR
 #eg:  Commonly opencast or matterhorn.  Can also be your normal user if you are testing.
 MATTERHORN_USER=$USERNAME
 #Enable this if this machine is a CA.  This will enable capture device autoconfiguration.
@@ -68,9 +70,9 @@ case "$1" in
   start)
     log_begin_msg "Starting OpenCast Matterhorn: $NAME"
     if $IS_CA ; then
-        $MATTERHORN/capture-agent/device_config.sh
-        if [ -d $MATTERHORN/capture-agent/epiphan_driver ]; then
-                make -C $MATTERHORN/capture-agent/epiphan_driver load
+        $CA/device_config.sh
+        if [ -d $CA/epiphan_driver ]; then
+                make -C $CA/epiphan_driver load
         fi
     fi
 
@@ -80,13 +82,13 @@ case "$1" in
     ;;
   stop)
     log_begin_msg "Stopping OpenCast Matterhorn: $NAME"
+    start-stop-daemon --stop --pidfile /var/run/matterhorn/matterhorn.pid --oknodo --exec $DAEMON && log_end_msg 0 || log_end_msg 1
+
     if $IS_CA ; then
-        if [ -d $MATTERHORN/capture-agent/epiphan_driver ]; then
-                make -C $MATTERHORN/capture-agent/epiphan_driver unload
+        if [ -d $CA/epiphan_driver ]; then
+                make -C $CA/epiphan_driver unload
         fi
     fi
-
-    start-stop-daemon --stop --pidfile /var/run/matterhorn/matterhorn.pid --oknodo --exec $DAEMON && log_end_msg 0 || log_end_msg 1
     rm -f /var/run/matterhorn/matterhorn.pid
     ;;
   restart)
