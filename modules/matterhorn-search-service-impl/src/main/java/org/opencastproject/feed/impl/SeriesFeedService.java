@@ -49,7 +49,7 @@ public class SeriesFeedService extends AbstractFeedService implements FeedGenera
     int idparts = query.length - 1;
     if (idparts < 1)
       return false;
-    for (int i = 1; i < idparts; i++) {
+    for (int i = 1; i <= idparts; i++) {
       if (id.length() > 0)
         id.append("/");
       id.append(query[i]);

@@ -205,7 +205,7 @@ public class SolrIndexManager {
     // Add the episode metadata
     if (episodeDocument != null) {
       if (seriesDocument != null)
-        episodeDocument.setField(SolrFields.DC_IS_PART_OF, seriesDocument.getField(SolrFields.ID));
+        episodeDocument.setField(SolrFields.DC_IS_PART_OF, seriesDocument.getFieldValue(SolrFields.ID));
       solrRequest.add(episodeDocument);
     }
 
