@@ -30,7 +30,7 @@
         var mp = parent.ocIngest.mediaPackage;
         var mpId = $(mp.documentElement).attr('id');
         $.ajax({
-          url : '../../files/move/inbox/' + file + '/' + mpId + '/' + TRACK_ID,
+          url : '../../files/move/inbox/' + file + '/' + mpId + '/' + TRACK_ID + "/" + file,
           type : 'POST',
           dataType : 'text',
           success : function(data) {
