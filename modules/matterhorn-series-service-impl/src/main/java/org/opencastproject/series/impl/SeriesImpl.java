@@ -17,7 +17,6 @@
 package org.opencastproject.series.impl;
 
 import org.opencastproject.mediapackage.EName;
-import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
@@ -151,7 +150,7 @@ public class SeriesImpl implements Series {
    * {@inheritDoc}
    * @see org.opencastproject.series.api.Series#getDublinCore()
    */
-  public DublinCore getDublinCore () {
+  public DublinCoreCatalog getDublinCore () {
       if (dublinCore == null) dublinCore = buildDublinCore();
       return dublinCore;
   }

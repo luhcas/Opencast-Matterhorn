@@ -15,7 +15,7 @@
  */
 package org.opencastproject.series.endpoint;
 
-import org.opencastproject.metadata.dublincore.DublinCore;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.api.SeriesService;
@@ -29,12 +29,12 @@ import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Param.Type;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -152,14 +152,14 @@ public class SeriesRestService {
 
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("series/{seriesID}/dublincore")
+  @Path("{seriesID}.xml")
   public Response getDublinCoreForSeries(@PathParam("seriesID") String seriesID) {
     logger.debug("Series Lookup: {}", seriesID);
     try {
-      DublinCore dc = service.getDublinCore(seriesID);
+      DublinCoreCatalog dc = service.getDublinCore(seriesID);
       if (dc == null)
         return Response.status(Status.BAD_REQUEST).build();
-      return Response.ok(dc).build();
+      return Response.ok(dc.toXmlString()).build();
     } catch (Exception e) {
       logger.warn("Series Lookup failed: {}", seriesID);
       return Response.status(Status.SERVICE_UNAVAILABLE).build();
@@ -373,8 +373,8 @@ public class SeriesRestService {
 
     // get Dublin Core for Series
     RestEndpoint dcEndpoint = new RestEndpoint("getDublinCoreForSeries", RestEndpoint.Method.GET,
-            "/series/{seriesID}/dublincore", "Get the DublinCore metdata for a specific Series.");
-    dcEndpoint.addFormat(new Format("xml", null, null));
+            "/{seriesID}.xml", "Get the DublinCore metdata for a specific Series.");
+    dcEndpoint.addFormat(new Format("Dublin Core xml", null, null));
     dcEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, DublinCore returned"));
     dcEndpoint.addPathParam(new Param("seriesID", Type.STRING, "UUID of the Series", "The unique ID of the Series."));
     dcEndpoint.setTestForm(RestTestForm.auto());

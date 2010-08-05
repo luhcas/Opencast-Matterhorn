@@ -15,6 +15,17 @@
  */
 package org.opencastproject.series.impl;
 
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.series.api.Series;
+import org.opencastproject.series.api.SeriesMetadata;
+import org.opencastproject.series.api.SeriesService;
+
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
@@ -27,16 +38,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.spi.PersistenceProvider;
-
-import org.opencastproject.metadata.dublincore.DublinCore;
-import org.opencastproject.series.api.Series;
-import org.opencastproject.series.api.SeriesMetadata;
-import org.opencastproject.series.api.SeriesService;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * TODO: Comment me!
@@ -129,7 +130,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * @see org.opencastproject.series.api.SeriesService#getDublinCore(java.lang.String)
    */
   @Override
-  public DublinCore getDublinCore(String seriesID) {
+  public DublinCoreCatalog getDublinCore(String seriesID) {
     return getSeries(seriesID).getDublinCore();
   }
 

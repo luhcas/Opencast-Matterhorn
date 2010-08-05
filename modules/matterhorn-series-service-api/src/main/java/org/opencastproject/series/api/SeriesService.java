@@ -15,9 +15,9 @@
  */
 package org.opencastproject.series.api;
 
-import java.util.List;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 
-import org.opencastproject.metadata.dublincore.DublinCore;
+import java.util.List;
 
 /**
  * FIXME -- Add javadocs
@@ -69,7 +69,7 @@ public interface SeriesService {
    * @param seriesID The ID of the demanded series 
    * @return A dublin Core Element
    */
-  public DublinCore getDublinCore (String seriesID);
+  public DublinCoreCatalog getDublinCore (String seriesID);
 
   /**
    * Searches for all series' that fit into a certain pattern

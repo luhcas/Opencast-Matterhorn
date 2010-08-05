@@ -16,9 +16,9 @@
 
 package org.opencastproject.series.api;
 
-import java.util.List;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 
-import org.opencastproject.metadata.dublincore.DublinCore;
+import java.util.List;
 
 public interface Series extends Comparable<Series> {
 
@@ -34,7 +34,7 @@ public interface Series extends Comparable<Series> {
 
   public abstract void setMetadata(List<SeriesMetadata> metadata);
 
-  public abstract DublinCore getDublinCore();
+  public abstract DublinCoreCatalog getDublinCore();
 
   public abstract boolean valid();
   
