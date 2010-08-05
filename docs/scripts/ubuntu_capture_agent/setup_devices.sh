@@ -64,6 +64,7 @@ flavors=($FLAVORS)
 
 unset allDevices
 unset cleanName
+unset extensions
 
 # Log statement to explain the log syntax
 echo >> $LOG_FILE
@@ -119,6 +120,12 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
     # Setup device info using udevadm info (sed filters the <value> in ATTR{name}="<value>" and escapes the special characters --> []*? <-- )
     sysName=$(udevadm info --attribute-walk --name=${device[$i]} | sed -e '/ATTR{name}/!d' -e 's/^[^"]*"\(.*\)".*$/\1/' -e 's/\([][?\*]\)/\\\1/g')
     echo "KERNEL==\"video[0-9]*\", ATTR{name}==\"$sysName\", GROUP=\"video\", SYMLINK+=\"$symlinkName\"" >> $rules
+
+    # Prompt for the output file extension for the video capture device. Please see MH-4523 for details.
+    # The extension will be appended to the files and will be stored in the config files 
+    ask -f '^[a-zA-Z0-9_\-]*$' -d "$DEFAULT_VIDEO_EXTENSION" -e "The extension should not contain periods, parentheses, slashes or whitespaces"\
+        -? "$EXTENSIONS_HELP" "Please enter the output file extension for the media created by the video capture device" extension[$i]
+
 
     # Prompt for the flavor for this device
     if [[ ${#flavors[@]} -eq 0 ]]; then
@@ -179,9 +186,9 @@ for (( i = 0; i < ${#device[@]}; i++ )); do
 
     # Writes device to the config file
     echo "$DEVICE_PREFIX.${cleanName[$i]}.$SOURCE_SUFFIX=/dev/$symlinkName" >> $CAPTURE_PROPS
-    echo "$DEVICE_PREFIX.${cleanName[$i]}.$OUT_SUFFIX=${cleanName[$i]}" >> $CAPTURE_PROPS
+    echo "$DEVICE_PREFIX.${cleanName[$i]}.$OUT_SUFFIX=${cleanName[$i]}.${extension[$i]}" >> $CAPTURE_PROPS
     echo "$DEVICE_PREFIX.${cleanName[$i]}.$FLAVOR_SUFFIX=$flavor" >> $CAPTURE_PROPS
-    echo "$DEVICE_PREFIX.${cleanName[$i]}.$QUEUE_SUFFIX=$((q_size*1024))" >> $CAPTURE_PROPS
+    echo "$DEVICE_PREFIX.${cleanName[$i]}.$QUEUE_SUFFIX=$((q_size*1024*1024))" >> $CAPTURE_PROPS
     allDevices="${allDevices}${cleanName[$i]},"
     
     # Log this device
@@ -241,6 +248,11 @@ if [[ "$response" ]]; then
     done
     echo
 
+    # Prompt for the output file extension for the audio capture device. Please see MH-4523 for details.
+    # The extension will be appended to the files and will be stored in the config files 
+    ask -f '^[a-zA-Z0-9_\-]*$' -d "$DEFAULT_AUDIO_EXTENSION" -e "The extension should not contain periods, parentheses, slashes or whitespaces"\
+        -? "$EXTENSIONS_HELP" "Please enter the output file extension for the media created by the audio capture device" extension[$i]
+
     # Prompt for the flavor for this device
     if [[ ${#flavors[@]} -eq 0 ]]; then
 	flavor=0
@@ -265,7 +277,7 @@ if [[ "$response" ]]; then
 
     # Write the config values to the properties file
     echo "$DEVICE_PREFIX.${cleanName[$i]}.$SOURCE_SUFFIX=$audioDevice" >> $CAPTURE_PROPS
-    echo "$DEVICE_PREFIX.${cleanName[$i]}.$OUT_SUFFIX=${cleanName[$i]}" >> $CAPTURE_PROPS
+    echo "$DEVICE_PREFIX.${cleanName[$i]}.$OUT_SUFFIX=${cleanName[$i]}.${extension[$i]}" >> $CAPTURE_PROPS
     echo "$DEVICE_PREFIX.${cleanName[$i]}.$FLAVOR_SUFFIX=$flavor" >> $CAPTURE_PROPS
     echo "$DEVICE_PREFIX.${cleanName[$i]}.$QUEUE_SUFFIX=$((q_size*1024))" >> $CAPTURE_PROPS
 

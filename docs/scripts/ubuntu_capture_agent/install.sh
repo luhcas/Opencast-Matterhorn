@@ -95,7 +95,10 @@ export BAD_PKG_REASON="These packages provide support for h264 and mpeg2"
 # This is a backup file to preserve the list of installed packages in case something fails and the script is re-launched
 # The name should start with a '.' so that it is a hidden file and it is not erased with the rest of the files when a new execution starts
 export PKG_BACKUP=$WORKING_DIR/.installed_pkgs
-
+# Default output file extension for a video capture device
+export DEFAULT_VIDEO_EXTENSION="mpg"
+# Default output file extension for an audio device
+export DEFAULT_AUDIO_EXTENSION="mp2"
 # 1-based index default option for the device flavor
 export DEFAULT_FLAVOR=1
 # Lists of flavors the user can choose from to assign to a certain device
@@ -153,6 +156,8 @@ $(uname -a))"
 # Help for the device friendly name prompt
 export FRIENDLY_NAMES_HELP="The friendly name (e.g. \"screen\", or \"professor\") will identify the device in the system and will be displayed in the user interfaces for controlling this device.
 It can't contain spaces or punctuation."
+# Help for the device output file extension
+export EXTENSIONS_HELP="Please see http://opencast.jira.com/browse/MH-4523 for more details about why the output file extension needs to be specified for each captured file as they are injested by the core."
 # Help for the device flavor prompt
 export FLAVORS_HELP="Devices that capture the screen are usually \"Presentation\", while devices that capture the instructor or audience are usually \"Presenter\".
 Setting this value correctly is important to ensure video content is processed and distributed correctly."
@@ -351,7 +356,6 @@ echo -e "\n\n\nCapture Agent succesfully installed\n\n\n"
 #    fi
 #done
 #echo
-echo "Due to a known issue, each device must save output files with proper file extensions. Please see issue MH-4523. For more information on how to configure file extensions for output files see the file org.opencastproject.capture.impl.ConfigurationManager.properties."
 echo
 
 yesno -d yes "It is recommended to reboot the system after installation. Do you wish to do it now?" reboot
