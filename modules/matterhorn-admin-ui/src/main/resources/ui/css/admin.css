@@ -280,6 +280,7 @@ select { font-size:1.15em; }
 #holdActionPanel-iframe {
   border:none;
   width:100%;
+  height:600px;
 }
 
 #holdActionPanel-submit {
