@@ -139,9 +139,17 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
       } else {
         parentFile = videoSource;
       }
-      params.put("out.dir", parentFile.getAbsoluteFile().getParent());
-      params.put("out.name", FilenameUtils.getBaseName(parentFile.getName()));
-      params.put("out.suffix", processParameters(profile.getSuffix()));
+      String outDir = parentFile.getAbsoluteFile().getParent();
+      String outFileName = FilenameUtils.getBaseName(parentFile.getName());
+      String outSuffix = processParameters(profile.getSuffix());
+      
+      if(new File(outDir, outFileName + outSuffix).exists()) {
+        outFileName += "_reencode";
+      }
+      
+      params.put("out.dir", outDir);
+      params.put("out.name", outFileName);
+      params.put("out.suffix", outSuffix);
 
       // create encoder process.
       // no special working dir is set which means the working dir of the
@@ -181,8 +189,7 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
                 profile.getIdentifier() });
       }
       fireEncoded(this, profile, audioSource, videoSource);
-      return new File(parentFile.getParent(), FilenameUtils.getBaseName(parentFile.getCanonicalPath())
-              + processParameters(profile.getSuffix()));
+      return new File(parentFile.getParent(), outFileName + outSuffix);
     } catch (EncoderException e) {
       if (audioSource != null) {
         logger.warn("Error while encoding audio track {} and video track {} using '{}': {}", new String[] {
