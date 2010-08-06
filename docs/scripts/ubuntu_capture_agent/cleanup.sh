@@ -30,7 +30,7 @@ if [[ `id -u` -ne 0 ]]; then
 fi
 
 # Double check to make sure they aren't losing any vital information
-read -p "Are you sure you want to remove the Matterhorn Capture Agent and user $USER from your system [yes/NO]? " response
+read -p "Are you sure you want to remove the Matterhorn Capture Agent [yes/NO]? " response
 while [[ -z $(echo "$response" | grep -i '^yes$') && -z $(echo "${response:-no}" | grep -i '^no$') ]]; do
     read -p "Please write yes or no [no]: " response
 done
@@ -86,7 +86,7 @@ rm -rf $CA_DIR
 echo "Done"
 
 # Remove the user and their home directory
-read -p "Do you want to remove the matterhorn user [y/N]? " response
+read -p "Do you want to remove the matterhorn user '$USER' [y/N]? " response
 until [[ $(echo ${response:-no} | grep -i '^[yn]') ]]; do
     read -p "Please answer [y]es or [N]o: " response
 done

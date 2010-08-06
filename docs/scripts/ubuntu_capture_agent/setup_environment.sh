@@ -29,6 +29,8 @@ mkdir -p "$oc_dir"/cache
 mkdir -p "$oc_dir"/config
 mkdir -p "$oc_dir"/volatile
 mkdir -p "$oc_dir"/cache/captures
+# Point the CA's fileservice at the right dir
+sed -i "s/\/tmp\/opencast\/cache\/captures/$oc_dir\/cache\/captures" $SOURCE/modules/matterhorn-capture-agent-impl/src/main/resources/OSGI-INF/capture-files.xml
 
 # Establish their permissions
 chown -R $USERNAME:$USERNAME "$oc_dir"
@@ -88,6 +90,8 @@ EXPORT_M2_REPO="export M2_REPO=${M2_REPO}"
 EXPORT_FELIX_HOME="export FELIX_HOME=${FELIX_HOME}"
 EXPORT_JAVA_HOME="export JAVA_HOME=${JAVA_HOME}"
 EXPORT_SOURCE_HOME="export MATTERHORN_SOURCE=${SOURCE}"
+ALIAS_DEPLOY_MACRO="alias deploy=\"mvn install -DdeployTo=$FELIX_HOME/load\""
+ALIAS_REDEPLOY_MACRO="alias redeploy=\"mvn clean && deploy\""
 
 grep -e "${EXPORT_M2_REPO}" "$HOME"/.bashrc &> /dev/null
 if [ "$?" -ne 0 ]; then
@@ -105,8 +109,14 @@ grep -e "${EXPORT_SOURCE_HOME}" "$HOME"/.bashrc &> /dev/null
 if [ "$?" -ne 0 ]; then
     echo "${EXPORT_SOURCE_HOME}" >> "$HOME"/.bashrc
 fi
-echo "alias deploy=\"mvn install -DdeployTo=$FELIX_HOME/load\"" >> "$HOME"/.bashrc
-echo "alias redeploy=\"mvn clean && deploy\"" >> "$HOME"/.bashrc
+grep -e "${ALIAS_DEPLOY_MACRO}" "$HOME"/.bashrc &> /dev/null
+if [ "$?" -ne 0 ]; then
+    echo "${ALIAS_DEPLOY_MACRO}" >> "$HOME"/.bashrc
+fi
+grep -e "${ALIAS_REDEPLOY_MACRO}" "$HOME"/.bashrc &> /dev/null
+if [ "$?" -ne 0 ]; then
+    echo "${ALIAS_REDEPLOY_MACRO}" >> "$HOME"/.bashrc
+fi
 
 #chown $USERNAME:$USERNAME $HOME/.bashrc
 
@@ -140,6 +150,7 @@ echo "Done"
 
 # Prompt for the location of the cleanup script
 echo
+echo "A cleanup script is being created that will uninstall the capture agent and undo any changes made by this installation process"
 while [[ true ]]; do
     ask -d "$START_PATH" "Please enter the location to store the cleanup script" location
     if [[ -d "$location" ]]; then
