@@ -23,4 +23,4 @@ sed -i "s/IS_CA=false/IS_CA=true/g" $ACTUAL_SCRIPT
 # Set the appropriate permissions
 chown root:root $STARTUP_SCRIPT
 chmod 755 $STARTUP_SCRIPT
-update-rc.d "${STARTUP_SCRIPT##*/}" defaults
+update-rc.d "${STARTUP_SCRIPT##*/}" defaults 99 01
