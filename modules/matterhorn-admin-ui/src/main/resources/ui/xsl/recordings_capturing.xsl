@@ -44,7 +44,7 @@
           <th width="30%" id="th-Title" class="sortable recording-Table-head">Title</th>
           <th width="15%" id="th-Presenter" class="sortable recording-Table-head">Presenter</th>
           <th width="20%" id="th-Series" class="sortable recording-Table-head">Course/Series</th>
-          <th width="20%" id="th-StartDate" class="sortable date-column recording-Table-head">Recording Date &amp; Time</th>
+          <th width="20%" id="th-StartDate" class="sortable date-column recording-Table-head">Upload / Recording Time</th>
           <th width="10%" id="th-CaptureAgent" class="sortable recording-Table-head">Capture Agent</th>
           <th width="15%" id="th-ProcessingStatus" class="sortable recording-Table-head">Status</th>
           <th width="15%" id="th-Action" class="recording-Table-head">Action</th>
