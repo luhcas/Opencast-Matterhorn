@@ -81,7 +81,7 @@ ocIngest.copyPreviousFiles = function(data) {
       }
     });
   } else {
-    ocIngest.addCatalog(ocUtils.xmlToString(ocIngest.mediaPackage), ocIngest.createDublinCoreCatalog(ocIngest.metadata));
+    ocIngest.addCatalog(ocUtils.xmlToString(ocIngest.mediaPackage), ocIngest.createDublinCoreCatalog(ocIngest.metadata), 'dublincore/episode');
   }
 }
 
@@ -105,7 +105,7 @@ ocIngest.createDublinCoreCatalog = function(data) {
   return dc;
 }
 
-ocIngest.addCatalog = function(mediaPackage, dcCatalog) {
+ocIngest.addCatalog = function(mediaPackage, dcCatalog, flavor) {
   Upload.log("Adding DublinCore catalog");
   Upload.setProgress('100%','adding Metadata',' ', ' ');
   $.ajax({
@@ -113,8 +113,9 @@ ocIngest.addCatalog = function(mediaPackage, dcCatalog) {
     type       : 'POST',
     dataType   : 'xml',
     data       : {
+      flavor : flavor,
       mediaPackage: mediaPackage,
-      dublinCore: ocUtils.xmlToString(dcCatalog)
+      dublinCore  : ocUtils.xmlToString(dcCatalog)
     },
     error      : function(XHR,status,e){
       showFailedScreen('Could not add DublinCore catalog to MediaPackage.');
@@ -144,7 +145,7 @@ ocIngest.addSeriesCatalog = function(seriesId) {
     success    : function(data, status) {
       Upload.log("Adding series metadata");
       ocIngest.seriesDC = data;
-      ocIngest.addCatalog(ocUtils.xmlToString(ocIngest.mediaPackage), data);
+      ocIngest.addCatalog(ocUtils.xmlToString(ocIngest.mediaPackage), data, 'dublincore/series');
     }
   });
 }

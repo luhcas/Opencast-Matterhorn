@@ -80,7 +80,7 @@ UploadListener.uploadComplete = function() {
   Upload.log("upload complete");
   var uploadFrame = document.getElementById("filechooser-ajax");
   var mp = uploadFrame.contentWindow.document.getElementById("mp").value;
-  ocIngest.addCatalog(mp, ocIngest.createDublinCoreCatalog(ocIngest.metadata));
+  ocIngest.addCatalog(mp, ocIngest.createDublinCoreCatalog(ocIngest.metadata), 'dublincore/episode');
 }
 
 UploadListener.uploadFailed = function() {
