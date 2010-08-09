@@ -404,7 +404,7 @@ public class SolrRequester {
       sb.append(SolrFields.ID);
       sb.append(":");
       sb.append(cleanSolrIdRequest);
-      if (q.isIncludeSeries() && q.isIncludeEpisodes()) {
+      if (q.isIncludeEpisodes()) {
         sb.append(" OR ");
         sb.append(SolrFields.DC_IS_PART_OF);
         sb.append(":");
