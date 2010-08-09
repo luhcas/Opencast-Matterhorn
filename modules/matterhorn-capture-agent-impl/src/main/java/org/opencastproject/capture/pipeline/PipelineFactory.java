@@ -32,7 +32,6 @@ import org.gstreamer.Gst;
 import org.gstreamer.Message;
 import org.gstreamer.MessageType;
 import org.gstreamer.Pad;
-import org.gstreamer.PadDirection;
 import org.gstreamer.Pipeline;
 import org.gstreamer.event.EOSEvent;
 import org.slf4j.Logger;
@@ -352,8 +351,13 @@ public class PipelineFactory {
     String bufferTime = captureDevice.properties.getProperty("bufferTime");
     boolean confidence = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE));
 
-    Element dec, enc, muxer;
     Element filesrc = ElementFactory.make("filesrc", null);
+    filesrc.set("location", captureDevice.getLocation());
+    Element filesink = ElementFactory.make("filesink", null);
+    filesink.set("location", captureDevice.getOutputPath());
+    Element mpegpsdemux = ElementFactory.make("mpegpsdemux", null);
+    Element muxer = ElementFactory.make("mpegtsmux", null);
+
     Element queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
     if (bufferCount != null) {
       logger.debug("{} bufferCount set to {}.", captureDevice.getName(), bufferCount);
@@ -367,95 +371,118 @@ public class PipelineFactory {
       logger.debug("{} bufferTime set to {}.", captureDevice.getName(), bufferTime);
       queue.set("max-size-time", bufferTime);
     }
-    Element mpegpsdemux = ElementFactory.make("mpegpsdemux", null);
-    final Element mpegvideoparse = ElementFactory.make("mpegvideoparse", null);
     
-    // Elements that allow for change in fps
-    Element videorate = ElementFactory.make("videorate", null);
-    Element fpsfilter = ElementFactory.make("capsfilter", null);
-    Caps fpsCaps;
-    if (framerate != null && codec != null) {
-      fpsCaps = new Caps("video/x-raw-yuv, framerate=" + framerate + "/1");
-      logger.debug("{} fps: {}", captureDevice.getName(), framerate);
-    }
-    else
-      fpsCaps = Caps.anyCaps();
-    fpsfilter.setCaps(fpsCaps);
-    
-    
-    if (codec != null && codec.equalsIgnoreCase("ffenc_mpeg2video")) {
-      logger.debug("{} using encoder: {}", captureDevice.getName(), codec);
-      dec = ElementFactory.make("mpeg2dec", null);
-      enc = ElementFactory.make(codec, null);
-    }
-    else {
-      dec = ElementFactory.make("capsfilter", null);
-      enc = ElementFactory.make("capsfilter", null);
-    }
-    
-    if (container != null) {
-      logger.debug("{} muxing to: {}", captureDevice.getName(), container);
-      muxer = ElementFactory.make(container, null);
-    }
-    else {
-      muxer = ElementFactory.make("mpegtsmux", null);
-    }
-    
-    Element filesink = ElementFactory.make("filesink", null);
-    filesrc.set("location", captureDevice.getLocation());
-    filesink.set("location", captureDevice.getOutputPath());
-    
-    if (bitrate != null) {
-      logger.debug("{} bitrate set to: {}", captureDevice.getName(), bitrate);
-      enc.set("bitrate", bitrate);
-    }
-    pipeline.addMany(filesrc, queue, mpegpsdemux, mpegvideoparse, dec, videorate, fpsfilter, enc, muxer, filesink);
-
-    /*
-     * mpegpsdemux source pad is only available sometimes, therefore we need to add a listener to accept dynamic pads
-     */
-    mpegpsdemux.connect(new Element.PAD_ADDED() {
-      public void padAdded(Element arg0, Pad arg1) {
-        arg1.link(mpegvideoparse.getStaticPad("sink"));
+    //If we're defaulting on container and codec, do a simple copy from hauppauge card.
+    if(codec == null && container == null){
+      final Element queue2 = ElementFactory.make("queue", "Demux to Mux queue");
+      // mpegpsdemux source pad is only available sometimes, therefore we need to add a listener to accept dynamic pads
+      mpegpsdemux.connect(new Element.PAD_ADDED() {
+        public void padAdded(Element arg0, Pad arg1) {
+          arg1.link(queue2.getStaticPad("sink"));
+        }
+      });
+      
+      pipeline.addMany(filesrc, queue, mpegpsdemux, queue2, muxer, filesink);
+      
+      if(confidence){
+        boolean trace = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG));
+        if (!VideoMonitoring.addVideoMonitor(pipeline, filesrc, queue, interval, imageloc, device, trace))
+          error = formatPipelineError(captureDevice, filesrc, queue);
+      } else {
+        if(!filesrc.link(queue)){
+          error = formatPipelineError(captureDevice, filesrc, queue);
+        }
       }
-    });
-    Pad newpad = new Pad(null, PadDirection.SRC);
-    if (!filesrc.link(queue))
-      error = formatPipelineError(captureDevice, filesrc, queue);
-    else if (!queue.link(mpegpsdemux))
-      error = formatPipelineError(captureDevice, queue, mpegpsdemux);
-    else if (!mpegpsdemux.addPad(newpad))
-      error = formatPipelineError(captureDevice, mpegpsdemux, mpegvideoparse);
-    else if (!mpegvideoparse.link(dec))
-      error = formatPipelineError(captureDevice, mpegvideoparse, dec);
-    else if (!dec.link(videorate))
-      error = formatPipelineError(captureDevice, dec, videorate);
-    else if (!videorate.link(fpsfilter))
-      error = formatPipelineError(captureDevice, videorate, fpsfilter);
-    if (confidence) {
-      boolean trace = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG));
-      if (!VideoMonitoring.addVideoMonitor(pipeline, fpsfilter, enc, interval, imageloc, device, trace))
-        error = formatPipelineError(captureDevice, fpsfilter, enc);
-    } else {
-      if (!fpsfilter.link(enc))
-        error = formatPipelineError(captureDevice, fpsfilter, enc);
-    }
-    if (!enc.link(muxer))
-      error = formatPipelineError(captureDevice, enc, muxer);
-    else if (!muxer.link(filesink))
-      error = formatPipelineError(captureDevice, muxer, filesink);
+      if(!queue.link(mpegpsdemux)) {
+        error = formatPipelineError(captureDevice, queue, mpegpsdemux);
+      } else if(!queue2.link(muxer)){
+        error = formatPipelineError(captureDevice, queue2, muxer);
+      } else if(!muxer.link(filesink)){
+        error = formatPipelineError(captureDevice, muxer, filesink);
+      }
+      if(error != null){
+        pipeline.removeMany(filesrc, queue, mpegpsdemux, queue2, muxer, filesink);
+        logger.error(error);
+        return false;
+      }
+    } else { //Either we're changing the container, or re-encoding, or both.
+      Element dec, enc;
+      final Element mpegvideoparse = ElementFactory.make("mpegvideoparse", null);
+      
+      // mpegpsdemux source pad is only available sometimes, therefore we need to add a listener to accept dynamic pads
+      mpegpsdemux.connect(new Element.PAD_ADDED() {
+        public void padAdded(Element arg0, Pad arg1) {
+          arg1.link(mpegvideoparse.getStaticPad("sink"));
+        }
+      });
+    
+      // Elements that allow for change in fps
+      Element videorate = ElementFactory.make("videorate", null);
+      Element fpsfilter = ElementFactory.make("capsfilter", null);
+      Caps fpsCaps;
+      if (framerate != null) {
+        fpsCaps = new Caps("video/x-raw-yuv, framerate=" + framerate + "/1");
+        logger.debug("{} fps: {}", captureDevice.getName(), framerate);
+      } else {
+        fpsCaps = Caps.anyCaps();
+      }
+      fpsfilter.setCaps(fpsCaps);
+    
+      dec = ElementFactory.make("mpeg2dec", null);
+      if(codec != null){
+        logger.debug("{} using encoder: {}", captureDevice.getName(), codec);
+        enc = ElementFactory.make(codec, null);
+      } else {
+        enc = ElementFactory.make("ffenc_mpeg2video", null);
+      }
+      
+      if (bitrate != null) {
+        logger.debug("{} bitrate set to: {}", captureDevice.getName(), bitrate);
+        enc.set("bitrate", bitrate);
+      }
 
-    if (error != null) {
-      pipeline.removeMany(filesrc, queue, mpegpsdemux, mpegvideoparse, dec, videorate, fpsfilter, enc, muxer, filesink);
-      logger.error(error);
-      return false;
-    }
+      if (container != null) {
+        logger.debug("{} muxing to: {}", captureDevice.getName(), container);
+        muxer = ElementFactory.make(container, null);
+      } else {
+        
+      }
+    
+      pipeline.addMany(filesrc, queue, mpegpsdemux, mpegvideoparse, dec, videorate, fpsfilter, enc, muxer, filesink);
 
+      if (!filesrc.link(queue)) {
+        error = formatPipelineError(captureDevice, filesrc, queue);
+      } else if (!queue.link(mpegpsdemux))
+        error = formatPipelineError(captureDevice, queue, mpegpsdemux);
+      else if (!mpegvideoparse.link(dec))
+        error = formatPipelineError(captureDevice, mpegvideoparse, dec);
+      else if (!dec.link(videorate))
+        error = formatPipelineError(captureDevice, dec, videorate);
+      else if (!videorate.link(fpsfilter))
+        error = formatPipelineError(captureDevice, videorate, fpsfilter);
+      if (confidence) {
+        boolean trace = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG));
+        if (!VideoMonitoring.addVideoMonitor(pipeline, fpsfilter, enc, interval, imageloc, device, trace))
+          error = formatPipelineError(captureDevice, fpsfilter, enc);
+      } else {
+        if (!fpsfilter.link(enc))
+          error = formatPipelineError(captureDevice, fpsfilter, enc);
+      }
+      if (!enc.link(muxer))
+        error = formatPipelineError(captureDevice, enc, muxer);
+      else if (!muxer.link(filesink))
+        error = formatPipelineError(captureDevice, muxer, filesink);
+
+      if (error != null) {
+        pipeline.removeMany(filesrc, queue, mpegpsdemux, mpegvideoparse, dec, videorate, fpsfilter, enc, muxer, filesink);
+        logger.error(error);
+        return false;
+      }
+    }
     if (logger.isTraceEnabled()) {
       BufferThread t = new BufferThread(queue);
       t.start();
     }
-
     return true;
   }
 
