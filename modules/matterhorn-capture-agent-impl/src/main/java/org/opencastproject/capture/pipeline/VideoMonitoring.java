@@ -198,7 +198,6 @@ public class VideoMonitoring {
         case EPIPHAN_VGA2USB: src = ElementFactory.make("v4lsrc", null); src.set("device", capdev.getLocation()); break;
         case HAUPPAUGE_WINTV: src = ElementFactory.make("filesrc", null); src.set("location", capdev.getLocation()); break;
         case BLUECHERRY_PROVIDEO: src = ElementFactory.make("v4l2src", null); src.set("device", capdev.getLocation()); break;
-        case DV_1394: src = ElementFactory.make("dv1394src", null); break;
         default: return;
       }
       
