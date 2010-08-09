@@ -205,7 +205,9 @@ public class SearchRestService {
     if (!StringUtils.isBlank(id)) {
       query.includeEpisodes(includeEpisodes);
       query.withId(id);
-    } else if (!StringUtils.isBlank(text)) {
+    }
+    
+    if (!StringUtils.isBlank(text)) {
       query.withText(text);
     }
     
