@@ -29,8 +29,9 @@ mkdir -p "$oc_dir"/cache
 mkdir -p "$oc_dir"/config
 mkdir -p "$oc_dir"/volatile
 mkdir -p "$oc_dir"/cache/captures
+# TODO:  Make this work
 # Point the CA's fileservice at the right dir
-sed -i "s/\/tmp\/opencast\/cache\/captures/$oc_dir\/cache\/captures" $SOURCE/modules/matterhorn-capture-agent-impl/src/main/resources/OSGI-INF/capture-files.xml
+#sed -i "s/\/tmp\/opencast\/cache\/captures/$oc_dir\/cache\/captures" $SOURCE/modules/matterhorn-capture-agent-impl/src/main/resources/OSGI-INF/capture-files.xml
 
 # Establish their permissions
 chown -R $USERNAME:$USERNAME "$oc_dir"
