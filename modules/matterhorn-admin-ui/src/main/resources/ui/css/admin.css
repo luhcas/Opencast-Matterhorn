@@ -381,7 +381,7 @@ select { font-size:1.15em; }
 
 .paging-nav-mocklink {
   color: gray;
-  font-weight: bold;
+  /*font-weight: bold;*/
 }
 
 /* Refresh controls and text */
