@@ -413,7 +413,7 @@ Recordings.removeRecording = function(workflowId) {
   });
 }
 
-Recordings.removeScheduledRecording = function(eventId, title) {
+Recordings.removeScheduledEvent = function(eventId, title) {
   if(confirm('Are you sure you wish to delete ' + title + '?')){
     $.ajax({
       url        : '/scheduler/rest/event/'+eventId,
