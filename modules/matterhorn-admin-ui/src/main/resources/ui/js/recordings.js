@@ -26,6 +26,7 @@ Recordings.lastCount = null;
 Recordings.tableInterval = null;
 Recordings.tableUpdateRequested = false;
 Recordings.changedMediaPackage = null;
+Recordings.configuration = null;
 
 /** Initialize the Recordings page.
  *  Register event handlers.
@@ -41,6 +42,12 @@ Recordings.init = function() {
   });
   AdminUI.internationalize(i18n, 'i18n');
   
+  // get config
+  $.getJSON("/info.json", function(data) {
+    Recordings.configuration = data;
+    $('#engagelink').attr('href', data.engage);
+  });
+
   // Event: clicked somewhere
   //  $('body').click( function() {
   //    $('#holdActionPanel-container').fadeOut('fast');
