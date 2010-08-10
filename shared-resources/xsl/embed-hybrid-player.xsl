@@ -60,7 +60,7 @@
         </xsl:if>
       </xsl:if>
       
-       <xsl:if test="@type='presenter/delivery'">
+       <xsl:if test="@type='presenter/delivery' and not(preceding-sibling::track[@type='presentation/delivery']/mimetype[.='video/...']) and not(following-sibling::track[@type='presentation/delivery']/mimetype[.='video/...'])">
         <xsl:if test="./mimetype='audio/x-adpcm'">
           <xsl:if test="substring(url, 1, 4)='http'">
            <div id="oc-video-presenter-delivery-x-flv-http" style="display: none">
