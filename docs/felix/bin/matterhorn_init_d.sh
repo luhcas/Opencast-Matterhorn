@@ -71,7 +71,7 @@ case "$1" in
     log_begin_msg "Starting OpenCast Matterhorn: $NAME"
     if $IS_CA ; then
         $CA/device_config.sh
-        if [ -d $CA/epiphan_driver ]; then
+        if [ -d $CA/epiphan_driver -a -z "$(lsmod | grep vga2usb)" ]; then
                 make -C $CA/epiphan_driver load
         fi
     fi
@@ -85,7 +85,7 @@ case "$1" in
     start-stop-daemon --stop --pidfile /var/run/matterhorn/matterhorn.pid --oknodo --exec $DAEMON && log_end_msg 0 || log_end_msg 1
 
     if $IS_CA ; then
-        if [ -d $CA/epiphan_driver ]; then
+        if [ -d $CA/epiphan_driver -a -z "$(lsmod | grep vga2usb)" ]; then
                 make -C $CA/epiphan_driver unload
         fi
     fi

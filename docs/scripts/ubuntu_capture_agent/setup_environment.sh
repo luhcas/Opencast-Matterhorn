@@ -91,7 +91,7 @@ EXPORT_M2_REPO="export M2_REPO=${M2_REPO}"
 EXPORT_FELIX_HOME="export FELIX_HOME=${FELIX_HOME}"
 EXPORT_JAVA_HOME="export JAVA_HOME=${JAVA_HOME}"
 EXPORT_SOURCE_HOME="export MATTERHORN_SOURCE=${SOURCE}"
-ALIAS_DEPLOY_MACRO="alias deploy=\"mvn install -DdeployTo=$FELIX_HOME/load\""
+ALIAS_DEPLOY_MACRO="alias deploy=\"mvn install -DdeployTo=$FELIX_HOME/matterhorn\""
 ALIAS_REDEPLOY_MACRO="alias redeploy=\"mvn clean && deploy\""
 
 grep -e "${EXPORT_M2_REPO}" "$HOME"/.bashrc &> /dev/null
