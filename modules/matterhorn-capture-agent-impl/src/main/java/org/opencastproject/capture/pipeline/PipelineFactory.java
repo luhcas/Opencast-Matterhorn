@@ -1003,7 +1003,7 @@ public class PipelineFactory {
     return true;
   }
   
-  /**
+/**
    * Adds a pipeline specifically designed to captured from a DV Camera attached by firewire to the main pipeline
    * 
    * @deprecated  This function has not been maintained in a long time and has many problems.  If you need DV support let the list know.
@@ -1014,45 +1014,127 @@ public class PipelineFactory {
    * @return True, if successful
    */
   private static boolean getDvPipeline(CaptureDevice captureDevice, Pipeline pipeline) {
+    // confidence vars
+    String imageloc = properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
+    String device = new File(captureDevice.getOutputPath()).getName();
+    int interval = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName() + CaptureParameters.CAPTURE_DEVICE_CONFIDENCE_INTERVAL, "5"));
+    
     String error = null;
     String codec =  captureDevice.properties.getProperty("codec");
+    String container = captureDevice.properties.getProperty("container");
     String bitrate = captureDevice.properties.getProperty("bitrate");
+    String framerate = captureDevice.properties.getProperty("framerate");
     String bufferCount = captureDevice.properties.getProperty("bufferCount");
     String bufferBytes = captureDevice.properties.getProperty("bufferBytes");
     String bufferTime = captureDevice.properties.getProperty("bufferTime");
+    boolean confidence = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE));
 
-    Element queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
-    if (bufferCount != null)
-      queue.set("max-size-buffers", bufferCount);
-    if (bufferBytes != null)
-      queue.set("max-size-bytes", bufferBytes);
-    if (bufferTime != null)
-      queue.set("max-size-time", bufferTime);
-
+    Element enc, muxer;
     Element src = ElementFactory.make("dv1394src", null);
-    Element dec = ElementFactory.make("capsfilter", null);
-    Element enc = ElementFactory.make("capsfilter", null);
-    Element filesink = ElementFactory.make("filesink", null);
+    Element queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
+    if (bufferCount != null) {
+      logger.debug("{} bufferCount set to {}.", captureDevice.getName(), bufferCount);
+      queue.set("max-size-buffers", bufferCount);
+    }
+    if (bufferBytes != null) {
+      logger.debug("{} bufferBytes set to {}.", captureDevice.getName(), bufferBytes);
+      queue.set("max-size-bytes", bufferBytes);
+    }
+    if (bufferTime != null) {
+      logger.debug("{} bufferTime set to {}.", captureDevice.getName(), bufferTime);
+      queue.set("max-size-time", bufferTime);
+    }
     
-    filesink.set("location", captureDevice.getOutputPath());
+    Element ffmpegcolorspace = ElementFactory.make("ffmpegcolorspace", null);
+    
+    /* set up dv stream decoding */
+    final Element demux = ElementFactory.make("dvdemux", null);
+    final Element dec   = ElementFactory.make("dvdec", null);
+    
+    /* handle demuxer's sometimes pads. Filter for just video. */
+    demux.connect(new Element.PAD_ADDED() {
+      public void padAdded(Element element, Pad pad) {
+        logger.info("Element: {}, Pad: {}", element.getName(), pad.getName());
+        Element.linkPadsFiltered(demux, "video", dec, "sink", Caps.fromString("video/x-dv"));
+      }
+    });
+    
+    /* set up encoding */
+    if (codec != null) {
+      logger.debug("{} encoder set to: {}", captureDevice.getName(), codec);
+      enc = ElementFactory.make(codec, null);
+    } else {
+      enc = ElementFactory.make("ffenc_mpeg2video", null);
+    }
+      
     if (bitrate != null) {
       logger.debug("{} bitrate set to: {}", captureDevice.getName(), bitrate);
       enc.set("bitrate", bitrate);
+    } else {
+      enc.set("bitrate", "2000000");
+    }
+      
+    if (container != null) {
+      logger.debug("{} muxing to: {}", captureDevice.getName(), container);
+      muxer = ElementFactory.make(container, null);
+    } else {
+      muxer = ElementFactory.make("mpegtsmux", null);
     }
     
-    pipeline.addMany(src, queue, dec, enc, filesink);
+    Element filesink = ElementFactory.make("filesink", null);
+    filesink.set("location", captureDevice.getOutputPath());
     
-    if (!src.link(queue))
+    // Elements that allow for change in fps
+    Element videorate = ElementFactory.make("videorate", null);
+    Element fpsfilter = ElementFactory.make("capsfilter", null);
+    Caps fpsCaps;
+    if (framerate != null) {
+      fpsCaps = Caps.fromString("video/x-raw-yuv, framerate=" + framerate + "/1");
+      logger.debug("{} fps: {}", captureDevice.getName(), framerate);
+    } else {
+      fpsCaps = Caps.anyCaps();
+    }
+    fpsfilter.setCaps(fpsCaps);
+    
+    pipeline.addMany(src, queue, demux, dec, videorate, fpsfilter, ffmpegcolorspace, enc, muxer, filesink);
+    
+    demux.connect(new Element.PAD_ADDED() {
+      public void padAdded(Element element, Pad pad) {
+        pad.link(dec.getStaticPad("sink"));
+      }
+    });
+    
+    if (!src.link(queue)) {
       error = formatPipelineError(captureDevice, src, queue);
-    else if (!queue.link(dec))
-      error = formatPipelineError(captureDevice, queue, dec);
-    else if (!dec.link(enc))
-      error = formatPipelineError(captureDevice, dec, enc);
-    else if (!enc.link(filesink))
-      error = formatPipelineError(captureDevice, enc, filesink);
+    } else if (!queue.link(demux)) {
+      error = formatPipelineError(captureDevice, queue, demux);
+    } else if (!dec.link(videorate)) {
+      error = formatPipelineError(captureDevice, dec, videorate);
+    } else if (!videorate.link(fpsfilter)) {
+      error = formatPipelineError(captureDevice, videorate, fpsfilter);
+    }
+    
+    if (confidence) {
+      boolean trace = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG));
+      if (!VideoMonitoring.addVideoMonitor(pipeline, fpsfilter, ffmpegcolorspace, interval, imageloc, device, trace)) {
+        error = formatPipelineError(captureDevice, fpsfilter, ffmpegcolorspace);
+      }
+    } else {
+      if (!fpsfilter.link(ffmpegcolorspace)) {
+        error = formatPipelineError(captureDevice, fpsfilter, ffmpegcolorspace);
+      }
+    }
+    
+    if (!ffmpegcolorspace.link(enc)) {
+      error = formatPipelineError(captureDevice, ffmpegcolorspace, enc);
+    } else if (!enc.link(muxer)) {
+      error = formatPipelineError(captureDevice, enc, muxer);
+    } else if (!muxer.link(filesink)) {
+      error = formatPipelineError(captureDevice, muxer, filesink);
+    } 
     
     if (error != null) {
-      pipeline.removeMany(src, queue, enc, dec, filesink);
+      pipeline.removeMany(src, queue, demux, dec, videorate, fpsfilter, ffmpegcolorspace, enc, muxer, filesink);
       logger.error(error);
       return false;
     }
@@ -1064,7 +1146,6 @@ public class PipelineFactory {
     
     return true;
   }
-  
 }
 
 /**
