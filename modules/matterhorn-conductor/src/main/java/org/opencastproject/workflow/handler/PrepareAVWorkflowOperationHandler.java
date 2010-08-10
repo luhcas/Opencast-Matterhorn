@@ -71,6 +71,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
   static {
     CONFIG_OPTIONS = new TreeMap<String, String>();
     CONFIG_OPTIONS.put("source-flavor", "The \"flavor\" of the track to use as a video source input");
+    CONFIG_OPTIONS.put("promiscuous-muxing", "If there is no matching flavor to mux, try other flavors as well");
     CONFIG_OPTIONS.put("encoding-profile", "The encoding profile to use (default is 'mux-av.http')");
     CONFIG_OPTIONS.put("target-flavor", "The flavor to apply to the encoded file");
     CONFIG_OPTIONS.put(OPT_REWRITE, "Indicating whether the container for audio and video tracks should be rewritten");
@@ -155,6 +156,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     String targetTrackTags = StringUtils.trimToNull(operation.getConfiguration("target-tags"));
     String targetTrackFlavorName = StringUtils.trimToNull(operation.getConfiguration("target-flavor"));
     String encodingProfileName = StringUtils.trimToNull(operation.getConfiguration("encoding-profile"));
+    boolean promiscuousMuxing = "true".equalsIgnoreCase(StringUtils.trimToEmpty(operation.getConfiguration("promiscuous-audio-muxing")));
 
     // Make sure the source flavor is properly set
     if (sourceFlavorName == null)
@@ -191,7 +193,12 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
       logger.info("No audio/video tracks with flavor '{}' found to prepare", sourceFlavor);
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
     case 1:
-      audioTrack = videoTrack = tracks[0];
+      if (!tracks[0].hasAudio() && tracks[0].hasVideo() && promiscuousMuxing) {
+        videoTrack = tracks[0];
+        audioTrack = findAudioTrack(tracks[0], mediaPackage);
+      } else {
+        audioTrack = videoTrack = tracks[0];
+      }
       break;
     case 2:
       for (Track track : tracks) {
@@ -299,5 +306,33 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, timeInQueue);
   }
   //CHECKSTYLE:ON
+
+  /**
+   * 
+   * 
+   * @param videoTrack
+   * @return
+   */
+  private Track findAudioTrack(Track videoTrack, MediaPackage mediaPackage) {
+    MediaPackageElementFlavor flavor = new MediaPackageElementFlavor("*", videoTrack.getFlavor().getSubtype());
+    
+    // Try matching subtype first
+    for(Track t : mediaPackage.getTracks(flavor)) {
+      if(t.hasAudio()) {
+        logger.info("Promiscuous audio muxing found audio source {} with flavor {}", t, t.getFlavor());
+        return t;
+      }
+    }
+    
+    // Ok, full promiscuous mode now
+    for(Track t : mediaPackage.getTracks()) {
+      if(t.hasAudio()) {
+        logger.info("Promiscuous audio muxing resulted in audio source {}", t);
+        return t;
+      }
+    }
+    
+    return null;
+  }
 
 }
