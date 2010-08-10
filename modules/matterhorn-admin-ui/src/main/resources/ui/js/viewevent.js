@@ -32,16 +32,18 @@ function handleWorkflow(workflowDoc){
   $(workflowDoc).find('operation').each(function() {
     var opBar = {};
     opBar.opName = $(this).attr('id');
-    var start = new Date($(this).find('started').text()).getTime();
-    var finish = new Date($(this).find('completed').text()).getTime();
-    var totalSeconds = Math.round((finish - start) / 1000);
-    opBar.queuetime = Math.round($(this).find('time-in-queue').text() / 1000);
-    opBar.runtime = totalSeconds - opBar.queuetime;
+    if($(this).find('completed').size() > 0) {
+      var start = $(this).find('started').text();
+      var finish = $(this).find('completed').text();
+      var totalSeconds = Math.round((finish - start) / 1000);
+      opBar.queuetime = Math.round($(this).find('time-in-queue').text() / 1000);
+      opBar.runtime = totalSeconds - opBar.queuetime;
+    } else {
+      opBar.queuetime = 0;
+      opBar.runtime = 0;
+    }
     opBars.push(opBar);
   });
-
-  // the chart API displays bottom-to-top, so reverse the array
-  opBars.reverse();
 
   // find the maximum for this chart
   var max = 0;
@@ -68,7 +70,8 @@ function handleWorkflow(workflowDoc){
     runtimes = runtimes + opBars[i].runtime;
   }
   
-  // finally, the labels
+  // finally, the labels.  the chart displays labels bottom-to-top, so reverse the array
+  opBars.reverse();
   var chartLabels = '';
   for(var i in opBars) {
     chartLabels = chartLabels + '|';

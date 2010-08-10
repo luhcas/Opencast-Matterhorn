@@ -29,6 +29,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * A JAXB-annotated implementation of {@link WorkflowOperationInstance}
@@ -63,9 +64,11 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   @XmlAttribute(name="exception-handler-workflow")
   protected String exceptionHandlingWorkflow;
 
+  @XmlJavaTypeAdapter(WorkflowOperationInstanceImpl.DateAdapter.class)
   @XmlElement(name="started")
   protected Date dateStarted;
 
+  @XmlJavaTypeAdapter(WorkflowOperationInstanceImpl.DateAdapter.class)
   @XmlElement(name="completed")
   protected Date dateCompleted;
 
@@ -325,5 +328,24 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
    */
   public void setTimeInQueue(long timeInQueue) {
     this.timeInQueue = timeInQueue;
+  }
+
+  static class DateAdapter extends XmlAdapter<Long, Date> {
+    /**
+     * {@inheritDoc}
+     * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
+     */
+    @Override
+    public Long marshal(Date v) throws Exception {
+      return v == null ? null : v.getTime();
+    }
+    /**
+     * {@inheritDoc}
+     * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
+     */
+    @Override
+    public Date unmarshal(Long v) throws Exception {
+      return v == null ? null : new Date(v);
+    }
   }
 }
