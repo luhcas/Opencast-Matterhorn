@@ -597,14 +597,22 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("addDCCatalog")
-  public Response addDCCatalog(@FormParam("mediaPackage") String mp, @FormParam("dublinCore") String dc) {
+  public Response addDCCatalog(@FormParam("mediaPackage") String mp, @FormParam("dublinCore") String dc, @FormParam("flavor") String flavor) {
+    MediaPackageElementFlavor dcFlavor = MediaPackageElements.EPISODE;
+    if(flavor != null) {
+      try {
+        dcFlavor = MediaPackageElementFlavor.parseFlavor(flavor);
+      } catch(IllegalArgumentException e) {
+        logger.warn("Unable to set dublin core flavor to {}, using {} instead", flavor, MediaPackageElements.EPISODE);
+      }
+    }
     try {
       MediaPackage mediaPackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(mp); // @FormParam("mediaPackage")
       // MediaPackage
       // mp
       // yields
       // Exception
-      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc, "UTF-8"), "dublincore.xml", MediaPackageElements.EPISODE, mediaPackage);
+      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc, "UTF-8"), "dublincore.xml", dcFlavor, mediaPackage);
       return Response.ok(mediaPackage).build();
     } catch (Exception e) {
       logger.error(e.getMessage());
@@ -755,6 +763,7 @@ public class IngestRestService {
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null, "The media package as XML"));
     endpoint.addRequiredParam(new Param("dublinCore", Param.Type.STRING, null, "DublinCore catalog as XML"));
+    endpoint.addOptionalParam(new Param("flavor", Param.Type.STRING, "dublincore/episode", "DublinCore Flavor"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns augmented media package"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
     endpoint.setTestForm(RestTestForm.auto());
