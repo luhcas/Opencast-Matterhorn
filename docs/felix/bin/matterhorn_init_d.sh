@@ -82,7 +82,7 @@ case "$1" in
     ;;
   stop)
     log_begin_msg "Stopping OpenCast Matterhorn: $NAME"
-    start-stop-daemon --stop --pidfile /var/run/matterhorn/matterhorn.pid --oknodo --exec $DAEMON && log_end_msg 0 || log_end_msg 1
+    start-stop-daemon --stop --pidfile /var/run/matterhorn/matterhorn.pid --oknodo --retry=TERM/10/KILL/5 --exec $DAEMON && log_end_msg 0 || log_end_msg 1
 
     if $IS_CA ; then
         if [ -d $CA/epiphan_driver -a -z "$(lsmod | grep vga2usb)" ]; then
