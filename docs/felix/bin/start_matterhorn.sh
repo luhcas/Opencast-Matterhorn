@@ -28,7 +28,7 @@ fi
 
 DEBUG_PORT="8000"
 DEBUG_SUSPEND="n"
-DEBUG_OPTS="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=$DEBUG_PORT,server=y,suspend=$DEBUG_SUSPEND"
+#DEBUG_OPTS="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=$DEBUG_PORT,server=y,suspend=$DEBUG_SUSPEND"
 
 ##
 # Only change the line below if you want to customize the server
