@@ -148,7 +148,11 @@ $.extend(AdminForm.Component.prototype, {
    *  Sets the fields from an array of element ids.
    *  @param {String[]} Array of element ids
    */
-  setFields:  function(fields){
+  setFields:  function(fields, append){
+    append = append || false;
+    if(!append){
+      this.fields = [];
+    }
     if(typeof fields == 'string') { //If a single field is specified, wrap in an array.
       fields = [fields];
     }

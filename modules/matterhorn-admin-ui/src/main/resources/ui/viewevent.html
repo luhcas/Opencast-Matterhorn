@@ -35,9 +35,9 @@
       $(document).ready(
       function() {
         if (params.type && params.id) {
-          if (params['type'].toLowerCase() == 'workflow') {
+          if (params.type.toLowerCase() == 'workflow') {
             $.get("/workflow/rest/instance/" + params.id + ".xml", handleWorkflow);
-          } else if (params['type'].toLowerCase() == 'scheduler_event') {
+          } else if (params.type.toLowerCase() == 'event') {
             $.get("/scheduler/rest/event/" + params.id , handleEvent);
           }
         }
