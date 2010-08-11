@@ -7,7 +7,7 @@
       <table cellspacing="0" width="100%">
         <xsl:for-each select="ns2:search-results/result">
             <tr class="search-item">
-                    <td style="vertical-align: top; horizontal-align: middle; width: 180px;">
+                    <td style="vertical-align: middle; text-align: center; width: 180px; height: 140px;">
                         <a class="itemtitle">
                             <xsl:attribute name="href">watch.html?id=<xsl:value-of
                                 select="mediapackage/@id" /></xsl:attribute>
