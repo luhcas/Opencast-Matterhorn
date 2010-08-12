@@ -128,6 +128,7 @@
             <Service-Component>
               OSGI-INF/workflow-definition-scanner.xml,
               OSGI-INF/operations/caption.xml,
+              OSGI-INF/operations/cli.xml,
               OSGI-INF/operations/cleanup.xml,
               OSGI-INF/operations/compose.xml,
               OSGI-INF/operations/distribute-download.xml,
