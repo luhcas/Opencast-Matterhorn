@@ -205,13 +205,16 @@ public class SearchRestService {
     
     // If id is specified, do a search based on id
     if (!StringUtils.isBlank(id)) {
-      query.includeEpisodes(includeEpisodes);
       query.withId(id);
     }
     
     // Include series data in the results?
     query.includeSeries(includeSeries);
 
+    // Include episodes in the result?
+    query.includeEpisodes(includeEpisodes);
+
+    // Include free-text search?
     if (!StringUtils.isBlank(text)) {
       query.withText(text);
     }
