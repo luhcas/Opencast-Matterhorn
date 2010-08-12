@@ -475,11 +475,11 @@ public class SolrRequester {
 
     SolrQuery query = new SolrQuery(sb.toString());
 
-    if (q.isIncludeSeries()) {
+    if (q.isIncludeSeries() && ! q.isIncludeEpisodes()) {
       query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.Series);
     }
 
-    if (q.isIncludeEpisodes()) {
+    if (q.isIncludeEpisodes() && ! q.isIncludeSeries()) {
       query.setFilterQueries(SolrFields.OC_MEDIATYPE + ":" + SearchResultItemType.AudioVisual);
     }
 

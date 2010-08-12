@@ -130,7 +130,12 @@
       <artifactId>itunes</artifactId>
       <version>0.4</version>
     </dependency>
-    
+    <dependency>
+      <groupId>com.sun.syndication.feed.module</groupId>
+      <artifactId>opml</artifactId>
+      <version>0.1</version>
+    </dependency>
+
     <!--
     The following dependencies are part of the solr distribution, but we are leaving out of the search service (for now)
       commons-csv-1.0-SNAPSHOT-r609327.jar (no released version yet)

@@ -95,7 +95,8 @@ public class SearchRestService {
     seriesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The search results, expressed as xml"));
     seriesEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The series ID. This takes the additional boolean \"episodes\" parameter. If true, the result set will include this series episodes."));
     seriesEndpoint.addOptionalParam(new Param("q", Type.STRING, null, "Any series that matches this free-text query. This takes the additional boolean \"episodes\" parameter. If true, the result set will include this series episodes."));
-    seriesEndpoint.addOptionalParam(new Param("episodes", Type.BOOLEAN, null, "Whether to include this series episodes.  This can be used in combination with id or q"));
+    seriesEndpoint.addOptionalParam(new Param("episodes", Type.BOOLEAN, "false", "Whether to include this series episodes.  This can be used in combination with id or q"));
+    seriesEndpoint.addOptionalParam(new Param("series", Type.BOOLEAN, "false", "Whether to include this series information itself.  This can be used in combination with id or q"));
     seriesEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0", "The maximum number of items to return per page"));
     seriesEndpoint.addOptionalParam(new Param("offset", Type.STRING, "0", "The page number"));
     seriesEndpoint.setTestForm(RestTestForm.auto());
@@ -197,6 +198,7 @@ public class SearchRestService {
           @QueryParam("id") String id,
           @QueryParam("q") String text,
           @QueryParam("episodes") boolean includeEpisodes,
+          @QueryParam("series") boolean includeSeries,
           @QueryParam("limit") int limit,
           @QueryParam("offset") int offset) {
     SearchQueryImpl query = new SearchQueryImpl();
@@ -207,6 +209,9 @@ public class SearchRestService {
       query.withId(id);
     }
     
+    // Include series data in the results?
+    query.includeSeries(includeSeries);
+
     if (!StringUtils.isBlank(text)) {
       query.withText(text);
     }

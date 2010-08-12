@@ -105,7 +105,7 @@ public class SolrIndexManager {
   private Mpeg7CatalogService mpeg7Service;
 
   private Workspace workspace;
-  
+
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
@@ -127,7 +127,7 @@ public class SolrIndexManager {
   public SolrIndexManager(SolrConnection connection, Workspace workspace) {
     if (connection == null)
       throw new IllegalArgumentException("Unable to manage solr with null connection");
-    if(workspace == null)
+    if (workspace == null)
       throw new IllegalArgumentException("Unable to manager solr without a workspace");
     this.solrConnection = connection;
     this.workspace = workspace;
@@ -278,7 +278,7 @@ public class SolrIndexManager {
     // Add mpeg7
     logger.debug("Looking for mpeg-7 catalogs containing segment texts");
     Catalog mpeg7Catalogs[] = mediaPackage.getCatalogs(MediaPackageElements.TEXTS);
-    if(mpeg7Catalogs.length == 0) {
+    if (mpeg7Catalogs.length == 0) {
       logger.debug("No text catalogs found, trying segments only");
       mpeg7Catalogs = mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS);
     }
@@ -291,7 +291,7 @@ public class SolrIndexManager {
     }
     return solrEpisodeDocument;
   }
-  
+
   protected DublinCoreCatalog loadDublinCoreCatalog(Catalog cat) throws IOException {
     InputStream in = null;
     try {
@@ -364,20 +364,27 @@ public class SolrIndexManager {
   }
 
   /**
-   * Takes the same field from a dublin core catalog and a mediapackage and chooses the mediapckage's one over the other
-   * if it's not null.
+   * Takes the same field from a dublin core catalog and a mediapackage and chooses the mediapckage's value over the
+   * dublin core value if a) the mediapackage value is not null and b) the dublin core document has the
+   * {@link MediaPackageElements#EPISODE} flavor.
    * 
+   * @param flavor
+   *          the dublin core flavor
    * @param dcValue
    *          the dublin core field value
    * @param mediaPackageValue
    *          the media package field value
    * @return the value to be used
    */
-  private String getValue(String dcValue, String... mediaPackageValue) {
-    String mpVal = mediaPackageValue == null || mediaPackageValue.length == 0 ? null : StringUtils
-            .trimToNull(mediaPackageValue[0]);
-    String dcVal = StringUtils.trimToNull(dcValue);
-    return mpVal == null ? dcVal : mpVal;
+  private String getValue(MediaPackageElementFlavor flavor, String dcValue, String... mediaPackageValue) {
+    if (MediaPackageElements.EPISODE.equals(flavor)) {
+      String mpVal = mediaPackageValue == null || mediaPackageValue.length == 0 ? null : StringUtils
+              .trimToNull(mediaPackageValue[0]);
+      String dcVal = StringUtils.trimToNull(dcValue);
+      return mpVal == null ? dcVal : mpVal;
+    } else {
+      return dcValue;
+    }
   }
 
   /**
@@ -408,18 +415,19 @@ public class SolrIndexManager {
     if (!dc.hasValue(DublinCore.PROPERTY_TITLE) && mediaPackage.getTitle() == null)
       throw new IllegalStateException("Found media package without a title");
 
-    // dc:title
-    solrInput.addField(SolrFields.DC_TITLE, getValue(dc.getFirst(DublinCore.PROPERTY_TITLE), mediaPackage.getTitle()));
+    // dc:title. Use the value from the mediapackage over the dublin core setting if this is an episode
+    solrInput.addField(SolrFields.DC_TITLE, getValue(flavor, dc.getFirst(DublinCore.PROPERTY_TITLE), mediaPackage
+            .getTitle()));
 
     // dc:subject
     if (dc.hasValue(DublinCore.PROPERTY_SUBJECT)) {
-      solrInput.addField(SolrFields.DC_SUBJECT, getValue(dc.getFirst(DublinCore.PROPERTY_SUBJECT), mediaPackage
+      solrInput.addField(SolrFields.DC_SUBJECT, getValue(flavor, dc.getFirst(DublinCore.PROPERTY_SUBJECT), mediaPackage
               .getSubjects()));
     }
 
     // dc:creator
     if (dc.hasValue(DublinCore.PROPERTY_CREATOR)) {
-      solrInput.addField(SolrFields.DC_CREATOR, getValue(dc.getFirst(DublinCore.PROPERTY_CREATOR), mediaPackage
+      solrInput.addField(SolrFields.DC_CREATOR, getValue(flavor, dc.getFirst(DublinCore.PROPERTY_CREATOR), mediaPackage
               .getCreators()));
     }
 
@@ -438,8 +446,8 @@ public class SolrIndexManager {
 
     // dc:contributor
     if (dc.hasValue(DublinCore.PROPERTY_CONTRIBUTOR)) {
-      solrInput.addField(SolrFields.DC_CONTRIBUTOR, getValue(dc.getFirst(DublinCore.PROPERTY_CONTRIBUTOR), mediaPackage
-              .getContributors()));
+      solrInput.addField(SolrFields.DC_CONTRIBUTOR, getValue(flavor, dc.getFirst(DublinCore.PROPERTY_CONTRIBUTOR),
+              mediaPackage.getContributors()));
     }
 
     // dc:abstract
@@ -473,8 +481,8 @@ public class SolrIndexManager {
 
     // dc:language
     if (dc.hasValue(DublinCore.PROPERTY_LANGUAGE)) {
-      solrInput.addField(SolrFields.DC_LANGUAGE, getValue(dc.getFirst(DublinCore.PROPERTY_LANGUAGE), mediaPackage
-              .getLanguage()));
+      solrInput.addField(SolrFields.DC_LANGUAGE, getValue(flavor, dc.getFirst(DublinCore.PROPERTY_LANGUAGE),
+              mediaPackage.getLanguage()));
     }
 
     // dc:rightsholder
@@ -509,7 +517,7 @@ public class SolrIndexManager {
 
     // dc:license
     if (dc.hasValue(DublinCore.PROPERTY_LICENSE)) {
-      solrInput.addField(SolrFields.DC_LICENSE, getValue(dc.getFirst(DublinCore.PROPERTY_LICENSE), mediaPackage
+      solrInput.addField(SolrFields.DC_LICENSE, getValue(flavor, dc.getFirst(DublinCore.PROPERTY_LICENSE), mediaPackage
               .getLicense()));
     }
 
@@ -583,15 +591,15 @@ public class SolrIndexManager {
 
       // We need to process visual segments first, due to the way they are handled in the ui.
       for (Iterator<?> iterator = multimediaContent.elements(); iterator.hasNext();) {
-        
+
         MultimediaContentType type = (MultimediaContentType) iterator.next();
         if (!(type instanceof Video) && !(type instanceof AudioVisual))
           continue;
 
         // for every segment in the current multimedia content track
 
-        Video video = (Video)type;
-        Iterator<VideoSegment> vsegments = (Iterator<VideoSegment>)video.getTemporalDecomposition().segments();
+        Video video = (Video) type;
+        Iterator<VideoSegment> vsegments = (Iterator<VideoSegment>) video.getTemporalDecomposition().segments();
         while (vsegments.hasNext()) {
           VideoSegment segment = vsegments.next();
 
