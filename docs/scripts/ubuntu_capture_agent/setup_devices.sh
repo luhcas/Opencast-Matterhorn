@@ -279,7 +279,7 @@ if [[ "$response" ]]; then
     echo "$DEVICE_PREFIX.${cleanName[$i]}.$SOURCE_SUFFIX=$audioDevice" >> $CAPTURE_PROPS
     echo "$DEVICE_PREFIX.${cleanName[$i]}.$OUT_SUFFIX=${cleanName[$i]}.${extension[$i]}" >> $CAPTURE_PROPS
     echo "$DEVICE_PREFIX.${cleanName[$i]}.$FLAVOR_SUFFIX=$flavor" >> $CAPTURE_PROPS
-    echo "$DEVICE_PREFIX.${cleanName[$i]}.$QUEUE_SUFFIX=$((q_size*1024))" >> $CAPTURE_PROPS
+    echo "$DEVICE_PREFIX.${cleanName[$i]}.$QUEUE_SUFFIX=$((q_size*1024*1024))" >> $CAPTURE_PROPS
 
     allDevices="${allDevices}${cleanName[$i]}"
 
