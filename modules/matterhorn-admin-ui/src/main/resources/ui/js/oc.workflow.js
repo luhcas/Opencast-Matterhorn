@@ -11,6 +11,7 @@ ocWorkflow.init = function(selectElm, configContainer) {
 
 ocWorkflow.loadDefinitions = function(selector, container) {
   $.ajax({
+    async: false,
     method: 'GET',
     url: '../workflow/rest/definitions.json',
     dataType: 'json',
