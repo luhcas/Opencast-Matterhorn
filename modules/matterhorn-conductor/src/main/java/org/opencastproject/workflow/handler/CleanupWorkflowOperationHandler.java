@@ -106,15 +106,10 @@ public class CleanupWorkflowOperationHandler extends AbstractWorkflowOperationHa
       }
       // remove the element if it doesn't match the flavors to preserve
       boolean remove = true;
-      if(element.getFlavor() == null) {
-        // elements without flavors are kept, since this is a configuration error and the files should be kept to ease fixing the problem
-        remove = false;
-      } else {
-        for(MediaPackageElementFlavor flavor : flavorsToPreserve) {
-          if(flavor.matches(element.getFlavor())) {
-            remove = false;
-            break;
-          }
+      for(MediaPackageElementFlavor flavor : flavorsToPreserve) {
+        if(flavor.matches(element.getFlavor())) {
+          remove = false;
+          break;
         }
       }
       if(remove) {
