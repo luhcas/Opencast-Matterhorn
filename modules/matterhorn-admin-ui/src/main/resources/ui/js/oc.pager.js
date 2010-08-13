@@ -2,7 +2,7 @@
 var ocPager = ocPager || {};
 
 ocPager.pageSize = 20;
-ocPager.currentPageIdx = 1;
+ocPager.currentPageIdx = 0;
 
 ocPager.init = function() {
   // Event: change of pagesize selector

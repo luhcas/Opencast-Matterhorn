@@ -78,6 +78,7 @@ import javax.ws.rs.core.Response;
 public class AdminuiRestService {
 
   private final static int CAPTURE_AGENT_DELAY = 5000;
+  private final static int CAPTURE_STATUS_TIMEOUT = 60 * 1000;
   private static final Logger logger = LoggerFactory.getLogger(AdminuiRestService.class);
   private SchedulerServiceImpl schedulerService;
   private SeriesService seriesService;
@@ -436,6 +437,7 @@ public class AdminuiRestService {
       for (Event event : events) {
         Recording recording = captureAdminService.getRecordingState(event.getEventId());
         if ((recording == null)
+                || (new Date().getTime() - recording.getLastCheckinTime() > CAPTURE_STATUS_TIMEOUT)
                 || (recording.getState().equals(RecordingState.CAPTURE_ERROR))
                 || (recording.getState().equals(RecordingState.COMPRESSING_ERROR))
                 || (recording.getState().equals(RecordingState.MANIFEST_ERROR))
