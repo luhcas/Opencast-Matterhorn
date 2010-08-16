@@ -402,8 +402,8 @@ Opencast.FlashVersion = (function ()
         else 
         {  // flash is too old or we can't detect the plugin
             var alternateContent = 'Matterhorn requires Adobe Flash Player.<br>'
-            + 'Please install lates version for your Os.<br>(recommended version 10.1) '
-            + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
+            + 'Please install latest version for your OS.<br>(recommended version 10.1)'
+            + '<a href="http://www.adobe.com/go/getflash/">Get Flash</a>';
             //document.write(alternateContent);  // insert non-flash content
             $("#oc_flash-player").html(alternateContent);
         }
