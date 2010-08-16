@@ -7,7 +7,7 @@
         <span class="load-progress" value="0"/>
         <span id="play-progress" class="play-progress" value="0" style="width: 0%;"/>
         <span id="scubber-channel" class="scrubber-channel">
-          <input id="scrubber" type="submit" class="scrubber-button" role="slider"/>
+          <input id="scrubber" type="image" src="img/space.png" class="scrubber-button" role="slider"/>
           <div id="draggable" class="ui-widget-content" style="left: 0%;" value="test"/>
         </span>
       </div>
