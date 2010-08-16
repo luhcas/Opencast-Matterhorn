@@ -285,7 +285,11 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         try {
           long startTimeSeconds = segmentTimePoint.getTimeInMilliseconds() / 1000;
           long durationSeconds = segmentDuration.getDurationInMilliseconds() / 1000;
-          image = extractImage(sourceTrack, startTimeSeconds + durationSeconds - stabilityThreshold + 1);
+          Receipt imageReceipt = composer.image(sourceTrack, IMAGE_EXTRACTION_PROFILE, startTimeSeconds
+                  + durationSeconds - stabilityThreshold + 1, true);
+          image = (Attachment) imageReceipt.getElement();
+          long timeInComposerQueue = imageReceipt.getDateStarted().getTime() - imageReceipt.getDateCreated().getTime();
+          totalTimeInQueue += timeInComposerQueue;
         } catch (EncoderException e) {
           logger.error("Error creating still image from {}", sourceTrack);
           throw e;
@@ -462,21 +466,6 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
       logger.warn("Error reading the videosegmenter's service configuration");
     }
     return DEFAULT_STABILITY_THRESHOLD;
-  }
-
-  /**
-   * Returns a still image from the given track that is suitable for ocr.
-   * 
-   * @param track
-   *          the track identifier
-   * @return the extracted image
-   * @throws EncoderException
-   *           if encoding fails
-   */
-  protected Attachment extractImage(Track track, long time) throws EncoderException {
-    logger.info("Requesting image extration from {} at {} s", track, time);
-    Receipt receipt = composer.image(track, IMAGE_EXTRACTION_PROFILE, time, true);
-    return (Attachment) receipt.getElement();
   }
 
   /**
