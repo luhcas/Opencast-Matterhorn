@@ -40,6 +40,7 @@ Opencast.Watch = (function ()
         $('#data').xslt(restEndpoint, "xsl/player-hybrid-download.xsl", function () 
         {
           $('#oc-segments').html("");
+          $(".segments").css("margin-top","-3px");
           
           mimetypeOne = "video/x-flv";
           mimetypeTwo = "video/x-flv";
@@ -174,7 +175,7 @@ Opencast.Watch = (function ()
 
           // init the volume scrubber
           Opencast.Scrubber.init();
-
+          
           
           // bind handler 
           $('#scrubber').bind('keydown', 'left', function(evt) 
