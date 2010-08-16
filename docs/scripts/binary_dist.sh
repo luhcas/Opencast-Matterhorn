@@ -2,9 +2,9 @@
 # SETTINGS #
 ############
 SRCDIR=/Users/josh/dev/src/mh_jira
-VERSION=r8040-bin-all-dist
-LOCAL_MH_BUNDLES=/Applications/Matterhorn_all/matterhorn
-TEMPDIR=felix-framework-2.0.5
+VERSION=r8729-bin-all-dist
+LOCAL_MH_BUNDLES=/Applications/Matterhorn_felix3/matterhorn
+TEMPDIR=felix-framework-3.0.1
 
 #########
 # START #
@@ -15,7 +15,7 @@ echo "* Building binary distribution version $VERSION from the local source at $
 # DOWNLOAD FELIX #
 ##################
 # Get an exploded, vanilla felix, downloading if necessary
-[ -f ./felix_temp.zip ] || curl -o felix_temp.zip -# http://repo2.maven.org/maven2/org/apache/felix/org.apache.felix.main.distribution/2.0.5/org.apache.felix.main.distribution-2.0.5.zip;
+[ -f ./felix_temp.zip ] || curl -o felix_temp.zip -# http://repo2.maven.org/maven2/org/apache/felix/org.apache.felix.main.distribution/3.0.1/org.apache.felix.main.distribution-3.0.1.zip;
 unzip -q felix_temp.zip;
 #rm felix_temp.zip
 
@@ -24,15 +24,14 @@ unzip -q felix_temp.zip;
 #######################
 echo "* Copying files to felix";
 cp $SRCDIR/docs/felix/bin/binary_dist_start_matterhorn.sh $TEMPDIR/bin/start.sh;
-cp -R $SRCDIR/docs/felix/conf $TEMPDIR;
-cp -R $SRCDIR/docs/felix/load $TEMPDIR;
-cp -R $SRCDIR/docs/felix/inbox $TEMPDIR;
-cp -R $SRCDIR/docs/scripts/3rd_party_tools $TEMPDIR;
+cp -r $SRCDIR/docs/felix/etc $TEMPDIR;
+cp -r $SRCDIR/docs/felix/conf $TEMPDIR;
+cp -r $SRCDIR/docs/felix/load $TEMPDIR;
+cp -r $SRCDIR/docs/felix/inbox $TEMPDIR;
+cp -r $SRCDIR/docs/scripts/3rd_party_tools $TEMPDIR;
 
 # Clean up unneeded felix files
 echo "* Removing unneeded files from felix";
-rm $TEMPDIR/pom.xml;
-rm $TEMPDIR/assembly.xml;
 rm $TEMPDIR/LICENSE;
 rm -rf $TEMPDIR/doc;
 
@@ -92,3 +91,4 @@ zip -r -q matterhorn-$VERSION.zip matterhorn-$VERSION
 echo "****************************************************"
 echo "* Finished building matterhorn-$VERSION.zip binary *"
 echo "****************************************************"
+
