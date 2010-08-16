@@ -428,8 +428,7 @@ package org.opencast.engage.videodisplay.control.util
                 mediaPlayerSingle.play();
                 model.currentPlayerState = PlayerState.PLAYING;
                 ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PAUSED );
-                model.mediaPlayer.setVolume( 1 );
-                ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, 100 );
+                
             }
 
             if( model.statePlayerOne == PlayerState.READY && model.statePlayerTwo == PlayerState.READY )
@@ -445,9 +444,10 @@ package org.opencast.engage.videodisplay.control.util
 
                 model.currentPlayerState = PlayerState.PLAYING;
                 ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PAUSED );
-                model.mediaPlayer.setVolume( 1 );
-                ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, 100 );
+               
             }
+            model.mediaPlayer.setVolume( 1 );
+            ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, 100 );
         }
 
         /**
@@ -772,6 +772,11 @@ package org.opencast.engage.videodisplay.control.util
          */
         private function onStateChange( event : MediaPlayerStateChangeEvent ) : void
         {
+            if( event.state == PlayerState.LOADING )
+            {
+            	model.loader = true;
+            }
+                
             if( model.startPlay == true )
             {
                 model.singleState = event.state;
@@ -793,6 +798,10 @@ package org.opencast.engage.videodisplay.control.util
             }
             else
             {
+                
+                
+                
+                
                 if( event.state == PlayerState.READY )
                 {
                     model.startPlaySingle = true;
@@ -805,6 +814,7 @@ package org.opencast.engage.videodisplay.control.util
                     {
                         startEmbedPlayer();
                     }
+                    model.loader = false;
                 }
             }
         }
@@ -821,17 +831,9 @@ package org.opencast.engage.videodisplay.control.util
             model.currentDurationString = _time.getTC( event.time );
             ExternalInterface.call( ExternalFunction.SETDURATION, event.time );
             ExternalInterface.call( ExternalFunction.SETTOTALTIME, model.currentDurationString );
+            ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, 100 );
+            
 
-            if( event.time * 0.05 > 10 )
-            {
-                model.rewindTime = Math.round( event.time * 0.05 );
-                model.fastForwardTime = Math.round( event.time * 0.05 );
-            }
-            else
-            {
-                model.rewindTime = 10;
-                model.fastForwardTime = 10;
-            }
         }
 
         /**
@@ -1056,6 +1058,11 @@ package org.opencast.engage.videodisplay.control.util
         private function playerOneOnStateChange( event : MediaPlayerStateChangeEvent ) : void
         {
             model.statePlayerOne = event.state;
+            
+            if( event.state == PlayerState.LOADING )
+            {
+            	model.loader = true;
+            }
 
             if( model.startPlay == true )
             {
@@ -1088,6 +1095,8 @@ package org.opencast.engage.videodisplay.control.util
                     {
                         startEmbedPlayer();
                     }
+                    
+                    model.loader = false;
 
                 }
             }
@@ -1375,6 +1384,11 @@ package org.opencast.engage.videodisplay.control.util
         private function playerTwoOnStateChange( event : MediaPlayerStateChangeEvent ) : void
         {
             model.statePlayerTwo = event.state;
+            
+            if( event.state == PlayerState.LOADING )
+            {
+            	model.loader = true;
+            }
 
             if( model.startPlay == true )
             {
@@ -1395,7 +1409,8 @@ package org.opencast.engage.videodisplay.control.util
             }
             else
             {
-                if( event.state == PlayerState.READY )
+                
+               if( event.state == PlayerState.READY )
                 {
                     model.startPlayTwo = true;
 
@@ -1407,7 +1422,7 @@ package org.opencast.engage.videodisplay.control.util
                     {
                         startEmbedPlayer();
                     }
-
+					model.loader = false;
                 }
             }
         }

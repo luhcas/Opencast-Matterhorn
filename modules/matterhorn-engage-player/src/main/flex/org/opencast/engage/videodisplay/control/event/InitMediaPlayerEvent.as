@@ -37,11 +37,13 @@ package org.opencast.engage.videodisplay.control.event
         private var _mimetypeTwo : String;
 
         private var _playerMode : String;
+        
+        private var _slideLength : int;
 
         /**
          * Constructor
          */
-        public function InitMediaPlayerEvent( coverURLOne : String, coverURLTwo : String, mediaURLOne : String, mediaURLTwo : String, mimetypeOne : String, mimetypeTwo : String, playerMode : String, bubbles : Boolean = false, cancelable : Boolean = false )
+        public function InitMediaPlayerEvent( coverURLOne : String, coverURLTwo : String, mediaURLOne : String, mediaURLTwo : String, mimetypeOne : String, mimetypeTwo : String, playerMode : String, slideLength : int, bubbles : Boolean = false, cancelable : Boolean = false )
         {
             super( EVENT_NAME, bubbles, cancelable );
             _mediaURLOne = mediaURLOne;
@@ -51,6 +53,7 @@ package org.opencast.engage.videodisplay.control.event
             _mimetypeOne = mimetypeOne;
             _mimetypeTwo = mimetypeTwo;
             _playerMode = playerMode;
+            _slideLength = slideLength;
         }
 
         /**
@@ -60,7 +63,7 @@ package org.opencast.engage.videodisplay.control.event
          */
         override public function clone() : Event
         {
-            return new InitMediaPlayerEvent( coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerMode, bubbles, cancelable );
+            return new InitMediaPlayerEvent( coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerMode, slideLength, bubbles, cancelable );
         }
 
         /**
@@ -132,5 +135,18 @@ package org.opencast.engage.videodisplay.control.event
         {
             return _playerMode;
         }
+        
+        /**
+         * slideLength
+         * Get the slideLength.
+         * @return _slideLength
+         */
+        public function get slideLength() : int
+        {
+            return _slideLength;
+        }
+        
+        
+        
     }
 }

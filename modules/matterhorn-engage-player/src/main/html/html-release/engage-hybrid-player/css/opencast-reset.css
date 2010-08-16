@@ -114,9 +114,15 @@ input {
 }
 
 /* custom default focus indicator - theme overwrites this */
-:focus 
-{    
-   outline: 2px solid #FA6E23;
+
+div input:focus
+{
+	outline: 2px solid #FA6E23;
+}
+
+span:focus
+{
+	outline: 2px solid #FA6E23;
 }
 
 

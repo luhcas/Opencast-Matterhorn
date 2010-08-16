@@ -1,4 +1,5 @@
 <?xml version = "1.0" encoding = "utf-8"?>
+
 <!--
      /**
      *  Copyright 2009 The Regents of the University of California
@@ -31,18 +32,15 @@
     verticalScrollPolicy = "off"
     horizontalScrollPolicy = "off"
     xmlns:business = "org.opencast.engage.videodisplay.business.*"
-    frameRate = "30"
-    backgroundGradientColors="[#666666, #000000]"
-    >
+    frameRate = "30">
 
     <mx:Style 
-        source = "style/standard_videodisplay.css"
-        />
+        source = "style/standard_videodisplay.css"/>
 
     <mx:Script>
         <![CDATA[
-        	import org.osmf.layout.VerticalAlign;
-        	import org.opencast.engage.videodisplay.business.FlexAjaxBridge;
+            import org.osmf.layout.VerticalAlign;
+            import org.opencast.engage.videodisplay.business.FlexAjaxBridge;
             import bridge.ExternalFunction;
             import org.opencast.engage.videodisplay.control.event.LoadDFXPXMLEvent;
             import org.opencast.engage.videodisplay.control.util.TimeCode;
@@ -50,7 +48,6 @@
             import org.opencast.engage.videodisplay.control.event.SetCurrentCaptionsEvent;
             import mx.collections.ArrayCollection;
             import org.opencast.engage.videodisplay.vo.CaptionSetVO;
-            import mx.controls.Alert;
             import org.opencast.engage.videodisplay.control.event.SetVolumeEvent;
             import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
             import org.opencast.engage.videodisplay.model.VideodisplayModel;
@@ -60,31 +57,27 @@
 
             [Autowire]
             [Bindable]
-            public var model:VideodisplayModel;
+            public var model : VideodisplayModel;
 
             /**
              * init
-             *
              * initialization
-             * */
-            private function onApplicationComplete( evt:Event ):void
+             * @eventType Event event
+             */
+            private function onApplicationComplete( event : Event ) : void
             {
                 /* Set up full screen handler. */
                 Application.application.stage.addEventListener( FullScreenEvent.FULL_SCREEN, fullScreenHandler );
-                
-                
-                
-                
             }
 
             /**
              * fullScreenHandler
-             *
              * Save the status of the fullscreen mode
-             * */
-            private function fullScreenHandler( evt:FullScreenEvent ):void
+             * @eventType FullScreenEvent event
+             */
+            private function fullScreenHandler( event : FullScreenEvent ) : void
             {
-                if ( evt.fullScreen )
+                if( event.fullScreen )
                 {
                     model.fullscreenMode = true;
                 }
@@ -99,36 +92,53 @@
 
             /**
              * onPreinitialize
-             *
              * load Beans
-             * */
-            private function onPreinitialize():void
+             */
+            private function onPreinitialize() : void
             {
-                Swiz.getInstance().loadBeans( [   VideodisplayBean   ] );
+                Swiz.getInstance().loadBeans( [ VideodisplayBean ] );
                 Swiz.autowire( this );
             }
 
             /**
              * onAddedToStage
-             *
              * Add an event listener for the keyboard.
-             * */
-            private function onAddedToStage():void
+             */
+            private function onAddedToStage() : void
             {
-            	flexAjaxBridge = new FlexAjaxBridge();
+                flexAjaxBridge = new FlexAjaxBridge();
                 stage.addEventListener( KeyboardEvent.KEY_UP, reportKeyUp );
             }
 
-            private function reportKeyUp( event:KeyboardEvent ):void
+            /**
+             * reportKeyUp
+             * Keyboard Flex Bridge Listener
+             * @eventType KeyboardEvent event
+             */
+            private function reportKeyUp( event : KeyboardEvent ) : void
             {
                 flexAjaxBridge.reportKeyUp( event );
             }
 
-            private var flexAjaxBridge:FlexAjaxBridge;
-            
-            public function getFlexAjaxBridge():FlexAjaxBridge
+            private var flexAjaxBridge : FlexAjaxBridge;
+
+            /**
+             * getFlexAjaxBridge
+             * Get the Flex Ajax Bridge
+             * @return KeyboardEvent FlexAjaxBridge
+             */
+            public function getFlexAjaxBridge() : FlexAjaxBridge
             {
                 return this.flexAjaxBridge;
+            }
+
+            /**
+             * playPause
+             * Toggle between play and pause
+             */
+            private function playPause() : void
+            {
+                ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' );
             }
         ]]>
     </mx:Script>
@@ -136,78 +146,64 @@
     <mx:states>
 
         <mx:State 
-            name = "media"
-            >
+            name = "media">
 
             <mx:SetProperty 
                 target = "{ bx_media }"
                 name = "visible"
-                value = "true"
-                />
+                value = "true"/>
 
             <mx:SetProperty 
                 target = "{ bx_media }"
                 name = "includeInLayout"
-                value = "true"
-                />
+                value = "true"/>
         </mx:State>
 
         <mx:State 
-            name = "audio"
-            >
+            name = "audio">
 
             <mx:SetProperty 
                 target = "{ bx_audio }"
                 name = "visible"
-                value = "true"
-                />
+                value = "true"/>
 
             <mx:SetProperty 
                 target = "{ bx_audio }"
                 name = "includeInLayout"
-                value = "true"
-                />
+                value = "true"/>
         </mx:State>
 
         <mx:State 
-            name = "error"
-            >
+            name = "error">
 
             <mx:SetProperty 
                 target = "{ bx_error }"
                 name = "visible"
-                value = "true"
-                />
+                value = "true"/>
 
             <mx:SetProperty 
                 target = "{ bx_error }"
                 name = "includeInLayout"
-                value = "true"
-                />
+                value = "true"/>
         </mx:State>
-        
-        
     </mx:states>
 
-    <br:FABridge />
-    
+    <br:FABridge/>
+
     <view:AudioView 
         id = "bx_audio"
         visible = "false"
         includeInLayout = "false"
-        />
-        
-    <view:MediaView
-    	id="bx_media"
-    	visible = "false"
+        click = "{ playPause() }"/>
+
+    <view:MediaView 
+        id = "bx_media"
+        visible = "false"
         includeInLayout = "false"
-        currentState="{ model.videoState }"
-    	/>
+        currentState = "{ model.videoState }"/>
 
     <view:ErrorView 
         id = "bx_error"
         visible = "false"
-        includeInLayout = "false"
-        />
-        
+        includeInLayout = "false"/>
 </mx:Application>

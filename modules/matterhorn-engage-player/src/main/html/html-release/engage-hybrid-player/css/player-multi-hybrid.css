@@ -139,6 +139,7 @@ table
   background-color:         transparent !important;
   color:                    #FFFFFF;
   text-decoration: 			underline;
+  float: 					left;	
 }
 
 .oc_current-time-hide
@@ -592,6 +593,11 @@ option:hover
   top:                      -19px;
   z-index:                  3;
   margin-left:              -4px;
+}
+
+#draggable:focus 
+{
+	outline: 2px solid #FA6E23; 
 }
 
 #divToolTip

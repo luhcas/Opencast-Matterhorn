@@ -24,8 +24,7 @@
     height = "100%"
     xmlns:view = "org.opencast.engage.videodisplay.view.*"
     xmlns:ui = "com.fusiox.ui.*"
-    borderStyle = "solid"
-    borderThickness = "2">
+    >
 
     <mx:Script>
         <![CDATA[

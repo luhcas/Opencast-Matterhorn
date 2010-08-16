@@ -220,6 +220,11 @@
                     fastForwardTimer.addEventListener( TimerEvent.TIMER_COMPLETE, onFastForwardTimerComplete );
                     fastForwardTimer.start();
                 }
+
+                if( model.fastForwardTime < ( model.currentDuration * 0.1 ) )
+                {
+                    model.fastForwardTime = model.fastForwardTime + model.fastForwardTime;
+                }
             }
 
             /**
@@ -244,6 +249,11 @@
                     rewindTimer.addEventListener( TimerEvent.TIMER_COMPLETE, onRewindTimerComplete );
                     rewindTimer.start();
                 }
+
+                if( model.rewindTime < ( model.currentDuration * 0.1 ) )
+                {
+                    model.rewindTime = model.rewindTime + model.rewindTime;
+                }
             }
 
             /**
@@ -254,6 +264,7 @@
             {
                 fastForwardTimer.stop();
                 jumpForward();
+
             }
 
             /**
@@ -265,6 +276,7 @@
             {
                 rewindTimer.stop();
                 jumpBack();
+
             }
 
 
@@ -358,7 +370,7 @@
                     <mx:Button 
                         id = "btn_skipBackward"
                         toolTip = "Jump To The Previous Slide"
-                        styleName = "SkipBackward"
+                        styleName = "{ model.slideLength != 0 ? 'SkipBackward' : 'disable' }"
                         click = "{ExternalInterface.call( ExternalFunction.SKIPBACKWARD, '' )}"/>
 
                     <mx:Button 
@@ -366,7 +378,7 @@
                         toolTip = "Jump Back"
                         styleName = "Rewind"
                         mouseDown = "{ jumpBack() }"
-                        mouseUp = "{ rewindTimer.stop(); }"/>
+                        mouseUp = "{ rewindTimer.stop(); model.rewindTime = 10; }"/>
 
                     <mx:Button 
                         id = "btn_playpause"
@@ -379,12 +391,12 @@
                         toolTip = "Jump Forward"
                         styleName = "FastForward"
                         mouseDown = "{ jumpForward() }"
-                        mouseUp = "{ fastForwardTimer.stop() }"/>
+                        mouseUp = "{ fastForwardTimer.stop(); model.fastForwardTime = 10 }"/>
 
                     <mx:Button 
                         id = "btn_skipforward"
                         toolTip = "Jump To The Next Slide"
-                        styleName = "SkipForward"
+                        styleName = "{ model.slideLength != 0 ? 'SkipForward' : 'disable' }"
                         click = "{ExternalInterface.call( ExternalFunction.SKIPFORWARD, '' )}"/>
                 </mx:HBox>
 
@@ -421,7 +433,7 @@
                     width = "48"
                     height = "48"
                     toolTip = "{ model.captionsURL == '' ? 'No Closed Captons' : model.ccBoolean == true ? 'Closed Captons On' : 'Closed Captons Off' }"
-                    styleName = "{ model.captionsURL == '' ? 'ccOff' : model.ccButtonBoolean == true ? 'ccActivate' :  mute == true ? 'ccActivate' :  'ccOn' }"
+                    styleName = "{ model.captionsURL == '' ? 'disable' : model.ccButtonBoolean == true ? 'ccActivate' :  mute == true ? 'ccActivate' :  'ccOn' }"
                     click = "{ Swiz.dispatchEvent( new ClosedCaptionsEvent() ) }"
                     enabled = "{  model.captionsURL == '' ? false : true }"/>
 

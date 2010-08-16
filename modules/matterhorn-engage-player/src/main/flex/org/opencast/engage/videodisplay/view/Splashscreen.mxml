@@ -158,6 +158,10 @@
                 }
             }
 
+            /**
+             * play
+             * Play the media file
+             */
             private function play() : void
             {
                 if( model.startPlaySingle == true )

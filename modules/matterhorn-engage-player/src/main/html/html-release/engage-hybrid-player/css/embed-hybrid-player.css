@@ -15,10 +15,7 @@
  */
 #oc_image
 {
-  max-width:                100%;
-  max-height:               100%;
   background-color:         #ffffff;
-  
 } 
 
 #oc_embed-title-bar
@@ -85,8 +82,7 @@ table
   width:                    100%;
   background-image:         url("../img/oc_icons.png");
   background-position:      0 0px;
-  visibility:               hidden;
-  display:                  none;
+ 
 }
 
 #oc_video-player-controls-embed

@@ -34,8 +34,10 @@ Opencast.Initialize = (function ()
     VIDEOSIZEONLYRIGHT     = "videoSizeOnlyRight",
     VIDEOSIZEONLYLEFT      = "videoSizeOnlyLeft",
     SINGLEPLAYER           = "Singleplayer",
+    intvalOnPlayerReady    = "",
     locked = false,
     start = false,
+    playerReady = false,
     formatOne = 0,
     formatTwo = 0,
     formatSingle = 0,
@@ -48,6 +50,7 @@ Opencast.Initialize = (function ()
     iFrameHeight = 0,
     otherDivHeight = 0,
     flashHeight = 0,
+    flashWidth = 0,
     embedUrl = "",
     advancedUrl = "",
     size = "";
@@ -68,6 +71,28 @@ Opencast.Initialize = (function ()
     function getDivId()
     {
         return divId;
+    }
+    
+
+    /**
+        @memberOf Opencast.Player
+        @description Set the playerReady.
+     */
+    function setPlayerReady(playerReadyBool)
+    {
+    	playerReady = playerReadyBool;
+        
+    }
+    
+
+    /**
+        @memberOf Opencast.Player
+        @description Get the playerReady.
+        @return Boolean playerReady
+     */
+    function getPlayerReady()
+    {
+        return playerReady;
     }
     
     /**
@@ -167,6 +192,29 @@ Opencast.Initialize = (function ()
         dropdown_open();
     }
     
+    function onPlayerReadyListener()
+    {
+    	if (intvalOnPlayerReady === "")
+        {
+    		intvalOnPlayerReady = window.setInterval("Opencast.Initialize.onPlayerReady()", 100);
+        }
+    }
+    
+    
+    function onPlayerReady()
+    {
+    	if( getPlayerReady() === true )
+    	{
+    		Opencast.Watch.onPlayerReady();
+    		 window.clearInterval(intvalOnPlayerReady);
+    		 intvalOnPlayerReady = "";
+    		 
+    		 
+    		 $('#oc_image').hide();
+             start = true;
+             $('#oc_controlbar-embed').hide();
+    	}
+    }
     
     $(document).ready(function () 
     {
@@ -325,11 +373,9 @@ Opencast.Initialize = (function ()
         });
         $('#oc_btn-play-pause-embed').click(function () 
         {
-        	// init Flash
-            Opencast.FlashVersion.initFlash();
-            $('#oc_image').hide();
-            start = true;
-            $('#oc_controlbar-embed').hide();
+        	
+            
+           
         });
         
         $('#oc_btn-volume').click(function () 
@@ -346,15 +392,13 @@ Opencast.Initialize = (function ()
         });
         $('#oc_image').click(function () 
         {
-            // init Flash
-            Opencast.FlashVersion.initFlash();
-            $('#oc_image').hide();
-            start = true;
-            $('#oc_controlbar-embed').hide();
+            
+            
+           
         });
         $('#oc-link-advanced-player').click(function () 
         {
-        	Opencast.Player.doTogglePlayPause();
+        	Opencast.Player.doPause();
         });
         
         // Handler for .mouseover()
@@ -589,18 +633,60 @@ Opencast.Initialize = (function ()
             }
         });
         
+        onPlayerReadyListener();
+        
         // to calculate the embed flash height
         iFrameHeight = document.documentElement.clientHeight;
         otherDivHeight = 100;
         flashHeight = iFrameHeight - otherDivHeight;
+        flashWidth = document.documentElement.clientWidth;
         
-       
         $("#oc_flash-player").css('height', flashHeight + 'px'); 
         
         // create watch.html link
         embedUrl = window.location.href;
         advancedUrl = embedUrl.replace(/embed.html/g, "watch.html");
         $("a[href='#']").attr('href', '' + advancedUrl + '');
+        
+        
+        // set preview image size
+        var previewImageHeight = 480;
+        var previewImageWidth = 640;
+        var previewImageFormat = previewImageWidth / previewImageHeight;
+        var newPreviewImageHeight = previewImageHeight;
+        var newPreviewImageWidth = previewImageWidth;
+        var previewFlashWidth = flashWidth - 4;
+        var previewFlashHeigth = flashHeight - 3;
+        var flashFormat = previewFlashWidth / previewFlashHeigth;
+        var previewImageMarginTop = 0;
+        
+        
+        if (previewFlashHeigth < previewImageHeight || previewFlashWidth <  previewImageWidth)
+        {
+        	if (flashFormat > previewImageFormat )
+        	{
+        		newPreviewImageHeight = previewFlashHeigth;
+        		newPreviewImageWidth = Math.round(newPreviewImageHeight * previewImageFormat);
+        	}
+        	else if ( flashFormat < previewImageFormat )
+        	{
+        		newPreviewImageWidth = previewFlashWidth;
+        		newPreviewImageHeight = Math.round(newPreviewImageWidth / previewImageFormat);
+        	}
+        	else if (flashFormat === previewImageFormat)
+        	{
+        		newPreviewImageWidth = previewFlashWidth;
+        		newPreviewImageHeight = previewFlashHeigth;
+        	}
+        }
+        
+        // to calculate the new previewImageMarginTop
+        previewImageMarginTop = Math.round((previewFlashHeigth - newPreviewImageHeight) / 2);
+        
+        // set the new css style
+        $("#oc_image").css('height', newPreviewImageHeight + 'px');
+        $("#oc_image").css('width', newPreviewImageWidth + 'px');
+        $("#oc_image").css('margin-top', previewImageMarginTop + 'px');
         
         var coverUrl = Opencast.engage.getCoverUrl();
         if (coverUrl === null) {
@@ -633,7 +719,7 @@ Opencast.Initialize = (function ()
             }); //close ajax
         } // close if
         
-        
+   
     });
     
     /**
@@ -721,6 +807,8 @@ Opencast.Initialize = (function ()
         dropdown_timer : dropdown_timer,
         dropdown_close : dropdown_close,
         doResize : doResize,
+        setPlayerReady : setPlayerReady,
+        onPlayerReady : onPlayerReady,
         setNewResolution : setNewResolution,
         setMediaResolution : setMediaResolution
     };

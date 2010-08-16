@@ -20,7 +20,6 @@ package org.opencast.engage.videodisplay.control.command
 
     import flash.external.ExternalInterface;
 
-    import mx.controls.Alert;
     import mx.core.Application;
 
     import org.opencast.engage.videodisplay.control.event.InitMediaPlayerEvent;
@@ -34,6 +33,8 @@ package org.opencast.engage.videodisplay.control.command
     import org.osmf.elements.VideoElement;
     import org.osmf.media.MediaElement;
     import org.osmf.media.URLResource;
+    import org.osmf.net.DynamicStreamingItem;
+    import org.osmf.net.DynamicStreamingResource;
     import org.swizframework.Swiz;
 
     /**
@@ -44,6 +45,9 @@ package org.opencast.engage.videodisplay.control.command
 
         [Autowire]
         public var model : VideodisplayModel;
+
+
+
 
         /**
          * Constructor
@@ -63,6 +67,7 @@ package org.opencast.engage.videodisplay.control.command
             model.currentPlayerState = PlayerState.PAUSED;
             ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PLAYING );
             model.playerMode = event.playerMode;
+            model.slideLength = event.slideLength;
 
             // set the cover URL One
             model.coverURLOne = event.coverURLOne;
@@ -152,14 +157,14 @@ package org.opencast.engage.videodisplay.control.command
 
                 model.mediaPlayer = new OpencastMediaPlayer( VideoState.MULTI );
 
-                //
                 var newVideoElementOne : VideoElement = new VideoElement( new URLResource( event.mediaURLOne ) );
+
                 newVideoElementOne.smoothing = true;
                 var mediaElementVideoOne : MediaElement = newVideoElementOne;
                 model.mediaPlayer.setMediaElementOne( mediaElementVideoOne );
 
-                //
                 var newVideoElementTwo : VideoElement = new VideoElement( new URLResource( event.mediaURLTwo ) );
+
                 newVideoElementTwo.smoothing = true;
                 var mediaElementVideoTwo : MediaElement = newVideoElementTwo;
                 model.mediaPlayer.setMediaElementTwo( mediaElementVideoTwo );

@@ -29,12 +29,7 @@
 var Videodisplay = Videodisplay || {};
 
 
-/**
-    @namespace FlashVersion
-*/
-Videodisplay.VideodisplayGo = (function () 
-{
-	
+
 /**
  * Hook here all the code that must run as soon as the "Videodisplay" class
  * finishes its instantiation over the bridge.
@@ -44,12 +39,14 @@ Videodisplay.VideodisplayGo = (function ()
  */
 function VideodisplayReady() 
 {
+
     // Initialize the "root" object. This represents the actual 
     // "Videodisplay.mxml" flex application.
     var b_Videodisplay_root = FABridge['b_Videodisplay'].root().getFlexAjaxBridge();
+    
     // Global functions in the "Videodisplay.mxml" application
 
-    Videodisplay.play = function () {
+   Videodisplay.play = function () {
         return b_Videodisplay_root.play();
     };
 
@@ -69,8 +66,16 @@ function VideodisplayReady()
         b_Videodisplay_root.rewind();
     };
     
+    Videodisplay.stopRewind = function () {
+        b_Videodisplay_root.stopRewind();
+    };
+    
     Videodisplay.fastForward = function () {
         b_Videodisplay_root.fastForward();
+    };
+    
+    Videodisplay.stopFastForward = function () {
+        b_Videodisplay_root.stopFastForward();
     };
     
     Videodisplay.skipForward = function () {
@@ -83,8 +88,12 @@ function VideodisplayReady()
     
     Videodisplay.seek = function (argNumber) {
         var progress = Opencast.engage.getLoadProgress();
-        var seekValue = Math.min(argNumber, progress);
-        return b_Videodisplay_root.seek(seekValue);
+        if(progress === -1)
+            return b_Videodisplay_root.seek(argNumber);
+        else {
+            var seekValue = Math.min(argNumber, progress);
+            return b_Videodisplay_root.seek(seekValue);
+        }
     };
     
     Videodisplay.mute = function () {
@@ -103,8 +112,8 @@ function VideodisplayReady()
         b_Videodisplay_root.closedCaptions();
     };
     
-    Videodisplay.setMediaURL = function (argCoverOne, argCoverTwo, argStringOne, argStringTwo, argMimetypeOne, argMimetypeTwo, argPlayerstyle) {
-        b_Videodisplay_root.setMediaURL(argCoverOne, argCoverTwo, argStringOne, argStringTwo, argMimetypeOne, argMimetypeTwo, argPlayerstyle);
+    Videodisplay.setMediaURL = function (argCoverOne, argCoverTwo, argStringOne, argStringTwo, argMimetypeOne, argMimetypeTwo, argPlayerstyle, slideLength) {
+        b_Videodisplay_root.setMediaURL(argCoverOne, argCoverTwo, argStringOne, argStringTwo, argMimetypeOne, argMimetypeTwo, argPlayerstyle, slideLength);
     };
     
     Videodisplay.setCaptionsURL = function (argString) {
@@ -123,22 +132,16 @@ function VideodisplayReady()
         return b_Videodisplay_root.setMediaResolution(argWidthMediaOne, argHeightMediaOne, argWidthMediaTwo, argHeightMediaTwo, argMultiMediaContainerLeft);
     };
     
+    
+    
+    
+    
     b_Videodisplay_root.onBridgeReady();
 }
-
-
-
 
 
 /**
  * Listen for the instantiation of the Flex application over the bridge
  */
-return {
-	VideodisplayReady : VideodisplayReady
-	
+FABridge.addInitializationCallback("b_Videodisplay", VideodisplayReady);
 
-};
-
-
-
-}());

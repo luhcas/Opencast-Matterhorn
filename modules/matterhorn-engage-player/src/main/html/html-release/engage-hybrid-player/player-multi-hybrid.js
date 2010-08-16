@@ -882,7 +882,7 @@ Opencast.Player = (function () {
         @description Set the media URL.
         @param String mediaURL
      */
-    function setMediaURL(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerstyle)
+    function setMediaURL(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerstyle, slideLength)
     {
         if (mediaURLOne[0] === 'h' || mediaURLOne[0] === 'H' && mediaURLOne[2] === 't' || mediaURLOne[2] === 'T' || mediaURLTwo[0] === 'h' || mediaURLTwo[0] === 'H' && mediaURLTwo[2] === 't' || mediaURLTwo[2] === 'T')
         {
@@ -893,7 +893,7 @@ Opencast.Player = (function () {
         {
             setHtmlBool(false);
         }
-        Videodisplay.setMediaURL(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerstyle);
+        Videodisplay.setMediaURL(coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerstyle, slideLength);
     }
     
     /**
@@ -949,11 +949,13 @@ Opencast.Player = (function () {
      */
     function stopRewind()
     {
-        if (intvalRewind !== "")
+        
+    	if (intvalRewind !== "")
         {
             window.clearInterval(intvalRewind);
             intvalRewind = "";
         }
+        Videodisplay.stopRewind(); 
     }
     
     
@@ -992,6 +994,7 @@ Opencast.Player = (function () {
             window.clearInterval(intvalFastForward);
             intvalFastForward = "";
         }
+        Videodisplay.stopFastForward();
     }  
     
     /**
@@ -1592,7 +1595,8 @@ Opencast.Player = (function () {
      */
     function setVolumeSlider(newVolume) 
     {
-        Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(SLIDERVOLUME), newVolume);
+        
+    	Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(SLIDERVOLUME), newVolume);
     }
     
     /**

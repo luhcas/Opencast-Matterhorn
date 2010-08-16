@@ -109,9 +109,9 @@ table
 {
   height:                   30px;
   width:                    100%;
-  background-image:         url("../img/oc_icons.png");
   background-position:      0 0px;
   visibility:               hidden;
+  background-color:         black;
 }
 
 #oc_video-time

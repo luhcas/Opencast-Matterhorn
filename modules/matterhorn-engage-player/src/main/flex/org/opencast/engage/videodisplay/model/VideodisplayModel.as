@@ -61,8 +61,11 @@ package org.opencast.engage.videodisplay.model
 
         // playerMode
         public var playerMode : String = '';
-
-        // audioURLaudioURL
+        
+        // slideLength
+        public var slideLength : int;
+        
+		// audioURLaudioURL
         public var audioURL : String = "";
 
         // An Array with different caption data
@@ -126,7 +129,7 @@ package org.opencast.engage.videodisplay.model
         public var errorDetail : String = '';
 
         // Skip Fast Forward -change time
-        public var fastForwardTime : Number = 0;
+        public var fastForwardTime : Number = 10;
 
         // Captions font size
         public var fontSizeCaptions : int = 12;
@@ -177,7 +180,7 @@ package org.opencast.engage.videodisplay.model
         public var progressBar : ProgressBar = new ProgressBar();
 
         // Rewind Time
-        public var rewindTime : Number = 0;
+        public var rewindTime : Number = 10;
 
         // Time Code
         public var timeCode : TimeCode = new TimeCode();

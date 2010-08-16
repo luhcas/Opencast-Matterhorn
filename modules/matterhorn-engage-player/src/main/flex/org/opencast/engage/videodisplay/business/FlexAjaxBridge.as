@@ -100,12 +100,30 @@ package org.opencast.engage.videodisplay.business
         }
 
         /**
+         * stopRewind
+         * Reset the rewind time.
+         */
+        public function stopRewind() : void
+        {
+            model.rewindTime = 10;
+        }
+
+        /**
          * fastForward
          * When the learnder click on the fast forward button. Call the event VideoControlEvent.FASTFORWARD.
          */
         public function fastForward() : void
         {
             Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.FASTFORWARD ) );
+        }
+
+        /**
+         * stopFastForward
+         * Reset the fas forward time
+         */
+        public function stopFastForward() : void
+        {
+            model.fastForwardTime = 10;
         }
 
         /**
@@ -188,9 +206,9 @@ package org.opencast.engage.videodisplay.business
          * Developer: You can change your own urls here.
          * @param String coverURLOne, String coverURLTwo, String mediaURLOne, String mediaURLTwo, String mimetypeOne, String mimetypeTwo, String playerMode
          */
-        public function setMediaURL( coverURLOne : String, coverURLTwo : String, mediaURLOne : String, mediaURLTwo : String, mimetypeOne : String, mimetypeTwo : String, playerMode : String ) : void
+        public function setMediaURL( coverURLOne : String, coverURLTwo : String, mediaURLOne : String, mediaURLTwo : String, mimetypeOne : String, mimetypeTwo : String, playerMode : String, slideLength : int ) : void
         {
-            Swiz.dispatchEvent( new InitMediaPlayerEvent( coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerMode ) );
+            Swiz.dispatchEvent( new InitMediaPlayerEvent( coverURLOne, coverURLTwo, mediaURLOne, mediaURLTwo, mimetypeOne, mimetypeTwo, playerMode, slideLength ) );
         }
 
         /**
@@ -444,7 +462,7 @@ package org.opencast.engage.videodisplay.business
          */
         public function onBridgeReady() : void
         {
-            ExternalInterface.call( ExternalFunction.ONPLAYERREADY );
+            ExternalInterface.call( ExternalFunction.ONPLAYERREADY, true );
         }
     }
 }

@@ -22,8 +22,8 @@
 {
   height:                   20px;
   width:                    100%;
-  background-image:         url("../img/icons.png");
   background-position:      0 -4px;
+  background-color:			black;
 } 
   
 #oc_embed-title
@@ -80,9 +80,9 @@ table
 {
   height:                   30px;
   width:                    100%;
-  background-image:         url("../img/oc_icons.png");
   background-position:      0 0px;
   visibility:               hidden;
+  background-color:			black;
 }
 
 #oc_video-player-controls-embed

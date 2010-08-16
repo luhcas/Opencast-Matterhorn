@@ -115,6 +115,10 @@ package org.opencast.engage.videodisplay.control.command
                             model.mediaPlayer.seek( 0 );
                         }
                     }
+                    if( model.rewindTime < ( model.currentDuration * 0.1 )  )
+                    {
+                    	model.rewindTime = model.rewindTime + model.rewindTime;
+                    }
                     break;
 
                 case VideoControlEvent.FASTFORWARD:
@@ -132,6 +136,10 @@ package org.opencast.engage.videodisplay.control.command
                         {
                             model.mediaPlayer.seek( newPlayhead );
                         }
+                    }
+                    if( model.fastForwardTime < ( model.currentDuration * 0.1 ) )
+                    {
+                    	model.fastForwardTime = model.fastForwardTime + model.fastForwardTime;
                     }
                     break;
 
