@@ -229,8 +229,7 @@ Opencast.Initialize = (function ()
      */
     function dropdown_open()
     {
-        dropdown_canceltimer();
-        dropdown_close();
+
        
 
         if (getDivId() === VIDEOSIZE)
@@ -247,6 +246,7 @@ Opencast.Initialize = (function ()
             $('#oc_player_video-dropdown').css('visibility', 'hidden');
             ddmenuitem = $('#oc_volume-menue');
         }
+        dropdown_canceltimer();
         setDivId('');
     }
     
