@@ -37,5 +37,10 @@
     <div id="error">
       Sorry, no DVD encoded track was found in this Media Package.
     </div>
+    <div id="actions">
+         <!-- control buttons -->
+         <button title="Move on to next steps in processing this recording" style="margin-right: 16px; width: 160px;" onclick="parent.Recordings.continueWorkflow();" id="continueBtn" type="button">Continue processing</button>
+         <button onclick="$('#holdActionPanel-container',top.document).toggle();$('#recordings-table-container',top.document).toggle();$('#oc_recordingmenu' ,top.document).toggle();$('.paging-nav-container',top.document).toggle();$('#refresh-controls-container',top.document).toggle();$('#category-selector-container',top.document).parent().toggle();" title="Cancel" style="margin-right: 16px;" type="button">Cancel</button>
+     </div>
   </body>
 </html>

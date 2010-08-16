@@ -29,6 +29,9 @@
       UploadListener.filename = null;
       UploadListener.mediaPackage = '';
       UploadListener.flavor = 'captions/timedtext';
+      UploadListener.initUpload = function() {
+        // TODO: if there aleady is a captions file, remove it from the mediaPackage
+      }
       UploadListener.startUpload = function() {
         if (UploadListener.filename != null) {
           $('#upload-container').css('display','none');

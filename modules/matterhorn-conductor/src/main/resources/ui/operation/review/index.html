@@ -37,7 +37,6 @@
               success: function(data) {
                 $(data.documentElement).children().each(function(index, elm) {
                   var tagName = elm.tagName.split(/:/)[1];
-                  //alert(tagName);
                   if ($(elm).text() != '') {
                     $('#container-'+tagName).css('display','block');
                     var text = $('#meta-'+tagName).text();
@@ -63,6 +62,7 @@
               $('#player-container').text('No preview encoded track found in MediaPackage');
             }*/
             var previewFiles = new Array();
+         
             $(data.documentElement).find("mediapackage > media > track").each(function(index, elm) {
               if ($(elm).attr('type').split(/\//)[1] == 'preview') {
                 previewFiles.push($(elm).find('url').text());

@@ -93,8 +93,7 @@ public class DownloadDVDWorkflowOperationHandler extends AbstractResumableWorkfl
         }
       }
     } catch (Exception e) {
-      logger.error("Could not remove dvd encoded track - {}", e.getMessage());
-      e.printStackTrace();
+      logger.warn("Could not remove dvd encoded track - {}", e.getMessage());
     }
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
   }
