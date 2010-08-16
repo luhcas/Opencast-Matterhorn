@@ -441,11 +441,11 @@ public class AdminuiRestService {
                 || (recording.getState().equals(RecordingState.COMPRESSING_ERROR))
                 || (recording.getState().equals(RecordingState.MANIFEST_ERROR))
                 || (recording.getState().equals(RecordingState.UPLOAD_ERROR))
-                || (new Date().getTime() - recording.getLastCheckinTime() > CAPTURE_STATUS_TIMEOUT)
+                || ((new Date().getTime() - recording.getLastCheckinTime() > CAPTURE_STATUS_TIMEOUT)
                   && (recording.getState().equals(RecordingState.CAPTURING)
                       || recording.getState().equals(RecordingState.COMPRESSING)
                       || recording.getState().equals(RecordingState.MANIFEST)
-                      || recording.getState().equals(RecordingState.UPLOADING))
+                      || recording.getState().equals(RecordingState.UPLOADING)))
                 ) {
           AdminRecordingImpl item = new AdminRecordingImpl();
           item.setItemType(AdminRecording.ItemType.SCHEDULER_EVENT);
