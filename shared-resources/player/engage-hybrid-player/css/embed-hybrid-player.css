@@ -82,7 +82,7 @@ table
   width:                    100%;
   background-position:      0 0px;
   visibility:               hidden;
-  background-color:			black;
+  background-image:         url("../img/oc_icons.png");
 }
 
 #oc_video-player-controls-embed
