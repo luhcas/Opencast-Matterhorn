@@ -69,6 +69,9 @@ UI.Init = function(){
         }
         //handle OC Workflow specialness
         ocwprops = ocWorkflow.getConfiguration($('#workflow-config-container'));
+
+
+        // FIXME: This should be a loop over the form values, not hard coded to variables from specific workflow definitions.
         
         //Review Hold
         review = doc.createElement('metadata');
@@ -94,6 +97,18 @@ UI.Init = function(){
           value.appendChild(doc.createTextNode(ocwprops['caption.hold']));
         } else {
           value.appendChild(doc.createTextNode("false"));
+        }
+        caption.appendChild(value);
+        mdlist.appendChild(caption);
+
+        //DVD
+        caption = doc.createElement('metadata');
+        key = doc.createElement('key');
+        key.appendChild(doc.createTextNode('org.opencastproject.workflow.config.dvd.format'));
+        caption.appendChild(key);
+        value = doc.createElement('value');
+        if( ocwprops['dvd.format'] ) {
+          value.appendChild(doc.createTextNode(ocwprops['dvd.format']));
         }
         caption.appendChild(value);
         mdlist.appendChild(caption);
