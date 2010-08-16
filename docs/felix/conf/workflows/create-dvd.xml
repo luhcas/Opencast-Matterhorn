@@ -14,10 +14,6 @@
       <legend>DVD Specs</legend>
       <ul class="no-bullets formField-list fl-controls-right">
         <li class="ui-helper-clearfix">
-          <label class="fl-label"><span class="color-red">* </span>Title:</label>
-          <input type="text" class="configField requiredField" id="dvd.title" name="dvd.title">
-        </li>
-        <li class="ui-helper-clearfix">
           <label class="fl-label">TV Norm:</label>
           <select id="dvd.format" name="dvd.format" class="configField">
             <option value="pal">PAL</option>
