@@ -80,10 +80,11 @@ div.segment-tooltip
 }
 
 a.segments-time {
-    color:            #2D8F8B;
+    color:            #666666;
     cursor:           pointer;
 }
 
 .segments-time:hover {
+	color:          #A72123;
     text-decoration:underline;
 }

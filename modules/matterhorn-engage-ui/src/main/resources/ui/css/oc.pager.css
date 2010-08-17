@@ -17,3 +17,12 @@ ul.navigation li {
   font-weight: bold;
   color: #2D8F8B;
 }
+a {
+  text-decoration: none;
+  color:#666666;
+}
+
+a:hover {
+  text-decoration: underline;
+  color:#A72123;
+}

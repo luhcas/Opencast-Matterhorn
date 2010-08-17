@@ -3,6 +3,16 @@ body
   text-align:center;
 }
 
+a {
+  text-decoration: none;
+  color:#666666;
+}
+
+a:hover {
+  text-decoration: underline;
+  color:#A72123;
+}
+
 #oclogo {
 	position:absolute;
 	right: 0;
@@ -125,6 +135,12 @@ a.itemtitle {
   font-family: arial,helvetica,clean,sans-serif;
   text-decoration: none;
 }
+
+a.itemtitle:hover {
+  color:          #A72123;
+  text-decoration:underline;
+}
+
 
 span.itemdesc {
   color: #2D8F8B;

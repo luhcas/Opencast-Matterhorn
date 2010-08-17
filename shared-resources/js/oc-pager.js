@@ -46,7 +46,7 @@ Opencast.pager = ( function() {
 
     } else {
       link = LINK_PREFIX + (currentPageId - 1);
-      text = "<a href='" + link + "' style='color:#666666'>" + PREVIOUS_TEXT + "</a>";
+      text = "<a href='" + link + "'>" + PREVIOUS_TEXT + "</a>";
     }
     li = document.createElement('li');
     li.innerHTML = text;
@@ -109,7 +109,7 @@ Opencast.pager = ( function() {
 
     } else {
       link = LINK_PREFIX + (++currentPageId);
-      text = "<a href='" + link + "' style='color:#666666'>" + NEXT_TEXT + "</a>";
+      text = "<a href='" + link + "'>" + NEXT_TEXT + "</a>";
     }
     li = document.createElement('li');
     li.innerHTML = text;
