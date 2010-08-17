@@ -25,14 +25,16 @@ import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
@@ -62,11 +64,22 @@ public class WorkspaceImplTest {
     WorkingFileRepository repo = EasyMock.createNiceMock(WorkingFileRepository.class);
     EasyMock.expect(repo.getBaseUri()).andReturn(new URI("http://localhost:8080/files")).anyTimes();
     EasyMock.replay(repo);
-
     workspace.setRepository(repo);
+
     File source = new File(
             "target/test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/../test-classes/opencast_header.gif");
     URL urlToSource = source.toURI().toURL();
+
+    TrustedHttpClient httpClient = EasyMock.createNiceMock(TrustedHttpClient.class);
+    HttpEntity entity = EasyMock.createNiceMock(HttpEntity.class);
+    EasyMock.expect(entity.getContent()).andReturn(new FileInputStream(source));
+    EasyMock.replay(entity);
+    HttpResponse response = EasyMock.createNiceMock(HttpResponse.class);
+    EasyMock.expect(response.getEntity()).andReturn(entity);
+    EasyMock.replay(response);
+    EasyMock.expect(httpClient.execute((HttpUriRequest) EasyMock.anyObject())).andReturn(response);
+    EasyMock.replay(httpClient);
+    workspace.trustedHttpClient = httpClient;
     Assert.assertTrue(urlToSource.toString().length() > 255);
     try {
       Assert.assertNotNull(workspace.get(urlToSource.toURI()));

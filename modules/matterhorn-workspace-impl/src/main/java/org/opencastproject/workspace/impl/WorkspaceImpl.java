@@ -179,7 +179,6 @@ public class WorkspaceImpl implements Workspace {
    */
   public File get(URI uri) throws NotFoundException, IOException {
     String urlString = uri.toString();
-    String safeFilename = PathSupport.toSafeName(urlString);
     File f = getWorkspaceFile(uri, false);
 
     // Does the file exist and is it up to date?
@@ -194,15 +193,14 @@ public class WorkspaceImpl implements Workspace {
       if (uri.toString().startsWith(wfrUrl)) {
         String localPath = uri.toString().substring(wfrUrl.length());
         File wfrCopy = new File(PathSupport.concat(wfrRoot, localPath));
-        if (f.isFile()) {
-          File workspaceCopy = new File(wsRoot, safeFilename);
+        if (wfrCopy.isFile()) {
           if (linkingEnabled) {
-            FileSupport.link(f, workspaceCopy);
+            FileSupport.link(wfrCopy, f);
           } else {
-            FileSupport.copy(wfrCopy, workspaceCopy);
+            FileSupport.copy(wfrCopy, f);
           }
           logger.debug("Getting {} directly from working file repository root at {}", uri, f);
-          return workspaceCopy;
+          return f;
         }
       }
     }
@@ -211,8 +209,9 @@ public class WorkspaceImpl implements Workspace {
     HttpGet get = new HttpGet(urlString);
     InputStream in = null;
     OutputStream out = null;
+    HttpResponse response = null;
     try {
-      HttpResponse response = trustedHttpClient.execute(get);
+      response = trustedHttpClient.execute(get);
       if (HttpServletResponse.SC_NOT_FOUND == response.getStatusLine().getStatusCode()) {
         throw new NotFoundException(uri + " does not exist");
       }
@@ -225,6 +224,7 @@ public class WorkspaceImpl implements Workspace {
     } finally {
       IOUtils.closeQuietly(in);
       IOUtils.closeQuietly(out);
+      trustedHttpClient.close(response);
     }
 
     return f;
