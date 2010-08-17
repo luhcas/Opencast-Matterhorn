@@ -12,6 +12,16 @@ Opencast.engage = (function () {
 
   /**
    * @memberOf Opencast.engage
+   * @description Gets player type ("watch" or "embed")
+   * @return the player type
+   */
+  function getPlayerType() {
+    var pathname = window.location.pathname;
+    return pathname;
+  }
+
+  /**
+   * @memberOf Opencast.engage
    * @description Gets the url to the search service;
    * @return the search service endpoint url
    */
@@ -93,6 +103,16 @@ Opencast.engage = (function () {
 
     /**
      * @memberOf Opencast.engage
+     * @description Gets the play paramenter
+     * @return The play parameter
+     */
+    function getPlay() {
+      var value = getGETParameter("play");
+      return value;
+    }
+
+    /**
+     * @memberOf Opencast.engage
      * @description Gets the current video url
      * @return The video url
      */
@@ -142,6 +162,8 @@ Opencast.engage = (function () {
       getCookie : getCookie,
       formatSeconds : formatSeconds,
       getMediaPackageId : getMediaPackageId,
+      getPlay : getPlay,
+      getPlayerType : getPlayerType,
       getVideoUrl : getVideoUrl,
       getVideoUrl2 : getVideoUrl2,
       getCoverUrl : getCoverUrl,

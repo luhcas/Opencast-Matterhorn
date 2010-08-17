@@ -244,9 +244,17 @@ Opencast.FlashVersion = (function ()
               str += '> </embed></object>';
         }
 
-        //document.write(str);
-        $("#oc_flash-player").html(str);
-        
+        var playerType = Opencast.engage.getPlayerType();
+
+        if (playerType === "/engage/ui/embed.html") {
+            var play = Opencast.engage.getPlay(); 
+            if(play!== "true") {
+                str = '<input id="oc_image" type="image" src="" alt="Matterhorn Player" title="Click to start" />'
+            }
+        }
+
+        // DO NOT CHANGE THIS. IE8 Flash 10.0 cannot handle adding the SWF by jquery
+        document.write(str);
     }
 
     function AC_FL_RunContent()
