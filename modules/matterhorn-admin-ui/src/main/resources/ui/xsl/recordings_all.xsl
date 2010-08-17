@@ -123,7 +123,7 @@
               Edit
             </a>
             <br />
-            <a title="Delete Recording">
+            <a title="Delete Recording" class="cursor">
               <xsl:attribute name="onclick">
                 <xsl:text>Recordings.removeScheduledRecording('</xsl:text>
                 <xsl:value-of select="id" />
@@ -131,7 +131,7 @@
                 <xsl:value-of select="title" />
                 <xsl:text>');</xsl:text>
               </xsl:attribute>
-                Delete
+               Delete
             </a>
           </xsl:when>
         </xsl:choose>
@@ -139,7 +139,7 @@
           <xsl:when test="recordingStatus = 'hold'">
             <input type="hidden">
             </input>
-            <a>
+            <a class="cursor">
               <xsl:attribute name="onclick">
                 <xsl:text>Recordings.displayHoldActionPanel('</xsl:text>
                 <xsl:value-of select="holdActionPanelURL" />
@@ -153,7 +153,7 @@
           <xsl:when test="recordingStatus = 'failed'">
             <xsl:choose>
               <xsl:when test ="processingStatus = 'Failed during capture' or processingStatus = 'Failed to start capture'">
-                <a title="Delete Recording">
+                <a title="Delete Recording" class="cursor">
                   <xsl:attribute name="onclick">
                     <xsl:text>Recordings.removeScheduledEvent('</xsl:text>
                     <xsl:value-of select="id" />
@@ -173,7 +173,7 @@
                   </xsl:attribute>
                         Re-try
                 </a-->
-                <a>
+                <a title="Delete Recording" class="cursor">
                   <xsl:attribute name="onclick">
                     <xsl:text>Recordings.removeRecording('</xsl:text>
                     <xsl:value-of select="id" />

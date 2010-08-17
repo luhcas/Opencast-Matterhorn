@@ -62,7 +62,7 @@
           Edit
         </a>
         <br />
-        <a title="Delete Recording">
+        <a title="Delete Recording" class="cursor">
           <xsl:attribute name="onclick">
             <xsl:text>Recordings.removeScheduledRecording('</xsl:text>
             <xsl:value-of select="id" />
