@@ -45,7 +45,7 @@ Recordings.init = function() {
   // get config
   $.getJSON("/info.json", function(data) {
     Recordings.configuration = data;
-    $('#engagelink').attr('href', data.engage);
+    $('#engagelink').attr('href', data.engage + '/engage/ui');
   });
 
   // Event: clicked somewhere
