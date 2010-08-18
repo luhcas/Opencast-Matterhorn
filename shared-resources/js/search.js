@@ -37,7 +37,7 @@ Opencast.search = ( function() {
 
             // reset background color of scrubber segments
             $('.segment-holder').each( function(i) {
-              $(this).css("background-color", "#B8B8B8");
+              $(this).css("background-color", "");
             });
 
             $(xml).find('segment').each(function(){
