@@ -374,7 +374,7 @@ public class SeriesRestService {
     // get Dublin Core for Series
     RestEndpoint dcEndpoint = new RestEndpoint("getDublinCoreForSeries", RestEndpoint.Method.GET,
             "/{seriesID}.xml", "Get the DublinCore metdata for a specific Series.");
-    dcEndpoint.addFormat(new Format("Dublin Core xml", null, null));
+    dcEndpoint.addFormat(new Format("xml", "Dublin Core representation", null));
     dcEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, DublinCore returned"));
     dcEndpoint.addPathParam(new Param("seriesID", Type.STRING, "UUID of the Series", "The unique ID of the Series."));
     dcEndpoint.setTestForm(RestTestForm.auto());
