@@ -60,8 +60,8 @@
     <div id="oc_search">    
       <form action="index.html">
         <label id="skip" for="oc_searchField">Search Field</label>
-        <input id="oc_searchField" class="oc_search-Field" type="text" name="q" value="Search Matterhorn" />
-        <input id="oc_btn-search" type="submit" name="search" alt="search" title="search" value="Search"></input>
+        <input id="oc_searchField" class="oc_search-Field handcursor" type="text" name="q" value="Search Matterhorn" />
+        <input id="oc_btn-search" class="handcursor" type="submit" name="search" alt="search" title="search" value="Search"></input>
       </form>
     </div>
     </div>  
@@ -76,8 +76,8 @@
       
       <div id="oc_video-time">
         <div id="simpleEdit">    
-          <input id="oc_current-time" class="oc_current-time" type="submit" name="Current Time" title="Current Time" value="00:00:00" tabIndex="0"></input>
-          <input id="oc_edit-time" class="oc_edit-time-hide" type="text" maxlength="8" size="8" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="00:00:00"></input> 
+          <input id="oc_current-time" class="oc_current-time handcursor" type="submit" name="Current Time" title="Current Time" value="00:00:00" tabIndex="0"></input>
+          <input id="oc_edit-time" class="oc_edit-time-hide handcursor" type="text" maxlength="8" size="8" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="00:00:00"></input> 
           of
           <span id="oc_duration" class="oc_duration" name="Duration" title="Duration" tabIndex="0">00:00:00</span>
         </div>
@@ -88,23 +88,23 @@
             <a name="controls"></a>
             <h2>Video Player Controls</h2>
         </span>
-        <input id="oc_btn-skip-backward" class="oc_btn-skip-backward" type="submit" name="Jump To The Previous Slide" alt="Jump To The Previous Slide" title="Jump To The Previous Slide" value=""></input>
-        <input id="oc_btn-rewind" class="oc_btn-rewind" type="submit" name="Jump Back: Control + Alt + R" alt="Jump Back: Control + Alt + R" title="Jump Back: Control + Alt + R" value=""></input>
-        <input id="oc_btn-play-pause" class="oc_btn-play" type="submit" name="Play: Control + Alt + P"  alt="Play: Control + Alt + P" title="Play: Control + Alt + P" value=""></input>
-        <input id="oc_btn-fast-forward" class="oc_btn-fast-forward" type="submit" name="Jump Forward: Control + Alt + F" alt="Jump Forward: Control + Alt + F" title="Jump Forward: Control + Alt + F" value=""></input>
-        <input id="oc_btn-skip-forward" class="oc_btn-skip-forward" type="submit" name="Jump To The Next Slide"  alt="Jump To The Next Slide" title="Jump To The Next Slide" value=""></input>
+        <input id="oc_btn-skip-backward" class="oc_btn-skip-backward handcursor" type="submit" name="Jump To The Previous Slide" alt="Jump To The Previous Slide" title="Jump To The Previous Slide" value=""></input>
+        <input id="oc_btn-rewind" class="oc_btn-rewind handcursor" type="submit" name="Jump Back: Control + Alt + R" alt="Jump Back: Control + Alt + R" title="Jump Back: Control + Alt + R" value=""></input>
+        <input id="oc_btn-play-pause" class="oc_btn-play handcursor" type="submit" name="Play: Control + Alt + P"  alt="Play: Control + Alt + P" title="Play: Control + Alt + P" value=""></input>
+        <input id="oc_btn-fast-forward" class="oc_btn-fast-forward handcursor" type="submit" name="Jump Forward: Control + Alt + F" alt="Jump Forward: Control + Alt + F" title="Jump Forward: Control + Alt + F" value=""></input>
+        <input id="oc_btn-skip-forward" class="oc_btn-skip-forward handcursor" type="submit" name="Jump To The Next Slide"  alt="Jump To The Next Slide" title="Jump To The Next Slide" value=""></input>
       </div> 
      
       <div id="oc_sound">
         <span id="oc_volume-dropdown">
-            <input id="oc_btn-volume" class="oc_btn-volume-high" type="submit" name="Unmute: Control + Alt + M" alt="Unmute: Control + Alt + M" title="Unmute: Control + Alt + M" value=""></input>
+            <input id="oc_btn-volume" class="oc_btn-volume-high handcursor" type="submit" name="Unmute: Control + Alt + M" alt="Unmute: Control + Alt + M" title="Unmute: Control + Alt + M" value=""></input>
         </span>
         <span id="oc_volume-menue">
             <div id="oc_volume-dropdown-div">
                 <div id="oc_volume-slider">
-                    <div id="slider_volume_Rail" class="oc_slider-volume-Rail" title="Volume" alt="Volume">
-                        <label id="volumeLabel" for="slider_volume_Rail" class="oc_offScreen-hidden"></label>
-                        <input id="slider_volume_Thumb" class="oc_slider-volume-Thumb" type="submit" value=""></input>
+                    <div id="slider_volume_Rail" class="oc_slider-volume-Rail handcursor" title="Volume" alt="Volume">
+                        <label id="volumeLabel" for="slider_volume_Rail" class="oc_offScreen-hidden "></label>
+                        <input id="slider_volume_Thumb" class="oc_slider-volume-Thumb handcursor" type="submit" value=""></input>
                     </div>
                 </div>
             </div>
@@ -128,11 +128,11 @@
     <div class="clear"></div>
       
     <div id="oc_tabs" class="oc_tabs-input">
-      <input id="oc_btn-description" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleDescription()" name="Description" value="Description" alt="Description" title="Description"></input>
-      <input id="oc_btn-slides" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Hide Segments" value="Hide Segments" alt="Hide Segments" title="Hide Segments"></input>
-      <input id="oc_btn-slidetext" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleSlideText()" name="Segment Text" value="Segment Text" alt="Segment Text" title="Segment Text"></input>
-      <input id="oc_btn-shortcuts" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleShortcuts()" name="Shortcuts" value="Shortcuts" alt="Shortcuts" title="Shortcuts"></input>
-      <input id="oc_btn-embed" class="oc_btn-tabs" type="submit" onClick="Opencast.Player.doToggleEmbed()" name="Embed" value="Embed" alt="Embed" title="Embed"></input>
+      <input id="oc_btn-description" class="oc_btn-tabs handcursor" type="submit" onClick="Opencast.Player.doToggleDescription()" name="Description" value="Description" alt="Description" title="Description"></input>
+      <input id="oc_btn-slides" class="oc_btn-tabs handcursor" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Hide Segments" value="Hide Segments" alt="Hide Segments" title="Hide Segments"></input>
+      <input id="oc_btn-slidetext" class="oc_btn-tabs handcursor" type="submit" onClick="Opencast.Player.doToggleSlideText()" name="Segment Text" value="Segment Text" alt="Segment Text" title="Segment Text"></input>
+      <input id="oc_btn-shortcuts" class="oc_btn-tabs handcursor" type="submit" onClick="Opencast.Player.doToggleShortcuts()" name="Shortcuts" value="Shortcuts" alt="Shortcuts" title="Shortcuts"></input>
+      <input id="oc_btn-embed" class="oc_btn-tabs handcursor" type="submit" onClick="Opencast.Player.doToggleEmbed()" name="Embed" value="Embed" alt="Embed" title="Embed"></input>
     </div>
       
     <div id="oc_description" class="oc_DisplayNone fl-fix">

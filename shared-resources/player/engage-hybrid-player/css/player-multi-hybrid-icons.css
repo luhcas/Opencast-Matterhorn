@@ -22,6 +22,12 @@ input
   overflow:                 hidden;
   background:               #2D8F8B;
   color:                    #FFFFFF;
+
+}
+
+.handcursor {
+  cursor:                   pointer;
+  cursor:                   hand;
 }
 
 #oc_video-controls input
@@ -29,12 +35,6 @@ input
   float:                    left;
   margin-left:              2px;
   margin-right:             2px;
-}
-
-input:hover
-{
-  cursor:                   pointer;
-  cursor:                   hand;
 }
 
 .oc_btn-skip-backward
