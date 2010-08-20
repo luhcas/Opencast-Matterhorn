@@ -10,7 +10,7 @@ sleep 5
 
 if
 	# installing prerequisite tools
-	sudo apt-get -y install zlib1g-dev gcc g++ pkg-config byacc subversion patch &&
+	sudo apt-get -y install zlib1g-dev gcc g++ build-essential bzip2 pkg-config byacc subversion patch &&
 	# installing required libraries
 	sudo apt-get -y install libjpeg-dev libpng12-dev libtiff4-dev jam libaspell-dev &&
 	# installing gstreamer
