@@ -86,7 +86,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -94,6 +93,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 
 import javax.activation.MimetypesFileTypeMap;
@@ -127,7 +127,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   private Pipeline confidencePipe = null;
 
   /** Keeps the recordings which have not been succesfully ingested yet. **/
-  private Map<String, AgentRecording> pendingRecordings = new HashMap<String, AgentRecording>();
+  private Map<String, AgentRecording> pendingRecordings = new ConcurrentHashMap<String, AgentRecording>();
+
+  /** Keeps the recordings which have been successfully ingested. */
+  private Map<String, AgentRecording> completedRecordings = new ConcurrentHashMap<String, AgentRecording>();
 
   /** The agent's name. */
   private String agentName = null;
