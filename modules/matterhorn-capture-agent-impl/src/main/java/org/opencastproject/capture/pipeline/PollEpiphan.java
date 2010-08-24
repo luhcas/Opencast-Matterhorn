@@ -65,7 +65,7 @@ class PollEpiphan implements Runnable {
 
             // Reconnect the device
             PipelineFactory.logger.debug("Attempting to reconnect to v4lsrc.");
-            Element src = ElementFactory.make("v4lsrc", "v4lsrc_" + ++PipelineFactory.v4lsrc_index);
+            Element src = ElementFactory.make("v4lsrc", "v4lsrc_" + location + "_" + ++PipelineFactory.v4lsrc_index);
             Pad v4lsrc_pad = src.getStaticPad("src");
             v4lsrc_pad.addEventProbe(new Pad.EVENT_PROBE() {
               public boolean eventReceived(Pad pad, Event event) {

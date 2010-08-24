@@ -518,7 +518,7 @@ public class PipelineFactory {
     
     // The Epiphan card
     v4lsrc_index = 0;
-    Element v4lsrc = ElementFactory.make("v4lsrc", "v4lsrc_" + v4lsrc_index);
+    Element v4lsrc = ElementFactory.make("v4lsrc", "v4lsrc_" + captureDevice.getLocation() + "_" + v4lsrc_index);
     /* Bus bus = v4lsrc.getBus();
     bus.connect(new Bus.EOS() {
       public void endOfStream(GstObject v4lsrc) {
@@ -561,7 +561,7 @@ public class PipelineFactory {
           broken = true;
           
           // Remove the broken v4lsrc
-          Element src = pipeline.getElementByName("v4lsrc_" + v4lsrc_index); 
+          Element src = pipeline.getElementByName("v4lsrc_" + captureDevice.getLocation() + "_" + v4lsrc_index); 
           src.unlink(pipeline.getElementByName(captureDevice.getLocation() + "_v4l_identity"));
           pipeline.remove(src);
           
@@ -725,7 +725,7 @@ public class PipelineFactory {
     } else {
       // No VGA signal on start up, remove Epiphan source
       broken = true;
-      Element src = pipeline.getElementByName("v4lsrc_" + v4lsrc_index);
+      Element src = pipeline.getElementByName("v4lsrc_" + captureDevice.getLocation() + "_" + v4lsrc_index);
       pipeline.remove(src);
       Pad new_pad = selector.getStaticPad("sink1");
       selector.set("active-pad", new_pad);
