@@ -75,14 +75,14 @@ class PollEpiphan implements Runnable {
             });
             
             src.set("device", location);
-            Element identity = pipeline.getElementByName("v4l_identity");
+            Element identity = pipeline.getElementByName(location + "_v4l_identity");
             pipeline.add(src);
             src.setState(State.PAUSED);
             src.link(identity);
             src.setState(State.PLAYING);
 
             // Tell the input-selector
-            Element selector = pipeline.getElementByName("selector");
+            Element selector = pipeline.getElementByName(location + "_selector");
             Pad new_pad = selector.getStaticPad("sink0");
             selector.set("active-pad", new_pad);
           }

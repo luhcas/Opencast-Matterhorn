@@ -527,7 +527,7 @@ public class PipelineFactory {
         src.setState(State.NULL);
       }
     }); */
-    Element v4l_identity = ElementFactory.make("identity", "v4l_identity");
+    Element v4l_identity = ElementFactory.make("identity", captureDevice.getLocation() + "_v4l_identity");
     v4l_identity.set("sync", true);
     
     // Add an event probe to the v4l_identity elements so that we can catch the
@@ -562,11 +562,11 @@ public class PipelineFactory {
           
           // Remove the broken v4lsrc
           Element src = pipeline.getElementByName("v4lsrc_" + v4lsrc_index); 
-          src.unlink(pipeline.getElementByName("v4l_identity"));
+          src.unlink(pipeline.getElementByName(captureDevice.getLocation() + "_v4l_identity"));
           pipeline.remove(src);
           
           // Tell the input-selector to change its active-pad
-          Element selector = pipeline.getElementByName("selector");
+          Element selector = pipeline.getElementByName(captureDevice.getLocation() + "_selector");
           Pad new_pad = selector.getStaticPad("sink1");
           selector.set("active-pad", new_pad);
           
@@ -596,11 +596,11 @@ public class PipelineFactory {
       capsfilter.set("caps", Caps.fromString("video/x-raw-yuv, width=1280, height=720"));
       logger.error("Could not get resolution Epiphan device is outputting: {}", e.getLocalizedMessage());
     }
-    Element static_identity = ElementFactory.make("identity", "static_identity");
+    Element static_identity = ElementFactory.make("identity", captureDevice.getLocation() + "_static_identity");
     
     // The input-selector which allows us to choose which source we want to capture from
-    Element selector = ElementFactory.make("input-selector", "selector");
-    Element segment = ElementFactory.make("identity", "identity-segment");
+    Element selector = ElementFactory.make("input-selector", captureDevice.getLocation() + "_selector");
+    Element segment = ElementFactory.make("identity", captureDevice.getLocation() + "_identity-segment");
     
     
     if (bufferCount != null) {
