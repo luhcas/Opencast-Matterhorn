@@ -83,7 +83,8 @@ Opencast.search = ( function() {
 
                   if (value !== "") {
                     // Set text inside of the scrubber
-                    var rgbValue = 200*1/relevance;
+                    relevance = Math.max(relevance, 1);
+                    var rgbValue = 200/relevance;
                     $('#segment' + segmentIndex).css("background-color", "rgb(" + rgbValue + "," + rgbValue + "," + rgbValue + ")");
                   }
               }
