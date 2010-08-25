@@ -2,9 +2,12 @@
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
  name="org.opencastproject.caption.api.CaptionService" immediate="true" activate="activate">
   <implementation class="org.opencastproject.caption.impl.CaptionServiceImpl" />
-  <property name="service.description" value="Caption Service" />
+  <property name="service.description" value="Caption Converter Service" />
   <service>
     <provide interface="org.opencastproject.caption.api.CaptionService" />
-    <!-- <provide interface="org.osgi.service.cm.ManagedService" /> -->
   </service>
+  <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
+      cardinality="1..1" policy="static" bind="setWorkspace" />
+  <reference name="remoteServiceManager" interface="org.opencastproject.remote.api.RemoteServiceManager"
+      cardinality="1..1" policy="static" bind="setRemoteServiceManager" />
 </scr:component>

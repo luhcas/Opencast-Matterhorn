@@ -16,11 +16,13 @@
 package org.opencastproject.composer.remote;
 
 import org.opencastproject.composer.api.ComposerService;
+import org.opencastproject.composer.api.EmbedderException;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfileBuilder;
 import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
+import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Receipt;
@@ -37,6 +39,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 import java.io.IOException;
@@ -272,6 +275,57 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
   /**
    * {@inheritDoc}
    * 
+   * @see org.opencastproject.composer.api.ComposerService#captions(org.opencastproject.mediapackage.Track,
+   *      org.opencastproject.mediapackage.Attachment, java.lang.String)
+   */
+  @Override
+  public Receipt captions(Track mediaTrack, Catalog[] captions) throws EmbedderException {
+    return captions(mediaTrack, captions, false);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#captions(org.opencastproject.mediapackage.Track,
+   *      org.opencastproject.mediapackage.Attachment, java.lang.String, boolean)
+   */
+  @Override
+  public Receipt captions(Track mediaTrack, Catalog[] captions, boolean block) throws EmbedderException {
+    List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+    UrlEncodedFormEntity entity = null;
+    String url = "/composer/rest/captions";
+    HttpPost post = new HttpPost(url);
+    try {
+      params.add(new BasicNameValuePair("mediaTrack", getXML(mediaTrack)));
+      params.add(new BasicNameValuePair("captions", getXMLArray(captions, "captions")));
+      entity = new UrlEncodedFormEntity(params);
+      post.setEntity(entity);
+    } catch (Exception e) {
+      throw new EmbedderException(e);
+    }
+    HttpResponse response = null;
+    try {
+      response = getResponse(post);
+      if (response != null) {
+        Receipt r = remoteServiceManager.parseReceipt(response.getEntity().getContent());
+        logger.info("Caption embedding job {} started on a remote composer", r.getId());
+        if (block) {
+          r = poll(r.getId());
+        }
+        return r;
+      }
+    } catch (Exception e) {
+      throw new EmbedderException(e);
+    } finally {
+      closeConnection(response);
+    }
+    throw new EmbedderException("Unable to embed an captions from catalogs " + captions + " to track " + mediaTrack
+            + " using the remote composer service proxy");
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.composer.api.ComposerService#listProfiles()
    */
   @Override
@@ -299,9 +353,11 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
   /**
    * Serializes a mediapackage element to an xml string
    * 
-   * @param element the mediapackage element
+   * @param element
+   *          the mediapackage element
    * @return the xml string
-   * @throws Exception if marshalling goes wrong
+   * @throws Exception
+   *           if marshalling goes wrong
    */
   protected String getXML(MediaPackageElement element) throws Exception {
     if (element == null)
@@ -318,4 +374,32 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
     return writer.toString();
   }
 
+  /**
+   * Serializes media package element array to XML string.
+   * 
+   * @param elementArray
+   *          elements to be serialized
+   * @param rootName
+   *          name of the root node
+   * @return the xml string
+   * @throws Exception
+   *           if marshalling fails
+   */
+  protected String getXMLArray(MediaPackageElement[] elementArray, String rootName) throws Exception {
+
+    DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    Document doc = docBuilder.newDocument();
+    Element root = doc.createElement(rootName);
+    for (MediaPackageElement element : elementArray) {
+      Node node = element.toManifest(doc, null);
+      root.appendChild(node);
+    }
+    DOMSource domSource = new DOMSource(root);
+    StringWriter writer = new StringWriter();
+    StreamResult result = new StreamResult(writer);
+    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+    transformer.transform(domSource, result);
+
+    return writer.toString();
+  }
 }

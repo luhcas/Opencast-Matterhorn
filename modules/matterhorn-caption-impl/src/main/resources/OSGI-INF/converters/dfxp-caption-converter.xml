@@ -3,7 +3,7 @@
  name="org.opencastproject.caption.converters.DFXPCaptionConverter" immediate="true">
   <implementation class="org.opencastproject.caption.converters.DFXPCaptionConverter" />
   <property name="service.description" value="DFXP caption converter" />
-  <property name="caption.format" value="DFXP" />
+  <property name="caption.format" value="dfxp" />
   <service>
     <provide interface="org.opencastproject.caption.api.CaptionConverter" />
   </service>

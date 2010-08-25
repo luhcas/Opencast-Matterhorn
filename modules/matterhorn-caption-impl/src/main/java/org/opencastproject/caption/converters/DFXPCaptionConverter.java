@@ -18,7 +18,7 @@ package org.opencastproject.caption.converters;
 import org.opencastproject.caption.api.Caption;
 import org.opencastproject.caption.api.CaptionCollection;
 import org.opencastproject.caption.api.CaptionConverter;
-import org.opencastproject.caption.api.IllegalCaptionFormatException;
+import org.opencastproject.caption.api.CaptionConverterException;
 import org.opencastproject.caption.api.IllegalTimeFormatException;
 import org.opencastproject.caption.api.Time;
 import org.opencastproject.caption.impl.CaptionCollectionImpl;
@@ -34,6 +34,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -54,7 +55,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * This is converter for DFXP, XML based caption format. DOM parser is used for both caption importing and exporting,
@@ -65,6 +65,8 @@ public class DFXPCaptionConverter implements CaptionConverter {
   /** logging utility */
   private static final Logger logger = LoggerFactory.getLogger(DFXPCaptionConverter.class);
 
+  private static final String EXTENSION = "dfxp.xml";
+
   /**
    * {@inheritDoc} Parser used for parsing XML document is DOM parser. Language parameter will determine which language
    * is searched for and parsed. If there is no matching language, empty collection is returned. If language parameter
@@ -73,7 +75,7 @@ public class DFXPCaptionConverter implements CaptionConverter {
    * @see org.opencastproject.caption.api.CaptionConverter#importCaption(java.io.InputStream, java.lang.String)
    */
   @Override
-  public CaptionCollection importCaption(InputStream in, String language) throws IllegalCaptionFormatException {
+  public CaptionCollection importCaption(InputStream in, String language) throws CaptionConverterException {
 
     // create new collection
     CaptionCollection collection = new CaptionCollectionImpl();
@@ -85,11 +87,11 @@ public class DFXPCaptionConverter implements CaptionConverter {
       doc = builder.parse(in);
       doc.getDocumentElement().normalize();
     } catch (ParserConfigurationException e) {
-      throw new IllegalCaptionFormatException(e.getMessage());
+      throw new CaptionConverterException("Could not parse captions", e);
     } catch (SAXException e) {
-      throw new IllegalCaptionFormatException(e.getMessage());
+      throw new CaptionConverterException("Could not parse captions", e);
     } catch (IOException e) {
-      throw new IllegalCaptionFormatException(e.getMessage());
+      throw new CaptionConverterException("Could not parse captions", e);
     }
 
     // get all <div> elements since they contain information about language
@@ -271,7 +273,7 @@ public class DFXPCaptionConverter implements CaptionConverter {
    * @see org.opencastproject.caption.api.CaptionConverter#getLanguageList(java.io.InputStream)
    */
   @Override
-  public List<String> getLanguageList(InputStream input) throws IllegalCaptionFormatException {
+  public String[] getLanguageList(InputStream input) throws CaptionConverterException {
 
     // create lang list
     final List<String> langList = new LinkedList<String>();
@@ -305,11 +307,21 @@ public class DFXPCaptionConverter implements CaptionConverter {
       // should not happen
       throw new RuntimeException(e);
     } catch (SAXException e) {
-      throw new IllegalCaptionFormatException(e.getMessage());
+      throw new CaptionConverterException("Could not parse captions", e);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
 
-    return langList;
+    return langList.toArray(new String[0]);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.caption.api.CaptionConverter#getExtension()
+   */
+  @Override
+  public String getExtension() {
+    return EXTENSION;
   }
 }

@@ -18,7 +18,6 @@ package org.opencastproject.caption.api;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 
 /**
  * Imports captions to {@link CaptionCollection} and exports from {@link CaptionCollection} to String presentation.
@@ -37,7 +36,7 @@ public interface CaptionConverter {
    * @throws IllegalCaptionFormatException
    *           if parser encounters an exception
    */
-  CaptionCollection importCaption(InputStream inputStream, String language) throws IllegalCaptionFormatException;
+  CaptionCollection importCaption(InputStream inputStream, String language) throws CaptionConverterException;
 
   /**
    * Exports caption collection. Language parameter is used to set language of the captions for those caption format
@@ -61,9 +60,16 @@ public interface CaptionConverter {
    * 
    * @param inputStream
    *          stream from where captions are read
-   * @return {@link List} containing languages in captions
+   * @return Array containing languages in captions
    * @throws IllegalCaptionFormatException
    *           if parser encounters exception
    */
-  List<String> getLanguageList(InputStream inputStream) throws IllegalCaptionFormatException;
+  String[] getLanguageList(InputStream inputStream) throws CaptionConverterException;
+
+  /**
+   * Get extension of specific caption format.
+   * 
+   * @return caption format extension
+   */
+  String getExtension();
 }

@@ -44,6 +44,12 @@ tesseract_lang_version="2.00.eng"
 # ocropus
 ocropus_revision="r644"
 
+# mp4v2
+mp4v2_revision="r355"
+
+# qtsbtlembedder
+qtsbtlembedder_version="0.3"
+
 # ---- 3rd party tools properties ----
 
 libpng_url="${thirdparty_repository}/libpng${libpng_version}.tar.gz"
@@ -63,6 +69,10 @@ tesseract_url="${thirdparty_repository}/tesseract${tesseract_version}.tar.gz"
 tesseract_lang_url="${thirdparty_repository}/tesseract${tesseract_lang_version}.tar.gz"
 
 ocropus_url="${thirdparty_repository}/ocropus${ocropus_revision}.tar.gz"
+
+mp4v2_url="${thirdparty_repository}/mp4v2trunk${mp4v2_revision}.tar.bz2"
+
+qtsbtlembedder_url="${thirdparty_repository}/qt_sbtl_embedder${qtsbtlembedder_version}.tar.gz"
 
 ########################################################
 ######## 3rd party tools installation script ###########
@@ -442,6 +452,102 @@ setup_ocropus ()
 	fi	
 }
 
+# mp4v2
+
+setup_mp4v2 ()
+{
+	echo
+	echo "Installing mp4v2-$mp4v2_revision"
+	echo
+	mkdir -p ${working_dir}/mp4v2
+	cd ${working_dir}/mp4v2
+	if ! [ -f mp4v2-trunk-${mp4v2_revision}/README ]
+	then
+		cp ${base_dir}/patches/mp4v2r355.patch . &&
+		wget $mp4v2_url &&
+		tar xfvj mp4v2trunk${mp4v2_revision}.tar.bz2 &&
+		cd mp4v2-trunk-${mp4v2_revision} &&
+		patch -p0 < ../mp4v2r355.patch &&
+		cd ..
+		if ! [ $? -eq 0 ]
+		then
+			cd $working_dir
+			rm -rf mp4v2
+			return 1
+		fi
+	fi
+	cd mp4v2-trunk-${mp4v2_revision}
+	if ! [ -f ./libmp4v2.la ]
+	then
+		./configure --disable-static &&
+		make
+		if ! [ $? -eq 0 ]
+		then
+			make clean
+			cd $working_dir
+			return 1
+		fi
+	fi
+	if make install
+	then
+		echo
+		echo "Mp4v2 library installed successfully."
+		cd $working_dir
+		return 0
+	else
+		echo
+		echo "Mp4v2 library installation failed."
+		cd $working_dir
+		return 1
+	fi
+}
+
+# qtsbtlembedder
+
+setup_qtsbtlembedder ()
+{
+	echo
+	echo "Installing qtsbtlembedder $qtsbtlembedder_version"
+	echo
+	mkdir -p ${working_dir}/qtsbtlembedder
+	cd ${working_dir}/qtsbtlembedder
+	if ! [ -f qt_sbtl_embedder-${qtsbtlembedder_version}/INSTALL ]
+	then
+		wget $qtsbtlembedder_url &&
+		tar zxfv qt_sbtl_embedder${qtsbtlembedder_version}.tar.gz
+		if ! [ $? -eq 0 ]
+		then
+			cd $working_dir
+			rm -rf qtsbtlembedder
+			return 1
+		fi
+	fi
+	cd qt_sbtl_embedder-${qtsbtlembedder_version}
+	if ! [ -f ./qtsbtlembedder ]
+	then
+		./configure &&
+		make
+		if ! [ $? -eq 0 ]
+		then
+			make clean
+			cd $working_dir
+			return 1
+		fi
+	fi
+	if make install
+	then
+		echo
+		echo "QT subtitle embedder installed successfully."
+		cd $working_dir
+		return 0
+	else
+		echo
+		echo "QT subtitle embedder installation failed."
+		cd $working_dir
+		return 1
+	fi	
+}
+
 ########################################################
 ############# Script execution starts here #############
 ########################################################
@@ -502,7 +608,11 @@ setup_ffmpeg &&
 
 # Media analyzer
 setup_tesseract &&
-setup_ocropus
+setup_ocropus &&
+
+# Subtitle embedding
+setup_mp4v2 &&
+setup_qtsbtlembedder
 
 # --- Cleaning ---
 

@@ -15,10 +15,8 @@
  */
 package org.opencastproject.caption.api;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.remote.api.Receipt;
 
 /**
  * Provides captioning support. This service makes use of {@link CaptionConverter} instances that need to be registered
@@ -26,43 +24,59 @@ import java.util.List;
  */
 public interface CaptionService {
 
+  final String JOB_TYPE = "org.opencastproject.caption";
+
   /**
    * Converts captions from one format to another. Language parameter is used for those formats that store information
    * about language.
    * 
    * @param input
-   *          stream from where captions are read
+   *          Catalog containing captions
    * @param inputFormat
    *          format of imported captions
-   * @param output
-   *          stream to where captions are written
+   * @param outputFormat
+   *          format of exported captions
+   * @throws UnsupportedCaptionFormatException
+   *           if there is no matching engine registered for given input or output
+   * @throws CaptionConverterException
+   *           if exception occurs while converting
+   */
+  Receipt convert(Catalog input, String inputFormat, String outputFormat) throws UnsupportedCaptionFormatException,
+          CaptionConverterException;
+
+  /**
+   * Converts captions from one format to another. Language parameter is used for those formats that store information
+   * about language.
+   * 
+   * @param input
+   *          Catalog containing captions
+   * @param inputFormat
+   *          format of imported captions
    * @param outputFormat
    *          format of exported captions
    * @param language
-   *          (optional) language of captions
+   *          language of captions
    * @throws UnsupportedCaptionFormatException
    *           if there is no matching engine registered for given input or output
-   * @throws IllegalCaptionFormatException
-   *           if importing captions fails
-   * @throws IOException
-   *           if exception occurs during exporting captions
+   * @throws CaptionConverterException
+   *           if exception occurs while converting
    */
-  void convert(InputStream input, String inputFormat, OutputStream output, String outputFormat, String language)
-          throws UnsupportedCaptionFormatException, IllegalCaptionFormatException, IOException;
+  Receipt convert(Catalog input, String inputFormat, String outputFormat, String language)
+          throws UnsupportedCaptionFormatException, CaptionConverterException;
 
   /**
    * Returns list of languages available in captions (if such information is stored).
    * 
    * @param input
-   *          stream from where captions are read
+   *          Catalog containing captions
    * @param format
    *          captions' format
-   * @return {@link List} of languages available in captions
+   * @return Array of languages available in captions
    * @throws UnsupportedCaptionFormatException
    *           if there is no matching engine registered for given input or output
-   * @throws IllegalCaptionFormatException
+   * @throws CaptionConverterException
    *           if parser encounters exception
    */
-  List<String> getLanguageList(InputStream input, String format) throws UnsupportedCaptionFormatException,
-          IllegalCaptionFormatException;
+  String[] getLanguageList(Catalog input, String format) throws UnsupportedCaptionFormatException,
+          CaptionConverterException;
 }

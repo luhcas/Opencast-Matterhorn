@@ -16,10 +16,12 @@
 package org.opencastproject.composer.impl.endpoint;
 
 import org.opencastproject.composer.api.ComposerService;
+import org.opencastproject.composer.api.EmbedderException;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
+import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
@@ -42,10 +44,13 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.ws.rs.FormParam;
@@ -177,8 +182,8 @@ public class ComposerRestService {
   @POST
   @Path("image")
   @Produces(MediaType.TEXT_XML)
-  public Response image(@FormParam("sourceTrack") String sourceTrackXml,
-          @FormParam("profileId") String profileId, @FormParam("time") long time) throws Exception {
+  public Response image(@FormParam("sourceTrack") String sourceTrackXml, @FormParam("profileId") String profileId,
+          @FormParam("time") long time) throws Exception {
     // Ensure that the POST parameters are present
     if (sourceTrackXml == null || profileId == null) {
       return Response.status(Response.Status.BAD_REQUEST).entity("sourceTrack and profileId must not be null").build();
@@ -195,6 +200,54 @@ public class ComposerRestService {
       return Response.ok().entity(receipt.toXml()).build();
     } catch (EncoderException e) {
       logger.warn("Unable to extract image: " + e.getMessage());
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  /**
+   * Embeds captions in media file.
+   * 
+   * @param sourceTrackXml
+   *          media file to which captions will be embedded
+   * @param captionsXml
+   *          captions that will be embedded
+   * @param language
+   *          language of captions
+   * @return A response containing the receipt for this encoding job in the response body.
+   * @throws Exception
+   */
+  @POST
+  @Path("captions")
+  @Produces(MediaType.TEXT_XML)
+  public Response captions(@FormParam("mediaTrack") String sourceTrackXml, @FormParam("captions") String captionsAsXml,
+          @FormParam("language") String language) throws Exception {
+    if (sourceTrackXml == null || captionsAsXml == null) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("Source track and captions must not be null").build();
+    }
+
+    MediaPackageElement mediaTrack = toMediaPackageElement(sourceTrackXml);
+    if (!Track.TYPE.equals(mediaTrack.getElementType())) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("Source track element must be of type track").build();
+    }
+
+    MediaPackageElement[] mpElements = toMediaPackageElementArray(captionsAsXml);
+    if (mpElements.length == 0) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("At least one caption must be present").build();
+    }
+    // cast to catalogs
+    Catalog[] captions = new Catalog[mpElements.length];
+    for (int i = 0; i < mpElements.length; i++) {
+      if (!Catalog.TYPE.equals(mpElements[i].getElementType())) {
+        return Response.status(Response.Status.BAD_REQUEST).entity("All captions must be of type catalog").build();
+      }
+      captions[i] = (Catalog) mpElements[i];
+    }
+
+    try {
+      Receipt receipt = composerService.captions((Track) mediaTrack, captions);
+      return Response.ok().entity(receipt.toXml()).build();
+    } catch (EmbedderException e) {
+      logger.warn("Unable to embed captions: " + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -328,6 +381,18 @@ public class ComposerRestService {
     imageEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, imageEndpoint);
 
+    // captions
+    RestEndpoint captionsEndpoint = new RestEndpoint("captions", RestEndpoint.Method.POST, "/captions",
+            "Starts caption embedding process, based on the specified source track and captions");
+    captionsEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .OK("Result in an xml document containing resulting media file."));
+    captionsEndpoint.addRequiredParam(new Param("mediaTrack", Type.STRING, generateMediaTrack(),
+            "QuickTime file containg video stream"));
+    captionsEndpoint.addRequiredParam(new Param("captions", Type.STRING, generateCaptionsCatalogs(),
+            "Catalog(s) containing captions in SRT format"));
+    captionsEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, captionsEndpoint);
+
     return DocUtil.generate(data);
   }
 
@@ -351,6 +416,38 @@ public class ComposerRestService {
     return sourceTrack;
   }
 
+  /**
+   * Converts string representation of the one or more catalogs to object array
+   * 
+   * @param elementsAsXml
+   *          the serialized elements array representation
+   * @return
+   * @throws ParserConfigurationException
+   * @throws SAXException
+   * @throws IOException
+   */
+  protected MediaPackageElement[] toMediaPackageElementArray(String elementsAsXml) throws ParserConfigurationException,
+          SAXException, IOException {
+
+    List<MediaPackageElement> mpElements = new LinkedList<MediaPackageElement>();
+
+    DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    Document doc = docBuilder.parse(IOUtils.toInputStream(elementsAsXml, "UTF-8"));
+    // TODO -> explicit check for root node name?
+    NodeList nodeList = doc.getDocumentElement().getChildNodes();
+
+    MediaPackageSerializer serializer = new DefaultMediaPackageSerializerImpl();
+    MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+
+    for (int i = 0; i < nodeList.getLength(); i++) {
+      if (nodeList.item(i).getNodeType() == Node.ELEMENT_NODE) {
+        mpElements.add(builder.elementFromManifest(nodeList.item(i), serializer));
+      }
+    }
+
+    return mpElements.toArray(new MediaPackageElement[mpElements.size()]);
+  }
+
   protected String generateVideoTrack() {
     return "<track id=\"track-1\" type=\"presentation/source\">\n" + "  <mimetype>video/quicktime</mimetype>\n"
             + "  <url>serverUrl/workflow/samples/camera.mpg</url>\n"
@@ -371,4 +468,22 @@ public class ComposerRestService {
             + "    <samplingrate>44100</samplingrate>\n" + "  </audio>\n" + "</track>";
   }
 
+  protected String generateMediaTrack() {
+    return "<track id=\"track-3\">\n" + "  <mimetype>video/quicktime</mimetype>\n"
+            + "  <url>serverUrl/workflow/samples/slidechanges.mov</url>\n"
+            + "  <checksum type=\"md5\">4cbcc9223c0425a54c3f253823487d5f</checksum>\n"
+            + "  <duration>27626</duration>\n" + "  <video>\n" + "    <resolution>1024x768</resolution>"
+            + "  </video>\n" + "</track>";
+  }
+
+  protected String generateCaptionsCatalogs() {
+    return "<captions>\n" + "  <catalog id=\"catalog-1\">\n" + "    <mimetype>application/x-subrip</mimetype>\n"
+            + "    <url>serverUrl/workflow/samples/captions_test_eng.srt</url>\n"
+            + "    <checksum type=\"md5\">55d70b062896aa685e2efc4226b32980</checksum>\n" + "    <tags>\n"
+            + "      <tag>lang:en</tag>\n" + "    </tags>\n" + "  </catalog>\n" + "  <catalog id=\"catalog-2\">\n"
+            + "    <mimetype>application/x-subrip</mimetype>\n"
+            + "    <url>serverUrl/workflow/samples/captions_test_fra.srt</url>\n"
+            + "    <checksum type=\"md5\">8f6cd99bbb6d591107f3b5c47ee51f2c</checksum>\n" + "    <tags>\n"
+            + "      <tag>lang:fr</tag>\n" + "    </tags>\n" + "  </catalog>\n" + "</captions>\n";
+  }
 }

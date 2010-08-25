@@ -15,29 +15,6 @@
  */
 package org.opencastproject.composer.impl;
 
-import org.opencastproject.composer.api.ComposerService;
-import org.opencastproject.composer.api.EncoderEngine;
-import org.opencastproject.composer.api.EncoderEngineFactory;
-import org.opencastproject.composer.api.EncoderException;
-import org.opencastproject.composer.api.EncodingProfile;
-import org.opencastproject.inspection.api.MediaInspectionService;
-import org.opencastproject.mediapackage.Attachment;
-import org.opencastproject.mediapackage.MediaPackageElementBuilder;
-import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.RemoteServiceManager;
-import org.opencastproject.remote.api.Receipt.Status;
-import org.opencastproject.util.NotFoundException;
-import org.opencastproject.util.UrlSupport;
-import org.opencastproject.workspace.api.Workspace;
-
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -50,6 +27,36 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.opencastproject.composer.api.ComposerService;
+import org.opencastproject.composer.api.EmbedderEngine;
+import org.opencastproject.composer.api.EmbedderEngineFactory;
+import org.opencastproject.composer.api.EmbedderException;
+import org.opencastproject.composer.api.EncoderEngine;
+import org.opencastproject.composer.api.EncoderEngineFactory;
+import org.opencastproject.composer.api.EncoderException;
+import org.opencastproject.composer.api.EncodingProfile;
+import org.opencastproject.inspection.api.MediaInspectionService;
+import org.opencastproject.mediapackage.Attachment;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.MediaPackageElementBuilder;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.Stream;
+import org.opencastproject.mediapackage.Track;
+import org.opencastproject.mediapackage.VideoStream;
+import org.opencastproject.mediapackage.identifier.IdBuilder;
+import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
+import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.UrlSupport;
+import org.opencastproject.workspace.api.Workspace;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Default implementation of the composer service api.
@@ -77,6 +84,12 @@ public class ComposerServiceImpl implements ComposerService {
   /** Reference to the encoder engine factory */
   private EncoderEngineFactory encoderEngineFactory;
 
+  /** Reference to the embedder engine factory */
+  private EmbedderEngineFactory embedderEngineFactory;
+
+  /** Id builder used to create ids for encoded tracks */
+  private final IdBuilder idBuilder = IdBuilderFactory.newInstance().newIdBuilder();
+
   /** Thread pool */
   private ExecutorService executor = null;
 
@@ -87,7 +100,7 @@ public class ComposerServiceImpl implements ComposerService {
   public static final String CONFIG_THREADS = "composer.threads";
 
   /** The default number of concurrent encoding threads to run */
-  public static final int DEFAULT_THREADS = 1;
+  public static final int DEFAULT_THREADS = 2;
 
   /**
    * Sets the media inspection service
@@ -107,6 +120,16 @@ public class ComposerServiceImpl implements ComposerService {
    */
   public void setEncoderEngineFactory(EncoderEngineFactory encoderEngineFactory) {
     this.encoderEngineFactory = encoderEngineFactory;
+  }
+
+  /**
+   * Sets the embedder engine factoy
+   * 
+   * @param embedderEngineFactory
+   *          The embedder engine factory
+   */
+  public void setEmbedderEngineFactory(EmbedderEngineFactory embedderEngineFactory) {
+    this.embedderEngineFactory = embedderEngineFactory;
   }
 
   /**
@@ -213,6 +236,7 @@ public class ComposerServiceImpl implements ComposerService {
   /**
    * Encodes audio and video track to a file. If both an audio and a video track are given, they are muxed together into
    * one movie container.
+   * 
    * @param videoTrack
    *          the video track
    * @param audioTrack
@@ -228,6 +252,8 @@ public class ComposerServiceImpl implements ComposerService {
    */
   private Receipt encode(final Track videoTrack, final Track audioTrack, final String profileId, final boolean block)
           throws EncoderException {
+
+    final String targetTrackId = idBuilder.createNew().toString();
     final Receipt composerReceipt = remoteServiceManager.createReceipt(JOB_TYPE);
 
     // Get the tracks and make sure they exist
@@ -281,17 +307,17 @@ public class ComposerServiceImpl implements ComposerService {
 
     Runnable runnable = new Runnable() {
       public void run() {
-        
+
         if (audioTrack != null && videoTrack != null)
-          logger.info("Muxing audio track {} and video track {}", new String[] {
-                  audioTrack.getIdentifier(), videoTrack.getIdentifier() });
+          logger.info("Muxing audio track {} and video track {} into {}", new String[] { audioTrack.getIdentifier(),
+                  videoTrack.getIdentifier(), targetTrackId });
         else if (audioTrack == null)
-          logger.info("Encoding video track {} using profile '{}'", new String[] {
-                  videoTrack.getIdentifier(), profileId });
+          logger.info("Encoding video track {} to {} using profile '{}'", new String[] { videoTrack.getIdentifier(),
+                  targetTrackId, profileId });
         else if (videoTrack == null)
-          logger.info("Encoding audio track {} using profile '{}'", new String[] {
-                  audioTrack.getIdentifier(), profileId });
-          
+          logger.info("Encoding audio track {} to {} using profile '{}'", new String[] { audioTrack.getIdentifier(),
+                  targetTrackId, profileId });
+
         composerReceipt.setStatus(Status.RUNNING);
         remoteServiceManager.updateReceipt(composerReceipt);
 
@@ -310,8 +336,7 @@ public class ComposerServiceImpl implements ComposerService {
         InputStream in = null;
         try {
           in = new FileInputStream(encodingOutput);
-          String fileName = composerReceipt.getId() + "." + FilenameUtils.getExtension(encodingOutput.getName());
-          returnURL = workspace.putInCollection(COLLECTION, fileName, in);
+          returnURL = workspace.putInCollection(COLLECTION, encodingOutput.getName(), in);
           logger.info("Copied the encoded file to the workspace at {}", returnURL);
           encodingOutput.delete();
           logger.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
@@ -323,12 +348,15 @@ public class ComposerServiceImpl implements ComposerService {
         } finally {
           IOUtils.closeQuietly(in);
         }
+        if (encodingOutput != null)
+          encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
 
         // Have the encoded track inspected and return the result
         Receipt inspectionReceipt = inspectionService.inspect(returnURL, true);
         if (inspectionReceipt.getStatus() == Receipt.Status.FAILED)
           throw new RuntimeException("Media inspection failed");
         Track inspectedTrack = (Track) inspectionReceipt.getElement();
+        inspectedTrack.setIdentifier(targetTrackId);
 
         composerReceipt.setElement(inspectedTrack);
         composerReceipt.setStatus(Status.FINISHED);
@@ -462,8 +490,7 @@ public class ComposerServiceImpl implements ComposerService {
         InputStream in = null;
         try {
           in = new FileInputStream(encodingOutput);
-          String fileName = receipt.getId() + "." + FilenameUtils.getExtension(encodingOutput.getName());
-          returnURL = workspace.putInCollection(COLLECTION, fileName, in);
+          returnURL = workspace.putInCollection(COLLECTION, encodingOutput.getName(), in);
           logger.debug("Copied the encoded file to the workspace at {}", returnURL);
         } catch (Exception e) {
           receipt.setStatus(Status.FAILED);
@@ -494,6 +521,186 @@ public class ComposerServiceImpl implements ComposerService {
       }
     }
     return receipt;
+  }
+
+  /**
+   * 
+   * {@inheritDoc} Supports inserting captions in QuickTime files.
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#captions(org.opencastproject.mediapackage.Track,
+   *      org.opencastproject.mediapackage.Attachment, java.lang.String)
+   */
+  @Override
+  public Receipt captions(Track mediaTrack, Catalog[] captions) throws EmbedderException {
+    return captions(mediaTrack, captions, false);
+  }
+
+  /**
+   * 
+   * {@inheritDoc} Supports inserting captions in QuickTime files.
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#captions(org.opencastproject.mediapackage.Track,
+   *      org.opencastproject.mediapackage.Attachment, java.lang.String, boolean)
+   */
+  @Override
+  public Receipt captions(Track mediaTrack, Catalog[] captions, boolean block) throws EmbedderException {
+
+    final String targetTrackId = idBuilder.createNew().toString();
+    final Receipt receipt = remoteServiceManager.createReceipt(JOB_TYPE);
+
+    // get embedder engine
+    final EmbedderEngine engine = embedderEngineFactory.newEmbedderEngine();
+    if (engine == null) {
+      receipt.setStatus(Receipt.Status.FAILED);
+      remoteServiceManager.updateReceipt(receipt);
+      throw new EmbedderException("Embedder engine not available");
+    }
+
+    // check if media file has video track
+    if (mediaTrack == null || !mediaTrack.hasVideo()) {
+      throw new EmbedderException("Media track must contain video stream");
+    }
+    // get video height
+    Integer videoHeigth = null;
+    for (Stream s : mediaTrack.getStreams()) {
+      if (s instanceof VideoStream) {
+        videoHeigth = ((VideoStream) s).getFrameHeight();
+        break;
+      }
+    }
+    final int subHeight;
+    if (videoHeigth != null) {
+      // get 1/8 of track height
+      // smallest size is 60 pixels
+      subHeight = videoHeigth > 8 * 60 ? videoHeigth / 8 : 60;
+    } else {
+      // no information about video height retrieved, use 60 pixels
+      subHeight = 60;
+    }
+
+    // retrieve media file
+    final File mediaFile;
+    try {
+      mediaFile = workspace.get(mediaTrack.getURI());
+    } catch (NotFoundException e) {
+      receipt.setStatus(Receipt.Status.FAILED);
+      remoteServiceManager.updateReceipt(receipt);
+      throw new EmbedderException("Could not find track: " + mediaTrack);
+    } catch (IOException e) {
+      receipt.setStatus(Receipt.Status.FAILED);
+      throw new EmbedderException("Error accessing track: " + mediaTrack);
+    }
+
+    final File[] captionFiles = new File[captions.length];
+    final String[] captionLanguages = new String[captions.length];
+    for (int i = 0; i < captions.length; i++) {
+      // get file
+      try {
+        captionFiles[i] = workspace.get(captions[i].getURI());
+      } catch (NotFoundException e) {
+        receipt.setStatus(Receipt.Status.FAILED);
+        remoteServiceManager.updateReceipt(receipt);
+        throw new EmbedderException("Could not found captions at: " + captions[i]);
+      } catch (IOException e) {
+        receipt.setStatus(Receipt.Status.FAILED);
+        remoteServiceManager.updateReceipt(receipt);
+        throw new EmbedderException("Error accessing captions at: " + captions[i]);
+      }
+      // get language
+      captionLanguages[i] = getLanguageFromTags(captions[i].getTags());
+      if (captionLanguages[i] == null) {
+        receipt.setStatus(Receipt.Status.FAILED);
+        remoteServiceManager.updateReceipt(receipt);
+        throw new EmbedderException("Missing caption language information for captions at: " + captions[i]);
+      }
+    }
+
+    // create runnable
+    Runnable runnable = new Runnable() {
+
+      @Override
+      public void run() {
+
+        logger.info("Atempting to create and embed subtitles to video track");
+
+        receipt.setStatus(Receipt.Status.RUNNING);
+        remoteServiceManager.updateReceipt(receipt);
+
+        // set properties
+        Map<String, String> properties = new HashMap<String, String>();
+        properties.put("param.trackh", String.valueOf(subHeight));
+        properties.put("param.offset", String.valueOf(subHeight / 2));
+
+        File output;
+        try {
+          output = engine.embed(mediaFile, captionFiles, captionLanguages, properties);
+        } catch (EmbedderException e) {
+          receipt.setStatus(Receipt.Status.FAILED);
+          remoteServiceManager.updateReceipt(receipt);
+          throw new RuntimeException(e);
+        }
+
+        URI returnURL = null;
+        InputStream in = null;
+        try {
+          in = new FileInputStream(output);
+          returnURL = workspace.putInCollection(COLLECTION, output.getName(), in);
+          logger.info("Copied the encoded file to the workspace at {}", returnURL);
+        } catch (Exception e) {
+          receipt.setStatus(Status.FAILED);
+          remoteServiceManager.updateReceipt(receipt);
+          logger.error("Unable to put the encoded file into the workspace", e);
+          throw new RuntimeException(e);
+        } finally {
+          IOUtils.closeQuietly(in);
+          logger.info("Deleting the local copy of the embedded file at {}", output.getAbsolutePath());
+          try {
+            FileUtils.forceDelete(output);
+          } catch (IOException e) {
+            logger.warn("Could not delete local copy of file at {}", output.getAbsolutePath());
+          }
+        }
+
+        // Have the encoded track inspected and return the result
+        Receipt inspectionReceipt = inspectionService.inspect(returnURL, true);
+        if (inspectionReceipt.getStatus() == Receipt.Status.FAILED)
+          throw new RuntimeException("Media inspection failed");
+        Track inspectedTrack = (Track) inspectionReceipt.getElement();
+        inspectedTrack.setIdentifier(targetTrackId);
+
+        receipt.setElement(inspectedTrack);
+        receipt.setStatus(Status.FINISHED);
+        remoteServiceManager.updateReceipt(receipt);
+      }
+    };
+
+    Future<?> future = executor.submit(runnable);
+    if (block) {
+      try {
+        future.get();
+      } catch (ExecutionException e) {
+        throw new EmbedderException(e);
+      } catch (InterruptedException e) {
+        throw new EmbedderException(e);
+      }
+    }
+    return receipt;
+  }
+
+  /**
+   * Helper function that iterates tags and returns language from tag in form lang:&lt;lang&gt;
+   * 
+   * @param tags
+   *          catalog tags
+   * @return language or null if no corresponding tag was found
+   */
+  private String getLanguageFromTags(String[] tags) {
+    for (String tag : tags) {
+      if (tag.startsWith("lang:") && tag.length() > 5) {
+        return tag.substring(5);
+      }
+    }
+    return null;
   }
 
   /**

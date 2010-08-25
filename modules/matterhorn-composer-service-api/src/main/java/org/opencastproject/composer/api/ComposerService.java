@@ -15,6 +15,7 @@
  */
 package org.opencastproject.composer.api;
 
+import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Receipt;
@@ -121,6 +122,40 @@ public interface ComposerService {
    *           if image extraction fails
    */
   Receipt image(Track sourceTrack, String profileId, long time, boolean block) throws EncoderException;
+
+  /**
+   * Insert captions in media package element identified by <code>mediaTrack</code> from catalog which contains
+   * captions.
+   * 
+   * @param mediaTrack
+   *          media track to which captions will be embedded
+   * @param captions
+   *          captions to be inserted
+   * @param language
+   *          caption language
+   * @return Receipt for this embedding job
+   * @throws EmbedderException
+   *           if exception occurs during embedding process
+   */
+  Receipt captions(Track mediaTrack, Catalog[] captions) throws EmbedderException;
+
+  /**
+   * Insert captions in media package element identified by <code>mediaTrack</code> from catalog which contains
+   * captions.
+   * 
+   * @param mediaTrack
+   *          media track to which captions will be embedded
+   * @param captions
+   *          captions to be inserted
+   * @param language
+   *          caption language
+   * @param block
+   *          Whether this method should block the calling thread (true) or return asynchronously (false)
+   * @return Receipt for this embedding job
+   * @throws EmbedderException
+   *           if exception occurs during embedding process
+   */
+  Receipt captions(Track mediaTrack, Catalog[] captions, boolean block) throws EmbedderException;
 
   /**
    * @return All registered {@link EncodingProfile}s.

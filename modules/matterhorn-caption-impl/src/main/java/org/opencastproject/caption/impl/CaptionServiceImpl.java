@@ -17,21 +17,38 @@ package org.opencastproject.caption.impl;
 
 import org.opencastproject.caption.api.CaptionCollection;
 import org.opencastproject.caption.api.CaptionConverter;
+import org.opencastproject.caption.api.CaptionConverterException;
 import org.opencastproject.caption.api.CaptionService;
-import org.opencastproject.caption.api.IllegalCaptionFormatException;
 import org.opencastproject.caption.api.UnsupportedCaptionFormatException;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.MediaPackageElementBuilder;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.util.MimeType;
+import org.opencastproject.util.NotFoundException;
+import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.net.URI;
 import java.util.HashMap;
-import java.util.List;
+
+import javax.activation.MimetypesFileTypeMap;
 
 /**
  * Implementation of {@link CaptionService}. Uses {@link ComponentContext} to get all registered
@@ -44,6 +61,15 @@ public class CaptionServiceImpl implements CaptionService {
   /** Logging utility */
   private static final Logger logger = LoggerFactory.getLogger(CaptionServiceImpl.class);
 
+  /** The collection name */
+  public static final String COLLECTION = "captions";
+
+  /** Reference to workspace */
+  private Workspace workspace;
+
+  /** Reference to remote service manager */
+  private RemoteServiceManager remoteServiceManager;
+
   /** Component context needed for retrieving Converter Engines */
   protected ComponentContext componentContext = null;
 
@@ -54,40 +80,117 @@ public class CaptionServiceImpl implements CaptionService {
     this.componentContext = componentContext;
   }
 
+  /** Setter for workspace via declarative activation */
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
+  }
+
+  /** Setter for remote service manager via declarative activation */
+  public void setRemoteServiceManager(RemoteServiceManager manager) {
+    this.remoteServiceManager = manager;
+  }
+
   /**
-   * 
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.caption.api.CaptionService#convert(java.io.InputStream, java.lang.String,
-   *      java.io.OutputStream, java.lang.String, java.lang.String)
+   * @see org.opencastproject.caption.api.CaptionService#convert(org.opencastproject.mediapackage.MediaPackageElement,
+   *      java.lang.String, java.lang.String)
    */
   @Override
-  public void convert(InputStream input, String inputFormat, OutputStream output, String outputFormat, String language)
-          throws UnsupportedCaptionFormatException, IllegalCaptionFormatException, IOException {
-    if (inputFormat == null || outputFormat == null) {
-      // or just spit warning and find format?
-      throw new UnsupportedCaptionFormatException("<null>");
-    }
-
-    // TODO sanitize language
-
-    logger.debug("Atempting to convert from {} to {}...", inputFormat, outputFormat);
-    CaptionCollection collection;
-    // FIXME perform language check
-    collection = importCaptions(input, inputFormat, language);
-    logger.debug("Parsing to collection succeeded.");
-    exportCaptions(collection, output, outputFormat, language);
+  public Receipt convert(Catalog input, String inputFormat, String outputFormat)
+          throws UnsupportedCaptionFormatException, CaptionConverterException {
+    return convert(input, inputFormat, outputFormat, null);
   }
 
   /**
    * 
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.caption.api.CaptionService#getLanguageList(java.io.InputStream, java.lang.String)
+   * @see org.opencastproject.caption.api.CaptionService#convert(org.opencastproject.mediapackage.MediaPackageElement,
+   *      java.lang.String, java.lang.String, java.lang.String)
    */
   @Override
-  public List<String> getLanguageList(InputStream input, String format) throws UnsupportedCaptionFormatException,
-          IllegalCaptionFormatException {
+  public Receipt convert(Catalog input, String inputFormat, String outputFormat, String language)
+          throws UnsupportedCaptionFormatException, CaptionConverterException {
+
+    Receipt receipt = remoteServiceManager.createReceipt(JOB_TYPE);
+
+    if (inputFormat == null || outputFormat == null) {
+      receipt.setStatus(Status.FAILED);
+      remoteServiceManager.updateReceipt(receipt);
+      throw new UnsupportedCaptionFormatException("<null>");
+    }
+
+    // get input file
+    File captionsFile;
+    try {
+      captionsFile = workspace.get(input.getURI());
+    } catch (NotFoundException e) {
+      receipt.setStatus(Status.FAILED);
+      remoteServiceManager.updateReceipt(receipt);
+      throw new CaptionConverterException("Requested media package element " + input + " could not be found.");
+    } catch (IOException e) {
+      receipt.setStatus(Status.FAILED);
+      remoteServiceManager.updateReceipt(receipt);
+      throw new CaptionConverterException("Requested media package element " + input + "could not be accessed.");
+    }
+
+    logger.debug("Atempting to convert from {} to {}...", inputFormat, outputFormat);
+
+    CaptionCollection collection;
+    try {
+      collection = importCaptions(captionsFile, inputFormat, language);
+      logger.debug("Parsing to collection succeeded.");
+    } catch (UnsupportedCaptionFormatException e) {
+      receipt.setStatus(Status.FAILED);
+      remoteServiceManager.updateReceipt(receipt);
+      throw new UnsupportedCaptionFormatException(inputFormat);
+    } catch (CaptionConverterException e) {
+      receipt.setStatus(Status.FAILED);
+      remoteServiceManager.updateReceipt(receipt);
+      throw e;
+    }
+
+    URI exported;
+    try {
+      exported = exportCaptions(collection, FilenameUtils.getBaseName(captionsFile.getAbsolutePath()), outputFormat,
+              language);
+      logger.debug("Exporting captions succeeding.");
+    } catch (UnsupportedCaptionFormatException e) {
+      receipt.setStatus(Status.FAILED);
+      remoteServiceManager.updateReceipt(receipt);
+      throw new UnsupportedCaptionFormatException(outputFormat);
+    } catch (IOException e) {
+      receipt.setStatus(Status.FAILED);
+      remoteServiceManager.updateReceipt(receipt);
+      throw new CaptionConverterException("Could not export caption collection.", e);
+    }
+
+    // create catalog and set properties
+    MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+    Catalog catalog = (Catalog) elementBuilder.elementFromURI(exported, Catalog.TYPE, new MediaPackageElementFlavor(
+            "captions", outputFormat));
+    String[] mimetype = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(exported.getPath()).split("/");
+    catalog.setMimeType(new MimeType(mimetype[0], mimetype[1]));
+    catalog.addTag("lang:" + language);
+
+    receipt.setElement(catalog);
+    receipt.setStatus(Status.FINISHED);
+    remoteServiceManager.updateReceipt(receipt);
+
+    return receipt;
+  }
+
+  /**
+   * 
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.caption.api.CaptionService#getLanguageList(org.opencastproject.mediapackage.MediaPackageElement,
+   *      java.lang.String)
+   */
+  @Override
+  public String[] getLanguageList(Catalog input, String format) throws UnsupportedCaptionFormatException,
+          CaptionConverterException {
 
     if (format == null) {
       throw new UnsupportedCaptionFormatException("<null>");
@@ -96,7 +199,32 @@ public class CaptionServiceImpl implements CaptionService {
     if (converter == null) {
       throw new UnsupportedCaptionFormatException(format);
     }
-    return converter.getLanguageList(input);
+
+    File captions;
+    try {
+      captions = workspace.get(input.getURI());
+    } catch (NotFoundException e) {
+      throw new CaptionConverterException("Requested media package element " + input + " could not be found.");
+    } catch (IOException e) {
+      throw new CaptionConverterException("Requested media package element " + input + "could not be accessed.");
+    }
+
+    FileInputStream stream;
+    try {
+      stream = new FileInputStream(captions);
+    } catch (FileNotFoundException e) {
+      throw new CaptionConverterException("Requested file " + captions + "could not be found.");
+    }
+
+    String[] languageList = converter.getLanguageList(stream);
+
+    try {
+      stream.close();
+    } catch (IOException e) {
+      logger.warn("Could not close stream.");
+    }
+
+    return languageList == null ? new String[0] : languageList;
   }
 
   /**
@@ -159,7 +287,7 @@ public class CaptionServiceImpl implements CaptionService {
    * Imports captions using registered converter engine and specified language.
    * 
    * @param input
-   *          stream from which captions are imported
+   *          file containing captions
    * @param inputFormat
    *          format of imported captions
    * @param language
@@ -170,36 +298,46 @@ public class CaptionServiceImpl implements CaptionService {
    * @throws IllegalCaptionFormatException
    *           if parser encounters exception
    */
-  private CaptionCollection importCaptions(InputStream input, String inputFormat, String language)
-          throws UnsupportedCaptionFormatException, IllegalCaptionFormatException {
+  private CaptionCollection importCaptions(File input, String inputFormat, String language)
+          throws UnsupportedCaptionFormatException, CaptionConverterException {
     // get input format
     CaptionConverter converter = getCaptionConverter(inputFormat);
     if (converter == null) {
       logger.error("No available caption format found for {}.", inputFormat);
       throw new UnsupportedCaptionFormatException(inputFormat);
     }
-    // TODO check if collection is empty
-    return converter.importCaption(input, language);
+
+    FileInputStream fileStream;
+    try {
+      fileStream = new FileInputStream(input);
+    } catch (FileNotFoundException e) {
+      throw new CaptionConverterException("Could not locate file " + input);
+    }
+    CaptionCollection collection = converter.importCaption(fileStream, language);
+    IOUtils.closeQuietly(fileStream);
+
+    return collection;
   }
 
   /**
-   * Exports {@link CaptionCollection} to specified format. Throws {@link UnsupportedCaptionFormatException} if format
-   * is not supported.
+   * Exports {@link CaptionCollection} to specified format. Extension is added to exported file name. Throws
+   * {@link UnsupportedCaptionFormatException} if format is not supported.
    * 
    * @param collection
    *          {@link CaptionCollection} to be exported
-   * @param output
-   *          where to export caption collection
+   * @param outputName
+   *          name under which exported captions will be stored
    * @param outputFormat
    *          format of exported collection
    * @param language
    *          (optional) captions' language
    * @throws UnsupportedCaptionFormatException
    *           if there is no registered engine for given format
+   * @return location of converted captions
    * @throws IOException
    *           if exception occurs while writing to output stream
    */
-  private void exportCaptions(CaptionCollection collection, OutputStream output, String outputFormat, String language)
+  private URI exportCaptions(CaptionCollection collection, String outputName, String outputFormat, String language)
           throws UnsupportedCaptionFormatException, IOException {
     CaptionConverter converter = getCaptionConverter(outputFormat);
     if (converter == null) {
@@ -207,6 +345,14 @@ public class CaptionServiceImpl implements CaptionService {
       throw new UnsupportedCaptionFormatException(outputFormat);
     }
 
-    converter.exportCaption(output, collection, language);
+    // TODO instead of first writing it all in memory, write it directly to disk
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+    try {
+      converter.exportCaption(outputStream, collection, language);
+    } catch (IOException e) {
+      // since we're writing to memory, this should not happen
+    }
+    ByteArrayInputStream in = new ByteArrayInputStream(outputStream.toByteArray());
+    return workspace.putInCollection(COLLECTION, outputName + "." + converter.getExtension(), in);
   }
 }

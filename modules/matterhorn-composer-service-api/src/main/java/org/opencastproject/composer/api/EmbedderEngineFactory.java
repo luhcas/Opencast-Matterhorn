@@ -13,17 +13,19 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.caption.api;
+package org.opencastproject.composer.api;
 
 /**
- * Indicates that exception occurred while parsing captions in specific format.
- *
+ * Factory for creating new {@link EmbedderEngine} instances.
+ * 
  */
-public class IllegalCaptionFormatException extends Exception {
+public interface EmbedderEngineFactory {
 
-  private static final long serialVersionUID = 1713563947093397459L;
-  
-  public IllegalCaptionFormatException(String exception){
-    super("Illegal caption format: " + exception);
-  }
+  /**
+   * Creates new {@link EmbedderEngine} instance.
+   * 
+   * @return new {@link EmbedderEngine} instance
+   */
+  // TODO maybe property?
+  EmbedderEngine newEmbedderEngine();
 }

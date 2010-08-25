@@ -18,7 +18,7 @@ package org.opencastproject.caption.converters;
 import org.opencastproject.caption.api.Caption;
 import org.opencastproject.caption.api.CaptionCollection;
 import org.opencastproject.caption.api.CaptionConverter;
-import org.opencastproject.caption.api.IllegalCaptionFormatException;
+import org.opencastproject.caption.api.CaptionConverterException;
 import org.opencastproject.caption.api.IllegalTimeFormatException;
 import org.opencastproject.caption.api.Time;
 import org.opencastproject.caption.impl.CaptionCollectionImpl;
@@ -35,8 +35,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -49,6 +47,8 @@ public class SubRipCaptionConverter implements CaptionConverter {
   /** Logging utility */
   private static final Logger logger = LoggerFactory.getLogger(SubRipCaptionConverter.class);
 
+  private static final String EXTENSION = "srt";
+
   /** line ending used in srt - windows native in specification */
   private final String LINE_ENDING = "\r\n";
 
@@ -58,7 +58,7 @@ public class SubRipCaptionConverter implements CaptionConverter {
    * @see org.opencastproject.caption.api.CaptionConverter#importCaption(java.io.InputStream, java.lang.String)
    */
   @Override
-  public CaptionCollection importCaption(InputStream in, String language) throws IllegalCaptionFormatException {
+  public CaptionCollection importCaption(InputStream in, String language) throws CaptionConverterException {
 
     CaptionCollection collection = new CaptionCollectionImpl();
 
@@ -82,7 +82,7 @@ public class SubRipCaptionConverter implements CaptionConverter {
       String[] captionParts = captionString.split("\n", 3);
       // check for table length
       if (captionParts.length != 3) {
-        throw new IllegalCaptionFormatException("Invalid caption for SubRip format: " + captionString);
+        throw new CaptionConverterException("Invalid caption for SubRip format: " + captionString);
       }
 
       // get time part
@@ -95,7 +95,7 @@ public class SubRipCaptionConverter implements CaptionConverter {
         inTime = TimeUtil.importSrt(timePart[0].trim());
         outTime = TimeUtil.importSrt(timePart[1].trim());
       } catch (IllegalTimeFormatException e) {
-        throw new IllegalCaptionFormatException(e.getMessage());
+        throw new CaptionConverterException(e.getMessage());
       }
 
       // check for time validity
@@ -108,7 +108,7 @@ public class SubRipCaptionConverter implements CaptionConverter {
       // get text captions
       String[] captionLines = createCaptionLines(captionParts[2]);
       if (captionLines == null) {
-        throw new IllegalCaptionFormatException("Caption does not contain any caption text: " + captionString);
+        throw new CaptionConverterException("Caption does not contain any caption text: " + captionString);
       }
 
       // create caption object and add to caption collection
@@ -130,7 +130,7 @@ public class SubRipCaptionConverter implements CaptionConverter {
           throws IOException {
 
     if (language != null) {
-      logger.info("SubRip format does not include language information. Ignoring language attribute.");
+      logger.debug("SubRip format does not include language information. Ignoring language attribute.");
     }
 
     // initialize stream writer
@@ -194,7 +194,17 @@ public class SubRipCaptionConverter implements CaptionConverter {
    * @see org.opencastproject.caption.api.CaptionConverter#getLanguageList(java.io.InputStream)
    */
   @Override
-  public List<String> getLanguageList(InputStream input) throws IllegalCaptionFormatException {
-    return new LinkedList<String>();
+  public String[] getLanguageList(InputStream input) throws CaptionConverterException {
+    return new String[0];
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.caption.api.CaptionConverter#getExtension()
+   */
+  @Override
+  public String getExtension() {
+    return EXTENSION;
   }
 }
