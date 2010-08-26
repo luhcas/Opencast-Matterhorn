@@ -45,8 +45,6 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import javax.jms.IllegalStateException;
-
 /**
  * Workflow operation handler for embedding captions in QuickTime movies.
  * 
