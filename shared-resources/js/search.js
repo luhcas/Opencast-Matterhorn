@@ -13,14 +13,14 @@ Opencast.search = ( function() {
    * @description Does the search
    */
   function showResult(value){
-    // url: "../../search/rest/episode", // Production
+    // url: "../../search/rest/episode.xml", // Production
     // url: "episode-segments.xml",      // For Testing
     var mediaPackageId = Opencast.engage.getMediaPackageId();
     $.ajax(
         {
           type: 'GET',
           contentType: 'text/xml',
-          url: "../../search/rest/episode",
+          url: "../../search/rest/episode.xml",
           data: "id=" + mediaPackageId+"&q="+escape(value),
           dataType: 'xml',
           success: function(xml) 
@@ -135,7 +135,7 @@ Opencast.search = ( function() {
         {
           type: 'GET',
           contentType: 'text/xml',
-          url: "../../search/rest/episode",
+          url: "../../search/rest/episode.xml",
           data: "id=" + mediaPackageId,
           dataType: 'xml',
           success: function(xml) 

@@ -79,9 +79,10 @@ public class SearchRestService {
     // abstract
     data.setAbstract("This service indexes and queries available (distributed) episodes.");
     // episode
-    RestEndpoint episodeEndpoint = new RestEndpoint("episode", RestEndpoint.Method.GET, "/episode", "Search for episodes matching the query parameters");
+    RestEndpoint episodeEndpoint = new RestEndpoint("episode", RestEndpoint.Method.GET, "/episode{format}", "Search for episodes matching the query parameters");
     episodeEndpoint.addFormat(new Format("XML", null, null));
-    episodeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The search results, expressed as xml"));
+    episodeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The search results"));
+    episodeEndpoint.addPathParam(new Param("format", Type.STRING, ".xml", "The output format (.xml or .json).  Defaults to xml."));
     episodeEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The ID of the single episode to be returned, if it exists"));
     episodeEndpoint.addOptionalParam(new Param("q", Type.STRING, null, "Any episode that matches this free-text query"));
     episodeEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0", "The maximum number of items to return per page"));
@@ -90,9 +91,11 @@ public class SearchRestService {
     data.addEndpoint(RestEndpoint.Type.READ, episodeEndpoint);
 
     // series
-    RestEndpoint seriesEndpoint = new RestEndpoint("series", RestEndpoint.Method.GET, "/series", "Search for series matching the query parameters");
+    RestEndpoint seriesEndpoint = new RestEndpoint("series", RestEndpoint.Method.GET, "/series{format}", "Search for series matching the query parameters");
     seriesEndpoint.addFormat(new Format("XML", null, null));
-    seriesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The search results, expressed as xml"));
+    seriesEndpoint.addFormat(new Format("JSON", null, null));
+    seriesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The search results"));
+    seriesEndpoint.addPathParam(new Param("format", Type.STRING, ".xml", "The output format (.xml or .json).  Defaults to xml."));
     seriesEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The series ID. This takes the additional boolean \"episodes\" parameter. If true, the result set will include this series episodes."));
     seriesEndpoint.addOptionalParam(new Param("q", Type.STRING, null, "Any series that matches this free-text query. This takes the additional boolean \"episodes\" parameter. If true, the result set will include this series episodes."));
     seriesEndpoint.addOptionalParam(new Param("episodes", Type.BOOLEAN, "false", "Whether to include this series episodes.  This can be used in combination with id or q"));
@@ -205,7 +208,7 @@ public class SearchRestService {
   }
 
   @GET
-  @Path("series")
+  @Path("series.xml")
   @Produces(MediaType.APPLICATION_XML)
   public SearchResultImpl getEpisodeAndSeriesById(
           @QueryParam("id") String id,
@@ -252,7 +255,7 @@ public class SearchRestService {
   }
   
   @GET
-  @Path("episode")
+  @Path("episode.xml")
   @Produces(MediaType.APPLICATION_XML)
   public SearchResultImpl getEpisode(
           @QueryParam("id") String id,
@@ -303,7 +306,7 @@ public class SearchRestService {
   }
   
   @GET
-  @Path("lucene")
+  @Path("lucene.xml")
   @Produces(MediaType.APPLICATION_XML)
   public SearchResultImpl getByLuceneQuery(
           @QueryParam("q") String q,

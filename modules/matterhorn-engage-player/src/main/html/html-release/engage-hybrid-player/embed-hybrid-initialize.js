@@ -697,7 +697,7 @@ Opencast.Initialize = (function ()
             {
                 type: 'GET',
                 contentType: 'text/xml',
-                url: "../../search/rest/episode",
+                url: "../../search/rest/episode.xml",
                 data: "id=" + Opencast.engage.getMediaPackageId(),
                 dataType: 'xml',
                 success: function(xml) 
