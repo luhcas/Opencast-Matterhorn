@@ -16,9 +16,9 @@
 package org.opencastproject.scheduler.endpoint;
 
 import org.apache.commons.io.IOUtils;
-import org.opencastproject.scheduler.impl.Event;
-import org.opencastproject.scheduler.impl.Metadata;
-import org.opencastproject.scheduler.impl.RecurringEvent;
+import org.opencastproject.scheduler.impl.EventImpl;
+import org.opencastproject.scheduler.impl.MetadataImpl;
+import org.opencastproject.scheduler.impl.RecurringEventImpl;
 
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -101,47 +101,47 @@ public class SchedulerBuilder {
     return parseSchedulerFilterJaxbImpl(IOUtils.toInputStream(in, "UTF8"));
   }
 
-  public Event parseEvent(String in) throws Exception {
+  public EventImpl parseEvent(String in) throws Exception {
     return parseEvent(IOUtils.toInputStream(in, "UTF8"));
   }
   
-  public Event parseEvent(InputStream in) throws Exception {
+  public EventImpl parseEvent(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-                                  Event.class).getValue();
+                                  EventImpl.class).getValue();
   }
   
-  public RecurringEvent parseRecurringEvent(String in) throws Exception {
+  public RecurringEventImpl parseRecurringEvent(String in) throws Exception {
     return parseRecurringEvent(IOUtils.toInputStream(in, "UTF8"));
   }
   
-  public RecurringEvent parseRecurringEvent(InputStream in) throws Exception {
+  public RecurringEventImpl parseRecurringEvent(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-                                  RecurringEvent.class).getValue();
+                                  RecurringEventImpl.class).getValue();
   } 
   
-  public String marshallRecurringEvent (RecurringEvent e) throws Exception {
+  public String marshallRecurringEvent (RecurringEventImpl e) throws Exception {
     Marshaller marshaller = jaxbContext.createMarshaller();
     StringWriter writer = new StringWriter();
     marshaller.marshal(e, writer);
     return writer.toString();
   }
   
-  public String marshallEvent (Event e) throws Exception {
+  public String marshallEvent (EventImpl e) throws Exception {
     Marshaller marshaller = jaxbContext.createMarshaller();
     StringWriter writer = new StringWriter();
     marshaller.marshal(e, writer);
     return writer.toString();
   }    
   
-  public Metadata parseMetadata(String in) throws Exception {
+  public MetadataImpl parseMetadata(String in) throws Exception {
     return parseMetadata(IOUtils.toInputStream(in, "UTF8"));
   }
   
-  public Metadata parseMetadata(InputStream in) throws Exception {
+  public MetadataImpl parseMetadata(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-                                  Metadata.class).getValue();
+                                  MetadataImpl.class).getValue();
   }   
 }

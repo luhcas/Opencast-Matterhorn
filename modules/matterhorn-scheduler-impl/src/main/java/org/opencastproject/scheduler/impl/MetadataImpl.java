@@ -25,13 +25,16 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+
+import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
 
 @Entity(name="Metadata")
 @Table(name="SCHED_METADATA")
 @Access(AccessType.FIELD)
 @XmlType(name="Metadata")
-public class Metadata {
+public class MetadataImpl implements Metadata {
   @Id
   @Column(name = "ID", length=128)
   @GeneratedValue
@@ -42,39 +45,47 @@ public class Metadata {
   @Column(name="MD_VAL")
   protected String value;
   
-  public Metadata () {
+  public MetadataImpl () {
     super();
   }
   
-  public Metadata (String key, String value) {
+  public MetadataImpl (String key, String value) {
     this.key = key;
     this.value = value;
   }
   
+  @Override
   @XmlAttribute
   public long getId() {
     return id;
   }
+  @Override
   public void setId(long id) {
     this.id = id;
   }
+  @Override
   public String getKey() {
     return key;
   }
+  @Override
   public void setKey(String key) {
     this.key = key;
   }
+  @Override
   public String getValue() {
     return value;
   }
+  @Override
   public void setValue(String value) {
     this.value = value;
   }  
   
+  @Override
   public String toString () {
     return "("+id+") "+key+":"+value;
   }
   
+  @Override
   public boolean equals (Object o) {
     if (o == null) return false;
     if (! (o instanceof Metadata)) return false;
@@ -83,6 +94,7 @@ public class Metadata {
     return false;
   }
   
+  @Override
   public int hashCode () {
     return getKey().hashCode();
   }
@@ -93,7 +105,18 @@ public class Metadata {
    *  @param    xmlString string representation of an event.
    *  @return   instantiated event SchdeulerEventJaxbImpl.
    */
-  public static Metadata valueOf(String xmlString) throws Exception {
-    return (Metadata) SchedulerBuilder.getInstance().parseMetadata(xmlString);
-  }   
+  public static MetadataImpl valueOf(String xmlString) throws Exception {
+    return SchedulerBuilder.getInstance().parseMetadata(xmlString);
+  }
+  
+  static class Adapter extends XmlAdapter<MetadataImpl, Metadata> {
+    @Override
+    public MetadataImpl marshal(Metadata v) throws Exception {
+      return (MetadataImpl)v;
+    }
+    @Override
+    public Metadata unmarshal(MetadataImpl v) throws Exception {
+      return v;
+    }
+  }
 }

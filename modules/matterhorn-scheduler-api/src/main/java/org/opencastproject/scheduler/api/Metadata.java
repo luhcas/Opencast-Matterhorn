@@ -13,31 +13,47 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.scheduler.impl;
+package org.opencastproject.scheduler.api;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-
-import org.opencastproject.scheduler.api.Metadata;
-
-public class ListAdapter extends XmlAdapter<Metadata[], List<Metadata>> {
-
-  public ListAdapter () {
-    
-  }
-
-  @Override
-  public Metadata[] marshal(List<Metadata> arg0) throws Exception {
-    return arg0.toArray(new Metadata [0]);
-  }
-
-  @Override
-  public List<Metadata> unmarshal(Metadata[] arg0) throws Exception {
-    ArrayList<Metadata> list = new ArrayList<Metadata>(arg0.length);
-    for (Metadata data : arg0) list.add(data);
-    return list;
-  }
+public interface Metadata {
   
+  /**
+   * @return This metadata's id.
+   */
+  public long getId();
+  
+  /**
+   * @param id
+   */
+  public void setId(long id);
+  
+  /**
+   * @return This metadata's key
+   */
+  public String getKey();
+  
+  /**
+   * @param key
+   */
+  public void setKey(String key);
+  
+  /**
+   * @return This metadata's value
+   */
+  public String getValue();
+  
+  /**
+   * @param value
+   */
+  public void setValue(String value);
+  
+  @Override
+  public String toString ();
+  
+  @Override
+  public boolean equals (Object o);
+  
+  @Override
+  public int hashCode ();
+
 }

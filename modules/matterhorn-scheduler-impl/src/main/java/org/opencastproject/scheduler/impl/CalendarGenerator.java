@@ -17,7 +17,7 @@ package org.opencastproject.scheduler.impl;
 
 import java.io.IOException;
 import java.io.StringWriter;
-
+import java.util.Date;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
@@ -27,8 +27,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
-import org.opencastproject.scheduler.impl.Event;
+import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesService;
 
@@ -106,8 +105,18 @@ public class CalendarGenerator {
    */
   public boolean addEvent (Event e) {
     logger.debug("creating iCal VEvent from SchedulerEvent: {}", e.toString());
-    DateTime startDate = new DateTime(e.getStartdate());
-    DateTime endDate = new DateTime(e.getEnddate());
+    Date start = e.getStartdate();
+    Date end = e.getEnddate();
+    if(start == null){
+      logger.debug("Couldn't get startdate from event!");
+      return false;
+    }
+    if(end == null){
+      logger.debug("Couldn't get enddate from event!");
+      return false;
+    }
+    DateTime startDate = new DateTime(start);
+    DateTime endDate = new DateTime(end);
     startDate.setUtc(true);
     endDate.setUtc(true);
     String seriesID = null;
@@ -176,7 +185,7 @@ public class CalendarGenerator {
     Series series = seriesService.getSeries(seriesID); 
     
     try {
-      Document doc = ((DublinCoreCatalog) series.getDublinCore()).toXml();
+      Document doc = (series.getDublinCore()).toXml();
       
       Source source = new DOMSource(doc);
       StringWriter stringWriter = new StringWriter();

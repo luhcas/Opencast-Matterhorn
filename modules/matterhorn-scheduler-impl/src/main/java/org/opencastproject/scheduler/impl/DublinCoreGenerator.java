@@ -16,12 +16,13 @@
 package org.opencastproject.scheduler.impl;
 
 import org.opencastproject.mediapackage.EName;
+import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
 import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
 import org.opencastproject.metadata.dublincore.Precision;
-import org.opencastproject.scheduler.impl.Event;
+import org.opencastproject.scheduler.api.Event;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,8 +91,8 @@ public class DublinCoreGenerator {
     
     DublinCoreCatalog dcCatalog = DublinCoreCatalogImpl.newInstance();
 
-    dcCatalog.add(DublinCoreCatalog.PROPERTY_IDENTIFIER, new DublinCoreValue(event.getEventId()));
-    dcCatalog.add(DublinCoreCatalog.PROPERTY_CREATED, EncodingSchemeUtils.encodeDate(event.getStartdate(), Precision.Second));
+    dcCatalog.add(DublinCore.PROPERTY_IDENTIFIER, new DublinCoreValue(event.getEventId()));
+    dcCatalog.add(DublinCore.PROPERTY_CREATED, EncodingSchemeUtils.encodeDate(event.getStartdate(), Precision.Second));
     for (String key : dcMetadata.keySet()) {  
       if (validDcKey(key)) {
         DublinCoreValue value = new DublinCoreValue(dcMetadata.get(key));

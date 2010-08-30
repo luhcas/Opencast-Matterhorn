@@ -15,11 +15,13 @@
  */
 package org.opencastproject.scheduler.impl;
 
-import org.opencastproject.scheduler.impl.Event;
+import org.opencastproject.scheduler.impl.EventImpl;
 import org.opencastproject.scheduler.impl.IncompleteDataException;
-import org.opencastproject.scheduler.impl.Metadata;
-import org.opencastproject.scheduler.impl.RecurringEvent;
+import org.opencastproject.scheduler.impl.MetadataImpl;
+import org.opencastproject.scheduler.impl.RecurringEventImpl;
 import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
+import org.opencastproject.scheduler.api.Event;
+import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.endpoint.SchedulerRestService;
 import org.opencastproject.series.api.Series;
@@ -45,7 +47,6 @@ import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
@@ -158,18 +158,18 @@ public class SchedulerServiceImplTest {
     } catch (IOException e) {
       Assert.fail(e.getMessage());
     }
-    event = new Event();
+    event = new EventImpl();
     event.generateId();
-    event.addMetadata(new Metadata("title","new recording"));
-    event.addMetadata(new Metadata("timeStart",Long.toString(System.currentTimeMillis())));
-    event.addMetadata(new Metadata("timeEnd",Long.toString(System.currentTimeMillis()+5000000)));
-    event.addMetadata(new Metadata("location","testlocation"));
-    event.addMetadata(new Metadata("device","testrecorder"));
-    event.addMetadata(new Metadata("creator","test lecturer"));
-    event.addMetadata(new Metadata("resouces","vga"));
-    event.addMetadata(new Metadata("seriesId",seriesID));
-    event.addMetadata(new Metadata("description","a test description"));
-    event.addMetadata(new Metadata("channelId","unittest"));
+    event.addMetadata((Metadata) new MetadataImpl("title","new recording"));
+    event.addMetadata((Metadata) new MetadataImpl("timeStart",Long.toString(System.currentTimeMillis())));
+    event.addMetadata((Metadata) new MetadataImpl("timeEnd",Long.toString(System.currentTimeMillis()+5000000)));
+    event.addMetadata((Metadata) new MetadataImpl("location","testlocation"));
+    event.addMetadata((Metadata) new MetadataImpl("device","testrecorder"));
+    event.addMetadata((Metadata) new MetadataImpl("creator","test lecturer"));
+    event.addMetadata((Metadata) new MetadataImpl("resouces","vga"));
+    event.addMetadata((Metadata) new MetadataImpl("seriesId",seriesID));
+    event.addMetadata((Metadata) new MetadataImpl("description","a test description"));
+    event.addMetadata((Metadata) new MetadataImpl("channelId","unittest"));
     List<Metadata> test = event.getCompleteMetadata();
     logger.info("Metadata: {}", test);
     
@@ -192,7 +192,7 @@ public class SchedulerServiceImplTest {
     Event eventModified = service.getEvent(eventLoaded.getEventId());
     logger.info("State of the loaded event {}.", eventModified);
     
-    eventModified.getCompleteMetadata().add(new Metadata("stupid.unused.key","no matter what"));
+    eventModified.getCompleteMetadata().add((Metadata) new MetadataImpl("stupid.unused.key","no matter what"));
     for (int i = 0; i < eventModified.getCompleteMetadata().size(); i++) {
       if (eventModified.getCompleteMetadata().get(i).getKey().equals("creator") || eventModified.getCompleteMetadata().get(i).getKey().equals("seriesId")) 
         eventModified.getCompleteMetadata().remove(i);
@@ -262,28 +262,34 @@ public class SchedulerServiceImplTest {
     }
     
     // test for upcoming events (it should not be in there). Not in use currently because of changes in design. 
-    Event[] upcoming = service.getUpcomingEvents();
+    List<Event> upcoming = service.getUpcomingEvents();
     boolean eventFound = false;
 //    for (int i = 0; i < upcoming.length; i++ ) 
 //      if (upcoming[i].equals(eventUpdated)) eventFound= true; 
 //    Assert.assertFalse(eventFound);    
     
     // test if event is in list in general 
-    Event[] allEvents = service.getEvents(null);
+    List<Event> allEvents = service.getEvents(null);
     eventFound = false;
-    Assert.assertTrue(allEvents.length > 0);
-    for (int i = 0; i < allEvents.length; i++ ) 
-      if (allEvents[i].equals(eventUpdated)) eventFound= true; 
+    Assert.assertFalse(allEvents.isEmpty());
+    for (Event event : allEvents) {
+      if (event.equals(eventUpdated)) {
+        eventFound= true; 
+      }
+    }
     Assert.assertTrue(eventFound); 
     
     //test event filter (positive test)
     SchedulerFilter filter = new SchedulerFilterImpl();
     filter.setDeviceFilter("testrecorder");
     allEvents = service.getEvents(filter);
-    Assert.assertTrue(allEvents.length > 0);
+    Assert.assertFalse(allEvents.isEmpty());
     eventFound = false;
-    for (int i = 0; i < allEvents.length; i++ ) 
-      if (allEvents[i].equals(eventUpdated)) eventFound= true; 
+    for (Event event : allEvents) {
+      if (event.equals(eventUpdated)) {
+        eventFound= true; 
+      }
+    }
     Assert.assertTrue(eventFound);    
     
     //test event filter (negative test)
@@ -291,27 +297,30 @@ public class SchedulerServiceImplTest {
     filter.setDeviceFilter("something");
     allEvents = service.getEvents(filter);
     eventFound = false;
-    for (int i = 0; i < allEvents.length; i++ ) {    
-      if (allEvents[i].equals(eventUpdated)) {
-        Assert.fail("FALSE EVENT:  filtered for "+filter+" in" + allEvents[i]);
+    for (Event event : allEvents) {
+      if (event.equals(eventUpdated)) {
+        Assert.fail("FALSE EVENT:  filtered for "+filter+" in" + event);
       }
     }
     Assert.assertFalse(eventFound);    
     
     // update event
-    eventUpdated.updateMetadata(new Metadata("timeEnd", Long.toString(System.currentTimeMillis()+900000)));
-    eventUpdated.updateMetadata(new Metadata("timeStart", Long.toString(System.currentTimeMillis()+20000)));
-    eventUpdated.updateMetadata(new Metadata("contributor", "Matterhorn"));
+    eventUpdated.updateMetadata((Metadata) new MetadataImpl("timeEnd", Long.toString(System.currentTimeMillis()+900000)));
+    eventUpdated.updateMetadata((Metadata) new MetadataImpl("timeStart", Long.toString(System.currentTimeMillis()+20000)));
+    eventUpdated.updateMetadata((Metadata) new MetadataImpl("contributor", "Matterhorn"));
     Assert.assertTrue(service.updateEvent(eventUpdated));
     Assert.assertEquals(service.getEvent(eventUpdated.getEventId()).getValue("contributor"), "Matterhorn");
     Assert.assertNotNull(service.getEvents(null));
     
     // test for upcoming events (now it should be there
     upcoming = service.getUpcomingEvents();
-    Assert.assertTrue(upcoming.length > 0);
+    Assert.assertFalse(upcoming.isEmpty());
     eventFound = false;
-    for (int i = 0; i < upcoming.length; i++ ) 
-      if (upcoming[i].equals(eventUpdated)) eventFound= true; 
+    for (Event event : upcoming) {
+      if (event.equals(eventUpdated)) {
+        eventFound= true; 
+      }
+    }
     Assert.assertTrue(eventFound);
     
     //delete event
@@ -365,22 +374,22 @@ public class SchedulerServiceImplTest {
   
   @Test
   public void testRecurrence () {
-    RecurringEvent recurringEvent = new RecurringEvent();
+    RecurringEventImpl recurringEvent = new RecurringEventImpl();
     recurringEvent.setRecurrence("FREQ=WEEKLY;BYDAY=TU;BYHOUR=12");
     GregorianCalendar now = new GregorianCalendar();
     GregorianCalendar start = new GregorianCalendar(now.get(GregorianCalendar.YEAR)+1, 1, 1);
     GregorianCalendar end = new GregorianCalendar(now.get(GregorianCalendar.YEAR)+1, 6, 1);
-    recurringEvent.getMetadata().add(new Metadata("recurrenceStart", ""+start.getTimeInMillis()));
-    recurringEvent.getMetadata().add(new Metadata("recurrenceEnd", ""+end.getTimeInMillis()));
-    recurringEvent.getMetadata().add(new Metadata("recurrenceDuration", "900000"));
-    recurringEvent.getMetadata().add(new Metadata("title", "recurrence test title"));
+    recurringEvent.getMetadata().add((Metadata) new MetadataImpl("recurrenceStart", ""+start.getTimeInMillis()));
+    recurringEvent.getMetadata().add((Metadata) new MetadataImpl("recurrenceEnd", ""+end.getTimeInMillis()));
+    recurringEvent.getMetadata().add((Metadata) new MetadataImpl("recurrenceDuration", "900000"));
+    recurringEvent.getMetadata().add((Metadata) new MetadataImpl("title", "recurrence test title"));
     
-    RecurringEvent storedEvent = service.addRecurringEvent(recurringEvent);
+    RecurringEventImpl storedEvent = (RecurringEventImpl) service.addRecurringEvent(recurringEvent);
     
     Assert.assertNotNull(storedEvent);
     Assert.assertNotNull(storedEvent.getRecurringEventId());
     
-    RecurringEvent loadedEvent = service.getRecurringEvent(storedEvent.getRecurringEventId());
+    RecurringEventImpl loadedEvent = (RecurringEventImpl) service.getRecurringEvent(storedEvent.getRecurringEventId());
     
     Assert.assertNotNull(loadedEvent);
     Assert.assertEquals(storedEvent.getValueAsDate("recurrenceStart"), loadedEvent.getValueAsDate("recurrenceStart"));

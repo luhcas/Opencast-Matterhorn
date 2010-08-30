@@ -16,8 +16,8 @@
 
 package org.opencastproject.scheduler.impl;
 
-import org.opencastproject.scheduler.impl.Event;
-import org.opencastproject.scheduler.impl.Metadata;
+import org.opencastproject.scheduler.api.Event;
+import org.opencastproject.scheduler.api.Metadata;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

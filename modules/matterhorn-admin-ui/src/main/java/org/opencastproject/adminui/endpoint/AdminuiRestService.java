@@ -30,7 +30,8 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.scheduler.api.SchedulerFilter;
-import org.opencastproject.scheduler.impl.Event;
+import org.opencastproject.scheduler.api.Event;
+import org.opencastproject.scheduler.impl.EventImpl;
 import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
@@ -401,11 +402,13 @@ public class AdminuiRestService {
     // get number of upcoming recordings if scheduler is present
     if (schedulerService != null) {
       int upcoming = 0;
-      Event[] events = schedulerService.getUpcomingEvents();
+      List<Event> events = schedulerService.getUpcomingEvents();
       for (Event event : events) {
-        if (System.currentTimeMillis() < event.getStartdate().getTime()) {
-          upcoming++;
-          total++;
+        if(event.getStartdate() != null){
+          if (System.currentTimeMillis() < ((EventImpl)event).getStartdate().getTime()) {
+            upcoming++;
+            total++;
+          }
         }
       }
       out.put("upcoming", new Integer(upcoming));
@@ -433,7 +436,7 @@ public class AdminuiRestService {
     if ((schedulerService != null) && (captureAdminService != null)) {
       SchedulerFilter filter = schedulerService.getNewSchedulerFilter();
       filter.setEnd(new Date(System.currentTimeMillis() + CAPTURE_AGENT_DELAY));
-      Event[] events = schedulerService.getEvents(filter);
+      List<Event> events =  schedulerService.getEvents(filter);
       for (Event event : events) {
         Recording recording = captureAdminService.getRecordingState(event.getEventId());
         if ((recording == null)
@@ -453,8 +456,12 @@ public class AdminuiRestService {
           item.setTitle(event.getValue("title"));
           item.setPresenter(event.getValue("creator"));
           item.setSeriesTitle(getSeriesNameFromEvent(event));
-          item.setStartTime(Long.toString(event.getStartdate().getTime()));
-          item.setEndTime(Long.toString(event.getEnddate().getTime()));
+          if(event.getStartdate() != null){
+            item.setStartTime(Long.toString(event.getStartdate().getTime()));
+          }
+          if(event.getEnddate() != null){
+            item.setEndTime(Long.toString(event.getEnddate().getTime()));
+          }
           if (recording != null) {
             item.setProcessingStatus("Failed during capture" /*recording.getState()*/);
           } else {
@@ -478,18 +485,18 @@ public class AdminuiRestService {
     LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
     if (schedulerService != null) {
       logger.debug("getting upcoming recordings from scheduler");
-      Event[] events = schedulerService.getUpcomingEvents();
-      for (int i = 0; i < events.length; i++) {
-        if (System.currentTimeMillis() < events[i].getStartdate().getTime()) {
+      List<Event> events = schedulerService.getUpcomingEvents();
+      for (Event event : events) {
+        if (event.getStartdate() != null && System.currentTimeMillis() < event.getStartdate().getTime()) {
           AdminRecording item = new AdminRecordingImpl();
-          item.setId(events[i].getEventId());
+          item.setId(event.getEventId());
           item.setItemType(AdminRecording.ItemType.SCHEDULER_EVENT);
-          item.setTitle(events[i].getValue("title"));
-          item.setPresenter(events[i].getValue("creator"));
-          item.setSeriesTitle(getSeriesNameFromEvent(events[i]));
-          item.setStartTime(Long.toString(events[i].getStartdate().getTime()));
-          item.setEndTime(Long.toString(events[i].getEnddate().getTime()));
-          item.setCaptureAgent(events[i].getValue("device"));
+          item.setTitle(event.getValue("title"));
+          item.setPresenter(event.getValue("creator"));
+          item.setSeriesTitle(getSeriesNameFromEvent(event));
+          item.setStartTime(Long.toString(event.getStartdate().getTime()));
+          item.setEndTime(Long.toString(event.getEnddate().getTime()));
+          item.setCaptureAgent(event.getValue("device"));
           item.setProcessingStatus("Scheduled");
           item.setDistributionStatus("not distributed");
           out.add(item);
@@ -653,7 +660,7 @@ public class AdminuiRestService {
 
   public String getSeriesNameFromEvent(Event event) {
     String seriesId = event.getValue("seriesId");
-    if (!seriesId.isEmpty()) {
+    if (seriesId != null && !seriesId.isEmpty()) {
       return getSeriesNameById(seriesId);
     }
     return "";

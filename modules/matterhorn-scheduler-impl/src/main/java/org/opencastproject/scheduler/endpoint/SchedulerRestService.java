@@ -15,11 +15,14 @@
  */
 package org.opencastproject.scheduler.endpoint;
 
+import org.opencastproject.scheduler.api.Event;
+import org.opencastproject.scheduler.api.Metadata;
+import org.opencastproject.scheduler.api.RecurringEvent;
 import org.opencastproject.scheduler.api.SchedulerFilter;
-import org.opencastproject.scheduler.impl.Event;
+import org.opencastproject.scheduler.impl.EventImpl;
 import org.opencastproject.scheduler.impl.IncompleteDataException;
-import org.opencastproject.scheduler.impl.Metadata;
-import org.opencastproject.scheduler.impl.RecurringEvent;
+import org.opencastproject.scheduler.impl.MetadataImpl;
+import org.opencastproject.scheduler.impl.RecurringEventImpl;
 import org.opencastproject.scheduler.impl.SchedulerFilterImpl;
 import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
 import org.opencastproject.util.DocUtil;
@@ -37,7 +40,6 @@ import org.slf4j.LoggerFactory;
 import org.json.simple.JSONObject;
 
 import java.io.StringReader;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -132,7 +134,7 @@ public class SchedulerRestService {
   @PUT
   @Produces(MediaType.TEXT_XML)
   @Path("recurrence")
-  public Response addRecurringEvent(@FormParam("recurringEvent") RecurringEvent event) {
+  public Response addRecurringEvent(@FormParam("recurringEvent") RecurringEventImpl event) {
     logger.debug("add Recurrent event: {}", event);
     try {
       if (event == null) return Response.status(Status.BAD_REQUEST).build();
@@ -153,7 +155,7 @@ public class SchedulerRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("recurrence")
-  public Response updateRecurringEvent(@FormParam("recurringEvent") RecurringEvent event) {
+  public Response updateRecurringEvent(@FormParam("recurringEvent") RecurringEventImpl event) {
     logger.debug("update Recurrent event: {}", event);
     try {
       if (event == null) return Response.status(Status.BAD_REQUEST).build();
@@ -260,15 +262,15 @@ public class SchedulerRestService {
   @PUT
   @Produces(MediaType.TEXT_XML)
   @Path("event")
-  public Response addEvent (@FormParam("event") Event e) {
+  public Response addEvent (@FormParam("event") EventImpl e) {
     logger.debug("addEvent(e): {}", e);
     if (e == null) {
       logger.error("Event that should be added is null");
       return Response.status(Status.BAD_REQUEST).build();
     }
-    Event j = service.addEvent(e);
-    logger.info("Adding event {} to scheduler",j.getEventId());
-    return Response.ok(j).build();
+    service.addEvent(e);
+    logger.info("Adding event {} to scheduler",e.getEventId());
+    return Response.ok(e).build();
   }  
   
   /**
@@ -306,7 +308,7 @@ public class SchedulerRestService {
   @POST
   @Produces(MediaType.TEXT_PLAIN)
   @Path("event")
-  public Response updateEvent (@FormParam("event") Event e) {
+  public Response updateEvent (@FormParam("event") EventImpl e) {
     if(service.updateEvent(e)) {
       return Response.ok(true).build();
     } else {
@@ -345,7 +347,7 @@ public class SchedulerRestService {
       return Response.status(Status.BAD_REQUEST).build();
     }
     logger.info("Filter events with "+filterJaxB.getFilter());
-    List<Event> events = Arrays.asList(service.getEvents(filterJaxB.getFilter()));
+    List<Event> events = service.getEvents(filterJaxB.getFilter());
     if (events == null) return Response.status(Status.BAD_REQUEST).build();
     return Response.ok((new GenericEntity<List<Event>> (events){})).build();
   }
@@ -358,33 +360,36 @@ public class SchedulerRestService {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("events/conflict")
-  public Response findConflictingEvents (@FormParam("event") Event e) {
+  public Response findConflictingEvents (@FormParam("event") EventImpl e) {
     if (e == null) {
       logger.error("event is null");
       return Response.status(Status.BAD_REQUEST).build();
     } 
-    List<Event> events = null;
+    List<EventImpl> events = new LinkedList<EventImpl>();
     try {
-      events = Arrays.asList(service.findConflictingEvents(e));
+      for(Event event : service.findConflictingEvents(e)){
+        events.add((EventImpl)event);
+      }
     } catch (Exception e1) {
       logger.error("Find Conflicting Failed: {}", e1);
       return Response.status(Status.BAD_REQUEST).build();
     }
-    
-    return Response.ok((new GenericEntity<List<Event>> (events){})).build();
+    return Response.ok((new GenericEntity<List<EventImpl>> (events){})).build();
   }   
   
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("recurrence/conflict")
-  public Response findConflictingEvents (@FormParam("recurringEvent") RecurringEvent e) {
+  public Response findConflictingEvents (@FormParam("recurringEvent") RecurringEventImpl e) {
     if (e == null) {
       logger.error("event is null");
       return Response.status(Status.BAD_REQUEST).build();
     } 
-    List<Event> events = null;
+    List<EventImpl> events = new LinkedList<EventImpl>();
     try {
-      events = Arrays.asList(service.findConflictingEvents(e));
+      for(Event event : service.findConflictingEvents(e)){
+        events.add((EventImpl)event);
+      }
     } catch (IncompleteDataException e2) {
       logger.warn("Recurring event incomplete {}", e.toString());
       return Response.status(Status.BAD_REQUEST).build();
@@ -393,7 +398,7 @@ public class SchedulerRestService {
       return Response.status(Status.BAD_REQUEST).build();
     }
     
-    return Response.ok((new GenericEntity<List<Event>> (events){})).build();
+    return Response.ok((new GenericEntity<List<EventImpl>> (events){})).build();
   }
 
   /**
@@ -406,7 +411,7 @@ public class SchedulerRestService {
   public Response allEvents () {
     List<Event> events = null;
     try {
-      events = Arrays.asList(service.getEvents(null));
+      events = service.getEvents(null);
     } catch (Exception e) {
       return Response.status(Status.SERVICE_UNAVAILABLE).build();
     }
@@ -424,7 +429,7 @@ public class SchedulerRestService {
   public Response allRecurringEvents () {
     List <RecurringEvent> events = null;
     try {
-      events = Arrays.asList(service.getAllRecurringEvents());
+      events = service.getAllRecurringEvents();
     } catch (Exception e) {
       return Response.status(Status.SERVICE_UNAVAILABLE).build();
     }
@@ -443,7 +448,7 @@ public class SchedulerRestService {
     SchedulerFilter filter = new SchedulerFilterImpl();
     filter.setStart(new Date(System.currentTimeMillis()));
      
-    List<Event> events = Arrays.asList(service.getEvents(filter));
+    List<Event> events = service.getEvents(filter);
     if (events == null) return Response.status(Status.BAD_REQUEST).build();
     return Response.ok((new GenericEntity<List<Event>> (events){})).build();
   }    
@@ -653,62 +658,31 @@ public class SchedulerRestService {
   }
 
   /**
-   * Creates an example XML of an SchedulerEvent for the documentation.
-   * @return A XML with a SchedulerEvent
-   */ 
-  private String generateSchedulerEvent() {
-    return "<ns1:SchedulerEvent xmlns:ns1=\"http://scheduler.opencastproject.org\">\n"+
-           "<id>c0e3d8a7-7ecc-479b-aee7-8da369e445f2</id>\n"+
-           "<metadata>\n"+
-           "  <item key=\"channel-id\"><value>1</value></item>\n"+
-           "  <item key=\"creator\"><value>lecturer</value></item>\n"+
-           "  <item key=\"device\"><value>recorder</value></item>\n"+
-           "  <item key=\"title\"><value>Test title</value></item>\n"+
-           "  <item key=\"abstract\"><value>a description of the event</value></item>\n"+
-           "  <item key=\"contributor\"><value>The contribution institution</value></item>\n"+
-           "  <item key=\"series-id\"><value>c0e3d8a7-7ecc-479b-1234-8da369e445f2</value></item>\n"+
-           "  <item key=\"location\"><value>my room</value></item>\n"+
-           "</metadata>\n"+
-           "<startdate>1262631892201</startdate>\n"+
-           "<enddate>1262644114423</enddate>\n"+
-           "<duration>12222222</duration>\n"+
-           "<attendees>\n"+
-           "  <attendee>recorder</attendee>\n"+
-           "  <attendee>another attendee</attendee>\n"+
-           "</attendees>\n"+
-           "<resources>\n"+
-           "  <resource>vga</resource>\n"+
-           "  <resource>audio</resource>\n"+
-           "</resources>\n"+
-           "</ns1:SchedulerEvent>";
-  }  
-  
-  /**
-   * Creates an example XML of an SchedulerEvent for the documentation.
-   * @return A XML with a SchedulerEvent
+   * Creates an example XML of an Event for the documentation.
+   * @return A XML with a Event
    */ 
   private String generateEvent() {
-    Event e = new Event();
+    Event e = new EventImpl();
     e.generateId();
     e.setRecurringEventId("demo-recurring-event");
     e.setPositionInRecurrence(0);
     LinkedList<Metadata> metadata = new LinkedList<Metadata>();
-    metadata.add(new Metadata("title", "demo title"));
-    metadata.add(new Metadata("location", "demo location"));
-    metadata.add(new Metadata("abstract", "demo abstract"));
-    metadata.add(new Metadata("creator", "demo creator"));
-    metadata.add(new Metadata("contributor", "demo contributor"));
-    metadata.add(new Metadata("time.start", "1317499200000"));
-    metadata.add(new Metadata("time.end", "1317507300000"));
-    metadata.add(new Metadata("device", "demo"));
-    metadata.add(new Metadata("resources", "vga, audio"));
-    metadata.add(new Metadata("series-id", "demo series"));
+    metadata.add(new MetadataImpl("title", "demo title"));
+    metadata.add(new MetadataImpl("location", "demo location"));
+    metadata.add(new MetadataImpl("abstract", "demo abstract"));
+    metadata.add(new MetadataImpl("creator", "demo creator"));
+    metadata.add(new MetadataImpl("contributor", "demo contributor"));
+    metadata.add(new MetadataImpl("time.start", "1317499200000"));
+    metadata.add(new MetadataImpl("time.end", "1317507300000"));
+    metadata.add(new MetadataImpl("device", "demo"));
+    metadata.add(new MetadataImpl("resources", "vga, audio"));
+    metadata.add(new MetadataImpl("series-id", "demo series"));
     e.setMetadata(metadata); 
     
     SchedulerBuilder builder = SchedulerBuilder.getInstance();
     try {
       
-      String result = builder.marshallEvent(e);
+      String result = builder.marshallEvent((EventImpl)e);
       logger.info("Event: "+result);
       return result;
     } catch (Exception e1) {
@@ -718,25 +692,25 @@ public class SchedulerRestService {
   }
   
   /**
-   * Creates an example XML of an SchedulerEvent for the documentation.
-   * @return A XML with a SchedulerEvent
+   * Creates an example XML of an RecurringEvent for the documentation.
+   * @return A XML with a RecurringEvent
    */ 
   private String generateRecurringEvent() {
-    RecurringEvent e = new RecurringEvent();
+    RecurringEvent e = new RecurringEventImpl();
     e.generateId();
     e.setRecurringEventId("demo-recurring-event");
     LinkedList<Metadata> metadata = new LinkedList<Metadata>();
-    metadata.add(new Metadata("title", "demo title"));
-    metadata.add(new Metadata("location", "demo location"));
-    metadata.add(new Metadata("abstract", "demo abstract"));
-    metadata.add(new Metadata("creator", "demo creator"));
-    metadata.add(new Metadata("contributor", "demo contributor"));
-    metadata.add(new Metadata("recurrence.start", "1317499200000"));
-    metadata.add(new Metadata("recurrence.end", "1329350400000"));
-    metadata.add(new Metadata("recurrence.duration", "3600000"));
-    metadata.add(new Metadata("device", "demo"));
-    metadata.add(new Metadata("resources", "vga, audio"));
-    metadata.add(new Metadata("series-id", "demo series"));
+    metadata.add(new MetadataImpl("title", "demo title"));
+    metadata.add(new MetadataImpl("location", "demo location"));
+    metadata.add(new MetadataImpl("abstract", "demo abstract"));
+    metadata.add(new MetadataImpl("creator", "demo creator"));
+    metadata.add(new MetadataImpl("contributor", "demo contributor"));
+    metadata.add(new MetadataImpl("recurrence.start", "1317499200000"));
+    metadata.add(new MetadataImpl("recurrence.end", "1329350400000"));
+    metadata.add(new MetadataImpl("recurrence.duration", "3600000"));
+    metadata.add(new MetadataImpl("device", "demo"));
+    metadata.add(new MetadataImpl("resources", "vga, audio"));
+    metadata.add(new MetadataImpl("series-id", "demo series"));
     e.setMetadata(metadata); 
     
     e.setRecurrence("FREQ=WEEKLY;BYDAY=TU;BYHOUR=9;BYMINUTE=15");
@@ -744,7 +718,7 @@ public class SchedulerRestService {
     SchedulerBuilder builder = SchedulerBuilder.getInstance();
     try {
       
-      String result = builder.marshallRecurringEvent(e);
+      String result = builder.marshallRecurringEvent((RecurringEventImpl)e);
       logger.info("Event: "+result);
       return result;
     } catch (Exception e1) {

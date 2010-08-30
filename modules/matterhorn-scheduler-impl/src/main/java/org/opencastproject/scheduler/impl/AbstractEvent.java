@@ -27,7 +27,7 @@ import javax.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.opencastproject.scheduler.impl.Metadata;
+import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.impl.IncompleteDataException;
 
 public abstract class AbstractEvent {

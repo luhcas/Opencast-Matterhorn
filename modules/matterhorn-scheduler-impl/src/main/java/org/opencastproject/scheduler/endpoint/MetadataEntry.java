@@ -42,6 +42,7 @@ public class MetadataEntry implements Entry<String, String> {
    * {@inheritDoc}
    * @see java.util.Map.Entry#getKey()
    */
+  @Override
   public String getKey() {
     return key;
   }
@@ -50,6 +51,7 @@ public class MetadataEntry implements Entry<String, String> {
    * {@inheritDoc}
    * @see java.util.Map.Entry#getValue()
    */
+  @Override
   public String getValue() {
     return value;
   }
@@ -58,6 +60,7 @@ public class MetadataEntry implements Entry<String, String> {
    * {@inheritDoc}
    * @see java.util.Map.Entry#setValue(java.lang.Object)
    */
+  @Override
   public String setValue(String value) {
     this.value = value;
     return this.value;

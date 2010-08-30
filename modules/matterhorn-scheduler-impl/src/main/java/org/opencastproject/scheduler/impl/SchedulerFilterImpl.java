@@ -54,6 +54,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#getAbstractFilter()
    */
+  @Override
   public String getAbstractFilter() {
     return abstr;
   }
@@ -62,6 +63,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#getAttendeeFilter()
    */
+  @Override
   public String getAttendeeFilter() {
     return attendee;
   }
@@ -70,6 +72,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#getChannelIDFilter()
    */
+  @Override
   public String getChannelIDFilter() {
     return channelID;
   }
@@ -78,6 +81,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#getContributorFilter()
    */
+  @Override
   public String getContributorFilter() {
     return contributor;
   }
@@ -86,6 +90,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#getCreatorFilter()
    */
+  @Override
   public String getCreatorFilter() {
     return creator;
   }
@@ -94,6 +99,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#getDeviceFilter()
    */
+  @Override
   public String getDeviceFilter() {
     return device;
   }
@@ -102,6 +108,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#getEnd()
    */
+  @Override
   public Date getEnd() {
     return end;
   }
@@ -110,6 +117,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#getEventIDFilter()
    */
+  @Override
   public String getEventIDFilter() {
     return eventID;
   }
@@ -118,6 +126,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#getLocationFilter()
    */
+  @Override
   public String getLocationFilter() {
     return location;
   }
@@ -126,6 +135,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#getResourceFilter()
    */
+  @Override
   public String getResourceFilter() {
     return resource;
   }
@@ -134,6 +144,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#getSeriesIDFilter()
    */
+  @Override
   public String getSeriesIDFilter() {
     return seriesID;
   }
@@ -142,6 +153,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#getStart()
    */
+  @Override
   public Date getStart() {
     return start;
   }
@@ -150,6 +162,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#getTitleFilter()
    */
+  @Override
   public String getTitleFilter() {
     return title;
   }
@@ -158,6 +171,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setAbstractFilter(java.lang.String)
    */
+  @Override
   public void setAbstractFilter(String text) {
     this.abstr = text;
 
@@ -167,6 +181,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setAttendeeFilter(java.lang.String)
    */
+  @Override
   public void setAttendeeFilter(String attendeePattern) {
     attendee = attendeePattern;
 
@@ -176,6 +191,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setChannelIDFilter(java.lang.String)
    */
+  @Override
   public void setChannelIDFilter(String channelID) {
     this.channelID = channelID;
 
@@ -185,6 +201,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setContributorFilter(java.lang.String)
    */
+  @Override
   public void setContributorFilter(String contributorPattern) {
     contributor = contributorPattern;
 
@@ -194,6 +211,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setCreatorFilter(java.lang.String)
    */
+  @Override
   public void setCreatorFilter(String creatorPattern) {
     creator = creatorPattern;
 
@@ -203,6 +221,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setDeviceFilter(java.lang.String)
    */
+  @Override
   public void setDeviceFilter(String devicePattern) {
     device = devicePattern;
   }
@@ -211,6 +230,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setEnd(java.util.Date)
    */
+  @Override
   public void setEnd(Date end) {
     this.end = end;
 
@@ -220,6 +240,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setEventIDFilter(java.lang.String)
    */
+  @Override
   public void setEventIDFilter(String eventID) {
     this.eventID = eventID;
 
@@ -229,6 +250,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setLocationFilter(java.lang.String)
    */
+  @Override
   public void setLocationFilter(String locationPattern) {
     location = locationPattern;
 
@@ -238,6 +260,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setResourceFilter(java.lang.String)
    */
+  @Override
   public void setResourceFilter(String resourcePattern) {
     resource = resourcePattern;
 
@@ -247,6 +270,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setSeriesIDFilter(java.lang.String)
    */
+  @Override
   public void setSeriesIDFilter(String seriesID) {
     this.seriesID = seriesID;
 
@@ -256,6 +280,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setStart(java.util.Date)
    */
+  @Override
   public void setStart(Date start) {
     this.start = start;
 
@@ -265,6 +290,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setTitleFilter(java.lang.String)
    */
+  @Override
   public void setTitleFilter(String titlePattern) {
     title = titlePattern;
 
@@ -274,6 +300,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#getOrderBy()
    */
+  @Override
   public String getOrderBy() {
     return orderBy;
   }
@@ -286,6 +313,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerFilter#setOrderBy(java.lang.String)
    */
+  @Override
   public boolean setOrderBy(String order) throws IllegalArgumentException {
     if (order == null) {
       logger.error ("Order is null");
@@ -310,6 +338,7 @@ public class SchedulerFilterImpl implements SchedulerFilter {
    * {@inheritDoc}
    * @see java.lang.Object#toString()
    */
+  @Override
   public String toString () {
     String result = "SchedulerFilter = ";
     if (attendee != null) result += "attendee pattern = "+attendee+", ";

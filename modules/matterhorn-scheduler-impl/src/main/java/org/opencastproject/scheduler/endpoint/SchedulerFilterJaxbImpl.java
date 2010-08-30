@@ -132,7 +132,7 @@ public class SchedulerFilterJaxbImpl {
    *  @return   instantiated event SchdeulerFilterJaxbImpl.
    */
   public static SchedulerFilterJaxbImpl valueOf(String xmlString) throws Exception {
-    return (SchedulerFilterJaxbImpl) SchedulerBuilder.getInstance().parseSchedulerFilterJaxbImpl(xmlString);
+    return SchedulerBuilder.getInstance().parseSchedulerFilterJaxbImpl(xmlString);
   }
   
 }
