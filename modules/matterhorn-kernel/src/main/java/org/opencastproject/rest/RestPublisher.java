@@ -18,6 +18,7 @@ package org.opencastproject.rest;
 import org.apache.cxf.Bus;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxrs.lifecycle.SingletonResourceProvider;
+import org.apache.cxf.jaxrs.provider.JSONProvider;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -93,12 +94,30 @@ public class RestPublisher {
       return;
     }
     servletMap.put(alias, cxf);
+
+    // Set up cxf
     Bus bus = cxf.getBus();
     JAXRSServerFactoryBean factory = new JAXRSServerFactoryBean();
     factory.setBus(bus);
+    
+    // Add custom interceptors
+    factory.getInInterceptors().add(new JsonpInInterceptor());
+    factory.getOutInterceptors().add(new JsonpPreOutInterceptor());
+    factory.getOutInterceptors().add(new JsonpPostOutInterceptor());
+
+    // Remove namespaces from json, since it's not useful for us
+    JSONProvider jsonProvider = new JSONProvider();
+    jsonProvider.setIgnoreNamespaces(true);
+    factory.setProvider(jsonProvider);
+    
+    // Set the service class
     factory.setServiceClass(service.getClass());
     factory.setResourceProvider(service.getClass(), new SingletonResourceProvider(service));
+
+    // Set the address to '/', which will force the use of the http service
     factory.setAddress("/");
+    
+    // Use the cxf classloader itself to create the cxf server
     ClassLoader bundleClassLoader = Thread.currentThread().getContextClassLoader();
     ClassLoader delegateClassLoader = JAXRSServerFactoryBean.class.getClassLoader();
     try {

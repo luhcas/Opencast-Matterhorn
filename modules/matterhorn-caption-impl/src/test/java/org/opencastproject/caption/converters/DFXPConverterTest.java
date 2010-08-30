@@ -41,7 +41,8 @@ public class DFXPConverterTest {
   // resulting output stream
   private ByteArrayOutputStream outputStream;
   // expected output
-  private String expectedOutput = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+  
+  private String expectedOutput = "<?xml version=\"1.0\" encoding=\"UTF-8\"";
 
   @Before
   public void setup() throws IOException {

@@ -82,7 +82,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.cxf</groupId>
-      <artifactId>cxf-bundle-minimal</artifactId>
+      <artifactId>cxf-bundle-jaxrs</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

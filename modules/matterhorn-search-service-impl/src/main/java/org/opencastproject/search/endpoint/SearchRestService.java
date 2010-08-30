@@ -192,8 +192,21 @@ public class SearchRestService {
   }
   
   @GET
+  @Path("series.json")
+  @Produces(MediaType.APPLICATION_JSON)
+  public SearchResultImpl getEpisodeAndSeriesByIdAsJson(
+          @QueryParam("id") String id,
+          @QueryParam("q") String text,
+          @QueryParam("episodes") boolean includeEpisodes,
+          @QueryParam("series") boolean includeSeries,
+          @QueryParam("limit") int limit,
+          @QueryParam("offset") int offset) {
+    return getEpisodeAndSeriesById(id, text, includeEpisodes, includeSeries, limit, offset);
+  }
+
+  @GET
   @Path("series")
-  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_JSON})
+  @Produces(MediaType.APPLICATION_XML)
   public SearchResultImpl getEpisodeAndSeriesById(
           @QueryParam("id") String id,
           @QueryParam("q") String text,
@@ -226,8 +239,21 @@ public class SearchRestService {
   }
 
   @GET
+  @Path("episode.json")
+  @Produces(MediaType.APPLICATION_JSON)
+  public SearchResultImpl getEpisodeAsJson(
+          @QueryParam("id") String id,
+          @QueryParam("q") String text,
+          @QueryParam("tag") String[] tags,
+          @QueryParam("flavor") String[] flavors,
+          @QueryParam("limit") int limit,
+          @QueryParam("offset") int offset) {
+    return getEpisode(id, text, tags, flavors, limit, offset);
+  }
+  
+  @GET
   @Path("episode")
-  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_JSON})
+  @Produces(MediaType.APPLICATION_XML)
   public SearchResultImpl getEpisode(
           @QueryParam("id") String id,
           @QueryParam("q") String text,
@@ -259,7 +285,7 @@ public class SearchRestService {
   }
 
   @GET
-  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_JSON})
+  @Produces(MediaType.APPLICATION_XML)
   public SearchResultImpl getEpisodesAndSeries(
           @QueryParam("q") String text,
           @QueryParam("limit") int limit,
@@ -278,7 +304,7 @@ public class SearchRestService {
   
   @GET
   @Path("lucene")
-  @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_ATOM_XML, MediaType.APPLICATION_JSON})
+  @Produces(MediaType.APPLICATION_XML)
   public SearchResultImpl getByLuceneQuery(
           @QueryParam("q") String q,
           @QueryParam("limit") int limit,
@@ -292,4 +318,15 @@ public class SearchRestService {
     query.withOffset(offset);
     return (SearchResultImpl) searchService.getByQuery(query);
   }
+
+  @GET
+  @Path("lucene.json")
+  @Produces(MediaType.APPLICATION_JSON)
+  public SearchResultImpl getByLuceneQueryAsJson(
+          @QueryParam("q") String q,
+          @QueryParam("limit") int limit,
+          @QueryParam("offset") int offset) {
+    return getByLuceneQuery(q, limit, offset);
+  }
+
 }

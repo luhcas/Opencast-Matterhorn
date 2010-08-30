@@ -671,7 +671,7 @@
       <!-- CXF -->
       <dependency>
         <groupId>org.apache.cxf</groupId>
-        <artifactId>cxf-bundle-minimal</artifactId>
+        <artifactId>cxf-bundle-jaxrs</artifactId>
         <version>2.2.9</version>
       </dependency>
 
