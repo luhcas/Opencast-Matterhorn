@@ -15,32 +15,15 @@
  */
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.inspection.api.MediaInspectionService;
-import org.opencastproject.mediapackage.Catalog;
-import org.opencastproject.mediapackage.EName;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.mediapackage.MediaPackageImpl;
-import org.opencastproject.mediapackage.MediaPackageMetadata;
-import org.opencastproject.mediapackage.Track;
-import org.opencastproject.metadata.dublincore.DublinCore;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
-import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
-import org.opencastproject.metadata.dublincore.DublinCoreValue;
-import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.mediapackage.identifier.IdImpl;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
-import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
-import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
-import org.opencastproject.workspace.api.Workspace;
-
-import org.easymock.EasyMock;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,13 +31,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
-import java.io.InputStream;
-import java.net.URI;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class CLIWorkflowOperationHandlerTest {
@@ -81,6 +60,7 @@ public class CLIWorkflowOperationHandlerTest {
   private boolean isLinux(){
     return System.getProperty("os.name").toLowerCase().equals("linux");
   }
+   
   
   /**
    * Creates a new CLI workflow and readies the engine for processing
@@ -101,6 +81,82 @@ public class CLIWorkflowOperationHandlerTest {
     workflowInstance.next(); // Simulate starting the workflow      
     return new InstanceAndHandler(workflowInstance,cliHandler);
   }
+
+  /**
+   * Tests the xpath replacement in the CLI handler
+   * @throws Exception 
+   */
+
+  @Test
+  public void testVariableSubstitution() throws Exception {
+      //create a dummy mediapackage
+      MediaPackageBuilderFactory factory = MediaPackageBuilderFactory.newInstance();
+      MediaPackageBuilder builder = factory.newMediaPackageBuilder();
+      MediaPackage mp = builder.createNew( new IdImpl("blah") );
+      mp.addContributor("chris");
+      mp.addContributor("greg");
+      
+      //test the trivial
+      InstanceAndHandler tuple = createCLIWorkflow("","");
+      CLIWorkflowOperationHandler handler = (CLIWorkflowOperationHandler) tuple.workflowHandler;
+      
+      // test the case where the whole work is a string replacement
+      try{
+        String s = handler.substituteVariables("#{//mediapackage/@id}", mp);
+        Assert.assertTrue(s.equals("blah"));
+      }
+      catch (Exception e){
+        Assert.fail("Simple parameter that is a single replacement values failed");
+      }
+
+      // test the case where the replacement string has the right characters but is not formed (should just return params
+      try{
+        String s = handler.substituteVariables("-r /bob/#44/{123-123}", mp);
+        Assert.assertTrue(s.equals("-r /bob/#44/{123-123}"));
+      }
+      catch (Exception e){
+        Assert.fail("String without replacement variables failed ");
+      }
+      
+      //test a single substitution
+      //this should not throw and exception
+      try{
+        String result = handler.substituteVariables("/backups/#{//mediapackage/@id}", mp);
+        Assert.assertTrue( result.equals("/backups/blah") );
+      }
+      catch (Exception e){
+        Assert.fail("String with replacement variables failed ");
+      }
+      
+      //test a double substitution
+      //this should not throw and exception
+      try{
+        String result = handler.substituteVariables("/backups/#{//mediapackage/@id}/1 /backups/#{//mediapackage/@id}/2", mp);
+        Assert.assertTrue( result.equals("/backups/blah/1 /backups/blah/2") );
+      }
+      catch (Exception e){
+        Assert.fail("String with 2 replacement variables failed ");
+      }
+      //test a triple substitution
+      //this should not throw and exception
+      try{
+        String result = handler.substituteVariables("/backups/#{//mediapackage/@id}/1 /backups/#{//mediapackage/@id}/2 /backups/#{//mediapackage/@id}/3", mp);
+        Assert.assertTrue( result.equals("/backups/blah/1 /backups/blah/2 /backups/blah/3") );
+      }
+      catch (Exception e){
+        Assert.fail("String with 3 replacement variables failed ");
+      }
+      //test substitution with more than one node returned
+      try{
+          String result = handler.substituteVariables("#{//contributor}", mp);
+          Assert.assertTrue( result.equals("chris,greg") );
+        }
+        catch (Exception e){
+          Assert.fail("String with multiple nodes in nodeset failed");
+        }
+      
+  }
+
   
   //test that a filename containing media package is returned correctly
   @Test
@@ -215,4 +271,39 @@ public class CLIWorkflowOperationHandlerTest {
       }
     }
   }
+  
+  @Test
+  public void testNoMediaPackageOperationMultipleParameters() throws Exception{
+    if ( isLinux() ){
+      try{
+        InstanceAndHandler tuple = createCLIWorkflow("/usr/bin/touch","/tmp/me /tmp/and /tmp/you");
+        
+        //start the flow
+        tuple.workflowHandler.start(tuple.workflowInstance).getMediaPackage();
+        File f1 = new File("/tmp/me");
+        Assert.assertTrue( f1.exists() );
+        File f2 = new File("/tmp/and");
+        Assert.assertTrue( f2.exists() );
+        File f3 = new File("/tmp/you");
+        Assert.assertTrue( f3.exists() );
+      }
+      finally{
+        try{
+          File f = new File("/tmp/me");
+          f.delete();
+
+          File f1 = new File("/tmp/and");
+          f1.delete();
+
+          File f2 = new File("/tmp/you");
+          f2.delete();
+        }
+        catch(Exception e){
+          //Suppressed
+        }
+      }
+    }
+  }
+  
+  
 }
