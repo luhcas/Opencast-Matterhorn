@@ -35,6 +35,27 @@
     <script type="text/javascript" src="js/search.js"></script>
     <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-initialize.js"></script>
     <script type="text/javascript" src="js/watch.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function(){
+          // parse the query string (TODO: move this into a js utility class)
+          function parseQueryString(qs) {
+            var urlParams = {};
+            var e,
+            d = function (s) { return decodeURIComponent(s.replace(/\+/g, " ")); },
+            q = window.location.search.substring(1),
+            r = /([^&=]+)=?([^&]*)/g;
+            while (e = r.exec(q))
+              urlParams[d(e[1])] = d(e[2]);
+            return urlParams;
+          }
+
+        if(parseQueryString(window.location.search.substring(1)).embed) {
+          $('#oc_title-bar').hide();
+          $('#oc_embed').hide();
+          $('#oc_btn-embed').hide();
+        }
+      })
+    </script>
   </head>
 
   <body>
