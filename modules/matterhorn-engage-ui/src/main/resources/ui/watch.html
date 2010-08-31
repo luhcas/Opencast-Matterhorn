@@ -14,6 +14,9 @@
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/opencast-reset.css" />
     <link rel="stylesheet" type="text/css" href="jquery/plugins/jwysiwyg/jquery.wysiwyg.css"  />
     <link rel="stylesheet" type="text/css" href="css/oc.segments.css">
+    <style type="text/css">
+      .scroll {height: 100px; overflow: scroll;}
+    </style>
 
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
@@ -53,6 +56,7 @@
           $('#oc_title-bar').hide();
           $('#oc_embed').hide();
           $('#oc_btn-embed').hide();
+          $('#oc_slidetext').addClass('scroll');
         }
       })
     </script>

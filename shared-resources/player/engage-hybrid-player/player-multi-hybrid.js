@@ -471,7 +471,8 @@ Opencast.Player = (function () {
      */
     function showSlideText()
     {
-        $("#oc_slidetext").attr("className", "oc_DisplayBlock-textleft");
+        $("#oc_slidetext").removeClass("oc_DisplayNone");
+        $("#oc_slidetext").addClass("oc_DisplayBlock-textleft");
         $("#oc_btn-slidetext").attr({ 
             alt: SLIDETEXTHIDE,
             title: SLIDETEXTHIDE,
@@ -486,7 +487,8 @@ Opencast.Player = (function () {
      */
     function hideSlideText()
     {
-        $("#oc_slidetext").attr("className", "oc_DisplayNone");
+        $("#oc_slidetext").removeClass("oc_DisplayBlock-textleft");
+        $("#oc_slidetext").addClass("oc_DisplayNone");
         $("#oc_btn-slidetext").attr({ 
             alt: SLIDETEXT,
             title: SLIDETEXT,
@@ -950,7 +952,7 @@ Opencast.Player = (function () {
     function stopRewind()
     {
         
-    	if (intvalRewind !== "")
+      if (intvalRewind !== "")
         {
             window.clearInterval(intvalRewind);
             intvalRewind = "";
@@ -1538,7 +1540,7 @@ Opencast.Player = (function () {
         }
         if(newPos <= $("#scubber-channel").width())
         {
-        	$("#draggable").css("left", newPos);
+          $("#draggable").css("left", newPos);
             $("#scrubber").css("left", newPos);
             $("#play-progress").css("width", newPos);
         }
@@ -1596,7 +1598,7 @@ Opencast.Player = (function () {
     function setVolumeSlider(newVolume) 
     {
         
-    	Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(SLIDERVOLUME), newVolume);
+      Opencast.ariaSlider.changeValueFromVideodisplay(Opencast.ariaSlider.getElementId(SLIDERVOLUME), newVolume);
     }
     
     /**
@@ -1654,7 +1656,7 @@ Opencast.Player = (function () {
         else if (displayMode === AUDIOPLAYER)
         {
             $('#oc_video-size-controls').css('display','none');
-        	//$("#oc_btn-dropdown").attr("className", "oc_btn-audioDisplay");
+          //$("#oc_btn-dropdown").attr("className", "oc_btn-audioDisplay");
             setDisplayMode(displayMode);
             setCurrentVideoSize(VIDEOSIZEAUDIO);
         }
