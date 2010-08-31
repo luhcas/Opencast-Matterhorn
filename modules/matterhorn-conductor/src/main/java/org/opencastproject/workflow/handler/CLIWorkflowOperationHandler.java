@@ -215,28 +215,88 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
   }
 
   /**
-   * This code is a hack to split parameters based on white space, but does not handle quoted strings or escaped
-   * whitespace/strings.
+   * Returns a list of strings broken on whitespace characters except where those
+   * whitespace characters are escaped or quoted.
+   * @return list of individual arguments
    */
-  ArrayList<String> splitParameters(String params) {
-    ArrayList<String> args = new ArrayList<String>();
-    String[] paramary = params.split(" ");
-    for (String item : paramary) {
-      args.add(item);
+  ArrayList<String> splitParameters(String input) {
+    
+    // this list stores the parsed input
+    ArrayList<String> parsedInput = new ArrayList<String>();
+   
+    try {
+      int index = 0; // the current index in parsedInput
+      parsedInput.add(index, "");
+     
+      // Parsing by character
+      for (int i = 0; i < input.length(); i++) {
+        char c = input.charAt(i); // get the next char
+       
+        // if it is whitespace we break into a new index, unless the current
+        // index is actually empty (i.e., multiple spaces in a row
+        if ((c == ' ' || c == '\t') && parsedInput.get(index).length() > 0) {
+          index++;
+          parsedInput.add(index, "");
+          continue;
+        }
+       
+        // if the character is a double or single quote, and not the escape char
+        // we append the character to the string located at the current index
+        // in parsedInput
+        if (c != '"' && c != '\'' && c != '\\') {
+          String token = parsedInput.remove(index);
+          token += c;
+          parsedInput.add(index, token);
+        }
+        // this handles the escape character, putting the character after it into
+        // the string, whatever it maybe
+        else if (c == '\\') {
+          i++;
+          c = input.charAt(i);
+          String token = parsedInput.remove(index);
+          token += c;
+          parsedInput.add(index, token);
+        }
+        // Parse the objects in quotes. Separate case for single vs double
+        else {
+          if (c == '"') {
+            if (parsedInput.get(index).length() > 0) {
+              index++;
+              parsedInput.add(index, "");
+            }
+            do {
+              i++;
+              c = input.charAt(i);
+              if (c != '"') {
+                String token = parsedInput.remove(index);
+                token += c;
+                parsedInput.add(index, token);
+              }
+            } while (c != '"');
+          }
+          else if (c == '\'') {
+            if (parsedInput.get(index).length() > 0) {
+              index++;
+              parsedInput.add(index, "");
+            }
+            do {
+              i++;
+              c = input.charAt(i);
+              if (c != '\'') {
+                String token = parsedInput.remove(index);
+                token += c;
+                parsedInput.add(index, token);
+              }
+            } while (c != '\'');
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
-    return args;
+   
+    return parsedInput;
   }
-
-  /*
-   * ArrayList<String> splitParameters(String input){ ArrayList<String> parameters = new ArrayList<String>(); //put the
-   * list of all quoted double quote indicies. These should be ignored. int nextQuote=input.indexOf("\"");
-   * 
-   * return parameters; }
-   * 
-   * private int findNextQuote(int position, String input){ boolean done=false; int nextQuote=-1 while (!done){
-   * nextQuote=input.indexOf("\"", position); if (nextQuote>0){ if
-   * (input.substring(nextQuote-1,nextQuote).equals("\\")){ continue; } } } return nextQuote; }
-   */
 
   /**
    * Replaces instances of the substring #{x} with values from the media package. Requires that x is a valid xpath

@@ -305,5 +305,13 @@ public class CLIWorkflowOperationHandlerTest {
     }
   }
   
+  @Test
+  public void testParametersString() throws Exception{
+    InstanceAndHandler tuple = createCLIWorkflow("/usr/bin/touch","/tmp/me /tmp/and /tmp/you");
+    CLIWorkflowOperationHandler handler = (CLIWorkflowOperationHandler) tuple.workflowHandler;
+    Assert.assertTrue( handler.splitParameters("one two three").size()==3 );
+    Assert.assertTrue( handler.splitParameters("\"one \'two\' three\"").get(0).equals("one \'two\' three") );
+    Assert.assertTrue( handler.splitParameters("one\\ two three").size()==2 );
+  }
   
 }
