@@ -15,7 +15,7 @@
       <ul class="no-bullets formField-list fl-controls-right">
         <li class="ui-helper-clearfix">
           <label class="fl-label">TV Norm:</label>
-          <select id="dvd.format" name="dvd.format" class="configField">
+          <select id="dvdformat" name="dvd.format" class="configField">
             <option value="pal">PAL</option>
             <option value="ntsc">NTSC</option>
           </select>
