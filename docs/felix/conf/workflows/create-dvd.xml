@@ -22,6 +22,19 @@
         </li>
       </ul>
     </fieldset>
+    <script type="text/javascript">
+      function registerWorkflowComponents(components){
+        /* components with keys that begin with 'org.opencastproject.workflow.config' will be passed
+         * into the workflow. The component's nodeKey must match the components array key.
+         *
+         * Example:'org.opencastproject.workflow.config.my.property' will be availible at ${my.property}
+         */
+        components['org.opencastproject.workflow.config.dvd.format'] = new AdminForm.Component(['dvdFormat'], {nodeKey: 'org.opencastproject.workflow.config.dvd.format'});
+      }
+      function setWorkflowComponentValues(values, components){
+        components['org.opencastproject.workflow.config.dvd.format'].setValue(values['org.opencastproject.workflow.config.dvd.format']);
+      }
+    </script>
 ]]>
   </configuration_panel>
 

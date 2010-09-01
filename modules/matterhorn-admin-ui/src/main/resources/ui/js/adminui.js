@@ -54,10 +54,11 @@ AdminUI.getURLParams = function(param) {
 
 AdminForm.components = {};
 
-AdminForm.Manager = function(rootElm, rootNs, components){
+AdminForm.Manager = function(rootElm, rootNs, components, workflowComponents){
   this.rootElm = rootElm;
   this.rootNs = rootNs;
   this.components = components;
+  this.workflowComponents = workflowComponents || {};
 };
 
 $.extend(AdminForm.Manager.prototype, {
@@ -72,14 +73,12 @@ $.extend(AdminForm.Manager.prototype, {
           this.components[c].toNode(mdlist);
         }
       }
-      doc.documentElement.appendChild(mdlist);
-      if(typeof XMLSerializer != 'undefined') {
-        return (new XMLSerializer()).serializeToString(doc);
-      } else if(doc.xml) {
-        return doc.xml;
-      } else { 
-        return false;
+      //handle OC Workflow specialness
+      for(var wc in this.workflowComponents){
+        this.workflowComponents[wc].toNode(mdlist);
       }
+      doc.documentElement.appendChild(mdlist);
+      return ocUtils.xmlToString(doc);
     }
     return false;
   },
@@ -211,7 +210,20 @@ $.extend(AdminForm.Component.prototype, {
       for(var el in this.fields){
         var e = this.fields[el];
         if(e.length){
-          values.push(e.val());
+          switch(e[0].type){
+            case 'checkbox':
+            case 'radio':
+              if(e.is(":checked")){
+                values.push('true');
+              }else{
+                values.push('false');
+              }
+              break;
+            case 'select-multiple':
+              values.concat(e.val());
+            default:
+              values.push(e.val());
+          }
         }
         this.value = values.join(',');
       } 
@@ -226,21 +238,24 @@ $.extend(AdminForm.Component.prototype, {
   setValue: function(val){
     for(var el in this.fields){
       if(this.fields[el].length){
-        this.fields[el].val(val);
+        switch(this.fields[el][0].type){
+          case 'checkbox':
+          case 'radio':
+            if(val == 'true'){
+              this.fields[el][0].checked = true;
+            }
+            break;
+          case 'select-multiple':
+            break;
+          default:
+            this.fields[el].val(val);
+        }
       }
     }
   },
   /** 
-   *  Default toString function
-   *  @return A string of the Components value.
-   *	@type String
-   */
-  toString:  function(){
-    return this.getValue();
-  },
-  /** 
    *  Add this because IE seems to use the default toString() of Object instead of the definition above (MH-5097)
-   *
+   *  Default toString function
    *  @return A string of the Components value.
    *	@type String
    */

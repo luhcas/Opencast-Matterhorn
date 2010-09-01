@@ -15,13 +15,13 @@
       <ul class="no-bullets formField-list fl-controls-right">
         <li class="ui-helper-clearfix"> 
           <span id="holdconfig" style="float:left;">
-            <input id="review.hold" name="review.hold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;" style="float:left;">
+            <input id="reviewHold" name="review.hold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;" style="float:left;">
             <span id="i18n_hold_for_review">&nbsp;Review before encoding (with option to edit info)</span>
           </span>
          </li>
          <li class="ui-helper-clearfix">
           <span id="captionconfig" style="float:left;">
-            <input id="caption.hold" name="caption.hold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;">
+            <input id="captionHold" name="caption.hold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;">
             <span id="i18n_hold_for_caption">&nbsp;Captions file upload</span>
           </span>
          </li>
@@ -51,6 +51,24 @@
         </li>
       </ul>
     </fieldset>
+    <script type="text/javascript">
+      WorkflowPanel = WorkflowPanel || {};
+      function WorkflowPanel.registerPanelComponents(components){
+        components.reviewhold = new Component(
+          ['reviewHold'],
+          {nodeKey: 'org.opencastproject.workflow.config.review.hold'},
+          {getValue: function(){ return this.fields.reviewHold.is(":checked"); }
+          });
+          
+        components.captionhold = new Component(
+          ['captionHold'],
+          {nodeKey: 'org.opencastproject.workflow.config.caption.hold'},
+          {getValue: function(){ return this.fields.reviewCaption.is(":checked");}
+          });
+          
+          //etc...
+      }
+    </script>
   ]]>
   </configuration_panel>
 

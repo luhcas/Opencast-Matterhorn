@@ -305,7 +305,7 @@ public class WorkflowRestService {
    * @return config panel HTML snippet
    */
   @GET
-  @Produces(MediaType.APPLICATION_XML)
+  @Produces(MediaType.TEXT_HTML)
   @Path("configurationPanel")
   public Response getConfigurationPanel(@QueryParam("definitionId") String definitionId) {
     try {

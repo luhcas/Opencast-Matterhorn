@@ -51,91 +51,6 @@ UI.Init = function(){
 
   Scheduler.FormManager = new AdminForm.Manager(SINGLE_EVENT_ROOT_ELM, '', Scheduler.components);
   
-  $.extend(Scheduler.FormManager, {
-    serialize: function(){
-      var doc, mdlist, ocwprops, review, caption, workflow, key, value;
-      if(Scheduler.conflictingEvents){
-        return false;
-      }
-      if(this.validate()){
-        doc = this.createDoc();
-        mdlist = doc.createElement('metadataList');
-        for(var c in this.components){
-          if(c === 'recurrence' || c === 'eventId'){
-            this.components[c].toNode(doc.documentElement)
-          } else {
-            this.components[c].toNode(mdlist);
-          }
-        }
-        //handle OC Workflow specialness
-        ocwprops = ocWorkflow.getConfiguration($('#workflow-config-container'));
-
-
-        // FIXME: This should be a loop over the form values, not hard coded to variables from specific workflow definitions.
-        
-        //Review Hold
-        review = doc.createElement('metadata');
-        key = doc.createElement('key');
-        key.appendChild(doc.createTextNode('org.opencastproject.workflow.config.review.hold'));
-        review.appendChild(key);
-        value = doc.createElement('value');
-        if( ocwprops['review.hold'] ){
-          value.appendChild(doc.createTextNode(ocwprops['review.hold']));
-        } else {
-          value.appendChild(doc.createTextNode("false"));
-        }
-        review.appendChild(value);
-        mdlist.appendChild(review);
-        
-        //Caption Hold
-        caption = doc.createElement('metadata');
-        key = doc.createElement('key');
-        key.appendChild(doc.createTextNode('org.opencastproject.workflow.config.caption.hold'));
-        caption.appendChild(key);
-        value = doc.createElement('value');
-        if( ocwprops['caption.hold'] ) {
-          value.appendChild(doc.createTextNode(ocwprops['caption.hold']));
-        } else {
-          value.appendChild(doc.createTextNode("false"));
-        }
-        caption.appendChild(value);
-        mdlist.appendChild(caption);
-
-        //DVD
-        caption = doc.createElement('metadata');
-        key = doc.createElement('key');
-        key.appendChild(doc.createTextNode('org.opencastproject.workflow.config.dvd.format'));
-        caption.appendChild(key);
-        value = doc.createElement('value');
-        if( ocwprops['dvd.format'] ) {
-          value.appendChild(doc.createTextNode(ocwprops['dvd.format']));
-        }
-        caption.appendChild(value);
-        mdlist.appendChild(caption);
-        
-        //Workflow selection
-        workflow = doc.createElement('metadata');
-        key = doc.createElement('key');
-        key.appendChild(doc.createTextNode('org.opencastproject.workflow.definition'));
-        workflow.appendChild(key);
-        value = doc.createElement('value');
-        value.appendChild(doc.createTextNode($('#workflow-selector').val()))
-        workflow.appendChild(value);
-        mdlist.appendChild(workflow);
-        
-        doc.documentElement.appendChild(mdlist);
-        if(typeof XMLSerializer != 'undefined') {
-          return (new XMLSerializer()).serializeToString(doc);
-        } else if(doc.xml) {
-          return doc.xml;
-        } else { 
-          return false;
-        }
-      }
-      return false;
-    }
-  });
-  
   if(Scheduler.type === SINGLE_EVENT){
     UI.agentList = '#agent';
     UI.inputList = '#input-list';
@@ -532,13 +447,22 @@ UI.HandleAgentList = function(data) {
 
 UI.LoadEvent = function(doc){
   var metadata = {};
+  var workflowProperties = {};
   $.each($('metadataList > metadata',doc), function(i,v){
-    metadata[$('key', v).text()] = $('value', v).text();
+    if($('key', v).text().indexOf('org.opencastproject.workflow') > -1){
+      workflowProperties[$('key', v).text()] = $('value', v).text();
+    }else{
+      metadata[$('key', v).text()] = $('value', v).text();
+    }
   });
   $.each($('completeMetadata > metadata',doc), function(i,v){
-    if(metadata[$('key', v).text()] == undefined){1
+    if(metadata[$('key', v).text()] == undefined){
       //feild not in list, add it.
-      metadata[$('key', v).text()] = $('value', v).text();
+      if($('key', v).text().indexOf('org.opencastproject.workflow') > -1){
+        workflowProperties[$('key', v).text()] = $('value', v).text();
+      }else{
+        metadata[$('key', v).text()] = $('value', v).text();
+      }
     }
   });
   if(metadata['resources']){
@@ -554,15 +478,14 @@ UI.LoadEvent = function(doc){
     Scheduler.components.recurrenceId = new AdminForm.Component(['recurrenceId']);
     Scheduler.components.recurrencePosition = new AdminForm.Component(['recurrencePosition']);
   }
-  if(metadata['org.opencastproject.workflow.config.review.hold'] === 'true'){
-    document.getElementById('review.hold').checked = true;
-  }else{
-    document.getElementById('review.hold').checked = false;
-  }
-  if(metadata['org.opencastproject.workflow.config.caption.hold'] == 'true'){
-    document.getElementById('caption.hold').checked = true;
-  }else{
-    document.getElementById('caption.hold').checked = false;
+  if(workflowProperties['org.opencastproject.workflow.definition']){
+    Scheduler.components.workflowDefinition.setValue(workflowProperties['org.opencastproject.workflow.definition']);
+    ocWorkflow.definitionSelected(workflowProperties['org.opencastproject.workflow.definition'],
+      $('#workflow-config-container'),
+      function(){
+        registerWorkflowComponents(Scheduler.FormManager.workflowComponents);
+        setWorkflowComponentValues(workflowProperties, Scheduler.FormManager.workflowComponents);
+      });
   }
   Scheduler.FormManager.populate(metadata)
   $('#agent').change(); //update the selected agent's capabilities
@@ -694,7 +617,7 @@ UI.RegisterComponents = function(){
   Scheduler.components.subject = new AdminForm.Component(['subject'], {label: 'label-subject'});
   Scheduler.components.language = new AdminForm.Component(['language'], {label: 'label-subject'});
   Scheduler.components.description = new AdminForm.Component(['description'], {label: 'label-description'});
-  Scheduler.components.license = new AdminForm.Component(['license'], {label: 'i18n_license_label', required: true},
+  /*Scheduler.components.license = new AdminForm.Component(['license'], {label: 'i18n_license_label', required: true},
     { validate: function(){
         var license;
         if(this.fields.license){
@@ -708,7 +631,7 @@ UI.RegisterComponents = function(){
         }
         return false;
       }
-    });
+    });*/
   Scheduler.components.resources = new AdminForm.Component([],
     { label: 'i18n_input_label', errorField: 'missing-inputs', nodeKey: 'resources' },
     { getValue: function(){
@@ -746,6 +669,7 @@ UI.RegisterComponents = function(){
         return checked;
       }
     });
+  Scheduler.components.workflowDefinition = new AdminForm.Component(['workflow-selector'], {nodeKey: 'org.opencastproject.workflow.definition'})
   if(Scheduler.type === MULTIPLE_EVENTS){
     //Series validation override for recurring events.
     Scheduler.components.seriesId.validate = function(){

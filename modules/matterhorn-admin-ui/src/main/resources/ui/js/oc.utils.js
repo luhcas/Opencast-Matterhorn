@@ -39,3 +39,24 @@ ocUtils.createDoc = function(rootEl, rootNS){
   }
   return doc;
 }
+
+ocUtils.toICalDate = function(d){
+  if(d.constructor != Date){
+    d = new Date(0);
+  }
+  var month = UI.padstring(d.getUTCMonth() + 1, '0', 2);
+  var hours = UI.padstring(d.getUTCHours(), '0', 2);
+  var minutes = UI.padstring(d.getUTCMinutes(), '0', 2);
+  var seconds = UI.padstring(d.getUTCSeconds(), '0', 2);
+  return '' + d.getUTCFullYear() + month + d.getUTCDate() + 'T' + hours + minutes + seconds + 'Z';
+}
+
+ocUtils.padstring = function(str, pad, padlen){
+  if(typeof str != 'string'){ 
+    str = str.toString();
+  }
+  while(str.length < padlen && pad.length > 0){
+    str = pad + str;
+  }
+  return str;
+}

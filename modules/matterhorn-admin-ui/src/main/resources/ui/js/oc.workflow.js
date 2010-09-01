@@ -3,7 +3,7 @@ var ocWorkflow = {};
 ocWorkflow.init = function(selectElm, configContainer) {
   ocWorkflow.container = configContainer;
   ocWorkflow.selector = selectElm;
-  $(ocWorkflow.selector).click( function() {
+  $(ocWorkflow.selector).change( function() {
     ocWorkflow.definitionSelected($(this).val(), configContainer);
   });
   ocWorkflow.loadDefinitions(selectElm, configContainer);
@@ -33,13 +33,18 @@ ocWorkflow.loadDefinitions = function(selector, container) {
 }
 
 ocWorkflow.definitionSelected = function(defId, container, callback) {
-  $(container).load(
-    '../workflow/rest/configurationPanel?definitionId=' + defId,
+  $(container).load('../workflow/rest/configurationPanel?definitionId=' + defId,
     function() {
       $('.holdCheckbox').attr('checked', false);
       $(container).show('fast');
       if (callback) {
         callback();
+      }
+      if(registerWorkflowComponents && Scheduler && Scheduler.FormManager){
+        Scheduler.FormManager.workflowComponents = {}; //Clear the previously selected panel's components
+        registerWorkflowComponents(Scheduler.FormManager.workflowComponents);
+      }else{
+        AdminUI.log("component registration handler not found.");
       }
     }
   );
