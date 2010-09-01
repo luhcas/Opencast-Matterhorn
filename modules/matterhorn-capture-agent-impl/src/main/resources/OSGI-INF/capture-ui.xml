@@ -4,6 +4,7 @@
   <implementation class="org.opencastproject.http.StaticResource" />
   <property name="service.description" value="Capture UI" />
   <property name="alias" value="/capture" />
+  <property name="contextId" value="opencast.httpcontext" />
   <property name="classpath" value="/ui" />
   <property name="welcome.file" value="index.html" />
   <service>

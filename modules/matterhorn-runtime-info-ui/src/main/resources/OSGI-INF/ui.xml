@@ -4,10 +4,11 @@
   <implementation class="org.opencastproject.http.StaticResource" />
   <property name="service.description" value="Matterhorn welcome pages" />
   <property name="alias" value="/" />
+  <property name="contextId" value="opencast.httpcontext" />
   <property name="classpath" value="/ui" />
   <property name="welcome.file" value="welcome.html" />
   <property name="test.classpath" value="/uitests" />
   <service>
-    <provide interface="org.opencastproject.http.StaticResource" />
+    <provide interface="javax.servlet.Servlet" />
   </service>
 </scr:component>

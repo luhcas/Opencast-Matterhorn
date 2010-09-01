@@ -28,7 +28,7 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpHead;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -131,7 +130,15 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
 
     // HttpClient doesn't handle the request dynamics for other verbs (especially when sending a streamed multipart
     // request), so we need to handle the details of the digest auth back-and-forth manually
-    String[] realmAndNonce = getRealmAndNonce(httpClient, httpUriRequest.getURI());
+    HttpRequestBase digestRequest;
+    try {
+      digestRequest = (HttpRequestBase) httpUriRequest.getClass().newInstance();
+    } catch (Exception e) {
+      throw new IllegalStateException("Can not create a new " + httpUriRequest.getClass().getName());
+    }
+    digestRequest.setURI(httpUriRequest.getURI());
+    digestRequest.addHeader(REQUESTED_AUTH_HEADER, DIGEST_AUTH);
+    String[] realmAndNonce = getRealmAndNonce(digestRequest);
     
     if(realmAndNonce != null) {
       // Set the user/pass
@@ -197,24 +204,24 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
   }
 
   /**
-   * Perform a HEAD request to the URI, and extract the realm and nonce values
+   * Perform a request, and extract the realm and nonce values
    * 
-   * @param httpClient The client to use in executing the HEAD
-   * @param uri The URI for the request
+   * @param request The request to execute in order to obtain the realm and nonce
    * @return A String[] containing the {realm, nonce}
    */
-  protected String[] getRealmAndNonce(HttpClient httpClient, URI uri) {
-    HttpHead head = new HttpHead(uri);
-    head.addHeader(REQUESTED_AUTH_HEADER, DIGEST_AUTH);
-    HttpResponse headResponse;
+  protected String[] getRealmAndNonce(HttpRequestBase request) {
+    DefaultHttpClient httpClient = new DefaultHttpClient();
+    HttpResponse response;
     try {
-      headResponse = httpClient.execute(head);
+      response = httpClient.execute(request);
     } catch (IOException e) {
+      httpClient.getConnectionManager().shutdown();
       throw new TrustedHttpClientException(e);
     }
-    Header[] headers = headResponse.getHeaders("WWW-Authenticate");
+    Header[] headers = response.getHeaders("WWW-Authenticate");
     if(headers == null || headers.length == 0) {
-      logger.warn("URI {} does not support digest authentication", uri);
+      logger.warn("URI {} does not support digest authentication", request.getURI());
+      httpClient.getConnectionManager().shutdown();
       return null;
     }
     Header authRequiredResponseHeader = headers[0];
@@ -227,6 +234,7 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
         realm = element.getValue();
       }
     }
+    httpClient.getConnectionManager().shutdown();
     return new String[] {realm, nonce};
   }
   

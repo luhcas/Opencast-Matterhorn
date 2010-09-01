@@ -43,9 +43,15 @@ Recordings.init = function() {
   AdminUI.internationalize(i18n, 'i18n');
   
   // get config
-  $.getJSON("/info.json", function(data) {
+  $.getJSON("/info/rest/components.json", function(data) {
     Recordings.configuration = data;
     $('#engagelink').attr('href', data.engage + '/engage/ui');
+  });
+
+  // get 'me'
+  $.getJSON("/info/rest/me.json", function(data) {
+    Recordings.me = data;
+    $('#logout').append(" '" + data.username + "'");
   });
 
   // Event: clicked somewhere

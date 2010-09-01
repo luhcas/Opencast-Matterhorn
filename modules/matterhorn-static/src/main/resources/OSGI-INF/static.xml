@@ -3,8 +3,9 @@
  name="org.opencastproject.fsresources.StaticResourceServlet" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.fsresources.StaticResourceServlet" />
   <property name="service.description" value="Opencast Download Resources" />
-  <reference name="http-service" interface="org.osgi.service.http.HttpService"
-    cardinality="1..1" policy="static" bind="setHttpService" />
-  <reference name="http-context" interface="org.osgi.service.http.HttpContext"
-    cardinality="1..1" policy="static" bind="setHttpContext" />
+  <property name="alias" value="/static" />
+  <property name="contextId" value="opencast.httpcontext" />
+  <service>
+    <provide interface="javax.servlet.Servlet" />
+  </service>
 </scr:component>

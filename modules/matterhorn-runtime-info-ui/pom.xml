@@ -135,8 +135,12 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Private-Package>org.opencastproject.runtimeinfo,
-              org.json.*, ui.*</Private-Package>
+            <Private-Package>
+              ui.*,
+              org.json.*,
+              org.opencastproject.runtimeinfo
+            </Private-Package>
+            <Import-Package>org.opencastproject.http, *;resolution:=optional</Import-Package>
             <Embed-Dependency>*;scope=compile|runtime;inline=true</Embed-Dependency>
             <Service-Component>
               OSGI-INF/ui.xml,

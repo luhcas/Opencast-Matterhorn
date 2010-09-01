@@ -4,9 +4,10 @@
   <implementation class="org.opencastproject.http.StaticResource" />
   <property name="service.description" value="Workflow Samples" />
   <property name="alias" value="/workflow/samples" />
+  <property name="contextId" value="opencast.httpcontext" />
   <property name="classpath" value="/sample" />
   <property name="welcome.file" value="index.txt" />
   <service>
-    <provide interface="org.opencastproject.http.StaticResource" />
+    <provide interface="javax.servlet.Servlet" />
   </service>
 </scr:component>

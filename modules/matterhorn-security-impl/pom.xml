@@ -121,6 +121,7 @@
             <Export-Package> org.opencastproject.security;version=${project.version} </Export-Package>
             <Service-Component>
               OSGI-INF/http-client.xml,
+              OSGI-INF/security-service.xml,
               OSGI-INF/security-config-scanner.xml
             </Service-Component>
           </instructions>

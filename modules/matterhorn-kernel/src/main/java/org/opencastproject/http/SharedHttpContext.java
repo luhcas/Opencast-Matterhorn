@@ -39,15 +39,22 @@ import javax.servlet.http.HttpServletResponse;
  * {@link HttpContext} that is registered with the OSGi service registry.
  */
 public class SharedHttpContext implements HttpContext {
+  /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(SharedHttpContext.class);
 
+  /** The ID by which this http context is known by the extended http service */
+  public static final String HTTP_CONTEXT_ID = "opencast.httpcontext";
+
+  /** This osgi bundle's bundlecontext */
   protected BundleContext bundleContext = null;
 
+  /** Activate the component */
   public void activate(ComponentContext cc) {
     this.bundleContext = cc.getBundleContext();
     logger.debug("Shared http context activated with bundle context {}", this.bundleContext);
   }
 
+  /** Deactivate the component */
   public void deactivate() {
     this.bundleContext = null;
     logger.debug("Shared http context deactivated");
@@ -81,25 +88,13 @@ public class SharedHttpContext implements HttpContext {
    */
   @Override
   public boolean handleSecurity(HttpServletRequest request, HttpServletResponse response) throws IOException {
-    ServiceReference[] refs;
+    // Let the filters handle security.  If there are none, don't let the request through
+    ServiceReference[] filterRefs;
     try {
-      refs = bundleContext.getServiceReferences(Filter.class.getName(), "(org.opencastproject.filter=true)");
+      filterRefs = bundleContext.getAllServiceReferences(Filter.class.getName(), null);
+      return filterRefs != null && filterRefs.length > 0;
     } catch (InvalidSyntaxException e) {
-      logger.warn(e.getMessage(), e);
-      return false;
-    }
-    if (refs == null || refs.length == 0) {
-     logger.warn("Requests are not permitted without a registered matterhorn security filter.");
-     return false;
-    }
-    Filter[] filters = new Filter[refs.length];
-    for (int i = 0; i < refs.length; i++)
-      filters[i] = (Filter) bundleContext.getService(refs[i]);
-    try {
-      new Chain(filters).doFilter(request, response);
-      return !response.isCommitted();
-    } catch (ServletException e) {
-      logger.warn(e.getMessage(), e);
+      logger.error(e.getMessage(), e);
       return false;
     }
   }

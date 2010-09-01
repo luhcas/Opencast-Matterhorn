@@ -4,20 +4,17 @@
   <component name="org.opencastproject.rest.RestPublisher" immediate="true" activate="activate" deactivate="deactivate">
     <implementation class="org.opencastproject.rest.RestPublisher" />
     <property name="service.description" value="Opencast REST Endpoint Publisher" />
-    <reference name="http-service" interface="org.osgi.service.http.HttpService" cardinality="1..1" policy="static"
-      bind="setHttpService" />
-    <reference name="http-context" interface="org.osgi.service.http.HttpContext" cardinality="1..1" policy="static"
-      bind="setHttpContext" />
   </component>
 
   <component name="org.opencastproject.rest.ui" immediate="true" activate="activate">
     <implementation class="org.opencastproject.http.StaticResource" />
     <property name="service.description" value="Support files for REST documentation" />
     <property name="alias" value="/restdocs" />
+    <property name="contextId" value="opencast.httpcontext" />
     <property name="classpath" value="/ui/restdocs" />
     <property name="welcome.file" value="template.xhtml" />
     <service>
-      <provide interface="org.opencastproject.http.StaticResource" />
+      <provide interface="javax.servlet.Servlet" />
     </service>
   </component>
 

@@ -15,18 +15,31 @@
  */
 package org.opencastproject.webconsole;
 
+import org.opencastproject.http.SharedHttpContext;
 import org.opencastproject.http.StaticResource;
 
+import org.apache.felix.webconsole.internal.servlet.OsgiManager;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+
+import java.util.Dictionary;
+import java.util.Hashtable;
+
+import javax.servlet.Servlet;
 
 /**
  * Activates the Felix web console, which has been customized for use in matterhorn
  */
 public class Activator implements BundleActivator {
   /** The static resource registration */
-  ServiceRegistration staticResourceRegistration = null;
+  protected ServiceRegistration staticResourceRegistration = null;
+  
+  /** The web console registration */
+  protected ServiceRegistration webConsoleRegistration;
+  
+  /** The web console servlet */
+  protected OsgiManager manager;
 
   /**
    * {@inheritDoc}
@@ -35,7 +48,16 @@ public class Activator implements BundleActivator {
   @Override
   public void start(BundleContext bundleContext) throws Exception {
     StaticResource staticResource = new StaticResource(bundleContext, "/res", "/system/console/res", null);
-    staticResourceRegistration = bundleContext.registerService(StaticResource.class.getName(), staticResource, null);
+    Dictionary<String, String> resourceProps = new Hashtable<String, String>();
+    resourceProps.put("contextId", SharedHttpContext.HTTP_CONTEXT_ID);
+    resourceProps.put("alias", "/system/console/res");
+    staticResourceRegistration = bundleContext.registerService(Servlet.class.getName(), staticResource, resourceProps);
+
+    manager = new WebConsole(bundleContext);
+    Dictionary<String, String> consoleProps = new Hashtable<String, String>();
+    consoleProps.put("alias", "/system/console");
+    consoleProps.put("contextId", SharedHttpContext.HTTP_CONTEXT_ID);
+    webConsoleRegistration = bundleContext.registerService(Servlet.class.getName(), manager, consoleProps);
   }
   
   /**
@@ -45,5 +67,7 @@ public class Activator implements BundleActivator {
   @Override
   public void stop(BundleContext bundleContext) throws Exception {
     staticResourceRegistration.unregister();
+    webConsoleRegistration.unregister();
+    manager.destroy();
   }
 }

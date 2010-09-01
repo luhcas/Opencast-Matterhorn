@@ -12,30 +12,30 @@
     <!--        URL SECURITY       -->
     <!-- ######################### -->
     <!--
-      Enable anonymous access to public resources.
-      Use filters="none" only if there are no audit requirements for these resources.
+      Enable anonymous access to public resources. Use filters="none" only if there are no audit requirements for these
+      resources.
     -->
-    <sec:intercept-url pattern='/login.html' access='ROLE_ANONYMOUS'/>
-    <sec:intercept-url pattern='/style.css' access='ROLE_ANONYMOUS, ROLE_USER, ROLE_ADMIN'/>
-    <sec:intercept-url pattern="/favicon.ico" filters="none"/>
-    <sec:intercept-url pattern="/admin/img/favicon.ico" filters="none"/>
-    <sec:intercept-url pattern='/images/**' filters="none"/>
-    <sec:intercept-url pattern="/img/**" filters="none"/>
-    <sec:intercept-url pattern="/js/**" filters="none"/>
-    <sec:intercept-url pattern="/css/**" filters="none"/>
+    <sec:intercept-url pattern='/login.html' access='ROLE_ANONYMOUS' />
+    <sec:intercept-url pattern="/admin/img/favicon.ico" filters="none" />
+    <sec:intercept-url pattern="/favicon.ico" filters="none" />
+    <sec:intercept-url pattern='/images/**' filters="none" />
+    <sec:intercept-url pattern="/img/**" filters="none" />
+    <sec:intercept-url pattern="/js/**" filters="none" />
+    <sec:intercept-url pattern='/style.css' filters='none' />
+    <sec:intercept-url pattern="/css/**" filters="none" />
 
     <!-- Enable anonymous access to the engage player and the GET endpoints it requires -->
-    <sec:intercept-url pattern='/engage/ui/**' access='ROLE_ANONYMOUS, ROLE_USER'/>
-    <sec:intercept-url pattern='/search/rest/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER'/>
-    <sec:intercept-url pattern='/feedback/rest/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER'/>
-    <sec:intercept-url pattern='/static/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER'/>
+    <sec:intercept-url pattern='/engage/ui/**' access='ROLE_ANONYMOUS, ROLE_USER' />
+    <sec:intercept-url pattern='/search/rest/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER' />
+    <sec:intercept-url pattern='/feedback/rest/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER' />
+    <sec:intercept-url pattern='/static/**' method="GET" access='ROLE_ANONYMOUS, ROLE_USER' />
 
     <!-- Secure the management URLs for admins only -->
-    <sec:intercept-url pattern='/remote.json' access='ROLE_ADMIN'/>
-    <sec:intercept-url pattern='/system/**' access='ROLE_ADMIN'/>
+    <sec:intercept-url pattern='/remote/*' access='ROLE_ADMIN' />
+    <sec:intercept-url pattern='/system/**' access='ROLE_ADMIN' />
 
     <!-- Everything else is for any logged in user -->
-    <sec:intercept-url pattern='/**' access='ROLE_USER, ROLE_ADMIN'/>
+    <sec:intercept-url pattern='/**' access='ROLE_USER, ROLE_ADMIN' />
 
     <!-- ######################### -->
     <!-- LOGIN / LOGOUT MECHANISMS -->
@@ -43,6 +43,7 @@
 
     <sec:custom-filter position="BASIC_AUTH_FILTER" ref="digestFilter" />
     <sec:custom-filter position="FORM_LOGIN_FILTER" ref="casFilter" />
+
     <sec:anonymous />
   </sec:http>
 

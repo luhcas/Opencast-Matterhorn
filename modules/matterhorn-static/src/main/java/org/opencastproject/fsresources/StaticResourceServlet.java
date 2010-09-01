@@ -16,8 +16,6 @@
 package org.opencastproject.fsresources;
 
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,19 +44,9 @@ public class StaticResourceServlet extends HttpServlet {
   private static final Logger logger = LoggerFactory.getLogger(StaticResourceServlet.class);
   private static final MimetypesFileTypeMap mimeMap = new MimetypesFileTypeMap();
 
-  protected HttpContext httpContext;
-  protected HttpService httpService;
   protected String distributionDirectory;
 
   public StaticResourceServlet() {
-  }
-
-  public void setHttpContext(HttpContext httpContext) {
-    this.httpContext = httpContext;
-  }
-
-  public void setHttpService(HttpService httpService) {
-    this.httpService = httpService;
   }
 
   public void activate(ComponentContext cc) {
@@ -73,20 +61,9 @@ public class StaticResourceServlet extends HttpServlet {
     if (distributionDirectory == null)
       distributionDirectory = System.getProperty("java.io.tmpdir") + File.separator + "opencast" + File.separator
               + "static";
-
-    try {
-      httpService.registerServlet("/static", this, null, httpContext);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
   }
 
   public void deactivate() {
-    try {
-      httpService.unregister("/static");
-    } catch (Exception e) {
-      logger.warn("Deactivation problem: {}", e.getMessage());
-    }
   }
 
   /**

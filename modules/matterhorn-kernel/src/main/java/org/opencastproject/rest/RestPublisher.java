@@ -15,6 +15,8 @@
  */
 package org.opencastproject.rest;
 
+import org.opencastproject.http.SharedHttpContext;
+
 import org.apache.cxf.Bus;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxrs.lifecycle.SingletonResourceProvider;
@@ -22,18 +24,18 @@ import org.apache.cxf.jaxrs.provider.JSONProvider;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.GenericServlet;
+import javax.servlet.Servlet;
 import javax.ws.rs.Path;
 
 /**
@@ -44,17 +46,15 @@ public class RestPublisher {
   public static final String SERVICE_PROPERTY = "opencast.rest.url";
   public static final String SERVICE_FILTER = "(" + SERVICE_PROPERTY + "=*)";
 
-  protected HttpService httpService;
-  protected HttpContext httpContext;
   protected ComponentContext componentContext;
   protected ServiceTracker tracker = null;
 
-  protected Map<String, GenericServlet> servletMap;
+  protected Map<String, ServiceRegistration> servletRegistrationMap;
 
   public void activate(ComponentContext componentContext) {
     logger.info("activate()");
     this.componentContext = componentContext;
-    this.servletMap = new ConcurrentHashMap<String, GenericServlet>();
+    this.servletRegistrationMap = new ConcurrentHashMap<String, ServiceRegistration>();
     try {
       tracker = new RestServiceTracker();
     } catch (InvalidSyntaxException e) {
@@ -86,15 +86,18 @@ public class RestPublisher {
     }
     String alias = (String) aliasObj;
     CXFNonSpringServlet cxf = new CXFNonSpringServlet();
+    ServiceRegistration reg = null;
     try {
-      httpService.registerServlet(alias, cxf, new Hashtable<String, String>(), httpContext);
-      logger.info("Registered REST endpoint at " + alias);
+      Dictionary<String, String> props = new Hashtable<String, String>();
+      props.put("contextId", SharedHttpContext.HTTP_CONTEXT_ID);
+      props.put("alias", alias);
+      reg = componentContext.getBundleContext().registerService(Servlet.class.getName(), cxf, props);
     } catch (Exception e) {
       logger.info("Problem registering REST endpoint {} : {}", alias, e.getMessage());
       return;
     }
-    servletMap.put(alias, cxf);
-
+    servletRegistrationMap.put(alias, reg);
+    
     // Set up cxf
     Bus bus = cxf.getBus();
     JAXRSServerFactoryBean factory = new JAXRSServerFactoryBean();
@@ -126,6 +129,7 @@ public class RestPublisher {
     } finally {
       Thread.currentThread().setContextClassLoader(bundleClassLoader);
     }
+    logger.info("Registered REST endpoint at " + alias);
   }
 
   /**
@@ -135,28 +139,14 @@ public class RestPublisher {
    *          The URL space to reclaim
    */
   protected void destroyEndpoint(String alias) {
-    try {
-      httpService.unregister(alias);
-      logger.info("Unregistered rest endpoint {}", alias);
-    } catch (Exception e) {
-      logger.info("Unable to unregister {}", alias, e);
+    ServiceRegistration reg = servletRegistrationMap.remove(alias);
+    if(reg != null) {
+      reg.unregister();
     }
-    // Shut down the CXF servlet for this endpoint
-    GenericServlet servlet = servletMap.remove(alias);
-    if (servlet != null)
-      servlet.destroy();
   }
 
   public void deactivate(ComponentContext componentContext) {
     logger.info("deactivate()");
-  }
-
-  public void setHttpService(HttpService httpService) {
-    this.httpService = httpService;
-  }
-
-  public void setHttpContext(HttpContext httpContext) {
-    this.httpContext = httpContext;
   }
 
   /**

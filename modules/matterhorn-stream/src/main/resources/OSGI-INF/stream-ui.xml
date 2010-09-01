@@ -4,13 +4,10 @@
   <implementation class="org.opencastproject.http.StaticResource" />
   <property name="service.description" value="Streaming Service UI" />
   <property name="alias" value="/stream/ui" />
+  <property name="contextId" value="opencast.httpcontext" />
   <property name="classpath" value="/html" />
   <property name="welcome.file" value="echo_test.swf" />
   <service>
-    <provide interface="org.opencastproject.http.StaticResource" />
+    <provide interface="javax.servlet.Servlet" />
   </service>
-  <reference name="http-service" interface="org.osgi.service.http.HttpService"
-    cardinality="1..1" policy="static" bind="setHttpService" />
-  <reference name="http-context" interface="org.osgi.service.http.HttpContext"
-    cardinality="1..1" policy="static" bind="setHttpContext" />
 </scr:component>

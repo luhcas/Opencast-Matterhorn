@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+ name="org.opencastproject.runtimeinfo.TestSuiteServlet" immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.runtimeinfo.TestSuiteServlet" />
+  <property name="service.description" value="User Interface Test Suite" />
+  <property name="alias" value="/TestSuites.html" />
+  <property name="contextId" value="opencast.httpcontext" />
+  <service>
+    <provide interface="javax.servlet.Servlet" />
+  </service>
+</scr:component>

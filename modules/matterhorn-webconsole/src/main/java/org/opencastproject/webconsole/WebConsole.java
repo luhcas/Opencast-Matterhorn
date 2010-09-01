@@ -40,7 +40,7 @@ public class WebConsole extends OsgiManager {
   public WebConsole(BundleContext bundleContext) {
     super(bundleContext);
     AbstractWebConsolePlugin.setBrandingPlugin(new MatterhornBrandingPlugin(bundleContext.getProperty("org.opencastproject.server.url")));
-    logger.info("The matterhorn web console will use the {} branding plugin", AbstractWebConsolePlugin.getBrandingPlugin());
+    logger.debug("The matterhorn web console will use the {} branding plugin", AbstractWebConsolePlugin.getBrandingPlugin());
   }
 
   public void service( ServletRequest req, ServletResponse res ) throws ServletException, IOException {

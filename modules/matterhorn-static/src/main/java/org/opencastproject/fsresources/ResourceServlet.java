@@ -17,8 +17,6 @@ package org.opencastproject.fsresources;
 
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,37 +33,30 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Serves static content from a configured path on the filesystem.  In production systems, this should be replaced with
+ * Serves static content from a configured path on the filesystem. In production systems, this should be replaced with
  * apache httpd or another web server optimized for serving static content.
  */
 public class ResourceServlet extends HttpServlet {
   private static final long serialVersionUID = 1L;
   private static final Logger logger = LoggerFactory.getLogger(ResourceServlet.class);
 
-  protected HttpContext httpContext;
-  protected HttpService httpService;
   protected String root;
   protected String serverAlias;
-  protected SimpleDateFormat sdf; 
+  protected SimpleDateFormat sdf;
 
-  public ResourceServlet() {}
+  public ResourceServlet() {
+  }
 
-  public ResourceServlet(String alias, String filesystemDir ) {
+  public ResourceServlet(String alias, String filesystemDir) {
     root = filesystemDir;
     serverAlias = alias;
   }
 
-  public void setHttpContext(HttpContext httpContext) {
-    this.httpContext = httpContext;
-  }
-
-  public void setHttpService(HttpService httpService) {
-    this.httpService = httpService;
-  }
-
   public void activate(ComponentContext cc) {
-    if(root == null) root = (String) cc.getProperties().get("filesystemDir");
-    if(serverAlias == null) serverAlias = (String) cc.getProperties().get("alias");
+    if (root == null)
+      root = (String) cc.getProperties().get("filesystemDir");
+    if (serverAlias == null)
+      serverAlias = (String) cc.getProperties().get("alias");
 
     if (serverAlias.charAt(0) != '/') {
       serverAlias = '/' + serverAlias;
@@ -76,39 +67,21 @@ public class ResourceServlet extends HttpServlet {
       logger.error("Unable to create servlet for {} because root directory is null!", serverAlias);
       return;
     } else if (!rootDir.exists()) {
-        if (!rootDir.mkdirs()) {
-          logger.error("Unable to create directories for {}!", rootDir.getAbsolutePath());
-          return;
-        }
+      if (!rootDir.mkdirs()) {
+        logger.error("Unable to create directories for {}!", rootDir.getAbsolutePath());
+        return;
+      }
     }
 
     if (!(rootDir.isDirectory() || rootDir.isFile())) {
-      logger.error("Unable to create servlet for {} because {} is not a file or directory!", serverAlias, rootDir.getAbsolutePath());
-      return;
-    } else {
-      try {
-        httpService.registerServlet(serverAlias, this, null, httpContext);
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
+      throw new IllegalStateException("Unable to create servlet for " + serverAlias + " because "
+              + rootDir.getAbsolutePath() + " is not a file or directory!");
     }
     sdf = new SimpleDateFormat();
     sdf.applyPattern("yyyy-MM-dd HH:mm:ss Z");
-
   }
-  
+
   public void deactivate() {
-    try {
-      if (httpService != null && serverAlias != null) {
-        httpService.unregister(serverAlias);
-      } else if (httpService == null) {
-        logger.info("HTTP service is already null, can't unregister alias!");
-      } else if (serverAlias == null) {
-        logger.info("Alias was already null, can't unregister null alias!");
-      }
-    } catch (Exception e) {
-      logger.warn("Deactivation problem: {}", e.getMessage());
-    }
   }
 
   /**
@@ -150,7 +123,7 @@ public class ResourceServlet extends HttpServlet {
       for (File child : f.listFiles()) {
         StringBuffer sb = new StringBuffer();
         sb.append("<a href=\"");
-        if (req.getRequestURL().charAt(req.getRequestURL().length()-1) != '/') {
+        if (req.getRequestURL().charAt(req.getRequestURL().length() - 1) != '/') {
           sb.append(req.getRequestURL().append("/").append(child.getName()));
         } else {
           sb.append(req.getRequestURL().append(child.getName()));
@@ -174,8 +147,8 @@ public class ResourceServlet extends HttpServlet {
   }
 
   protected String formatLength(long length) {
-    //FIXME:  Why isn't there a library function for this?!
-    //TODO:  Make this better
+    // FIXME: Why isn't there a library function for this?!
+    // TODO: Make this better
     if (length > 1073741824.0) {
       return length / 1073741824 + " GB";
     } else if (length > 1048576.0) {

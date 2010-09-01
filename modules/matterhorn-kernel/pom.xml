@@ -30,7 +30,12 @@
       <groupId>org.osgi</groupId>
       <artifactId>osgi_R4_compendium</artifactId>
     </dependency>
-    
+
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.http.bundle</artifactId>
+    </dependency>
+        
     <dependency>
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
@@ -196,7 +201,6 @@
             <Embed-Transitive>true</Embed-Transitive>
             <Service-Component>
               OSGI-INF/httpContext.xml,
-              OSGI-INF/staticResource.xml,
               OSGI-INF/rest.xml
             </Service-Component>
           </instructions>
