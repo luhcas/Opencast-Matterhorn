@@ -59,9 +59,11 @@ public class DistributionRestService {
   /**
    * Gets the distribution service that is registered with the specified "distribution.channel" property
    * 
-   * @param distributionChannel the id of this distribution channel
+   * @param distributionChannel
+   *          the id of this distribution channel
    * @return the distribution service for this channel
-   * @throws IllegalArgumentException if there is not service registered for this channel
+   * @throws IllegalArgumentException
+   *           if there is not service registered for this channel
    */
   protected DistributionService getService(String distributionChannel) {
     ServiceReference[] refs = null;
@@ -97,7 +99,7 @@ public class DistributionRestService {
     if (elements == null || elements.length == 0) {
       return Response.status(Status.BAD_REQUEST).build();
     }
-    
+
     try {
       DistributionService service = getService(distChannel);
       result = service.distribute(mediaPackage, elements);
@@ -112,11 +114,12 @@ public class DistributionRestService {
   @Path("/retract/{distChannel}")
   @Produces(MediaType.TEXT_XML)
   public Response retract(@PathParam("distChannel") String distChannel,
-          @FormParam("mediapackage") MediaPackageImpl mediaPackage) throws Exception {
+          @FormParam("mediapackageId") String mediaPackageId) throws Exception {
     try {
-      getService(distChannel).retract(mediaPackage);
+      getService(distChannel).retract(mediaPackageId);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.warn("Unable to retract mediapackage '{}' from channel '{}': {}", new Object[] { mediaPackageId,
+              distChannel, e });
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
     return Response.noContent().build();
@@ -132,9 +135,9 @@ public class DistributionRestService {
   protected String docs;
   private String[] notes = {
           "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
-          "If the service is down or not working it will return a status 503, this means the the underlying service " +
-          "is not working and is either restarting or has failed. A status code 500 means a general failure has " +
-          "occurred which is not recoverable and was not anticipated. In other words, there is a bug!" };
+          "If the service is down or not working it will return a status 503, this means the the underlying service "
+                  + "is not working and is either restarting or has failed. A status code 500 means a general failure has "
+                  + "occurred which is not recoverable and was not anticipated. In other words, there is a bug!" };
 
   private String generateMediaPackage() {
     try {
@@ -166,6 +169,17 @@ public class DistributionRestService {
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
+
+    // retract
+    RestEndpoint retractEndpoint = new RestEndpoint("retract", RestEndpoint.Method.POST, "/retract/{distChannel}",
+            "Retract a media package from a distribution channel");
+    retractEndpoint.addPathParam(new Param("distChannel", Type.STRING, "download",
+            "The distribution channel identifier (e.g. download, streaming, youtube, etc.)"));
+    retractEndpoint.addRequiredParam(new Param("mediapackageId", Param.Type.STRING, null, "The media package ID"));
+    retractEndpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
+    retractEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
+    retractEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, retractEndpoint);
 
     return DocUtil.generate(data);
   }

@@ -64,13 +64,22 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
   protected abstract URI getDistributionUri(MediaPackageElement element) throws URISyntaxException;
 
   /**
+   * Gets the directory containing the distributed files for this mediapackage.
+   * 
+   * @param mediaPackageId the mediapackage ID
+   * @return the filesystem directory 
+   */
+  protected abstract File getMediaPackageDirectory(String mediaPackageId);
+  
+  /**
    * Distributes the mediapackage's element to the location that is returned by the concrete implementation. In
    * addition, a representation of the distributed element is added to the mediapackage.
    * 
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.distribution.api.DistributionService#distribute(org.opencastproject.mediapackage.MediaPackage)
+   * @see org.opencastproject.distribution.api.DistributionService#distribute(MediaPackage, String...)
    */
+  @Override
   public MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException {
     try {
       Map<MediaPackageElement, MediaPackageElement> mappings = new HashMap<MediaPackageElement, MediaPackageElement>();
@@ -90,11 +99,10 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
           MediaPackageElement distributedElement = (MediaPackageElement) element.clone();
           distributedElement.setURI(getDistributionUri(element));
           distributedElement.setIdentifier(null);
-          distributedElement.clearTags();
 
           MediaPackageReference ref = element.getReference();
           if (ref != null && mediaPackage.getElementByReference(ref) != null) {
-            distributedElement.setReference((MediaPackageReference)ref.clone());
+            distributedElement.setReference((MediaPackageReference) ref.clone());
             mediaPackage.add(distributedElement);
           } else {
             mediaPackage.addDerived(distributedElement, element);
@@ -131,7 +139,7 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
         MediaPackageElement oldReference = mediaPackage.getElementByReference(ref);
         MediaPackageElement newReference = mappings.get(oldReference);
         if (newReference != null) {
-          MediaPackageReference newRef = (MediaPackageReference)newReference.clone();
+          MediaPackageReference newRef = (MediaPackageReference) newReference.clone();
           clone.setReference(newRef);
         }
       }
@@ -144,44 +152,12 @@ public abstract class AbstractLocalDistributionService implements DistributionSe
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.distribution.api.DistributionService#retract(org.opencastproject.mediapackage.MediaPackage)
+   * @see org.opencastproject.distribution.api.DistributionService#retract(java.lang.String)
    */
   @Override
-  public void retract(MediaPackage mediaPackage) throws DistributionException {
-    // throw new UnsupportedOperationException();
-    MediaPackageElement mediaPackageElement = null;
-
-    for (MediaPackageElement element : mediaPackage.getElements()) {
-      switch (element.getElementType()) {
-      case Track:
-        mediaPackageElement = element;
-        break;
-      case Catalog:
-        continue;
-      case Attachment:
-        continue;
-      default:
-        throw new IllegalStateException("Someone is trying to distribute strange things here");
-      }
-    }
-
-    if (mediaPackageElement == null) {
-      throw new DistributionException("Media package does not contain tracks");
-    }
-
-    try {
-      File destination = getDistributionFile(mediaPackageElement);
-
-      // delete the file
-      if (FileSupport.delete(destination)) {
-        logger.info("Succeeded retracting {} ...", destination);
-      } else {
-        logger.info("Failed retracting {} ...", destination);
-      }
-    } catch (Exception e) {
-      throw new DistributionException(e);
+  public void retract(String mediaPackageId) throws DistributionException {
+    if( ! FileSupport.delete(getMediaPackageDirectory(mediaPackageId), true)) {
+      throw new DistributionException("Unable to retract mediapackage " + mediaPackageId);
     }
   }
-
 }

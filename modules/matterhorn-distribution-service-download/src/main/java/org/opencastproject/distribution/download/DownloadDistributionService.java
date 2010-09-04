@@ -95,5 +95,13 @@ public class DownloadDistributionService extends AbstractLocalDistributionServic
     String destinationURI = UrlSupport.concat(new String[] { serverUrl + "/static", mediaPackageId, elementId, fileName });
     return new URI(destinationURI);
   }
-  
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.distribution.download.AbstractLocalDistributionService#getMediaPackageDirectory(java.lang.String)
+   */
+  @Override
+  protected File getMediaPackageDirectory(String mediaPackageId) {
+    return new File(distributionDirectory, mediaPackageId);
+  }
 }

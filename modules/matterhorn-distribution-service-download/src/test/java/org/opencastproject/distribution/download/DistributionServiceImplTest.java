@@ -67,13 +67,14 @@ public class DistributionServiceImplTest {
   }
   
   @Test
-  public void testDistribution() throws Exception {
+  public void testPartialDistribution() throws Exception {
+    // Distribute only some of the elements in the mediapackage
     service.distribute(mp, new String[] {"track-1", "catalog-1"}); // "catalog-2" and "notes" are not to be distributed
     File mpDir = new File(distributionRoot, mp.getIdentifier().compact());
     Assert.assertTrue(mpDir.exists());
     File mediaDir = new File(mpDir, "track-1");
     File metadataDir = new File(mpDir, "catalog-1");
-    File attachmentsDir = new File(mpDir, "attachment-1");
+    File attachmentsDir = new File(mpDir, "notes");
     Assert.assertTrue(mediaDir.exists());
     Assert.assertTrue(metadataDir.exists());
     Assert.assertFalse(attachmentsDir.exists());
@@ -83,4 +84,29 @@ public class DistributionServiceImplTest {
     Assert.assertFalse(new File(attachmentsDir, "attachment.txt").exists());
   }
 
+  @Test
+  public void testRetract() throws Exception {
+    // Distribute the mediapackage and all of its elements
+    service.distribute(mp, new String[] {"track-1", "catalog-1", "catalog-2", "notes"});
+    File mpDir = new File(distributionRoot, mp.getIdentifier().compact());
+    File mediaDir = new File(mpDir, "track-1");
+    File metadata1Dir = new File(mpDir, "catalog-1");
+    File metadata2Dir = new File(mpDir, "catalog-2");
+    File attachmentsDir = new File(mpDir, "notes");
+    Assert.assertTrue(mediaDir.exists());
+    Assert.assertTrue(metadata1Dir.exists());
+    Assert.assertTrue(metadata2Dir.exists());
+    Assert.assertTrue(attachmentsDir.exists());
+    Assert.assertTrue(new File(mediaDir, "media.mov").exists()); // the filenames are changed to reflect the element ID
+    Assert.assertTrue(new File(metadata1Dir, "dublincore.xml").exists());
+    Assert.assertTrue(new File(metadata2Dir, "mpeg7.xml").exists());
+    Assert.assertTrue(new File(attachmentsDir, "attachment.txt").exists());
+
+    // Now retract the mediapackage and ensure that the distributed files have been removed
+    service.retract(mp.getIdentifier().compact());
+    Assert.assertFalse(service.getDistributionFile(mp.getElementById("track-1")).isFile());
+    Assert.assertFalse(service.getDistributionFile(mp.getElementById("catalog-1")).isFile());
+    Assert.assertFalse(service.getDistributionFile(mp.getElementById("catalog-2")).isFile());
+    Assert.assertFalse(service.getDistributionFile(mp.getElementById("notes")).isFile());
+  }
 }

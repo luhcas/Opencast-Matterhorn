@@ -124,4 +124,13 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
     String destinationURI = UrlSupport.concat(new String[] { streamingUrl, mediaPackageId, elementId, fileName });
     return new URI(destinationURI);
   }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.distribution.streaming.AbstractLocalDistributionService#getMediaPackageDirectory(java.lang.String)
+   */
+  @Override
+  protected File getMediaPackageDirectory(String mediaPackageId) {
+    return new File(distributionDirectory, mediaPackageId);
+  }
 }

@@ -294,42 +294,13 @@ public class YoutubeDistributionService implements DistributionService {
   public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
-
+  
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.distribution.api.DistributionService#retract(org.opencastproject.mediapackage.MediaPackage)
+   * @see org.opencastproject.distribution.api.DistributionService#retract(java.lang.String)
    */
   @Override
-  public void retract(MediaPackage mediaPackage) throws DistributionException {
-    // throw new UnsupportedOperationException();
-    String trackID = "";
-  
-    for (MediaPackageElement element : mediaPackage.getElements()) {
-      switch (element.getElementType()) {
-      case Track:
-        trackID = element.getIdentifier();
-        break;
-      case Catalog:
-        continue;
-      case Attachment:
-        continue;
-      default:
-        throw new IllegalStateException("Someone is trying to distribute strange things here");
-      }
-    }
-  
-    // get task name
-    String name = getTaskID(mediaPackage.getIdentifier().compact(), trackID);
-
-    // check if the file has already been delivered
-    Task savedTask = schedule.getSavedTask(name);
-
-    if (savedTask == null || savedTask.getState() != Task.State.COMPLETE) {
-        // has not been successfully delivered
-         throw new DistributionException("Media has not been distributed!");
-    }
-
-    // remove the media
-    remove(name);
+  public void retract(String mediaPackageId) throws DistributionException {
+    throw new UnsupportedOperationException();
   }
 }

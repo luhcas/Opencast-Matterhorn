@@ -112,19 +112,12 @@ public class DistributionServiceRemoteImpl extends RemoteBase implements Distrib
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.distribution.api.DistributionService#retract(org.opencastproject.mediapackage.MediaPackage)
+   * @see org.opencastproject.distribution.api.DistributionService#retract(java.lang.String)
    */
   @Override
-  public void retract(MediaPackage mediaPackage) throws DistributionException {
-    String xml = null;
-    try {
-      xml = mediaPackage.toXml();
-    } catch (MediaPackageException e) {
-      throw new DistributionException("Unable to marshall mediapackage to xml: " + e.getMessage());
-    }
+  public void retract(String mediaPackageId) throws DistributionException {
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-    params.add(new BasicNameValuePair("mediapackage", xml));
+    params.add(new BasicNameValuePair("mediapackageId", mediaPackageId));
     String url = "/distribution/rest/retract/" + distributionChannel;
     HttpPost post = new HttpPost(url);
     HttpResponse response = null;
@@ -132,19 +125,19 @@ public class DistributionServiceRemoteImpl extends RemoteBase implements Distrib
     try {
       entity = new UrlEncodedFormEntity(params);
     } catch (UnsupportedEncodingException e) {
-      throw new DistributionException("Unable to encode mediapackage " + mediaPackage + " for http post", e);
+      throw new DistributionException("Unable to encode mediapackage " + mediaPackageId + " for http post", e);
     }
     post.setEntity(entity);
     try {
       response = getResponse(post, HttpStatus.SC_NO_CONTENT);
       if (response != null) {
-        logger.info("retracted {} from {}", mediaPackage, distributionChannel);
+        logger.info("retracted {} from {}", mediaPackageId, distributionChannel);
         return;
       }
     } finally {
       closeConnection(response);
     }
-    throw new DistributionException("Unable to retract mediapackage " + mediaPackage
+    throw new DistributionException("Unable to retract mediapackage " + mediaPackageId
             + " using a remote distribution service proxy");
   }
 }

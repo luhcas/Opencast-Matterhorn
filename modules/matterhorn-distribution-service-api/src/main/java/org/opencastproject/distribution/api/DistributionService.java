@@ -38,12 +38,12 @@ public interface DistributionService {
   MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException;
 
   /**
-   * Retract all media associated with this media package from the distribution channel.
+   * Retract all media and metadata associated with this media package from the distribution channel.
    * 
-   * @param mediaPackage The media package containing the media to retract
-   * @throws DistributionException if there was a problem retracting the media
+   * @param mediaPackageId The identifier of the media package to retract
+   * @throws DistributionException if there was a problem retracting the mediapackage
    */
-  void retract(MediaPackage mediaPackage) throws DistributionException;
+  void retract(String mediaPackageId) throws DistributionException;
 
 }
 
