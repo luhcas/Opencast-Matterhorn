@@ -100,6 +100,16 @@ Opencast.engage = (function () {
       var value = getGETParameter("id");
       return value;
     }
+    
+    /**
+     * @memberOf Opencast.engage
+     * @description Gets the user id
+     * @return The user id
+     */
+    function getUserId() {
+      var value = getGETParameter("user");
+      return value;
+    }
 
     /**
      * @memberOf Opencast.engage
@@ -162,11 +172,13 @@ Opencast.engage = (function () {
       getCookie : getCookie,
       formatSeconds : formatSeconds,
       getMediaPackageId : getMediaPackageId,
+      getUserId : getUserId,
       getPlay : getPlay,
       getPlayerType : getPlayerType,
       getVideoUrl : getVideoUrl,
       getVideoUrl2 : getVideoUrl2,
       getCoverUrl : getCoverUrl,
+      getGETParameter : getGETParameter,
       getLoadProgress : getLoadProgress,
       setLoadProgressPercent : setLoadProgressPercent,
       getSearchServiceEpisodeIdURL :  getSearchServiceEpisodeIdURL

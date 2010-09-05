@@ -30,12 +30,14 @@ Opencast.Watch = (function ()
           
 
         var mediaPackageId = Opencast.engage.getMediaPackageId();
+        var userId = Opencast.engage.getUserId();
 
         var restEndpoint = Opencast.engage.getSearchServiceEpisodeIdURL() + mediaPackageId;
         restEndpoint = Opencast.engage.getVideoUrl() !== null ? "preview.xml" : restEndpoint;
 
         Opencast.Player.setSessionId(Opencast.engage.getCookie("JSESSIONID"));
         Opencast.Player.setMediaPackageId(mediaPackageId);
+        Opencast.Player.setUserId(userId);
 
         $('#data').xslt(restEndpoint, "xsl/player-hybrid-download.xsl", function () 
         {

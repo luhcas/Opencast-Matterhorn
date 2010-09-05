@@ -1449,6 +1449,7 @@ Opencast.Player = (function () {
     }
     
     var mediaPackageId;
+    var userId;
     var sessionId;
     var inPosition = 0;
     var outPosition = 0;
@@ -1494,6 +1495,16 @@ Opencast.Player = (function () {
 
     /**
     @memberOf Opencast.Player
+    @description Set the userId
+    @param String userId 
+     */
+    function setUserId(id) 
+    {
+        userId = id;
+    }
+    
+    /**
+    @memberOf Opencast.Player
     @description Set the mediaPackageId
     @param String mediaPackageId 
      */
@@ -1506,27 +1517,25 @@ Opencast.Player = (function () {
         @memberOf Opencast.Player
         @description Add a Footpring.
      */
-    function addFootprint()
-    {
+    function addFootprint() {
+        // user id is optional
+        var strUser = userId === null ? '' : "&user=" + userId;
+
         $.ajax(
         {
             type: 'GET',
             contentType: 'text/xml',
             url: "../../feedback/rest/add",
-            data: "id=" + mediaPackageId + "&session=" + sessionId + "&in=" + inPosition + "&out=" + outPosition + "&key=FOOTPRINT",
+            data: "id=" + mediaPackageId + strUser + "&session=" + sessionId + "&in=" + inPosition + "&out=" + outPosition + "&key=FOOTPRINT",
             dataType: 'xml',
-            success: function (xml) 
-            {
+            success: function (xml) {
                 // Do nothing, the FOOTPRINT has been saved
             },
-            error: function (a, b, c) 
-            {
+            error: function (a, b, c) {
                // Some error while adding the FOOTPRINT
             }
-        
-        }); 
+        });
     }
-    
 
     /**
         @memberOf Opencast.Player
@@ -1731,6 +1740,7 @@ Opencast.Player = (function () {
         getCurrentTime : getCurrentTime,
         setTotalTime : setTotalTime,
         setMediaPackageId : setMediaPackageId,
+        setUserId : setUserId,
         setSessionId : setSessionId,
         showEditTime : showEditTime,
         hideEditTime : hideEditTime,

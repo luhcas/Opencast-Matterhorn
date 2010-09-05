@@ -131,4 +131,17 @@ public interface FeedbackService {
    * @return the report
    */
   Report getReport(int offset, int limit);
+
+  /**
+   * Returns a list of footprints, if a userId is passed only the footprints of that user are returned.
+   * 
+   * @param mediapackageId
+   *          The mediapackageId
+   * @param userId
+   *          The userId is optional
+   * @return the footprintList
+   */
+  FootprintList getFootprints(String mediapackageId, String userId);
+
+
 }

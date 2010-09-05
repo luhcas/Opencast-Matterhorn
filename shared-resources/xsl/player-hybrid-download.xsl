@@ -15,6 +15,7 @@
         <tbody>
           <tr class="player-chrome">
             <td class="progress-segment" width="100%">
+              <span class="dynamicbar">Loading..</span>
               <table class="segments" cellspacing="0" cellpadding="0">
                 <tr>
                   <xsl:choose>
@@ -217,6 +218,16 @@
         <xsl:otherwise>
 					No Title
 				</xsl:otherwise>
+      </xsl:choose>
+    </div>
+    <div id="dc-extent" style="display: none">
+      <xsl:choose>
+        <xsl:when test="ns2:search-results/result/dcExtent">
+          <xsl:value-of select="ns2:search-results/result/ dcExtent"/>
+        </xsl:when>
+        <xsl:otherwise>
+          0
+        </xsl:otherwise>
       </xsl:choose>
     </div>
     <div id="oc-creator" style="display: none">

@@ -96,8 +96,8 @@ public class FeedbackRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("annotation")
-  public Response getAnnotations(@QueryParam("id") String id, @QueryParam("key") String key, @QueryParam("day") String day,
-          @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
+  public Response getAnnotations(@QueryParam("id") String id, @QueryParam("key") String key,
+          @QueryParam("day") String day, @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
 
     // Are the values of offset and limit valid?
     if (offset < 0 || limit < 0)
@@ -144,7 +144,7 @@ public class FeedbackRestService {
     if (limit == 0)
       limit = 10;
 
-    if(from == null && to == null)
+    if (from == null && to == null)
       return Response.ok(feedbackService.getReport(offset, limit)).build();
     else
       return Response.ok(feedbackService.getReport(from, to, offset, limit)).build();
@@ -153,12 +153,13 @@ public class FeedbackRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("add")
-  public Response add(@QueryParam("id") String mediapackageId, @QueryParam("session") String sessionId,
-          @QueryParam("in") int inpoint, @QueryParam("out") int outpoint, @QueryParam("key") String key,
-          @QueryParam("value") String value) {
+  public Response add(@QueryParam("id") String mediapackageId, @QueryParam("user") String userId,
+          @QueryParam("session") String sessionId, @QueryParam("in") int inpoint, @QueryParam("out") int outpoint,
+          @QueryParam("key") String key, @QueryParam("value") String value) {
 
     Annotation a = new AnnotationImpl();
     a.setMediapackageId(mediapackageId);
+    a.setUserId(userId);
     a.setSessionId(sessionId);
     a.setInpoint(inpoint);
     a.setOutpoint(outpoint);
@@ -168,6 +169,18 @@ public class FeedbackRestService {
     a = feedbackService.addAnnotation(a);
 
     return Response.ok(a).build();
+  }
+
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("footprint")
+  public Response getFootprint(@QueryParam("id") String mediapackageId, @QueryParam("userId") String userId) {
+
+    // Is the mediapackageId passed
+    if (mediapackageId == null)
+      return Response.status(Status.BAD_REQUEST).build();
+
+    return Response.ok(feedbackService.getFootprints(mediapackageId, userId)).build();
   }
 
   /**
@@ -218,6 +231,7 @@ public class FeedbackRestService {
     addEndpoint.addFormat(new Format("XML", null, null));
     addEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The annotation, expressed as xml"));
     addEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The ID of the single episode"));
+    addEndpoint.addOptionalParam(new Param("user", Type.STRING, null, "The user related to the session"));
     addEndpoint.addOptionalParam(new Param("session", Type.STRING, null, "The session related to the annotation"));
     addEndpoint.addOptionalParam(new Param("in", Type.STRING, null, "The inpoint of the annotation"));
     addEndpoint.addOptionalParam(new Param("out", Type.STRING, null, "The outpoint of the annotation"));

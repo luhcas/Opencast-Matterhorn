@@ -49,6 +49,7 @@ import org.opencastproject.feedback.api.Annotation;
         @NamedQuery(name = "findLastAnnotationsOfSession", query = "SELECT a FROM AnnotationImpl a  WHERE a.sessionId = :sessionId ORDER BY a.created DESC"),
         @NamedQuery(name = "findAnnotationsByKey", query = "SELECT a FROM AnnotationImpl a WHERE a.key = :key"),
         @NamedQuery(name = "findAnnotationsByKeyAndMediapackageId", query = "SELECT a FROM AnnotationImpl a WHERE a.mediapackageId = :mediapackageId AND a.key = :key"),
+        @NamedQuery(name = "findAnnotationsByKeyAndMediapackageIdOrderByOutpointDESC", query = "SELECT a FROM AnnotationImpl a WHERE a.mediapackageId = :mediapackageId AND a.key = :key ORDER BY a.outpoint DESC"),
         @NamedQuery(name = "findAnnotationsByIntervall", query = "SELECT a FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end"),
         @NamedQuery(name = "findAnnotationsByKeyAndIntervall", query = "SELECT a FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end AND a.key = :key"),
         @NamedQuery(name = "findTotal", query = "SELECT COUNT(a) FROM AnnotationImpl a"),
@@ -70,6 +71,10 @@ public class AnnotationImpl implements Annotation {
   @Column(name = "MEDIA_PACKAGE_ID")
   @XmlElement(name = "mediapackage-id")
   private String mediapackageId;
+
+  @Column(name = "USER_ID")
+  @XmlElement(name = "user-id")
+  private String userId;
 
   @Column(name = "SESSION_ID")
   @XmlElement(name = "session-id")
@@ -123,6 +128,14 @@ public class AnnotationImpl implements Annotation {
     this.mediapackageId = mediapackageId;
   }
 
+  public String getUserId() {
+    return userId;
+  }
+
+  public void setUserId(String userId) {
+    this.userId = userId;
+  }
+
   public String getSessionId() {
     return sessionId;
   }
@@ -137,7 +150,7 @@ public class AnnotationImpl implements Annotation {
 
   public void setInpoint(int inpoint) {
     this.inpoint = inpoint;
-    this.length = this.outpoint - this.inpoint;
+    updateLength();
   }
 
   public int getOutpoint() {
@@ -146,9 +159,9 @@ public class AnnotationImpl implements Annotation {
 
   public void setOutpoint(int outpoint) {
     this.outpoint = outpoint;
-    this.length = this.outpoint - this.inpoint;
+    updateLength();
   }
-  
+
   public int getLength() {
     return length;
   }
@@ -175,5 +188,9 @@ public class AnnotationImpl implements Annotation {
 
   public void setCreated(Date created) {
     this.created = created;
+  }
+
+  private void updateLength() {
+    this.length = this.outpoint - this.inpoint;
   }
 }

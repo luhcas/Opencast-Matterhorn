@@ -15,51 +15,11 @@
  */
 package org.opencastproject.feedback.api;
 
-import java.util.Date;
-
-
 /**
- * A class that represents an annotation
+ * A List of {@link Footprint}s
  * 
  */
-public interface Annotation {
+public interface FootprintList {
 
-  int getAnnotationId();
-
-  void setAnnotationId(int annotationId);
-
-  String getMediapackageId();
-
-  void setMediapackageId(String mediapackageId);
-
-  String getUserId();
-
-  void setUserId(String userId);
-
-  String getSessionId();
-
-  void setSessionId(String sessionId);
-
-  int getInpoint();
-
-  void setInpoint(int inpoint);
-
-  int getOutpoint();
-
-  void setOutpoint(int outpoint);
-  
-  int getLength();
-
-  String getKey();
-
-  void setKey(String key);
-
-  String getValue();
-
-  void setValue(String value);
-
-  Date getCreated();
-
-  void setCreated(Date created);
-
+  void add(Footprint footprint);
 }

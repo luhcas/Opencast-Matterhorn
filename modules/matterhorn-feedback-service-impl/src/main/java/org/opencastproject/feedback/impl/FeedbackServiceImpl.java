@@ -31,9 +31,14 @@ import javax.persistence.spi.PersistenceProvider;
 import org.opencastproject.feedback.api.Annotation;
 import org.opencastproject.feedback.api.AnnotationList;
 import org.opencastproject.feedback.api.FeedbackService;
+import org.opencastproject.feedback.api.Footprint;
+import org.opencastproject.feedback.api.FootprintList;
 import org.opencastproject.feedback.api.Report;
 import org.opencastproject.feedback.api.ReportItem;
+import org.opencastproject.search.api.SearchService;
 import org.opencastproject.feedback.endpoint.AnnotationListImpl;
+import org.opencastproject.feedback.endpoint.FootprintImpl;
+import org.opencastproject.feedback.endpoint.FootprintsListImpl;
 import org.opencastproject.feedback.endpoint.ReportImpl;
 import org.opencastproject.feedback.endpoint.ReportItemImpl;
 import org.osgi.service.component.ComponentContext;
@@ -47,7 +52,11 @@ import org.slf4j.LoggerFactory;
  */
 public class FeedbackServiceImpl implements FeedbackService {
 
+  public static final String FOOTPRINT_KEY = "FOOTPRINT";
+
   private static final Logger logger = LoggerFactory.getLogger(FeedbackServiceImpl.class);
+
+  private SearchService searchService;
 
   /**
    * The component context that is passed when activate is called
@@ -113,8 +122,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     emf.close();
   }
 
-  
-  public int getViews(String mediapackageId){
+  public int getViews(String mediapackageId) {
     Query q = em.createNamedQuery("countSessionsOfMediapackage");
     q.setParameter("mediapackageId", mediapackageId);
     return ((Long) q.getSingleResult()).intValue();
@@ -125,25 +133,26 @@ public class FeedbackServiceImpl implements FeedbackService {
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-    Query q = em.createNamedQuery("findLastAnnotationsOfSession");
-    q.setMaxResults(1);
-    q.setParameter("sessionId", a.getSessionId());
-    Collection<Annotation> annotations = q.getResultList();
-    
-    if(annotations.size()>=1) {
-      Annotation last = annotations.iterator().next();
-      if(last.getMediapackageId().equals(a.getMediapackageId()) && last.getKey().equals(a.getKey()) && last.getOutpoint() == a.getInpoint()){
-        last.setOutpoint(a.getOutpoint());
-        a = last;
+      Query q = em.createNamedQuery("findLastAnnotationsOfSession");
+      q.setMaxResults(1);
+      q.setParameter("sessionId", a.getSessionId());
+      Collection<Annotation> annotations = q.getResultList();
+
+      if (annotations.size() >= 1) {
+        Annotation last = annotations.iterator().next();
+        if (last.getMediapackageId().equals(a.getMediapackageId()) && last.getKey().equals(a.getKey())
+                && last.getOutpoint() == a.getInpoint()) {
+          last.setOutpoint(a.getOutpoint());
+          a = last;
+        } else {
+          em.persist(a);
+        }
+
       } else {
         em.persist(a);
       }
-      
-    } else {
-      em.persist(a);
-    }
-    tx.commit();
-    return a;
+      tx.commit();
+      return a;
     } finally {
       if (tx.isActive()) {
         tx.rollback();
@@ -224,7 +233,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     return result;
   }
-  
+
   @SuppressWarnings("unchecked")
   public AnnotationList getAnnotationsByKeyAndDay(String key, String day, int offset, int limit) {
     AnnotationList result = new AnnotationListImpl();
@@ -301,7 +310,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     for (Annotation a : annotations) {
       result.add(a);
     }
- 
+
     return result;
   }
 
@@ -312,7 +321,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     return ((Long) q.getSingleResult()).intValue();
   }
 
-  public Report getReport(int offset, int limit){
+  public Report getReport(int offset, int limit) {
     Report report = new ReportImpl();
     report.setLimit(limit);
     report.setOffset(offset);
@@ -326,16 +335,16 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     for (Object[] a : result) {
       item = new ReportItemImpl();
-      item.setEpisodeId((String)a[0]);
-      item.setViews((Long)a[1]);
-      item.setPlayed((Long)a[2]);
+      item.setEpisodeId((String) a[0]);
+      item.setViews((Long) a[1]);
+      item.setPlayed((Long) a[2]);
       report.add(item);
     }
 
     return report;
   }
 
-  public Report getReport(String from, String to, int offset, int limit){
+  public Report getReport(String from, String to, int offset, int limit) {
     Report report = new ReportImpl();
     report.setLimit(limit);
     report.setOffset(offset);
@@ -364,12 +373,56 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     for (Object[] a : result) {
       item = new ReportItemImpl();
-      item.setEpisodeId((String)a[0]);
-      item.setViews((Long)a[1]);
-      item.setPlayed((Long)a[2]);
+      item.setEpisodeId((String) a[0]);
+      item.setViews((Long) a[1]);
+      item.setPlayed((Long) a[2]);
       report.add(item);
     }
 
     return report;
+  }
+
+  public FootprintList getFootprints(String mediapackageId, String userId) {
+    FootprintList result = new FootprintsListImpl();
+
+    Query q = em.createNamedQuery("findAnnotationsByKeyAndMediapackageIdOrderByOutpointDESC");
+    q.setParameter("key", FOOTPRINT_KEY);
+    q.setParameter("mediapackageId", mediapackageId);
+    Collection<Annotation> annotations = q.getResultList();
+
+    int[] resultArray = new int[1];
+    boolean first = true;
+
+    for (Annotation a : annotations) {
+      if (first) {
+        // Get one more item than the known outpoint to append a footprint of 0 views at the end of the result set
+        resultArray = new int[a.getOutpoint() + 1];
+        first = false;
+      }
+      for (int i = a.getInpoint(); i < a.getOutpoint(); i++) {
+        resultArray[i]++;
+      }
+    }
+
+    FootprintList list = new FootprintsListImpl();
+    int current, last = -1;
+    int lastPositionAdded = -1;
+    for (int i = 0; i < resultArray.length; i++) {
+      current = resultArray[i];
+      if (last != current) {
+        Footprint footprint = new FootprintImpl();
+        footprint.setPosition(i);
+        footprint.setViews(current);
+        list.add(footprint);
+        lastPositionAdded = i;
+      }
+      last = current;
+    }
+
+    return list;
+  }
+
+  public void setSearchService(SearchService searchService) {
+    this.searchService = searchService;
   }
 }
