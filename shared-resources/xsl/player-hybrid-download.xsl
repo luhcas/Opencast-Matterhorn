@@ -15,7 +15,7 @@
         <tbody>
           <tr class="player-chrome">
             <td class="progress-segment" width="100%">
-              <span class="dynamicbar">Loading..</span>
+              <span id="dynamicbar" class="dynamicbar" style="display: none;">Loading..</span>
               <table class="segments" cellspacing="0" cellpadding="0">
                 <tr>
                   <xsl:choose>

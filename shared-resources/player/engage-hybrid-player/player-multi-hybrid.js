@@ -45,6 +45,8 @@ Opencast.Player = (function () {
     SLIDESHIDE             = "Hide Segments",
     NOTES                  = "Notes",
     NOTESHIDE              = "Hide Notes",
+    ANALYTICS              = "Analytics",
+    ANALYTICSHIDE          = "Analytics off",
     SLIDETEXT              = "Segment Text",
     SLIDETEXTHIDE          = "Hide Segment Text",
     TRANSCRIPT             = "Transcript",
@@ -466,6 +468,42 @@ Opencast.Player = (function () {
     }
 
     /**
+      @memberOf Opencast.Player
+      @description Show Analytics
+     */
+    function showAnalytics()
+    {
+        //$("#oc_notes").attr("className", "oc_DisplayBlock");
+        $("#oc_btn-analytics").attr({ 
+            alt:   ANALYTICSHIDE,
+            title: ANALYTICSHIDE,
+            value: ANALYTICSHIDE
+        });
+        $("#oc_btn-analytics").attr('aria-pressed', 'true');
+        
+        
+        $("#dynamicbar").show();
+        $.sparkline_display_visible()
+    }
+
+    /**
+      @memberOf Opencast.Player
+      @description Hide the notes
+     */
+    function hideAnalytics()
+    {
+        //$("#oc_notes").attr("className", "oc_DisplayNone");
+        $("#oc_btn-analytics").attr({ 
+            alt: ANALYTICS,
+            title: ANALYTICS,
+            value: ANALYTICS
+        });
+        $("#oc_btn-analytics").attr('aria-pressed', 'false');
+        
+        $("#dynamicbar").hide();
+    }
+
+    /**
         @memberOf Opencast.Player
         @description Show the slide text
      */
@@ -695,6 +733,22 @@ Opencast.Player = (function () {
         else
         {
             hideNotes();
+        }
+    }
+    
+    /**
+      @memberOf Opencast.Player
+      @description Toggle Analytics
+     */
+    function doToggleAnalytics()
+    {
+        if ($("#oc_btn-analytics").attr("title") === ANALYTICS)
+        {
+            showAnalytics(); 
+        }
+        else
+        {
+            hideAnalytics();
         }
     }
 
@@ -1688,6 +1742,7 @@ Opencast.Player = (function () {
         getDuration : getDuration,
         setDragging : setDragging,
         getCaptionsBool : getCaptionsBool,
+        doToggleAnalytics : doToggleAnalytics,
         doToggleSlides : doToggleSlides,
         doToggleNotes : doToggleNotes,
         doToggleSlideText : doToggleSlideText,

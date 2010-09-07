@@ -537,9 +537,12 @@ option:hover
 .player-chrome 
 {
   height:                   1px;
+}
+
+#oc_seek-slider {
   background-color:         #B8B8B8;
 }
- 
+
 .progress-segment 
 {
   border-bottom-color:      #BDBDBD;
@@ -778,7 +781,6 @@ option:hover
   border-width:             1px;
   width:                    100%;
   position:                 relative;
-  top:                      -25px;
 }
 
 #oc_embed-left
