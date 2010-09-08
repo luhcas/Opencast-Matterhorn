@@ -11,10 +11,10 @@
           <div id="draggable" class="ui-widget-content" style="left: 0%;" value="test"/>
         </span>
       </div>
-      <table width="100%">
-        <tbody>
-          <tr class="player-chrome">
-            <td class="progress-segment" width="100%">
+
+
+
+      <div style="height: 25px">
               <span id="dynamicbar" class="dynamicbar" style="display: none;">Loading..</span>
               <table class="segments" cellspacing="0" cellpadding="0">
                 <tr>
@@ -39,10 +39,12 @@
                   </xsl:choose>
                 </tr>
               </table>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              
+      </div>
+
+
+
+
     </div>
     <div id="oc-segments">
       <div id="slider">

@@ -530,8 +530,10 @@ Opencast.Player = (function () {
         else {
           drawFootprints();
         }
-        $("#dynamicbar").show();
+        
+        $(".segments").css('top', '-25px');
         $.sparkline_display_visible()
+        $("#dynamicbar").show();
     }
 
     
@@ -567,7 +569,8 @@ Opencast.Player = (function () {
         $("#oc_btn-analytics").attr('aria-pressed', 'false');
         
         $("#dynamicbar").hide();
-        
+        $(".segments").css('top', '0px');
+
         myvalues = undefined;
     }
 
