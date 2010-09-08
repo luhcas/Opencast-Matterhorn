@@ -92,6 +92,7 @@ Opencast.Player = (function () {
     intvalFastForward      = "",
     displayMode            = "",
     optionClassName        = "",
+    myvalues,
     seekState              = PAUSING;
    
    
@@ -482,10 +483,75 @@ Opencast.Player = (function () {
         $("#oc_btn-analytics").attr('aria-pressed', 'true');
         
         
+        if(myvalues === undefined) {
+          $.ajax( {
+            type : 'GET',
+            contentType : 'text/xml',
+            url : "../../feedback/rest/footprint",
+            data : "id=" + mediaPackageId,
+            dataType : 'xml',
+
+            success : function(xml) {
+
+            var position = 0;
+              var views;
+              var lastPosition = -1;
+              var lastViews;
+              var dcExtent = parseInt($('#dc-extent').html());
+              
+              myvalues = new Array(parseInt(dcExtent/1000));
+  
+              for ( var i = 0; i < myvalues.length; i++)
+                myvalues[i] = 0;
+              $(xml).find('footprint').each(function() {
+                position = parseInt($(this).find('position').text());
+                views = parseInt($(this).find('views').text());
+  
+                if (position -1 != lastPosition ) {
+                  for(var j = lastPosition + 1; j < position; j++) {
+                    myvalues[j] = lastViews;
+                  }
+                }
+                myvalues[position] = views;
+                lastPosition = position;
+                lastViews = views;
+              })
+
+              drawFootprints();
+
+
+
+          },
+            error : function(a, b, c) {
+              // Some error while trying to get the views
+          }
+          });
+        }
+        else {
+          drawFootprints();
+        }
         $("#dynamicbar").show();
         $.sparkline_display_visible()
     }
 
+    
+    
+    /**
+    @memberOf Opencast.Player
+    @description Draw Footprints
+   */
+  function drawFootprints() {
+      $('.dynamicbar').sparkline(myvalues, {
+        type : 'line',
+        spotRadius : '0',
+        width : '100%',
+        height : '25px'
+      });
+
+      //$('.dynamicbar').append(myvalues);
+  }
+  
+  
     /**
       @memberOf Opencast.Player
       @description Hide the notes
@@ -501,6 +567,8 @@ Opencast.Player = (function () {
         $("#oc_btn-analytics").attr('aria-pressed', 'false');
         
         $("#dynamicbar").hide();
+        
+        myvalues = undefined;
     }
 
     /**
@@ -1807,6 +1875,7 @@ Opencast.Player = (function () {
         setVolumeSlider : setVolumeSlider,
         setVideoSizeList : setVideoSizeList,
         currentTime : currentTime,
+        drawFootprints : drawFootprints,
         flashVars: flashVars
     };
 }());

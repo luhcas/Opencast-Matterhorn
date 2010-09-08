@@ -238,51 +238,7 @@ Opencast.Watch = (function() {
               }
               });
 
-              $.ajax( {
-                type : 'GET',
-                contentType : 'text/xml',
-                url : "../../feedback/rest/footprint",
-                data : "id=" + mediaPackageId,
-                dataType : 'xml',
-
-                success : function(xml) {
-
-                  var position = 0;
-                  var views;
-                  var lastPosition = -1;
-                  var lastViews;
-                  var dcExtent = parseInt($('#dc-extent').html());
-                  var myvalues = new Array(parseInt(dcExtent/1000));
-
-                  for ( var i = 0; i < myvalues.length; i++)
-                    myvalues[i] = 0;
-                  $(xml).find('footprint').each(function() {
-                    position = parseInt($(this).find('position').text());
-                    views = parseInt($(this).find('views').text());
-
-                    if (position -1 != lastPosition ) {
-                      for(var j = lastPosition + 1; j < position; j++) {
-                        myvalues[j] = lastViews;
-                      }
-                    }
-                    myvalues[position] = views;
-                    lastPosition = position;
-                    lastViews = views;
-                  })
-
-                  $('.dynamicbar').sparkline(myvalues, {
-                    type : 'line',
-                    spotRadius : '0',
-                    width : '100%',
-                    height : '25px'
-                  });
-                  
-                  $('.dynamicbar').append(myvalues);
-                },
-                error : function(a, b, c) {
-                  // Some error while trying to get the views
-              }
-              });
+              
               // init
               Opencast.Initialize.init();
 

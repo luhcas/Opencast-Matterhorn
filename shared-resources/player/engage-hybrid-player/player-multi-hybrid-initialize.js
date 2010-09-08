@@ -966,6 +966,8 @@ Opencast.Initialize = (function ()
             margin = ((margin - controlswith) / 2) - 8;
             $('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
         }
+        
+        Opencast.Player.drawFootprints();
     }
 
     /**
