@@ -16,7 +16,7 @@
 
       <div style="height: 25px">
               <span id="dynamicbar" class="dynamicbar" style="display: none;">Loading..</span>
-              <table class="segments" cellspacing="0" cellpadding="0">
+              <table class="segments" cellspacing="0" cellpadding="0" style="opacity:0.5;">
                 <tr>
                   <xsl:choose>
                     <xsl:when test="ns2:search-results/result/segments/segment">
