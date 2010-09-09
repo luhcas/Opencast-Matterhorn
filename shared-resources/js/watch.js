@@ -39,12 +39,12 @@ Opencast.Watch = (function() {
               // set date
               var timeDate = $('#oc-date').html();
               var sd = new Date();
-              sd.setFullYear(parseInt(timeDate.substring(0, 4)));
-              sd.setMonth(parseInt(timeDate.substring(5, 7)) - 1);
-              sd.setDate(parseInt(timeDate.substring(8, 10)));
-              sd.setHours(parseInt(timeDate.substring(11, 13)));
-              sd.setMinutes(parseInt(timeDate.substring(14, 16)));
-              sd.setSeconds(parseInt(timeDate.substring(17, 19)));
+              sd.setFullYear(parseInt(timeDate.substring(0,4),10));
+              sd.setMonth(parseInt(timeDate.substring(5,7),10)-1);
+	      sd.setDate(parseInt(timeDate.substring(8,10),10));
+	      sd.setHours(parseInt(timeDate.substring(11,13),10));
+	      sd.setMinutes(parseInt(timeDate.substring(14,16),10));
+	      sd.setSeconds(parseInt(timeDate.substring(17,19),10));
 
               $('#oc_segment-table').html($('#oc-segments').html());
 
