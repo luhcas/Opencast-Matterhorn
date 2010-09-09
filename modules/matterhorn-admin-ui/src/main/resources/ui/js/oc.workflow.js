@@ -40,11 +40,11 @@ ocWorkflow.definitionSelected = function(defId, container, callback) {
       if (callback) {
         callback();
       }
-      if(registerWorkflowComponents && Scheduler && Scheduler.FormManager){
+      if(registerWorkflowComponents && typeof Scheduler != 'undefined' && typeof Scheduler.FormManager != 'undefined'){
         Scheduler.FormManager.workflowComponents = {}; //Clear the previously selected panel's components
         registerWorkflowComponents(Scheduler.FormManager.workflowComponents);
       }else{
-        AdminUI.log("component registration handler not found.");
+        //AdminUI.log("component registration handler not found.");
       }
     }
   );
