@@ -30,6 +30,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -93,13 +94,12 @@ public class CaptionUploadWorkflowOperationHandler extends AbstractResumableWork
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance, java.util.Map)
    */
   @Override
-  public WorkflowOperationResult resume(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    return super.resume(workflowInstance);
-// FIXME: enable this logic once the caotion upload UI has been implemented
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties) throws WorkflowOperationException {
+    return super.resume(workflowInstance, properties);
+// FIXME: enable this logic once the caption upload UI has been implemented
 //    MediaPackageElementFlavor flavor = getFlavor(workflowInstance.getCurrentOperation());
 //    boolean hasCaptions = hasCaptions(workflowInstance.getMediaPackage(), flavor);
 //    if (hasCaptions) {

@@ -16,7 +16,6 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.Track;
 import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -33,21 +32,25 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
- * Operation that holds for download of DVD image
+ * Simple implementation that holds for user-entered trim points.
  */
-public class DownloadDVDWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
+public class TrimWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
 
-  private static final Logger logger = LoggerFactory.getLogger(DownloadDVDWorkflowOperationHandler.class);
-
-  /** Path to the hold ui resources */
-  private static final String HOLD_UI_PATH = "/ui/operation/download-dvd/index.html";
-  private static final String ACTION_TITLE = "download DVD";
+  private static final Logger logger = LoggerFactory.getLogger(TrimWorkflowOperationHandler.class);
 
   /** The configuration options for this handler */
   private static final SortedMap<String, String> CONFIG_OPTIONS;
 
+  /** Path to the hold ui resources */
+  private static final String HOLD_UI_PATH = "/ui/operation/trim/index.html";
+
+  /** Name of the configuration option that provides the tags we are looking for */
+  private static final String PREVIEW_TAG_NAME = "source-tag";
+
   static {
     CONFIG_OPTIONS = new TreeMap<String, String>();
+    CONFIG_OPTIONS.put(PREVIEW_TAG_NAME, "The tag identifying the preview media");
+    CONFIG_OPTIONS.put(REQUIRED_PROPERTY, "The configuration key that must be set to true for this operation to run.");
   }
 
   /**
@@ -62,9 +65,9 @@ public class DownloadDVDWorkflowOperationHandler extends AbstractResumableWorkfl
 
   public void activate(ComponentContext cc) {
     super.activate(cc);
+    setHoldActionTitle("Trim");
     registerHoldStateUserInterface(HOLD_UI_PATH);
-    setHoldActionTitle(ACTION_TITLE);
-    logger.info("Registering download-DVD hold state ui from classpath {}", HOLD_UI_PATH);
+    logger.info("Registering trim hold state ui from classpath {}", HOLD_UI_PATH);
   }
 
   /**
@@ -74,7 +77,20 @@ public class DownloadDVDWorkflowOperationHandler extends AbstractResumableWorkfl
    */
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    logger.info("Holding for download of DVD image...");
+    if (!"true".equalsIgnoreCase(workflowInstance.getCurrentOperation().getConfiguration(REQUIRED_PROPERTY)))
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+
+    logger.info("Holding for trim...");
+
+    // What are we looking for?
+    String tag = workflowInstance.getCurrentOperation().getConfiguration(PREVIEW_TAG_NAME);
+
+    // Let's see if there is preview media available
+    MediaPackage mp = workflowInstance.getMediaPackage();
+    if (mp.getTracksByTag(tag).length == 0) {
+      logger.warn("No media with tag '{}' found to preview", tag);
+    }
+
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
   }
 
@@ -87,19 +103,7 @@ public class DownloadDVDWorkflowOperationHandler extends AbstractResumableWorkfl
   @Override
   public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
           throws WorkflowOperationException {
-    // remove the DVD encoded track from the mediaPackage
-    try {
-      MediaPackage mp = workflowInstance.getMediaPackage();
-      Track[] tracks = mp.getTracks();
-      for (int i = 0; i < tracks.length; i++) {
-        if (tracks[i].getFlavor().getSubtype().toUpperCase().equals("DVD")) {
-          logger.info("Deleting {} from MediaPackage {}", tracks[i].toString(), mp.getIdentifier().toString());
-          mp.remove(tracks[i]);
-        }
-      }
-    } catch (Exception e) {
-      logger.warn("Could not remove dvd encoded track - {}", e.getMessage());
-    }
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+    logger.info("resuming workflow {} with trim properties {}", workflowInstance, properties);
+    return super.resume(workflowInstance, properties);
   }
 }

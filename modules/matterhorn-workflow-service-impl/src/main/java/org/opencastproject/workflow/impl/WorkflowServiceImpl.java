@@ -449,6 +449,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   Executor ex = Executors.newCachedThreadPool();
 
   protected void run(final WorkflowInstance wfi) {
+    run(wfi, null);
+  }
+
+  
+  protected void run(final WorkflowInstance wfi, final Map<String, String> properties) {
     WorkflowOperationInstance operation = wfi.getCurrentOperation();
     if (operation == null)
       operation = wfi.next();
@@ -458,7 +463,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       logger.warn("No handler available to execute operation {}", operation);
       throw new IllegalStateException("Unable to find a workflow handler for " + operation);
     }
-    ex.execute(new WorkflowOperationWorker(operationHandler, wfi, this));
+    ex.execute(new WorkflowOperationWorker(operationHandler, wfi, properties, this));
   }
 
   /**
@@ -517,7 +522,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     if(workflowInstance == null) throw new NotFoundException("Workflow ID='" + workflowInstanceId + "' does not exist");
     workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
     dao.update(workflowInstance);
-    run(workflowInstance);
+    run(workflowInstance, properties);
   }
 
   /**

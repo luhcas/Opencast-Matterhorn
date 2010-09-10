@@ -27,6 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.opencastproject.feedback.api.Annotation;
 import org.opencastproject.feedback.api.FeedbackService;
 import org.opencastproject.feedback.api.Stats;
+import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -150,13 +151,16 @@ public class FeedbackRestService {
       return Response.ok(feedbackService.getReport(from, to, offset, limit)).build();
   }
 
+  protected SecurityService securityService;
+  
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("add")
-  public Response add(@QueryParam("id") String mediapackageId, @QueryParam("user") String userId,
+  public Response add(@QueryParam("id") String mediapackageId,
           @QueryParam("session") String sessionId, @QueryParam("in") int inpoint, @QueryParam("out") int outpoint,
           @QueryParam("key") String key, @QueryParam("value") String value) {
 
+    String userId = securityService.getUserName();
     Annotation a = new AnnotationImpl();
     a.setMediapackageId(mediapackageId);
     a.setUserId(userId);

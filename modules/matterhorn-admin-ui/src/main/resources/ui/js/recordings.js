@@ -376,19 +376,30 @@ Recordings.adjustHoldActionPanelHeight = function() {
 /** Calls workflow endpoint to end hold operation and continue the workflow
  *
  */
-Recordings.continueWorkflow = function() {
+Recordings.continueWorkflow = function(postData) {
   var workflowId = $('#holdWorkflowId').val();
-  var postData = {
-    id : workflowId
-  };
+  if(postData===null) {
+    postData = {id : workflowId};
+  }
   if (Recordings.changedMediaPackage != null) {
     postData['mediapackage'] = Recordings.changedMediaPackage;
     Recordings.changedMediaPackage = null;
   }
+  
+  // resume expects a "properties" form field with one key=value pair per line
+  var props = {};
+  props.id = workflowId;
+  props.properties = "";
+  $.each(postData, function(key, value) {
+    if(key != 'id') {
+      props.properties = props.properties + key + "=" + value + "\n"; 
+    }
+  });
+  
   $.ajax({
     type       : 'POST',
     url        : '../workflow/rest/resume/',
-    data       : postData,
+    data       : props,
     error      : function(XHR,status,e){
       alert('Could not resume Workflow: ' + status);
     },

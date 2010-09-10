@@ -149,6 +149,7 @@
               OSGI-INF/operations/segment.xml,
               OSGI-INF/operations/segmentpreviews.xml,
               OSGI-INF/operations/textanalysis.xml,
+              OSGI-INF/operations/trim.xml,
               OSGI-INF/operations/zip.xml
             </Service-Component>
           </instructions>

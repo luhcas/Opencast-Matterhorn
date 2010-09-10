@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.api;
 
+import org.opencastproject.http.SharedHttpContext;
 import org.opencastproject.http.StaticResource;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
@@ -23,6 +24,11 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 
 import java.net.URL;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
+
+import javax.servlet.Servlet;
 
 /**
  * Abstract base implementation for a resumable operation handler, which implements a simple operations for starting an
@@ -76,8 +82,11 @@ public abstract class AbstractResumableWorkflowOperationHandler extends Abstract
     String path = FilenameUtils.getPathNoEndSeparator(resourcePath);
     String welcomeFile = FilenameUtils.getName(resourcePath);
     staticResource = new StaticResource(componentContext.getBundleContext(), path, alias, welcomeFile);
-    staticResourceRegistration = componentContext.getBundleContext().registerService(StaticResource.class.getName(),
-            staticResource, null);
+    Dictionary<String, String> props = new Hashtable<String, String>();
+    props.put("contextId", SharedHttpContext.HTTP_CONTEXT_ID);
+    props.put("alias", alias);
+    staticResourceRegistration = componentContext.getBundleContext().registerService(Servlet.class.getName(),
+            staticResource, props);
     return staticResource.getDefaultUrl();
   }
 
@@ -93,11 +102,10 @@ public abstract class AbstractResumableWorkflowOperationHandler extends Abstract
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance, java.util.Map)
    */
   @Override
-  public WorkflowOperationResult resume(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties) throws WorkflowOperationException {
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
   }
 

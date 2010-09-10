@@ -27,25 +27,36 @@ import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 /**
  * Handles execution of a workflow operation.
  */
 final class WorkflowOperationWorker implements Runnable {
 
   private static final Logger logger = LoggerFactory.getLogger(WorkflowOperationWorker.class);
-  
+
   protected WorkflowOperationHandler handler = null;
   protected WorkflowInstance workflow = null;
   protected WorkflowServiceImpl service = null;
+  protected Map<String, String> properties = null;
 
-  public WorkflowOperationWorker(WorkflowOperationHandler handler, WorkflowInstance workflow, WorkflowServiceImpl service) {
+  public WorkflowOperationWorker(WorkflowOperationHandler handler, WorkflowInstance workflow,
+          WorkflowServiceImpl service) {
     this.handler = handler;
     this.workflow = workflow;
     this.service = service;
   }
 
+  public WorkflowOperationWorker(WorkflowOperationHandler handler, WorkflowInstance workflow,
+          Map<String, String> properties, WorkflowServiceImpl service) {
+    this(handler, workflow, service);
+    this.properties = properties;
+  }
+
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Runnable#run()
    */
   @Override
@@ -53,21 +64,22 @@ final class WorkflowOperationWorker implements Runnable {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
     try {
       WorkflowOperationResult result = null;
-      switch(operation.getState()) {
-      case INSTANTIATED :
+      switch (operation.getState()) {
+      case INSTANTIATED:
         result = start();
         break;
-      case RUNNING :
+      case RUNNING:
         result = start();
         break;
-      case PAUSED :
+      case PAUSED:
         result = resume();
         break;
       }
-      if(result == null || Action.CONTINUE.equals(result.getAction())) handler.destroy(workflow);
+      if (result == null || Action.CONTINUE.equals(result.getAction()))
+        handler.destroy(workflow);
       service.handleOperationResult(workflow, result);
-    } catch(WorkflowOperationException e) {
-      logger.error("Workflow operation '{}' failed with error: {}", new Object[] {handler, e.getMessage(), e});
+    } catch (WorkflowOperationException e) {
+      logger.error("Workflow operation '{}' failed with error: {}", new Object[] { handler, e.getMessage(), e });
       e.printStackTrace();
       service.handleOperationException(workflow, e);
     }
@@ -79,21 +91,22 @@ final class WorkflowOperationWorker implements Runnable {
     service.update(workflow);
     try {
       WorkflowOperationResult result = handler.start(workflow);
-      if(result != null && Action.PAUSE.equals(result.getAction())) {
+      if (result != null && Action.PAUSE.equals(result.getAction())) {
         operation.setState(OperationState.PAUSED);
       } else {
         operation.setState(OperationState.SUCCEEDED);
       }
       return result;
-    } catch(Exception e) {
+    } catch (Exception e) {
       operation.setState(OperationState.FAILED);
-      if(e instanceof WorkflowOperationException) throw (WorkflowOperationException)e;
+      if (e instanceof WorkflowOperationException)
+        throw (WorkflowOperationException) e;
       throw new WorkflowOperationException(e);
     }
   }
-  
+
   public WorkflowOperationResult resume() throws WorkflowOperationException {
-    if( ! (handler instanceof ResumableWorkflowOperationHandler)) {
+    if (!(handler instanceof ResumableWorkflowOperationHandler)) {
       throw new IllegalStateException("an attempt was made to resume a non-resumable operation");
     }
     ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler) handler;
@@ -101,17 +114,18 @@ final class WorkflowOperationWorker implements Runnable {
     operation.setState(OperationState.RUNNING);
     service.update(workflow);
     try {
-      WorkflowOperationResult result = resumableHandler.resume(workflow);
-      if(result == null || Action.CONTINUE.equals(result.getAction())) {
+      WorkflowOperationResult result = resumableHandler.resume(workflow, properties);
+      if (result == null || Action.CONTINUE.equals(result.getAction())) {
         operation.setState(OperationState.SUCCEEDED);
       }
-      if(result != null && Action.PAUSE.equals(result.getAction())) {
+      if (result != null && Action.PAUSE.equals(result.getAction())) {
         operation.setState(OperationState.PAUSED);
       }
       return result;
-    } catch(Exception e) {
+    } catch (Exception e) {
       operation.setState(OperationState.FAILED);
-      if(e instanceof WorkflowOperationException) throw (WorkflowOperationException)e;
+      if (e instanceof WorkflowOperationException)
+        throw (WorkflowOperationException) e;
       throw new WorkflowOperationException(e);
     }
   }

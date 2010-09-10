@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -56,7 +57,7 @@ public class PauseFinalOperationTest {
   private WorkflowServiceImplDaoFileImpl dao = null;
   private Workspace workspace = null;
   private OpHandler handler = null;
-  
+
   @Before
   public void setup() throws Exception {
     // always start with a fresh solr root directory
@@ -112,23 +113,29 @@ public class PauseFinalOperationTest {
 
     while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.PAUSED)) {
       System.out.println("Waiting for workflows to enter the hold state...");
-      try {Thread.sleep(1000);} catch (InterruptedException e) {}
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+      }
     }
     // Ensure that "start" was called on the first operation handler, but not resume
     Assert.assertTrue(handler.startCalled);
-    Assert.assertTrue( ! handler.resumeCalled);
+    Assert.assertTrue(!handler.resumeCalled);
 
     // The workflow should be in the paused state
     Assert.assertEquals(WorkflowState.PAUSED, service.getWorkflowById(workflow.getId()).getState());
-    
+
     // Resume the workflow
     service.resume(workflow.getId());
-    
+
     while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
       System.out.println("Waiting for workflows to complete...");
-      try {Thread.sleep(1000);} catch (InterruptedException e) {}
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+      }
     }
-    
+
     Assert.assertEquals(WorkflowState.SUCCEEDED, service.getWorkflowById(workflow.getId()).getState());
   }
 
@@ -142,24 +149,36 @@ public class PauseFinalOperationTest {
     }
 
     @Override
-    public SortedMap<String, String> getConfigurationOptions() {return new TreeMap<String, String>();}
-    
-    @Override
-    public String getId() {return this.getClass().getName();}
+    public SortedMap<String, String> getConfigurationOptions() {
+      return new TreeMap<String, String>();
+    }
 
     @Override
-    public String getDescription() {return "ContinuingWorkflowOperationHandler";}
+    public String getId() {
+      return this.getClass().getName();
+    }
+
+    @Override
+    public String getDescription() {
+      return "ContinuingWorkflowOperationHandler";
+    }
 
     @Override
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
       startCalled = true;
       return super.start(workflowInstance);
     }
-    
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance,
+     *      java.util.Map)
+     */
     @Override
-    public WorkflowOperationResult resume(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties) throws WorkflowOperationException {
       resumeCalled = true;
-      return super.resume(workflowInstance);
+      return super.resume(workflowInstance, properties);
     }
   }
 

@@ -210,14 +210,25 @@ public class WorkflowRestService {
     data.addEndpoint(RestEndpoint.Type.WRITE, suspendEndpoint);
 
     // Resume a Workflow Instance
+    RestEndpoint resumeAndReplaceEndpoint = new RestEndpoint("replaceAndresume", RestEndpoint.Method.POST,
+            "/replaceAndresume", "Resume a suspended workflow instance, replacing the mediapackage");
+    resumeAndReplaceEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Suspended workflow has now resumed"));
+    resumeAndReplaceEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .NOT_FOUND("A workflow instance with this ID was not found"));
+    resumeAndReplaceEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
+    resumeAndReplaceEndpoint.addOptionalParam(new Param("mediapackage", Type.TEXT, "mediapackage",
+            "The updated mediapackage for this workflow instance"));
+    resumeAndReplaceEndpoint.addOptionalParam(new Param("properties", Type.TEXT, "",
+            "The properties to set for this workflow instance"));
+    resumeAndReplaceEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, resumeAndReplaceEndpoint);
+
     RestEndpoint resumeEndpoint = new RestEndpoint("resume", RestEndpoint.Method.POST, "/resume",
             "Resume a suspended workflow instance");
     resumeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Suspended workflow has now resumed"));
     resumeEndpoint.addStatus(org.opencastproject.util.doc.Status
             .NOT_FOUND("A workflow instance with this ID was not found"));
     resumeEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
-    resumeEndpoint.addOptionalParam(new Param("mediapackage", Type.TEXT, "mediapackage",
-    "The updated mediapackage for this workflow instance"));
     resumeEndpoint.addOptionalParam(new Param("properties", Type.TEXT, "",
             "The properties to set for this workflow instance"));
     resumeEndpoint.setTestForm(RestTestForm.auto());
@@ -434,6 +445,24 @@ public class WorkflowRestService {
   @POST
   @Path("resume")
   @Produces(MediaType.TEXT_PLAIN)
+  public Response resume(@FormParam("id") String workflowInstanceId, @FormParam("properties") LocalHashMap properties) {
+    Map<String, String> map;
+    if (properties == null) {
+      map = new HashMap<String, String>();
+    } else {
+      map = properties.getMap();
+    }
+    try {
+      service.resume(workflowInstanceId, map);
+      return Response.ok("resumed " + workflowInstanceId).build();
+    } catch (NotFoundException e) {
+      return Response.status(Status.NOT_FOUND).build();
+    }
+  }
+
+  @POST
+  @Path("replaceAndresume")
+  @Produces(MediaType.TEXT_PLAIN)
   public Response resume(@FormParam("id") String workflowInstanceId,
           @FormParam("mediapackage") MediaPackageImpl mediaPackage, @FormParam("properties") LocalHashMap properties) {
     Map<String, String> map;
@@ -442,7 +471,7 @@ public class WorkflowRestService {
     } else {
       map = properties.getMap();
     }
-    if(mediaPackage != null) {
+    if (mediaPackage != null) {
       WorkflowInstance workflow = service.getWorkflowById(workflowInstanceId);
       workflow.setMediaPackage(mediaPackage);
       service.update(workflow);

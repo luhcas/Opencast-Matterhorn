@@ -107,9 +107,10 @@ public class HoldStateTest {
   @After
   public void teardown() throws Exception {
     System.out.println("All tests finished... tearing down...");
-    if(workflow != null) {
+    if (workflow != null) {
       while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
-        System.out.println("Waiting for workflow to complete, current state is " + service.getWorkflowById(workflow.getId()).getState());
+        System.out.println("Waiting for workflow to complete, current state is "
+                + service.getWorkflowById(workflow.getId()).getState());
         Thread.sleep(1000);
       }
     }
@@ -124,7 +125,10 @@ public class HoldStateTest {
     workflow = service.start(def, mp, initialProps);
     while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.PAUSED)) {
       System.out.println("Waiting for workflow to enter paused state...");
-      try {Thread.sleep(1000);} catch (InterruptedException e) {}
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+      }
     }
 
     // The variable "testproperty" should have been replaced by "foo", but not "anotherproperty"
@@ -132,7 +136,8 @@ public class HoldStateTest {
     Assert.assertTrue(xml.contains("foo"));
     Assert.assertTrue(xml.contains("anotherproperty"));
 
-    // Simulate a user resuming and submitting new properties (this time, with a value for "anotherproperty") to the workflow
+    // Simulate a user resuming and submitting new properties (this time, with a value for "anotherproperty") to the
+    // workflow
     Map<String, String> resumeProps = new HashMap<String, String>();
     resumeProps.put("anotherproperty", "bar");
     service.resume(workflow.getId(), resumeProps);
@@ -149,7 +154,10 @@ public class HoldStateTest {
     workflow = service.start(def, mp);
     while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.PAUSED)) {
       System.out.println("Waiting for workflow to enter paused state...");
-      try {Thread.sleep(1000);} catch (InterruptedException e) {}
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+      }
     }
 
     // Simulate a user resuming the workflow, but the handler still keeps the workflow in a hold state
@@ -159,19 +167,25 @@ public class HoldStateTest {
     // The workflow is running again, but should very quickly reenter the paused state
     while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.PAUSED)) {
       System.out.println("Waiting for workflow to reenter paused state...");
-      try {Thread.sleep(1000);} catch (InterruptedException e) {}
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+      }
     }
 
     WorkflowInstance fromDb = service.getWorkflowById(workflow.getId());
     Assert.assertEquals(WorkflowState.PAUSED, fromDb.getState());
-    
+
     // Resume the workflow again, and this time continue with the workflow
     holdingOperationHandler.pauseOnResume = false;
     service.resume(workflow.getId());
 
     while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
       System.out.println("Waiting for workflow to finish...");
-      try {Thread.sleep(1000);} catch (InterruptedException e) {}
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+      }
     }
     Assert.assertEquals(WorkflowState.SUCCEEDED, service.getWorkflowById(workflow.getId()).getState());
   }
@@ -180,15 +194,19 @@ public class HoldStateTest {
 
     /** Whether to return pause or continue when {@link #resume(WorkflowInstance)} is called */
     boolean pauseOnResume;
-    
-    public SortedMap<String, String> getConfigurationOptions() {return new TreeMap<String, String>();}
+
+    public SortedMap<String, String> getConfigurationOptions() {
+      return new TreeMap<String, String>();
+    }
 
     /**
      * {@inheritDoc}
-     * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance)
+     * 
+     * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance,
+     *      java.util.Map)
      */
     @Override
-    public WorkflowOperationResult resume(WorkflowInstance workflowInstance)
+    public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
             throws WorkflowOperationException {
       Action action = pauseOnResume ? Action.PAUSE : Action.CONTINUE;
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(action);
@@ -197,11 +215,19 @@ public class HoldStateTest {
 
   class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
     @Override
-    public SortedMap<String, String> getConfigurationOptions() {return new TreeMap<String, String>();}
+    public SortedMap<String, String> getConfigurationOptions() {
+      return new TreeMap<String, String>();
+    }
+
     @Override
-    public String getId() {return this.getClass().getName();}
+    public String getId() {
+      return this.getClass().getName();
+    }
+
     @Override
-    public String getDescription() {return "ContinuingWorkflowOperationHandler";}
+    public String getDescription() {
+      return "ContinuingWorkflowOperationHandler";
+    }
   }
 
 }

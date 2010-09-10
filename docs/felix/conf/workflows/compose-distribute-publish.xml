@@ -13,15 +13,24 @@
       <legend>Holds</legend>
       <span style="padding-left:5px">Processing should be paused to allow for:</span>
       <ul class="no-bullets formField-list fl-controls-right">
+
+
+        <li class="ui-helper-clearfix"> 
+          <span id="trimholdconfig" style="float:left;">
+            <input id="trimHold" name="trimHold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;" style="float:left;">
+            <span id="i18n_hold_for_trim">&nbsp;Trim before encoding (with option to edit info)</span>
+          </span>
+        </li>
+
         <li class="ui-helper-clearfix"> 
           <span id="holdconfig" style="float:left;">
-            <input id="reviewHold" name="review.hold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;" style="float:left;">
-            <span id="i18n_hold_for_review">&nbsp;Review before encoding (with option to edit info)</span>
+            <input id="reviewHold" name="reviewHold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;" style="float:left;">
+            <span id="i18n_hold_for_review">&nbsp;Review after encoding (with option to edit info)</span>
           </span>
          </li>
          <li class="ui-helper-clearfix">
           <span id="captionconfig" style="float:left;">
-            <input id="captionHold" name="caption.hold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;">
+            <input id="captionHold" name="captionHold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;">
             <span id="i18n_hold_for_caption">&nbsp;Captions file upload</span>
           </span>
          </li>
@@ -56,13 +65,19 @@
       function WorkflowPanel.registerPanelComponents(components){
         components.reviewhold = new Component(
           ['reviewHold'],
-          {nodeKey: 'org.opencastproject.workflow.config.review.hold'},
+          {nodeKey: 'org.opencastproject.workflow.config.reviewHold'},
           {getValue: function(){ return this.fields.reviewHold.is(":checked"); }
+          });
+
+        components.trimhold = new Component(
+          ['trimHold'],
+          {nodeKey: 'org.opencastproject.workflow.config.trimHold'},
+          {getValue: function(){ return this.fields.trimHold.is(":checked"); }
           });
           
         components.captionhold = new Component(
           ['captionHold'],
-          {nodeKey: 'org.opencastproject.workflow.config.caption.hold'},
+          {nodeKey: 'org.opencastproject.workflow.config.captionHold'},
           {getValue: function(){ return this.fields.reviewCaption.is(":checked");}
           });
           
@@ -167,6 +182,19 @@
       </configurations>
     </operation>
 
+    <!-- hold to trim media-->
+   
+    <operation
+      id="trim"
+      fail-on-error="true"
+      exception-handler-workflow="error"
+      description="Waiting for user to trim recording">
+      <configurations>
+        <configuration key="source-tag">preview</configuration>
+        <configuration key="required-property">${trimHold}</configuration>
+      </configurations>
+    </operation>  
+
     <!-- hold to review media-->
    
     <operation
@@ -176,8 +204,8 @@
       description="Waiting for user to review recording">
       <configurations>
         <configuration key="source-tag">preview</configuration>
-        <configuration key="required-property">${review.hold}</configuration>
-        </configurations>
+        <configuration key="required-property">${reviewHold}</configuration>
+      </configurations>
     </operation>  
 
     <!-- hold for captions -->
@@ -189,7 +217,7 @@
       description="Waiting for user to upload captions">
       <configurations>
         <configuration key="caption-flavor">caption/dfxp</configuration>
-        <configuration key="required-property">${caption.hold}</configuration>
+        <configuration key="required-property">${captionHold}</configuration>
       </configurations>
     </operation>
 
