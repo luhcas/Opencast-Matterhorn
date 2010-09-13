@@ -33,6 +33,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Timer;
@@ -48,18 +49,18 @@ import java.util.TimerTask;
 public class ConfigurationManager implements ManagedService {
   
   /** slf4j logging */
-  private static final Logger logger = 
+  static final Logger logger = 
     LoggerFactory.getLogger(ConfigurationManager.class);
   
   /** Hashtable that represents config file in memory */
-  private XProperties properties = new XProperties();
+  XProperties properties = new XProperties();
   
   /** should point to a centralised config file */
-  private URL url; 
+  URL url; 
   
   /** Timer that will every at a specified interval to retrieve the centralised
    * configuration file from a server */
-  private Timer timer;
+  Timer timer;
 
   public void activate(ComponentContext ctx) {
     if (ctx != null) {
@@ -82,7 +83,17 @@ public class ConfigurationManager implements ManagedService {
       return;
     }
     logger.debug("Merging new properties into in-memory structure.");
-    properties.merge(props);
+
+    //Filter out all of the non-string objects from the incoming dictionary
+    //If we don't do this then serialization of the RecordingImpl in CaptureAgentImpl doesn't work
+    Enumeration<Object> keys = props.keys();
+    while (keys.hasMoreElements()) {
+      Object key = keys.nextElement();
+      Object value = props.get(key);
+      if (String.class.isInstance(key) && String.class.isInstance(value)) {
+        properties.put(key, value);
+      }
+    }
 
     // Attempt to parse the location of the configuration server
     try {
@@ -134,7 +145,7 @@ public class ConfigurationManager implements ManagedService {
   /**
    * Creates the core Opencast directories.
    */
-  private void createCoreDirectories() {
+  void createCoreDirectories() {
     createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CACHE_URL, "cache/captures");
     createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_VOLATILE_URL, "volatile");
   }
@@ -144,7 +155,7 @@ public class ConfigurationManager implements ManagedService {
    * @param key    The key to set in this configuration manager.  Key is set equal to name.
    * @param fallback The directory structure that should be created under java.io.tmpdir should the key not be found in the configuration data.
    */
-  private void createFileObj(String key, String fallback) {
+  void createFileObj(String key, String fallback) {
     if (this.getItem(key) == null) {
       File parent = new File(System.getProperty("java.io.tmpdir"));
       File dir = new File(parent, fallback);
@@ -229,7 +240,7 @@ public class ConfigurationManager implements ManagedService {
    * @return The properties (if any) fetched from the server
    * @see org.opencastproject.capture.api.CaptureParameters#CAPTURE_CONFIG_REMOTE_ENDPOINT_URL
    */
-  protected Properties retrieveConfigFromServer() {
+  Properties retrieveConfigFromServer() {
     if (url == null) {
       return null;
     }
@@ -251,7 +262,7 @@ public class ConfigurationManager implements ManagedService {
    * 
    * @see org.opencastproject.capture.api.CaptureParameters#CAPTURE_CONFIG_CACHE_URL
    */
-  protected void writeConfigFileToDisk() {
+  void writeConfigFileToDisk() {
     File cachedConfig = new File(properties.getProperty(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
 
     FileOutputStream fout = null;
@@ -273,8 +284,8 @@ public class ConfigurationManager implements ManagedService {
    * Returns a Dictionary of all the properties associated with this configuration manager.
    * @return the key/value pair mapping.
    */
-  public Properties getAllProperties() {
-    return (Properties) properties.clone();
+  public XProperties getAllProperties() {
+    return (XProperties) properties.clone();
   }
   
   /** 
@@ -297,8 +308,7 @@ public class ConfigurationManager implements ManagedService {
     }
 
     //For each key
-    for (Object obj : properties.keySet()) {
-      String key = (String) obj;
+    for (String key : properties.stringPropertyNames()) {
       //For each device
       for (String name : friendlyNames) {
         String check = CaptureParameters.CAPTURE_DEVICE_PREFIX + name;
@@ -335,25 +345,25 @@ public class ConfigurationManager implements ManagedService {
    * @param overwrite true if this should overwrite the ConfigurationManager's properties, false if not.
    * @return the merged properties.
    */
-  public Properties merge(Properties p, boolean overwrite) {
+  public XProperties merge(Properties p, boolean overwrite) {
     // if no properties are specified, just return current configuration
     if (p == null) {
       return getAllProperties();
     }
     // overwrite the current properties in the ConfigurationManager
     if (overwrite) {
-      for (Object key : p.keySet()) {
-        properties.setProperty((String) key, p.getProperty((String) key));
+      for (String key : p.stringPropertyNames()) {
+        properties.setProperty( key, p.getProperty(key));
       }
       return getAllProperties();
     }
     // do not overwrite the ConfigurationManager, but merge the properties
     else {
-      Properties merged = getAllProperties();
-      for (Object key : p.keySet()) {
-        String property = p.getProperty((String) key);
+      XProperties merged = getAllProperties();
+      for (String key : p.stringPropertyNames()) {
+        String property = p.getProperty(key);
         if (property != null) {
-          merged.setProperty(key.toString(), property);
+          merged.setProperty(key, property);
         } else {
           logger.error("Unable to merge properties!");
           return null;

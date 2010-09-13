@@ -19,6 +19,7 @@ import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.ScheduledEvent;
 import org.opencastproject.capture.api.ScheduledEventImpl;
 import org.opencastproject.capture.impl.jobs.CleanCaptureJob;
+import org.opencastproject.capture.impl.jobs.IngestJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.impl.jobs.PollCalendarJob;
 import org.opencastproject.capture.impl.jobs.SerializeJob;
@@ -99,31 +100,31 @@ import java.util.Properties;
 public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler, ManagedService {
 
   /** Log facility */
-  private static final Logger log = LoggerFactory.getLogger(SchedulerImpl.class);
+  static final Logger log = LoggerFactory.getLogger(SchedulerImpl.class);
 
   /** The scheduler used for all of the scheduling */
-  private Scheduler scheduler = null;
+  Scheduler scheduler = null;
 
   /** The stored URL for the remote calendar source */
-  private URL remoteCalendarURL = null;
+  URL remoteCalendarURL = null;
 
   /** The URL of the cached copy of the recording schedule */
-  private URL localCalendarCacheURL = null;
+  URL localCalendarCacheURL = null;
 
   /** The time in milliseconds between attempts to fetch the calendar data */
-  private long pollTime = 0;
+  long pollTime = 0;
 
   /** A stored copy of the Calendar */
-  private Calendar calendar = null;
+  Calendar calendar = null;
 
   /** The configuration for this service */
-  private ConfigurationManager configService = null;
+  ConfigurationManager configService = null;
 
   /** The capture agent this scheduler is scheduling for */
-  private CaptureAgentImpl captureAgent = null;
+  CaptureAgentImpl captureAgent = null;
 
   /** The trusted HttpClient used to talk to the core */
-  private TrustedHttpClient trustedClient = null;
+  TrustedHttpClient trustedClient = null;
 
   public void setConfigService(ConfigurationManager svc) {
     configService = svc;
@@ -148,6 +149,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   @SuppressWarnings("unchecked")
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
+    log.debug("Scheduler updated.");
     try {
       localCalendarCacheURL = new File(configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL)).toURI().toURL();
     } catch (NullPointerException e) {
@@ -178,7 +180,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       setupPolling();
       updateCalendar();
       scheduleCleanJob();
-      scheduler.start();
+      startScheduler();
     } catch (SchedulerException e) {
       throw new ConfigurationException("Internal error in scheduler, unable to start.", e.getMessage());
     }
@@ -187,7 +189,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   /**
    * Creates the schedule polling task which checks with the core to see if there is any new scheduling data 
    */
-  private void setupPolling() {
+  void setupPolling() {
     if (scheduler == null) {
       log.warn("Unable to setup polling because internal scheduler is null.");
       return;
@@ -242,6 +244,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    */
   public void setCaptureAgent(CaptureAgentImpl agent) {
     captureAgent = agent;
+    //FIXME:  This shouldn't be doing this...
     if (agent != null) {
       agent.setScheduler(this);
     }
@@ -295,10 +298,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @param url The {@code URL} to read the calendar data from.
    * @return A {@code Calendar} object, or null in the case of an error or to indicate that no update should be performed.
    */
-  private Calendar parseCalendar(URL url) {
+  Calendar parseCalendar(URL url) {
 
     String calendarString = null;
-    boolean error = false;
     calendarString = readCalendar(url);
 
     if (calendarString == null) {
@@ -350,7 +352,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @param file The {@code URL} of the local file you wish to write to.
    * @param contents The contents of the file you wish to create.
    */
-  private void writeFile(URL file, String contents) {
+  void writeFile(URL file, String contents) {
     //TODO:  Handle file corruption issues for this block
     //TODO:  Handle UTF16, etc
     FileWriter out = null;
@@ -372,7 +374,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @throws IOException
    * @throws URISyntaxException 
    */
-  private String readCalendar(URL url) {
+  String readCalendar(URL url) {
     StringBuilder sb = new StringBuilder();
     DataInputStream in = null;
     HttpResponse response = null;
@@ -462,7 +464,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * Prints out the current schedules for both schedules.
    * @throws SchedulerException
    */
-  private void checkSchedules() throws SchedulerException {
+  void checkSchedules() throws SchedulerException {
     if (scheduler != null) {
       String [] jobnames = scheduler.getJobNames(JobParameters.CAPTURE_TYPE);
       log.debug("Currently scheduled jobs for capture schedule: {}", jobnames.length);
@@ -496,7 +498,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * Also note that any files which are in the way when this call tries to save the iCal attachments are overwritten without prompting.
    * @param newCal The new {@code Calendar} data
    */
-  private synchronized void setCaptureSchedule(Calendar newCal) {
+  synchronized void setCaptureSchedule(Calendar newCal) {
     log.debug("setCaptureSchedule(newCal)");
 
     try {
@@ -642,7 +644,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @throws ParseException
    */
   @SuppressWarnings("unchecked")
-  private boolean setupEvent(VEvent event, Properties props, JobDetail job) throws org.opencastproject.util.ConfigurationException, MediaPackageException, MalformedURLException, ParseException {
+  boolean setupEvent(VEvent event, Properties props, JobDetail job) throws org.opencastproject.util.ConfigurationException, MediaPackageException, MalformedURLException, ParseException {
     MediaPackage pack = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     pack.setIdentifier(new IdImpl(props.getProperty(CaptureParameters.RECORDING_ID)));
     boolean hasProperties = false;
@@ -723,7 +725,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @return A {@code String} representation of the attachment
    * @throws ParseException
    */
-  private String getAttachmentAsString(Property property) throws ParseException {
+  String getAttachmentAsString(Property property) throws ParseException {
     byte[] bytes = Base64.decodeBase64(property.getValue());
     String attach = new String(bytes);
     return attach;
@@ -735,7 +737,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @return A cron-like scheduling string in a {@code CronExpression} object.
    * @throws ParseException
    */
-  private CronExpression getCronString(Date date) throws ParseException {
+  CronExpression getCronString(Date date) throws ParseException {
     //TODO:  Remove the deprecated calls here.
     StringBuilder sb = new StringBuilder();
     sb.append(date.getSeconds() + " ");
@@ -774,7 +776,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   /**
    * Schedules a {@code StopCaptureJob} to stop a capture at a given time.
    * @param recordingID The recordingID of the recording you wish to stop.
-   * @param atTime The time (in seconds since 1970) in a {@code Date} at which to stop the capture.
+   * @param atTime The time (in seconds since 1970) at which to stop the capture.
    * @return True if the job was scheduled, false otherwise.
    */
   public boolean scheduleUnscheduledStopCapture(String recordingID, long atTime) {
@@ -782,11 +784,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
-   * Schedules an immediate {@code SerializeJob} for the recording.
+   * Schedules an immediate {@code SerializeJob} for the recording.  This method will manifest and zip the recording before ingesting it.
    * @param recordingID The ID of the recording to it ingest.
    * @return True if the job was scheduled correctly, false otherwise.
    */
-  public boolean scheduleIngest(String recordingID) {
+  public boolean scheduleSerializationAndIngest(String recordingID) {
     try {
       String[] jobs = scheduler.getJobNames(JobParameters.OTHER_TYPE);
       for (String jobname : jobs) {
@@ -821,9 +823,43 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   }
 
   /**
+   * Schedules an immediate {@code IngestJob} for the recording.  This method does not create a manifest or zip the recording.
+   * @param recordingID The ID of the recording to it ingest.
+   * @return True if the job was scheduled correctly, false otherwise.
+   */
+  public boolean scheduleIngest(String recordingID) {
+    JobDetail job = new JobDetail("IngestJob-" + recordingID, JobParameters.OTHER_TYPE, IngestJob.class);
+    CronTrigger trigger;
+
+    try {
+      trigger = new CronTrigger();
+      trigger.setGroup(JobParameters.OTHER_TYPE);
+      trigger.setName("IngestJobTrigger-" + recordingID);
+      trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
+
+      //TODO:  Make this configurable.  Or at least slow it down a bit - hitting things every 20 seconds it too fast.
+      trigger.setCronExpression("0/20 * * * * ?");
+      trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, this.captureAgent);
+      trigger.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
+      trigger.getJobDataMap().put(JobParameters.JOB_POSTFIX, recordingID);
+
+      //Schedule the job
+      scheduler.scheduleJob(job, trigger);
+
+    } catch (ParseException e) {
+      log.error("Invalid argument for CronTrigger: {}", e.getMessage());
+      return false;
+    } catch (SchedulerException e) {
+      log.error("Couldn't schedule task: {}", e.getMessage());
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Schedules the job in charge of cleaning the old captures
    */
-  private void scheduleCleanJob() {
+  void scheduleCleanJob() {
 
     try {
       long cleanInterval = Long.parseLong(configService.getItem(CaptureParameters.CAPTURE_CLEANER_INTERVAL)) * 1000L;

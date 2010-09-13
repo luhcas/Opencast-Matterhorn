@@ -43,7 +43,7 @@ public interface StateService {
 
   /**
    * Gets a map of recording ID and Recording pairs containing all of the recordings the system is aware of.
-   * The recording ID is either the DTSTART field in the scheduler iCal feed, or Unscheduled-$TIMESTAMP if the recording was unscheduled
+   * The recording ID is either the DTSTART field in the scheduler iCal feed, or Unscheduled-$AGENTID-$TIMESTAMP if the recording was unscheduled
    * This is returning a string so that inter-version compatibility it maintained (eg, a version 2 agent talking to a version 1 core)
    * 
    * @return A map of recording ID-state pairs.  May be null if the implementation is not active yet.

@@ -18,6 +18,7 @@ package org.opencastproject.capture.impl.jobs;
 import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.RecordingImpl;
+import org.opencastproject.util.XProperties;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -29,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Properties;
 import java.util.Vector;
 
 
@@ -42,7 +42,7 @@ public class CleanCaptureJobTest {
 
   private static final long CONVERSION_RATE =  5 * 1000; // five seconds
 
-  Properties props = null;
+  XProperties props = null;
   CleanCaptureJob theJob = null;
   Vector<AgentRecording> theRecordings = null;
 
@@ -53,7 +53,7 @@ public class CleanCaptureJobTest {
   @Before
   public void setUp() {
     // Define particular instances for the CleanCaptureJob required arguments
-    props = new Properties();
+    props = new XProperties();
     theJob = new CleanCaptureJob();
     theRecordings = new Vector<AgentRecording>();
 

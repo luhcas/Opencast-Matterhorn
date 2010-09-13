@@ -23,16 +23,22 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.mediapackage.identifier.IdImpl;
 import org.opencastproject.util.ConfigurationException;
+import org.opencastproject.util.XProperties;
 
 import org.apache.commons.io.FileUtils;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
@@ -42,46 +48,48 @@ import java.util.TimeZone;
  * This class is a container for the properties relating a certain recording -- 
  * a set of Properties and a MediaPackage with all the metadata/attachments/etc. associated 
  */
-public class RecordingImpl implements AgentRecording {
+public class RecordingImpl implements AgentRecording, Serializable {
 
-  private static final Logger logger = LoggerFactory.getLogger(RecordingImpl.class);
+  static final long serialVersionUID = 1L;
+
+  transient static final Logger logger = LoggerFactory.getLogger(RecordingImpl.class);
 
   /** Date formatter for the metadata file */
-  private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
+  transient static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
 
-  /** Unique identifier for this ID   */
-  private String id = null;
+  /** Unique identifier for this ID */
+  String id = null;
 
   /** Directory in the filesystem where the files related with this recording are */
-  private File baseDir = null;
+  File baseDir = null;
 
-  /** The recording's state */
-  private String state = RecordingState.UNKNOWN;
+  /** The recording's state.  Defined in {@code RecordingState}. */
+  String state = RecordingState.UNKNOWN;
 
   /**
    * The time at which the recording last checked in with this service.
    * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in). 
    */
-  private Long lastHeardFrom; 
+  Long lastHeardFrom; 
 
   /** Keeps the properties associated with this recording */
-  private Properties props = null;
+  XProperties props = null;
 
   /** The MediaPackage containing all the metadata/attachments/any file related with this recording */
-  private MediaPackage mPkg = null;
+  transient MediaPackage mPkg = null;
 
   /** 
    * Constructs a RecordingImpl object using the Properties and MediaPackage provided
-   * @param properties The {@code Properties} object associated to this recording
+   * @param Xproperties The {@code XProperties} object associated to this recording
    * @param mp    The {@code MediaPackage} with this recording files
    * @throws IOException If the base directory could not be fetched
    */
-  public RecordingImpl(MediaPackage mp, Properties properties) throws IOException {
+  public RecordingImpl(MediaPackage mp, XProperties properties) throws IOException {
     // Stores the MediaPackage
     this.mPkg = mp;
 
     if (properties != null) {
-      this.props = (Properties) properties.clone();
+      this.props = (XProperties) properties.clone();
     } else {
       logger.warn("Properties parameter was null, this recording will be in a very weird state!");
     }
@@ -139,10 +147,10 @@ public class RecordingImpl implements AgentRecording {
    * Determines the root URL and ID from the recording's properties
    * //TODO:  What if the properties object contains a character in the recording id or root url fields that is invalid for the filesystem? 
    */
-  protected void determineRootURLandID() {
+  void determineRootURLandID() {
     if (props == null) {
       logger.info("Properties are null for recording, guessing that the root capture dir is java.io.tmpdir...");
-      props = new Properties();
+      props = new XProperties();
       props.setProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, System.getProperty("java.io.tmpdir"));
     }
 
@@ -177,7 +185,7 @@ public class RecordingImpl implements AgentRecording {
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.AgentRecording#getProperties()
    */
-  public Properties getProperties() {
+  public XProperties getProperties() {
     return props;
   }
 
@@ -185,8 +193,26 @@ public class RecordingImpl implements AgentRecording {
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.AgentRecording#setProps(java.util.Properties)
    */
-  public void setProps(Properties props) {
+  public void setProps(XProperties props) {
     this.props = props;
+  }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.capture.api.AgentRecording#setProps(java.util.Properties)
+   */
+  public void setProps(Properties props) {
+    //Preserve the bundle context between property lists
+    BundleContext ctx = null;
+    if (this.props != null) {
+      ctx = this.props.getBundleContext();
+    }
+    this.props = new XProperties();
+    this.props.setBundleContext(ctx);
+    
+    for (String key : props.stringPropertyNames()) {
+      props.put(key, props.getProperty(key));
+    }
   }
 
   /**
@@ -264,8 +290,37 @@ public class RecordingImpl implements AgentRecording {
    * @param d The Date to format
    * @return The formatted Date
    */
-  private static synchronized String formatDate(Date d) {
+  static synchronized String formatDate(Date d) {
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
     return sdf.format(d);
+  }
+
+  /**
+   * Overrides the default serialization behaviour.  This method writes the mediapackage to the mediapackage.xml file in the base directory of this capture 
+   * @param out The ObjectOutputStream for the serialization
+   * @throws IOException
+   */
+  private void writeObject(ObjectOutputStream out) throws IOException {
+    out.defaultWriteObject();
+    try {
+      mPkg.toXml(out, true);
+    } catch (MediaPackageException e) {
+      logger.error("Unable to write mediapackage to disk!  Error was: {}.", e.getMessage());
+    }
+  }
+
+  /**
+   * Overrides the default serialization behaviour.  This method reads the mediapackage from the mediapackage.xml file in the base directory of this capture 
+   * @param in The ObjectInputStream for the serialization
+   * @throws IOException
+   * @throws ClassNotFoundException
+   */
+  private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    in.defaultReadObject();
+    try {
+      mPkg = MediaPackageImpl.valueOf(in);
+    } catch (MediaPackageException e) {
+      logger.error("Unable to read mediapackage from disk!  Error was: {}.", e.getMessage());
+    }
   }
 }

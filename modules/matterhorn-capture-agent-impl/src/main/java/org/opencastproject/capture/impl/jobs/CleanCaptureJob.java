@@ -50,6 +50,7 @@ public class CleanCaptureJob implements Job {
   boolean checkArchivalDays = true;
   boolean checkDiskSpace = true;
   boolean underMinSpace = false;
+  CaptureAgentImpl service = null;
   
   /**
    * Cleans up lectures which no longer need to be stored on the capture agent itself.
@@ -60,14 +61,18 @@ public class CleanCaptureJob implements Job {
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
 
     ConfigurationManager cm = (ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE);
-    CaptureAgentImpl service = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
+    service = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
     Properties p = cm.getAllProperties();
 
     if (service != null) {
-      doCleaning(p, service.getKnownRecordings().values());
+      doCleaning(p, service);
     } else {
       logger.error("Unable to run clean capture job, service pointer is null!");
     }
+  }
+
+  public void doCleaning(Properties p, CaptureAgentImpl service) {
+    doCleaning(p, service.getKnownRecordings().values());
   }
   
   /**
@@ -82,7 +87,7 @@ public class CleanCaptureJob implements Job {
     try {
       maxArchivalDays = Long.parseLong(p.getProperty(CaptureParameters.CAPTURE_CLEANER_MAX_ARCHIVAL_DAYS));
       // If the value is < 0 (no matter if it's because of an overflow), it's invalid.
-      // MAX_VALUE is considered infinity, and therefore there is no limit for arquiving the recordings
+      // MAX_VALUE is considered infinity, and therefore there is no limit for archiving the recordings
       if ((maxArchivalDays < 0) || (maxArchivalDays == Long.MAX_VALUE))
         checkArchivalDays = false;
     } catch (NumberFormatException e) {
@@ -123,6 +128,9 @@ public class CleanCaptureJob implements Job {
           underMinSpace = true;
           logger.info("Removing capture {} archives in {}. Under minimum free disk space.", theRec.getID(), recDir.getAbsolutePath());
           FileSupport.delete(recDir, true);
+          if (service != null) {
+            service.removeCompletedRecording(theRec.getID());
+          }
           continue;
         }
         else {
@@ -138,6 +146,9 @@ public class CleanCaptureJob implements Job {
         if (currentTime - age > maxArchivalDays * DAY_LENGTH_MILLIS) {
           logger.info("Removing capture {} archives at {}.\nExceeded the maximum archival days.", theRec.getID(), recDir.getAbsolutePath());
           FileSupport.delete(recDir, true);
+          if (service != null) {
+            service.removeCompletedRecording(theRec.getID());
+          }
           continue;
         }
         else {

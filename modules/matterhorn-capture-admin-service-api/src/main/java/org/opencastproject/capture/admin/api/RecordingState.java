@@ -29,11 +29,13 @@ public interface RecordingState {
   public static final String CAPTURE_ERROR = "capture_error";
   /** Constant <code>MANIFEST="manifest"</code> */
   public static final String MANIFEST = "manifest";
-  /** Constant <code>MANIFEST="manifest"</code> */
+  /** Constant <code>MANIFEST_ERROR="manifest_error"</code> */
   public static final String MANIFEST_ERROR = "manifest_error";
+  /** Constant <code>MANIFEST_FINISHED="manifest_finished"</code> */
+  public static final String MANIFEST_FINISHED = "manifest_finished";
   /** Constant <code>COMPRESSING="compressing"</code> */
   public static final String COMPRESSING = "compressing";
-  /** Constant <code>COMPRESSING="compressing"</code> */
+  /** Constant <code>COMPRESSING_ERROR="compressing_error"</code> */
   public static final String COMPRESSING_ERROR = "compressing_error";
   /** Constant <code>UPLOADING="uploading"</code> */
   public static final String UPLOADING = "uploading";

@@ -9,6 +9,7 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.ConfigurationException;
+import org.opencastproject.util.XProperties;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -21,7 +22,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 @Ignore()
 public class AgentStateJobTest {
@@ -43,7 +43,7 @@ public class AgentStateJobTest {
     EasyMock.expectLastCall().anyTimes();
 
     Map<String, AgentRecording> recordingMap = new HashMap<String, AgentRecording>();
-    recordingMap.put("test", new RecordingImpl(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew(), new Properties()));
+    recordingMap.put("test", new RecordingImpl(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew(), new XProperties()));
     EasyMock.expect(state.getKnownRecordings()).andReturn(recordingMap);
     EasyMock.expectLastCall().anyTimes();
 

@@ -48,10 +48,10 @@ public class XProperties extends Properties {
   private static final Logger log = LoggerFactory.getLogger(XProperties.class);
 
   /** The {@code BundleContext} for this properties object */
-  private BundleContext context = null;
+  transient private BundleContext context = null;
 
   /** The {@link Bundle} that loaded this object */
-  private Bundle bundle = null;
+  transient private Bundle bundle = null;
   
   /**
    * {@inheritDoc}
@@ -148,5 +148,13 @@ public class XProperties extends Properties {
     if(ctx != null) {
       bundle = ctx.getBundle();
     }
+  }
+
+  /**
+   * Return the current {@code BundleContext} that's in use by this object.
+   * @return The current {@code BundleContext}
+   */
+  public BundleContext getBundleContext() {
+    return this.context;
   }
 }

@@ -27,6 +27,7 @@ import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.jobs.AgentCapabilitiesJob;
 import org.opencastproject.capture.impl.jobs.AgentStateJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
+import org.opencastproject.capture.impl.jobs.LoadRecordingsJob;
 import org.opencastproject.capture.pipeline.AudioMonitoring;
 import org.opencastproject.capture.pipeline.PipelineFactory;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
@@ -45,6 +46,7 @@ import org.opencastproject.security.api.TrustedHttpClientException;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.MimeType;
+import org.opencastproject.util.XProperties;
 import org.opencastproject.util.ZipUtil;
 
 import org.apache.commons.io.IOUtils;
@@ -77,6 +79,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -121,43 +125,46 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   public static final long GST_SECOND = 1000000000L;
 
   /** The agent's pipeline. **/
-  private Pipeline pipe = null;
+  Pipeline pipe = null;
 
   /** Pipeline for confidence monitoring while agent is idle */
-  private Pipeline confidencePipe = null;
+  Pipeline confidencePipe = null;
 
   /** Keeps the recordings which have not been succesfully ingested yet. **/
-  private Map<String, AgentRecording> pendingRecordings = new ConcurrentHashMap<String, AgentRecording>();
+  Map<String, AgentRecording> pendingRecordings = new ConcurrentHashMap<String, AgentRecording>();
 
   /** Keeps the recordings which have been successfully ingested. */
-  private Map<String, AgentRecording> completedRecordings = new ConcurrentHashMap<String, AgentRecording>();
+  Map<String, AgentRecording> completedRecordings = new ConcurrentHashMap<String, AgentRecording>();
 
   /** The agent's name. */
-  private String agentName = null;
+  String agentName = null;
 
   /** The agent's current state.  Used for logging. */
-  private String agentState = null;
+  String agentState = null;
 
   /** A pointer to the scheduler. */
-  private SchedulerImpl scheduler = null;
+  SchedulerImpl scheduler = null;
 
   /** The scheduler the agent will use to schedule any recurring events */
-  private Scheduler agentScheduler = null;
+  Scheduler agentScheduler = null;
 
   /** The configuration manager for the agent. */
-  private ConfigurationManager configService = null;
+  ConfigurationManager configService = null;
 
   /** The http client used to communicate with the core */
-  private TrustedHttpClient client = null;
+  TrustedHttpClient client = null;
 
   /** Indicates the ID of the recording currently being recorded. **/
-  private String currentRecID = null;
+  String currentRecID = null;
 
   /** Is confidence monitoring enabled? */
-  private boolean confidence = false;
+  boolean confidence = false;
 
   /** Stores the start time of the current recording */
-  private long startTime = -1l;
+  long startTime = -1l;
+
+  /** Stores the current bundle context */
+  ComponentContext context = null;
 
     /**
    * Sets the configuration service form which this capture agent should draw its configuration data.
@@ -231,6 +238,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   @Override
   public String startCapture(Properties properties) {
     // Creates default MediaPackage
+    //TODO:  This is also done in the RecordingImpl class, should this code go away?
     MediaPackage pack;
     try {
       pack = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
@@ -299,6 +307,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         resetOnFailure(newRec.getID());
       }
     }
+
+    serializeRecording(recordingID);
     return recordingID;
   }
 
@@ -308,7 +318,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @param properties The properties of the recording
    * @return The RecordingImpl instance, or null in the case of an error
    */
-  private RecordingImpl createRecording(MediaPackage mediaPackage, Properties properties) {
+  RecordingImpl createRecording(MediaPackage mediaPackage, Properties properties) {
     // Creates a new recording object, checking if it was correctly initialized
     RecordingImpl newRec = null;
     try {
@@ -337,7 +347,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @param newRec The RecordingImpl of the capture we wish to perform.
    * @return The recording ID (equal to newRec.getID()) or null in the case of an error
    */
-  private String initPipeline(RecordingImpl newRec) {
+  String initPipeline(RecordingImpl newRec) {
     //Create the pipeline
     try {
       pipe = PipelineFactory.create(newRec.getProperties(), false, this);
@@ -412,7 +422,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * Convenience method to reset an agent when a capture fails to start.
    * @param recordingID The recordingID of the capture which failed to start.
    */
-  private void resetOnFailure(String recordingID) {
+  void resetOnFailure(String recordingID) {
     setAgentState(AgentState.IDLE);
     setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
     currentRecID = null;
@@ -423,7 +433,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @param recordingID The recordingID to stop.
    * @return true if the stop was scheduled, false otherwise.
    */
-  private boolean scheduleStop(String recordingID) {
+  boolean scheduleStop(String recordingID) {
     String maxLength = pendingRecordings.get(recordingID).getProperty(CaptureParameters.CAPTURE_MAX_LENGTH);
     long length = 0L;
     if (maxLength != null) {
@@ -509,15 +519,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     //Update the states of everything.
     setRecordingState(theRec.getID(), RecordingState.CAPTURE_FINISHED);
     setAgentState(AgentState.IDLE);
-
-    // Creates the file indicating the recording has been successfully stopped
-    try {
-      new File(theRec.getDir(), CaptureParameters.CAPTURE_STOPPED_FILE_NAME).createNewFile();
-    } catch (IOException e) {
-      setRecordingState(theRec.getID(), RecordingState.CAPTURE_ERROR);
-      logger.error("IOException: Could not create \"{}\" file: {}.", CaptureParameters.CAPTURE_STOPPED_FILE_NAME, e.getMessage());
-      return false; 
-    }
+    serializeRecording(theRec.getID());
 
     theRec.setProperty(CaptureParameters.RECORDING_DURATION, String.valueOf(System.currentTimeMillis() - startTime));
     startTime = -1l;
@@ -525,7 +527,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     logger.info("Recording \"{}\" succesfully stopped", theRec.getID());
 
     if (immediateIngest) {
-      if (scheduler.scheduleIngest(theRec.getID())) {
+      if (scheduler.scheduleSerializationAndIngest(theRec.getID())) {
         logger.info("Ingest scheduled for recording {}.", theRec.getID());
       } else {
         logger.warn("Ingest scheduling failed for recording {}!", theRec.getID());
@@ -558,8 +560,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * Generates the manifest.xml file from the files specified in the properties
    * @param recID The ID for the recording whose manifest will be created
    * @return A state boolean
-   * @throws IOException 
-   * @throws NoSuchAlgorithmException 
+   * @throws IOException
+   * @throws NoSuchAlgorithmException
    */
   public boolean createManifest(String recID) throws NoSuchAlgorithmException, IOException {
 
@@ -608,7 +610,9 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
           String[] detectedMimeType = new MimetypesFileTypeMap().getContentType(outputFile).split("/");
           t.setMimeType(new MimeType(detectedMimeType[0], detectedMimeType[1]));
           t.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, outputFile));
-          t.setDuration(Long.parseLong(recording.getProperty(CaptureParameters.RECORDING_DURATION)));
+          if (recording.getProperty(CaptureParameters.RECORDING_DURATION) != null) {
+            t.setDuration(Long.parseLong(recording.getProperty(CaptureParameters.RECORDING_DURATION)));
+          }
 
           //Commented out because this does not work properly with mock captures.  Also doesn't do much when it does work...
           /*if (name.contains("hw:")) {
@@ -618,6 +622,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
             VideoStreamImpl stream = new VideoStreamImpl(outputFile.getName());
             t.addStream(stream);
           }*/
+          if (recording.getMediaPackage() == null) {
+            logger.error("Recording media package is null!");
+            return false;
+          }
           recording.getMediaPackage().add(t);
         } else {
           // FIXME: Is the admin reading the agent logs? (jt)
@@ -644,7 +652,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       MediaPackageSerializer serializer = new DefaultMediaPackageSerializerImpl(recording.getDir());
       File manifestFile = new File(recording.getDir(), CaptureParameters.MANIFEST_NAME);
       Result outputFile = new StreamResult(manifestFile);
-      Document manifest = recording.getMediaPackage().toXml(serializer); 
+      Document manifest = recording.getMediaPackage().toXml(serializer);
 
       TransformerFactory tf = TransformerFactory.newInstance();
       Transformer t = tf.newTransformer();
@@ -670,6 +678,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       IOUtils.closeQuietly(fos);
     }
 
+    setRecordingState(recording.getID(), RecordingState.MANIFEST_FINISHED);
     return true;
   }
 
@@ -719,8 +728,14 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     for (File f : filesToZip)
       logger.debug("--> {}", f.getName());
 
+    //Nuke any existing zipfile, we want to recreate it if it already exists.
+    File outputZip = new File(recording.getDir(), CaptureParameters.ZIP_NAME);
+    if (outputZip.isFile()) {
+      outputZip.delete();
+    }
+
     //Return a pointer to the zipped file
-    return ZipUtil.zip(filesToZip.toArray(new File[filesToZip.size()]), new File(recording.getDir(), CaptureParameters.ZIP_NAME).getAbsolutePath(), ZipEntry.STORED);
+    return ZipUtil.zip(filesToZip.toArray(new File[filesToZip.size()]), outputZip, ZipEntry.STORED);
   }
 
   // FIXME: Replace HTTP-based ingest with remote implementation of the Ingest Service. (jt)
@@ -728,7 +743,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   // The idea is to get the details of the HTTP interaction out of the client code
   /**
    * Sends a file to the REST ingestion service.
-   * 
+   *
    * @param recID
    *      The ID for the recording to be ingested.
    * @return The status code for the http post, or one of a number of error values.
@@ -796,7 +811,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     try {
       entities.addPart(fileDesc.getName(), new InputStreamBody(new FileInputStream(fileDesc), fileDesc.getName()));
     } catch (FileNotFoundException ex) {
-      logger.error("Could not find zipped mediapackge" + fileDesc.getAbsolutePath());
+      logger.error("Could not find zipped mediapackage " + fileDesc.getAbsolutePath());
       return -5;
     }
 
@@ -816,6 +831,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       response = client.execute(postMethod);
     } catch (TrustedHttpClientException e) {
       logger.error("Unable to ingest recording {}, message reads: {}.", recID, e.getMessage());
+    } catch (NullPointerException e) {
+      logger.error("Unable to ingest recording {}, null pointer exception!", recID);
     } finally {
       if (response != null) {
         retValue = response.getStatusLine().getStatusCode();
@@ -831,6 +848,9 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       setRecordingState(recID, RecordingState.UPLOAD_ERROR);
     }
 
+    serializeRecording(recID);
+    completedRecordings.put(recID, recording);
+    pendingRecordings.remove(recID);
     return retValue;
   }
 
@@ -853,7 +873,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @param state The state of the agent.  Should be defined in AgentState.
    * @see org.opencastproject.capture.admin.api.AgentState
    */
-  protected void setAgentState(String state) {
+  void setAgentState(String state) {
     if (confidence) {
       if (state.equalsIgnoreCase(AgentState.CAPTURING) && confidencePipe != null) {
         confidencePipe.stop();
@@ -867,11 +887,11 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
           confidencePipe = PipelineFactory.create(configService.getAllProperties(), true, this);
           Bus bus = confidencePipe.getBus();
           bus.connect(new Bus.EOS() {
-            
+
             @Override
             public void endOfStream(GstObject source) {
               // TODO Auto-generated method stub
-              
+
             }
           });
           confidencePipe.play();
@@ -882,10 +902,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         }
       }
     }
-    
+
     /*
     // When returning to idle state reload Epiphan driver to prevent problems caused by
-    // too many captures running without reloaded the driver. 
+    // too many captures running without reloaded the driver.
     if (state.equals(AgentState.IDLE)){
       try {
         Process p = Runtime.getRuntime().exec("reload_epiphan");
@@ -901,7 +921,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       }
     }
     */
-      
+
     agentState = state;
   }
 
@@ -914,19 +934,70 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   }
 
   /**
-   * Sets the recording's current state.
-   * 
+   * Serializes a recording to disk
+   * @param newRec The recording object.  The output object will be written to the recording's directory and will be named $recordingID.recording.
+   */
+  void serializeRecording(String id) {
+    if (id == null) {
+      logger.error("Unable to serialize recording, bad id parameter: null!");
+      return;
+    }
+    try {
+      RecordingImpl newRec = (RecordingImpl) pendingRecordings.get(id);
+      if (newRec == null) {
+        newRec = (RecordingImpl) completedRecordings.get(id);
+      }
+      if (newRec == null) {
+        logger.error("Unable to serialize {} because it does not exist in any recording state table!", id);
+      }
+      File output = new File(newRec.getDir(), newRec.getID() + ".recording");
+      logger.debug("Serializing recording {} to {}.", newRec.getID(), output.getAbsolutePath());
+      ObjectOutputStream serializer = new ObjectOutputStream(new FileOutputStream(output));
+      serializer.writeObject(newRec);
+      serializer.close();
+    } catch (IOException e) {
+      logger.error("Unable to serialize recording {}, IO exception.  Message: {}.", id, e);
+    }
+  }
+
+  /**
+   * Deserializes a recording from disk.
+   * @param recording The directory containing the serialized recording and all of its files.
+   * @return The deserialized {@code RecordingImpl}, or null in the case of an error.
+   */
+  RecordingImpl loadRecording(File recording) {
+    RecordingImpl rec = null;
+    try {
+      logger.debug("Loading {}.", recording.getAbsolutePath());
+      ObjectInputStream stream = new ObjectInputStream(new FileInputStream(recording));
+      rec = (RecordingImpl) stream.readObject();
+      if (context != null) {
+        rec.getProperties().setBundleContext(context.getBundleContext());
+      }
+    } catch (FileNotFoundException e) {
+      logger.error("Unable to load recording {}, file not found!", recording.getAbsolutePath());
+    } catch (IOException e) {
+      logger.error("IOException loading recording {}: {}.", recording.getAbsolutePath(), e);
+    } catch (ClassNotFoundException e) {
+      logger.error("Unable to load recording {}, file not found!", recording.getAbsolutePath());
+    }
+    return rec;
+  }
+
+  /**
+   * Sets a pending recording's current state.
+   *
    * @param recordingID The ID of the recording.
    * @param state The state for the recording.  Defined in RecordingState.
    * @see org.opencastproject.capture.admin.api.RecordingState
    */
-  protected void setRecordingState(String recordingID, String state) {
+  void setRecordingState(String recordingID, String state) {
     if (recordingID != null && state != null) {
       AgentRecording rec = pendingRecordings.get(recordingID);
       if (rec != null) {
         rec.setState(state);
       } else {
-        Properties p = configService.getAllProperties();
+        XProperties p = configService.getAllProperties();
         p.put(CaptureParameters.RECORDING_ID, recordingID);
         try {
           rec = new RecordingImpl(null, p);
@@ -950,6 +1021,14 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   }
 
   /**
+   * Removes a recording from the completed recording table.
+   * @param recID The ID of the recording to remove.
+   */
+  public void removeCompletedRecording(String recID) {
+    completedRecordings.remove(recID);
+  }
+
+  /**
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.StateService#getKnownRecordings()
    */
@@ -964,15 +1043,19 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   public Properties getAgentCapabilities() {
     if (configService != null) {
       Properties p = configService.getCapabilities();
-      //TODO:  Do we need this?  What is it used for?  If nothing else the key should be in the capture parameters file...
-      Calendar cal = Calendar.getInstance();
-      p.setProperty("capture.device.timezone.offset", Integer.toString((cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)) / (60 * 1000)));
+      if (p != null) {
+        //TODO:  Do we need this?  What is it used for?  If nothing else the key should be in the capture parameters file...
+        Calendar cal = Calendar.getInstance();
+        p.setProperty("capture.device.timezone.offset", Integer.toString((cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)) / (60 * 1000)));
+      } else {
+        logger.warn("Returning null capabilities from capture agent...");
+      }
       return p;
     } else {
       return null;
     }
   }
-  
+
   /**
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.CaptureAgent#getDefaultAgentPropertiesAsString()
@@ -1026,11 +1109,13 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
     //Recreate the agent state push tasks
     createPushTask(props);
+    //Setup the task to load the recordings from disk once everything has started (let's be safe and use 60 seconds)
+    createRecordingLoadTask(props, 60);
   }
 
   /**
    * Callback from the OSGi container once this service is started. This is where we register our shell commands.
-   * 
+   *
    * @param ctx
    *          the component context
    */
@@ -1051,6 +1136,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       commands.put(CommandProcessor.COMMAND_FUNCTION, new String[] { "status", "start", "stop", "ingest", "reset", "capture" });
       logger.info("Registering capture agent osgi shell commands");
       ctx.getBundleContext().registerService(CaptureAgentShellCommands.class.getName(), new CaptureAgentShellCommands(this), commands);
+      this.context = ctx;
     } else {
       logger.warn("Bundle context is null, so this is probably a test.  If you see this message from Felix please post a bug!");
     }
@@ -1084,16 +1170,89 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   }
 
   /**
-   * Creates the Quartz task which pushes the agent's state to the state server.
-   * @param schedulerProps The properties for the Quartz scheduler
+   * Loads all of the recordings from the capture cache dir.
    */
-  private void createPushTask(Properties schedulerProps) {
+  public boolean loadRecordingsFromDisk() {
+    if (configService == null) {
+      logger.error("Unable to load recordings from disk, configuration service is null!");
+      return false;
+    } else if (configService.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL) == null) {
+      logger.error("Unable to load recordings from disk, configuration service has null cache URL.");
+      return false;
+    }
+
+    if (scheduler == null) {
+      logger.error("Unable to load recordings from disk, scheduler service is null!");
+      return false;
+    }
+
+    File captureRootDir = new File(configService.getItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL));
+    if (captureRootDir.listFiles() == null) {
+      logger.debug("Unable to load recordings from disk, capture root dir is a file...");
+      return false;
+    }
+
+    for (File f : captureRootDir.listFiles()) {
+      if (f != null && f.isDirectory()) {
+        for (File r : f.listFiles()) {
+          if (r.getName().endsWith(".recording")) {
+            RecordingImpl rec = loadRecording(r);
+            String state = rec.getState();
+            String id = rec.getID();
+            logger.info("Loading recording {}...", id);
+            if (pendingRecordings.containsKey(id) || completedRecordings.containsKey(id)) {
+              logger.debug("Unable to load recording {} with state {}.  The recording already exists.", id, state);
+              continue;
+            }
+
+            //FIXME:  This should be redone when the job refactoring ticket is finished (MH-5235).
+            if (state.equals(RecordingState.CAPTURE_ERROR)) {
+              logger.debug("Loaded recording {} with state {}.  This is an error state so placing recording in completed index.", id, state);
+              completedRecordings.put(id, rec);
+            } else if (state.equals(RecordingState.CAPTURE_FINISHED) || state.equals(RecordingState.CAPTURING)) {
+              logger.debug("Loaded recording {} with state {}.  This is a completed recording so placing recording in pending index.", id, state);
+              pendingRecordings.put(id, rec);
+              scheduler.scheduleSerializationAndIngest(id);
+            } else if (state.equals(RecordingState.MANIFEST) || state.equals(RecordingState.MANIFEST_ERROR)) {
+              logger.debug("Loaded recording {} with state {}.  This is ready to ingest so placing recording in pending index.", id, state);
+              pendingRecordings.put(id, rec);
+              scheduler.scheduleSerializationAndIngest(id);
+            } else if (state.equals(RecordingState.MANIFEST_FINISHED) || state.equals(RecordingState.COMPRESSING) || state.equals(RecordingState.COMPRESSING_ERROR)) {
+              logger.debug("Loaded recording {} with state {}.  This is partially ingested so placing recording in pending index.", id, state);
+              pendingRecordings.put(id, rec);
+              scheduler.scheduleSerializationAndIngest(id);
+            } else if (state.equals(RecordingState.UPLOAD_ERROR) || state.equals(RecordingState.UPLOADING)) {
+              logger.debug("Loaded recording {} with state {}.  This is to upload so placing recording in pending index.", id, state);
+              pendingRecordings.put(id, rec);
+              scheduler.scheduleIngest(id);
+            } else if (state.equals(RecordingState.UPLOAD_FINISHED)) {
+              logger.debug("Loaded recording {} with state {}.  This is a completed state so placing recording in completed index.", id, state);
+              completedRecordings.put(id, rec);
+            } else if (state.equals(RecordingState.UNKNOWN)) {
+              logger.debug("Loaded recording {} with state {}.  This is an unknown state, discarding.", id, state);
+            }
+          }
+        }
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Creates the agent's scheduler
+   * @param schedulerProps
+   * @param jobname
+   * @param jobtype
+   */
+  void createScheduler(Properties schedulerProps, String jobname, String jobtype) {
     //Either create the scheduler or empty out the existing one
     try {
       if (agentScheduler != null) {
         //Clear the existing jobs and reschedule everything
-        for (String name : agentScheduler.getJobNames(JobParameters.RECURRING_TYPE)) {
-          agentScheduler.deleteJob(name, JobParameters.RECURRING_TYPE);
+        for (String name : agentScheduler.getJobNames(jobtype)) {
+          if (jobname.equals(name)) {
+            agentScheduler.deleteJob(name, JobParameters.RECURRING_TYPE);
+          }
         }
       } else {
         StdSchedulerFactory sched_fact = new StdSchedulerFactory(schedulerProps);
@@ -1104,6 +1263,44 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       }
     } catch (SchedulerException e) {
       logger.error("Scheduler exception in State Service: {}.", e.getMessage());
+      return;
+    }
+  }
+
+  /**
+   * Creates the Quartz task which loads the recordings from disk.
+   * @param schedulerProps The properties of the scheduler, used to create the scheduler if it doesn't already exist
+   * @param delay The delay before firing the job, in seconds
+   */
+  void createRecordingLoadTask(Properties schedulerProps, long delay) {
+    createScheduler(schedulerProps, "recordingLoad", JobParameters.OTHER_TYPE);
+    if (agentScheduler == null) {
+      return;
+    }
+
+    JobDetail loadJob = new JobDetail("recordingLoad", JobParameters.OTHER_TYPE, LoadRecordingsJob.class);
+
+    loadJob.getJobDataMap().put(JobParameters.CAPTURE_AGENT, this);
+
+    //Create a new trigger                          Name              Group name               Start
+    SimpleTrigger loadTrigger = new SimpleTrigger("recording_load", JobParameters.OTHER_TYPE, new Date(System.currentTimeMillis() + delay * 1000l));
+    loadTrigger.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
+
+    //Schedule the update
+    try {
+      agentScheduler.scheduleJob(loadJob, loadTrigger);
+    } catch (SchedulerException e) {
+      logger.warn("Unable to load recordings from disk due to scheduler error: {}.", e.getMessage());
+    }
+  }
+
+  /**
+   * Creates the Quartz task which pushes the agent's state to the state server.
+   * @param schedulerProps The properties for the Quartz scheduler
+   */
+  void createPushTask(Properties schedulerProps) {
+    createScheduler(schedulerProps, "agentStateUpdate", JobParameters.RECURRING_TYPE);
+    if (agentScheduler == null) {
       return;
     }
 
@@ -1154,7 +1351,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   }
 
   /**
-   * 
+   *
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.ConfidenceMonitor#grabFrame(java.lang.String)
    */

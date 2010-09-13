@@ -87,8 +87,8 @@ public class ConfigurationManagerTest {
     //Setup the basic properties
     configManager.setItem("test", "foo");
     configManager.setItem("unchanged", "bar");
-    Assert.assertEquals(configManager.getItem("test"), "foo");
-    Assert.assertEquals(configManager.getItem("unchanged"), "bar");
+    Assert.assertEquals("foo", configManager.getItem("test"));
+    Assert.assertEquals("bar", configManager.getItem("unchanged"));
 
     //Setup the additions
     Properties p = new Properties();
@@ -103,16 +103,16 @@ public class ConfigurationManagerTest {
 
     //Now test a basic merge
     Properties t = configManager.merge(p, false);
-    Assert.assertEquals(t.getProperty("test"), "value");
-    Assert.assertEquals(t.getProperty("unchanged"), "bar");
+    Assert.assertEquals("value", t.getProperty("test"));
+    Assert.assertEquals("bar", t.getProperty("unchanged"));
     t = null;
 
     //Now overwrite the system settings
     t = configManager.merge(p, true);
-    Assert.assertEquals(t.getProperty("test"), "value");
-    Assert.assertEquals(t.getProperty("unchanged"), "bar");
-    Assert.assertEquals(configManager.getItem("test"), "value");
-    Assert.assertEquals(configManager.getItem("unchanged"), "bar");
+    Assert.assertEquals("value", t.getProperty("test"));
+    Assert.assertEquals("bar", t.getProperty("unchanged"));
+    Assert.assertEquals("value", configManager.getItem("test"));
+    Assert.assertEquals("bar", configManager.getItem("unchanged"));
   }
   
   @Test
@@ -144,7 +144,7 @@ public class ConfigurationManagerTest {
     configManager.updated(sourceProps);
 
     Properties configProps = configManager.getAllProperties();
-    for (Object key : sourceProps.keySet()) {
+    for (Object key : sourceProps.stringPropertyNames()) {
       if (!configProps.containsKey(key)) {
         Assert.fail();
       }
@@ -163,6 +163,7 @@ public class ConfigurationManagerTest {
 
     configManager.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
     configManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
+    configManager.setItem("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());
     configManager.updated(sourceProps);
     
     Properties caps = configManager.getCapabilities();
@@ -174,6 +175,7 @@ public class ConfigurationManagerTest {
 
   private void assertCaps(Properties caps, String name, String baseVar, String relPath, String dest, String flavour) {
     Assert.assertEquals("${"+baseVar+"}"+relPath, configManager.getUninterpretedItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE));
+    Assert.assertTrue(new File(configManager.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE)).exists());
     Assert.assertEquals(configManager.getVariable(baseVar) + relPath, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE));
     Assert.assertEquals(dest, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_DEST));
     Assert.assertEquals(flavour, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_FLAVOR));
@@ -213,7 +215,7 @@ public class ConfigurationManagerTest {
     //Add in two missing props
     sourceProps.put("anything", "nothing");
     sourceProps.put("org.opencastproject.storage.dir", "${java.io.tmpdir}/configman-test");
-    sourceProps.put("M2_REPO", "${java.io.tmpdir}/configman-test");
+    sourceProps.put("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());
     sourceProps.put("org.opencastproject.server.url", "http://localhost:8080");
     File tempfile = File.createTempFile("temp", "file", new File(sourceProps.getProperty("org.opencastproject.storage.dir")));
 
