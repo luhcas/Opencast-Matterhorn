@@ -144,9 +144,11 @@ public class SchedulerServiceImplTest {
     metadata.add(new SeriesMetadataImpl(series, "description", "demo"));
     metadata.add(new SeriesMetadataImpl(series, "issued", ""+System.currentTimeMillis()));
     
-    seriesID = series.generateSeriesId();
     series.setMetadata(metadata);
-    Assert.assertTrue(seriesService.addSeries(series));
+    seriesService.addSeries(series);
+    
+    // now that the series has been persisted, grab its ID
+    seriesID = series.getSeriesId();
 
     service.activate(null);
 

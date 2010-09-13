@@ -22,10 +22,14 @@ import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.mediapackage.identifier.HandleException;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.ZipUtil;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -65,6 +69,8 @@ public class IngestServiceImpl implements IngestService {
   private WorkflowService workflowService;
   private Workspace workspace;
   private TrustedHttpClient httpClient;
+  private SeriesService seriesService;
+  private DublinCoreCatalogService dublinCoreService;
   private String tempFolder;
   private String fs;
 
@@ -164,6 +170,11 @@ public class IngestServiceImpl implements IngestService {
           logger.error(e.getMessage());
         }
         element.setURI(newUrl);
+        
+        // if this is a series, update the series service
+        if(MediaPackageElements.SERIES.equals(element.getFlavor())) {
+          updateSeries(element.getURI());
+        }
       }
 
     } catch (Exception e) {
@@ -229,9 +240,30 @@ public class IngestServiceImpl implements IngestService {
           throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
     URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
+    if(MediaPackageElements.SERIES.equals(flavor)) {
+      updateSeries(uri);
+    }
     return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Catalog, flavor);
   }
 
+  
+  /**
+   * Updates the persistent representation of a series based on a potentially modified dublin core document.
+   * @param uri the URI to the dublin core document containing series metadata.
+   */
+  protected void updateSeries(URI uri) throws IOException {
+    HttpResponse response = null;
+    try {
+      HttpGet getDc = new HttpGet(uri);
+      response = httpClient.execute(getDc);
+      InputStream in = response.getEntity().getContent();
+      DublinCoreCatalog dc = dublinCoreService.load(in);
+      seriesService.addOrUpdate(dc);
+    } finally {
+      httpClient.close(response);
+    }
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.ingest.api.IngestService#addCatalog(java.io.InputStream, java.lang.String, org.opencastproject.mediapackage.MediaPackageElementFlavor, org.opencastproject.mediapackage.MediaPackage)
@@ -241,6 +273,9 @@ public class IngestServiceImpl implements IngestService {
           MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, IOException {
     String elementId = UUID.randomUUID().toString();
     URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
+    if(MediaPackageElements.SERIES.equals(flavor)) {
+      updateSeries(newUrl);
+    }    
     return addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Catalog, flavor);
   }
 
@@ -435,4 +470,11 @@ public class IngestServiceImpl implements IngestService {
     this.workspace = workspace;
   }
 
+  public void setSeriesService(SeriesService seriesService) {
+    this.seriesService = seriesService;
+  }
+  
+  public void setDublinCoreService(DublinCoreCatalogService dublinCoreService) {
+    this.dublinCoreService = dublinCoreService;
+  }
 }

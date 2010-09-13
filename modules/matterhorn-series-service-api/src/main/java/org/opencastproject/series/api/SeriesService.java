@@ -16,6 +16,7 @@
 package org.opencastproject.series.api;
 
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.util.NotFoundException;
 
 import java.util.List;
 
@@ -23,33 +24,28 @@ import java.util.List;
  * FIXME -- Add javadocs
  */
 public interface SeriesService {
-
-  /**
-   * creates a new unique ID for a series
-   * @return the new unique ID
-   */
-  public String newSeriesID ();
   
   /**
-   * Adds a new Series to the database 
+   * Adds a new Series
+   * 
    * @param s The series that should be stored
-   * @return true if the new series could be store, false if not, probably because of an already existing ID 
+   * @throws IllegalArgumentException if a series already exists with this identifier
    */
-  public boolean addSeries (Series s);
+  public void addSeries (Series s) throws IllegalArgumentException;
   
   /**
-   * removes removes the series with the given seriesID from the database. Returns true is operation was successfull
+   * Removes the series with the given seriesID
    * @param seriesID The ID of the series that should be removed
-   * @return true if the series was removed
+   * @throws NotFoundException if the series doesn't exist
    */
-  public boolean removeSeries (String seriesID);
+  public void removeSeries (String seriesID) throws NotFoundException;
   
   /**
-   * updates an series in the database and returns true if the operation was successfull 
+   * updates an series in the database 
    * @param s The series that should be updated. A series with the given ID has to be in the database already! 
-   * @return true if the series could be updated
+   * @throws NotFoundException if the series doesn't exist
    */
-  public boolean updateSeries (Series s);
+  public void updateSeries (Series s) throws NotFoundException;
   
   /**
    * returns the series with the provided ID 
@@ -71,6 +67,14 @@ public interface SeriesService {
    */
   public DublinCoreCatalog getDublinCore (String seriesID);
 
+  /**
+   * Adds or updates an existing series based on a dublin core catalog.
+   * 
+   * @param dcCatalog The dublin core metadata catalog
+   * @return The updated series
+   */
+  public Series addOrUpdate(DublinCoreCatalog dcCatalog);
+  
   /**
    * Searches for all series' that fit into a certain pattern
    * @param pattern a part the value of a metadata field

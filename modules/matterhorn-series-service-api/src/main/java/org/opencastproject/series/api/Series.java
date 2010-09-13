@@ -28,8 +28,6 @@ public interface Series extends Comparable<Series> {
 
   public abstract void addToMetadata(String key, String value);
 
-  public abstract String generateSeriesId();
-
   public abstract List<SeriesMetadata> getMetadata();
 
   public abstract void setMetadata(List<SeriesMetadata> metadata);

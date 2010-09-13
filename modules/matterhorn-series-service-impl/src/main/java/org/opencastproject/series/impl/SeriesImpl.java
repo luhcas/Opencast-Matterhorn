@@ -33,12 +33,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -55,6 +55,7 @@ public class SeriesImpl implements Series {
   private static final Logger logger = LoggerFactory.getLogger(SeriesImpl.class);
   
   @Id
+  @GeneratedValue
   @Column(name="ID", length=128)
   String seriesId;
   
@@ -109,15 +110,6 @@ public class SeriesImpl implements Series {
     for (SeriesMetadata m: getMetadata()) 
       if (m.getKey().equals(key)) return m.getValue();
     return null;
-  }
-  
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.series.api.Series#generateSeriesId()
-   */
-  public String generateSeriesId() {
-    setSeriesId(UUID.randomUUID().toString());
-    return getSeriesId();
   }
   
   /**
@@ -224,6 +216,19 @@ public class SeriesImpl implements Series {
     }
     
     return dc;
+  }
+  
+  public static SeriesImpl buildSeries(DublinCoreCatalog dc) {
+    SeriesImpl s = new SeriesImpl();
+    s.setSeriesId(dc.getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER));
+    s.updateMetadata(dc);
+    return s;
+  }
+  
+  public void updateMetadata(DublinCoreCatalog dc) {
+    for(EName prop : dc.getProperties()) {
+      addToMetadata(prop.getLocalName(), dc.getFirst(prop));
+    }
   }
 
   @Override

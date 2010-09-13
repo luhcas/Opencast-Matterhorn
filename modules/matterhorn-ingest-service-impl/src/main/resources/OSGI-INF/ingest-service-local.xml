@@ -15,4 +15,8 @@
     cardinality="1..1" policy="static" bind="setWorkspace" />
   <reference name="trustedHttpClient" interface="org.opencastproject.security.api.TrustedHttpClient"
     cardinality="1..1" policy="static" bind="setHttpClient" />
+  <reference name="dc" interface="org.opencastproject.metadata.dublincore.DublinCoreCatalogService"
+    cardinality="1..1" policy="static" bind="setDublinCoreService" />
+  <reference name="series-service" interface="org.opencastproject.series.api.SeriesService"
+    cardinality="1..1" policy="static" bind="setSeriesService" />
 </scr:component>

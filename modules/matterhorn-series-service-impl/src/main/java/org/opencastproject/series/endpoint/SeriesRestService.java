@@ -22,6 +22,7 @@ import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.series.impl.SeriesImpl;
 import org.opencastproject.series.impl.SeriesMetadataImpl;
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -38,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -172,17 +174,9 @@ public class SeriesRestService {
   @Path("new/id")
   public Response newSeriesId() {
     logger.debug("create ne Series Id");
-    try {
-      String id = service.newSeriesID();
-      if (id == null)
-        return Response.status(Status.SERVICE_UNAVAILABLE).build();
-      JSONObject j = new JSONObject();
-      j.put("id", id);
-      return Response.ok(j.toString()).build();
-    } catch (Exception e) {
-      logger.warn("could not create new seriesID");
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
-    }
+    JSONObject j = new JSONObject();
+    j.put("id", UUID.randomUUID().toString());
+    return Response.ok(j.toString()).build();
   }
 
   /**
@@ -208,12 +202,16 @@ public class SeriesRestService {
       logger.error("series that should be added is null");
       return Response.status(Status.BAD_REQUEST).build();
     }
-    boolean result = service.addSeries(series);
-    logger.info("Adding series {} ", series.getSeriesId());
-    JSONObject j = new JSONObject();
-    j.put("success", result);
-    j.put("id", series.getSeriesId());
-    return Response.ok(j.toString()).build();
+    try {
+      service.addSeries(series);
+      logger.info("Adding series {} ", series.getSeriesId());
+      JSONObject j = new JSONObject();
+      j.put("success", true);
+      j.put("id", series.getSeriesId());
+      return Response.ok(j.toString()).build();
+    } catch(IllegalArgumentException e) {
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   /**
@@ -228,7 +226,12 @@ public class SeriesRestService {
   @Produces(MediaType.TEXT_PLAIN)
   @Path("series/{seriesID}")
   public Response deleteSeries(@PathParam("seriesID") String seriesID) {
-    return Response.ok(service.removeSeries(seriesID)).build();
+    try {
+      service.removeSeries(seriesID);
+      return Response.noContent().build();
+    } catch(NotFoundException e) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
   }
 
   /**
@@ -253,10 +256,11 @@ public class SeriesRestService {
       logger.error("series that should be updated is null");
       return Response.status(Status.BAD_REQUEST).build();
     }
-    if (service.updateSeries(s)) {
-      return Response.ok(true).build();
-    } else {
-      return Response.serverError().build();
+    try {
+      service.updateSeries(s);
+      return Response.noContent().build();
+    } catch(NotFoundException e) {
+      return Response.status(Status.NOT_FOUND).build();
     }
   }
 
@@ -423,8 +427,6 @@ public class SeriesRestService {
       metadata.add(new SeriesMetadataImpl(series, "contributor", "demo"));
       metadata.add(new SeriesMetadataImpl(series, "description", "demo"));
       metadata.add(new SeriesMetadataImpl(series, "issued", "" + System.currentTimeMillis()));
-
-      series.generateSeriesId();
 
       series.setMetadata(metadata);
 

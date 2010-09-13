@@ -79,11 +79,7 @@ public class SeriesJaxbImpl {
   @XmlTransient
   public Series getSeries() {
     Series s = new SeriesImpl();
-    if(seriesId != ""){
-      s.setSeriesId(seriesId);
-    }else{
-      s.generateSeriesId();
-    }
+    s.setSeriesId(seriesId);
     
     List<SeriesMetadata> list = new LinkedList<SeriesMetadata>(); 
     for (SeriesMetadataJaxbImpl m : metadata) {

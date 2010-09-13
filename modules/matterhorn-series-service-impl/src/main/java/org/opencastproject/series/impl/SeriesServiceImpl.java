@@ -19,6 +19,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.api.SeriesService;
+import org.opencastproject.util.NotFoundException;
 
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -71,9 +72,8 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * @see org.opencastproject.series.api.SeriesService#addSeries(org.opencastproject.series.api.Series)
    */
   @Override
-  public boolean addSeries(Series s) {
-    if (s == null) return false;
-    s = makeIdUnique(s);
+  public void addSeries(Series s) {
+    if (s == null) throw new IllegalArgumentException("Can not add a null series");
     
     EntityManager em = emf.createEntityManager();
     try {
@@ -81,31 +81,11 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
       tx.begin();
       em.persist(s);
       tx.commit();
-    } catch (Exception e) {
-      logger.warn("Problem to add series {}", s.getSeriesId());
-      return false;
-    }
-    finally {
-      em.close();
-    } 
-    return true;
-  }
-
-  protected Series makeIdUnique (Series series) {
-    EntityManager em = emf.createEntityManager();
-    if (series.getSeriesId() == null || series.getSeriesId().length() == 0) series.generateSeriesId();
-    try {
-      Series found = em.find(SeriesImpl.class, series.getSeriesId());
-      while (found != null) {
-        series.generateSeriesId();
-        found = em.find(SeriesImpl.class, series.getSeriesId());
-      }
     } finally {
       em.close();
     }
-    return series;
-  }  
-  
+  }
+
   /**
    * {@inheritDoc}
    * @see org.opencastproject.series.api.SeriesService#getAllSeries()
@@ -133,6 +113,31 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   public DublinCoreCatalog getDublinCore(String seriesID) {
     return getSeries(seriesID).getDublinCore();
   }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.series.api.SeriesService#addOrUpdate(org.opencastproject.metadata.dublincore.DublinCoreCatalog)
+   */
+  @Override
+  public Series addOrUpdate(DublinCoreCatalog dcCatalog) {
+    String id = dcCatalog.get(DublinCoreCatalog.PROPERTY_IDENTIFIER).get(0).getValue();
+    SeriesImpl existingSeries = (SeriesImpl)getSeries(id);
+    if(existingSeries == null) {
+      Series series = SeriesImpl.buildSeries(dcCatalog);
+      addSeries(series);
+      return series;
+    } else {
+      existingSeries.updateMetadata(dcCatalog);
+      try {
+        updateSeries(existingSeries);
+        return existingSeries;
+      } catch(NotFoundException e) {
+        // this should not happen, since we explicitly check for the series above
+        logger.warn("Unable to find series {}: {}", existingSeries, e);
+        throw new IllegalStateException(e);
+      }
+    }
+  }
 
   /**
    * {@inheritDoc}
@@ -157,33 +162,22 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.series.api.SeriesService#newSeriesID()
-   */
-  @Override
-  public String newSeriesID() {
-    Series s = new SeriesImpl();
-    return s.generateSeriesId();
-  }
-
-  /**
-   * {@inheritDoc}
    * @see org.opencastproject.series.api.SeriesService#removeSeries(java.lang.String)
    */
   @Override
-  public boolean removeSeries(String seriesID) {
-    logger.debug("Removing series with the ID {}", seriesID);
+  public void removeSeries(String seriesId) throws NotFoundException {
+    logger.debug("Removing series with the ID {}", seriesId);
     Series s;
     EntityManager em = emf.createEntityManager();
     try {
       em.getTransaction().begin();
-      s = em.find(SeriesImpl.class, seriesID);
-      if (s == null) return false; // series not in database
+      s = em.find(SeriesImpl.class, seriesId);
+      if (s == null) throw new NotFoundException("Series " + seriesId + " does not exist");
       em.remove(s);
       em.getTransaction().commit();
     } finally {
       em.close();
     }
-    return true; 
   }
 
   /**
@@ -191,22 +185,18 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * @see org.opencastproject.series.api.SeriesService#updateSeries(org.opencastproject.series.api.Series)
    */
   @Override
-  public boolean updateSeries(Series s) {
+  public void updateSeries(Series s) throws NotFoundException {
     EntityManager em = emf.createEntityManager();
     try {
       em.getTransaction().begin();
       SeriesImpl storedSeries = em.find(SeriesImpl.class, s.getSeriesId()); 
-      if (storedSeries == null) return false; //nothing found to update
+      if (storedSeries == null) throw new NotFoundException("Series " + s + " does not exist");
       storedSeries.setMetadata(s.getMetadata());
       em.merge(storedSeries);
       em.getTransaction().commit();
-    } catch (Exception e1) {
-      logger.warn("Could not update series {}. Reason: {}",s.getSeriesId(),e1.getMessage());
-      return false;
     } finally {
       em.close();
     }
-    return true;
   }
   
   public void activate (ComponentContext cc) {
