@@ -15,9 +15,9 @@
  */
 package org.opencastproject.feedback.endpoint;
 
-import java.util.Date;
+import org.opencastproject.feedback.api.Annotation;
 
-import org.hibernate.annotations.Index;
+import java.util.Date;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -35,8 +35,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-
-import org.opencastproject.feedback.api.Annotation;
 
 /**
  * A JAXB-annotated implementation of {@link Annotation}
@@ -72,7 +70,6 @@ public class AnnotationImpl implements Annotation {
 
   @Column(name = "MEDIA_PACKAGE_ID", length = 36)
   @XmlElement(name = "mediapackage-id")
-  @Index(name = "MEDIA_PACKAGE_IDX")
   private String mediapackageId;
 
   @Column(name = "USER_ID")
