@@ -70,7 +70,7 @@ public class AnnotationImpl implements Annotation {
   @XmlElement(name = "annotation-id")
   private int annotationId;
 
-  @Column(name = "MEDIA_PACKAGE_ID")
+  @Column(name = "MEDIA_PACKAGE_ID", length = 36)
   @XmlElement(name = "mediapackage-id")
   @Index(name = "MEDIA_PACKAGE_IDX")
   private String mediapackageId;
