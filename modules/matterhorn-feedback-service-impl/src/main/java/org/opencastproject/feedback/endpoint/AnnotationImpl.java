@@ -17,6 +17,8 @@ package org.opencastproject.feedback.endpoint;
 
 import java.util.Date;
 
+import org.hibernate.annotations.Index;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -70,6 +72,7 @@ public class AnnotationImpl implements Annotation {
 
   @Column(name = "MEDIA_PACKAGE_ID")
   @XmlElement(name = "mediapackage-id")
+  @Index(name = "MEDIA_PACKAGE_IDX")
   private String mediapackageId;
 
   @Column(name = "USER_ID")
