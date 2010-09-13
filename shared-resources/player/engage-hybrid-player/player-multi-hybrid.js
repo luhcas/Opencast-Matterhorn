@@ -1627,7 +1627,7 @@ Opencast.Player = (function () {
     {
         userId = id;
     }
-    
+
     /**
     @memberOf Opencast.Player
     @description Set the mediaPackageId
@@ -1643,15 +1643,12 @@ Opencast.Player = (function () {
         @description Add a Footpring.
      */
     function addFootprint() {
-        // user id is optional
-        var strUser = userId === null ? '' : "&user=" + userId;
-
         $.ajax(
         {
             type: 'GET',
             contentType: 'text/xml',
             url: "../../feedback/rest/add",
-            data: "id=" + mediaPackageId + strUser + "&session=" + sessionId + "&in=" + inPosition + "&out=" + outPosition + "&key=FOOTPRINT",
+            data: "id=" + mediaPackageId + "&in=" + inPosition + "&out=" + outPosition + "&key=FOOTPRINT",
             dataType: 'xml',
             success: function (xml) {
                 // Do nothing, the FOOTPRINT has been saved

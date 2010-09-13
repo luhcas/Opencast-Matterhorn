@@ -15,10 +15,12 @@
  */
 package org.opencastproject.feedback.endpoint;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -156,11 +158,15 @@ public class FeedbackRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("add")
-  public Response add(@QueryParam("id") String mediapackageId,
-          @QueryParam("session") String sessionId, @QueryParam("in") int inpoint, @QueryParam("out") int outpoint,
-          @QueryParam("key") String key, @QueryParam("value") String value) {
+  public Response add(@QueryParam("id") String mediapackageId, @QueryParam("in") int inpoint, @QueryParam("out") int outpoint,
+          @QueryParam("key") String key, @QueryParam("value") String value, @Context HttpServletRequest request) {
 
-    String userId = securityService.getUserName();
+    String sessionId = request.getSession().getId();
+
+    String userId = null;
+    if (securityService != null)
+      userId = securityService.getUserName();
+
     Annotation a = new AnnotationImpl();
     a.setMediapackageId(mediapackageId);
     a.setUserId(userId);
