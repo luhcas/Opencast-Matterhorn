@@ -967,7 +967,7 @@ Opencast.Initialize = (function ()
             $('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
         }
         
-        Opencast.Player.drawFootprints();
+        Opencast.Analytics.drawFootprints();
     }
 
     /**

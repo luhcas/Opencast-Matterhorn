@@ -45,8 +45,6 @@ Opencast.Player = (function () {
     SLIDESHIDE             = "Hide Segments",
     NOTES                  = "Notes",
     NOTESHIDE              = "Hide Notes",
-    ANALYTICS              = "Analytics",
-    ANALYTICSHIDE          = "Analytics off",
     SLIDETEXT              = "Segment Text",
     SLIDETEXTHIDE          = "Hide Segment Text",
     TRANSCRIPT             = "Transcript",
@@ -92,7 +90,6 @@ Opencast.Player = (function () {
     intvalFastForward      = "",
     displayMode            = "",
     optionClassName        = "",
-    myvalues,
     seekState              = PAUSING;
    
    
@@ -468,111 +465,7 @@ Opencast.Player = (function () {
         $("#oc_btn-notes").attr('aria-pressed', 'false');
     }
 
-    /**
-      @memberOf Opencast.Player
-      @description Show Analytics
-     */
-    function showAnalytics()
-    {
-        //$("#oc_notes").attr("className", "oc_DisplayBlock");
-        $("#oc_btn-analytics").attr({ 
-            alt:   ANALYTICSHIDE,
-            title: ANALYTICSHIDE,
-            value: ANALYTICSHIDE
-        });
-        $("#oc_btn-analytics").attr('aria-pressed', 'true');
-        
-        
-        if(myvalues === undefined) {
-          $.ajax( {
-            type : 'GET',
-            contentType : 'text/xml',
-            url : "../../feedback/rest/footprint",
-            data : "id=" + mediaPackageId,
-            dataType : 'xml',
 
-            success : function(xml) {
-
-            var position = 0;
-              var views;
-              var lastPosition = -1;
-              var lastViews;
-              var dcExtent = parseInt($('#dc-extent').html());
-              
-              myvalues = new Array(parseInt(dcExtent/1000));
-  
-              for ( var i = 0; i < myvalues.length; i++)
-                myvalues[i] = 0;
-              $(xml).find('footprint').each(function() {
-                position = parseInt($(this).find('position').text());
-                views = parseInt($(this).find('views').text());
-  
-                if (position -1 != lastPosition ) {
-                  for(var j = lastPosition + 1; j < position; j++) {
-                    myvalues[j] = lastViews;
-                  }
-                }
-                myvalues[position] = views;
-                lastPosition = position;
-                lastViews = views;
-              })
-
-              drawFootprints();
-
-
-
-          },
-            error : function(a, b, c) {
-              // Some error while trying to get the views
-          }
-          });
-        }
-        else {
-          drawFootprints();
-        }
-        
-        $(".segments").css('top', '-25px');
-        $.sparkline_display_visible()
-        $("#dynamicbar").show();
-    }
-
-    
-    
-    /**
-    @memberOf Opencast.Player
-    @description Draw Footprints
-   */
-  function drawFootprints() {
-      $('.dynamicbar').sparkline(myvalues, {
-        type : 'line',
-        spotRadius : '0',
-        width : '100%',
-        height : '25px'
-      });
-
-      //$('.dynamicbar').append(myvalues);
-  }
-  
-  
-    /**
-      @memberOf Opencast.Player
-      @description Hide the notes
-     */
-    function hideAnalytics()
-    {
-        //$("#oc_notes").attr("className", "oc_DisplayNone");
-        $("#oc_btn-analytics").attr({ 
-            alt: ANALYTICS,
-            title: ANALYTICS,
-            value: ANALYTICS
-        });
-        $("#oc_btn-analytics").attr('aria-pressed', 'false');
-        
-        $("#dynamicbar").hide();
-        $(".segments").css('top', '0px');
-
-        myvalues = undefined;
-    }
 
     /**
         @memberOf Opencast.Player
@@ -804,22 +697,6 @@ Opencast.Player = (function () {
         else
         {
             hideNotes();
-        }
-    }
-    
-    /**
-      @memberOf Opencast.Player
-      @description Toggle Analytics
-     */
-    function doToggleAnalytics()
-    {
-        if ($("#oc_btn-analytics").attr("title") === ANALYTICS)
-        {
-            showAnalytics(); 
-        }
-        else
-        {
-            hideAnalytics();
         }
     }
 
@@ -1810,7 +1687,6 @@ Opencast.Player = (function () {
         getDuration : getDuration,
         setDragging : setDragging,
         getCaptionsBool : getCaptionsBool,
-        doToggleAnalytics : doToggleAnalytics,
         doToggleSlides : doToggleSlides,
         doToggleNotes : doToggleNotes,
         doToggleSlideText : doToggleSlideText,
@@ -1875,7 +1751,6 @@ Opencast.Player = (function () {
         setVolumeSlider : setVolumeSlider,
         setVideoSizeList : setVideoSizeList,
         currentTime : currentTime,
-        drawFootprints : drawFootprints,
         flashVars: flashVars
     };
 }());

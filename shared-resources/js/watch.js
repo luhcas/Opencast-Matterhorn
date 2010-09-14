@@ -22,6 +22,7 @@ Opencast.Watch = (function() {
 
     Opencast.Player.setSessionId(Opencast.engage.getCookie("JSESSIONID"));
     Opencast.Player.setMediaPackageId(mediaPackageId);
+
     Opencast.Player.setUserId(userId);
 
     $('#data')
@@ -46,6 +47,11 @@ Opencast.Watch = (function() {
 	      sd.setMinutes(parseInt(timeDate.substring(14,16),10));
 	      sd.setSeconds(parseInt(timeDate.substring(17,19),10));
 
+	          Opencast.Analytics.setMediaPackageId(mediaPackageId);
+	          var dcExtent = parseInt($('#dc-extent').html());
+	          Opencast.Analytics.setDuration(parseInt(dcExtent/1000));
+	      
+	      
               $('#oc_segment-table').html($('#oc-segments').html());
 
               $('#oc-segments').html("");
