@@ -262,6 +262,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
@@ -322,11 +323,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.3</version>
+        <version>2.5</version>
         <configuration>
           <configLocation>${settings.localRepository}/org/opencastproject/matterhorn-checkstyle/1.0/matterhorn-checkstyle-1.0.xml</configLocation>
-          <logViolationsToConsole>true</logViolationsToConsole>
           <headerLocation>${settings.localRepository}/org/opencastproject/matterhorn-header/1.0/matterhorn-header-1.0.txt</headerLocation>
+          <logViolationsToConsole>true</logViolationsToConsole>
           <excludes>**/package-info.java</excludes>
         </configuration>
         <dependencies>
@@ -343,6 +344,7 @@
             <type>txt</type>
           </dependency>
         </dependencies>
+        <!--
         <executions>
           <execution>
             <goals>
@@ -350,6 +352,7 @@
             </goals>
           </execution>
         </executions>
+        -->
       </plugin>
     </plugins>
 
@@ -371,6 +374,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.3.2</version>
           <configuration>
             <source>1.6</source>
             <target>1.6</target>
@@ -1258,21 +1262,17 @@
           </tags>
         </configuration>
       </plugin>
-      <!--
-        disabling this report for now because of errors I cannot figure out
-        -AZ
-      -->
-      <!--      <plugin>-->
-      <!--        <groupId>org.apache.maven.plugins</groupId>-->
-      <!--        <artifactId>maven-checkstyle-plugin</artifactId>-->
-      <!--        <version>2.3</version>-->
-      <!--        <configuration>-->
-      <!--          <configLocation>checkstyle.xml</configLocation>-->
-      <!--          <logViolationsToConsole>true</logViolationsToConsole>-->
-      <!--          <headerLocation>header.txt</headerLocation>-->
-      <!--          <excludes>**/package-info.java</excludes>-->
-      <!--        </configuration>-->
-      <!--      </plugin>-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <configLocation>${settings.localRepository}/org/opencastproject/matterhorn-checkstyle/1.0/matterhorn-checkstyle-1.0.xml</configLocation>
+          <headerLocation>${settings.localRepository}/org/opencastproject/matterhorn-header/1.0/matterhorn-header-1.0.txt</headerLocation>
+          <logViolationsToConsole>true</logViolationsToConsole>
+          <excludes>**/package-info.java</excludes>
+        </configuration>
+      </plugin>
       <!--
         WARNING: this plugin is beta only, we should maybe not use it -AZ
       -->
@@ -1288,7 +1288,6 @@
       <!--      </plugin>-->
     </plugins>
   </reporting>
-
   <!-- defines the various repositories -->
   <pluginRepositories>
     <pluginRepository>
