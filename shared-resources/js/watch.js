@@ -50,6 +50,9 @@ Opencast.Watch = (function() {
 	          Opencast.Analytics.setMediaPackageId(mediaPackageId);
 	          var dcExtent = parseInt($('#dc-extent').html());
 	          Opencast.Analytics.setDuration(parseInt(dcExtent/1000));
+	          $('#oc_body').bind('resize', function() {
+	            Opencast.Analytics.drawFootprints();
+	          });
 	      
 	      
               $('#oc_segment-table').html($('#oc-segments').html());
