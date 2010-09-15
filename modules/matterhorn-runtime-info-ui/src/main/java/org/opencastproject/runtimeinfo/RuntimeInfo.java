@@ -22,6 +22,12 @@ import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.osgi.framework.BundleContext;
@@ -32,6 +38,13 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import javax.servlet.Servlet;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -41,6 +54,9 @@ import javax.ws.rs.core.MediaType;
 /**
  * This REST endpoint provides information about the runtime environment, including the services and user interfaces
  * deployed and the current login context.
+ * 
+ * If the 'org.opencastproject.anonymous.feedback.url' is set in config.properties, this service will also update the
+ * opencast project with the contents of the {@link #getRuntimeInfo()} json feed.
  */
 @Path("/")
 public class RuntimeInfo {
@@ -56,7 +72,8 @@ public class RuntimeInfo {
   private String adminBaseUrl;
   private boolean testMode;
   private String docs;
-  
+  private Timer pingbackTimer = null;
+
   protected void setSecurityService(SecurityService securityService) {
     this.securityService = securityService;
   }
@@ -80,35 +97,71 @@ public class RuntimeInfo {
       engageBaseUrl = serverUrl;
     this.serverUrl = bundleContext.getProperty("org.opencastproject.server.url");
     this.testMode = "true".equalsIgnoreCase(bundleContext.getProperty("testMode"));
+
+    // Pingback server, if enabled
+    String pingbackUrl = bundleContext.getProperty("org.opencastproject.anonymous.feedback.url");
+    if (pingbackUrl != null) {
+      try {
+        final URI uri = new URI(pingbackUrl);
+        pingbackTimer = new Timer("Anonymous Feedback Service", true);
+        pingbackTimer.schedule(new TimerTask() {
+          public void run() {
+            HttpClient httpClient = new DefaultHttpClient();
+            try {
+              HttpPost post = new HttpPost(uri);
+              List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+              // TODO: we are currently using drupal to store this information.  Use something less demanding so
+              // we can simply post the data.
+              params.add(new BasicNameValuePair("form_id", "webform_client_form_1834"));
+              params.add(new BasicNameValuePair("submitted[data]", getRuntimeInfo()));
+              UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+              post.setEntity(entity);
+              HttpResponse response = httpClient.execute(post);
+              logger.debug("Received pingback response: {}", response);
+            } catch (Exception e) {
+              logger.warn("Unable to post feedback: {}", e);
+            } finally {
+              httpClient.getConnectionManager().shutdown();
+            }
+          }
+        }, (1000 * 60), (1000 * 60 * 60)); // wait 60 seconds to send first message, and once an hour thereafter
+      } catch (URISyntaxException e1) {
+        logger.warn("Can not ping back to '{}'", pingbackUrl);
+      }
+    }
   }
 
   public void deactivate() {
+    if(pingbackTimer != null) {
+      pingbackTimer.cancel();
+    }
   }
 
   protected String generateDocs() {
     DocRestData data = new DocRestData("RuntimeInfo", "Runtime Information", "/info/rest", null);
 
     // abstract
-    data.setAbstract("This service provides information about the runtime environment, including the servives that are" +
-      "deployed and the current user context.");
+    data.setAbstract("This service provides information about the runtime environment, including the servives that are"
+            + "deployed and the current user context.");
 
     // services
-    RestEndpoint servicesEndpoint = new RestEndpoint("services", RestEndpoint.Method.GET, "/components.json", "List " +
-      "the REST services and user interfaces running on this host");
+    RestEndpoint servicesEndpoint = new RestEndpoint("services", RestEndpoint.Method.GET, "/components.json", "List "
+            + "the REST services and user interfaces running on this host");
     servicesEndpoint.addFormat(new Format("JSON", null, null));
     servicesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The components running on this host"));
     servicesEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, servicesEndpoint);
 
     // me
-    RestEndpoint meEndpoint = new RestEndpoint("me", RestEndpoint.Method.GET, "/me.json", "Information about the curent user");
+    RestEndpoint meEndpoint = new RestEndpoint("me", RestEndpoint.Method.GET, "/me.json",
+            "Information about the curent user");
     meEndpoint.addFormat(new Format("JSON", null, null));
     meEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns information about the current user"));
     meEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, meEndpoint);
 
     logger.debug("generated documentation for {}", data);
-    
+
     return DocUtil.generate(data);
   }
 
@@ -116,10 +169,12 @@ public class RuntimeInfo {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if (docs == null) { docs = generateDocs(); }
+    if (docs == null) {
+      docs = generateDocs();
+    }
     return docs;
   }
-  
+
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("components.json")
