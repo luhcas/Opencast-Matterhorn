@@ -38,9 +38,8 @@ public interface ComposerService {
    * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getReceipt(String)}
    *         to obtain the status of an encoding job.
    * @throws EncoderException
-   * @throws MediaPackageException
    */
-  Receipt encode(Track sourceTrack, String profileId) throws EncoderException, MediaPackageException;
+  Receipt encode(Track sourceTrack, String profileId) throws EncoderException;
 
   /**
    * Encode one track, using that track's audio and video streams.
@@ -88,6 +87,44 @@ public interface ComposerService {
    *           if muxing fails
    */
   Receipt mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId, boolean block) throws EncoderException;
+
+  /**
+   * Trims the given track to the given start time and duration.
+   * 
+   * @param sourceTrack
+   *          The source track
+   * @param profileId
+   *          The profile to use for trimming
+   * @param start
+   *          start time in miliseconds
+   * @param duration
+   *          duration in miliseconds
+   * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getReceipt(String)}
+   *         to obtain the status of an encoding job.
+   * @throws EncoderException
+   *           if trimming fails
+   * @throws MediaPackageException
+   */
+  Receipt trim(Track sourceTrack, String profileId, long start, long duration) throws EncoderException, MediaPackageException;
+
+  /**
+   * Trims the given track to the given start time and duration.
+   * 
+   * @param sourceTrack
+   *          The the source track
+   * @param profileId
+   *          The profile to use for trimming
+   * @param start
+   *          start time in miliseconds
+   * @param duration
+   *          duration in miliseconds
+   * @param block
+   *          Whether this method should block the calling thread (true) or return asynchronously (false)
+   * @return The receipt for this encoding job
+   * @throws EncoderException
+   *           if trimming fails
+   */
+  Receipt trim(Track sourceTrack, String profileId, long start, long duration, boolean block) throws EncoderException;
 
   /**
    * Extracts an image from the media package element identified by <code>sourceVideoTrackId</code>. The image is taken

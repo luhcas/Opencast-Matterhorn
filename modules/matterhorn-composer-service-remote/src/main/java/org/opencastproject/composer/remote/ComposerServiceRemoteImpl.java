@@ -24,6 +24,7 @@ import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Receipt;
 import org.opencastproject.remote.api.RemoteBase;
@@ -58,6 +59,7 @@ import javax.xml.transform.stream.StreamResult;
  * Proxies a set of remote composer services for use as a JVM-local service. Remote services are selected at random.
  */
 public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerService {
+
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(ComposerServiceRemoteImpl.class);
 
@@ -132,6 +134,60 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
       closeConnection(response);
     }
     throw new RuntimeException("Unable to encode track " + sourceTrack + " using a remote composer service");
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#trim(org.opencastproject.mediapackage.Track,
+   *      java.lang.String, long, long)
+   */
+  @Override
+  public Receipt trim(Track sourceTrack, String profileId, long start, long duration) throws EncoderException,
+          MediaPackageException {
+    return trim(sourceTrack, profileId, start, duration, false);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#trim(org.opencastproject.mediapackage.Track,
+   *      java.lang.String, long, long, boolean)
+   */
+  @Override
+  public Receipt trim(Track sourceTrack, String profileId, long start, long duration, boolean block)
+          throws EncoderException {
+    String url = "/composer/rest/trim";
+    HttpPost post = new HttpPost(url);
+    try {
+      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+      params.add(new BasicNameValuePair("sourceTrack", getXML(sourceTrack)));
+      params.add(new BasicNameValuePair("profileId", profileId));
+      params.add(new BasicNameValuePair("start", Long.toString(start)));
+      params.add(new BasicNameValuePair("duration", Long.toString(duration)));
+      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+      post.setEntity(entity);
+    } catch (Exception e) {
+      throw new EncoderException("Unable to assemble a remote composer request for track " + sourceTrack, e);
+    }
+    HttpResponse response = null;
+    try {
+      response = getResponse(post);
+      if (response != null) {
+        String content = EntityUtils.toString(response.getEntity());
+        Receipt r = remoteServiceManager.parseReceipt(content);
+        logger.info("Trimming job {} started on a remote composer", r.getId());
+        if (block) {
+          r = poll(r.getId());
+        }
+        return r;
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to trim track " + sourceTrack + " using a remote composer service", e);
+    } finally {
+      closeConnection(response);
+    }
+    throw new RuntimeException("Unable to trim track " + sourceTrack + " using a remote composer service");
   }
 
   /**

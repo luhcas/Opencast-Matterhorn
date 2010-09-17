@@ -127,6 +127,53 @@ public class ComposerRestService {
   }
 
   /**
+   * Trims a track to a new length.
+   * 
+   * @param sourceTrack
+   *          The source track
+   * @param profileId
+   *          the encoding profile to use for trimming
+   * @param start
+   *          the new trimming start time
+   * @param duration
+   *          the new video duration
+   * @return A response containing the receipt for this encoding job in the response body.
+   * @throws Exception
+   */
+  @POST
+  @Path("trim")
+  @Produces(MediaType.TEXT_XML)
+  public Response trim(@FormParam("sourceTrack") String sourceTrackAsXml, @FormParam("profileId") String profileId,
+          @FormParam("start") long start, @FormParam("duration") long duration) throws Exception {
+    // Ensure that the POST parameters are present
+    if (sourceTrackAsXml == null || profileId == null) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("sourceTrack and profileId must not be null").build();
+    }
+
+    // Deserialize the track
+    MediaPackageElement sourceElement = toMediaPackageElement(sourceTrackAsXml);
+    if (!Track.TYPE.equals(sourceElement.getElementType())) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("sourceTrack element must be of type track").build();
+    }
+
+    // Make sure the trim times make sense
+    Track sourceTrack = (Track) sourceElement;
+    if (start < 0) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("start time must be greater than 00:00:00").build();
+    } else if (duration <= 0) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("duration must be greater than 00:00:00").build();
+    } else if (start + duration > sourceTrack.getDuration()) {
+      return Response.status(Response.Status.BAD_REQUEST).entity("requested duration exceeds track").build();
+    }
+
+    // Asynchronously encode the specified tracks
+    Receipt receipt = composerService.trim(sourceTrack, profileId, start, duration);
+    if (receipt == null)
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Trimming failed").build();
+    return Response.ok().entity(receipt.toXml()).build();
+  }
+
+  /**
    * Encodes a track.
    * 
    * @param audioSourceTrack
@@ -146,8 +193,8 @@ public class ComposerRestService {
           throws Exception {
     // Ensure that the POST parameters are present
     if (audioSourceTrackXml == null || videoSourceTrackXml == null || profileId == null) {
-      return Response.status(Response.Status.BAD_REQUEST).entity(
-              "audioSourceTrack, videoSourceTrack, and profileId must not be null").build();
+      return Response.status(Response.Status.BAD_REQUEST)
+              .entity("audioSourceTrack, videoSourceTrack, and profileId must not be null").build();
     }
 
     // Deserialize the audio track
@@ -353,6 +400,22 @@ public class ComposerRestService {
     encodeEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "flash.http", "The encoding profile to use"));
     encodeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, encodeEndpoint);
+
+    // trim
+    RestEndpoint trimEndpoint = new RestEndpoint("trim", RestEndpoint.Method.POST, "/trim",
+            "Starts a trimming process, based on the specified track, start time and duration in ms");
+    trimEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .OK("Results in an xml document containing the receipt for the trimming task"));
+    trimEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .BAD_REQUEST("if the start time is negative or exceeds the track duration"));
+    trimEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .BAD_REQUEST("if the duration is negative or, including the new start time, exceeds the track duration"));
+    trimEndpoint.addRequiredParam(new Param("sourceTrack", Type.STRING, generateVideoTrack(),
+            "The track containing the stream"));
+    trimEndpoint.addRequiredParam(new Param("start", Type.STRING, "0", "The start time in milisecond"));
+    trimEndpoint.addRequiredParam(new Param("duration", Type.STRING, "10000", "The duration in milisecond"));
+    trimEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, trimEndpoint);
 
     // mux
     RestEndpoint muxEndpoint = new RestEndpoint("mux", RestEndpoint.Method.POST, "/mux",

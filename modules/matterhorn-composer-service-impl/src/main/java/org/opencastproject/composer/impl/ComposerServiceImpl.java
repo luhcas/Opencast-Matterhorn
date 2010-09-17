@@ -15,21 +15,6 @@
  */
 package org.opencastproject.composer.impl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EmbedderEngine;
 import org.opencastproject.composer.api.EmbedderEngineFactory;
@@ -43,20 +28,39 @@ import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Stream;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.VideoStream;
 import org.opencastproject.mediapackage.identifier.IdBuilder;
 import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
 import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.Workspace;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Default implementation of the composer service api.
@@ -207,7 +211,36 @@ public class ComposerServiceImpl implements ComposerService {
    */
   @Override
   public Receipt encode(Track sourceTrack, String profileId, boolean block) throws EncoderException {
-    return encode(sourceTrack, null, profileId, block);
+    return encode(sourceTrack, null, profileId, null, block);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#trim(org.opencastproject.mediapackage.Track,
+   *      java.lang.String, long, long)
+   */
+  @Override
+  public Receipt trim(Track sourceTrack, String profileId, long start, long duration) throws EncoderException,
+          MediaPackageException {
+    return trim(sourceTrack, profileId, start, duration, false);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.composer.api.ComposerService#trim(org.opencastproject.mediapackage.Track,
+   *      java.lang.String, long, long, boolean)
+   */
+  @Override
+  public Receipt trim(Track sourceTrack, String profileId, long start, long duration, boolean block)
+          throws EncoderException {
+    Dictionary<String, String> props = new Hashtable<String, String>();
+//    props.put(key, Long.toString(start));
+//    props.put(key, Long.toString(duration));
+
+    // TODO: Finish implementation
+    return null;
   }
 
   /**
@@ -218,7 +251,7 @@ public class ComposerServiceImpl implements ComposerService {
    */
   @Override
   public Receipt mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException {
-    return encode(sourceVideoTrack, sourceAudioTrack, profileId, false);
+    return encode(sourceVideoTrack, sourceAudioTrack, profileId, null, false);
   }
 
   /**
@@ -230,7 +263,7 @@ public class ComposerServiceImpl implements ComposerService {
   @Override
   public Receipt mux(final Track videoTrack, final Track audioTrack, final String profileId, final boolean block)
           throws EncoderException {
-    return encode(videoTrack, audioTrack, profileId, block);
+    return encode(videoTrack, audioTrack, profileId, null, block);
   }
 
   /**
@@ -243,15 +276,16 @@ public class ComposerServiceImpl implements ComposerService {
    *          the audio track
    * @param profileId
    *          the encoding profile
+   * @param properties
+   *          encoding properties
    * @param block
    *          <code>true</code> to only return once encoding is finished
-   * 
    * @return the receipt
    * @throws EncoderException
    *           if encoding fails
    */
-  private Receipt encode(final Track videoTrack, final Track audioTrack, final String profileId, final boolean block)
-          throws EncoderException {
+  private Receipt encode(final Track videoTrack, final Track audioTrack, final String profileId, Dictionary properties,
+          final boolean block) throws EncoderException {
 
     final String targetTrackId = idBuilder.createNew().toString();
     final Receipt composerReceipt = remoteServiceManager.createReceipt(JOB_TYPE);
