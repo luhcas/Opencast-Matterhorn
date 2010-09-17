@@ -1,21 +1,30 @@
+/**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
 var ocUtils = ocUtils || {};
 
-ocUtils.formToMap = function(form) {
-  out = {};
-  for (var i=0; i < form.elements.length; i++) {
-    var field = form.elements[i];
-    if (field.value != '') {
-      out[field.name] = field.value;
-    }
+ocUtils.getURLParam = function(name) {
+  name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+  var regexS = "[\\?&]"+name+"=([^&#]*)";
+  var regex = new RegExp( regexS );
+  var results = regex.exec( window.location.href );
+  if( results == null ) {
+    return "";
+  } else {
+    return results[1];
   }
-  return out;
-}
-
-ocUtils.mergeMaps = function(map1,map2) {
-  for (key in map2) {
-    map1[key] = map2[key];
-  }
-  return map1;
 }
 
 ocUtils.xmlToString = function(doc) {
@@ -41,7 +50,7 @@ ocUtils.createDoc = function(rootEl, rootNS){
 }
 
 ocUtils.toICalDate = function(d){
-  if(d.constructor != Date){
+  if(d.constructor !== Date){
     d = new Date(0);
   }
   var month = UI.padstring(d.getUTCMonth() + 1, '0', 2);
@@ -51,12 +60,32 @@ ocUtils.toICalDate = function(d){
   return '' + d.getUTCFullYear() + month + d.getUTCDate() + 'T' + hours + minutes + seconds + 'Z';
 }
 
-ocUtils.padstring = function(str, pad, padlen){
-  if(typeof str != 'string'){ 
+/** convert timestamp to locale date string
+ * @param timestamp
+ * @return Strng localized String representation of timestamp
+ */
+ocUtils.makeLocaleDateString = function(timestamp) {
+  var date = new Date();
+  date.setTime(timestamp);
+  return date.toLocaleString();
+}
+
+ocUtils.padString = function(str, pad, padlen){
+  if(typeof str !== 'string'){ 
     str = str.toString();
   }
   while(str.length < padlen && pad.length > 0){
     str = pad + str;
   }
   return str;
+}
+
+ocUtils.log = function(){
+  if(window.console){
+    try{
+      window.console && console.log.apply(console,Array.prototype.slice.call(arguments));
+    }catch(e){
+      console.log(e);
+    }
+  }
 }

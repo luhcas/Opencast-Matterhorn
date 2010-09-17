@@ -1,4 +1,19 @@
-var UploadListener = {};
+/**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+var UploadListener = {} || UploadListener;
 
 UploadListener.jobId = "";
 UploadListener.shortFilename = "";
@@ -7,20 +22,20 @@ UploadListener.updateInterval = null;
 UploadListener.updateRequested = false;
 
 UploadListener.initialized = function() {
-  Upload.log('Uploader initialized');
+  ocUtils.log('Uploader initialized');
   $('#track').val();
   $('#BtnBrowse').attr('disabled', false);
   UploadListener.appletPresent = true;
 }
 
 UploadListener.resumeReady = function(jobId) {
-  Upload.log('resume negotiation successful');
+  ocUtils.log('resume negotiation successful');
   var filename = document.Uploader.getFilename();
 }
 
 
 UploadListener.fileSelectedAjax = function(filename,jobId) {
-  Upload.log("File selected for job " + jobId + ": " + filename);
+  ocUtils.log("File selected for job " + jobId + ": " + filename);
   UploadListener.shortFilename = filename;
   UploadListener.jobId = jobId;
   $('#track').val(filename);
@@ -29,7 +44,7 @@ UploadListener.fileSelectedAjax = function(filename,jobId) {
 }
 
 UploadListener.uploadStarted = function(uploadingFile) {
-  Upload.log('upload started');
+  ocUtils.log('upload started');
   if (uploadingFile) {
     UploadListener.updateInterval = window.setInterval('UploadListener.getProgress()', 1000);
   } else {
@@ -45,7 +60,7 @@ UploadListener.getProgress = function() {
       type       : 'GET',
       dataType   : 'json',
       error      : function(XHR,status,e){
-        Upload.log('failed to get progress information from ' + '../ingest/rest/getProgress/' + UploadListener.jobId);
+        ocUtils.log('failed to get progress information from ' + '../ingest/rest/getProgress/' + UploadListener.jobId);
         window.clearInterval(UploadListener.updateInterval); // ie in case of inbox ingest
       },
       success    : function(data, status) {
@@ -70,14 +85,14 @@ UploadListener.uploadProgress = function(total, transfered) {
     totalMB = total / MEGABYTE;
     totalMB = totalMB.toFixed(2);
   }
-  Upload.log("transfered: " + transfered + " of " + total + " MB, " + percentage + "%");
+  ocUtils.log("transfered: " + transfered + " of " + total + " MB, " + percentage + "%");
   Upload.setProgress(percentage,percentage,'Total: '+totalMB+' MB',megaBytes+' MB send');
 }
 
 UploadListener.uploadComplete = function() {
   UploadListener.updateRequested = false;
   window.clearInterval(UploadListener.updateInterval);
-  Upload.log("upload complete");
+  ocUtils.log("upload complete");
   var uploadFrame = document.getElementById("filechooser-ajax");
   var mp = uploadFrame.contentWindow.document.getElementById("mp").value;
   ocIngest.addCatalog(mp, ocIngest.createDublinCoreCatalog(ocIngest.metadata), 'dublincore/episode');
@@ -86,16 +101,12 @@ UploadListener.uploadComplete = function() {
 UploadListener.uploadFailed = function() {
   UploadListener.updateRequested = false;
   window.clearInterval(UploadListener.updateInterval);
-  Upload.log('ERROR: media fileupload has failed');
+  ocUtils.log('ERROR: media fileupload has failed');
   Upload.showFailedScreen("Media file upload has failed.");
 }
 
 UploadListener.error = function(message) {
   UploadListener.updateRequested = false;
   window.clearInterval(UploadListener.updateInterval);
-  Upload.log('ERROR: ' + message);
-}
-
-UploadListener.log = function(message) {
-  Upload.log('Uploader: ' + message);
+  ocUtils.log('ERROR: ' + message);
 }

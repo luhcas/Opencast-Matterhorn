@@ -319,7 +319,7 @@ UI.HandleAgentChange = function(elm){
             if(agent_tz !== 'NaN'){
               UI.HandleAgentTZ(agent_tz);
             }else{
-              AdminUI.log("Couldn't parse TZ");
+              ocUtils.log("Couldn't parse TZ");
             }
           }
         });
@@ -617,21 +617,6 @@ UI.RegisterComponents = function(){
   Scheduler.components.subject = new AdminForm.Component(['subject'], {label: 'label-subject'});
   Scheduler.components.language = new AdminForm.Component(['language'], {label: 'label-subject'});
   Scheduler.components.description = new AdminForm.Component(['description'], {label: 'label-description'});
-  /*Scheduler.components.license = new AdminForm.Component(['license'], {label: 'i18n_license_label', required: true},
-    { validate: function(){
-        var license;
-        if(this.fields.license){
-          return true;
-        }else{
-          license = $('#license')[0];
-          if(license){
-            this.setFields('license');
-            return this.validate();
-          }
-        }
-        return false;
-      }
-    });*/
   Scheduler.components.resources = new AdminForm.Component([],
     { label: 'i18n_input_label', errorField: 'missing-inputs', nodeKey: 'resources' },
     { getValue: function(){
@@ -701,7 +686,7 @@ UI.RegisterComponents = function(){
           if(date != 'NaN') {
             date = new Date(date + (Agent.tzDiff * 60 * 1000));
           } else {
-            AdminUI.log('Could not parse date.');
+            ocUtils.log('Could not parse date.');
           }
           if(this.fields.recurStart && this.fields.recurStartTimeHour && this.fields.recurStartTimeMin){
             this.fields.recurStartTimeHour.val(date.getHours());
@@ -747,7 +732,7 @@ UI.RegisterComponents = function(){
           }
           val = parseInt(value.duration);
           if(val === 'NaN') {
-            AdminUI.log('Could not parse duration.');
+            ocUtils.log('Could not parse duration.');
           }
           if(this.fields.recurDurationHour && this.fields.recurDurationMin){
             val   = val/1000; //milliseconds -> seconds
@@ -991,7 +976,7 @@ UI.RegisterComponents = function(){
           if(date != 'NaN') {
             date = new Date(date + (Agent.tzDiff * 60 * 1000));
           } else {
-            AdminUI.log('Could not parse date.');
+            ocUtils.log('Could not parse date.');
           }
           if(this.fields.startDate && this.fields.startTimeHour && this.fields.startTimeMin){
             hour = date.getHours();
@@ -1040,7 +1025,7 @@ UI.RegisterComponents = function(){
           }
           val = parseInt(value.duration);
           if(val == 'NaN') {
-            AdminUI.log('Could not parse duration.');
+            ocUtils.log('Could not parse duration.');
           }
           if(this.fields.durationHour && this.fields.durationMin){
             val = val/1000; //milliseconds -> seconds
@@ -1103,25 +1088,4 @@ UI.RegisterComponents = function(){
         }
       });
   }
-}
-
-UI.toICalDate = function(d){
-  if(d.constructor != Date){
-    d = new Date(0);
-  }
-  var month = UI.padstring(d.getUTCMonth() + 1, '0', 2);
-  var hours = UI.padstring(d.getUTCHours(), '0', 2);
-  var minutes = UI.padstring(d.getUTCMinutes(), '0', 2);
-  var seconds = UI.padstring(d.getUTCSeconds(), '0', 2);
-  return '' + d.getUTCFullYear() + month + d.getUTCDate() + 'T' + hours + minutes + seconds + 'Z';
-}
-
-UI.padstring = function(str, pad, padlen){
-  if(typeof str != 'string'){ 
-    str = str.toString();
-  }
-  while(str.length < padlen && pad.length > 0){
-    str = pad + str;
-  }
-  return str;
 }

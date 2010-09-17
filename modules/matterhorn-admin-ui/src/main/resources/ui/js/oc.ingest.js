@@ -1,4 +1,18 @@
-
+/**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
 var ocIngest = ocIngest || {};
 
 ocIngest.debug = true;
@@ -9,7 +23,7 @@ ocIngest.previousMediaPackage = null;
 ocIngest.previousFiles = new Array();
 
 ocIngest.createMediaPackage = function() {
-  Upload.log("creating MediaPackage")
+  ocUtils.log("creating MediaPackage")
   Upload.setProgress('0%','creating MediaPackage',' ', ' ');
   $.ajax({
     url        : '../ingest/rest/createMediaPackage',
@@ -19,11 +33,11 @@ ocIngest.createMediaPackage = function() {
       showFailedScreen('Could not create MediaPackage on server.');
     },
     success    : function(data, status) {
-      Upload.log("MediaPackage created");
+      ocUtils.log("MediaPackage created");
       ocIngest.mediaPackage = data;
       if (Upload.retryId != '') {
         // add tracks from old mediaPackage to the new one
-        Upload.log("adding files from previous mediaPackge");
+        ocUtils.log("adding files from previous mediaPackge");
         ocIngest.copyPreviousFiles(ocIngest.mediaPackage);
       } else {
         var uploadFrame = document.getElementById("filechooser-ajax");
@@ -106,7 +120,7 @@ ocIngest.createDublinCoreCatalog = function(data) {
 }
 
 ocIngest.addCatalog = function(mediaPackage, dcCatalog, flavor) {
-  Upload.log("Adding DublinCore catalog");
+  ocUtils.log("Adding DublinCore catalog");
   Upload.setProgress('100%','adding Metadata',' ', ' ');
   $.ajax({
     url        : '../ingest/rest/addDCCatalog',
@@ -121,7 +135,7 @@ ocIngest.addCatalog = function(mediaPackage, dcCatalog, flavor) {
       showFailedScreen('Could not add DublinCore catalog to MediaPackage.');
     },
     success    : function(data, status) {
-      Upload.log("DublinCore catalog added");
+      ocUtils.log("DublinCore catalog added");
       ocIngest.mediaPackage = data;
       var seriesId = $('#isPartOf').val();
       if (seriesId && ocIngest.seriesDC == null) {
@@ -134,7 +148,7 @@ ocIngest.addCatalog = function(mediaPackage, dcCatalog, flavor) {
 }
 
 ocIngest.addSeriesCatalog = function(seriesId) {
-  Upload.log("Getting sweries DublinCore");
+  ocUtils.log("Getting sweries DublinCore");
   Upload.setProgress('100%','Getting series Metadata',' ', ' ');
   $.ajax({
     url        : '../series/rest/'+seriesId+'.xml',
@@ -143,7 +157,7 @@ ocIngest.addSeriesCatalog = function(seriesId) {
       showFailedScreen('The metadata for the series you selected could not be retrieved.');
     },
     success    : function(data, status) {
-      Upload.log("Adding series metadata");
+      ocUtils.log("Adding series metadata");
       ocIngest.seriesDC = data;
       ocIngest.addCatalog(ocUtils.xmlToString(ocIngest.mediaPackage), data, 'dublincore/series');
     }
@@ -172,7 +186,7 @@ ocIngest.addTrack = function(mediaPackage, jobId, flavor) {
 */
 
 ocIngest.startIngest = function(mediaPackage) {
-  Upload.log("Starting Ingest on MediaPackage with Workflow " + $('#workflow-selector').val());
+  ocUtils.log("Starting Ingest on MediaPackage with Workflow " + $('#workflow-selector').val());
   Upload.setProgress('100%','starting Ingest',' ', ' ');
   var data = ocWorkflow.getConfiguration($('#workflow-config-container'));
   data['mediaPackage'] = ocUtils.xmlToString(mediaPackage);

@@ -1,3 +1,18 @@
+/**
+ *  Copyright 2009 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
 var Upload = Upload || {};
 
 Upload.metadata = {};
@@ -9,7 +24,7 @@ Upload.retryId = "";
 Upload.init = function() {
 
   // are we in debug mode?
-  if (Upload.getURLParam("debug")) {
+  if (ocUtils.getURLParam("debug")) {
     $('#console').show();
   }
 
@@ -56,7 +71,7 @@ Upload.init = function() {
   // Event: Submit button, submit form if no missing inputs
   $('#BtnSubmit').click( function() {
     if (Upload.checkRequiredFields(true))  {
-      Upload.log("Collecting metadata");
+      ocUtils.log("Collecting metadata");
       $('.formField').each( function() {
         if (($(this).attr('id') != 'flavor') && ($(this).attr('id') != 'distribution')) {
           //log("adding metadata " + $(this).attr('id') + ' ' + $(this).val());
@@ -122,14 +137,14 @@ Upload.init = function() {
   ocWorkflow.init($('#workflow-selector'), $('#workflow-config-container'));
 
   // test if we upload a new recording or want to retry a workflow
-  Upload.retryId = Upload.getURLParam("retry");
+  Upload.retryId = ocUtils.getURLParam("retry");
   if (Upload.retryId != '') {
     $('#i18n_page_title').text("Edit Recording Before Continuing");
     $('#BtnSubmit').text("Continue Processing");
     $('#i18n_submit_instr').css('display','none');
     Upload.initRetry(Upload.retryId);
   } else {                                             // FIXME well this has to be cleaned up, agile...
-    Upload.retryId = Upload.getURLParam("edit");
+    Upload.retryId = ocUtils.getURLParam("edit");
     if (Upload.retryId != '') {
       $('#i18n_page_title').text("Edit Recording Before Continuing");
       $('#BtnSubmit').text("Continue Processing");
@@ -368,27 +383,4 @@ Upload.createSeriesFromSearchText = function(){
     }
   });
   return creationSucceeded;
-}
-
-/** print line to log console
- *
- */
-Upload.log = function(message) {
-  var console = document.getElementById("console");
-  console.innerHTML += message + "\n";
-  console.scrollTop = console.scrollHeight;
-}
-
-/** get parameter from URL
- *
- */
-Upload.getURLParam = function(name) {
-  name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
-  var regexS = "[\\?&]"+name+"=([^&#]*)";
-  var regex = new RegExp( regexS );
-  var results = regex.exec( window.location.href );
-  if( results == null )
-    return "";
-  else
-    return results[1];
 }

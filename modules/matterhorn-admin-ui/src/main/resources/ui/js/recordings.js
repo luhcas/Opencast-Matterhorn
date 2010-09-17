@@ -109,26 +109,26 @@ Recordings.init = function() {
     Recordings.initTableRefresh($(this).val());
   });
 
-  var sort = Recordings.getURLParam('sortBy');
+  var sort = ocUtils.getURLParam('sortBy');
   if (sort == '') {
     sort='StartDate';
   }
   Recordings.sortBy = sort;
 
-  var order = Recordings.getURLParam('sortOrder');
+  var order = ocUtils.getURLParam('sortOrder');
   if (order == '') {
     order='Descending';
   }
   Recordings.sortOrder = order;
 
-  var psize = Recordings.getURLParam('pageSize');
+  var psize = ocUtils.getURLParam('pageSize');
   if (psize == '') {
     psize = 10;
   }
   ocPager.pageSize = psize;
   ocPager.init();
 
-  var show = Recordings.getURLParam('show');
+  var show = ocUtils.getURLParam('show');
   if (show == '') {
     show='upcoming';
   }
@@ -277,14 +277,14 @@ Recordings.renderTable = function(xml, xsl) {
           if (sday < 10) sday = "0" + sday;
           if (smon < 10) smon = "0" + smon;
 
-          startTime = sd.getFullYear() + '-' + smon + '-' + sday + ' ' + sd.getHours() + ':' + Recordings.ensureTwoDigits(sd.getMinutes());
+          startTime = sd.getFullYear() + '-' + smon + '-' + sday + ' ' + sd.getHours() + ':' + ocUtils.padString(sd.getMinutes(), '0', 2);
         } else {
           startTime = "NA";
         }
         if (endTime) {
           var ed = new Date();
           ed.setTime(endTime);
-          endTime = ' - ' + ed.getHours() + ':' + Recordings.ensureTwoDigits(ed.getMinutes());
+          endTime = ' - ' + ed.getHours() + ':' + ocUtils.padString(ed.getMinutes(), '0', 2);
         } else {
           endTime = "";
         }
@@ -300,24 +300,6 @@ Recordings.renderTable = function(xml, xsl) {
   });
 }
 
-Recordings.ensureTwoDigits = function(number) {
-  if (number < 10) {
-    return '0' + number;
-  } else {
-    return number;
-  }
-}
-
-/** convert timestamp to locale date string
- * @param timestamp
- * @return Strng localized String representation of timestamp
- */
-Recordings.makeLocaleDateString = function(timestamp) {
-  var date = new Date();
-  date.setTime(timestamp);
-  return date.toLocaleString();
-}
-
 /** inject a 'loading' animation in the specified element
  * @param elm elmement into which the animation should be injected
  */
@@ -325,21 +307,6 @@ Recordings.injectLoadingAnimation = function(elm) {
   var anim = document.createElement('div');
   $(anim).addClass('loadingAnimation');
   $(elm).empty().append(anim);
-}
-
-/** Get URL parameter
- * @param name key in URL parameters
- * @return String value for the first occurance of the key or empty string if key was not found
- */
-Recordings.getURLParam = function(name) {
-  name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
-  var regexS = "[\\?&]"+name+"=([^&#]*)";
-  var regex = new RegExp( regexS );
-  var results = regex.exec( window.location.href );
-  if( results == null )
-    return "";
-  else
-    return results[1];
 }
 
 /** Displays Hold Operation UI
