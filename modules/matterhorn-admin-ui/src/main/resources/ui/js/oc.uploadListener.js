@@ -13,65 +13,65 @@
  *  permissions and limitations under the License.
  *
  */
-var UploadListener = {} || UploadListener;
+var ocUploadListener = {} || ocUploadListener;
 
-UploadListener.jobId = "";
-UploadListener.shortFilename = "";
-UploadListener.appletPresent = false;
-UploadListener.updateInterval = null;
-UploadListener.updateRequested = false;
+ocUploadListener.jobId = "";
+ocUploadListener.shortFilename = "";
+ocUploadListener.appletPresent = false;
+ocUploadListener.updateInterval = null;
+ocUploadListener.updateRequested = false;
 
-UploadListener.initialized = function() {
+ocUploadListener.initialized = function() {
   ocUtils.log('Uploader initialized');
   $('#track').val();
   $('#BtnBrowse').attr('disabled', false);
-  UploadListener.appletPresent = true;
+  ocUploadListener.appletPresent = true;
 }
 
-UploadListener.resumeReady = function(jobId) {
+ocUploadListener.resumeReady = function(jobId) {
   ocUtils.log('resume negotiation successful');
   var filename = document.Uploader.getFilename();
 }
 
 
-UploadListener.fileSelectedAjax = function(filename,jobId) {
+ocUploadListener.fileSelectedAjax = function(filename,jobId) {
   ocUtils.log("File selected for job " + jobId + ": " + filename);
-  UploadListener.shortFilename = filename;
-  UploadListener.jobId = jobId;
+  ocUploadListener.shortFilename = filename;
+  ocUploadListener.jobId = jobId;
   $('#track').val(filename);
   var uploadForm = document.getElementById("filechooser-ajax").contentWindow.document.uploadForm;
-  Upload.checkRequiredFields();
+  ocUpload.checkRequiredFields();
 }
 
-UploadListener.uploadStarted = function(uploadingFile) {
+ocUploadListener.uploadStarted = function(uploadingFile) {
   ocUtils.log('upload started');
   if (uploadingFile) {
-    UploadListener.updateInterval = window.setInterval('UploadListener.getProgress()', 1000);
+    ocUploadListener.updateInterval = window.setInterval('ocUploadListener.getProgress()', 1000);
   } else {
-    Upload.setProgress('0%','moving file form Inbox to MediaPackage',' ', ' ');
+    ocUpload.setProgress('0%','moving file form Inbox to MediaPackage',' ', ' ');
   }
 }
 
-UploadListener.getProgress = function() {
-  if (!UploadListener.updateRequested) {
-    UploadListener.updateRequested = true;
+ocUploadListener.getProgress = function() {
+  if (!ocUploadListener.updateRequested) {
+    ocUploadListener.updateRequested = true;
     $.ajax({
-      url        : '../ingest/rest/getProgress/' + UploadListener.jobId,
+      url        : '../ingest/rest/getProgress/' + ocUploadListener.jobId,
       type       : 'GET',
       dataType   : 'json',
       error      : function(XHR,status,e){
-        ocUtils.log('failed to get progress information from ' + '../ingest/rest/getProgress/' + UploadListener.jobId);
-        window.clearInterval(UploadListener.updateInterval); // ie in case of inbox ingest
+        ocUtils.log('failed to get progress information from ' + '../ingest/rest/getProgress/' + ocUploadListener.jobId);
+        window.clearInterval(ocUploadListener.updateInterval); // ie in case of inbox ingest
       },
       success    : function(data, status) {
-        UploadListener.updateRequested = false;
-        UploadListener.uploadProgress(data.total, data.received);
+        ocUploadListener.updateRequested = false;
+        ocUploadListener.uploadProgress(data.total, data.received);
       }
     });
   }
 }
 
-UploadListener.uploadProgress = function(total, transfered) {
+ocUploadListener.uploadProgress = function(total, transfered) {
   var MEGABYTE = 1024 * 1024;
   var percentage = 0;
   var megaBytes = 0;
@@ -86,27 +86,27 @@ UploadListener.uploadProgress = function(total, transfered) {
     totalMB = totalMB.toFixed(2);
   }
   ocUtils.log("transfered: " + transfered + " of " + total + " MB, " + percentage + "%");
-  Upload.setProgress(percentage,percentage,'Total: '+totalMB+' MB',megaBytes+' MB send');
+  ocUpload.setProgress(percentage,percentage,'Total: '+totalMB+' MB',megaBytes+' MB send');
 }
 
-UploadListener.uploadComplete = function() {
-  UploadListener.updateRequested = false;
-  window.clearInterval(UploadListener.updateInterval);
+ocUploadListener.uploadComplete = function() {
+  ocUploadListener.updateRequested = false;
+  window.clearInterval(ocUploadListener.updateInterval);
   ocUtils.log("upload complete");
   var uploadFrame = document.getElementById("filechooser-ajax");
   var mp = uploadFrame.contentWindow.document.getElementById("mp").value;
   ocIngest.addCatalog(mp, ocIngest.createDublinCoreCatalog(ocIngest.metadata), 'dublincore/episode');
 }
 
-UploadListener.uploadFailed = function() {
-  UploadListener.updateRequested = false;
-  window.clearInterval(UploadListener.updateInterval);
+ocUploadListener.uploadFailed = function() {
+  ocUploadListener.updateRequested = false;
+  window.clearInterval(ocUploadListener.updateInterval);
   ocUtils.log('ERROR: media fileupload has failed');
-  Upload.showFailedScreen("Media file upload has failed.");
+  ocUpload.showFailedScreen("Media file upload has failed.");
 }
 
-UploadListener.error = function(message) {
-  UploadListener.updateRequested = false;
-  window.clearInterval(UploadListener.updateInterval);
+ocUploadListener.error = function(message) {
+  ocUploadListener.updateRequested = false;
+  window.clearInterval(ocUploadListener.updateInterval);
   ocUtils.log('ERROR: ' + message);
 }

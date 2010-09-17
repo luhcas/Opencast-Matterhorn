@@ -13,9 +13,9 @@
  *  permissions and limitations under the License.
  *
  */
-SeriesList = {} || SeriesList;
+ocSeriesList = {} || ocSeriesList;
 
-SeriesList.init = function(){
+ocSeriesList.init = function(){
   $('#series-table-container').xslt('/admin/rest/series', 'xsl/series_list.xsl', function(){
   
   });

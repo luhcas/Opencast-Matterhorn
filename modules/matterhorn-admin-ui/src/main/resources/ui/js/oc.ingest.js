@@ -24,7 +24,7 @@ ocIngest.previousFiles = new Array();
 
 ocIngest.createMediaPackage = function() {
   ocUtils.log("creating MediaPackage")
-  Upload.setProgress('0%','creating MediaPackage',' ', ' ');
+  ocUpload.setProgress('0%','creating MediaPackage',' ', ' ');
   $.ajax({
     url        : '../ingest/rest/createMediaPackage',
     type       : 'GET',
@@ -35,7 +35,7 @@ ocIngest.createMediaPackage = function() {
     success    : function(data, status) {
       ocUtils.log("MediaPackage created");
       ocIngest.mediaPackage = data;
-      if (Upload.retryId != '') {
+      if (ocUpload.retryId != '') {
         // add tracks from old mediaPackage to the new one
         ocUtils.log("adding files from previous mediaPackge");
         ocIngest.copyPreviousFiles(ocIngest.mediaPackage);
@@ -44,35 +44,12 @@ ocIngest.createMediaPackage = function() {
         uploadFrame.contentWindow.document.uploadForm.flavor.value = $('#flavor').val();
         uploadFrame.contentWindow.document.uploadForm.mediaPackage.value = ocUtils.xmlToString(data);
         var uploadingFile = $('#ingest-upload').is(':checked');
-        UploadListener.uploadStarted(uploadingFile);
+        ocUploadListener.uploadStarted(uploadingFile);
         uploadFrame.contentWindow.document.uploadForm.submit();
       }
     }
   });
 }
-
-/* not needed for now
-ocIngest.copyPreviousMediaFile = function() {
-  var flavor = $('#previous-file-flavor').val();
-  var url = $('#previous-file-url').val();
-  $.ajax({
-    url        : '../ingest/rest/addTrack',
-    type       : 'POST',
-    dataType   : 'xml',
-    data       : {
-      mediaPackage: ocUtils.xmlToString(ocIngest.mediaPackage),
-      flavor: flavor,
-      url: url
-    },
-    error      : function(XHR,status,e){
-      Upload.showFailedScreen('Could not add DublinCore catalog to MediaPackage.');
-    },
-    success    : function(data, status) {
-      ocIngest.mediaPackage = data;
-      ocIngest.addCatalog(ocUtils.xmlToString(ocIngest.mediaPackage), ocIngest.createDublinCoreCatalog(ocIngest.metadata));
-    }
-  });
-}*/
 
 ocIngest.copyPreviousFiles = function(data) {
   if (ocIngest.previousFiles.length != 0) {
@@ -87,7 +64,7 @@ ocIngest.copyPreviousFiles = function(data) {
         url: fileItem.url
       },
       error      : function(XHR,status,e){
-        Upload.showFailedScreen('Could not add DublinCore catalog to MediaPackage.');
+        ocUpload.showFailedScreen('Could not add DublinCore catalog to MediaPackage.');
       },
       success    : function(data, status) {
         ocIngest.mediaPackage = data;
@@ -121,7 +98,7 @@ ocIngest.createDublinCoreCatalog = function(data) {
 
 ocIngest.addCatalog = function(mediaPackage, dcCatalog, flavor) {
   ocUtils.log("Adding DublinCore catalog");
-  Upload.setProgress('100%','adding Metadata',' ', ' ');
+  ocUpload.setProgress('100%','adding Metadata',' ', ' ');
   $.ajax({
     url        : '../ingest/rest/addDCCatalog',
     type       : 'POST',
@@ -149,7 +126,7 @@ ocIngest.addCatalog = function(mediaPackage, dcCatalog, flavor) {
 
 ocIngest.addSeriesCatalog = function(seriesId) {
   ocUtils.log("Getting sweries DublinCore");
-  Upload.setProgress('100%','Getting series Metadata',' ', ' ');
+  ocUpload.setProgress('100%','Getting series Metadata',' ', ' ');
   $.ajax({
     url        : '../series/rest/'+seriesId+'.xml',
     type       : 'GET',
@@ -164,30 +141,9 @@ ocIngest.addSeriesCatalog = function(seriesId) {
   });
 }
 
-/*
-ocIngest.addTrack = function(mediaPackage, jobId, flavor) {
-    log("Adding track to MediaPackage");
-    setProgress('100%','adding Track',' ', ' ');
-    $.ajax({
-    url        : '../fileupload/'+jobId+'/addToMediaPackage',
-    type       : 'POST',
-    dataType   : 'xml',
-    data       : {mediaPackage: ocUtils.xmlToString(mediaPackage), flavor: flavor},
-    error      : function(XHR,status,e){
-      showFailedScreen();
-    },
-    success    : function(data, status) {
-      log("Track added successfully");
-      ocIngest.mediaPackage = data;
-      ocIngest.startIngest(data);
-    }
-  });
-}
-*/
-
 ocIngest.startIngest = function(mediaPackage) {
   ocUtils.log("Starting Ingest on MediaPackage with Workflow " + $('#workflow-selector').val());
-  Upload.setProgress('100%','starting Ingest',' ', ' ');
+  ocUpload.setProgress('100%','starting Ingest',' ', ' ');
   var data = ocWorkflow.getConfiguration($('#workflow-config-container'));
   data['mediaPackage'] = ocUtils.xmlToString(mediaPackage);
   $.ajax({
@@ -199,11 +155,11 @@ ocIngest.startIngest = function(mediaPackage) {
       showFailedScreen("Could not start Ingest on MediaPackage");
     },
     success    : function(data, status) {
-      if (Upload.retryId != '') {
-        ocIngest.removeWorkflowInstance(Upload.retryId);
+      if (ocUpload.retryId != '') {
+        ocIngest.removeWorkflowInstance(ocUpload.retryId);
       } else {
-        Upload.hideProgressStage();
-        Upload.showSuccessScreen();
+        ocUpload.hideProgressStage();
+        ocUpload.showSuccessScreen();
       }
     }
   });
@@ -215,12 +171,12 @@ ocIngest.removeWorkflowInstance = function(wfId) {
     data: {id: wfId},
     type: 'POST',
     error: function() {
-      Upload.hideProgressStage();   // better than showing error since new workflow has already been successfully started at this point
-      Upload.showSuccessScreen();
+      ocUpload.hideProgressStage();   // better than showing error since new workflow has already been successfully started at this point
+      ocUpload.showSuccessScreen();
     },
     success: function() {
-      Upload.hideProgressStage();
-      Upload.showSuccessScreen();
+      ocUpload.hideProgressStage();
+      ocUpload.showSuccessScreen();
     }
   });
 }

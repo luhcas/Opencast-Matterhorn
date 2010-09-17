@@ -24,7 +24,7 @@ ocPager.init = function() {
     var val = $(this).val();
     $('.paging-nav-pagesize-selector').val(val);
     ocPager.update(val, ocPager.currentPageIdx);
-    Recordings.displayRecordings(Recordings.currentState, true);
+    ocRecordings.displayRecordings(ocRecordings.currentState, true);
   });
 
   // Event: text entered
@@ -33,7 +33,7 @@ ocPager.init = function() {
       var val = $(this).val();
       if ((val !== '') && (!isNaN(val))) {
         ocPager.update(ocPager.pageSize, val-1);
-        Recordings.displayRecordings(Recordings.currentState, true);
+        ocRecordings.displayRecordings(ocRecordings.currentState, true);
         $(this).val('');
       }
     }
@@ -42,13 +42,13 @@ ocPager.init = function() {
   // Event: pager nav next clicked
   $('.paging-nav-go-next').click(function() {
     ocPager.update(ocPager.pageSize, ocPager.currentPageIdx+1);
-    Recordings.displayRecordings(Recordings.currentState, true);
+    ocRecordings.displayRecordings(ocRecordings.currentState, true);
   });
 
   // Event: pager nav previous clicked
   $('.paging-nav-go-previous').click(function() {
     ocPager.update(ocPager.pageSize, ocPager.currentPageIdx-1);
-    Recordings.displayRecordings(Recordings.currentState, true);
+    ocRecordings.displayRecordings(ocRecordings.currentState, true);
   });
 
   $('.paging-nav-pagesize-selector').each( function() {
@@ -58,7 +58,7 @@ ocPager.init = function() {
 
 ocPager.update = function(size, current) {
   ocPager.pageSize = size;
-  var numPages = Math.ceil(Recordings.lastCount/size);     // number of pages
+  var numPages = Math.ceil(ocRecordings.lastCount/size);     // number of pages
   
   if (current >= numPages) {
     current = numPages - 1;
@@ -91,6 +91,6 @@ ocPager.update = function(size, current) {
   $('.paging-nav-total').each(function() {
     $(this).text(numPages);
   });
-  //alert("pageSize: " + ocPager.pageSize + "\ncurrent: " + ocPager.currentPageIdx + "\nitems: " + Recordings.lastCount + "\npages: " + numPages + "\nstate: " + Recordings.currentState);
+  //alert("pageSize: " + ocPager.pageSize + "\ncurrent: " + ocPager.currentPageIdx + "\nitems: " + ocRecordings.lastCount + "\npages: " + numPages + "\nstate: " + ocRecordings.currentState);
 }
 

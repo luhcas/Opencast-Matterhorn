@@ -58,13 +58,13 @@
       <td>
         <br />
         <a title="Edit Recording Info">
-          <xsl:attribute name="href">/admin/scheduler.html?eventId=<xsl:value-of select="id" />&amp;edit</xsl:attribute>
+          <xsl:attribute name="href">/admin/scheduler.html?eventId=<xsl:value-of select="id" />&amp;edit=true</xsl:attribute>
           Edit
         </a>
         <br />
         <a title="Delete Recording" class="cursor">
           <xsl:attribute name="onclick">
-            <xsl:text>Recordings.removeScheduledRecording('</xsl:text>
+            <xsl:text>ocRecordings.removeScheduledRecording('</xsl:text>
             <xsl:value-of select="id" />
             <xsl:text>', '</xsl:text>
             <xsl:value-of select="title" />

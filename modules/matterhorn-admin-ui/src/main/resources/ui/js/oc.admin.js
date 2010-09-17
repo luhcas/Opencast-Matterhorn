@@ -15,14 +15,12 @@
  */
 
 /* @namespace Holds functions and properites related to all Admin UIs. */
-var AdminUI = {} || AdminUI;
-/* @namespace Holds functions and properites related to forms used in Admin UIs. */
-var AdminForm = {} || AdminForm;
+var ocAdmin = {} || ocAdmin;
 
-AdminUI.internationalize = function(obj, prefix){
+ocAdmin.internationalize = function(obj, prefix){
   for(var i in obj){
     if(typeof obj[i] == 'object'){
-      AdminUI.internationalize(obj[i], prefix + '_' + i);
+      ocAdmin.internationalize(obj[i], prefix + '_' + i);
     }else if(typeof obj[i] == 'string'){
       var id = '#' + prefix + '_' + i;
       if($(id).length){
@@ -32,42 +30,16 @@ AdminUI.internationalize = function(obj, prefix){
   }
 }
 
-/**
- *  Function parses the URL for parameters.
- *  @param {String} Optional. If a name is passed, that parameter's value is returned.
- *  @return {String|Boolean|Array} If optional parameter is left empty, an array of all params are returned.
- */
-AdminUI.getURLParams = function(param) {
-  var urlParams = {};
-  if(document.location.search) {
-    params = document.location.search.substr(1).split('&');
-    for(var p in params) {
-      eq = params[p].indexOf('=');
-      if(eq != -1) {
-        urlParams[params[p].substr(0, eq)] = params[p].substr(eq+1);
-      } else {
-        urlParams[params[p]] = true;
-      }
-    }
-  }
-  if(param && urlParams[param]) {
-    return urlParams[param];
-  } else if(urlParams.length > 0) {
-    return urlParams;
-  }
-  return null;
-};
+ocAdmin.components = {};
 
-AdminForm.components = {};
-
-AdminForm.Manager = function(rootElm, rootNs, components, workflowComponents){
+ocAdmin.Manager = function(rootElm, rootNs, components, workflowComponents){
   this.rootElm = rootElm;
   this.rootNs = rootNs;
   this.components = components;
   this.workflowComponents = workflowComponents || {};
 };
 
-$.extend(AdminForm.Manager.prototype, {
+$.extend(ocAdmin.Manager.prototype, {
   serialize: function(){
     if(this.validate()){
       var doc = this.createDoc();
@@ -130,10 +102,10 @@ $.extend(AdminForm.Manager.prototype, {
 });
 
 /* @class The Component class is a collection of form elements and associated functions for use
- * with the AdminForm.Manager. It provides basic implementations for setting, getting, displaying,
+ * with the ocAdmin.Manager. It provides basic implementations for setting, getting, displaying,
  * and XMLifying the form elements.
  */
-AdminForm.Component = function Component(fields, props, funcs){
+ocAdmin.Component = function Component(fields, props, funcs){
   this.fields = [];
   this.errorField = "";
   this.label = "";
@@ -147,8 +119,8 @@ AdminForm.Component = function Component(fields, props, funcs){
   this.setProperties(props);
 };
 
-$.extend(AdminForm.Component.prototype, {
-  /* @lends AdminForm.Component.prototype */
+$.extend(ocAdmin.Component.prototype, {
+  /* @lends ocAdmin.Component.prototype */
   /** 
    *  Sets the fields from an array of element ids.
    *  @param {String[]} Array of element ids
@@ -334,11 +306,11 @@ $.extend(AdminForm.Component.prototype, {
 /*
 TODO: Create a container for components to handle those components that can repeat
 
-AdminUI.ComponentSet = function ComponentSet(){
+ocAdmin.ComponentSet = function ComponentSet(){
 
 };
 
-$.extend(AdminUI.ComponentSet.prototype, {
+$.extend(ocAdmin.ComponentSet.prototype, {
   components: []
 });
 

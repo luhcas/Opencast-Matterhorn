@@ -105,7 +105,7 @@
           <xsl:when test="itemType='SCHEDULER_EVENT'">
             <a title="Delete Recording">
               <xsl:attribute name="onclick">
-                <xsl:text>Recordings.removeScheduledEvent('</xsl:text>
+                <xsl:text>ocRecordings.removeScheduledEvent('</xsl:text>
                 <xsl:value-of select="id" />
                 <xsl:text>','</xsl:text>
                 <xsl:value-of select="title" />
@@ -125,7 +125,7 @@
             </xsl:if>
             <a>
               <xsl:attribute name="onclick">
-                <xsl:text>Recordings.removeRecording('</xsl:text>
+                <xsl:text>ocRecordings.removeRecording('</xsl:text>
                 <xsl:value-of select="id" />
                 <xsl:text>');</xsl:text>
               </xsl:attribute>

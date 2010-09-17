@@ -62,7 +62,7 @@
         <br />
         <a class="cursor">
           <xsl:attribute name="onclick">
-            <xsl:text>Recordings.displayHoldActionPanel('</xsl:text><xsl:value-of select="holdActionPanelURL" /><xsl:text>','</xsl:text><xsl:value-of select="id" /><xsl:text>', this);</xsl:text>
+            <xsl:text>ocRecordings.displayHoldActionPanel('</xsl:text><xsl:value-of select="holdActionPanelURL" /><xsl:text>','</xsl:text><xsl:value-of select="id" /><xsl:text>', this);</xsl:text>
           </xsl:attribute>
           <xsl:value-of select="holdActionTitle" />
         </a>

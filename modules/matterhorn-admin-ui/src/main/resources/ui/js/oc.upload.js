@@ -13,15 +13,15 @@
  *  permissions and limitations under the License.
  *
  */
-var Upload = Upload || {};
+var ocUpload = ocUpload || {};
 
-Upload.metadata = {};
-Upload.retryId = "";
+ocUpload.metadata = {};
+ocUpload.retryId = "";
 
 /** Init the upload page. Init events.
  *
  */
-Upload.init = function() {
+ocUpload.init = function() {
 
   // are we in debug mode?
   if (ocUtils.getURLParam("debug")) {
@@ -34,7 +34,7 @@ Upload.init = function() {
       $('#regular-file-chooser').fadeOut('fast');
       $('#regular-file-chooser-flavor').fadeOut('fast');
       $('#track').val($('#previous-file-link').attr('href'));
-      Upload.checkRequiredFields(false);
+      ocUpload.checkRequiredFields(false);
     }
   });
 
@@ -70,29 +70,29 @@ Upload.init = function() {
 
   // Event: Submit button, submit form if no missing inputs
   $('#BtnSubmit').click( function() {
-    if (Upload.checkRequiredFields(true))  {
+    if (ocUpload.checkRequiredFields(true))  {
       ocUtils.log("Collecting metadata");
       $('.formField').each( function() {
         if (($(this).attr('id') != 'flavor') && ($(this).attr('id') != 'distribution')) {
           //log("adding metadata " + $(this).attr('id') + ' ' + $(this).val());
           if ($(this).hasClass('multiValueField')) {
-            if (Upload.metadata[$(this).attr('name')] == undefined) {
-              Upload.metadata[$(this).attr('name')] = new Array($(this).val());
+            if (ocUpload.metadata[$(this).attr('name')] == undefined) {
+              ocUpload.metadata[$(this).attr('name')] = new Array($(this).val());
             } else {
-              Upload.metadata[$(this).attr('name')].push($(this).val());
+              ocUpload.metadata[$(this).attr('name')].push($(this).val());
             }
           } else {
             if($(this).attr('id') === 'isPartOf'){
               if($('#series').val() !== '' && $('#isPartOf').val() === ''){ //have text and no id
-                Upload.createSeriesFromSearchText();
+                ocUpload.createSeriesFromSearchText();
               }
             }
-            Upload.metadata[$(this).attr('name')] = $(this).val();
+            ocUpload.metadata[$(this).attr('name')] = $(this).val();
           }
         }
       });
-      ocIngest.metadata = Upload.metadata;
-      Upload.showProgressStage();
+      ocIngest.metadata = ocUpload.metadata;
+      ocUpload.showProgressStage();
       ocIngest.createMediaPackage();
     } else {
       $('#container-missingFields').show('fast');
@@ -108,14 +108,14 @@ Upload.init = function() {
 
   // Event: form field changed, check if data for required fields is missing when a input value changes
   $('.requiredField').change( function() {
-    Upload.checkRequiredFields();
+    ocUpload.checkRequiredFields();
   });
 
   // Event: Help icon clicked, display help
   $('.helpIcon').click( function() {
     var help = $(this).prev().attr('id');
     //alert("Displaying help for: " + help);
-    Upload.showHelpBox(help,$(this).offset().top,$(this).offset().left);
+    ocUpload.showHelpBox(help,$(this).offset().top,$(this).offset().left);
     return false;
   });
 
@@ -137,24 +137,24 @@ Upload.init = function() {
   ocWorkflow.init($('#workflow-selector'), $('#workflow-config-container'));
 
   // test if we upload a new recording or want to retry a workflow
-  Upload.retryId = ocUtils.getURLParam("retry");
-  if (Upload.retryId != '') {
+  ocUpload.retryId = ocUtils.getURLParam("retry");
+  if (ocUpload.retryId != '') {
     $('#i18n_page_title').text("Edit Recording Before Continuing");
     $('#BtnSubmit').text("Continue Processing");
     $('#i18n_submit_instr').css('display','none');
-    Upload.initRetry(Upload.retryId);
+    ocUpload.initRetry(ocUpload.retryId);
   } else {                                             // FIXME well this has to be cleaned up, agile...
-    Upload.retryId = ocUtils.getURLParam("edit");
-    if (Upload.retryId != '') {
+    ocUpload.retryId = ocUtils.getURLParam("edit");
+    if (ocUpload.retryId != '') {
       $('#i18n_page_title').text("Edit Recording Before Continuing");
       $('#BtnSubmit').text("Continue Processing");
       $('#i18n_submit_instr').css('display','none');
-      Upload.initRetry(Upload.retryId);
+      ocUpload.initRetry(ocUpload.retryId);
     }
   }
 }
 
-Upload.initRetry = function(wfId) {
+ocUpload.initRetry = function(wfId) {
   // display current file element / hide file chooser
   $('#retry-file').css('display', 'block');
   $('#regular-file-selection').css('display', 'none');
@@ -169,7 +169,7 @@ Upload.initRetry = function(wfId) {
     success: function(data) {
       ocIngest.previousMediaPackage = data;
       var catalogUrl = $(data.documentElement).find("mediapackage > metadata > catalog[type='dublincore/episode'] > url").text();
-      Upload.loadDublinCore(catalogUrl);
+      ocUpload.loadDublinCore(catalogUrl);
       // previous file
       var files = new Array();
       $(data.documentElement).find("mediapackage > media > track").each(function(index, elm) {
@@ -205,7 +205,7 @@ Upload.initRetry = function(wfId) {
   });
 }
 
-Upload.loadDublinCore = function(url) {
+ocUpload.loadDublinCore = function(url) {
   $.ajax({
     method: 'GET',
     url: url,
@@ -237,7 +237,7 @@ Upload.loadDublinCore = function(url) {
 /** collect data from workflow configuration panel
  *
  */
-Upload.collectWorkflowConfig = function() {
+ocUpload.collectWorkflowConfig = function() {
   var out = {};
   $('.configField').each(function() {
     out[$(this).attr('name')] = $(this).val();
@@ -248,7 +248,7 @@ Upload.collectWorkflowConfig = function() {
 /** check if data for required fields is missing
  *
  */
-Upload.checkRequiredFields = function(submit) {
+ocUpload.checkRequiredFields = function(submit) {
   var missing = false;
   var wrongtype = false;
   $('.requiredField:visible, .requiredField[type|=hidden]').each( function() {
@@ -294,7 +294,7 @@ Upload.checkRequiredFields = function(submit) {
   return !missing;
 }
 
-Upload.showHelpBox = function(help,top,left) {
+ocUpload.showHelpBox = function(help,top,left) {
   $('#helpTitle').text(helpTexts[help][0]);
   $('#helpText').text(helpTexts[help][1]);
   $('#helpBox').css({
@@ -306,7 +306,7 @@ Upload.showHelpBox = function(help,top,left) {
 /** gray-out whole page and display progress popup
  *
  */
-Upload.showProgressStage = function() {
+ocUpload.showProgressStage = function() {
   //$('#gray-out').fadeIn('fast');
   $('#gray-out').css('display','block');
   $('#progress-stage').fadeIn('normal');
@@ -315,7 +315,7 @@ Upload.showProgressStage = function() {
 /** Restore view
  *
  */
-Upload.hideProgressStage = function() {
+ocUpload.hideProgressStage = function() {
   $('#gray-out').fadeOut('fast');
   $('#progress-stage').fadeOut('normal');
 }
@@ -323,7 +323,7 @@ Upload.hideProgressStage = function() {
 /** Set the progress view to a certain state
  *
  */
-Upload.setProgress = function(width, text, total, transfered) {
+ocUpload.setProgress = function(width, text, total, transfered) {
   $('#progressbar-indicator').css('width',width);
   $('#progressbar-label').text(text);
   $('#label-filesize').text(total);
@@ -333,22 +333,22 @@ Upload.setProgress = function(width, text, total, transfered) {
 /** Load success screen into stage
  *
  */
-Upload.showSuccessScreen = function() {
+ocUpload.showSuccessScreen = function() {
   $('#stage').load('complete.html', function() {
-    for (key in Upload.metadata) {
-      if (Upload.metadata[key] != "") {
+    for (key in ocUpload.metadata) {
+      if (ocUpload.metadata[key] != "") {
         $('#field-'+key).css('display','block');
-        if (Upload.metadata[key] instanceof Array) {
-          $('#field-'+key).children('.fieldValue').text(Upload.metadata[key].join(', '));
+        if (ocUpload.metadata[key] instanceof Array) {
+          $('#field-'+key).children('.fieldValue').text(ocUpload.metadata[key].join(', '));
         } else {
-          $('#field-'+key).children('.fieldValue').text(Upload.metadata[key]);
+          $('#field-'+key).children('.fieldValue').text(ocUpload.metadata[key]);
         }
       }
-      if (Upload.retryId != "") {
+      if (ocUpload.retryId != "") {
         $('#heading-metadata').text('Your recording with the following information has been resubmitted');
       }
     }
-    $('#field-filename').children('.fieldValue').text(UploadListener.shortFilename);
+    $('#field-filename').children('.fieldValue').text(ocUploadListener.shortFilename);
     
   });
 }
@@ -356,18 +356,18 @@ Upload.showSuccessScreen = function() {
 /** Load failed screen into stage and display error message
  *
  */
-Upload.showFailedScreen = function(message) {
-  Upload.hideProgressStage();
+ocUpload.showFailedScreen = function(message) {
+  ocUpload.hideProgressStage();
   $('#stage').load('error.html', function() {
     if (message) {
       $('#error-message').text(message).show();
     }
-    $('#field-filename').children('.fieldValue').text(UploadListener.shortFilename);
+    $('#field-filename').children('.fieldValue').text(ocUploadListener.shortFilename);
     
   });
 }
 
-Upload.createSeriesFromSearchText = function(){
+ocUpload.createSeriesFromSearchText = function(){
   var seriesXml = '<series><metadataList><metadata><key>title</key><value>' + $('#series').val() + '</value></metadata></metadataList></series>';
   var creationSucceeded = false;
   $.ajax({

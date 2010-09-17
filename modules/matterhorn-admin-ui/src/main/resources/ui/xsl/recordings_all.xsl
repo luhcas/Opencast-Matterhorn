@@ -119,13 +119,13 @@
         <xsl:choose>
           <xsl:when test="recordingStatus = 'upcoming'">
             <a title="Edit Recording Info">
-              <xsl:attribute name="href">/admin/scheduler.html?eventId=<xsl:value-of select="id" />&amp;edit</xsl:attribute>
+              <xsl:attribute name="href">/admin/scheduler.html?eventId=<xsl:value-of select="id" />&amp;edit=true</xsl:attribute>
               Edit
             </a>
             <br />
             <a title="Delete Recording" class="cursor">
               <xsl:attribute name="onclick">
-                <xsl:text>Recordings.removeScheduledRecording('</xsl:text>
+                <xsl:text>ocRecordings.removeScheduledRecording('</xsl:text>
                 <xsl:value-of select="id" />
                 <xsl:text>', '</xsl:text>
                 <xsl:value-of select="title" />
@@ -141,7 +141,7 @@
             </input>
             <a class="cursor">
               <xsl:attribute name="onclick">
-                <xsl:text>Recordings.displayHoldActionPanel('</xsl:text>
+                <xsl:text>ocRecordings.displayHoldActionPanel('</xsl:text>
                 <xsl:value-of select="holdActionPanelURL" />
                 <xsl:text>','</xsl:text>
                 <xsl:value-of select="id" />
@@ -155,7 +155,7 @@
               <xsl:when test ="processingStatus = 'Failed during capture' or processingStatus = 'Failed to start capture'">
                 <a title="Delete Recording" class="cursor">
                   <xsl:attribute name="onclick">
-                    <xsl:text>Recordings.removeScheduledEvent('</xsl:text>
+                    <xsl:text>ocRecordings.removeScheduledEvent('</xsl:text>
                     <xsl:value-of select="id" />
                     <xsl:text>', '</xsl:text>
                     <xsl:value-of select="title" />
@@ -175,7 +175,7 @@
                 </a-->
                 <a title="Delete Recording" class="cursor">
                   <xsl:attribute name="onclick">
-                    <xsl:text>Recordings.removeRecording('</xsl:text>
+                    <xsl:text>ocRecordings.removeRecording('</xsl:text>
                     <xsl:value-of select="id" />
                     <xsl:text>');</xsl:text>
                   </xsl:attribute>

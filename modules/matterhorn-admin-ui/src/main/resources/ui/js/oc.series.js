@@ -15,18 +15,16 @@
  */
 
 /*    NAMSPACES    */
-var Series        = Series || {};
-Series.components = {};
-var UI            = UI || {};
-
+var ocSeries        = ocSeries || {};
+ocSeries.components = {};
 
 /*    PAGE CONFIGURATION    */
 var SERIES_SERVICE_URL = "/series/rest";
 
 /*    UI FUNCTIONS    */
-UI.Init = function(){
+ocSeries.Init = function(){
   //Load i18n strings and replace default english
-  UI.Internationalize();
+  ocSeries.Internationalize();
   
   //Add folding action for hidden sections.
   $('.folder-head').click(
@@ -37,27 +35,27 @@ UI.Init = function(){
       return false;
   });
   
-  UI.RegisterComponents();
-  Series.FormManager = new AdminForm.Manager('Series', '', Series.components);
-  $('#submitButton').click(UI.SubmitForm);
+  ocSeries.RegisterComponents();
+  ocSeries.FormManager = new ocAdmin.Manager('Series', '', ocSeries.components);
+  $('#submitButton').click(ocSeries.SubmitForm);
   $('#cancelButton').click(function() {
     document.location = 'recordings.html';
   });
   $.get(SERIES_SERVICE_URL + '/new/id', function(data){ $('#seriesId').val(data.id); });
 }
 
-UI.Internationalize = function(){
+ocSeries.Internationalize = function(){
   //Do internationalization of text
   jQuery.i18n.properties({
     name:'series',
     path:'i18n/'
   });
-  AdminUI.internationalize(i18n, 'i18n');
+  ocAdmin.internationalize(i18n, 'i18n');
   
   //Handle special cases like the window title.
 }
 
-UI.SelectMetaTab = function(elm){
+ocSeries.SelectMetaTab = function(elm){
   $(elm).siblings().removeClass('selected');
   $(elm).addClass('selected');
   if(elm.id == "meta-common-tab"){
@@ -69,8 +67,8 @@ UI.SelectMetaTab = function(elm){
   }
 }
 
-UI.RegisterComponents = function(){
-  Series.components.seriesId = new AdminForm.Component(
+ocSeries.RegisterComponents = function(){
+  ocSeries.components.seriesId = new ocAdmin.Component(
     ['seriesId'],
     { required: true, nodeKey: 'seriesId' },
     { toNode: function(parent) {
@@ -86,59 +84,59 @@ UI.RegisterComponents = function(){
     }
   );
   //Core Metadata
-  Series.components.title = new AdminForm.Component(
+  ocSeries.components.title = new ocAdmin.Component(
     ['title'],
     {label:'label-series',required:true}
   );
   
-  Series.components.contributor = new AdminForm.Component(
+  ocSeries.components.contributor = new ocAdmin.Component(
     ['contributor'],
     {label:'label-contributor'}
   );
   
-  Series.components.creator = new AdminForm.Component(
+  ocSeries.components.creator = new ocAdmin.Component(
     ['creator'],
     {label: 'label-creator'}
   );
   
   //Additional Metadata
-  Series.components.subject = new AdminForm.Component(
+  ocSeries.components.subject = new ocAdmin.Component(
     ['subject'],
     {label: 'label-subject'}
   )
   
-  Series.components.language = new AdminForm.Component(
+  ocSeries.components.language = new ocAdmin.Component(
     ['language'],
     {label: 'label-language'}
   )
   
-  Series.components.license = new AdminForm.Component(
+  ocSeries.components.license = new ocAdmin.Component(
     ['license'],
     {label: 'label-license'}
   )
   
-  Series.components.description = new AdminForm.Component(
+  ocSeries.components.description = new ocAdmin.Component(
     ['description'],
     {label: 'label-description'}
   )
   
   /*
   //Extended Metadata
-  AdminForm.components.type
-  //AdminForm.components.subtype
-  AdminForm.components.publisher
-  AdminForm.components.audience
-  //AdminForm.components.duration
-  //AdminForm.components.startdate
-  //AdminForm.components.enddate
-  AdminForm.components.spatial
-  AdminForm.components.temporal
-  AdminForm.components.rights
+  ocAdmin.components.type
+  //ocAdmin.components.subtype
+  ocAdmin.components.publisher
+  ocAdmin.components.audience
+  //ocAdmin.components.duration
+  //ocAdmin.components.startdate
+  //ocAdmin.components.enddate
+  ocAdmin.components.spatial
+  ocAdmin.components.temporal
+  ocAdmin.components.rights
   */
 }
 
-UI.SubmitForm = function(){
-  var seriesXml = Series.FormManager.serialize();
+ocSeries.SubmitForm = function(){
+  var seriesXml = ocSeries.FormManager.serialize();
   if(seriesXml){
     $.ajax({
       type: "PUT",
@@ -146,20 +144,20 @@ UI.SubmitForm = function(){
       data: {
         series: seriesXml
       },
-      success: UI.SeriesSubmitComplete
+      success: ocSeries.SeriesSubmitComplete
     });
   }
 }
 
-UI.SeriesSubmitComplete = function(){
-  for(var k in Series.components){
+ocSeries.SeriesSubmitComplete = function(){
+  for(var k in ocSeries.components){
     if(i18n[k]){
       $("#data-" + k).show();
       $("#data-" + k + " > .data-label").text(i18n[k].label + ":");
-      $("#data-" + k + " > .data-value").text(Series.components[k].asString());
+      $("#data-" + k + " > .data-value").text(ocSeries.components[k].asString());
     }
   }
-  $("#schedulerLink").attr('href',$("#schedulerLink").attr('href') + '?seriesId=' + Series.components.seriesId.getValue());
+  $("#schedulerLink").attr('href',$("#schedulerLink").attr('href') + '?seriesId=' + ocSeries.components.seriesId.getValue());
   $("#submission_success").siblings().hide();
   $("#submission_success").show();
 }
