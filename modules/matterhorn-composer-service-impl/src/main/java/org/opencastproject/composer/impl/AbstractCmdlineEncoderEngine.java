@@ -92,17 +92,50 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
    */
   @Override
   public File encode(File mediaSource, EncodingProfile format, Map<String, String> properties) throws EncoderException {
-    return encode(null, mediaSource, format, properties);
+    return process(null, mediaSource, format, properties);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File, java.io.File,
+   * @see org.opencastproject.composer.api.EncoderEngine#trim(java.io.File,
+   *      org.opencastproject.composer.api.EncodingProfile, long, long, java.util.Map)
+   */
+  @Override
+  public File trim(File mediaSource, EncodingProfile format, long start, long duration, Map<String, String> properties)
+          throws EncoderException {
+    return process(null, mediaSource, format, properties);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.composer.api.EncoderEngine#mux(java.io.File, java.io.File,
    *      org.opencastproject.composer.api.EncodingProfile, java.util.Map)
    */
   @Override
-  public File encode(File audioSource, File videoSource, EncodingProfile profile, Map<String, String> properties)
+  public File mux(File audioSource, File videoSource, EncodingProfile profile, Map<String, String> properties)
+          throws EncoderException {
+    return process(audioSource, videoSource, profile, properties);
+  }
+
+  /**
+   * Executes the command line encoder with the given set of files and properties and using the provided encoding
+   * profile.
+   * 
+   * @param audioSource
+   *          the audio file (used when muxing)
+   * @param videoSource
+   *          the video file
+   * @param profile
+   *          the profile identifier
+   * @param properties
+   *          the encoding properties to be interpreted by the actual encoder implementation
+   * @return the processed file
+   * @throws EncoderException
+   *           if processing fails
+   */
+  protected File process(File audioSource, File videoSource, EncodingProfile profile, Map<String, String> properties)
           throws EncoderException {
     // Fist, update the parameters
     if (properties != null)
@@ -142,11 +175,11 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
       String outDir = parentFile.getAbsoluteFile().getParent();
       String outFileName = FilenameUtils.getBaseName(parentFile.getName());
       String outSuffix = processParameters(profile.getSuffix());
-      
-      if(new File(outDir, outFileName + outSuffix).exists()) {
+
+      if (new File(outDir, outFileName + outSuffix).exists()) {
         outFileName += "_reencode";
       }
-      
+
       params.put("out.dir", outDir);
       params.put("out.name", outFileName);
       params.put("out.suffix", outSuffix);
@@ -181,9 +214,9 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
       }
 
       if (audioSource != null) {
-        logger.info("Audio track {} and video track {} successfully encoded using profile '{}'", new String[] {
-                (audioSource == null ? "N/A" : audioSource.getName()),
-                (videoSource == null ? "N/A" : videoSource.getName()), profile.getIdentifier() });
+        logger.info("Audio track {} and video track {} successfully encoded using profile '{}'",
+                new String[] { (audioSource == null ? "N/A" : audioSource.getName()),
+                        (videoSource == null ? "N/A" : videoSource.getName()), profile.getIdentifier() });
       } else {
         logger.info("Video track {} successfully encoded using profile '{}'", new String[] { videoSource.getName(),
                 profile.getIdentifier() });
@@ -192,9 +225,10 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
       return new File(parentFile.getParent(), outFileName + outSuffix);
     } catch (EncoderException e) {
       if (audioSource != null) {
-        logger.warn("Error while encoding audio track {} and video track {} using '{}': {}", new String[] {
-                (audioSource == null ? "N/A" : audioSource.getName()),
-                (videoSource == null ? "N/A" : videoSource.getName()), profile.getIdentifier(), e.getMessage() });
+        logger.warn(
+                "Error while encoding audio track {} and video track {} using '{}': {}",
+                new String[] { (audioSource == null ? "N/A" : audioSource.getName()),
+                        (videoSource == null ? "N/A" : videoSource.getName()), profile.getIdentifier(), e.getMessage() });
       } else {
         logger.warn("Error while encoding video track {} using '{}': {}", new String[] {
                 (videoSource == null ? "N/A" : videoSource.getName()), profile.getIdentifier(), e.getMessage() });
@@ -202,9 +236,9 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
       fireEncodingFailed(this, profile, e, audioSource, videoSource);
       throw e;
     } catch (Exception e) {
-      logger.warn("Error while encoding audio {} and video {} to {}:{}, {}", new Object[] {
-              (audioSource == null ? "N/A" : audioSource.getName()),
-              (videoSource == null ? "N/A" : videoSource.getName()), profile.getName(), e.getMessage() });
+      logger.warn("Error while encoding audio {} and video {} to {}:{}, {}",
+              new Object[] { (audioSource == null ? "N/A" : audioSource.getName()),
+                      (videoSource == null ? "N/A" : videoSource.getName()), profile.getName(), e.getMessage() });
       fireEncodingFailed(this, profile, e, audioSource, videoSource);
       throw new EncoderException(this, e.getMessage(), e);
     } finally {

@@ -105,7 +105,7 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
   public void activate(ComponentContext cc) {
     // TODO: read configuration data
     Properties config = new Properties();
-    
+
     // Use the passed in configuration
     configure(config);
 
@@ -236,19 +236,48 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File, java.io.File, org.opencastproject.composer.api.EncodingProfile, java.util.Map)
+   * 
+   * @see org.opencastproject.composer.api.EncoderEngine#mux(java.io.File, java.io.File,
+   *      org.opencastproject.composer.api.EncodingProfile, java.util.Map)
    */
-  public File encode(File audioSource, File videoSource, EncodingProfile format, Map<String, String> properties) throws EncoderException {
+  public File mux(File audioSource, File videoSource, EncodingProfile format, Map<String, String> properties)
+          throws EncoderException {
     throw new UnsupportedOperationException("Not yet implemented");
-//    xmlrpcController.submitJob(source, format);
+    // xmlrpcController.submitJob(source, format);
     // TODO Wait for encoding outcome
     // File outputFile = null;
-    //return outputFile;
+    // return outputFile;
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.impl.AbstractEncoderEngine#getOutputFile(java.io.File, org.opencastproject.composer.api.EncodingProfile)
+   * 
+   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File,
+   *      org.opencastproject.composer.api.EncodingProfile, java.util.Map)
+   */
+  @Override
+  public File encode(File mediaSource, EncodingProfile format, Map<String, String> properties) throws EncoderException {
+    return mux(null, mediaSource, format, properties);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.composer.api.EncoderEngine#trim(java.io.File,
+   *      org.opencastproject.composer.api.EncodingProfile, long, long, java.util.Map)
+   */
+  @Override
+  public File trim(File mediaSource, EncodingProfile format, long start, long duration, Map<String, String> properties)
+          throws EncoderException {
+    // TODO: Implement
+    throw new UnsupportedOperationException("Not yet implemented");
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.composer.impl.AbstractEncoderEngine#getOutputFile(java.io.File,
+   *      org.opencastproject.composer.api.EncodingProfile)
    */
   @Override
   protected File getOutputFile(File source, EncodingProfile profile) {
@@ -302,15 +331,6 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
   @Override
   public String toString() {
     return "Telestream Episode Engine";
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.composer.api.EncoderEngine#encode(java.io.File, org.opencastproject.composer.api.EncodingProfile, java.util.Map)
-   */
-  @Override
-  public File encode(File mediaSource, EncodingProfile format, Map<String, String> properties) throws EncoderException {
-    return encode(null, mediaSource, format, properties);
   }
 
 }

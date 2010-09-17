@@ -55,7 +55,6 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -233,14 +232,104 @@ public class ComposerServiceImpl implements ComposerService {
    *      java.lang.String, long, long, boolean)
    */
   @Override
-  public Receipt trim(Track sourceTrack, String profileId, long start, long duration, boolean block)
+  public Receipt trim(Track sourceTrack, String profileId, final long start, final long duration, boolean block)
           throws EncoderException {
-    Dictionary<String, String> props = new Hashtable<String, String>();
-//    props.put(key, Long.toString(start));
-//    props.put(key, Long.toString(duration));
 
-    // TODO: Finish implementation
-    return null;
+    final String targetTrackId = idBuilder.createNew().toString();
+    final Receipt composerReceipt = remoteServiceManager.createReceipt(JOB_TYPE);
+
+    // Get the track and make sure it exists
+    final File trackFile;
+    if (sourceTrack == null) {
+      trackFile = null;
+    } else {
+      try {
+        trackFile = workspace.get(sourceTrack.getURI());
+      } catch (NotFoundException e) {
+        composerReceipt.setStatus(Status.FAILED);
+        remoteServiceManager.updateReceipt(composerReceipt);
+        throw new EncoderException("Requested track " + sourceTrack + " is not found");
+      } catch (IOException e) {
+        composerReceipt.setStatus(Status.FAILED);
+        remoteServiceManager.updateReceipt(composerReceipt);
+        throw new EncoderException("Unable to access track " + sourceTrack);
+      }
+    }
+
+    // Get the encoding profile
+    final EncodingProfile profile = profileScanner.getProfile(profileId);
+    if (profile == null) {
+      composerReceipt.setStatus(Status.FAILED);
+      remoteServiceManager.updateReceipt(composerReceipt);
+      throw new EncoderException(null, "Profile '" + profileId + " is unkown");
+    }
+    
+    // Create the engine
+    final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
+    if (encoderEngine == null) {
+      composerReceipt.setStatus(Status.FAILED);
+      remoteServiceManager.updateReceipt(composerReceipt);
+      throw new EncoderException(null, "No encoder engine available for profile '" + profileId + "'");
+    }
+
+    Runnable runnable = new Runnable() {
+      public void run() {
+        composerReceipt.setStatus(Status.RUNNING);
+        remoteServiceManager.updateReceipt(composerReceipt);
+
+        // Do the work
+        File encodingOutput = null;
+        try {
+          encodingOutput = encoderEngine.trim(trackFile, profile, start, duration, null);
+        } catch (EncoderException e) {
+          composerReceipt.setStatus(Status.FAILED);
+          remoteServiceManager.updateReceipt(composerReceipt);
+          throw new RuntimeException(e);
+        }
+
+        // Put the file in the workspace
+        URI returnURL = null;
+        InputStream in = null;
+        try {
+          in = new FileInputStream(encodingOutput);
+          returnURL = workspace.putInCollection(COLLECTION, encodingOutput.getName(), in);
+          logger.info("Copied the trimmed file to the workspace at {}", returnURL);
+          encodingOutput.delete();
+          logger.info("Deleted the local copy of the trimmed file at {}", encodingOutput.getAbsolutePath());
+        } catch (Exception e) {
+          composerReceipt.setStatus(Status.FAILED);
+          remoteServiceManager.updateReceipt(composerReceipt);
+          logger.error("Unable to put the trimmed file into the workspace", e);
+          throw new RuntimeException(e);
+        } finally {
+          IOUtils.closeQuietly(in);
+        }
+        if (encodingOutput != null)
+          encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
+
+        // Have the encoded track inspected and return the result
+        Receipt inspectionReceipt = inspectionService.inspect(returnURL, true);
+        if (inspectionReceipt.getStatus() == Receipt.Status.FAILED)
+          throw new RuntimeException("Media inspection failed");
+        Track inspectedTrack = (Track) inspectionReceipt.getElement();
+        inspectedTrack.setIdentifier(targetTrackId);
+
+        composerReceipt.setElement(inspectedTrack);
+        composerReceipt.setStatus(Status.FINISHED);
+        remoteServiceManager.updateReceipt(composerReceipt);
+      }
+    };
+    Future<?> future = executor.submit(runnable);
+    if (block) {
+      try {
+        future.get();
+      } catch (Exception e) {
+        composerReceipt.setStatus(Status.FAILED);
+        remoteServiceManager.updateReceipt(composerReceipt);
+        throw new EncoderException(encoderEngine, e);
+      }
+    }
+    return composerReceipt;
   }
 
   /**
@@ -284,7 +373,7 @@ public class ComposerServiceImpl implements ComposerService {
    * @throws EncoderException
    *           if encoding fails
    */
-  private Receipt encode(final Track videoTrack, final Track audioTrack, final String profileId, Dictionary properties,
+  private Receipt encode(final Track videoTrack, final Track audioTrack, final String profileId, Dictionary<String, String> properties,
           final boolean block) throws EncoderException {
 
     final String targetTrackId = idBuilder.createNew().toString();
@@ -358,7 +447,7 @@ public class ComposerServiceImpl implements ComposerService {
         // Do the work
         File encodingOutput = null;
         try {
-          encodingOutput = encoderEngine.encode(audioFile, videoFile, profile, null);
+          encodingOutput = encoderEngine.mux(audioFile, videoFile, profile, null);
         } catch (EncoderException e) {
           composerReceipt.setStatus(Status.FAILED);
           remoteServiceManager.updateReceipt(composerReceipt);

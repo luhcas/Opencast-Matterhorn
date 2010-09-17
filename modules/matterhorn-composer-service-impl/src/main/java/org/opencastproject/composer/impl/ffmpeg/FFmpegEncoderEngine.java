@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,15 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
   public static final String CMD_SUFFIX = "ffmpeg.command";
 
   private static final String CONFIG_FFMPEG_PATH = "composer.ffmpegpath";
+  
+  /** Format for trim times */
+  private static final String TIME_FORMAT = "%02d:%02d:%02d";
+
+  /** The trimming start time property name */
+  private static final String PROP_TRIMMING_START_TIME = "trim.start";
+
+  /** The trimming duration property name */
+  private static final String PROP_TRIMMING_DURATION = "trim.duration";
 
   /** the logging facility provided by log4j */
   private static final Logger logger = LoggerFactory.getLogger(FFmpegEncoderEngine.class);
@@ -61,6 +71,20 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
       setBinary(path);
       logger.debug("FFmpegEncoderEngine config binary: {}", path);
     }
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.composer.impl.AbstractCmdlineEncoderEngine#trim(java.io.File, org.opencastproject.composer.api.EncodingProfile, long, long, java.util.Map)
+   */
+  @Override
+  public File trim(File mediaSource, EncodingProfile format, long start, long duration, Map<String, String> properties)
+          throws EncoderException {
+    if (properties == null)
+      properties = new HashMap<String, String>();
+    properties.put(PROP_TRIMMING_START_TIME, String.format(TIME_FORMAT, start/360000, (start%3600)/6000, (start%6000)));
+    properties.put(PROP_TRIMMING_DURATION, String.format(TIME_FORMAT, duration/360000, (duration%3600)/6000, (duration%6000)));
+    return super.trim(mediaSource, format, start, duration, properties);
   }
 
   /**
