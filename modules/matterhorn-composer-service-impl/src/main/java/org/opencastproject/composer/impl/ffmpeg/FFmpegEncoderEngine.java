@@ -47,10 +47,10 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
   private static final String TIME_FORMAT = "%02d:%02d:%02d";
 
   /** The trimming start time property name */
-  private static final String PROP_TRIMMING_START_TIME = "trim.start";
+  public static final String PROP_TRIMMING_START_TIME = "trim.start";
 
   /** The trimming duration property name */
-  private static final String PROP_TRIMMING_DURATION = "trim.duration";
+  public static final String PROP_TRIMMING_DURATION = "trim.duration";
 
   /** the logging facility provided by log4j */
   private static final Logger logger = LoggerFactory.getLogger(FFmpegEncoderEngine.class);
@@ -82,8 +82,10 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
           throws EncoderException {
     if (properties == null)
       properties = new HashMap<String, String>();
-    properties.put(PROP_TRIMMING_START_TIME, String.format(TIME_FORMAT, start/360000, (start%3600)/6000, (start%6000)));
-    properties.put(PROP_TRIMMING_DURATION, String.format(TIME_FORMAT, duration/360000, (duration%3600)/6000, (duration%6000)));
+    start /= 1000;
+    duration /= 1000;
+    properties.put(PROP_TRIMMING_START_TIME, String.format(TIME_FORMAT, (long)Math.floor(start/3600), (start%3600)/60, (start%60)));
+    properties.put(PROP_TRIMMING_DURATION, String.format(TIME_FORMAT, (long)Math.floor(duration/3600), (duration%3600)/60, (duration%60)));
     return super.trim(mediaSource, format, start, duration, properties);
   }
 
