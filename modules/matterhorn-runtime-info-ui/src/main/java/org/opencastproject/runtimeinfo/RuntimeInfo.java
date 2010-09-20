@@ -183,7 +183,7 @@ public class RuntimeInfo {
     JSONObject json = new JSONObject();
     json.put("engage", engageBaseUrl);
     json.put("admin", adminBaseUrl);
-    json.put("rest", getRestAsJson());
+    json.put("rest", getRestEndpointsAsJson());
     json.put("ui", getUserInterfacesAsJson());
     return json.toJSONString();
   }
@@ -205,7 +205,7 @@ public class RuntimeInfo {
   }
 
   @SuppressWarnings("unchecked")
-  protected JSONArray getRestAsJson() {
+  protected JSONArray getRestEndpointsAsJson() {
     JSONArray json = new JSONArray();
     ServiceReference[] serviceRefs = null;
     try {
@@ -216,10 +216,12 @@ public class RuntimeInfo {
     if (serviceRefs == null)
       return json;
     for (ServiceReference jaxRsRef : serviceRefs) {
+      String version = jaxRsRef.getBundle().getVersion().toString();
       String description = (String) jaxRsRef.getProperty(Constants.SERVICE_DESCRIPTION);
       String servletContextPath = (String) jaxRsRef.getProperty(RS_CONTEXT);
       JSONObject endpoint = new JSONObject();
       endpoint.put("description", description);
+      endpoint.put("version", version);
       endpoint.put("docs", serverUrl + servletContextPath + "/docs");
       endpoint.put("wadl", serverUrl + servletContextPath + "/?_wadl&type=xml");
       json.add(endpoint);
@@ -240,12 +242,14 @@ public class RuntimeInfo {
       return json;
     for (ServiceReference ref : serviceRefs) {
       String description = (String) ref.getProperty(Constants.SERVICE_DESCRIPTION);
+      String version = ref.getBundle().getVersion().toString();
       String alias = (String) ref.getProperty("alias");
       String welcomeFile = (String) ref.getProperty("welcome.file");
       String welcomePath = "/".equals(alias) ? alias + welcomeFile : alias + "/" + welcomeFile;
       String testSuite = (String) ref.getProperty("test.suite");
       JSONObject endpoint = new JSONObject();
       endpoint.put("description", description);
+      endpoint.put("version", version);
       endpoint.put("welcomepage", serverUrl + welcomePath);
       if (testSuite != null && testMode) {
         String testSuitePath = "/".equals(alias) ? alias + testSuite : alias + "/" + testSuite;
