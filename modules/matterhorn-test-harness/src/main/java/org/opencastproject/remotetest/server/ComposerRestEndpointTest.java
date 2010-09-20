@@ -36,11 +36,16 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
@@ -69,16 +74,16 @@ public class ComposerRestEndpointTest {
     Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
     String postResponseXml = EntityUtils.toString(postResponse.getEntity());
     String receiptId = getReceiptId(postResponseXml);
-    
+
     // Poll the service for the status of the receipt.
     String status = null;
-    while(status == null || "RUNNING".equals(status) || "QUEUED".equals(status)) {
+    while (status == null || "RUNNING".equals(status) || "QUEUED".equals(status)) {
       Thread.sleep(5000); // wait and try again
       HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/receipt/" + receiptId + ".xml");
       status = getReceiptStatus(client.execute(pollRequest));
       System.out.println("encoding job " + receiptId + " is " + status);
     }
-    if( ! "FINISHED".equals(status)) {
+    if (!"FINISHED".equals(status)) {
       Assert.fail("receipt status terminated with status=" + status);
     }
   }
@@ -99,12 +104,75 @@ public class ComposerRestEndpointTest {
     Assert.assertTrue(postResponseXml.contains("receipt"));
   }
 
+  @Test
+  public void testTrimming() throws Exception {
+    HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/trim");
+    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+    formParams.add(new BasicNameValuePair("sourceTrack", generateVideoTrack(BASE_URL)));
+    formParams.add(new BasicNameValuePair("start", "2000"));
+    formParams.add(new BasicNameValuePair("duration", "5000"));
+    formParams.add(new BasicNameValuePair("profileId", "trim.work"));
+    postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
+
+    // Grab the receipt from the response
+    HttpResponse postResponse = client.execute(postEncode);
+    String postResponseXml = EntityUtils.toString(postResponse.getEntity());
+    Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
+    Assert.assertTrue(postResponseXml.contains("receipt"));
+
+    // Poll for the finished composer job
+    // Poll the service for the status of the receipt.
+    String receiptId = getReceiptId(postResponseXml);
+    String status = null;
+    while (status == null || "RUNNING".equals(status) || "QUEUED".equals(status)) {
+      Thread.sleep(5000); // wait and try again
+      HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/receipt/" + receiptId + ".xml");
+      status = getReceiptStatus(client.execute(pollRequest));
+      System.out.println("encoding job " + receiptId + " is " + status);
+    }
+    if (!"FINISHED".equals(status)) {
+      Assert.fail("receipt status terminated with status=" + status);
+    }
+
+    // Get the track xml from the receipt
+    HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/receipt/" + receiptId + ".xml");
+    HttpResponse pollResponse = client.execute(pollRequest);
+    long duration = getDurationFromReceipt(pollResponse);
+    Assert.assertTrue(duration < 14546);
+  }
+
+  /**
+   * Gets the mediapackage element from a receipt polling response
+   * 
+   * @param pollResponse
+   *          the http response
+   * @return the mediapackage elemet as an xml string
+   */
+  protected long getDurationFromReceipt(HttpResponse pollResponse) throws Exception {
+    String receiptXml = EntityUtils.toString(pollResponse.getEntity());
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    factory.setNamespaceAware(true);
+    DocumentBuilder builder = factory.newDocumentBuilder();
+    Document doc = builder.parse(IOUtils.toInputStream(receiptXml, "UTF-8"));
+    Element element = ((Element) XPathFactory.newInstance().newXPath().compile("/track/duration")
+            .evaluate(doc, XPathConstants.NODE));
+    if (element == null)
+      throw new IllegalStateException("Track doesn't contain a duration");
+
+    TransformerFactory transFactory = TransformerFactory.newInstance();
+    Transformer transformer = transFactory.newTransformer();
+    StringWriter buffer = new StringWriter();
+    transformer.transform(new DOMSource(element), new StreamResult(buffer));
+    return Long.parseLong(buffer.toString());
+  }
+
   protected String getReceiptId(String xml) throws Exception {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
     Document doc = builder.parse(IOUtils.toInputStream(xml, "UTF-8"));
-    return ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("id");
+    return ((Element) XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE))
+            .getAttribute("id");
   }
 
   protected String getReceiptStatus(HttpResponse pollResponse) throws Exception {
@@ -113,25 +181,20 @@ public class ComposerRestEndpointTest {
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
     Document doc = builder.parse(IOUtils.toInputStream(xml, "UTF-8"));
-    String status = ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("status");
+    String status = ((Element) XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE))
+            .getAttribute("status");
     return status;
   }
 
   protected String generateVideoTrack(String serverUrl) {
-    return "<track id=\"track-1\" type=\"presentation/source\">\n"
-            + "  <mimetype>video/quicktime</mimetype>\n"
+    return "<track id=\"track-1\" type=\"presentation/source\">\n" + "  <mimetype>video/quicktime</mimetype>\n"
             + "  <url>" + serverUrl + "/workflow/samples/camera.mpg</url>\n"
             + "  <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n"
-            + "  <duration>14546</duration>\n"
-            + "  <video>\n"
+            + "  <duration>14546</duration>\n" + "  <video>\n"
             + "    <device type=\"UFG03\" version=\"30112007\" vendor=\"Unigraf\" />\n"
             + "    <encoder type=\"H.264\" version=\"7.4\" vendor=\"Apple Inc\" />\n"
-            + "    <resolution>640x480</resolution>\n"
-            + "    <scanType type=\"progressive\" />\n"
-            + "    <bitrate>540520</bitrate>\n"
-            + "    <frameRate>2</frameRate>\n"
-            + "  </video>\n"
-            + "</track>";
+            + "    <resolution>640x480</resolution>\n" + "    <scanType type=\"progressive\" />\n"
+            + "    <bitrate>540520</bitrate>\n" + "    <frameRate>2</frameRate>\n" + "  </video>\n" + "</track>";
   }
 
 }
