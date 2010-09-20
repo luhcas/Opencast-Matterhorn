@@ -154,16 +154,12 @@ public class ComposerRestEndpointTest {
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
     Document doc = builder.parse(IOUtils.toInputStream(receiptXml, "UTF-8"));
-    Element element = ((Element) XPathFactory.newInstance().newXPath().compile("/track/duration")
+    Element element = ((Element) XPathFactory.newInstance().newXPath().compile("//duration[1]")
             .evaluate(doc, XPathConstants.NODE));
     if (element == null)
       throw new IllegalStateException("Track doesn't contain a duration");
 
-    TransformerFactory transFactory = TransformerFactory.newInstance();
-    Transformer transformer = transFactory.newTransformer();
-    StringWriter buffer = new StringWriter();
-    transformer.transform(new DOMSource(element), new StreamResult(buffer));
-    return Long.parseLong(buffer.toString());
+    return Long.parseLong(element.getFirstChild().getNodeValue());
   }
 
   protected String getReceiptId(String xml) throws Exception {
