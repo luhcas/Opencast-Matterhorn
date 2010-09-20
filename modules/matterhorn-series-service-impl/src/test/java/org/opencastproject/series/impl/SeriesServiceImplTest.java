@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -39,24 +38,16 @@ public class SeriesServiceImplTest {
   private static final String resourcesRoot = "src" + File.separator + "main" + File.separator + "resources";
 
   private DataSource connectToDatabase(File storageDirectory) {
-    if (storageDirectory == null) {
-      storageDirectory = new File(File.separator + "tmp" + File.separator + "opencast" + File.separator
-              + "scheduler-db");
-    }
     JdbcConnectionPool cp = JdbcConnectionPool.create("jdbc:h2:" + storageDirectory + ";LOCK_MODE=1;MVCC=TRUE", "sa",
             "sa");
     return cp;
   }
-
+  
   @Before
   public void setup() {
-    // Clean up database
-    try {
-      FileUtils.deleteDirectory(new File(storageRoot));
-    } catch (IOException e) {
-      Assert.fail(e.getMessage());
-    }
-    datasource = connectToDatabase(new File(storageRoot));
+    File storageDir = new File(storageRoot);
+    storageDir.mkdirs();
+    datasource = connectToDatabase(new File(storageDir, "db"));
 
     // Collect the persistence properties
     Map<String, Object> props = new HashMap<String, Object>();
@@ -102,9 +93,10 @@ public class SeriesServiceImplTest {
   }
 
   @After
-  public void teardown() {
+  public void teardown() throws Exception {
     service.deactivate(null);
     service = null;
+    FileUtils.deleteDirectory(new File(storageRoot));
   }
 
   @Test
