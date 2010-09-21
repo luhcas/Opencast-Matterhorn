@@ -16,7 +16,7 @@
             $(elm).attr('value', filename);
             $('#file').append(elm);
           }
-          parent.UploadListener.fileSelectedAjax($('#file').val(),'');
+          parent.ocUploadListener.fileSelectedAjax($('#file').val(),'');
         });
       });
 
@@ -40,7 +40,7 @@
             track = $(track).append(url);
             $(mp.documentElement).find('media').append(track);
             $('#mp').val(parent.ocUtils.xmlToString(mp));
-            parent.UploadListener.uploadComplete();
+            parent.ocUploadListener.uploadComplete();
           }
         });
       }
@@ -50,7 +50,7 @@
     <form name="uploadForm" id="uploadForm" action="javascript: submit();">
       <input type="hidden" name="flavor" id="flavor" value="">
       <input type="hidden" name="mediaPackage" id="mp" value="">
-      <select id="file" onchange="parent.UploadListener.fileSelectedAjax(this.value,'');" style="width:250px;">
+      <select id="file" onchange="parent.ocUploadListener.fileSelectedAjax(this.value,'');" style="width:250px;">
       </select>
     </form>
   </body>
