@@ -35,7 +35,6 @@ public class SeriesServiceImplTest {
   private DataSource datasource;
 
   private static final String storageRoot = "target" + File.separator + "service-test-db";
-  private static final String resourcesRoot = "src" + File.separator + "main" + File.separator + "resources";
 
   private DataSource connectToDatabase(File storageDirectory) {
     JdbcConnectionPool cp = JdbcConnectionPool.create("jdbc:h2:" + storageDirectory + ";LOCK_MODE=1;MVCC=TRUE", "sa",
