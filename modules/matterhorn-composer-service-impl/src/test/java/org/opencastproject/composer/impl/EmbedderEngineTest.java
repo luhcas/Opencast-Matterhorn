@@ -22,6 +22,7 @@ import org.opencastproject.composer.impl.qtembedder.QTSbtlEmbedderEngine;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,7 @@ public class EmbedderEngineTest {
     Assert.assertNotNull(movie);
   }
 
-  @Test
+  @Test @Ignore
   public void testEmbedding() throws EmbedderException, URISyntaxException {
     logger.info("Checking for Qt subtitle embedder binary in {}", defaultBinaryPath);
 	  if (!new File(defaultBinaryPath).canExecute()) {
