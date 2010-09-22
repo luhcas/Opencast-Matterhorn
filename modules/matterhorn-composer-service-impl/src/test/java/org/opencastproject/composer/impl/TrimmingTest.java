@@ -25,23 +25,22 @@ import org.opencastproject.util.FileSupport;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URL;
 import java.util.Map;
 
 /**
- * TODO: Comment me!
- *
+ * Test trimming using ffmpeg.
  */
 public class TrimmingTest {
 
   /** the encoding engine */
   FFmpegEncoderEngine engine;
-  
-  /** whether to skip the tests that rely on an ffmpeg binary */
-  boolean skipMediaTests = false;
 
   /** The temporary directory to store media files */
   File workingDirectory = null;
@@ -49,15 +48,29 @@ public class TrimmingTest {
   /** Encoding profiles **/
   Map<String, EncodingProfile> profiles;
   
+  /** True to run the tests */
+  private static boolean ffmpegInstalled = true;
+  
+  /** Logging facility */
+  private static final Logger logger = LoggerFactory.getLogger(TrimmingTest.class);
+
+  @BeforeClass
+  public static void testOcropus() {
+    try {
+      Process p = new ProcessBuilder(FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT, "-version").start();
+      if (p.waitFor() != 0)
+        throw new IllegalStateException();
+    } catch (Throwable t) {
+      logger.warn("Skipping trimming tests due to unsatisifed ffmpeg installation");
+      ffmpegInstalled = false;
+    }
+  }
+
   /**
    * @throws java.lang.Exception
    */
   @Before
   public void setUp() throws Exception {
-    if(!new File(FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT).exists()) {
-      skipMediaTests = true;
-      return;
-    }
     engine = new FFmpegEncoderEngine();
     workingDirectory = FileSupport.getTempDirectory("trimtest");
     FileUtils.forceMkdir(workingDirectory);
@@ -80,7 +93,8 @@ public class TrimmingTest {
    */
   @Test
   public void testTrim() throws Exception {
-    if(skipMediaTests) return;
+    if (!ffmpegInstalled)
+      return;
     URL sourceUrl = getClass().getResource("/slidechanges.mov");
     File sourceFile = new File(workingDirectory, "slidechanges.mov");
     FileUtils.copyURLToFile(sourceUrl, sourceFile);

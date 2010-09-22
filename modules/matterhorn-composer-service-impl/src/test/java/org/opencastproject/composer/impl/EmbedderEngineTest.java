@@ -22,6 +22,7 @@ import org.opencastproject.composer.impl.qtembedder.QTSbtlEmbedderEngine;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -45,8 +46,24 @@ public class EmbedderEngineTest {
   
   // default path to QT subtitle embedder
   private static String defaultBinaryPath = "/usr/local/bin/qtsbtlembedder";
+
   // logger
   private static final Logger logger = LoggerFactory.getLogger(EmbedderEngineTest.class);
+
+  /** True to run the tests */
+  private static boolean qtembedderInstalled = true;
+  
+  @BeforeClass
+  public static void testGst() {
+    try {
+      Process p = new ProcessBuilder(defaultBinaryPath, "--help").start();
+      if (p.waitFor() != 0)
+        throw new IllegalStateException();
+    } catch (Throwable t) {
+      logger.warn("Skipping qt embedder tests due to unsatisifed qtsbtlembedder installation");
+      qtembedderInstalled = false;
+    }
+  }
 
   @Before
   public void setUp() throws Exception {
@@ -63,15 +80,13 @@ public class EmbedderEngineTest {
     Assert.assertNotNull(movie);
   }
 
-  @Test @Ignore
+  @Test
+  @Ignore("The embedder does not work on Mac OS X (Segmentation fault, see MH-5415")
   public void testEmbedding() throws EmbedderException, URISyntaxException {
-    logger.info("Checking for Qt subtitle embedder binary in {}", defaultBinaryPath);
-	  if (!new File(defaultBinaryPath).canExecute()) {
-	    logger.warn("Binary not found, skipping test");
-	  } else {
-	    logger.info("Binary found, executing test...");
-	    resultingFile = engine.embed(movie, captions, languages, new HashMap<String, String>());
-	  }
+    if (!qtembedderInstalled)
+      return;
+    resultingFile = engine.embed(movie, captions, languages, new HashMap<String, String>());
+    // TODO: Is there a way to test whether embedding actually succeeded?
   }
 
   @After

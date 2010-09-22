@@ -28,8 +28,8 @@ import org.opencastproject.workspace.api.Workspace;
 import junit.framework.Assert;
 
 import org.easymock.EasyMock;
-import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,13 +39,31 @@ import java.net.URI;
 import java.util.Date;
 
 public class MediaInspectionServiceImplTest {
+  
   private MediaInspectionServiceImpl service = null;
   private Workspace workspace = null;
 
   private URI uriTrack;
 
-  private String defaultBinaryPath = "/usr/local/bin/mediainfo";
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceImplTest.class);
+
+  /** True to run the tests */
+  private static boolean mediainfoInstalled = true;
+  
+  @BeforeClass
+  public static void testOcropus() {
+    try {
+      // Mediainfo requires a track in order to return a status code of 0, indicating that it is workinng as expected
+      URI uriTrack = MediaInspectionServiceImpl.class.getResource("/av.mov").toURI();
+      File f = new File(uriTrack);
+      Process p = new ProcessBuilder(MediaInfoAnalyzer.DEFAULT_MEDIAINFO_PATH, f.getAbsolutePath()).start();
+      if (p.waitFor() != 0)
+        throw new IllegalStateException();
+    } catch (Throwable t) {
+      logger.warn("Skipping media inspection tests due to unsatisifed mediainfo installation");
+      mediainfoInstalled = false;
+    }
+  }
 
   @Before
   public void setup() throws Exception {
@@ -68,21 +86,11 @@ public class MediaInspectionServiceImplTest {
     service.activate();
   }
 
-  @After
-  public void teardown() {
-
-  }
-
   @Test
   public void testInspection() throws Exception {
-
-    logger.info("Checking for binary in " + defaultBinaryPath);
-    if (!new File(defaultBinaryPath).canExecute()) {
-      logger.warn("Binary not found, skipping test...");
+    if (!mediainfoInstalled)
       return;
-    }
-    logger.info("Binary found, executing test...");
-
+    
     try {
       Receipt receipt = service.inspect(uriTrack, true);
       Track track = (Track) receipt.getElement();
@@ -99,13 +107,8 @@ public class MediaInspectionServiceImplTest {
 
   @Test
   public void testEnrichment() throws Exception {
-
-    logger.info("Checking for binary in " + defaultBinaryPath);
-    if (!new File(defaultBinaryPath).canExecute()) {
-      logger.warn("Binary not found, skipping test...");
+    if (!mediainfoInstalled)
       return;
-    }
-    logger.info("Binary found, executing test...");
 
     try {
       // init a track with inspect

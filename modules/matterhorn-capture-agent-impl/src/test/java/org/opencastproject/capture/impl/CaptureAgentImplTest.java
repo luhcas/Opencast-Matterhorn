@@ -21,11 +21,15 @@ import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.util.XProperties;
 
 import org.apache.commons.io.FileUtils;
+import org.gstreamer.Gst;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.osgi.service.cm.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,8 +57,27 @@ public class CaptureAgentImplTest {
   /** Define a recording ID for the test */
   private final static String recordingID = "UnitTest1";
   
+  /** True to run the tests */
+  private static boolean gstreamerInstalled = true;
+  
+  /** Logging facility */
+  private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImplTest.class);
+
+  @BeforeClass
+  public static void testGst() {
+    try {
+      Gst.init();
+    } catch (Throwable t) {
+      logger.warn("Skipping agent tests due to unsatisifed gstreamer installation");
+      gstreamerInstalled = false;
+    }
+  }
+  
   @Before
   public void setup() throws ConfigurationException, IOException, URISyntaxException {
+    if (!gstreamerInstalled)
+      return;
+    
     //Create the configuration manager
     config = new ConfigurationManager();
 
@@ -86,6 +109,9 @@ public class CaptureAgentImplTest {
 
   @After
   public void tearDown() {
+    if (!gstreamerInstalled)
+      return;
+
     agent.deactivate();
     agent = null;
     config.deactivate();
@@ -108,6 +134,9 @@ public class CaptureAgentImplTest {
 
   @Test
   public void testCaptureAgentImpl() throws InterruptedException {
+    if (!gstreamerInstalled)
+      return;
+
     // start the capture, assert the recording id is correct
     String id = agent.startCapture(properties);
     Assert.assertEquals(recordingID, id);
@@ -146,6 +175,9 @@ public class CaptureAgentImplTest {
   }
 
   private void buildRecordingState(String id, String state) throws IOException {
+    if (!gstreamerInstalled)
+      return;
+
     agent.setRecordingState(id, state);
     Assert.assertEquals(state, agent.getRecordingState(id).getState());
     RecordingImpl rec = (RecordingImpl) agent.getKnownRecordings().get(id);
@@ -167,6 +199,9 @@ public class CaptureAgentImplTest {
   
   @Test
   public void testRecordingLoadJob() throws ConfigurationException, IOException, InterruptedException {
+    if (!gstreamerInstalled)
+      return;
+
     //Put a recording into the agent, then kill it mid-capture
     Assert.assertEquals(0, agent.getKnownRecordings().size());
     String id = agent.startCapture(properties);
@@ -191,6 +226,9 @@ public class CaptureAgentImplTest {
 
   @Test
   public void testRecordingLoadMethod() throws IOException {
+    if (!gstreamerInstalled)
+      return;
+
     agent.deactivate();
     agent = null;
 

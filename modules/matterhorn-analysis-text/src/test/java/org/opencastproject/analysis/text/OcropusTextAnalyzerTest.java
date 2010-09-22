@@ -15,9 +15,8 @@
  */
 package org.opencastproject.analysis.text;
 
-import static org.junit.Assert.assertTrue;
-
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.opencastproject.analysis.text.ocropus.OcropusTextAnalyzer;
 import org.opencastproject.analysis.text.ocropus.OcropusTextFrame;
@@ -25,7 +24,10 @@ import org.opencastproject.analysis.text.ocropus.OcropusTextFrame;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URL;
@@ -42,13 +44,31 @@ public class OcropusTextAnalyzerTest {
   protected File testFile = null;
 
   /** Path to the ocropus binary */
-  protected String ocropusbinary = "/usr/local/bin/ocrocmd";
+  protected static String ocropusbinary = "/usr/local/bin/ocrocmd";
 
   /** The ocropus text analyzer */
   protected OcropusTextAnalyzer analyzer = null;
   
   /** The text without punctuation */
   protected String text = "Land and Vegetation Key players on the";
+
+  /** True to run the tests */
+  private static boolean ocropusInstalled = true;
+  
+  /** Logging facility */
+  private static final Logger logger = LoggerFactory.getLogger(OcropusTextAnalyzerTest.class);
+
+  @BeforeClass
+  public static void testOcropus() {
+    try {
+      Process p = new ProcessBuilder(ocropusbinary).start();
+      if (p.waitFor() != 0)
+        throw new IllegalStateException();
+    } catch (Throwable t) {
+      logger.warn("Skipping text analysis tests due to unsatisifed ocropus installation");
+      ocropusInstalled = false;
+    }
+  }
 
   /**
    * @throws java.lang.Exception
@@ -82,6 +102,9 @@ public class OcropusTextAnalyzerTest {
    */
   @Test
   public void testAnalyze() {
+    if (!ocropusInstalled)
+      return;
+    
     if (!new File(ocropusbinary).exists())
       return;
     OcropusTextFrame frame = analyzer.analyze(testFile);
