@@ -15,156 +15,153 @@
  */
 package org.opencastproject.util;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+import de.schlichtherle.io.ArchiveDetector;
+import de.schlichtherle.io.ArchiveException;
+import de.schlichtherle.io.DefaultArchiveDetector;
+import de.schlichtherle.io.File;
+import de.schlichtherle.io.archive.zip.ZipDriver;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Vector;
+import java.util.zip.Deflater;
+
+
+/*
+ * WARNING:
+ * Some archivers, such as file-roller in Ubuntu, seem not to be able to uncompress zip archives containg files with special characters.
+ * The pure zip standard uses the CP437 encoding which CAN'T represent special characters, but applications have implemented their own methods
+ * to overcome this inconvenience. TrueZip also. However, it seems file-roller (and probably others) doesn't "understand" how to restore the
+ * original filenames and shows strange (and un-readable) characters in the unzipped filenames
+ * However, the inverse process (unzipping zip archives made with file-roller and containing files with special characters) seems to work fine
+ * 
+ * N.B. By "special characters" I mean those not present in the original ASCII specification, such as accents, special letters, etc
+ * 
+ * ruben.perez
+ */
 
 /**
  * Provides static methods for compressing and extracting zip files using zip64 extensions when necessary.
  */
 public class ZipUtil {
-  
+
+  private static final Logger logger = LoggerFactory.getLogger(ZipUtil.class);
+  public static final int DEFAULT_COMPRESSION = Deflater.DEFAULT_COMPRESSION;
+
+  /***********************************************************************************/
+  /* SERVICE CLASSES - The two following classes are the ones actually doing the job */
+  /***********************************************************************************/
+
   /**
-   * Compresses source files into a zip archive.  Does not support recursive addition of directories.
+   * Compresses source files into a zip archive
    * 
-   * @param sourceFiles The files to include in the root of the archive
-   * @param destination The path to put the resulting zip archive file.
-   * @return the resulting zip archive file
+   * @param files A {java.io.File} array with the files to include in the root of the archive
+   * @param destination A {java.io.File} descriptor to the location where the zip file should be created
+   * @param recursive Indicate whether or not recursively zipping nested directories
+   * @param level The zip algorithm compression level. Ranges between 0 (no compression) and 9 (max. compression)
+   * @return A {java.io.File} descriptor of the zip archive file
    */
-  public static java.io.File zip(java.io.File[] sourceFiles, String destination) {
-    return zip(sourceFiles, destination, false, ZipEntry.DEFLATED);
-  }
+  public static java.io.File zip(java.io.File[] sourceFiles, java.io.File destination, boolean recursive, int level) {
 
-  public static java.io.File zip(java.io.File[] sourceFiles, File destination) {
-    return zip(sourceFiles, destination, false, ZipEntry.DEFLATED);
-  }
+    boolean success;
 
-  /**
-   * Compresses a files into a zip archive. May add files recursively.
-   *
-   * @param sourceFiles The files to include in the root of the archive
-   * @param destination The path to put the resulting zip archive file.
-   * @param compressionMethod The compression method to use.  Defined in {@code ZipEntry}.
-   * @return the resulting zip archive file
-   */
-  public static java.io.File zip(java.io.File[] sourceFiles, String destination, int compressionMethod) {
-    return zip(sourceFiles, destination, false, compressionMethod);
-  }
+    if (sourceFiles == null) {
+      logger.error("The array with files to zip cannot be null");
+      throw new NullPointerException("The array with files to zip cannot be null");
+    } 
 
-  public static java.io.File zip(java.io.File[] sourceFiles, File destination, int compressionMethod) {
-    return zip(sourceFiles, destination, false, compressionMethod);
-  }
-
-  /**
-   * Compresses a files into a zip archive. May add files recursively.
-   *
-   * @param sourceFiles The files to include in the root of the archive
-   * @param destination The path to put the resulting zip archive file.
-   * @param recursively Set true to recursively add directories.
-   * @return the resulting zip archive file
-   */
-  public static File zip(File[] sourceFiles, String destination, boolean recursively) {
-    return zip(sourceFiles, new File(destination), recursively, ZipEntry.DEFLATED);
-  }
-
-  /**
-   * Compresses a files into a zip archive. May add files recursively.
-   *
-   * @param sourceFiles The files to include in the root of the archive
-   * @param destination The path to put the resulting zip archive file.
-   * @param recursively Set true to recursively add directories.
-   * @param compressionMethod The compression method to use.  Defined in {@code ZipEntry}.
-   * @return the resulting zip archive file
-   */
-  public static File zip(File[] sourceFiles, String destination, boolean recursively, int compressionMethod) {
-    return zip(sourceFiles, new File(destination), recursively, compressionMethod);
-  }
-
-  public static File zip(File[] sourceFiles, File destination, boolean recursively) {
-    return zip(sourceFiles, destination, recursively, ZipEntry.DEFLATED);
-  }
-  
-  public static File zip(File[] sourceFiles, File destination, boolean recursively, int compressionMethod) {
-    if (sourceFiles == null || sourceFiles.length <= 0) {
-      throw new IllegalArgumentException("sourceFiles must include at least 1 file");
+    if (sourceFiles.length <= 0) {
+      logger.error("The array with files to zip cannot be empty");
+      throw new IllegalArgumentException("The array with files to zip cannot be empty");
     }
+
     if (destination == null) {
-      throw new IllegalArgumentException("destination must be set");
+      logger.error("The destination file cannot be null");
+      throw new NullPointerException("The destination file cannot be null");
     }
-    ZipOutputStream out = new ZipOutputStream(outputStream(destination));
+
+    if (destination.exists()) {
+      logger.error("The destination file {} already exists", destination.getAbsolutePath());
+      throw new IllegalArgumentException("The destination file already exists");
+    }
+    
+    if (level < -1) {
+      logger.warn("Compression level cannot be less than 0 (or -1 for default)");
+      logger.warn("Reverting to default...");
+      level = -1;
+    } else if (level > 9) {
+      logger.warn("Compression level cannot be greater than 9");
+      logger.warn("Reverting to default...");
+      level = -1;
+    }
+
+    // Limits the compression support to ZIP only and sets the compression level
+    ZipDriver zd = new ZipDriver(level);
+    ArchiveDetector ad = new DefaultArchiveDetector(ArchiveDetector.NULL, "zip", zd);
+    File zipFile = new File (destination, ad);
+    
+    if (!zipFile.isArchive()) {
+      logger.error("The destination file does not represent a valid zip archive (.zip extension is required)");
+      throw new IllegalArgumentException("The destination file does not represent a vlid zip archive (.zip extension is required)");
+    }
+    
     try {
-      _zip(sourceFiles, out, -1, recursively, compressionMethod);
-      return destination;
+      if (!zipFile.mkdirs())
+        throw new Exception();
     } catch (Exception e) {
-      throw new RuntimeException(e);
-    } finally {
-      IOUtils.closeQuietly(out);
+      logger.error("Couldn't create the destination file {}", zipFile.getAbsolutePath());
+      throw new RuntimeException("Couldn't create the destination file", e);
     }
-  }
 
-  private static void _zip(File[] files, ZipOutputStream out, int basePath, boolean recursively, int compressionMethod) {
-    for (File file : files) {
-      if (file.isDirectory()) {
-        if (recursively)
-          _zip(file.listFiles(), out, curBasePath(file, basePath), recursively, compressionMethod);
-      } else {
-        InputStream in = inputStream(file);
-        try {
-          ZipEntry z = new ZipEntry(entryName(file, curBasePath(file, basePath)));
-          z.setCrc(FileUtils.checksumCRC32(file.getAbsoluteFile()));
-          z.setSize(file.length());
-          z.setMethod(compressionMethod);
-          out.putNextEntry(z);
-          IOUtils.copy(in, out);
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        } finally {
-          IOUtils.closeQuietly(in);
-        }
+    for(java.io.File f : sourceFiles) {
+      
+      if (f == null) {
+        logger.warn("One of the input files is null");
+        continue;
       }
+      
+      logger.debug("Attempting to zip file {}...", f.getAbsolutePath());
+
+      // TrueZip manual says that (archiveC|copy)All(From|To) methods work with either directories or regular files
+      // Therefore, one could do zipFile.archiveCopyAllFrom(f), where f is a regular file, and it would work. Well, it DOESN'T
+      // This is why we have to tell if a file is a regular file or a directory BEFORE copying it with the appropriate method
+      if (f.exists()) {
+        if (f.isDirectory()) {
+          if (recursive)
+            success = new File(zipFile, f.getName()).copyAllFrom(f);
+          else {
+            logger.debug("Skipping directory {}", f.getAbsolutePath());
+            continue;
+          }
+        } else
+          success = new File(zipFile,f.getName()).archiveCopyFrom(f);
+          
+        if (success) 
+          logger.debug("File {} zipped successfuly", f.getAbsolutePath());
+        else
+          logger.warn("File {} not zipped", f.getAbsolutePath());
+        
+      } else
+        logger.warn("Input file {} doesn't exist", f.getAbsolutePath());
     }
-  }
 
-  private static int curBasePath(File f, int basePath) {
-    return basePath >= 0 ? basePath : f.getParentFile().getAbsolutePath().length();
-  }
+    if (zipFile.isDirectory() && zipFile.list().length == 0) {
+      logger.warn("No files were zipped into {}", zipFile.getAbsolutePath());
+      //TODO: Should this fail?
+      // throw new RuntimeException("No files were zipped to the destination");
+    }
 
-  private static String entryName(File f, int basePath) {
-    return rel(f.getAbsolutePath().substring(basePath));
-  }
-
-  private static InputStream inputStream(File file) {
     try {
-      return new BufferedInputStream(new FileInputStream(file));
-    } catch (FileNotFoundException e) {
-      throw new RuntimeException(e);
+      File.umount(zipFile);
+    } catch (ArchiveException e) {
+      logger.error("Cannot unmount virtual ZIP file: {}", e.getMessage());
+      throw new RuntimeException("Cannot unmount virtual ZIP file", e);
     }
+
+    return destination;
   }
 
-  private static OutputStream outputStream(File file) {
-    try {
-      return new BufferedOutputStream(new FileOutputStream(file));
-    } catch (FileNotFoundException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /** Chop of a leading separator. */
-  private static String rel(String path) {
-    return path.startsWith(File.separator) ? path.substring(1) : path;
-  }
 
   /**
    * Extracts a zip file to a directory.
@@ -174,40 +171,387 @@ public class ZipUtil {
    * will be created.
    */
   public static void unzip(java.io.File zipFile, java.io.File destination) {
-    if (zipFile == null) {
-      throw new IllegalArgumentException("zipFile must be set");
-    }
-    if (destination == null) {
-      throw new IllegalArgumentException("destination must be set");
-    }
-    if (destination.exists() && destination.isFile()) {
-      throw new IllegalArgumentException("destination file must be a directory");
-    }
-    if (!destination.exists())
-      if (!destination.mkdirs())
-        throw new RuntimeException("cannot create " + destination);
 
-    ZipInputStream in = new ZipInputStream(inputStream(zipFile));
-    try {
-      ZipEntry entry;
-      while ((entry = in.getNextEntry()) != null) {
-        File file = new File(destination, entry.getName());
-        if (entry.isDirectory()) {
-          file.mkdirs();
-          continue;
-        }
-        file.getParentFile().mkdirs();
-        OutputStream out = outputStream(file);
-        try {
-          IOUtils.copy(in, out);
-        } finally {
-          IOUtils.closeQuietly(out);
+    boolean success;
+
+    if (zipFile == null) {
+      logger.error("The zip file must be set");
+      throw new NullPointerException("The zip file must be set");
+    }
+
+    if (destination == null) {
+      logger.error("The destination file must be set");
+      throw new NullPointerException("Destination file must be set");
+    } 
+
+    // FIXME Commented out for 3rd party compatibility. See comment in the zip method above -ruben.perez
+    // File f = new File(zipFile, new DefaultArchiveDetector(ArchiveDetector.NULL, "zip", new ZipDriver("utf-8")));
+    File f = new File(zipFile);
+
+    if (f.isArchive() && f.isDirectory()) {
+      if (destination.exists()) {	
+        if (! destination.isDirectory()) {
+          logger.error("Destination file must be a directory");
+          throw new IllegalArgumentException("Destination file must be a directory");
         }
       }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } finally {
-      IOUtils.closeQuietly(in);
+      
+      try {
+        destination.mkdirs();
+
+        success = f.archiveCopyAllTo(destination);
+
+        if (success)
+          logger.debug("File {} unzipped successfully", zipFile.getAbsolutePath());
+        else {
+          logger.warn("File {} was not correctly unzipped", zipFile.getAbsolutePath());
+          //TODO: Should this fail?
+          // throw new RuntimeException("File " + zipFile.getAbsolutePath() + " was not correctly unzipped");
+        }
+
+        File.umount();
+      } catch (SecurityException e) {
+        logger.error("Cannot create destination directory");
+        throw new RuntimeException("Cannot create destination directory", e);
+      } catch (ArchiveException e) {
+        logger.error("Cannot unmount virtual ZIP filesystem: {}", e.getMessage());
+        throw new RuntimeException("Cannot unmount virtual ZIP filesystem", e);
+      }
+    } else {
+      logger.error("The input file is not a valid zip file");
+      throw new IllegalArgumentException("The input file is not a valid zip file");
     }
   }
+
+
+  /************************************************************************************* */
+  /* "ALIASES" - For different types of input, but actually calling the previous methods */
+  /***************************************************************************************/
+
+  /**
+   * Compresses source files into a zip archive (no recursive, default compression)
+   * 
+   * @param sourceFiles The file names to include in the root of the archive
+   * @param destination The path name of the resulting zip file
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(String[] sourceFiles, String destination) {
+    return zip(sourceFiles,destination, false, DEFAULT_COMPRESSION);
+  }
+
+  /**
+   * Compresses source files into a zip archive (no recursive)
+   * 
+   * @param sourceFiles The file names to include in the root of the archive
+   * @param destination The path name of the resulting zip file
+   * @param level The zip algorithm compression level. Ranges between 0 (no compression) and 9 (max. compression)
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(String[] sourceFiles, String destination, int level) {
+    return zip(sourceFiles,destination, false, level);
+  }
+
+  /**
+   * Compresses source files into a zip archive (default compression)
+   * 
+   * @param sourceFiles The file names to include in the root of the archive
+   * @param destination The path name of the resulting zip file
+   * @param recursive Indicate whether or not recursively zipping nested directories
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(String[] sourceFiles, String destination, boolean recursive) {
+    return zip(sourceFiles, destination, recursive, DEFAULT_COMPRESSION);
+  }
+
+  /**
+   * Compresses source files into a zip archive
+   * 
+   * @param sourceFiles The file names to include in the root of the archive
+   * @param destination The path name of the resulting zip file
+   * @param recursive Indicate whether or not recursively zipping nested directories
+   * @param level The zip algorithm compression level. Ranges between 0 (no compression) and 9 (max. compression)
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(String[] sourceFiles, String destination, boolean recursive, int level) {
+
+    if (sourceFiles == null) {
+      logger.error("The input String array cannot be null");
+      throw new NullPointerException("The input String array cannot be null");
+    }
+
+    if (destination == null) {
+      logger.error("Destination file cannot be null");
+      throw new NullPointerException("Destination file cannot be null");
+    }
+
+    if ("".equals(destination)) {
+      logger.error("Destination file name must be set");
+      throw new IllegalArgumentException("Destination file name must be set");
+    }
+
+    Vector<java.io.File> files = new Vector<java.io.File>();
+    for (String name : sourceFiles) {
+      if (name == null) {
+        logger.warn("One of the input file names is null. Ignoring...");
+        continue;
+      } else if ("".equals(name)) {
+        logger.warn("One of the input file names is blank. Ignoring...");
+        continue;
+      }
+      files.add(new java.io.File(name));
+    }
+
+    return zip(files.toArray(new java.io.File[files.size()]), new java.io.File(destination), recursive, level);
+
+  }
+
+
+
+  /**
+   * Compresses source files into a zip archive (no recursive, default compression)
+   * 
+   * @param sourceFiles A {String} array with the names of the files to include in the root of the archive
+   * @param destination A {java.io.File} descriptor to the location where the zip file should be created
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(String[] sourceFiles, java.io.File destination) {
+    return zip(sourceFiles,destination,false, DEFAULT_COMPRESSION);
+  }
+
+  /**
+   * Compresses source files into a zip archive (no recursive)
+   * 
+   * @param sourceFiles A {String} array with the names of the files to include in the root of the archive
+   * @param destination A {java.io.File} descriptor to the location where the zip file should be created
+   * @param level The zip algorithm compression level. Ranges between 0 (no compression) and 9 (max. compression)
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(String[] sourceFiles, java.io.File destination, int level) {
+    return zip(sourceFiles,destination, false, level);
+  }
+
+  /**
+   * Compresses source files into a zip archive (default compression)
+   * 
+   * @param sourceFiles A {String} array with the names of the files to include in the root of the archive
+   * @param destination A {java.io.File} descriptor to the location where the zip file should be created
+   * @param recursive Indicate whether or not recursively zipping nested directories
+   * @param level The zip algorithm compression level. Ranges between 0 (no compression) and 9 (max. compression)
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(String[] sourceFiles, java.io.File destination, boolean recursive) {
+    return zip(sourceFiles,destination,recursive, DEFAULT_COMPRESSION);
+  }
+
+  /**
+   * Compresses source files into a zip archive
+   * 
+   * @param sourceFiles A {String} array with the names of the files to include in the root of the archive
+   * @param destination A {java.io.File} descriptor to the location where the zip file should be created
+   * @param recursive Indicate whether or not recursively zipping nested directories
+   * @param level The zip algorithm compression level. Ranges between 0 (no compression) and 9 (max. compression)
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(String[] sourceFiles, java.io.File destination, boolean recursive, int level) {
+
+    if (sourceFiles == null) {
+      logger.error("The input String array cannot be null");
+      throw new NullPointerException("The input String array cannot be null");
+    }
+
+    Vector<java.io.File> files = new Vector<java.io.File>();
+    for (String name : sourceFiles) {
+      if (name == null) {
+        logger.warn("One of the input file names is null. Ignoring...");
+        continue;
+      } else if ("".equals(name)) {
+        logger.warn("One of the input file names is blank. Ignoring...");
+        continue;
+      }
+      files.add(new java.io.File(name));
+    }
+
+    return zip(files.toArray(new java.io.File[files.size()]), destination, recursive, level);
+
+  }	
+
+
+
+  /**
+   * Compresses source files into a zip archive (no recursive, default compression)
+   * 
+   * @param sourceFiles A {java.io.File} array with the files to include in the root of the archive
+   * @param destination The path name of the resulting zip archive file
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(java.io.File[] sourceFiles, String destination) {
+    return zip(sourceFiles, destination, false, DEFAULT_COMPRESSION);
+  }
+
+  /**
+   * Compresses source files into a zip archive (no recursive)
+   * 
+   * @param sourceFiles A {java.io.File} array with the files to include in the root of the archive
+   * @param destination The path name of the resulting zip archive file
+   * @param level The zip algorithm compression level. Ranges between 0 (no compression) and 9 (max. compression)
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(java.io.File[] sourceFiles, String destination, int level) {
+    return zip(sourceFiles,destination,false, level);
+  }		
+
+  /**
+   * Compresses source files into a zip archive (default compression)
+   * 
+   * @param sourceFiles A {java.io.File} array with the files to include in the root of the archive
+   * @param destination The path name of the resulting zip archive file
+   * @param recursive Indicate whether or not recursively zipping nested directories
+   * @param level The zip algorithm compression level. Ranges between 0 (no compression) and 9 (max. compression)
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(java.io.File[] sourceFiles, String destination, boolean recursive) {
+    return zip(sourceFiles, destination, recursive, DEFAULT_COMPRESSION);
+
+  }
+
+  /**
+   * Compresses source files into a zip archive
+   * 
+   * @param sourceFiles A {java.io.File} array with the files to include in the root of the archive
+   * @param destination The path name of the resulting zip archive file
+   * @param recursive Indicate whether or not recursively zipping nested directories
+   * @param level The zip algorithm compression level. Ranges between 0 (no compression) and 9 (max. compression)
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(java.io.File[] sourceFiles, String destination, boolean recursive, int level) {
+
+    if (destination == null) {
+      logger.error("Destination file cannot be null");
+      throw new NullPointerException("Destination file cannot be null");
+    }
+
+    if ("".equals(destination)) {
+      logger.error("Destination file name must be set");
+      throw new IllegalArgumentException("Destination file name must be set");
+    }
+
+    return zip(sourceFiles, new java.io.File(destination), recursive, level);
+
+  }
+
+
+
+  /**
+   * Compresses source files into a zip archive (no recursive, default compression)
+   * 
+   * @param sourceFiles A {java.io.File} array with the files to include in the root of the archive
+   * @param destination A {java.io.File} descriptor to the location where the zip file should be created
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(java.io.File[] sourceFiles, java.io.File destination) {
+    return zip(sourceFiles,destination,false, DEFAULT_COMPRESSION);
+  }
+
+  /**
+   * Compresses source files into a zip archive (default compression)
+   * 
+   * @param sourceFiles A {java.io.File} array with the files to include in the root of the archive
+   * @param destination A {java.io.File} descriptor to the location where the zip file should be created
+   * @param recursive Indicate whether or not recursively zipping nested directories
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(java.io.File[] sourceFiles, java.io.File destination, boolean recursive) {
+    return zip(sourceFiles,destination, recursive, DEFAULT_COMPRESSION);
+  }
+
+  /**
+   * Compresses source files into a zip archive (no recursive)
+   * 
+   * @param sourceFiles A {java.io.File} array with the files to include in the root of the archive
+   * @param destination A {java.io.File} descriptor to the location where the zip file should be created
+   * @param level The zip algorithm compression level. Ranges between 0 (no compression) and 9 (max. compression)
+   * @return A {java.io.File} descriptor of the zip archive file
+   */
+  public static java.io.File zip(java.io.File[] sourceFiles, java.io.File destination, int level) {
+    return zip(sourceFiles,destination,false, level);
+  }
+
+
+  /**
+   * Extracts a zip file to a directory.
+   * 
+   * @param zipFile The source zip archive
+   * @param destination the destination to extract the zip archive.  If this destination directory does not exist, it will be created.
+   */
+  public static void unzip(String zipFile, String destination) {
+
+    if (zipFile == null) {
+      logger.error("Input filename cannot be null");
+      throw new NullPointerException("Input filename cannot be null");
+    }
+
+    if ("".equals(zipFile)) {
+      logger.error("Input filename cannot be empty");
+      throw new IllegalArgumentException("Input filename cannot be empty");
+    }
+
+    if (destination == null) { 
+      logger.error("Output filename cannot be null");
+      throw new NullPointerException("Output filename cannot be null");
+    }
+
+    if ("".equals(destination)) {
+      logger.error("Output filename cannot be empty");
+      throw new IllegalArgumentException("Output filename cannot be empty");
+    }
+
+    unzip(new java.io.File(zipFile), new java.io.File(destination));
+
+  }
+
+
+  /**
+   * Extracts a zip file to a directory.
+   * 
+   * @param zipFile The source zip archive
+   * @param destination the destination to extract the zip archive.  If this destination directory does not exist, it will be created.
+   */
+  public static void unzip(java.io.File zipFile, String destination) {
+
+    if (destination == null) { 
+      logger.error("Output filename cannot be null");
+      throw new NullPointerException("Output filename cannot be null");
+    }
+
+    if ("".equals(destination)) {
+      logger.error("Output filename cannot be empty");
+      throw new IllegalArgumentException("Output filename cannot be empty");
+    }
+
+    unzip(zipFile, new java.io.File(destination));
+
+  }
+
+  /**
+   * Extracts a zip file to a directory.
+   * 
+   * @param zipFile The source zip archive
+   * @param destination the destination to extract the zip archive.  If this destination directory does not exist, it will be created.
+   */
+  public static void unzip(String zipFile, java.io.File destination) {
+
+    if (zipFile == null) {
+      logger.error("Input filename cannot be null");
+      throw new NullPointerException("Input filename cannot be null");
+    }
+
+    if ("".equals(zipFile)) {
+      logger.error("Input filename cannot be empty");
+      throw new IllegalArgumentException("Input filename cannot be empty");
+    }
+
+    unzip(new java.io.File(zipFile), destination);
+
+  }
+
 }

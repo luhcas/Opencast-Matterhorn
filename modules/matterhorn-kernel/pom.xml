@@ -75,9 +75,9 @@
     
     <!-- Embedding opencast version of truezip -->
     <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>opencast-truezip</artifactId>
-      <version>0.1</version>
+      <groupId>de.schlichtherle</groupId>
+      <artifactId>truezip</artifactId>
+      <version>6.8</version>
       <exclusions>
         <exclusion>
           <groupId>bouncycastle</groupId>
@@ -107,7 +107,6 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
     </dependency>
     
     <!-- Testing -->
