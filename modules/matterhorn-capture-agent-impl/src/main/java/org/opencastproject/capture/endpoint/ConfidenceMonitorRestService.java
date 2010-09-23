@@ -85,14 +85,25 @@ public class ConfidenceMonitorRestService {
     return DocUtil.generate(data);
   }
   
+  /**
+   * OSGI activate method. Will be called on service activation.
+   */
   public void activate() {
     logger.info("Video Monitoring Service Activated");
   }
   
+  /**
+   * Set {@link org.opencastproject.capture.api.ConfidenceMonitor} service.
+   * @param service Service implemented {@link org.opencastproject.capture.api.ConfidenceMonitor}
+   */
   public void setService(ConfidenceMonitor service) {
     this.service = service;
   }
   
+  /**
+   * Unset {@link org.opencastproject.capture.api.ConfidenceMonitor} service.
+   * @param service Service implemented {@link org.opencastproject.capture.api.ConfidenceMonitor}
+   */
   public void unsetService(ConfidenceMonitor service) {
     this.service = null;
   }
@@ -102,13 +113,16 @@ public class ConfidenceMonitorRestService {
   @Path("{name}")
   public Response grabFrame(@PathParam("name") String device) {
     if (service == null) {
-      //TODO:  What happens here if we return a string?  Is this going to break things in the confidence monitor UI?
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity("Confidence monitor unavailable, please wait...").build();
     }
 
     CacheControl cc = new CacheControl();
     cc.setNoCache(true);
-    return Response.ok(service.grabFrame(device)).cacheControl(cc).build();
+    try {
+      return Response.ok(service.grabFrame(device)).cacheControl(cc).build();
+    } catch (Exception ex) {
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("Can not get frame from resource").build();
+    }
   }
   
   @GET
@@ -142,7 +156,8 @@ public class ConfidenceMonitorRestService {
   public Response getRMSValues(@PathParam("name") String device, @PathParam("timestamp") double timestamp) {
     JSONObject jsonOutput = new JSONObject();
     if (service == null) {
-      return Response.serverError().build();
+      // Error code 500 -> 503
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity("Confidence monitor unavailable, please wait...").build();
     }
     // Attempt to grab audio information, if exception is thrown the device does not exist
     try {

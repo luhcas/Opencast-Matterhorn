@@ -112,7 +112,7 @@ public class CleanCaptureJob implements Job {
 
     // Gets all the recording IDs for this agent, and iterates over them
     for (AgentRecording theRec : recordings) {
-      File recDir = theRec.getDir();
+      File recDir = theRec.getBaseDir();
       File ingested = new File(recDir, CaptureParameters.CAPTURE_INGESTED_FILE);
 
       // If the capture.ingested file does not exist we cannot delete the data

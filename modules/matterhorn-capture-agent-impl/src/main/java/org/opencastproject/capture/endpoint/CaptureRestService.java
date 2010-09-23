@@ -127,10 +127,18 @@ public class CaptureRestService {
     return DocUtil.generate(data);
   }  
 
+  /**
+   * Set {@link org.opencastproject.capture.api.CaptureAgent} service.
+   * @param service Service implemented {@link org.opencastproject.capture.api.CaptureAgent}
+   */
   public void setService(CaptureAgent service) {
     this.service = service;
   }
 
+  /**
+   * Unset {@link org.opencastproject.capture.api.CaptureAgent} service.
+   * @param service Service implemented {@link org.opencastproject.capture.api.CaptureAgent}
+   */
   public void unsetService(CaptureAgent service) {
     this.service = null;
   }

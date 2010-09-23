@@ -191,7 +191,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.AgentRecording#setProps(java.util.Properties)
+   * @see org.opencastproject.capture.api.AgentRecording#setProperties(java.util.Properties)
    */
   public void setProps(XProperties props) {
     this.props = props;
@@ -199,9 +199,9 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.api.AgentRecording#setProps(java.util.Properties)
+   * @see org.opencastproject.capture.api.AgentRecording#setProperties(java.util.Properties)
    */
-  public void setProps(Properties props) {
+  public void setProperties(Properties props) {
     //Preserve the bundle context between property lists
     BundleContext ctx = null;
     if (this.props != null) {
@@ -235,7 +235,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.AgentRecording#getDir()
    */
-  public File getDir() {
+  public File getBaseDir() {
     return baseDir;
   }
 

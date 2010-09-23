@@ -36,25 +36,42 @@ public class AgentDevice {
   private String name;
 
   /**
-   * TODO:  Document what I can be
-   */
-  /**
    * Used to classify the device as video or audio
    */
   @XmlElement(name="type")
   private String type;
   
+  /**
+   * Default constructor for serialization. Do not use it otherwise.
+   */
   public AgentDevice() {}
 
+  /**
+   * Constructor.
+   * @param device friendly device name
+   * @param type device capture type 
+   *    ({@link org.opencastproject.capture.impl.CaptureAgentImpl#CAPTURE_TYPE_AUDIO} or
+   *     {@link org.opencastproject.capture.impl.CaptureAgentImpl#CAPTURE_TYPE_VIDEO})
+   */
   public AgentDevice(String device, String type) {
     this.name = device;
     this.type = type;
   }
   
+  /**
+   * Get device friendly name.
+   * @return device friendly name
+   */
   public String getDevice() {
     return this.name;
   }
   
+  /**
+   * Get device capture type.
+   * @return device capture type
+   *    ({@link org.opencastproject.capture.impl.CaptureAgentImpl#CAPTURE_TYPE_AUDIO} or
+   *     {@link org.opencastproject.capture.impl.CaptureAgentImpl#CAPTURE_TYPE_VIDEO})
+   */
   public String getType() {
     return this.type;
   }

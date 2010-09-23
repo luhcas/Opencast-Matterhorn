@@ -57,7 +57,7 @@ public class RecordingImplTest {
     Assert.assertEquals(System.getProperty("java.io.tmpdir"), rec.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL));
     Assert.assertNull(rec.setProperty("test", "foo"));
     Assert.assertEquals("foo", rec.setProperty("test", "bar"));
-    FileUtils.deleteQuietly(rec.getDir());
+    FileUtils.deleteQuietly(rec.getBaseDir());
   }
 
   @Test
@@ -93,7 +93,7 @@ public class RecordingImplTest {
     //Create the recording for a scheduled capture which only has its root url set
     rec = new RecordingImpl(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew(), configManager.getAllProperties());
     Assert.assertNotNull(rec);
-    Assert.assertEquals(new File(baseDir, "MyTestRecording"), rec.getDir());
+    Assert.assertEquals(new File(baseDir, "MyTestRecording"), rec.getBaseDir());
     Assert.assertEquals("MyTestRecording", rec.getID());
     Assert.assertEquals("MyTestRecording", rec.getProperty(CaptureParameters.RECORDING_ID));
     Assert.assertEquals("MyTestRecording", rec.getProperties().getProperty(CaptureParameters.RECORDING_ID));
@@ -110,7 +110,7 @@ public class RecordingImplTest {
     //Create the recording for a scheduled capture which only has its root url set
     rec = new RecordingImpl(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew(), configManager.getAllProperties());
     Assert.assertNotNull(rec);
-    Assert.assertEquals(new File(baseDir, recordingID), rec.getDir());
+    Assert.assertEquals(new File(baseDir, recordingID), rec.getBaseDir());
     Assert.assertEquals(recordingID, rec.getID());
     Assert.assertEquals(recordingID, rec.getProperty(CaptureParameters.RECORDING_ID));
     Assert.assertEquals(recordingID, rec.getProperties().getProperty(CaptureParameters.RECORDING_ID));

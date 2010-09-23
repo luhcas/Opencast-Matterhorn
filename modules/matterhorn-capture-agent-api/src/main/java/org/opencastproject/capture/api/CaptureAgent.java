@@ -61,7 +61,7 @@ public interface CaptureAgent {
   String startCapture(MediaPackage mediaPackage, Properties configuration);
   
   /**
-   * Stops the capture.  Returns true on success.
+   * Stops the currently running capture.  Returns true on success.
    * Error conditions occur if gstreamer has an unexpected error, or there is no recording currently in progress.  In this case it will return false.
    * @param immediateIngest True to cause the agent to immediately ingest the capture, false to wait until the normal stop time to ingest.
    * @return True if the capture stopped successfully, false if the recordingID parameter was not the recording currently being captured, or there was an error.
@@ -104,7 +104,14 @@ public interface CaptureAgent {
    * Returns a pretty-printed version of the agent's default properties.
    * @return The agent's default properties
    */
+  @Deprecated
   String getDefaultAgentPropertiesAsString();
+  
+  /**
+   * Returns the agent's default properties.
+   * @return The agent's default properties
+   */
+  Properties getDefaultAgentProperties();
 
   /**
    * Returns the current schedule in a {@code List} of {@code ScheduledEvent}s.

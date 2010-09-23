@@ -47,7 +47,7 @@ public interface AgentRecording extends Recording {
   /**
    * @param props A {@code Properties} object to associate to the recording
    */
-  public void setProps(Properties props);
+  public void setProperties(Properties props);
 
   /**
    * @return The current {@code MediaPackage}
@@ -55,7 +55,7 @@ public interface AgentRecording extends Recording {
   public MediaPackage getMediaPackage();
 
   /**
-   * @return A {@code File} object pointing to the directory where this recording files are
+   * @return A {@code File} object pointing to the directory where those recording files are
    */
-  public File getDir();
+  public File getBaseDir();
 }

@@ -159,7 +159,7 @@ public class CaptureAgentImplTest {
     // the appropriate files exists, so the capture can be stopped. The agent's state should return to idle.
     Assert.assertTrue(agent.stopCapture(recordingID, true));
     Assert.assertEquals(AgentState.IDLE, agent.getAgentState());
-    Assert.assertEquals(RecordingState.CAPTURE_FINISHED, agent.loadRecording(new File(agent.getKnownRecordings().get(id).getDir(), id + ".recording")).getState());
+    Assert.assertEquals(RecordingState.CAPTURE_FINISHED, agent.loadRecording(new File(agent.getKnownRecordings().get(id).getBaseDir(), id + ".recording")).getState());
 
     Thread.sleep(1000);
 
@@ -192,7 +192,7 @@ public class CaptureAgentImplTest {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }
-    RecordingImpl r = agent.loadRecording(new File(rec.getDir(), newID + ".recording"));
+    RecordingImpl r = agent.loadRecording(new File(rec.getBaseDir(), newID + ".recording"));
     Assert.assertEquals(state, r.getState());
     Assert.assertEquals(newID, r.getID());
   }

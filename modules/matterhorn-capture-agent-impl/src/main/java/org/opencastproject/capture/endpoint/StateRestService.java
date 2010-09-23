@@ -48,10 +48,18 @@ public class StateRestService {
 
   private StateService service;
 
+  /**
+   * Set {@link org.opencastproject.capture.api.StateService} service.
+   * @param service Service implemented {@link org.opencastproject.capture.api.StateService}
+   */
   public void setService(StateService service) {
     this.service = service;
   }
-
+  
+  /**
+   * Set {@link org.opencastproject.capture.api.StateService} service.
+   * @param service Service implemented {@link org.opencastproject.capture.api.StateService}
+   */
   public void unsetService(StateService service) {
     this.service = null;
   }

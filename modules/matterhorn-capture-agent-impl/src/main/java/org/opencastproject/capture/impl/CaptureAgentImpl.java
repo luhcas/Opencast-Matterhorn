@@ -98,6 +98,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.zip.ZipEntry;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.xml.transform.OutputKeys;
@@ -122,6 +123,11 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
   /** The number of nanoseconds in a second.  This is a borrowed constant from gStreamer and is used in the pipeline initialisation routines */
   public static final long GST_SECOND = 1000000000L;
+  
+  /** The capture type for audio devices */
+  public static final String CAPTURE_TYPE_AUDIO = "audio";
+  /** The capture type for video devices */
+  public static final String CAPTURE_TYPE_VIDEO = "video";
 
   /** The agent's pipeline. **/
   Pipeline pipe = null;
@@ -264,7 +270,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     //Check to make sure we're not already capturing something
     if (currentRecID != null || !agentState.equals(AgentState.IDLE)) {
       logger.warn("Unable to start capture, a different capture is still in progress in {}.",
-              pendingRecordings.get(currentRecID).getDir().getAbsolutePath());
+              pendingRecordings.get(currentRecID).getBaseDir().getAbsolutePath());
       //Set the recording's state to error
       if (properties != null && properties.getProperty(CaptureParameters.RECORDING_ID) != null) {
         setRecordingState(properties.getProperty(CaptureParameters.RECORDING_ID), RecordingState.CAPTURE_ERROR);
@@ -596,7 +602,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         flavor = MediaPackageElementFlavor.parseFlavor(flavorString);
 
         String outputProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_DEST;
-        File outputFile = new File(recording.getDir(), recording.getProperty(outputProperty));
+        File outputFile = new File(recording.getBaseDir(), recording.getProperty(outputProperty));
 
         // Adds the file to the MediaPackage
         if (outputFile.exists()) {
@@ -648,8 +654,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       logger.debug("Serializing metadata and MediaPackage...");
 
       // Gets the manifest.xml as a Document object and writes it to a file
-      MediaPackageSerializer serializer = new DefaultMediaPackageSerializerImpl(recording.getDir());
-      File manifestFile = new File(recording.getDir(), CaptureParameters.MANIFEST_NAME);
+      MediaPackageSerializer serializer = new DefaultMediaPackageSerializerImpl(recording.getBaseDir());
+      File manifestFile = new File(recording.getBaseDir(), CaptureParameters.MANIFEST_NAME);
       Result outputFile = new StreamResult(manifestFile);
       Document manifest = recording.getMediaPackage().toXml(serializer);
 
@@ -712,7 +718,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       if (elementPath.startsWith("file:") || elementPath.startsWith(File.separator)) {
         tmpFile = new File(elementPath);
       } else {
-        tmpFile = new File(recording.getDir(), elementPath);
+        tmpFile = new File(recording.getBaseDir(), elementPath);
       }
 
       if (!tmpFile.isFile()) {
@@ -721,20 +727,20 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       }
       filesToZip.add(tmpFile);
     }
-    filesToZip.add(new File(recording.getDir(), CaptureParameters.MANIFEST_NAME));
+    filesToZip.add(new File(recording.getBaseDir(), CaptureParameters.MANIFEST_NAME));
 
     logger.info("Zipping {} files:", filesToZip.size());
     for (File f : filesToZip)
       logger.debug("--> {}", f.getName());
 
     //Nuke any existing zipfile, we want to recreate it if it already exists.
-    File outputZip = new File(recording.getDir(), CaptureParameters.ZIP_NAME);
+    File outputZip = new File(recording.getBaseDir(), CaptureParameters.ZIP_NAME);
     if (outputZip.isFile()) {
       outputZip.delete();
     }
 
     //Return a pointer to the zipped file
-    return ZipUtil.zip(filesToZip.toArray(new File[filesToZip.size()]), outputZip, ZipUtil.NO_COMPRESSION);
+    return ZipUtil.zip(filesToZip.toArray(new File[filesToZip.size()]), outputZip, ZipEntry.STORED);
   }
 
   // FIXME: Replace HTTP-based ingest with remote implementation of the Ingest Service. (jt)
@@ -778,7 +784,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       return -4;
     }
 
-    File fileDesc = new File(recording.getDir(), CaptureParameters.ZIP_NAME);
+    File fileDesc = new File(recording.getBaseDir(), CaptureParameters.ZIP_NAME);
 
     // Set the file as the body of the request
     MultipartEntity entities = new MultipartEntity();
@@ -949,7 +955,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       if (newRec == null) {
         logger.error("Unable to serialize {} because it does not exist in any recording state table!", id);
       }
-      File output = new File(newRec.getDir(), newRec.getID() + ".recording");
+      File output = new File(newRec.getBaseDir(), newRec.getID() + ".recording");
       logger.debug("Serializing recording {} to {}.", newRec.getID(), output.getAbsolutePath());
       ObjectOutputStream serializer = new ObjectOutputStream(new FileOutputStream(output));
       serializer.writeObject(newRec);
@@ -1057,8 +1063,17 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
 
   /**
    * {@inheritDoc}
+   * @see org.opencastproject.capture.api.CaptureAgent#getDefaultAgentProperties()
+   */
+  public Properties getDefaultAgentProperties() {
+    return configService.getAllProperties();
+  }
+  
+  /**
+   * {@inheritDoc}
    * @see org.opencastproject.capture.api.CaptureAgent#getDefaultAgentPropertiesAsString()
    */
+  @Deprecated
   public String getDefaultAgentPropertiesAsString() {
     Properties p = configService.getAllProperties();
     StringBuffer result = new StringBuffer();
@@ -1389,9 +1404,9 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       String srcName = configService.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE);
       //Determine the type and add it to the appropriate list
       if (srcName.contains("hw:")) {
-        deviceList.add(name + ",audio");
+        deviceList.add(name + "," + CAPTURE_TYPE_AUDIO);
       } else {
-        deviceList.add(name + ",video");
+        deviceList.add(name + "," + CAPTURE_TYPE_VIDEO);
       }
     }
     return deviceList;

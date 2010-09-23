@@ -103,7 +103,7 @@ public class CleanCaptureJobTest {
   public void tearDown() {
     props = null;
     for (int i = 0; i < numberOfRecordings; i++) {
-      FileUtils.deleteQuietly(theRecordings.get(i).getDir());
+      FileUtils.deleteQuietly(theRecordings.get(i).getBaseDir());
     }
 
     theRecordings = null;
@@ -124,10 +124,10 @@ public class CleanCaptureJobTest {
     // Check the cleaning was OK
     for (int i = 0; i < numberOfRecordings; i++) 
       if (i <= numberOfRecordings/2) {
-        Assert.assertFalse(theRecordings.get(i).getDir().exists());
+        Assert.assertFalse(theRecordings.get(i).getBaseDir().exists());
       }
       else {
-        Assert.assertTrue(theRecordings.get(i).getDir().exists());
+        Assert.assertTrue(theRecordings.get(i).getBaseDir().exists());
       }
 
   }
@@ -146,7 +146,7 @@ public class CleanCaptureJobTest {
 
     //Check the cleaning was OK
     for (AgentRecording aRec : theRecordings)
-      Assert.assertTrue(aRec.getDir().exists());
+      Assert.assertTrue(aRec.getBaseDir().exists());
   }
 
   /**
@@ -160,7 +160,7 @@ public class CleanCaptureJobTest {
     try {
       // Create a capture.ingested file for the recordings that don't have it
       for (AgentRecording aRec : theRecordings) {
-        File ingested = new File(aRec.getDir(), CaptureParameters.CAPTURE_INGESTED_FILE);
+        File ingested = new File(aRec.getBaseDir(), CaptureParameters.CAPTURE_INGESTED_FILE);
         if (!ingested.isFile())
           Assert.assertTrue(ingested.createNewFile());
       }       
@@ -174,7 +174,7 @@ public class CleanCaptureJobTest {
 
     // Check the cleaning was OK
     for (AgentRecording aRec : theRecordings)
-      Assert.assertFalse(aRec.getDir().exists());
+      Assert.assertFalse(aRec.getBaseDir().exists());
   }
 
   /**
@@ -192,8 +192,8 @@ public class CleanCaptureJobTest {
     // Check the cleaning was OK
     for (int i = 0; i < numberOfRecordings; i++) 
       if (i <= numberOfRecordings/2)
-        Assert.assertFalse(theRecordings.get(i).getDir().exists());
+        Assert.assertFalse(theRecordings.get(i).getBaseDir().exists());
       else
-        Assert.assertTrue(theRecordings.get(i).getDir().exists());
+        Assert.assertTrue(theRecordings.get(i).getBaseDir().exists());
   }
 }
