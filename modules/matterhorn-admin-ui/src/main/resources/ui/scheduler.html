@@ -78,48 +78,48 @@
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
         <div class="fl-container-800" style="text-align: center;">
           <h2><span id="i18n_page_title"></span></h2>
-          <div id="recording-type" style="width:160px; text-align: left; margin-left: auto; margin-right: auto; padding-bottom: 20px;">
+          <div id="recordingType" style="width:160px; text-align: left; margin-left: auto; margin-right: auto; padding-bottom: 20px;">
             <input type="radio" id="singleRecording" name="recordingType" checked="checked"><label for="singleRecording"> Single Recording</label><br />
             <input type="radio" id="multipleRecordings" name="recordingType"><label for="multipleRecordings"> Group of Recordings</label>
           </div>
         </div>
 
         <!-- missing fields notification -->
-        <div class="fl-container-800" id="missingFields-container" style="display:none;">
+        <div class="fl-container-800" id="missingFieldsContainer" style="display:none;">
           <div class="fl-widget">
             <div class="fl-widget-titlebar warnbox-title">
               <b>Missing or invalid input</b>
             </div>
             <div class="fl-widget-content warnbox-content">
               <ul id="warnbox-ul">
-                <li id="missing-title" class="missing-fields-item single-error multiple-error">
+                <li id="missingTitle" class="missing-fields-item single-error multiple-error">
                   <span class="fl-icon inline-icon icon-bullet"></span>Please enter a <a href="javascript:$('#title')[0].focus();">title</a> for the recording.
                 </li>
-                <li id="missing-series" class="missing-fields-item multiple-error">
+                <li id="missingSeries" class="missing-fields-item multiple-error">
                   <span class="fl-icon inline-icon icon-bullet"></span>Please enter a <a href="javascript:$('#series')[0].focus();">Series name</a> for this group of recordings.
                 </li>
-                <li id="missing-distribution" class="missing-fields-item single-error multiple-error">
+                <li id="missingDistribution" class="missing-fields-item single-error multiple-error">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose at least one <a href="javascript:document.getElementById('distITunesU').focus();">distribution channel</a>.
                 </li>
-                <li id="missing-startdate" class="missing-fields-item single-error multiple-error">
+                <li id="missingStartDate" class="missing-fields-item single-error multiple-error">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose a starting <a href="javascript:document.getElementById('startDate').focus()">date</a> and <a href="javascript:document.getElementById('startTimeHour').focus()">time</a> in the future for your recording. If you are scheduling for a capture agent in a different timezone, account for the time different in the scheduled time.
                 </li>
-                <li id="missing-duration" class="missing-fields-item single-error multiple-error">
+                <li id="missingDuration" class="missing-fields-item single-error multiple-error">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>You must have a <a href="javascript:document.getElementById('durationHour').focus();">duration</a> greater than 0 hours and 0 minutes.
                 </li>
-                <li id="missing-agent" class="missing-fields-item single-error multiple-error">
+                <li id="missingAgent" class="missing-fields-item single-error multiple-error">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose a <a href="javascript:document.getElementById('agent').focus();">capture agent</a> to record the event.
                 </li>
-                <li id="missing-inputs" class="missing-fields-item single-error multiple-error">
-                  <span class="fl-icon inline-icon icon-bullet" title=""></span>You must choose at least one <a href="javascript:document.getElementById('input-list').focus();">input</a>.
+                <li id="missingInputs" class="missing-fields-item single-error multiple-error">
+                  <span class="fl-icon inline-icon icon-bullet" title=""></span>You must choose at least one <a href="javascript:document.getElementById('inputList').focus();">input</a>.
                 </li>
-                <li id="error-recurstart-end" class="missing-fields-item multiple-error">
+                <li id="errorRecurStartEnd" class="missing-fields-item multiple-error">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>Please choose an end date that occurs after the start date.
                 </li>
-                <li id="error-recurrence" class="missing-fields-item multiple-error">
+                <li id="errorRecurrence" class="missing-fields-item multiple-error">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>You must select at least one day of the week.
                 </li>
-                <li id="notice-offline" class="missing-fields-item" style="display:none;">
+                <li id="noticeOffline" class="missing-fields-item" style="display:none;">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>The <a href="javascript:document.getElementById('agent').focus();">capture agent</a> you previously selected is currently offline. You may want to select a different capture agent.
                 </li>
               </ul>
@@ -127,22 +127,22 @@
           </div>
         </div>
 
-        <div class="fl-container-800" id="notice-container" style="display:none;">
+        <div class="fl-container-800" id="noticeContainer" style="display:none;">
           <div class="fl-widget">
             <div class="fl-widget-titlebar warnbox-title">
               <b>Notice</b>
             </div>
             <div class="fl-widget-content warnbox-content">
               <ul>
-                <li id="notice-offline" class="missing-fields-item" style="display:none;">
+                <li id="noticeOffline" class="missing-fields-item" style="display:none;">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>The <a href="javascript:document.getElementById('agent').focus();">capture agent</a> you previously selected is currently offline. You may want to select a different capture agent.
                 </li>
-                <li id="notice-tzdiff" class="missing-fields-item" style="display:none;">
+                <li id="noticeTzDiff" class="missing-fields-item" style="display:none;">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>The timezone for this <a href="javascript:document.getElementById('agent').focus();">capture agent</a> is <span id="tzdiff"></span>. Capture will occur according to the time local to the agent, though when you look at your list of Recordings it will be shown in your local time.
                 </li>
-                <li id="notice-conflict" class="missing-fields-item" style="display:none;">
+                <li id="noticeConflict" class="missing-fields-item" style="display:none;">
                   <span class="fl-icon inline-icon icon-bullet" title=""></span>The following events conflict with your scheduled time on your selected capture agent:
-                  <ul id="conflicting-events" style="margin-top: 0px;">
+                  <ul id="conflictingEvents" style="margin-top: 0px;">
                   </ul>
                 </li>
               </ul>
@@ -157,24 +157,24 @@
               <form action="">
                 <ul class="fl-controls-right form-list">
                   <li class="required">
-                    <label class="fl-label" for="title" id="label-title"><span class="color-red">* </span><span id="i18n_title_label"></span>:</label>
+                    <label class="fl-label" for="title" id="titleLabel"><span class="color-red">* </span><span id="i18n_title_label"></span>:</label>
                     <input type="text" id="title" name="title" class="form-field">
                     <span class="fl-icon icon-help" id="help_title" title="Click for help"></span>
                   </li>
-                  <li id="title-note" class="ui-helper-clearfix" style="display:none;">
+                  <li id="titleNote" class="ui-helper-clearfix" style="display:none;">
                     <label class="fl-label">&nbsp;</label>
                     <span style="float:left;" title="Click for help" class="instruction-text">
                       Titles of individual recordings will be appended by sequential numbers starting with 1
                     </span>
                   </li>
-                  <li id="series_container">
-                    <label class="fl-label" for="series_select"  id="label-series"><span id="i18n_series_label"></span>:</label>
-                    <input type="text" class="form-field ui-autocomplete-input" name="series_select" id="series_select">
+                  <li id="seriesContainer">
+                    <label class="fl-label" for="seriesSelect"  id="seriesLabel"><span id="i18n_series_label"></span>:</label>
+                    <input type="text" class="form-field ui-autocomplete-input" name="seriesSelect" id="seriesSelect">
                     <input type="hidden" id="series">
                     <span class="fl-icon icon-help"  id="help_series" title="Click for help"></span>
                   </li>
                   <li>
-                    <label class="fl-label" for="creator" id="label-creator"><span id="i18n_presenter_label"></span>:</label>
+                    <label class="fl-label" for="creator" id="creatorLabel"><span id="i18n_presenter_label"></span>:</label>
                     <input type="text" class="form-field" name="creator" id="creator">
                     <span class="fl-icon icon-help"  id="help_presenter" title="Click for help"></span>
                   </li>
@@ -195,22 +195,22 @@
               <form action="">
                 <ul class="fl-controls-right form-list">
                   <li class="additionalMeta">
-                    <label class="fl-label" for="contributor" id="label-contributor"><span id="i18n_dept_label"></span>:</label>
+                    <label class="fl-label" for="contributor" id="contributorLabel"><span id="i18n_dept_label"></span>:</label>
                     <input type="text" class="form-field" name="contributor" id="contributor">
                     <span class="fl-icon icon-help"  id="help_contributor" title="Click for help"></span>
                   </li>
                   <li class="additionalMeta">
-                    <label class="fl-label" for="subject" id="label-subject"><span id="i18n_sub_label"></span>:</label>
+                    <label class="fl-label" for="subject" id="subjectLabel"><span id="i18n_sub_label"></span>:</label>
                     <input type="text" class="form-field" name="subject" id="subject">
                     <span class="fl-icon icon-help"  id="help_subject" title="Click for help"></span>
                   </li>
                   <li class="additionalMeta">
-                    <label class="fl-label" for="language" id="label-language"><span id="i18n_lang_label"></span>:</label>
+                    <label class="fl-label" for="language" id="languageLabel"><span id="i18n_lang_label"></span>:</label>
                     <input type="text" class="form-field" name="language" id="language">
                     <span class="fl-icon icon-help"  id="help_language" title="Click for help"></span>
                   </li>
                   <li class="additionalMeta">
-                    <label class="fl-label" for="description" id="label-description"><span id="i18n_desc_label"></span>:</label>
+                    <label class="fl-label" for="description" id="descriptionLabel"><span id="i18n_desc_label"></span>:</label>
                     <textarea name="description" id="description" class="form-field" rows="5" cols="10"></textarea>
                     <span class="fl-icon icon-help"  id="help_description" title="Click for help"></span>
                   </li>
@@ -221,7 +221,7 @@
         </div>
 
         <!-- Scheduling Specifics (Single Recording) -->
-        <div id="single_recording" class="fl-container-800">
+        <div id="singleRecordingPanel" class="fl-container-800">
           <div class="fl-widget">
             <div class="fl-widget-titlebar form-box-title"><b id="i18n_capture">Capture</b></div>
             <div class="fl-widget-content form-box-container">
@@ -236,14 +236,14 @@
                 -->
                 <ul class="fl-controls-right form-list">
                   <li class="required">
-                    <label class="fl-label form-box-label" id="label-startdate"><span class="color-red">* </span><span id="i18n_startdate_label"></span>:</label>
+                    <label class="fl-label form-box-label" id="startDateLabel"><span class="color-red">* </span><span id="i18n_startdate_label"></span>:</label>
                     <input type="text" size="10" name="startDate" id="startDate" style="margin-right:5px;">
                     <span class="fl-icon icon-help" id="help_startdate" title="Click for help"></span>
                   </li>
                 </ul>
                 <ul class="fl-controls-right form-list">
                   <li class="required">
-                    <label class="fl-label form-box-label" id="label-starttime"><span class="color-red">* </span><span id="i18n_starttime_label"></span>:</label>
+                    <label class="fl-label form-box-label" id="startTimeLabel"><span class="color-red">* </span><span id="i18n_starttime_label"></span>:</label>
                     <select id="startTimeHour">
                       <option value="0">00</option>
                       <option value="1">01</option>
@@ -335,7 +335,7 @@
                     <span class="fl-icon icon-help" id="help_starttime" title="Click for help"></span>
                   </li>
                   <li class="required">
-                    <label class="fl-label form-box-label" id="label-duration"><span class="color-red">* </span><span id="i18n_dur_label"></span>:</label>
+                    <label class="fl-label form-box-label" id="durationLabel"><span class="color-red">* </span><span id="i18n_dur_label"></span>:</label>
                     <select id="durationHour">
                       <option value="0">0</option>
                       <option value="1">1</option>
@@ -371,7 +371,7 @@
                     <span class="fl-icon icon-help" id="help_duration" title="Click for help"></span>
                   </li>
                   <li class="required" style="clear: both;">
-                    <label class="fl-label"  id="label-agent"><span class="color-red">* </span><span id="i18n_agent_label"></span>:</label>
+                    <label class="fl-label"  id="agentLabel"><span class="color-red">* </span><span id="i18n_agent_label"></span>:</label>
                     <div>
                       <select id="agent" name="agent">
                         <option value="">Choose one:</option>
@@ -380,9 +380,9 @@
                     </div>
                   </li>
                   <li class="required">
-                    <label class="fl-label" id="label-input"><span class="color-red">* </span><span id="i18n_input_label"></span>:</label>
+                    <label class="fl-label" for="inputList" id="inputLabel"><span class="color-red">* </span><span id="i18n_input_label"></span>:</label>
                     <div class="form-radio-group" style="float: left; width: 300px;">
-                      <div id="input-list"></div>
+                      <div id="inputList"></div>
                       <span class="fl-icon icon-help" id="help_input" title="Click for help" style="vertical-align: middle; margin-left: .8em;"></span>
                     </div>
                   </li>
@@ -394,7 +394,7 @@
         </div>
 
         <!-- Scheduling Specifics (Multiple Recordings) -->
-        <div id="recurring_recording" class="fl-container-800">
+        <div id="recurringRecordingPanel" class="fl-container-800">
           <div class="fl-widget">
             <div class="fl-widget-titlebar form-box-title"><b id="i18n_capture_recur">Capture</b></div>
             <div class="fl-widget-content form-box-container">
@@ -412,14 +412,14 @@
                   <fieldset>
                     <ul class="fl-controls-right form-list">
                       <li>
-                        <label for="schedule_repeat" class="fl-label form-box-label"><span id="i18n_sched_repeats">Repeats</span>:</label>
-                        <select id="schedule_repeat" disabled="disabled">
+                        <label for="scheduleRepeat" class="fl-label form-box-label"><span id="i18n_sched_repeats">Repeats</span>:</label>
+                        <select id="scheduleRepeat" disabled="disabled">
                           <option value="norepeat" selected="selected"><span id="i18n_sched_no_repeat">Don't Repeat</span></option>
                           <option value="weekly" selected="selected"><span id="i18n_sched_weekly">Weekly</span></option>
                         </select>
                       </li>
-                      <li class="required" id="day-select">
-                        <label class="fl-label form-box-label" for="repeat-days"><span class="color-red">* </span><span id="i18n_sched_days">Days</span>:</label>
+                      <li class="required" id="daySelect">
+                        <label class="fl-label form-box-label" for="repeatDays"><span class="color-red">* </span><span id="i18n_sched_days">Days</span>:</label>
                         <table id="agentsTable">
                           <thead>
                             <tr>
@@ -434,24 +434,24 @@
                           </thead>
                           <tbody>
                             <tr>
-                              <td><input type="checkbox" id="repeat_sun" value="SU" /></td>
-                              <td><input type="checkbox" id="repeat_mon" value="MO" /></td>
-                              <td><input type="checkbox" id="repeat_tue" value="TU" /></td>
-                              <td><input type="checkbox" id="repeat_wed" value="WE" /></td>
-                              <td><input type="checkbox" id="repeat_thu" value="TH" /></td>
-                              <td><input type="checkbox" id="repeat_fri" value="FR" /></td>
-                              <td><input type="checkbox" id="repeat_sat" value="SA" /></td>
+                              <td><input type="checkbox" id="repeatSun" value="SU" /></td>
+                              <td><input type="checkbox" id="repeatMon" value="MO" /></td>
+                              <td><input type="checkbox" id="repeatTue" value="TU" /></td>
+                              <td><input type="checkbox" id="repeatWed" value="WE" /></td>
+                              <td><input type="checkbox" id="repeatThu" value="TH" /></td>
+                              <td><input type="checkbox" id="repeatFri" value="FR" /></td>
+                              <td><input type="checkbox" id="repeatSat" value="SA" /></td>
                             </tr>
                           </tbody>
                         </table>
                       </li>
                       <li class="required">
-                        <label class="fl-label form-box-label" id="label-recurstart"><span class="color-red">* </span><span id="i18n_recurstart_label">Start Date</span>:</label>
+                        <label class="fl-label form-box-label" id="recurStartLabel"><span class="color-red">* </span><span id="i18n_recurstart_label">Start Date</span>:</label>
                         <input type="text" size="10" name="recurStart" id="recurStart" style="margin-right:5px;">
                         <span class="fl-icon icon-help" id="help_recurstart" title="Click for help"></span>
                       </li>
                       <li class="required">
-                        <label class="fl-label form-box-label" id="label-recurend"><span class="color-red">* </span><span id="i18n_recurend_label">End Date</span>:</label>
+                        <label class="fl-label form-box-label" for="recurEnd" id="recurEndLabel"><span class="color-red">* </span><span id="i18n_recurend_label">End Date</span>:</label>
                         <input type="text" size="10" name="recurEnd" id="recurEnd" style="margin-right:5px;">
                         <span class="fl-icon icon-help" id="help_recurend" title="Click for help"></span>
                       </li>
@@ -459,7 +459,7 @@
                   </fieldset>
                   <ul class="fl-controls-right form-list">
                     <li class="required">
-                      <label class="fl-label form-box-label" id="label-recurstarttime"><span class="color-red">* </span><span id="i18n_recur_start_label">Start Time</span>:</label>
+                      <label class="fl-label form-box-label" id="recurStartTimeLabel"><span class="color-red">* </span><span id="i18n_recur_start_label">Start Time</span>:</label>
                       <select id="recurStartTimeHour">
                         <option value="0">00</option>
                         <option value="1">01</option>
@@ -551,7 +551,7 @@
                       <span class="fl-icon icon-help" id="help_starttime" title="Click for help"></span>
                     </li>
                     <li class="required">
-                      <label class="fl-label form-box-label" id="label-recurduration"><span class="color-red">* </span><span id="i18n_recur_dur_label">Duration</span>:</label>
+                      <label class="fl-label form-box-label" id="recurDurationLabel"><span class="color-red">* </span><span id="i18n_recur_dur_label">Duration</span>:</label>
                       <select id="recurDurationHour">
                         <option value="0">0</option>
                         <option value="1">1</option>
@@ -587,7 +587,7 @@
                       <span class="fl-icon icon-help" id="help_duration" title="Click for help"></span>
                     </li>
                     <li class="required" style="clear: both;">
-                      <label class="fl-label"  id="label-recurAgent"><span class="color-red">* </span><span id="i18n_agent_label">Agent</span>:</label>
+                      <label class="fl-label"  id="recurAgentLabel"><span class="color-red">* </span><span id="i18n_agent_label">Agent</span>:</label>
                       <div>
                         <select id="recurAgent" name="recurAgent">
                           <option value="">Choose one:</option>
@@ -596,9 +596,9 @@
                       </div>
                     </li>
                     <li class="required">
-                      <label class="fl-label" id="label-input"><span class="color-red">* </span><span id="i18n_input_label">Inputs</span>:</label>
+                      <label class="fl-label" id="inputLabel"><span class="color-red">* </span><span id="i18n_input_label">Inputs</span>:</label>
                       <div class="form-radio-group" style="float: left; width: 300px;">
-                        <div id="recur-input-list"></div>
+                        <div id="recurInputList"></div>
                         <span class="fl-icon icon-help" id="help_input" title="Click for help" style="vertical-align: middle; margin-left: .8em;"></span>
                       </div>
                     </li>
@@ -617,11 +617,11 @@
               <ul class="fl-controls-right form-list">
                 <li class="ui-helper-clearfix">
                   <label class="fl-label"><span class="color-red">* </span><span id="i18n_process_instr">Processing instructions</span>:</label>
-                  <select id="workflow-selector" style="float:left;margin:3px;"></select>
+                  <select id="workflowSelector" style="float:left;margin:3px;"></select>
                   <span class="helpIcon" title="Click for help">&nbsp;</span>
                 </li>
               </ul>
-              <div id="workflow-config-container"></div>
+              <div id="workflowConfigContainer"></div>
             </div>
           </div>
         </div>
@@ -648,7 +648,7 @@
             </div>
           </div>
         </div>
-        <div class="fl-container-800" id="submission_success" style="display: none;">
+        <div class="fl-container-800" id="submissionSuccess" style="display: none;">
           <div class="notification-header">
             A Recording with the following information has been scheduled:
           </div>

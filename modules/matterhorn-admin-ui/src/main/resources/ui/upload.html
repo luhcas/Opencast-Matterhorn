@@ -101,7 +101,7 @@
 
       <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;">
         <div class="fl-container-800" style="text-align: center;">
-          <h2 id="page-title"><span id="i18n_page_title">Upload Recording</span></h2>
+          <h2 id="pageTitle"><span id="i18n_page_title">Upload Recording</span></h2>
         </div>
 
         <!-- missing fields notification -->
@@ -109,16 +109,16 @@
           <div id="heading-missingFields" class="fl-widget-header warnbox-title">Missing Inputs</div>
           <div id="content-missingFields" class="fl-widget-content warnbox-content">
             <ul>
-              <li id="notification-title" class="missing-fields-item">
+              <li id="notificationTitle" class="missing-fields-item">
                 <!-- <span class="fl-icon inline-icon icon-bullet"></span> -->
                 <span style="width:600px;">
                   Please enter a <a href="javascript:document.uploadForm.title.focus();">title</a> for the recording.
                 </span>
               </li>
-              <li id="notification-flavor" class="missing-fields-item">
+              <li id="notificationFlavor" class="missing-fields-item">
                 <!--span class="fl-icon inline-icon icon-bullet" --></span>Please select the <a href="javascript:document.getElementById('flavor').focus();">media file content</a> - the type of content the media file contains.
               </li>
-              <li id="notification-track" class="missing-fields-item">
+              <li id="notificationTrack" class="missing-fields-item">
                 <!-- <span class="fl-icon inline-icon icon-bullet"></span> -->
                 <span>
                   Please select a <a href="javascript:document.getElementById('track').focus();">media file</a> to upload. Supported file formats are: .avi, .mp3, .mp4, .mov, .mpg, .mkv, .flv or .wmv.
@@ -196,7 +196,7 @@
             <div id="content-basicData" class="fl-widget-content">
               <input type="hidden" name="track" id="track" class="requiredField" value="">
               <ul class="no-bullets formField-list fl-controls-right">
-                <li id="retry-file" class="ui-helper-clearfix" style="display:none;">
+                <li id="retryFile" class="ui-helper-clearfix" style="display:none;">
                   <label class="fl-label"><span id="i18n_upload.content">File(s)</span>:</label>
                   <!-- div style="display:table-cell;">
                     <input type="hidden" id="previous-file-url" value="">
@@ -204,20 +204,20 @@
                     <input type="radio" name="use-file" class="use-file" value="previous-file" id="use-file-previous" checked="true">Use previously uploaded/captured file:&nbsp;<a id="previous-file-link"></a><br>
                     <input type="radio" name="use-file" class="use-file" value="replace-file" id="use-file-replace">Upload replacement file
                   </div -->
-                  <div id="previous-file-list" style="display:table-cell;">
+                  <div id="previousFileList" style="display:table-cell;">
                   </div>
                 </li>
                 <li class="ui-helper-clearfix" id="regular-file-selection">
                   <label class="fl-label"><span id="i18n_file_location">File Location</span>:</label>
-                  <input type="radio" id="ingest-upload" name="file-location" class="file-location" value="local" checked="true">Local hard drive
+                  <input type="radio" id="ingestUpload" name="fileLocation" class="file-location" value="local" checked="true">Local hard drive
                   &nbsp;&nbsp;
-                  <input type="radio" id="ingest-inbox" name="file-location" class="file-location" value="inbox">Designated inbox on server
+                  <input type="radio" id="ingestInbox" name="fileLocation" class="file-location" value="inbox">Designated inbox on server
                 </li>
                 <!-- field: Media File -->
-                <li class="ui-helper-clearfix" id="regular-file-chooser">
+                <li class="ui-helper-clearfix" id="regularFileChooser">
                   <label class="fl-label"><span class="color-red">* </span><span id="i18n_upload_file">Media File</span>:</label>
                   <div style="display:table-cell;">
-                    <iframe name="filechooserAjax" id="filechooser-ajax" frameborder="0" scrolling="no" src="../ingest/rest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
+                    <iframe name="filechooserAjax" id="filechooserAjax" frameborder="0" scrolling="no" src="../ingest/rest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
                     </iframe>
                     <span class="helpIcon" title="Click for help">&nbsp;</span>
                   </div>
@@ -240,11 +240,11 @@
               <ul class="no-bullets formField-list fl-controls-right">
                 <li class="ui-helper-clearfix">
                   <label class="fl-label"><span class="color-red">* </span><span id="i18n_process_instr">Processing instructions</span>:</label>
-                  <select name="workflow-selector" id="workflow-selector" class="requiredField" style="float:left;margin:3px;"></select>
+                  <select name="workflowSelector" id="workflowSelector" class="requiredField" style="float:left;margin:3px;"></select>
                   <span class="helpIcon" title="Click for help">&nbsp;</span>
                 </li>
               </ul>
-              <div id="workflow-config-container">
+              <div id="workflowConfigContainer">
 
               </div>
             </div>
@@ -262,7 +262,7 @@
                 <li class="ui-helper-clearfix">
                   <label class="fl-label">&nbsp;</label>
                   <button type="button" id="BtnSubmit" class="mouseover-pointer control-button">Upload</button>
-                  <button id="btnCancle" type="button" onclick="history.back();" class="mouseover-pointer control-button">Cancel</button>
+                  <button id="btnCancel" type="button" onclick="history.back();" class="mouseover-pointer control-button">Cancel</button>
                   <!-- <a href="index.html" style="float:right;">Switch to AJAX upload form</a> -->
                 </li>
                 <!-- * = required -->
@@ -289,11 +289,11 @@
       &nbsp;
     </div>
     <div id="progressbar">
-      <div id="progressbar-indicator" style="width:0%;">&nbsp;</div>
-      <div id="progressbar-label"><span id="i18n_progress">Initializing upload...</span></div>
+      <div id="progressbarIndicator" style="width:0%;">&nbsp;</div>
+      <div id="progressbarLabel"><span id="i18n_progress">Initializing upload...</span></div>
     </div>
-    <div id="label-filesize">&nbsp</div>
-    <div id="label-bytestrasfered">&nbsp;</div>
+    <div id="labelFilesize">&nbsp;</div>
+    <div id="labelBytesTrasfered">&nbsp;</div>
   </div>
 
   <!-- template for the popup help box -->

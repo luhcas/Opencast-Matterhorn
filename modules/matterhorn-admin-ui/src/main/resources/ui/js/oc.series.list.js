@@ -16,7 +16,7 @@
 ocSeriesList = {} || ocSeriesList;
 
 ocSeriesList.init = function(){
-  $('#series-table-container').xslt('/admin/rest/series', 'xsl/series_list.xsl', function(){
+  $('#seriesTableContainer').xslt('/admin/rest/series', 'xsl/series_list.xsl', function(){
   
   });
 }

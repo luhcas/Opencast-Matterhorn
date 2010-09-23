@@ -58,12 +58,12 @@ ocSeries.Internationalize = function(){
 ocSeries.SelectMetaTab = function(elm){
   $(elm).siblings().removeClass('selected');
   $(elm).addClass('selected');
-  if(elm.id == "meta-common-tab"){
-    $("#common_descriptors").show();
-    $("#additional_metadata").hide();
+  if(elm.id == "metaCommonTab"){
+    $("#commonDescriptors").show();
+    $("#additionalMetadata").hide();
   }else{
-    $("#common_descriptors").hide();
-    $("#additional_metadata").show();
+    $("#commonDescriptors").hide();
+    $("#additionalMetadata").show();
   }
 }
 
@@ -86,38 +86,38 @@ ocSeries.RegisterComponents = function(){
   //Core Metadata
   ocSeries.components.title = new ocAdmin.Component(
     ['title'],
-    {label:'label-series',required:true}
+    {label:'seriesLabel',required:true}
   );
   
   ocSeries.components.contributor = new ocAdmin.Component(
     ['contributor'],
-    {label:'label-contributor'}
+    {label:'contributorLabel'}
   );
   
   ocSeries.components.creator = new ocAdmin.Component(
     ['creator'],
-    {label: 'label-creator'}
+    {label: 'creatorLabel'}
   );
   
   //Additional Metadata
   ocSeries.components.subject = new ocAdmin.Component(
     ['subject'],
-    {label: 'label-subject'}
+    {label: 'subjectLabel'}
   )
   
   ocSeries.components.language = new ocAdmin.Component(
     ['language'],
-    {label: 'label-language'}
+    {label: 'languageLabel'}
   )
   
   ocSeries.components.license = new ocAdmin.Component(
     ['license'],
-    {label: 'label-license'}
+    {label: 'licenseLabel'}
   )
   
   ocSeries.components.description = new ocAdmin.Component(
     ['description'],
-    {label: 'label-description'}
+    {label: 'descriptionLabel'}
   )
   
   /*
@@ -158,6 +158,6 @@ ocSeries.SeriesSubmitComplete = function(){
     }
   }
   $("#schedulerLink").attr('href',$("#schedulerLink").attr('href') + '?seriesId=' + ocSeries.components.seriesId.getValue());
-  $("#submission_success").siblings().hide();
-  $("#submission_success").show();
+  $("#submissionSuccess").siblings().hide();
+  $("#submissionSuccess").show();
 }

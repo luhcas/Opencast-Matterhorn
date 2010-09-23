@@ -29,28 +29,28 @@ ocUpload.init = function() {
   }
 
   // Event: Retry: use already uploaded file clicked
-  $('#use-file-previous').click(function() {
+  $('#useFilePrevious').click(function() {
     if ($(this).val()) {
-      $('#regular-file-chooser').fadeOut('fast');
-      $('#regular-file-chooser-flavor').fadeOut('fast');
-      $('#track').val($('#previous-file-link').attr('href'));
+      $('#regularFileChooser').fadeOut('fast');
+      $('#regularFileChooserFlavor').fadeOut('fast');
+      $('#track').val($('#previousFileLink').attr('href'));
       ocUpload.checkRequiredFields(false);
     }
   });
 
   // Event: Retry: use replacement file clicked
-  $('#use-file-replace').click(function() {
+  $('#useFileReplace').click(function() {
     if ($(this).val()) {
-      $('#regular-file-chooser').fadeIn('fast');
-      $('#regular-file-chooser-flavor').fadeIn('fast');
-      $('#track').val($('#filechooser-ajax'));
+      $('#regularFileChooser').fadeIn('fast');
+      $('#regularFileChooserFlavor').fadeIn('fast');
+      $('#track').val($('#fileChooserAjax'));
     }
   });
 
   // Event: File location selector clicked
   $(".file-location").change(function() {
     var location = $(this).val();
-    $('#filechooser-ajax').attr('src', '../ingest/rest/filechooser-' + location + '.html');
+    $('#fileChooserAjax').attr('src', '../ingest/rest/filechooser-' + location + '.html');
   });
 
   // Event: Add form filed button clicked
@@ -95,7 +95,7 @@ ocUpload.init = function() {
       ocUpload.showProgressStage();
       ocIngest.createMediaPackage();
     } else {
-      $('#container-missingFields').show('fast');
+      $('#containerMissingFields').show('fast');
     }
   });
 
@@ -134,7 +134,7 @@ ocUpload.init = function() {
     }
   });
 
-  ocWorkflow.init($('#workflow-selector'), $('#workflow-config-container'));
+  ocWorkflow.init($('#workflowSelector'), $('#workflowConfigContainer'));
 
   // test if we upload a new recording or want to retry a workflow
   ocUpload.retryId = ocUtils.getURLParam("retry");
@@ -156,10 +156,10 @@ ocUpload.init = function() {
 
 ocUpload.initRetry = function(wfId) {
   // display current file element / hide file chooser
-  $('#retry-file').css('display', 'block');
-  $('#regular-file-selection').css('display', 'none');
-  $('#regular-file-chooser').css('display', 'none');
-  $('#regular-file-chooser-flavor').css('display', 'none');
+  $('#retryFile').css('display', 'block');
+  $('#regularFileSelection').css('display', 'none');
+  $('#regularFileChooser').css('display', 'none');
+  $('#regularFileChooserFlavor').css('display', 'none');
   $('#track').val('reingest');
   // get failed Workflow
   $.ajax({
@@ -184,11 +184,11 @@ ocUpload.initRetry = function(wfId) {
           files.push(filename);
         }
       });
-      $('#previous-file-list').text(files.join(', '));
+      $('#previousFileList').text(files.join(', '));
       // previous workflow definition
       var defId = $(data.documentElement).find('template').text();
-      $('#workflow-selector').val(defId);
-      ocWorkflow.definitionSelected(defId, $('#workflow-config-container'), function() {
+      $('#workflowSelector').val(defId);
+      ocWorkflow.definitionSelected(defId, $('#workflowConfigContainer'), function() {
         $(data.documentElement).find("> configurations > configuration").each(function(index, elm) {
           var fieldname = '#' + $(elm).attr('key').replace(/\./g, '\\\\.');
           var field = $(fieldname);
@@ -250,11 +250,11 @@ ocUpload.collectWorkflowConfig = function() {
  */
 ocUpload.checkRequiredFields = function(submit) {
   var missing = false;
-  var wrongtype = false;
+  var wrongtype = false; //ID TODO
   $('.requiredField:visible, .requiredField[type|=hidden]').each( function() {
     if (!$(this).val()) {
-      $('#notification-' + $(this).attr('id')).show();
-      if ((submit) || ($('#container-missingFields').is(':visible'))) {
+      $('#notification' + $(this).attr('id')).show();
+      if ((submit) || ($('#containerMissingFields').is(':visible'))) {
         $(this).prev('.fl-label').css('color','red');
       }
       if ((submit) && $('#track').val() == '') {
@@ -262,7 +262,7 @@ ocUpload.checkRequiredFields = function(submit) {
       }
       missing = true;
     } else {
-      $('#notification-' + $(this).attr('id')).hide();
+      $('#notification' + $(this).attr('id')).hide();
       $(this).prev('.fl-label').css('color','black');
     }
   });
@@ -289,7 +289,7 @@ ocUpload.checkRequiredFields = function(submit) {
   }
   return !missing && right;*/
   if (!missing) {
-    $('#container-missingFields').hide('fast');
+    $('#containerMissingFields').hide('fast');
   }
   return !missing;
 }
@@ -308,26 +308,26 @@ ocUpload.showHelpBox = function(help,top,left) {
  */
 ocUpload.showProgressStage = function() {
   //$('#gray-out').fadeIn('fast');
-  $('#gray-out').css('display','block');
-  $('#progress-stage').fadeIn('normal');
+  $('#grayOut').css('display','block');
+  $('#progressStage').fadeIn('normal');
 }
 
 /** Restore view
  *
  */
 ocUpload.hideProgressStage = function() {
-  $('#gray-out').fadeOut('fast');
-  $('#progress-stage').fadeOut('normal');
+  $('#grayOut').fadeOut('fast');
+  $('#progressStage').fadeOut('normal');
 }
 
 /** Set the progress view to a certain state
  *
  */
 ocUpload.setProgress = function(width, text, total, transfered) {
-  $('#progressbar-indicator').css('width',width);
-  $('#progressbar-label').text(text);
-  $('#label-filesize').text(total);
-  $('#label-bytestrasfered').text(transfered);
+  $('#progressbarIndicator').css('width',width);
+  $('#progressbarLabel').text(text);
+  $('#labelFilesize').text(total);
+  $('#labelBytesTrasfered').text(transfered);
 }
 
 /** Load success screen into stage
@@ -360,9 +360,9 @@ ocUpload.showFailedScreen = function(message) {
   ocUpload.hideProgressStage();
   $('#stage').load('error.html', function() {
     if (message) {
-      $('#error-message').text(message).show();
+      $('#errorMessage').text(message).show();
     }
-    $('#field-filename').children('.fieldValue').text(ocUploadListener.shortFilename);
+    $('#fieldFilename').children('.fieldValue').text(ocUploadListener.shortFilename);
     
   });
 }

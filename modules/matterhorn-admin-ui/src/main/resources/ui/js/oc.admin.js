@@ -69,7 +69,7 @@ $.extend(ocAdmin.Manager.prototype, {
   },
   validate: function(){
     var error = false;
-    $('#missingFields-container').hide();
+    $('#missingFieldsContainer').hide();
     $('.missing-fields-item').hide();
     for(var k in this.components){
       if(this.components[k].required && !this.components[k].validate()){
@@ -84,7 +84,7 @@ $.extend(ocAdmin.Manager.prototype, {
       }
     }
     if(error){
-      $('#missingFields-container').show();
+      $('#missingFieldsContainer').show();
     }
     return !error;
   },
@@ -137,8 +137,8 @@ $.extend(ocAdmin.Component.prototype, {
       var e = $('#' + fields[k]);
       if(e[0]){
         this.fields[fields[k]] = e;
-        this.label = 'label-' + e[0].id;
-        this.errorField = 'missing-' + e[0].id;
+        this.label = e[0].id + 'Label';
+        this.errorField = 'missing' + e[0].id;
       }
     }
   },
