@@ -38,8 +38,6 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workspace.api.Workspace;
 
-import de.schlichtherle.util.zip.ZipEntry;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
@@ -301,7 +299,7 @@ public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandle
 
     // Zip the directory
     File zip = new File(tempStorageDir, clone.getIdentifier().compact() + ".zip");
-    int compressValue = compress ? ZipEntry.DEFLATED : ZipEntry.STORED;
+    int compressValue = compress ? ZipUtil.DEFAULT_COMPRESSION : ZipUtil.NO_COMPRESSION;
 
     long startTime = System.currentTimeMillis();
     ZipUtil.zip(new File[] { mediaPackageDir }, zip, true, compressValue);

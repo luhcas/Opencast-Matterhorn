@@ -47,7 +47,11 @@ import java.util.zip.Deflater;
 public class ZipUtil {
 
   private static final Logger logger = LoggerFactory.getLogger(ZipUtil.class);
+  
+  public static final int BEST_SPEED = Deflater.BEST_SPEED; 
+  public static final int BEST_COMPRESSION = Deflater.BEST_COMPRESSION;
   public static final int DEFAULT_COMPRESSION = Deflater.DEFAULT_COMPRESSION;
+  public static final int NO_COMPRESSION = Deflater.NO_COMPRESSION;
 
   /***********************************************************************************/
   /* SERVICE CLASSES - The two following classes are the ones actually doing the job */
