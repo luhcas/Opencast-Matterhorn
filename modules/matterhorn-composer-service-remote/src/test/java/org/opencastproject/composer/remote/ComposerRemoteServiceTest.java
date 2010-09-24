@@ -6,8 +6,8 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.remote.api.Job;
+import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.security.TrustedHttpClientImpl;
 
 import org.junit.Assert;
@@ -56,7 +56,7 @@ public class ComposerRemoteServiceTest {
             new URI("https://opencast.jira.com/svn/MH/trunk/modules/matterhorn-media/src/test/resources/av.mov"),
             Track.TYPE, MediaPackageElements.PRESENTER_SOURCE);
     mp.add(track);
-    Receipt r = service.encode(track, "feed-m4a.http.http");
+    Job r = service.encode(track, "feed-m4a.http.http");
     Assert.assertNotNull(service.getReceipt(r.getId()));
     Assert.assertNull(service.getReceipt("badId"));
   }

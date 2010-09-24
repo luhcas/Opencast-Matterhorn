@@ -39,9 +39,9 @@ import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.Video;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.remote.api.RemoteServiceManager;
-import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workspace.api.Workspace;
@@ -279,14 +279,14 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
    * @return a receipt containing the resulting mpeg-7 catalog
    * @throws MediaAnalysisException
    */
-  public Receipt analyze(final MediaPackageElement element, boolean block) throws MediaAnalysisException {
+  public Job analyze(final MediaPackageElement element, boolean block) throws MediaAnalysisException {
     final RemoteServiceManager rs = remoteServiceManager;
-    final Receipt receipt = rs.createReceipt(RECEIPT_TYPE);
+    final Job receipt = rs.createJob(RECEIPT_TYPE);
 
     // Make sure the element can be analyzed using this analysis implementation
     if (!super.isSupported(element)) {
       receipt.setStatus(Status.FAILED);
-      rs.updateReceipt(receipt);
+      rs.updateJob(receipt);
       return receipt;
     }
 
@@ -295,7 +295,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
     Runnable command = new Runnable() {
       public void run() {
         receipt.setStatus(Status.RUNNING);
-        rs.updateReceipt(receipt);
+        rs.updateJob(receipt);
 
         PlayerListener processorListener = null;
         Track mjpegTrack = null;
@@ -317,7 +317,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
             processor.addControllerListener(processorListener);
           } catch (Exception e) {
             receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            rs.updateJob(receipt);
             throw new MediaAnalysisException(e);
           }
 
@@ -325,7 +325,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
           processor.configure();
           if (!processorListener.waitForState(Processor.Configured)) {
             receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            rs.updateJob(receipt);
             throw new MediaAnalysisException("Unable to configure processor");
           }
 
@@ -336,7 +336,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
           processor.realize();
           if (!processorListener.waitForState(Processor.Realized)) {
             receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            rs.updateJob(receipt);
             throw new MediaAnalysisException("Unable to realize the processor");
           }
 
@@ -349,7 +349,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
             dsh.setSource(outputDataSource);
           } catch (IncompatibleSourceException e) {
             receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            rs.updateJob(receipt);
             throw new MediaAnalysisException("Cannot handle the output data source from the processor: "
                     + outputDataSource);
           }
@@ -358,7 +358,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
           processor.prefetch();
           if (!processorListener.waitForState(Controller.Prefetched)) {
             receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            rs.updateJob(receipt);
             throw new MediaAnalysisException("Unable to switch player into 'prefetch' state");
           }
 
@@ -366,7 +366,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
           Time duration = processor.getDuration();
           if (duration == Duration.DURATION_UNKNOWN) {
             receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            rs.updateJob(receipt);
             throw new MediaAnalysisException("Java media framework is unable to detect movie duration");
           }
 
@@ -397,17 +397,17 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
 
           receipt.setElement(mpeg7Catalog);
           receipt.setStatus(Status.FINISHED);
-          rs.updateReceipt(receipt);
+          rs.updateJob(receipt);
 
           logger.info("Finished video segmentation of {}", mediaUrl);
 
         } catch (MediaAnalysisException e) {
           receipt.setStatus(Status.FAILED);
-          rs.updateReceipt(receipt);
+          rs.updateJob(receipt);
           throw e;
         } catch (Exception e) {
           receipt.setStatus(Status.FAILED);
-          rs.updateReceipt(receipt);
+          rs.updateJob(receipt);
           throw new MediaAnalysisException(e);
         }
       }
@@ -419,7 +419,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
         future.get();
       } catch (Exception e) {
         receipt.setStatus(Status.FAILED);
-        remoteServiceManager.updateReceipt(receipt);
+        remoteServiceManager.updateJob(receipt);
         throw new MediaAnalysisException(e);
       }
     }
@@ -432,8 +432,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
    * @see org.opencastproject.analysis.api.MediaAnalysisService#getReceipt(java.lang.String)
    */
   @Override
-  public Receipt getReceipt(String id) {
-    return remoteServiceManager.getReceipt(id);
+  public Job getReceipt(String id) {
+    return remoteServiceManager.getJob(id);
   }
 
   /**
@@ -662,7 +662,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
 
     // Looks like we need to do the work ourselves
     logger.info("Requesting {} version of track {}", MJPEG_MIMETYPE, track);
-    final Receipt receipt = composer.encode(track, MJPEG_ENCODING_PROFILE, true);
+    final Job receipt = composer.encode(track, MJPEG_ENCODING_PROFILE, true);
     Track composedTrack = (Track) receipt.getElement();
     composedTrack.setReference(original);
     composedTrack.setMimeType(MJPEG_MIMETYPE);

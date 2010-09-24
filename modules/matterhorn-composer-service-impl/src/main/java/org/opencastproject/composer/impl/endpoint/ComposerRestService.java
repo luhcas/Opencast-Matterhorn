@@ -28,8 +28,8 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.remote.api.Job;
+import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -120,7 +120,7 @@ public class ComposerRestService {
     }
 
     // Asynchronously encode the specified tracks
-    Receipt receipt = composerService.encode((Track) sourceTrack, profileId);
+    Job receipt = composerService.encode((Track) sourceTrack, profileId);
     if (receipt == null)
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Encoding failed").build();
     return Response.ok().entity(receipt.toXml()).build();
@@ -167,7 +167,7 @@ public class ComposerRestService {
     }
 
     // Asynchronously encode the specified tracks
-    Receipt receipt = composerService.trim(sourceTrack, profileId, start, duration);
+    Job receipt = composerService.trim(sourceTrack, profileId, start, duration);
     if (receipt == null)
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Trimming failed").build();
     return Response.ok().entity(receipt.toXml()).build();
@@ -212,7 +212,7 @@ public class ComposerRestService {
     }
 
     // Asynchronously encode the specified tracks
-    Receipt receipt = composerService.mux((Track) videoSourceTrack, (Track) audioSourceTrack, profileId);
+    Job receipt = composerService.mux((Track) videoSourceTrack, (Track) audioSourceTrack, profileId);
     return Response.ok().entity(receipt.toXml()).build();
   }
 
@@ -243,7 +243,7 @@ public class ComposerRestService {
     }
 
     try {
-      Receipt receipt = composerService.image((Track) sourceTrack, profileId, time);
+      Job receipt = composerService.image((Track) sourceTrack, profileId, time);
       return Response.ok().entity(receipt.toXml()).build();
     } catch (EncoderException e) {
       logger.warn("Unable to extract image: " + e.getMessage());
@@ -291,7 +291,7 @@ public class ComposerRestService {
     }
 
     try {
-      Receipt receipt = composerService.captions((Track) mediaTrack, captions);
+      Job receipt = composerService.captions((Track) mediaTrack, captions);
       return Response.ok().entity(receipt.toXml()).build();
     } catch (EmbedderException e) {
       logger.warn("Unable to embed captions: " + e.getMessage());
@@ -303,7 +303,7 @@ public class ComposerRestService {
   @Path("receipt/{id}.xml")
   @Produces(MediaType.TEXT_XML)
   public Response getReceipt(@PathParam("id") String id) {
-    Receipt r = composerService.getReceipt(id);
+    Job r = composerService.getReceipt(id);
     if (r == null)
       return Response.status(Response.Status.NOT_FOUND).build();
     return Response.ok().entity(r.toXml()).build();

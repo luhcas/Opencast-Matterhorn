@@ -19,7 +19,7 @@ import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -74,7 +74,7 @@ public class MediaInspectionRestEndpoint {
   public Response inspectTrack(@QueryParam("uri") URI uri) {
     checkNotNull(service);
     try {
-      Receipt r = service.inspect(uri, false);
+      Job r = service.inspect(uri, false);
       return Response.ok(r.toXml()).build();
     } catch (Exception e) {
       logger.info(e.getMessage());
@@ -93,7 +93,7 @@ public class MediaInspectionRestEndpoint {
       Document doc = docBuilder.parse(IOUtils.toInputStream(mediaPackageElement, "UTF-8"));
       MediaPackageElement mpe = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
               .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
-      Receipt r = service.enrich(mpe, override, false);
+      Job r = service.enrich(mpe, override, false);
       return Response.ok(r.toXml()).build();
     } catch (Exception e) {
       logger.info(e.getMessage(), e);
@@ -107,7 +107,7 @@ public class MediaInspectionRestEndpoint {
   public Response getReceipt(@PathParam("id") String id) {
     checkNotNull(service);
     try {
-      Receipt r = service.getReceipt(id);
+      Job r = service.getReceipt(id);
       if (r == null) {
         return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
       } else {

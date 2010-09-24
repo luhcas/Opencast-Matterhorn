@@ -31,7 +31,7 @@ public class MaintenanceCommand {
   
   public String set(String jobType, String baseUrl, boolean maintenanceMode) {
     try {
-      remoteServiceManager.setMaintenanceMode(jobType, baseUrl, maintenanceMode);
+      remoteServiceManager.setMaintenanceStatus(jobType, baseUrl, maintenanceMode);
       if(maintenanceMode) {
         return jobType + "@" + baseUrl + " is now in maintenance mode\n";
       } else {
@@ -45,7 +45,7 @@ public class MaintenanceCommand {
   public String list() {
     StringBuilder sb = new StringBuilder();
     for(ServiceRegistration reg : remoteServiceManager.getServiceRegistrations()) {
-      sb.append(reg.getReceiptType());
+      sb.append(reg.getJobType());
       sb.append("@");
       sb.append(reg.getHost());
       if(reg.isInMaintenanceMode()) {

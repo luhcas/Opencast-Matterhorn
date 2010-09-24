@@ -28,7 +28,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
 import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
 import org.opencastproject.metadata.dublincore.Precision;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -122,7 +122,7 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
     for (Track track : mediaPackage.getTracks()) {
       
       logger.info("Inspecting track '{}' of {}", track.getIdentifier(), mediaPackage);
-      Receipt receipt = inspectionService.enrich(track, false, true);
+      Job receipt = inspectionService.enrich(track, false, true);
 
       // add this receipt's queue time to the total
       long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();

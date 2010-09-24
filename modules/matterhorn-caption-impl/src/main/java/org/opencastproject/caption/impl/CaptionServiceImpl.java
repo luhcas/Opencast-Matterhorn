@@ -24,9 +24,9 @@ import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.remote.api.RemoteServiceManager;
-import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
@@ -97,7 +97,7 @@ public class CaptionServiceImpl implements CaptionService {
    *      java.lang.String, java.lang.String)
    */
   @Override
-  public Receipt convert(Catalog input, String inputFormat, String outputFormat)
+  public Job convert(Catalog input, String inputFormat, String outputFormat)
           throws UnsupportedCaptionFormatException, CaptionConverterException {
     return convert(input, inputFormat, outputFormat, null);
   }
@@ -110,14 +110,14 @@ public class CaptionServiceImpl implements CaptionService {
    *      java.lang.String, java.lang.String, java.lang.String)
    */
   @Override
-  public Receipt convert(Catalog input, String inputFormat, String outputFormat, String language)
+  public Job convert(Catalog input, String inputFormat, String outputFormat, String language)
           throws UnsupportedCaptionFormatException, CaptionConverterException {
 
-    Receipt receipt = remoteServiceManager.createReceipt(JOB_TYPE);
+    Job receipt = remoteServiceManager.createJob(JOB_TYPE);
 
     if (inputFormat == null || outputFormat == null) {
       receipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateReceipt(receipt);
+      remoteServiceManager.updateJob(receipt);
       throw new UnsupportedCaptionFormatException("<null>");
     }
 
@@ -127,11 +127,11 @@ public class CaptionServiceImpl implements CaptionService {
       captionsFile = workspace.get(input.getURI());
     } catch (NotFoundException e) {
       receipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateReceipt(receipt);
+      remoteServiceManager.updateJob(receipt);
       throw new CaptionConverterException("Requested media package element " + input + " could not be found.");
     } catch (IOException e) {
       receipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateReceipt(receipt);
+      remoteServiceManager.updateJob(receipt);
       throw new CaptionConverterException("Requested media package element " + input + "could not be accessed.");
     }
 
@@ -143,11 +143,11 @@ public class CaptionServiceImpl implements CaptionService {
       logger.debug("Parsing to collection succeeded.");
     } catch (UnsupportedCaptionFormatException e) {
       receipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateReceipt(receipt);
+      remoteServiceManager.updateJob(receipt);
       throw new UnsupportedCaptionFormatException(inputFormat);
     } catch (CaptionConverterException e) {
       receipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateReceipt(receipt);
+      remoteServiceManager.updateJob(receipt);
       throw e;
     }
 
@@ -158,11 +158,11 @@ public class CaptionServiceImpl implements CaptionService {
       logger.debug("Exporting captions succeeding.");
     } catch (UnsupportedCaptionFormatException e) {
       receipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateReceipt(receipt);
+      remoteServiceManager.updateJob(receipt);
       throw new UnsupportedCaptionFormatException(outputFormat);
     } catch (IOException e) {
       receipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateReceipt(receipt);
+      remoteServiceManager.updateJob(receipt);
       throw new CaptionConverterException("Could not export caption collection.", e);
     }
 
@@ -176,7 +176,7 @@ public class CaptionServiceImpl implements CaptionService {
 
     receipt.setElement(catalog);
     receipt.setStatus(Status.FINISHED);
-    remoteServiceManager.updateReceipt(receipt);
+    remoteServiceManager.updateJob(receipt);
 
     return receipt;
   }

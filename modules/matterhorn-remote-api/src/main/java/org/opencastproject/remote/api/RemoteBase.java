@@ -15,7 +15,7 @@
  */
 package org.opencastproject.remote.api;
 
-import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.UrlSupport;
 
@@ -104,7 +104,7 @@ public class RemoteBase {
    * @return the response object
    */
   protected HttpResponse getResponse(HttpRequestBase httpRequest, Integer... expectedHttpStatus) {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(serviceType);
+    List<String> remoteHosts = remoteServiceManager.getActiveHosts(serviceType);
     Map<String, String> hostErrors = new HashMap<String, String>();
     String uriSuffix = httpRequest.getURI().toString();
     for (String remoteHost : remoteHosts) {
@@ -143,9 +143,9 @@ public class RemoteBase {
    *          The receipt id
    * @return The receipt
    */
-  protected Receipt poll(String id) {
+  protected Job poll(String id) {
     while (true) {
-      Receipt r = getReceipt(id);
+      Job r = getReceipt(id);
       if(Status.FAILED.equals(r.getStatus()) || Status.FINISHED.equals(r.getStatus())) {
         return r;
       }
@@ -163,8 +163,8 @@ public class RemoteBase {
    * @param id The receipt identifier
    * @return the receipt, or null if no receipt with this identifier exists
    */
-  protected Receipt getReceipt(String id) {
-    return remoteServiceManager.getReceipt(id);
+  protected Job getReceipt(String id) {
+    return remoteServiceManager.getJob(id);
   }
 
   /**

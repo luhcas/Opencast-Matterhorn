@@ -33,7 +33,7 @@ import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.Video;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -275,7 +275,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
             // Choose a time
             long time = tp.getTimeInMilliseconds() / 1000;
 
-            Receipt receipt = composerService.image(t, profile.getIdentifier(), time, true);
+            Job receipt = composerService.image(t, profile.getIdentifier(), time, true);
 
             // add this receipt's queue time to the total
             long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();

@@ -173,7 +173,7 @@
             </Import-Package>
             <Embed-Dependency>
               freemarker;inline=true,
-              opencast-truezip;inline=true
+              truezip;inline=true
             </Embed-Dependency>
             <Export-Package>
               org.opencastproject.util.*;version=${project.version};-split-package:=merge-first,

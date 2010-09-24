@@ -21,7 +21,7 @@ import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -214,7 +214,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
       throw new WorkflowOperationException("More than two tracks with flavor '" + sourceFlavor + "' found");
     }
 
-    Receipt receipt = null;
+    Job receipt = null;
     Track composedTrack = null;
 
     // Make sure we have a matching combination
@@ -222,7 +222,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
       if (rewrite) {
         logger.info("Encoding video only track {} to work version", videoTrack);
         receipt = composerService.encode(videoTrack, PREPARE_VONLY_PROFILE, true);
-        if (!receipt.getStatus().equals(Receipt.Status.FINISHED)) {
+        if (!receipt.getStatus().equals(Job.Status.FINISHED)) {
           throw new WorkflowOperationException("Rewriting container for video track " + videoTrack + " failed");
         }
         composedTrack = (Track) receipt.getElement();
@@ -243,7 +243,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
       if (rewrite) {
         logger.info("Encoding audio only track {} to work version", audioTrack);
         receipt = composerService.encode(audioTrack, PREPARE_AONLY_PROFILE, true);
-        if (!receipt.getStatus().equals(Receipt.Status.FINISHED)) {
+        if (!receipt.getStatus().equals(Job.Status.FINISHED)) {
           throw new WorkflowOperationException("Rewriting container for audio track " + audioTrack + " failed");
         }
         composedTrack = (Track) receipt.getElement();
@@ -260,7 +260,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
       if (rewrite) {
         logger.info("Encoding audiovisual track {} to work version", videoTrack);
         receipt = composerService.encode(videoTrack, PREPARE_AV_PROFILE, true);
-        if (!receipt.getStatus().equals(Receipt.Status.FINISHED)) {
+        if (!receipt.getStatus().equals(Job.Status.FINISHED)) {
           throw new WorkflowOperationException("Rewriting container for a/v track " + videoTrack + " failed");
         }
         composedTrack = (Track) receipt.getElement();
@@ -276,7 +276,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     } else {
       logger.info("Muxing audio and video only track {} to work version", videoTrack);
       receipt = composerService.mux(videoTrack, audioTrack, profile.getIdentifier(), true);
-      if (!receipt.getStatus().equals(Receipt.Status.FINISHED)) {
+      if (!receipt.getStatus().equals(Job.Status.FINISHED)) {
         throw new WorkflowOperationException("Muxing video track " + videoTrack + " and audio track " + audioTrack
                 + " failed");
       }

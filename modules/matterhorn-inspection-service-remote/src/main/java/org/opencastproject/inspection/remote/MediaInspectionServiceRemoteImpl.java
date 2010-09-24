@@ -18,7 +18,7 @@ package org.opencastproject.inspection.remote;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.remote.api.RemoteBase;
 
 import org.apache.http.HttpEntity;
@@ -56,7 +56,7 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
    * @see org.opencastproject.inspection.api.MediaInspectionService#inspect(java.net.URI, boolean)
    */
   @Override
-  public Receipt inspect(URI uri, boolean block) {
+  public Job inspect(URI uri, boolean block) {
     List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
     queryStringParams.add(new BasicNameValuePair("uri", uri.toString()));
     String url = "/inspection/rest/inspect?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
@@ -66,7 +66,7 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
       HttpGet get = new HttpGet(url);
       response = getResponse(get);
       if (response != null) {
-        Receipt receipt = remoteServiceManager.parseReceipt(response.getEntity().getContent());
+        Job receipt = remoteServiceManager.parseJob(response.getEntity().getContent());
         if (block) {
           receipt = poll(receipt.getId());
         }
@@ -88,7 +88,7 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
    *      boolean, boolean)
    */
   @Override
-  public Receipt enrich(MediaPackageElement original, boolean override, boolean block) {
+  public Job enrich(MediaPackageElement original, boolean override, boolean block) {
     String url = "/inspection/rest/enrich";
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     try {
@@ -105,7 +105,7 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
       post.setEntity(entity);
       response = getResponse(post);
       if (response != null) {
-        Receipt receipt = remoteServiceManager.parseReceipt(response.getEntity().getContent());
+        Job receipt = remoteServiceManager.parseJob(response.getEntity().getContent());
         if (block) {
           receipt = poll(receipt.getId());
         }
@@ -127,8 +127,8 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
    * @see org.opencastproject.inspection.api.MediaInspectionService#getReceipt(java.lang.String)
    */
   @Override
-  public Receipt getReceipt(String id) {
-    return super.remoteServiceManager.getReceipt(id);
+  public Job getReceipt(String id) {
+    return super.remoteServiceManager.getJob(id);
   }
 
 }

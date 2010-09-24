@@ -21,7 +21,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -121,8 +121,8 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
     Catalog mpeg7Catalog = null;
     long timeInQueue = 0;
     try {
-      Receipt receipt = videosegmenter.analyze(track, true);
-      if (receipt.getStatus().equals(Receipt.Status.FAILED)) {
+      Job receipt = videosegmenter.analyze(track, true);
+      if (receipt.getStatus().equals(Job.Status.FAILED)) {
         throw new WorkflowOperationException("Videosegmentation on " + track + " failed");
       }
       timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();

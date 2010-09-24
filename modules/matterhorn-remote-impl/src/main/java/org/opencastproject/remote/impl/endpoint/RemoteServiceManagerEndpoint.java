@@ -17,7 +17,8 @@ package org.opencastproject.remote.impl.endpoint;
 
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.ServiceRegistration;
-import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.remote.api.ServiceStatistics;
+import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -26,6 +27,8 @@ import org.opencastproject.util.doc.RestTestForm;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+
+import java.util.List;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -79,13 +82,16 @@ public class RemoteServiceManagerEndpoint {
   @SuppressWarnings("unchecked")
   public String getRemoteServiceRegistrations() {
     JSONArray jsonArray = new JSONArray();
-    for(ServiceRegistration serviceRegistration : service.getServiceRegistrations()) {
+    List<ServiceRegistration> registrations = service.getServiceRegistrations();
+    List<ServiceStatistics> stats = service.getServiceStatistics();
+    for(ServiceRegistration serviceRegistration : registrations) {
       JSONObject reg = new JSONObject();
       reg.put("host", serviceRegistration.getHost());
-      reg.put("type", serviceRegistration.getReceiptType());
+      reg.put("type", serviceRegistration.getJobType());
+      reg.put("online", serviceRegistration.isOnline());
       reg.put("maintenance", serviceRegistration.isInMaintenanceMode());
-      reg.put("running", service.count(serviceRegistration.getReceiptType(), Status.RUNNING));
-      reg.put("queued", service.count(serviceRegistration.getReceiptType(), Status.QUEUED));
+      reg.put("running", service.count(serviceRegistration.getJobType(), Status.RUNNING));
+      reg.put("queued", service.count(serviceRegistration.getJobType(), Status.QUEUED));
       jsonArray.add(reg);
     }
     return jsonArray.toJSONString();

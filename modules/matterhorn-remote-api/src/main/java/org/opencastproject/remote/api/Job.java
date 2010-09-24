@@ -22,7 +22,7 @@ import java.util.Date;
 /**
  * A receipt for an long running, asynchronous job. A Receipt may be used to track any task once it has been queued.
  */
-public interface Receipt {
+public interface Job {
   /** The status of the job that this receipt represents */
   public static enum Status {
     QUEUED, RUNNING, FINISHED, FAILED
@@ -34,11 +34,8 @@ public interface Receipt {
   /** Sets the receipt identifier */
   public void setId(String id);
 
-  /** Gets the receipt type, which determines the type of service that runs the job */
-  public String getType();
-
-  /** Sets the receipt type */
-  public void setType(String type);
+  /** Gets the job type, which determines the type of service that runs the job */
+  public String getJobType();
 
   /** Gets the receipt's current {@link Status} */
   public Status getStatus();
@@ -49,23 +46,14 @@ public interface Receipt {
   /** Gets the host responsible for queuing and running this job */
   public String getHost();
 
-  /** Sets the host responsible for queuing and running this job */
-  public void setHost(String host);
-
   /** The date this receipt was created */
   public Date getDateCreated();
 
   /** The date this job was started. If the job was queued, this can be significantly later than the date created. */
   public Date getDateStarted();
-  
+
   /** The date this job was completed */
   public Date getDateCompleted();
-
-  // /** Gets the execution context for this receipt. This can be a workflow identifier or any other reference. */
-  // public String getContext();
-  //  
-  // /** Sets the execution context for this receipt. */
-  // public void setContext(String context);
 
   /**
    * Gets the mediapackage element that was produced by this job, or null if none was produced, or if it has yet to be

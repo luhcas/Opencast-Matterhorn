@@ -44,7 +44,7 @@ import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -285,7 +285,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         try {
           long startTimeSeconds = segmentTimePoint.getTimeInMilliseconds() / 1000;
           long durationSeconds = segmentDuration.getDurationInMilliseconds() / 1000;
-          Receipt imageReceipt = composer.image(sourceTrack, IMAGE_EXTRACTION_PROFILE, startTimeSeconds
+          Job imageReceipt = composer.image(sourceTrack, IMAGE_EXTRACTION_PROFILE, startTimeSeconds
                   + durationSeconds - stabilityThreshold + 1, true);
           image = (Attachment) imageReceipt.getElement();
           long timeInComposerQueue = imageReceipt.getDateStarted().getTime() - imageReceipt.getDateCreated().getTime();
@@ -296,7 +296,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         }
 
         // If there is a corresponding spaciotemporal decomposition, remove all the videotext elements
-        Receipt receipt = analysisService.analyze(image, true);
+        Job receipt = analysisService.analyze(image, true);
 
         // add this receipt's queue time to the total
         long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();

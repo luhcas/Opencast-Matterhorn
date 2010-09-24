@@ -23,8 +23,9 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.impl.ReceiptImpl;
+import org.opencastproject.remote.api.Job;
+import org.opencastproject.remote.impl.JobImpl;
+import org.opencastproject.remote.impl.ServiceRegistrationImpl;
 
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -42,26 +43,29 @@ import javax.ws.rs.core.Response.Status;
  */
 public class ComposerRestServiceTest {
 
-  Receipt receipt;
+  Job receipt;
   EncodingProfileImpl profile;
   EncodingProfileList profileList;
   Track audioTrack;
   Track videoTrack;
   String profileId;
   ComposerRestService restService;
-  
+
   @Before
   public void setup() throws Exception {
     MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
     // Set up our arguments and return values
-    audioTrack = (Track)builder.newElement(Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
+    audioTrack = (Track) builder.newElement(Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
     audioTrack.setIdentifier("audio1");
-    
-    videoTrack = (Track)builder.newElement(Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
+
+    videoTrack = (Track) builder.newElement(Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
     videoTrack.setIdentifier("video1");
 
     profileId = "profile1";
-    receipt = new ReceiptImpl("123", org.opencastproject.remote.api.Receipt.Status.QUEUED, ComposerService.JOB_TYPE, "encoding_farm_server_456", null);
+    
+    // FIXME: Remove the test scoped dependency on matterhorn-remote-impl and replace this code with mocks
+    receipt = new JobImpl(org.opencastproject.remote.api.Job.Status.QUEUED, new ServiceRegistrationImpl(
+            ComposerService.JOB_TYPE, "encoding_farm_server_456"));
     profile = new EncodingProfileImpl();
     profile.setIdentifier(profileId);
     List<EncodingProfileImpl> list = new ArrayList<EncodingProfileImpl>();
@@ -81,7 +85,7 @@ public class ComposerRestServiceTest {
     restService.setComposerService(composer);
     restService.activate(null);
   }
-  
+
   @Test
   public void testMissingArguments() throws Exception {
     // Ensure the rest endpoint tests for missing parameters
@@ -90,7 +94,7 @@ public class ComposerRestServiceTest {
 
     response = restService.encode(null, "profile");
     Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
-    
+
     response = restService.mux(generateAudioTrack(), null, "profile");
     Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
@@ -100,16 +104,16 @@ public class ComposerRestServiceTest {
     response = restService.mux(generateAudioTrack(), generateVideoTrack(), null);
     Assert.assertEquals(Status.BAD_REQUEST.getStatusCode(), response.getStatus());
   }
-  
+
   @Test
-  public void testEncode() throws Exception {    
+  public void testEncode() throws Exception {
     Response response = restService.encode(generateVideoTrack(), profileId);
     Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     Assert.assertEquals(receipt.toXml(), response.getEntity());
   }
 
   @Test
-  public void testMux() throws Exception {    
+  public void testMux() throws Exception {
     Response response = restService.mux(generateAudioTrack(), generateVideoTrack(), profileId);
     Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     Assert.assertEquals(receipt.toXml(), response.getEntity());
@@ -127,7 +131,7 @@ public class ComposerRestServiceTest {
     EncodingProfileList list = restService.listProfiles();
     Assert.assertEquals(profileList, list);
   }
-  
+
   protected String generateVideoTrack() {
     return "<track id=\"video1\" type=\"presentation/source\">\n" + "  <mimetype>video/quicktime</mimetype>\n"
             + "  <url>serverUrl/workflow/samples/camera.mpg</url>\n"

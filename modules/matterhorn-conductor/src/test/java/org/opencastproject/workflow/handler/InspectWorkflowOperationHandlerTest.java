@@ -27,8 +27,8 @@ import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
-import org.opencastproject.remote.api.Receipt;
-import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.remote.api.Job;
+import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -59,7 +59,7 @@ public class InspectWorkflowOperationHandlerTest {
   private MediaPackage mp;
   private MediaPackage mpUpdatedDC;
   private Track newTrack;
-  private Receipt receipt;
+  private Job receipt;
 
   // mock services and objects
   private Workspace workspace = null;
@@ -119,7 +119,7 @@ public class InspectWorkflowOperationHandlerTest {
     operationHandler.setDublincoreService(dcService);
 
     // set up mock receipt and inspect service providing it
-    receipt = EasyMock.createNiceMock(Receipt.class);
+    receipt = EasyMock.createNiceMock(Job.class);
     EasyMock.expect(receipt.getElement()).andReturn(newTrack);
     EasyMock.expect(receipt.getId()).andReturn("123");
     EasyMock.expect(receipt.getStatus()).andReturn(Status.FINISHED);

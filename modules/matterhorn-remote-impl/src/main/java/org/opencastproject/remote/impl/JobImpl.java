@@ -22,12 +22,13 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -35,6 +36,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -49,57 +51,72 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
- * A receipt for a long running, asynchronously executed job.
+ * A long running, asynchronously executed job.
  */
-@Entity(name="Receipt")
+@Entity(name = "Job")
 @Access(AccessType.PROPERTY)
-@Table(name="JOB")
+@Table(name = "JOB")
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name="receipt", namespace="http://receipt.opencastproject.org/")
-public class ReceiptImpl implements Receipt {
+@XmlRootElement(name = "job", namespace = "http://remote.opencastproject.org/")
+public class JobImpl implements Job {
 
   /** Default constructor needed by jaxb and jpa */
-  public ReceiptImpl() {}
-
-  /** Constructor with everything needed for a newly instantiated receipt. */
-  public ReceiptImpl(String id, Status status, String type, String host, String context) {
-    this();
-    setId(id);
-    setStatus(status);
-    setType(type);
-    setHost(host);
+  public JobImpl() {
   }
 
-  /** The receipt ID */
+  /**
+   * Constructor with everything needed for a newly instantiated job, using a random ID and setting the status to
+   * queued.
+   */
+  public JobImpl(ServiceRegistrationImpl serviceRegistration) {
+    this();
+    setId(UUID.randomUUID().toString());
+    setStatus(Status.QUEUED);
+    setDateCreated(new Date());
+    this.serviceRegistration = serviceRegistration;
+  }
+
+  /** Constructor with everything needed for a newly instantiated job, using a random ID. */
+  public JobImpl(Status status, ServiceRegistrationImpl serviceRegistration) {
+    this(serviceRegistration);
+    setStatus(status);
+  }
+
+  /** The job ID */
   String id;
-  
-  /** The receipt type */
-  String type;
-  
-  /** The receipt status */
+
+  /** The service that produced this job */
+  @ManyToOne
+  ServiceRegistrationImpl serviceRegistration;
+
+  /** The job status */
   Status status;
 
-  /** The host responsible for this receipt */
-  String host;
-
-  /** The date this receipt was created */
+  /** The date this job was created */
   Date dateCreated;
-  
-  /** The date this receipt was started */
+
+  /** The date this job was started */
   Date dateStarted;
 
-  /** The date this receipt was completed */
+  /** The date this job was completed */
   Date dateCompleted;
+  
+  /** The queue time is denormalized in the database to enable cross-platform date arithmetic in JPA queries */
+  Long queueTime;
 
-  /** The receipt's context.  Not currently utilized.  See http://opencast.jira.com/browse/MH-4492 */
-//  String context;
+  /** The run time is denormalized in the database to enable cross-platform date arithmetic in JPA queries */
+  Long runTime;
+
+  /** The job's context. Not currently utilized. See http://opencast.jira.com/browse/MH-4492 */
+  // String context;
 
   /** The element produced by this job, or null if it has not yet been generated (or was not due to an exception) */
   MediaPackageElement element;
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#getId()
+   * 
+   * @see org.opencastproject.remote.api.Job#getId()
    */
   @Id
   @XmlID
@@ -111,7 +128,8 @@ public class ReceiptImpl implements Receipt {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#setId(java.lang.String)
+   * 
+   * @see org.opencastproject.remote.api.Job#setId(java.lang.String)
    */
   @Override
   public void setId(String id) {
@@ -120,7 +138,8 @@ public class ReceiptImpl implements Receipt {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#getStatus()
+   * 
+   * @see org.opencastproject.remote.api.Job#getStatus()
    */
   @Column
   @XmlAttribute
@@ -131,66 +150,40 @@ public class ReceiptImpl implements Receipt {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#setStatus(org.opencastproject.remote.api.Receipt.Status)
+   * 
+   * @see org.opencastproject.remote.api.Job#setStatus(org.opencastproject.remote.api.Job.Status)
    */
   @Override
   public void setStatus(Status status) {
-    Date now = new Date();
-    if(Status.QUEUED.equals(status)) {
-      this.dateCreated = now;
-    } else if(Status.RUNNING.equals(status)) {
-      this.dateStarted = now;
-    } else if(Status.FAILED.equals(status)) {
-      this.dateCompleted = now;
-    } else if(Status.FINISHED.equals(status)) {
-      this.dateCompleted = now;
-    }
     this.status = status;
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#getType()
+   * 
+   * @see org.opencastproject.remote.api.Job#getType()
    */
-  @Column
-  @XmlAttribute
+  @XmlAttribute(name="type")
   @Override
-  public String getType() {
-    return type;
+  public String getJobType() {
+    return serviceRegistration.getJobType();
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#setType(java.lang.String)
+   * 
+   * @see org.opencastproject.remote.api.Job#getHost()
    */
-  @Override
-  public void setType(String type) {
-    this.type = type;
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#getHost()
-   */
-  @Column
   @XmlElement
   @Override
   public String getHost() {
-    return host;
+    return serviceRegistration.getHost();
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#setHost(java.lang.String)
-   */
-  @Override
-  public void setHost(String host) {
-    this.host = host;
-  }
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#getDateCompleted()
+   * 
+   * @see org.opencastproject.remote.api.Job#getDateCompleted()
    */
   @Column
   @Temporal(TemporalType.TIMESTAMP)
@@ -199,10 +192,11 @@ public class ReceiptImpl implements Receipt {
   public Date getDateCompleted() {
     return dateCompleted;
   }
-  
+
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#getDateCreated()
+   * 
+   * @see org.opencastproject.remote.api.Job#getDateCreated()
    */
   @Column
   @Temporal(TemporalType.TIMESTAMP)
@@ -214,7 +208,8 @@ public class ReceiptImpl implements Receipt {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#getDateStarted()
+   * 
+   * @see org.opencastproject.remote.api.Job#getDateStarted()
    */
   @Column
   @Temporal(TemporalType.TIMESTAMP)
@@ -225,47 +220,63 @@ public class ReceiptImpl implements Receipt {
   }
   
   /**
-   * @param dateCreated the dateCreated to set
+   * @return the queueTime
+   */
+  @Column
+  public Long getQueueTime() {
+    return queueTime;
+  }
+
+  /**
+   * @param queueTime the queueTime to set
+   */
+  public void setQueueTime(Long queueTime) {
+    this.queueTime = queueTime;
+  }
+
+  /**
+   * @return the runTime
+   */
+  @Column
+  public Long getRunTime() {
+    return runTime;
+  }
+  
+  /**
+   * @param runTime the runTime to set
+   */
+  public void setRunTime(Long runTime) {
+    this.runTime = runTime;
+  }
+  
+  /**
+   * @param dateCreated
+   *          the dateCreated to set
    */
   public void setDateCreated(Date dateCreated) {
     this.dateCreated = dateCreated;
   }
 
   /**
-   * @param dateStarted the dateStarted to set
+   * @param dateStarted
+   *          the dateStarted to set
    */
   public void setDateStarted(Date dateStarted) {
     this.dateStarted = dateStarted;
   }
 
   /**
-   * @param dateCompleted the dateCompleted to set
+   * @param dateCompleted
+   *          the dateCompleted to set
    */
   public void setDateCompleted(Date dateCompleted) {
     this.dateCompleted = dateCompleted;
   }
 
-//  /**
-//   * {@inheritDoc}
-//   * @see org.opencastproject.remote.api.Receipt#getContext()
-//   */
-//  @Override
-//  public String getContext() {
-//    return context;
-//  }
-//  
-//  /**
-//   * {@inheritDoc}
-//   * @see org.opencastproject.remote.api.Receipt#setContext(java.lang.String)
-//   */
-//  @Override
-//  public void setContext(String context) {
-//    this.context = context;
-//  }
-  
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#getElement()
+   * 
+   * @see org.opencastproject.remote.api.Job#getElement()
    */
   @Transient
   @Override
@@ -275,7 +286,8 @@ public class ReceiptImpl implements Receipt {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#setElement(org.opencastproject.mediapackage.MediaPackageElement)
+   * 
+   * @see org.opencastproject.remote.api.Job#setElement(org.opencastproject.mediapackage.MediaPackageElement)
    */
   @Transient
   @Override
@@ -284,72 +296,91 @@ public class ReceiptImpl implements Receipt {
   }
 
   @Transient
-  @XmlElement(name="track")
+  @XmlElement(name = "track")
   public Track getTrack() {
-    if(element != null && element instanceof Track) {
-      return (Track)element;
+    if (element != null && element instanceof Track) {
+      return (Track) element;
     } else {
       return null;
     }
   }
+
   public void setTrack(Track track) {
     this.element = track;
   }
 
   @Transient
-  @XmlElement(name="attachment")
+  @XmlElement(name = "attachment")
   public Attachment getAttachment() {
-    if(element != null && element instanceof Attachment) {
-      return (Attachment)element;
+    if (element != null && element instanceof Attachment) {
+      return (Attachment) element;
     } else {
       return null;
     }
   }
+
   public void setAttachment(Attachment attachment) {
     this.element = attachment;
   }
 
   @Transient
-  @XmlElement(name="catalog")
+  @XmlElement(name = "catalog")
   public Catalog getCatalog() {
-    if(element != null && element instanceof Catalog) {
-      return (Catalog)element;
+    if (element != null && element instanceof Catalog) {
+      return (Catalog) element;
     } else {
       return null;
     }
   }
+
   public void setCatalog(Catalog catalog) {
     this.element = catalog;
   }
 
   @Lob
-  @Column(name="ELEMENT_XML")
+  @Column(name = "ELEMENT_XML")
   public String getElementAsXml() throws Exception {
-    if(element == null) return null;
-    return ((AbstractMediaPackageElement)element).getAsXml();
+    if (element == null)
+      return null;
+    return ((AbstractMediaPackageElement) element).getAsXml();
   }
 
   public void setElementAsXml(String xml) throws Exception {
-    if(xml == null) {
+    if (xml == null) {
       element = null;
     } else {
       DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
       Document doc = docBuilder.parse(IOUtils.toInputStream(xml, "UTF-8"));
-      element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-              .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
+      element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromManifest(
+              doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
     }
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.Receipt#toXml()
+   * 
+   * @see org.opencastproject.remote.api.Job#toXml()
    */
   @Override
   public String toXml() {
     try {
-      return ReceiptBuilder.getInstance().toXml(this);
+      return JobBuilder.getInstance().toXml(this);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * @return the serviceRegistration
+   */
+  public ServiceRegistrationImpl getServiceRegistration() {
+    return serviceRegistration;
+  }
+
+  /**
+   * @param serviceRegistration the serviceRegistration to set
+   */
+  public void setServiceRegistration(ServiceRegistrationImpl serviceRegistration) {
+    this.serviceRegistration = serviceRegistration;
   }
 }

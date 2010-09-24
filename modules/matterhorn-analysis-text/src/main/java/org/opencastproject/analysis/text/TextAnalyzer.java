@@ -40,9 +40,9 @@ import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.metadata.mpeg7.VideoTextImpl;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.remote.api.RemoteServiceManager;
-import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.lang.StringUtils;
@@ -153,9 +153,9 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
    * @throws MediaAnalysisException
    */
   @Override
-  public Receipt analyze(final MediaPackageElement element, boolean block) throws MediaAnalysisException {
+  public Job analyze(final MediaPackageElement element, boolean block) throws MediaAnalysisException {
     final RemoteServiceManager rs = remoteServiceManager;
-    final Receipt receipt = rs.createReceipt(RECEIPT_TYPE);
+    final Job receipt = rs.createJob(RECEIPT_TYPE);
 
     final Attachment attachment = (Attachment) element;
     final URI imageUrl = attachment.getURI();
@@ -164,7 +164,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
       @SuppressWarnings("unchecked")
       public void run() {
         receipt.setStatus(Status.RUNNING);
-        rs.updateReceipt(receipt);
+        rs.updateJob(receipt);
 
         Mpeg7CatalogImpl mpeg7 = Mpeg7CatalogImpl.newInstance();
 
@@ -203,17 +203,17 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
 
           receipt.setElement(catalog);
           receipt.setStatus(Status.FINISHED);
-          rs.updateReceipt(receipt);
+          rs.updateJob(receipt);
 
           logger.info("Finished text extraction of {}", imageUrl);
 
         } catch (MediaAnalysisException e) {
           receipt.setStatus(Status.FAILED);
-          rs.updateReceipt(receipt);
+          rs.updateJob(receipt);
           throw e;
         } catch (Exception e) {
           receipt.setStatus(Status.FAILED);
-          rs.updateReceipt(receipt);
+          rs.updateJob(receipt);
           throw new MediaAnalysisException(e);
         }
       }
@@ -225,7 +225,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
         future.get();
       } catch (Exception e) {
         receipt.setStatus(Status.FAILED);
-        remoteServiceManager.updateReceipt(receipt);
+        remoteServiceManager.updateJob(receipt);
         throw new MediaAnalysisException(e);
       }
     }
@@ -239,8 +239,8 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
    *          the receipt identifier
    * @return the receipt
    */
-  public Receipt getReceipt(String id) {
-    return remoteServiceManager.getReceipt(id);
+  public Job getReceipt(String id) {
+    return remoteServiceManager.getJob(id);
   }
 
   /**

@@ -16,7 +16,7 @@
 package org.opencastproject.inspection.api;
 
 import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 
 import java.net.URI;
 
@@ -44,7 +44,7 @@ public interface MediaInspectionService {
    * @throws RuntimeException
    *           if there is a failure during media package update
    */
-  Receipt inspect(URI uri, boolean block);
+  Job inspect(URI uri, boolean block);
 
   /**
    * Equip an existing media package element with automatically generated metadata
@@ -61,7 +61,7 @@ public interface MediaInspectionService {
    * @throws RuntimeException
    *           if there is a failure during media package update
    */
-  Receipt enrich(MediaPackageElement original, boolean override, boolean block);
+  Job enrich(MediaPackageElement original, boolean override, boolean block);
 
   /**
    * Gets the receipt with a given ID. This can be used to retrieve the status and outcome of a non-blocking call to
@@ -71,5 +71,5 @@ public interface MediaInspectionService {
    *          The id of the receipt
    * @return The receipt, or null if not found
    */
-  Receipt getReceipt(String id);
+  Job getReceipt(String id);
 }

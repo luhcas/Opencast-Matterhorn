@@ -22,7 +22,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -50,7 +50,7 @@ public class ComposeWorkflowOperationHandlerTest {
   // local resources
   private MediaPackage mp;
   private MediaPackage mpEncode;
-  private Receipt receipt;
+  private Job receipt;
   private Track[] encodedTracks;
   EncodingProfile[] profileList;
 
@@ -96,9 +96,9 @@ public class ComposeWorkflowOperationHandlerTest {
     EasyMock.replay(profile);
 
     // set up mock receipt
-    receipt = EasyMock.createNiceMock(Receipt.class);
+    receipt = EasyMock.createNiceMock(Job.class);
     EasyMock.expect(receipt.getElement()).andReturn(encodedTracks[0]);
-    EasyMock.expect(receipt.getStatus()).andReturn(Receipt.Status.FINISHED);
+    EasyMock.expect(receipt.getStatus()).andReturn(Job.Status.FINISHED);
     EasyMock.expect(receipt.getDateCreated()).andReturn(new Date());
     EasyMock.expect(receipt.getDateStarted()).andReturn(new Date());
     EasyMock.replay(receipt);
@@ -144,7 +144,7 @@ public class ComposeWorkflowOperationHandlerTest {
     EasyMock.replay(profile);
 
     // set up mock receipt
-    receipt = EasyMock.createNiceMock(Receipt.class);
+    receipt = EasyMock.createNiceMock(Job.class);
     EasyMock.expect(receipt.getElement()).andReturn(encodedTracks[0]);
     EasyMock.replay(receipt);
 

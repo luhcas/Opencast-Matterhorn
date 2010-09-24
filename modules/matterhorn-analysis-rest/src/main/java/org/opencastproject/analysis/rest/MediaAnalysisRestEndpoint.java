@@ -19,7 +19,7 @@ import org.opencastproject.analysis.api.MediaAnalysisService;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -93,7 +93,7 @@ public class MediaAnalysisRestEndpoint {
       Document doc = docBuilder.parse(IOUtils.toInputStream(trackAsXml, "UTF-8"));
       MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
               .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
-      Receipt receipt = service.analyze(element, false);
+      Job receipt = service.analyze(element, false);
       return Response.ok(receipt.toXml()).build();
     } catch (Exception e) {
       logger.warn(e.getMessage(), e);
@@ -106,7 +106,7 @@ public class MediaAnalysisRestEndpoint {
   @Path("/{analysisType}/{id}.xml")
   public Response getReceipt(@PathParam("analysisType") String analysisType, @PathParam("id") String id) {
     MediaAnalysisService service = getMediaAnalysiService(analysisType);
-    Receipt receipt = service.getReceipt(id);
+    Job receipt = service.getReceipt(id);
     if (receipt == null) {
       return Response.status(Status.NOT_FOUND).type(MediaType.TEXT_HTML).build();
     } else {

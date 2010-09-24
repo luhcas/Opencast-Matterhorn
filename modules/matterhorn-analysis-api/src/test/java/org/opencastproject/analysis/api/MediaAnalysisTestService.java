@@ -20,7 +20,7 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 
 import org.junit.Ignore;
 
@@ -59,7 +59,7 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
    * @see org.opencastproject.analysis.api.MediaAnalysisServiceSupport#analyze(java.net.URL)
    */
   @Override
-  public Receipt analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException {
+  public Job analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException {
     ReceiptStub receipt = new ReceiptStub();
     try {
       receipt.element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder().newElement(Catalog.TYPE,
@@ -75,11 +75,11 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
    * @see org.opencastproject.analysis.api.MediaAnalysisService#getReceipt(java.lang.String)
    */
   @Override
-  public Receipt getReceipt(String id) {
+  public Job getReceipt(String id) {
     return null;
   }
   
-  class ReceiptStub implements Receipt {
+  class ReceiptStub implements Job {
     MediaPackageElement element;
     Status status;
     public MediaPackageElement getElement() {
@@ -94,7 +94,7 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
     public Status getStatus() {
       return status;
     }
-    public String getType() {
+    public String getJobType() {
       return "analysis-test";
     }
     public void setElement(MediaPackageElement element) {

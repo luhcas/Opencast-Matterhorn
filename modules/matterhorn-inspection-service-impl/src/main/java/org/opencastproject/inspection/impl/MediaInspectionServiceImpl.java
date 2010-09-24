@@ -31,9 +31,9 @@ import org.opencastproject.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.mediapackage.track.AudioStreamImpl;
 import org.opencastproject.mediapackage.track.TrackImpl;
 import org.opencastproject.mediapackage.track.VideoStreamImpl;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.remote.api.RemoteServiceManager;
-import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.MimeTypes;
@@ -117,8 +117,8 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
    * @see org.opencastproject.inspection.api.MediaInspectionService#getReceipt(java.lang.String)
    */
   @Override
-  public Receipt getReceipt(String id) {
-    return remoteServiceManager.getReceipt(id);
+  public Job getReceipt(String id) {
+    return remoteServiceManager.getJob(id);
   }
 
   /**
@@ -126,17 +126,17 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
    * 
    * @see org.opencastproject.inspection.api.MediaInspectionService#inspect(java.net.URI, boolean)
    */
-  public Receipt inspect(final URI uri, final boolean block) {
+  public Job inspect(final URI uri, final boolean block) {
     logger.debug("inspect(" + uri + ") called, using workspace " + workspace);
 
     // Construct a receipt for this operation
-    final Receipt receipt = remoteServiceManager.createReceipt(JOB_TYPE);
+    final Job job = remoteServiceManager.createJob(JOB_TYPE);
     final RemoteServiceManager rs = remoteServiceManager;
     Callable<Track> command = new Callable<Track>() {
       public Track call() throws Exception {
         // Update the receipt status
-        receipt.setStatus(Status.RUNNING);
-        rs.updateReceipt(receipt);
+        job.setStatus(Status.RUNNING);
+        rs.updateJob(job);
 
         // Get the file from the URL (runtime exception if invalid)
         File file = null;
@@ -144,8 +144,8 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
           file = workspace.get(uri);
         } catch (NotFoundException e) {
           logger.warn("File " + file + " was not found and can therefore not be inspected");
-          receipt.setStatus(Status.FAILED);
-          rs.updateReceipt(receipt);
+          job.setStatus(Status.FAILED);
+          rs.updateJob(job);
           throw new RuntimeException(e);
         }
         
@@ -153,16 +153,16 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
         // TODO: Try to guess the extension from the container's metadata
         if ("".equals(FilenameUtils.getExtension(file.getName()))) {
           logger.warn("Track " + file + " has no file extension");
-          receipt.setStatus(Status.FAILED);
-          rs.updateReceipt(receipt);
+          job.setStatus(Status.FAILED);
+          rs.updateJob(job);
           throw new UnsupportedElementException("Track " + file + " has no file extension");
         }
         
         MediaContainerMetadata metadata = getFileMetadata(file);
         if (metadata == null) {
           logger.warn("Unable to acquire media metadata for " + uri);
-          receipt.setStatus(Status.FAILED);
-          rs.updateReceipt(receipt);
+          job.setStatus(Status.FAILED);
+          rs.updateJob(job);
           return null; // TODO: does the contract for this service define what to do if the file isn't valid media?
         } else {
           MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance()
@@ -173,8 +173,8 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
             element = elementBuilder.elementFromURI(uri, Type.Track, null);
           } catch (UnsupportedElementException e) {
             logger.warn("Unable to create track element from " + file + ": " + e.getMessage());
-            receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            job.setStatus(Status.FAILED);
+            rs.updateJob(job);
             throw new RuntimeException(e);
           }
           track = (TrackImpl) element;
@@ -188,13 +188,13 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
             track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
           } catch (NoSuchAlgorithmException e) {
             logger.warn("Unable to create checksum for " + file + ": " + e.getMessage());
-            receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            job.setStatus(Status.FAILED);
+            rs.updateJob(job);
             throw new RuntimeException(e);
           } catch (IOException e) {
             logger.warn("Unable to read " + file + ": " + e.getMessage());
-            receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            job.setStatus(Status.FAILED);
+            rs.updateJob(job);
             throw new RuntimeException(e);
           }
 
@@ -210,8 +210,8 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
             addAudioStreamMetadata(track, metadata);
           } catch (Exception e) {
             logger.warn("Unable to extract audio metadata from " + file + ": " + e.getMessage());
-            receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            job.setStatus(Status.FAILED);
+            rs.updateJob(job);
             throw new RuntimeException(e);
           }
 
@@ -220,14 +220,14 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
             addVideoStreamMetadata(track, metadata);
           } catch (Exception e) {
             logger.warn("Unable to extract video metadata from " + file + ": " + e.getMessage());
-            receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            job.setStatus(Status.FAILED);
+            rs.updateJob(job);
             throw new RuntimeException(e);
           }
 
-          receipt.setElement(track);
-          receipt.setStatus(Status.FINISHED);
-          rs.updateReceipt(receipt);
+          job.setElement(track);
+          job.setStatus(Status.FINISHED);
+          rs.updateJob(job);
           return track;
         }
       }
@@ -242,17 +242,17 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
         throw new RuntimeException(e);
       }
     }
-    return receipt;
+    return job;
   }
 
   protected Callable<MediaPackageElement> getEnrichTrackCommand(final Track originalTrack, final boolean override,
-          final Receipt receipt) {
+          final Job receipt) {
     final RemoteServiceManager rs = remoteServiceManager;
     return new Callable<MediaPackageElement>() {
       public MediaPackageElement call() throws Exception {
         // Set the receipt state to running
         receipt.setStatus(Status.RUNNING);
-        rs.updateReceipt(receipt);
+        rs.updateJob(receipt);
 
         URI originalTrackUrl = originalTrack.getURI();
         MediaPackageElementFlavor flavor = originalTrack.getFlavor();
@@ -265,7 +265,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
         } catch (NotFoundException e) {
           logger.warn("File " + file + " was not found and can therefore not be inspected");
           receipt.setStatus(Status.FAILED);
-          rs.updateReceipt(receipt);
+          rs.updateJob(receipt);
           throw new RuntimeException(e);
         }
 
@@ -274,7 +274,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
         if ("".equals(FilenameUtils.getExtension(file.getName()))) {
           logger.warn("Track " + file + " has no file extension");
           receipt.setStatus(Status.FAILED);
-          rs.updateReceipt(receipt);
+          rs.updateJob(receipt);
           throw new UnsupportedElementException("Track " + file + " has no file extension");
         }
 
@@ -282,12 +282,12 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
         if (metadata == null) {
           logger.warn("Unable to acquire media metadata for " + originalTrackUrl);
           receipt.setStatus(Status.FAILED);
-          rs.updateReceipt(receipt);
+          rs.updateJob(receipt);
           return null;
         } else if (metadata.getAudioStreamMetadata().size() == 0 && metadata.getVideoStreamMetadata().size() == 0) {
           logger.warn("File at {} does not seem like a a/v media", originalTrackUrl);
           receipt.setStatus(Status.FAILED);
-          rs.updateReceipt(receipt);
+          rs.updateJob(receipt);
           return null;
         } else {
           TrackImpl track = null;
@@ -297,7 +297,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
           } catch (UnsupportedElementException e) {
             logger.warn("Unable to create track element from " + file + ": " + e.getMessage());
             receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            rs.updateJob(receipt);
             throw new RuntimeException(e);
           }
 
@@ -324,12 +324,12 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
             } catch (NoSuchAlgorithmException e) {
               logger.warn("Unable to create checksum for " + file + ": " + e.getMessage());
               receipt.setStatus(Status.FAILED);
-              rs.updateReceipt(receipt);
+              rs.updateJob(receipt);
               throw new RuntimeException(e);
             } catch (IOException e) {
               logger.warn("Unable to read " + file + ": " + e.getMessage());
               receipt.setStatus(Status.FAILED);
-              rs.updateReceipt(receipt);
+              rs.updateJob(receipt);
               throw new RuntimeException(e);
             }
           }
@@ -357,7 +357,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
           } catch (Exception e) {
             logger.warn("Unable to extract audio metadata from " + file + ": " + e.getMessage());
             receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            rs.updateJob(receipt);
             throw new RuntimeException(e);
           }
 
@@ -367,13 +367,13 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
           } catch (Exception e) {
             logger.warn("Unable to extract video metadata from " + file + ": " + e.getMessage());
             receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            rs.updateJob(receipt);
             throw new RuntimeException(e);
           }
 
           receipt.setElement(track);
           receipt.setStatus(Status.FINISHED);
-          rs.updateReceipt(receipt);
+          rs.updateJob(receipt);
           logger.info("Successfully inspected track {}", track);
           return track;
         }
@@ -438,18 +438,18 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
   }
 
   protected Callable<MediaPackageElement> getEnrichElementCommand(final MediaPackageElement element,
-          final boolean override, final Receipt receipt) {
+          final boolean override, final Job receipt) {
     final RemoteServiceManager rs = remoteServiceManager;
     return new Callable<MediaPackageElement>() {
       public MediaPackageElement call() throws Exception {
         receipt.setStatus(Status.RUNNING);
-        rs.updateReceipt(receipt);
+        rs.updateJob(receipt);
         File file;
         try {
           file = workspace.get(element.getURI());
         } catch (NotFoundException e) {
           receipt.setStatus(Status.FAILED);
-          rs.updateReceipt(receipt);
+          rs.updateJob(receipt);
           throw new RuntimeException(e);
         }
         if (element.getChecksum() == null || override) {
@@ -457,7 +457,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
             element.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
           } catch (Exception e) {
             receipt.setStatus(Status.FAILED);
-            rs.updateReceipt(receipt);
+            rs.updateJob(receipt);
             throw new RuntimeException(e);
           }
         }
@@ -470,7 +470,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
         }
         receipt.setElement(element);
         receipt.setStatus(Status.FINISHED);
-        rs.updateReceipt(receipt);
+        rs.updateJob(receipt);
         logger.info("Successfully inspected element {}", element);
         return element;
       }
@@ -484,14 +484,14 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
    *      boolean, boolean)
    */
   @Override
-  public Receipt enrich(final MediaPackageElement element, final boolean override, final boolean block) {
+  public Job enrich(final MediaPackageElement element, final boolean override, final boolean block) {
     Callable<MediaPackageElement> command;
-    final Receipt receipt = remoteServiceManager.createReceipt(JOB_TYPE);
+    final Job job = remoteServiceManager.createJob(JOB_TYPE);
     if (element instanceof Track) {
       final Track originalTrack = (Track) element;
-      command = getEnrichTrackCommand(originalTrack, override, receipt);
+      command = getEnrichTrackCommand(originalTrack, override, job);
     } else {
-      command = getEnrichElementCommand(element, override, receipt);
+      command = getEnrichElementCommand(element, override, job);
     }
 
     Future<MediaPackageElement> future = executor.submit(command);
@@ -503,7 +503,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
         throw new RuntimeException(e);
       }
     }
-    return receipt;
+    return job;
   }
 
   private MediaContainerMetadata getFileMetadata(File file) {

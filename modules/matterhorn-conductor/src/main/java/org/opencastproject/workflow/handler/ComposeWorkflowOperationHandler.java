@@ -22,7 +22,7 @@ import org.opencastproject.composer.api.EncodingProfile.MediaType;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -191,8 +191,8 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
       logger.info("Encoding track {} using encoding profile '{}'", t, profile);
 
       // Start encoding and wait for the result
-      final Receipt receipt = composerService.encode(t, profile.getIdentifier(), true);
-      if (receipt == null || receipt.getStatus().equals(Receipt.Status.FAILED)) {
+      final Job receipt = composerService.encode(t, profile.getIdentifier(), true);
+      if (receipt == null || receipt.getStatus().equals(Job.Status.FAILED)) {
         throw new WorkflowOperationException("Encoding failed");
       }
       Track composedTrack = (Track) receipt.getElement();

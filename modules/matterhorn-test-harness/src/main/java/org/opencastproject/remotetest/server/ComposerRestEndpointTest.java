@@ -36,16 +36,11 @@ import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
@@ -101,7 +96,7 @@ public class ComposerRestEndpointTest {
     HttpResponse postResponse = client.execute(postEncode);
     String postResponseXml = EntityUtils.toString(postResponse.getEntity());
     Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
-    Assert.assertTrue(postResponseXml.contains("receipt"));
+    Assert.assertTrue(postResponseXml.contains("job"));
   }
 
   @Test
@@ -118,7 +113,7 @@ public class ComposerRestEndpointTest {
     HttpResponse postResponse = client.execute(postEncode);
     String postResponseXml = EntityUtils.toString(postResponse.getEntity());
     Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
-    Assert.assertTrue(postResponseXml.contains("receipt"));
+    Assert.assertTrue(postResponseXml.contains("job"));
 
     // Poll for the finished composer job
     // Poll the service for the status of the receipt.

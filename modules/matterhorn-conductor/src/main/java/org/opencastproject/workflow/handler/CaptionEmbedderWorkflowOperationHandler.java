@@ -23,7 +23,7 @@ import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -159,8 +159,8 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
     // perform embedding
     long totalTimeInQueue = 0;
     for (Track t : qtTracks) {
-      Receipt receipt = composerService.captions(t, convertedCaptions, true);
-      if (receipt == null || receipt.getStatus().equals(Receipt.Status.FAILED)) {
+      Job receipt = composerService.captions(t, convertedCaptions, true);
+      if (receipt == null || receipt.getStatus().equals(Job.Status.FAILED)) {
         throw new WorkflowOperationException("Embedding failed");
       }
       Track processedTrack = (Track) receipt.getElement();
@@ -246,8 +246,8 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
       }
       for (String language : languages) {
         if (!captionLanguages.contains(language)) {
-          Receipt receipt = captionService.convert(caption, flavor.getSubtype(), outputFormat, language);
-          if (receipt == null || receipt.getStatus().equals(Receipt.Status.FAILED)) {
+          Job receipt = captionService.convert(caption, flavor.getSubtype(), outputFormat, language);
+          if (receipt == null || receipt.getStatus().equals(Job.Status.FAILED)) {
             throw new WorkflowOperationException("Caption converting failed.");
           }
           Catalog convertedCaption = (Catalog) receipt.getElement();

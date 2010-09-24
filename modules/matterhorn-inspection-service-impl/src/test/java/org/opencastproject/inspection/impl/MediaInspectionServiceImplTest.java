@@ -18,7 +18,7 @@ package org.opencastproject.inspection.impl;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
@@ -79,7 +79,7 @@ public class MediaInspectionServiceImplTest {
     service.setWorkspace(workspace);
 
     RemoteServiceManager rs = EasyMock.createNiceMock(RemoteServiceManager.class);
-    EasyMock.expect(rs.createReceipt(MediaInspectionService.JOB_TYPE)).andReturn(new ReceiptStub()).anyTimes();
+    EasyMock.expect(rs.createJob(MediaInspectionService.JOB_TYPE)).andReturn(new ReceiptStub()).anyTimes();
     EasyMock.replay(rs);
     service.setRemoteServiceManager(rs);
 
@@ -92,7 +92,7 @@ public class MediaInspectionServiceImplTest {
       return;
     
     try {
-      Receipt receipt = service.inspect(uriTrack, true);
+      Job receipt = service.inspect(uriTrack, true);
       Track track = (Track) receipt.getElement();
       // test the returned values
       Checksum cs = Checksum.create(ChecksumType.fromString("md5"), "9d3523e464f18ad51f59564acde4b95a");
@@ -112,7 +112,7 @@ public class MediaInspectionServiceImplTest {
 
     try {
       // init a track with inspect
-      Receipt receipt = service.inspect(uriTrack, true);
+      Job receipt = service.inspect(uriTrack, true);
       Track track = (Track) receipt.getElement();
       // make changes to metadata
       Checksum cs = track.getChecksum();
@@ -120,7 +120,7 @@ public class MediaInspectionServiceImplTest {
       MimeType mt = new MimeType("video", "flash");
       track.setMimeType(mt);
       // test the enrich scenario
-      Receipt newReceipt = service.enrich(track, false, true);
+      Job newReceipt = service.enrich(track, false, true);
       Track newTrack = (Track) newReceipt.getElement();
       Assert.assertEquals(newTrack.getChecksum(), cs);
       Assert.assertEquals(newTrack.getMimeType(), mt);
@@ -136,7 +136,7 @@ public class MediaInspectionServiceImplTest {
     }
   }
 
-  class ReceiptStub implements Receipt {
+  class ReceiptStub implements Job {
     MediaPackageElement element;
     Status status;
 
@@ -156,7 +156,7 @@ public class MediaInspectionServiceImplTest {
       return status;
     }
 
-    public String getType() {
+    public String getJobType() {
       return MediaInspectionService.JOB_TYPE;
     }
 

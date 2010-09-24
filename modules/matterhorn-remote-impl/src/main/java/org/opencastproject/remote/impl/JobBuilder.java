@@ -16,7 +16,7 @@
 package org.opencastproject.remote.impl;
 
 
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 
 import org.apache.commons.io.IOUtils;
 
@@ -31,33 +31,33 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
- * Provides a mechanism to transform {@link Receipt}s to and from xml.
+ * Provides a mechanism to transform {@link Job}s to and from xml.
  */
-public class ReceiptBuilder {
+public class JobBuilder {
 
   /** The singleton instance for this factory */
-  private static ReceiptBuilder instance = null;
+  private static JobBuilder instance = null;
 
   protected JAXBContext jaxbContext = null;
   
-  private ReceiptBuilder() throws JAXBException {
+  private JobBuilder() throws JAXBException {
     StringBuilder sb = new StringBuilder();
     sb.append("org.opencastproject.mediapackage");
     sb.append(":org.opencastproject.mediapackage.attachment");
     sb.append(":org.opencastproject.mediapackage.track");
     sb.append(":org.opencastproject.remote.impl");
-    jaxbContext= JAXBContext.newInstance(sb.toString(), ReceiptBuilder.class.getClassLoader());
+    jaxbContext= JAXBContext.newInstance(sb.toString(), JobBuilder.class.getClassLoader());
   }
   
   /**
-   * Returns an instance of the {@link ReceiptBuilder}.
+   * Returns an instance of the {@link JobBuilder}.
    * 
    * @return a factory
    */
-  public static ReceiptBuilder getInstance() {
+  public static JobBuilder getInstance() {
     if (instance == null) {
       try {
-        instance = new ReceiptBuilder();
+        instance = new JobBuilder();
       } catch (JAXBException e) {
         throw new RuntimeException(e.getLinkedException() != null ? e.getLinkedException() : e);
       }
@@ -74,10 +74,10 @@ public class ReceiptBuilder {
    * @throws Exception
    *           if creating the receipt fails
    */
-  public Receipt parseReceipt(InputStream in) throws Exception {
+  public Job parseJob(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-            ReceiptImpl.class).getValue();
+            JobImpl.class).getValue();
   }
   
   /**
@@ -89,11 +89,11 @@ public class ReceiptBuilder {
    * @throws Exception
    *           if creating the receipt fails
    */
-  public Receipt parseReceipt(String in) throws Exception {
+  public Job parseJob(String in) throws Exception {
     InputStream is = null;
     try {
       is = IOUtils.toInputStream(in, "UTF-8");
-      return parseReceipt(is);
+      return parseJob(is);
     } finally {
       IOUtils.closeQuietly(is);
     }
@@ -106,7 +106,7 @@ public class ReceiptBuilder {
    * @return the xml fragment
    * @throws Exception
    */
-  public String toXml(Receipt receipt) throws Exception {
+  public String toXml(Job receipt) throws Exception {
     Marshaller marshaller = jaxbContext.createMarshaller();
     Writer writer = new StringWriter();
     marshaller.marshal(receipt, writer);

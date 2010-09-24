@@ -32,7 +32,7 @@ import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.MultimediaContentType;
 import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workspace.api.Workspace;
@@ -121,10 +121,10 @@ public class VideoSegmenterTest {
       }
     });
     EasyMock.replay(workspace);
-    Receipt receipt = new ReceiptStub();
+    Job receipt = new ReceiptStub();
 
     RemoteServiceManager remoteServiceManager = EasyMock.createNiceMock(RemoteServiceManager.class);
-    EasyMock.expect(remoteServiceManager.createReceipt((String) EasyMock.anyObject())).andReturn(receipt).anyTimes();
+    EasyMock.expect(remoteServiceManager.createJob((String) EasyMock.anyObject())).andReturn(receipt).anyTimes();
     EasyMock.replay(remoteServiceManager);
 
     vsegmenter = new VideoSegmenter();
@@ -150,7 +150,7 @@ public class VideoSegmenterTest {
 
   @Test
   public void testAnalyze() throws Exception {
-    Receipt receipt = vsegmenter.analyze(track, true);
+    Job receipt = vsegmenter.analyze(track, true);
     Catalog catalog = (Catalog) receipt.getElement();
 
     Mpeg7Catalog mpeg7 = new Mpeg7CatalogImpl(catalog.getURI().toURL().openStream());
@@ -186,7 +186,7 @@ public class VideoSegmenterTest {
     assertFalse("Found an unexpected third video segment", si.hasNext());
   }
 
-  class ReceiptStub implements Receipt {
+  class ReceiptStub implements Job {
     MediaPackageElement element;
     Status status;
 
@@ -206,7 +206,7 @@ public class VideoSegmenterTest {
       return status;
     }
 
-    public String getType() {
+    public String getJobType() {
       return "analysis-test";
     }
 

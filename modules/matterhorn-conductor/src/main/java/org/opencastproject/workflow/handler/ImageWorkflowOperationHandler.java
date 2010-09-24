@@ -22,7 +22,7 @@ import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -174,7 +174,7 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
       // take the minimum of the specified time and the video track duration
       long time = Math.min(Long.parseLong(timeConfiguration), t.getDuration() / 1000L);
 
-      Receipt receipt = composerService.image(t, profile.getIdentifier(), time, true);
+      Job receipt = composerService.image(t, profile.getIdentifier(), time, true);
 
       // add this receipt's queue time to the total
       long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();

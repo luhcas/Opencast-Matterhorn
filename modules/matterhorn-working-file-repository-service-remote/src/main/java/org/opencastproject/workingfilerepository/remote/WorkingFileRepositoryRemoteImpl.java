@@ -332,7 +332,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   @Override
   public URI put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in) {
     // TODO: generalize this and put it in the base class
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getActiveHosts(JOB_TYPE);
     if (remoteHosts.size() == 0) {
       throw new IllegalStateException("No remote file repositories are available");
     }
@@ -364,7 +364,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   @Override
   public URI putInCollection(String collectionId, String fileName, InputStream in) {
     // TODO: generalize this and put it in the base class
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getActiveHosts(JOB_TYPE);
     if (remoteHosts.size() == 0) {
       throw new IllegalStateException("No remote file repositories are available");
     }
@@ -476,7 +476,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public URI getBaseUri() {
-    List<String> remoteHosts = remoteServiceManager.getRemoteHosts(JOB_TYPE);
+    List<String> remoteHosts = remoteServiceManager.getActiveHosts(JOB_TYPE);
     if (remoteHosts.size() == 0) {
       throw new IllegalStateException("No remote file repositories are available");
     }

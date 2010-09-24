@@ -16,7 +16,7 @@
 package org.opencastproject.caption.api;
 
 import org.opencastproject.mediapackage.Catalog;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 
 /**
  * Provides captioning support. This service makes use of {@link CaptionConverter} instances that need to be registered
@@ -41,7 +41,7 @@ public interface CaptionService {
    * @throws CaptionConverterException
    *           if exception occurs while converting
    */
-  Receipt convert(Catalog input, String inputFormat, String outputFormat) throws UnsupportedCaptionFormatException,
+  Job convert(Catalog input, String inputFormat, String outputFormat) throws UnsupportedCaptionFormatException,
           CaptionConverterException;
 
   /**
@@ -61,7 +61,7 @@ public interface CaptionService {
    * @throws CaptionConverterException
    *           if exception occurs while converting
    */
-  Receipt convert(Catalog input, String inputFormat, String outputFormat, String language)
+  Job convert(Catalog input, String inputFormat, String outputFormat, String language)
           throws UnsupportedCaptionFormatException, CaptionConverterException;
 
   /**

@@ -16,29 +16,21 @@
 package org.opencastproject.remote.api;
 
 /**
- * Manages clustered services and the {@link Job}s they may create to enable asynchronous job handling.
+ * Provides statistics for a service registration
  */
-public interface ServiceRegistration {
+public interface ServiceStatistics {
+  /** The service for which these statistics apply **/
+  ServiceRegistration getServiceRegistration();
 
-  /**
-   * @return the host
-   */
-  public String getHost();
-
-  /**
-   * @return the receiptType
-   */
-  public String getJobType();
-
-
-  /** Whether the service is online */
-  boolean isOnline();
-
-  /**
-   * Whether the service is in maintenance mode. If a server was in maintenance mode when shut down, it will remain in
-   * maintenance mode when it comes back online
-   */
-  boolean isInMaintenanceMode();
-
-
+  /** The number of milliseconds a job takes, on average, to run **/
+  long getMeanRunTime();
+  
+  /** The number of milliseconds a job sits in a queue, on average **/
+  long getMeanQueueTime();
+  
+  /** The number of job that this service is currently running **/
+  int getRunningJobs();
+  
+  /** The number of job that are currently waiting to be run by this service **/
+  int getQueuedJobs();
 }

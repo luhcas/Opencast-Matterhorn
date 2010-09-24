@@ -18,7 +18,7 @@ package org.opencastproject.analysis.api;
 
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 
 /**
  * Api for media analysis implementations, aimed at extracting metadata information from audio and audiovisual tracks.
@@ -35,7 +35,7 @@ public interface MediaAnalysisService {
    *          whether to block the calling thread until the analysis is complete
    * @return the metadata
    */
-  Receipt analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException;
+  Job analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException;
 
   /**
    * Gets the receipt with this identifier
@@ -44,7 +44,7 @@ public interface MediaAnalysisService {
    *          The ID of the receipt
    * @return The receipt, or null if none is found.
    */
-  Receipt getReceipt(String id);
+  Job getReceipt(String id);
 
   /**
    * Returns the flavor that this media analysis service implementation produces. The flavor will usually be of type

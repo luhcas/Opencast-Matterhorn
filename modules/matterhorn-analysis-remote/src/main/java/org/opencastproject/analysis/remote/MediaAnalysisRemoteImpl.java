@@ -19,7 +19,7 @@ import org.opencastproject.analysis.api.MediaAnalysisException;
 import org.opencastproject.analysis.api.MediaAnalysisService;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.remote.api.RemoteBase;
 
 import org.apache.http.HttpResponse;
@@ -83,7 +83,7 @@ public class MediaAnalysisRemoteImpl extends RemoteBase implements MediaAnalysis
   }
 
   @Override
-  public Receipt analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException {
+  public Job analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException {
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     UrlEncodedFormEntity entity;
     try {
@@ -92,7 +92,7 @@ public class MediaAnalysisRemoteImpl extends RemoteBase implements MediaAnalysis
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
-    Receipt receipt = null;
+    Job receipt = null;
     logger.info("Analyzing {} on a remote analysis server", element);
     String remoteHostMethod = "/analysis/rest/" + analysisType;
     HttpPost post = new HttpPost(remoteHostMethod);
@@ -102,7 +102,7 @@ public class MediaAnalysisRemoteImpl extends RemoteBase implements MediaAnalysis
       response = getResponse(post);
       if (response != null) {
         try {
-          receipt = remoteServiceManager.parseReceipt(response.getEntity().getContent());
+          receipt = remoteServiceManager.parseJob(response.getEntity().getContent());
           if (block) {
             receipt = poll(receipt.getId());
           }
@@ -140,7 +140,7 @@ public class MediaAnalysisRemoteImpl extends RemoteBase implements MediaAnalysis
    * @see org.opencastproject.remote.api.RemoteBase#getReceipt(java.lang.String)
    */
   @Override
-  public Receipt getReceipt(String id) {
+  public Job getReceipt(String id) {
     return super.getReceipt(id);
   }
 

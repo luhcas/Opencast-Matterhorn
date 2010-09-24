@@ -26,9 +26,9 @@ import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Receipt;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.remote.api.RemoteBase;
-import org.opencastproject.remote.api.Receipt.Status;
+import org.opencastproject.remote.api.Job.Status;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -70,7 +70,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#countJobs(orgorg.opencastproject.remote.Receipt.Status)
+   * @see org.opencastproject.composer.api.ComposerService#countJobs(Job.opencastproject.remote.Receipt.Status)
    */
   @Override
   public long countJobs(Status status) {
@@ -80,7 +80,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.composer.api.Receipt.Status,
+   * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.composer.api.Job.Status,
    *      java.lang.String)
    */
   @Override
@@ -94,7 +94,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.Track,
    *      java.lang.String)
    */
-  public Receipt encode(Track sourceTrack, String profileId) throws EncoderException {
+  public Job encode(Track sourceTrack, String profileId) throws EncoderException {
     return encode(sourceTrack, profileId, false);
   }
 
@@ -104,7 +104,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    * @see org.opencastproject.composer.api.ComposerService#encode(org.opencastproject.mediapackage.Track,
    *      java.lang.String, boolean)
    */
-  public Receipt encode(Track sourceTrack, String profileId, boolean block) throws EncoderException {
+  public Job encode(Track sourceTrack, String profileId, boolean block) throws EncoderException {
     String url = "/composer/rest/encode";
     HttpPost post = new HttpPost(url);
     try {
@@ -121,7 +121,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
       response = getResponse(post);
       if (response != null) {
         String content = EntityUtils.toString(response.getEntity());
-        Receipt r = remoteServiceManager.parseReceipt(content);
+        Job r = remoteServiceManager.parseJob(content);
         logger.info("Encoding job {} started on a remote composer", r.getId());
         if (block) {
           r = poll(r.getId());
@@ -143,7 +143,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    *      java.lang.String, long, long)
    */
   @Override
-  public Receipt trim(Track sourceTrack, String profileId, long start, long duration) throws EncoderException,
+  public Job trim(Track sourceTrack, String profileId, long start, long duration) throws EncoderException,
           MediaPackageException {
     return trim(sourceTrack, profileId, start, duration, false);
   }
@@ -155,7 +155,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    *      java.lang.String, long, long, boolean)
    */
   @Override
-  public Receipt trim(Track sourceTrack, String profileId, long start, long duration, boolean block)
+  public Job trim(Track sourceTrack, String profileId, long start, long duration, boolean block)
           throws EncoderException {
     String url = "/composer/rest/trim";
     HttpPost post = new HttpPost(url);
@@ -175,7 +175,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
       response = getResponse(post);
       if (response != null) {
         String content = EntityUtils.toString(response.getEntity());
-        Receipt r = remoteServiceManager.parseReceipt(content);
+        Job r = remoteServiceManager.parseJob(content);
         logger.info("Trimming job {} started on a remote composer", r.getId());
         if (block) {
           r = poll(r.getId());
@@ -196,7 +196,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    * @see org.opencastproject.composer.api.ComposerService#mux(org.opencastproject.mediapackage.Track,
    *      org.opencastproject.mediapackage.Track, java.lang.String)
    */
-  public Receipt mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException {
+  public Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId) throws EncoderException {
     return mux(sourceVideoTrack, sourceAudioTrack, profileId, false);
   }
 
@@ -206,7 +206,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    * @see org.opencastproject.composer.api.ComposerService#mux(org.opencastproject.mediapackage.Track,
    *      org.opencastproject.mediapackage.Track, java.lang.String, boolean)
    */
-  public Receipt mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId, boolean block)
+  public Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId, boolean block)
           throws EncoderException {
     String url = "/composer/rest/mux";
     HttpPost post = new HttpPost(url);
@@ -225,7 +225,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
       response = getResponse(post);
       if (response != null) {
         String content = EntityUtils.toString(response.getEntity());
-        Receipt r = remoteServiceManager.parseReceipt(content);
+        Job r = remoteServiceManager.parseJob(content);
         logger.info("Muxing job {} started on a remote composer", r.getId());
         if (block) {
           r = poll(r.getId());
@@ -274,8 +274,8 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    * @see org.opencastproject.composer.api.ComposerService#getReceipt(java.lang.String)
    */
   @Override
-  public Receipt getReceipt(String id) {
-    return remoteServiceManager.getReceipt(id);
+  public Job getReceipt(String id) {
+    return remoteServiceManager.getJob(id);
   }
 
   /**
@@ -284,7 +284,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.Track,
    *      java.lang.String, long)
    */
-  public Receipt image(Track sourceTrack, String profileId, long time) throws EncoderException {
+  public Job image(Track sourceTrack, String profileId, long time) throws EncoderException {
     return image(sourceTrack, profileId, time, false);
   }
 
@@ -294,7 +294,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    * @see org.opencastproject.composer.api.ComposerService#image(org.opencastproject.mediapackage.Track,
    *      java.lang.String, long, boolean)
    */
-  public Receipt image(Track sourceTrack, String profileId, long time, boolean block) throws EncoderException {
+  public Job image(Track sourceTrack, String profileId, long time, boolean block) throws EncoderException {
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     UrlEncodedFormEntity entity = null;
     String url = "/composer/rest/image";
@@ -312,7 +312,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
     try {
       response = getResponse(post);
       if (response != null) {
-        Receipt r = remoteServiceManager.parseReceipt(response.getEntity().getContent());
+        Job r = remoteServiceManager.parseJob(response.getEntity().getContent());
         logger.info("Image extraction job {} started on a remote composer", r.getId());
         if (block) {
           r = poll(r.getId());
@@ -335,7 +335,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    *      org.opencastproject.mediapackage.Attachment, java.lang.String)
    */
   @Override
-  public Receipt captions(Track mediaTrack, Catalog[] captions) throws EmbedderException {
+  public Job captions(Track mediaTrack, Catalog[] captions) throws EmbedderException {
     return captions(mediaTrack, captions, false);
   }
 
@@ -346,7 +346,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    *      org.opencastproject.mediapackage.Attachment, java.lang.String, boolean)
    */
   @Override
-  public Receipt captions(Track mediaTrack, Catalog[] captions, boolean block) throws EmbedderException {
+  public Job captions(Track mediaTrack, Catalog[] captions, boolean block) throws EmbedderException {
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     UrlEncodedFormEntity entity = null;
     String url = "/composer/rest/captions";
@@ -363,7 +363,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
     try {
       response = getResponse(post);
       if (response != null) {
-        Receipt r = remoteServiceManager.parseReceipt(response.getEntity().getContent());
+        Job r = remoteServiceManager.parseJob(response.getEntity().getContent());
         logger.info("Caption embedding job {} started on a remote composer", r.getId());
         if (block) {
           r = poll(r.getId());

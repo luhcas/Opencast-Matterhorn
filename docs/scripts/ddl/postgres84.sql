@@ -1,3 +1,20 @@
+CREATE TABLE job (
+    id character varying(255) NOT NULL,
+    host character varying(255),
+    status integer,
+    datecreated timestamp without time zone,
+    datestarted timestamp without time zone,
+    datecompleted timestamp without time zone,
+    element_xml text,
+    type character varying(255)
+);
+
+CREATE TABLE service_registration (
+    host character varying(255) NOT NULL,
+    job_type character varying(255) NOT NULL,
+    maintenance boolean NOT NULL default 'f'
+);
+
 CREATE TABLE annotation (
     id integer NOT NULL,
     outpoint integer,
@@ -16,17 +33,6 @@ CREATE TABLE capture_agent_state (
     capabilities bytea,
     last_heard_from bigint NOT NULL,
     url character varying(255)
-);
-
-CREATE TABLE job (
-    id character varying(255) NOT NULL,
-    host character varying(255),
-    status integer,
-    datecreated timestamp without time zone,
-    datestarted timestamp without time zone,
-    datecompleted timestamp without time zone,
-    element_xml text,
-    type character varying(255)
 );
 
 CREATE TABLE sched_event (
@@ -74,12 +80,6 @@ CREATE TABLE series_metadata (
     metadata_key character varying(128) NOT NULL,
     metadata_val character varying(256),
     series_id character varying(128) NOT NULL
-);
-
-CREATE TABLE service_registration (
-    host character varying(255) NOT NULL,
-    job_type character varying(255) NOT NULL,
-    maintenance boolean NOT NULL default 'f'
 );
 
 CREATE TABLE upload (
