@@ -22,15 +22,20 @@ CREATE TABLE `CAPTURE_AGENT_STATE` (
 
 CREATE TABLE `JOB` (
   `ID` varchar(255) collate utf8_unicode_ci NOT NULL,
-  `HOST` varchar(255) collate utf8_unicode_ci default NULL,
+  `HOST` varchar(255) collate utf8_unicode_ci NOT NULL,
   `STATUS` int(11) default NULL,
   `DATECREATED` datetime default NULL,
   `DATESTARTED` datetime default NULL,
   `DATECOMPLETED` datetime default NULL,
+  `RUNTIME` bigint(20) default NULL,
+  `QUEUETIME` bigint(20) default NULL,
   `ELEMENT_XML` mediumtext collate utf8_unicode_ci,
-  `TYPE` varchar(255) collate utf8_unicode_ci default NULL,
+  `JOB_TYPE` varchar(255) collate utf8_unicode_ci NOT NULL,
   PRIMARY KEY  (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+create index JOB_TYPE_HOST on `JOB` (`HOST`, `JOB_TYPE`);
+alter table `JOB` add FOREIGN KEY (`HOST`, `JOB_TYPE`) REFERENCES `SERVICE_REGISTRATION` (`HOST`, `JOB_TYPE`);
 
 CREATE TABLE `SCHED_EVENT` (
   `ID` varchar(128) collate utf8_unicode_ci NOT NULL,
@@ -96,6 +101,7 @@ CREATE TABLE `SERVICE_REGISTRATION` (
   `HOST` varchar(255) collate utf8_unicode_ci NOT NULL,
   `JOB_TYPE` varchar(255) collate utf8_unicode_ci NOT NULL,
   `MAINTENANCE` tinyint(1) NOT NULL default '0',
+  `ONLINE` tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (`HOST`,`JOB_TYPE`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -118,3 +124,4 @@ CREATE TABLE `DICTIONARY` (
 
 CREATE INDEX DICTIONARY_TEXT ON DICTIONARY (TEXT);
 CREATE INDEX DICTIONARY_LANGUAGE ON DICTIONARY (LANGUAGE);
+

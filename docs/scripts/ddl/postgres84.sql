@@ -5,13 +5,16 @@ CREATE TABLE job (
     datecreated timestamp without time zone,
     datestarted timestamp without time zone,
     datecompleted timestamp without time zone,
+    runtime bigint,
+    queuetime bigint,
     element_xml text,
-    type character varying(255)
+    job_type character varying(255)
 );
 
 CREATE TABLE service_registration (
     host character varying(255) NOT NULL,
     job_type character varying(255) NOT NULL,
+    online boolean NOT NULL default 'f',
     maintenance boolean NOT NULL default 'f'
 );
 
@@ -106,6 +109,9 @@ ALTER TABLE ONLY capture_agent_state
 
 ALTER TABLE ONLY job
     ADD CONSTRAINT job_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY job
+    ADD FOREIGN KEY (job_type, host) REFERENCES service_registration(job_type, host);
 
 ALTER TABLE ONLY sched_event_metadata
     ADD CONSTRAINT sched_event_metadata_pkey PRIMARY KEY (event_id, metadata_id);
