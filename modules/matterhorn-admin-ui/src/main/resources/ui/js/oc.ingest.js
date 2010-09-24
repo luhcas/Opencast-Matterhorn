@@ -40,10 +40,10 @@ ocIngest.createMediaPackage = function() {
         ocUtils.log("adding files from previous mediaPackge");
         ocIngest.copyPreviousFiles(ocIngest.mediaPackage);
       } else {
-        var uploadFrame = document.getElementById("filechooser-ajax");
+        var uploadFrame = document.getElementById("fileChooserAjax");
         uploadFrame.contentWindow.document.uploadForm.flavor.value = $('#flavor').val();
         uploadFrame.contentWindow.document.uploadForm.mediaPackage.value = ocUtils.xmlToString(data);
-        var uploadingFile = $('#ingest-upload').is(':checked');
+        var uploadingFile = $('#ingestUpload').is(':checked');
         ocUploadListener.uploadStarted(uploadingFile);
         uploadFrame.contentWindow.document.uploadForm.submit();
       }
@@ -142,12 +142,12 @@ ocIngest.addSeriesCatalog = function(seriesId) {
 }
 
 ocIngest.startIngest = function(mediaPackage) {
-  ocUtils.log("Starting Ingest on MediaPackage with Workflow " + $('#workflow-selector').val());
+  ocUtils.log("Starting Ingest on MediaPackage with Workflow " + $('#workflowSelector').val());
   ocUpload.setProgress('100%','starting Ingest',' ', ' ');
-  var data = ocWorkflow.getConfiguration($('#workflow-config-container'));
+  var data = ocWorkflow.getConfiguration($('#workflowConfigContainer'));
   data['mediaPackage'] = ocUtils.xmlToString(mediaPackage);
   $.ajax({
-    url        : '../ingest/rest/ingest/' + $('#workflow-selector').val(),
+    url        : '../ingest/rest/ingest/' + $('#workflowSelector').val(),
     type       : 'POST',
     dataType   : 'text',
     data       : data,

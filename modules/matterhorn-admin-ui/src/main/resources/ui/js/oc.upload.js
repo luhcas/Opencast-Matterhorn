@@ -324,8 +324,8 @@ ocUpload.hideProgressStage = function() {
  *
  */
 ocUpload.setProgress = function(width, text, total, transfered) {
-  $('#progressbarIndicator').css('width',width);
-  $('#progressbarLabel').text(text);
+  $('#progressBarIndicator').css('width',width);
+  $('#progressBarLabel').text(text);
   $('#labelFilesize').text(total);
   $('#labelBytesTrasfered').text(transfered);
 }

@@ -39,7 +39,7 @@ ocUploadListener.fileSelectedAjax = function(filename,jobId) {
   ocUploadListener.shortFilename = filename;
   ocUploadListener.jobId = jobId;
   $('#track').val(filename);
-  var uploadForm = document.getElementById("filechooser-ajax").contentWindow.document.uploadForm;
+  var uploadForm = document.getElementById("fileChooserAjax").contentWindow.document.uploadForm;
   ocUpload.checkRequiredFields();
 }
 
@@ -93,7 +93,7 @@ ocUploadListener.uploadComplete = function() {
   ocUploadListener.updateRequested = false;
   window.clearInterval(ocUploadListener.updateInterval);
   ocUtils.log("upload complete");
-  var uploadFrame = document.getElementById("filechooser-ajax");
+  var uploadFrame = document.getElementById("fileChooserAjax");
   var mp = uploadFrame.contentWindow.document.getElementById("mp").value;
   ocIngest.addCatalog(mp, ocIngest.createDublinCoreCatalog(ocIngest.metadata), 'dublincore/episode');
 }

@@ -105,9 +105,9 @@
         </div>
 
         <!-- missing fields notification -->
-        <div id="container-missingFields" class="container" style="display:none;">
-          <div id="heading-missingFields" class="fl-widget-header warnbox-title">Missing Inputs</div>
-          <div id="content-missingFields" class="fl-widget-content warnbox-content">
+        <div id="containerMissingFields" class="container" style="display:none;">
+          <div id="headingMissingFields" class="fl-widget-header warnbox-title">Missing Inputs</div>
+          <div id="contentMissingFields" class="fl-widget-content warnbox-content">
             <ul>
               <li id="notificationTitle" class="missing-fields-item">
                 <!-- <span class="fl-icon inline-icon icon-bullet"></span> -->
@@ -131,8 +131,8 @@
         <form id="uploadForm" name="uploadForm" action="../ingest/rest/addMediaPackage" method="POST" enctype="multipart/form-data" accept-charset="UTF-8">
 
           <!-- basic metadata -->
-          <div id="container-basicData" class="fl-widget">
-            <div id="content-basicData" class="fl-widget-content">
+          <div id="containerBasicData" class="fl-widget">
+            <div id="contentBasicData" class="fl-widget-content">
               <ul class="no-bullets formField-list fl-controls-right">
                 <!-- field: Title -->
                 <li class="ui-helper-clearfix">
@@ -158,9 +158,9 @@
           </div>
 
           <!-- additional metadata -->
-          <div id="container-additionalData" class="fl-widget">
-            <div id="heading-additionalData" class="fl-widget-titlebar collapse-control collapse-control-closed"><span id="i18n_aditional">Additional Description</span></div>
-            <div id="content-basicData" class="fl-widget-content collapsable" style="display:none;">
+          <div id="containerAdditionalData" class="fl-widget">
+            <div id="headingAdditionalData" class="fl-widget-titlebar collapse-control collapse-control-closed"><span id="i18n_aditional">Additional Description</span></div>
+            <div id="contentAdditionalData" class="fl-widget-content collapsable" style="display:none;">
               <ul class="no-bullets formField-list fl-controls-right">
                 <!-- field: Sponsoring Department -->
                 <li class="ui-helper-clearfix">
@@ -191,13 +191,13 @@
           </div>
 
           <!-- file upload -->
-          <div id="container-additionalData" class="container fl-widget">
-            <div id="heading-additionalData" class="fl-widget-titlebar titlebar"><span id="i18n_upload_title">File Upload</span></div>
-            <div id="content-basicData" class="fl-widget-content">
+          <div class="container fl-widget">
+            <div class="fl-widget-titlebar titlebar"><span id="i18n_upload_title">File Upload</span></div>
+            <div class="fl-widget-content">
               <input type="hidden" name="track" id="track" class="requiredField" value="">
               <ul class="no-bullets formField-list fl-controls-right">
                 <li id="retryFile" class="ui-helper-clearfix" style="display:none;">
-                  <label class="fl-label"><span id="i18n_upload.content">File(s)</span>:</label>
+                  <label class="fl-label"><span id="i18n_upload_content">File(s)</span>:</label>
                   <!-- div style="display:table-cell;">
                     <input type="hidden" id="previous-file-url" value="">
                     <input type="hidden" id="previous-file-flavor" value="">
@@ -207,7 +207,7 @@
                   <div id="previousFileList" style="display:table-cell;">
                   </div>
                 </li>
-                <li class="ui-helper-clearfix" id="regular-file-selection">
+                <li class="ui-helper-clearfix" id="regularFileSelection">
                   <label class="fl-label"><span id="i18n_file_location">File Location</span>:</label>
                   <input type="radio" id="ingestUpload" name="fileLocation" class="file-location" value="local" checked="true">Local hard drive
                   &nbsp;&nbsp;
@@ -217,12 +217,12 @@
                 <li class="ui-helper-clearfix" id="regularFileChooser">
                   <label class="fl-label"><span class="color-red">* </span><span id="i18n_upload_file">Media File</span>:</label>
                   <div style="display:table-cell;">
-                    <iframe name="filechooserAjax" id="filechooserAjax" frameborder="0" scrolling="no" src="../ingest/rest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
+                    <iframe name="fileChooserAjax" id="fileChooserAjax" frameborder="0" scrolling="no" src="../ingest/rest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
                     </iframe>
                     <span class="helpIcon" title="Click for help">&nbsp;</span>
                   </div>
                 </li>
-                <li class="ui-helper-clearfix" id="regular-file-chooser-flavor">
+                <li class="ui-helper-clearfix" id="regularFileChooserFlavor">
                   <label class="fl-label"><span class="color-red">* </span><span id="i18n_upload_flavor">Media File Content</span>:</label>
                   <select name="flavor" id="flavor" class="requiredField" style="float:left;margin-right:3px;">
                     <option value="">Choose one:</option>
@@ -234,9 +234,9 @@
             </div>
           </div>
 
-          <div id="container-processing" class="container fl-widget">
-            <div id="heading-processing" class="fl-widget-titlebar titlebar"><span id="i18n_process_title">Processing</span></div>
-            <div id="content-processing" class="fl-widget-content">
+          <div id="containerProcessing" class="container fl-widget">
+            <div id="headingProcessing" class="fl-widget-titlebar titlebar"><span id="i18n_process_title">Processing</span></div>
+            <div id="contentProcessing" class="fl-widget-content">
               <ul class="no-bullets formField-list fl-controls-right">
                 <li class="ui-helper-clearfix">
                   <label class="fl-label"><span class="color-red">* </span><span id="i18n_process_instr">Processing instructions</span>:</label>
@@ -251,8 +251,8 @@
           </div>
 
           <!-- submit/cancel controls -->
-          <div id="container-additionalData" class="container fl-widget">
-            <div id="content-basicData" class="fl-widget-content">
+          <div class="container fl-widget">
+            <div class="fl-widget-content">
               <ul class="no-bullets formField-list fl-controls-right">
                 <!-- submit / cancal button -->
                 <li class="ui-helper-clearfix">
@@ -284,13 +284,13 @@
   <div id="gray-out">
     &nbsp;
   </div>
-  <div id="progress-stage" style="display:none;">
-    <div id="label-filename">
+  <div id="progressStage" style="display:none;">
+    <div id="labelFilename">
       &nbsp;
     </div>
-    <div id="progressbar">
-      <div id="progressbarIndicator" style="width:0%;">&nbsp;</div>
-      <div id="progressbarLabel"><span id="i18n_progress">Initializing upload...</span></div>
+    <div id="progressBar">
+      <div id="progressBarIndicator" style="width:0%;">&nbsp;</div>
+      <div id="progressBarLabel"><span id="i18n_progress">Initializing upload...</span></div>
     </div>
     <div id="labelFilesize">&nbsp;</div>
     <div id="labelBytesTrasfered">&nbsp;</div>

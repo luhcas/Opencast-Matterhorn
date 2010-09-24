@@ -293,7 +293,7 @@ select { font-size:1.15em; }
   border:1px solid lightgrey;
 }
 
-#workflow-config-container {
+#workflowConfigContainer {
   width: 96%;
   margin-left: 2%;
   margin-bottom: 2%;
