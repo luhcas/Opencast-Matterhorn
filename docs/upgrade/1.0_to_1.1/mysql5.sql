@@ -9,5 +9,5 @@ alter table `SERVICE_REGISTRATION` add column `ONLINE` tinyint NOT NULL default 
 alter table `JOB` change `TYPE` `JOB_TYPE` varchar(255) collate utf8_unicode_ci default NULL;
 alter table `JOB` add column `RUNTIME` bigint(20) default NULL;
 alter table `JOB` add column `QUEUETIME` bigint(20) default NULL;
-create index JOB_TYPE_HOST on `JOB` (`JOB_TYPE`, `HOST`);
+create index JOB_TYPE_HOST on `JOB` (`HOST`, `JOB_TYPE`);
 alter table `JOB` add FOREIGN KEY (`HOST`, `JOB_TYPE`) REFERENCES `SERVICE_REGISTRATION` (`HOST`, `JOB_TYPE`);
