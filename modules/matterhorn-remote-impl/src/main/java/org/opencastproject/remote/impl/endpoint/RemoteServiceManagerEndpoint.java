@@ -16,9 +16,7 @@
 package org.opencastproject.remote.impl.endpoint;
 
 import org.opencastproject.remote.api.RemoteServiceManager;
-import org.opencastproject.remote.api.ServiceRegistration;
 import org.opencastproject.remote.api.ServiceStatistics;
-import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -60,7 +58,7 @@ public class RemoteServiceManagerEndpoint {
     data.setAbstract("This service lists the members of this cluster.");
 
     RestEndpoint endpoint = new RestEndpoint("list", RestEndpoint.Method.GET, "/services.json",
-            "List the service registrations in the cluster, along with the number of queued and running jobs.");
+            "List the service registrations in the cluster, along with some simple statistics.");
     endpoint.addFormat(new Format("json", null, null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the remote services."));
     endpoint.setTestForm(RestTestForm.auto());
@@ -82,16 +80,17 @@ public class RemoteServiceManagerEndpoint {
   @SuppressWarnings("unchecked")
   public String getRemoteServiceRegistrations() {
     JSONArray jsonArray = new JSONArray();
-    List<ServiceRegistration> registrations = service.getServiceRegistrations();
-    List<ServiceStatistics> stats = service.getServiceStatistics();
-    for(ServiceRegistration serviceRegistration : registrations) {
+    List<ServiceStatistics> statistics = service.getServiceStatistics();
+    for(ServiceStatistics stats : statistics) {
       JSONObject reg = new JSONObject();
-      reg.put("host", serviceRegistration.getHost());
-      reg.put("type", serviceRegistration.getJobType());
-      reg.put("online", serviceRegistration.isOnline());
-      reg.put("maintenance", serviceRegistration.isInMaintenanceMode());
-      reg.put("running", service.count(serviceRegistration.getJobType(), Status.RUNNING));
-      reg.put("queued", service.count(serviceRegistration.getJobType(), Status.QUEUED));
+      reg.put("host", stats.getServiceRegistration().getHost());
+      reg.put("type", stats.getServiceRegistration().getJobType());
+      reg.put("online", stats.getServiceRegistration().isOnline());
+      reg.put("maintenance", stats.getServiceRegistration().isInMaintenanceMode());
+      reg.put("running", stats.getRunningJobs());
+      reg.put("queued", stats.getQueuedJobs());
+      reg.put("meanQueueTime", stats.getMeanQueueTime());
+      reg.put("meanRunTime", stats.getMeanRunTime());
       jsonArray.add(reg);
     }
     return jsonArray.toJSONString();
