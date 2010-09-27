@@ -123,8 +123,9 @@ public interface ComposerService {
    * @return The receipt for this encoding job
    * @throws EncoderException
    *           if trimming fails
+   * @throws MediaPackageException
    */
-  Job trim(Track sourceTrack, String profileId, long start, long duration, boolean block) throws EncoderException;
+  Job trim(Track sourceTrack, String profileId, long start, long duration, boolean block) throws EncoderException, MediaPackageException;
 
   /**
    * Extracts an image from the media package element identified by <code>sourceVideoTrackId</code>. The image is taken

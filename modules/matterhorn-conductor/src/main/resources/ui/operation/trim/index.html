@@ -157,7 +157,7 @@
          <!-- control buttons -->
          <label for="trimin">Trim from:</label><input type="text" id="trimin" name="trimin" />
          <label for="trimout">Trim until:</label><input type="text" id="trimout" name="trimout" />
-         <button title="Move on to next steps in processing this recording" style="margin-right: 16px; width: 160px;" onclick="parent.Recordings.continueWorkflow(postData);" id="continueBtn" type="button">Continue processing</button>
+         <button title="Move on to next steps in processing this recording" style="margin-right: 16px; width: 160px;" onclick="parent.ocRecordings.continueWorkflow(postData);" id="continueBtn" type="button">Continue processing</button>
          <button  id="edit-link" type="button" style="margin-right: 16px;">Edit before continuing</button>
          <button onclick="$('#holdActionPanel-container',top.document).toggle();$('#recordings-table-container',top.document).toggle();$('#oc_recordingmenu' ,top.document).toggle();$('.paging-nav-container',top.document).toggle();$('#refresh-controls-container',top.document).toggle();$('#category-selector-container',top.document).parent().toggle();" title="Cancel" style="margin-right: 16px;" type="button">Cancel</button>
      </div>

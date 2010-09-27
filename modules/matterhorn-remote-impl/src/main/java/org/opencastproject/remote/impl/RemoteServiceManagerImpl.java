@@ -247,19 +247,22 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
       fromDb.dateCreated = now;
     } else if (Status.RUNNING.equals(status)) {
       job.dateStarted = now;
-      job.queueTime = now.getTime() - fromDb.dateCreated.getTime();
+      job.queueTime = now.getTime() - job.dateCreated.getTime();
       fromDb.dateStarted = now;
-      fromDb.queueTime = now.getTime() - fromDb.dateCreated.getTime();
+      fromDb.queueTime = now.getTime() - job.dateCreated.getTime();
     } else if (Status.FAILED.equals(status)) {
-      job.dateCompleted = now;
-      job.runTime = now.getTime() - fromDb.dateStarted.getTime();
-      fromDb.dateCompleted = now;
-      fromDb.runTime = now.getTime() - fromDb.dateStarted.getTime();
+      // failed jobs may not have even started properly
+      if(job.dateStarted != null) {
+        job.dateCompleted = now;
+        job.runTime = now.getTime() - job.dateStarted.getTime();
+        fromDb.dateCompleted = now;
+        fromDb.runTime = now.getTime() - job.dateStarted.getTime();
+      }
     } else if (Status.FINISHED.equals(status)) {
       job.dateCompleted = now;
-      job.runTime = now.getTime() - fromDb.dateStarted.getTime();
+      job.runTime = now.getTime() - job.dateStarted.getTime();
       fromDb.dateCompleted = now;
-      fromDb.runTime = now.getTime() - fromDb.dateStarted.getTime();
+      fromDb.runTime = now.getTime() - job.dateStarted.getTime();
     }
   }
 
