@@ -76,7 +76,7 @@ EOF
 # Changes the default array delimiter: from 'space' to 'newline'
 IFS='
 '
-# Gets the list of the ackages to install --those are delimited by newlines, that's why IFS was previously changed
+# Gets the list of the packages to install --those are delimited by newlines, that's why IFS was previously changed
 pkgs=( $PKG_LIST )
 bad=( $BAD_PKG_LIST )
 reason=( $BAD_PKG_REASON )
@@ -85,21 +85,20 @@ reason=( $BAD_PKG_REASON )
 unset IFS
 
 for (( i = 0; i < ${#bad[@]}; i++ )); do
-    unset exists
+    unset install
     # Check if the packages are installed before asking the user
     for item in $(echo "${bad[$i]}" | cut -d ' ' -f 1-); do
-	if [[ "$(dpkg -l | grep "$item")" ]]; then
-	    exists=true
-	    break
-	fi
+        if [[ -z "$(dpkg -l | grep "$item")" ]]; then
+            install="$install$item "
+        fi
     done
-    
-    if [[ ! "$exists" ]]; then
-	yesno -d no -? "${reason[$i]}" -h "? for details" "Do you wish to install ${bad[$i]}?" ok
-	if [[ "$ok" ]]; then
-	    pkgs[${#pkgs[@]}]=${bad[$i]}
-	fi
-    fi
+
+    if [[ "$install" ]]; then
+        yesno -d no -? "${reason[$i]}" -h "? for details" "Do you wish to install ${install}?" ok
+        if [[ "$ok" ]]; then
+            pkgs[${#pkgs[@]}]="$install"
+        fi
+    fi 
 done
 
 # Check which required packages are already installed
