@@ -20,6 +20,7 @@ import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.series.impl.SeriesImpl;
+import org.opencastproject.series.impl.SeriesListImpl;
 import org.opencastproject.series.impl.SeriesMetadataImpl;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.NotFoundException;
@@ -117,9 +118,10 @@ public class SeriesRestService {
     logger.debug("Series Lookup: {}", seriesID);
     try {
       Series s = service.getSeries(seriesID);
-      if (s == null)
+      if (s == null) {
         return Response.status(Status.BAD_REQUEST).build();
-      return Response.ok(new SeriesJaxbImpl(s)).build();
+      }
+      return Response.ok(s).build();
     } catch (Exception e) {
       logger.warn("Series Lookup failed: {}", seriesID);
       return Response.status(Status.SERVICE_UNAVAILABLE).build();
@@ -173,7 +175,7 @@ public class SeriesRestService {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("new/id")
   public Response newSeriesId() {
-    logger.debug("create ne Series Id");
+    logger.debug("create new Series Id");
     JSONObject j = new JSONObject();
     j.put("id", UUID.randomUUID().toString());
     return Response.ok(j.toString()).build();
@@ -190,14 +192,12 @@ public class SeriesRestService {
   @PUT
   @Produces(MediaType.APPLICATION_JSON)
   @Path("series")
-  public Response addSeries(@FormParam("series") SeriesJaxbImpl s) {
-    logger.debug("addseries: {}", s);
-
-    if (s == null) {
-      logger.error("series that should be added is null");
-      return Response.status(Status.BAD_REQUEST).build();
-    }
-    Series series = s.getSeries();
+  public Response addSeries(@FormParam("series") String seriesAsXml) {
+    logger.debug("addseries: {}", seriesAsXml);
+    try {
+    SeriesImpl series = SeriesBuilder.getInstance().parseSeriesImpl(seriesAsXml);
+    logger.debug("Created Series: {}", series.getSeriesId());
+    logger.debug("Series Title: {}", series.getFromMetadata("title"));
     if (series == null) {
       logger.error("series that should be added is null");
       return Response.status(Status.BAD_REQUEST).build();
@@ -210,6 +210,10 @@ public class SeriesRestService {
       j.put("id", series.getSeriesId());
       return Response.ok(j.toString()).build();
     } catch(IllegalArgumentException e) {
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+    } catch (Exception e) {
+      logger.debug("Error Parsing Series: {}", e);
       return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -245,19 +249,14 @@ public class SeriesRestService {
   @POST
   @Produces(MediaType.TEXT_PLAIN)
   @Path("series")
-  public Response updateSeries(@FormParam("series") SeriesJaxbImpl series) {
+  public Response updateSeries(@FormParam("series") SeriesImpl series) {
 
     if (series == null) {
       logger.error("series that should be updated is null");
       return Response.status(Status.BAD_REQUEST).build();
     }
-    Series s = series.getSeries();
-    if (s == null) {
-      logger.error("series that should be updated is null");
-      return Response.status(Status.BAD_REQUEST).build();
-    }
     try {
-      service.updateSeries(s);
+      service.updateSeries(series);
       return Response.noContent().build();
     } catch(NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
@@ -277,12 +276,12 @@ public class SeriesRestService {
     List<Series> series = service.getAllSeries();
     if (series == null)
       return Response.status(Status.BAD_REQUEST).build();
-    LinkedList<SeriesJaxbImpl> list = new LinkedList<SeriesJaxbImpl>();
+    LinkedList<SeriesImpl> list = new LinkedList<SeriesImpl>();
     for (Series s : series) {
-      list.add(new SeriesJaxbImpl(s));
+      list.add((SeriesImpl)s);
     }
-    SeriesListJaxbImpl container = new SeriesListJaxbImpl(list);
-    return Response.ok((new GenericEntity<SeriesListJaxbImpl>(container) {
+    SeriesListImpl container = new SeriesListImpl(list);
+    return Response.ok((new GenericEntity<SeriesListImpl>(container) {
     })).build();
   }
 

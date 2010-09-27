@@ -74,7 +74,11 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   @Override
   public void addSeries(Series s) {
     if (s == null) throw new IllegalArgumentException("Can not add a null series");
-    
+    List<SeriesMetadata> metadataList = s.getMetadata();
+    for(SeriesMetadata item : metadataList){
+      item.setSeries(s);
+    }
+    s.setMetadata(metadataList);
     EntityManager em = emf.createEntityManager();
     try {
       EntityTransaction tx = em.getTransaction();

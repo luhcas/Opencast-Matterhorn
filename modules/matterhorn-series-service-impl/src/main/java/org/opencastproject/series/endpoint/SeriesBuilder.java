@@ -17,6 +17,8 @@ package org.opencastproject.series.endpoint;
 
 import org.apache.commons.io.IOUtils;
 import org.opencastproject.series.api.Series;
+import org.opencastproject.series.impl.SeriesImpl;
+import org.opencastproject.series.impl.SeriesMetadataImpl;
 
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -39,7 +41,7 @@ public class SeriesBuilder {
    *
    */
   private SeriesBuilder() throws JAXBException {
-    jaxbContext = JAXBContext.newInstance("org.opencastproject.series.endpoint", SeriesBuilder.class.getClassLoader());
+    jaxbContext = JAXBContext.newInstance("org.opencastproject.series.impl", SeriesBuilder.class.getClassLoader());
   }
   
   /**
@@ -59,32 +61,31 @@ public class SeriesBuilder {
     return instance;
   }
   
-  public SeriesJaxbImpl parseSeriesJaxbImpl(String in) throws Exception {
-    return parseSeriesJaxbImpl(IOUtils.toInputStream(in, "UTF8"));
+  public SeriesImpl parseSeriesImpl(String in) throws Exception {
+    return parseSeriesImpl(IOUtils.toInputStream(in, "UTF8"));
   }
   
-  public SeriesJaxbImpl parseSeriesJaxbImpl(InputStream in) throws Exception {
+  public SeriesImpl parseSeriesImpl(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-                                  SeriesJaxbImpl.class).getValue();
+                                  SeriesImpl.class).getValue();
   }
       
   
-  public SeriesMetadataJaxbImpl parseSeriesMetadataJaxbImpl(String in) throws Exception {
-    return parseSeriesMetadataJaxbImpl(IOUtils.toInputStream(in, "UTF8"));
+  public SeriesMetadataImpl parseSeriesMetadataImpl(String in) throws Exception {
+    return parseSeriesMetadataImpl(IOUtils.toInputStream(in, "UTF8"));
   }
   
-  public SeriesMetadataJaxbImpl parseSeriesMetadataJaxbImpl(InputStream in) throws Exception {
+  public SeriesMetadataImpl parseSeriesMetadataImpl(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-                                  SeriesMetadataJaxbImpl.class).getValue();
-  }   
+                                  SeriesMetadataImpl.class).getValue();
+  }
   
   public String marshallSeries (Series s) throws Exception {
-    SeriesJaxbImpl jaxbSeries = new SeriesJaxbImpl(s);
     Marshaller marshaller = jaxbContext.createMarshaller();
     StringWriter writer = new StringWriter();
-    marshaller.marshal(jaxbSeries, writer);
+    marshaller.marshal(s, writer);
     return writer.toString();
-  }   
+  }
 }

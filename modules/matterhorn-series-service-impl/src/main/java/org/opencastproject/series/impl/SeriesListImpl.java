@@ -13,44 +13,30 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.series.endpoint;
+package org.opencastproject.series.impl;
 
-import javax.persistence.Transient;
+import java.util.LinkedList;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.opencastproject.series.api.SeriesMetadata;
-import org.opencastproject.series.impl.SeriesMetadataImpl;
-
 /**
- * TODO: Comment me!
- *
+ * A List of {@link SeriesJaxbImpl}s
  */
-@XmlType(name="seriesMetadata", namespace="http://series.opencastproject.org")
-@XmlRootElement(name="series")
+@XmlType(name="seriesList", namespace="http://series.opencastproject.org")
+@XmlRootElement(name="seriesList")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class SeriesMetadataJaxbImpl {
-  String key;
-  String value;
-  
-  public SeriesMetadataJaxbImpl () {
-    
-  }
-  
-  public SeriesMetadataJaxbImpl (SeriesMetadata m) {
-    key = m.getKey();
-    value = m.getValue();
-  }
+public class SeriesListImpl {
 
-  @Transient
-  public SeriesMetadataImpl getSeriesMetadata() {
-    return new SeriesMetadataImpl(key,value);
+  protected LinkedList<SeriesImpl> series;
+  
+  public SeriesListImpl(){
+    series = new LinkedList<SeriesImpl>();
   }
   
-  public static SeriesMetadataJaxbImpl valueOf(String xmlString) throws Exception {
-    return (SeriesMetadataJaxbImpl) SeriesBuilder.getInstance().parseSeriesMetadataJaxbImpl(xmlString);
+  public SeriesListImpl(LinkedList<SeriesImpl> s){
+    series = s;
   }
-  
 }

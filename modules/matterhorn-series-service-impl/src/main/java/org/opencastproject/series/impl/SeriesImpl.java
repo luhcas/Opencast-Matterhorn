@@ -22,6 +22,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
+import org.opencastproject.series.endpoint.SeriesBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,15 +35,27 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlID;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Data type for a Series that stores the metadata that belongs to the series
@@ -51,19 +64,34 @@ import javax.persistence.Transient;
  
 @Entity
 @Table(name="SERIES")
+@Access(AccessType.FIELD)
+@XmlType(name="series", namespace="http://series.opencastproject.org")
+@XmlRootElement(name="series")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class SeriesImpl implements Series {
   private static final Logger logger = LoggerFactory.getLogger(SeriesImpl.class);
   
   @Id
   @GeneratedValue
   @Column(name="ID", length=128)
+  @XmlID
   String seriesId;
   
   @Transient
+  @XmlTransient
   DublinCoreCatalog dublinCore;
   
-  @OneToMany (fetch=FetchType.EAGER, cascade=CascadeType.ALL, mappedBy="series")
+  @OneToMany(cascade=CascadeType.ALL, targetEntity=SeriesMetadataImpl.class, mappedBy="series")
+  @XmlElementWrapper(name="metadataList")
+  @XmlElement(name="metadata")
   List<SeriesMetadataImpl> metadata;
+  
+  /**
+   * Default constructor without any import.
+   */
+  public SeriesImpl() {
+    metadata = new LinkedList<SeriesMetadataImpl>();
+  }
   
   /**
    * {@inheritDoc}
@@ -248,5 +276,15 @@ public class SeriesImpl implements Series {
   @Override
   public int compareTo(Series o) {
     return getDescription().compareTo(o.getDescription());
+  }
+  
+  /**
+   * valueOf function is called by JAXB to bind values. This function calls the series factory.
+   *
+   *  @param    xmlString string representation of an series.
+   *  @return   instantiated event SeriesJaxbImpl.
+   */
+  public static SeriesImpl valueOf(String xmlString) throws Exception {
+    return SeriesBuilder.getInstance().parseSeriesImpl(xmlString);
   }
 }

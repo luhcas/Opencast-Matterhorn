@@ -18,7 +18,10 @@ package org.opencastproject.series.impl;
 
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
+import org.opencastproject.series.endpoint.SeriesBuilder;
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,21 +30,36 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Access(AccessType.FIELD)
 @Entity(name="SeriesMetadataImpl")
 @Table(name="SERIES_METADATA")
+@XmlType(name="seriesMetadata", namespace="http://series.opencastproject.org")
+@XmlRootElement(name="series")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class SeriesMetadataImpl implements SeriesMetadata {
-  
+  private static final Logger logger = LoggerFactory.getLogger(SeriesImpl.class);
+    
   @Id
   @Column(name="METADATA_KEY", length=128)
+  @XmlElement(name="key")
   protected String key;
 
   @Column(name="METADATA_VAL", length=256)
+  @XmlElement(name="value")
   protected String value;
   
   @Id
+  @ManyToOne
   @JoinColumn(name="SERIES_ID")
-  @ManyToOne(cascade=CascadeType.ALL)
   protected SeriesImpl series;
   
   public SeriesImpl getSeries() {
@@ -49,8 +67,10 @@ public class SeriesMetadataImpl implements SeriesMetadata {
   }
 
   public void setSeries(Series series) {
-    if (series instanceof SeriesImpl)
+    logger.debug("Set series: {}", series.getSeriesId());
+    if (series instanceof SeriesImpl) {
       this.series = (SeriesImpl) series;
+    }
   }
 
   public SeriesMetadataImpl () {
@@ -123,5 +143,9 @@ public class SeriesMetadataImpl implements SeriesMetadata {
    */
   public int hashCode () {
     return getKey().hashCode();
-  } 
+  }
+  
+  public static SeriesMetadataImpl valueOf(String xmlString) throws Exception {
+    return SeriesBuilder.getInstance().parseSeriesMetadataImpl(xmlString);
+  }
 }
