@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,6 +36,12 @@ public class JsonpPreOutInterceptor extends AbstractPhaseInterceptor<Message> {
 
   /** the logger */
   private static final Logger logger = LoggerFactory.getLogger(JsonpPreOutInterceptor.class);
+
+  /** The regular expression to ensure that the callback is safe for display to a browser */
+  public static final Pattern SAFE_PATTERN = Pattern.compile("[a-zA-Z0-9\\.]+");
+
+  /** The default callback to use if the provided callback doesn't match SAFE_PATTERN. */
+  public static final String DEFAULT_CALLBACK = "matterhornCallback";
 
   public JsonpPreOutInterceptor() {
     super(Phase.PRE_STREAM);
@@ -50,6 +57,10 @@ public class JsonpPreOutInterceptor extends AbstractPhaseInterceptor<Message> {
     Exchange exchange = message.getExchange();
     String callbackValue = (String) exchange.get(JsonpInInterceptor.CALLBACK_KEY);
     if (!StringUtils.isEmpty(callbackValue)) {
+      if( ! SAFE_PATTERN.matcher(callbackValue).matches()) {
+        // replace the unsafe callback with something generic
+        callbackValue = DEFAULT_CALLBACK;
+      }
       logger.debug("Appending callback padding '{}' to message {}", callbackValue, message);
       HttpServletResponse response = (HttpServletResponse) message.get("HTTP.RESPONSE");
       try {
