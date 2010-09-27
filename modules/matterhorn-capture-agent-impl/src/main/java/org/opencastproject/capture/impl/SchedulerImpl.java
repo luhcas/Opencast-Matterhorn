@@ -450,7 +450,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           JobDetail job = scheduler.getJobDetail(jobname, JobParameters.CAPTURE_TYPE);
           Trigger[] triggers = scheduler.getTriggersOfJob(jobname, JobParameters.CAPTURE_TYPE);
           for (Trigger t : triggers) {
-            events.add(new ScheduledEventImpl(job.getName(), t.getStartTime().getTime(), (Long) job.getJobDataMap().get(CaptureParameters.RECORDING_DURATION)));
+            events.add(new ScheduledEventImpl(job.getName(), t.getFireTimeAfter(new Date()).getTime(), (Long) job.getJobDataMap().get(CaptureParameters.RECORDING_DURATION)));
           }
         } catch (SchedulerException e) {
           log.warn("Scheduler exception while generating capture schedule: {}.", e.getMessage());
