@@ -10,3 +10,10 @@ alter table job rename column type to job_type;
 alter table job add column runtime bigint;
 alter table job add column queuetime bigint;
 alter table job add FOREIGN KEY (job_type, host) REFERENCES service_registration(job_type, host);
+
+/**
+ * MH-5364 (DB schema fixes for the feedback service)
+ */
+alter table annotation add column user_id varchar(255) default NULL;
+alter table annotation alter column  media_package_id type varchar(36);
+create index media_package_idx on annotation (media_package_id);

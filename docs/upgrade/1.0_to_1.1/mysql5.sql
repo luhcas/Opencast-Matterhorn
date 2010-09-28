@@ -11,3 +11,11 @@ alter table `JOB` add column `RUNTIME` bigint(20) default NULL;
 alter table `JOB` add column `QUEUETIME` bigint(20) default NULL;
 create index JOB_TYPE_HOST on `JOB` (`HOST`, `JOB_TYPE`);
 alter table `JOB` add FOREIGN KEY (`HOST`, `JOB_TYPE`) REFERENCES `SERVICE_REGISTRATION` (`HOST`, `JOB_TYPE`);
+
+
+/**
+ * MH-5364 (DB schema fixes for the feedback service)
+ */
+alter table `ANNOTATION` add column `USER_ID` varchar(255) default NULL;
+alter table `ANNOTATION` modify `MEDIA_PACKAGE_ID` VARCHAR(36);
+create index MEDIA_PACKAGE_IDX on `ANNOTATION` (`MEDIA_PACKAGE_ID`);
