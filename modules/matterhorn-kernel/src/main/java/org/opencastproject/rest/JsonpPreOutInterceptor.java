@@ -58,6 +58,7 @@ public class JsonpPreOutInterceptor extends AbstractPhaseInterceptor<Message> {
   public void handleMessage(Message message) throws Fault {
     Exchange exchange = message.getExchange();
     String callbackValue = (String) exchange.get(JsonpInInterceptor.CALLBACK_KEY);
+    if(callbackValue == null) return;
     if (!SAFE_PATTERN.matcher(callbackValue).matches()) {
       // replace the unsafe callback with something generic
       callbackValue = DEFAULT_CALLBACK;
