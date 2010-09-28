@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <!-- scripts -->
+    <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
+    <script type="text/javascript" src="js/oc.services.js"></script>
+    <script type="text/javascript" src="/remote/rest/services.json?jsonp=Opencast.Services.buildServicesView"></script>
+    <script type="text/javascript">
+      jQuery(document).ready(function() {
+        var result = TrimPath.processDOMTemplate("servicesTemplate", Opencast.Services);
+        jQuery("#servicesDisplay").html(result);
+      });
+    </script>
+  </head>
+  <body>
+
+    <!-- The div to place the contents of the rendered template -->
+    <div id="servicesDisplay"></div>
+    
+    <!--template -->
+    <textarea id="servicesTemplate" style="display:none">
+      {for service in servicesView}
+        <h2>${service.id}</h2>
+        <table>
+          <th>Host</th>
+          <th>Jobs Running</th>
+          <th>Jobs Queued</th>
+          <th>Mean Run Time</th>
+          <th>Mean Queue Time</th>
+          {for server in service.servers}
+            <tr>
+              <td>${server.host}</td>
+              <td>${server.running}</td>
+              <td>${server.queued}</td>
+              <td>${server.runtime}</td>
+              <td>${server.queuetime}</td>
+            </tr>
+          {/for}
+        </table>
+      {/for}
+    </textarea>
+
+  </body>
+</html>
