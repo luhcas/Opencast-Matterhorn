@@ -22,7 +22,8 @@ CREATE TABLE annotation (
     id integer NOT NULL,
     outpoint integer,
     inpoint integer,
-    media_package_id character varying(255),
+    media_package_id character varying(36),
+    user_id character varying(255),
     session_id character varying(255),
     created timestamp without time zone,
     length integer,
@@ -172,3 +173,5 @@ ALTER TABLE ONLY dictionary
 
 create index dictionary_text on dictionary (text);
 create index dictionary_language on dictionary (language);
+
+create index media_package_idx on annotation (media_package_id);

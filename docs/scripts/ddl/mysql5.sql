@@ -2,7 +2,8 @@ CREATE TABLE `ANNOTATION` (
   `ID` int(11) NOT NULL,
   `OUTPOINT` int(11) default NULL,
   `INPOINT` int(11) default NULL,
-  `MEDIA_PACKAGE_ID` varchar(255) collate utf8_unicode_ci default NULL,
+  `MEDIA_PACKAGE_ID` varchar(36) collate utf8_unicode_ci default NULL,
+  `USER_ID` varchar(255) collate utf8_unicode_ci default NULL,
   `SESSION_ID` varchar(255) collate utf8_unicode_ci default NULL,
   `CREATED` datetime default NULL,
   `LENGTH` int(11) default NULL,
@@ -121,6 +122,8 @@ CREATE TABLE `DICTIONARY` (
 
 CREATE INDEX DICTIONARY_TEXT ON DICTIONARY (TEXT);
 CREATE INDEX DICTIONARY_LANGUAGE ON DICTIONARY (LANGUAGE);
+
+create index MEDIA_PACKAGE_IDX on `ANNOTATION` (`MEDIA_PACKAGE_ID`);
 
 create index JOB_TYPE_HOST on `JOB` (`HOST`, `JOB_TYPE`);
 alter table `JOB` add FOREIGN KEY (`HOST`, `JOB_TYPE`) REFERENCES `SERVICE_REGISTRATION` (`HOST`, `JOB_TYPE`);
