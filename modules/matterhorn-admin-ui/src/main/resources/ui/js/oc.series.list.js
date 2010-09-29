@@ -14,9 +14,47 @@
  *
  */
 ocSeriesList = {} || ocSeriesList;
+ocSeriesList.views = {} || ocSeriesList.views;
+ocSeriesList.views.seriesView = {} || ocSeriesList.seriesView;
 
 ocSeriesList.init = function(){
-  $('#seriesTableContainer').xslt('/admin/rest/series', 'xsl/series_list.xsl', function(){
-  
-  });
+  var result = TrimPath.processDOMTemplate("seriesTemplate", ocSeriesList.views);
+  $('#seriesTableContainer').html(result);
+}
+
+ocSeriesList.buildSeriesView = function(data) {
+  if(typeof data.seriesList === 'object'){
+    if(!$.isArray(data.seriesList.series)){
+      data.seriesList.series = [data.seriesList.series]
+    }
+    $.each(data.seriesList.series, function(i,series){
+      var s = ocSeriesList.views.seriesView[series.seriesId] = {};
+      s.id = series.seriesId;
+      for(m in series.metadataList.metadata){
+        var metadata = series.metadataList.metadata[m];
+        if(metadata.key === 'title'){
+          s.title = metadata.value;
+        } else if(metadata.key === 'creator') {
+          s.creator = metadata.value;
+        } else if(metadata.key  === 'contributor') {
+          s.contributor = metadata.value;
+        }
+      }
+    });
+  }
+}
+
+ocSeriesList.deleteSeries = function(seriesId, title) {
+  if(confirm('Are you sure you want to delete the series "' + title + '"?')){
+    $.ajax({
+      type: 'DELETE',
+      url: '/series/rest/' + seriesId,
+      error: function(XHR,status,e){
+        alert('Could not remove series "' + title + '"');
+      },
+      success: function(data) {
+        location.reload();
+      }
+    });
+  }
 }

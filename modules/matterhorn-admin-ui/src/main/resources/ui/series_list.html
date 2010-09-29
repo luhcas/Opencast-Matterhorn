@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title id="i18n_window_title">Series | Opencast Matterhorn</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="shortcut icon" href="img/favicon.ico"> 
+    <!-- styles -->
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css">
+    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css">
+    <link rel="stylesheet" type="text/css" href="css/admin.css">
+    <link rel="stylesheet" type="text/css" href="css/shared.css">
+    <link rel="stylesheet" type="text/css" href="css/tablesorter.css">
+    <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.7.2.custom.css">
+
+    <!-- scripts -->
+    <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
+    <script type="text/javascript" src="js/version.js"></script>
+    <script type="text/javascript" src="js/oc.utils.js"></script>
+    <script type="text/javascript" src="js/oc.admin.js"></script>
+    <script type="text/javascript" src="js/oc.series.list.js"></script>
+    <script type="text/javascript" src="/series/rest/all.json?jsonp=ocSeriesList.buildSeriesView"></script>
+    <script type="text/javascript">
+      $(document).ready(ocSeriesList.init);
+    </script>
+  </head>
+  <body>
+    <div id="pageHeader">
+      <div id="currentVersion" style="float:left;"></div>
+      <div style="text-align:right; float: right;"><a href="/j_spring_security_logout" style="color:#FFFFFF">Log out</a></div>
+    </div>
+
+    <!-- notification that javaScript is disabled -->
+    <noscript>
+      <center>
+        <div style="border:1px solid red;width:530px;margin:20px;">
+          <div id="messages">
+            <div class="icon icon-error" style="margin-left:5px;margin-right:5px;">&nbsp;</div>
+            JavaScript is disabled
+          </div>
+          <div style="padding:10px;">
+            JavaScript is turned off in your web browser, so this site won't work properly! <br />
+            <strong>
+              Please turn JavaScript on to use this site, then refresh the page.
+            </strong>
+          </div>
+        </div>
+      </center>
+    </noscript>
+
+    <!-- fl-centered doesn't work in winXP-IE8 -->
+    <div class="fl-container-flex fl-centered fl-theme-coal">
+      <div id="header">
+        <div id="logotitle">
+          <a href="../../welcome.html">
+            <img src="img/MatterhornLogo.png" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" align="left">
+            <h1>Admin Tools</h1>
+          </a>
+        </div>
+        <div id="oclogo">
+          <a href="http://www.opencastproject.org">
+            <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project">
+          </a>
+        </div>
+      </div>
+      <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
+        <li><a href="recordings.html" id="i18n_tab_recording">Recordings</a></li>
+        <li class="fl-activeTab"><a href="series_list.html" id="i18n_tab_series">Series</a></li>
+        <li><a href="agents_status.html" id="i18n_tab_agent">Capture Agents</a></li>
+      </ul>
+      <div id="stage" class="fl-tab-content wu-tab-content fl-fix">
+        <!-- Add/Schedule Buttons -->
+        <div id="add-buttons-container">
+          <button type="button" id="button_series" onclick="document.location = '/admin/series.html'"  style="height:2.1em;cursor:pointer;margin-right:1em;font-size:0.9em;vertical-align: middle;">
+            <span class="icon icon-add">&nbsp;</span>
+            <span style="font-weight: bold; font-size:1em;" id="i18n_button_schedule">&nbsp; Add Series</span>
+          </button>
+        </div>
+        <div>
+          <div id="seriesTableContainer"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Series Table Template -->
+    <textarea id="seriesTemplate" style="display:none;">
+      <table id="seriesTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
+        <thead>
+          <tr>
+            <th width="25%" class="sortable">Title</th>
+            <th width="25%" class="sortable">Organizer</th>
+            <th width="25%" class="sortable">Sponsoring Department</th>
+            <th width="25%">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {for series in seriesView}
+          <tr class="highlightable">
+            <td>${series.title}</td>
+            <td>${series.contributor}</td>
+            <td>${series.creator}</td>
+            <td>
+              <a href="series.html?seriesId=${series.id}&edit=true">Edit</a><br/>
+              <a href="javascript:ocSeriesList.deleteSeries('${series.id}', '${series.title}');">Delete</a>
+            </td>
+          </tr>
+          {/for}
+        </tbody>
+      </table>
+    </textarea>
+  </body>
+</html>

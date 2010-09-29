@@ -240,7 +240,7 @@ public class SeriesRestService {
     try {
       service.addSeries(series);
       logger.debug("Adding series {} ", series.getSeriesId());
-      return Response.status(Status.CREATED).build();
+      return Response.status(Status.CREATED).type("").build(); //get rid of content type
     } catch(IllegalArgumentException e) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
@@ -259,7 +259,7 @@ public class SeriesRestService {
   public Response deleteSeries(@PathParam("seriesID") String seriesID) {
     try {
       service.removeSeries(seriesID);
-      return Response.noContent().build();
+      return Response.noContent().type("").build(); //get rid of content type
     } catch(NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
     }
@@ -284,7 +284,7 @@ public class SeriesRestService {
     logger.debug("Updated Series: {}", series.getSeriesId());
     try {
       service.updateSeries(series);
-      return Response.noContent().build();
+      return Response.noContent().type("").build(); //get rid of content-type
     } catch(NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
     }

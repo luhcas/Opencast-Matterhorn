@@ -20,6 +20,10 @@ ocSeries.components = {};
 
 /*    PAGE CONFIGURATION    */
 var SERIES_SERVICE_URL = "/series/rest";
+var CREATE_MODE = 1;
+var EDIT_MODE   = 2;
+
+ocSeries.mode = CREATE_MODE;
 
 /*    UI FUNCTIONS    */
 ocSeries.Init = function(){
@@ -41,7 +45,23 @@ ocSeries.Init = function(){
   $('#cancelButton').click(function() {
     document.location = 'recordings.html';
   });
-  $.get(SERIES_SERVICE_URL + '/new/id', function(data){ $('#seriesId').val(data.id); });
+  
+  ocUtils.log(ocUtils.getURLParam('edit'));
+  if(ocUtils.getURLParam('edit') === 'true'){
+    ocSeries.mode = EDIT_MODE;
+  }
+  
+  if(ocSeries.mode === CREATE_MODE){
+    $.get(SERIES_SERVICE_URL + '/new/id', function(data){ $('#seriesId').val(data.id); });
+  } else {
+    $('#submitButton').val('Update Series');
+    $('#i18n_page_title').text(i18n.page.title.edit);
+    var seriesId = ocUtils.getURLParam('seriesId');
+    if(seriesId !== '') {
+      $('#seriesId').val(seriesId);
+      $.getJSON(SERIES_SERVICE_URL + "/" + seriesId + ".json", ocSeries.loadSeries);
+    }
+  }
 }
 
 ocSeries.Internationalize = function(){
@@ -51,8 +71,8 @@ ocSeries.Internationalize = function(){
     path:'i18n/'
   });
   ocAdmin.internationalize(i18n, 'i18n');
-  
   //Handle special cases like the window title.
+  $('#i18n_page_title').text(i18n.page.title.add);
 }
 
 ocSeries.SelectMetaTab = function(elm){
@@ -64,6 +84,15 @@ ocSeries.SelectMetaTab = function(elm){
   }else{
     $("#commonDescriptors").hide();
     $("#additionalMetadata").show();
+  }
+}
+
+ocSeries.loadSeries = function(data) {
+  for(m in data.series.metadataList.metadata){
+    var metadata = data.series.metadataList.metadata[m];
+    if(ocSeries.components[metadata.key]){
+      ocSeries.components[metadata.key].setValue(metadata.value);
+    }
   }
 }
 
@@ -138,11 +167,16 @@ ocSeries.RegisterComponents = function(){
 ocSeries.SubmitForm = function(){
   var seriesXml = ocSeries.FormManager.serialize();
   if(seriesXml){
+    if(ocSeries.mode === CREATE_MODE) {
+      method = "PUT";
+    } else {
+      method = "POST";
+    }
     $.ajax({
-      type: "PUT",
-      url: SERIES_SERVICE_URL + '/series/' + $('#seriesId').val(),
+      type: method,
+      url: SERIES_SERVICE_URL + '/' + $('#seriesId').val(),
       data: { series: seriesXml },
-      success: ocSeries.SeriesSubmitComplete
+      complete: ocSeries.SeriesSubmitComplete
     });
   }
 }
