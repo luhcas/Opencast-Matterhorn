@@ -62,23 +62,22 @@ import javax.xml.bind.annotation.XmlTransient;
  *
  */
  
-@Entity
+@Entity(name="SeriesImpl")
 @Table(name="SERIES")
 @Access(AccessType.FIELD)
 @XmlType(name="series", namespace="http://series.opencastproject.org")
 @XmlRootElement(name="series")
-@XmlAccessorType(XmlAccessType.FIELD)
+@XmlAccessorType(XmlAccessType.NONE)
 public class SeriesImpl implements Series {
   private static final Logger logger = LoggerFactory.getLogger(SeriesImpl.class);
   
   @Id
   @GeneratedValue
   @Column(name="ID", length=128)
-  @XmlID
+  @XmlElement
   String seriesId;
   
   @Transient
-  @XmlTransient
   DublinCoreCatalog dublinCore;
   
   @OneToMany(cascade=CascadeType.ALL, targetEntity=SeriesMetadataImpl.class, mappedBy="series")
@@ -91,6 +90,16 @@ public class SeriesImpl implements Series {
    */
   public SeriesImpl() {
     metadata = new LinkedList<SeriesMetadataImpl>();
+  }
+  
+  public SeriesImpl(String seriesXml){
+    try {
+      SeriesImpl series = SeriesImpl.valueOf(seriesXml);
+      setSeriesId(series.getSeriesId());
+      setMetadata(series.getMetadata());
+    } catch (Exception e) {
+      logger.debug("Unable to load series: {}", e);
+    }
   }
   
   /**
@@ -108,7 +117,6 @@ public class SeriesImpl implements Series {
   public void setSeriesId (String seriesId) {
     this.seriesId = seriesId;
     addToMetadata("identifier", seriesId);
-    
   }
   
   /**

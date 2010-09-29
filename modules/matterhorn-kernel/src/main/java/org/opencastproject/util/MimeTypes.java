@@ -56,6 +56,7 @@ public class MimeTypes {
   /** Common mime types */
   public static MimeType XML = null;
   public static MimeType TEXT = null;
+  public static MimeType JSON = null;
   public static MimeType JPG = null;
   public static MimeType MJPEG = null;
   public static MimeType MPEG4 = null;
@@ -72,6 +73,7 @@ public class MimeTypes {
   static {
     XML = MimeTypes.parseMimeType("text/xml");
     TEXT = MimeTypes.parseMimeType("text/plain");
+    JSON = MimeTypes.parseMimeType("application/json");
     JPG = MimeTypes.parseMimeType("image/jpg");
     MJPEG = MimeTypes.parseMimeType("video/x-motion-jpeg");
     MPEG4 = MimeTypes.parseMimeType("video/mp4");
@@ -142,6 +144,10 @@ public class MimeTypes {
 
     // TYPE_XML
     mimeType = new MimeType("text", "xml", "xml");
+    mimeTypes_.add(mimeType);
+    
+    // JSON
+    mimeType = new MimeType("application", "json", "json");
     mimeTypes_.add(mimeType);
 
     // MPEG-4

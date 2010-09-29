@@ -140,7 +140,10 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.series.*;version=${project.version} </Export-Package>
+            <Export-Package>
+              org.opencastproject.series.endpoint;version=${project.version},
+              org.opencastproject.series.impl;version=${project.version}
+            </Export-Package>
             <Import-Package>
               org.opencastproject.http;version=${project.version},
               org.opencastproject.metadata.dublincore;version=${project.version},
@@ -158,9 +161,7 @@
               OSGI-INF/series-service.xml,
               OSGI-INF/series-service-rest.xml
             </Service-Component>
-		    <JPA-PersistenceUnits>
-		      org.opencastproject.series.impl
-		    </JPA-PersistenceUnits>            
+            <JPA-PersistenceUnits>org.opencastproject.series.impl</JPA-PersistenceUnits>            
           </instructions>
         </configuration>
       </plugin>

@@ -1,4 +1,4 @@
 /**
- * Scheduler REST and WSDL Service endpoints
+ * Series REST Service endpoints
  */
 package org.opencastproject.series.endpoint;

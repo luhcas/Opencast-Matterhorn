@@ -21,6 +21,7 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.mediapackage.identifier.HandleException;
 import org.opencastproject.util.ConfigurationException;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 
 import java.io.FileNotFoundException;
@@ -144,7 +145,7 @@ public interface IngestService {
    * @throws IOException
    */
   MediaPackage addCatalog(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, IOException;
+          throws MediaPackageException, UnsupportedElementException, IOException, NotFoundException;
 
   /**
    * Add a [metadata catalog] to an existing MediaPackage in the repository
@@ -163,7 +164,7 @@ public interface IngestService {
    */
   MediaPackage addCatalog(InputStream catalog, String fileName, MediaPackageElementFlavor flavor,
           MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, MalformedURLException,
-          IOException;
+          IOException, NotFoundException;
 
   /**
    * Add an attachment to an existing MediaPackage in the repository

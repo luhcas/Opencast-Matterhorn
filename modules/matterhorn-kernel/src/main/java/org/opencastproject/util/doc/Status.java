@@ -30,6 +30,13 @@ public class Status {
    * @param desc [optional] description to add to this status
    * @return the status
    */
+  public static Status CREATED(String desc) {
+    return new Status(201, desc);
+  }
+  /**
+   * @param desc [optional] description to add to this status
+   * @return the status
+   */
   public static Status NO_CONTENT(String desc) {
     return new Status(204, desc);
   }

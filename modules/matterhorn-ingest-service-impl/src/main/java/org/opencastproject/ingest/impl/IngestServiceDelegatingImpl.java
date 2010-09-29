@@ -22,6 +22,7 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.mediapackage.identifier.HandleException;
 import org.opencastproject.util.ConfigurationException;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 
 import org.osgi.service.component.ComponentContext;
@@ -104,14 +105,14 @@ public class IngestServiceDelegatingImpl implements IngestService {
 
   @Override
   public MediaPackage addCatalog(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, IOException {
+          throws MediaPackageException, UnsupportedElementException, IOException, NotFoundException {
     return delegate.addCatalog(uri, flavor, mediaPackage);
   }
 
   @Override
   public MediaPackage addCatalog(InputStream catalog, String fileName, MediaPackageElementFlavor flavor,
           MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, MalformedURLException,
-          IOException {
+          IOException, NotFoundException {
     return delegate.addCatalog(catalog, fileName, flavor, mediaPackage);
   }
 

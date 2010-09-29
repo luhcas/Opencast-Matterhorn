@@ -99,14 +99,13 @@ public class SeriesServiceImplTest {
   }
 
   @Test
-  public void testSeriesService() {
+  public void testSeriesService() throws Exception {
     Assert.assertNotNull(series.getSeriesId());
     Assert.assertNotNull(series.getMetadata());
     Assert.assertNotNull(series.getDublinCore());
     Assert.assertTrue(series.valid());
 
     service.addSeries(series);
-
     Series loaded = service.getSeries(series.getSeriesId());
     Assert.assertNotNull(loaded);
     Assert.assertNotNull(loaded.getMetadata());

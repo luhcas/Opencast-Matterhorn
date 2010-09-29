@@ -52,7 +52,7 @@ public interface SeriesService {
    * @param seriesID The ID of the requested series
    * @return The requested series
    */
-  public Series getSeries (String seriesID);
+  public Series getSeries (String seriesID) throws NotFoundException;
   
   /**
    * returns all series' as a List 
@@ -65,7 +65,7 @@ public interface SeriesService {
    * @param seriesID The ID of the demanded series 
    * @return A dublin Core Element
    */
-  public DublinCoreCatalog getDublinCore (String seriesID);
+  public DublinCoreCatalog getDublinCore (String seriesID) throws NotFoundException;
 
   /**
    * Adds or updates an existing series based on a dublin core catalog.
@@ -73,14 +73,14 @@ public interface SeriesService {
    * @param dcCatalog The dublin core metadata catalog
    * @return The updated series
    */
-  public Series addOrUpdate(DublinCoreCatalog dcCatalog);
+  public Series addOrUpdate(DublinCoreCatalog dcCatalog) throws NotFoundException;
   
   /**
    * Searches for all series' that fit into a certain pattern
    * @param pattern a part the value of a metadata field
    * @return a List of all series that match that pattern
    */
-  public List<Series> searchSeries(String pattern);
+  public List<Series> searchSeries(String pattern) throws NotFoundException;
   
 }
 

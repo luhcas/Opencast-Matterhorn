@@ -15,28 +15,40 @@
  */
 package org.opencastproject.series.impl;
 
+import org.opencastproject.series.api.Series;
+
+import java.util.List;
 import java.util.LinkedList;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 /**
  * A List of {@link SeriesJaxbImpl}s
  */
-@XmlType(name="seriesList", namespace="http://series.opencastproject.org")
 @XmlRootElement(name="seriesList")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class SeriesListImpl {
 
-  protected LinkedList<SeriesImpl> series;
+  @XmlElement
+  protected List<SeriesImpl> series;
   
-  public SeriesListImpl(){
+  public SeriesListImpl() {
     series = new LinkedList<SeriesImpl>();
   }
   
-  public SeriesListImpl(LinkedList<SeriesImpl> s){
-    series = s;
+  public SeriesListImpl(List<Series> s) {
+    this.setSeriesList(s);
+  }
+  
+  public void setSeriesList(List<Series> series) {
+    if(!this.series.isEmpty()){
+      this.series.clear();
+    }
+    for(Series s : series){
+      this.series.add((SeriesImpl) s);
+    }
   }
 }

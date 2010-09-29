@@ -36,7 +36,7 @@ ocSeries.Init = function(){
   });
   
   ocSeries.RegisterComponents();
-  ocSeries.FormManager = new ocAdmin.Manager('Series', '', ocSeries.components);
+  ocSeries.FormManager = new ocAdmin.Manager('series', '', ocSeries.components);
   $('#submitButton').click(ocSeries.SubmitForm);
   $('#cancelButton').click(function() {
     document.location = 'recordings.html';
@@ -140,10 +140,8 @@ ocSeries.SubmitForm = function(){
   if(seriesXml){
     $.ajax({
       type: "PUT",
-      url: SERIES_SERVICE_URL + '/series',
-      data: {
-        series: seriesXml
-      },
+      url: SERIES_SERVICE_URL + '/series/' + $('#seriesId').val(),
+      data: { series: seriesXml },
       success: ocSeries.SeriesSubmitComplete
     });
   }

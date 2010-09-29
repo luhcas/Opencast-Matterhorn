@@ -113,17 +113,39 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("event/{eventID}")
-  public Response getSingleEvent(@PathParam("eventID") String eventID) {
+  @Path("event/{eventID}.xml")
+  public EventImpl getSingleEvent(@PathParam("eventID") String eventID) {
     logger.debug("Single event Lookup: {}", eventID);
-    try {
+    return (EventImpl) service.getEvent(eventID);
+    /*try {
+      
+      if (event == null) return Response.status(Status.BAD_REQUEST).build();
+      return Response.ok(event).build();
+    } catch (Exception e) {
+      logger.warn("Single event Lookup failed: {}", eventID);
+      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+    }*/
+  }
+  
+  /**
+   * Get a specific scheduled event.
+   * @param eventID The unique ID of the event.
+   * @return event XML with the data of the event
+   */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("event/{eventID}.json")
+  public EventImpl getSingleEventJson(@PathParam("eventID") String eventID) {
+    logger.debug("Single event Lookup: {}", eventID);
+    return getSingleEvent(eventID);
+    /*try {
       Event event = service.getEvent(eventID);
       if (event == null) return Response.status(Status.BAD_REQUEST).build();
       return Response.ok(event).build();
     } catch (Exception e) {
       logger.warn("Single event Lookup failed: {}", eventID);
       return Response.status(Status.SERVICE_UNAVAILABLE).build();
-    }
+    }*/
   }
   
   /**

@@ -114,7 +114,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * @see org.opencastproject.series.api.SeriesService#getDublinCore(java.lang.String)
    */
   @Override
-  public DublinCoreCatalog getDublinCore(String seriesID) {
+  public DublinCoreCatalog getDublinCore(String seriesID) throws NotFoundException {
     return getSeries(seriesID).getDublinCore();
   }
   
@@ -123,7 +123,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * @see org.opencastproject.series.api.SeriesService#addOrUpdate(org.opencastproject.metadata.dublincore.DublinCoreCatalog)
    */
   @Override
-  public Series addOrUpdate(DublinCoreCatalog dcCatalog) {
+  public Series addOrUpdate(DublinCoreCatalog dcCatalog) throws NotFoundException {
     String id = dcCatalog.get(DublinCoreCatalog.PROPERTY_IDENTIFIER).get(0).getValue();
     SeriesImpl existingSeries = (SeriesImpl)getSeries(id);
     if(existingSeries == null) {
@@ -148,11 +148,10 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * @see org.opencastproject.series.api.SeriesService#getSeries(java.lang.String)
    */
   @Override
-  public Series getSeries(String seriesID) {
+  public Series getSeries(String seriesID) throws NotFoundException {
     logger.debug("loading series with the ID {}", seriesID);
     if (seriesID == null || emf == null) {
-      logger.warn("could not find series {}. Null Pointer exeption", seriesID);
-      return null;
+      throw new NotFoundException("Unable to find series with seriesID of '" + seriesID + "'");
     }
     EntityManager em = emf.createEntityManager();
     Series s = null;
@@ -176,7 +175,9 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
     try {
       em.getTransaction().begin();
       s = em.find(SeriesImpl.class, seriesId);
-      if (s == null) throw new NotFoundException("Series " + seriesId + " does not exist");
+      if (s == null) {
+        throw new NotFoundException("Series " + seriesId + " does not exist");
+      }
       em.remove(s);
       em.getTransaction().commit();
     } finally {
@@ -237,12 +238,12 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
     this.properties = properties;
-    
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public List<Series> searchSeries(String pattern) {
+  //TODO: Is this a security risk??
+  public List<Series> searchSeries(String pattern) throws NotFoundException {
     EntityManager em = emf.createEntityManager();
     List<SeriesMetadataImpl> found = null;
     try {
@@ -251,8 +252,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
       found = (List<SeriesMetadataImpl>) query.getResultList();
       logger.debug("Found {} values containing {}.", found.size(), pattern);
     } catch (Exception e) {
-      logger.warn("Could not search for pattern {}: {} ",pattern, e.getMessage());
-      return null;
+      throw new NotFoundException("Could not search for pattern '" + pattern + "': ", e);
     } finally {
       em.close();
     } 
@@ -267,8 +267,6 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
     Collections.sort(result);
     
     return result;
-    
-    
   }
 
 }

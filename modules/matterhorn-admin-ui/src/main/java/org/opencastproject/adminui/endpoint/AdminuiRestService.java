@@ -37,6 +37,7 @@ import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
@@ -669,9 +670,14 @@ public class AdminuiRestService {
   public String getSeriesNameById(String seriesId) {
     String seriesName = null;
     if (seriesId != null && !seriesId.isEmpty()) {
-      Series series = seriesService.getSeries(seriesId);
-      if (series != null) {
-        seriesName = series.getFromMetadata("title");
+      try {
+        Series series = seriesService.getSeries(seriesId);
+        if (series != null) {
+          seriesName = series.getFromMetadata("title");
+        }
+      } catch (NotFoundException e){
+        logger.warn("Could not find series '" + seriesId + "': {}", e);
+        return "";
       }
     }
     if (seriesName != null) {

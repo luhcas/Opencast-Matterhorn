@@ -35,16 +35,17 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlTransient;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Access(AccessType.FIELD)
 @Entity(name="SeriesMetadataImpl")
 @Table(name="SERIES_METADATA")
+@Access(AccessType.FIELD)
 @XmlType(name="seriesMetadata", namespace="http://series.opencastproject.org")
 @XmlRootElement(name="series")
-@XmlAccessorType(XmlAccessType.FIELD)
+@XmlAccessorType(XmlAccessType.NONE)
 public class SeriesMetadataImpl implements SeriesMetadata {
   private static final Logger logger = LoggerFactory.getLogger(SeriesImpl.class);
     
@@ -61,20 +62,19 @@ public class SeriesMetadataImpl implements SeriesMetadata {
   @ManyToOne
   @JoinColumn(name="SERIES_ID")
   protected SeriesImpl series;
-  
-  public SeriesImpl getSeries() {
-    return series;
-  }
-
-  public void setSeries(Series series) {
-    logger.debug("Set series: {}", series.getSeriesId());
-    if (series instanceof SeriesImpl) {
-      this.series = (SeriesImpl) series;
-    }
-  }
 
   public SeriesMetadataImpl () {
     super();
+  }
+  
+  public SeriesMetadataImpl (String seriesMetadataXml) {
+    try {
+    SeriesMetadataImpl smd = SeriesMetadataImpl.valueOf(seriesMetadataXml);
+    setKey(smd.getKey());
+    setValue(smd.getValue());
+    } catch (Exception e) {
+      logger.debug("Unable to load series metadata: {}", e);
+    }
   }
 
   public SeriesMetadataImpl (String key, String value) {
@@ -86,6 +86,17 @@ public class SeriesMetadataImpl implements SeriesMetadata {
     this.key = key;
     this.value = value;
     setSeries(series);
+  }
+  
+  public SeriesImpl getSeries() {
+    return series;
+  }
+
+  public void setSeries(Series series) {
+    logger.debug("Set series: {}", series.getSeriesId());
+    if (series instanceof SeriesImpl) {
+      this.series = (SeriesImpl) series;
+    }
   }
   
   /**

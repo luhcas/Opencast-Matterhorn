@@ -30,6 +30,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesService;
+import org.opencastproject.util.NotFoundException;
 
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.DateTime;
@@ -182,9 +183,9 @@ public class CalendarGenerator {
       logger.warn("No SeriesService available");
       return null;
     }
-    Series series = seriesService.getSeries(seriesID); 
     
     try {
+      Series series = seriesService.getSeries(seriesID);
       Document doc = (series.getDublinCore()).toXml();
       
       Source source = new DOMSource(doc);
@@ -195,6 +196,8 @@ public class CalendarGenerator {
       transformer.transform(source, result);
     
       return stringWriter.getBuffer().toString().trim(); 
+    } catch (NotFoundException e){
+      logger.warn("Could not find series '" + seriesID + "': {}", e);
     } catch (ParserConfigurationException e) {
       logger.error("Could not parse DublinCoreCatalog for Series: {}", e.getMessage());
     } catch (IOException e) {

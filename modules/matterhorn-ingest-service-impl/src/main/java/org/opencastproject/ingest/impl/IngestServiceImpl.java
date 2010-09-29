@@ -237,7 +237,7 @@ public class IngestServiceImpl implements IngestService {
    */
   @Override
   public MediaPackage addCatalog(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, IOException {
+          throws MediaPackageException, UnsupportedElementException, IOException, NotFoundException {
     String elementId = UUID.randomUUID().toString();
     URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
     if(MediaPackageElements.SERIES.equals(flavor)) {
@@ -251,7 +251,7 @@ public class IngestServiceImpl implements IngestService {
    * Updates the persistent representation of a series based on a potentially modified dublin core document.
    * @param uri the URI to the dublin core document containing series metadata.
    */
-  protected void updateSeries(URI uri) throws IOException {
+  protected void updateSeries(URI uri) throws IOException, NotFoundException {
     HttpResponse response = null;
     try {
       HttpGet getDc = new HttpGet(uri);
@@ -270,7 +270,7 @@ public class IngestServiceImpl implements IngestService {
    */
   @Override
   public MediaPackage addCatalog(InputStream in, String fileName, MediaPackageElementFlavor flavor,
-          MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, IOException {
+          MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, IOException, NotFoundException {
     String elementId = UUID.randomUUID().toString();
     URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
     if(MediaPackageElements.SERIES.equals(flavor)) {

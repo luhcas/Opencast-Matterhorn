@@ -179,7 +179,6 @@ public class SchedulerServiceImpl implements ManagedService{
   public RecurringEvent addRecurringEvent(RecurringEvent e) {
     EntityManager em = emf.createEntityManager();
     RecurringEventImpl event = (RecurringEventImpl)e;
-    event.setEntityManagerFactory(emf);
     event.generatedEvents();
     try {
       EntityTransaction tx = em.getTransaction();
