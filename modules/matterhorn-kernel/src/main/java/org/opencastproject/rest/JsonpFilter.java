@@ -15,16 +15,13 @@
  */
 package org.opencastproject.rest;
 
-import org.apache.cxf.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 import javax.servlet.Filter;
@@ -37,6 +34,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import javax.ws.rs.core.MediaType;
 
 /**
  * Adds padding to json responses when the 'jsonp' parameter is specified.
@@ -54,11 +52,14 @@ public class JsonpFilter implements Filter {
   /** The default padding to use if the specified padding contains invalid characters */
   public static final String DEFAULT_CALLBACK = "handleMatterhornData";
 
-  /** The content type for jsonp is "application/javascript", not "application/json". */
-  public static final String JS_CONTENT_TYPE = "application/javascript;charset=UTF-8";
+  /** The content type for jsonp is "application/x-javascript", not "application/json". */
+  public static final String JS_CONTENT_TYPE = "application/x-javascript";
+
+  /** The character encoding. */
+  public static final String CHARACTER_ENCODING = "UTF-8";
 
   /** The post padding, which is always ');' no matter what the pre-padding looks like */
-  protected byte[] postPadding;
+  public static final String POST_PADDING = ");";
 
   /**
    * {@inheritDoc}
@@ -67,11 +68,6 @@ public class JsonpFilter implements Filter {
    */
   @Override
   public void init(FilterConfig config) throws ServletException {
-    try {
-      postPadding = ");".getBytes("UTF-8");
-    } catch (UnsupportedEncodingException e) {
-      throw new ServletException(e);
-    }
   }
 
   /**
@@ -95,111 +91,181 @@ public class JsonpFilter implements Filter {
 
     // Cast the request and response to HTTP versions
     HttpServletRequest request = (HttpServletRequest) req;
-    HttpServletResponse response = (HttpServletResponse) resp;
+    HttpServletResponse originalResponse = (HttpServletResponse) resp;
 
     // Determine whether the response must be wrapped
     String callbackValue = request.getParameter(CALLBACK_PARAM);
-    if (StringUtils.isEmpty(callbackValue)) {
+    if (callbackValue == null || callbackValue.isEmpty()) {
       logger.debug("No json padding requested from {}", request);
-      chain.doFilter(request, response);
+      chain.doFilter(request, originalResponse);
     } else {
       logger.debug("Json padding '{}' requested from {}", callbackValue, request);
-      
+
       // Ensure the callback value contains only safe characters
-      if(!SAFE_PATTERN.matcher(callbackValue).matches()) {
+      if (!SAFE_PATTERN.matcher(callbackValue).matches()) {
         callbackValue = DEFAULT_CALLBACK;
       }
-      
+
       // Write the padded response
-      byte[] prePadding = (callbackValue + "(").getBytes();
-      OutputStream out = response.getOutputStream();
-      GenericResponseWrapper wrapper = new GenericResponseWrapper((HttpServletResponse) response);
+      String preWrapper = callbackValue + "(";
+      HttpServletResponseContentWrapper wrapper = new HttpServletResponseContentWrapper(originalResponse, preWrapper);
       chain.doFilter(request, wrapper);
-      out.write(prePadding);
-      out.write(wrapper.getData());
-      out.write(postPadding);
-      wrapper.setContentType("text/javascript;charset=UTF-8");
-      out.close();
+      wrapper.flushWrapper();
     }
   }
 
   /**
    * A response wrapper that allows for json padding.
    */
-  static class GenericResponseWrapper extends HttpServletResponseWrapper {
+  static class HttpServletResponseContentWrapper extends HttpServletResponseWrapper {
 
-    /** The output stream */
-    private ByteArrayOutputStream output;
-    
-    /** The content length */
-    private int contentLength;
-    
-    /** The content type */
-    private String contentType;
+    protected ByteArrayServletOutputStream buffer;
+    protected PrintWriter bufferWriter;
+    protected boolean committed = false;
+    protected boolean enableWrapping = false;
+    protected String preWrapper;
 
-    /** Wrap the original response */
-    public GenericResponseWrapper(HttpServletResponse response) {
+    public HttpServletResponseContentWrapper(HttpServletResponse response, String preWrapper) {
       super(response);
-      output = new ByteArrayOutputStream();
+      this.preWrapper = preWrapper;
+      this.buffer = new ByteArrayServletOutputStream();
     }
 
-    /** Get the data from the original response */
-    public byte[] getData() {
-      return output.toByteArray();
+    public void flushWrapper() throws IOException {
+      if(enableWrapping) {
+        if (bufferWriter != null)
+          bufferWriter.close();
+        if (buffer != null)
+          buffer.close();
+        byte[] content = wrap(buffer.toByteArray());
+        getResponse().setContentType(JS_CONTENT_TYPE);
+        getResponse().setContentLength(content.length);
+        getResponse().setCharacterEncoding(CHARACTER_ENCODING);
+        getResponse().getOutputStream().write(content);
+        getResponse().flushBuffer();
+        committed = true;
+      }
+    }
+
+    public byte[] wrap(byte[] content) throws IOException {
+      StringBuilder sb = new StringBuilder(preWrapper);
+      sb.append(new String(content, CHARACTER_ENCODING));
+      sb.append(POST_PADDING);
+      return sb.toString().getBytes(CHARACTER_ENCODING);
     }
 
     @Override
-    public ServletOutputStream getOutputStream() {
-      return new FilterServletOutputStream(output);
-    }
-
-    @Override
-    public PrintWriter getWriter() {
-      return new PrintWriter(getOutputStream(), true);
-    }
-
-    @Override
-    public void setContentLength(int length) {
-      this.contentLength = length;
-      super.setContentLength(length);
-    }
-
-    public int getContentLength() {
-      return contentLength;
-    }
-
-    public void setContentType(String type) {
-      this.contentType = type;
-      super.setContentType(type);
-    }
-
     public String getContentType() {
-      return contentType;
+      return enableWrapping ? JS_CONTENT_TYPE : getResponse().getContentType();
+    }
+
+    /**
+     * If the content type is set to JSON, we enable wrapping. Otherwise, we leave it disabled.
+     * 
+     * {@inheritDoc}
+     * 
+     * @see javax.servlet.ServletResponseWrapper#setContentType(java.lang.String)
+     */
+    @Override
+    public void setContentType(String type) {
+      enableWrapping = MediaType.APPLICATION_JSON.equals(type);
+    }
+
+    @Override
+    public ServletOutputStream getOutputStream() throws IOException {
+      return enableWrapping ? buffer : getResponse().getOutputStream();
+    }
+
+    @Override
+    public PrintWriter getWriter() throws IOException {
+      if (enableWrapping) {
+        if (bufferWriter == null) {
+          bufferWriter = new PrintWriter(new OutputStreamWriter(buffer, this.getCharacterEncoding()));
+        }
+        return bufferWriter;
+      } else {
+        return getResponse().getWriter();
+      }
+    }
+
+    @Override
+    public void setBufferSize(int size) {
+      if (enableWrapping) {
+        buffer.enlarge(size);
+      } else {
+        getResponse().setBufferSize(size);
+      }
+    }
+
+    @Override
+    public int getBufferSize() {
+      return enableWrapping ? buffer.size() : getResponse().getBufferSize();
+    }
+
+    @Override
+    public void flushBuffer() throws IOException {
+      if( ! enableWrapping) getResponse().flushBuffer();
+    }
+
+    @Override
+    public boolean isCommitted() {
+      return enableWrapping ? committed : getResponse().isCommitted();
+    }
+
+    @Override
+    public void reset() {
+      getResponse().reset();
+      buffer.reset();
+    }
+
+    @Override
+    public void resetBuffer() {
+      getResponse().resetBuffer();
+      buffer.reset();
     }
   }
 
-  static class FilterServletOutputStream extends ServletOutputStream {
+  static class ByteArrayServletOutputStream extends ServletOutputStream {
 
-    private DataOutputStream stream;
+    protected byte buf[];
 
-    public FilterServletOutputStream(OutputStream output) {
-      stream = new DataOutputStream(output);
+    protected int count;
+
+    public ByteArrayServletOutputStream() {
+      this(32);
+    }
+
+    public ByteArrayServletOutputStream(int size) {
+      if (size < 0) {
+        throw new IllegalArgumentException("Negative initial size: " + size);
+      }
+      buf = new byte[size];
+    }
+
+    public synchronized byte toByteArray()[] {
+      return Arrays.copyOf(buf, count);
+    }
+
+    public synchronized void reset() {
+      count = 0;
+    }
+
+    public synchronized int size() {
+      return count;
+    }
+
+    public void enlarge(int size) {
+      if (size > buf.length) {
+        buf = Arrays.copyOf(buf, Math.max(buf.length << 1, size));
+      }
     }
 
     @Override
-    public void write(int b) throws IOException {
-      stream.write(b);
-    }
-
-    @Override
-    public void write(byte[] b) throws IOException {
-      stream.write(b);
-    }
-
-    @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-      stream.write(b, off, len);
+    public synchronized void write(int b) throws IOException {
+      int newcount = count + 1;
+      enlarge(newcount);
+      buf[count] = (byte) b;
+      count = newcount;
     }
   }
-
 }
