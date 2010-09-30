@@ -56,6 +56,7 @@ import javax.xml.bind.annotation.XmlType;
         @NamedQuery(name = "findTotalByKey", query = "SELECT COUNT(a) FROM AnnotationImpl a WHERE a.key = :key"),
         @NamedQuery(name = "findTotalByKeyAndMediapackageId", query = "SELECT COUNT(a) FROM AnnotationImpl a WHERE a.mediapackageId = :mediapackageId AND a.key = :key"),
         @NamedQuery(name = "findTotalByIntervall", query = "SELECT COUNT(a) FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end"),
+        @NamedQuery(name = "findDistinctEpisodeIdTotalByIntervall", query = "SELECT COUNT(distinct a.mediapackageId) FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end"),
         @NamedQuery(name = "findTotalByKeyAndIntervall", query = "SELECT COUNT(a) FROM AnnotationImpl a WHERE :begin <= a.created AND a.created <= :end AND a.key = :key") })
 @XmlType(name = "annotation", namespace = "http://feedback.opencastproject.org/")
 @XmlRootElement(name = "annotation", namespace = "http://feedback.opencastproject.org/")

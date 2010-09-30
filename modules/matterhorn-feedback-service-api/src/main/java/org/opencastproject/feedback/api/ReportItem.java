@@ -15,15 +15,50 @@
  */
 package org.opencastproject.feedback.api;
 
-
 /**
- * A class that represents a reportItem 
+ * A class that represents a Report Item
  * 
  */
 public interface ReportItem {
+  /**
+   * Sets the episode id the report item is referring to
+   * 
+   * @param episodeId
+   */
   void setEpisodeId(String episodeId);
 
+  /**
+   * Sets the number of views of the episode
+   * 
+   * @param views
+   */
   void setViews(long views);
 
+  /**
+   * Sets the number of played seconds of the episode
+   * 
+   * @param played
+   */
   void setPlayed(long played);
+
+  /**
+   * Gets the episode id the report item is referring to
+   * 
+   * @return
+   */
+  String getEpisodeId();
+
+  /**
+   * Get the number of views of the episode id
+   * 
+   * @return
+   */
+  long getViews();
+
+  /**
+   * Gets the number of played seconds of the episode
+   * 
+   * @return
+   */
+  long getPlayed();
 }

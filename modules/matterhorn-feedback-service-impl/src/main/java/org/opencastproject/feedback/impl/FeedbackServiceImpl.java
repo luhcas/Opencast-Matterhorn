@@ -320,6 +320,13 @@ public class FeedbackServiceImpl implements FeedbackService {
     q.setParameter("end", calEnd, TemporalType.TIMESTAMP);
     return ((Long) q.getSingleResult()).intValue();
   }
+  
+  private int getDistinctEpisodeIdTotal(Calendar calBegin, Calendar calEnd) {
+    Query q = em.createNamedQuery("findDistinctEpisodeIdTotalByIntervall");
+    q.setParameter("begin", calBegin, TemporalType.TIMESTAMP);
+    q.setParameter("end", calEnd, TemporalType.TIMESTAMP);
+    return ((Long) q.getSingleResult()).intValue();
+  }
 
   public Report getReport(int offset, int limit) {
     Report report = new ReportImpl();
@@ -361,7 +368,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     Calendar calEnd = new GregorianCalendar();
     calEnd.set(year, month, date, 23, 59);
 
-    report.setTotal(getTotal(calBegin, calEnd));
+    report.setTotal(getDistinctEpisodeIdTotal(calBegin, calEnd));
     Query q = em.createNamedQuery("countSessionsGroupByMediapackageByIntervall");
     q.setParameter("begin", calBegin, TemporalType.TIMESTAMP);
     q.setParameter("end", calEnd, TemporalType.TIMESTAMP);
