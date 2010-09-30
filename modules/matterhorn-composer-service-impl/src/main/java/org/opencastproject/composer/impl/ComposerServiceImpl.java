@@ -538,33 +538,39 @@ public class ComposerServiceImpl implements ComposerService {
   public Job image(final Track sourceTrack, final String profileId, final long time, boolean block)
           throws EncoderException {
 
-    final Job receipt = remoteServiceManager.createJob(JOB_TYPE);
+    final Job job = remoteServiceManager.createJob(JOB_TYPE);
 
     // Get the encoding profile
     final EncodingProfile profile = profileScanner.getProfile(profileId);
     if (profile == null) {
-      receipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(receipt);
+      job.setStatus(Status.FAILED);
+      remoteServiceManager.updateJob(job);
       throw new EncoderException(null, "Profile '" + profileId + "' is unknown");
     }
 
     // Create the encoding engine
     final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
     if (encoderEngine == null) {
-      receipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(receipt);
+      job.setStatus(Status.FAILED);
+      remoteServiceManager.updateJob(job);
       throw new EncoderException(null, "No encoder engine available for profile '" + profileId + "'");
     }
 
     // ake sure there is a video stream in the track
     if (sourceTrack != null && !sourceTrack.hasVideo()) {
+      job.setStatus(Status.FAILED);
+      remoteServiceManager.updateJob(job);
       throw new RuntimeException("Cannot extract an image without a video stream");
     } else if (sourceTrack == null) {
+      job.setStatus(Status.FAILED);
+      remoteServiceManager.updateJob(job);
       throw new RuntimeException("SourceTrack cannot be null");
     }
 
     // The time should not be outside of the track's duration
     if (time < 0 || time > sourceTrack.getDuration()) {
+      job.setStatus(Status.FAILED);
+      remoteServiceManager.updateJob(job);
       throw new IllegalArgumentException("Can not extract an image at time " + Long.valueOf(time)
               + " from a track with duration " + Long.valueOf(sourceTrack.getDuration()));
     }
@@ -574,12 +580,12 @@ public class ComposerServiceImpl implements ComposerService {
     try {
       videoFile = workspace.get(sourceTrack.getURI());
     } catch (NotFoundException e) {
-      receipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(receipt);
+      job.setStatus(Status.FAILED);
+      remoteServiceManager.updateJob(job);
       throw new EncoderException("Requested video track " + sourceTrack + " was not found", e);
     } catch (IOException e) {
-      receipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(receipt);
+      job.setStatus(Status.FAILED);
+      remoteServiceManager.updateJob(job);
       throw new EncoderException("Error accessing video track " + sourceTrack, e);
     }
 
@@ -588,8 +594,8 @@ public class ComposerServiceImpl implements ComposerService {
       public void run() {
         logger.info("creating an image using video track {}", sourceTrack.getIdentifier());
 
-        receipt.setStatus(Status.RUNNING);
-        remoteServiceManager.updateJob(receipt);
+        job.setStatus(Status.RUNNING);
+        remoteServiceManager.updateJob(job);
 
         Map<String, String> properties = new HashMap<String, String>();
         String timeAsString = Long.toString(time);
@@ -603,8 +609,8 @@ public class ComposerServiceImpl implements ComposerService {
         }
 
         if (encodingOutput == null || !encodingOutput.isFile()) {
-          receipt.setStatus(Status.FAILED);
-          remoteServiceManager.updateJob(receipt);
+          job.setStatus(Status.FAILED);
+          remoteServiceManager.updateJob(job);
           throw new RuntimeException("Image extracttion failed: encoding output doesn't exist at " + encodingOutput);
         }
 
@@ -616,8 +622,8 @@ public class ComposerServiceImpl implements ComposerService {
           returnURL = workspace.putInCollection(COLLECTION, encodingOutput.getName(), in);
           logger.debug("Copied the encoded file to the workspace at {}", returnURL);
         } catch (Exception e) {
-          receipt.setStatus(Status.FAILED);
-          remoteServiceManager.updateJob(receipt);
+          job.setStatus(Status.FAILED);
+          remoteServiceManager.updateJob(job);
           throw new RuntimeException("unable to put the encoded file into the workspace", e);
         } finally {
           IOUtils.closeQuietly(in);
@@ -628,9 +634,9 @@ public class ComposerServiceImpl implements ComposerService {
 
         MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
         Attachment attachment = (Attachment) builder.elementFromURI(returnURL, Attachment.TYPE, null);
-        receipt.setElement(attachment);
-        receipt.setStatus(Status.FINISHED);
-        remoteServiceManager.updateJob(receipt);
+        job.setElement(attachment);
+        job.setStatus(Status.FINISHED);
+        remoteServiceManager.updateJob(job);
       }
     };
     Future<?> future = executor.submit(runnable);
@@ -643,7 +649,7 @@ public class ComposerServiceImpl implements ComposerService {
         throw new EncoderException(encoderEngine, e);
       }
     }
-    return receipt;
+    return job;
   }
 
   /**
