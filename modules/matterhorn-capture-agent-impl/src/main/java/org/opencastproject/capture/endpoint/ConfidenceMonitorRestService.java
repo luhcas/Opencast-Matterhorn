@@ -67,6 +67,7 @@ public class ConfidenceMonitorRestService {
     getDevices.addFormat(new Format("XML", "Devices that support confidence monitoring", null));
     getDevices.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, results returned"));
     getDevices.addStatus(org.opencastproject.util.doc.Status.ERROR("Couldn't list devices"));
+    getDevices.addStatus(org.opencastproject.util.doc.Status.SERVICE_UNAVAILABLE("Confidence monitor unavailable"));
     getDevices.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getDevices);
     
@@ -128,19 +129,19 @@ public class ConfidenceMonitorRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("devices")
-  public List<AgentDevice> getDevices() {
+  public Response getDevices() {
+    if (service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity("Confidence monitor unavailable, please wait...").build();
+    }
+    
     //TODO:  Should we be storing this list of device names as a list of AgentDevice objects instead?
     LinkedList<AgentDevice> devices = new LinkedList<AgentDevice>();
-    if (service != null) {
-      List<String> names = service.getFriendlyNames();
-      for (String name : names) {
-        String nameType[] = name.split(",");
-        devices.add(new AgentDevice(nameType[0], nameType[1]));
-      }
-    } else {
-      logger.warn("Service is null in getDevices()");
+    List<String> names = service.getFriendlyNames();
+    for (String name : names) {
+      String nameType[] = name.split(",");
+      devices.add(new AgentDevice(nameType[0], nameType[1]));
     }
-    return devices;
+    return Response.ok(devices).build();
   }
   
   /**
@@ -189,9 +190,9 @@ public class ConfidenceMonitorRestService {
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
-  public String getDocumentation() {
+  public Response getDocumentation() {
     if (docs == null) { docs = generateDocs(); }
-    return docs;
+    return Response.ok(docs).build();
   }
   
 }

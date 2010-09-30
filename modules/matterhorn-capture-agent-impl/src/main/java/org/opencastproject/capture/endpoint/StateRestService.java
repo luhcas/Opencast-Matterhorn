@@ -29,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -37,6 +36,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * The REST endpoint for the state service on the capture device
@@ -78,26 +78,26 @@ public class StateRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("recordings")
-  public List<RecordingStateUpdate> getRecordings() {
-    LinkedList<RecordingStateUpdate> update = new LinkedList<RecordingStateUpdate>();
-    if (service != null) {
-      Map<String, AgentRecording> data = service.getKnownRecordings();
-      //Run through and build a map of updates (rather than states)
-      for (Entry<String, AgentRecording> e : data.entrySet()) {
-        update.add(new RecordingStateUpdate(e.getValue()));
-      }
-    } else {
-      logger.warn("Service is null in getRecordings()");
+  public Response getRecordings() {
+    if(service == null) {
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity("State Service is unavailable, please wait...").build();
     }
-    return update;
+    
+    LinkedList<RecordingStateUpdate> update = new LinkedList<RecordingStateUpdate>();
+    Map<String, AgentRecording> data = service.getKnownRecordings();
+    //Run through and build a map of updates (rather than states)
+    for (Entry<String, AgentRecording> e : data.entrySet()) {
+      update.add(new RecordingStateUpdate(e.getValue()));
+    }
+    return Response.ok(update).build();
   }
 
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
-  public String getDocumentation() {
+  public Response getDocumentation() {
     if (docs == null) { docs = generateDocs(); }
-    return docs;
+    return Response.ok(docs).build();
   }
 
   protected String docs;
@@ -124,6 +124,7 @@ public class StateRestService {
         "Return a list of the capture agent's recordings");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addStatus(Status.OK(null));
+    endpoint.addStatus(Status.SERVICE_UNAVAILABLE("State Service is unavailable"));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
     

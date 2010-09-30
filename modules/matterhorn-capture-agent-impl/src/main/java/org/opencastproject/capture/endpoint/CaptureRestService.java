@@ -41,6 +41,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.StatusType;
 import javax.xml.bind.JAXBException;
 
 /**
@@ -111,9 +113,9 @@ public class CaptureRestService {
 
     //// configuration()
     RestEndpoint configEndpoint = new RestEndpoint("config", RestEndpoint.Method.GET, "/configuration", "Returns a list with the default agent configuration properties.  This is in the same format as the startCapture endpoint.");
-    configEndpoint.addStatus(org.opencastproject.util.
-            doc.Status.OK("the configuration values are returned"));
+    configEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("the configuration values are returned"));
     configEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("the configuration properties could not be retrieved"));
+    configEndpoint.addStatus(org.opencastproject.util.doc.Status.SERVICE_UNAVAILABLE("Capture Agent is unavailable"));
     configEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, configEndpoint);
 
@@ -121,6 +123,7 @@ public class CaptureRestService {
     RestEndpoint scheduleEndpoint = new RestEndpoint("schedule", RestEndpoint.Method.GET, "/schedule", "Returns an XML formatted list of the capture agent's current schedule");
     scheduleEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("the agent's schedule is returned"));
     scheduleEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("the agent's schedule could not be retrieved"));
+    scheduleEndpoint.addStatus(org.opencastproject.util.doc.Status.SERVICE_UNAVAILABLE("Capture Agent is unavailable"));
     scheduleEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, scheduleEndpoint);
 
@@ -195,11 +198,11 @@ public class CaptureRestService {
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
-  public String getDocumentation() {
-    if (docs == null)
+  public Response getDocumentation() {
+    if (docs == null) 
       docs = generateDocs();
     
-    return docs;
+    return Response.ok(docs).build();
   }
 
   @GET
@@ -260,12 +263,20 @@ public class CaptureRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("schedule")
-  public LinkedList<ScheduledEventImpl> getSchedule() throws JAXBException {
+  public Response getSchedule() throws JAXBException {
+    if (service == null) {
+      return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity("Capture Agent is unavailable, please wait...").build();
+    }
+    
+    try {
     //FIXME:  This is incredibly lame, but JAXB breaks without this extra copy+cast
     LinkedList<ScheduledEventImpl> list = new LinkedList<ScheduledEventImpl>();
     for (ScheduledEvent event : service.getAgentSchedule()) {
       list.add((ScheduledEventImpl) event);
     }
-    return list;
+    return Response.ok(list).build();
+    } catch (Exception e) {
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    }
   }
 }
