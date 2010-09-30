@@ -4,7 +4,7 @@
 var Opencast = Opencast || {};
 
 /**
- * @namespace the global Opencast namespace analytics
+ * @namespace the global Opencast namespace analytics delegate. This file contains the rest endpoint and passes the data to the analytics plugin
  */
 Opencast.Analytics = ( function() {
 
@@ -14,13 +14,11 @@ Opencast.Analytics = ( function() {
    *  variables
    */
   var
-  footprintData,
   mediaPackageId,
-  duration;
+  duration,
   ANALYTICS              = "Analytics",
   ANALYTICSHIDE          = "Analytics off";
-  
-  
+
   /**
   * @memberOf Opencast.Analytics
   * @description Show Analytics
@@ -47,7 +45,7 @@ Opencast.Analytics = ( function() {
         var views;
         var lastPosition = -1;
         var lastViews;
-        footprintData = new Array(duration);
+        var footprintData = new Array(duration);
 
         for ( var i = 0; i < footprintData.length; i++)
           footprintData[i] = 0;
@@ -65,36 +63,19 @@ Opencast.Analytics = ( function() {
           lastViews = views;
         })
 
-        drawFootprints();
-
-      },
+         Opencast.AnalyticsPlugin.addAsPlugin('#analytics', footprintData);
+        },
           error : function(a, b, c) {
-            // Some error while trying to get the views
+          // Some error while trying to get the views
         }
         });
-      
+
       $(".segments").css('top', '-25px');
       $.sparkline_display_visible()
       $("#analytics").show();
   }
-  
-  
-  
-  /**
-   * @memberOf Opencast.Analytics
-   * @description Draw Footprints
-   */
-  function drawFootprints() {
-    $('.analytics').sparkline(footprintData, {
-      type : 'line',
-      spotRadius : '0',
-      width : '100%',
-      height : '25px'
-    });
-  }
-  
-  
-  /**
+
+/**
    * @memberOf Opencast.Analytics
    * @description Hide the notes
    */
@@ -151,7 +132,6 @@ Opencast.Analytics = ( function() {
   return {
     hideAnalytics : hideAnalytics,
     showAnalytics : showAnalytics,
-    drawFootprints : drawFootprints,
     setDuration : setDuration,
     setMediaPackageId : setMediaPackageId,
     doToggleAnalytics : doToggleAnalytics

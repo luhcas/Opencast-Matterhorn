@@ -51,11 +51,10 @@ Opencast.Watch = (function() {
 	          var dcExtent = parseInt($('#dc-extent').html());
 	          Opencast.Analytics.setDuration(parseInt(dcExtent/1000));
 	          $('#oc_body').bind('resize', function() {
-	            Opencast.Analytics.drawFootprints();
+	            Opencast.AnalyticsPlugin.resizePlugin();
 	          });
-	      
-	      
-              $('#oc_segment-table').html($('#oc-segments').html());
+
+	          $('#oc_segment-table').html($('#oc-segments').html());
 
               $('#oc-segments').html("");
 
