@@ -103,11 +103,6 @@ public class RestPublisher {
     JAXRSServerFactoryBean factory = new JAXRSServerFactoryBean();
     factory.setBus(bus);
     
-    // Add custom interceptors
-    factory.getInInterceptors().add(new JsonpInInterceptor());
-    factory.getOutInterceptors().add(new JsonpPreOutInterceptor());
-    factory.getOutInterceptors().add(new JsonpPostOutInterceptor());
-
     // Remove namespaces from json, since it's not useful for us
     JSONProvider jsonProvider = new JSONProvider();
     jsonProvider.setIgnoreNamespaces(true);

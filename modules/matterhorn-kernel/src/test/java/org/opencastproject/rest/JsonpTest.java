@@ -18,17 +18,17 @@ package org.opencastproject.rest;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class JsonpPreOutInterceptorTest {
+public class JsonpTest {
 
   @Test
   public void testCallbackSafety() {
     // Some good ones
-    Assert.assertTrue(JsonpPreOutInterceptor.SAFE_PATTERN.matcher("GoodCallback").matches());
-    Assert.assertTrue(JsonpPreOutInterceptor.SAFE_PATTERN.matcher("GoodCallback1").matches());
-    Assert.assertTrue(JsonpPreOutInterceptor.SAFE_PATTERN.matcher("Good1Callback").matches());
-    Assert.assertTrue(JsonpPreOutInterceptor.SAFE_PATTERN.matcher("Object.GoodCallback").matches());
+    Assert.assertTrue(JsonpFilter.SAFE_PATTERN.matcher("GoodCallback").matches());
+    Assert.assertTrue(JsonpFilter.SAFE_PATTERN.matcher("GoodCallback1").matches());
+    Assert.assertTrue(JsonpFilter.SAFE_PATTERN.matcher("Good1Callback").matches());
+    Assert.assertTrue(JsonpFilter.SAFE_PATTERN.matcher("Object.GoodCallback").matches());
 
     // Some bad ones
-    Assert.assertFalse(JsonpPreOutInterceptor.SAFE_PATTERN.matcher("alert(document.cookie)").matches());
+    Assert.assertFalse(JsonpFilter.SAFE_PATTERN.matcher("alert(document.cookie)").matches());
   }
 }
