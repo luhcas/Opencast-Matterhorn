@@ -52,6 +52,8 @@ public class FeedbackRestService {
 
   private FeedbackService feedbackService;
 
+  protected SecurityService securityService;
+
   protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
 
   /**
@@ -64,12 +66,13 @@ public class FeedbackRestService {
   }
 
   /**
-   * Method to unset the service this REST endpoint uses
+   * Sets the security service
    * 
-   * @param service
+   * @param securityService
+   *          the securityService to set
    */
-  public void unsetService(FeedbackService service) {
-    this.feedbackService = null;
+  public void setSecurityService(SecurityService securityService) {
+    this.securityService = securityService;
   }
 
   /**
@@ -98,8 +101,8 @@ public class FeedbackRestService {
    */
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("annotation")
-  public Response getAnnotations(@QueryParam("id") String id, @QueryParam("key") String key,
+  @Path("annotations.xml")
+  public Response getAnnotationsAsXml(@QueryParam("id") String id, @QueryParam("key") String key,
           @QueryParam("day") String day, @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
 
     // Are the values of offset and limit valid?
@@ -121,11 +124,22 @@ public class FeedbackRestService {
     else
       return Response.ok(feedbackService.getAnnotations(offset, limit)).build();
   }
+  
+  /**
+   * @return JSON with all footprints
+   */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("annotations.json")
+  public Response getAnnotationsAsJson(@QueryParam("id") String id, @QueryParam("key") String key,
+          @QueryParam("day") String day, @QueryParam("limit") int limit, @QueryParam("offset") int offset) {
+    return getAnnotationsAsXml(id, key, day, limit, offset); // same logic, different @Produces annotation
+  }
 
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("stats")
-  public Response stats(@QueryParam("id") String mediapackageId) {
+  @Path("stats.xml")
+  public Response statsAsXml(@QueryParam("id") String mediapackageId) {
     Stats s = new StatsImpl();
     s.setMediapackageId(mediapackageId);
     s.setViews(feedbackService.getViews(mediapackageId));
@@ -134,9 +148,16 @@ public class FeedbackRestService {
   }
 
   @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("stats.json")
+  public Response statsAsJson(@QueryParam("id") String mediapackageId) {
+    return statsAsXml(mediapackageId); // same logic, different @Produces annotation
+  }
+  
+  @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("report")
-  public Response report(@QueryParam("from") String from, @QueryParam("to") String to,
+  @Path("report.xml")
+  public Response reportAsXml(@QueryParam("from") String from, @QueryParam("to") String to,
           @QueryParam("offset") int offset, @QueryParam("limit") int limit) {
 
     // Are the values of offset and limit valid?
@@ -153,19 +174,24 @@ public class FeedbackRestService {
       return Response.ok(feedbackService.getReport(from, to, offset, limit)).build();
   }
 
-  protected SecurityService securityService;
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("report.json")
+  public Response reportAsJson(@QueryParam("from") String from, @QueryParam("to") String to,
+          @QueryParam("offset") int offset, @QueryParam("limit") int limit) {
+    return reportAsXml(from, to, offset, limit); // same logic, different @Produces annotation
+  }
   
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("add")
-  public Response add(@QueryParam("id") String mediapackageId, @QueryParam("in") int inpoint, @QueryParam("out") int outpoint,
-          @QueryParam("key") String key, @QueryParam("value") String value, @Context HttpServletRequest request) {
+  public Response add(@QueryParam("id") String mediapackageId, @QueryParam("in") int inpoint,
+          @QueryParam("out") int outpoint, @QueryParam("key") String key, @QueryParam("value") String value,
+          @Context HttpServletRequest request) {
 
     String sessionId = request.getSession().getId();
 
-    String userId = null;
-    if (securityService != null)
-      userId = securityService.getUserName();
+    String userId = securityService.getUserName();
 
     Annotation a = new AnnotationImpl();
     a.setMediapackageId(mediapackageId);
@@ -183,9 +209,10 @@ public class FeedbackRestService {
 
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("footprint")
-  public Response getFootprint(@QueryParam("id") String mediapackageId, @QueryParam("userId") String userId) {
-
+  @Path("footprint.xml")
+  public Response getFootprintAsXml(@QueryParam("id") String mediapackageId) {
+    String userId = securityService.getUserName();
+    
     // Is the mediapackageId passed
     if (mediapackageId == null)
       return Response.status(Status.BAD_REQUEST).build();
@@ -193,6 +220,13 @@ public class FeedbackRestService {
     return Response.ok(feedbackService.getFootprints(mediapackageId, userId)).build();
   }
 
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("footprint.json")
+  public Response getFootprintAsJson(@QueryParam("id") String mediapackageId) {
+    return getFootprintAsXml(mediapackageId); // this is the same logic... it's just annotated differently
+  }
+  
   /**
    * returns the REST documentation
    * 
@@ -226,10 +260,12 @@ public class FeedbackRestService {
     data.setAbstract("This service creates, edits and retrieves annotations.");
 
     // stats
-    RestEndpoint statsEndpoint = new RestEndpoint("stats", RestEndpoint.Method.GET, "/stats",
+    RestEndpoint statsEndpoint = new RestEndpoint("stats", RestEndpoint.Method.GET, "/stats.{format}",
             "Get the statistics for an episode");
     statsEndpoint.addFormat(new Format("XML", null, null));
-    statsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The statistics, expressed as xml"));
+    statsEndpoint.addFormat(new Format("JSON", null, null));
+    statsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The statistics, expressed as xml or json"));
+    statsEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The output format, xml or json"));
     statsEndpoint.addOptionalParam(new Param("id", Type.STRING, null,
             "The ID of the single episode to return the statistics for, if it exists"));
     statsEndpoint.setTestForm(RestTestForm.auto());
@@ -241,8 +277,6 @@ public class FeedbackRestService {
     addEndpoint.addFormat(new Format("XML", null, null));
     addEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The annotation, expressed as xml"));
     addEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The ID of the single episode"));
-    addEndpoint.addOptionalParam(new Param("user", Type.STRING, null, "The user related to the session"));
-    addEndpoint.addOptionalParam(new Param("session", Type.STRING, null, "The session related to the annotation"));
     addEndpoint.addOptionalParam(new Param("in", Type.STRING, null, "The inpoint of the annotation"));
     addEndpoint.addOptionalParam(new Param("out", Type.STRING, null, "The outpoint of the annotation"));
     addEndpoint.addOptionalParam(new Param("key", Type.STRING, null, "The key of the annotation"));
@@ -251,10 +285,12 @@ public class FeedbackRestService {
     data.addEndpoint(RestEndpoint.Type.READ, addEndpoint);
 
     // annotation
-    RestEndpoint annotationEndpoint = new RestEndpoint("annotation", RestEndpoint.Method.GET, "/annotation",
+    RestEndpoint annotationEndpoint = new RestEndpoint("annotation", RestEndpoint.Method.GET, "/annotations.{format}",
             "Get annotations by key and day");
     annotationEndpoint.addFormat(new Format("XML", null, null));
+    annotationEndpoint.addFormat(new Format("JSON", null, null));
     annotationEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The annotations, expressed as xml"));
+    annotationEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The output format, xml or json"));
     annotationEndpoint.addOptionalParam(new Param("key", Type.STRING, null, "The key of the annotation"));
     annotationEndpoint.addOptionalParam(new Param("day", Type.STRING, null, "The day of creation (format: YYYYMMDD)"));
     annotationEndpoint.addOptionalParam(new Param("limit", Type.STRING, "0",

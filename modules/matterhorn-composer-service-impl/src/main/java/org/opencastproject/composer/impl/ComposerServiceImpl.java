@@ -556,7 +556,7 @@ public class ComposerServiceImpl implements ComposerService {
       throw new EncoderException(null, "No encoder engine available for profile '" + profileId + "'");
     }
 
-    // ake sure there is a video stream in the track
+    // make sure there is a video stream in the track
     if (sourceTrack != null && !sourceTrack.hasVideo()) {
       job.setStatus(Status.FAILED);
       remoteServiceManager.updateJob(job);
