@@ -12,7 +12,7 @@ Opencast.Services.buildServersView = function(data) {
   jQuery.each(data, function(index, serviceInstance) {
     var server = servers[serviceInstance.host];
     if(server == null) {
-      server = {'host' : serviceInstance.host};
+      server = {'host' : serviceInstance.host, 'online' : serviceInstance.online, 'maintenance' : serviceInstance.maintenance};
       servers[serviceInstance.host] = server;
       server.services = [];
     }
@@ -37,7 +37,7 @@ Opencast.Services.buildServicesView = function(data) {
     var serviceTypeIdentifier = serviceInstance.type.replace(/\./g, "_");
     var service = services[serviceTypeIdentifier];
     if(service == null) {
-      service = {'id' : serviceTypeIdentifier};
+      service = {'id' : serviceTypeIdentifier, 'online' : serviceInstance.online, 'maintenance' : serviceInstance.maintenance};
       service.servers = [];
       services[serviceTypeIdentifier] = service;
     }

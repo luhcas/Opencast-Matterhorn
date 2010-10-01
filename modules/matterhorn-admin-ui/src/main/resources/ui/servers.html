@@ -24,6 +24,8 @@
         <h2>${server.host}</h2>
         <table>
           <th>Service</th>
+          <th>Online</th>
+          <th>Maintenance Mode</th>
           <th>Jobs Running</th>
           <th>Jobs Queued</th>
           <th>Mean Run Time</th>
@@ -31,6 +33,8 @@
           {for service in server.services}
             <tr>
               <td>${service.id}</td>
+              <td>{if server.online}<b>X</b>{/if}</td>
+              <td>{if server.maintenance}<b>X</b>{/if}</td>
               <td>${service.running}</td>
               <td>${service.queued}</td>
               <td>${service.meanRunTime}</td>
