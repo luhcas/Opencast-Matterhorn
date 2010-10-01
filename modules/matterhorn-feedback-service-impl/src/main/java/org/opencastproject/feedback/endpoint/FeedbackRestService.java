@@ -284,12 +284,24 @@ public class FeedbackRestService {
     addEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, addEndpoint);
 
+    // footprint
+    RestEndpoint footprintEndpoint = new RestEndpoint("footprint", RestEndpoint.Method.GET, "/footprint.{format}",
+            "Get footprints");
+    footprintEndpoint.addFormat(new Format("XML", null, null));
+    footprintEndpoint.addFormat(new Format("JSON", null, null));
+    footprintEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The footprints, expressed as xml or json"));
+    footprintEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The output format, xml or json"));
+    footprintEndpoint.addOptionalParam(new Param("id", Type.STRING, null, "The mediapackage ID"));
+    footprintEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, footprintEndpoint);
+
+    
     // annotation
     RestEndpoint annotationEndpoint = new RestEndpoint("annotation", RestEndpoint.Method.GET, "/annotations.{format}",
             "Get annotations by key and day");
     annotationEndpoint.addFormat(new Format("XML", null, null));
     annotationEndpoint.addFormat(new Format("JSON", null, null));
-    annotationEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The annotations, expressed as xml"));
+    annotationEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("The annotations, expressed as xml or json"));
     annotationEndpoint.addPathParam(new Param("format", Type.STRING, "json", "The output format, xml or json"));
     annotationEndpoint.addOptionalParam(new Param("key", Type.STRING, null, "The key of the annotation"));
     annotationEndpoint.addOptionalParam(new Param("day", Type.STRING, null, "The day of creation (format: YYYYMMDD)"));
