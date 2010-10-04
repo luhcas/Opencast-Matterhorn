@@ -155,7 +155,7 @@
               <xsl:when test ="processingStatus = 'Failed during capture' or processingStatus = 'Failed to start capture'">
                 <a title="Delete Recording" class="cursor">
                   <xsl:attribute name="onclick">
-                    <xsl:text>ocRecordings.removeScheduledEvent('</xsl:text>
+                    <xsl:text>ocRecordings.removeScheduledRecording('</xsl:text>
                     <xsl:value-of select="id" />
                     <xsl:text>', '</xsl:text>
                     <xsl:value-of select="title" />

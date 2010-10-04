@@ -13,9 +13,10 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.series.impl;
 
-import org.opencastproject.series.api.Series;
+package org.opencastproject.scheduler.impl;
+
+import org.opencastproject.scheduler.api.Event;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -23,30 +24,27 @@ import java.util.LinkedList;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
-/**
- * A List of {@link SeriesJaxbImpl}s
- */
-@XmlRootElement(name="seriesList")
-public class SeriesListImpl {
+@XmlRootElement(name="events")
+public class EventListImpl {
 
-  @XmlElement
-  protected List<SeriesImpl> series;
-  
-  public SeriesListImpl() {
-    this.series = new LinkedList<SeriesImpl>();
+  @XmlElement(name="event")
+  protected List<EventImpl> events;
+
+  public EventListImpl() {
+    this.events = new LinkedList<EventImpl>();
   }
   
-  public SeriesListImpl(List<Series> s) {
-    this.series = new LinkedList<SeriesImpl>();
-    this.setSeriesList(s);
+  public EventListImpl(List<Event> eventList){
+    this.events = new LinkedList<EventImpl>();
+    this.setEvents(eventList);
   }
   
-  public void setSeriesList(List<Series> series) {
-    if(!this.series.isEmpty()){
-      this.series.clear();
+  public void setEvents(List<Event> eventList) {
+    if(!this.events.isEmpty()){
+      this.events.clear();
     }
-    for(Series s : series){
-      this.series.add((SeriesImpl) s);
+    for(Event e : eventList){
+      this.events.add((EventImpl) e);
     }
   }
 }

@@ -250,13 +250,13 @@ ocScheduler.SubmitForm = function(){
   if(eventXML){
     if(ocScheduler.type === SINGLE_EVENT){
       if(ocUtils.getURLParam('edit')){
-        $.post( SCHEDULER_URL + '/event', {
+        $.post( SCHEDULER_URL + '/event/' + $('#eventId').val(), {
                event: eventXML
                }, ocScheduler.EventSubmitComplete );
       }else{
         $.ajax({
                type: "PUT",
-               url: SCHEDULER_URL + '/event',
+               url: SCHEDULER_URL + '/event/' + $('#eventId').val(),
                data: {
                event: eventXML
                },
@@ -265,13 +265,13 @@ ocScheduler.SubmitForm = function(){
       }
     }else{
       if(ocUtils.getURLParam('edit')){
-        $.post( SCHEDULER_URL + '/event', {
+        $.post( SCHEDULER_URL + '/event/' + $('#eventId').val(), {
                recurringEvent: eventXML
                }, ocScheduler.EventSubmitComplete );
       }else{
         $.ajax({
           type: "PUT",
-          url: SCHEDULER_URL + '/recurrence',
+          url: SCHEDULER_URL + '/recurrence/' + $('#eventId').val(),
           data: { recurringEvent: eventXML },
           success: ocScheduler.EventSubmitComplete
         });
@@ -438,7 +438,7 @@ ocScheduler.HandleAgentList = function(data) {
   if(eventId && ocUtils.getURLParam('edit')) {
     $.ajax({
       type: "GET",
-      url: SCHEDULER_URL + '/event/' + eventId,
+      url: SCHEDULER_URL + '/event/' + eventId + '.xml',
       success: ocScheduler.LoadEvent,
       cache: false
     });
@@ -519,7 +519,7 @@ ocScheduler.CheckForConflictingEvents = function(){
       event = '<event><metadataList>' + event;
       event += '<metadata><key>timeStart</key><value>' + ocScheduler.components.timeStart.getValue() + '</value></metadata>';
       event += '<metadata><key>timeEnd</key><value>' + ocScheduler.components.timeDuration.getValue() + '</value></metadata></metadataList></event>';
-      endpoint = '/events/conflict';
+      endpoint = '/event/conflict.xml';
       data = {event: event};
     }else{
       return false;
@@ -532,7 +532,7 @@ ocScheduler.CheckForConflictingEvents = function(){
       event += '<metadata><key>recurrenceEnd</key><value>' + ocScheduler.components.recurrenceEnd.getValue() + '</value></metadata>';
       event += '<metadata><key>recurrenceDuration</key><value>' + (ocScheduler.components.recurrenceDuration.getValue()) + '</value></metadata>';
       event += '</metadataList></recurringEvent>';
-      endpoint = '/recurrence/conflict';
+      endpoint = '/recurring/conflict.xml';
       data = {recurringEvent: event};
     }else{
       return false;

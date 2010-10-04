@@ -161,7 +161,7 @@ public class SchedulerServiceImpl implements ManagedService{
     try {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
-      em.persist(event);
+      em.persist(event); //TODO: Handle EntityExistsException
       tx.commit();
     } finally {
       em.close();
@@ -183,7 +183,7 @@ public class SchedulerServiceImpl implements ManagedService{
     try {
       EntityTransaction tx = em.getTransaction();
       tx.begin();
-      em.persist(event);
+      em.persist(event); //TODO: Handle EntityExistsException
       tx.commit();
     } finally {
       em.close();
@@ -334,7 +334,7 @@ public class SchedulerServiceImpl implements ManagedService{
     }
     for (Event e: marked) list.remove(e);
     
-    return list;    
+    return list;
   }
   
   /**
@@ -638,8 +638,10 @@ public class SchedulerServiceImpl implements ManagedService{
     SchedulerFilter filter = getFilterForCaptureAgent (captureAgentID); 
     CalendarGenerator cal = new CalendarGenerator(dcGenerator, caGenerator, seriesService);
     List<Event> events = getEvents(filter);
-    
-    for (Event event : events) cal.addEvent(event);
+    logger.debug("Events with CA '{}': {}", captureAgentID, events);
+    for (Event event : events) {
+      cal.addEvent(event);
+    }
     
     try {
       cal.getCalendar().validate();

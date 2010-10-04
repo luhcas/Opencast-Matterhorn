@@ -407,7 +407,7 @@ ocRecordings.removeRecording = function(workflowId) {
 ocRecordings.removeScheduledRecording = function(eventId, title) {
   if(confirm('Are you sure you wish to delete ' + title + '?')){
     $.ajax({
-      url        : '/scheduler/rest/event/'+eventId,
+      url        : '/scheduler/rest/event/' + eventId,
       type       : 'DELETE',
       error      : function(XHR,status,e){
         alert('Could not remove Scheduler Event ' + workflowId);

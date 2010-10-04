@@ -65,7 +65,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 @NamedQueries( { @NamedQuery(name = "Event.getAll", query = "SELECT e FROM Event e") })
 @XmlRootElement(name = "event")
-@XmlAccessorType(XmlAccessType.FIELD)
+@XmlAccessorType(XmlAccessType.NONE)
 @Entity(name = "Event")
 @Access(AccessType.FIELD)
 @Table(name = "SCHED_EVENT")

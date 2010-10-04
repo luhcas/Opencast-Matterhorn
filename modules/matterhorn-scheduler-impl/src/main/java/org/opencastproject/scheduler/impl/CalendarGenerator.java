@@ -128,47 +128,53 @@ public class CalendarGenerator {
       pl.add(new Cn(e.getValue("creator")));
       event.getProperties().add(new Uid(e.getEventId()));
       
-      // TODO Organizer should be URI (email-address?) created fake adress
-      if (e.containsKey("creator") && ! e.getValue("creator").equalsIgnoreCase("null")) event.getProperties().add(new Organizer(pl ,e.getValue("creator").replace(" ", "_")+"@matterhorn.opencast"));
-      if (e.containsKey("abstract") && ! e.getValue("abstract").equalsIgnoreCase("null")) event.getProperties().add(new Description(e.getValue("abstract")));
-      if (e.containsKey("location") && ! e.getValue("location").equalsIgnoreCase("null")) event.getProperties().add(new Location(e.getValue("location")));
+      // TODO Organizer should be URI (email-address?) created fake address
+      if (e.containsKey("creator") && ! e.getValue("creator").equalsIgnoreCase("null")) {
+        event.getProperties().add(new Organizer(pl ,e.getValue("creator").replace(" ", "_")+"@matterhorn.opencast"));
+      }
+      if (e.containsKey("abstract") && ! e.getValue("abstract").equalsIgnoreCase("null")) {
+        event.getProperties().add(new Description(e.getValue("abstract")));
+      }
+      if (e.containsKey("location") && ! e.getValue("location").equalsIgnoreCase("null")) {
+        event.getProperties().add(new Location(e.getValue("location")));
+      }
       if (e.containsKey("seriesId") && ! e.getValue("seriesId").equalsIgnoreCase("null")) {
         seriesID = e.getValue("seriesId");
         event.getProperties().add(new RelatedTo(seriesID));
       }
 
-        ParameterList dcParameters = new ParameterList();
-        dcParameters.add(new FmtType("application/xml"));
-        dcParameters.add(Value.BINARY);
-        dcParameters.add(Encoding.BASE64);
-        dcParameters.add(new XParameter("X-APPLE-FILENAME", "episode.xml"));
-        Attach metadataAttachment = new Attach(dcParameters, dcGenerator.generateAsString(e).getBytes("UTF-8"));
-        event.getProperties().add(metadataAttachment);
+      ParameterList dcParameters = new ParameterList();
+      dcParameters.add(new FmtType("application/xml"));
+      dcParameters.add(Value.BINARY);
+      dcParameters.add(Encoding.BASE64);
+      dcParameters.add(new XParameter("X-APPLE-FILENAME", "episode.xml"));
+      Attach metadataAttachment = new Attach(dcParameters, dcGenerator.generateAsString(e).getBytes("UTF-8"));
+      event.getProperties().add(metadataAttachment);
 
-        String seriesDC = getSeriesDublinCoreString(seriesID);
-        if (seriesDC != null) {
-          logger.debug("Attaching series {} information to event {}",seriesID, e.getEventId());
-          ParameterList sDcParameters = new ParameterList();
-          sDcParameters.add(new FmtType("application/xml"));
-          sDcParameters.add(Value.BINARY);
-          sDcParameters.add(Encoding.BASE64);
-          sDcParameters.add(new XParameter("X-APPLE-FILENAME", "series.xml"));
-          Attach seriesAttachment = new Attach(sDcParameters, seriesDC.getBytes("UTF-8"));
-          event.getProperties().add(seriesAttachment);
-        } else {
-          logger.debug("No series provided for event {}.", e.getEventId());
-        }
-        
-        ParameterList caParameters = new ParameterList(); 
-        caParameters.add(new FmtType("application/text"));        
-        caParameters.add(Value.BINARY);
-        caParameters.add(Encoding.BASE64);
-        caParameters.add(new XParameter("X-APPLE-FILENAME", "org.opencastproject.capture.agent.properties"));    
-        Attach agentsAttachment = new Attach(caParameters, caGenerator.generateAsString(e).getBytes("UTF-8"));
-        event.getProperties().add(agentsAttachment);
+      String seriesDC = getSeriesDublinCoreString(seriesID);
+      if (seriesDC != null) {
+        logger.debug("Attaching series {} information to event {}",seriesID, e.getEventId());
+        ParameterList sDcParameters = new ParameterList();
+        sDcParameters.add(new FmtType("application/xml"));
+        sDcParameters.add(Value.BINARY);
+        sDcParameters.add(Encoding.BASE64);
+        sDcParameters.add(new XParameter("X-APPLE-FILENAME", "series.xml"));
+        Attach seriesAttachment = new Attach(sDcParameters, seriesDC.getBytes("UTF-8"));
+        event.getProperties().add(seriesAttachment);
+      } else {
+        logger.debug("No series provided for event {}.", e.getEventId());
+      }
+      
+      ParameterList caParameters = new ParameterList(); 
+      caParameters.add(new FmtType("application/text"));        
+      caParameters.add(Value.BINARY);
+      caParameters.add(Encoding.BASE64);
+      caParameters.add(new XParameter("X-APPLE-FILENAME", "org.opencastproject.capture.agent.properties"));    
+      Attach agentsAttachment = new Attach(caParameters, caGenerator.generateAsString(e).getBytes("UTF-8"));
+      event.getProperties().add(agentsAttachment);
         
     } catch (Exception e1) {
-      logger.error("could not create Calendar entry for Event {}. Reason : {} ", e.toString(), e1.getMessage());
+      logger.error("could not create Calendar entry for Event {}. Reason : {} ", e.toString(), e1);
       return false;
     }
     cal.getComponents().add(event);

@@ -20,9 +20,11 @@ import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.api.RecurringEvent;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.impl.EventImpl;
+import org.opencastproject.scheduler.impl.EventListImpl;
 import org.opencastproject.scheduler.impl.IncompleteDataException;
 import org.opencastproject.scheduler.impl.MetadataImpl;
 import org.opencastproject.scheduler.impl.RecurringEventImpl;
+import org.opencastproject.scheduler.impl.RecurringEventListImpl;
 import org.opencastproject.scheduler.impl.SchedulerFilterImpl;
 import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
 import org.opencastproject.util.DocUtil;
@@ -39,10 +41,8 @@ import org.slf4j.LoggerFactory;
 
 import org.json.simple.JSONObject;
 
-import java.io.StringReader;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.UUID;
 
 import javax.ws.rs.DELETE;
@@ -53,13 +53,9 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 
 /**
  * REST Endpoint for Scheduler Service
@@ -114,17 +110,8 @@ public class SchedulerRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("event/{eventID}.xml")
-  public EventImpl getSingleEvent(@PathParam("eventID") String eventID) {
-    logger.debug("Single event Lookup: {}", eventID);
-    return (EventImpl) service.getEvent(eventID);
-    /*try {
-      
-      if (event == null) return Response.status(Status.BAD_REQUEST).build();
-      return Response.ok(event).build();
-    } catch (Exception e) {
-      logger.warn("Single event Lookup failed: {}", eventID);
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
-    }*/
+  public Response getSingleEventXml(@PathParam("eventID") String eventId) {
+    return getSingleEvent(eventId);
   }
   
   /**
@@ -135,56 +122,77 @@ public class SchedulerRestService {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("event/{eventID}.json")
-  public EventImpl getSingleEventJson(@PathParam("eventID") String eventID) {
-    logger.debug("Single event Lookup: {}", eventID);
-    return getSingleEvent(eventID);
-    /*try {
-      Event event = service.getEvent(eventID);
-      if (event == null) return Response.status(Status.BAD_REQUEST).build();
-      return Response.ok(event).build();
-    } catch (Exception e) {
-      logger.warn("Single event Lookup failed: {}", eventID);
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
-    }*/
+  public Response getSingleEventJson(@PathParam("eventID") String eventId) {
+    return getSingleEvent(eventId);
+  }
+  
+  private Response getSingleEvent(String eventId) {
+    logger.debug("Single event Lookup: {}", eventId);
+    if(!eventId.isEmpty()){
+      try {
+        Event e = service.getEvent(eventId);
+        if(e != null){
+          return Response.ok(e).build();
+        } else {
+          return Response.status(Status.NOT_FOUND).build();
+        }
+      } catch (Exception e) {
+        logger.warn("Error occured while looking for event '{}': {}", eventId, e);
+        return Response.serverError().build();
+      }
+    } else {
+      return Response.status(Status.BAD_REQUEST).build();
+    }
   }
   
   /**
    * add a recurring event.
    * @param event The recurring event to be added
-   * @return event XML with the data of the stored recurring event
+   * @return HTTP 201 Created, indicating succesful creation.
    */
   @PUT
-  @Produces(MediaType.TEXT_XML)
-  @Path("recurrence")
-  public Response addRecurringEvent(@FormParam("recurringEvent") RecurringEventImpl event) {
-    logger.debug("add Recurrent event: {}", event);
-    try {
-      if (event == null) return Response.status(Status.BAD_REQUEST).build();
-      RecurringEvent result = service.addRecurringEvent(event);
-      if (result == null) return Response.status(Status.BAD_REQUEST).build();
-      return Response.ok(result).build();
-    } catch (Exception e) {
-      logger.warn("could not add recurring event: {}", event);
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+  @Path("recurring/{recurringEventId}")
+  public Response addRecurringEvent(@PathParam("recurringEventId") String recurringEventId, @FormParam("recurringEvent") RecurringEventImpl recurringEvent) {
+    logger.debug("add Recurrent event: {}", recurringEvent);
+    if(!recurringEventId.isEmpty() && recurringEvent != null) {
+      try {
+        RecurringEvent result = service.addRecurringEvent(recurringEvent);
+        if (result != null) {
+          return Response.status(Status.CREATED).type("").build(); //remove content-type, no message-body.
+        } else {
+          return Response.serverError().build();
+        }
+      } catch (Exception e) {
+        logger.warn("could not add recurring event '{}': {}", recurringEvent, e);
+        return Response.serverError().build();
+      }
+    } else {
+      return Response.status(Status.BAD_REQUEST).build();
     }
   }  
   
   /**
    * update a recurring event.
    * @param event The recurring event to be added
-   * @return event XML with the data of the stored recurring event
+   * @return HTTP 204 No Content, indicating succesful update.
    */
   @POST
-  @Produces(MediaType.TEXT_XML)
-  @Path("recurrence")
-  public Response updateRecurringEvent(@FormParam("recurringEvent") RecurringEventImpl event) {
+  @Path("recurring/{recurringEventId}")
+  public Response updateRecurringEvent(@PathParam("recurringEventId") String recurringEventId, @FormParam("recurringEvent") RecurringEventImpl event) {
     logger.debug("update Recurrent event: {}", event);
-    try {
-      if (event == null) return Response.status(Status.BAD_REQUEST).build();
-      return Response.ok(service.updateRecurringEvent(event)).build();
-    } catch (Exception e) {
-      logger.warn("could not update recurring event {}: ", event, e.getMessage());
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+    if(!recurringEventId.isEmpty() && event != null){
+      try {
+        if(service.updateRecurringEvent(event)){
+          return Response.noContent().type("").build(); //Remove content-type, no message-body.
+        } else {
+          return Response.serverError().build();
+        }
+      } catch (Exception e) {
+        logger.warn("could not update recurring event {}: {}", event, e);
+        return Response.serverError().build();
+      }
+    } else {
+      return Response.status(Status.BAD_REQUEST).build();
     }
   }  
   
@@ -195,18 +203,41 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("recurrence/{recurringEventID}")
-  public Response getRecurringEvent(@PathParam("recurringEventID") String eventID) {
-    logger.debug("Recurrent event Lookup: {}", eventID);
-    try {
-      RecurringEvent event = service.getRecurringEvent(eventID);
-      if (event == null) return Response.status(Status.BAD_REQUEST).build();
-      return Response.ok(event).build();
-    } catch (Exception e) {
-      logger.warn("Recurrent event Lookup failed: {}", eventID);
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+  @Path("recurring/{recurringEventID}.xml")
+  public Response getRecurringEventXml(@PathParam("recurringEventID") String eventId) {
+    return getRecurringEvent(eventId);
+  }
+  
+  /**
+   * Get a specific scheduled recurring event.
+   * @param eventID The unique ID of the event.
+   * @return event JSON with the data of the recurring event
+   */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("recurring/{recurringEventID}.json")
+  public Response getRecurringEventJson(@PathParam("recurringEventID") String eventId) {
+    return getRecurringEvent(eventId);
+  }
+  
+  private Response getRecurringEvent(String eventId) {
+    logger.debug("Recurrent event Lookup: {}", eventId);
+    if(!eventId.isEmpty()){
+      try {
+        RecurringEvent event = service.getRecurringEvent(eventId);
+        if (event != null) {
+          return Response.ok(event).build();
+        } else {
+          return Response.status(Status.NOT_FOUND).build();
+        }
+      } catch (Exception e) {
+        logger.warn("Recurrent event Lookup failed for '{}': ", eventId, e);
+        return Response.serverError().build();
+      }
+    } else {
+      return Response.status(Status.BAD_REQUEST).build();
     }
-  } 
+  }
   
   /**
    * Get list of events that belong to the recurring event.
@@ -215,35 +246,65 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("recurrence/{recurringEventID}/events")
-  public Response getEventsFromRecurringEvent(@PathParam("recurringEventID") String eventID) {
-    logger.debug("Getting events from recurrent event: {}", eventID);
-    try {
-      RecurringEvent event = service.getRecurringEvent(eventID);
-      if (event == null) return Response.status(Status.BAD_REQUEST).build();
-      return Response.ok((new GenericEntity<List<Event>> (event.getEvents()){})).build();
-    } catch (Exception e) {
-      logger.warn("Getting events from recurrent event failed: {}", eventID);
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+  @Path("recurring/{recurringEventID}/events.xml")
+  public Response getEventsFromRecurringEventXml(@PathParam("recurringEventID") String eventId) {
+    return getEventsFromRecurringEvent(eventId);
+  }
+  
+  /**
+   * Get list of events that belong to the recurring event.
+   * @param eventID The unique ID of the RecurringEvent.
+   * @return List of events XML with the data of the events that belong to the recurring event 
+   */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("recurring/{recurringEventID}/events.json")
+  public Response getEventsFromRecurringEventJson(@PathParam("recurringEventID") String eventId) {
+    return getEventsFromRecurringEvent(eventId);
+  }
+  
+  private Response getEventsFromRecurringEvent(String eventId) {
+    logger.debug("Getting events from recurrent event: {}", eventId);
+    if(!eventId.isEmpty()) {
+      try {
+        RecurringEvent event = service.getRecurringEvent(eventId);
+        if (event != null){
+          EventListImpl eventList = new EventListImpl(event.getEvents());
+          return Response.ok(eventList).build();
+        } else {
+          return Response.status(Status.NOT_FOUND).build();
+        }
+      } catch (Exception e) {
+        logger.warn("Getting events from recurrent event failed for '{}': {}", eventId, e);
+        return Response.serverError().build();
+      }
+    } else {
+      return Response.status(Status.BAD_REQUEST).build();
     }
-  } 
+  }
   
   /**
    * Delete a recurring event
    * @param eventID The unique ID of the RecurringEvent.
-   * @return List of events XML with the data of the events that belong to the recurring event 
+   * @return HTTP Status 204 No Content if successfully deleted.
    */
   @DELETE
-  @Produces(MediaType.TEXT_XML)
-  @Path("recurrence/{recurringEventID}")
-  public Response deleteRecurringEvent(@PathParam("recurringEventID") String eventID) {
-    logger.debug("delete recurring event: {}", eventID);
-    try {
-      if (eventID == null) return Response.status(Status.BAD_REQUEST).build();
-      return Response.ok(service.removeRecurringEvent(eventID)).build();
-    } catch (Exception e) {
-      logger.warn("removing events from recurrent event failed: {}", eventID);
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+  @Path("recurring/{recurringEventID}")
+  public Response deleteRecurringEvent(@PathParam("recurringEventID") String eventId) {
+    logger.debug("delete recurring event: {}", eventId);
+    if(!eventId.isEmpty()){
+      try {
+        if (service.removeRecurringEvent(eventId)) {
+          return Response.noContent().type("").build(); //remove content-type, no message-body.
+        } else {
+          return Response.status(Status.NOT_FOUND).build();
+        }
+      } catch (Exception e) {
+        logger.warn("removing events from recurrent event failed: {}", eventId);
+        return Response.serverError().build();
+      }
+    } else {
+      return Response.status(Status.BAD_REQUEST).build();
     }
   }  
   
@@ -254,11 +315,23 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("getDublinCoreMetadata/{eventID}")
-  public Response getDublinCoreMetadata(@PathParam("eventID") String eventID) {
-    String result = service.getDublinCoreMetadata(eventID);
-    if (result == null) return Response.status(Status.BAD_REQUEST).build();
-    return Response.ok(result).build();
+  @Path("event/{eventId}/dublincore")
+  public Response getDublinCoreMetadata(@PathParam("eventId") String eventId) {
+    if(!eventId.isEmpty()){
+      try {
+        String result = service.getDublinCoreMetadata(eventId);
+        if (result != null) {
+          return Response.ok(result).build();
+        } else {
+          return Response.status(Status.NOT_FOUND).build();
+        }
+      } catch(Exception e) {
+        logger.warn("Unable to get dublincore Metadata for id '{}': {}", eventId, e);
+        return Response.serverError().build();
+      }
+    } else {
+      return Response.status(Status.BAD_REQUEST).build();
+    }
   }  
 
   /**
@@ -268,11 +341,23 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_PLAIN)
-  @Path("getCaptureAgentMetadata/{eventID}")
-  public Response getCaptureAgentMetadata(@PathParam("eventID") String eventID) {
-    String result = service.getCaptureAgentMetadata(eventID);
-    if (result == null) return Response.status(Status.BAD_REQUEST).build();
-    return Response.ok(result).build();
+  @Path("event/{eventId}/captureAgentMetadata")
+  public Response getCaptureAgentMetadata(@PathParam("eventId") String eventId) {
+    if(!eventId.isEmpty()){
+      try{
+      String result = service.getCaptureAgentMetadata(eventId);
+        if (result != null) {
+          return Response.ok(result).build();
+        } else {
+          return Response.status(Status.NOT_FOUND).build();
+        }
+      } catch(Exception e) {
+        logger.warn("Unable to get capture agent metadata for id '{}': {}", eventId, e);
+        return Response.serverError().build();
+      }
+    } else {
+      return Response.status(Status.BAD_REQUEST).build();
+    }
   }    
   
 
@@ -283,29 +368,25 @@ public class SchedulerRestService {
    */
   @PUT
   @Produces(MediaType.TEXT_XML)
-  @Path("event")
-  public Response addEvent (@FormParam("event") EventImpl e) {
-    logger.debug("addEvent(e): {}", e);
-    if (e == null) {
-      logger.error("Event that should be added is null");
+  @Path("event/{eventId}")
+  public Response addEvent (@PathParam("eventId") String eventId, @FormParam("event") EventImpl event) {
+    logger.debug("addEvent(e): {}", event);
+    if(!eventId.isEmpty() && event != null){
+      try{
+        Event result = service.addEvent(event);
+        if ( result != null) { //TODO: addEvent never returns null. When it's updated to throw EntityExistsException Handle it though...
+          return Response.status(Status.CREATED).type("").build();
+        } else {
+          logger.error("Event that should be added is null");
+          return Response.status(Status.NOT_FOUND).build();
+        }
+      } catch(Exception e) {
+        logger.warn("Unable to create new event with id '{}': {}", eventId, e);
+        return Response.serverError().build();
+      }
+    } else {
       return Response.status(Status.BAD_REQUEST).build();
     }
-    service.addEvent(e);
-    logger.info("Adding event {} to scheduler",e.getEventId());
-    return Response.ok(e).build();
-  }  
-  
-  /**
-   * 
-   * Removes the specified event from the database. Returns true if the event was found and could be removed.
-   * @param eventID The unique ID of the event.
-   * @return true if the event was found and could be deleted.
-   */
-  @GET
-  @Produces(MediaType.TEXT_PLAIN)
-  @Path("removeEvent/{eventID}")
-  public Response removeEvent (@PathParam("eventID") String eventID) {
-    return Response.ok(service.removeEvent(eventID)).build();
   }
   
   /**
@@ -315,10 +396,22 @@ public class SchedulerRestService {
    * @return true if the event was found and could be deleted.
    */
   @DELETE
-  @Produces(MediaType.TEXT_PLAIN)
-  @Path("event/{eventID}")
-  public Response deleteEvent (@PathParam("eventID") String eventID) {
-    return Response.ok(service.removeEvent(eventID)).build();
+  @Path("event/{eventId}")
+  public Response deleteEvent (@PathParam("eventId") String eventId) {
+    if(!eventId.isEmpty()){
+      try{
+        if(service.removeEvent(eventId)){
+          return Response.noContent().type("").build(); //remove content-type, no message-body.
+        } else {
+          return Response.status(Status.NOT_FOUND).build(); 
+        }
+      } catch(Exception e) {
+        logger.warn("Unable to delete event with id '{}': {}", eventId, e);
+        return Response.serverError().build();
+      }
+    } else {
+      return Response.status(Status.BAD_REQUEST).build();
+    }
   }  
 
   
@@ -328,50 +421,60 @@ public class SchedulerRestService {
    * @return true if the event was found and could be updated.
    */
   @POST
-  @Produces(MediaType.TEXT_PLAIN)
-  @Path("event")
-  public Response updateEvent (@FormParam("event") EventImpl e) {
-    if(service.updateEvent(e)) {
-      return Response.ok(true).build();
+  @Path("event/{eventId}")
+  public Response updateEvent (@PathParam("eventId") String eventId, @FormParam("event") EventImpl event) {
+    if(!eventId.isEmpty() && event != null) {
+      try {
+        if(service.updateEvent(event)) {
+          return Response.noContent().type("").build(); //remove content-type, no message-body.
+        } else {
+          return Response.status(Status.NOT_FOUND).build();
+        }
+      } catch(Exception e) {
+        logger.warn("Unable to update event with id '{}': {}", eventId, e);
+        return Response.serverError().build();
+      }
     } else {
-      return Response.serverError().build();
+      return Response.status(Status.BAD_REQUEST).build();
     }
   }  
   
  /**
-   * returns scheduled events, that pass the filter. filter: an xml definition of the filter. Tags that are not included will noct be filtered. Possible values for order by are title,creator,series,time-asc,time-desc,contributor,channel,location,device
+   * returns scheduled events, that pass the filter. filter: an xml definition of the filter. Tags that are not included will not be filtered. Possible values for order by are title,creator,series,time-asc,time-desc,contributor,channel,location,device
    * @param filter exact id to search for pattern to search for pattern to search for A short description of the content of the lecture begin of the period of valid events end of the period of valid events pattern to search for ID of the series which will be filtered ID of the channel that will be filtered pattern to search for pattern to search for pattern to search for title|creator|series|time-asc|time-desc|contributor|channel|location|device">
    * @return List of SchedulerEvents as XML 
    */
   @POST
   @Produces(MediaType.TEXT_XML)
-  @Path("events")
-  public Response getEvents (@FormParam("filter") String filter) {
-    if (filter == null) {
-      logger.error("Filter is null");
+  @Path("filter/events.xml")
+  public Response filterEventsXml(@FormParam("filter") SchedulerFilterJaxbImpl filter) {
+    return filterEvents(filter);
+  }
+  
+  /**
+   * returns scheduled events, that pass the filter. filter: an xml definition of the filter. Tags that are not included will not be filtered. Possible values for order by are title,creator,series,time-asc,time-desc,contributor,channel,location,device
+   * @param filter exact id to search for pattern to search for pattern to search for A short description of the content of the lecture begin of the period of valid events end of the period of valid events pattern to search for ID of the series which will be filtered ID of the channel that will be filtered pattern to search for pattern to search for pattern to search for title|creator|series|time-asc|time-desc|contributor|channel|location|device">
+   * @return List of SchedulerEvents as JSON 
+   */
+  @POST
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("filter/events.json")
+  public Response filterEventsJson(@FormParam("filter") SchedulerFilterJaxbImpl filter) {
+    return filterEvents(filter);
+  }
+  
+  private Response filterEvents(SchedulerFilterJaxbImpl filter) {
+    if (filter != null) {
+      try {
+        logger.debug("Filter events with {}",filter.getFilter());
+        EventListImpl eventList = new EventListImpl(service.getEvents(filter.getFilter()));
+        return Response.ok(eventList).type("").build();
+      } catch (Exception e) {
+        return Response.serverError().build();
+      }
+    } else {
       return Response.status(Status.BAD_REQUEST).build();
     }
-    logger.debug("Filter: {} ", filter);
-    SchedulerFilterJaxbImpl filterJaxB = null;
-    try {
-      JAXBContext jaxbContext = JAXBContext.newInstance(SchedulerFilterJaxbImpl.class);
-      logger.debug("context created");
-      Unmarshaller m = jaxbContext.createUnmarshaller();
-      logger.debug("unmarshaler ready");
-      filterJaxB =  (SchedulerFilterJaxbImpl) m.unmarshal(new StringReader(filter));      
-      logger.debug("unmarshaler read");      
-    } catch (JAXBException e) {
-      logger.error(e.getMessage());
-      e.printStackTrace();
-    }      
-    if (filterJaxB == null) {
-      logger.error("FilterJaxB is null");
-      return Response.status(Status.BAD_REQUEST).build();
-    }
-    logger.info("Filter events with "+filterJaxB.getFilter());
-    List<Event> events = service.getEvents(filterJaxB.getFilter());
-    if (events == null) return Response.status(Status.BAD_REQUEST).build();
-    return Response.ok((new GenericEntity<List<Event>> (events){})).build();
   }
   
   /**
@@ -381,46 +484,66 @@ public class SchedulerRestService {
    */
   @POST
   @Produces(MediaType.TEXT_XML)
-  @Path("events/conflict")
-  public Response findConflictingEvents (@FormParam("event") EventImpl e) {
-    if (e == null) {
-      logger.error("event is null");
-      return Response.status(Status.BAD_REQUEST).build();
-    } 
-    List<EventImpl> events = new LinkedList<EventImpl>();
-    try {
-      for(Event event : service.findConflictingEvents(e)){
-        events.add((EventImpl)event);
+  @Path("event/conflict.xml")
+  public Response getConflictingEventsXml(@FormParam("event") EventImpl event) {
+    return getConflictingEvents(event);
+  }
+  
+  /**
+   * Looks for events that are conflicting with the given event, because they use the same recorder at the same time.
+   * @param e The event that should be checked for conflicts
+   * @return An JSON with the list of conflicting events
+   */
+  @POST
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("event/conflict.json")
+  public Response getConflictingEventsJson(@FormParam("event") EventImpl event) {
+    return getConflictingEvents(event);
+  }
+  
+  private Response getConflictingEvents(EventImpl event) {
+    if (event != null) {
+      try {
+        EventListImpl eventList = new EventListImpl(service.findConflictingEvents(event));
+        return Response.ok(eventList).type("").build();
+      } catch (Exception e) {
+        logger.error("Unable to find conflicting events for {}: {}", event, e);
+        return Response.serverError().build();
       }
-    } catch (Exception e1) {
-      logger.error("Find Conflicting Failed: {}", e1);
+    } else {
       return Response.status(Status.BAD_REQUEST).build();
     }
-    return Response.ok((new GenericEntity<List<EventImpl>> (events){})).build();
-  }   
+  }
   
   @POST
   @Produces(MediaType.TEXT_XML)
-  @Path("recurrence/conflict")
-  public Response findConflictingEvents (@FormParam("recurringEvent") RecurringEventImpl e) {
-    if (e == null) {
-      logger.error("event is null");
-      return Response.status(Status.BAD_REQUEST).build();
-    } 
-    List<EventImpl> events = new LinkedList<EventImpl>();
-    try {
-      for(Event event : service.findConflictingEvents(e)){
-        events.add((EventImpl)event);
+  @Path("recurring/conflict.xml")
+  public Response getConflictingEventsXml (@FormParam("recurringEvent") RecurringEventImpl rEvent) {
+    return getConflictingEvents(rEvent);
+  }
+  
+  @POST
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("recurring/conflict.json")
+  public Response getConflictingEventsJson (@FormParam("recurringEvent") RecurringEventImpl rEvent) {
+    return getConflictingEvents(rEvent);
+  }
+  
+  private Response getConflictingEvents(RecurringEventImpl rEvent) {
+    if (rEvent != null) {
+      try {
+        EventListImpl eventList = new EventListImpl(service.findConflictingEvents(rEvent));
+        return Response.ok(eventList).build();
+      } catch (IncompleteDataException e2) {
+        logger.warn("Recurring event incomplete: {}", e2);
+        return Response.status(Status.BAD_REQUEST).build();
+      } catch (Exception e1) {
+        logger.error("Find Conflicting Failed: {}", e1);
+        return Response.serverError().build();
       }
-    } catch (IncompleteDataException e2) {
-      logger.warn("Recurring event incomplete {}", e.toString());
-      return Response.status(Status.BAD_REQUEST).build();
-    } catch (Exception e1) {
-      logger.error("Find Conflicting Failed: {}", e1);
+    } else {
       return Response.status(Status.BAD_REQUEST).build();
     }
-    
-    return Response.ok((new GenericEntity<List<EventImpl>> (events){})).build();
   }
 
   /**
@@ -429,17 +552,31 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("events/all")
-  public Response allEvents () {
-    List<Event> events = null;
+  @Path("all/events.xml")
+  public Response getAllEventsXml() {
+    return getAllEvents();
+  }
+  
+  /**
+   * Lists all events in the database, without any filter
+   * @return JSON with all events 
+   */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("all/events.json")
+  public Response getAllEventsJson() {
+    return getAllEvents();
+  }
+  
+  private Response getAllEvents() {
     try {
-      events = service.getEvents(null);
+      EventListImpl eventList = new EventListImpl(service.getEvents(null));
+      return Response.ok(eventList).build();
     } catch (Exception e) {
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+      logger.error("Unable to return all events: {}", e);
+      return Response.serverError().build();
     }
-    if (events == null) return Response.status(Status.BAD_REQUEST).build();
-    return Response.ok((new GenericEntity<List<Event>> (events){})).build();
-  }     
+  }
 
   /**
    * Lists all Recurring events in the database
@@ -447,16 +584,30 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("recurrences/all")
-  public Response allRecurringEvents () {
-    List <RecurringEvent> events = null;
+  @Path("all/recurring.xml")
+  public Response getAllRecurringEventsXml() {
+    return getAllRecurringEvents();
+  }
+  
+  /**
+   * Lists all Recurring events in the database
+   * @return JSON with all events 
+   */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("all/recurring.json")
+  public Response getAllRecurringEventsJson() {
+    return getAllRecurringEvents();
+  }
+  
+  private Response getAllRecurringEvents() {
     try {
-      events = service.getAllRecurringEvents();
+      RecurringEventListImpl eventList = new RecurringEventListImpl(service.getAllRecurringEvents());
+      return Response.ok(eventList).build();
     } catch (Exception e) {
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+      logger.error("Unable to return all recurring events: {}", e);
+      return Response.serverError().build();
     }
-    if (events == null) return Response.status(Status.BAD_REQUEST).build();
-    return Response.ok((new GenericEntity<List<RecurringEvent>> (events){})).build();
   }
   
   /**
@@ -465,15 +616,33 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("events/upcoming")
-  public Response getUpcomingEvents () {
+  @Path("upcoming.xml")
+  public Response getUpcomingEventsXml() {
+    return getUpcomingEvents();
+  }
+  
+  /**
+   * Lists all future events in the database, without any filter
+   * @return JSON with all events 
+   */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("upcoming.json")
+  public Response getUpcomingEventsJson() {
+    return getUpcomingEvents();
+  }
+  
+  private Response getUpcomingEvents() {
     SchedulerFilter filter = new SchedulerFilterImpl();
     filter.setStart(new Date(System.currentTimeMillis()));
-     
-    List<Event> events = service.getEvents(filter);
-    if (events == null) return Response.status(Status.BAD_REQUEST).build();
-    return Response.ok((new GenericEntity<List<Event>> (events){})).build();
-  }    
+    try {
+      EventListImpl eventList = new EventListImpl(service.getEvents(filter));
+      return Response.ok(eventList).build();
+    } catch(Exception e) {
+      logger.error("Unable to return upcoming events: {}", e);
+      return Response.serverError().build();
+    }
+  }
   
   
   /**
@@ -483,11 +652,23 @@ public class SchedulerRestService {
    */
   @GET
   @Produces(MediaType.TEXT_PLAIN)
-  @Path("getCalendarForCaptureAgent/{captureAgentID}")
-  public Response getCalendarForCaptureAgent (@PathParam("captureAgentID") String captureAgentID) {
-    String result = service.getCalendarForCaptureAgent(captureAgentID);
-    if (result == null) return Response.status(Status.BAD_REQUEST).build();
-    return Response.ok(result).build();
+  @Path("{captureAgentID}/calendar")
+  public Response getCalendarForCaptureAgent (@PathParam("captureAgentID") String captureAgentId) {
+    if(!captureAgentId.isEmpty()){
+      try {
+        String result = service.getCalendarForCaptureAgent(captureAgentId);
+        if (!result.isEmpty()){
+          return Response.ok(result).build();
+        } else {
+          return Response.status(Status.NOT_FOUND).build();
+        }
+      } catch(Exception e) {
+        logger.error("Unable to get calendar for capture agent '{}': {}", captureAgentId, e);
+        return Response.serverError().build();
+      }
+    } else {
+      return Response.status(Status.BAD_REQUEST).build();
+    }
   }
   
   @SuppressWarnings("unchecked")
@@ -536,143 +717,199 @@ public class SchedulerRestService {
 
     
     // Scheduler addEvent 
-    RestEndpoint addEventJPAEndpoint = new RestEndpoint("addEvent", RestEndpoint.Method.PUT, "/event", "Stores a new event in the database. As a result the event will be returned, but some fields especially the event-id may have been updated.\nWithin the metadata section it is possible to add any additional metadata as a key-value pair. The information will be stored even if the key is yet unknown.");
-    addEventJPAEndpoint.addFormat(new Format("xml", null, null));
-    addEventJPAEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, result returned"));
-    addEventJPAEndpoint.addRequiredParam(new Param("event", Type.TEXT, generateEvent(), "The Event that should be stored."));
-    addEventJPAEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, addEventJPAEndpoint);   
+    RestEndpoint addEventEndpoint = new RestEndpoint("addEvent", RestEndpoint.Method.PUT, "/event/{eventId}", "Stores a new event in the database.");
+    addEventEndpoint.addStatus(org.opencastproject.util.doc.Status.CREATED("Event was successfully created."));
+    addEventEndpoint.addPathParam(new Param("eventId", Type.STRING, "", "A UUID for the new event."));
+    addEventEndpoint.addRequiredParam(new Param("event", Type.TEXT, generateEvent(), "The Event that should be stored."));
+    addEventEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, addEventEndpoint);   
     
     // Scheduler addEvent 
-    RestEndpoint addREventEndpoint = new RestEndpoint("addREvent", RestEndpoint.Method.PUT, "/recurrence", "Stores a new event in the database. As a result the event will be returned, but some fields especially the event-id may have been updated.\nWithin the metadata section it is possible to add any additional metadata as a key-value pair. The information will be stored even if the key is yet unknown.");
-    addREventEndpoint.addFormat(new Format("xml", null, null));
-    addREventEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, result returned"));
+    RestEndpoint addREventEndpoint = new RestEndpoint("addREvent", RestEndpoint.Method.PUT, "/recurring/{rEventId}", "Stores a new recurring event in the database. All member events as specified by the recurrence rule will be created as well.");
+    addREventEndpoint.addStatus(org.opencastproject.util.doc.Status.CREATED("Recurrence and member events successfully created."));
+    addREventEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("Supplied rEventId or RecurringEvent is invalid or missing."));
+    addREventEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+    addREventEndpoint.addPathParam(new Param("rEventId", Type.STRING, "", "A UUID for the new recurring event."));
     addREventEndpoint.addRequiredParam(new Param("recurringEvent", Type.TEXT, generateRecurringEvent(), "The Recurring Event that should be stored."));
     addREventEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, addREventEndpoint);    
  
     // Scheduler updateEvent 
-    RestEndpoint updateEventEndpoint = new RestEndpoint("updateEvent", RestEndpoint.Method.POST, "/event", "Updates an existing event in the database. The event-id has to be stored in the database already. Will return true, if the event was found and could be updated.");
-    updateEventEndpoint.addFormat(new Format("boolean", null, null));
-    updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, boolean returned"));
+    RestEndpoint updateEventEndpoint = new RestEndpoint("updateEvent", RestEndpoint.Method.POST, "/event/{eventId}", "Updates an existing event in the database. The event-id has to be stored in the database already.");
+    updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Event successfully updated."));
+    updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("Supplied eventId or Event are incorrect or missing."));
+    updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("An event matching the supplied eventId was not found."));
+    updateEventEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+    updateEventEndpoint.addPathParam(new Param("eventId", Type.STRING, "", "The UUID of the event to update."));
     updateEventEndpoint.addRequiredParam(new Param("event", Type.TEXT, generateEvent(), "The Event that should be updated."));
     updateEventEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, updateEventEndpoint);       
     
     // Scheduler updateRecurringEvent 
-    RestEndpoint updateREventEndpoint = new RestEndpoint("updateREvent", RestEndpoint.Method.POST, "/recurrence", "Updates an existing recurrence event in the database. The recurringEventId has to be stored in the database already. Will return true, if the event was found and could be updated.");
-    updateREventEndpoint.addFormat(new Format("boolean", null, null));
-    updateREventEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, boolean returned"));
+    RestEndpoint updateREventEndpoint = new RestEndpoint("updateREvent", RestEndpoint.Method.POST, "/recurring/{rEventId}", "Updates an existing recurrence event in the database. The recurringEventId has to be stored in the database already.");
+    updateREventEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Recurring event successfully updated."));
+    updateREventEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("Supplied rEventId or RecurringEvent are incorrect or missing."));
+    updateREventEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A RecurringEvent matching the supplied rEventId was not found."));
+    updateREventEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+    updateREventEndpoint.addPathParam(new Param("rEventId", Type.STRING, "", "The UUID of the recurring event to update."));
     updateREventEndpoint.addRequiredParam(new Param("recurringEvent", Type.TEXT, generateRecurringEvent(), "The RecurringEvent that should be updated."));
     updateREventEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.WRITE, updateREventEndpoint);   
+    data.addEndpoint(RestEndpoint.Type.WRITE, updateREventEndpoint);
     
     // Scheduler removeEvent 
-    RestEndpoint removeEventEndpoint = new RestEndpoint("removeEvent", RestEndpoint.Method.DELETE, "/event/{eventID}", "Removes the specified event from the database. Returns true if the event could be removed. It is also true if no event was found.");
-    removeEventEndpoint.addFormat(new Format("boolean", null, null));
-    removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, boolean returned"));
-    removeEventEndpoint.addPathParam(new Param("eventID", Type.STRING, "EventID", "The unique ID of the event."));
+    RestEndpoint removeEventEndpoint = new RestEndpoint("removeEvent", RestEndpoint.Method.DELETE, "/event/{eventId}", "Removes the specified event from the database.");
+    removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Event successfully deleted."));
+    removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("Supplied eventId is incorrect or missing."));
+    removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("An Event matching the supplied eventId was not found."));
+    removeEventEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+    removeEventEndpoint.addPathParam(new Param("eventId", Type.STRING, "EventId", "The UUID of the event."));
     removeEventEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, removeEventEndpoint);     
     
     // Scheduler removeRecurringEvent 
-    RestEndpoint removeREventEndpoint = new RestEndpoint("removeREvent", RestEndpoint.Method.DELETE, "/recurrence/{recurringEventID}", "Removes the specified recurringEvent from the database. Returns true if the event could be removed. It is also true if no event was found.");
-    removeREventEndpoint.addFormat(new Format("boolean", null, null));
-    removeREventEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, boolean returned"));
-    removeREventEndpoint.addPathParam(new Param("recurringEventID", Type.STRING, "RecurrentEventID", "The unique ID of the event."));
+    RestEndpoint removeREventEndpoint = new RestEndpoint("removeREvent", RestEndpoint.Method.DELETE, "/recurring/{recurringEventID}", "Removes the specified recurringEvent from the database.");
+    removeREventEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("RecurringEvent successfully deleted."));
+    removeREventEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("Supplied rEventId is incorrect or missing."));
+    removeREventEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("An RecurringEvent matching the supplied rEventId was not found."));
+    removeREventEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+    removeREventEndpoint.addPathParam(new Param("recurringEventID", Type.STRING, "RecurrentEventID", "The UUID of the event."));
     removeREventEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, removeREventEndpoint);     
     
     // Scheduler getEvent
-    RestEndpoint getEventEndpoint = new RestEndpoint("getEvent", RestEndpoint.Method.GET, "/event/{eventID}", "Get a specific scheduled event.");
-    getEventEndpoint.addFormat(new Format("xml", null, null));
-    getEventEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, Event XML returned"));
-    getEventEndpoint.addPathParam(new Param("eventID", Type.STRING, "c0e3d8a7-7ecc-479b-aee7-8da369e445f2", "The unique ID of the event."));
+    RestEndpoint getEventEndpoint = new RestEndpoint("getEvent", RestEndpoint.Method.GET, "/event/{eventId}", "Get a specific scheduled event.");
+    getEventEndpoint.addFormat(Format.xml("XML representation of the event."));
+    getEventEndpoint.addFormat(Format.json("JSON representation of the event."));
+    getEventEndpoint.setAutoPathFormat(true);
+    getEventEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("XML or JSON representation of the Event."));
+    getEventEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("Supplied eventId is incorrect or missing."));
+    getEventEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("An Event matching the supplied eventId was not found."));
+    getEventEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+    getEventEndpoint.addPathParam(new Param("eventId", Type.STRING, "c0e3d8a7-7ecc-479b-aee7-8da369e445f2", "The UUID of the event."));
     getEventEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getEventEndpoint);  
     
     // Scheduler get recurring event
-    RestEndpoint getREventEndpoint = new RestEndpoint("getREvent", RestEndpoint.Method.GET, "/recurrence/{recurringEventID}", "Get a specific scheduled recurrent event.");
-    getREventEndpoint.addFormat(new Format("xml", null, null));
-    getREventEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, Event XML returned"));
-    getREventEndpoint.addPathParam(new Param("recurringEventID", Type.STRING, "Recurring Event ID", "The unique ID of the recurring event."));
+    RestEndpoint getREventEndpoint = new RestEndpoint("getREvent", RestEndpoint.Method.GET, "/recurring/{rEventId}", "Get a specific scheduled recurrent event.");
+    getREventEndpoint.addFormat(Format.xml("XML representation of the recurring event."));
+    getREventEndpoint.addFormat(Format.json("JSON representation of the recurring event."));
+    getREventEndpoint.setAutoPathFormat(true);
+    getREventEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("XML or JSON representation of the RecurringEvent."));
+    getREventEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("Supplied rEventId is incorrect or missing."));
+    getREventEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A RecurringEvent matching the supplied rEventId was not found."));
+    getREventEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+    getREventEndpoint.addPathParam(new Param("rEventId", Type.STRING, "Recurring Event ID", "The unique ID of the recurring event."));
     getREventEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getREventEndpoint);    
     
     // Scheduler getEventsFromRecurringEvent
-    RestEndpoint getEventsFromRecurringEventEndpoint = new RestEndpoint("getEventsFromRecurringEvent", RestEndpoint.Method.GET, "/recurrence/{recurringEventID}/events", "returns scheduled events, that pass the filter.\nfilter: an xml definition of the filter. Tags that are not included will noct be filtered. Possible values for order by are title,creator,series,time-asc,time-desc,contributor,channel,location,device");
-    getEventsFromRecurringEventEndpoint.addFormat(new Format("xml", null, null));
-    getEventsFromRecurringEventEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, List of Events as XML returned"));
-    getEventsFromRecurringEventEndpoint.addPathParam(new Param("recurringEventID", Type.STRING, "Recurring Event ID", "The unique ID of the recurring event."));
+    RestEndpoint getEventsFromRecurringEventEndpoint = new RestEndpoint("getEventsFromRecurringEvent", RestEndpoint.Method.GET, "/recurring/{rEventId}/events", "returns all events that belong to a recurring event.");
+    getEventsFromRecurringEventEndpoint.addFormat(Format.xml("XML representation of a list of the events belonging to a recurring event."));
+    getEventsFromRecurringEventEndpoint.addFormat(Format.json("JSON representation of a list of the event belonging to a recurring event."));
+    getEventsFromRecurringEventEndpoint.setAutoPathFormat(true);
+    getEventsFromRecurringEventEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("XML or JSON representation of a list of events belonging to a recurring event."));
+    getEventsFromRecurringEventEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("Supplied rEventId is incorrect or missing."));
+    getEventsFromRecurringEventEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A RecurringEvent matching the supplied rEventId was not found."));
+    getEventsFromRecurringEventEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+    getEventsFromRecurringEventEndpoint.addPathParam(new Param("rEventId", Type.STRING, "Recurring Event ID", "The unique ID of the recurring event."));
     getEventsFromRecurringEventEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getEventsFromRecurringEventEndpoint);
     
-    // Scheduler getEvents
-    RestEndpoint getEventsEndpoint = new RestEndpoint("events", RestEndpoint.Method.POST, "/events", "returns scheduled events, that pass the filter.\nfilter: an xml definition of the filter. Tags that are not included will noct be filtered. Possible values for order by are title,creator,series,time-asc,time-desc,contributor,channel,location,device");
-    getEventsEndpoint.addFormat(new Format("xml", null, null));
-    getEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, List of Events as XML returned"));
-    getEventsEndpoint.addOptionalParam(new Param("filter", Type.TEXT, generateSchedulerFilter(), "The SchedulerFilter that should be applied."));
-    getEventsEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, getEventsEndpoint);
+    // Scheduler filterEventsEndpoint
+    RestEndpoint filterEventsEndpoint = new RestEndpoint("filterEvents", RestEndpoint.Method.POST, "/filter/events", "returns scheduled events, that pass the filter.\nfilter: an xml definition of the filter. Tags that are not included will noct be filtered. Possible values for order by are title,creator,series,time-asc,time-desc,contributor,channel,location,device");
+    filterEventsEndpoint.addFormat(Format.xml("XML representation of a list of the events conforming to the supplied filter."));
+    filterEventsEndpoint.addFormat(Format.json("JSON representation of a list of the event conforming to the supplied filter."));
+    filterEventsEndpoint.setAutoPathFormat(true);
+    filterEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("XML or JSON representation of a list of events belonging to a recurring event."));
+    filterEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("Supplied filter is incorrect or missing."));
+    filterEventsEndpoint.addOptionalParam(new Param("filter", Type.TEXT, generateSchedulerFilter(), "The SchedulerFilter that should be applied."));
+    filterEventsEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, filterEventsEndpoint);
     
     // Scheduler getEvents
-    RestEndpoint getAllEventsEndpoint = new RestEndpoint("allEvents", RestEndpoint.Method.GET, "/events/all", "returns all scheduled events");
-    getAllEventsEndpoint.addFormat(new Format("xml", null, null));
-    getAllEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, List of Events as XML returned"));
+    RestEndpoint getAllEventsEndpoint = new RestEndpoint("allEvents", RestEndpoint.Method.GET, "/all/events", "returns all scheduled events");
+    getAllEventsEndpoint.addFormat(Format.xml("XML representation of a list of all events."));
+    getAllEventsEndpoint.addFormat(Format.json("JSON representation of a list of all events."));
+    getAllEventsEndpoint.setAutoPathFormat(true);
+    getAllEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("XML or JSON representation of a list of all events."));
+    getAllEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
     getAllEventsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getAllEventsEndpoint);  
     
     // Scheduler getAllRecurringEvents
-    RestEndpoint getAllREventsEndpoint = new RestEndpoint("allRecurringEvents", RestEndpoint.Method.GET, "/recurrences/all", "returns all scheduled events");
-    getAllREventsEndpoint.addFormat(new Format("xml", null, null));
-    getAllREventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, List of Events as XML returned"));
+    RestEndpoint getAllREventsEndpoint = new RestEndpoint("allRecurringEvents", RestEndpoint.Method.GET, "/all/recurring", "returns all scheduled events");
+    getAllREventsEndpoint.addFormat(Format.xml("XML representation of a list of all events."));
+    getAllREventsEndpoint.addFormat(Format.json("JSON representation of a list of all events."));
+    getAllREventsEndpoint.setAutoPathFormat(true);
+    getAllREventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("XML or JSON representation of a list of all recurring events."));
+    getAllREventsEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
     getAllREventsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getAllREventsEndpoint);
     
     // Scheduler getUpcomingEvents 
-    RestEndpoint getUpcomingEventsEndpoint = new RestEndpoint("upcomingEvents", RestEndpoint.Method.GET, "/events/upcoming", "returns all upcoming events. Returns true if the event was found and could be removed.");
-    getUpcomingEventsEndpoint.addFormat(new Format("xml", null, null));
-    getUpcomingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, List of Events as XML returned"));
+    RestEndpoint getUpcomingEventsEndpoint = new RestEndpoint("upcomingEvents", RestEndpoint.Method.GET, "/upcoming", "returns all upcoming events. Returns true if the event was found and could be removed.");
+    getUpcomingEventsEndpoint.addFormat(Format.xml("XML representation of a list of all events."));
+    getUpcomingEventsEndpoint.addFormat(Format.json("JSON representation of a list of all events."));
+    getUpcomingEventsEndpoint.setAutoPathFormat(true);
+    getUpcomingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("XML or JSON representation of a list of all upcoming events."));
+    getUpcomingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
     getUpcomingEventsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getUpcomingEventsEndpoint);    
     
     // Scheduler findConflictingEvents 
-    RestEndpoint findConflictingEventsEndpoint = new RestEndpoint("findConflictingEvents", RestEndpoint.Method.POST, "/events/conflict", "Looks for events that are conflicting with the given event, because they use the same recorder at the same time ");
-    findConflictingEventsEndpoint.addFormat(new Format("xml", null, null));
-    findConflictingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, List of Events as XML returned, or an empty list, if no conflicts were found"));
+    RestEndpoint findConflictingEventsEndpoint = new RestEndpoint("findConflictingEvents", RestEndpoint.Method.POST, "/event/conflict", "Looks for events that are conflicting with the given event, because they use the same recorder at the same time ");
+    findConflictingEventsEndpoint.addFormat(Format.xml("XML representation of a list of all events that conflict with supplied event."));
+    findConflictingEventsEndpoint.addFormat(Format.json("JSON representation of a list of all events that conflict with supplied event."));
+    findConflictingEventsEndpoint.setAutoPathFormat(true);
+    findConflictingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("XML or JSON representation of a list of all upcoming events."));
+    findConflictingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("Supplied Event is invalid or missing."));
+    findConflictingEventsEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
     findConflictingEventsEndpoint.addRequiredParam(new Param("event", Type.TEXT, generateEvent(), "The Event that should be checked for conflicts."));
     findConflictingEventsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, findConflictingEventsEndpoint);  
     
     // Scheduler findConflictingREvents 
-    RestEndpoint findConflictingREventsEndpoint = new RestEndpoint("findConflictingRecurringEvents", RestEndpoint.Method.POST, "/recurrence/conflict", "Looks for events that are conflicting with the given event, because they use the same recorder at the same time ");
-    findConflictingREventsEndpoint.addFormat(new Format("xml", null, null));
-    findConflictingREventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, List of Events as XML returned, or an empty list, if no conflicts were found"));
-    findConflictingREventsEndpoint.addRequiredParam(new Param("recurringEvent", Type.TEXT, generateEvent(), "The recurring Event that should be checked for conflicts. "));
+    RestEndpoint findConflictingREventsEndpoint = new RestEndpoint("findConflictingRecurringEvents", RestEndpoint.Method.POST, "/recurring/conflict", "Looks for events that are conflicting with the given event, because they use the same recorder at the same time ");
+    findConflictingREventsEndpoint.addFormat(Format.xml("XML representation of a list of all events that conflict with supplied recurring event."));
+    findConflictingREventsEndpoint.addFormat(Format.json("JSON representation of a list of all events that conflict with supplied recurring event."));
+    findConflictingREventsEndpoint.setAutoPathFormat(true);
+    findConflictingREventsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("XML or JSON representation of a list of all upcoming events."));
+    findConflictingREventsEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("Supplied RecurringEvent is invalid or missing."));
+    findConflictingREventsEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+    findConflictingREventsEndpoint.addRequiredParam(new Param("recurringEvent", Type.TEXT, generateEvent(), "The RecurringEvent that should be checked for conflicts. "));
     findConflictingREventsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, findConflictingREventsEndpoint);      
 
     // Scheduler getDublinCoreMetadata
-    RestEndpoint getDublinCoreMetadataEndpoint = new RestEndpoint("getDublinCoreMetadata", RestEndpoint.Method.GET, "/getDublinCoreMetadata/{eventID}", "Gets a XML with the Dublin Core metadata for the specified event. ");
-    getDublinCoreMetadataEndpoint.addFormat(new Format("xml", null, null));
-    getDublinCoreMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, Dublin Core XML returned"));
-    getDublinCoreMetadataEndpoint.addPathParam(new Param("eventID", Type.STRING, "c0e3d8a7-7ecc-479b-aee7-8da369e445f2", "The unique ID of the event."));
+    RestEndpoint getDublinCoreMetadataEndpoint = new RestEndpoint("getDublinCoreMetadata", RestEndpoint.Method.GET, "/event/{eventId}/dublincore", "Gets a XML with the Dublin Core metadata for the specified event. ");
+    getDublinCoreMetadataEndpoint.addFormat(Format.xml("Dublincore metadata for the supplied eventId."));
+    getDublinCoreMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Dublinecore XML document containing the event's metadata."));
+    getDublinCoreMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("Supplied eventId is invalid or missing."));
+    getDublinCoreMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("No Event matching the supplied eventId was found."));
+    getDublinCoreMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+    getDublinCoreMetadataEndpoint.addPathParam(new Param("eventId", Type.STRING, "c0e3d8a7-7ecc-479b-aee7-8da369e445f2", "The unique ID of the event."));
     getDublinCoreMetadataEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getDublinCoreMetadataEndpoint);    
     
     // Scheduler getCaptureAgentMetadata
-    RestEndpoint getCaptureAgentMetadataEndpoint = new RestEndpoint("getCaptureAgentMetadata", RestEndpoint.Method.GET, "/getCaptureAgentMetadata/{eventID}", "Gets java Properties file with technical metadata for the specified event. ");
-    getCaptureAgentMetadataEndpoint.addFormat(new Format("properties", "Java Properties", null));
-    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, Java Properties File returned"));
-    getCaptureAgentMetadataEndpoint.addPathParam(new Param("eventID", Type.STRING, "c0e3d8a7-7ecc-479b-aee7-8da369e445f2", "The unique ID of the event."));
+    RestEndpoint getCaptureAgentMetadataEndpoint = new RestEndpoint("getCaptureAgentMetadata", RestEndpoint.Method.GET, "/event/{eventId}/captureAgentMetadata", "Gets java Properties file with technical metadata for the specified event. ");
+    getCaptureAgentMetadataEndpoint.addFormat(new Format("properties", "Java Properties files that is needed by the capture agent.", null));
+    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Java Properties file for the event."));
+    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("Supplied eventId is invalid or missing."));
+    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("No Event matching the supplied eventId was found."));
+    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+    getCaptureAgentMetadataEndpoint.addPathParam(new Param("eventId", Type.STRING, "c0e3d8a7-7ecc-479b-aee7-8da369e445f2", "The unique ID of the event."));
     getCaptureAgentMetadataEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getCaptureAgentMetadataEndpoint);  
     
     // Scheduler getCalendarForCaptureAgent
-    RestEndpoint getCalendarForCaptureAgentEndpoint = new RestEndpoint("getCalendarForCaptureAgent", RestEndpoint.Method.GET, "/getCalendarForCaptureAgent/{captureAgentID}", "Gets the iCalendar with all upcoming events for the specified capture agent id. ");
+    RestEndpoint getCalendarForCaptureAgentEndpoint = new RestEndpoint("getCalendarForCaptureAgent", RestEndpoint.Method.GET, "/{captureAgentId}/calendar", "Gets the iCalendar with all upcoming events for the specified capture agent id. ");
     getCalendarForCaptureAgentEndpoint.addFormat(new Format("ics", "iCalendar", "http://tools.ietf.org/html/rfc2445"));
-    getCalendarForCaptureAgentEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, valid request, iCalendar returned"));
-    getCalendarForCaptureAgentEndpoint.addPathParam(new Param("captureAgentID", Type.STRING, "recorder", "The ID that specifies the capture agent."));
+    getCalendarForCaptureAgentEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("iCalendar file containing the scheduled Events for the capture agent."));
+    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("Supplied captureAgentId is invalid or missing."));
+    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("No capture agent matching the supplied catureAgentId was found."));
+    getCaptureAgentMetadataEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("A server error occured."));
+    getCalendarForCaptureAgentEndpoint.addPathParam(new Param("captureAgentId", Type.STRING, "recorder", "The ID that specifies the capture agent."));
     getCalendarForCaptureAgentEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getCalendarForCaptureAgentEndpoint);    
     

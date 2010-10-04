@@ -63,7 +63,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @NamedQueries( { @NamedQuery(name = "RecurringEvent.getAll", query = "SELECT e FROM RecurringEvent e") })
 @XmlRootElement(name = "recurringEvent")
-@XmlAccessorType(XmlAccessType.FIELD)
+@XmlAccessorType(XmlAccessType.NONE)
 @Entity(name = "RecurringEvent")
 @Table(name = "SCHED_R_EVENT")
 @Access(AccessType.FIELD)
