@@ -72,6 +72,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.json.simple.JSONArray;
 
 /**
  * REST endpoint for the Admin UI proxy service
@@ -126,19 +127,79 @@ public class AdminuiRestService {
     captureAdminService = null;
   }
 
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("recordings/{state}")
+  public AdminRecordingListImpl getRecordingsXML(@PathParam("state") String state,
+          @QueryParam("pn") int pageNumber,
+          @QueryParam("ps") int pageSize,
+          @QueryParam("sb") String sortBy,
+          @QueryParam("so") String sortOrder) {
+    return getRecordings(state, pageNumber, pageSize, sortBy, sortOrder);
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("recordings/{state}.json")
+  public Response getRecordingsJSON(@PathParam("state") String state,
+          @QueryParam("pn") int pageNumber,
+          @QueryParam("ps") int pageSize,
+          @QueryParam("sb") String sortBy,
+          @QueryParam("so") String sortOrder) {
+    AdminRecordingListImpl recordings = getRecordings(state, pageNumber, pageSize, sortBy, sortOrder);
+    logger.info("Result items: " + recordings.size());
+    JSONArray out = new JSONArray();
+    for (Iterator<AdminRecording> i = recordings.iterator(); i.hasNext();) {
+      AdminRecording rec = i.next();
+      JSONObject jsonRec = new JSONObject();
+      jsonRec.put("captureAgent", ensureString(rec.getCaptureAgent()));
+      jsonRec.put("distributionStatus", ensureString(rec.getDistributionStatus()));
+      jsonRec.put("endTime", ensureString(rec.getEndTime()));
+      jsonRec.put("failedOperation", ensureString(rec.getFailedOperation()));
+      jsonRec.put("holdActionPanelURL", ensureString(rec.getHoldActionPanelURL()));
+      jsonRec.put("HoldActionTitle", ensureString(rec.getHoldActionTitle()));
+      jsonRec.put("HoldOperationTitle", ensureString(rec.getHoldOperationTitle()));
+      jsonRec.put("id", ensureString(rec.getId()));
+      jsonRec.put("itemType", ensureString(rec.getItemType().toString()));
+      jsonRec.put("presenter", ensureString(rec.getPresenter()));
+      jsonRec.put("processingStatus", ensureString(rec.getProcessingStatus()));
+      jsonRec.put("recordingStatus", ensureString(rec.getRecordingStatus()));
+      jsonRec.put("seriesId", ensureString(rec.getSeriesId()));
+      jsonRec.put("seriesTitle", ensureString(rec.getSeriesTitle()));
+      jsonRec.put("startTime", ensureString(rec.getStartTime()));
+      jsonRec.put("title", ensureString(rec.getTitle()));
+      jsonRec.put("zipUrl", ensureString(rec.getZipUrl()));
+      JSONArray errMsgs = new JSONArray();
+      String[] err = rec.getErrorMessages();
+      if (err != null) {
+        for (String m : err) {
+          errMsgs.add(m);
+        }
+      }
+      jsonRec.put("errorMessages", errMsgs);
+      out.add(jsonRec);
+    }
+    return Response.ok(out.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
+  }
+
+  private String ensureString(String in) {
+    if (in != null) {
+      return in;
+    } else {
+      return "";
+    }
+  }
+
   /**
    * Returns a list of recordings in a certain state.
    * @param state state according to which the recordings should filtered
    * @return recordings list of recordings in specified state
    */
-  @GET
-  @Produces(MediaType.TEXT_XML)
-  @Path("recordings/{state}")
-  public AdminRecordingListImpl getRecordings(@PathParam("state") String state,
-          @QueryParam("pn") int pageNumber,
-          @QueryParam("ps") int pageSize,
-          @QueryParam("sb") String sortBy,
-          @QueryParam("so") String sortOrder) {
+  public AdminRecordingListImpl getRecordings(String state,
+          int pageNumber,
+          int pageSize,
+          String sortBy,
+          String sortOrder) {
 
     AdminRecordingListImpl out;
     try {
@@ -405,8 +466,8 @@ public class AdminuiRestService {
       int upcoming = 0;
       List<Event> events = schedulerService.getUpcomingEvents();
       for (Event event : events) {
-        if(event.getStartdate() != null){
-          if (System.currentTimeMillis() < ((EventImpl)event).getStartdate().getTime()) {
+        if (event.getStartdate() != null) {
+          if (System.currentTimeMillis() < ((EventImpl) event).getStartdate().getTime()) {
             upcoming++;
             total++;
           }
@@ -437,7 +498,7 @@ public class AdminuiRestService {
     if ((schedulerService != null) && (captureAdminService != null)) {
       SchedulerFilter filter = schedulerService.getNewSchedulerFilter();
       filter.setEnd(new Date(System.currentTimeMillis() + CAPTURE_AGENT_DELAY));
-      List<Event> events =  schedulerService.getEvents(filter);
+      List<Event> events = schedulerService.getEvents(filter);
       for (Event event : events) {
         Recording recording = captureAdminService.getRecordingState(event.getEventId());
         if ((recording == null)
@@ -446,21 +507,20 @@ public class AdminuiRestService {
                 || (recording.getState().equals(RecordingState.MANIFEST_ERROR))
                 || (recording.getState().equals(RecordingState.UPLOAD_ERROR))
                 || ((new Date().getTime() - recording.getLastCheckinTime() > CAPTURE_STATUS_TIMEOUT)
-                  && (recording.getState().equals(RecordingState.CAPTURING)
-                      || recording.getState().equals(RecordingState.COMPRESSING)
-                      || recording.getState().equals(RecordingState.MANIFEST)
-                      || recording.getState().equals(RecordingState.UPLOADING)))
-                ) {
+                && (recording.getState().equals(RecordingState.CAPTURING)
+                || recording.getState().equals(RecordingState.COMPRESSING)
+                || recording.getState().equals(RecordingState.MANIFEST)
+                || recording.getState().equals(RecordingState.UPLOADING)))) {
           AdminRecordingImpl item = new AdminRecordingImpl();
           item.setItemType(AdminRecording.ItemType.SCHEDULER_EVENT);
           item.setId(event.getEventId());
           item.setTitle(event.getValue("title"));
           item.setPresenter(event.getValue("creator"));
           item.setSeriesTitle(getSeriesNameFromEvent(event));
-          if(event.getStartdate() != null){
+          if (event.getStartdate() != null) {
             item.setStartTime(Long.toString(event.getStartdate().getTime()));
           }
-          if(event.getEnddate() != null){
+          if (event.getEnddate() != null) {
             item.setEndTime(Long.toString(event.getEnddate().getTime()));
           }
           if (recording != null) {
@@ -555,10 +615,37 @@ public class AdminuiRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("series")
-  public AdminSeriesListImpl getSeries(@QueryParam("pn") int pageNumber,
+  public AdminSeriesListImpl getSeriesXML(@QueryParam("pn") int pageNumber,
           @QueryParam("ps") int pageSize,
           @QueryParam("sb") String sortBy,
           @QueryParam("so") String sortOrder) {
+    return getSeries(pageNumber, pageSize, sortBy, sortOrder);
+  }
+
+  @GET
+  @Path("series.json")
+  public Response getSeriesJSON(@QueryParam("pn") int pageNumber,
+          @QueryParam("ps") int pageSize,
+          @QueryParam("sb") String sortBy,
+          @QueryParam("so") String sortOrder) {
+    JSONArray out = new JSONArray();
+    AdminSeriesListImpl series = getSeries(pageNumber, pageSize, sortBy, sortOrder);
+    for (Iterator<AdminSeries> i = series.iterator(); i.hasNext();) {
+      JSONObject jsonSr = new JSONObject();
+      AdminSeries sr = i.next();
+      jsonSr.put("id", ensureString(sr.getId()));
+      jsonSr.put("title", ensureString(sr.getTitle()));
+      jsonSr.put("creator", ensureString(sr.getCreator()));
+      jsonSr.put("contributor", ensureString(sr.getContributor()));
+      out.add(jsonSr);
+    }
+    return Response.ok(out.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
+  }
+
+  public AdminSeriesListImpl getSeries(int pageNumber,
+          int pageSize,
+          String sortBy,
+          String sortOrder) {
     logger.debug("PageSize, PageNumber: {},{}", pageSize, pageNumber);
     AdminSeriesListImpl seriesList;
     try {
@@ -675,7 +762,7 @@ public class AdminuiRestService {
         if (series != null) {
           seriesName = series.getFromMetadata("title");
         }
-      } catch (NotFoundException e){
+      } catch (NotFoundException e) {
         logger.warn("Could not find series '" + seriesId + "': {}", e);
         return "";
       }
