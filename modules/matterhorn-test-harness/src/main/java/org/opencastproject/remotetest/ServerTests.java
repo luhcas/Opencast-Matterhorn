@@ -15,7 +15,6 @@
  */
 package org.opencastproject.remotetest;
 
-import org.opencastproject.integrationtest.UploadTest;
 import org.opencastproject.remotetest.server.AdminProxyRestEndpointTest;
 import org.opencastproject.remotetest.server.CaptureAdminRestEndpointTest;
 import org.opencastproject.remotetest.server.ComposerRestEndpointTest;
@@ -24,6 +23,9 @@ import org.opencastproject.remotetest.server.EngageModuleTest;
 import org.opencastproject.remotetest.server.IngestRestEndpointTest;
 import org.opencastproject.remotetest.server.IngestZipTest;
 import org.opencastproject.remotetest.server.MultiPartTest;
+import org.opencastproject.remotetest.server.ScheduledCaptureTest;
+import org.opencastproject.remotetest.server.UnscheduledCaptureTest;
+import org.opencastproject.remotetest.server.UploadTest;
 import org.opencastproject.remotetest.server.WorkflowRestEndpointTest;
 import org.opencastproject.remotetest.server.WorkingFileRepoRestEndpointTest;
 
@@ -46,8 +48,10 @@ import org.junit.runners.Suite.SuiteClasses;
   EngageModuleTest.class,
   AdminProxyRestEndpointTest.class,
   UploadTest.class,
-  MultiPartTest.class
+  MultiPartTest.class,
+  ScheduledCaptureTest.class,
+  UnscheduledCaptureTest.class,
+  UploadTest.class
 })
 public class ServerTests {
-
 }

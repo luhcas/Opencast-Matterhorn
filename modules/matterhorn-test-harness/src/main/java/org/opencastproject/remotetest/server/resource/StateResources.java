@@ -13,30 +13,27 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.integrationtest;
+package org.opencastproject.remotetest.server.resource;
 
-import org.junit.runner.JUnitCore;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import org.opencastproject.remotetest.Main;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 
 /**
- * Run all integration tests
- *
+ * State REST resources
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-  UploadTest.class,
-  UnscheduledCaptureTest.class,
-  ScheduledCaptureTest.class
-})
-public class IntegrationTests {
-  public static String BASE_URL = "http://localhost:8080";
-  public static String AGENT = "demo_capture_agent";
-  public static String USER = "admin";
-  public static String PASS = "opencast";
+
+public class StateResources {
+  private static final String getServiceUrl() {
+    return Main.getBaseUrl() + "/state/rest/";
+  }
   
-  public static void main() {
-    JUnitCore.runClasses(IntegrationTests.class);
+  public static HttpResponse getState() throws Exception {
+    return Main.getClient().execute(new HttpGet(getServiceUrl() + "state"));
+  }
+  
+  public static HttpResponse recordings() throws Exception {
+    return Main.getClient().execute(new HttpGet(getServiceUrl() + "recordings"));
   }
 }

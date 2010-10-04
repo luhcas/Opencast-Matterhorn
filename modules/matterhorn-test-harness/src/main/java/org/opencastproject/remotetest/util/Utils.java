@@ -13,9 +13,23 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.integrationtest;
+package org.opencastproject.remotetest.util;
+
+import org.opencastproject.remotetest.Main;
+import org.opencastproject.security.api.TrustedHttpClient;
+
+import de.schlichtherle.io.FileOutputStream;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.w3c.dom.Document;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -26,26 +40,18 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.apache.commons.io.IOUtils;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.w3c.dom.Document;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.UniformInterfaceException;
-import com.sun.jersey.api.client.WebResource;
-
 /**
  * Test utilities
  *
  */
 public class Utils {
 
-  public static Document parseXml(String doc) throws Exception {
+
+  public static Document parseXml(InputStream in) throws Exception {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setNamespaceAware(true);
       DocumentBuilder builder = factory.newDocumentBuilder();
-      return builder.parse(IOUtils.toInputStream(doc, "UTF-8"));
+      return builder.parse(in);
    }
   
   public static Object xPath(Document document, String path, QName returnType)
@@ -75,17 +81,31 @@ public class Utils {
 		.replace("@@duration@@", duration.toString());
   }
 
-  public static File getUrlAsFile(String url) throws UniformInterfaceException {
-	  Client c = Client.create();
-	  WebResource r = c.resource(url);
-	  return r.get(File.class);
+  public static File getUrlAsFile(String url) throws IOException {
+    HttpGet get = new HttpGet(url);
+    HttpResponse response = null;
+    FileOutputStream out = null;
+    try {
+      response = Main.getClient().execute(get);
+      File f = File.createTempFile("testfile", ".tmp");
+      out = new FileOutputStream(f);
+      IOUtils.copy(response.getEntity().getContent(), out);
+      return f;
+    } finally {
+      Main.getClient().close(response);
+    }
   }
   
-  public static Document getUrlAsDocument(String url) throws UniformInterfaceException, Exception {
-	  Client c = Client.create();
-	  WebResource r = c.resource(url);
-	  String response = r.get(String.class);
-	  return parseXml(response);
+  public static Document getUrlAsDocument(String url) throws Exception {
+    TrustedHttpClient client = Main.getClient();
+    HttpGet get = new HttpGet(url);
+    HttpResponse response = null;
+    try {
+      response = client.execute(get);
+      return parseXml(response.getEntity().getContent());
+    } finally {
+      client.close(response);
+    }
   }
   
 }

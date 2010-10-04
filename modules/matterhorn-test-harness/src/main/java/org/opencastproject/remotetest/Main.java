@@ -15,6 +15,9 @@
  */
 package org.opencastproject.remotetest;
 
+import org.opencastproject.security.TrustedHttpClientImpl;
+import org.opencastproject.security.api.TrustedHttpClient;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -36,6 +39,19 @@ public class Main {
   public static String BASE_URL = "http://localhost:8080";
   public static String USERNAME = "matterhorn_system_account";
   public static String PASSWORD = "CHANGE_ME";
+
+  protected static TrustedHttpClient client;
+  
+  public static final TrustedHttpClient getClient() {
+    if(client == null) {
+      client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
+    }
+    return client;
+  }
+  
+  public static final String getBaseUrl() {
+    return BASE_URL;
+  }
 
   public static void main(String[] args) {
     Options options = new Options();
@@ -96,6 +112,9 @@ public class Main {
       PASSWORD = line.getOptionValue("password");
     }
 
+    // set up the shared http client
+    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
+    
     // run the tests
     System.out.println("Beginning matterhorn test suite on " + BASE_URL);
     Result result = JUnitCore.runClasses(testClasses.toArray(new Class<?>[testClasses.size()]));

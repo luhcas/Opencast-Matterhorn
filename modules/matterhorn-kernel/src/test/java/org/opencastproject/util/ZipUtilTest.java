@@ -19,6 +19,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -883,7 +884,7 @@ public class ZipUtilTest {
   /**
    * Test compression of >4GB file
    */
-  @Test
+  @Test @Ignore
   public void testOver4GB() throws Exception {
 
     if (bigFile.exists() || bigFile.createNewFile()) {

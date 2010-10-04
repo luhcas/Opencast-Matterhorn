@@ -1,4 +1,4 @@
-package org.opencastproject.integrationtest;
+package org.opencastproject.remotetest.server;
 
 import java.io.File;
 import java.io.FileInputStream;

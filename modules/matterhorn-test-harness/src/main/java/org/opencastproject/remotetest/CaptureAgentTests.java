@@ -15,9 +15,6 @@
  */
 package org.opencastproject.remotetest;
 
-import org.opencastproject.integrationtest.ScheduledCaptureTest;
-import org.opencastproject.integrationtest.UnscheduledCaptureTest;
-import org.opencastproject.integrationtest.UploadTest;
 import org.opencastproject.remotetest.capture.CaptureRestEndpointTest;
 import org.opencastproject.remotetest.capture.StateRestEndpointTest;
 import org.opencastproject.remotetest.server.AdminProxyRestEndpointTest;
@@ -27,6 +24,9 @@ import org.opencastproject.remotetest.server.DistributionDownloadRestEndpointTes
 import org.opencastproject.remotetest.server.EngageModuleTest;
 import org.opencastproject.remotetest.server.IngestRestEndpointTest;
 import org.opencastproject.remotetest.server.IngestZipTest;
+import org.opencastproject.remotetest.server.ScheduledCaptureTest;
+import org.opencastproject.remotetest.server.UnscheduledCaptureTest;
+import org.opencastproject.remotetest.server.UploadTest;
 import org.opencastproject.remotetest.server.WorkflowRestEndpointTest;
 import org.opencastproject.remotetest.server.WorkingFileRepoRestEndpointTest;
 

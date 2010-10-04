@@ -4,7 +4,7 @@ import static org.opencastproject.remotetest.Main.BASE_URL;
 import static org.opencastproject.remotetest.Main.PASSWORD;
 import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.integrationtest.UniversalNamespaceResolver;
+import org.opencastproject.remotetest.util.UniversalNamespaceResolver;
 import org.opencastproject.security.TrustedHttpClientImpl;
 
 import junit.framework.Assert;

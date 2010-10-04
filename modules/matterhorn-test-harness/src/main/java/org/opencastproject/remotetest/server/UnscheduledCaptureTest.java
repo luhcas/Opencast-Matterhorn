@@ -13,14 +13,20 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.integrationtest;
+package org.opencastproject.remotetest.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import com.sun.jersey.api.client.ClientResponse;
+import org.opencastproject.remotetest.server.resource.AdminResources;
+import org.opencastproject.remotetest.server.resource.CaptureAdminResources;
+import org.opencastproject.remotetest.server.resource.CaptureResources;
+import org.opencastproject.remotetest.server.resource.StateResources;
+import org.opencastproject.remotetest.util.Utils;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -41,31 +47,31 @@ public class UnscheduledCaptureTest {
   public void testUnscheduledCapture() throws Exception {
 
     // Agent Registered (Capture Admin Agents)
-    ClientResponse response = CaptureAdminResources.agents();
-    assertEquals("Response code (agents):", 200, response.getStatus());
-    Document xml = Utils.parseXml(response.getEntity(String.class));
-    assertTrue("Agent included? (agents):", Utils.xPathExists(xml, "//ns1:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']"));
+    HttpResponse response = CaptureAdminResources.agents();
+    assertEquals("Response code (agents):", 200, response.getStatusLine().getStatusCode());
+    Document xml = Utils.parseXml(response.getEntity().getContent());
+    assertTrue("Agent included? (agents):", Utils.xPathExists(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']"));
 
     // Agent Registered (Capture Admin Agent)
-    response = CaptureAdminResources.agent(IntegrationTests.AGENT);
-    assertEquals("Response code (agent):", 200, response.getStatus());
-    xml = Utils.parseXml(response.getEntity(String.class));
-    assertTrue("Agent included? (agent):", Utils.xPathExists(xml, "//ns2:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']"));
+    response = CaptureAdminResources.agent(CaptureResources.AGENT);
+    assertEquals("Response code (agent):", 200, response.getStatusLine().getStatusCode());
+    xml = Utils.parseXml(response.getEntity().getContent());
+    assertTrue("Agent included? (agent):", Utils.xPathExists(xml, "//ns2:agent-state-update[name=\'" + CaptureResources.AGENT + "\']"));
 
     // Agent idle (State)
     response = StateResources.getState();
-    assertEquals("Response code (getState):", 200, response.getStatus());
-    assertEquals("Agent idle? (getState):", "idle", response.getEntity(String.class));
+    assertEquals("Response code (getState):", 200, response.getStatusLine().getStatusCode());
+    assertEquals("Agent idle? (getState):", "idle", EntityUtils.toString(response.getEntity(), "UTF-8"));
 
     // Get initial recording count (Admin Proxy)
     response = AdminResources.countRecordings();
-    assertEquals("Response code (countRecordings):", 200, response.getStatus());
-    JSONObject initialRecordingCount = Utils.parseJson(response.getEntity(String.class));
+    assertEquals("Response code (countRecordings):", 200, response.getStatusLine().getStatusCode());
+    JSONObject initialRecordingCount = Utils.parseJson(EntityUtils.toString(response.getEntity(), "UTF-8"));
     // System.out.println("Initial: " + initialRecordingCount);
 
     // Start capture (Capture)
     response = CaptureResources.startCaptureGet();
-    assertEquals("Response code (startCapture):", 200, response.getStatus());
+    assertEquals("Response code (startCapture):", 200, response.getStatusLine().getStatusCode());
 
     // Get capture ID (Capture)
     recordingId = CaptureResources.captureId(response);
@@ -78,8 +84,8 @@ public class UnscheduledCaptureTest {
 
       // Check capture agent status
       response = StateResources.getState();
-      assertEquals("Response code (workflow instance):", 200, response.getStatus());
-      if (response.getEntity(String.class).equals("capturing")) {
+      assertEquals("Response code (workflow instance):", 200, response.getStatusLine().getStatusCode());
+      if (EntityUtils.toString(response.getEntity(), "UTF-8").equals("capturing")) {
         break;
       }
 
@@ -98,9 +104,9 @@ public class UnscheduledCaptureTest {
 
       // Check capture agent status
       response = CaptureAdminResources.agents();
-      assertEquals("Response code (agents):", 200, response.getStatus());
-      xml = Utils.parseXml(response.getEntity(String.class));
-      if (Utils.xPath(xml, "//ns1:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']/state", XPathConstants.STRING).equals("capturing")) {
+      assertEquals("Response code (agents):", 200, response.getStatusLine().getStatusCode());
+      xml = Utils.parseXml(response.getEntity().getContent());
+      if (Utils.xPath(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']/state", XPathConstants.STRING).equals("capturing")) {
         break;
       }
 
@@ -113,8 +119,8 @@ public class UnscheduledCaptureTest {
 
     // Get capturing recording count (Admin Proxy)
     response = AdminResources.countRecordings();
-    assertEquals("Response code (countRecordings):", 200, response.getStatus());
-    JSONObject capturingRecordingCount = Utils.parseJson(response.getEntity(String.class));
+    assertEquals("Response code (countRecordings):", 200, response.getStatusLine().getStatusCode());
+    JSONObject capturingRecordingCount = Utils.parseJson(EntityUtils.toString(response.getEntity(), "UTF-8"));
     // System.out.println("Recording Started: " + capturingRecordingCount);
 
     // Compare total recording count
@@ -124,7 +130,7 @@ public class UnscheduledCaptureTest {
 
     // Stop capture (Capture)
     response = CaptureResources.stopCapturePost(recordingId);
-    assertEquals("Response code (stopCapturePost):", 200, response.getStatus());
+    assertEquals("Response code (stopCapturePost):", 200, response.getStatusLine().getStatusCode());
 
     // Confirm recording stopped (State)
     retries = 0;
@@ -134,8 +140,8 @@ public class UnscheduledCaptureTest {
 
       // Check capture agent status
       response = StateResources.getState();
-      assertEquals("Response code (workflow instance):", 200, response.getStatus());
-      if (response.getEntity(String.class).equals("idle")) {
+      assertEquals("Response code (workflow instance):", 200, response.getStatusLine().getStatusCode());
+      if (EntityUtils.toString(response.getEntity(), "UTF-8").equals("idle")) {
         break;
       }
 
@@ -153,9 +159,9 @@ public class UnscheduledCaptureTest {
 
       // Check capture agent status
       response = CaptureAdminResources.agents();
-      assertEquals("Response code (agents):", 200, response.getStatus());
-      xml = Utils.parseXml(response.getEntity(String.class));
-      if (Utils.xPath(xml, "//ns1:agent-state-update[name=\'" + IntegrationTests.AGENT + "\']/state", XPathConstants.STRING).equals("idle")) {
+      assertEquals("Response code (agents):", 200, response.getStatusLine().getStatusCode());
+      xml = Utils.parseXml(response.getEntity().getContent());
+      if (Utils.xPath(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']/state", XPathConstants.STRING).equals("idle")) {
         break;
       }
 
@@ -168,8 +174,8 @@ public class UnscheduledCaptureTest {
 
     // Get processing recording count (Admin Proxy)
     response = AdminResources.countRecordings();
-    assertEquals("Response code (countRecordings):", 200, response.getStatus());
-    JSONObject processingRecordingCount = Utils.parseJson(response.getEntity(String.class));
+    assertEquals("Response code (countRecordings):", 200, response.getStatusLine().getStatusCode());
+    JSONObject processingRecordingCount = Utils.parseJson(EntityUtils.toString(response.getEntity(), "UTF-8"));
     System.out.println("Process Recording: " + processingRecordingCount);
 
     // Compare total recording count
@@ -185,8 +191,8 @@ public class UnscheduledCaptureTest {
 
     // Get finished recording count (Admin Proxy)
     response = AdminResources.countRecordings();
-    assertEquals("Response code (countRecordings):", 200, response.getStatus());
-    JSONObject finishedRecordingCount = Utils.parseJson(response.getEntity(String.class));
+    assertEquals("Response code (countRecordings):", 200, response.getStatusLine().getStatusCode());
+    JSONObject finishedRecordingCount = Utils.parseJson(EntityUtils.toString(response.getEntity(), "UTF-8"));
     System.out.println("Finished Recording: " + finishedRecordingCount);
 
     // Compare total recording count
