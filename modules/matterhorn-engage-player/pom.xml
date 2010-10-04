@@ -19,6 +19,8 @@
 		<sourceFile>Videodisplay.mxml</sourceFile>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <matterhorn.basedir>${project.parent.basedir}</matterhorn.basedir>
+    <checkstyle.skip>false</checkstyle.skip>
 	</properties>
 
 	<repositories>

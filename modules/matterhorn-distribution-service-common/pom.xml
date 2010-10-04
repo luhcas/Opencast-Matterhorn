@@ -7,6 +7,8 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <matterhorn.basedir>${basedir}/../..</matterhorn.basedir>
+    <checkstyle.skip>false</checkstyle.skip>
   </properties>
   
   <!--
@@ -143,25 +145,18 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.3</version>
-        <!--
-          must use version 2.3 because of the xml schema for our config file
-        -->
+        <version>2.5</version>
         <configuration>
-          <configLocation>checkstyle.xml</configLocation>
+          <skip>${checkstyle.skip}</skip>
+          <sourceDirectory>${matterhorn.basedir}</sourceDirectory>
+          <configLocation>${matterhorn.basedir}/docs/checkstyle/matterhorn-checkstyle.xml</configLocation>
+          <headerLocation>${matterhorn.basedir}/docs/checkstyle/matterhorn-header.txt</headerLocation>
+          <consoleOutput>true</consoleOutput>
           <logViolationsToConsole>true</logViolationsToConsole>
-          <headerLocation>header.txt</headerLocation>
           <excludes>**/package-info.java</excludes>
+          <failOnViolation>false</failOnViolation> 
+          <failsOnError>false</failsOnError> 
         </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.opencastproject</groupId>
-            <artifactId>matterhorn-build-tools</artifactId>
-            <version>1.1-SNAPSHOT</version>
-            <scope>compile</scope>
-          </dependency>
-        </dependencies>
-        <!--
         <executions>
           <execution>
             <goals>
@@ -169,7 +164,6 @@
             </goals>
           </execution>
         </executions>
-        -->
       </plugin>
     </plugins>
   </build>

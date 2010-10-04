@@ -12,6 +12,10 @@
     <version>1.1-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
+  <properties>
+    <matterhorn.basedir>${project.parent.basedir}</matterhorn.basedir>
+    <checkstyle.skip>true</checkstyle.skip>
+  </properties>
   <build>
     <plugins>
       <!-- Get the current svn version and place in admin-ui module's resources -->

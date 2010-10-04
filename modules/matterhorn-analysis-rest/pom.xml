@@ -12,6 +12,10 @@
     <version>1.1-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
+  <properties>
+    <matterhorn.basedir>${project.parent.basedir}</matterhorn.basedir>
+    <checkstyle.skip>false</checkstyle.skip>
+  </properties>
   <dependencies>
   
     <!-- Matterhorn dependencies -->

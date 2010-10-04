@@ -6,12 +6,12 @@
   <packaging>jar</packaging>
   <name>matterhorn-test-harness</name>
   <version>1.1-SNAPSHOT</version>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <matterhorn.basedir>${project.parent.basedir}</matterhorn.basedir>
+    <checkstyle.skip>false</checkstyle.skip>
   </properties>
-
   <dependencies>
     <dependency>
       <groupId>junit</groupId>

@@ -14,8 +14,10 @@
     <maven>2.0.6</maven>
   </prerequisites>
   <properties>
+    <matterhorn.basedir>${basedir}</matterhorn.basedir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <checkstyle.skip>true</checkstyle.skip>
   </properties>
 
   <profiles>
@@ -325,34 +327,23 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>2.5</version>
         <configuration>
-          <configLocation>${settings.localRepository}/org/opencastproject/matterhorn-checkstyle/1.0/matterhorn-checkstyle-1.0.xml</configLocation>
-          <headerLocation>${settings.localRepository}/org/opencastproject/matterhorn-header/1.0/matterhorn-header-1.0.txt</headerLocation>
+          <skip>${checkstyle.skip}</skip>
+          <configLocation>${matterhorn.basedir}/docs/checkstyle/matterhorn-checkstyle.xml</configLocation>
+          <headerLocation>${matterhorn.basedir}/docs/checkstyle/matterhorn-header.txt</headerLocation>
+          <consoleOutput>true</consoleOutput>
           <logViolationsToConsole>true</logViolationsToConsole>
           <excludes>**/package-info.java</excludes>
+          <failOnViolation>false</failOnViolation> 
+          <failsOnError>false</failsOnError> 
         </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.opencastproject</groupId>
-            <artifactId>matterhorn-checkstyle</artifactId>
-            <version>1.0</version>
-            <type>xml</type>
-          </dependency>
-          <dependency>
-            <groupId>org.opencastproject</groupId>
-            <artifactId>matterhorn-header</artifactId>
-            <version>1.0</version>
-            <type>txt</type>
-          </dependency>
-        </dependencies>
-        <!--
         <executions>
           <execution>
+            <phase>validate</phase>
             <goals>
               <goal>check</goal>
             </goals>
           </execution>
         </executions>
-        -->
       </plugin>
     </plugins>
 
@@ -1240,8 +1231,8 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>2.5</version>
         <configuration>
-          <configLocation>${settings.localRepository}/org/opencastproject/matterhorn-checkstyle/1.0/matterhorn-checkstyle-1.0.xml</configLocation>
-          <headerLocation>${settings.localRepository}/org/opencastproject/matterhorn-header/1.0/matterhorn-header-1.0.txt</headerLocation>
+          <configLocation>${matterhorn.checkstyle.location}</configLocation>
+          <headerLocation>${matterhorn.header.location}</headerLocation>
           <logViolationsToConsole>true</logViolationsToConsole>
           <excludes>**/package-info.java</excludes>
         </configuration>
