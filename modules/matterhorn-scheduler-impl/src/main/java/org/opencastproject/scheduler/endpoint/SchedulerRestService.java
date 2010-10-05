@@ -43,6 +43,7 @@ import org.json.simple.JSONObject;
 
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.ws.rs.DELETE;
@@ -504,8 +505,13 @@ public class SchedulerRestService {
   private Response getConflictingEvents(EventImpl event) {
     if (event != null) {
       try {
-        EventListImpl eventList = new EventListImpl(service.findConflictingEvents(event));
-        return Response.ok(eventList).type("").build();
+        List<Event> events = service.findConflictingEvents(event);
+        if(!events.isEmpty()){
+          EventListImpl eventList = new EventListImpl(events);
+          return Response.ok(eventList).build();
+        } else {
+          return Response.noContent().type("").build();
+        }
       } catch (Exception e) {
         logger.error("Unable to find conflicting events for {}: {}", event, e);
         return Response.serverError().build();
@@ -532,8 +538,13 @@ public class SchedulerRestService {
   private Response getConflictingEvents(RecurringEventImpl rEvent) {
     if (rEvent != null) {
       try {
-        EventListImpl eventList = new EventListImpl(service.findConflictingEvents(rEvent));
-        return Response.ok(eventList).build();
+        List<Event> events = service.findConflictingEvents(rEvent);
+        if(!events.isEmpty()){
+          EventListImpl eventList = new EventListImpl(events);
+          return Response.ok(eventList).build();
+        } else {
+          return Response.noContent().type("").build();
+        }
       } catch (IncompleteDataException e2) {
         logger.warn("Recurring event incomplete: {}", e2);
         return Response.status(Status.BAD_REQUEST).build();

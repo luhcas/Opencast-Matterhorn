@@ -574,7 +574,7 @@ public class SchedulerServiceImpl implements ManagedService{
     List<Event> events = new LinkedList<Event>(getAllEvents());
     //reduce to device first
     events = filterEventsForExactValue(events, "device", e.getValue("device"));
-    
+    logger.debug("Device Filtered: {}", events);
     //all events that start at the same time or later
     long start = e.getStartdate().getTime() -1; // make sure that the same start time is included too;
     events = filterEventsForAfterDate(events, new DateTime(start));
@@ -582,7 +582,7 @@ public class SchedulerServiceImpl implements ManagedService{
     //all events that stop at the same time or earlier
     long end = e.getEnddate().getTime() + 1; // make sure that the same stop time is included too;
     events = filterEventsForBeforeDate(events, new DateTime(end));
-    
+    logger.debug("Start/end filtered: {}", events);
     return events;
   }
   
