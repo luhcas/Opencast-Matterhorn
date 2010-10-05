@@ -271,7 +271,7 @@ ocScheduler.SubmitForm = function(){
       }else{
         $.ajax({
           type: "PUT",
-          url: SCHEDULER_URL + '/recurrence/' + $('#eventId').val(),
+          url: SCHEDULER_URL + '/recurring/' + $('#eventId').val(),
           data: { recurringEvent: eventXML },
           success: ocScheduler.EventSubmitComplete
         });

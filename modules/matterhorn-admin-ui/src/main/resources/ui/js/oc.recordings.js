@@ -399,7 +399,7 @@ ocRecordings.removeRecording = function(workflowId) {
       alert('Could not remove Workflow ' + workflowId);
     },
     success    : function(data) {
-      location.reload();
+      ocRecordings.loadRecordingsXML();
     }
   });
 }
@@ -413,7 +413,7 @@ ocRecordings.removeScheduledRecording = function(eventId, title) {
         alert('Could not remove Scheduler Event ' + workflowId);
       },
       success    : function(data) {
-        location.reload();
+        ocRecordings.loadRecordingsXML();
       }
     });
   }
