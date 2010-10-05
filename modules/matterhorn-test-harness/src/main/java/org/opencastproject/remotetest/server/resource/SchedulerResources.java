@@ -21,6 +21,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
@@ -38,11 +39,11 @@ public class SchedulerResources {
   }
   
   public static HttpResponse addEvent(String event) throws Exception {
-    HttpPost post = new HttpPost(getServiceUrl() + "addEvent");
+    HttpPut put = new HttpPut(getServiceUrl() + "event");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("event", event));
-    post.setEntity(new UrlEncodedFormEntity(params));
-    return Main.getClient().execute(post);
+    put.setEntity(new UrlEncodedFormEntity(params));
+    return Main.getClient().execute(put);
   }
   
   public static HttpResponse updateEvent(String event) throws Exception {

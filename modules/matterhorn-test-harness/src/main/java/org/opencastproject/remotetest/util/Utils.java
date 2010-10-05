@@ -16,9 +16,7 @@
 package org.opencastproject.remotetest.util;
 
 import org.opencastproject.remotetest.Main;
-import org.opencastproject.security.api.TrustedHttpClient;
-
-import de.schlichtherle.io.FileOutputStream;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -28,8 +26,13 @@ import org.json.simple.JSONValue;
 import org.w3c.dom.Document;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -107,5 +110,44 @@ public class Utils {
       client.close(response);
     }
   }
+  
+  public static final String md5(File f) throws IOException {
+    byte[] bytes = new byte[1024];
+    InputStream is = null;
+    try {
+      MessageDigest md = MessageDigest.getInstance("MD5");
+      is = new DigestInputStream(new FileInputStream(f), md);
+      while ((is.read(bytes)) >= 0) {}
+      return hex(md.digest());
+    } catch(NoSuchAlgorithmException e) {
+      throw new IOException("No MD5 algorithm available");
+    } finally {
+      is.close();
+    }
+  }
+  
+  /**
+   * Converts the checksum to a hex string.
+   * 
+   * @param data
+   *          the digest
+   * @return the digest hex representation
+   */
+  private static String hex(byte[] data) {
+    StringBuffer buf = new StringBuffer();
+    for (int i = 0; i < data.length; i++) {
+      int halfbyte = (data[i] >>> 4) & 0x0F;
+      int two_halfs = 0;
+      do {
+        if ((0 <= halfbyte) && (halfbyte <= 9))
+          buf.append((char) ('0' + halfbyte));
+        else
+          buf.append((char) ('a' + (halfbyte - 10)));
+        halfbyte = data[i] & 0x0F;
+      } while (two_halfs++ < 1);
+    }
+    return buf.toString();
+  }
+
   
 }

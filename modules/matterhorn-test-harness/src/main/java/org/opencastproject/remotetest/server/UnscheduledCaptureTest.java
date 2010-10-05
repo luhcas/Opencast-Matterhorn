@@ -28,6 +28,7 @@ import org.opencastproject.remotetest.util.Utils;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -43,6 +44,7 @@ import javax.xml.xpath.XPathConstants;
 public class UnscheduledCaptureTest {
   public static String recordingId;
 
+  @Ignore
   @Test
   public void testUnscheduledCapture() throws Exception {
 

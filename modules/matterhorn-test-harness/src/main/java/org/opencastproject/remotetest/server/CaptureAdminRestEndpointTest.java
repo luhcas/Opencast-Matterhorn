@@ -20,7 +20,7 @@ import static org.opencastproject.remotetest.Main.BASE_URL;
 import static org.opencastproject.remotetest.Main.PASSWORD;
 import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.security.TrustedHttpClientImpl;
+import org.opencastproject.remotetest.security.TrustedHttpClientImpl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;

@@ -54,7 +54,7 @@ public class AdminResources {
   }
   
   private static final String getServiceUrl() {
-    return Main.getBaseUrl() + "/capture-admin/rest/";
+    return Main.getBaseUrl() + "/admin/rest/";
   }
 
 }

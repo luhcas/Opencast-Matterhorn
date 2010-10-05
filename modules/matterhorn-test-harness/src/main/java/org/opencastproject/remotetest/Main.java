@@ -15,8 +15,8 @@
  */
 package org.opencastproject.remotetest;
 
-import org.opencastproject.security.TrustedHttpClientImpl;
-import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
+import org.opencastproject.remotetest.security.TrustedHttpClientImpl;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;

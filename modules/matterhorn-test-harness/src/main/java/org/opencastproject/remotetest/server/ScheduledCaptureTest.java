@@ -15,6 +15,10 @@
  */
 package org.opencastproject.remotetest.server;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.opencastproject.remotetest.server.resource.AdminResources;
 import org.opencastproject.remotetest.server.resource.CaptureAdminResources;
 import org.opencastproject.remotetest.server.resource.CaptureResources;
@@ -23,13 +27,10 @@ import org.opencastproject.remotetest.server.resource.SearchResources;
 import org.opencastproject.remotetest.server.resource.StateResources;
 import org.opencastproject.remotetest.util.Utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 
@@ -46,6 +47,7 @@ import javax.xml.xpath.XPathConstants;
 
 public class ScheduledCaptureTest {
 
+  @Ignore
   @Test
   public void testScheduledCapture() throws Exception {
 

@@ -22,8 +22,6 @@ import org.opencastproject.remotetest.Main;
 import org.opencastproject.remotetest.server.resource.IngestResources;
 import org.opencastproject.remotetest.server.resource.SearchResources;
 import org.opencastproject.remotetest.util.Utils;
-import org.opencastproject.util.Checksum;
-import org.opencastproject.util.ChecksumType;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -96,8 +94,9 @@ public class UploadTest {
     // Compare Track
     String ingestedTrackUrl = (String) Utils.xPath(xml, "//media/track[@type='presenter/source']/url",
             XPathConstants.STRING);
-    assertEquals("Media Track Checksum:", Checksum.create(ChecksumType.DEFAULT_TYPE, Utils
-            .getUrlAsFile(ingestedTrackUrl)), Checksum.create(ChecksumType.DEFAULT_TYPE, Utils.getUrlAsFile(trackUrl)));
+    String ingestedMd5 = Utils.md5(Utils.getUrlAsFile(ingestedTrackUrl));
+    String trackMd5 = Utils.md5(Utils.getUrlAsFile(trackUrl));
+    assertEquals("Media Track Checksum:", ingestedMd5, trackMd5);
 
     // Compare Catalog
     String ingestedCatalogUrl = (String) Utils.xPath(xml, "//metadata/catalog[@type='dublincore/episode']/url",
@@ -113,9 +112,9 @@ public class UploadTest {
     // Compare Attachment
     String ingestedAttachmentUrl = (String) Utils.xPath(xml, "//attachments/attachment[@type='attachment/txt']/url",
             XPathConstants.STRING);
-    assertEquals("Attachment Checksum:", Checksum.create(ChecksumType.DEFAULT_TYPE, Utils
-            .getUrlAsFile(ingestedAttachmentUrl)), Checksum.create(ChecksumType.DEFAULT_TYPE, Utils
-            .getUrlAsFile(attachmentUrl)));
+    ingestedMd5 = Utils.md5(Utils.getUrlAsFile(ingestedAttachmentUrl));
+    String attachmentMd5 = Utils.md5(Utils.getUrlAsFile(attachmentUrl));
+    assertEquals("Attachment Checksum:", ingestedMd5, attachmentMd5);
 
     // Confirm search indexing
     int retries = 0;

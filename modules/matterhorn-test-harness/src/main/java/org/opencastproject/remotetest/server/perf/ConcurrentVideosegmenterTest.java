@@ -19,7 +19,7 @@ import static org.opencastproject.remotetest.Main.BASE_URL;
 import static org.opencastproject.remotetest.Main.PASSWORD;
 import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.security.TrustedHttpClientImpl;
+import org.opencastproject.remotetest.security.TrustedHttpClientImpl;
 
 import junit.framework.Assert;
 
