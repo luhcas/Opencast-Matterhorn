@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-
+console.log('test2');
 // REST endpoints
 var SCHEDULER_URL     = '/scheduler/rest';
 var WORKFLOW_URL      = '/workflow/rest';
@@ -593,21 +593,24 @@ ocScheduler.RegisterComponents = function(){
         return true; //nothing, or we have an id.
       },
       createSeriesFromSearchText: function(){
-        var series, seriesComponent;
+        var series, seriesComponent, seriesId;
         var creationSucceeded = false;
+        if(Math.uuid){
+          seriesId = Math.uuid();
+        } else { //Client generated uuid could be done, call the series service.
+          $.ajax({async: false, type: 'GET', url: SERIES_URL + '/new/id', success: function(data){ seriesId = data.id; }});
+        }
         if(this.fields.seriesSelect !== ''){
           series = '<series><metadataList><metadata><key>title</key><value>' + this.fields.seriesSelect.val() + '</value></metadata></metadataList></series>';
           seriesComponent = this;
           $.ajax({
             async: false,
             type: 'PUT',
-            url: SERIES_URL + '/series',
+            url: SERIES_URL + '/' + seriesId,
             data: { series: series },
-            success: function(data){
-              if(data.success){
-                creationSucceeded = true;
-                seriesComponent.fields.series.val(data.id);
-              }
+            success: function(){
+              creationSucceeded = true;
+              seriesComponent.fields.series.val(seriesId);
             }
           });
         }

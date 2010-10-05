@@ -368,18 +368,22 @@ ocUpload.showFailedScreen = function(message) {
 }
 
 ocUpload.createSeriesFromSearchText = function(){
+  var seriesId;
   var seriesXml = '<series><metadataList><metadata><key>title</key><value>' + $('#series').val() + '</value></metadata></metadataList></series>';
   var creationSucceeded = false;
+  if(Math.uuid){
+    seriesId = Math.uuid();
+  } else { //Client generated uuid could be done, call the series service.
+    $.ajax({async: false, type: 'GET', url: '/series/rest/new/id', success: function(data){ seriesId = data.id; }});
+  }
   $.ajax({
     async: false,
     type: 'PUT',
-    url: '/series/rest/series',
+    url: '/series/rest/' + seriesId,
     data: { series: seriesXml },
     success: function(data){
-      if(data.success){
-        creationSucceeded = true;
-        $('#isPartOf').val(data.id);
-      }
+      creationSucceeded = true;
+      $('#isPartOf').val(data.id);
     }
   });
   return creationSucceeded;

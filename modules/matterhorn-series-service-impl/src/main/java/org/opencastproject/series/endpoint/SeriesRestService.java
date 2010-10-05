@@ -51,6 +51,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -170,8 +171,8 @@ public class SeriesRestService {
   @SuppressWarnings("unchecked")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
-  @Path("search/{term}")
-  public Response searchSeries(@PathParam("term") String pattern) {
+  @Path("search")
+  public Response searchSeries(@QueryParam("term") String pattern) {
     logger.debug("Searching all Series that match the pattern {}", pattern);
     try {
       List<Series> list = service.searchSeries(pattern);
@@ -187,7 +188,7 @@ public class SeriesRestService {
       }
       return Response.ok(a.toJSONString()).build();
     } catch (Exception e) {
-      logger.warn("search for series failed. Pattern: {}", pattern);
+      logger.warn("search for series failed. {}", e);
       return Response.status(Status.SERVICE_UNAVAILABLE).build();
     }
   }
