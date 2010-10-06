@@ -3,6 +3,7 @@
   <head>
     <!-- scripts -->
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
     <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
     <script type="text/javascript" src="js/oc.services.js"></script>
     <script type="text/javascript" src="/remote/rest/services.json?jsonp=Opencast.Services.buildServersView"></script>
@@ -32,7 +33,7 @@
           <th>Mean Queue Time</th>
           {for service in server.services}
             <tr>
-              <td>${service.id}</td>
+              <td>${Opencast.Services.labels[service.id]}</td>
               <td>{if server.online}<b>X</b>{/if}</td>
               <td>{if server.maintenance}<b>X</b>{/if}</td>
               <td>${service.running}</td>

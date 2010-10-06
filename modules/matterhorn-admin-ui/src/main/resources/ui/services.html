@@ -21,7 +21,7 @@
     <!--template -->
     <textarea id="servicesTemplate" style="display:none">
       {for service in servicesView}
-        <h2>${service.id}</h2>
+        <h2>${Opencast.Services.labels[service.id]}</h2>
         <table>
           <th>Host</th>
           <th>Online</th>
