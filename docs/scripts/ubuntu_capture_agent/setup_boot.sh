@@ -18,7 +18,7 @@ sed -i "s/\$MATTERHORN_HOME/$(echo $OC_DIR | sed 's/\//\\\//g')/g" $ACTUAL_SCRIP
 sed -i "s/\$FELIX_HOME/$(echo $FELIX_HOME | sed 's/\//\\\//g')/g" $ACTUAL_SCRIPT
 sed -i "s/\$USERNAME/$USERNAME/g" $ACTUAL_SCRIPT
 sed -i "s/\$CA_DIR/$(echo $CA_DIR | sed 's/\//\\\//g')/g" $ACTUAL_SCRIPT
-sed -i "s/\$M2_REPO/$(echo $M2_REPO | sed '/\//\\\//g')/g" $ACTUAL_SCRIPT
+sed -i "s/\$M2_REPO/$(echo $M2_REPO | sed 's/\//\\\//g')/g" $ACTUAL_SCRIPT
 sed -i "s/IS_CA=false/IS_CA=true/g" $ACTUAL_SCRIPT
 
 # Set the appropriate permissions

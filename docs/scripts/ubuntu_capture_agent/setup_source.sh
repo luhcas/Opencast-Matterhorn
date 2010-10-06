@@ -32,13 +32,13 @@ if [[ -z "$keep" ]]; then
 	svn co --force $url $SOURCE
 
 	if [[ $? -eq 0 ]]; then
-	    #### Exit the loop ####
 	    break
+	else
+	    ## Error
+	    echo "Error! Couldn't check out the matterhorn code. Check your internet connection and/or the URL inputted."
+	    yesno -d yes "Do you wish to retry?" retry
+	    [[ "$retry" ]] || exit 1
 	fi
-
-	## Error. The loop repeats
-	echo "Error!"
-	echo "Couldn't check out the matterhorn code. Is the URL correct?"
     done
     echo "Done"
 fi

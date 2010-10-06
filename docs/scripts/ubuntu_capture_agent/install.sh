@@ -298,38 +298,63 @@ if [[ "$?" -ne 0 ]]; then
     exit 1
 fi
 
-# Set up the matterhorn code --doesn't build yet!
-${SETUP_SOURCE}
-if [[ "$?" -ne 0 ]]; then
-    echo "Error setting up the matterhorn code. Contact matterhorn@opencastproject.org for assistance."
-    exit 1
-fi
+unset source_ok
+while [[ ! "$source_ok" ]] ; do 
+    # Set up the matterhorn code --doesn't build yet!
+    ${SETUP_SOURCE}
+    if [[ "$?" -ne 0 ]]; then
+	echo "Error setting up the matterhorn code. Contact matterhorn@opencastproject.org for assistance."
+	exit 1
+    fi
+    source_ok=true
+    
+    # Setup properties of the devices
+    ${SETUP_DEVICES}
+    if [[ "$?" -ne 0 ]]; then
+	echo "Error setting up the capture devices. Contact matterhorn@opencastproject.org for assistance."
+	exit 1
+    fi
+    
+    # Set up user environment
+    ${SETUP_ENVIRONMENT}
+    if [[ "$?" -ne 0 ]]; then
+	echo "Error setting up the environment for $USERNAME. Contact matterhorn@opencastproject.org for assistance."
+	exit 1
+    fi
+    
+    # Build matterhorn
+    echo -e "\n\nProceeding to build the capture agent source. This may take a long time. Press any key to continue...\n\n"
+    read -n 1 -s
+    
+    unset build_ok
+    while [[ ! "$build_ok" ]]; do
+	cd $SOURCE
+	su $USERNAME -c "mvn clean install -Pcapture -DdeployTo=\${FELIX_HOME}/${DEPLOY_DIR}"
+	if [[ "$?" -ne 0 ]]; then
+	    echo
+	    choose -t "Error building the matterhorn code. What do you wish to do?" "Download another source" "Retry build" "Exit" src_opt
+	    case "$src_opt" in
+		0) 
+		    # Forces repeating the outer loop (download sources and building)
+		    unset source_ok
+		    # This is to exit this loop only. Doesn't mean the code is correctly build.
+		    build_ok=true
+		    ;;
+	        #1)
+	        #    Does nothing. The inner loop repeats (building the source only)
+                #    ;;
+		2) 
+		    echo -e "\nError building the matterhorn code. Contact matterhorn@opencastproject.org for assistance."
+		    exit 3
+		    ;;
+	    esac
+	else
+	    build_ok=true
+	fi
+    done
 
-# Setup properties of the devices
-${SETUP_DEVICES}
-if [[ "$?" -ne 0 ]]; then
-    echo "Error setting up the capture devices. Contact matterhorn@opencastproject.org for assistance."
-    exit 1
-fi
-
-# Set up user environment
-${SETUP_ENVIRONMENT}
-if [[ "$?" -ne 0 ]]; then
-    echo "Error setting up the environment for $USERNAME. Contact matterhorn@opencastproject.org for assistance."
-    exit 1
-fi
-
-# Build matterhorn
-echo -e "\n\nProceeding to build the capture agent source. This may take a long time. Press any key to continue...\n\n"
-read -n 1 -s
-
-cd $SOURCE
-su $USERNAME -c "mvn clean install -Pcapture -DdeployTo=\${FELIX_HOME}/${DEPLOY_DIR}"
-if [[ "$?" -ne 0 ]]; then
-    echo -e "\nError building the matterhorn code. Contact matterhorn@opencastproject.org for assistance."
-    exit 1
-fi
-cd $WORKING_DIR
+    cd $WORKING_DIR
+done
 
 # Set up the file to run matterhorn automatically on startup
 ${SETUP_BOOT}
