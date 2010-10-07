@@ -15,6 +15,8 @@
  */
 var ocUtils = ocUtils || {};
 
+ocUtils.templateRoot = "jst/";
+
 ocUtils.getURLParam = function(name) {
   name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
   var regexS = "[\\?&]"+name+"=([^&#]*)";
@@ -88,4 +90,25 @@ ocUtils.log = function(){
       console.log(e);
     }
   }
+}
+
+/** loads and prepare a JST template
+ *  @param name of tempalte
+ *  @param callback 
+ */
+ocUtils.getTemplate = function(name, callback) {
+  var reqUrl = ocUtils.templateRoot + name + '.jst';
+  $.ajax( {
+    url : reqUrl,
+    type : 'get',
+    dataType : 'text',
+    error : function(xhr) {
+      ocUtils.log('Error: Could not get template ' + name + ' from ' + reqUrl);
+      ocUtils.log(xhr.status + ' ' + xhr.responseText);
+    },
+    success : function(data) {
+      var template = TrimPath.parseTemplate(data);
+      callback(template);
+    }
+  });
 }

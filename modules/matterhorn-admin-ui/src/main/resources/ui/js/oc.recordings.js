@@ -19,7 +19,6 @@ var ocRecordings = ocRecordings || {};
 ocRecordings.statsInterval = null;
 ocRecordings.updateRequested = false;
 ocRecordings.currentState = null;
-ocRecordings.currentXSL = null;
 ocRecordings.sortBy = "startDate";
 ocRecordings.sortOrder = "Descending";
 ocRecordings.lastCount = null;
@@ -27,6 +26,7 @@ ocRecordings.tableInterval = null;
 ocRecordings.tableUpdateRequested = false;
 ocRecordings.changedMediaPackage = null;
 ocRecordings.configuration = null;
+ocRecordings.tableTemplate = null;
 
 /** Initialize the Recordings page.
  *  Register event handlers.
@@ -134,6 +134,10 @@ ocRecordings.init = function() {
   }
   ocRecordings.currentState = show;
   ocRecordings.displayRecordingStats();
+  ocUtils.getTemplate(show, function(template) {
+    ocRecordings.tableTemplate = template;
+    ocRecordings.displayRecordings(show, false);
+  });
 
   if (ocRecordings.currentState == "upcoming" || ocRecordings.currentState == "finished") {
     $('#info-box').css("display", "block");
@@ -157,6 +161,9 @@ ocRecordings.init = function() {
  *
  */
 ocRecordings.initTableRefresh = function(time) {
+  if (ocRecordings.tableInterval != null) {
+    window.clearInterval(ocRecordings.tableInterval);
+  }
   ocRecordings.tableInterval = window.setInterval('ocRecordings.displayRecordings("' + ocRecordings.currentState + '",true);', time*1000);
 }
 
@@ -193,120 +200,29 @@ ocRecordings.displayRecordingStats = function() {
 }
 
 /** Request a list of recordings in a certain state and render the response as a table.
- *  While we are waiting for a response, a a little animation is displayed.
+ *  While we are waiting for a response, a little animation is displayed.
  */
 ocRecordings.displayRecordings = function(state, reload) {
-  if (!ocRecordings.tableUpdateRequested) {
+  if (!ocRecordings.tableUpdateRequested && ocRecordings.tableTemplate != null) {
     ocRecordings.tableUpdateRequested = true;
-    ocRecordings.currentState = state;
-    $('.state-selector').removeClass('state-selector-active');
-    $('.selector-'+state).addClass('state-selector-active');
-    if (!reload) {
-      ocRecordings.injectLoadingAnimation($('#recordings-table-container'));
-    }
-    if (ocRecordings.currentXML == null) {
-      $.ajax({
-        type       : 'GET',
-        url        : 'xsl/recordings_'+ocRecordings.currentState+'.xsl',
-        cache      : false,
-        dataType   : 'text',
-        error      : function(XHR,status,e){
-          //alert('Not able to load XSL for ' + ocRecordings.currentState);
-        },
-        success    : function(data) {
-          ocRecordings.currentXSL = data;
-          ocRecordings.loadRecordingsXML();
-        }
-      });
-    } else {
-      ocRecordings.loadRecordingsXML();
-    }
-  }
-}
-
-ocRecordings.loadRecordingsXML = function() {
-  var page = ocPager.currentPageIdx;
-  var psize = ocPager.pageSize;
-  var sort = ocRecordings.sortBy;
-  var order = ocRecordings.sortOrder;
-  var url = "rest/recordings/"+ocRecordings.currentState+"?ps="+psize+"&pn="+page+"&sb="+sort+"&so="+order;
-  $.ajax({
-    type       : 'GET',
-    url        : url,
-    cache      : false,
-    dataType   : 'text',
-    error      : function(XHR,status,e){
-      //alert('Not able to load recordings list for state ' + ocRecordings.currentState);
-    },
-    success    : function(data) {
-      ocRecordings.renderTable(data, ocRecordings.currentXSL);
-    }
-  });
-}
-
-ocRecordings.renderTable = function(xml, xsl) {
-  $('#recordings-table-container').xslt(xml, xsl, function() {
-    ocRecordings.tableUpdateRequested = false;
-    // prepare table heads
-    $('.recording-Table-head').removeClass('sortable-Ascending').removeClass('sortable-Descending');
-    $('#th-'+ocRecordings.sortBy).addClass('sortable-'+ocRecordings.sortOrder);
-    $('.recording-Table-head').click(function(){
-      ocRecordings.sortBy = $(this).attr('id').substr(3);
-      if ($(this).is('.sortable-Descending')) {
-        ocRecordings.sortOrder = 'Ascending';
-      } else {
-        ocRecordings.sortOrder = 'Descending';
+    var page = ocPager.currentPageIdx;
+    var psize = ocPager.pageSize;
+    var sort = ocRecordings.sortBy;
+    var order = ocRecordings.sortOrder;
+    var recordingsUrl = "rest/recordings/"+ocRecordings.currentState+".json?ps="+psize+"&pn="+page+"&sb="+sort+"&so="+order;
+    $.ajax({
+      url : recordingsUrl,
+      type : 'get',
+      dataType : 'json',
+      error : function(xhr) {
+        ocUtils.log('Error: Could not get Recordings');   // TODO more detailed debug info
+      },
+      success : function(data) {
+        var container = document.getElementById('recordings-table-container');
+        container.innerHTML = ocRecordings.tableTemplate.process(data);
       }
-      ocPager.currentPageIdx = 0;
-      ocRecordings.displayRecordings(ocRecordings.currentState, true);
     });
-    // format dates
-    if ($('.date-column').length > 0) {
-      // if date date/time column is present
-      $('.td-TimeDate').each( function() {     // format date/time
-        var startTime = $(this).children(".date-start").text();
-        var endTime = $(this).children(".date-end").text();
-        //alert(startTime + " - " + endTime);
-        if (startTime) {
-          var sd = new Date();
-          sd.setTime(startTime);
-
-          var sday  = sd.getDate();
-          var smon  = sd.getMonth()+1;
-
-          if (sday < 10) sday = "0" + sday;
-          if (smon < 10) smon = "0" + smon;
-
-          startTime = sd.getFullYear() + '-' + smon + '-' + sday + ' ' + sd.getHours() + ':' + ocUtils.padString(sd.getMinutes(), '0', 2);
-        } else {
-          startTime = "NA";
-        }
-        if (endTime) {
-          var ed = new Date();
-          ed.setTime(endTime);
-          endTime = ' - ' + ed.getHours() + ':' + ocUtils.padString(ed.getMinutes(), '0', 2);
-        } else {
-          endTime = "";
-        }
-        $(this).append($(document.createElement('span')).text(startTime + endTime));
-      });
-    }
-    //header underline
-    $(".header").hover(function(){
-      $(this).css('text-decoration', 'underline');
-    }, function(){
-      $(this).css('text-decoration', 'none')
-    });
-  });
-}
-
-/** inject a 'loading' animation in the specified element
- * @param elm elmement into which the animation should be injected
- */
-ocRecordings.injectLoadingAnimation = function(elm) {
-  var anim = document.createElement('div');
-  $(anim).addClass('loadingAnimation');
-  $(elm).empty().append(anim);
+  }
 }
 
 /** Displays Hold Operation UI
@@ -346,7 +262,9 @@ ocRecordings.adjustHoldActionPanelHeight = function() {
 ocRecordings.continueWorkflow = function(postData) {
   var workflowId = $('#holdWorkflowId').val();
   if(postData===null) {
-    postData = {id : workflowId};
+    postData = {
+      id : workflowId
+    };
   }
   if (ocRecordings.changedMediaPackage != null) {
     postData['mediapackage'] = ocRecordings.changedMediaPackage;
@@ -377,6 +295,26 @@ ocRecordings.continueWorkflow = function(postData) {
       $('.paging-nav-container').toggle();
       $('#refresh-controls-container').toggle();
       location.reload();
+    }
+  });
+}
+
+ocRecordings.loadRecordingsXML = function() {
+  var page = ocPager.currentPageIdx;
+  var psize = ocPager.pageSize;
+  var sort = ocRecordings.sortBy;
+  var order = ocRecordings.sortOrder;
+  var url = "rest/recordings/"+ocRecordings.currentState+"?ps="+psize+"&pn="+page+"&sb="+sort+"&so="+order;
+  $.ajax({
+    type       : 'GET',
+    url        : url,
+    cache      : false,
+    dataType   : 'text',
+    error      : function(XHR,status,e){
+      //alert('Not able to load recordings list for state ' + ocRecordings.currentState);
+    },
+    success    : function(data) {
+      ocRecordings.renderTable(data, ocRecordings.currentXSL);
     }
   });
 }

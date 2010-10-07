@@ -148,7 +148,7 @@ public class AdminuiRestService {
           @QueryParam("so") String sortOrder) {
     AdminRecordingListImpl recordings = getRecordings(state, pageNumber, pageSize, sortBy, sortOrder);
     logger.info("Result items: " + recordings.size());
-    JSONArray out = new JSONArray();
+    JSONArray jsonRecordings = new JSONArray();
     for (Iterator<AdminRecording> i = recordings.iterator(); i.hasNext();) {
       AdminRecording rec = i.next();
       JSONObject jsonRec = new JSONObject();
@@ -177,8 +177,10 @@ public class AdminuiRestService {
         }
       }
       jsonRec.put("errorMessages", errMsgs);
-      out.add(jsonRec);
+      jsonRecordings.add(jsonRec);
     }
+    JSONObject out = new JSONObject();
+    out.put("recordings", jsonRecordings);
     return Response.ok(out.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
   }
 
