@@ -98,7 +98,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.zip.ZipEntry;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.xml.transform.OutputKeys;
@@ -740,7 +739,16 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
 
     //Return a pointer to the zipped file
-    return ZipUtil.zip(filesToZip.toArray(new File[filesToZip.size()]), outputZip, ZipEntry.STORED);
+    File returnZip;
+    try {
+      returnZip = ZipUtil.zip(filesToZip.toArray(new File[filesToZip.size()]), outputZip, ZipUtil.NO_COMPRESSION);
+    } catch (IOException e) {
+      logger.error("An IOException has occurred while zipping the files for recording {}: {}", recID, e.getMessage());
+      return null;
+    } 
+    
+    return returnZip;
+        
   }
 
   // FIXME: Replace HTTP-based ingest with remote implementation of the Ingest Service. (jt)
