@@ -1,0 +1,49 @@
+<table id="recordingsTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
+  <thead>
+    <tr>
+      <th width="30%" id="th-Title" class="sortable recording-Table-head">Title</th>
+      <th width="15%" id="th-Presenter" class="sortable recording-Table-head">Presenter</th>
+      <th width="20%" id="th-Series" class="sortable recording-Table-head">Course/Series</th>
+      <th width="20%" id="th-StartDate" class="sortable date-column recording-Table-head">Upload / Recording Time</th>
+      <th width="15%" id="th-ProcessingStatus" class="sortable recording-Table-head">Status</th>
+      <th width="15%" id="th-Action" class="recording-Table-head">Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {for rec in recordings}
+    <tr class="highlightable">
+      <td>
+        ${rec.title}
+      </td>
+      <td>
+        ${rec.presenter}
+      </td>
+      <td>
+        ${rec.seriesTitle}
+      </td>
+      <td class="td-TimeDate">
+        <span class="date-start">
+          ${ocUtils.makeLocaleDateString(rec.startTime)}
+        </span>
+        <span class="date-end">
+          ${ocUtils.makeLocaleDateString(rec.endTime)}
+        </span>
+      </td>
+      <td class="processingStatus">
+        ${rec.processingStatus}
+      </td>
+      <td>
+        <a title="Delete Recording" class="cursor" onclick="ocRecordings.removeRecording('${rec.id}');">
+          Delete
+        </a>
+      </td>
+    </tr>
+    {forelse}
+    <tr>
+      <td colspan="7" align="center">
+        No failed Recordings
+      </td>
+    </tr>
+    {/for}
+  </tbody>
+</table>
