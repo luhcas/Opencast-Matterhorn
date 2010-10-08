@@ -3,7 +3,10 @@
  name="org.opencastproject.runtimeinfo.RuntimeInfo" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.runtimeinfo.RuntimeInfo" />
   <property name="service.description" value="Runtime Information REST Endpoint" />
-  <property name="opencast.rest.url" value="/info/rest" />
+
+  <property name="opencast.service.type" value="org.opencastproject.info" />
+  <property name="opencast.service.path" value="/info/rest" />
+
   <service>
     <provide interface="org.opencastproject.runtimeinfo.RuntimeInfo" />
   </service>

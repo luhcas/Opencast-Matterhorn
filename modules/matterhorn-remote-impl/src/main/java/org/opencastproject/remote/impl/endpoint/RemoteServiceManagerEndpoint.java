@@ -84,7 +84,7 @@ public class RemoteServiceManagerEndpoint {
     for(ServiceStatistics stats : statistics) {
       JSONObject reg = new JSONObject();
       reg.put("host", stats.getServiceRegistration().getHost());
-      reg.put("type", stats.getServiceRegistration().getJobType());
+      reg.put("type", stats.getServiceRegistration().getServiceType());
       reg.put("online", stats.getServiceRegistration().isOnline());
       reg.put("maintenance", stats.getServiceRegistration().isInMaintenanceMode());
       reg.put("running", stats.getRunningJobs());

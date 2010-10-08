@@ -13,6 +13,7 @@ CREATE TABLE job (
 
 CREATE TABLE service_registration (
     host character varying(255) NOT NULL,
+    path character varying(255) NOT NULL,
     job_type character varying(255) NOT NULL,
     online boolean NOT NULL default 'f',
     maintenance boolean NOT NULL default 'f'

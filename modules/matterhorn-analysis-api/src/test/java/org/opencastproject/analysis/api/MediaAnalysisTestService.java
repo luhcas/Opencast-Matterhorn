@@ -31,15 +31,6 @@ import java.util.Date;
  */
 @Ignore
 public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
-
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.analysis.api.MediaAnalysisService#getAnalysisType()
-   */
-  @Override
-  public String getAnalysisType() {
-    return "org.opencastproject.analysis.vsegmenter";
-  }
   
   /**
    * Creates a new test implementation object.

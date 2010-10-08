@@ -3,7 +3,13 @@
  name="org.opencastproject.distribution.rest.DistributionRestService" immediate="true" activate="activate">
   <implementation class="org.opencastproject.distribution.rest.DistributionRestService" />
   <property name="service.description" value="Distribution REST Endpoint" />
-  <property name="opencast.rest.url" value="/distribution/rest" />
+
+  <!-- TODO: Replace this with one rest endpoint per dist service -->
+  <property name="opencast.service.type" value="org.opencastproject.distribution" />
+  <property name="opencast.service.path" value="/distribution/rest" />
+  <!-- TODO: This should be true, but update the java first -->
+  <property name="opencast.service.jobproducer" value="false" />
+
   <service>
     <provide interface="org.opencastproject.distribution.rest.DistributionRestService" />
   </service>

@@ -43,9 +43,6 @@ public class DownloadDistributionService extends AbstractLocalDistributionServic
   /** this server's base URL */
   protected String serverUrl = null;
 
-  /* the configured id for this distribution channel */
-  protected String distChannelId = null;
-  
   public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
@@ -60,13 +57,6 @@ public class DownloadDistributionService extends AbstractLocalDistributionServic
       throw new IllegalStateException("Distribution directory must be set (org.opencastproject.download.directory)");
     this.distributionDirectory = new File(ccDistributionDirectory);
     logger.info("Download distribution directory is {}", distributionDirectory);
-    
-    distChannelId = (String)cc.getProperties().get("distribution.channel");
-    remoteServiceManager.registerService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
-  }
-
-  protected void deactivate() {
-    remoteServiceManager.unRegisterService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
   }
   
   /**

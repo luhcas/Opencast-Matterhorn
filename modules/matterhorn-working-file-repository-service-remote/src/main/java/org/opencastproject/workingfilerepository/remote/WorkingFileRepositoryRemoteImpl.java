@@ -40,8 +40,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.List;
 
 /**
  * A remote service proxy for a working file repository
@@ -52,7 +50,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryRemoteImpl.class);
 
   public WorkingFileRepositoryRemoteImpl() {
-    super(JOB_TYPE);
+    super(SERVICE_TYPE);
   }
 
   /**
@@ -331,12 +329,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public URI put(String mediaPackageID, String mediaPackageElementID, String filename, InputStream in) {
-    // TODO: generalize this and put it in the base class
-    List<String> remoteHosts = remoteServiceManager.getActiveHosts(JOB_TYPE);
-    if (remoteHosts.size() == 0) {
-      throw new IllegalStateException("No remote file repositories are available");
-    }
-    String url = UrlSupport.concat(new String[] { remoteHosts.get(0), "files", "mp", mediaPackageID,
+    String url = UrlSupport.concat(new String[] { "/files", "mp", mediaPackageID,
             mediaPackageElementID });
     HttpPost post = new HttpPost(url);
     MultipartEntity entity = new MultipartEntity();
@@ -345,7 +338,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
     post.setEntity(entity);
     HttpResponse response = null;
     try {
-      response = client.execute(post);
+      response = getResponse(post);
       String content = EntityUtils.toString(response.getEntity());
       return new URI(content);
     } catch (Exception e) {
@@ -363,12 +356,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public URI putInCollection(String collectionId, String fileName, InputStream in) {
-    // TODO: generalize this and put it in the base class
-    List<String> remoteHosts = remoteServiceManager.getActiveHosts(JOB_TYPE);
-    if (remoteHosts.size() == 0) {
-      throw new IllegalStateException("No remote file repositories are available");
-    }
-    String url = UrlSupport.concat(new String[] { remoteHosts.get(0), "/files", "collection", collectionId });
+    String url = UrlSupport.concat(new String[] { "/files", "collection", collectionId });
     HttpPost post = new HttpPost(url);
     MultipartEntity entity = new MultipartEntity();
     ContentBody body = new InputStreamBody(in, fileName);
@@ -376,7 +364,7 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
     post.setEntity(entity);
     HttpResponse response = null;
     try {
-      response = client.execute(post);
+      response = getResponse(post);
       String content = EntityUtils.toString(response.getEntity());
       return new URI(content);
     } catch (Exception e) {
@@ -476,14 +464,15 @@ public class WorkingFileRepositoryRemoteImpl extends RemoteBase implements Worki
    */
   @Override
   public URI getBaseUri() {
-    List<String> remoteHosts = remoteServiceManager.getActiveHosts(JOB_TYPE);
-    if (remoteHosts.size() == 0) {
-      throw new IllegalStateException("No remote file repositories are available");
-    }
+    HttpGet get = new HttpGet("/baseUri");
+    HttpResponse response = null;
     try {
-      return new URI(UrlSupport.concat(remoteHosts.get(0), "files"));
-    } catch (URISyntaxException e) {
-      throw new IllegalStateException("service URL is not valid: ", e);
+      response = getResponse(get);
+      return new URI(EntityUtils.toString(response.getEntity(), "UTF-8"));
+    } catch (Exception e) {
+      throw new IllegalStateException("Unable to determine the base URI of the file repository");
+    } finally {
+      closeConnection(response);
     }
   }
 

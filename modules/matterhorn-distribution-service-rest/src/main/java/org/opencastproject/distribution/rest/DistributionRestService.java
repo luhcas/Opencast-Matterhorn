@@ -18,6 +18,7 @@ package org.opencastproject.distribution.rest;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageImpl;
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -192,7 +193,7 @@ public class DistributionRestService {
     } else {
       String ccServerUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
       logger.info("configured server url is {}", ccServerUrl);
-      alias = (String) cc.getProperties().get("opencast.rest.url");
+      alias = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
       if (ccServerUrl == null) {
         serverUrl = UrlSupport.DEFAULT_BASE_URL;
       } else {

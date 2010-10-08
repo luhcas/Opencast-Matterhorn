@@ -3,10 +3,13 @@
  name="org.opencastproject.workflow.endpoint.WorkflowRestService" activate="activate" immediate="true">
   <implementation class="org.opencastproject.workflow.endpoint.WorkflowRestService" />
   <property name="service.description" value="Workflow REST Endpoint" />
-  <property name="opencast.rest.url" value="/workflow/rest" />
+
+  <property name="opencast.service.type" value="org.opencastproject.workflow" />
+  <property name="opencast.service.path" value="/workflow/rest" />
+
   <service>
     <provide interface="org.opencastproject.workflow.endpoint.WorkflowRestService" />
   </service>
   <reference name="service-impl" interface="org.opencastproject.workflow.api.WorkflowService"
-    cardinality="0..1" policy="dynamic" bind="setService" unbind="unsetService" />
+    cardinality="1..1" policy="static" bind="setService" />
 </scr:component>

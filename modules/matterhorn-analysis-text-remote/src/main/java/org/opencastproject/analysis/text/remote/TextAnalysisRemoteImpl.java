@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.analysis.remote;
+package org.opencastproject.analysis.text.remote;
 
 import org.opencastproject.analysis.api.MediaAnalysisException;
 import org.opencastproject.analysis.api.MediaAnalysisService;
@@ -43,12 +43,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-public class MediaAnalysisRemoteImpl extends RemoteBase implements MediaAnalysisService {
-  /** The logger */
-  private static final Logger logger = LoggerFactory.getLogger(MediaAnalysisRemoteImpl.class);
+public class TextAnalysisRemoteImpl extends RemoteBase implements MediaAnalysisService {
 
-  /** The type of analysis this remote service proxy handles */
-  protected String analysisType = null;
+  /** The logger */
+  private static final Logger logger = LoggerFactory.getLogger(TextAnalysisRemoteImpl.class);
 
   /** The catalog flavor that is produced by this implementation */
   protected MediaPackageElementFlavor resultingFlavor = null;
@@ -56,14 +54,12 @@ public class MediaAnalysisRemoteImpl extends RemoteBase implements MediaAnalysis
   /** The flavors that are required by this media analysis */
   protected MediaPackageElementFlavor[] requiredFlavors = new MediaPackageElementFlavor[] {};
 
-  public MediaAnalysisRemoteImpl() {
-    // the service type is not available at construction time. we need to wait for activation to set this value
-    super("waiting for activation");
+  public TextAnalysisRemoteImpl() {
+    super("org.opencastproject.analysis.text");
   }
 
   /** activate the component */
   public void activate(ComponentContext cc) {
-    this.analysisType = (String) cc.getProperties().get("analysis.type");
     this.resultingFlavor = MediaPackageElementFlavor.parseFlavor((String) cc.getProperties().get("resulting.flavor"));
     Object requiredFlavorsObj = cc.getProperties().get("required.flavors");
     if (requiredFlavorsObj != null) {
@@ -79,7 +75,6 @@ public class MediaAnalysisRemoteImpl extends RemoteBase implements MediaAnalysis
       }
     }
     this.resultingFlavor = MediaPackageElementFlavor.parseFlavor((String) cc.getProperties().get("resulting.flavor"));
-    super.serviceType = analysisType;
   }
 
   @Override
@@ -94,8 +89,7 @@ public class MediaAnalysisRemoteImpl extends RemoteBase implements MediaAnalysis
     }
     Job receipt = null;
     logger.info("Analyzing {} on a remote analysis server", element);
-    String remoteHostMethod = "/analysis/rest/" + analysisType;
-    HttpPost post = new HttpPost(remoteHostMethod);
+    HttpPost post = new HttpPost();
     post.setEntity(entity);
     HttpResponse response = null;
     try {

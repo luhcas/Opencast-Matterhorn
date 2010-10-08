@@ -167,7 +167,6 @@
       </activation>
       <modules>
         <module>modules/matterhorn-analysis-api</module>
-        <module>modules/matterhorn-analysis-rest</module>
         <module>modules/matterhorn-analysis-text</module>
         <module>modules/matterhorn-analysis-videosegmenter</module>
         <module>modules/matterhorn-composer-service-api</module>

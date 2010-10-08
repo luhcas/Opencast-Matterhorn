@@ -108,8 +108,7 @@
             <Export-Package> org.opencastproject.workingfilerepository.impl;version=${project.version} </Export-Package>
             <Embed-Dependency>json-simple;inline=true</Embed-Dependency>
             <Service-Component>
-              OSGI-INF/working-file-repo.xml,
-              OSGI-INF/working-file-repo-rest.xml
+              OSGI-INF/working-file-repo.xml
             </Service-Component>
           </instructions>
         </configuration>

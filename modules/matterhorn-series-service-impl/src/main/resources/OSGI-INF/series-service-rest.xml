@@ -3,7 +3,10 @@
  name="org.opencastproject.series.endpoint.SeriesRestService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.series.endpoint.SeriesRestService" />
   <property name="service.description" value="Series REST Endpoint" />
-  <property name="opencast.rest.url" value="/series/rest" />
+
+  <property name="opencast.service.type" value="org.opencastproject.series" />
+  <property name="opencast.service.path" value="/series/rest" />
+
   <service>
     <provide interface="org.opencastproject.series.endpoint.SeriesRestService" />
   </service>

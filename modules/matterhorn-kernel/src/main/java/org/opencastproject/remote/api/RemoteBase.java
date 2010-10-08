@@ -19,6 +19,7 @@ import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.UrlSupport;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
@@ -87,7 +88,7 @@ public class RemoteBase {
    * 
    * @param httpRequest
    *          the http request
-   * @return the respomse object
+   * @return the response object
    */
   protected HttpResponse getResponse(HttpRequestBase httpRequest) {
     return getResponse(httpRequest, HttpStatus.SC_OK);
@@ -95,7 +96,7 @@ public class RemoteBase {
 
   /**
    * Makes a request to all available remote services and returns the response as soon as the first of them returns the
-   * excepcted http status code.
+   * expected http status code.
    * 
    * @param httpRequest
    *          the http request
@@ -104,13 +105,23 @@ public class RemoteBase {
    * @return the response object
    */
   protected HttpResponse getResponse(HttpRequestBase httpRequest, Integer... expectedHttpStatus) {
-    List<String> remoteHosts = remoteServiceManager.getActiveHosts(serviceType);
+    List<ServiceRegistration> remoteServices = remoteServiceManager.getServiceRegistrations(serviceType);
     Map<String, String> hostErrors = new HashMap<String, String>();
-    String uriSuffix = httpRequest.getURI().toString();
-    for (String remoteHost : remoteHosts) {
+    URI originalUri = httpRequest.getURI();
+    String uriSuffix = null;
+    if(originalUri != null && StringUtils.isNotBlank(originalUri.toString())) {
+      uriSuffix = originalUri.toString();
+    }
+    for (ServiceRegistration remoteService : remoteServices) {
       HttpResponse response = null;
       try {
-        URI uri = new URI(UrlSupport.concat(remoteHost, httpRequest.getURI().toString()));
+        String fullUrl = null;
+        if(uriSuffix == null) {
+          fullUrl = UrlSupport.concat(remoteService.getHost(), remoteService.getPath());
+        } else {
+          fullUrl = UrlSupport.concat(new String[] {remoteService.getHost(), remoteService.getPath(), uriSuffix});
+        }
+        URI uri = new URI(fullUrl);
         httpRequest.setURI(uri);
         response = client.execute(httpRequest);
         StatusLine status = response.getStatusLine();
@@ -121,7 +132,7 @@ public class RemoteBase {
           closeConnection(response);
         }
       } catch (Exception e) {
-        hostErrors.put(httpRequest.getMethod() + " " + remoteHost + uriSuffix , e.getMessage());
+        hostErrors.put(httpRequest.getMethod() + " " + remoteService + uriSuffix , e.getMessage());
         closeConnection(response);
       }
     }

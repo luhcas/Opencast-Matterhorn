@@ -24,36 +24,36 @@ import java.util.Date;
  */
 public interface Job {
   /** The status of the job that this receipt represents */
-  public static enum Status {
+  static enum Status {
     QUEUED, RUNNING, FINISHED, FAILED
   }
 
   /** Gets the receipt identifier */
-  public String getId();
+  String getId();
 
   /** Sets the receipt identifier */
-  public void setId(String id);
+  void setId(String id);
 
   /** Gets the job type, which determines the type of service that runs the job */
-  public String getJobType();
+  String getJobType();
 
   /** Gets the receipt's current {@link Status} */
-  public Status getStatus();
+  Status getStatus();
 
   /** Sets the receipt's current {@link Status} */
-  public void setStatus(Status status);
+  void setStatus(Status status);
 
   /** Gets the host responsible for queuing and running this job */
-  public String getHost();
+  String getHost();
 
   /** The date this receipt was created */
-  public Date getDateCreated();
+  Date getDateCreated();
 
   /** The date this job was started. If the job was queued, this can be significantly later than the date created. */
-  public Date getDateStarted();
+  Date getDateStarted();
 
   /** The date this job was completed */
-  public Date getDateCompleted();
+  Date getDateCompleted();
 
   /**
    * Gets the mediapackage element that was produced by this job, or null if none was produced, or if it has yet to be
@@ -61,11 +61,11 @@ public interface Job {
    * 
    * @return the mediapackage element
    */
-  public MediaPackageElement getElement();
+  MediaPackageElement getElement();
 
   /** Sets the mediapackage element produced by this job. */
-  public void setElement(MediaPackageElement element);
+  void setElement(MediaPackageElement element);
 
   /** Gets an xml representation of this receipt */
-  public String toXml();
+  String toXml();
 }

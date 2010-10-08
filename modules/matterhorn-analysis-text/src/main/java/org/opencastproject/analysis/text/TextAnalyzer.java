@@ -94,9 +94,6 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   /** The executor service used to queue and run jobs */
   private ExecutorService executor = null;
 
-  /** This server's base URL */
-  private String serverUrl = null;
-
   /** Path to the ocropus binary */
   private String ocropusbinary = "/usr/local/bin/ocrocmd";
 
@@ -122,15 +119,8 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
     }
     setExecutorThreads(threads);
 
-    // register as a handler for "org.opencastproject.analysis.text" jobs
-    serverUrl = (String) cc.getBundleContext().getProperty("org.opencastproject.server.url");
     if (cc.getBundleContext().getProperty("textanalyzer.ocrocmd") != null)
       ocropusbinary = (String) cc.getBundleContext().getProperty("textanalyzer.ocrocmd");
-    remoteServiceManager.registerService(RECEIPT_TYPE, serverUrl);
-  }
-
-  protected void deactivate() {
-    remoteServiceManager.unRegisterService(RECEIPT_TYPE, serverUrl);
   }
 
   /**
@@ -308,16 +298,6 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
       videoTexts.add(videoText);
     }
     return videoTexts.toArray(new VideoText[videoTexts.size()]);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.analysis.api.MediaAnalysisService#getAnalysisType()
-   */
-  @Override
-  public String getAnalysisType() {
-    return RECEIPT_TYPE;
   }
 
   /**

@@ -35,10 +35,9 @@ import org.opencastproject.mediapackage.VideoStream;
 import org.opencastproject.mediapackage.identifier.IdBuilder;
 import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
 import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.util.NotFoundException;
-import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
@@ -95,9 +94,6 @@ public class ComposerServiceImpl implements ComposerService {
 
   /** Thread pool */
   private ExecutorService executor = null;
-
-  /** The server's base URL */
-  private String serverUrl = UrlSupport.DEFAULT_BASE_URL;
 
   /** The configuration property containing the number of concurrent encoding threads to run */
   public static final String CONFIG_THREADS = "composer.threads";
@@ -175,20 +171,12 @@ public class ComposerServiceImpl implements ComposerService {
       throw new IllegalStateException("The composer needs one or more threads to function.");
     }
     setExecutorThreads(threads);
-
-    serverUrl = (String) cc.getBundleContext().getProperty("org.opencastproject.server.url");
-    // Register as a handler
-    remoteServiceManager.registerService(JOB_TYPE, serverUrl);
   }
 
   /** Separating this from the activate method so it's easier to test */
   void setExecutorThreads(int threads) {
     executor = Executors.newFixedThreadPool(threads);
     logger.info("Thread pool size = {}", threads);
-  }
-
-  protected void deactivate() {
-    remoteServiceManager.unRegisterService(JOB_TYPE, serverUrl);
   }
 
   /**

@@ -37,6 +37,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -58,6 +60,12 @@ import javax.xml.parsers.DocumentBuilderFactory;
 @Table(name = "JOB")
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlRootElement(name = "job", namespace = "http://remote.opencastproject.org/")
+@NamedQueries( {
+        @NamedQuery(name = "Job.count", query = "SELECT COUNT(j) FROM Job j "
+                + "where j.status = :status and j.serviceRegistration.serviceType = :serviceType"),
+        @NamedQuery(name = "Job.countByHost", query = "SELECT COUNT(j) FROM Job j "
+                + "where j.status = :status and j.serviceRegistration.serviceType = :serviceType and "
+                + "j.serviceRegistration.host = :host") })
 public class JobImpl implements Job {
 
   /** Default constructor needed by jaxb and jpa */
@@ -100,7 +108,7 @@ public class JobImpl implements Job {
 
   /** The date this job was completed */
   Date dateCompleted;
-  
+
   /** The queue time is denormalized in the database to enable cross-platform date arithmetic in JPA queries */
   Long queueTime;
 
@@ -163,10 +171,10 @@ public class JobImpl implements Job {
    * 
    * @see org.opencastproject.remote.api.Job#getType()
    */
-  @XmlAttribute(name="type")
+  @XmlAttribute(name = "type")
   @Override
   public String getJobType() {
-    return serviceRegistration.getJobType();
+    return serviceRegistration.getServiceType();
   }
 
   /**
@@ -218,7 +226,7 @@ public class JobImpl implements Job {
   public Date getDateStarted() {
     return dateStarted;
   }
-  
+
   /**
    * @return the queueTime
    */
@@ -228,7 +236,8 @@ public class JobImpl implements Job {
   }
 
   /**
-   * @param queueTime the queueTime to set
+   * @param queueTime
+   *          the queueTime to set
    */
   public void setQueueTime(Long queueTime) {
     this.queueTime = queueTime;
@@ -241,14 +250,15 @@ public class JobImpl implements Job {
   public Long getRunTime() {
     return runTime;
   }
-  
+
   /**
-   * @param runTime the runTime to set
+   * @param runTime
+   *          the runTime to set
    */
   public void setRunTime(Long runTime) {
     this.runTime = runTime;
   }
-  
+
   /**
    * @param dateCreated
    *          the dateCreated to set
@@ -378,7 +388,8 @@ public class JobImpl implements Job {
   }
 
   /**
-   * @param serviceRegistration the serviceRegistration to set
+   * @param serviceRegistration
+   *          the serviceRegistration to set
    */
   public void setServiceRegistration(ServiceRegistrationImpl serviceRegistration) {
     this.serviceRegistration = serviceRegistration;

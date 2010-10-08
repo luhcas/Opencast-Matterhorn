@@ -49,9 +49,6 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
 
   /** the base URL for streaming */
   protected String streamingUrl = null;
-  
-  /* the configured id for this distribution channel */
-  protected String distChannelId = null;
 
   public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
@@ -73,14 +70,7 @@ public class StreamingDistributionService extends AbstractLocalDistributionServi
       if (distributionDirectory == null)
         throw new IllegalStateException("Distribution directory must be set (org.opencastproject.streaming.directory)");
       logger.info("Streaming distribution directory is {}", distributionDirectory);
-
-      distChannelId = (String)cc.getProperties().get("distribution.channel");
-      remoteServiceManager.registerService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
     }
-  }
-
-  protected void deactivate() {
-    remoteServiceManager.unRegisterService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
   }
 
   /**

@@ -63,11 +63,4 @@ public interface MediaAnalysisService {
    * @return the required catalog flavors
    */
   MediaPackageElementFlavor[] requires();
-
-  /**
-   * Returns the type of analysis this service performs.
-   * 
-   * @return The media analysis type
-   */
-  String getAnalysisType();
 }

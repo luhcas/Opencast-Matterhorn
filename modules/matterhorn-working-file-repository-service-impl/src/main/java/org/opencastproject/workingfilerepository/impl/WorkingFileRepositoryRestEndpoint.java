@@ -57,15 +57,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @Path("/")
-public class WorkingFileRepositoryRestEndpoint {
+public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl {
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryRestEndpoint.class);
   private final MimetypesFileTypeMap mimeMap = new MimetypesFileTypeMap(getClass().getClassLoader()
           .getResourceAsStream("mimetypes"));
-  protected WorkingFileRepository repo;
-
-  public void setRepository(WorkingFileRepository repo) {
-    this.repo = repo;
-  }
 
   public WorkingFileRepositoryRestEndpoint() {
     docs = generateDocs();
@@ -230,16 +225,15 @@ public class WorkingFileRepositoryRestEndpoint {
   @POST
   @Produces(MediaType.TEXT_HTML)
   @Path(WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "{mediaPackageID}/{mediaPackageElementID}")
-  public Response put(@PathParam("mediaPackageID") String mediaPackageID,
+  public Response restPut(@PathParam("mediaPackageID") String mediaPackageID,
           @PathParam("mediaPackageElementID") String mediaPackageElementID, @Context HttpServletRequest request)
           throws Exception {
-    checkService();
     if (ServletFileUpload.isMultipartContent(request)) {
       for (FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
         FileItemStream item = iter.next();
         if (item.isFormField())
           continue;
-        URI url = repo.put(mediaPackageID, mediaPackageElementID, item.getName(), item.openStream());
+        URI url = this.put(mediaPackageID, mediaPackageElementID, item.getName(), item.openStream());
         return Response.ok(url.toString()).build();
       }
     }
@@ -249,15 +243,14 @@ public class WorkingFileRepositoryRestEndpoint {
   @POST
   @Produces(MediaType.TEXT_HTML)
   @Path(WorkingFileRepository.COLLECTION_PATH_PREFIX + "{collectionId}")
-  public Response putInCollection(@PathParam("collectionId") String collectionId, @Context HttpServletRequest request)
+  public Response restPutInCollection(@PathParam("collectionId") String collectionId, @Context HttpServletRequest request)
           throws Exception {
-    checkService();
     if (ServletFileUpload.isMultipartContent(request)) {
       for (FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
         FileItemStream item = iter.next();
         if (item.isFormField())
           continue;
-        URI url = repo.putInCollection(collectionId, item.getName(), item.openStream());
+        URI url = this.putInCollection(collectionId, item.getName(), item.openStream());
         return Response.ok(url.toString()).build();
       }
     }
@@ -266,11 +259,10 @@ public class WorkingFileRepositoryRestEndpoint {
 
   @DELETE
   @Path(WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "{mediaPackageID}/{mediaPackageElementID}")
-  public Response deleteViaHttp(@PathParam("mediaPackageID") String mediaPackageID,
+  public Response restDelete(@PathParam("mediaPackageID") String mediaPackageID,
           @PathParam("mediaPackageElementID") String mediaPackageElementID) {
-    checkService();
     try {
-      repo.delete(mediaPackageID, mediaPackageElementID);
+      this.delete(mediaPackageID, mediaPackageElementID);
       return Response.noContent().build();
     } catch (Exception e) {
       return Response.serverError().entity(e.getMessage()).build();
@@ -279,11 +271,10 @@ public class WorkingFileRepositoryRestEndpoint {
 
   @DELETE
   @Path(WorkingFileRepository.COLLECTION_PATH_PREFIX + "{collectionId}/{fileName}")
-  public Response deleteFromCollection(@PathParam("collectionId") String collectionId,
+  public Response restDeleteFromCollection(@PathParam("collectionId") String collectionId,
           @PathParam("fileName") String fileName) {
-    checkService();
     try {
-      repo.deleteFromCollection(collectionId, fileName);
+      this.deleteFromCollection(collectionId, fileName);
       return Response.noContent().build();
     } catch (Exception e) {
       return Response.serverError().entity(e.getMessage()).build();
@@ -292,20 +283,19 @@ public class WorkingFileRepositoryRestEndpoint {
 
   @GET
   @Path(WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "{mediaPackageID}/{mediaPackageElementID}")
-  public Response get(@PathParam("mediaPackageID") String mediaPackageID,
+  public Response restGet(@PathParam("mediaPackageID") String mediaPackageID,
           @PathParam("mediaPackageElementID") String mediaPackageElementID,
           @HeaderParam("If-None-Match") String ifNoneMatch) {
-    checkService();
     String contentType = null;
     InputStream in = null;
     try {
-      String md5 = repo.hashMediaPackageElement(mediaPackageID, mediaPackageElementID);
+      String md5 = this.hashMediaPackageElement(mediaPackageID, mediaPackageElementID);
       if (md5.equals(ifNoneMatch)) {
         return Response.notModified().build();
       }
-      in = repo.get(mediaPackageID, mediaPackageElementID);
+      in = this.get(mediaPackageID, mediaPackageElementID);
       contentType = extractContentType(in);
-      return Response.ok(repo.get(mediaPackageID, mediaPackageElementID)).header("Content-Type", contentType).build();
+      return Response.ok(this.get(mediaPackageID, mediaPackageElementID)).header("Content-Type", contentType).build();
     } catch (IllegalStateException e) {
       return Response.status(Response.Status.NOT_FOUND).build();
     } catch (IOException e) {
@@ -342,19 +332,18 @@ public class WorkingFileRepositoryRestEndpoint {
 
   @GET
   @Path(WorkingFileRepository.MEDIAPACKAGE_PATH_PREFIX + "{mediaPackageID}/{mediaPackageElementID}/{fileName}")
-  public Response get(@PathParam("mediaPackageID") String mediaPackageID,
+  public Response restGet(@PathParam("mediaPackageID") String mediaPackageID,
           @PathParam("mediaPackageElementID") String mediaPackageElementID, @PathParam("fileName") String fileName,
           @HeaderParam("If-None-Match") String ifNoneMatch) {
-    checkService();
     try {
-      String md5 = repo.hashMediaPackageElement(mediaPackageID, mediaPackageElementID);
+      String md5 = this.hashMediaPackageElement(mediaPackageID, mediaPackageElementID);
       if (md5.equals(ifNoneMatch)) {
         return Response.notModified().build();
       }
-      InputStream in = repo.get(mediaPackageID, mediaPackageElementID);
+      InputStream in = this.get(mediaPackageID, mediaPackageElementID);
       String contentType = mimeMap.getContentType(fileName);
       int contentLength = 0;
-      contentLength = in.available(); // FIXME: this won't always work, depending on the implementation of the service
+      contentLength = in.available();
       return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type",
               contentType).header("Content-length", contentLength).entity(in).build();
     } catch (IllegalStateException e) {
@@ -370,15 +359,13 @@ public class WorkingFileRepositoryRestEndpoint {
 
   @GET
   @Path(WorkingFileRepository.COLLECTION_PATH_PREFIX + "{collectionId}/{fileName}")
-  public Response getFromCollection(@PathParam("collectionId") String collectionId,
+  public Response restGetFromCollection(@PathParam("collectionId") String collectionId,
           @PathParam("fileName") String fileName) {
     InputStream in = null;
     try {
-      in = repo.getFromCollection(collectionId, fileName);
+      in = super.getFromCollection(collectionId, fileName);
     } catch (NotFoundException e) {
       return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-    } catch (IOException e) {
-      return Response.serverError().entity(e.getMessage()).build();
     }
     String contentType = mimeMap.getContentType(fileName);
     int contentLength = 0;
@@ -386,33 +373,32 @@ public class WorkingFileRepositoryRestEndpoint {
       contentLength = in.available();
     } catch (IOException e) {
       logger.info("unable to get the content length for collection/{}/{}", new Object[] { collectionId, fileName });
-    } // FIXME: this won't always work, depending on the implementation of the service
-    checkService();
+    }
     return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type",
             contentType).header("Content-length", contentLength).entity(in).build();
   }
 
   @GET
   @Path("/collectionuri/{collectionID}/{fileName}")
-  public Response getCollectionUri(@PathParam("collectionID") String collectionId,
+  public Response restGetCollectionUri(@PathParam("collectionID") String collectionId,
           @PathParam("fileName") String fileName) {
-    URI uri = repo.getCollectionURI(collectionId, fileName);
+    URI uri = this.getCollectionURI(collectionId, fileName);
     return Response.ok(uri.toString()).build();
   }
 
   @GET
   @Path("/uri/{mediaPackageID}/{mediaPackageElementID}")
-  public Response getUri(@PathParam("mediaPackageID") String mediaPackageID,
+  public Response restGetUri(@PathParam("mediaPackageID") String mediaPackageID,
           @PathParam("mediaPackageElementID") String mediaPackageElementID) {
-    URI uri = repo.getURI(mediaPackageID, mediaPackageElementID);
+    URI uri = this.getURI(mediaPackageID, mediaPackageElementID);
     return Response.ok(uri.toString()).build();
   }
 
   @GET
   @Path("/uri/{mediaPackageID}/{mediaPackageElementID}/{fileName}")
-  public Response getUri(@PathParam("mediaPackageID") String mediaPackageID,
+  public Response restGetUri(@PathParam("mediaPackageID") String mediaPackageID,
           @PathParam("mediaPackageElementID") String mediaPackageElementID, @PathParam("fileName") String fileName) {
-    URI uri = repo.getURI(mediaPackageID, mediaPackageElementID, fileName);
+    URI uri = this.getURI(mediaPackageID, mediaPackageElementID, fileName);
     return Response.ok(uri.toString()).build();
   }
 
@@ -420,9 +406,9 @@ public class WorkingFileRepositoryRestEndpoint {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("/list/{collectionId}.json")
-  public Response getCollectionContents(@PathParam("collectionId") String collectionId) {
+  public Response restGetCollectionContents(@PathParam("collectionId") String collectionId) {
     try {
-      URI[] uris = repo.getCollectionContents(collectionId);
+      URI[] uris = super.getCollectionContents(collectionId);
       JSONArray jsonArray = new JSONArray();
       for (URI uri : uris) {
         jsonArray.add(uri.toString());
@@ -435,11 +421,11 @@ public class WorkingFileRepositoryRestEndpoint {
 
   @POST
   @Path("/copy/{fromCollection}/{fromFileName}/{toMediaPackage}/{toMediaPackageElement}/{toFileName}")
-  public Response copyTo(@PathParam("fromCollection") String fromCollection,
+  public Response restCopyTo(@PathParam("fromCollection") String fromCollection,
           @PathParam("fromFileName") String fromFileName, @PathParam("toMediaPackage") String toMediaPackage,
           @PathParam("toMediaPackageElement") String toMediaPackageElement, @PathParam("toFileName") String toFileName) {
     try {
-      URI uri = repo.copyTo(fromCollection, fromFileName, toMediaPackage, toMediaPackageElement, toFileName);
+      URI uri = super.copyTo(fromCollection, fromFileName, toMediaPackage, toMediaPackageElement, toFileName);
       return Response.ok().entity(uri.toString()).build();
     } catch (Exception e) {
       return Response.serverError().entity(e.getMessage()).build();
@@ -448,11 +434,11 @@ public class WorkingFileRepositoryRestEndpoint {
 
   @POST
   @Path("/move/{fromCollection}/{fromFileName}/{toMediaPackage}/{toMediaPackageElement}/{toFileName}")
-  public Response moveTo(@PathParam("fromCollection") String fromCollection,
+  public Response restMoveTo(@PathParam("fromCollection") String fromCollection,
           @PathParam("fromFileName") String fromFileName, @PathParam("toMediaPackage") String toMediaPackage,
           @PathParam("toMediaPackageElement") String toMediaPackageElement, @PathParam("toFileName") String toFileName) {
     try {
-      URI uri = repo.moveTo(fromCollection, fromFileName, toMediaPackage, toMediaPackageElement, toFileName);
+      URI uri = super.moveTo(fromCollection, fromFileName, toMediaPackage, toMediaPackageElement, toFileName);
       return Response.ok().entity(uri.toString()).build();
     } catch (Exception e) {
       return Response.serverError().entity(e.getMessage()).build();
@@ -463,15 +449,22 @@ public class WorkingFileRepositoryRestEndpoint {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("storage")
-  public Response getTotalStorage() {
-    long total = repo.getTotalSpace();
-    long usable = repo.getUsableSpace();
-    String summary = repo.getDiskSpace();
+  public Response restGetTotalStorage() {
+    long total = this.getTotalSpace();
+    long usable = this.getUsableSpace();
+    String summary = this.getDiskSpace();
     JSONObject json = new JSONObject();
     json.put("size", total);
     json.put("usable", usable);
     json.put("summary", summary);
     return Response.ok(json.toJSONString()).build();
+  }
+  
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  @Path("/baseUri")
+  public Response restGetBaseUri() {
+    return Response.ok(super.getBaseUri().toString()).build();
   }
 
   @GET
@@ -479,12 +472,5 @@ public class WorkingFileRepositoryRestEndpoint {
   @Path("docs")
   public String getDocumentation() {
     return docs;
-  }
-
-  protected void checkService() {
-    if (repo == null) {
-      // TODO What should we do in this case?
-      throw new RuntimeException("Working File Repository is currently unavailable");
-    }
   }
 }

@@ -3,7 +3,11 @@
  name="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint" immediate="true">
   <implementation class="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint" />
   <property name="service.description" value="Media Inspection REST Endpoint" />
-  <property name="opencast.rest.url" value="/inspection/rest" />
+
+  <property name="opencast.service.type" value="org.opencastproject.inspection" />
+  <property name="opencast.service.path" value="/inspection/rest" />
+  <property name="opencast.service.jobproducer" value="true" />
+
   <service>
     <provide interface="org.opencastproject.inspection.impl.endpoints.MediaInspectionRestEndpoint" />
   </service>

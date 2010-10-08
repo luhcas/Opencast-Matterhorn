@@ -42,21 +42,35 @@ import javax.ws.rs.Path;
  * Listens for JAX-RS annotated services and publishes them to the global URL space using a single shared HttpContext.
  */
 public class RestPublisher {
+  /** The logger **/
   private static final Logger logger = LoggerFactory.getLogger(RestPublisher.class);
-  public static final String SERVICE_PROPERTY = "opencast.rest.url";
-  public static final String SERVICE_FILTER = "(" + SERVICE_PROPERTY + "=*)";
+
+  /** The service property indicating the type of service.  This is an arbitrary ID, not necessarily a java interface. */
+  public static final String SERVICE_TYPE_PROPERTY = "opencast.service.type";
+  
+  /** The service property indicating the URL path that the service is attempting to claim */
+  public static final String SERVICE_PATH_PROPERTY = "opencast.service.path";
+  
+  /** The service property indicating that this service should be registered in the remote service registry */
+  public static final String SERVICE_JOBPRODUCER_PROPERTY = "opencast.service.jobproducer";
+  
+  /** The rest publisher looks for any non-servlet with the 'opencast.service.path' property */
+  public static final String SERVICE_FILTER = "(&(!(objectClass=javax.servlet.Servlet))("
+    + RestPublisher.SERVICE_PATH_PROPERTY + "=*))";
 
   protected ComponentContext componentContext;
   protected ServiceTracker tracker = null;
+  protected String baseServerUri;
 
   protected Map<String, ServiceRegistration> servletRegistrationMap;
 
   public void activate(ComponentContext componentContext) {
     logger.info("activate()");
+    this.baseServerUri = componentContext.getBundleContext().getProperty("org.opencastproject.server.url");
     this.componentContext = componentContext;
     this.servletRegistrationMap = new ConcurrentHashMap<String, ServiceRegistration>();
     try {
-      tracker = new RestServiceTracker();
+      tracker = new JaxRsServiceTracker();
     } catch (InvalidSyntaxException e) {
       throw new IllegalStateException(e);
     }
@@ -66,7 +80,7 @@ public class RestPublisher {
   public void deactivate() {
     tracker.close();
   }
-
+  
   /**
    * Creates a REST endpoint for the JAX-RS annotated service.
    * 
@@ -76,27 +90,24 @@ public class RestPublisher {
    *          The service itself
    */
   protected void createEndpoint(ServiceReference ref, Object service) {
-    Object aliasObj = ref.getProperty(SERVICE_PROPERTY);
-    if (aliasObj == null) {
-      logger.warn("Unable to publish a REST endpoint for {}", service.getClass().getName());
-      return;
-    } else if (!(aliasObj instanceof String)) {
-      logger.warn("Property '{}' must be a string, but is a {}", SERVICE_PROPERTY, aliasObj.getClass());
-      return;
-    }
-    String alias = (String) aliasObj;
     CXFNonSpringServlet cxf = new CXFNonSpringServlet();
     ServiceRegistration reg = null;
+    String serviceType = (String)ref.getProperty(SERVICE_TYPE_PROPERTY);
+    String servicePath = (String)ref.getProperty(SERVICE_PATH_PROPERTY);
+    boolean jobProducer = Boolean.parseBoolean((String)ref.getProperty(SERVICE_JOBPRODUCER_PROPERTY));
     try {
-      Dictionary<String, String> props = new Hashtable<String, String>();
+      Dictionary<String, Object> props = new Hashtable<String, Object>();
       props.put("contextId", SharedHttpContext.HTTP_CONTEXT_ID);
-      props.put("alias", alias);
+      props.put("alias", servicePath);
+      props.put(SERVICE_TYPE_PROPERTY, serviceType);
+      props.put(SERVICE_PATH_PROPERTY, servicePath);
+      props.put(SERVICE_JOBPRODUCER_PROPERTY, jobProducer);
       reg = componentContext.getBundleContext().registerService(Servlet.class.getName(), cxf, props);
     } catch (Exception e) {
-      logger.info("Problem registering REST endpoint {} : {}", alias, e.getMessage());
+      logger.info("Problem registering REST endpoint {} : {}", servicePath, e.getMessage());
       return;
     }
-    servletRegistrationMap.put(alias, reg);
+    servletRegistrationMap.put(servicePath, reg);
     
     // Set up cxf
     Bus bus = cxf.getBus();
@@ -124,7 +135,7 @@ public class RestPublisher {
     } finally {
       Thread.currentThread().setContextClassLoader(bundleClassLoader);
     }
-    logger.info("Registered REST endpoint at " + alias);
+    logger.info("Registered REST endpoint at " + servicePath);
   }
 
   /**
@@ -148,15 +159,16 @@ public class RestPublisher {
    * A custom ServiceTracker that published JAX-RS annotated services with the {@link RestPublisher#SERVICE_PROPERTY}
    * property set to some non-null value.
    */
-  class RestServiceTracker extends ServiceTracker {
+  public class JaxRsServiceTracker extends ServiceTracker {
     
-    RestServiceTracker() throws InvalidSyntaxException {
+    JaxRsServiceTracker() throws InvalidSyntaxException {
       super(componentContext.getBundleContext(), componentContext.getBundleContext().createFilter(SERVICE_FILTER), null);
     }
 
     @Override
     public void removedService(ServiceReference reference, Object service) {
-      destroyEndpoint(reference.getProperty(SERVICE_PROPERTY).toString());
+      String servicePath = (String)reference.getProperty(SERVICE_PATH_PROPERTY);
+      destroyEndpoint(servicePath);
       super.removedService(reference, service);
     }
 
@@ -167,7 +179,7 @@ public class RestPublisher {
       if (pathAnnotation == null) {
         logger.warn("{} was registered with '{}={}', but the service is not annotated with the JAX-RS "
                 + "@Path annotation",
-                new Object[] { service, SERVICE_PROPERTY, reference.getProperty(SERVICE_PROPERTY) });
+                new Object[] { service, SERVICE_PATH_PROPERTY, reference.getProperty(SERVICE_PATH_PROPERTY) });
         return null;
       }
       createEndpoint(reference, service);

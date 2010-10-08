@@ -3,7 +3,9 @@
  name="org.opencastproject.composer.impl.endpoint.ComposerRestService" immediate="true" activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.composer.impl.endpoint.ComposerRestService" />
   <property name="service.description" value="Composer REST Endpoint" />
-  <property name="opencast.rest.url" value="/composer/rest" />
+  <property name="opencast.service.type" value="org.opencastproject.composer" />
+  <property name="opencast.service.path" value="/composer/rest" />
+  <property name="opencast.service.jobproducer" value="true" />
   <service>
     <provide interface="org.opencastproject.composer.impl.endpoint.ComposerRestService" />
   </service>

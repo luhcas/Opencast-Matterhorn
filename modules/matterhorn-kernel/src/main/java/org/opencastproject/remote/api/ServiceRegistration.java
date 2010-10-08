@@ -21,17 +21,28 @@ package org.opencastproject.remote.api;
 public interface ServiceRegistration {
 
   /**
-   * @return the host
+   * @return the type of service
    */
-  public String getHost();
+  String getServiceType();
 
   /**
-   * @return the receiptType
+   * @return the host providing the service endpoint.
    */
-  public String getJobType();
+  String getHost();
 
+  /**
+   * @return The relative path to the service endpoint.
+   */
+  String getPath();
 
-  /** Whether the service is online */
+  /**
+   * @return Whether the service performs long running operations using {@link Job}s.
+   */
+  boolean isJobProducer();
+  
+  /**
+   * @return Whether the service is online
+   */
   boolean isOnline();
 
   /**
@@ -39,6 +50,4 @@ public interface ServiceRegistration {
    * maintenance mode when it comes back online
    */
   boolean isInMaintenanceMode();
-
-
 }

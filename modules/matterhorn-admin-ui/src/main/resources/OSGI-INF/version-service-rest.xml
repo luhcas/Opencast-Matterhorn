@@ -2,7 +2,10 @@
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="org.opencastproject.adminui.endpoint.VersionRestService">
   <implementation class="org.opencastproject.adminui.endpoint.VersionRestService" />
   <property name="service.description" value="Versioning Service" />
-  <property name="opencast.rest.url" value="/version/rest" />
+
+  <property name="opencast.service.type" value="org.opencastproject.admin.version" />
+  <property name="opencast.service.path" value="/version/rest" />
+
   <service>
     <provide interface="org.opencastproject.adminui.endpoint.VersionRestService" />
   </service>

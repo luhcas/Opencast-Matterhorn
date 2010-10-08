@@ -3,7 +3,11 @@
  name="org.opencastproject.ingest.endpoint.IngestRestService" immediate="true" activate="activate">
   <implementation class="org.opencastproject.ingest.endpoint.IngestRestService" />
   <property name="service.description" value="Ingest REST Endpoint" />
-  <property name="opencast.rest.url" value="/ingest/rest" />
+
+  <property name="opencast.service.type" value="org.opencastproject.ingest" />
+  <property name="opencast.service.path" value="/ingest/rest" />
+  <property name="opencast.service.jobproducer" value="false" /> <!-- This should be true.  Update Java first. -->
+
   <service>
     <provide interface="org.opencastproject.ingest.endpoint.IngestRestService" />
   </service>

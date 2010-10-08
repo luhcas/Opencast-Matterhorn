@@ -29,44 +29,63 @@ public interface RemoteServiceManager {
   /**
    * Registers a host to handle a specific type of job
    * 
-   * @param jobType
+   * @param serviceType
    *          The job type
-   * @param baseUrl
-   *          The base URL where the service that can handle this job type can be found
+   * @param host
+   *          The base URL where the service that can handle this service type can be found
+   * @param path
+   *          The path to the service endpoint
    * @return the service registration
    */
-  ServiceRegistration registerService(String jobType, String baseUrl);
+  ServiceRegistration registerService(String serviceType, String host, String path);
+
+  /**
+   * Registers a host to handle a specific type of job
+   * 
+   * @param serviceType
+   *          The service type
+   * @param host
+   *          The base URL where the service that can handle this job type can be found
+   * @param path
+   *          The path to the service endpoint
+   * @param jobProducer
+   *          Whether this service registration produces {@link Job}s to track long running operations
+   * @return the service registration
+   */
+  ServiceRegistration registerService(String serviceType, String host, String path, boolean jobProducer);
 
   /**
    * Unregisters a host from handling a specific type of job
    * 
-   * @param jobType
-   *          The job type
-   * @param baseUrl
+   * @param serviceType
+   *          The service type
+   * @param host
    *          The base URL where the service that can handle this job type can be found
+   * @param path
+   *          The path to the service endpoint
    */
-  void unRegisterService(String jobType, String baseUrl);
+  void unRegisterService(String serviceType, String host, String path);
 
   /**
    * Sets a registered host's maintenance status
    * 
-   * @param jobType
-   *          The job type
-   * @param baseUrl
-   *          The base URL where the service that can handle this job type can be found
+   * @param serviceType
+   *          The service type
+   * @param host
+   *          The base URL where the service that can handle this service type can be found
    * @param maintenance
    *          the new maintenance status for this service
    * @throws IllegalStateException
    *           if this is called for a jobType and baseUrl that is not registered
    */
-  void setMaintenanceStatus(String jobType, String baseUrl, boolean maintenance) throws IllegalStateException;
+  void setMaintenanceStatus(String serviceType, String host, boolean maintenance) throws IllegalStateException;
 
   /**
    * Parses an xml string representing a Receipt
    * 
    * @param xml
    *          The xml string
-   * @return The job
+   * @return The job TODO: Move this out of the service if possible
    */
   Job parseJob(String xml) throws IOException;
 
@@ -103,18 +122,29 @@ public interface RemoteServiceManager {
   Job getJob(String id);
 
   /**
-   * Finds the servers registered to handle this kind of job, ordered by their load (lightest to heaviest).
+   * Finds the service registrations for this kind of job, ordered by load (lightest to heaviest).
    * 
-   * @param jobType
-   *          The type of job that must be handled by the hosts
+   * @param serviceType
+   *          The type of service that must be handled by the hosts
    * @return A list of hosts that handle this job type, in order of their running and queued job load
    */
-  List<String> getActiveHosts(String jobType);
+  List<ServiceRegistration> getServiceRegistrations(String serviceType);
 
   /**
-   * Finds all current service registrations.
+   * Finds a single service registration by host and type.
    * 
-   * @return the current service registrations
+   * @param serviceType
+   *          The type of service
+   * @param host
+   *          the base URL of the host
+   * @return The service registration, or null
+   */
+  ServiceRegistration getServiceRegistration(String serviceType, String host);
+
+  /**
+   * Finds all service registrations.
+   * 
+   * @return A list of service registrations
    */
   List<ServiceRegistration> getServiceRegistrations();
 
@@ -128,25 +158,25 @@ public interface RemoteServiceManager {
   /**
    * Count the number of receipts of this type in this {@link Status} across all hosts
    * 
-   * @param jobType
-   *          The type of jobs to count
+   * @param serviceType
+   *          The jobs run by this type of service
    * @param status
    *          The status of the receipts
    * @return the number of jobs
    */
-  long count(String jobType, Status status);
+  long count(String serviceType, Status status);
 
   /**
    * Count the number of jobs in this {@link Status} on this host
    * 
-   * @param type
-   *          The type of jobs
+   * @param serviceType
+   *          The jobs run by this type of service
    * @param status
    *          The status of the jobs
    * @param host
    *          The server that created and will be handling the job
    * @return the number of jobs
    */
-  long count(String type, Status status, String host);
+  long count(String serviceType, Status status, String host);
 
 }

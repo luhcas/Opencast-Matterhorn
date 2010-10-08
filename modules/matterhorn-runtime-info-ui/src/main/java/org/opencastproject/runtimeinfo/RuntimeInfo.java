@@ -15,6 +15,7 @@
  */
 package org.opencastproject.runtimeinfo;
 
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.security.api.SecurityService;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
@@ -62,8 +63,6 @@ import javax.ws.rs.core.MediaType;
 public class RuntimeInfo {
   private static final long serialVersionUID = 1L;
   private static final Logger logger = LoggerFactory.getLogger(RuntimeInfo.class);
-  private static final String RS_CONTEXT = "opencast.rest.url";
-  private static final String RS_CONTEXT_FILTER = "(" + RS_CONTEXT + "=*)";
 
   private SecurityService securityService;
   private BundleContext bundleContext;
@@ -79,7 +78,7 @@ public class RuntimeInfo {
   }
 
   protected ServiceReference[] getRestServiceReferences() throws InvalidSyntaxException {
-    return bundleContext.getAllServiceReferences(null, RS_CONTEXT_FILTER);
+    return bundleContext.getAllServiceReferences(null, RestPublisher.SERVICE_FILTER);
   }
 
   protected ServiceReference[] getUserInterfaceServiceReferences() throws InvalidSyntaxException {
@@ -215,15 +214,15 @@ public class RuntimeInfo {
     }
     if (serviceRefs == null)
       return json;
-    for (ServiceReference jaxRsRef : serviceRefs) {
-      String version = jaxRsRef.getBundle().getVersion().toString();
-      String description = (String) jaxRsRef.getProperty(Constants.SERVICE_DESCRIPTION);
-      String servletContextPath = (String) jaxRsRef.getProperty(RS_CONTEXT);
+    for (ServiceReference servletRef : serviceRefs) {
+      String version = servletRef.getBundle().getVersion().toString();
+      String description = (String) servletRef.getProperty(Constants.SERVICE_DESCRIPTION);
+      String servletContextPath = (String) servletRef.getProperty(RestPublisher.SERVICE_PATH_PROPERTY);
       JSONObject endpoint = new JSONObject();
       endpoint.put("description", description);
       endpoint.put("version", version);
-      endpoint.put("docs", serverUrl + servletContextPath + "/docs");
-      endpoint.put("wadl", serverUrl + servletContextPath + "/?_wadl&type=xml");
+      endpoint.put("docs", serverUrl + servletContextPath + "/docs"); // This is a Matterhorn convention 
+      endpoint.put("wadl", serverUrl + servletContextPath + "/?_wadl&type=xml"); // This triggers a CXF-specific handler
       json.add(endpoint);
     }
     return json;

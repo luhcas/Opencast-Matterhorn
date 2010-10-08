@@ -77,9 +77,6 @@ public class SearchServiceImpl implements SearchService {
   /** The registry of remote services */
   protected RemoteServiceManager remoteServiceManager;
 
-  protected String serverUrl = null;
-  
-
   public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
@@ -118,14 +115,10 @@ public class SearchServiceImpl implements SearchService {
       this.solrRoot = PathSupport.concat(storageDir, "searchindex");
     }
     logger.info("DEFAULT " + CONFIG_SOLR_ROOT + ": " + this.solrRoot);
-
-    serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     setupSolr(this.solrRoot);
-    remoteServiceManager.registerService(JOB_TYPE, serverUrl);
   }
 
   public void deactivate() {
-    remoteServiceManager.unRegisterService(JOB_TYPE, serverUrl);
     try {
       solrConnection.destroy();
       // Needs some time to close properly

@@ -65,7 +65,7 @@ public class ComposerRestServiceTest {
     
     // FIXME: Remove the test scoped dependency on matterhorn-remote-impl and replace this code with mocks
     receipt = new JobImpl(org.opencastproject.remote.api.Job.Status.QUEUED, new ServiceRegistrationImpl(
-            ComposerService.JOB_TYPE, "encoding_farm_server_456"));
+            ComposerService.JOB_TYPE, "encoding_farm_server_456", "/composer/rest"));
     profile = new EncodingProfileImpl();
     profile.setIdentifier(profileId);
     List<EncodingProfileImpl> list = new ArrayList<EncodingProfileImpl>();

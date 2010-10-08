@@ -3,7 +3,10 @@
  name="org.opencastproject.adminui.endpoint.AdminuiRestService" immediate="true">
   <implementation class="org.opencastproject.adminui.endpoint.AdminuiRestService" />
   <property name="service.description" value="Admin UI REST Proxy" />
-  <property name="opencast.rest.url" value="/admin/rest" />
+
+  <property name="opencast.service.type" value="org.opencastproject.admin" />
+  <property name="opencast.service.path" value="/admin/rest" />
+
   <service>
     <provide interface="org.opencastproject.adminui.endpoint.AdminuiRestService" />
   </service>

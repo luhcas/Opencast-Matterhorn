@@ -4,7 +4,10 @@
 	immediate="true" activate="activate" deactivate="deactivate">
 	<implementation class="org.opencastproject.feedback.endpoint.FeedbackRestService" />
 	<property name="service.description" value="Feedback REST Endpoint" />
-	<property name="opencast.rest.url" value="/feedback/rest" />
+
+  <property name="opencast.service.type" value="org.opencastproject.usertracking" />
+  <property name="opencast.service.path" value="/feedback/rest" />
+
 	<service>
 		<provide interface="org.opencastproject.feedback.endpoint.FeedbackRestService" />
 	</service>

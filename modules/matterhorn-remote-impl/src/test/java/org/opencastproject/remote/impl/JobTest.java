@@ -42,6 +42,7 @@ public class JobTest {
   private static final String RECEIPT_TYPE_2 = "testing2";
   private static final String LOCALHOST = UrlSupport.DEFAULT_BASE_URL;
   private static final String HOST_2 = "host2";
+  private static final String PATH = "/path";
 
   private ComboPooledDataSource pooledDataSource = null;
   private RemoteServiceManagerImpl remoteServiceManager = null;
@@ -71,18 +72,18 @@ public class JobTest {
     remoteServiceManager.activate(null);
 
     // register some service instances
-    regType1Host1 = (ServiceRegistrationImpl) remoteServiceManager.registerService(RECEIPT_TYPE_1, LOCALHOST);
-    regType1Host2 = (ServiceRegistrationImpl) remoteServiceManager.registerService(RECEIPT_TYPE_1, HOST_2);
-    regType2Host1 = (ServiceRegistrationImpl) remoteServiceManager.registerService(RECEIPT_TYPE_2, LOCALHOST);
-    regType2Host2 = (ServiceRegistrationImpl) remoteServiceManager.registerService(RECEIPT_TYPE_2, HOST_2);
+    regType1Host1 = (ServiceRegistrationImpl) remoteServiceManager.registerService(RECEIPT_TYPE_1, LOCALHOST, PATH);
+    regType1Host2 = (ServiceRegistrationImpl) remoteServiceManager.registerService(RECEIPT_TYPE_1, HOST_2, PATH);
+    regType2Host1 = (ServiceRegistrationImpl) remoteServiceManager.registerService(RECEIPT_TYPE_2, LOCALHOST, PATH);
+    regType2Host2 = (ServiceRegistrationImpl) remoteServiceManager.registerService(RECEIPT_TYPE_2, HOST_2, PATH);
   }
 
   @After
   public void tearDown() throws Exception {
-    remoteServiceManager.unRegisterService(RECEIPT_TYPE_1, LOCALHOST);
-    remoteServiceManager.unRegisterService(RECEIPT_TYPE_1, HOST_2);
-    remoteServiceManager.unRegisterService(RECEIPT_TYPE_2, LOCALHOST);
-    remoteServiceManager.unRegisterService(RECEIPT_TYPE_2, HOST_2);
+    remoteServiceManager.unRegisterService(RECEIPT_TYPE_1, LOCALHOST, PATH);
+    remoteServiceManager.unRegisterService(RECEIPT_TYPE_1, HOST_2, PATH);
+    remoteServiceManager.unRegisterService(RECEIPT_TYPE_2, LOCALHOST, PATH);
+    remoteServiceManager.unRegisterService(RECEIPT_TYPE_2, HOST_2, PATH);
     remoteServiceManager.deactivate();
     pooledDataSource.close();
   }
@@ -163,8 +164,8 @@ public class JobTest {
 
   @Test
   public void testGetHostsCountWithNoJobs() throws Exception {
-    Assert.assertEquals(2, remoteServiceManager.getActiveHosts(RECEIPT_TYPE_1).size());
-    Assert.assertEquals(2, remoteServiceManager.getActiveHosts(RECEIPT_TYPE_2).size());
+    Assert.assertEquals(2, remoteServiceManager.getServiceRegistrations(RECEIPT_TYPE_1).size());
+    Assert.assertEquals(2, remoteServiceManager.getServiceRegistrations(RECEIPT_TYPE_2).size());
   }
 
   @Test
@@ -209,20 +210,20 @@ public class JobTest {
     otherTypeFinished.setStatus(Status.FINISHED);
     remoteServiceManager.updateJob(otherTypeFinished);
 
-    List<String> type1Hosts = remoteServiceManager.getActiveHosts(RECEIPT_TYPE_1);
-    List<String> type2Hosts = remoteServiceManager.getActiveHosts(RECEIPT_TYPE_2);
+    List<ServiceRegistration> type1Hosts = remoteServiceManager.getServiceRegistrations(RECEIPT_TYPE_1);
+    List<ServiceRegistration> type2Hosts = remoteServiceManager.getServiceRegistrations(RECEIPT_TYPE_2);
 
     // Host 1 has more "type 1" jobs than host 2
     Assert.assertEquals(2, type1Hosts.size());
-    Assert.assertEquals(HOST_2, type1Hosts.get(0));
-    Assert.assertEquals(LOCALHOST, type1Hosts.get(1));
+    Assert.assertEquals(HOST_2, type1Hosts.get(0).getHost());
+    Assert.assertEquals(LOCALHOST, type1Hosts.get(1).getHost());
 
     // There is just one running job of receipt type 2.  It is on the localhost.  Since host 2 has no type 2 jobs, it
     // is the least loaded server, and takes precedence in the list.
     Assert.assertEquals(1, remoteServiceManager.count(RECEIPT_TYPE_2, Status.RUNNING));
     Assert.assertEquals(2, type2Hosts.size());
-    Assert.assertEquals(HOST_2, type2Hosts.get(0));
-    Assert.assertEquals(LOCALHOST, type2Hosts.get(1));
+    Assert.assertEquals(HOST_2, type2Hosts.get(0).getHost());
+    Assert.assertEquals(LOCALHOST, type2Hosts.get(1).getHost());
   }
 
   @Test
@@ -230,28 +231,28 @@ public class JobTest {
     String url = "http://type1handler:8080";
     String receiptType = "type1";
     // we should start with no handlers
-    List<String> hosts = remoteServiceManager.getActiveHosts(receiptType);
+    List<ServiceRegistration> hosts = remoteServiceManager.getServiceRegistrations(receiptType);
     Assert.assertEquals(0, hosts.size());
 
     // register a handler
-    remoteServiceManager.registerService(receiptType, url);
-    hosts = remoteServiceManager.getActiveHosts("type1");
+    remoteServiceManager.registerService(receiptType, url, PATH);
+    hosts = remoteServiceManager.getServiceRegistrations("type1");
     Assert.assertEquals(1, hosts.size());
-    Assert.assertEquals("http://type1handler:8080", hosts.get(0));
+    Assert.assertEquals("http://type1handler:8080", hosts.get(0).getHost());
 
     // set the handler to be in maintenance mode
     remoteServiceManager.setMaintenanceStatus(receiptType, url, true);
-    hosts = remoteServiceManager.getActiveHosts("type1");
+    hosts = remoteServiceManager.getServiceRegistrations("type1");
     Assert.assertEquals(0, hosts.size());
 
     // set it back to normal mode
     remoteServiceManager.setMaintenanceStatus(receiptType, url, false);
-    hosts = remoteServiceManager.getActiveHosts("type1");
+    hosts = remoteServiceManager.getServiceRegistrations("type1");
     Assert.assertEquals(1, hosts.size());
 
     // unregister
-    remoteServiceManager.unRegisterService(receiptType, url);
-    hosts = remoteServiceManager.getActiveHosts("type1");
+    remoteServiceManager.unRegisterService(receiptType, url, PATH);
+    hosts = remoteServiceManager.getServiceRegistrations("type1");
     Assert.assertEquals(0, hosts.size());
   }
 
@@ -260,31 +261,31 @@ public class JobTest {
     String url = "http://type1handler:8080";
     String receiptType = "type1";
     // we should start with no handlers
-    List<String> hosts = remoteServiceManager.getActiveHosts(receiptType);
+    List<ServiceRegistration> hosts = remoteServiceManager.getServiceRegistrations(receiptType);
     Assert.assertEquals(0, hosts.size());
 
     // register a handler
-    remoteServiceManager.registerService(receiptType, url);
-    hosts = remoteServiceManager.getActiveHosts("type1");
+    remoteServiceManager.registerService(receiptType, url, PATH);
+    hosts = remoteServiceManager.getServiceRegistrations("type1");
     Assert.assertEquals(1, hosts.size());
-    Assert.assertEquals("http://type1handler:8080", hosts.get(0));
+    Assert.assertEquals("http://type1handler:8080", hosts.get(0).getHost());
 
     // set the handler to be in maintenance mode
     remoteServiceManager.setMaintenanceStatus(receiptType, url, true);
-    hosts = remoteServiceManager.getActiveHosts("type1");
+    hosts = remoteServiceManager.getServiceRegistrations("type1");
     Assert.assertEquals(0, hosts.size());
 
     // re-register. this should not unset the maintenance mode and should not throw an exception
-    ServiceRegistration reg = remoteServiceManager.registerService(receiptType, url);
+    ServiceRegistration reg = remoteServiceManager.registerService(receiptType, url, PATH);
     Assert.assertTrue(reg.isInMaintenanceMode());
     
     // zero because it's still in maintenance mode
-    Assert.assertEquals(0, remoteServiceManager.getActiveHosts(receiptType).size());
+    Assert.assertEquals(0, remoteServiceManager.getServiceRegistrations(receiptType).size());
 
 
     // unregister
-    remoteServiceManager.unRegisterService(receiptType, url);
-    hosts = remoteServiceManager.getActiveHosts("type1");
+    remoteServiceManager.unRegisterService(receiptType, url, PATH);
+    hosts = remoteServiceManager.getServiceRegistrations("type1");
     Assert.assertEquals(0, hosts.size());
   }
 

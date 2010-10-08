@@ -3,7 +3,10 @@
  name="org.opencastproject.capture.endpoint.StateRestService" immediate="true">
   <implementation class="org.opencastproject.capture.endpoint.StateRestService" />
   <property name="service.description" value="State REST Endpoint" />
-  <property name="opencast.rest.url" value="/state/rest" />
+
+  <property name="opencast.service.type" value="org.opencastproject.capture.state" />
+  <property name="opencast.service.path" value="/state/rest" />
+
   <service>
     <provide interface="org.opencastproject.capture.endpoint.StateRestService" />
   </service>

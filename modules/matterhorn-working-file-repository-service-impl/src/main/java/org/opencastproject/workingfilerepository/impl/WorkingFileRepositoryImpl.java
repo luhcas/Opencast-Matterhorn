@@ -16,6 +16,7 @@
 package org.opencastproject.workingfilerepository.impl;
 
 import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
@@ -83,7 +84,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
    */
   public void activate(ComponentContext cc) {
     if (rootDirectory != null)
-      return; // If the root directory was set by the constructor, respect that setting
+      return; // If the root directory was set, respect that setting
 
     // server url
     serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
@@ -91,15 +92,23 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
       throw new IllegalStateException("Server URL must be set");
 
     // working file repository 'facade' configuration
-    String serviceUrlString = UrlSupport.concat(serverUrl, "files");
     String canonicalFileRepositoryUrl = cc.getBundleContext().getProperty("org.opencastproject.file.repo.url");
     if (canonicalFileRepositoryUrl != null) {
-      serviceUrlString = UrlSupport.concat(canonicalFileRepositoryUrl, "files");
+      String serviceUrlString = canonicalFileRepositoryUrl;
+      try {
+        this.serviceUrl = new URI(serviceUrlString);
+      } catch (URISyntaxException e) {
+        throw new IllegalStateException("Service URL must be a valid URI, but is " + serviceUrlString, e);
+      }
     }
-    try {
-      this.serviceUrl = new URI(serviceUrlString);
-    } catch (URISyntaxException e) {
-      throw new IllegalStateException("Service URL must be a valid URI, but is " + serviceUrlString);
+    
+    if (this.serviceUrl == null) {
+      String servicePath = (String)cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+      try {
+        serviceUrl = new URI(UrlSupport.concat(serverUrl, servicePath));
+      } catch (URISyntaxException e) {
+        throw new IllegalStateException("Service URL can not be set to " + serverUrl + servicePath, e);
+      }
     }
 
     // root directory
@@ -112,15 +121,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
       rootDirectory = cc.getBundleContext().getProperty("org.opencastproject.file.repo.path");
     }
     createRootDirectory();
-    remoteServiceManager.registerService(JOB_TYPE, serverUrl);
     logger.info(getDiskSpace());
-  }
-
-  /**
-   * Deactivate the component
-   */
-  public void deactivate() {
-    remoteServiceManager.unRegisterService(JOB_TYPE, serverUrl);
   }
 
   public void delete(String mediaPackageID, String mediaPackageElementID) {
@@ -183,7 +184,7 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
    */
   @Override
   public URI getURI(String mediaPackageID, String mediaPackageElementID, String fileName) {
-    String uri = UrlSupport.concat(new String[] { serviceUrl.toString(), MEDIAPACKAGE_PATH_PREFIX, mediaPackageID,
+    String uri = UrlSupport.concat(new String[] { getBaseUri().toString(), MEDIAPACKAGE_PATH_PREFIX, mediaPackageID,
             mediaPackageElementID });
     if (fileName == null) {
       File existingDirectory = getElementDirectory(mediaPackageID, mediaPackageElementID);

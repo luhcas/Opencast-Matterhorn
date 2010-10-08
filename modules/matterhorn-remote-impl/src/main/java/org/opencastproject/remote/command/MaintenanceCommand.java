@@ -45,7 +45,7 @@ public class MaintenanceCommand {
   public String list() {
     StringBuilder sb = new StringBuilder();
     for(ServiceRegistration reg : remoteServiceManager.getServiceRegistrations()) {
-      sb.append(reg.getJobType());
+      sb.append(reg.getServiceType());
       sb.append("@");
       sb.append(reg.getHost());
       if(reg.isInMaintenanceMode()) {

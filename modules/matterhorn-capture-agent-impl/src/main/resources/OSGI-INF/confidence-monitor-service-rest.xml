@@ -3,7 +3,10 @@
  name="org.opencastproject.capture.endpoint.ConfidenceMonitorRestService" activate="activate" immediate="true">
   <implementation class="org.opencastproject.capture.endpoint.ConfidenceMonitorRestService" />
   <property name="service.description" value="Confidence Monitoring REST Endpoint" />
-  <property name="opencast.rest.url" value="/confidence/rest" />
+
+  <property name="opencast.service.type" value="org.opencastproject.capture.confidence" />
+  <property name="opencast.service.path" value="/confidence/rest" />
+
   <service>
     <provide interface="org.opencastproject.capture.endpoint.ConfidenceMonitorRestService" />
   </service>

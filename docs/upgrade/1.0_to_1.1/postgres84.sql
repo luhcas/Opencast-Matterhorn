@@ -6,6 +6,7 @@
  * MH-5445 (overview of series and services)
  */
 alter table service_registration add column online boolean NOT NULL default 'f';
+alter table service_registration add column path varying(255) NOT NULL;
 alter table job rename column type to job_type;
 alter table job add column runtime bigint;
 alter table job add column queuetime bigint;

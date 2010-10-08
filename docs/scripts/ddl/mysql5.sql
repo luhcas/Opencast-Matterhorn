@@ -97,6 +97,7 @@ CREATE TABLE `SERIES_METADATA` (
 
 CREATE TABLE `SERVICE_REGISTRATION` (
   `HOST` varchar(255) collate utf8_unicode_ci NOT NULL,
+  `PATH` varchar(255) collate utf8_unicode_ci NOT NULL,
   `JOB_TYPE` varchar(255) collate utf8_unicode_ci NOT NULL,
   `MAINTENANCE` tinyint(1) NOT NULL default '0',
   `ONLINE` tinyint(1) NOT NULL default '0',

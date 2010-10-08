@@ -6,6 +6,7 @@
  * MH-5445 (overview of series and services)
  */
 alter table `SERVICE_REGISTRATION` add column `ONLINE` tinyint NOT NULL default '0';
+alter table `SERVICE_REGISTRATION` add column `PATH` varchar(255) NOT NULL;
 alter table `JOB` change `TYPE` `JOB_TYPE` varchar(255) collate utf8_unicode_ci default NULL;
 alter table `JOB` add column `RUNTIME` bigint(20) default NULL;
 alter table `JOB` add column `QUEUETIME` bigint(20) default NULL;

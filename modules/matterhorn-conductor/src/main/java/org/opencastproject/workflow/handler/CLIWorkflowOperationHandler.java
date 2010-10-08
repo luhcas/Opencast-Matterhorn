@@ -26,11 +26,11 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workspace.api.Workspace;
 
-import org.jaxen.SimpleNamespaceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -351,7 +351,7 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
 
       XPath xpath = XPathFactory.newInstance().newXPath();
 
-      SimpleNamespaceContext namespace = new SimpleNamespaceContext();
+//      SimpleNamespaceContext namespace = new SimpleNamespaceContext();
       // xpath.setNamespaceContext( new MediaPackageNamespace() );
       // InputSource inputSource = new InputSource( new StringReader(mp.toXml( )) );
       NodeList nodes = (NodeList) xpath.evaluate(xpathExpression, xmldoc, XPathConstants.NODESET);

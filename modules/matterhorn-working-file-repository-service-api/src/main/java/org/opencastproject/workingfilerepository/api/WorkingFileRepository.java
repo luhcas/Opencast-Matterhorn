@@ -40,7 +40,7 @@ public interface WorkingFileRepository {
   String MEDIAPACKAGE_PATH_PREFIX = "/mediapackage/";
 
   /** The job type we use to register with the remote services manager */
-  String JOB_TYPE = "workingfiles";
+  String SERVICE_TYPE = "org.opencastproject.files";
 
   /**
    * Gets the base URI for this service.

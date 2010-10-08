@@ -151,9 +151,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
   /** The executor service used to queue and run jobs */
   protected ExecutorService executor = null;
 
-  /** The base URL for this server */
-  protected String serverUrl = null;
-
   /**
    * Creates a new video segmenter.
    */
@@ -209,18 +206,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
       throw new IllegalStateException("The composer needs one or more threads to function.");
     }
     setExecutorThreads(threads);
-
-    // Get this server's URL
-    serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
-    if (serverUrl == null)
-      throw new IllegalStateException("property 'org.opencastproject.server.url' must be configured");
-
-    // Register as a handler for JOB_TYPE receipts
-    remoteServiceManager.registerService(RECEIPT_TYPE, serverUrl);
-  }
-
-  public void deactivate() {
-    remoteServiceManager.unRegisterService(RECEIPT_TYPE, serverUrl);
   }
 
   /** Separating this from the activate method so it's easier to test */
@@ -669,16 +654,6 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
     composedTrack.addTag("segmentation");
 
     return composedTrack;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.analysis.api.MediaAnalysisService#getAnalysisType()
-   */
-  @Override
-  public String getAnalysisType() {
-    return RECEIPT_TYPE;
   }
 
 }

@@ -3,7 +3,10 @@
  name="org.opencastproject.capture.admin.endpoint.CaptureAgentStateRestService" immediate="true">
   <implementation class="org.opencastproject.capture.admin.endpoint.CaptureAgentStateRestService" />
   <property name="service.description" value="Capture Agent Admin REST Endpoint" />
-  <property name="opencast.rest.url" value="/capture-admin/rest" />
+
+  <property name="opencast.service.type" value="org.opencastproject.capture.admin" />
+  <property name="opencast.service.path" value="/capture-admin/rest" />
+
   <service>
     <provide interface="org.opencastproject.capture.admin.endpoint.CaptureAgentStateRestService" />
   </service>

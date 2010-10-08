@@ -3,7 +3,11 @@
  name="org.opencastproject.caption.endpoint.CaptionServiceRestEndpoint" immediate="true">
   <implementation class="org.opencastproject.caption.endpoint.CaptionServiceRestEndpoint" />
   <property name="service.description" value="Caption REST Endpoint" />
-  <property name="opencast.rest.url" value="/caption/rest" />
+
+  <property name="opencast.service.type" value="org.opencastproject.caption" />
+  <property name="opencast.service.path" value="/caption/rest" />
+  <property name="opencast.service.jobproducer" value="true" />
+
   <service>
     <provide interface="org.opencastproject.caption.endpoint.CaptionServiceRestEndpoint" />
   </service>

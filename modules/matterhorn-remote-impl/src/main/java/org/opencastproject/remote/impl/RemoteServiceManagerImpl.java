@@ -20,10 +20,15 @@ import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.ServiceRegistration;
 import org.opencastproject.remote.api.ServiceStatistics;
 import org.opencastproject.remote.api.Job.Status;
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.UrlSupport;
 
 import org.apache.commons.lang.StringUtils;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +53,7 @@ import javax.persistence.spi.PersistenceProvider;
  * JPA implementation of the {@link RemoteServiceManager}
  */
 public class RemoteServiceManagerImpl implements RemoteServiceManager {
+
   private static final Logger logger = LoggerFactory.getLogger(RemoteServiceManagerImpl.class);
 
   /**
@@ -90,6 +96,8 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /** The factory used to generate the entity manager */
   protected EntityManagerFactory emf = null;
 
+  protected RestServiceTracker tracker = null;
+
   public void activate(ComponentContext cc) {
     logger.debug("activate");
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.remote", persistenceProperties);
@@ -98,11 +106,25 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
     } else {
       hostName = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     }
+    if (cc != null) {
+      try {
+        tracker = new RestServiceTracker(cc.getBundleContext());
+        tracker.open();
+      } catch (InvalidSyntaxException e) {
+        logger.error("Invlid filter syntax: {}", e);
+        throw new IllegalStateException(e);
+      }
+    }
   }
 
   public void deactivate() {
     logger.debug("deactivate");
-    emf.close();
+    if (tracker != null) {
+      tracker.close();
+    }
+    if (emf != null) {
+      emf.close();
+    }
   }
 
   /**
@@ -252,7 +274,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
       fromDb.queueTime = now.getTime() - job.dateCreated.getTime();
     } else if (Status.FAILED.equals(status)) {
       // failed jobs may not have even started properly
-      if(job.dateStarted != null) {
+      if (job.dateStarted != null) {
         job.dateCompleted = now;
         job.runTime = now.getTime() - job.dateStarted.getTime();
         fromDb.dateCompleted = now;
@@ -269,18 +291,30 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#registerService(java.lang.String, java.lang.String)
+   * @see org.opencastproject.remote.api.RemoteServiceManager#registerService(java.lang.String, java.lang.String,
+   *      java.lang.String)
    */
   @Override
-  public ServiceRegistration registerService(String jobType, String baseUrl) {
-    return setOnlineStatus(jobType, baseUrl, true);
+  public ServiceRegistration registerService(String serviceType, String baseUrl, String path) {
+    return setOnlineStatus(serviceType, baseUrl, path, true, false);
   }
 
-  protected ServiceRegistrationImpl getServiceRegistration(EntityManager em, String jobType, String baseUrl) {
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.RemoteServiceManager#registerService(java.lang.String, java.lang.String,
+   *      java.lang.String, boolean)
+   */
+  @Override
+  public ServiceRegistration registerService(String serviceType, String baseUrl, String path, boolean jobProducer) {
+    return setOnlineStatus(serviceType, baseUrl, path, true, jobProducer);
+  }
+
+  protected ServiceRegistrationImpl getServiceRegistration(EntityManager em, String serviceType, String baseUrl) {
     try {
-      Query q = em.createQuery("SELECT rh from ServiceRegistration rh where rh.host = :host and rh.jobType = :jobType");
+      Query q = em.createNamedQuery("ServiceRegistration.getRegistration");
+      q.setParameter("serviceType", serviceType);
       q.setParameter("host", baseUrl);
-      q.setParameter("jobType", jobType);
       return (ServiceRegistrationImpl) q.getSingleResult();
     } catch (NoResultException e) {
       return null;
@@ -290,28 +324,38 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * Sets the online status of a service registration.
    * 
-   * @param jobType
+   * @param serviceType
    *          The job type
    * @param baseUrl
    *          the host URL
    * @param online
    *          whether the service is online or off
+   * @param jobProducer
+   *          whether this service produces jobs for long running operations
    * @return the service registration
    */
-  protected ServiceRegistration setOnlineStatus(String jobType, String baseUrl, boolean online) {
-    if (StringUtils.trimToNull(jobType) == null || StringUtils.trimToNull(baseUrl) == null) {
-      throw new IllegalArgumentException("job and baseUrl must not be empty or null");
+  protected ServiceRegistration setOnlineStatus(String serviceType, String baseUrl, String path, boolean online,
+          Boolean jobProducer) {
+    if (StringUtils.isBlank(serviceType) || StringUtils.isBlank(baseUrl) || StringUtils.isBlank(path)) {
+      throw new IllegalArgumentException("job, baseUrl, and path must not be blank");
     }
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      ServiceRegistrationImpl registration = getServiceRegistration(em, jobType, baseUrl);
+      ServiceRegistrationImpl registration = getServiceRegistration(em, serviceType, baseUrl);
       if (registration == null) {
-        registration = new ServiceRegistrationImpl(baseUrl, jobType);
+        if (jobProducer == null) { // if we are not provided a value, consider it to be false
+          registration = new ServiceRegistrationImpl(serviceType, baseUrl, path, false);
+        } else {
+          registration = new ServiceRegistrationImpl(serviceType, baseUrl, path, jobProducer);
+        }
         em.persist(registration);
       } else {
         registration.setOnline(online);
+        if (jobProducer != null) { // if we are not provided a value, don't update the persistent value
+          registration.setJobProducer(jobProducer);
+        }
         em.merge(registration);
       }
       tx.commit();
@@ -322,17 +366,17 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
     } finally {
       em.close();
     }
-
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#unRegisterService(java.lang.String, java.lang.String)
+   * @see org.opencastproject.remote.api.RemoteServiceManager#unRegisterService(java.lang.String, java.lang.String,
+   *      java.lang.String)
    */
   @Override
-  public void unRegisterService(String jobType, String baseUrl) {
-    setOnlineStatus(jobType, baseUrl, false);
+  public void unRegisterService(String serviceType, String baseUrl, String path) {
+    setOnlineStatus(serviceType, baseUrl, path, false, null);
   }
 
   /**
@@ -342,22 +386,18 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
    *      boolean)
    */
   @Override
-  public void setMaintenanceStatus(String jobType, String baseUrl, boolean maintenance) throws IllegalStateException {
+  public void setMaintenanceStatus(String serviceType, String baseUrl, boolean maintenance)
+          throws IllegalStateException {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      Query q = em.createQuery("Select rh from ServiceRegistration rh where rh.host = :host and rh.jobType = :jobType");
-      q.setParameter("host", baseUrl);
-      q.setParameter("jobType", jobType);
-      ServiceRegistrationImpl rh = null;
-      try {
-        rh = (ServiceRegistrationImpl) q.getSingleResult();
-      } catch (NoResultException e) {
+      ServiceRegistrationImpl reg = getServiceRegistration(em, serviceType, baseUrl);
+      if (reg == null) {
         throw new IllegalStateException("Can not set maintenance mode on a service that has not been registered");
       }
-      rh.setMaintenanceMode(maintenance);
-      em.merge(rh);
+      reg.setMaintenanceMode(maintenance);
+      em.merge(reg);
       tx.commit();
     } catch (RollbackException e) {
       if (tx.isActive())
@@ -378,7 +418,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   public List<ServiceRegistration> getServiceRegistrations() {
     EntityManager em = emf.createEntityManager();
     try {
-      return em.createQuery("SELECT rh FROM ServiceRegistration rh").getResultList();
+      return em.createNamedQuery("ServiceRegistration.getAll").getResultList();
     } finally {
       em.close();
     }
@@ -394,10 +434,9 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   public long count(String type, Status status) {
     EntityManager em = emf.createEntityManager();
     try {
-      Query query = em
-              .createQuery("SELECT COUNT(j) FROM Job j where j.status = :status and j.serviceRegistration.jobType = :type");
+      Query query = em.createNamedQuery("Job.count");
       query.setParameter("status", status);
-      query.setParameter("type", type);
+      query.setParameter("serviceType", type);
       Number countResult = (Number) query.getSingleResult();
       return countResult.longValue();
     } finally {
@@ -415,10 +454,9 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   public long count(String type, Status status, String host) {
     EntityManager em = emf.createEntityManager();
     try {
-      Query query = em
-              .createQuery("SELECT COUNT(j) FROM Job j where j.status = :status and j.serviceRegistration.jobType = :type and j.serviceRegistration.host = :host");
+      Query query = em.createNamedQuery("Job.countByHost");
       query.setParameter("status", status);
-      query.setParameter("type", type);
+      query.setParameter("serviceType", type);
       query.setParameter("host", host);
       Number countResult = (Number) query.getSingleResult();
       return countResult.longValue();
@@ -476,7 +514,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
         public int compare(ServiceStatistics o1, ServiceStatistics o2) {
           ServiceRegistration reg1 = o1.getServiceRegistration();
           ServiceRegistration reg2 = o2.getServiceRegistration();
-          int typeComparison = reg1.getJobType().compareTo(reg2.getJobType());
+          int typeComparison = reg1.getServiceType().compareTo(reg2.getServiceType());
           return typeComparison == 0 ? reg1.getHost().compareTo(reg2.getHost()) : typeComparison;
         }
       });
@@ -489,42 +527,72 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#getActiveHosts(java.lang.String)
+   * @see org.opencastproject.remote.api.RemoteServiceManager#getServiceRegistrations(java.lang.String)
    */
   @Override
-  public List<String> getActiveHosts(String jobType) {
-    List<HostHolder> hostHolders = new ArrayList<HostHolder>();
-    for (ServiceStatistics serviceStats : getServiceStatistics()) {
+  public List<ServiceRegistration> getServiceRegistrations(String serviceType) {
+    List<ServiceRegistration> registrations = new ArrayList<ServiceRegistration>();
+    List<ServiceStatistics> stats = getServiceStatistics();
+    Collections.sort(stats, new Comparator<ServiceStatistics>() {
+      @Override
+      public int compare(ServiceStatistics o1, ServiceStatistics o2) {
+        return (o1.getQueuedJobs() + o1.getRunningJobs()) - (o2.getQueuedJobs() + o2.getRunningJobs());
+      }
+    });
+    for (ServiceStatistics serviceStats : stats) {
       ServiceRegistration registration = serviceStats.getServiceRegistration();
-      if (registration.isInMaintenanceMode() || !registration.isOnline() || !jobType.equals(registration.getJobType())) {
+      if (registration.isInMaintenanceMode() || !registration.isOnline()
+              || !serviceType.equals(registration.getServiceType())) {
         continue;
       }
-      hostHolders.add(new HostHolder(registration.getHost(), serviceStats.getQueuedJobs()
-              + serviceStats.getRunningJobs()));
+      registrations.add(serviceStats.getServiceRegistration());
     }
-    Collections.sort(hostHolders);
-    List<String> hosts = new ArrayList<String>();
-    for (HostHolder hostHolder : hostHolders) {
-      hosts.add(hostHolder.host);
-    }
-    return hosts;
+    return registrations;
   }
 
   /**
-   * A job-count comparable holder for hosts.
+   * {@inheritDoc}
+   * @see org.opencastproject.remote.api.RemoteServiceManager#getServiceRegistration(java.lang.String, java.lang.String)
    */
-  class HostHolder implements Comparable<HostHolder> {
-    String host;
-    Integer count;
+  @Override
+  public ServiceRegistration getServiceRegistration(String serviceType, String host) {
+    EntityManager em = null;
+    try {
+      em = emf.createEntityManager();
+      return getServiceRegistration(em, serviceType, host);
+    } finally {
+      if(em != null) {
+        em.close();
+      }
+    }
+  }
+  
+  /**
+   * A custom ServiceTracker that registers all locally published servlets so clients can find the most appropriate
+   * service on the network to handle new jobs.
+   */
+  class RestServiceTracker extends ServiceTracker {
 
-    HostHolder(String host, Integer count) {
-      this.host = host;
-      this.count = count;
+    RestServiceTracker(BundleContext bundleContext) throws InvalidSyntaxException {
+      super(bundleContext, bundleContext.createFilter("(&(objectClass=javax.servlet.Servlet)("
+              + RestPublisher.SERVICE_PATH_PROPERTY + "=*))"), null);
     }
 
     @Override
-    public int compareTo(HostHolder o) {
-      return this.count.compareTo(o.count);
+    public void removedService(ServiceReference reference, Object service) {
+      String serviceType = (String) reference.getProperty(RestPublisher.SERVICE_TYPE_PROPERTY);
+      String servicePath = (String) reference.getProperty(RestPublisher.SERVICE_PATH_PROPERTY);
+      boolean jobProducer = (Boolean)reference.getProperty(RestPublisher.SERVICE_JOBPRODUCER_PROPERTY);
+      registerService(serviceType, hostName, servicePath, jobProducer);
+      super.removedService(reference, service);
+    }
+
+    @Override
+    public Object addingService(ServiceReference reference) {
+      String serviceType = (String) reference.getProperty(RestPublisher.SERVICE_TYPE_PROPERTY);
+      String servicePath = (String) reference.getProperty(RestPublisher.SERVICE_PATH_PROPERTY);
+      unRegisterService(serviceType, hostName, servicePath);
+      return super.addingService(reference);
     }
   }
 }

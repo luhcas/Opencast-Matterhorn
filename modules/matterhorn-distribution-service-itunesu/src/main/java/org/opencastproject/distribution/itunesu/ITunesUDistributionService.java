@@ -20,14 +20,11 @@ import org.opencastproject.deliver.itunesu.ITunesDeliveryAction;
 import org.opencastproject.deliver.itunesu.ITunesRemoveAction;
 import org.opencastproject.deliver.schedule.Schedule;
 import org.opencastproject.deliver.schedule.Task;
-// import org.opencastproject.deliver.schedule.TaskSerializer;
-// import org.opencastproject.deliver.store.JPAStore;
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.osgi.service.component.ComponentContext;
@@ -46,9 +43,6 @@ public class ITunesUDistributionService implements DistributionService {
   /** workspace instance */
   protected Workspace workspace = null;
 
-  /** the remote services registry */
-  protected RemoteServiceManager remoteServiceManager;
-
   /** iTunes configuration instance */
   private static ITunesConfiguration config = null;
   /** group handle */
@@ -60,12 +54,6 @@ public class ITunesUDistributionService implements DistributionService {
 
   /** context strategy for the distribution service */
   ITunesUDistributionContextStrategy contextStrategy;
-
-  /** this server's base URL */
-  protected String serverUrl = null;
-
-  /* the configured id for this distribution channel */
-  protected String distChannelId = null;
 
   /**
    * Called when service activates. Defined in OSGi resource file.
@@ -95,19 +83,12 @@ public class ITunesUDistributionService implements DistributionService {
     File data_directory = new File(directory_name);
     data_directory.mkdirs();
     schedule = new Schedule(data_directory);
-
-    serverUrl = (String)cc.getBundleContext().getProperty("org.opencastproject.server.url");
-    distChannelId = (String)cc.getProperties().get("distribution.channel");
-    remoteServiceManager.registerService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
   }
 
   /**
    * Called when service deactivates. Defined in OSGi resource file.
    */
   public void deactivate() {
-    // unregister as a handler for itunesU distribution
-    remoteServiceManager.unRegisterService(JOB_TYPE_PREFIX + distChannelId, serverUrl);
-    
     // shutdown the scheduler
     schedule.shutdown();
   }
@@ -258,7 +239,6 @@ public class ITunesUDistributionService implements DistributionService {
       } // end of schedule loop
     } catch (Exception e) {
       throw new DistributionException(e);
-    } finally {
     }
 
     return mediaPackage;
@@ -266,10 +246,6 @@ public class ITunesUDistributionService implements DistributionService {
 
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
-  }
-
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
-    this.remoteServiceManager = remoteServiceManager;
   }
 
   /**

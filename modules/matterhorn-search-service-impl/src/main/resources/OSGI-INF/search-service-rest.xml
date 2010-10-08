@@ -3,7 +3,10 @@
  name="org.opencastproject.search.endpoint.SearchRestService" immediate="true">
   <implementation class="org.opencastproject.search.endpoint.SearchRestService" />
   <property name="service.description" value="Search REST Endpoint" />
-  <property name="opencast.rest.url" value="/search/rest" />
+
+  <property name="opencast.service.type" value="org.opencastproject.search" />
+  <property name="opencast.service.path" value="/search/rest" />
+
   <service>
     <provide interface="org.opencastproject.search.endpoint.SearchRestService" />
   </service>
