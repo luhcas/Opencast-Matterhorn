@@ -23,12 +23,7 @@
         ${rec.seriesTitle}
       </td>
       <td class="td-TimeDate">
-        <span class="date-start">
-          ${ocUtils.makeLocaleDateString(rec.startTime)}
-        </span>
-        <span class="date-end">
-          ${ocUtils.makeLocaleDateString(rec.endTime)}
-        </span>
+        ${ocRecordings.formatRecordingDates(rec.startTime, rec.endTime)}
       </td>
       <td>
         ${rec.captureAgent}
