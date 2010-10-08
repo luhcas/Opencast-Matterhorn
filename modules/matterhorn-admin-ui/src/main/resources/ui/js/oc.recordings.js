@@ -28,6 +28,11 @@ ocRecordings.changedMediaPackage = null;
 ocRecordings.configuration = null;
 ocRecordings.tableTemplate = null;
 
+
+ocRecordings.test = function() {
+
+  alert("Hallo");
+}
 /** Initialize the Recordings page.
  *  Register event handlers.
  *  Set up parser for the date/time field so that tablesorter can sort this col to.
@@ -299,26 +304,6 @@ ocRecordings.continueWorkflow = function(postData) {
   });
 }
 
-ocRecordings.loadRecordingsXML = function() {
-  var page = ocPager.currentPageIdx;
-  var psize = ocPager.pageSize;
-  var sort = ocRecordings.sortBy;
-  var order = ocRecordings.sortOrder;
-  var url = "rest/recordings/"+ocRecordings.currentState+"?ps="+psize+"&pn="+page+"&sb="+sort+"&so="+order;
-  $.ajax({
-    type       : 'GET',
-    url        : url,
-    cache      : false,
-    dataType   : 'text',
-    error      : function(XHR,status,e){
-      //alert('Not able to load recordings list for state ' + ocRecordings.currentState);
-    },
-    success    : function(data) {
-      ocRecordings.renderTable(data, ocRecordings.currentXSL);
-    }
-  });
-}
-
 /** Show the recording editor
  *
  */
@@ -355,4 +340,15 @@ ocRecordings.removeScheduledRecording = function(eventId, title) {
       }
     });
   }
+}
+
+ocRecordings.formatRecordingDates = function(startTime, endTime) {
+  var startDate = new Date(); startDate.setTime(startTime);
+  var endDate = new Date(); endDate.setTime(endTime);
+  var out = startDate.getFullYear() + '-' +
+    ocUtils.padString(startDate.getMonth()+1) + '-' +
+    ocUtils.padString(startDate.getDate()) + ' ' +
+    endDate.getHours() + ":" + ocUtils.padString(endDate.getMinutes()) + ' - ' +
+    endDate.getHours() + ":" + ocUtils.padString(endDate.getMinutes());
+  return out;
 }
