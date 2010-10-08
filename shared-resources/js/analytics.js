@@ -35,7 +35,7 @@ Opencast.Analytics = ( function() {
       $.ajax( {
         type : 'GET',
         contentType : 'text/xml',
-        url : "../../feedback/rest/footprint.xml",
+        url : "../../usertracking/rest/footprint.xml",
         data : "id=" + mediaPackageId,
         dataType : 'xml',
 

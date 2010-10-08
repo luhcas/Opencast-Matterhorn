@@ -219,7 +219,7 @@ Opencast.Watch = (function() {
               $.ajax( {
                 type : 'GET',
                 contentType : 'text/xml',
-                url : "../../feedback/rest/stats.xml",
+                url : "../../usertracking/rest/stats.xml",
                 data : "id=" + mediaPackageId,
                 dataType : 'xml',
 

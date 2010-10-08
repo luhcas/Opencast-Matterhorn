@@ -1524,7 +1524,7 @@ Opencast.Player = (function () {
         {
             type: 'GET',
             contentType: 'text/xml',
-            url: "../../feedback/rest/add",
+            url: "../../usertracking/rest/add",
             data: "id=" + mediaPackageId + "&in=" + inPosition + "&out=" + outPosition + "&key=FOOTPRINT",
             dataType: 'xml',
             success: function (xml) {

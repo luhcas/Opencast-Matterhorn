@@ -133,7 +133,7 @@ Opencast.Bookmarks = ( function() {
     $.ajax({
       type: 'GET',
       contentType: 'text/xml',
-      url: "../../feedback/rest/add",
+      url: "../../usertracking/rest/add",
       data: "id=" + mediaPackageId + "&session=" + sessionId + "&in=" + curPosition + "&out=" + curPosition + "&key=BOOKMARK&value=" + value,
       dataType: 'xml',
       success: function (xml){
