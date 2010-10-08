@@ -163,8 +163,7 @@ Opencast.Initialize = (function ()
      */
     function dropdown_open()
     {
-        dropdown_canceltimer();
-        dropdown_close();
+
        
         if (getDivId() === VIDEOSIZE)
         {
@@ -179,6 +178,7 @@ Opencast.Initialize = (function ()
             $('#oc_player_video-dropdown').css('visibility', 'hidden');
             ddmenuitem = $('#oc_volume-menue');
         }
+        dropdown_canceltimer();
         setDivId('');
     }
     
@@ -211,8 +211,9 @@ Opencast.Initialize = (function ()
     		 
     		 
     		 $('#oc_image').hide();
-             start = true;
-             $('#oc_controlbar-embed').hide();
+    		 $('#oc_video-player-controls').show();
+    		 start = true;
+         $('#oc_controlbar-embed').hide();
     	}
     }
     
@@ -373,9 +374,11 @@ Opencast.Initialize = (function ()
         });
         $('#oc_btn-play-pause-embed').click(function () 
         {
-        	
-            
-           
+        	$('#oc_image').hide();
+        	$('#oc_controlbar-embed').hide();
+        	$('#oc_video-player-controls').show();
+        	//$('#oc_flash-player').html('<script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-flash.js"></script>');
+          window.location = window.location + "&play=true";
         });
         
         $('#oc_btn-volume').click(function () 
@@ -392,8 +395,11 @@ Opencast.Initialize = (function ()
         });
         $('#oc_image').click(function () 
         {
-            
-            
+        	 $('#oc_image').hide();
+        	 $('#oc_controlbar-embed').hide();
+        	 $('#oc_video-player-controls').show();
+           //$('#oc_flash-player').html('<script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-flash.js"></script>');
+        	 window.location = window.location + "&play=true";
            
         });
         $('#oc-link-advanced-player').click(function () 

@@ -459,7 +459,7 @@
 
                     <mx:HSlider 
                         id = "hs_seek"
-                        width = "580"
+                        width = "590"
                         maximum = "{ model.currentDuration }"
                         value = "{ model.currentPlayhead }"
                         change = "{ onSeek() }"

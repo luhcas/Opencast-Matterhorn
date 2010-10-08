@@ -229,8 +229,7 @@ Opencast.Initialize = (function ()
      */
     function dropdown_open()
     {
-        dropdown_canceltimer();
-        dropdown_close();
+
        
 
         if (getDivId() === VIDEOSIZE)
@@ -247,6 +246,7 @@ Opencast.Initialize = (function ()
             $('#oc_player_video-dropdown').css('visibility', 'hidden');
             ddmenuitem = $('#oc_volume-menue');
         }
+        dropdown_canceltimer();
         setDivId('');
     }
     
@@ -966,6 +966,8 @@ Opencast.Initialize = (function ()
             margin = ((margin - controlswith) / 2) - 8;
             $('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
         }
+        
+        $("#oc_body").trigger("resize", []);
     }
 
     /**

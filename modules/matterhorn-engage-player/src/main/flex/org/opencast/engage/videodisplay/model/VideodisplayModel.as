@@ -343,7 +343,7 @@ package org.opencast.engage.videodisplay.model
         public var currentSeekPosition : Number = 0;
 
         // fullscreenProgressWidth
-        public var fullscreenProgressWidth : Number = 565;
+        public var fullscreenProgressWidth : Number = 575;
 
         // playerSeekBool
         public var playerSeekBool : Boolean = false;

@@ -235,17 +235,26 @@ Opencast.FlashVersion = (function ()
                 str += '<param name="allowScriptAccess" value="sameDomain" />';
                 str += '<param name="bgcolor" value="#000000" />';
                 str += '<param name="allowFullScreen" value="true" />';
+                str += '<param name="wmode" value="transparent" />'
                 str += '<param name="flashvars" value="bridgeName=b_Videodisplay&amp;autoplay=false"/>';
             
-            str += '<embed ';
+            str += '<embed wmode="transparent" style="z-index: 100;"';
               for (var i in embedAttrs)
                   str += i + '="' + embedAttrs[i] + '" ';
               str += '> </embed></object>';
         }
 
+        var playerType = Opencast.engage.getPlayerType();
+
+        if (playerType === "/engage/ui/embed.html") {
+            var play = Opencast.engage.getPlay(); 
+            if(play!== "true") {
+                str = '<input id="oc_image" type="image" src="" alt="Matterhorn Player" title="Click to start" />'
+            }
+        }
+
+        // DO NOT CHANGE THIS. IE8 Flash 10.0 cannot handle adding the SWF by jquery
         document.write(str);
-        //$("#oc_flash-player").html(str);
-        
     }
 
     function AC_FL_RunContent()
@@ -371,6 +380,7 @@ Opencast.FlashVersion = (function ()
                 "name", "Videodisplay",
                 "allowScriptAccess", "sameDomain",
                 "type", "application/x-shockwave-flash",
+                "wmode", "transparent",
                 "pluginspage", "http://www.adobe.com/go/getflashplayer"
           );
         } 
@@ -391,6 +401,7 @@ Opencast.FlashVersion = (function ()
                 "flashvars", "bridgeName=b_Videodisplay&amp;autoplay=false",
                 "allowScriptAccess", "sameDomain",
                 "type", "application/x-shockwave-flash",
+                "wmode", "transparent",
                 "pluginspage", "http://www.adobe.com/go/getflashplayer"
             );
        
@@ -398,11 +409,11 @@ Opencast.FlashVersion = (function ()
         } 
         else 
         {  // flash is too old or we can't detect the plugin
-            var alternateContent = 'Alternate HTML content should be placed here.'
-            + 'This content requires the Adobe Flash Player. '
-            + '<a href=http://www.adobe.com/go/getflash/>Get Flash</a>';
-            document.write(alternateContent);  // insert non-flash content
-            //$("#oc_flash-player").html(alternateContent);
+            var alternateContent = 'Matterhorn requires Adobe Flash Player.<br>'
+            + 'Please install latest version for your OS.<br>(recommended version 10.1)'
+            + '<a href="http://www.adobe.com/go/getflash/">Get Flash</a>';
+            //document.write(alternateContent);  // insert non-flash content
+            $("#oc_flash-player").html(alternateContent);
         }
     
     
