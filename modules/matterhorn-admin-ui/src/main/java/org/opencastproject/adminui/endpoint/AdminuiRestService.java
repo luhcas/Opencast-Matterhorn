@@ -157,8 +157,8 @@ public class AdminuiRestService {
       jsonRec.put("endTime", ensureString(rec.getEndTime()));
       jsonRec.put("failedOperation", ensureString(rec.getFailedOperation()));
       jsonRec.put("holdActionPanelURL", ensureString(rec.getHoldActionPanelURL()));
-      jsonRec.put("HoldActionTitle", ensureString(rec.getHoldActionTitle()));
-      jsonRec.put("HoldOperationTitle", ensureString(rec.getHoldOperationTitle()));
+      jsonRec.put("holdActionTitle", ensureString(rec.getHoldActionTitle()));
+      jsonRec.put("holdOperationTitle", ensureString(rec.getHoldOperationTitle()));
       jsonRec.put("id", ensureString(rec.getId()));
       jsonRec.put("itemType", ensureString(rec.getItemType().toString()));
       jsonRec.put("presenter", ensureString(rec.getPresenter()));
