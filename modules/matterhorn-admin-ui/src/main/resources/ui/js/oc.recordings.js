@@ -29,10 +29,6 @@ ocRecordings.configuration = null;
 ocRecordings.tableTemplate = null;
 
 
-ocRecordings.test = function() {
-
-  alert("Hallo");
-}
 /** Initialize the Recordings page.
  *  Register event handlers.
  *  Set up parser for the date/time field so that tablesorter can sort this col to.
@@ -61,7 +57,7 @@ ocRecordings.init = function() {
 
   // Event: clicked somewhere
   //  $('body').click( function() {
-  //    $('#holdActionPanel-container').fadeOut('fast');
+  //    $('#holdActionPanelContainer').fadeOut('fast');
   //  });
 
   // Buttons style
@@ -81,12 +77,12 @@ ocRecordings.init = function() {
   });
 
   /* Event: Scheduler button clicked */
-  $('#button_schedule').click( function() {
+  $('#buttonSchedule').click( function() {
     window.location.href = '../../admin/scheduler.html';
   });
 
   /* Event: Upload button clicked */
-  $('#button_upload').click( function() {
+  $('#buttonUpload').click( function() {
     window.location.href = '../../admin/upload.html';
   });
 
@@ -97,20 +93,20 @@ ocRecordings.init = function() {
     return false;
   });
 
-  $('#refresh-enabled').click( function() {
+  $('#refreshEnabled').click( function() {
     if ($(this).is(':checked')) {
-      $('#refresh-interval').removeAttr('disabled');
+      $('#refreshInterval').removeAttr('disabled');
       $('.refresh-text').removeClass('refresh-text-disabled').addClass('refresh-text-enabled');
-      ocRecordings.initTableRefresh($('#refresh-interval').val());
+      ocRecordings.initTableRefresh($('#refreshInterval').val());
     } else {
-      $('#refresh-interval').attr('disabled','true');
+      $('#refreshInterval').attr('disabled','true');
       $('.refresh-text').removeClass('refresh-text-enabled').addClass('refresh-text-disabled');
       window.clearInterval(ocRecordings.tableInterval);
       ocRecordings.tableUpdateRequested = false;
     }
   });
 
-  $('#refresh-interval').change(function() {
+  $('#refreshInterval').change(function() {
     ocRecordings.initTableRefresh($(this).val());
   });
 
@@ -145,20 +141,20 @@ ocRecordings.init = function() {
   });
 
   if (ocRecordings.currentState == "upcoming" || ocRecordings.currentState == "finished") {
-    $('#info-box').css("display", "block");
-    $("#table-info-box-"+ocRecordings.currentState).css("display","block");
+    $('#infoBox').css("display", "block");
+    $('#'+ ocRecordings.currentState +'TableInfoBox').css("display","block");
   }
 
   // init update interval for recording stats
   ocRecordings.statsInterval = window.setInterval( 'ocRecordings.displayRecordingStats();', 3000 );
   if (show == 'all' || show == 'capturing' || show == 'processing') {
-    $('#refresh-controls-container').css('display','block');
-    if ($('#refresh-enabled').is(':visible') && $('#refresh-enabled').is(':checked')) {
+    $('#refreshControlsContainer').css('display','block');
+    if ($('#refreshEnabled').is(':visible') && $('#refreshEnabled').is(':checked')) {
       $('.refresh-text').removeClass('refresh-text-disabled').addClass('refresh-text-enabled');
-      ocRecordings.initTableRefresh($('#refresh-interval').val());
+      ocRecordings.initTableRefresh($('#refreshInterval').val());
     }
   } else {
-    $('#refresh-controls-container').css('display','none');
+    $('#refreshControlsContainer').css('display','none');
   }
 }
 
@@ -194,7 +190,7 @@ ocRecordings.displayRecordingStats = function() {
               ocRecordings.lastCount = data[key];
             }
           }
-          var elm = $('#count-' + key);
+          var elm = $('#' + key + 'Count');
           if (elm) {
             elm.text('(' + data[key] + ')');
           }
@@ -223,7 +219,7 @@ ocRecordings.displayRecordings = function(state, reload) {
         ocUtils.log('Error: Could not get Recordings');   // TODO more detailed debug info
       },
       success : function(data) {
-        var container = document.getElementById('recordings-table-container');
+        var container = document.getElementById('recordingsTableContainer');
         container.innerHTML = ocRecordings.tableTemplate.process(data);
       }
     });
@@ -236,28 +232,28 @@ ocRecordings.displayRecordings = function(state, reload) {
  * @param callerElm HTML element that invoked the UI (so that information from the recordings table row can be gathered
  */
 ocRecordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
-  $('#holdActionPanel-container iframe').attr('src', URL);
+  $('#holdActionPanelContainer iframe').attr('src', URL);
   $('#holdWorkflowId').val(wfId);
   var parentRow = $(callerElm).parent().parent();
-  $('#holdStateHeadRow-title').html($($(parentRow).children().get(0)).html());
-  $('#holdStateHeadRow-presenter').html($($(parentRow).children().get(1)).html());
-  $('#holdStateHeadRow-series').html($($(parentRow).children().get(2)).html());
-  $('#holdStateHeadRow-date').html($($(parentRow).children().get(3)).html());
-  $('#holdStateHeadRow-status').html($($(parentRow).children().get(4)).html());
-  $('#holdActionPanel-container').toggle();
-  $('#recordings-table-container').hide();
-  $('#category-selector-container').parent().hide();
+  $('#holdStateHeadRowTitle').html($($(parentRow).children().get(0)).html());
+  $('#holdStateHeadRowPresenter').html($($(parentRow).children().get(1)).html());
+  $('#holdStateHeadRowSeries').html($($(parentRow).children().get(2)).html());
+  $('#holdStateHeadRowDate').html($($(parentRow).children().get(3)).html());
+  $('#holdStateHeadRowStatus').html($($(parentRow).children().get(4)).html());
+  $('#holdActionPanelContainer').toggle();
+  $('#recordingsTableContainer').hide();
+  $('#categorySelectorContainer').parent().hide();
   $('#oc_recordingmenu').hide();
-  $('.paging-nav-container').hide();
-  $('#refresh-controls-container').hide();
+  $('.pagingNavContainer').hide();
+  $('#refreshControlsContainer').hide();
 }
 
 /** Adjusts the height of the panel holding the Hold Operation UI
  *
  */
 ocRecordings.adjustHoldActionPanelHeight = function() {
-  var height = $("#holdActionPanel-iframe").contents().find("html").height();
-  $('#holdActionPanel-iframe').height(height+10);
+  var height = $("#holdActionPanelIframe").contents().find("html").height();
+  $('#holdActionPanelIframe').height(height+10);
 //alert("Hold action panel height: " + height);
 }
 
@@ -294,11 +290,11 @@ ocRecordings.continueWorkflow = function(postData) {
       alert('Could not resume Workflow: ' + status);
     },
     success    : function(data) {
-      $('#holdActionPanel-container').toggle();
-      $('#recordings-table-container').toggle();
+      $('#holdActionPanelContainer').toggle();
+      $('#recordingsTableContainer').toggle();
       $('#oc_recordingmenu').toggle();
-      $('.paging-nav-container').toggle();
-      $('#refresh-controls-container').toggle();
+      $('.pagingNavContainer').toggle();
+      $('#refreshControlsContainer').toggle();
       location.reload();
     }
   });

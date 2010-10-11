@@ -73,85 +73,85 @@
 
         <div class="fl-fix">
           <!-- Add/Schedule Buttons -->
-          <div id="add-buttons-container">
-            <button type="button" id="button_schedule" style="height:2.1em;cursor:pointer;margin-right:1em;font-size:0.9em;vertical-align: middle;">
+          <div id="addButtonsContainer">
+            <button type="button" id="buttonSchedule" style="height:2.1em;cursor:pointer;margin-right:1em;font-size:0.9em;vertical-align: middle;">
               <span class="icon icon-add">&nbsp;</span>
               <span style="font-weight: bold; font-size:1em;" id="i18n_button_schedule">&nbsp; Schedule Recordings</span>
             </button>
-            <button type="button" id="button_upload" style="height:2.1em;cursor:pointer;font-size:0.9em;vertical-align: middle;">
+            <button type="button" id="buttonUpload" style="height:2.1em;cursor:pointer;font-size:0.9em;vertical-align: middle;">
               <span class="icon icon-add">&nbsp;</span>
               <span style="font-weight: bold; font-size:1em;" id="i18n_button_upload">&nbsp; Upload Recording</span>
             </button>
           </div>
 
           <!-- recording state selector -->
-          <div id="category-selector-container" class="fl-fix">
+          <div id="categorySelectorContainer" class="fl-fix">
             <ul class="category-selector">
               <li class="category-selector-item">
-                <span class="state-selector selector-all clickable" state="all"><span id="i18n_view_all">All</span> <span id="count-all"></span></span>
+                <span class="state-selector selector-all clickable" state="all"><span id="i18n_view_all">All</span> <span id="allCount"></span></span>
               </li>
               <li class="category-selector-spacer">
                 &#124;
               </li>
               <li class="category-selector-item">
-                <span class="state-selector selector-upcoming clickable" state="upcoming"><span id="i18n_view_upcoming">Upcoming</span> <span id="count-upcoming"></span></span>
+                <span class="state-selector selector-upcoming clickable" state="upcoming"><span id="i18n_view_upcoming">Upcoming</span> <span id="upcomingCount"></span></span>
               </li>
               <li class="category-selector-spacer">
                 &#124;
               </li>
               <li class="category-selector-item">
-                <span class="state-selector selector-capturing clickable" state="capturing"><span id="i18n_view_capturing">Capturing</span> <span id="count-capturing"></span></span>
+                <span class="state-selector selector-capturing clickable" state="capturing"><span id="i18n_view_capturing">Capturing</span> <span id="capturingCount"></span></span>
               </li>
               <li class="category-selector-spacer">
                 &#124;
               </li>
               <li class="category-selector-item">
-                <span class="state-selector selector-processing clickable" state="processing"><span id="i18n_view_processing">Processing</span> <span id="count-processing"></span></span>
+                <span class="state-selector selector-processing clickable" state="processing"><span id="i18n_view_processing">Processing</span> <span id="processingCount"></span></span>
               </li>
               <li class="category-selector-spacer">
                 &#124;
               </li>
               <li class="category-selector-item">
-                <span class="state-selector selector-finished clickable" state="finished"><span id="i18n_view_finished">Finished</span> <span id="count-finished"></span></span>
+                <span class="state-selector selector-finished clickable" state="finished"><span id="i18n_view_finished">Finished</span> <span id="finishedCount"></span></span>
               </li>
               <li class="category-selector-spacer" style="width:30px;">
                 &nbsp;
               </li>
               <li class="category-selector-item">
-                <span class="state-selector selector-hold clickable" state="hold"><span id="i18n_view_onhold">On Hold</span> <span id="count-hold">()</span></span>
+                <span class="state-selector selector-hold clickable" state="hold"><span id="i18n_view_onhold">On Hold</span> <span id="holdCount">()</span></span>
               </li>
               <li class="category-selector-spacer">
                 &#124;
               </li>
               <li class="category-selector-item">
-                <span class="state-selector selector-failed clickable" state="failed"><span id="i18n_view_failed">Failed</span> <span id="count-failed">()</span></span>
+                <span class="state-selector selector-failed clickable" state="failed"><span id="i18n_view_failed">Failed</span> <span id="failedCount">()</span></span>
               </li>
             </ul>
           </div>
         </div>
 
         <!-- info boxes shown above the table when upcoming or finished filter is selected -->
-        <div id="info-box" style="margin-bottom:18px;display:none;">
-            <div id="table-info-box-finished" style="display:none;border: 1px solid #cccccc;font-size:0.9em;text-align:center;width:600px;margin-left:auto;margin-right:auto;margin-bottom:0.5em;padding:0.5em;">
+        <div id="infoBox" style="margin-bottom:18px;display:none;">
+            <div id="finishedTableInfoBox" style="display:none;border: 1px solid #cccccc;font-size:0.9em;text-align:center;width:600px;margin-left:auto;margin-right:auto;margin-bottom:0.5em;padding:0.5em;">
                 <img title="Information" alt="Information" src="img/icons/information.png" style="vertical-align: bottom;"></img>
                 Go to the <a id="engagelink" style="text-decoration:underline">Matterhorn Media Module</a> to see any Recordings which have gone through "Encode, Analyze, and Distribute" processing.
             </div>
-            <div id="table-info-box-upcoming" style="display:none;border: 1px solid #cccccc;font-size:0.9em;text-align:center;width:900px;margin-left:auto;margin-right:auto;margin-bottom:0.5em;padding:0.5em;">
+            <div id="upcomingTableInfoBox" style="display:none;border: 1px solid #cccccc;font-size:0.9em;text-align:center;width:900px;margin-left:auto;margin-right:auto;margin-bottom:0.5em;padding:0.5em;">
                 <img title="Information" alt="Information" src="img/icons/information.png" style="vertical-align: bottom;"></img>
                 All recordings scheduled for the future appear below. (Future versions of Matterhorn will allow you to filter this list to show specific days.)
             </div>
        </div>
 
         <!-- recordings table -->
-        <div id="recordings-table-container" style="clear:both;">
+        <div id="recordingsTableContainer" style="clear:both;">
           <!-- This is where the rendered table goes -->
         </div>
 
-      <div id="holdActionPanel-container">
+      <div id="holdActionPanelContainer">
           <h2>
-            <span id="holdStateHeadRow-title" >&nbsp;</span>
-            <span id="holdStateHeadRow-presenter">&nbsp;</span>
-            <span id="holdStateHeadRow-series">&nbsp;</span>
+            <span id="holdStateHeadRowTitle" >&nbsp;</span>
+            <span id="holdStateHeadRowPresenter">&nbsp;</span>
+            <span id="holdStateHeadRowSeries">&nbsp;</span>
             <span id="holdStateHeadRow-date"></span>
           </h2>
           <div id="holdIframe-container">
@@ -165,10 +165,10 @@
           </div>
         </div>
 
-        <div id="refresh-controls-container" style="float:left;">
-          <input type="checkbox" id="refresh-enabled" checked="checked">
+        <div id="refreshControlsContainer" style="float:left;">
+          <input type="checkbox" id="refreshEnabled" checked="checked">
           <span class="refresh-text">Update table every&nbsp;</span>
-          <select id="refresh-interval">
+          <select id="refreshInterval">
             <option value="5">5</option>
             <option value="7">7</option>
             <option value="10">10</option>
