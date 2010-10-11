@@ -35,8 +35,11 @@ public class OcropusTextAnalyzer {
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(OcropusTextAnalyzer.class);
 
+  /** Default name of the ocrocmd binary */
+  public static final String OCROPUS_BINARY_DEFAULT = "ocrocmd";
+
   /** Binary of the ocropus command */
-  protected String binary = "/usr/local/bin/ocrocmd";
+  protected String binary = OCROPUS_BINARY_DEFAULT;
 
   /** The text frame containing the result of the analysis operation */
   protected OcropusTextFrame textFrame = null;

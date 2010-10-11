@@ -56,7 +56,7 @@ public class MediaInspectionServiceImplTest {
       // Mediainfo requires a track in order to return a status code of 0, indicating that it is workinng as expected
       URI uriTrack = MediaInspectionServiceImpl.class.getResource("/av.mov").toURI();
       File f = new File(uriTrack);
-      Process p = new ProcessBuilder(MediaInfoAnalyzer.DEFAULT_MEDIAINFO_PATH, f.getAbsolutePath()).start();
+      Process p = new ProcessBuilder(MediaInfoAnalyzer.MEDIAINFO_BINARY_DEFAULT, f.getAbsolutePath()).start();
       if (p.waitFor() != 0)
         throw new IllegalStateException();
     } catch (Throwable t) {

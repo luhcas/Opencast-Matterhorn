@@ -36,7 +36,7 @@ import java.util.Map;
 public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
 
   /** Default location of the ffmepg binary (resembling the installer) */
-  public static final String FFMPEG_BINARY_DEFAULT = "/usr/local/bin/ffmpeg";
+  public static final String FFMPEG_BINARY_DEFAULT = "ffmpeg";
 
   /** The ffmpeg commandline suffix */
   public static final String CMD_SUFFIX = "ffmpeg.command";

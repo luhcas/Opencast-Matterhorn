@@ -44,7 +44,7 @@ public class OcropusTextAnalyzerTest {
   protected File testFile = null;
 
   /** Path to the ocropus binary */
-  protected static String ocropusbinary = "/usr/local/bin/ocrocmd";
+  protected static String ocropusbinary = OcropusTextAnalyzer.OCROPUS_BINARY_DEFAULT;
 
   /** The ocropus text analyzer */
   protected OcropusTextAnalyzer analyzer = null;

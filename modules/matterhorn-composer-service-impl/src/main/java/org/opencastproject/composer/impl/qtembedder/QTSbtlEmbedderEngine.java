@@ -33,7 +33,7 @@ import java.util.MissingResourceException;
 public class QTSbtlEmbedderEngine extends AbstractCmdlineEmbedderEngine {
 
   /** Default location of the qtsbtlembedder binary (resembling the installer) */
-  public static final String QTEMBEDDER_BINARY_DEFAULT = "/usr/local/bin/qtsbtlembedder";
+  public static final String QTEMBEDDER_BINARY_DEFAULT = "qtsbtlembedder";
 
   /** Parameter name for retrieving qt embedder path */
   private static final String CONFIG_QTEMBEDDER_PATH = "composer.qtembedderpath";

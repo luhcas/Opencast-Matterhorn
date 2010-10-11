@@ -53,7 +53,7 @@ import java.util.regex.Pattern;
 public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
 
   public static final String CONFIG_MEDIAINFO_BINARY = "mediainfo.binary";
-  public static final String DEFAULT_MEDIAINFO_PATH = "/usr/local/bin/mediainfo";
+  public static final String MEDIAINFO_BINARY_DEFAULT = "mediainfo";
 
   private static final Logger logger = LoggerFactory.getLogger(MediaInfoAnalyzer.class);
 
@@ -114,7 +114,7 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
 
   public MediaInfoAnalyzer() {
     // instantiated using MediaAnalyzerFactory via newInstance()
-    super(DEFAULT_MEDIAINFO_PATH);
+    super(MEDIAINFO_BINARY_DEFAULT);
   }
 
   /**
@@ -211,7 +211,7 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
 
   @Override
   protected boolean onVersionCheck(String line) {
-    return "MediaInfoLib - v0.7.19".equals(line);
+    return line.startsWith("MediaInfoLib - v0.7");
   }
 
   // --------------------------------------------------------------------------------------------

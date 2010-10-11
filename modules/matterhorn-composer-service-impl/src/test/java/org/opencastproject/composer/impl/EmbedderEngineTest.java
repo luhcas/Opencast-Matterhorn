@@ -45,7 +45,7 @@ public class EmbedderEngineTest {
   private File resultingFile;
   
   // default path to QT subtitle embedder
-  private static String defaultBinaryPath = "/usr/local/bin/qtsbtlembedder";
+  private static String defaultBinaryPath = QTSbtlEmbedderEngine.QTEMBEDDER_BINARY_DEFAULT;
 
   // logger
   private static final Logger logger = LoggerFactory.getLogger(EmbedderEngineTest.class);

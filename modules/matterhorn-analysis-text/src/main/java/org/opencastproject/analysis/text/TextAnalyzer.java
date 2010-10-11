@@ -95,7 +95,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   private ExecutorService executor = null;
 
   /** Path to the ocropus binary */
-  private String ocropusbinary = "/usr/local/bin/ocrocmd";
+  private String ocropusbinary = OcropusTextAnalyzer.OCROPUS_BINARY_DEFAULT;
 
   /**
    * Creates a new text analzer.
