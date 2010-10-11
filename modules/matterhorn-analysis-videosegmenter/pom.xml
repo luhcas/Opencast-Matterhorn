@@ -119,7 +119,8 @@
               *;resolution:=optional
             </Import-Package>
             <Service-Component>
-              OSGI-INF/segmenter.xml
+              OSGI-INF/segmenter.xml,
+              OSGI-INF/segmenter-rest.xml
             </Service-Component>
           </instructions>
         </configuration>

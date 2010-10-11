@@ -87,7 +87,9 @@ public class RemoteBase {
    * {@link HttpStatus.SC_OK} as the status code.
    * 
    * @param httpRequest
-   *          the http request
+   *          the http request.  If the URI is specified, it should include only the path beyond the service endpoint.
+   *          For example, a request intended for http://{host}/{service}/extra/path/info.xml should include the URI
+   *          "/extra/path/info.xml".
    * @return the response object
    */
   protected HttpResponse getResponse(HttpRequestBase httpRequest) {
@@ -99,7 +101,9 @@ public class RemoteBase {
    * expected http status code.
    * 
    * @param httpRequest
-   *          the http request
+   *          the http request.  If the URI is specified, it should include only the path beyond the service endpoint.
+   *          For example, a request intended for http://{host}/{service}/extra/path/info.xml should include the URI
+   *          "/extra/path/info.xml".
    * @param expectedHttpStatus
    *          any expected status codes to include in the return.
    * @return the response object

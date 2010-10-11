@@ -6,7 +6,7 @@
   <property name="service.description" value="Text Analysis REST Endpoint" />
 
   <property name="opencast.service.type" value="org.opencastproject.analysis.text" />
-  <property name="opencast.service.path" value="/analysis/test/rest" />
+  <property name="opencast.service.path" value="/analysis/text/rest" />
   <property name="opencast.service.jobproducer" value="true" />
 
   <service>
