@@ -129,7 +129,7 @@ public class AdminuiRestService {
 
   @GET
   @Produces(MediaType.TEXT_XML)
-  @Path("recordings/{state}")
+  @Path("recordings/{state}.xml")
   public AdminRecordingListImpl getRecordingsXML(@PathParam("state") String state,
           @QueryParam("pn") int pageNumber,
           @QueryParam("ps") int pageSize,
@@ -141,47 +141,12 @@ public class AdminuiRestService {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("recordings/{state}.json")
-  public Response getRecordingsJSON(@PathParam("state") String state,
+  public AdminRecordingListImpl getRecordingsJSON(@PathParam("state") String state,
           @QueryParam("pn") int pageNumber,
           @QueryParam("ps") int pageSize,
           @QueryParam("sb") String sortBy,
           @QueryParam("so") String sortOrder) {
-    AdminRecordingListImpl recordings = getRecordings(state, pageNumber, pageSize, sortBy, sortOrder);
-    logger.info("Result items: " + recordings.size());
-    JSONArray jsonRecordings = new JSONArray();
-    for (Iterator<AdminRecording> i = recordings.iterator(); i.hasNext();) {
-      AdminRecording rec = i.next();
-      JSONObject jsonRec = new JSONObject();
-      jsonRec.put("captureAgent", ensureString(rec.getCaptureAgent()));
-      jsonRec.put("distributionStatus", ensureString(rec.getDistributionStatus()));
-      jsonRec.put("endTime", ensureString(rec.getEndTime()));
-      jsonRec.put("failedOperation", ensureString(rec.getFailedOperation()));
-      jsonRec.put("holdActionPanelURL", ensureString(rec.getHoldActionPanelURL()));
-      jsonRec.put("holdActionTitle", ensureString(rec.getHoldActionTitle()));
-      jsonRec.put("holdOperationTitle", ensureString(rec.getHoldOperationTitle()));
-      jsonRec.put("id", ensureString(rec.getId()));
-      jsonRec.put("itemType", ensureString(rec.getItemType().toString()));
-      jsonRec.put("presenter", ensureString(rec.getPresenter()));
-      jsonRec.put("processingStatus", ensureString(rec.getProcessingStatus()));
-      jsonRec.put("recordingStatus", ensureString(rec.getRecordingStatus()));
-      jsonRec.put("seriesId", ensureString(rec.getSeriesId()));
-      jsonRec.put("seriesTitle", ensureString(rec.getSeriesTitle()));
-      jsonRec.put("startTime", ensureString(rec.getStartTime()));
-      jsonRec.put("title", ensureString(rec.getTitle()));
-      jsonRec.put("zipUrl", ensureString(rec.getZipUrl()));
-      JSONArray errMsgs = new JSONArray();
-      String[] err = rec.getErrorMessages();
-      if (err != null) {
-        for (String m : err) {
-          errMsgs.add(m);
-        }
-      }
-      jsonRec.put("errorMessages", errMsgs);
-      jsonRecordings.add(jsonRec);
-    }
-    JSONObject out = new JSONObject();
-    out.put("recordings", jsonRecordings);
-    return Response.ok(out.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
+    return getRecordings(state, pageNumber, pageSize, sortBy, sortOrder);
   }
 
   private String ensureString(String in) {
@@ -625,23 +590,13 @@ public class AdminuiRestService {
   }
 
   @GET
+  @Produces(MediaType.APPLICATION_JSON)
   @Path("series.json")
-  public Response getSeriesJSON(@QueryParam("pn") int pageNumber,
+  public AdminSeriesListImpl getSeriesJSON(@QueryParam("pn") int pageNumber,
           @QueryParam("ps") int pageSize,
           @QueryParam("sb") String sortBy,
           @QueryParam("so") String sortOrder) {
-    JSONArray out = new JSONArray();
-    AdminSeriesListImpl series = getSeries(pageNumber, pageSize, sortBy, sortOrder);
-    for (Iterator<AdminSeries> i = series.iterator(); i.hasNext();) {
-      JSONObject jsonSr = new JSONObject();
-      AdminSeries sr = i.next();
-      jsonSr.put("id", ensureString(sr.getId()));
-      jsonSr.put("title", ensureString(sr.getTitle()));
-      jsonSr.put("creator", ensureString(sr.getCreator()));
-      jsonSr.put("contributor", ensureString(sr.getContributor()));
-      out.add(jsonSr);
-    }
-    return Response.ok(out.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
+    return getSeries(pageNumber, pageSize, sortBy, sortOrder);
   }
 
   public AdminSeriesListImpl getSeries(int pageNumber,
