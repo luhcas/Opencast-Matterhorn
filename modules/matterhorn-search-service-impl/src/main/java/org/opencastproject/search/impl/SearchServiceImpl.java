@@ -53,7 +53,7 @@ public class SearchServiceImpl implements SearchService {
   /** Log facility */
   private static final Logger logger = LoggerFactory.getLogger(SearchServiceImpl.class);
 
-  public static final String CONFIG_SOLR_ROOT = "search.searchindexdir";
+  public static final String CONFIG_SOLR_ROOT = "org.opencastproject.search.searchindexdir";
 
   /** Connection to the solr database */
   private SolrConnection solrConnection = null;

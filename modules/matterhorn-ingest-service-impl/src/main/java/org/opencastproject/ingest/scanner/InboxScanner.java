@@ -70,11 +70,11 @@ public class InboxScanner implements ArtifactInstaller {
 
   protected void activate(ComponentContext cc) {
     int maxThreads = 1;
-    if(cc != null && cc.getBundleContext().getProperty("inbox.threads") != null) {
+    if(cc != null && cc.getBundleContext().getProperty("org.opencastproject.inbox.threads") != null) {
       try {
-        maxThreads = Integer.parseInt(cc.getBundleContext().getProperty("inbox.threads"));
+        maxThreads = Integer.parseInt(cc.getBundleContext().getProperty("org.opencastproject.inbox.threads"));
       } catch(NumberFormatException e) {
-        logger.warn("Illegal value set for inbox.threads. Using default value of 1 inbox ingest at a time.");
+        logger.warn("Illegal value set for org.opencastproject.inbox.threads. Using default value of 1 inbox ingest at a time.");
       }
     }
     this.executorService = Executors.newFixedThreadPool(maxThreads);

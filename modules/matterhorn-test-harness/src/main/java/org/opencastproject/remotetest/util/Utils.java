@@ -24,7 +24,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -37,7 +40,12 @@ import java.security.NoSuchAlgorithmException;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -45,43 +53,59 @@ import javax.xml.xpath.XPathFactory;
 
 /**
  * Test utilities
- *
+ * 
  */
 public class Utils {
 
-
   public static Document parseXml(InputStream in) throws Exception {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      factory.setNamespaceAware(true);
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      return builder.parse(in);
-   }
-  
-  public static Object xPath(Document document, String path, QName returnType)
-    throws XPathExpressionException, TransformerException {
+    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    factory.setNamespaceAware(true);
+    DocumentBuilder builder = factory.newDocumentBuilder();
+    return builder.parse(in);
+  }
+
+  /**
+   * Converts the node to a string representation.
+   * 
+   * @param node
+   *          the node
+   * @return the string representation
+   * @throws Exception
+   */
+  public static String nodeToString(Node node) throws Exception {
+    DOMSource domSource = new DOMSource(node);
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    StreamResult result = new StreamResult(out);
+    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+    transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+    transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
+    transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+    transformer.transform(domSource, result);
+    InputStream in = new ByteArrayInputStream(out.toByteArray());
+    return IOUtils.toString(in, "UTF-8");
+  }
+
+  public static Object xPath(Document document, String path, QName returnType) throws XPathExpressionException,
+          TransformerException {
     XPath xPath = XPathFactory.newInstance().newXPath();
     xPath.setNamespaceContext(new UniversalNamespaceResolver(document));
     return xPath.compile(path).evaluate(document, returnType);
   }
-  
+
   public static Boolean xPathExists(Document document, String path) throws Exception {
     return (Boolean) xPath(document, path, XPathConstants.BOOLEAN);
   }
-  
+
   public static JSONObject parseJson(String doc) throws Exception {
     return (JSONObject) JSONValue.parse(doc);
   }
-  
+
   public static String schedulerEvent(Integer duration, String title, String id) throws Exception {
-	Long start = System.currentTimeMillis() + 60000;
-	Long end = start + duration;
-	String event = IOUtils.toString(Utils.class.getResourceAsStream("/scheduler-event.xml"), "UTF-8");
-	return event
-		.replace("@@id@@", id)
-		.replace("@@title@@", title)
-		.replace("@@start@@", start.toString())
-		.replace("@@end@@", end.toString())
-		.replace("@@duration@@", duration.toString());
+    Long start = System.currentTimeMillis() + 60000;
+    Long end = start + duration;
+    String event = IOUtils.toString(Utils.class.getResourceAsStream("/scheduler-event.xml"), "UTF-8");
+    return event.replace("@@id@@", id).replace("@@title@@", title).replace("@@start@@", start.toString())
+            .replace("@@end@@", end.toString()).replace("@@duration@@", duration.toString());
   }
 
   public static File getUrlAsFile(String url) throws IOException {
@@ -98,7 +122,7 @@ public class Utils {
       Main.getClient().close(response);
     }
   }
-  
+
   public static Document getUrlAsDocument(String url) throws Exception {
     TrustedHttpClient client = Main.getClient();
     HttpGet get = new HttpGet(url);
@@ -110,22 +134,23 @@ public class Utils {
       client.close(response);
     }
   }
-  
+
   public static final String md5(File f) throws IOException {
     byte[] bytes = new byte[1024];
     InputStream is = null;
     try {
       MessageDigest md = MessageDigest.getInstance("MD5");
       is = new DigestInputStream(new FileInputStream(f), md);
-      while ((is.read(bytes)) >= 0) {}
+      while ((is.read(bytes)) >= 0) {
+      }
       return hex(md.digest());
-    } catch(NoSuchAlgorithmException e) {
+    } catch (NoSuchAlgorithmException e) {
       throw new IOException("No MD5 algorithm available");
     } finally {
       is.close();
     }
   }
-  
+
   /**
    * Converts the checksum to a hex string.
    * 
@@ -149,5 +174,4 @@ public class Utils {
     return buf.toString();
   }
 
-  
 }

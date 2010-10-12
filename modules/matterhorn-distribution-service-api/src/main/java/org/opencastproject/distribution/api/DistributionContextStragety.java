@@ -15,7 +15,6 @@
  */
 package org.opencastproject.distribution.api;
 
-import org.opencastproject.mediapackage.MediaPackage;
 
 /**
  * DistributionContextStrategy implementations provide mappings between mediapackages and distribution channel specific
@@ -26,20 +25,20 @@ public interface DistributionContextStragety {
    * Gets an identifier for a mediapackage. Implementations may return a series identifier, a creator name, or any other
    * kind of metadata obtained from the mediapackage.
    * 
-   * @param mp
-   *          The mediapackage
+   * @param mediaPackageId
+   *          The mediapackage id
    * @return The context ID
    */
-  public String getContextId(MediaPackage mp);
+  public String getContextId(String mediaPackageId);
 
   /**
    * Gets the name for a context within a distribution channel. This method is called once to create a new tab or
    * playlist.
    * 
-   * @param mp
-   *          The mediapackage
+   * @param mediaPackageId
+   *          The mediapackage id
    * @return The name of the context (playlist, tab, etc)
    */
-  public String getContextName(MediaPackage mp);
+  public String getContextName(String mediaPackageId);
 
 }

@@ -96,7 +96,7 @@ public class ComposerServiceImpl implements ComposerService {
   private ExecutorService executor = null;
 
   /** The configuration property containing the number of concurrent encoding threads to run */
-  public static final String CONFIG_THREADS = "composer.threads";
+  public static final String CONFIG_THREADS = "org.opencastproject.composer.threads";
 
   /** The default number of concurrent encoding threads to run */
   public static final int DEFAULT_THREADS = 2;

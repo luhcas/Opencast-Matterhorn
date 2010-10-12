@@ -18,9 +18,20 @@ package org.opencastproject.distribution.api;
 /**
  * A DistributionException indicates that an error occurred while interacting with a distribution channel.
  */
-public class DistributionException extends Exception {
+public class DistributionException extends RuntimeException {
+  
   private static final long serialVersionUID = -2340507612898278368L;
-  public DistributionException(String message) {super(message);}
-  public DistributionException(Throwable cause) {super(cause);}
-  public DistributionException(String message, Throwable cause) {super(message, cause);}
+
+  public DistributionException(String message) {
+    super(message);
+  }
+
+  public DistributionException(Throwable cause) {
+    super(cause);
+  }
+
+  public DistributionException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
 }

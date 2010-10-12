@@ -83,7 +83,8 @@
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Export-Package> org.opencastproject.distribution.streaming;version=${project.version} </Export-Package>
             <Service-Component>
-              OSGI-INF/distribution-service-streaming.xml
+              OSGI-INF/distribution-service-streaming.xml,
+              OSGI-INF/distribution-service-streaming-rest.xml
             </Service-Component>
           </instructions>
         </configuration>

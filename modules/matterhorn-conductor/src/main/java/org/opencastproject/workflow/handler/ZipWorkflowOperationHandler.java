@@ -86,7 +86,7 @@ public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandle
   public static final String ARCHIVE_TEMP_DIR = "archive-temp";
 
   /** The bundle context property to consult for determining the number of concurrent threads to use in zipping */
-  public static final String ARCHIVE_THREADS_BUNDLE_CONTEXT_PROPERTY = "archive.threads";
+  public static final String ARCHIVE_THREADS_BUNDLE_CONTEXT_PROPERTY = "org.opencastproject.zip.threads";
 
   /** The flavor to use for a mediapackage archive */
   public static final MediaPackageElementFlavor ARCHIVE_FLAVOR = MediaPackageElementFlavor.parseFlavor("archive/zip");
@@ -147,7 +147,7 @@ public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandle
       try {
         maxThreads = Integer.parseInt(cc.getBundleContext().getProperty(ARCHIVE_THREADS_BUNDLE_CONTEXT_PROPERTY));
       } catch (NumberFormatException e) {
-        logger.warn("Illegal value set for archive.threads.  Using default value of 1 archive operation at a time.");
+        logger.warn("Illegal value set for org.opencastproject.zip.threads. Using default value of 1 archive operation at a time.");
       }
     }
     this.executorService = Executors.newFixedThreadPool(maxThreads);

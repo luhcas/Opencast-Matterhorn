@@ -175,7 +175,8 @@
               org.apache.servicemix.specs.javamail-api-1.4;inline=true
             </Embed-Dependency>
             <Service-Component>
-              OSGI-INF/distribution-service-youtube.xml
+              OSGI-INF/distribution-service-youtube.xml,
+              OSGI-INF/distribution-service-youtube-rest.xml
             </Service-Component>
           </instructions>
         </configuration>

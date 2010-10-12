@@ -16,11 +16,14 @@
 package org.opencastproject.distribution.api;
 
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.remote.api.Job;
 
 /**
  * Distributes elements from {@link MediaPackage}s to distribution channels.
  */
 public interface DistributionService {
+
   /**
    * A prefix used by distribution service implementations to indicate the types of distribution channels they manage.
    */
@@ -29,21 +32,28 @@ public interface DistributionService {
   /**
    * Distribute the elementIds from a media package.
    * 
-   * @param mediaPackage The media package to distribute
-   * @param elementIds The elements in the media package to include in this distribution
-   * @return The augmented media package, typically including all of the source media package's elements along with new
-   * elements pointing to the distributed media. 
-   * @throws DistributionException if there was a problem distributing the media
+   * @param mediaPackageId
+   *          The media package to distribute
+   * @param element
+   *          The element in the media package to distribute
+   * @param block
+   *          <code>true</code> to wait for this method to finish
+   * @return The job
+   * @throws DistributionException
+   *           if there was a problem distributing the media
    */
-  MediaPackage distribute(MediaPackage mediaPackage, String... elementIds) throws DistributionException;
+  Job distribute(String mediaPackageId, MediaPackageElement element, boolean block) throws DistributionException;
 
   /**
    * Retract all media and metadata associated with this media package from the distribution channel.
    * 
-   * @param mediaPackageId The identifier of the media package to retract
-   * @throws DistributionException if there was a problem retracting the mediapackage
+   * @param mediaPackageId
+   *          The identifier of the media package to retract
+   * @param block
+   *          <code>true</code> to wait for this method to finish
+   * @throws DistributionException
+   *           if there was a problem retracting the mediapackage
    */
-  void retract(String mediaPackageId) throws DistributionException;
+  Job retract(String mediaPackageId, boolean block) throws DistributionException;
 
 }
-

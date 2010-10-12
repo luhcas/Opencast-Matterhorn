@@ -74,7 +74,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   public static final String COLLECTION_ID = "ocrtext";
 
   /** The configuration key for setting the number of worker threads */
-  public static final String CONFIG_THREADS = "textanalyzer.threads";
+  public static final String CONFIG_THREADS = "org.opencastproject.textanalyzer.threads";
 
   /** The default worker thread pool size to use if no configuration is specified */
   public static final int DEFAULT_THREADS = 1;
@@ -119,8 +119,8 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
     }
     setExecutorThreads(threads);
 
-    if (cc.getBundleContext().getProperty("textanalyzer.ocrocmd") != null)
-      ocropusbinary = (String) cc.getBundleContext().getProperty("textanalyzer.ocrocmd");
+    if (cc.getBundleContext().getProperty("org.opencastproject.textanalyzer.ocrocmd") != null)
+      ocropusbinary = (String) cc.getBundleContext().getProperty("org.opencastproject.textanalyzer.ocrocmd");
   }
 
   /**

@@ -270,4 +270,14 @@ public interface MediaPackageElement extends ManifestContributor, Comparable<Med
    * @return The copy
    */
   public Object clone();
+
+  /**
+   * Returns an xml representation of the media package element's manifest representation.
+   * 
+   * @return the element representation
+   * @throws MediaPackageException
+   *           if serialization fails
+   */
+  String getAsXml() throws MediaPackageException;
+  
 }

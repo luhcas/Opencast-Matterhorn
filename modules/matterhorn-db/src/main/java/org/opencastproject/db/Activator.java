@@ -61,11 +61,11 @@ public class Activator implements BundleActivator {
     rootDir = bundleContext.getProperty("org.opencastproject.storage.dir") + File.separator + "db";
     
     // Register the Datasource, defaulting to an embedded H2 database if DB configurations are not specified
-    String vendor = getConfigProperty(bundleContext.getProperty("dbVendor"), "HSQL");
-    String jdbcDriver = getConfigProperty(bundleContext.getProperty("jdbcDriver"), "org.h2.Driver");
-    String jdbcUrl = getConfigProperty(bundleContext.getProperty("jdbcUrl"), "jdbc:h2:" + rootDir + ";LOCK_MODE=1;MVCC=TRUE");
-    String jdbcUser = getConfigProperty(bundleContext.getProperty("jdbcUser"), "sa");
-    String jdbcPass = getConfigProperty(bundleContext.getProperty("jdbcPass"), "sa");
+    String vendor = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.vendor"), "HSQL");
+    String jdbcDriver = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.jdbc.driver"), "org.h2.Driver");
+    String jdbcUrl = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.jdbc.url"), "jdbc:h2:" + rootDir + ";LOCK_MODE=1;MVCC=TRUE");
+    String jdbcUser = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.jdbc.user"), "sa");
+    String jdbcPass = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.jdbc.pass"), "sa");
     pooledDataSource = new ComboPooledDataSource();
     pooledDataSource.setDriverClass(jdbcDriver);
     pooledDataSource.setJdbcUrl(jdbcUrl);
@@ -78,7 +78,7 @@ public class Activator implements BundleActivator {
     props.put("type", "persistence");
     props.put("javax.persistence.nonJtaDataSource", pooledDataSource);
     props.put("eclipselink.target-database", vendor);
-    if("true".equalsIgnoreCase(bundleContext.getProperty("ddl-generation"))) {
+    if("true".equalsIgnoreCase(bundleContext.getProperty("org.opencastproject.db.ddl.generation"))) {
       props.put("eclipselink.ddl-generation", "create-tables");
       props.put("eclipselink.ddl-generation.output-mode", "database");
     }

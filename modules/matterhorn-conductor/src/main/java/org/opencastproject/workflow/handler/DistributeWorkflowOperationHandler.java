@@ -20,6 +20,8 @@ import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageReference;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -32,6 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -83,58 +87,72 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
   public WorkflowOperationResult start(final WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.debug("Running distribution workflow operation");
 
-    MediaPackage resultingMediaPackage = null;
+    MediaPackage mediaPackage = workflowInstance.getMediaPackage();
+
     try {
 
       // Check which tags have been configured
       String sourceTags = workflowInstance.getCurrentOperation().getConfiguration("source-tags");
       String targetTags = workflowInstance.getCurrentOperation().getConfiguration("target-tags");
-      MediaPackage currentMediaPackage = workflowInstance.getMediaPackage();
       if (StringUtils.trimToNull(sourceTags) == null) {
         logger.warn("No tags have been specified");
-        return WorkflowBuilder.getInstance().buildWorkflowOperationResult(currentMediaPackage, Action.CONTINUE);
+        return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
       }
 
-      // Send a mediapackage clone to the distribution service so we don't manipulate mediapackages associated with previous workflow operations
-      MediaPackage clone = (MediaPackage)currentMediaPackage.clone();
-      
       // Look for elements matching any tag
       Set<String> elementIds = new HashSet<String>();
       for (String tag : asList(sourceTags)) {
         if(StringUtils.trimToNull(tag) == null) continue;
-        MediaPackageElement[] elts = currentMediaPackage.getElementsByTag(tag);
+        MediaPackageElement[] elts = mediaPackage.getElementsByTag(tag);
         for (MediaPackageElement e : elts) {
           if (elementIds.add(e.getIdentifier())) {
-            logger.info("Distributing '{}' to the local repository", e.getIdentifier(), currentMediaPackage);
+            logger.info("Distributing '{}' to the local repository", e.getIdentifier(), mediaPackage);
           }
         }
       }
 
       // Also distribute all of the metadata catalogs
-      for(Catalog c : clone.getCatalogs()) elementIds.add(c.getIdentifier());
+      for(Catalog c : mediaPackage.getCatalogs()) elementIds.add(c.getIdentifier());
       
       // Finally, push the elements to the distribution channel
+      List<String> targetTagList = asList(targetTags);
+      
       try {
-        resultingMediaPackage = distributionService.distribute(clone, elementIds.toArray(new String[elementIds.size()]));
+        for(String elementId : elementIds) {
+          MediaPackageElement element = mediaPackage.getElementById(elementId);
+          if(element == null) throw new WorkflowOperationException("Unable to find element " + elementId);
+          Job job = distributionService.distribute(mediaPackage.getIdentifier().compact(), element, true);
+          if(job == null || ! Job.Status.FINISHED.equals(job.getStatus())) {
+            throw new WorkflowOperationException("Distribution job " + job + " did not complete successfully");
+          }
+          MediaPackageElement newElement = job.getElement();
+          newElement.setIdentifier(null);
+          MediaPackageReference ref = element.getReference();
+          if (ref != null && mediaPackage.getElementByReference(ref) != null) {
+            newElement.setReference((MediaPackageReference) ref.clone());
+            mediaPackage.add(newElement);
+          } else {
+            mediaPackage.addDerived(newElement, element);
+            if (ref != null) {
+              Map<String, String> props = ref.getProperties();
+              newElement.getReference().getProperties().putAll(props);
+            }
+          }
+
+          for(String tag : targetTagList) {
+            if(StringUtils.trimToNull(tag) == null) continue;
+            newElement.addTag(tag);
+          }
+        }
       } catch(DistributionException e) {
         throw new WorkflowOperationException(e);
       }
       
-      // Tag the distributed elements
-      for (MediaPackageElement element : resultingMediaPackage.getElements()) {
-        if (currentMediaPackage.getElementById(element.getIdentifier()) == null) {
-          for (String tag : asList(targetTags)) {
-            if(StringUtils.trimToNull(tag) == null) continue;
-            element.addTag(tag);
-          }
-        }
-      }
- 
       logger.debug("Distribute operation completed");
     } catch (RuntimeException e) {
       throw new WorkflowOperationException(e);
     }
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultingMediaPackage, Action.CONTINUE);
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
   }
 
 }

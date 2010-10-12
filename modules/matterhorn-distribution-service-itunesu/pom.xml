@@ -113,7 +113,8 @@
               flexjson;inline=true
             </Embed-Dependency>
             <Service-Component>
-              OSGI-INF/distribution-service-itunesu.xml
+              OSGI-INF/distribution-service-itunesu.xml,
+              OSGI-INF/distribution-service-itunesu-rest.xml
             </Service-Component>
           </instructions>
         </configuration>

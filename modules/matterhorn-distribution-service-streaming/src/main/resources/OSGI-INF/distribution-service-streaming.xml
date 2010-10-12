@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
   name="org.opencastproject.distribution.streaming.StreamingDistributionService" immediate="true"
-  activate="activate">
+  activate="activate" deactivate="deactivate">
   <implementation class="org.opencastproject.distribution.streaming.StreamingDistributionService" />
   <property name="service.description" value="Distribution Service (Local)" />
   <property name="distribution.channel" value="streaming" />

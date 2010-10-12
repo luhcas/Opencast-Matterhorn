@@ -19,18 +19,16 @@ import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.mediapackage.Track;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.remote.api.Job;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
-import org.opencastproject.workflow.api.WorkflowOperationResult;
-import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
-import junit.framework.Assert;
-
-import org.apache.commons.lang.StringUtils;
 import org.easymock.EasyMock;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,80 +42,112 @@ public class DistributeWorkflowOperationHandlerTest {
 
   private URI uriMP;
   private MediaPackage mp;
-  private MediaPackage mpAfter;
-  private Track t;
 
   @Before
   public void setup() throws Exception {
     MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
-
     uriMP = InspectWorkflowOperationHandler.class.getResource("/distribute_mediapackage.xml").toURI();
     mp = builder.loadFromXml(uriMP.toURL().openStream());
-    mpAfter = (MediaPackage) mp.clone();
-    t = (Track) mp.getTracks()[0].clone();
-    t.setIdentifier("Test-newtrack");
-    mpAfter.add(t);
 
-    // set up service
+    // set up the handler
     operationHandler = new DistributeWorkflowOperationHandler();
 
   }
 
   @Test
-  public void testDistributeOperation() throws Exception {
-    // set up mock distribution
-    service = EasyMock.createStrictMock(DistributionService.class);
-    EasyMock.expect(
-            service.distribute((MediaPackage) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock
-                    .anyObject())).andReturn(mpAfter);
-    EasyMock.replay(service);
-    operationHandler.setDistributionService(service);
-
-    String sourceTags = "nosuchtag";
-    String targetTags = "engage,publish";
-
-    WorkflowInstance workflowInstance = getWorkflowInstance(sourceTags, targetTags);
-
-    // Run the media package through the operation handler, ensuring that metadata gets added
-    WorkflowOperationResult result = operationHandler.start(workflowInstance);
-    MediaPackage mpNew = result.getMediaPackage();
-
-    // test that the new track was annotated with tags
-    String actualTags = StringUtils.join(mpNew.getTrack(t.getIdentifier()).getTags(), ",");
-    Assert.assertEquals(targetTags, actualTags);
-
-  }
-
-  @Test
   public void testSourceTags() throws Exception {
-    service = EasyMock.createStrictMock(DistributionService.class);
-    EasyMock.expect(
-            service.distribute((MediaPackage) EasyMock.anyObject(), EasyMock.matches("catalog-2"), EasyMock
-                    .matches("notes"), EasyMock.matches("track-2"), EasyMock.matches("catalog-1"))).andReturn(mpAfter);
-    EasyMock.expect(
-            service.distribute((MediaPackage) EasyMock.anyObject(), EasyMock.matches("catalog-2"), EasyMock
-                    .matches("notes"), EasyMock.matches("catalog-1"))).andReturn(mpAfter);
-    EasyMock.expect(
-            service.distribute((MediaPackage) EasyMock.anyObject(), EasyMock.matches("catalog-2"), EasyMock
-                    .matches("catalog-1"))).andReturn(mpAfter);
+    MediaPackageElement track2 = (MediaPackageElement) mp.getElementById("track-2");
+    MediaPackageElement catalog1 = (MediaPackageElement) mp.getElementById("catalog-1");
+    MediaPackageElement catalog2 = (MediaPackageElement) mp.getElementById("catalog-2");
+    MediaPackageElement attachment1 = (MediaPackageElement) mp.getElementById("notes");
+
+    Assert.assertNotNull(track2);
+
+    // Mock up a job
+    Job job = EasyMock.createNiceMock(Job.class);
+    EasyMock.expect(job.getStatus()).andReturn(Job.Status.FINISHED).anyTimes();
+    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) track2.clone());
+    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) catalog1.clone());
+    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) catalog2.clone());
+    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) attachment1.clone());
+    EasyMock.replay(job);
+
+    service = EasyMock.createNiceMock(DistributionService.class);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), track2, true)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog1, true)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog2, true)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), attachment1, true)).andReturn(job);
     EasyMock.replay(service);
     operationHandler.setDistributionService(service);
 
-    
-    // Source tags get tested by StrictMock
+    // Source tags get tested by our mock
     String sourceTags = "engage,atom,rss";
     String targetTags = "engage,publish";
     WorkflowInstance workflowInstance = getWorkflowInstance(sourceTags, targetTags);
     operationHandler.start(workflowInstance);
+    EasyMock.verify(service);
+  }
 
-    sourceTags = "rss";
-    workflowInstance = getWorkflowInstance(sourceTags, targetTags);
+  @Test
+  public void testRssTag() throws Exception {
+    MediaPackageElement track2 = (MediaPackageElement) mp.getElementById("track-2");
+    MediaPackageElement catalog1 = (MediaPackageElement) mp.getElementById("catalog-1");
+    MediaPackageElement catalog2 = (MediaPackageElement) mp.getElementById("catalog-2");
+    MediaPackageElement attachment1 = (MediaPackageElement) mp.getElementById("notes");
+
+    Assert.assertNotNull(track2);
+
+    // Mock up a job
+    Job job = EasyMock.createNiceMock(Job.class);
+    EasyMock.expect(job.getStatus()).andReturn(Job.Status.FINISHED).anyTimes();
+    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) catalog1.clone());
+    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) catalog2.clone());
+    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) attachment1.clone());
+    EasyMock.replay(job);
+
+    service = EasyMock.createNiceMock(DistributionService.class);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog1, true)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog2, true)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), attachment1, true)).andReturn(job);
+    EasyMock.replay(service);
+    operationHandler.setDistributionService(service);
+
+    // Source tags get tested by our mock
+    String sourceTags = "rss";
+    String targetTags = "engage,publish";
+    WorkflowInstance workflowInstance = getWorkflowInstance(sourceTags, targetTags);
     operationHandler.start(workflowInstance);
+    EasyMock.verify(service);
 
-    sourceTags = "nosuchtag";
-    workflowInstance = getWorkflowInstance(sourceTags, targetTags);
+  }
+
+  @Test
+  public void testNoSuchTag() throws Exception {
+    MediaPackageElement catalog1 = (MediaPackageElement) mp.getElementById("catalog-1");
+    MediaPackageElement catalog2 = (MediaPackageElement) mp.getElementById("catalog-2");
+    MediaPackageElement attachment1 = (MediaPackageElement) mp.getElementById("notes");
+
+
+    // Mock up a job
+    Job job = EasyMock.createNiceMock(Job.class);
+    EasyMock.expect(job.getStatus()).andReturn(Job.Status.FINISHED).anyTimes();
+    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) catalog1.clone());
+    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) catalog2.clone());
+    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) attachment1.clone());
+    EasyMock.replay(job);
+
+    service = EasyMock.createNiceMock(DistributionService.class);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog1, true)).andReturn(job);
+    EasyMock.expect(service.distribute(mp.getIdentifier().compact(), catalog2, true)).andReturn(job);
+    EasyMock.replay(service);
+    operationHandler.setDistributionService(service);
+
+    // Source tags get tested by our mock
+    String sourceTags = "nosuchtag";
+    String targetTags = "engage,publish";
+    WorkflowInstance workflowInstance = getWorkflowInstance(sourceTags, targetTags);
     operationHandler.start(workflowInstance);
-
+    EasyMock.verify(service);
   }
 
   private WorkflowInstance getWorkflowInstance(String sourceTags, String targetTags) {

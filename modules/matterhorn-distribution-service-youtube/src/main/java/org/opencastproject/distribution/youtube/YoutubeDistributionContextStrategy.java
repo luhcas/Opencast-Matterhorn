@@ -16,41 +16,38 @@
 package org.opencastproject.distribution.youtube;
 
 import org.opencastproject.distribution.api.DistributionContextStragety;
-import org.opencastproject.mediapackage.MediaPackage;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /**
  * Strategy to determine destination of distribution.
  */
 public class YoutubeDistributionContextStrategy implements DistributionContextStragety {
-  /** logger instance */
-  private static final Logger logger = LoggerFactory.getLogger(YoutubeDistributionContextStrategy.class);
 
   /**
    * Returns a series identifier of the mediapackage.
    * 
-   * @param mp The mediapackage
+   * @param mediaPackageId
+   *          The mediapackage identifier
    * @return The context ID
    */
-  public String getContextId(MediaPackage mp) {
+  public String getContextId(String mediaPackageId) {
     // map a media package to an intermediate ID
-    String series = mp.getSeriesTitle();
-
-    return series;
+    // TODO: Get series title from episode/series service
+    return "Matterhorn";
+    
+    //String series = mediaPackageId.getSeriesTitle();
+    //return series;
   }
 
   /**
    * Gets the name for a context within a distribution channel.
    * 
-   * @param mp The mediapackage
+   * @param mediaPackageId
+   *          The mediapackage identifier
    * @return The playlist ID
    */
-  public String getContextName(MediaPackage mp) {
+  public String getContextName(String mediaPackageId) {
     // get an intermediate ID
-    String id = getContextId(mp);
+    String id = getContextId(mediaPackageId);
 
     if (id == null) {
       // distribution service will use the default
@@ -63,13 +60,14 @@ public class YoutubeDistributionContextStrategy implements DistributionContextSt
     // creator of the media package determines which playlist this series title maps to.
     // The table looks like the following (in concept):
     // +------------------------------------+---------------+-------------+-----------------------+
-    // | Series Title    | Playlist ID      | Playlist Name | Tab Handle  | Tab Name              |
+    // | Series Title | Playlist ID | Playlist Name | Tab Handle | Tab Name |
     // +------------------------------------+---------------+-------------+-----------------------+
-    // | Art History 101 | B8B47104C2C1663B | Art           | 03386773035 | Art History           |
-    // | Physics 235     | A7A32342323B334A | Science       | 04388234023 | Science & Engineering |
-    // | ...             | ...              | ...           | ...         | ...                   |
+    // | Art History 101 | B8B47104C2C1663B | Art | 03386773035 | Art History |
+    // | Physics 235 | A7A32342323B334A | Science | 04388234023 | Science & Engineering |
+    // | ... | ... | ... | ... | ... |
     // +-----------------+------------------+---------------+-------------+-----------------------+
     // CHANGE ME: return YoutubeContextStrategyMap.get(id);
     return null;
   }
+  
 }

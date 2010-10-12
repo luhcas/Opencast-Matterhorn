@@ -122,7 +122,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
   public static final MimeType MJPEG_MIMETYPE = MimeTypes.MJPEG;
 
   /** The configuration key for setting the number of worker threads */
-  public static final String CONFIG_THREADS = "videosegmenter.threads";
+  public static final String CONFIG_THREADS = "org.opencastproject.videosegmenter.threads";
 
   /** The default worker thread pool size to use if no configuration is specified */
   public static final int DEFAULT_THREADS = 1;

@@ -15,12 +15,21 @@
  */
 package org.opencastproject.distribution.download;
 
+import org.opencastproject.distribution.api.DistributionException;
+import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.remote.api.Job;
+import org.opencastproject.remote.api.Job.Status;
+import org.opencastproject.remote.api.JobProducer;
 import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UrlSupport;
+import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,29 +37,62 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Distributes media to the local media delivery directory.
  */
-public class DownloadDistributionService extends AbstractLocalDistributionService {
+public class DownloadDistributionService implements DistributionService, JobProducer {
+
+  /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(DownloadDistributionService.class);
-  
+
+  /** Receipt type */
+  public static final String RECEIPT_TYPE = "org.opencastproject.distribution.download";
+
+  /** Default distribution directory */
   public static final String DEFAULT_DISTRIBUTION_DIR = "opencast" + File.separator + "static";
-  protected RemoteServiceManager remoteServiceManager;
+
+  /** Path to the distribution directory */
   protected File distributionDirectory = null;
 
+  /** this media download service's base URL */
+  protected String serviceUrl = null;
 
-  /** this server's base URL */
-  protected String serverUrl = null;
+  /** The remote service registry */
+  protected RemoteServiceManager remoteServiceManager = null;
 
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
-    this.remoteServiceManager = remoteServiceManager;
-  }
+  /** The workspace reference */
+  protected Workspace workspace = null;
 
+  /** The executor service used to queue and run jobs */
+  protected ExecutorService executor = null;
+
+  /**
+   * Activate method for this OSGi service implementation.
+   * 
+   * @param cc
+   *          the OSGi component context
+   */
   protected void activate(ComponentContext cc) {
-    serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
-    if (serverUrl == null)
-      throw new IllegalStateException("Server url must be set (org.opencastproject.server.url)");
+
+    int threads = 1;
+    String threadsConfig = StringUtils.trimToNull(cc.getBundleContext().getProperty(
+            "org.opencastproject.distribution.download.threads"));
+    if (threadsConfig != null) {
+      try {
+        threads = Integer.parseInt(threadsConfig);
+      } catch (NumberFormatException e) {
+        logger.warn("Download distribution threads configuration is malformed: '{}'", threadsConfig);
+      }
+    }
+    executor = Executors.newFixedThreadPool(threads);
+
+    serviceUrl = cc.getBundleContext().getProperty("org.opencastproject.download.url");
+    if (serviceUrl == null)
+      throw new IllegalStateException("Download url must be set (org.opencastproject.download.url)");
 
     String ccDistributionDirectory = cc.getBundleContext().getProperty("org.opencastproject.download.directory");
     if (ccDistributionDirectory == null)
@@ -58,40 +100,203 @@ public class DownloadDistributionService extends AbstractLocalDistributionServic
     this.distributionDirectory = new File(ccDistributionDirectory);
     logger.info("Download distribution directory is {}", distributionDirectory);
   }
-  
+
   /**
-   * {@inheritDoc}
-   * @see org.opencastproject.distribution.download.AbstractLocalDistributionService#getDistributionFile(org.opencastproject.mediapackage.MediaPackageElement)
+   * OSGi deactivation callback.
+   * 
+   * @param cc
+   *          the component context
    */
-  @Override
-  protected File getDistributionFile(MediaPackageElement element) {
-    String mediaPackageId = element.getMediaPackage().getIdentifier().compact();
-    String elementId = element.getIdentifier(); 
-    String fileName = FilenameUtils.getName(element.getURI().toString());
-    String directoryName = distributionDirectory.getAbsolutePath();
-    String destinationFileName = PathSupport.concat(new String[] { directoryName, mediaPackageId, elementId, fileName });
-    return new File(destinationFileName);
+  protected void deactivate(ComponentContext cc) {
+    executor.shutdown();
   }
-  
+
   /**
+   * Distributes the mediapackage's element to the location that is returned by the concrete implementation. In
+   * addition, a representation of the distributed element is added to the mediapackage.
+   * 
    * {@inheritDoc}
-   * @see org.opencastproject.distribution.download.AbstractLocalDistributionService#getDistributionUri(org.opencastproject.mediapackage.MediaPackageElement)
+   * 
+   * @see org.opencastproject.distribution.api.DistributionService#distribute(String, MediaPackageElement, boolean)
    */
   @Override
-  protected URI getDistributionUri(MediaPackageElement element) throws URISyntaxException {
-    String mediaPackageId = element.getMediaPackage().getIdentifier().compact();
-    String elementId = element.getIdentifier(); 
-    String fileName = FilenameUtils.getName(element.getURI().toString());
-    String destinationURI = UrlSupport.concat(new String[] { serverUrl + "/static", mediaPackageId, elementId, fileName });
-    return new URI(destinationURI);
+  public Job distribute(final String mediaPackageId, final MediaPackageElement element, boolean block)
+          throws DistributionException {
+    final RemoteServiceManager rs = remoteServiceManager;
+    final Job receipt = rs.createJob(RECEIPT_TYPE);
+
+    Runnable command = new Runnable() {
+      public void run() {
+        receipt.setStatus(Status.RUNNING);
+        rs.updateJob(receipt);
+
+        try {
+          File sourceFile = workspace.get(element.getURI());
+          File destination = getDistributionFile(element);
+
+          // Put the file in place
+          FileUtils.forceMkdir(destination.getParentFile());
+          logger.info("Distributing {} to {}", element, destination);
+
+          FileSupport.copy(sourceFile, destination);
+
+          // Create a representation of the distributed file in the mediapackage
+          MediaPackageElement distributedElement = (MediaPackageElement) element.clone();
+          distributedElement.setURI(getDistributionUri(element));
+          distributedElement.setIdentifier(null);
+
+          receipt.setElement(element);
+          receipt.setStatus(Status.FINISHED);
+          rs.updateJob(receipt);
+
+          logger.info("Finished distribution of {}", element);
+
+        } catch (Exception e) {
+          receipt.setStatus(Status.FAILED);
+          rs.updateJob(receipt);
+          throw new DistributionException(e);
+        }
+      }
+    };
+
+    Future<?> future = executor.submit(command);
+    if (block) {
+      try {
+        future.get();
+      } catch (Exception e) {
+        receipt.setStatus(Status.FAILED);
+        remoteServiceManager.updateJob(receipt);
+        throw new DistributionException(e);
+      }
+    }
+
+    return receipt;
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.distribution.download.AbstractLocalDistributionService#getMediaPackageDirectory(java.lang.String)
+   * 
+   * @see org.opencastproject.distribution.api.DistributionService#retract(java.lang.String)
    */
   @Override
+  public Job retract(final String mediaPackageId, boolean block) throws DistributionException {
+    final RemoteServiceManager rs = remoteServiceManager;
+    final Job receipt = rs.createJob(RECEIPT_TYPE);
+
+    Runnable command = new Runnable() {
+      public void run() {
+        receipt.setStatus(Status.RUNNING);
+        rs.updateJob(receipt);
+
+        try {
+          if (!FileSupport.delete(getMediaPackageDirectory(mediaPackageId), true)) {
+            throw new DistributionException("Unable to retract mediapackage " + mediaPackageId);
+          }
+
+          receipt.setStatus(Status.FINISHED);
+          rs.updateJob(receipt);
+
+          logger.info("Finished rectracting media package {}", mediaPackageId);
+
+        } catch (DistributionException e) {
+          receipt.setStatus(Status.FAILED);
+          rs.updateJob(receipt);
+          throw e;
+        } catch (Exception e) {
+          receipt.setStatus(Status.FAILED);
+          rs.updateJob(receipt);
+          throw new DistributionException(e);
+        }
+      }
+    };
+
+    Future<?> future = executor.submit(command);
+    if (block) {
+      try {
+        future.get();
+      } catch (Exception e) {
+        receipt.setStatus(Status.FAILED);
+        remoteServiceManager.updateJob(receipt);
+        throw new DistributionException(e);
+      }
+    }
+
+    return receipt;
+  }
+
+  /**
+   * Callback for the OSGi environment to set the workspace reference.
+   * 
+   * @param workspace
+   *          the workspace
+   */
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
+  }
+
+  /**
+   * Callback for the OSGi environment to set the service registry reference.
+   * 
+   * @param remoteServiceManager
+   *          the service registry
+   */
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
+   */
+  public Job getJob(String id) {
+    return remoteServiceManager.getJob(id);
+  }
+
+  /**
+   * Gets the destination file to copy the contents of a mediapackage element.
+   * 
+   * @param element
+   *          The mediapackage element being distributed
+   * @return The file to copy the content to
+   */
+  protected File getDistributionFile(MediaPackageElement element) {
+    String mediaPackageId = element.getMediaPackage().getIdentifier().compact();
+    String elementId = element.getIdentifier();
+    String fileName = FilenameUtils.getName(element.getURI().toString());
+    String directoryName = distributionDirectory.getAbsolutePath();
+    String destinationFileName = PathSupport
+            .concat(new String[] { directoryName, mediaPackageId, elementId, fileName });
+    return new File(destinationFileName);
+  }
+
+  /**
+   * Gets the URI for the element to be distributed.
+   * 
+   * @param element
+   *          The mediapackage element being distributed
+   * @return The resulting URI after distribution
+   * @throws URISyntaxException
+   *           if the concrete implementation tries to create a malformed uri
+   */
+  protected URI getDistributionUri(MediaPackageElement element) throws URISyntaxException {
+    String mediaPackageId = element.getMediaPackage().getIdentifier().compact();
+    String elementId = element.getIdentifier();
+    String fileName = FilenameUtils.getName(element.getURI().toString());
+    String destinationURI = UrlSupport
+            .concat(new String[] { serviceUrl, mediaPackageId, elementId, fileName });
+    return new URI(destinationURI);
+  }
+
+  /**
+   * Gets the directory containing the distributed files for this mediapackage.
+   * 
+   * @param mediaPackageId
+   *          the mediapackage ID
+   * @return the filesystem directory
+   */
   protected File getMediaPackageDirectory(String mediaPackageId) {
     return new File(distributionDirectory, mediaPackageId);
   }
+
 }

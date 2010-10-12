@@ -52,7 +52,7 @@ import java.util.regex.Pattern;
  */
 public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
 
-  public static final String CONFIG_MEDIAINFO_BINARY = "mediainfo.binary";
+  public static final String CONFIG_MEDIAINFO_BINARY = "org.opencastproject.inspection.mediainfopath";
   public static final String MEDIAINFO_BINARY_DEFAULT = "mediainfo";
 
   private static final Logger logger = LoggerFactory.getLogger(MediaInfoAnalyzer.class);

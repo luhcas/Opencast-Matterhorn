@@ -18,12 +18,20 @@ package org.opencastproject.mediapackage;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.MimeType;
 
+import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLFilterImpl;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.net.URI;
@@ -41,15 +49,15 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.transform.sax.SAXSource;
 
 /**
  * This class provides base functionality for media package elements.
  */
 @XmlTransient
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class AbstractMediaPackageElement implements
-        MediaPackageElement, Serializable {
-  
+public abstract class AbstractMediaPackageElement implements MediaPackageElement, Serializable {
+
   /** Serial version uid */
   private static final long serialVersionUID = 1L;
 
@@ -109,8 +117,7 @@ public abstract class AbstractMediaPackageElement implements
    * @param uri
    *          the elements location
    */
-  protected AbstractMediaPackageElement(Type elementType,
-          MediaPackageElementFlavor flavor, URI uri) {
+  protected AbstractMediaPackageElement(Type elementType, MediaPackageElementFlavor flavor, URI uri) {
     this(null, elementType, flavor, uri, -1, null, null);
   }
 
@@ -130,8 +137,7 @@ public abstract class AbstractMediaPackageElement implements
    * @param mimeType
    *          the element mime type
    */
-  protected AbstractMediaPackageElement(Type elementType,
-          MediaPackageElementFlavor flavor, URI uri, long size,
+  protected AbstractMediaPackageElement(Type elementType, MediaPackageElementFlavor flavor, URI uri, long size,
           Checksum checksum, MimeType mimeType) {
     this(null, elementType, flavor, uri, size, checksum, mimeType);
   }
@@ -154,9 +160,8 @@ public abstract class AbstractMediaPackageElement implements
    * @param mimeType
    *          the element mime type
    */
-  protected AbstractMediaPackageElement(String id, Type elementType,
-          MediaPackageElementFlavor flavor, URI uri, long size,
-          Checksum checksum, MimeType mimeType) {
+  protected AbstractMediaPackageElement(String id, Type elementType, MediaPackageElementFlavor flavor, URI uri,
+          long size, Checksum checksum, MimeType mimeType) {
     if (elementType == null)
       throw new IllegalArgumentException("Argument 'elementType' is null");
     this.id = id;
@@ -221,6 +226,7 @@ public abstract class AbstractMediaPackageElement implements
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackageElement#containsTag(java.util.Collection)
    */
   @Override
@@ -233,7 +239,7 @@ public abstract class AbstractMediaPackageElement implements
     }
     return false;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -245,13 +251,15 @@ public abstract class AbstractMediaPackageElement implements
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackageElement#clearTags()
    */
   @Override
   public void clearTags() {
-    if(tags != null) tags.clear();
+    if (tags != null)
+      tags.clear();
   }
-  
+
   /**
    * @see org.opencastproject.mediapackage.MediaPackageElement#getMediaPackage()
    */
@@ -310,8 +318,7 @@ public abstract class AbstractMediaPackageElement implements
   /**
    * Sets the url that is used to store the media package element.
    * <p>
-   * Make sure you know what you are doing, since usually, the media package
-   * will take care of the elements locations.
+   * Make sure you know what you are doing, since usually, the media package will take care of the elements locations.
    * 
    * @param uri
    *          the elements url
@@ -391,8 +398,7 @@ public abstract class AbstractMediaPackageElement implements
   /**
    * Sets the parent media package.
    * <p>
-   * <b>Note</b> This method is only used by the media package and should not be
-   * called from elsewhere.
+   * <b>Note</b> This method is only used by the media package and should not be called from elsewhere.
    * 
    * @param mediaPackage
    *          the parent media package
@@ -469,6 +475,7 @@ public abstract class AbstractMediaPackageElement implements
 
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -476,8 +483,7 @@ public abstract class AbstractMediaPackageElement implements
     final int prime = 31;
     int result = 1;
     result = prime * result + ((id == null) ? 0 : id.hashCode());
-    result = prime * result
-            + ((mediaPackage == null) ? 0 : mediaPackage.hashCode());
+    result = prime * result + ((mediaPackage == null) ? 0 : mediaPackage.hashCode());
     result = prime * result + ((uri == null) ? 0 : uri.hashCode());
     return result;
   }
@@ -497,9 +503,7 @@ public abstract class AbstractMediaPackageElement implements
 
     // Reference
     if (reference != null)
-      if (mediaPackage == null
-              || !reference
-                      .matches(new MediaPackageReferenceImpl(mediaPackage)))
+      if (mediaPackage == null || !reference.matches(new MediaPackageReferenceImpl(mediaPackage)))
         node.setAttribute("ref", reference.toString());
 
     // Description
@@ -522,8 +526,7 @@ public abstract class AbstractMediaPackageElement implements
 
     // Url
     Element urlNode = document.createElement("url");
-    String urlValue = (serializer != null) ? serializer.encodeURI(uri) : uri
-            .toString();
+    String urlValue = (serializer != null) ? serializer.encodeURI(uri) : uri.toString();
     urlNode.appendChild(document.createTextNode(urlValue));
     node.appendChild(urlNode);
 
@@ -580,6 +583,11 @@ public abstract class AbstractMediaPackageElement implements
     }
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackageElement#getAsXml()
+   */
   public String getAsXml() throws MediaPackageException {
     StringWriter writer = new StringWriter();
     Marshaller m = null;
@@ -588,9 +596,97 @@ public abstract class AbstractMediaPackageElement implements
       m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, false);
       m.marshal(this, writer);
       return writer.toString();
-    } catch(JAXBException e) {
+    } catch (JAXBException e) {
       throw new MediaPackageException(e.getLinkedException() != null ? e.getLinkedException() : e);
     }
+  }
+
+  /**
+   * 
+   * @param xml
+   * @return
+   * @throws MediaPackageException
+   */
+  public static AbstractMediaPackageElement getFromXml(String xml) throws MediaPackageException {
+    Unmarshaller unmarshaller = null;
+    try {
+      unmarshaller = MediaPackageImpl.context.createUnmarshaller();
+      // since we often get xml without namespaces, add the namespace so jaxb can find the appropriate object type
+      NamespaceFilter nsFilter = new NamespaceFilter("http://mediapackage.opencastproject.org", true);
+      XMLReader reader = XMLReaderFactory.createXMLReader();
+      nsFilter.setParent(reader);
+      InputSource inputSource = new InputSource(IOUtils.toInputStream(xml, "UTF-8"));
+      SAXSource source = new SAXSource(nsFilter, inputSource);
+      return (AbstractMediaPackageElement) unmarshaller.unmarshal(source);
+    } catch (JAXBException e) {
+      throw new MediaPackageException(e.getLinkedException() != null ? e.getLinkedException() : e);
+    } catch (IOException e) {
+      throw new MediaPackageException(e);
+    } catch (SAXException e) {
+      throw new MediaPackageException(e);
+    }
+  }
+
+  static class NamespaceFilter extends XMLFilterImpl {
+
+    private String usedNamespaceUri;
+    private boolean addNamespace;
+
+    // State variable
+    private boolean addedNamespace = false;
+
+    public NamespaceFilter(String namespaceUri, boolean addNamespace) {
+      super();
+
+      if (addNamespace)
+        this.usedNamespaceUri = namespaceUri;
+      else
+        this.usedNamespaceUri = "";
+      this.addNamespace = addNamespace;
+    }
+
+    @Override
+    public void startDocument() throws SAXException {
+      super.startDocument();
+      if (addNamespace) {
+        startControlledPrefixMapping();
+      }
+    }
+
+    @Override
+    public void startElement(String arg0, String arg1, String arg2, Attributes arg3) throws SAXException {
+
+      super.startElement(this.usedNamespaceUri, arg1, arg2, arg3);
+    }
+
+    @Override
+    public void endElement(String arg0, String arg1, String arg2) throws SAXException {
+
+      super.endElement(this.usedNamespaceUri, arg1, arg2);
+    }
+
+    @Override
+    public void startPrefixMapping(String prefix, String url) throws SAXException {
+
+      if (addNamespace) {
+        this.startControlledPrefixMapping();
+      } else {
+        // Remove the namespace, i.e. don´t call startPrefixMapping for parent!
+      }
+
+    }
+
+    private void startControlledPrefixMapping() throws SAXException {
+
+      if (this.addNamespace && !this.addedNamespace) {
+        // We should add namespace since it is set and has not yet been done.
+        super.startPrefixMapping("", this.usedNamespaceUri);
+
+        // Make sure we dont do it twice
+        this.addedNamespace = true;
+      }
+    }
+
   }
 
 }

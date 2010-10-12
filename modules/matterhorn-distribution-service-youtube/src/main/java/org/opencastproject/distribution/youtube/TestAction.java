@@ -21,72 +21,74 @@ import org.opencastproject.deliver.schedule.Action;
 
 public class TestAction extends Action {
 
-    private int execute_count = 0;
-    private int execute_limit = 3;
-    private boolean fails = false;
-    private boolean retries = false;
-    private long deadline_seconds = Action.DEFAULT_TASK_SECONDS;
+  /** Serial version uid */
+  private static final long serialVersionUID = -6702274519687833239L;
 
-    public TestAction() {
-        super(null);
-    }
+  private int execute_count = 0;
+  private int execute_limit = 3;
+  private boolean fails = false;
+  private boolean retries = false;
+  private long deadline_seconds = Action.DEFAULT_TASK_SECONDS;
 
-    public TestAction(String name) {
-        super(name);
-    }
+  public TestAction() {
+    super(null);
+  }
 
-    public int getExecuteCount() {
-        return execute_count;
-    }
+  public TestAction(String name) {
+    super(name);
+  }
 
-    public void setExecuteCount(int execute_count) {
-        this.execute_count = execute_count;
-    }
+  public int getExecuteCount() {
+    return execute_count;
+  }
 
-    public int getExecuteLimit() {
-        return execute_limit;
-    }
+  public void setExecuteCount(int execute_count) {
+    this.execute_count = execute_count;
+  }
 
-    public void setExecuteLimit(int execute_limit) {
-        this.execute_limit = execute_limit;
-    }
+  public int getExecuteLimit() {
+    return execute_limit;
+  }
 
-    public boolean getFails() {
-        return fails;
-    }
+  public void setExecuteLimit(int execute_limit) {
+    this.execute_limit = execute_limit;
+  }
 
-    public void setFails(boolean fails) {
-        this.fails = fails;
-    }
+  public boolean getFails() {
+    return fails;
+  }
 
-    public boolean getRetries() {
-        return retries;
-    }
+  public void setFails(boolean fails) {
+    this.fails = fails;
+  }
 
-    public void setRetries(boolean retries) {
-        this.retries = retries;
-    }
+  public boolean getRetries() {
+    return retries;
+  }
 
-    public void setDeadlineSeconds(long deadline_seconds) {
-        this.deadline_seconds = deadline_seconds;
-    }
+  public void setRetries(boolean retries) {
+    this.retries = retries;
+  }
 
-    protected long deadlineSeconds() {
-        return deadline_seconds;
-    }
+  public void setDeadlineSeconds(long deadline_seconds) {
+    this.deadline_seconds = deadline_seconds;
+  }
 
-    protected void execute() {
-        execute_count += 1;
-        System.out.println("Execute #" + execute_count
-                + ", limit=" + execute_limit);
-        if (execute_count < execute_limit)
-            resumeAfter(1);
-        else if (retries)
-            ; // throw new RetryException("Retry task.", 1);
-        else if (fails)
-            ; // throw new FailedException("oops!");
-        else
-            succeed();
-    }
+  protected long deadlineSeconds() {
+    return deadline_seconds;
+  }
+
+  protected void execute() {
+    execute_count += 1;
+    System.out.println("Execute #" + execute_count + ", limit=" + execute_limit);
+    if (execute_count < execute_limit)
+      resumeAfter(1);
+    else if (retries)
+      ; // throw new RetryException("Retry task.", 1);
+    else if (fails)
+      ; // throw new FailedException("oops!");
+    else
+      succeed();
+  }
 
 }
