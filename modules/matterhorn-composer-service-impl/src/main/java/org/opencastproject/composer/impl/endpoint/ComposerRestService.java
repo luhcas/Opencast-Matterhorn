@@ -31,6 +31,7 @@ import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Job;
 import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -302,10 +303,13 @@ public class ComposerRestService {
   @GET
   @Path("receipt/{id}.xml")
   @Produces(MediaType.TEXT_XML)
-  public Response getReceipt(@PathParam("id") String id) {
-    Job r = composerService.getReceipt(id);
-    if (r == null)
+  public Response getJob(@PathParam("id") String id) {
+    Job r = null;
+    try {
+      r = composerService.getJob(id);
+    } catch (NotFoundException e) {
       return Response.status(Response.Status.NOT_FOUND).build();
+    }
     return Response.ok().entity(r.toXml()).build();
   }
 

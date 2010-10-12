@@ -40,8 +40,8 @@ import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Job.Status;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workspace.api.Workspace;
@@ -92,7 +92,7 @@ import javax.media.protocol.DataSource;
 public class VideoSegmenter extends MediaAnalysisServiceSupport implements ManagedService {
 
   /** Receipt type */
-  public static final String RECEIPT_TYPE = "org.opencastproject.analysis.vsegmenter";
+  public static final String JOB_TYPE = "org.opencastproject.analysis.vsegmenter";
 
   /** Resulting collection in the working file repository */
   public static final String COLLECTION_ID = "vsegmenter";
@@ -164,7 +164,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
    * 
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
     logger.debug("Configuring the videosegmenter");
@@ -266,7 +266,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
    */
   public Job analyze(final MediaPackageElement element, boolean block) throws MediaAnalysisException {
     final RemoteServiceManager rs = remoteServiceManager;
-    final Job receipt = rs.createJob(RECEIPT_TYPE);
+    final Job receipt = rs.createJob(JOB_TYPE);
 
     // Make sure the element can be analyzed using this analysis implementation
     if (!super.isSupported(element)) {
@@ -373,8 +373,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
 
           MediaPackageElement mpeg7Catalog = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
                   .newElement(Catalog.TYPE, MediaPackageElements.SEGMENTS);
-          URI uri = workspace.putInCollection(COLLECTION_ID, receipt.getId() + ".xml", mpeg7CatalogService
-                  .serialize(mpeg7));
+          URI uri = workspace.putInCollection(COLLECTION_ID, receipt.getId() + ".xml",
+                  mpeg7CatalogService.serialize(mpeg7));
           mpeg7Catalog.setURI(uri);
           mpeg7Catalog.setReference(new MediaPackageReferenceImpl(element));
 
@@ -414,11 +414,35 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.analysis.api.MediaAnalysisService#getReceipt(java.lang.String)
+   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
    */
-  @Override
-  public Job getReceipt(String id) {
+  public Job getJob(String id) {
     return remoteServiceManager.getJob(id);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
+   */
+  public long countJobs(Status status) {
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
+    return remoteServiceManager.count(JOB_TYPE, status);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   *      java.lang.String)
+   */
+  public long countJobs(Status status, String host) {
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
+    if (host == null)
+      throw new IllegalArgumentException("host must not be null");
+    return remoteServiceManager.count(JOB_TYPE, status, host);
   }
 
   /**
@@ -573,8 +597,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
     if (icomp.hasStatistics()) {
       NumberFormat nf = NumberFormat.getNumberInstance();
       nf.setMaximumFractionDigits(2);
-      logger.info("Image comparison finished with an average change of {}% in {} comparisons", nf.format(icomp
-              .getAvgChange()), icomp.getComparisons());
+      logger.info("Image comparison finished with an average change of {}% in {} comparisons",
+              nf.format(icomp.getAvgChange()), icomp.getComparisons());
     }
 
     // Cleanup

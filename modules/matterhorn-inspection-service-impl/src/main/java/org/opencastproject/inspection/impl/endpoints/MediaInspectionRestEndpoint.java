@@ -21,6 +21,7 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.remote.api.Job;
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
@@ -104,15 +105,13 @@ public class MediaInspectionRestEndpoint {
   @GET
   @Path("receipt/{id}.xml")
   @Produces(MediaType.TEXT_XML)
-  public Response getReceipt(@PathParam("id") String id) {
+  public Response getJob(@PathParam("id") String id) {
     checkNotNull(service);
     try {
-      Job r = service.getReceipt(id);
-      if (r == null) {
-        return Response.status(javax.ws.rs.core.Response.Status.NOT_FOUND).build();
-      } else {
-        return Response.ok(r).build();
-      }
+      Job r = service.getJob(id);
+      return Response.ok(r).build();
+    } catch (NotFoundException e) {
+      return Response.status(Response.Status.NOT_FOUND).build();
     } catch (Exception e) {
       logger.info(e.getMessage());
       return Response.serverError().build();

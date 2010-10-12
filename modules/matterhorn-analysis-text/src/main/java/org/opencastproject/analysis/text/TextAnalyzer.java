@@ -41,8 +41,8 @@ import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.metadata.mpeg7.VideoTextImpl;
 import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Job.Status;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.lang.StringUtils;
@@ -68,7 +68,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   private static final Logger logger = LoggerFactory.getLogger(TextAnalyzer.class);
 
   /** Receipt type */
-  public static final String RECEIPT_TYPE = "org.opencastproject.analysis.text";
+  public static final String JOB_TYPE = "org.opencastproject.analysis.text";
 
   /** Resulting collection in the working file repository */
   public static final String COLLECTION_ID = "ocrtext";
@@ -145,7 +145,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   @Override
   public Job analyze(final MediaPackageElement element, boolean block) throws MediaAnalysisException {
     final RemoteServiceManager rs = remoteServiceManager;
-    final Job receipt = rs.createJob(RECEIPT_TYPE);
+    final Job receipt = rs.createJob(JOB_TYPE);
 
     final Attachment attachment = (Attachment) element;
     final URI imageUrl = attachment.getURI();
@@ -184,10 +184,10 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
 
           logger.info("Text extraction of {} finished, {} lines found", attachment.getURI(), videoTexts.length);
 
-          URI uri = workspace.putInCollection(COLLECTION_ID, receipt.getId() + ".xml", mpeg7CatalogService
-                  .serialize(mpeg7));
-          Catalog catalog = (Catalog) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().newElement(
-                  Catalog.TYPE, MediaPackageElements.TEXTS);
+          URI uri = workspace.putInCollection(COLLECTION_ID, receipt.getId() + ".xml",
+                  mpeg7CatalogService.serialize(mpeg7));
+          Catalog catalog = (Catalog) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+                  .newElement(Catalog.TYPE, MediaPackageElements.TEXTS);
           catalog.setURI(uri);
           catalog.setReference(new MediaPackageReferenceImpl(element));
 
@@ -223,14 +223,37 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   }
 
   /**
-   * Returns the receipt.
+   * {@inheritDoc}
    * 
-   * @param id
-   *          the receipt identifier
-   * @return the receipt
+   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
    */
-  public Job getReceipt(String id) {
+  public Job getJob(String id) {
     return remoteServiceManager.getJob(id);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
+   */
+  public long countJobs(Status status) {
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
+    return remoteServiceManager.count(JOB_TYPE, status);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   *      java.lang.String)
+   */
+  public long countJobs(Status status, String host) {
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
+    if (host == null)
+      throw new IllegalArgumentException("host must not be null");
+    return remoteServiceManager.count(JOB_TYPE, status, host);
   }
 
   /**

@@ -40,6 +40,7 @@ import java.util.List;
  * Proxies a remote media inspection service for use as a JVM-local service.
  */
 public class MediaInspectionServiceRemoteImpl extends RemoteBase implements MediaInspectionService {
+
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceRemoteImpl.class);
 
@@ -119,16 +120,6 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
       closeConnection(response);
     }
     throw new RuntimeException("Unable to enrich " + original + " using a remote inspection service");
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.inspection.api.MediaInspectionService#getReceipt(java.lang.String)
-   */
-  @Override
-  public Job getReceipt(String id) {
-    return super.remoteServiceManager.getJob(id);
   }
 
 }

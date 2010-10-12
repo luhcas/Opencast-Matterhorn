@@ -15,6 +15,7 @@
  */
 package org.opencastproject.remote.api;
 
+import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.util.NotFoundException;
 
 /**
@@ -32,5 +33,19 @@ public interface JobProducer {
    *           if the job doesn't exist
    */
   Job getJob(String id) throws NotFoundException;
+
+  /**
+   * Get the number of encoding jobs in a current status on all nodes.
+   * 
+   * @return Number of jobs in this state
+   */
+  long countJobs(Status status);
+
+  /**
+   * Get the number of encoding jobs in a current status on a specific node.
+   * 
+   * @return Number of running jobs
+   */
+  long countJobs(Status status, String host);
 
 }

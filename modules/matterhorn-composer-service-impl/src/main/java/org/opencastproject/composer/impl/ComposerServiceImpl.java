@@ -35,8 +35,8 @@ import org.opencastproject.mediapackage.VideoStream;
 import org.opencastproject.mediapackage.identifier.IdBuilder;
 import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
 import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.Job.Status;
+import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -251,7 +251,7 @@ public class ComposerServiceImpl implements ComposerService {
       remoteServiceManager.updateJob(composerReceipt);
       throw new EncoderException(null, "Profile '" + profileId + " is unkown");
     }
-    
+
     // Create the engine
     final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
     if (encoderEngine == null) {
@@ -361,8 +361,8 @@ public class ComposerServiceImpl implements ComposerService {
    * @throws EncoderException
    *           if encoding fails
    */
-  private Job encode(final Track videoTrack, final Track audioTrack, final String profileId, Dictionary<String, String> properties,
-          final boolean block) throws EncoderException {
+  private Job encode(final Track videoTrack, final Track audioTrack, final String profileId,
+          Dictionary<String, String> properties, final boolean block) throws EncoderException {
 
     final String targetTrackId = idBuilder.createNew().toString();
     final Job composerReceipt = remoteServiceManager.createJob(JOB_TYPE);
@@ -823,9 +823,9 @@ public class ComposerServiceImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#getReceipt(java.lang.String)
+   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
    */
-  public Job getReceipt(String id) {
+  public Job getJob(String id) {
     return remoteServiceManager.getJob(id);
   }
 

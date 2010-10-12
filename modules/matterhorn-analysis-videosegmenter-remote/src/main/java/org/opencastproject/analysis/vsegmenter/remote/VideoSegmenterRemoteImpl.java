@@ -1,4 +1,5 @@
 package org.opencastproject.analysis.vsegmenter.remote;
+
 /**
  *  Copyright 2009, 2010 The Regents of the University of California
  *  Licensed under the Educational Community License, Version 2.0
@@ -14,7 +15,6 @@ package org.opencastproject.analysis.vsegmenter.remote;
  *  permissions and limitations under the License.
  *
  */
-
 
 import org.opencastproject.analysis.api.MediaAnalysisException;
 import org.opencastproject.analysis.api.MediaAnalysisService;
@@ -127,16 +127,6 @@ public class VideoSegmenterRemoteImpl extends RemoteBase implements MediaAnalysi
     transformer = TransformerFactory.newInstance().newTransformer();
     transformer.transform(domSource, result);
     return writer.toString();
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.remote.api.RemoteBase#getReceipt(java.lang.String)
-   */
-  @Override
-  public Job getReceipt(String id) {
-    return super.getReceipt(id);
   }
 
   /**

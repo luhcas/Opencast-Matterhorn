@@ -51,7 +51,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
  */
 @Path("")
 public class VideoSegmenterRestEndpoint {
+
   private static final Logger logger = LoggerFactory.getLogger(VideoSegmenterRestEndpoint.class);
+
   protected String docs;
   
   protected VideoSegmenter videoSegmenter;
@@ -88,7 +90,7 @@ public class VideoSegmenterRestEndpoint {
   @Produces(MediaType.TEXT_XML)
   @Path("/{id}.xml")
   public Response getJob(@PathParam("id") String id) {
-    Job receipt = videoSegmenter.getReceipt(id);
+    Job receipt = videoSegmenter.getJob(id);
     if (receipt == null) {
       return Response.status(Status.NOT_FOUND).type(MediaType.TEXT_HTML).build();
     } else {

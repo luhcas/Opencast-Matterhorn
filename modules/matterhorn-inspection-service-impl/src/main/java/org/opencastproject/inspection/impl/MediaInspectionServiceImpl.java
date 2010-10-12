@@ -65,8 +65,10 @@ import java.util.concurrent.Future;
  * Inspects media via the 3rd party MediaInfo tool by default, and can be configured to use other media analyzers.
  */
 public class MediaInspectionServiceImpl implements MediaInspectionService {
+
   // FIXME move this to media info analyzer service
   public static final String CONFIG_ANALYZER_MEDIAINFOPATH = "inspection.analyzer.mediainfopath";
+  
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceImpl.class);
 
   Workspace workspace;
@@ -102,11 +104,35 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.inspection.api.MediaInspectionService#getReceipt(java.lang.String)
+   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
    */
-  @Override
-  public Job getReceipt(String id) {
+  public Job getJob(String id) {
     return remoteServiceManager.getJob(id);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
+   */
+  public long countJobs(Status status) {
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
+    return remoteServiceManager.count(JOB_TYPE, status);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   *      java.lang.String)
+   */
+  public long countJobs(Status status, String host) {
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
+    if (host == null)
+      throw new IllegalArgumentException("host must not be null");
+    return remoteServiceManager.count(JOB_TYPE, status, host);
   }
 
   /**
@@ -136,7 +162,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
           rs.updateJob(job);
           throw new RuntimeException(e);
         }
-        
+
         // Make sure the file has an extension. Otherwise, tools like ffmpeg will not work.
         // TODO: Try to guess the extension from the container's metadata
         if ("".equals(FilenameUtils.getExtension(file.getName()))) {
@@ -145,7 +171,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
           rs.updateJob(job);
           throw new UnsupportedElementException("Track " + file + " has no file extension");
         }
-        
+
         MediaContainerMetadata metadata = getFileMetadata(file);
         if (metadata == null) {
           logger.warn("Unable to acquire media metadata for " + uri);
@@ -280,8 +306,8 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
         } else {
           TrackImpl track = null;
           try {
-            track = (TrackImpl) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
-                    originalTrackUrl, Type.Track, flavor);
+            track = (TrackImpl) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+                    .elementFromURI(originalTrackUrl, Type.Track, flavor);
           } catch (UnsupportedElementException e) {
             logger.warn("Unable to create track element from " + file + ": " + e.getMessage());
             receipt.setStatus(Status.FAILED);
@@ -397,7 +423,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
     }
     return track;
   }
-  
+
   /**
    * Adds the audio related metadata to the track.
    * 

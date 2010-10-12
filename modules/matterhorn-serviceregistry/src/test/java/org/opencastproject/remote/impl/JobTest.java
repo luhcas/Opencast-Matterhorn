@@ -38,8 +38,8 @@ import java.util.List;
 import java.util.Map;
 
 public class JobTest {
-  private static final String RECEIPT_TYPE_1 = "testing1";
-  private static final String RECEIPT_TYPE_2 = "testing2";
+  private static final String JOB_TYPE_1 = "testing1";
+  private static final String JOB_TYPE_2 = "testing2";
   private static final String LOCALHOST = UrlSupport.DEFAULT_BASE_URL;
   private static final String HOST_2 = "host2";
   private static final String PATH = "/path";
@@ -72,25 +72,25 @@ public class JobTest {
     remoteServiceManager.activate(null);
 
     // register some service instances
-    regType1Host1 = (ServiceRegistrationImpl) remoteServiceManager.registerService(RECEIPT_TYPE_1, LOCALHOST, PATH);
-    regType1Host2 = (ServiceRegistrationImpl) remoteServiceManager.registerService(RECEIPT_TYPE_1, HOST_2, PATH);
-    regType2Host1 = (ServiceRegistrationImpl) remoteServiceManager.registerService(RECEIPT_TYPE_2, LOCALHOST, PATH);
-    regType2Host2 = (ServiceRegistrationImpl) remoteServiceManager.registerService(RECEIPT_TYPE_2, HOST_2, PATH);
+    regType1Host1 = (ServiceRegistrationImpl) remoteServiceManager.registerService(JOB_TYPE_1, LOCALHOST, PATH);
+    regType1Host2 = (ServiceRegistrationImpl) remoteServiceManager.registerService(JOB_TYPE_1, HOST_2, PATH);
+    regType2Host1 = (ServiceRegistrationImpl) remoteServiceManager.registerService(JOB_TYPE_2, LOCALHOST, PATH);
+    regType2Host2 = (ServiceRegistrationImpl) remoteServiceManager.registerService(JOB_TYPE_2, HOST_2, PATH);
   }
 
   @After
   public void tearDown() throws Exception {
-    remoteServiceManager.unRegisterService(RECEIPT_TYPE_1, LOCALHOST, PATH);
-    remoteServiceManager.unRegisterService(RECEIPT_TYPE_1, HOST_2, PATH);
-    remoteServiceManager.unRegisterService(RECEIPT_TYPE_2, LOCALHOST, PATH);
-    remoteServiceManager.unRegisterService(RECEIPT_TYPE_2, HOST_2, PATH);
+    remoteServiceManager.unRegisterService(JOB_TYPE_1, LOCALHOST, PATH);
+    remoteServiceManager.unRegisterService(JOB_TYPE_1, HOST_2, PATH);
+    remoteServiceManager.unRegisterService(JOB_TYPE_2, LOCALHOST, PATH);
+    remoteServiceManager.unRegisterService(JOB_TYPE_2, HOST_2, PATH);
     remoteServiceManager.deactivate();
     pooledDataSource.close();
   }
 
   @Test
   public void testMarshalling() throws Exception {
-    JobImpl job = (JobImpl) remoteServiceManager.createJob(RECEIPT_TYPE_1);
+    JobImpl job = (JobImpl) remoteServiceManager.createJob(JOB_TYPE_1);
     Track t = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
             new URI("file://test.mov"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
     t.setIdentifier("track-1");
@@ -116,7 +116,7 @@ public class JobTest {
 
   @Test
   public void testGetReceipt() throws Exception {
-    JobImpl job = (JobImpl) remoteServiceManager.createJob(RECEIPT_TYPE_1);
+    JobImpl job = (JobImpl) remoteServiceManager.createJob(JOB_TYPE_1);
 
     Job receiptFromDb = remoteServiceManager.getJob(job.getId());
     Assert.assertEquals(Status.QUEUED, receiptFromDb.getStatus());
@@ -140,14 +140,14 @@ public class JobTest {
 
   @Test
   public void testGetReceipts() throws Exception {
-    String id = remoteServiceManager.createJob(RECEIPT_TYPE_1).getId();
-    long queuedJobs = remoteServiceManager.count(RECEIPT_TYPE_1, Status.QUEUED);
+    String id = remoteServiceManager.createJob(JOB_TYPE_1).getId();
+    long queuedJobs = remoteServiceManager.count(JOB_TYPE_1, Status.QUEUED);
     Assert.assertEquals(1, queuedJobs);
 
     Job receipt = remoteServiceManager.getJob(id);
     receipt.setStatus(Status.RUNNING);
     remoteServiceManager.updateJob(receipt);
-    queuedJobs = remoteServiceManager.count(RECEIPT_TYPE_1, Status.QUEUED);
+    queuedJobs = remoteServiceManager.count(JOB_TYPE_1, Status.QUEUED);
     Assert.assertEquals(0, queuedJobs);
   }
 
@@ -157,28 +157,28 @@ public class JobTest {
     remoteServiceManager.createJob(regType1Host1);
     remoteServiceManager.createJob(regType1Host2);
 
-    Assert.assertEquals(1, remoteServiceManager.count(RECEIPT_TYPE_1, Status.QUEUED, LOCALHOST));
-    Assert.assertEquals(1, remoteServiceManager.count(RECEIPT_TYPE_1, Status.QUEUED, HOST_2));
-    Assert.assertEquals(2, remoteServiceManager.count(RECEIPT_TYPE_1, Status.QUEUED));
+    Assert.assertEquals(1, remoteServiceManager.count(JOB_TYPE_1, Status.QUEUED, LOCALHOST));
+    Assert.assertEquals(1, remoteServiceManager.count(JOB_TYPE_1, Status.QUEUED, HOST_2));
+    Assert.assertEquals(2, remoteServiceManager.count(JOB_TYPE_1, Status.QUEUED));
   }
 
   @Test
   public void testGetHostsCountWithNoJobs() throws Exception {
-    Assert.assertEquals(2, remoteServiceManager.getServiceRegistrations(RECEIPT_TYPE_1).size());
-    Assert.assertEquals(2, remoteServiceManager.getServiceRegistrations(RECEIPT_TYPE_2).size());
+    Assert.assertEquals(2, remoteServiceManager.getServiceRegistrations(JOB_TYPE_1).size());
+    Assert.assertEquals(2, remoteServiceManager.getServiceRegistrations(JOB_TYPE_2).size());
   }
 
   @Test
   public void testGetHostsCount() throws Exception {
-    JobImpl localRunning1 = (JobImpl) remoteServiceManager.createJob(RECEIPT_TYPE_1);
+    JobImpl localRunning1 = (JobImpl) remoteServiceManager.createJob(JOB_TYPE_1);
     localRunning1.setStatus(Status.RUNNING);
     remoteServiceManager.updateJob(localRunning1);
 
-    JobImpl localRunning2 = (JobImpl) remoteServiceManager.createJob(RECEIPT_TYPE_1);
+    JobImpl localRunning2 = (JobImpl) remoteServiceManager.createJob(JOB_TYPE_1);
     localRunning2.setStatus(Status.RUNNING);
     remoteServiceManager.updateJob(localRunning2);
 
-    JobImpl localFinished = (JobImpl) remoteServiceManager.createJob(RECEIPT_TYPE_1);
+    JobImpl localFinished = (JobImpl) remoteServiceManager.createJob(JOB_TYPE_1);
     // Simulate starting the job
     localFinished.setStatus(Status.RUNNING);
     remoteServiceManager.updateJob(localFinished);
@@ -198,11 +198,11 @@ public class JobTest {
     remoteFinished.setStatus(Status.FINISHED);
     remoteServiceManager.updateJob(remoteFinished);
 
-    JobImpl otherTypeRunning = (JobImpl) remoteServiceManager.createJob(RECEIPT_TYPE_2);
+    JobImpl otherTypeRunning = (JobImpl) remoteServiceManager.createJob(JOB_TYPE_2);
     otherTypeRunning.setStatus(Status.RUNNING);
     remoteServiceManager.updateJob(otherTypeRunning);
 
-    JobImpl otherTypeFinished = (JobImpl) remoteServiceManager.createJob(RECEIPT_TYPE_2);
+    JobImpl otherTypeFinished = (JobImpl) remoteServiceManager.createJob(JOB_TYPE_2);
     // Simulate starting the job
     otherTypeFinished.setStatus(Status.RUNNING);
     remoteServiceManager.updateJob(otherTypeFinished);
@@ -210,8 +210,8 @@ public class JobTest {
     otherTypeFinished.setStatus(Status.FINISHED);
     remoteServiceManager.updateJob(otherTypeFinished);
 
-    List<ServiceRegistration> type1Hosts = remoteServiceManager.getServiceRegistrations(RECEIPT_TYPE_1);
-    List<ServiceRegistration> type2Hosts = remoteServiceManager.getServiceRegistrations(RECEIPT_TYPE_2);
+    List<ServiceRegistration> type1Hosts = remoteServiceManager.getServiceRegistrations(JOB_TYPE_1);
+    List<ServiceRegistration> type2Hosts = remoteServiceManager.getServiceRegistrations(JOB_TYPE_2);
 
     // Host 1 has more "type 1" jobs than host 2
     Assert.assertEquals(2, type1Hosts.size());
@@ -220,7 +220,7 @@ public class JobTest {
 
     // There is just one running job of receipt type 2.  It is on the localhost.  Since host 2 has no type 2 jobs, it
     // is the least loaded server, and takes precedence in the list.
-    Assert.assertEquals(1, remoteServiceManager.count(RECEIPT_TYPE_2, Status.RUNNING));
+    Assert.assertEquals(1, remoteServiceManager.count(JOB_TYPE_2, Status.RUNNING));
     Assert.assertEquals(2, type2Hosts.size());
     Assert.assertEquals(HOST_2, type2Hosts.get(0).getHost());
     Assert.assertEquals(LOCALHOST, type2Hosts.get(1).getHost());

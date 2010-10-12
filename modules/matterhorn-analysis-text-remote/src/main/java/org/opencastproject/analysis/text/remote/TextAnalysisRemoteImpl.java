@@ -131,16 +131,6 @@ public class TextAnalysisRemoteImpl extends RemoteBase implements MediaAnalysisS
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteBase#getReceipt(java.lang.String)
-   */
-  @Override
-  public Job getReceipt(String id) {
-    return super.getReceipt(id);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
    * @see org.opencastproject.analysis.api.MediaAnalysisService#produces()
    */
   @Override

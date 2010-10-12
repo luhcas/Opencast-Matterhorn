@@ -46,7 +46,7 @@ import java.util.concurrent.Future;
 public class YoutubeDistributionService implements DistributionService {
 
   /** Receipt type */
-  public static final String RECEIPT_TYPE = "org.opencastproject.distribution.youtube";
+  public static final String JOB_TYPE = "org.opencastproject.distribution.youtube";
 
   /** logger instance */
   private static final Logger logger = LoggerFactory.getLogger(YoutubeDistributionService.class);
@@ -201,7 +201,7 @@ public class YoutubeDistributionService implements DistributionService {
           throws DistributionException {
 
     final RemoteServiceManager rs = remoteServiceManager;
-    final Job receipt = rs.createJob(RECEIPT_TYPE);
+    final Job receipt = rs.createJob(JOB_TYPE);
 
     Runnable command = new Runnable() {
       public void run() {
@@ -346,6 +346,31 @@ public class YoutubeDistributionService implements DistributionService {
    */
   public Job getJob(String id) {
     return remoteServiceManager.getJob(id);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
+   */
+  public long countJobs(Status status) {
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
+    return remoteServiceManager.count(JOB_TYPE, status);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   *      java.lang.String)
+   */
+  public long countJobs(Status status, String host) {
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
+    if (host == null)
+      throw new IllegalArgumentException("host must not be null");
+    return remoteServiceManager.count(JOB_TYPE, status, host);
   }
 
 }

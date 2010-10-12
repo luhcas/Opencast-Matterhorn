@@ -17,13 +17,15 @@ package org.opencastproject.inspection.api;
 
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.remote.api.Job;
+import org.opencastproject.remote.api.JobProducer;
 
 import java.net.URI;
 
 /**
  * Anayzes media to determine its technical metadata.
  */
-public interface MediaInspectionService {
+public interface MediaInspectionService extends JobProducer {
+
   /**
    * The namespace distinguishing media inspection jobs from other types
    */
@@ -63,13 +65,4 @@ public interface MediaInspectionService {
    */
   Job enrich(MediaPackageElement original, boolean override, boolean block);
 
-  /**
-   * Gets the receipt with a given ID. This can be used to retrieve the status and outcome of a non-blocking call to
-   * {@link #inspect(URI, boolean)} or {@link #enrich(MediaPackageElement, boolean, boolean)}.
-   * 
-   * @param id
-   *          The id of the receipt
-   * @return The receipt, or null if not found
-   */
-  Job getReceipt(String id);
 }

@@ -21,7 +21,6 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Job;
 import org.opencastproject.remote.api.Job.Status;
-import org.opencastproject.remote.api.JobProducer;
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.PathSupport;
@@ -45,13 +44,13 @@ import java.util.concurrent.Future;
 /**
  * Distributes media to the local media delivery directory.
  */
-public class StreamingDistributionService implements DistributionService, JobProducer {
+public class StreamingDistributionService implements DistributionService {
 
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(StreamingDistributionService.class);
 
   /** Receipt type */
-  public static final String RECEIPT_TYPE = "org.opencastproject.distribution.streaming";
+  public static final String JOB_TYPE = "org.opencastproject.distribution.streaming";
 
   /** Default distribution directory */
   public static final String DEFAULT_DISTRIBUTION_DIR = "opencast" + File.separator;
@@ -117,7 +116,7 @@ public class StreamingDistributionService implements DistributionService, JobPro
   public Job distribute(final String mediaPackageId, final MediaPackageElement element, boolean block)
           throws DistributionException {
     final RemoteServiceManager rs = remoteServiceManager;
-    final Job receipt = rs.createJob(RECEIPT_TYPE);
+    final Job receipt = rs.createJob(JOB_TYPE);
 
     Runnable command = new Runnable() {
       public void run() {
@@ -183,7 +182,7 @@ public class StreamingDistributionService implements DistributionService, JobPro
   @Override
   public Job retract(final String mediaPackageId, boolean block) throws DistributionException {
     final RemoteServiceManager rs = remoteServiceManager;
-    final Job receipt = rs.createJob(RECEIPT_TYPE);
+    final Job receipt = rs.createJob(JOB_TYPE);
 
     Runnable command = new Runnable() {
       public void run() {
@@ -224,35 +223,6 @@ public class StreamingDistributionService implements DistributionService, JobPro
     }
 
     return receipt;
-  }
-
-  /**
-   * Callback for the OSGi environment to set the workspace reference.
-   * 
-   * @param workspace
-   *          the workspace
-   */
-  public void setWorkspace(Workspace workspace) {
-    this.workspace = workspace;
-  }
-
-  /**
-   * Callback for the OSGi environment to set the service registry reference.
-   * 
-   * @param remoteServiceManager
-   *          the service registry
-   */
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
-    this.remoteServiceManager = remoteServiceManager;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
-   */
-  public Job getJob(String id) {
-    return remoteServiceManager.getJob(id);
   }
 
   /**
@@ -298,6 +268,60 @@ public class StreamingDistributionService implements DistributionService, JobPro
    */
   protected File getMediaPackageDirectory(String mediaPackageId) {
     return new File(distributionDirectory, mediaPackageId);
+  }
+
+  /**
+   * Callback for the OSGi environment to set the workspace reference.
+   * 
+   * @param workspace
+   *          the workspace
+   */
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
+  }
+
+  /**
+   * Callback for the OSGi environment to set the service registry reference.
+   * 
+   * @param remoteServiceManager
+   *          the service registry
+   */
+  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+    this.remoteServiceManager = remoteServiceManager;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
+   */
+  public Job getJob(String id) {
+    return remoteServiceManager.getJob(id);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
+   */
+  public long countJobs(Status status) {
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
+    return remoteServiceManager.count(JOB_TYPE, status);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   *      java.lang.String)
+   */
+  public long countJobs(Status status, String host) {
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
+    if (host == null)
+      throw new IllegalArgumentException("host must not be null");
+    return remoteServiceManager.count(JOB_TYPE, status, host);
   }
 
 }

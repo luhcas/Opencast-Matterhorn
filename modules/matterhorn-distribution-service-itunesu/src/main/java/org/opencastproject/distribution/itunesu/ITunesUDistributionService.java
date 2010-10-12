@@ -49,7 +49,7 @@ public class ITunesUDistributionService implements DistributionService {
   private static final Logger logger = LoggerFactory.getLogger(ITunesUDistributionService.class);
 
   /** Receipt type */
-  public static final String RECEIPT_TYPE = "org.opencastproject.distribution.itunes";
+  public static final String JOB_TYPE = "org.opencastproject.distribution.itunes";
 
   /** workspace instance */
   protected Workspace workspace = null;
@@ -100,7 +100,7 @@ public class ITunesUDistributionService implements DistributionService {
     File data_directory = new File(directory_name);
     data_directory.mkdirs();
     schedule = new Schedule(data_directory);
-    
+
     int threads = 1;
     String threadsConfig = StringUtils.trimToNull(cc.getBundleContext().getProperty(
             "org.opencastproject.distribution.itunesu.threads"));
@@ -177,100 +177,100 @@ public class ITunesUDistributionService implements DistributionService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.distribution.api.DistributionService#distribute(String,
-   *      MediaPackageElement, boolean)
+   * @see org.opencastproject.distribution.api.DistributionService#distribute(String, MediaPackageElement, boolean)
    */
-  public Job distribute(final String mediaPackageId, final MediaPackageElement element, boolean block) throws DistributionException {
+  public Job distribute(final String mediaPackageId, final MediaPackageElement element, boolean block)
+          throws DistributionException {
 
-      final RemoteServiceManager rs = remoteServiceManager;
-      final Job receipt = rs.createJob(RECEIPT_TYPE);
+    final RemoteServiceManager rs = remoteServiceManager;
+    final Job receipt = rs.createJob(JOB_TYPE);
 
-      Runnable command = new Runnable() {
-        public void run() {
-          receipt.setStatus(Status.RUNNING);
-          rs.updateJob(receipt);
+    Runnable command = new Runnable() {
+      public void run() {
+        receipt.setStatus(Status.RUNNING);
+        rs.updateJob(receipt);
 
-          try {
-            File sourceFile = workspace.get(element.getURI());
-            if (!sourceFile.exists() || !sourceFile.isFile()) {
-              throw new IllegalStateException("Could not retrieve a file for element " + element.getIdentifier());
-            }
-      
-            // get task name
-            String name = getTaskID(mediaPackageId, element.getIdentifier());
-      
-            // check if the file has already been delivered
-            Task savedTask = schedule.getSavedTask(name);
-      
-            if (savedTask != null && savedTask.getState() == Task.State.COMPLETE) {
-              // has been successfully delivered
-              // remove the media
-              remove(name);
-            }
-      
-            ITunesDeliveryAction act = new ITunesDeliveryAction();
-            act.setName(name);
-            act.setTitle(sourceFile.getName());
-            // CHNAGE ME: set metadata elements here
-            act.setCreator("Opencast Project");
-            act.setTags(new String[] { "whatever" });
-            act.setAbstract("Opencast Distribution Service - iTunes U");
-            act.setMediaPath(sourceFile.getAbsolutePath());
-      
-            // get playlist ID from context strategy
-            String contextDestination = contextStrategy.getContextName(mediaPackageId);
-            if (contextDestination != null) {
-              // use the destination from context strategy
-              destination = contextDestination;
-            }
-      
-            // deliver to a tab
-            act.setDestination(destination); // FIXME: replace this with a tab based on the episode's series
-      
-            logger.info("Delivering from {}", sourceFile.getAbsolutePath());
-      
-            // start the scheduler
-            schedule.start(act);
-            
-            while (true) {
-              Task task = schedule.getTask(name);
-              synchronized (task) {
-                Task.State state = task.getState();
-                if (state == Task.State.INITIAL || state == Task.State.ACTIVE) {
-                  try {
-                    Thread.sleep(1000L);
-                  } catch (Exception e) {
-                    throw new RuntimeException(e);
-                  }
-                  // still running
-                  continue;
-                } else if (state == Task.State.COMPLETE) {
-                  logger.info("Succeeded delivering from {}", sourceFile.getAbsolutePath());
-                  String videoURL = act.getTrackURL();
-                  URI newTrackUri = new URI(videoURL);
-                  MediaPackageElement newElement = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-                          .elementFromURI(newTrackUri, element.getElementType(), element.getFlavor());
-                  newElement.setIdentifier(element.getIdentifier() + "-dist");
-
-                  receipt.setElement(newElement);
-                  receipt.setStatus(Status.FINISHED);
-                  remoteServiceManager.updateJob(receipt);
-
-                  break;
-                } else if (state == Task.State.FAILED) {
-                  receipt.setStatus(Status.FAILED);
-                  remoteServiceManager.updateJob(receipt);
-                  logger.warn("Failed delivering from {}", sourceFile.getAbsolutePath());
-                  break;
-                }
-              }
-            } // end of schedule loop
-                        
-          } catch (Exception e) {
-            receipt.setStatus(Status.FAILED);
-            remoteServiceManager.updateJob(receipt);
-            throw new DistributionException(e);
+        try {
+          File sourceFile = workspace.get(element.getURI());
+          if (!sourceFile.exists() || !sourceFile.isFile()) {
+            throw new IllegalStateException("Could not retrieve a file for element " + element.getIdentifier());
           }
+
+          // get task name
+          String name = getTaskID(mediaPackageId, element.getIdentifier());
+
+          // check if the file has already been delivered
+          Task savedTask = schedule.getSavedTask(name);
+
+          if (savedTask != null && savedTask.getState() == Task.State.COMPLETE) {
+            // has been successfully delivered
+            // remove the media
+            remove(name);
+          }
+
+          ITunesDeliveryAction act = new ITunesDeliveryAction();
+          act.setName(name);
+          act.setTitle(sourceFile.getName());
+          // CHNAGE ME: set metadata elements here
+          act.setCreator("Opencast Project");
+          act.setTags(new String[] { "whatever" });
+          act.setAbstract("Opencast Distribution Service - iTunes U");
+          act.setMediaPath(sourceFile.getAbsolutePath());
+
+          // get playlist ID from context strategy
+          String contextDestination = contextStrategy.getContextName(mediaPackageId);
+          if (contextDestination != null) {
+            // use the destination from context strategy
+            destination = contextDestination;
+          }
+
+          // deliver to a tab
+          act.setDestination(destination); // FIXME: replace this with a tab based on the episode's series
+
+          logger.info("Delivering from {}", sourceFile.getAbsolutePath());
+
+          // start the scheduler
+          schedule.start(act);
+
+          while (true) {
+            Task task = schedule.getTask(name);
+            synchronized (task) {
+              Task.State state = task.getState();
+              if (state == Task.State.INITIAL || state == Task.State.ACTIVE) {
+                try {
+                  Thread.sleep(1000L);
+                } catch (Exception e) {
+                  throw new RuntimeException(e);
+                }
+                // still running
+                continue;
+              } else if (state == Task.State.COMPLETE) {
+                logger.info("Succeeded delivering from {}", sourceFile.getAbsolutePath());
+                String videoURL = act.getTrackURL();
+                URI newTrackUri = new URI(videoURL);
+                MediaPackageElement newElement = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+                        .elementFromURI(newTrackUri, element.getElementType(), element.getFlavor());
+                newElement.setIdentifier(element.getIdentifier() + "-dist");
+
+                receipt.setElement(newElement);
+                receipt.setStatus(Status.FINISHED);
+                remoteServiceManager.updateJob(receipt);
+
+                break;
+              } else if (state == Task.State.FAILED) {
+                receipt.setStatus(Status.FAILED);
+                remoteServiceManager.updateJob(receipt);
+                logger.warn("Failed delivering from {}", sourceFile.getAbsolutePath());
+                break;
+              }
+            }
+          } // end of schedule loop
+
+        } catch (Exception e) {
+          receipt.setStatus(Status.FAILED);
+          remoteServiceManager.updateJob(receipt);
+          throw new DistributionException(e);
+        }
       }
     };
 
@@ -325,6 +325,31 @@ public class ITunesUDistributionService implements DistributionService {
    */
   public Job getJob(String id) {
     return remoteServiceManager.getJob(id);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
+   */
+  public long countJobs(Status status) {
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
+    return remoteServiceManager.count(JOB_TYPE, status);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   *      java.lang.String)
+   */
+  public long countJobs(Status status, String host) {
+    if (status == null)
+      throw new IllegalArgumentException("status must not be null");
+    if (host == null)
+      throw new IllegalArgumentException("host must not be null");
+    return remoteServiceManager.count(JOB_TYPE, status, host);
   }
 
 }

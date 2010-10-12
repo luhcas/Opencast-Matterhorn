@@ -21,6 +21,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.remote.api.Job;
+import org.opencastproject.remote.api.Job.Status;
 
 import org.junit.Ignore;
 
@@ -31,7 +32,7 @@ import java.util.Date;
  */
 @Ignore
 public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
-  
+
   /**
    * Creates a new test implementation object.
    * 
@@ -53,8 +54,8 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
   public Job analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException {
     ReceiptStub receipt = new ReceiptStub();
     try {
-      receipt.element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder().newElement(Catalog.TYPE,
-              MediaPackageElements.SEGMENTS);
+      receipt.element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+              .newElement(Catalog.TYPE, MediaPackageElements.SEGMENTS);
     } catch (Exception e) {
       throw new MediaAnalysisException(e.getMessage());
     }
@@ -63,43 +64,74 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.analysis.api.MediaAnalysisService#getReceipt(java.lang.String)
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
    */
   @Override
-  public Job getReceipt(String id) {
+  public Job getJob(String id) {
     return null;
   }
-  
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
+   */
+  public long countJobs(Status status) {
+    return 0;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   *      java.lang.String)
+   */
+  public long countJobs(Status status, String host) {
+    return 0;
+  }
+
   class ReceiptStub implements Job {
     MediaPackageElement element;
     Status status;
+
     public MediaPackageElement getElement() {
       return element;
     }
+
     public String getHost() {
       return null;
     }
+
     public String getId() {
       return null;
     }
+
     public Status getStatus() {
       return status;
     }
+
     public String getJobType() {
       return "analysis-test";
     }
+
     public void setElement(MediaPackageElement element) {
       this.element = element;
     }
+
     public void setHost(String host) {
     }
+
     public void setId(String id) {
     }
+
     public void setStatus(Status status) {
       this.status = status;
     }
+
     public void setType(String type) {
     }
+
     public String toXml() {
       return null;
     }

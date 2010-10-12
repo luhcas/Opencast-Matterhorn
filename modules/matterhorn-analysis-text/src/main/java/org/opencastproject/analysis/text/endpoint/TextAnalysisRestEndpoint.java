@@ -88,8 +88,8 @@ public class TextAnalysisRestEndpoint {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("/{id}.xml")
-  public Response getReceipt(@PathParam("id") String id) {
-    Job receipt = textAnalyzer.getReceipt(id);
+  public Response getJob(@PathParam("id") String id) {
+    Job receipt = textAnalyzer.getJob(id);
     if (receipt == null) {
       return Response.status(Status.NOT_FOUND).type(MediaType.TEXT_HTML).build();
     } else {

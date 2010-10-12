@@ -19,15 +19,15 @@ package org.opencastproject.analysis.api;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.remote.api.Job;
+import org.opencastproject.remote.api.JobProducer;
 
 /**
  * Api for media analysis implementations, aimed at extracting metadata information from audio and audiovisual tracks.
  */
-public interface MediaAnalysisService {
+public interface MediaAnalysisService extends JobProducer {
 
   /**
-   * Takes the given element and returns a receipt that can be used to get the resulting
-   * {@link org.opencastproject.metadata.mpeg7.Mpeg7Catalog}.
+   * Takes the given element and returns a receipt that can be used to get the resulting {@link MediaPackageElement}.
    * 
    * @param element
    *          element to analyze
@@ -36,15 +36,6 @@ public interface MediaAnalysisService {
    * @return the metadata
    */
   Job analyze(MediaPackageElement element, boolean block) throws MediaAnalysisException;
-
-  /**
-   * Gets the receipt with this identifier
-   * 
-   * @param id
-   *          The ID of the receipt
-   * @return The receipt, or null if none is found.
-   */
-  Job getReceipt(String id);
 
   /**
    * Returns the flavor that this media analysis service implementation produces. The flavor will usually be of type
@@ -63,4 +54,5 @@ public interface MediaAnalysisService {
    * @return the required catalog flavors
    */
   MediaPackageElementFlavor[] requires();
+
 }

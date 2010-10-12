@@ -28,7 +28,6 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Job;
 import org.opencastproject.remote.api.RemoteBase;
-import org.opencastproject.remote.api.Job.Status;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -65,27 +64,6 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
 
   public ComposerServiceRemoteImpl() {
     super(JOB_TYPE);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#countJobs(Job.opencastproject.remote.Receipt.Status)
-   */
-  @Override
-  public long countJobs(Status status) {
-    return super.countJobs(status);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.composer.api.Job.Status,
-   *      java.lang.String)
-   */
-  @Override
-  public long countJobs(Status status, String host) {
-    return super.countJobs(status, host);
   }
 
   /**
@@ -266,16 +244,6 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
       closeConnection(response);
     }
     throw new RuntimeException("The remote composer service proxy could not get the profile " + profileId);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.composer.api.ComposerService#getReceipt(java.lang.String)
-   */
-  @Override
-  public Job getReceipt(String id) {
-    return remoteServiceManager.getJob(id);
   }
 
   /**

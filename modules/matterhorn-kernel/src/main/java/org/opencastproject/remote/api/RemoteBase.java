@@ -38,7 +38,7 @@ import java.util.Map;
 /**
  * Base class serving as a convenience implementation for remote services.
  */
-public class RemoteBase {
+public class RemoteBase implements JobProducer {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(RemoteBase.class);
@@ -87,7 +87,7 @@ public class RemoteBase {
    * {@link HttpStatus.SC_OK} as the status code.
    * 
    * @param httpRequest
-   *          the http request.  If the URI is specified, it should include only the path beyond the service endpoint.
+   *          the http request. If the URI is specified, it should include only the path beyond the service endpoint.
    *          For example, a request intended for http://{host}/{service}/extra/path/info.xml should include the URI
    *          "/extra/path/info.xml".
    * @return the response object
@@ -101,7 +101,7 @@ public class RemoteBase {
    * expected http status code.
    * 
    * @param httpRequest
-   *          the http request.  If the URI is specified, it should include only the path beyond the service endpoint.
+   *          the http request. If the URI is specified, it should include only the path beyond the service endpoint.
    *          For example, a request intended for http://{host}/{service}/extra/path/info.xml should include the URI
    *          "/extra/path/info.xml".
    * @param expectedHttpStatus
@@ -113,17 +113,17 @@ public class RemoteBase {
     Map<String, String> hostErrors = new HashMap<String, String>();
     URI originalUri = httpRequest.getURI();
     String uriSuffix = null;
-    if(originalUri != null && StringUtils.isNotBlank(originalUri.toString())) {
+    if (originalUri != null && StringUtils.isNotBlank(originalUri.toString())) {
       uriSuffix = originalUri.toString();
     }
     for (ServiceRegistration remoteService : remoteServices) {
       HttpResponse response = null;
       try {
         String fullUrl = null;
-        if(uriSuffix == null) {
+        if (uriSuffix == null) {
           fullUrl = UrlSupport.concat(remoteService.getHost(), remoteService.getPath());
         } else {
-          fullUrl = UrlSupport.concat(new String[] {remoteService.getHost(), remoteService.getPath(), uriSuffix});
+          fullUrl = UrlSupport.concat(new String[] { remoteService.getHost(), remoteService.getPath(), uriSuffix });
         }
         URI uri = new URI(fullUrl);
         httpRequest.setURI(uri);
@@ -136,7 +136,7 @@ public class RemoteBase {
           closeConnection(response);
         }
       } catch (Exception e) {
-        hostErrors.put(httpRequest.getMethod() + " " + remoteService + uriSuffix , e.getMessage());
+        hostErrors.put(httpRequest.getMethod() + " " + remoteService + uriSuffix, e.getMessage());
         closeConnection(response);
       }
     }
@@ -150,7 +150,7 @@ public class RemoteBase {
   protected void closeConnection(HttpResponse response) {
     client.close(response);
   }
-  
+
   /**
    * Polls for receipts until they return a status of {@link Status#FINISHED} or {@link Status#FAILED}
    * 
@@ -160,8 +160,8 @@ public class RemoteBase {
    */
   protected Job poll(String id) {
     while (true) {
-      Job r = getReceipt(id);
-      if(Status.FAILED.equals(r.getStatus()) || Status.FINISHED.equals(r.getStatus())) {
+      Job r = getJob(id);
+      if (Status.FAILED.equals(r.getStatus()) || Status.FINISHED.equals(r.getStatus())) {
         return r;
       }
       try {
@@ -171,37 +171,34 @@ public class RemoteBase {
       }
     }
   }
-  
+
   /**
-   * Gets the receipt with this identifier, or null if it does not exist.
+   * {@inheritDoc}
    * 
-   * @param id The receipt identifier
-   * @return the receipt, or null if no receipt with this identifier exists
+   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
    */
-  protected Job getReceipt(String id) {
+  public Job getJob(String id) {
     return remoteServiceManager.getJob(id);
   }
 
   /**
-   * Counts the number of jobs in a given status across the cluster
+   * {@inheritDoc}
    * 
-   * @param status the job status
-   * @return the number of jobs currently in this status
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
    */
-  protected long countJobs(Status status) {
+  public long countJobs(Status status) {
     if (status == null)
       throw new IllegalArgumentException("status must not be null");
     return remoteServiceManager.count(serviceType, status);
   }
 
   /**
-   * Counts the number of jobs in a given status on a single host
+   * {@inheritDoc}
    * 
-   * @param status the job status
-   * @param host the host responsible for the job
-   * @return the number of jobs
+   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   *      java.lang.String)
    */
-  protected long countJobs(Status status, String host) {
+  public long countJobs(Status status, String host) {
     if (status == null)
       throw new IllegalArgumentException("status must not be null");
     if (host == null)
@@ -209,7 +206,6 @@ public class RemoteBase {
     return remoteServiceManager.count(serviceType, status, host);
   }
 
-  
   /**
    * A stream wrapper that closes the http response when the stream is closed. If a remote service proxy returns an
    * inputstream, this implementation should be used to ensure that the http connection is closed properly.

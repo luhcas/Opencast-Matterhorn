@@ -19,12 +19,12 @@ import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.Job.Status;
+import org.opencastproject.remote.api.JobProducer;
 
 /**
  * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this encoding job.
  */
-public interface ComposerService {
+public interface ComposerService extends JobProducer {
 
   final String JOB_TYPE = "org.opencastproject.composer";
 
@@ -35,7 +35,7 @@ public interface ComposerService {
    *          The source track
    * @param profileId
    *          The profile to use for encoding
-   * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getReceipt(String)}
+   * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getJob(String)}
    *         to obtain the status of an encoding job.
    * @throws EncoderException
    */
@@ -99,7 +99,7 @@ public interface ComposerService {
    *          start time in miliseconds
    * @param duration
    *          duration in miliseconds
-   * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getReceipt(String)}
+   * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getJob(String)}
    *         to obtain the status of an encoding job.
    * @throws EncoderException
    *           if trimming fails
@@ -208,28 +208,5 @@ public interface ComposerService {
    * @return The encoding profile, or null if no profile is registered with that ID
    */
   EncodingProfile getProfile(String profileId);
-
-  /**
-   * Get a {@link Job} of the submitted encoding jobs.
-   * 
-   * @param id
-   *          The id of a Receipt
-   * @return The Receipt with this identifier, or null if no receipt exists with this identifier
-   */
-  Job getReceipt(String id);
-
-  /**
-   * Get the number of encoding jobs in a current status on all nodes.
-   * 
-   * @return Number of jobs in this state
-   */
-  long countJobs(Status status);
-
-  /**
-   * Get the number of encoding jobs in a current status on a specific node.
-   * 
-   * @return Number of running jobs
-   */
-  long countJobs(Status status, String host);
 
 }
