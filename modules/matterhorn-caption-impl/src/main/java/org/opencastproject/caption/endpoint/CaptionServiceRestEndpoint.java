@@ -23,6 +23,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.remote.api.Job;
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -32,6 +33,7 @@ import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Status;
 
 import org.apache.commons.io.IOUtils;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -67,6 +69,17 @@ public class CaptionServiceRestEndpoint {
   protected String docs;
 
   private static final Logger logger = LoggerFactory.getLogger(CaptionServiceRestEndpoint.class);
+
+  /**
+   * Callback from OSGi that is called when this service is activated.
+   * 
+   * @param cc
+   *          OSGi component context
+   */
+  public void activate(ComponentContext cc) {
+    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    docs = generateDocs(serviceUrl);
+  }
 
   public void setCaptionService(CaptionService service) {
     this.service = service;
@@ -161,8 +174,8 @@ public class CaptionServiceRestEndpoint {
    * 
    * @return Doc string
    */
-  protected String generateDocs() {
-    DocRestData data = new DocRestData("Caption", "Caption Service", "/caption/rest", null);
+  protected String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("Caption", "Caption Service", serviceUrl, null);
     data.setAbstract("This service enables conversion from one caption format to another.");
 
     // convert
@@ -200,9 +213,6 @@ public class CaptionServiceRestEndpoint {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if (docs == null) {
-      docs = generateDocs();
-    }
     return docs;
   }
 

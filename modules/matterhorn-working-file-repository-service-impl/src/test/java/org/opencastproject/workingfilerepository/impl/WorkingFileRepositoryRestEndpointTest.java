@@ -37,12 +37,6 @@ public class WorkingFileRepositoryRestEndpointTest {
   }
 
   @Test
-  public void testDocumentation() {
-    String docs = endpoint.getDocumentation();
-    Assert.assertTrue(docs.indexOf("<html") > -1);
-  }
-
-  @Test
   public void testExtractImageContentType() throws Exception {
     String mediaPackageId = "mp";
     String image = "element1";

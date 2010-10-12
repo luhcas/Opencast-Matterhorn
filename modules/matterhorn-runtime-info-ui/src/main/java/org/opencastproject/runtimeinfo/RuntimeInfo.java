@@ -96,6 +96,9 @@ public class RuntimeInfo {
       engageBaseUrl = serverUrl;
     this.serverUrl = bundleContext.getProperty("org.opencastproject.server.url");
     this.testMode = "true".equalsIgnoreCase(bundleContext.getProperty("testMode"));
+    
+    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    docs = generateDocs(serviceUrl);
 
     // Pingback server, if enabled
     String pingbackUrl = bundleContext.getProperty("org.opencastproject.anonymous.feedback.url");
@@ -136,8 +139,8 @@ public class RuntimeInfo {
     }
   }
 
-  protected String generateDocs() {
-    DocRestData data = new DocRestData("RuntimeInfo", "Runtime Information", "/info/rest", null);
+  protected String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("RuntimeInfo", "Runtime Information", serviceUrl, null);
 
     // abstract
     data.setAbstract("This service provides information about the runtime environment, including the servives that are"
@@ -168,9 +171,6 @@ public class RuntimeInfo {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if (docs == null) {
-      docs = generateDocs();
-    }
     return docs;
   }
 
@@ -258,4 +258,5 @@ public class RuntimeInfo {
     }
     return json;
   }
+
 }

@@ -15,15 +15,9 @@
  */
 package org.opencastproject.scheduler.impl;
 
-import org.opencastproject.scheduler.impl.EventImpl;
-import org.opencastproject.scheduler.impl.IncompleteDataException;
-import org.opencastproject.scheduler.impl.MetadataImpl;
-import org.opencastproject.scheduler.impl.RecurringEventImpl;
-import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
 import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.api.SchedulerFilter;
-import org.opencastproject.scheduler.endpoint.SchedulerRestService;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.impl.SeriesImpl;
@@ -59,8 +53,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -328,15 +322,6 @@ public class SchedulerServiceImplTest {
     //delete event
     service.removeEvent(eventUpdated.getEventId());
     Assert.assertNull(service.getEvent(eventUpdated.getEventId()));   
-  }
-  
-  @Test
-  public void testRESTDocs () {
-    SchedulerRestService restService = new SchedulerRestService();
-    restService.setService(service);
-    restService.activate(null);
-    
-    Assert.assertNotNull(restService.getDocumentation());
   }
   
   @Test

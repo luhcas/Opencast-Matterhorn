@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
- name="org.opencastproject.adminui.endpoint.AdminuiRestService" immediate="true">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" immediate="true" name="org.opencastproject.adminui.endpoint.AdminuiRestService">
   <implementation class="org.opencastproject.adminui.endpoint.AdminuiRestService" />
   <property name="service.description" value="Admin UI REST Proxy" />
 

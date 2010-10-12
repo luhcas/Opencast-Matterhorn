@@ -48,20 +48,27 @@ public class YouTubeDistributionRestService {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(YouTubeDistributionRestService.class);
-  
+
   /** The distribution service */
   protected DistributionService service;
-  
+
   /**
-   * @param service the service to set
+   * @param service
+   *          the service to set
    */
   public void setService(DistributionService service) {
     this.service = service;
   }
-  
+
+  /**
+   * Callback from OSGi that is called when this service is activated.
+   * 
+   * @param cc
+   *          OSGi component context
+   */
   public void activate(ComponentContext cc) {
-    String alias = (String)cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
-    docs = generateDocs(alias);
+    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    docs = generateDocs(serviceUrl);
   }
 
   @POST
@@ -109,18 +116,17 @@ public class YouTubeDistributionRestService {
                   + "is not working and is either restarting or has failed. A status code 500 means a general failure has "
                   + "occurred which is not recoverable and was not anticipated. In other words, there is a bug!" };
 
-  private String generateDocs(String url) {
-    DocRestData data = new DocRestData("localdistributionservice", "Local Distribution Service", url, notes);
+  private String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("youtubedistributionservice", "YouTube Distribution Service", serviceUrl, notes);
 
     // abstract
-    data.setAbstract("This service distributes media packages to the Matterhorn feed and engage services.");
+    data.setAbstract("This service distributes media packages to a playlist on YouTube.");
 
     // distribute
     RestEndpoint endpoint = new RestEndpoint("distribute", RestEndpoint.Method.POST, "/",
-            "Distribute a media package to this distribution channel");
+            "Distribute a media package to YouTube");
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addRequiredParam(new Param("mediapackageId", Param.Type.TEXT, null,
-            "The media package identifier"));
+    endpoint.addRequiredParam(new Param("mediapackageId", Param.Type.TEXT, null, "The media package identifier"));
     endpoint.addRequiredParam(new Param("elementId", Param.Type.STRING, null, "A media package element"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
@@ -129,7 +135,7 @@ public class YouTubeDistributionRestService {
 
     // retract
     RestEndpoint retractEndpoint = new RestEndpoint("retract", RestEndpoint.Method.POST, "/retract",
-            "Retract a media package from this distribution channel");
+            "Retract a media package from YouTube");
     retractEndpoint.addRequiredParam(new Param("mediapackageId", Param.Type.STRING, null, "The media package ID"));
     retractEndpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
     retractEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));

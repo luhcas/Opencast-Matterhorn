@@ -82,7 +82,7 @@ public class TextAnalysisRemoteImpl extends RemoteBase implements MediaAnalysisS
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     UrlEncodedFormEntity entity;
     try {
-      params.add(new BasicNameValuePair("track", getXML(element)));
+      params.add(new BasicNameValuePair("image", getXML(element)));
       entity = new UrlEncodedFormEntity(params);
     } catch (Exception e) {
       throw new RuntimeException(e);

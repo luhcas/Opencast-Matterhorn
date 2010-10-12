@@ -18,14 +18,16 @@ package org.opencastproject.capture.endpoint;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.ScheduledEvent;
 import org.opencastproject.capture.api.ScheduledEventImpl;
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.util.doc.Param.Type;
 
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +43,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.StatusType;
 import javax.xml.bind.JAXBException;
 
 /**
@@ -50,12 +50,26 @@ import javax.xml.bind.JAXBException;
  */
 @Path("/")
 public class CaptureRestService {
+  
   private static final Logger logger = LoggerFactory.getLogger(CaptureRestService.class);
+
   private CaptureAgent service;
+  
   protected String docs = null;
 
-  protected String generateDocs() {
-    DocRestData data = new DocRestData("CaptureAgent", "Capture Agent", "/capture/rest", null);
+  /**
+   * Callback from OSGi that is called when this service is activated.
+   * 
+   * @param cc
+   *          OSGi component context
+   */
+  public void activate(ComponentContext cc) {
+    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    docs = generateDocs(serviceUrl);
+  }
+
+  protected String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("CaptureAgent", "Capture Agent", serviceUrl, null);
     //// startCapture signatures
     // startCapture()
     RestEndpoint startNoParamEndpoint = new RestEndpoint("startNP", RestEndpoint.Method.GET, "/startCapture", "Starts a capture with the default parameters");
@@ -199,9 +213,6 @@ public class CaptureRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public Response getDocumentation() {
-    if (docs == null) 
-      docs = generateDocs();
-    
     return Response.ok(docs).build();
   }
 

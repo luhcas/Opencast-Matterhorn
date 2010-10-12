@@ -16,6 +16,7 @@
 package org.opencastproject.series.endpoint;
 
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.api.SeriesService;
@@ -28,9 +29,9 @@ import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.util.doc.Param.Type;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -42,7 +43,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -52,7 +52,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -103,6 +102,8 @@ public class SeriesRestService {
       } else {
         serverUrl = ccServerUrl;
       }
+      String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+      docs = generateDocs(serviceUrl);
     }
   }
 
@@ -123,20 +124,15 @@ public class SeriesRestService {
     } catch (NotFoundException e) {
       logger.debug("Could not find series: {}", e);
       return null;
-      //TODO: What do I do here?
+      // TODO: What do I do here?
     }
-    /*try {
-      Series s = service.getSeries(seriesID);
-      if (s == null) {
-        return Response.status(Status.BAD_REQUEST).build();
-      }
-      return Response.ok(s).build();
-    } catch (Exception e) {
-      logger.warn("Series Lookup failed: {}", seriesID);
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
-    }*/
+    /*
+     * try { Series s = service.getSeries(seriesID); if (s == null) { return
+     * Response.status(Status.BAD_REQUEST).build(); } return Response.ok(s).build(); } catch (Exception e) {
+     * logger.warn("Series Lookup failed: {}", seriesID); return Response.status(Status.SERVICE_UNAVAILABLE).build(); }
+     */
   }
-  
+
   /**
    * Get a specific series.
    * 
@@ -154,20 +150,15 @@ public class SeriesRestService {
     } catch (NotFoundException e) {
       logger.debug("Could not find series: {}", e);
       return null;
-      //TODO: What do I do here?
+      // TODO: What do I do here?
     }
-    /*try {
-      Series s = service.getSeries(seriesID);
-      if (s == null) {
-        return Response.status(Status.BAD_REQUEST).build();
-      }
-      return Response.ok(s).build();
-    } catch (Exception e) {
-      logger.warn("Series Lookup failed: {}", seriesID);
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
-    }*/
+    /*
+     * try { Series s = service.getSeries(seriesID); if (s == null) { return
+     * Response.status(Status.BAD_REQUEST).build(); } return Response.ok(s).build(); } catch (Exception e) {
+     * logger.warn("Series Lookup failed: {}", seriesID); return Response.status(Status.SERVICE_UNAVAILABLE).build(); }
+     */
   }
-  
+
   @SuppressWarnings("unchecked")
   @GET
   @Produces(MediaType.APPLICATION_JSON)
@@ -227,10 +218,9 @@ public class SeriesRestService {
    *          The Series that should be stored.
    * @return json object, success: true and uuid if succeeded
    */
-  @SuppressWarnings("unchecked")
   @PUT
   @Path("{seriesID}")
-  //TODO: Figure out why we can't just accept a SeriesImpl instead of using a stupid form param on a PUT
+  // TODO: Figure out why we can't just accept a SeriesImpl instead of using a stupid form param on a PUT
   public Response addSeries(@PathParam("seriesID") String seriesId, @FormParam("series") SeriesImpl series) {
     if (series == null) {
       logger.error("series that should be added is null");
@@ -241,8 +231,8 @@ public class SeriesRestService {
     try {
       service.addSeries(series);
       logger.debug("Adding series {} ", series.getSeriesId());
-      return Response.status(Status.CREATED).type("").build(); //get rid of content type
-    } catch(IllegalArgumentException e) {
+      return Response.status(Status.CREATED).type("").build(); // get rid of content type
+    } catch (IllegalArgumentException e) {
       return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -260,8 +250,8 @@ public class SeriesRestService {
   public Response deleteSeries(@PathParam("seriesID") String seriesID) {
     try {
       service.removeSeries(seriesID);
-      return Response.noContent().type("").build(); //get rid of content type
-    } catch(NotFoundException e) {
+      return Response.noContent().type("").build(); // get rid of content type
+    } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
     }
   }
@@ -285,8 +275,8 @@ public class SeriesRestService {
     logger.debug("Updated Series: {}", series.getSeriesId());
     try {
       service.updateSeries(series);
-      return Response.noContent().type("").build(); //get rid of content-type
-    } catch(NotFoundException e) {
+      return Response.noContent().type("").build(); // get rid of content-type
+    } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
     }
   }
@@ -302,7 +292,7 @@ public class SeriesRestService {
   public SeriesListImpl getAllSeriesXml() {
     return getAllSeries();
   }
-  
+
   /**
    * returns all series
    * 
@@ -314,7 +304,7 @@ public class SeriesRestService {
   public SeriesListImpl getAllSeriesJson() {
     return getAllSeries();
   }
-  
+
   private SeriesListImpl getAllSeries() {
     SeriesListImpl seriesList = new SeriesListImpl();
     logger.debug("getting all series.");
@@ -322,7 +312,6 @@ public class SeriesRestService {
     seriesList.setSeriesList(series);
     return seriesList;
   }
-  
 
   /**
    * returns the REST documentation
@@ -333,9 +322,6 @@ public class SeriesRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if (docs == null) {
-      docs = generateDocs();
-    }
     return docs;
   }
 
@@ -348,22 +334,29 @@ public class SeriesRestService {
   /**
    * Generates the REST documentation
    * 
+   * @param serviceUrl
+   *          the service mountpoint
    * @return The HTML with the documentation
    */
-  protected String generateDocs() {
-    DocRestData data = new DocRestData("Series", "Series Service", "/series/rest", notes);
+  protected String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("Series", "Series Service", serviceUrl, notes);
 
     // abstract
     data.setAbstract("This service creates, edits and retrieves and helps manage sereies that capture metadata.");
 
     // add Series
-    RestEndpoint addEndpoint = new RestEndpoint("addSeries", RestEndpoint.Method.PUT, "/{seriesId}",
+    RestEndpoint addEndpoint = new RestEndpoint(
+            "addSeries",
+            RestEndpoint.Method.PUT,
+            "/{seriesId}",
             "Accepts an XML or JSON form parameter representing a new Series and stores it in the database. Returns HTTP Status 201 (Created) if successful. 400 (Bad Request) if the no seriesId is supplied. 500 (Internal Server Error) if there was an error creating the series.");
     addEndpoint.addStatus(org.opencastproject.util.doc.Status.CREATED("Series was created successfully."));
     addEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("No seriesId was supplied."));
     addEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("The series was not created successfully."));
-    addEndpoint.addPathParam(new Param("seriesId", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a", "A UUID to use for the new Series."));
-    addEndpoint.addRequiredParam(new Param("series", Type.TEXT, generateSeries(), "The XML or JSON representation of the series to be stored."));
+    addEndpoint.addPathParam(new Param("seriesId", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a",
+            "A UUID to use for the new Series."));
+    addEndpoint.addRequiredParam(new Param("series", Type.TEXT, generateSeries(),
+            "The XML or JSON representation of the series to be stored."));
     addEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, addEndpoint);
 
@@ -375,10 +368,13 @@ public class SeriesRestService {
             "Accepts an XML or JSON form parameter representing the series to be updated. The seriesId has to be stored in the database already.");
     updateEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Series has be successfully updated."));
     updateEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("No seriesId was supplied."));
-    updateEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A Series matching the supplied seriesId was not found."));
+    updateEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .NOT_FOUND("A Series matching the supplied seriesId was not found."));
     updateEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("The Series was not successfully updated."));
-    updateEndpoint.addPathParam(new Param("seriesId", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a", "The UUID of the series to be updated."));
-    updateEndpoint.addRequiredParam(new Param("series", Type.TEXT, generateSeries(), "The XML or JSON representation of the series to be updated."));
+    updateEndpoint.addPathParam(new Param("seriesId", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a",
+            "The UUID of the series to be updated."));
+    updateEndpoint.addRequiredParam(new Param("series", Type.TEXT, generateSeries(),
+            "The XML or JSON representation of the series to be updated."));
     updateEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, updateEndpoint);
 
@@ -386,8 +382,10 @@ public class SeriesRestService {
     RestEndpoint removeEndpoint = new RestEndpoint("deleteSeries", RestEndpoint.Method.DELETE, "/{seriesId}",
             "Removes the specified series from the database. Returns true if the series could be removed.");
     removeEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Series has been successfully deleted."));
-    removeEndpoint.addStatus(org.opencastproject.util.doc.Status.NOT_FOUND("A Series matching the supplied seriesId was not found."));
-    removeEndpoint.addPathParam(new Param("seriesId", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a", "The UUID of the series."));
+    removeEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .NOT_FOUND("A Series matching the supplied seriesId was not found."));
+    removeEndpoint.addPathParam(new Param("seriesId", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a",
+            "The UUID of the series."));
     removeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, removeEndpoint);
 
@@ -397,9 +395,12 @@ public class SeriesRestService {
     getEndpoint.addFormat(Format.xml("XML Representation of a series."));
     getEndpoint.addFormat(Format.json("JSON Representation of a series."));
     getEndpoint.setAutoPathFormat(true);
-    getEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Series found and response contains XML or JSON representation of the series."));
-    getEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("A Series matching the supplied seriesId was not found."));
-    getEndpoint.addPathParam(new Param("seriesId", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a", "The UUID of the Series."));
+    getEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .OK("Series found and response contains XML or JSON representation of the series."));
+    getEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .NO_CONTENT("A Series matching the supplied seriesId was not found."));
+    getEndpoint.addPathParam(new Param("seriesId", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a",
+            "The UUID of the Series."));
     getEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getEndpoint);
 
@@ -414,24 +415,29 @@ public class SeriesRestService {
     data.addEndpoint(RestEndpoint.Type.READ, getAllEndpoint);
 
     // get new seriesID
-    RestEndpoint newIdEndpoint = new RestEndpoint("newSeriesId", RestEndpoint.Method.GET, "/new/id", "returns a new UUID for a new series in a JSON Wrapper");
+    RestEndpoint newIdEndpoint = new RestEndpoint("newSeriesId", RestEndpoint.Method.GET, "/new/id",
+            "returns a new UUID for a new series in a JSON Wrapper");
     newIdEndpoint.addFormat(Format.json("JSON containg the new ID"));
     newIdEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("UUID for a new seriesID"));
     newIdEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, newIdEndpoint);
 
     // get Dublin Core for Series
-    RestEndpoint dcEndpoint = new RestEndpoint("getDublinCoreForSeries", RestEndpoint.Method.GET, "/{seriesID}/dublincore", "Get the DublinCore metdata for a specific Series.");
+    RestEndpoint dcEndpoint = new RestEndpoint("getDublinCoreForSeries", RestEndpoint.Method.GET,
+            "/{seriesID}/dublincore", "Get the DublinCore metdata for a specific Series.");
     dcEndpoint.addFormat(Format.xml("Dublin Core representation"));
     dcEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Dublincore XML representation of Series."));
-    dcEndpoint.addPathParam(new Param("seriesID", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a", "The UUID of the Series."));
+    dcEndpoint.addPathParam(new Param("seriesID", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a",
+            "The UUID of the Series."));
     dcEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, dcEndpoint);
 
     // search Series
-    RestEndpoint searchEndpoint = new RestEndpoint("getSeries", RestEndpoint.Method.GET, "/search/{pattern}", "Get all Series that match this pattern in their Metadata.");
+    RestEndpoint searchEndpoint = new RestEndpoint("getSeries", RestEndpoint.Method.GET, "/search/{pattern}",
+            "Get all Series that match this pattern in their Metadata.");
     searchEndpoint.addFormat(Format.json("A JSON list of Series matching the search pattern."));
-    searchEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("JSON Object with UUID of the series and a String describing the series"));
+    searchEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .OK("JSON Object with UUID of the series and a String describing the series"));
     searchEndpoint.addPathParam(new Param("pattern", Type.STRING, "lecturer", "a part of a metadat value"));
     searchEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, searchEndpoint);

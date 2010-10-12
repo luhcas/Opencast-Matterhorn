@@ -17,6 +17,7 @@ package org.opencastproject.remote.impl.endpoint;
 
 import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.remote.api.ServiceStatistics;
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -25,6 +26,7 @@ import org.opencastproject.util.doc.RestTestForm;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.osgi.service.component.ComponentContext;
 
 import java.util.List;
 
@@ -51,20 +53,14 @@ public class RemoteServiceManagerEndpoint {
   }
 
   /**
-   * Default, no-arg constructor generates the default rest documentation
+   * Callback from OSGi that is called when this service is activated.
+   * 
+   * @param cc
+   *          OSGi component context
    */
-  public RemoteServiceManagerEndpoint() {
-    DocRestData data = new DocRestData("remote", "Remote Services", "/remote/rest", null);
-    data.setAbstract("This service lists the members of this cluster.");
-
-    RestEndpoint endpoint = new RestEndpoint("list", RestEndpoint.Method.GET, "/services.json",
-            "List the service registrations in the cluster, along with some simple statistics.");
-    endpoint.addFormat(new Format("json", null, null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the remote services."));
-    endpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
-
-    docs = DocUtil.generate(data);
+  public void activate(ComponentContext cc) {
+    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    docs = generateDocs(serviceUrl);
   }
 
   @GET
@@ -96,6 +92,16 @@ public class RemoteServiceManagerEndpoint {
     return jsonArray.toJSONString();
   }
   
-
+  protected String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("remote", "Remote Services", serviceUrl, null);
+    data.setAbstract("This service lists the members of this cluster.");
+    RestEndpoint endpoint = new RestEndpoint("list", RestEndpoint.Method.GET, "/services.json",
+            "List the service registrations in the cluster, along with some simple statistics.");
+    endpoint.addFormat(new Format("json", null, null));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the remote services."));
+    endpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, endpoint);
+    return DocUtil.generate(data);
+  }
   
 }

@@ -16,15 +16,17 @@
 package org.opencastproject.capture.endpoint;
 
 import org.opencastproject.capture.api.ConfidenceMonitor;
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.util.doc.Param.Type;
 
 import org.json.simple.JSONObject;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +37,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.CacheControl;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 
@@ -49,8 +51,19 @@ public class ConfidenceMonitorRestService {
   
   protected String docs;
   
-  protected String generateDocs() {
-    DocRestData data = new DocRestData("ConfidenceMonitor", "Confidence Monitor", "/confidence/rest", null);
+  /**
+   * Callback from OSGi that is called when this service is activated.
+   * 
+   * @param cc
+   *          OSGi component context
+   */
+  public void activate(ComponentContext cc) {
+    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    docs = generateDocs(serviceUrl);
+  }
+
+  protected String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("ConfidenceMonitor", "Confidence Monitor", serviceUrl, null);
     
     // grabFrame Endpoint
     RestEndpoint grabFrameEndpoint = new RestEndpoint("grabFrame", RestEndpoint.Method.GET, "/{name}", "Loads a JPEG image from the device specified");
@@ -191,7 +204,6 @@ public class ConfidenceMonitorRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public Response getDocumentation() {
-    if (docs == null) { docs = generateDocs(); }
     return Response.ok(docs).build();
   }
   

@@ -20,6 +20,7 @@ import org.opencastproject.capture.admin.api.AgentStateUpdate;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingStateUpdate;
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -28,6 +29,7 @@ import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Status;
 
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,8 +41,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -60,8 +62,22 @@ import javax.ws.rs.core.Response;
  */
 @Path("/")
 public class CaptureAgentStateRestService {
+  
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentStateRestService.class);
+
   private CaptureAgentStateService service;
+  
+  /**
+   * Callback from OSGi that is called when this service is activated.
+   * 
+   * @param cc
+   *          OSGi component context
+   */
+  public void activate(ComponentContext cc) {
+    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    docs = generateDocs(serviceUrl);
+  }
+
   public void setService(CaptureAgentStateService service) {
     this.service = service;
   }
@@ -310,7 +326,6 @@ public class CaptureAgentStateRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if (docs == null) { docs = generateDocs(); }
     return docs;
   }
 
@@ -320,8 +335,8 @@ public class CaptureAgentStateRestService {
           "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
           "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
 
-  private String generateDocs() {
-    DocRestData data = new DocRestData("captureadminservice", "Capture Admin Service", "/capture-admin/rest", notes);
+  private String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("captureadminservice", "Capture Admin Service", serviceUrl, notes);
 
     // abstract
     data.setAbstract("This service is a registry of capture agents and their recordings. Please see the <a href='http://wiki.opencastproject.org/confluence/display/open/Capture+Admin+Service'>service contract</a> for further information.");

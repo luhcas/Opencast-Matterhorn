@@ -29,8 +29,9 @@ import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.scheduler.api.SchedulerFilter;
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.scheduler.api.Event;
+import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.impl.EventImpl;
 import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
 import org.opencastproject.series.api.Series;
@@ -45,13 +46,15 @@ import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Status;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
-import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
-import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +75,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.json.simple.JSONArray;
 
 /**
  * REST endpoint for the Admin UI proxy service
@@ -87,6 +89,17 @@ public class AdminuiRestService {
   private SeriesService seriesService;
   private WorkflowService workflowService;
   private CaptureAgentStateService captureAdminService;
+
+  /**
+   * Callback from OSGi that is called when this service is activated.
+   * 
+   * @param cc
+   *          OSGi component context
+   */
+  public void activate(ComponentContext cc) {
+    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    docs = generateDocs(serviceUrl);
+  }
 
   public void setSchedulerService(SchedulerServiceImpl service) {
     logger.debug("binding SchedulerService");
@@ -663,9 +676,6 @@ public class AdminuiRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if (docs == null) {
-      docs = generateDocs();
-    }
     return docs;
   }
   protected String docs;
@@ -674,8 +684,8 @@ public class AdminuiRestService {
     "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
     "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>",};
 
-  private String generateDocs() {
-    DocRestData data = new DocRestData("adminuiservice", "Admin UI Service", "/admin/rest", notes);
+  private String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("adminuiservice", "Admin UI Service", serviceUrl, notes);
 
     // abstract
     data.setAbstract("This service reports the number and state of available recordings. It is designed to support the Admin UI.");
@@ -732,4 +742,5 @@ public class AdminuiRestService {
 
   public AdminuiRestService() {
   }
+  
 }

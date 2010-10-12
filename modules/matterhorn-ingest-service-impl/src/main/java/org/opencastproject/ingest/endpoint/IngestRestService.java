@@ -26,6 +26,7 @@ import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -116,6 +117,10 @@ public class IngestRestService {
       emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.ingest.endpoint", persistenceProperties);
     } catch (Exception e) {
       logger.error("Unable to initialize JPA EntityManager: " + e.getMessage());
+    }
+    if (context != null) {
+      String serviceUrl = (String) context.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+      docs = generateDocs(serviceUrl);
     }
   }
 
@@ -670,9 +675,6 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if (docs == null) {
-      docs = generateDocs();
-    }
     return docs;
   }
   protected String docs;
@@ -682,8 +684,8 @@ public class IngestRestService {
     "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>",};
 
   // CHECKSTYLE:OFF
-  private String generateDocs() {
-    DocRestData data = new DocRestData("ingestservice", "Ingest Service", "/ingest/rest", notes);
+  private String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("ingestservice", "Ingest Service", serviceUrl, notes);
 
     // abstract
     data.setAbstract("This service creates and augments Matterhorn media packages that include media tracks, metadata catalogs and attachments.");

@@ -15,6 +15,25 @@
  */
 package org.opencastproject.usertracking.endpoint;
 
+import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.security.api.SecurityService;
+import org.opencastproject.usertracking.api.Annotation;
+import org.opencastproject.usertracking.api.Stats;
+import org.opencastproject.usertracking.api.UserTrackingService;
+import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.UrlSupport;
+import org.opencastproject.util.doc.DocRestData;
+import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.Param.Type;
+import org.opencastproject.util.doc.RestEndpoint;
+import org.opencastproject.util.doc.RestTestForm;
+
+import org.apache.commons.lang.StringUtils;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -24,23 +43,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
-import org.apache.commons.lang.StringUtils;
-import org.opencastproject.usertracking.api.Annotation;
-import org.opencastproject.usertracking.api.UserTrackingService;
-import org.opencastproject.usertracking.api.Stats;
-import org.opencastproject.security.api.SecurityService;
-import org.opencastproject.util.DocUtil;
-import org.opencastproject.util.UrlSupport;
-import org.opencastproject.util.doc.DocRestData;
-import org.opencastproject.util.doc.Format;
-import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.RestEndpoint;
-import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.util.doc.Param.Type;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * REST Endpoint for User Tracking Service
@@ -93,6 +95,8 @@ public class UserTrackingRestService {
       } else {
         serverUrl = ccServerUrl;
       }
+      String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+      docs = generateDocs(serviceUrl);
     }
   }
 
@@ -236,9 +240,6 @@ public class UserTrackingRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if (docs == null) {
-      docs = generateDocs();
-    }
     return docs;
   }
 
@@ -251,10 +252,11 @@ public class UserTrackingRestService {
   /**
    * Generates the REST documentation
    * 
+   * @param 
    * @return The HTML with the documentation
    */
-  protected String generateDocs() {
-    DocRestData data = new DocRestData("UserTracking", "User Tracking Service", "/usertracking/rest", notes);
+  protected String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("UserTracking", "User Tracking Service", serviceUrl, notes);
 
     // abstract
     data.setAbstract("This service is used for tracking user interaction creates, edits and retrieves annotations and viewing statistics.");

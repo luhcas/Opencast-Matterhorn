@@ -21,7 +21,6 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.remote.api.Job;
 import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
-import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
@@ -50,14 +49,13 @@ public class ITunesUDistributionRestService {
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(ITunesUDistributionRestService.class);
   
-  /** The server's base URL */
-  protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
-  
   /** The distribution service */
   protected DistributionService service;
   
-  /** The base URL for this rest endpoint */
-  protected String alias;
+  public void activate(ComponentContext cc) {
+    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    docs = generateDocs(serviceUrl);
+  }
 
   /**
    * @param service the service to set
@@ -111,15 +109,15 @@ public class ITunesUDistributionRestService {
                   + "is not working and is either restarting or has failed. A status code 500 means a general failure has "
                   + "occurred which is not recoverable and was not anticipated. In other words, there is a bug!" };
 
-  private String generateDocs() {
-    DocRestData data = new DocRestData("localdistributionservice", "Local Distribution Service", alias, notes);
+  private String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("itunesudistributionservice", "iTunes U Distribution Service", serviceUrl, notes);
 
     // abstract
-    data.setAbstract("This service distributes media packages to the Matterhorn feed and engage services.");
+    data.setAbstract("This service distributes media packages to iTunes U.");
 
     // distribute
     RestEndpoint endpoint = new RestEndpoint("distribute", RestEndpoint.Method.POST, "/",
-            "Distribute a media package to this distribution channel");
+            "Distribute a media package to iTunes U");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addRequiredParam(new Param("mediapackageId", Param.Type.TEXT, null,
             "The media package identifier"));
@@ -131,7 +129,7 @@ public class ITunesUDistributionRestService {
 
     // retract
     RestEndpoint retractEndpoint = new RestEndpoint("retract", RestEndpoint.Method.POST, "/retract",
-            "Retract a media package from this distribution channel");
+            "Retract a media package from iTunes U");
     retractEndpoint.addRequiredParam(new Param("mediapackageId", Param.Type.STRING, null, "The media package ID"));
     retractEndpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
     retractEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
@@ -141,20 +139,4 @@ public class ITunesUDistributionRestService {
     return DocUtil.generate(data);
   }
 
-  public void activate(ComponentContext cc) {
-    // Get the configured server URL
-    if (cc == null) {
-      serverUrl = UrlSupport.DEFAULT_BASE_URL;
-    } else {
-      String ccServerUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
-      logger.info("configured server url is {}", ccServerUrl);
-      alias = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
-      if (ccServerUrl == null) {
-        serverUrl = UrlSupport.DEFAULT_BASE_URL;
-      } else {
-        serverUrl = ccServerUrl;
-      }
-    }
-    docs = generateDocs();
-  }
 }

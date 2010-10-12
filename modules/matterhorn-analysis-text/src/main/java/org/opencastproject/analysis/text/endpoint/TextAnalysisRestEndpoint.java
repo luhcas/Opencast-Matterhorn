@@ -21,13 +21,14 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.remote.api.Job;
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.util.doc.Param.Type;
 
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
@@ -52,13 +53,22 @@ import javax.xml.parsers.DocumentBuilderFactory;
  */
 @Path("")
 public class TextAnalysisRestEndpoint {
+  
   private static final Logger logger = LoggerFactory.getLogger(TextAnalysisRestEndpoint.class);
+
   protected String docs;
   
   protected TextAnalyzer textAnalyzer;
 
-  public void activate(ComponentContext componentContext) {
-    this.docs = generateDocs();
+  /**
+   * Callback from OSGi that is called when this service is activated.
+   * 
+   * @param cc
+   *          OSGi component context
+   */
+  public void activate(ComponentContext cc) {
+    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    docs = generateDocs(serviceUrl);
   }
 
   public void deactivate() {
@@ -71,10 +81,10 @@ public class TextAnalysisRestEndpoint {
   @POST
   @Produces(MediaType.TEXT_XML)
   @Path("/")
-  public Response analyze(@FormParam("track") String trackAsXml) {
+  public Response analyze(@FormParam("image") String imageAsXml) {
     try {
       DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document doc = docBuilder.parse(IOUtils.toInputStream(trackAsXml, "UTF-8"));
+      Document doc = docBuilder.parse(IOUtils.toInputStream(imageAsXml, "UTF-8"));
       MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
               .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
       Job receipt = textAnalyzer.analyze(element, false);
@@ -104,16 +114,16 @@ public class TextAnalysisRestEndpoint {
     return docs;
   }
 
-  protected String generateDocs() {
-    DocRestData data = new DocRestData("MediaAnalysis", "Media Analysis Service", "/analysis/text/rest",
+  protected String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("textanalysis", "Text Analysis Service", serviceUrl,
             new String[] { "$Rev$" });
     // analyze
     RestEndpoint analyzeEndpoint = new RestEndpoint("analyze", RestEndpoint.Method.POST, "/",
             "Submit a track for analysis");
     analyzeEndpoint.addStatus(org.opencastproject.util.doc.Status
             .OK("The receipt to use when polling for the resulting mpeg7 catalog"));
-    analyzeEndpoint.addRequiredParam(new Param("track", Type.TEXT, "",
-            "The track to analyze.  For text analysis, this must be a motion jpeg file."));
+    analyzeEndpoint.addRequiredParam(new Param("image", Type.TEXT, "",
+            "The image to analyze for text."));
     analyzeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, analyzeEndpoint);
 
@@ -129,4 +139,5 @@ public class TextAnalysisRestEndpoint {
 
     return DocUtil.generate(data);
   }
+
 }

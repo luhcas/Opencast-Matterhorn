@@ -30,15 +30,16 @@ import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.remote.api.Job;
 import org.opencastproject.remote.api.Job.Status;
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.util.doc.Param.Type;
 
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
@@ -82,16 +83,20 @@ public class ComposerRestService {
     this.composerService = composerService;
   }
 
+  /**
+   * Callback from OSGi that is called when this service is activated.
+   * 
+   * @param cc
+   *          OSGi component context
+   */
   public void activate(ComponentContext cc) {
     if (cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
       serverUrl = UrlSupport.DEFAULT_BASE_URL;
     } else {
       serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
+      String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+      docs = generateDocs(serviceUrl);
     }
-    docs = generateDocs();
-  }
-
-  protected void deactivate() {
   }
 
   /**
@@ -352,8 +357,8 @@ public class ComposerRestService {
     return docs;
   }
 
-  protected String generateDocs() {
-    DocRestData data = new DocRestData("Composer", "Composer Service", "/composer/rest",
+  protected String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("Composer", "Composer Service", serviceUrl,
             new String[] { "$Rev$" });
     // profiles
     RestEndpoint profilesEndpoint = new RestEndpoint("profiles", RestEndpoint.Method.GET, "/profiles.xml",

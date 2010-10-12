@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
- name="org.opencastproject.remote.impl.endpoint.RemoteServiceManagerEndpoint" immediate="true">
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" activate="activate" immediate="true" name="org.opencastproject.remote.impl.endpoint.RemoteServiceManagerEndpoint">
   <implementation class="org.opencastproject.remote.impl.endpoint.RemoteServiceManagerEndpoint" />
   <property name="service.description" value="Remote Service REST Endpoint" />
 

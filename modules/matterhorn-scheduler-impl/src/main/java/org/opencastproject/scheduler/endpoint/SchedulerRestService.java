@@ -15,6 +15,7 @@
  */
 package org.opencastproject.scheduler.endpoint;
 
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.api.RecurringEvent;
@@ -32,14 +33,14 @@ import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.util.doc.Param.Type;
+
+import org.json.simple.JSONObject;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.json.simple.JSONObject;
 
 import java.util.Date;
 import java.util.LinkedList;
@@ -100,6 +101,8 @@ public class SchedulerRestService {
       } else {
         serverUrl = ccServerUrl;
       }
+      String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+      docs = generateDocs(serviceUrl);
     }
   }  
   
@@ -706,7 +709,6 @@ public class SchedulerRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if (docs == null) { docs = generateDocs(); }
     return docs;
   }
   
@@ -720,8 +722,8 @@ public class SchedulerRestService {
    * Generates the REST documentation
    * @return The HTML with the documentation
    */
-  protected String generateDocs() {
-    DocRestData data = new DocRestData("Scheduler", "Scheduler Service", "/scheduler/rest", notes);
+  protected String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("Scheduler", "Scheduler Service", serviceUrl, notes);
 
     // abstract
     data.setAbstract("This service creates, edits and retrieves and helps manage scheduled capture events."); 

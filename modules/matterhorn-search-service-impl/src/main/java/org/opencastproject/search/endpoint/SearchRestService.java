@@ -17,6 +17,7 @@ package org.opencastproject.search.endpoint;
 
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageImpl;
+import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchResultImpl;
 import org.opencastproject.search.api.SearchService;
@@ -25,11 +26,12 @@ import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
+import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.util.doc.Param.Type;
 
 import org.apache.commons.lang.StringUtils;
+import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,9 +54,22 @@ import javax.ws.rs.core.Response;
  */
 @Path("/")
 public class SearchRestService {
+  
   private static final Logger logger = LoggerFactory.getLogger(SearchRestService.class);
   
   protected SearchService searchService;
+  
+  /**
+   * Callback from OSGi that is called when this service is activated.
+   * 
+   * @param cc
+   *          OSGi component context
+   */
+  public void activate(ComponentContext cc) {
+    String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    docs = generateDocs(serviceUrl);
+  }
+
   public void setSearchService(SearchService searchService) {
     this.searchService = searchService;
   }
@@ -63,7 +78,6 @@ public class SearchRestService {
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
   public String getDocumentation() {
-    if (docs == null) { docs = generateDocs(); }
     return docs;
   }
 
@@ -73,8 +87,8 @@ public class SearchRestService {
     "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
     "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
   
-  protected String generateDocs() {
-    DocRestData data = new DocRestData("Search", "Search Service", "/search/rest", notes);
+  protected String generateDocs(String serviceUrl) {
+    DocRestData data = new DocRestData("Search", "Search Service", serviceUrl, notes);
 
     // abstract
     data.setAbstract("This service indexes and queries available (distributed) episodes.");

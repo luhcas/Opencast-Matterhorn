@@ -46,6 +46,7 @@ import java.net.URISyntaxException;
  * ID as a subdirectory and the media package element ID as the file name.
  */
 public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMappable {
+  
   private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryImpl.class);
 
   /** The extension we use for the md5 hash calculated from the file contents */
