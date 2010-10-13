@@ -13,21 +13,23 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.impl.endpoint;
+package org.opencastproject.serviceregistry.impl.endpoint;
 
-import org.opencastproject.remote.api.RemoteServiceManager;
-import org.opencastproject.remote.api.ServiceStatistics;
 import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceStatistics;
+import org.opencastproject.serviceregistry.impl.ServiceStatisticsImpl;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
+import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Param.Type;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.osgi.service.component.ComponentContext;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -39,17 +41,17 @@ import javax.ws.rs.core.MediaType;
  * Displays hosts and the service IDs they provide.
  */
 @Path("")
-public class RemoteServiceManagerEndpoint {
+public class ServiceRegistryEndpoint {
 
   /** The remote service maanger */
-  protected RemoteServiceManager service = null;
+  protected ServiceRegistry serviceRegistry = null;
 
   /** The runtime documentation for this endpoint */
   protected String docs = null;
   
-  /**  Sets the remote service manager instance for delegation */
-  public void setRemoteServiceManager(RemoteServiceManager service) {
-    this.service = service;
+  /**  Sets the service registry instance for delegation */
+  public void setServiceRegistry(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
   }
 
   /**
@@ -71,34 +73,31 @@ public class RemoteServiceManagerEndpoint {
   }
 
   @GET
-  @Path("/services.json")
+  @Path("/statistics.json")
   @Produces(MediaType.APPLICATION_JSON)
-  @SuppressWarnings("unchecked")
-  public String getRemoteServiceRegistrations() {
-    JSONArray jsonArray = new JSONArray();
-    List<ServiceStatistics> statistics = service.getServiceStatistics();
-    for(ServiceStatistics stats : statistics) {
-      JSONObject reg = new JSONObject();
-      reg.put("host", stats.getServiceRegistration().getHost());
-      reg.put("type", stats.getServiceRegistration().getServiceType());
-      reg.put("online", stats.getServiceRegistration().isOnline());
-      reg.put("maintenance", stats.getServiceRegistration().isInMaintenanceMode());
-      reg.put("running", stats.getRunningJobs());
-      reg.put("queued", stats.getQueuedJobs());
-      reg.put("meanQueueTime", stats.getMeanQueueTime());
-      reg.put("meanRunTime", stats.getMeanRunTime());
-      jsonArray.add(reg);
-    }
-    return jsonArray.toJSONString();
+  public List<ServiceStatisticsImpl> getServicesAsJson() {
+    List<ServiceStatistics> apiList = serviceRegistry.getServiceStatistics();
+    List<ServiceStatisticsImpl> list = new ArrayList<ServiceStatisticsImpl>();
+    for(ServiceStatistics stats : apiList) list.add((ServiceStatisticsImpl)stats);
+    return list;
   }
-  
+
+  @GET
+  @Path("/statistics.xml")
+  @Produces(MediaType.TEXT_XML)
+  public List<ServiceStatisticsImpl> getServicesAsXml() {
+    return getServicesAsJson();
+  }
+
   protected String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("remote", "Remote Services", serviceUrl, null);
+    DocRestData data = new DocRestData("serviceregistry", "Service Registry", serviceUrl, null);
     data.setAbstract("This service lists the members of this cluster.");
-    RestEndpoint endpoint = new RestEndpoint("list", RestEndpoint.Method.GET, "/services.json",
+    RestEndpoint endpoint = new RestEndpoint("stats", RestEndpoint.Method.GET, "/statistics.{format}",
             "List the service registrations in the cluster, along with some simple statistics.");
+    endpoint.addPathParam(new Param("format", Type.STRING, "xml", "the output format"));
+    endpoint.addFormat(new Format("xml", null, null));
     endpoint.addFormat(new Format("json", null, null));
-    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the remote services."));
+    endpoint.addStatus(org.opencastproject.util.doc.Status.OK("Returns the service statistics."));
     endpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, endpoint);
     return DocUtil.generate(data);

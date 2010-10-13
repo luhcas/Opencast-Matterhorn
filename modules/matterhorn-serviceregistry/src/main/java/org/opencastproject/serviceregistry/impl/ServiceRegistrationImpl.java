@@ -13,9 +13,9 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.impl;
+package org.opencastproject.serviceregistry.impl;
 
-import org.opencastproject.remote.api.ServiceRegistration;
+import org.opencastproject.serviceregistry.api.ServiceRegistration;
 
 import java.util.Collection;
 
@@ -28,10 +28,18 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * A record of a service that creates and manages receipts.
  */
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlType(name="service", namespace="http://serviceregistry.opencastproject.org")
+@XmlRootElement(name="service", namespace="http://serviceregistry.opencastproject.org")
 @Entity(name = "ServiceRegistration")
 @Table(name = "SERVICE_REGISTRATION")
 @NamedQueries( {
@@ -44,24 +52,30 @@ import javax.persistence.Table;
         @NamedQuery(name = "ServiceRegistration.getAll", query = "SELECT rh FROM ServiceRegistration rh") })
 public class ServiceRegistrationImpl implements ServiceRegistration {
 
+  @XmlElement(name="type")
   @Id
   @Column(name = "SERVICE_TYPE", nullable = false)
   protected String serviceType;
 
+  @XmlElement(name="host")
   @Id
   @Column(name = "HOST", nullable = false)
   protected String host;
 
+  @XmlElement(name="path")
   @Id
   @Column(name = "PATH", nullable = false)
   protected String path;
 
+  @XmlElement(name="online")
   @Column(name = "ONLINE", nullable = false)
   protected boolean online;
 
+  @XmlElement(name="maintenance")
   @Column(name = "MAINTENANCE", nullable = false)
   protected boolean maintenanceMode;
 
+  @XmlElement(name="jobproducer")
   @Column(name = "JOB_PRODUCER", nullable = false)
   protected boolean jobProducer;
 
@@ -113,7 +127,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.ServiceRegistration#getHost()
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistration#getHost()
    */
   @Override
   public String getHost() {
@@ -131,7 +145,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.ServiceRegistration#getServiceType()
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistration#getServiceType()
    */
   @Override
   public String getServiceType() {
@@ -149,7 +163,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.ServiceRegistration#isInMaintenanceMode()
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistration#isInMaintenanceMode()
    */
   @Override
   public boolean isInMaintenanceMode() {
@@ -168,7 +182,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.ServiceRegistration#isOnline()
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistration#isOnline()
    */
   @Override
   public boolean isOnline() {
@@ -187,7 +201,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.ServiceRegistration#getPath()
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistration#getPath()
    */
   @Override
   public String getPath() {
@@ -205,7 +219,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.ServiceRegistration#isJobProducer()
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistration#isJobProducer()
    */
   @Override
   public boolean isJobProducer() {

@@ -15,8 +15,8 @@
  */
 package org.opencastproject.caption.api;
 
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.Catalog;
-import org.opencastproject.remote.api.Job;
 
 /**
  * Provides captioning support. This service makes use of {@link CaptionConverter} instances that need to be registered

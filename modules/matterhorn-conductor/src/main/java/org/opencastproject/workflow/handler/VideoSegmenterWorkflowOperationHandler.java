@@ -16,12 +16,12 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.analysis.api.MediaAnalysisService;
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Job;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;

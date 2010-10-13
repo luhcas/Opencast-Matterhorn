@@ -22,12 +22,12 @@ import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfileBuilder;
 import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.RemoteBase;
+import org.opencastproject.serviceregistry.api.RemoteBase;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;

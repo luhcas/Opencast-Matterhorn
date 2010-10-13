@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.impl.webconsole;
+package org.opencastproject.serviceregistry.impl.webconsole;
 
 import org.apache.commons.io.IOUtils;
 

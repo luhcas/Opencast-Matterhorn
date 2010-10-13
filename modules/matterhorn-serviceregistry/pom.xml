@@ -110,8 +110,8 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Bundle-Activator>org.opencastproject.remote.impl.webconsole.Activator</Bundle-Activator>
-            <Private-Package>org.opencastproject.remote.impl.webconsole, ui</Private-Package>
+            <Bundle-Activator>org.opencastproject.serviceregistry.impl.webconsole.Activator</Bundle-Activator>
+            <Private-Package>org.opencastproject.serviceregistry.impl.webconsole, ui</Private-Package>
             <Import-Package>
               org.opencastproject.mediapackage;version=${project.version},
               org.opencastproject.mediapackage.attachment;version=${project.version},
@@ -119,17 +119,17 @@
               *;resolution:=optional
             </Import-Package>
             <Export-Package>
-              org.opencastproject.remote.impl;version=${project.version},
-              org.opencastproject.remote.impl.endpoint;version=${project.version},
-              org.opencastproject.remote.command;version=${project.version}
+              org.opencastproject.serviceregistry.impl;version=${project.version},
+              org.opencastproject.serviceregistry.impl.endpoint;version=${project.version},
+              org.opencastproject.serviceregistry.command;version=${project.version}
             </Export-Package>
             <Embed-Dependency>json-simple;inline=true</Embed-Dependency>
             <Service-Component>
-              OSGI-INF/receipt.xml,
+              OSGI-INF/serviceregistry.xml,
               OSGI-INF/maintenance_shell.xml,
-              OSGI-INF/remote-service-endpoint.xml
+              OSGI-INF/serviceregistry-endpoint.xml
             </Service-Component>
-            <JPA-PersistenceUnits>org.opencastproject.remote</JPA-PersistenceUnits>
+            <JPA-PersistenceUnits>org.opencastproject.serviceregistry</JPA-PersistenceUnits>
           </instructions>
         </configuration>
       </plugin>

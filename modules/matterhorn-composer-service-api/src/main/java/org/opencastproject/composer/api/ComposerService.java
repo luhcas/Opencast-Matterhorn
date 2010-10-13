@@ -15,11 +15,11 @@
  */
 package org.opencastproject.composer.api;
 
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.JobProducer;
 
 /**
  * Encodes media and (optionally) periodically alerts a statusService endpoint of the status of this encoding job.

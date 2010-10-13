@@ -22,6 +22,8 @@ import org.opencastproject.analysis.text.ocropus.OcropusTextAnalyzer;
 import org.opencastproject.analysis.text.ocropus.OcropusTextFrame;
 import org.opencastproject.dictionary.api.DictionaryService;
 import org.opencastproject.dictionary.api.DictionaryService.DICT_TOKEN;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -40,9 +42,7 @@ import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.metadata.mpeg7.VideoTextImpl;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.Job.Status;
-import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.lang.StringUtils;
@@ -80,7 +80,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   public static final int DEFAULT_THREADS = 1;
 
   /** Reference to the receipt service */
-  private RemoteServiceManager remoteServiceManager = null;
+  private ServiceRegistry remoteServiceManager = null;
 
   /** The workspace to ue when retrieving remote media files */
   private Workspace workspace = null;
@@ -144,7 +144,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
    */
   @Override
   public Job analyze(final MediaPackageElement element, boolean block) throws MediaAnalysisException {
-    final RemoteServiceManager rs = remoteServiceManager;
+    final ServiceRegistry rs = remoteServiceManager;
     final Job receipt = rs.createJob(JOB_TYPE);
 
     final Attachment attachment = (Attachment) element;
@@ -225,7 +225,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
    */
   public Job getJob(String id) {
     return remoteServiceManager.getJob(id);
@@ -234,7 +234,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
    */
   public long countJobs(Status status) {
     if (status == null)
@@ -245,7 +245,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status,
    *      java.lang.String)
    */
   public long countJobs(Status status, String host) {
@@ -329,7 +329,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
    * @param remoteServiceManager
    *          the receipt service
    */
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+  public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
 

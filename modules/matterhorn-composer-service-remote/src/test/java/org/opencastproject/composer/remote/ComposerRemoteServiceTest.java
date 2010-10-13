@@ -1,13 +1,13 @@
 package org.opencastproject.composer.remote;
 
 
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.Job.Status;
 import org.opencastproject.security.TrustedHttpClientImpl;
 
 import org.junit.Assert;

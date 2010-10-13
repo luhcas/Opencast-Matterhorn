@@ -13,30 +13,50 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.impl;
+package org.opencastproject.serviceregistry.impl;
 
-import org.opencastproject.remote.api.ServiceRegistration;
-import org.opencastproject.remote.api.ServiceStatistics;
+import org.opencastproject.serviceregistry.api.ServiceRegistration;
+import org.opencastproject.serviceregistry.api.ServiceStatistics;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * Statistics for a service registration.
  */
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlType(name="statistics", namespace="http://serviceregistry.opencastproject.org")
+@XmlRootElement(name="statistics", namespace="http://serviceregistry.opencastproject.org")
 public class ServiceStatisticsImpl implements ServiceStatistics {
 
   /** The service registration **/
+  @XmlElement
   protected ServiceRegistrationImpl serviceRegistration;
 
   /** The mean run time for jobs **/
+  @XmlAttribute(name="meanruntime")
   protected long meanRunTime;
   
   /** The mean queue time for jobs **/
+  @XmlAttribute(name="meanqueuetime")
   protected long meanQueueTime;
   
   /** The number of currently running jobs **/
+  @XmlAttribute(name="runnning")
   protected int runningJobs;
 
   /** The number of currently queued jobs **/
+  @XmlAttribute(name="queued")
   protected int queuedJobs;
+
+  /**
+   * No-arg constructor needed by JAXB
+   */
+  public ServiceStatisticsImpl() {}
 
   /**
    * Constructs a new service statistics instance without statistics.
@@ -68,7 +88,7 @@ public class ServiceStatisticsImpl implements ServiceStatistics {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ServiceStatistics#getMeanQueueTime()
+   * @see org.opencastproject.serviceregistry.api.ServiceStatistics#getMeanQueueTime()
    */
   @Override
   public long getMeanQueueTime() {
@@ -77,7 +97,7 @@ public class ServiceStatisticsImpl implements ServiceStatistics {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ServiceStatistics#getMeanRunTime()
+   * @see org.opencastproject.serviceregistry.api.ServiceStatistics#getMeanRunTime()
    */
   @Override
   public long getMeanRunTime() {
@@ -86,7 +106,7 @@ public class ServiceStatisticsImpl implements ServiceStatistics {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ServiceStatistics#getQueuedJobs()
+   * @see org.opencastproject.serviceregistry.api.ServiceStatistics#getQueuedJobs()
    */
   @Override
   public int getQueuedJobs() {
@@ -95,7 +115,7 @@ public class ServiceStatisticsImpl implements ServiceStatistics {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ServiceStatistics#getRunningJobs()
+   * @see org.opencastproject.serviceregistry.api.ServiceStatistics#getRunningJobs()
    */
   @Override
   public int getRunningJobs() {
@@ -104,7 +124,7 @@ public class ServiceStatisticsImpl implements ServiceStatistics {
   
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.ServiceStatistics#getServiceRegistration()
+   * @see org.opencastproject.serviceregistry.api.ServiceStatistics#getServiceRegistration()
    */
   @Override
   public ServiceRegistration getServiceRegistration() {

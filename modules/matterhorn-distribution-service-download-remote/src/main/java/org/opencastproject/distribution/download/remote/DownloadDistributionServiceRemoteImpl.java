@@ -17,10 +17,10 @@ package org.opencastproject.distribution.download.remote;
 
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageException;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.RemoteBase;
+import org.opencastproject.serviceregistry.api.RemoteBase;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;

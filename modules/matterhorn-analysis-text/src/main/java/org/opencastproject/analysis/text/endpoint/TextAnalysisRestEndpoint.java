@@ -17,10 +17,10 @@ package org.opencastproject.analysis.text.endpoint;
 
 import org.opencastproject.analysis.api.MediaAnalysisService;
 import org.opencastproject.analysis.text.TextAnalyzer;
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.remote.api.Job;
 import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;

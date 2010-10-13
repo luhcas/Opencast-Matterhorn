@@ -8,6 +8,5 @@
   </service>
   <reference name="workspace" interface="org.opencastproject.workspace.api.Workspace"
       cardinality="1..1" policy="static" bind="setWorkspace" />
-  <reference name="remoteServiceManager" interface="org.opencastproject.remote.api.RemoteServiceManager"
-      cardinality="1..1" policy="static" bind="setRemoteServiceManager" />
+  <reference name="remoteServiceManager" interface="org.opencastproject.serviceregistry.api.ServiceRegistry" cardinality="1..1" policy="static" bind="setRemoteServiceManager" />
 </scr:component>

@@ -15,8 +15,8 @@
  */
 package org.opencastproject.workingfilerepository.impl;
 
-import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
@@ -60,14 +60,14 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
   };
 
   /** The remote service manager */
-  protected RemoteServiceManager remoteServiceManager;
+  protected ServiceRegistry remoteServiceManager;
 
   /**
    * Sets the remote service manager.
    * 
    * @param remoteServiceManager
    */
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+  public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
 

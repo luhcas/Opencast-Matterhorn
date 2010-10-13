@@ -13,9 +13,11 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.api;
+package org.opencastproject.serviceregistry.api;
 
-import org.opencastproject.remote.api.Job.Status;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobProducer;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.util.UrlSupport;
 
@@ -50,7 +52,7 @@ public class RemoteBase implements JobProducer {
   protected TrustedHttpClient client = null;
 
   /** the http client */
-  protected RemoteServiceManager remoteServiceManager = null;
+  protected ServiceRegistry remoteServiceManager = null;
 
   /**
    * Creates a remote implementation for the given type of service.
@@ -78,7 +80,7 @@ public class RemoteBase implements JobProducer {
    * 
    * @param remoteServiceManager
    */
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+  public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
 
@@ -175,7 +177,7 @@ public class RemoteBase implements JobProducer {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
    */
   public Job getJob(String id) {
     return remoteServiceManager.getJob(id);
@@ -184,7 +186,7 @@ public class RemoteBase implements JobProducer {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
    */
   public long countJobs(Status status) {
     if (status == null)
@@ -195,7 +197,7 @@ public class RemoteBase implements JobProducer {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status,
    *      java.lang.String)
    */
   public long countJobs(Status status, String host) {

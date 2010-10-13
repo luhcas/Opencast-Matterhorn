@@ -15,13 +15,13 @@
  */
 package org.opencastproject.analysis.api;
 
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.Job.Status;
 
 import org.junit.Ignore;
 
@@ -65,7 +65,7 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
    */
   @Override
   public Job getJob(String id) {
@@ -75,7 +75,7 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
    */
   public long countJobs(Status status) {
     return 0;
@@ -84,7 +84,7 @@ public class MediaAnalysisTestService extends MediaAnalysisServiceSupport {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status,
    *      java.lang.String)
    */
   public long countJobs(Status status, String host) {

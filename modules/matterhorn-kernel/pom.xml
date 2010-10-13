@@ -185,7 +185,8 @@
               org.opencastproject.mediapackage.selector;version=${project.version},
               org.opencastproject.http;version=${project.version},
               org.opencastproject.rest;version=${project.version},
-              org.opencastproject.remote.api;version=${project.version},
+              org.opencastproject.job.api;version=${project.version},
+              org.opencastproject.serviceregistry.api;version=${project.version},
               org.opencastproject.security.api;version=${project.version}
             </Export-Package>
             <!-- 

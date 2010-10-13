@@ -24,6 +24,8 @@ import org.opencastproject.composer.api.EncoderEngineFactory;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.inspection.api.MediaInspectionService;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
@@ -34,9 +36,7 @@ import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.VideoStream;
 import org.opencastproject.mediapackage.identifier.IdBuilder;
 import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.Job.Status;
-import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -81,7 +81,7 @@ public class ComposerServiceImpl implements ComposerService {
   private Workspace workspace = null;
 
   /** Reference to the receipt service */
-  private RemoteServiceManager remoteServiceManager;
+  private ServiceRegistry remoteServiceManager;
 
   /** Reference to the encoder engine factory */
   private EncoderEngineFactory encoderEngineFactory;
@@ -146,7 +146,7 @@ public class ComposerServiceImpl implements ComposerService {
    * 
    * @param remoteServiceManager
    */
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+  public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
 
@@ -823,7 +823,7 @@ public class ComposerServiceImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
    */
   public Job getJob(String id) {
     return remoteServiceManager.getJob(id);
@@ -832,7 +832,7 @@ public class ComposerServiceImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.remote.api.Job.Status)
+   * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.job.api.Job.Status)
    */
   @Override
   public long countJobs(Status status) {
@@ -842,7 +842,7 @@ public class ComposerServiceImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.remote.api.Job.Status,
+   * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.job.api.Job.Status,
    *      java.lang.String)
    */
   @Override

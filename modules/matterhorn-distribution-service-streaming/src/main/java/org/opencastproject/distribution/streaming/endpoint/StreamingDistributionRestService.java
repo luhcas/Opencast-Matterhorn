@@ -16,9 +16,9 @@
 package org.opencastproject.distribution.streaming.endpoint;
 
 import org.opencastproject.distribution.api.DistributionService;
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.remote.api.Job;
 import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;

@@ -22,11 +22,11 @@ import org.opencastproject.deliver.youtube.YouTubeDeliveryAction;
 import org.opencastproject.deliver.youtube.YouTubeRemoveAction;
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.RemoteServiceManager;
-import org.opencastproject.remote.api.Job.Status;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.lang.StringUtils;
@@ -55,7 +55,7 @@ public class YoutubeDistributionService implements DistributionService {
   protected Workspace workspace = null;
 
   /** The remote service registry */
-  protected RemoteServiceManager remoteServiceManager = null;
+  protected ServiceRegistry remoteServiceManager = null;
 
   /** Youtube configuration instance */
   private static YouTubeConfiguration config = null;
@@ -200,7 +200,7 @@ public class YoutubeDistributionService implements DistributionService {
   public Job distribute(final String mediaPackageId, final MediaPackageElement element, boolean block)
           throws DistributionException {
 
-    final RemoteServiceManager rs = remoteServiceManager;
+    final ServiceRegistry rs = remoteServiceManager;
     final Job receipt = rs.createJob(JOB_TYPE);
 
     Runnable command = new Runnable() {
@@ -335,14 +335,14 @@ public class YoutubeDistributionService implements DistributionService {
    * @param remoteServiceManager
    *          the service registry
    */
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+  public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
    */
   public Job getJob(String id) {
     return remoteServiceManager.getJob(id);
@@ -351,7 +351,7 @@ public class YoutubeDistributionService implements DistributionService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
    */
   public long countJobs(Status status) {
     if (status == null)
@@ -362,7 +362,7 @@ public class YoutubeDistributionService implements DistributionService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status,
    *      java.lang.String)
    */
   public long countJobs(Status status, String host) {

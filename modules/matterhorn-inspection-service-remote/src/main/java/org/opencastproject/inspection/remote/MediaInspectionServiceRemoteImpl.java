@@ -16,10 +16,10 @@
 package org.opencastproject.inspection.remote;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.RemoteBase;
+import org.opencastproject.serviceregistry.api.RemoteBase;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;

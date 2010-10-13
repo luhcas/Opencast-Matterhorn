@@ -13,9 +13,10 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.api;
+package org.opencastproject.serviceregistry.api;
 
-import org.opencastproject.remote.api.Job.Status;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +25,7 @@ import java.util.List;
 /**
  * Manages clustered services and the {@link Job}s they may create to enable asynchronous job handling.
  */
-public interface RemoteServiceManager {
+public interface ServiceRegistry {
 
   /**
    * Registers a host to handle a specific type of job

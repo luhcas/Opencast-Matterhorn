@@ -23,6 +23,8 @@ import org.opencastproject.analysis.vsegmenter.jmf.ImageUtils;
 import org.opencastproject.analysis.vsegmenter.jmf.PlayerListener;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
@@ -39,9 +41,7 @@ import org.opencastproject.metadata.mpeg7.Mpeg7Catalog;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.Video;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.Job.Status;
-import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workspace.api.Workspace;
@@ -137,7 +137,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
   protected int stabilityThreshold = DEFAULT_STABILITY_THRESHOLD;
 
   /** Reference to the receipt service */
-  protected RemoteServiceManager remoteServiceManager = null;
+  protected ServiceRegistry remoteServiceManager = null;
 
   /** The mpeg-7 service */
   protected Mpeg7CatalogService mpeg7CatalogService = null;
@@ -249,7 +249,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
    * @param remoteServiceManager
    *          the receipt service
    */
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+  public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
 
@@ -265,7 +265,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
    * @throws MediaAnalysisException
    */
   public Job analyze(final MediaPackageElement element, boolean block) throws MediaAnalysisException {
-    final RemoteServiceManager rs = remoteServiceManager;
+    final ServiceRegistry rs = remoteServiceManager;
     final Job receipt = rs.createJob(JOB_TYPE);
 
     // Make sure the element can be analyzed using this analysis implementation
@@ -414,7 +414,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
    */
   public Job getJob(String id) {
     return remoteServiceManager.getJob(id);
@@ -423,7 +423,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
    */
   public long countJobs(Status status) {
     if (status == null)
@@ -434,7 +434,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status,
    *      java.lang.String)
    */
   public long countJobs(Status status, String host) {

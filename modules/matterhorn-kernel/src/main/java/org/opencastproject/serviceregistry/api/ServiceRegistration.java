@@ -13,7 +13,9 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.api;
+package org.opencastproject.serviceregistry.api;
+
+import org.opencastproject.job.api.Job;
 
 /**
  * Manages clustered services and the {@link Job}s they may create to enable asynchronous job handling.

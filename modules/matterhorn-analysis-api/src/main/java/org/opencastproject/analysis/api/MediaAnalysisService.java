@@ -16,10 +16,10 @@
 
 package org.opencastproject.analysis.api;
 
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.JobProducer;
 
 /**
  * Api for media analysis implementations, aimed at extracting metadata information from audio and audiovisual tracks.

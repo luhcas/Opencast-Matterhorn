@@ -16,10 +16,10 @@
 package org.opencastproject.inspection.impl;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.MimeType;
@@ -78,7 +78,7 @@ public class MediaInspectionServiceImplTest {
     EasyMock.replay(workspace);
     service.setWorkspace(workspace);
 
-    RemoteServiceManager rs = EasyMock.createNiceMock(RemoteServiceManager.class);
+    ServiceRegistry rs = EasyMock.createNiceMock(ServiceRegistry.class);
     EasyMock.expect(rs.createJob(MediaInspectionService.JOB_TYPE)).andReturn(new ReceiptStub()).anyTimes();
     EasyMock.replay(rs);
     service.setRemoteServiceManager(rs);

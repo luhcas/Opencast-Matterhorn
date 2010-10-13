@@ -16,10 +16,10 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.composer.api.ComposerService;
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Job;
 import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;

@@ -19,7 +19,6 @@ package org.opencastproject.search.impl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
-import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
@@ -27,6 +26,7 @@ import org.opencastproject.search.api.SearchService;
 import org.opencastproject.search.impl.solr.SolrConnection;
 import org.opencastproject.search.impl.solr.SolrIndexManager;
 import org.opencastproject.search.impl.solr.SolrRequester;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -75,9 +75,9 @@ public class SearchServiceImpl implements SearchService {
   private Workspace workspace;
 
   /** The registry of remote services */
-  protected RemoteServiceManager remoteServiceManager;
+  protected ServiceRegistry remoteServiceManager;
 
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+  public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
 

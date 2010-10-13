@@ -16,12 +16,12 @@
 package org.opencastproject.search.remote;
 
 import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.remote.api.RemoteBase;
 import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultImpl;
 import org.opencastproject.search.api.SearchService;
+import org.opencastproject.serviceregistry.api.RemoteBase;
 import org.opencastproject.util.UrlSupport;
 
 import org.apache.http.HttpResponse;

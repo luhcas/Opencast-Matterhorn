@@ -15,9 +15,9 @@
  */
 package org.opencastproject.inspection.api;
 
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.JobProducer;
 
 import java.net.URI;
 

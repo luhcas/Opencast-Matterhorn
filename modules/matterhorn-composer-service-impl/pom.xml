@@ -100,7 +100,7 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-remote-impl</artifactId>
+      <artifactId>matterhorn-serviceregistry</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>

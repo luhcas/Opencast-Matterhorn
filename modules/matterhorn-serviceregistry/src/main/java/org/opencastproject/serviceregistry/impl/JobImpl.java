@@ -13,8 +13,9 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.impl;
+package org.opencastproject.serviceregistry.impl;
 
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
@@ -22,7 +23,6 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Job;
 
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
@@ -124,7 +124,7 @@ public class JobImpl implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.Job#getId()
+   * @see org.opencastproject.job.api.Job#getId()
    */
   @Id
   @XmlID
@@ -137,7 +137,7 @@ public class JobImpl implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.Job#setId(java.lang.String)
+   * @see org.opencastproject.job.api.Job#setId(java.lang.String)
    */
   @Override
   public void setId(String id) {
@@ -147,7 +147,7 @@ public class JobImpl implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.Job#getStatus()
+   * @see org.opencastproject.job.api.Job#getStatus()
    */
   @Column
   @XmlAttribute
@@ -159,7 +159,7 @@ public class JobImpl implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.Job#setStatus(org.opencastproject.remote.api.Job.Status)
+   * @see org.opencastproject.job.api.Job#setStatus(org.opencastproject.job.api.Job.Status)
    */
   @Override
   public void setStatus(Status status) {
@@ -169,7 +169,7 @@ public class JobImpl implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.Job#getType()
+   * @see org.opencastproject.job.api.Job#getType()
    */
   @XmlAttribute(name = "type")
   @Override
@@ -180,7 +180,7 @@ public class JobImpl implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.Job#getHost()
+   * @see org.opencastproject.job.api.Job#getHost()
    */
   @XmlElement
   @Override
@@ -191,7 +191,7 @@ public class JobImpl implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.Job#getDateCompleted()
+   * @see org.opencastproject.job.api.Job#getDateCompleted()
    */
   @Column
   @Temporal(TemporalType.TIMESTAMP)
@@ -204,7 +204,7 @@ public class JobImpl implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.Job#getDateCreated()
+   * @see org.opencastproject.job.api.Job#getDateCreated()
    */
   @Column
   @Temporal(TemporalType.TIMESTAMP)
@@ -217,7 +217,7 @@ public class JobImpl implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.Job#getDateStarted()
+   * @see org.opencastproject.job.api.Job#getDateStarted()
    */
   @Column
   @Temporal(TemporalType.TIMESTAMP)
@@ -286,7 +286,7 @@ public class JobImpl implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.Job#getElement()
+   * @see org.opencastproject.job.api.Job#getElement()
    */
   @Transient
   @Override
@@ -297,7 +297,7 @@ public class JobImpl implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.Job#setElement(org.opencastproject.mediapackage.MediaPackageElement)
+   * @see org.opencastproject.job.api.Job#setElement(org.opencastproject.mediapackage.MediaPackageElement)
    */
   @Transient
   @Override
@@ -369,7 +369,7 @@ public class JobImpl implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.Job#toXml()
+   * @see org.opencastproject.job.api.Job#toXml()
    */
   @Override
   public String toXml() {

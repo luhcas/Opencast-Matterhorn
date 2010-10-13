@@ -15,10 +15,10 @@
  */
 package org.opencastproject.distribution.api;
 
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.JobProducer;
 
 /**
  * Distributes elements from {@link MediaPackage}s to distribution channels.

@@ -16,12 +16,12 @@
 package org.opencastproject.distribution.download;
 
 import org.opencastproject.distribution.download.DownloadDistributionService;
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -57,7 +57,7 @@ public class DistributionServiceImplTest {
     Workspace workspace = EasyMock.createNiceMock(Workspace.class);
     service.setWorkspace(workspace);
     Job job = EasyMock.createNiceMock(Job.class);
-    RemoteServiceManager serviceRegistry = EasyMock.createNiceMock(RemoteServiceManager.class);
+    ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
     EasyMock.expect(serviceRegistry.createJob((String)EasyMock.anyObject())).andReturn(job).anyTimes();
     EasyMock.replay(job, serviceRegistry);
     service.setRemoteServiceManager(serviceRegistry);

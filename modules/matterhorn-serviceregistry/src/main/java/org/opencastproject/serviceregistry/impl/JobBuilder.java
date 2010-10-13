@@ -13,10 +13,10 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.impl;
+package org.opencastproject.serviceregistry.impl;
 
 
-import org.opencastproject.remote.api.Job;
+import org.opencastproject.job.api.Job;
 
 import org.apache.commons.io.IOUtils;
 
@@ -45,7 +45,7 @@ public class JobBuilder {
     sb.append("org.opencastproject.mediapackage");
     sb.append(":org.opencastproject.mediapackage.attachment");
     sb.append(":org.opencastproject.mediapackage.track");
-    sb.append(":org.opencastproject.remote.impl");
+    sb.append(":org.opencastproject.serviceregistry.impl");
     jaxbContext= JAXBContext.newInstance(sb.toString(), JobBuilder.class.getClassLoader());
   }
   

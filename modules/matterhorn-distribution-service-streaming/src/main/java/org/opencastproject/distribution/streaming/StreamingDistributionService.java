@@ -17,11 +17,11 @@ package org.opencastproject.distribution.streaming;
 
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.Job.Status;
-import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UrlSupport;
@@ -59,7 +59,7 @@ public class StreamingDistributionService implements DistributionService {
   protected Workspace workspace = null;
 
   /** The service registry */
-  protected RemoteServiceManager remoteServiceManager = null;
+  protected ServiceRegistry remoteServiceManager = null;
 
   /** The distribution directory */
   protected File distributionDirectory = null;
@@ -115,7 +115,7 @@ public class StreamingDistributionService implements DistributionService {
   @Override
   public Job distribute(final String mediaPackageId, final MediaPackageElement element, boolean block)
           throws DistributionException {
-    final RemoteServiceManager rs = remoteServiceManager;
+    final ServiceRegistry rs = remoteServiceManager;
     final Job receipt = rs.createJob(JOB_TYPE);
 
     Runnable command = new Runnable() {
@@ -181,7 +181,7 @@ public class StreamingDistributionService implements DistributionService {
    */
   @Override
   public Job retract(final String mediaPackageId, boolean block) throws DistributionException {
-    final RemoteServiceManager rs = remoteServiceManager;
+    final ServiceRegistry rs = remoteServiceManager;
     final Job receipt = rs.createJob(JOB_TYPE);
 
     Runnable command = new Runnable() {
@@ -286,14 +286,14 @@ public class StreamingDistributionService implements DistributionService {
    * @param remoteServiceManager
    *          the service registry
    */
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+  public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
    */
   public Job getJob(String id) {
     return remoteServiceManager.getJob(id);
@@ -302,7 +302,7 @@ public class StreamingDistributionService implements DistributionService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
    */
   public long countJobs(Status status) {
     if (status == null)
@@ -313,7 +313,7 @@ public class StreamingDistributionService implements DistributionService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status,
    *      java.lang.String)
    */
   public long countJobs(Status status, String host) {

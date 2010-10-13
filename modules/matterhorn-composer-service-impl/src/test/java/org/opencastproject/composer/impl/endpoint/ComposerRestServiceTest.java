@@ -19,13 +19,13 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.impl.JobImpl;
-import org.opencastproject.remote.impl.ServiceRegistrationImpl;
+import org.opencastproject.serviceregistry.impl.JobImpl;
+import org.opencastproject.serviceregistry.impl.ServiceRegistrationImpl;
 
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -63,8 +63,8 @@ public class ComposerRestServiceTest {
 
     profileId = "profile1";
     
-    // FIXME: Remove the test scoped dependency on matterhorn-remote-impl and replace this code with mocks
-    receipt = new JobImpl(org.opencastproject.remote.api.Job.Status.QUEUED, new ServiceRegistrationImpl(
+    // FIXME: Remove the test scoped dependency on matterhorn-serviceregistry and replace this code with mocks
+    receipt = new JobImpl(Job.Status.QUEUED, new ServiceRegistrationImpl(
             ComposerService.JOB_TYPE, "encoding_farm_server_456", "/composer/rest"));
     profile = new EncodingProfileImpl();
     profile.setIdentifier(profileId);

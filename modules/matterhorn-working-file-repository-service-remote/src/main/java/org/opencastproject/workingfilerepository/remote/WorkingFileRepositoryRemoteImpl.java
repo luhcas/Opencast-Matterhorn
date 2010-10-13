@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workingfilerepository.remote;
 
-import org.opencastproject.remote.api.RemoteBase;
+import org.opencastproject.serviceregistry.api.RemoteBase;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workingfilerepository.api.WorkingFileRepository;

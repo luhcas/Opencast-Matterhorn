@@ -20,13 +20,13 @@ import org.opencastproject.caption.api.CaptionConverter;
 import org.opencastproject.caption.api.CaptionConverterException;
 import org.opencastproject.caption.api.CaptionService;
 import org.opencastproject.caption.api.UnsupportedCaptionFormatException;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.RemoteServiceManager;
-import org.opencastproject.remote.api.Job.Status;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
@@ -68,7 +68,7 @@ public class CaptionServiceImpl implements CaptionService {
   private Workspace workspace;
 
   /** Reference to remote service manager */
-  private RemoteServiceManager remoteServiceManager;
+  private ServiceRegistry remoteServiceManager;
 
   /** Component context needed for retrieving Converter Engines */
   protected ComponentContext componentContext = null;
@@ -86,7 +86,7 @@ public class CaptionServiceImpl implements CaptionService {
   }
 
   /** Setter for remote service manager via declarative activation */
-  public void setRemoteServiceManager(RemoteServiceManager manager) {
+  public void setRemoteServiceManager(ServiceRegistry manager) {
     this.remoteServiceManager = manager;
   }
 

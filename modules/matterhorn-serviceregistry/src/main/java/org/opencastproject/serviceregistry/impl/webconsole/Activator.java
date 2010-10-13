@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.impl.webconsole;
+package org.opencastproject.serviceregistry.impl.webconsole;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -36,7 +36,7 @@ public class Activator implements BundleActivator {
    * {@inheritDoc}
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   @Override
   public void start(BundleContext context) throws Exception {
     Dictionary registrationProps = new Hashtable();

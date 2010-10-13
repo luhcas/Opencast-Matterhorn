@@ -26,9 +26,9 @@ import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
-import org.opencastproject.remote.api.RemoteServiceManager;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.IoSupport;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -76,7 +76,7 @@ public class SearchServiceImplTest {
     service.setDublincoreService(new DublinCoreCatalogService());
     service.setWorkspace(workspace);
     service.setupSolr(solrRoot);
-    RemoteServiceManager remote = EasyMock.createNiceMock(RemoteServiceManager.class);
+    ServiceRegistry remote = EasyMock.createNiceMock(ServiceRegistry.class);
     EasyMock.replay(remote);
     service.setRemoteServiceManager(remote);
   }

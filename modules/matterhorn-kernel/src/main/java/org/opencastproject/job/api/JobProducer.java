@@ -13,9 +13,9 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.api;
+package org.opencastproject.job.api;
 
-import org.opencastproject.remote.api.Job.Status;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.util.NotFoundException;
 
 /**

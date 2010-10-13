@@ -20,6 +20,8 @@ import org.opencastproject.inspection.impl.api.AudioStreamMetadata;
 import org.opencastproject.inspection.impl.api.MediaAnalyzer;
 import org.opencastproject.inspection.impl.api.MediaContainerMetadata;
 import org.opencastproject.inspection.impl.api.VideoStreamMetadata;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
@@ -31,9 +33,7 @@ import org.opencastproject.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.mediapackage.track.AudioStreamImpl;
 import org.opencastproject.mediapackage.track.TrackImpl;
 import org.opencastproject.mediapackage.track.VideoStreamImpl;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.RemoteServiceManager;
-import org.opencastproject.remote.api.Job.Status;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.MimeTypes;
@@ -72,7 +72,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceImpl.class);
 
   Workspace workspace;
-  RemoteServiceManager remoteServiceManager;
+  ServiceRegistry remoteServiceManager;
   ExecutorService executor = null;
   Map<String, Object> analyzerConfig = new ConcurrentHashMap<String, Object>();
 
@@ -81,7 +81,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
     this.workspace = workspace;
   }
 
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+  public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
 
@@ -104,7 +104,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#getJob(java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
    */
   public Job getJob(String id) {
     return remoteServiceManager.getJob(id);
@@ -113,7 +113,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status)
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
    */
   public long countJobs(Status status) {
     if (status == null)
@@ -124,7 +124,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.JobProducer#countJobs(org.opencastproject.remote.api.Job.Status,
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status,
    *      java.lang.String)
    */
   public long countJobs(Status status, String host) {
@@ -145,7 +145,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
 
     // Construct a receipt for this operation
     final Job job = remoteServiceManager.createJob(JOB_TYPE);
-    final RemoteServiceManager rs = remoteServiceManager;
+    final ServiceRegistry rs = remoteServiceManager;
     Callable<Track> command = new Callable<Track>() {
       public Track call() throws Exception {
         // Update the receipt status
@@ -261,7 +261,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
 
   protected Callable<MediaPackageElement> getEnrichTrackCommand(final Track originalTrack, final boolean override,
           final Job receipt) {
-    final RemoteServiceManager rs = remoteServiceManager;
+    final ServiceRegistry rs = remoteServiceManager;
     return new Callable<MediaPackageElement>() {
       public MediaPackageElement call() throws Exception {
         // Set the receipt state to running
@@ -453,7 +453,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
 
   protected Callable<MediaPackageElement> getEnrichElementCommand(final MediaPackageElement element,
           final boolean override, final Job receipt) {
-    final RemoteServiceManager rs = remoteServiceManager;
+    final ServiceRegistry rs = remoteServiceManager;
     return new Callable<MediaPackageElement>() {
       public MediaPackageElement call() throws Exception {
         receipt.setStatus(Status.RUNNING);

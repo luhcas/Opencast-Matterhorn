@@ -13,14 +13,14 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.impl;
+package org.opencastproject.serviceregistry.impl;
 
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.RemoteServiceManager;
-import org.opencastproject.remote.api.ServiceRegistration;
-import org.opencastproject.remote.api.ServiceStatistics;
-import org.opencastproject.remote.api.Job.Status;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.serviceregistry.api.ServiceRegistration;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceStatistics;
 import org.opencastproject.util.UrlSupport;
 
 import org.apache.commons.lang.StringUtils;
@@ -50,11 +50,11 @@ import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
 
 /**
- * JPA implementation of the {@link RemoteServiceManager}
+ * JPA implementation of the {@link ServiceRegistry}
  */
-public class RemoteServiceManagerImpl implements RemoteServiceManager {
+public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
-  private static final Logger logger = LoggerFactory.getLogger(RemoteServiceManagerImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(ServiceRegistryJpaImpl.class);
 
   /**
    * A static list of statuses that influence how load balancing is calculated
@@ -81,14 +81,14 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
     this.persistenceProvider = persistenceProvider;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   protected Map persistenceProperties;
 
   /**
    * @param persistenceProperties
    *          the persistenceProperties to set
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   public void setPersistenceProperties(Map persistenceProperties) {
     this.persistenceProperties = persistenceProperties;
   }
@@ -100,7 +100,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
 
   public void activate(ComponentContext cc) {
     logger.debug("activate");
-    emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.remote", persistenceProperties);
+    emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.serviceregistry", persistenceProperties);
     if (cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
       hostName = UrlSupport.DEFAULT_BASE_URL;
     } else {
@@ -130,7 +130,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#parseJob(java.io.InputStream)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#parseJob(java.io.InputStream)
    */
   @Override
   public Job parseJob(InputStream in) {
@@ -144,7 +144,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#parseJob(java.lang.String)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#parseJob(java.lang.String)
    */
   @Override
   public Job parseJob(String xml) {
@@ -158,7 +158,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#createJob(java.lang.String)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String)
    */
   @Override
   public Job createJob(String type) {
@@ -204,7 +204,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#getJob(java.lang.String)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getJob(java.lang.String)
    */
   @Override
   public Job getJob(String id) {
@@ -225,7 +225,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#updateJob(org.opencastproject.remote.api.Job)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#updateJob(org.opencastproject.job.api.Job)
    */
   @Override
   public void updateJob(Job job) {
@@ -291,7 +291,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#registerService(java.lang.String, java.lang.String,
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#registerService(java.lang.String, java.lang.String,
    *      java.lang.String)
    */
   @Override
@@ -302,7 +302,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#registerService(java.lang.String, java.lang.String,
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#registerService(java.lang.String, java.lang.String,
    *      java.lang.String, boolean)
    */
   @Override
@@ -371,7 +371,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#unRegisterService(java.lang.String, java.lang.String,
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#unRegisterService(java.lang.String, java.lang.String,
    *      java.lang.String)
    */
   @Override
@@ -382,7 +382,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#setMaintenanceStatus(java.lang.String, java.lang.String,
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#setMaintenanceStatus(java.lang.String, java.lang.String,
    *      boolean)
    */
   @Override
@@ -411,7 +411,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#getServiceRegistrations()
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrations()
    */
   @SuppressWarnings("unchecked")
   @Override
@@ -427,8 +427,8 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#count(java.lang.String,
-   *      org.opencastproject.remote.api.Job.Status)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#count(java.lang.String,
+   *      org.opencastproject.job.api.Job.Status)
    */
   @Override
   public long count(String type, Status status) {
@@ -447,8 +447,8 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#count(java.lang.String,
-   *      org.opencastproject.remote.api.Job.Status, java.lang.String)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#count(java.lang.String,
+   *      org.opencastproject.job.api.Job.Status, java.lang.String)
    */
   @Override
   public long count(String type, Status status, String host) {
@@ -468,7 +468,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#getServiceStatistics()
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceStatistics()
    */
   @SuppressWarnings("unchecked")
   @Override
@@ -527,7 +527,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.remote.api.RemoteServiceManager#getServiceRegistrations(java.lang.String)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrations(java.lang.String)
    */
   @Override
   public List<ServiceRegistration> getServiceRegistrations(String serviceType) {
@@ -552,7 +552,7 @@ public class RemoteServiceManagerImpl implements RemoteServiceManager {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.remote.api.RemoteServiceManager#getServiceRegistration(java.lang.String, java.lang.String)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistration(java.lang.String, java.lang.String)
    */
   @Override
   public ServiceRegistration getServiceRegistration(String serviceType, String host) {

@@ -20,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElements;
@@ -32,8 +33,7 @@ import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.MultimediaContentType;
 import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
-import org.opencastproject.remote.api.Job;
-import org.opencastproject.remote.api.RemoteServiceManager;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -123,7 +123,7 @@ public class VideoSegmenterTest {
     EasyMock.replay(workspace);
     Job receipt = new ReceiptStub();
 
-    RemoteServiceManager remoteServiceManager = EasyMock.createNiceMock(RemoteServiceManager.class);
+    ServiceRegistry remoteServiceManager = EasyMock.createNiceMock(ServiceRegistry.class);
     EasyMock.expect(remoteServiceManager.createJob((String) EasyMock.anyObject())).andReturn(receipt).anyTimes();
     EasyMock.replay(remoteServiceManager);
 

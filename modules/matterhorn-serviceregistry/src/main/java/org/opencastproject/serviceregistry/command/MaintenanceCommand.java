@@ -13,19 +13,19 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remote.command;
+package org.opencastproject.serviceregistry.command;
 
-import org.opencastproject.remote.api.RemoteServiceManager;
-import org.opencastproject.remote.api.ServiceRegistration;
+import org.opencastproject.serviceregistry.api.ServiceRegistration;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 
 /**
  * An interactive shell command for putting Maintainable services in and out of maintenance mode
  *
  */
 public class MaintenanceCommand {
-  protected RemoteServiceManager remoteServiceManager;
+  protected ServiceRegistry remoteServiceManager;
 
-  public void setRemoteServiceManager(RemoteServiceManager remoteServiceManager) {
+  public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
     this.remoteServiceManager = remoteServiceManager;
   }
   
