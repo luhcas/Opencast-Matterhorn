@@ -29,8 +29,8 @@ import javax.xml.bind.annotation.XmlType;
  * Statistics for a service registration.
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlType(name="statistics", namespace="http://serviceregistry.opencastproject.org")
-@XmlRootElement(name="statistics", namespace="http://serviceregistry.opencastproject.org")
+@XmlType(name="statistic", namespace="http://serviceregistry.opencastproject.org")
+@XmlRootElement(name="statistic", namespace="http://serviceregistry.opencastproject.org")
 public class ServiceStatisticsImpl implements ServiceStatistics {
 
   /** The service registration **/

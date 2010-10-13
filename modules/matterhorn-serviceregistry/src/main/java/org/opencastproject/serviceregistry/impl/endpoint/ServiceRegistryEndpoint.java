@@ -17,8 +17,7 @@ package org.opencastproject.serviceregistry.impl.endpoint;
 
 import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.serviceregistry.api.ServiceStatistics;
-import org.opencastproject.serviceregistry.impl.ServiceStatisticsImpl;
+import org.opencastproject.serviceregistry.impl.ServiceStatisticsList;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -29,13 +28,11 @@ import org.opencastproject.util.doc.Param.Type;
 
 import org.osgi.service.component.ComponentContext;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * Displays hosts and the service IDs they provide.
@@ -75,17 +72,14 @@ public class ServiceRegistryEndpoint {
   @GET
   @Path("/statistics.json")
   @Produces(MediaType.APPLICATION_JSON)
-  public List<ServiceStatisticsImpl> getServicesAsJson() {
-    List<ServiceStatistics> apiList = serviceRegistry.getServiceStatistics();
-    List<ServiceStatisticsImpl> list = new ArrayList<ServiceStatisticsImpl>();
-    for(ServiceStatistics stats : apiList) list.add((ServiceStatisticsImpl)stats);
-    return list;
+  public Response getServicesAsJson() {
+    return Response.ok(new ServiceStatisticsList(serviceRegistry.getServiceStatistics())).build();
   }
 
   @GET
   @Path("/statistics.xml")
   @Produces(MediaType.TEXT_XML)
-  public List<ServiceStatisticsImpl> getServicesAsXml() {
+  public Response getServicesAsXml() {
     return getServicesAsJson();
   }
 
