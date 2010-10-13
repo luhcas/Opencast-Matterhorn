@@ -13,7 +13,6 @@
  *  permissions and limitations under the License.
  *
  */
-console.log('test2');
 // REST endpoints
 var SCHEDULER_URL     = '/scheduler/rest';
 var WORKFLOW_URL      = '/workflow/rest';
