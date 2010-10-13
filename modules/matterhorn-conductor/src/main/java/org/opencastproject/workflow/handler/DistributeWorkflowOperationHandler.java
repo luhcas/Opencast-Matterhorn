@@ -126,6 +126,11 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
             throw new WorkflowOperationException("Distribution job " + job + " did not complete successfully");
           }
           MediaPackageElement newElement = job.getElement();
+          // If the job finished successfully, but returned no new element, the channel simply doesn't support this
+          // kind of element.  So we just keep on looping.
+          if(newElement == null) {
+            continue;
+          }
           newElement.setIdentifier(null);
           MediaPackageReference ref = element.getReference();
           if (ref != null && mediaPackage.getElementByReference(ref) != null) {

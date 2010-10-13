@@ -146,7 +146,7 @@ public class StreamingDistributionService implements DistributionService {
           distributedElement.setURI(getDistributionUri(element));
           distributedElement.setIdentifier(null);
 
-          receipt.setElement(element);
+          receipt.setElement(distributedElement);
           receipt.setStatus(Status.FINISHED);
           rs.updateJob(receipt);
 
