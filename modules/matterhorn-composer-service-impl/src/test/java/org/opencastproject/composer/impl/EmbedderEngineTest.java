@@ -18,6 +18,8 @@ package org.opencastproject.composer.impl;
 import org.opencastproject.composer.api.EmbedderEngine;
 import org.opencastproject.composer.api.EmbedderException;
 import org.opencastproject.composer.impl.qtembedder.QTSbtlEmbedderEngine;
+import org.opencastproject.util.IoSupport;
+import org.opencastproject.util.StreamHelper;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -55,13 +57,22 @@ public class EmbedderEngineTest {
   
   @BeforeClass
   public static void testGst() {
+    StreamHelper stdout = null;
+    StreamHelper stderr = null;
+    Process p = null;
     try {
-      Process p = new ProcessBuilder(defaultBinaryPath, "--help").start();
+      p = new ProcessBuilder(defaultBinaryPath, "--help").start();
+      stdout = new StreamHelper(p.getInputStream());
+      stderr = new StreamHelper(p.getErrorStream());
       if (p.waitFor() != 0)
         throw new IllegalStateException();
     } catch (Throwable t) {
       logger.warn("Skipping qt embedder tests due to unsatisifed qtsbtlembedder installation");
       qtembedderInstalled = false;
+    } finally {
+      IoSupport.closeQuietly(stdout);
+      IoSupport.closeQuietly(stderr);
+      IoSupport.closeQuietly(p);
     }
   }
 

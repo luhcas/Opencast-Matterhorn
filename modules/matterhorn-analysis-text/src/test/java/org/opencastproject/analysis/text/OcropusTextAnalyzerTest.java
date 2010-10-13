@@ -20,6 +20,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.opencastproject.analysis.text.ocropus.OcropusTextAnalyzer;
 import org.opencastproject.analysis.text.ocropus.OcropusTextFrame;
+import org.opencastproject.util.IoSupport;
+import org.opencastproject.util.StreamHelper;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -60,13 +62,22 @@ public class OcropusTextAnalyzerTest {
 
   @BeforeClass
   public static void testOcropus() {
+    StreamHelper stdout = null;
+    StreamHelper stderr = null;
+    Process p = null;
     try {
-      Process p = new ProcessBuilder(ocropusbinary).start();
+      p = new ProcessBuilder(ocropusbinary).start();
+      stdout = new StreamHelper(p.getInputStream());
+      stderr = new StreamHelper(p.getErrorStream());
       if (p.waitFor() != 0)
         throw new IllegalStateException();
     } catch (Throwable t) {
       logger.warn("Skipping text analysis tests due to unsatisifed ocropus installation");
       ocropusInstalled = false;
+    } finally {
+      IoSupport.closeQuietly(stdout);
+      IoSupport.closeQuietly(stderr);
+      IoSupport.closeQuietly(p);
     }
   }
 

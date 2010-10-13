@@ -21,6 +21,8 @@ import static org.junit.Assert.assertTrue;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.impl.ffmpeg.FFmpegEncoderEngine;
 import org.opencastproject.util.FileSupport;
+import org.opencastproject.util.IoSupport;
+import org.opencastproject.util.StreamHelper;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
@@ -56,13 +58,22 @@ public class TrimmingTest {
 
   @BeforeClass
   public static void testOcropus() {
+    StreamHelper stdout = null;
+    StreamHelper stderr = null;
+    Process p = null;
     try {
-      Process p = new ProcessBuilder(FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT, "-version").start();
+      p = new ProcessBuilder(FFmpegEncoderEngine.FFMPEG_BINARY_DEFAULT, "-version").start();
+      stdout = new StreamHelper(p.getInputStream());
+      stderr = new StreamHelper(p.getErrorStream());
       if (p.waitFor() != 0)
         throw new IllegalStateException();
     } catch (Throwable t) {
       logger.warn("Skipping trimming tests due to unsatisifed ffmpeg installation");
       ffmpegInstalled = false;
+    } finally {
+      IoSupport.closeQuietly(stdout);
+      IoSupport.closeQuietly(stderr);
+      IoSupport.closeQuietly(p);
     }
   }
 

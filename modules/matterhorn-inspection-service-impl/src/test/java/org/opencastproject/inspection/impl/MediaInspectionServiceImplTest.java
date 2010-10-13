@@ -22,7 +22,9 @@ import org.opencastproject.mediapackage.Track;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
+import org.opencastproject.util.IoSupport;
 import org.opencastproject.util.MimeType;
+import org.opencastproject.util.StreamHelper;
 import org.opencastproject.workspace.api.Workspace;
 
 import junit.framework.Assert;
@@ -52,16 +54,25 @@ public class MediaInspectionServiceImplTest {
   
   @BeforeClass
   public static void testOcropus() {
+    StreamHelper stdout = null;
+    StreamHelper stderr = null;
+    Process p = null;
     try {
       // Mediainfo requires a track in order to return a status code of 0, indicating that it is workinng as expected
       URI uriTrack = MediaInspectionServiceImpl.class.getResource("/av.mov").toURI();
       File f = new File(uriTrack);
-      Process p = new ProcessBuilder(MediaInfoAnalyzer.MEDIAINFO_BINARY_DEFAULT, f.getAbsolutePath()).start();
+      p = new ProcessBuilder(MediaInfoAnalyzer.MEDIAINFO_BINARY_DEFAULT, f.getAbsolutePath()).start();
+      stdout = new StreamHelper(p.getInputStream());
+      stderr = new StreamHelper(p.getErrorStream());
       if (p.waitFor() != 0)
         throw new IllegalStateException();
     } catch (Throwable t) {
       logger.warn("Skipping media inspection tests due to unsatisifed mediainfo installation");
       mediainfoInstalled = false;
+    } finally {
+      IoSupport.closeQuietly(stdout);
+      IoSupport.closeQuietly(stderr);
+      IoSupport.closeQuietly(p);
     }
   }
 
