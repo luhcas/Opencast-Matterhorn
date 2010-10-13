@@ -209,7 +209,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         log.error("Key {} is missing from the config file or invalid, unable to start polling.", CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL);
         return;
       }
-      remoteCalendarURL = new URL(new URL(remoteBase), configService.getItem(CaptureParameters.AGENT_NAME));
+      remoteCalendarURL = new URL(remoteBase);
 
       //Times are in seconds in the config file, so don't forget to multiply by 1000 later!
       pollTime = Long.parseLong(configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL));
