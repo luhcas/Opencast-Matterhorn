@@ -167,8 +167,9 @@ public class SeriesRestService {
     logger.debug("Searching all Series that match the pattern {}", pattern);
     try {
       List<Series> list = service.searchSeries(pattern);
-      if (list == null)
+      if (list == null) {
         return Response.status(Status.BAD_REQUEST).build();
+      }
       JSONArray a = new JSONArray();
       for (Series s : list) {
         JSONObject j = new JSONObject();
@@ -180,7 +181,7 @@ public class SeriesRestService {
       return Response.ok(a.toJSONString()).build();
     } catch (Exception e) {
       logger.warn("search for series failed. {}", e);
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+      return Response.serverError().build();
     }
   }
 
@@ -196,7 +197,7 @@ public class SeriesRestService {
       return Response.ok(dc.toXmlString()).build();
     } catch (Exception e) {
       logger.warn("Series Lookup failed: {}", seriesID);
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
+      return Response.serverError().build();
     }
   }
 
@@ -233,7 +234,7 @@ public class SeriesRestService {
       logger.debug("Adding series {} ", series.getSeriesId());
       return Response.status(Status.CREATED).type("").build(); // get rid of content type
     } catch (IllegalArgumentException e) {
-      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      return Response.serverError().build();
     }
   }
 
