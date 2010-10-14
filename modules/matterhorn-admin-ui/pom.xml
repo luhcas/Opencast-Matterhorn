@@ -213,6 +213,25 @@
               </resources>
             </configuration>
           </execution>
+                    <execution>
+            <id>copy-infusion2</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/classes/ui/infusion-1.2.1</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>../../shared-resources/infusion-1.2.1/</directory>
+                  <includes>
+                    <include> **/* </include>
+                  </includes>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
           <execution>
             <id>copy-img</id>
             <phase>validate</phase>

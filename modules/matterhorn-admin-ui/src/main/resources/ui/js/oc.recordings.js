@@ -59,22 +59,9 @@ ocRecordings.init = function() {
   //  $('body').click( function() {
   //    $('#holdActionPanelContainer').fadeOut('fast');
   //  });
-
-  // Buttons style
-  $("button").hover(function(){
-    $(this).css({
-      'background-color': 'white',
-      'border-top': '1px solid #ccc',
-      'border-left': '1px solid #ccc'
-    });
-  },
-  function(){
-    $(this).css({
-      'background-color': '',
-      'border-top': '',
-      'border-left': ''
-    })
-  });
+  
+  $("#buttonSchedule").button({icons:{primary:'ui-icon-circle-plus'}});
+  $("#buttonUpload").button({icons:{primary:'ui-icon-circle-plus'}});
 
   /* Event: Scheduler button clicked */
   $('#buttonSchedule').click( function() {
@@ -89,6 +76,7 @@ ocRecordings.init = function() {
   /* Event: Recording State selector clicked */
   $('.state-selector').click( function() {
     var state = $(this).attr('state');
+    ocUtils.log('state', state);
     window.location.href = 'recordings.html?show='+state+'&sortBy='+ocRecordings.sortBy+'&sortOrder='+ocRecordings.sortOrder+'&pageSize='+ocPager.pageSize;
     return false;
   });
@@ -342,9 +330,9 @@ ocRecordings.formatRecordingDates = function(startTime, endTime) {
   var startDate = new Date(); startDate.setTime(startTime);
   var endDate = new Date(); endDate.setTime(endTime);
   var out = startDate.getFullYear() + '-' +
-    ocUtils.padString(startDate.getMonth()+1) + '-' +
-    ocUtils.padString(startDate.getDate()) + ' ' +
-    endDate.getHours() + ":" + ocUtils.padString(endDate.getMinutes()) + ' - ' +
-    endDate.getHours() + ":" + ocUtils.padString(endDate.getMinutes());
+    ocUtils.padString(startDate.getMonth()+1, "0", 2) + '-' +
+    ocUtils.padString(startDate.getDate(), "0", 2) + ' ' +
+    startDate.getHours() + ":" + ocUtils.padString(startDate.getMinutes(), "0", 2) + ' - ' +
+    endDate.getHours() + ":" + ocUtils.padString(endDate.getMinutes(), "0", 2);
   return out;
 }

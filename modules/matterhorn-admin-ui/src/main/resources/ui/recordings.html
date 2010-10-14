@@ -1,22 +1,20 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
   <head>
-    <title id="i18n_window_title"></title>
-    <meta http-equiv="cache-control" content="no-cache">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="shortcut icon" href="img/favicon.ico"> 
-    <!-- styles -->
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css">
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css">
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css">
-    <link rel="stylesheet" type="text/css" href="css/admin.css">
-    <link rel="stylesheet" type="text/css" href="css/shared.css">
-    <link rel="stylesheet" type="text/css" href="css/tablesorter.css">
-
-    <!-- scripts -->
+    <!-- PAGE TITLE -->
+    <title id="i18n_window_title">Recordings</title>
+    <!-- META -->
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="css/oc.layout.css" />
+    <link rel="stylesheet" type="text/css" href="css/themes/oc.default.css" />
+    <link rel="stylesheet" type="text/css" href="css/pages/oc.recordings.css" />
+    <link rel="stylesheet" type="text/css" href="css/tablesorter.css" />
+    <!-- SCRIPTS -->
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
-    <script type="text/javascript" src="jquery/plugins/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="jquery/jquery-ui-1.8.5.custom.min.js"></script>
     <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
     <script type="text/javascript" src="js/version.js"></script>
     <script type="text/javascript" src="js/oc.pager.js"></script>
@@ -26,14 +24,7 @@
     <script type="text/javascript">
       $(document).ready(function(){ocRecordings.init();});
     </script>
-  </head>
-  <body>
-    <div id="pageHeader">
-      <div id="currentVersion" style="float:left;"></div>
-      <div style="text-align:right; float: right;"><a id="logout" href="/j_spring_security_logout" style="color:#FFFFFF">Log out</a></div>
-    </div>
-
-    <!-- notification that javaScript is disabled -->
+    <!-- NO SCRIPT -->
     <noscript>
       <center>
         <div style="border:1px solid red;width:530px;margin:20px;">
@@ -50,165 +41,150 @@
         </div>
       </center>
     </noscript>
-
-    <!-- fl-centered doesn't work in winXP-IE8 -->
-    <div class="fl-container-flex fl-centered fl-theme-coal">
-  <div id="header">
-         <div id="logotitle">
-            <a href="../../welcome.html">
-        	<img src="img/MatterhornLogo.png" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" align="left">
-			<h1>Admin Tools</h1>
-      </a>
-    </div>
-     	<div id="oclogo">
-       	<a href="http://www.opencastproject.org">
-        <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project">        </a>    </div>
-  </div>
-      <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
-        <li class="fl-activeTab"><a href="recordings.html" id="i18n_tab_recording">Recordings</a></li>
-        <li><a href="series_list.html" id="i18n_tab_series">Series</a></li>
-        <li><a href="agents_status.html" id="i18n_tab_agent">Capture Agents</a></li>
-      </ul>
-      <div id="stage" class="fl-tab-content wu-tab-content fl-fix">
-
-        <div class="fl-fix">
-          <!-- Add/Schedule Buttons -->
-          <div id="addButtonsContainer">
-            <button type="button" id="buttonSchedule" style="height:2.1em;cursor:pointer;margin-right:1em;font-size:0.9em;vertical-align: middle;">
-              <span class="icon icon-add">&nbsp;</span>
-              <span style="font-weight: bold; font-size:1em;" id="i18n_button_schedule">&nbsp; Schedule Recordings</span>
-            </button>
-            <button type="button" id="buttonUpload" style="height:2.1em;cursor:pointer;font-size:0.9em;vertical-align: middle;">
-              <span class="icon icon-add">&nbsp;</span>
-              <span style="font-weight: bold; font-size:1em;" id="i18n_button_upload">&nbsp; Upload Recording</span>
-            </button>
-          </div>
-
-          <!-- recording state selector -->
-          <div id="categorySelectorContainer" class="fl-fix">
-            <ul class="category-selector">
-              <li class="category-selector-item">
-                <span class="state-selector selector-all clickable" state="all"><span id="i18n_view_all">All</span> <span id="allCount"></span></span>
-              </li>
-              <li class="category-selector-spacer">
-                &#124;
-              </li>
-              <li class="category-selector-item">
-                <span class="state-selector selector-upcoming clickable" state="upcoming"><span id="i18n_view_upcoming">Upcoming</span> <span id="upcomingCount"></span></span>
-              </li>
-              <li class="category-selector-spacer">
-                &#124;
-              </li>
-              <li class="category-selector-item">
-                <span class="state-selector selector-capturing clickable" state="capturing"><span id="i18n_view_capturing">Capturing</span> <span id="capturingCount"></span></span>
-              </li>
-              <li class="category-selector-spacer">
-                &#124;
-              </li>
-              <li class="category-selector-item">
-                <span class="state-selector selector-processing clickable" state="processing"><span id="i18n_view_processing">Processing</span> <span id="processingCount"></span></span>
-              </li>
-              <li class="category-selector-spacer">
-                &#124;
-              </li>
-              <li class="category-selector-item">
-                <span class="state-selector selector-finished clickable" state="finished"><span id="i18n_view_finished">Finished</span> <span id="finishedCount"></span></span>
-              </li>
-              <li class="category-selector-spacer" style="width:30px;">
-                &nbsp;
-              </li>
-              <li class="category-selector-item">
-                <span class="state-selector selector-hold clickable" state="hold"><span id="i18n_view_onhold">On Hold</span> <span id="holdCount">()</span></span>
-              </li>
-              <li class="category-selector-spacer">
-                &#124;
-              </li>
-              <li class="category-selector-item">
-                <span class="state-selector selector-failed clickable" state="failed"><span id="i18n_view_failed">Failed</span> <span id="failedCount">()</span></span>
-              </li>
-            </ul>
+  </head>
+  <body>
+    <div class="layout-page-container">
+      <!-- VERSION AND LOGOUT BAR -->
+      <div class="layout-page-header oc-ui-version-bar">
+        <div id="currentVersion" class="layout-inline"></div>
+        <div class="layout-inline layout-float-right"><a id="logout" href="/j_spring_security_logout">Log out</a></div>
+      </div>
+      <!-- BANNER -->
+      <div class="layout-page-header">
+        <div class="oc-ui-banner layout-inline">
+          <div onclick="document.location='/welcome.html'" class="oc-ui-cursor">
+            <img src="img/MatterhornLogo.png" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" class="layout-inline" />
+            <h1 id="i18n_logo_title" class="layout-inline layout-valign-top">Admin Tools</h1>
           </div>
         </div>
-
+        <div class="layout-page-banner layout-inline layout-float-right">
+          <a href="http://www.opencastproject.org">
+            <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project" />
+          </a>
+        </div>
+      </div>
+      <!-- PAGE TABS -->
+      <div class="layout-page-header">
+        <ul class="layout-page-tabs oc-ui-page-tabs">
+          <li class="oc-ui-page-tab oc-ui-page-tab-active oc-ui-cursor" id="i18n_tab_recording" onclick="document.location='recordings.html'">Recordings</li>
+          <li class="oc-ui-page-tab oc-ui-cursor" id="i18n_tab_series" onclick="document.location='series_list.html'">Series</li>
+          <li class="oc-ui-page-tab oc-ui-cursor" id="i18n_tab_agent" onclick="document.location='agents_status.html'">Capture Agents</li>
+        </ul>
+      </div>
+      <!-- RECORDING AND BUTTON BAR -->
+      <div class="layout-page-header">
+        <!-- recording state selector -->
+        <div class="layout-inline">
+          <ul class="recordings-categories">
+            <li class="recordings-category recordings-first-item oc-ui-cursor">
+              <span class="state-selector selector-all clickable" state="all"><span id="i18n_view_all">All</span> <span id="allCount"></span></span>
+            </li>
+            <li class="recordings-category oc-ui-cursor">
+              <span class="state-selector selector-upcoming clickable" state="upcoming"><span id="i18n_view_upcoming">Upcoming</span> <span id="upcomingCount"></span></span>
+            </li>
+            <li class="recordings-category oc-ui-cursor">
+              <span class="state-selector selector-capturing clickable" state="capturing"><span id="i18n_view_capturing">Capturing</span> <span id="capturingCount"></span></span>
+            </li>
+            <li class="recordings-category oc-ui-cursor">
+              <span class="state-selector selector-processing clickable" state="processing"><span id="i18n_view_processing">Processing</span> <span id="processingCount"></span></span>
+            </li>
+            <li class="recordings-category oc-ui-cursor">
+              <span class="state-selector selector-finished clickable" state="finished"><span id="i18n_view_finished">Finished</span> <span id="finishedCount"></span></span>
+            </li>
+            <li class="recordings-category-spacer">
+              &nbsp;
+            </li>
+            <li class="recordings-category recordings-first-item oc-ui-cursor">
+              <span class="state-selector selector-hold clickable" state="hold"><span id="i18n_view_onhold">On Hold</span> <span id="holdCount">()</span></span>
+            </li>
+            <li class="recordings-category oc-ui-cursor">
+              <span class="state-selector selector-failed clickable" state="failed"><span id="i18n_view_failed">Failed</span> <span id="failedCount">()</span></span>
+            </li>
+          </ul>
+        </div>
+        <!-- Add/Schedule Buttons -->
+        <div class="layout-float-right recordings-button-container">
+          <!-- USE JQUERY UI BUTTON MAKER -->
+          <button type="button" id="buttonSchedule">
+            Schedule Recordings
+          </button>
+          <button type="button" id="buttonUpload">
+            <span id="i18n_button_upload">Upload Recording</span>
+          </button>
+        </div>
+      </div>
+      <div class="layout-page-header">
         <!-- info boxes shown above the table when upcoming or finished filter is selected -->
-        <div id="infoBox" style="margin-bottom:18px;display:none;">
-            <div id="finishedTableInfoBox" style="display:none;border: 1px solid #cccccc;font-size:0.9em;text-align:center;width:600px;margin-left:auto;margin-right:auto;margin-bottom:0.5em;padding:0.5em;">
-                <img title="Information" alt="Information" src="img/icons/information.png" style="vertical-align: bottom;"></img>
-                Go to the <a id="engagelink" style="text-decoration:underline">Matterhorn Media Module</a> to see any Recordings which have gone through "Encode, Analyze, and Distribute" processing.
-            </div>
-            <div id="upcomingTableInfoBox" style="display:none;border: 1px solid #cccccc;font-size:0.9em;text-align:center;width:900px;margin-left:auto;margin-right:auto;margin-bottom:0.5em;padding:0.5em;">
-                <img title="Information" alt="Information" src="img/icons/information.png" style="vertical-align: bottom;"></img>
-                All recordings scheduled for the future appear below. (Future versions of Matterhorn will allow you to filter this list to show specific days.)
-            </div>
-       </div>
-
-        <!-- recordings table -->
-        <div id="recordingsTableContainer" style="clear:both;">
-          <!-- This is where the rendered table goes -->
+        <div id="finishedTableInfoBox" class="layout-centered ui-state-highlight recordings-info-box">
+          <span class="ui-icon ui-icon-info layout-inline"></span>
+          Go to the <a id="engagelink">Matterhorn Media Module</a> to see any Recordings which have gone through "Encode, Analyze, and Distribute" processing.
         </div>
-
-      <div id="holdActionPanelContainer">
-          <h2>
-            <span id="holdStateHeadRowTitle" >&nbsp;</span>
-            <span id="holdStateHeadRowPresenter">&nbsp;</span>
-            <span id="holdStateHeadRowSeries">&nbsp;</span>
-            <span id="holdStateHeadRow-date"></span>
-          </h2>
-          <div id="holdIframe-container">
-	          <iframe id="holdActionPanel-iframe" src="">
-	          </iframe>
-	          <div id="holdActionPanel-submit" style="display:none;">
-                <span>
-                    <input type="hidden" id="holdWorkflowId" value="">
-                </span>
-	          </div>
+        <div id="upcomingTableInfoBox" class="layout-centered ui-state-highlight recordings-info-box">
+          <span class="ui-icon ui-icon-info layout-inline"></span>
+          All recordings scheduled for the future appear below. (Future versions of Matterhorn will allow you to filter this list to show specific days.)
+        </div>
+      </div>
+      <!-- RECORDINGS TABLE -->
+      <div class="layout-page-content">
+        <div id="recordingsTableContainer" />
+      </div>
+      <div id="holdActionPanelContainer" class="recordings-hold-state-frame">
+        <h2>
+          <span id="holdStateHeadRowTitle" >&nbsp;</span>
+          <span id="holdStateHeadRowPresenter">&nbsp;</span>
+          <span id="holdStateHeadRowSeries">&nbsp;</span>
+          <span id="holdStateHeadRow-date"></span>
+        </h2>
+        <div id="holdIframe-container">
+          <iframe id="holdActionPanel-iframe" src="">
+          </iframe>
+          <div id="holdActionPanel-submit" style="display:none;">
+              <span>
+                  <input type="hidden" id="holdWorkflowId" value="">
+              </span>
           </div>
         </div>
+      </div>
 
-        <div id="refreshControlsContainer" style="float:left;">
-          <input type="checkbox" id="refreshEnabled" checked="checked">
-          <span class="refresh-text">Update table every&nbsp;</span>
-          <select id="refreshInterval">
-            <option value="5">5</option>
-            <option value="7">7</option>
+      <div id="refreshControlsContainer" class="layout-float-left">
+        <input type="checkbox" id="refreshEnabled" checked="checked">
+        <span class="refresh-text">Update table every&nbsp;</span>
+        <select id="refreshInterval">
+          <option value="5">5</option>
+          <option value="7">7</option>
+          <option value="10">10</option>
+        </select>
+        <span class="refresh-text">&nbsp;seconds.</span>
+      </div>
+
+      <!-- paging navigation -->
+      <div class="paging-nav-container layout-float-right">
+        <span>
+          Show
+          <select class="paging-nav-pagesize-selector">
             <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
           </select>
-          <span class="refresh-text">&nbsp;seconds.</span>
-        </div>
-
-        <!-- paging navigation -->
-        <div class="paging-nav-container">
-          <span>
-            Show
-            <select class="paging-nav-pagesize-selector">
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-            Recordings per page
-          </span>
-          &nbsp;&nbsp;
-          <span>
-            Go to page
-            <input type="text" class="paging-nav-goto" style="width:50px;">
-          </span>
-          &nbsp;&nbsp;
-          <a href="#" class="paging-nav-go-previous">&lt; Previous</a>
-          <span class="paging-nav-mocklink">&lt; Previous</span>
-          <span>
-            Page
-            <span class="paging-nav-current">1</span>
-            of
-            <span class="paging-nav-total">1</span>
-          </span>
-          <a href="#" class="paging-nav-go-next">Next &gt;</a>
-          <span class="paging-nav-mocklink">Next &gt;</span>
-        </div>
-
+          Recordings per page
+        </span>
+        &nbsp;&nbsp;
+        <span>
+          Go to page
+          <input type="text" class="paging-nav-goto" style="width:50px;">
+        </span>
+        &nbsp;&nbsp;
+        <a href="#" class="paging-nav-go-previous">&lt; Previous</a>
+        <span class="paging-nav-mocklink">&lt; Previous</span>
+        <span>
+          Page
+          <span class="paging-nav-current">1</span>
+          of
+          <span class="paging-nav-total">1</span>
+        </span>
+        <a href="#" class="paging-nav-go-next">Next &gt;</a>
+        <span class="paging-nav-mocklink">Next &gt;</span>
       </div>
     </div>
-    <!-- p>
-    <button type="button" onclick="Recordings.displayHoldActionPanel('http://outstack.virtuos.uos.de:8080/org.opencastproject.workflow.handler.downloaddvdworkflowoperationhandler/index.html?9cc8c5bf-ce45-493d-974a-e9ec9eb6ead3','9cc8c5bf-ce45-493d-974a-e9ec9eb6ead3');">Display Example of Hold UI</button>
-    </p -->
   </body>
 </html>

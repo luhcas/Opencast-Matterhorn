@@ -26,8 +26,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * A JAXB-anotated implementation of {@link AdminRecording}
  */
-@XmlType(name="recording", namespace="http://adminui.opencastproject.org/")
-@XmlRootElement(name="recording", namespace="http://adminui.opencastproject.org/")
+@XmlRootElement(name="recording")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AdminRecordingImpl implements AdminRecording {
 

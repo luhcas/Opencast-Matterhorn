@@ -32,8 +32,7 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * A {@link List} of {@link AdminRecording}s
  */
-@XmlType(name="recordingList", namespace="http://adminui.opencastproject.org/")
-@XmlRootElement(name="recordingList", namespace="http://adminui.opencastproject.org/")
+@XmlRootElement(name="recordingList")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AdminRecordingListImpl implements AdminRecordingList {
 

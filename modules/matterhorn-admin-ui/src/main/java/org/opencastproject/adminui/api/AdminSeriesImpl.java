@@ -22,7 +22,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-@XmlType(name="series", namespace="http://adminui.opencastproject.org/")
 @XmlRootElement(name="series")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AdminSeriesImpl implements AdminSeries {

@@ -32,7 +32,6 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * A {@link List} of {@link AdminSeries}s
  */
-@XmlType(name="seriesList", namespace="http://adminui.opencastproject.org/")
 @XmlRootElement(name="seriesList")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AdminSeriesListImpl implements AdminSeriesList {
