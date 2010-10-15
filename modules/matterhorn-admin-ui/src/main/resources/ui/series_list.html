@@ -1,43 +1,33 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
   <head>
-    <title id="i18n_window_title">Series | Opencast Matterhorn</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <link rel="shortcut icon" href="img/favicon.ico"> 
-    <!-- styles -->
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css">
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css">
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css">
-    <link rel="stylesheet" type="text/css" href="css/admin.css">
-    <link rel="stylesheet" type="text/css" href="css/shared.css">
-    <link rel="stylesheet" type="text/css" href="css/tablesorter.css">
-    <link rel="stylesheet" type="text/css" href="css/smoothness/jquery-ui-1.7.2.custom.css">
-
-    <!-- scripts -->
+    <!-- PAGE TITLE -->
+    <title id="i18n_window_title">Recordings</title>
+    <!-- META -->
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="css/oc.layout.css" />
+    <link rel="stylesheet" type="text/css" href="css/themes/oc.default.css" />
+    <link rel="stylesheet" type="text/css" href="css/pages/oc.recordings.css" />
+    <link rel="stylesheet" type="text/css" href="css/tablesorter.css" />
+    <!-- SCRIPTS -->
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
-    <script type="text/javascript" src="jquery/plugins/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="jquery/jquery-ui-1.8.5.custom.min.js"></script>
     <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.tablesorter.min.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
     <script type="text/javascript" src="js/version.js"></script>
+    <script type="text/javascript" src="js/oc.pager.js"></script>
     <script type="text/javascript" src="js/oc.utils.js"></script>
-    <script type="text/javascript" src="js/oc.admin.js"></script>
     <script type="text/javascript" src="js/oc.series.list.js"></script>
     <script type="text/javascript" src="/series/rest/all.json?jsonp=ocSeriesList.buildSeriesView"></script>
     <script type="text/javascript">
       $(document).ready(ocSeriesList.init);
     </script>
-  </head>
-  <body>
-    <div id="pageHeader">
-      <div id="currentVersion" style="float:left;"></div>
-      <div style="text-align:right; float: right;"><a href="/j_spring_security_logout" style="color:#FFFFFF">Log out</a></div>
-    </div>
-
-    <!-- notification that javaScript is disabled -->
+    <!-- NO SCRIPT -->
     <noscript>
       <center>
         <div style="border:1px solid red;width:530px;margin:20px;">
-          <div id="messages">
+          <div style="text-align: left;background:red; color:white;padding-top:2px;padding-bottom:2px;">
             <div class="icon icon-error" style="margin-left:5px;margin-right:5px;">&nbsp;</div>
             JavaScript is disabled
           </div>
@@ -50,66 +40,106 @@
         </div>
       </center>
     </noscript>
-
-    <!-- fl-centered doesn't work in winXP-IE8 -->
-    <div class="fl-container-flex fl-centered fl-theme-coal">
-      <div id="header">
-        <div id="logotitle">
-          <a href="../../welcome.html">
-            <img src="img/MatterhornLogo.png" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" align="left">
-            <h1>Admin Tools</h1>
-          </a>
+  </head>
+  <body>
+    <div class="layout-page-container">
+      <!-- VERSION AND LOGOUT BAR -->
+      <div class="layout-page-header oc-ui-version-bar">
+        <div id="currentVersion" class="layout-inline"></div>
+        <div class="layout-inline layout-float-right"><a id="logout" href="/j_spring_security_logout">Log out</a></div>
+      </div>
+      <!-- BANNER -->
+      <div class="layout-page-header">
+        <div class="oc-ui-banner layout-inline">
+          <div onclick="document.location='/welcome.html'" class="oc-ui-cursor">
+            <img src="img/MatterhornLogo.png" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" class="layout-inline" />
+            <h1 id="i18n_logo_title" class="layout-inline layout-valign-top">Admin Tools</h1>
+          </div>
         </div>
-        <div id="oclogo">
+        <div class="layout-page-banner layout-inline layout-float-right">
           <a href="http://www.opencastproject.org">
-            <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project">
+            <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project" />
           </a>
         </div>
       </div>
-      <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
-        <li><a href="recordings.html" id="i18n_tab_recording">Recordings</a></li>
-        <li class="fl-activeTab"><a href="series_list.html" id="i18n_tab_series">Series</a></li>
-        <li><a href="agents_status.html" id="i18n_tab_agent">Capture Agents</a></li>
-      </ul>
-      <div id="stage" class="fl-tab-content wu-tab-content fl-fix">
-        <!-- Add/Schedule Buttons -->
-        <div id="add-buttons-container">
-          <button type="button" id="button_series" onclick="document.location = '/admin/series.html'"  style="height:2.1em;cursor:pointer;margin-right:1em;font-size:0.9em;vertical-align: middle;">
-            <span class="icon icon-add">&nbsp;</span>
-            <span style="font-weight: bold; font-size:1em;" id="i18n_button_schedule">&nbsp; Add Series</span>
+      <!-- PAGE TABS -->
+      <div class="layout-page-header">
+        <ul class="layout-page-tabs oc-ui-page-tabs">
+          <li class="oc-ui-page-tab oc-ui-page-tab-active oc-ui-cursor" id="i18n_tab_recording" onclick="document.location='recordings.html'">Recordings</li>
+          <li class="oc-ui-page-tab oc-ui-cursor" id="i18n_tab_series" onclick="document.location='series_list.html'">Series</li>
+          <li class="oc-ui-page-tab oc-ui-cursor" id="i18n_tab_agent" onclick="document.location='agents_status.html'">Capture Agents</li>
+        </ul>
+      </div>
+      <div class="layout-page-header">
+        <!-- Add Series Buttons -->
+        <div id="add-buttons-container" class="layout-float-right">
+          <button type="button" id="addSeriesButton" onclick="document.location = '/admin/series.html'">
+            <span id="i18n_button_schedule">&nbsp; Add Series</span>
           </button>
         </div>
-        <div>
-          <div id="seriesTableContainer"></div>
-        </div>
       </div>
+      <!-- CONTENT AREA -->
+      <div class="layout-page-content">
+        <div id="seriesTableContainer" />
+      </div>
+      <!-- TABLE PAGINATION OPTIONS -->
+      <div class="paging-nav-container layout-float-right">
+        <span>
+          Show
+          <select class="paging-nav-pagesize-selector">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+          Recordings per page
+        </span>
+        &nbsp;&nbsp;
+        <span>
+          Go to page
+          <input type="text" class="paging-nav-goto" style="width:50px;">
+        </span>
+        &nbsp;&nbsp;
+        <a href="#" class="paging-nav-go-previous">&lt; Previous</a>
+        <span class="paging-nav-mocklink">&lt; Previous</span>
+        <span>
+          Page
+          <span class="paging-nav-current">1</span>
+          of
+          <span class="paging-nav-total">1</span>
+        </span>
+        <a href="#" class="paging-nav-go-next">Next &gt;</a>
+        <span class="paging-nav-mocklink">Next &gt;</span>
+      </div>
+      <!-- Series Table Template -->
+      <textarea id="seriesTemplate" style="display:none;">
+        <table id="seriesTable" class="ui-widget" width="100%" style="float:left;">
+          <thead>
+            <tr>
+              <th width="25%" class="ui-widget-header oc-ui-sortable">Title</th>
+              <th width="25%" class="ui-widget-header oc-ui-sortable">Organizer</th>
+              <th width="25%" class="ui-widget-header oc-ui-sortable">Sponsoring Department</th>
+              <th width="25%" class="ui-widget-header">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {for series in seriesView}
+            <tr>
+              <td class="ui-widget-content">${series.title}</td>
+              <td class="ui-widget-content">${series.contributor}</td>
+              <td class="ui-widget-content">${series.creator}</td>
+              <td class="ui-widget-content">
+                <a href="series.html?seriesId=${series.id}&edit=true">Edit</a><br/>
+                <a href="javascript:ocSeriesList.deleteSeries('${series.id}', '${series.title}');">Delete</a>
+              </td>
+            </tr>
+            {forelse}
+            <tr>
+              <td colspan="4" align="center" class="ui-widget-content">No Series in the System</td>
+            </tr>
+            {/for}
+          </tbody>
+        </table>
+      </textarea>
     </div>
-    
-    <!-- Series Table Template -->
-    <textarea id="seriesTemplate" style="display:none;">
-      <table id="seriesTable" class="fl-theme-coal wu-table-list" width="100%" style="float:left;">
-        <thead>
-          <tr>
-            <th width="25%" class="sortable">Title</th>
-            <th width="25%" class="sortable">Organizer</th>
-            <th width="25%" class="sortable">Sponsoring Department</th>
-            <th width="25%">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {for series in seriesView}
-          <tr class="highlightable">
-            <td>${series.title}</td>
-            <td>${series.contributor}</td>
-            <td>${series.creator}</td>
-            <td>
-              <a href="series.html?seriesId=${series.id}&edit=true">Edit</a><br/>
-              <a href="javascript:ocSeriesList.deleteSeries('${series.id}', '${series.title}');">Delete</a>
-            </td>
-          </tr>
-          {/for}
-        </tbody>
-      </table>
-    </textarea>
   </body>
 </html>

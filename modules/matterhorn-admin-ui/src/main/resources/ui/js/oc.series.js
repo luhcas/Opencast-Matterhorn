@@ -70,7 +70,7 @@ ocSeries.Internationalize = function(){
     name:'series',
     path:'i18n/'
   });
-  ocAdmin.internationalize(i18n, 'i18n');
+  ocUtils.internationalize(i18n, 'i18n');
   //Handle special cases like the window title.
   $('#i18n_page_title').text(i18n.page.title.add);
 }

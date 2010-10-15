@@ -14,13 +14,11 @@
     <script type="text/javascript" src="jquery/jquery-ui-1.8.5.custom.min.js"></script>
     <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.tablesorter.min.js"></script>
-    <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
     <script type="text/javascript" src="js/version.js"></script>
     <script type="text/javascript" src="js/oc.pager.js"></script>
     <script type="text/javascript" src="js/oc.utils.js"></script>
     <script type="text/javascript" src="js/oc.recordings.js"></script>
-    <script type="text/javascript" src="js/oc.admin.js"></script>
     <script type="text/javascript">
       $(document).ready(function(){ocRecordings.init();});
     </script>
@@ -106,7 +104,7 @@
         <div class="layout-float-right recordings-button-container">
           <!-- USE JQUERY UI BUTTON MAKER -->
           <button type="button" id="buttonSchedule">
-            Schedule Recordings
+            <span id="i18n_button_schedule">Schedule Recordings</span>
           </button>
           <button type="button" id="buttonUpload">
             <span id="i18n_button_upload">Upload Recording</span>

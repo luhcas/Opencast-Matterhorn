@@ -18,6 +18,7 @@ ocSeriesList.views = {} || ocSeriesList.views;
 ocSeriesList.views.seriesView = {} || ocSeriesList.seriesView;
 
 ocSeriesList.init = function(){
+  $("#addSeriesButton").button({icons:{primary:"ui-icon-circle-plus"}});
   var result = TrimPath.processDOMTemplate("seriesTemplate", ocSeriesList.views);
   $('#seriesTableContainer').html(result);
 }

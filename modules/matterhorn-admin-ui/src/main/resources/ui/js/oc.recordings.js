@@ -41,7 +41,7 @@ ocRecordings.init = function() {
     name:'recordings',
     path:'i18n/'
   });
-  ocAdmin.internationalize(i18n, 'i18n');
+  ocUtils.internationalize(i18n, 'i18n');
   
   // get config
   $.getJSON("/info/rest/components.json", function(data) {

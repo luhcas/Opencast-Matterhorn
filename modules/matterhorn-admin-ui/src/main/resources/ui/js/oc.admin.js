@@ -17,19 +17,6 @@
 /* @namespace Holds functions and properites related to all Admin UIs. */
 var ocAdmin = {} || ocAdmin;
 
-ocAdmin.internationalize = function(obj, prefix){
-  for(var i in obj){
-    if(typeof obj[i] == 'object'){
-      ocAdmin.internationalize(obj[i], prefix + '_' + i);
-    }else if(typeof obj[i] == 'string'){
-      var id = '#' + prefix + '_' + i;
-      if($(id).length){
-        $(id).text(obj[i]);
-      }
-    }
-  }
-}
-
 ocAdmin.components = {};
 
 ocAdmin.Manager = function(rootElm, rootNs, components, workflowComponents){
