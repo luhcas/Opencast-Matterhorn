@@ -21,7 +21,9 @@ import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.FileSupport;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.Workspace;
@@ -34,8 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -61,7 +65,7 @@ public class DownloadDistributionService implements DistributionService {
   protected String serviceUrl = null;
 
   /** The remote service registry */
-  protected ServiceRegistry remoteServiceManager = null;
+  protected ServiceRegistry serviceRegistry = null;
 
   /** The workspace reference */
   protected Workspace workspace = null;
@@ -121,40 +125,63 @@ public class DownloadDistributionService implements DistributionService {
   @Override
   public Job distribute(final String mediaPackageId, final MediaPackageElement element, boolean block)
           throws DistributionException {
-    final ServiceRegistry rs = remoteServiceManager;
-    final Job receipt = rs.createJob(JOB_TYPE);
+    final Job job;
+    try {
+      job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceRegistryException e) {
+      throw new DistributionException("Unable to create a job", e);
+    }
 
-    Runnable command = new Runnable() {
-      public void run() {
-        receipt.setStatus(Status.RUNNING);
-        rs.updateJob(receipt);
+    Callable<Void> command = new Callable<Void>() {
+      /**
+       * {@inheritDoc}
+       * 
+       * @see java.util.concurrent.Callable#call()
+       */
+      @Override
+      public Void call() throws DistributionException {
+        job.setStatus(Status.RUNNING);
+        updateJob(job);
+
+        File sourceFile;
+        try {
+          sourceFile = workspace.get(element.getURI());
+        } catch (NotFoundException e) {
+          throw new DistributionException("Unable to find " + element.getURI() + " in the workspace", e);
+        } catch (IOException e) {
+          throw new DistributionException("Error loading " + element.getURI() + " from the workspace", e);
+        }
+        File destination = getDistributionFile(element);
+
+        // Put the file in place
+        try {
+          FileUtils.forceMkdir(destination.getParentFile());
+        } catch (IOException e) {
+          throw new DistributionException("Unable to create " + destination.getParentFile(), e);
+        }
+        logger.info("Distributing {} to {}", element, destination);
 
         try {
-          File sourceFile = workspace.get(element.getURI());
-          File destination = getDistributionFile(element);
-
-          // Put the file in place
-          FileUtils.forceMkdir(destination.getParentFile());
-          logger.info("Distributing {} to {}", element, destination);
-
           FileSupport.copy(sourceFile, destination);
-
-          // Create a representation of the distributed file in the mediapackage
-          MediaPackageElement distributedElement = (MediaPackageElement) element.clone();
-          distributedElement.setURI(getDistributionUri(element));
-          distributedElement.setIdentifier(null);
-
-          receipt.setElement(distributedElement);
-          receipt.setStatus(Status.FINISHED);
-          rs.updateJob(receipt);
-
-          logger.info("Finished distribution of {}", element);
-
-        } catch (Exception e) {
-          receipt.setStatus(Status.FAILED);
-          rs.updateJob(receipt);
-          throw new DistributionException(e);
+        } catch (IOException e) {
+          throw new DistributionException("Unable to copy " + sourceFile + " to " + destination, e);
         }
+
+        // Create a representation of the distributed file in the mediapackage
+        MediaPackageElement distributedElement = (MediaPackageElement) element.clone();
+        try {
+          distributedElement.setURI(getDistributionUri(element));
+        } catch (URISyntaxException e) {
+          throw new DistributionException("Distributed element produces an invalid URI", e);
+        }
+        distributedElement.setIdentifier(null);
+
+        job.setElement(distributedElement);
+        job.setStatus(Status.FINISHED);
+        updateJob(job);
+
+        logger.info("Finished distribution of {}", element);
+        return null;
       }
     };
 
@@ -163,13 +190,20 @@ public class DownloadDistributionService implements DistributionService {
       try {
         future.get();
       } catch (Exception e) {
-        receipt.setStatus(Status.FAILED);
-        remoteServiceManager.updateJob(receipt);
-        throw new DistributionException(e);
+        try {
+          job.setStatus(Status.FAILED);
+          updateJob(job);
+        } catch (Exception failureToFail) {
+          logger.warn("Unable to update job to failed state", failureToFail);
+        }
+        if (e instanceof DistributionException) {
+          throw (DistributionException) e;
+        } else {
+          throw new DistributionException(e);
+        }
       }
     }
-
-    return receipt;
+    return job;
   }
 
   /**
@@ -179,33 +213,30 @@ public class DownloadDistributionService implements DistributionService {
    */
   @Override
   public Job retract(final String mediaPackageId, boolean block) throws DistributionException {
-    final ServiceRegistry rs = remoteServiceManager;
-    final Job receipt = rs.createJob(JOB_TYPE);
+    final Job job;
+    try {
+      job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceRegistryException e) {
+      throw new DistributionException("Unable to create a job", e);
+    }
 
-    Runnable command = new Runnable() {
-      public void run() {
-        receipt.setStatus(Status.RUNNING);
-        rs.updateJob(receipt);
-
-        try {
-          if (!FileSupport.delete(getMediaPackageDirectory(mediaPackageId), true)) {
-            throw new DistributionException("Unable to retract mediapackage " + mediaPackageId);
-          }
-
-          receipt.setStatus(Status.FINISHED);
-          rs.updateJob(receipt);
-
-          logger.info("Finished rectracting media package {}", mediaPackageId);
-
-        } catch (DistributionException e) {
-          receipt.setStatus(Status.FAILED);
-          rs.updateJob(receipt);
-          throw e;
-        } catch (Exception e) {
-          receipt.setStatus(Status.FAILED);
-          rs.updateJob(receipt);
-          throw new DistributionException(e);
+    Callable<Void> command = new Callable<Void>() {
+      /**
+       * {@inheritDoc}
+       * 
+       * @see java.util.concurrent.Callable#call()
+       */
+      @Override
+      public Void call() throws DistributionException {
+        job.setStatus(Status.RUNNING);
+        updateJob(job);
+        if (!FileSupport.delete(getMediaPackageDirectory(mediaPackageId), true)) {
+          throw new DistributionException("Unable to retract mediapackage " + mediaPackageId);
         }
+        job.setStatus(Status.FINISHED);
+        updateJob(job);
+        logger.info("Finished rectracting media package {}", mediaPackageId);
+        return null;
       }
     };
 
@@ -214,13 +245,20 @@ public class DownloadDistributionService implements DistributionService {
       try {
         future.get();
       } catch (Exception e) {
-        receipt.setStatus(Status.FAILED);
-        remoteServiceManager.updateJob(receipt);
-        throw new DistributionException(e);
+        try {
+          job.setStatus(Status.FAILED);
+          updateJob(job);
+        } catch (Exception failureToFail) {
+          logger.warn("Unable to update job to failed state", failureToFail);
+        }
+        if (e instanceof DistributionException) {
+          throw (DistributionException) e;
+        } else {
+          throw new DistributionException(e);
+        }
       }
     }
-
-    return receipt;
+    return job;
   }
 
   /**
@@ -240,7 +278,7 @@ public class DownloadDistributionService implements DistributionService {
    *          the service registry
    */
   public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
-    this.remoteServiceManager = remoteServiceManager;
+    this.serviceRegistry = remoteServiceManager;
   }
 
   /**
@@ -248,8 +286,8 @@ public class DownloadDistributionService implements DistributionService {
    * 
    * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
    */
-  public Job getJob(String id) {
-    return remoteServiceManager.getJob(id);
+  public Job getJob(String id) throws NotFoundException, ServiceRegistryException {
+    return serviceRegistry.getJob(id);
   }
 
   /**
@@ -257,24 +295,23 @@ public class DownloadDistributionService implements DistributionService {
    * 
    * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
    */
-  public long countJobs(Status status) {
+  public long countJobs(Status status) throws ServiceRegistryException {
     if (status == null)
       throw new IllegalArgumentException("status must not be null");
-    return remoteServiceManager.count(JOB_TYPE, status);
+    return serviceRegistry.count(JOB_TYPE, status);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status,
-   *      java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
    */
-  public long countJobs(Status status, String host) {
+  public long countJobs(Status status, String host) throws ServiceRegistryException {
     if (status == null)
       throw new IllegalArgumentException("status must not be null");
     if (host == null)
       throw new IllegalArgumentException("host must not be null");
-    return remoteServiceManager.count(JOB_TYPE, status, host);
+    return serviceRegistry.count(JOB_TYPE, status, host);
   }
 
   /**
@@ -307,8 +344,7 @@ public class DownloadDistributionService implements DistributionService {
     String mediaPackageId = element.getMediaPackage().getIdentifier().compact();
     String elementId = element.getIdentifier();
     String fileName = FilenameUtils.getName(element.getURI().toString());
-    String destinationURI = UrlSupport
-            .concat(new String[] { serviceUrl, mediaPackageId, elementId, fileName });
+    String destinationURI = UrlSupport.concat(new String[] { serviceUrl, mediaPackageId, elementId, fileName });
     return new URI(destinationURI);
   }
 
@@ -321,6 +357,25 @@ public class DownloadDistributionService implements DistributionService {
    */
   protected File getMediaPackageDirectory(String mediaPackageId) {
     return new File(distributionDirectory, mediaPackageId);
+  }
+
+  /**
+   * Updates the job in the service registry. The exceptions that are possibly been thrown are wrapped in a
+   * {@link DistributionException}.
+   * 
+   * @param job
+   *          the job to update
+   * @throws DistributionException
+   *           the exception that is being thrown
+   */
+  private void updateJob(Job job) throws DistributionException {
+    try {
+      serviceRegistry.updateJob(job);
+    } catch (NotFoundException notFound) {
+      throw new DistributionException("Unable to find job " + job, notFound);
+    } catch (ServiceRegistryException serviceRegException) {
+      throw new DistributionException("Unable to update job '" + job + "' in service registry", serviceRegException);
+    }
   }
 
 }

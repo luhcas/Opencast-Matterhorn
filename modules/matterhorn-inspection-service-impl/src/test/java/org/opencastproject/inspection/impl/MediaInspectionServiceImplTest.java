@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.net.URI;
 import java.util.Date;
+import java.util.concurrent.Executors;
 
 public class MediaInspectionServiceImplTest {
   
@@ -93,8 +94,7 @@ public class MediaInspectionServiceImplTest {
     EasyMock.expect(rs.createJob(MediaInspectionService.JOB_TYPE)).andReturn(new ReceiptStub()).anyTimes();
     EasyMock.replay(rs);
     service.setRemoteServiceManager(rs);
-
-    service.activate();
+    service.executor = Executors.newFixedThreadPool(1);
   }
 
   @Test

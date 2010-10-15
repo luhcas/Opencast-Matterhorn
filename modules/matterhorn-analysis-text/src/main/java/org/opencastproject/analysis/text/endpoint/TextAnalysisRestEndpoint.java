@@ -22,7 +22,9 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
@@ -42,6 +44,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -99,11 +102,18 @@ public class TextAnalysisRestEndpoint {
   @Produces(MediaType.TEXT_XML)
   @Path("/{id}.xml")
   public Response getJob(@PathParam("id") String id) {
-    Job receipt = textAnalyzer.getJob(id);
-    if (receipt == null) {
-      return Response.status(Status.NOT_FOUND).type(MediaType.TEXT_HTML).build();
+    Job job;
+    try {
+      job = textAnalyzer.getJob(id);
+    } catch (NotFoundException e) {
+      return Response.status(Status.NOT_FOUND).build();
+    } catch (ServiceRegistryException e) {
+      throw new WebApplicationException(e);
+    }
+    if (job == null) {
+      return Response.status(Status.NOT_FOUND).build();
     } else {
-      return Response.ok(receipt.toXml()).build();
+      return Response.ok(job.toXml()).build();
     }
   }
 

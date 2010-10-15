@@ -17,43 +17,50 @@ package org.opencastproject.serviceregistry.command;
 
 import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 
 /**
  * An interactive shell command for putting Maintainable services in and out of maintenance mode
- *
+ * 
  */
 public class MaintenanceCommand {
-  protected ServiceRegistry remoteServiceManager;
+  protected ServiceRegistry jobManager;
 
   public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
-    this.remoteServiceManager = remoteServiceManager;
+    this.jobManager = remoteServiceManager;
   }
-  
+
   public String set(String jobType, String baseUrl, boolean maintenanceMode) {
     try {
-      remoteServiceManager.setMaintenanceStatus(jobType, baseUrl, maintenanceMode);
-      if(maintenanceMode) {
+      jobManager.setMaintenanceStatus(jobType, baseUrl, maintenanceMode);
+      if (maintenanceMode) {
         return jobType + "@" + baseUrl + " is now in maintenance mode\n";
       } else {
         return jobType + "@" + baseUrl + " has returned to service\n";
       }
-    } catch(IllegalStateException e) {
+    } catch (IllegalStateException e) {
       return jobType + "@" + baseUrl + " is not registered, so its maintenance mode can not be set\n";
+    } catch (ServiceRegistryException e) {
+      return "Error setting maintenance mode: " + e.getMessage() + "\n";
     }
   }
 
   public String list() {
-    StringBuilder sb = new StringBuilder();
-    for(ServiceRegistration reg : remoteServiceManager.getServiceRegistrations()) {
-      sb.append(reg.getServiceType());
-      sb.append("@");
-      sb.append(reg.getHost());
-      if(reg.isInMaintenanceMode()) {
-        sb.append(" (maintenance mode)");
+    try {
+      StringBuilder sb = new StringBuilder();
+      for (ServiceRegistration reg : jobManager.getServiceRegistrations()) {
+        sb.append(reg.getServiceType());
+        sb.append("@");
+        sb.append(reg.getHost());
+        if (reg.isInMaintenanceMode()) {
+          sb.append(" (maintenance mode)");
+        }
+        sb.append("\n");
       }
-      sb.append("\n");
+      return sb.toString();
+    } catch (ServiceRegistryException e) {
+      return "Error: " + e.getMessage() + "\n";
     }
-    return sb.toString();
   }
 
 }

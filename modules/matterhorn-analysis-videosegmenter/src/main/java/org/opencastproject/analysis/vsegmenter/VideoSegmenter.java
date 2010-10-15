@@ -29,7 +29,6 @@ import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
@@ -42,8 +41,10 @@ import org.opencastproject.metadata.mpeg7.Mpeg7CatalogService;
 import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
@@ -65,6 +66,7 @@ import java.util.Dictionary;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -74,6 +76,7 @@ import javax.media.Controller;
 import javax.media.Duration;
 import javax.media.IncompatibleSourceException;
 import javax.media.Manager;
+import javax.media.NoDataSourceException;
 import javax.media.Processor;
 import javax.media.Time;
 import javax.media.protocol.ContentDescriptor;
@@ -137,7 +140,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
   protected int stabilityThreshold = DEFAULT_STABILITY_THRESHOLD;
 
   /** Reference to the receipt service */
-  protected ServiceRegistry remoteServiceManager = null;
+  protected ServiceRegistry serviceRegistry = null;
 
   /** The mpeg-7 service */
   protected Mpeg7CatalogService mpeg7CatalogService = null;
@@ -250,7 +253,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
    *          the receipt service
    */
   public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
-    this.remoteServiceManager = remoteServiceManager;
+    this.serviceRegistry = remoteServiceManager;
   }
 
   /**
@@ -265,136 +268,157 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
    * @throws MediaAnalysisException
    */
   public Job analyze(final MediaPackageElement element, boolean block) throws MediaAnalysisException {
-    final ServiceRegistry rs = remoteServiceManager;
-    final Job receipt = rs.createJob(JOB_TYPE);
+    final Job job;
+    try {
+      job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceRegistryException e) {
+      throw new MediaAnalysisException("Unable to create a job", e);
+    }
 
     // Make sure the element can be analyzed using this analysis implementation
     if (!super.isSupported(element)) {
-      receipt.setStatus(Status.FAILED);
-      rs.updateJob(receipt);
-      return receipt;
+      job.setStatus(Status.FAILED);
+      updateJob(job);
+      return job;
     }
 
     final Track track = (Track) element;
 
-    Runnable command = new Runnable() {
-      public void run() {
-        receipt.setStatus(Status.RUNNING);
-        rs.updateJob(receipt);
+    Callable<Void> command = new Callable<Void>() {
+      /**
+       * {@inheritDoc}
+       * 
+       * @see java.util.concurrent.Callable#call()
+       */
+      @Override
+      public Void call() throws MediaAnalysisException {
+        job.setStatus(Status.RUNNING);
+        updateJob(job);
 
         PlayerListener processorListener = null;
         Track mjpegTrack = null;
         Mpeg7Catalog mpeg7 = mpeg7CatalogService.newInstance();
 
+        logger.info("Encoding {} to {}", track, MJPEG_MIMETYPE);
         try {
-
-          logger.info("Encoding {} to {}", track, MJPEG_MIMETYPE);
           mjpegTrack = prepare(track);
+        } catch (EncoderException encoderException) {
+          throw new MediaAnalysisException("Error creating a mjpeg", encoderException);
+        }
 
-          // Create a player
-          File mediaFile = workspace.get(mjpegTrack.getURI());
-          URL mediaUrl = mediaFile.toURI().toURL();
-          DataSource ds = Manager.createDataSource(mediaUrl);
-          Processor processor = null;
-          try {
-            processor = Manager.createProcessor(ds);
-            processorListener = new PlayerListener(processor);
-            processor.addControllerListener(processorListener);
-          } catch (Exception e) {
-            receipt.setStatus(Status.FAILED);
-            rs.updateJob(receipt);
-            throw new MediaAnalysisException(e);
-          }
-
-          // Configure the processor
-          processor.configure();
-          if (!processorListener.waitForState(Processor.Configured)) {
-            receipt.setStatus(Status.FAILED);
-            rs.updateJob(receipt);
-            throw new MediaAnalysisException("Unable to configure processor");
-          }
-
-          // Set the processor to RAW content
-          processor.setContentDescriptor(new ContentDescriptor(ContentDescriptor.RAW));
-
-          // Realize the processor
-          processor.realize();
-          if (!processorListener.waitForState(Processor.Realized)) {
-            receipt.setStatus(Status.FAILED);
-            rs.updateJob(receipt);
-            throw new MediaAnalysisException("Unable to realize the processor");
-          }
-
-          // Get the output DataSource from the processor and
-          // hook it up to the DataSourceHandler.
-          DataSource outputDataSource = processor.getDataOutput();
-          FrameGrabber dsh = new FrameGrabber();
-
-          try {
-            dsh.setSource(outputDataSource);
-          } catch (IncompatibleSourceException e) {
-            receipt.setStatus(Status.FAILED);
-            rs.updateJob(receipt);
-            throw new MediaAnalysisException("Cannot handle the output data source from the processor: "
-                    + outputDataSource);
-          }
-
-          // Load the movie and change the processor to prefetched state
-          processor.prefetch();
-          if (!processorListener.waitForState(Controller.Prefetched)) {
-            receipt.setStatus(Status.FAILED);
-            rs.updateJob(receipt);
-            throw new MediaAnalysisException("Unable to switch player into 'prefetch' state");
-          }
-
-          // Get the movie duration
-          Time duration = processor.getDuration();
-          if (duration == Duration.DURATION_UNKNOWN) {
-            receipt.setStatus(Status.FAILED);
-            rs.updateJob(receipt);
-            throw new MediaAnalysisException("Java media framework is unable to detect movie duration");
-          }
-
-          long durationInSeconds = Math.min(track.getDuration() / 1000, (long) duration.getSeconds());
-          logger.info("Track {} loaded, duration is {} s", mediaUrl, duration.getSeconds());
-
-          MediaTime contentTime = new MediaRelTimeImpl(0, (long) durationInSeconds * 1000);
-          MediaLocator contentLocator = new MediaLocatorImpl(mjpegTrack.getURI());
-          Video videoContent = mpeg7.addVideoContent("videosegment", contentTime, contentLocator);
-
-          logger.info("Starting video segmentation of {}", mediaUrl);
-
-          processor.setRate(1.0f);
-          processor.start();
-          dsh.start();
-          List<Segment> segments = segment(videoContent, dsh);
-
-          logger.info("Segmentation of {} yields {} segments", mediaUrl, segments.size());
-
-          MediaPackageElement mpeg7Catalog = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-                  .newElement(Catalog.TYPE, MediaPackageElements.SEGMENTS);
-          URI uri = workspace.putInCollection(COLLECTION_ID, receipt.getId() + ".xml",
-                  mpeg7CatalogService.serialize(mpeg7));
-          mpeg7Catalog.setURI(uri);
-          mpeg7Catalog.setReference(new MediaPackageReferenceImpl(element));
-
-          workspace.delete(mjpegTrack.getURI());
-
-          receipt.setElement(mpeg7Catalog);
-          receipt.setStatus(Status.FINISHED);
-          rs.updateJob(receipt);
-
-          logger.info("Finished video segmentation of {}", mediaUrl);
-
-        } catch (MediaAnalysisException e) {
-          receipt.setStatus(Status.FAILED);
-          rs.updateJob(receipt);
-          throw e;
+        // Create a player
+        File mediaFile = null;
+        URL mediaUrl = null;
+        try {
+          mediaFile = workspace.get(mjpegTrack.getURI());
+          mediaUrl = mediaFile.toURI().toURL();
+        } catch (NotFoundException e) {
+          throw new MediaAnalysisException("Error finding the mjpeg in the workspace", e);
+        } catch (IOException e) {
+          throw new MediaAnalysisException("Error reading the mjpeg in the workspace", e);
+        }
+        
+        DataSource ds;
+        try {
+          ds = Manager.createDataSource(mediaUrl);
+        } catch (NoDataSourceException e) {
+          throw new MediaAnalysisException("Error obtaining a JMF datasource", e);
+        } catch (IOException e) {
+          throw new MediaAnalysisException("Problem creating a JMF datasource", e);
+        }
+        Processor processor = null;
+        try {
+          processor = Manager.createProcessor(ds);
+          processorListener = new PlayerListener(processor);
+          processor.addControllerListener(processorListener);
         } catch (Exception e) {
-          receipt.setStatus(Status.FAILED);
-          rs.updateJob(receipt);
           throw new MediaAnalysisException(e);
         }
+
+        // Configure the processor
+        processor.configure();
+        if (!processorListener.waitForState(Processor.Configured)) {
+          throw new MediaAnalysisException("Unable to configure processor");
+        }
+
+        // Set the processor to RAW content
+        processor.setContentDescriptor(new ContentDescriptor(ContentDescriptor.RAW));
+
+        // Realize the processor
+        processor.realize();
+        if (!processorListener.waitForState(Processor.Realized)) {
+          throw new MediaAnalysisException("Unable to realize the processor");
+        }
+
+        // Get the output DataSource from the processor and
+        // hook it up to the DataSourceHandler.
+        DataSource outputDataSource = processor.getDataOutput();
+        FrameGrabber dsh = new FrameGrabber();
+
+        try {
+          dsh.setSource(outputDataSource);
+        } catch (IncompatibleSourceException e) {
+          throw new MediaAnalysisException("Cannot handle the output data source from the processor: "
+                  + outputDataSource);
+        }
+
+        // Load the movie and change the processor to prefetched state
+        processor.prefetch();
+        if (!processorListener.waitForState(Controller.Prefetched)) {
+          throw new MediaAnalysisException("Unable to switch player into 'prefetch' state");
+        }
+
+        // Get the movie duration
+        Time duration = processor.getDuration();
+        if (duration == Duration.DURATION_UNKNOWN) {
+          throw new MediaAnalysisException("Java media framework is unable to detect movie duration");
+        }
+
+        long durationInSeconds = Math.min(track.getDuration() / 1000, (long) duration.getSeconds());
+        logger.info("Track {} loaded, duration is {} s", mediaUrl, duration.getSeconds());
+
+        MediaTime contentTime = new MediaRelTimeImpl(0, (long) durationInSeconds * 1000);
+        MediaLocator contentLocator = new MediaLocatorImpl(mjpegTrack.getURI());
+        Video videoContent = mpeg7.addVideoContent("videosegment", contentTime, contentLocator);
+
+        logger.info("Starting video segmentation of {}", mediaUrl);
+
+        processor.setRate(1.0f);
+        processor.start();
+        dsh.start();
+        List<Segment> segments;
+        try {
+          segments = segment(videoContent, dsh);
+        } catch (IOException e) {
+          throw new MediaAnalysisException("Unable to access a frame in the mjpeg", e);
+        }
+
+        logger.info("Segmentation of {} yields {} segments", mediaUrl, segments.size());
+
+        MediaPackageElement mpeg7Catalog = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+                .newElement(Catalog.TYPE, MediaPackageElements.SEGMENTS);
+        URI uri;
+        try {
+          uri = workspace.putInCollection(COLLECTION_ID, job.getId() + ".xml", mpeg7CatalogService.serialize(mpeg7));
+        } catch (IOException e) {
+          throw new MediaAnalysisException("Unable to put the mpeg7 catalog into the workspace", e);
+        }
+        mpeg7Catalog.setURI(uri);
+
+        try {
+          workspace.delete(mjpegTrack.getURI());
+        } catch (NotFoundException e) {
+          throw new MediaAnalysisException("Unable to find the mjpeg in the workspace", e);
+        } catch (IOException e) {
+          throw new MediaAnalysisException("Unable to delete the mjpeg from the workspace", e);
+        }
+
+        job.setElement(mpeg7Catalog);
+        job.setStatus(Status.FINISHED);
+        updateJob(job);
+
+        logger.info("Finished video segmentation of {}", mediaUrl);
+        return null;
       }
     };
 
@@ -403,12 +427,20 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
       try {
         future.get();
       } catch (Exception e) {
-        receipt.setStatus(Status.FAILED);
-        remoteServiceManager.updateJob(receipt);
-        throw new MediaAnalysisException(e);
+        try {
+          job.setStatus(Status.FAILED);
+          updateJob(job);
+        } catch (Exception failureToFail) {
+          logger.warn("Unable to update job to failed state", failureToFail);
+        }
+        if (e instanceof MediaAnalysisException) {
+          throw (MediaAnalysisException) e;
+        } else {
+          throw new MediaAnalysisException(e);
+        }
       }
     }
-    return receipt;
+    return job;
   }
 
   /**
@@ -416,8 +448,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
    * 
    * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
    */
-  public Job getJob(String id) {
-    return remoteServiceManager.getJob(id);
+  public Job getJob(String id) throws NotFoundException, ServiceRegistryException {
+    return serviceRegistry.getJob(id);
   }
 
   /**
@@ -425,24 +457,23 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
    * 
    * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
    */
-  public long countJobs(Status status) {
+  public long countJobs(Status status) throws ServiceRegistryException {
     if (status == null)
       throw new IllegalArgumentException("status must not be null");
-    return remoteServiceManager.count(JOB_TYPE, status);
+    return serviceRegistry.count(JOB_TYPE, status);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status,
-   *      java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
    */
-  public long countJobs(Status status, String host) {
+  public long countJobs(Status status, String host) throws ServiceRegistryException {
     if (status == null)
       throw new IllegalArgumentException("status must not be null");
     if (host == null)
       throw new IllegalArgumentException("host must not be null");
-    return remoteServiceManager.count(JOB_TYPE, status, host);
+    return serviceRegistry.count(JOB_TYPE, status, host);
   }
 
   /**
@@ -643,14 +674,12 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
    * @param track
    *          the track identifier
    * @return the encoded track
-   * @throws MediaPackageException
-   *           if adding the encoded track to the media package fails
    * @throws EncoderException
    *           if encoding fails
    * @throws IllegalStateException
    *           if the track is not connected to a media package and is not in the correct format
    */
-  protected Track prepare(Track track) throws EncoderException, MediaPackageException {
+  protected Track prepare(Track track) throws EncoderException {
     if (MJPEG_MIMETYPE.equals(track.getMimeType()))
       return track;
 
@@ -678,6 +707,25 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
     composedTrack.addTag("segmentation");
 
     return composedTrack;
+  }
+
+  /**
+   * Updates the job in the service registry. The exceptions that are possibly been thrown are wrapped in a
+   * {@link MediaAnalysisException}.
+   * 
+   * @param job
+   *          the job to update
+   * @throws MediaAnalysisException
+   *           the exception that is being thrown
+   */
+  private void updateJob(Job job) throws MediaAnalysisException {
+    try {
+      serviceRegistry.updateJob(job);
+    } catch (NotFoundException notFound) {
+      throw new MediaAnalysisException("Unable to find job " + job, notFound);
+    } catch (ServiceRegistryException serviceRegException) {
+      throw new MediaAnalysisException("Unable to update job '" + job + "' in service registry", serviceRegException);
+    }
   }
 
 }

@@ -23,6 +23,7 @@ import org.opencastproject.composer.api.EncoderEngine;
 import org.opencastproject.composer.api.EncoderEngineFactory;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
+import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
@@ -37,10 +38,10 @@ import org.opencastproject.mediapackage.VideoStream;
 import org.opencastproject.mediapackage.identifier.IdBuilder;
 import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -48,6 +49,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -55,7 +57,7 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -81,7 +83,7 @@ public class ComposerServiceImpl implements ComposerService {
   private Workspace workspace = null;
 
   /** Reference to the receipt service */
-  private ServiceRegistry remoteServiceManager;
+  private ServiceRegistry serviceRegistry;
 
   /** Reference to the encoder engine factory */
   private EncoderEngineFactory encoderEngineFactory;
@@ -147,7 +149,7 @@ public class ComposerServiceImpl implements ComposerService {
    * @param remoteServiceManager
    */
   public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
-    this.remoteServiceManager = remoteServiceManager;
+    this.serviceRegistry = remoteServiceManager;
   }
 
   public void setProfileScanner(EncodingProfileScanner scanner) {
@@ -220,60 +222,56 @@ public class ComposerServiceImpl implements ComposerService {
    *      java.lang.String, long, long, boolean)
    */
   @Override
-  public Job trim(Track sourceTrack, String profileId, final long start, final long duration, boolean block)
+  public Job trim(final Track sourceTrack, final String profileId, final long start, final long duration, boolean block)
           throws EncoderException {
 
     final String targetTrackId = idBuilder.createNew().toString();
-    final Job composerReceipt = remoteServiceManager.createJob(JOB_TYPE);
-
-    // Get the track and make sure it exists
-    final File trackFile;
-    if (sourceTrack == null) {
-      trackFile = null;
-    } else {
-      try {
-        trackFile = workspace.get(sourceTrack.getURI());
-      } catch (NotFoundException e) {
-        composerReceipt.setStatus(Status.FAILED);
-        remoteServiceManager.updateJob(composerReceipt);
-        throw new EncoderException("Requested track " + sourceTrack + " is not found");
-      } catch (IOException e) {
-        composerReceipt.setStatus(Status.FAILED);
-        remoteServiceManager.updateJob(composerReceipt);
-        throw new EncoderException("Unable to access track " + sourceTrack);
-      }
+    final Job job;
+    try {
+      job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceRegistryException e) {
+      throw new EncoderException("Unable to create a job", e);
     }
 
-    // Get the encoding profile
-    final EncodingProfile profile = profileScanner.getProfile(profileId);
-    if (profile == null) {
-      composerReceipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(composerReceipt);
-      throw new EncoderException(null, "Profile '" + profileId + " is unkown");
-    }
+    Callable<Void> command = new Callable<Void>() {
+      /**
+       * {@inheritDoc}
+       * 
+       * @see java.util.concurrent.Callable#call()
+       */
+      @Override
+      public Void call() throws EncoderException {
+        job.setStatus(Status.RUNNING);
+        updateJob(job);
 
-    // Create the engine
-    final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
-    if (encoderEngine == null) {
-      composerReceipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(composerReceipt);
-      throw new EncoderException(null, "No encoder engine available for profile '" + profileId + "'");
-    }
+        // Get the track and make sure it exists
+        final File trackFile;
+        if (sourceTrack == null) {
+          trackFile = null;
+        } else {
+          try {
+            trackFile = workspace.get(sourceTrack.getURI());
+          } catch (NotFoundException e) {
+            throw new EncoderException("Requested track " + sourceTrack + " is not found");
+          } catch (IOException e) {
+            throw new EncoderException("Unable to access track " + sourceTrack);
+          }
+        }
 
-    Runnable runnable = new Runnable() {
-      public void run() {
-        composerReceipt.setStatus(Status.RUNNING);
-        remoteServiceManager.updateJob(composerReceipt);
+        // Get the encoding profile
+        final EncodingProfile profile = profileScanner.getProfile(profileId);
+        if (profile == null) {
+          throw new EncoderException("Profile '" + profileId + " is unkown");
+        }
+
+        // Create the engine
+        final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
+        if (encoderEngine == null) {
+          throw new EncoderException(encoderEngine, "No encoder engine available for profile '" + profileId + "'");
+        }
 
         // Do the work
-        File encodingOutput = null;
-        try {
-          encodingOutput = encoderEngine.trim(trackFile, profile, start, duration, null);
-        } catch (EncoderException e) {
-          composerReceipt.setStatus(Status.FAILED);
-          remoteServiceManager.updateJob(composerReceipt);
-          throw new RuntimeException(e);
-        }
+        File encodingOutput = encoderEngine.trim(trackFile, profile, start, duration, null);
 
         // Put the file in the workspace
         URI returnURL = null;
@@ -284,11 +282,10 @@ public class ComposerServiceImpl implements ComposerService {
           logger.info("Copied the trimmed file to the workspace at {}", returnURL);
           encodingOutput.delete();
           logger.info("Deleted the local copy of the trimmed file at {}", encodingOutput.getAbsolutePath());
-        } catch (Exception e) {
-          composerReceipt.setStatus(Status.FAILED);
-          remoteServiceManager.updateJob(composerReceipt);
-          logger.error("Unable to put the trimmed file into the workspace", e);
-          throw new RuntimeException(e);
+        } catch (FileNotFoundException e) {
+          throw new EncoderException("Encoded file " + encodingOutput + " not found", e);
+        } catch (IOException e) {
+          throw new EncoderException("Error putting " + encodingOutput + " into the workspace", e);
         } finally {
           IOUtils.closeQuietly(in);
         }
@@ -296,28 +293,45 @@ public class ComposerServiceImpl implements ComposerService {
           encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
 
         // Have the encoded track inspected and return the result
-        Job inspectionReceipt = inspectionService.inspect(returnURL, true);
-        if (inspectionReceipt.getStatus() == Job.Status.FAILED)
-          throw new RuntimeException("Media inspection failed");
-        Track inspectedTrack = (Track) inspectionReceipt.getElement();
+        Job inspectionJob = null;
+        try {
+          inspectionJob = inspectionService.inspect(returnURL, true);
+        } catch (MediaInspectionException e) {
+          throw new EncoderException("Media inspection of " + returnURL + " failed", e);
+        }
+        if (inspectionJob.getStatus() == Job.Status.FAILED)
+          throw new EncoderException("Media inspection of " + returnURL + " failed");
+        Track inspectedTrack = (Track) inspectionJob.getElement();
         inspectedTrack.setIdentifier(targetTrackId);
 
-        composerReceipt.setElement(inspectedTrack);
-        composerReceipt.setStatus(Status.FINISHED);
-        remoteServiceManager.updateJob(composerReceipt);
+        job.setElement(inspectedTrack);
+        job.setStatus(Status.FINISHED);
+        updateJob(job);
+
+        return null;
       }
     };
-    Future<?> future = executor.submit(runnable);
+
+    Future<?> future = executor.submit(command);
     if (block) {
       try {
         future.get();
       } catch (Exception e) {
-        composerReceipt.setStatus(Status.FAILED);
-        remoteServiceManager.updateJob(composerReceipt);
-        throw new EncoderException(encoderEngine, e);
+        try {
+          job.setStatus(Status.FAILED);
+          updateJob(job);
+        } catch (Exception failureToFail) {
+          logger.warn("Unable to update job to failed state", failureToFail);
+        }
+        if (e instanceof EncoderException) {
+          throw (EncoderException) e;
+        } else {
+          throw new EncoderException(e);
+        }
       }
     }
-    return composerReceipt;
+
+    return job;
   }
 
   /**
@@ -365,59 +379,60 @@ public class ComposerServiceImpl implements ComposerService {
           Dictionary<String, String> properties, final boolean block) throws EncoderException {
 
     final String targetTrackId = idBuilder.createNew().toString();
-    final Job composerReceipt = remoteServiceManager.createJob(JOB_TYPE);
-
-    // Get the tracks and make sure they exist
-    final File audioFile;
-    if (audioTrack == null) {
-      audioFile = null;
-    } else {
-      try {
-        audioFile = workspace.get(audioTrack.getURI());
-      } catch (NotFoundException e) {
-        composerReceipt.setStatus(Status.FAILED);
-        remoteServiceManager.updateJob(composerReceipt);
-        throw new EncoderException("Requested audio track " + audioTrack + " is not found");
-      } catch (IOException e) {
-        composerReceipt.setStatus(Status.FAILED);
-        remoteServiceManager.updateJob(composerReceipt);
-        throw new EncoderException("Unable to access audio track " + audioTrack);
-      }
+    final Job job;
+    try {
+      job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceRegistryException e) {
+      throw new EncoderException("Unable to create a job", e);
     }
 
-    final File videoFile;
-    if (videoTrack == null) {
-      videoFile = null;
-    } else {
-      try {
-        videoFile = workspace.get(videoTrack.getURI());
-      } catch (NotFoundException e) {
-        composerReceipt.setStatus(Status.FAILED);
-        remoteServiceManager.updateJob(composerReceipt);
-        throw new EncoderException("Requested video track " + videoTrack + " is not found");
-      } catch (IOException e) {
-        composerReceipt.setStatus(Status.FAILED);
-        remoteServiceManager.updateJob(composerReceipt);
-        throw new EncoderException("Unable to access audio track " + audioTrack);
-      }
-    }
+    Callable<Void> command = new Callable<Void>() {
+      /**
+       * {@inheritDoc}
+       * 
+       * @see java.util.concurrent.Callable#call()
+       */
+      @Override
+      public Void call() throws EncoderException {
+        job.setStatus(Status.RUNNING);
+        updateJob(job);
 
-    // Create the engine
-    final EncodingProfile profile = profileScanner.getProfile(profileId);
-    if (profile == null) {
-      composerReceipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(composerReceipt);
-      throw new EncoderException(null, "Profile '" + profileId + " is unkown");
-    }
-    final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
-    if (encoderEngine == null) {
-      composerReceipt.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(composerReceipt);
-      throw new EncoderException(null, "No encoder engine available for profile '" + profileId + "'");
-    }
+        // Get the tracks and make sure they exist
+        final File audioFile;
+        if (audioTrack == null) {
+          audioFile = null;
+        } else {
+          try {
+            audioFile = workspace.get(audioTrack.getURI());
+          } catch (NotFoundException e) {
+            throw new EncoderException("Requested audio track " + audioTrack + " is not found");
+          } catch (IOException e) {
+            throw new EncoderException("Unable to access audio track " + audioTrack);
+          }
+        }
 
-    Runnable runnable = new Runnable() {
-      public void run() {
+        final File videoFile;
+        if (videoTrack == null) {
+          videoFile = null;
+        } else {
+          try {
+            videoFile = workspace.get(videoTrack.getURI());
+          } catch (NotFoundException e) {
+            throw new EncoderException("Requested video track " + videoTrack + " is not found");
+          } catch (IOException e) {
+            throw new EncoderException("Unable to access audio track " + audioTrack);
+          }
+        }
+
+        // Create the engine
+        final EncodingProfile profile = profileScanner.getProfile(profileId);
+        if (profile == null) {
+          throw new EncoderException(null, "Profile '" + profileId + " is unkown");
+        }
+        final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
+        if (encoderEngine == null) {
+          throw new EncoderException(null, "No encoder engine available for profile '" + profileId + "'");
+        }
 
         if (audioTrack != null && videoTrack != null)
           logger.info("Muxing audio track {} and video track {} into {}", new String[] { audioTrack.getIdentifier(),
@@ -429,18 +444,8 @@ public class ComposerServiceImpl implements ComposerService {
           logger.info("Encoding audio track {} to {} using profile '{}'", new String[] { audioTrack.getIdentifier(),
                   targetTrackId, profileId });
 
-        composerReceipt.setStatus(Status.RUNNING);
-        remoteServiceManager.updateJob(composerReceipt);
-
         // Do the work
-        File encodingOutput = null;
-        try {
-          encodingOutput = encoderEngine.mux(audioFile, videoFile, profile, null);
-        } catch (EncoderException e) {
-          composerReceipt.setStatus(Status.FAILED);
-          remoteServiceManager.updateJob(composerReceipt);
-          throw new RuntimeException(e);
-        }
+        File encodingOutput = encoderEngine.mux(audioFile, videoFile, profile, null);
 
         // Put the file in the workspace
         URI returnURL = null;
@@ -452,39 +457,56 @@ public class ComposerServiceImpl implements ComposerService {
           encodingOutput.delete();
           logger.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
         } catch (Exception e) {
-          composerReceipt.setStatus(Status.FAILED);
-          remoteServiceManager.updateJob(composerReceipt);
-          logger.error("Unable to put the encoded file into the workspace", e);
-          throw new RuntimeException(e);
+          throw new EncoderException("Unable to put the encoded file into the workspace", e);
         } finally {
           IOUtils.closeQuietly(in);
         }
-        if (encodingOutput != null)
-          encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
+
+        // clean up the encoding output, since the file is now safely stored in the file repo
+        if (encodingOutput != null && !encodingOutput.delete()) {
+          logger.warn("Unable to delete the encoding output at {}", encodingOutput);
+        }
 
         // Have the encoded track inspected and return the result
-        Job inspectionReceipt = inspectionService.inspect(returnURL, true);
-        if (inspectionReceipt.getStatus() == Job.Status.FAILED)
-          throw new RuntimeException("Media inspection failed");
-        Track inspectedTrack = (Track) inspectionReceipt.getElement();
+        Job inspectionJob = null;
+        try {
+          inspectionJob = inspectionService.inspect(returnURL, true);
+        } catch (MediaInspectionException e) {
+          throw new EncoderException("Media inspection of " + returnURL + " failed", e);
+        }
+        if (inspectionJob.getStatus() == Job.Status.FAILED)
+          throw new EncoderException("Media inspection of " + returnURL + " failed");
+        Track inspectedTrack = (Track) inspectionJob.getElement();
         inspectedTrack.setIdentifier(targetTrackId);
 
-        composerReceipt.setElement(inspectedTrack);
-        composerReceipt.setStatus(Status.FINISHED);
-        remoteServiceManager.updateJob(composerReceipt);
+        job.setElement(inspectedTrack);
+        job.setStatus(Status.FINISHED);
+        updateJob(job);
+
+        return null;
       }
     };
-    Future<?> future = executor.submit(runnable);
+
+    Future<?> future = executor.submit(command);
     if (block) {
       try {
         future.get();
       } catch (Exception e) {
-        composerReceipt.setStatus(Status.FAILED);
-        remoteServiceManager.updateJob(composerReceipt);
-        throw new EncoderException(encoderEngine, e);
+        try {
+          job.setStatus(Status.FAILED);
+          updateJob(job);
+        } catch (Exception failureToFail) {
+          logger.warn("Unable to update job to failed state", failureToFail);
+        }
+        if (e instanceof EncoderException) {
+          throw (EncoderException) e;
+        } else {
+          throw new EncoderException(e);
+        }
       }
     }
-    return composerReceipt;
+
+    return job;
   }
 
   /**
@@ -526,80 +548,74 @@ public class ComposerServiceImpl implements ComposerService {
   public Job image(final Track sourceTrack, final String profileId, final long time, boolean block)
           throws EncoderException {
 
-    final Job job = remoteServiceManager.createJob(JOB_TYPE);
-
-    // Get the encoding profile
-    final EncodingProfile profile = profileScanner.getProfile(profileId);
-    if (profile == null) {
-      job.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(job);
-      throw new EncoderException(null, "Profile '" + profileId + "' is unknown");
-    }
-
-    // Create the encoding engine
-    final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
-    if (encoderEngine == null) {
-      job.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(job);
-      throw new EncoderException(null, "No encoder engine available for profile '" + profileId + "'");
-    }
-
-    // make sure there is a video stream in the track
-    if (sourceTrack != null && !sourceTrack.hasVideo()) {
-      job.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(job);
-      throw new RuntimeException("Cannot extract an image without a video stream");
-    } else if (sourceTrack == null) {
-      job.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(job);
-      throw new RuntimeException("SourceTrack cannot be null");
-    }
-
-    // The time should not be outside of the track's duration
-    if (time < 0 || time > sourceTrack.getDuration()) {
-      job.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(job);
-      throw new IllegalArgumentException("Can not extract an image at time " + Long.valueOf(time)
-              + " from a track with duration " + Long.valueOf(sourceTrack.getDuration()));
-    }
-
-    // Finally get the file that needs to be encoded
-    final File videoFile;
+    final Job job;
     try {
-      videoFile = workspace.get(sourceTrack.getURI());
-    } catch (NotFoundException e) {
-      job.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(job);
-      throw new EncoderException("Requested video track " + sourceTrack + " was not found", e);
-    } catch (IOException e) {
-      job.setStatus(Status.FAILED);
-      remoteServiceManager.updateJob(job);
-      throw new EncoderException("Error accessing video track " + sourceTrack, e);
+      job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceRegistryException e) {
+      throw new EncoderException("Unable to create a job", e);
     }
 
-    Runnable runnable = new Runnable() {
+    Callable<Void> command = new Callable<Void>() {
+      /**
+       * {@inheritDoc}
+       * 
+       * @see java.util.concurrent.Callable#call()
+       */
       @Override
-      public void run() {
+      public Void call() throws EncoderException {
+        job.setStatus(Status.RUNNING);
+        updateJob(job);
+
+        if (sourceTrack == null)
+          throw new EncoderException("SourceTrack cannot be null");
+
         logger.info("creating an image using video track {}", sourceTrack.getIdentifier());
 
         job.setStatus(Status.RUNNING);
-        remoteServiceManager.updateJob(job);
+        updateJob(job);
+
+        // Get the encoding profile
+        final EncodingProfile profile = profileScanner.getProfile(profileId);
+        if (profile == null) {
+          throw new EncoderException("Profile '" + profileId + "' is unknown");
+        }
+
+        // Create the encoding engine
+        final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
+        if (encoderEngine == null) {
+          throw new EncoderException("No encoder engine available for profile '" + profileId + "'");
+        }
+
+        // make sure there is a video stream in the track
+        if (sourceTrack != null && !sourceTrack.hasVideo()) {
+          throw new EncoderException("Cannot extract an image without a video stream");
+        }
+
+        // The time should not be outside of the track's duration
+        if (time < 0 || time > sourceTrack.getDuration()) {
+          throw new EncoderException("Can not extract an image at time " + Long.valueOf(time)
+                  + " from a track with duration " + Long.valueOf(sourceTrack.getDuration()));
+        }
+
+        // Finally get the file that needs to be encoded
+        final File videoFile;
+        try {
+          videoFile = workspace.get(sourceTrack.getURI());
+        } catch (NotFoundException e) {
+          throw new EncoderException("Requested video track " + sourceTrack + " was not found", e);
+        } catch (IOException e) {
+          throw new EncoderException("Error accessing video track " + sourceTrack, e);
+        }
 
         Map<String, String> properties = new HashMap<String, String>();
         String timeAsString = Long.toString(time);
         properties.put("time", timeAsString);
+
         // Do the work
-        File encodingOutput = null;
-        try {
-          encodingOutput = encoderEngine.encode(videoFile, profile, properties);
-        } catch (EncoderException e) {
-          throw new RuntimeException(e);
-        }
+        File encodingOutput = encoderEngine.encode(videoFile, profile, properties);
 
         if (encodingOutput == null || !encodingOutput.isFile()) {
-          job.setStatus(Status.FAILED);
-          remoteServiceManager.updateJob(job);
-          throw new RuntimeException("Image extracttion failed: encoding output doesn't exist at " + encodingOutput);
+          throw new EncoderException("Image extraction failed: encoding output doesn't exist at " + encodingOutput);
         }
 
         // Put the file in the workspace
@@ -610,33 +626,44 @@ public class ComposerServiceImpl implements ComposerService {
           returnURL = workspace.putInCollection(COLLECTION, encodingOutput.getName(), in);
           logger.debug("Copied the encoded file to the workspace at {}", returnURL);
         } catch (Exception e) {
-          job.setStatus(Status.FAILED);
-          remoteServiceManager.updateJob(job);
-          throw new RuntimeException("unable to put the encoded file into the workspace", e);
+          throw new EncoderException("unable to put the encoded file into the workspace", e);
         } finally {
           IOUtils.closeQuietly(in);
         }
-        if (encodingOutput != null) {
-          encodingOutput.delete();
+        if (encodingOutput != null && !encodingOutput.delete()) {
+          logger.warn("Unable to delete encoded file '{}'", encodingOutput);
         }
 
         MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
         Attachment attachment = (Attachment) builder.elementFromURI(returnURL, Attachment.TYPE, null);
+
         job.setElement(attachment);
         job.setStatus(Status.FINISHED);
-        remoteServiceManager.updateJob(job);
+        updateJob(job);
+
+        return null;
       }
     };
-    Future<?> future = executor.submit(runnable);
+
+    Future<?> future = executor.submit(command);
     if (block) {
       try {
         future.get();
-      } catch (ExecutionException e) {
-        throw new EncoderException(encoderEngine, e);
-      } catch (InterruptedException e) {
-        throw new EncoderException(encoderEngine, e);
+      } catch (Exception e) {
+        try {
+          job.setStatus(Status.FAILED);
+          updateJob(job);
+        } catch (Exception failureToFail) {
+          logger.warn("Unable to update job to failed state", failureToFail);
+        }
+        if (e instanceof EncoderException) {
+          throw (EncoderException) e;
+        } else {
+          throw new EncoderException(e);
+        }
       }
     }
+
     return job;
   }
 
@@ -660,102 +687,91 @@ public class ComposerServiceImpl implements ComposerService {
    *      org.opencastproject.mediapackage.Attachment, java.lang.String, boolean)
    */
   @Override
-  public Job captions(Track mediaTrack, Catalog[] captions, boolean block) throws EmbedderException {
+  public Job captions(final Track mediaTrack, final Catalog[] captions, boolean block) throws EmbedderException {
 
     final String targetTrackId = idBuilder.createNew().toString();
-    final Job receipt = remoteServiceManager.createJob(JOB_TYPE);
-
-    // get embedder engine
-    final EmbedderEngine engine = embedderEngineFactory.newEmbedderEngine();
-    if (engine == null) {
-      receipt.setStatus(Job.Status.FAILED);
-      remoteServiceManager.updateJob(receipt);
-      throw new EmbedderException("Embedder engine not available");
-    }
-
-    // check if media file has video track
-    if (mediaTrack == null || !mediaTrack.hasVideo()) {
-      throw new EmbedderException("Media track must contain video stream");
-    }
-    // get video height
-    Integer videoHeigth = null;
-    for (Stream s : mediaTrack.getStreams()) {
-      if (s instanceof VideoStream) {
-        videoHeigth = ((VideoStream) s).getFrameHeight();
-        break;
-      }
-    }
-    final int subHeight;
-    if (videoHeigth != null) {
-      // get 1/8 of track height
-      // smallest size is 60 pixels
-      subHeight = videoHeigth > 8 * 60 ? videoHeigth / 8 : 60;
-    } else {
-      // no information about video height retrieved, use 60 pixels
-      subHeight = 60;
-    }
-
-    // retrieve media file
-    final File mediaFile;
+    final Job job;
     try {
-      mediaFile = workspace.get(mediaTrack.getURI());
-    } catch (NotFoundException e) {
-      receipt.setStatus(Job.Status.FAILED);
-      remoteServiceManager.updateJob(receipt);
-      throw new EmbedderException("Could not find track: " + mediaTrack);
-    } catch (IOException e) {
-      receipt.setStatus(Job.Status.FAILED);
-      throw new EmbedderException("Error accessing track: " + mediaTrack);
+      job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceRegistryException e) {
+      throw new EmbedderException("Unable to create a job", e);
     }
 
-    final File[] captionFiles = new File[captions.length];
-    final String[] captionLanguages = new String[captions.length];
-    for (int i = 0; i < captions.length; i++) {
-      // get file
-      try {
-        captionFiles[i] = workspace.get(captions[i].getURI());
-      } catch (NotFoundException e) {
-        receipt.setStatus(Job.Status.FAILED);
-        remoteServiceManager.updateJob(receipt);
-        throw new EmbedderException("Could not found captions at: " + captions[i]);
-      } catch (IOException e) {
-        receipt.setStatus(Job.Status.FAILED);
-        remoteServiceManager.updateJob(receipt);
-        throw new EmbedderException("Error accessing captions at: " + captions[i]);
-      }
-      // get language
-      captionLanguages[i] = getLanguageFromTags(captions[i].getTags());
-      if (captionLanguages[i] == null) {
-        receipt.setStatus(Job.Status.FAILED);
-        remoteServiceManager.updateJob(receipt);
-        throw new EmbedderException("Missing caption language information for captions at: " + captions[i]);
-      }
-    }
-
-    // create runnable
-    Runnable runnable = new Runnable() {
-
+    Callable<Void> command = new Callable<Void>() {
+      /**
+       * {@inheritDoc}
+       * 
+       * @see java.util.concurrent.Callable#call()
+       */
       @Override
-      public void run() {
+      public Void call() throws EmbedderException {
+        job.setStatus(Status.RUNNING);
+        updateEmbedderJob(job);
 
         logger.info("Atempting to create and embed subtitles to video track");
 
-        receipt.setStatus(Job.Status.RUNNING);
-        remoteServiceManager.updateJob(receipt);
+        // get embedder engine
+        final EmbedderEngine engine = embedderEngineFactory.newEmbedderEngine();
+        if (engine == null) {
+          throw new EmbedderException("Embedder engine not available");
+        }
+
+        // check if media file has video track
+        if (mediaTrack == null || !mediaTrack.hasVideo()) {
+          throw new EmbedderException("Media track must contain video stream");
+        }
+        // get video height
+        Integer videoHeigth = null;
+        for (Stream s : mediaTrack.getStreams()) {
+          if (s instanceof VideoStream) {
+            videoHeigth = ((VideoStream) s).getFrameHeight();
+            break;
+          }
+        }
+        final int subHeight;
+        if (videoHeigth != null) {
+          // get 1/8 of track height
+          // smallest size is 60 pixels
+          subHeight = videoHeigth > 8 * 60 ? videoHeigth / 8 : 60;
+        } else {
+          // no information about video height retrieved, use 60 pixels
+          subHeight = 60;
+        }
+
+        // retrieve media file
+        final File mediaFile;
+        try {
+          mediaFile = workspace.get(mediaTrack.getURI());
+        } catch (NotFoundException e) {
+          throw new EmbedderException("Could not find track: " + mediaTrack);
+        } catch (IOException e) {
+          throw new EmbedderException("Error accessing track: " + mediaTrack);
+        }
+
+        final File[] captionFiles = new File[captions.length];
+        final String[] captionLanguages = new String[captions.length];
+        for (int i = 0; i < captions.length; i++) {
+          // get file
+          try {
+            captionFiles[i] = workspace.get(captions[i].getURI());
+          } catch (NotFoundException e) {
+            throw new EmbedderException("Could not found captions at: " + captions[i]);
+          } catch (IOException e) {
+            throw new EmbedderException("Error accessing captions at: " + captions[i]);
+          }
+          // get language
+          captionLanguages[i] = getLanguageFromTags(captions[i].getTags());
+          if (captionLanguages[i] == null) {
+            throw new EmbedderException("Missing caption language information for captions at: " + captions[i]);
+          }
+        }
 
         // set properties
         Map<String, String> properties = new HashMap<String, String>();
         properties.put("param.trackh", String.valueOf(subHeight));
         properties.put("param.offset", String.valueOf(subHeight / 2));
 
-        File output;
-        try {
-          output = engine.embed(mediaFile, captionFiles, captionLanguages, properties);
-        } catch (EmbedderException e) {
-          receipt.setStatus(Job.Status.FAILED);
-          remoteServiceManager.updateJob(receipt);
-          throw new RuntimeException(e);
-        }
+        File output = engine.embed(mediaFile, captionFiles, captionLanguages, properties);
 
         URI returnURL = null;
         InputStream in = null;
@@ -764,44 +780,55 @@ public class ComposerServiceImpl implements ComposerService {
           returnURL = workspace.putInCollection(COLLECTION, output.getName(), in);
           logger.info("Copied the encoded file to the workspace at {}", returnURL);
         } catch (Exception e) {
-          receipt.setStatus(Status.FAILED);
-          remoteServiceManager.updateJob(receipt);
-          logger.error("Unable to put the encoded file into the workspace", e);
-          throw new RuntimeException(e);
+          throw new EmbedderException("Unable to put the encoded file into the workspace", e);
         } finally {
           IOUtils.closeQuietly(in);
           logger.info("Deleting the local copy of the embedded file at {}", output.getAbsolutePath());
-          try {
-            FileUtils.forceDelete(output);
-          } catch (IOException e) {
+          if (!output.delete()) {
             logger.warn("Could not delete local copy of file at {}", output.getAbsolutePath());
           }
         }
 
         // Have the encoded track inspected and return the result
-        Job inspectionReceipt = inspectionService.inspect(returnURL, true);
+        Job inspectionReceipt;
+        try {
+          inspectionReceipt = inspectionService.inspect(returnURL, true);
+        } catch (MediaInspectionException e) {
+          throw new EmbedderException("Media inspection of " + returnURL + " failed", e);
+        }
         if (inspectionReceipt.getStatus() == Job.Status.FAILED)
-          throw new RuntimeException("Media inspection failed");
+          throw new EmbedderException("Media inspection failed");
         Track inspectedTrack = (Track) inspectionReceipt.getElement();
         inspectedTrack.setIdentifier(targetTrackId);
 
-        receipt.setElement(inspectedTrack);
-        receipt.setStatus(Status.FINISHED);
-        remoteServiceManager.updateJob(receipt);
+        job.setElement(inspectedTrack);
+        job.setStatus(Status.FINISHED);
+        updateEmbedderJob(job);
+
+        return null;
       }
+      
     };
 
-    Future<?> future = executor.submit(runnable);
+    Future<?> future = executor.submit(command);
     if (block) {
       try {
         future.get();
-      } catch (ExecutionException e) {
-        throw new EmbedderException(e);
-      } catch (InterruptedException e) {
-        throw new EmbedderException(e);
+      } catch (Exception e) {
+        try {
+          job.setStatus(Status.FAILED);
+          updateJob(job);
+        } catch (Exception failureToFail) {
+          logger.warn("Unable to update job to failed state", failureToFail);
+        }
+        if (e instanceof EmbedderException) {
+          throw (EmbedderException) e;
+        } else {
+          throw new EmbedderException(e);
+        }
       }
     }
-    return receipt;
+    return job;
   }
 
   /**
@@ -825,8 +852,8 @@ public class ComposerServiceImpl implements ComposerService {
    * 
    * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
    */
-  public Job getJob(String id) {
-    return remoteServiceManager.getJob(id);
+  public Job getJob(String id) throws NotFoundException, ServiceRegistryException {
+    return serviceRegistry.getJob(id);
   }
 
   /**
@@ -835,8 +862,8 @@ public class ComposerServiceImpl implements ComposerService {
    * @see org.opencastproject.composer.api.ComposerService#countJobs(org.opencastproject.job.api.Job.Status)
    */
   @Override
-  public long countJobs(Status status) {
-    return remoteServiceManager.count(JOB_TYPE, status);
+  public long countJobs(Status status) throws ServiceRegistryException {
+    return serviceRegistry.count(JOB_TYPE, status);
   }
 
   /**
@@ -846,8 +873,46 @@ public class ComposerServiceImpl implements ComposerService {
    *      java.lang.String)
    */
   @Override
-  public long countJobs(Status status, String host) {
-    return remoteServiceManager.count(JOB_TYPE, status, host);
+  public long countJobs(Status status, String host) throws ServiceRegistryException {
+    return serviceRegistry.count(JOB_TYPE, status, host);
+  }
+
+  /**
+   * Updates the job in the service registry. The exceptions that are possibly been thrown are wrapped in a
+   * {@link EncoderException}.
+   * 
+   * @param job
+   *          the job to update
+   * @throws EncoderException
+   *           the exception that is being thrown
+   */
+  private void updateJob(Job job) throws EncoderException {
+    try {
+      serviceRegistry.updateJob(job);
+    } catch (NotFoundException notFound) {
+      throw new EncoderException("Unable to find job " + job, notFound);
+    } catch (ServiceRegistryException serviceRegException) {
+      throw new EncoderException("Unable to update job '" + job + "' in service registry", serviceRegException);
+    }
+  }
+
+  /**
+   * Updates embedder jobs in the service registry. The exceptions that are possibly been thrown are wrapped in a
+   * {@link EncoderException}.
+   * 
+   * @param job
+   *          the job to update
+   * @throws EmbedderException
+   *           the exception that is being thrown
+   */
+  private void updateEmbedderJob(Job job) throws EmbedderException {
+    try {
+      serviceRegistry.updateJob(job);
+    } catch (NotFoundException notFound) {
+      throw new EmbedderException("Unable to find job " + job, notFound);
+    } catch (ServiceRegistryException serviceRegException) {
+      throw new EmbedderException("Unable to update job '" + job + "' in service registry", serviceRegException);
+    }
   }
 
 }

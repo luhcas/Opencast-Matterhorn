@@ -16,9 +16,10 @@
 package org.opencastproject.serviceregistry.api;
 
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 
 import org.apache.commons.lang.StringUtils;
@@ -108,10 +109,17 @@ public class RemoteBase implements JobProducer {
    *          "/extra/path/info.xml".
    * @param expectedHttpStatus
    *          any expected status codes to include in the return.
-   * @return the response object
+   * @return the response object, or null if we can not connect to any services
    */
   protected HttpResponse getResponse(HttpRequestBase httpRequest, Integer... expectedHttpStatus) {
-    List<ServiceRegistration> remoteServices = remoteServiceManager.getServiceRegistrations(serviceType);
+    List<ServiceRegistration> remoteServices = null;
+    try {
+      remoteServices = remoteServiceManager.getServiceRegistrations(serviceType);
+    } catch (ServiceRegistryException e) {
+      logger.warn("Unable to obtain a list of remote services", e);
+      return null;
+    }
+
     Map<String, String> hostErrors = new HashMap<String, String>();
     URI originalUri = httpRequest.getURI();
     String uriSuffix = null;
@@ -159,15 +167,19 @@ public class RemoteBase implements JobProducer {
    * @param r
    *          The receipt id
    * @return The receipt
+   * @throws NotFoundException
+   *           if the job doesn't exist
+   * @throws ServiceRegistryException
+   *           if communication with the service registry fails
    */
-  protected Job poll(String id) {
+  protected Job poll(String id) throws NotFoundException, ServiceRegistryException {
     while (true) {
-      Job r = getJob(id);
-      if (Status.FAILED.equals(r.getStatus()) || Status.FINISHED.equals(r.getStatus())) {
-        return r;
-      }
       try {
-        Thread.sleep(1000);
+        Job r = getJob(id);
+        if (Status.FAILED.equals(r.getStatus()) || Status.FINISHED.equals(r.getStatus())) {
+          return r;
+        }
+        Thread.sleep(10000);
       } catch (InterruptedException e) {
         logger.warn("polling interrupted");
       }
@@ -179,7 +191,7 @@ public class RemoteBase implements JobProducer {
    * 
    * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
    */
-  public Job getJob(String id) {
+  public Job getJob(String id) throws NotFoundException, ServiceRegistryException {
     return remoteServiceManager.getJob(id);
   }
 
@@ -188,7 +200,7 @@ public class RemoteBase implements JobProducer {
    * 
    * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status)
    */
-  public long countJobs(Status status) {
+  public long countJobs(Status status) throws ServiceRegistryException {
     if (status == null)
       throw new IllegalArgumentException("status must not be null");
     return remoteServiceManager.count(serviceType, status);
@@ -197,10 +209,9 @@ public class RemoteBase implements JobProducer {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status,
-   *      java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#countJobs(org.opencastproject.job.api.Job.Status, java.lang.String)
    */
-  public long countJobs(Status status, String host) {
+  public long countJobs(Status status, String host) throws ServiceRegistryException {
     if (status == null)
       throw new IllegalArgumentException("status must not be null");
     if (host == null)

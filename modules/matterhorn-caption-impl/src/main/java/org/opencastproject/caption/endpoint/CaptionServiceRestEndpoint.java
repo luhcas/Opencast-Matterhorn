@@ -113,9 +113,9 @@ public class CaptionServiceRestEndpoint {
       if (!Catalog.TYPE.equals(element.getElementType())) {
         return Response.status(Response.Status.BAD_REQUEST).entity("Captions must be of type catalog.").build();
       }
-      Job receipt = service.convert((Catalog) element, inputType, outputType, lang);
+      Job job = service.convert((Catalog) element, inputType, outputType, lang, false);
 
-      return Response.ok().entity(receipt.toXml()).build();
+      return Response.ok().entity(job.toXml()).build();
     } catch (Exception e) {
       logger.error(e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();

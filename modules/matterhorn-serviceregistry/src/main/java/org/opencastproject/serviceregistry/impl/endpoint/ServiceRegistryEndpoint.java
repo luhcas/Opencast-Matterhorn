@@ -17,6 +17,7 @@ package org.opencastproject.serviceregistry.impl.endpoint;
 
 import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.impl.ServiceStatisticsList;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
@@ -31,6 +32,7 @@ import org.osgi.service.component.ComponentContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -73,13 +75,17 @@ public class ServiceRegistryEndpoint {
   @Path("/statistics.json")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getServicesAsJson() {
-    return Response.ok(new ServiceStatisticsList(serviceRegistry.getServiceStatistics())).build();
+    try {
+      return Response.ok(new ServiceStatisticsList(serviceRegistry.getServiceStatistics())).build();
+    } catch (ServiceRegistryException e) {
+      throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @GET
   @Path("/statistics.xml")
   @Produces(MediaType.TEXT_XML)
-  public Response getServicesAsXml() {
+  public Response getServicesAsXml() throws ServiceRegistryException {
     return getServicesAsJson();
   }
 

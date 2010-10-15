@@ -43,10 +43,10 @@ public interface MediaInspectionService extends JobProducer {
    *         with added metadata when done
    * @throws IllegalStateException
    *           if the analyzer cannot be loaded
-   * @throws RuntimeException
+   * @throws MediaInspectionException
    *           if there is a failure during media package update
    */
-  Job inspect(URI uri, boolean block);
+  Job inspect(URI uri, boolean block) throws MediaInspectionException;
 
   /**
    * Equip an existing media package element with automatically generated metadata
@@ -60,9 +60,9 @@ public interface MediaInspectionService extends JobProducer {
    *         enriched element when done
    * @throws IllegalStateException
    *           if the analyzer cannot be loaded
-   * @throws RuntimeException
+   * @throws MediaInspectionException
    *           if there is a failure during media package update
    */
-  Job enrich(MediaPackageElement original, boolean override, boolean block);
+  Job enrich(MediaPackageElement original, boolean override, boolean block) throws MediaInspectionException;
 
 }

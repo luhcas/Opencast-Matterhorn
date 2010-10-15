@@ -32,7 +32,7 @@ import java.net.URI;
  * Test case for {@link MediaAnalysisServiceSupport}.
  * 
  */
-public class MediaAnalaysisServiceSupportTest extends TestCase {
+public class MediaAnalysisServiceSupportTest extends TestCase {
 
   MediaAnalysisServiceSupport analyzer = null;
   MediaPackageElementFlavor resultingFlavor = MediaPackageElements.TEXTS;

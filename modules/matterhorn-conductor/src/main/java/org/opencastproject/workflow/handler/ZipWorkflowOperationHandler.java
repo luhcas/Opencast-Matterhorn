@@ -19,11 +19,11 @@ import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageSerializer;
-import org.opencastproject.mediapackage.MediaPackageElement.Type;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.FileSupport;
@@ -51,7 +51,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
@@ -216,8 +215,6 @@ public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandle
                 .elementFromURI(uri, Type.Attachment, ARCHIVE_FLAVOR);
         try {
           attachment.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, zip));
-        } catch (NoSuchAlgorithmException e) {
-          throw new WorkflowOperationException(e);
         } catch (IOException e) {
           throw new WorkflowOperationException(e);
         }

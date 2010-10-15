@@ -86,6 +86,8 @@ public class MediaPackageReferenceImpl implements MediaPackageReference {
       throw new IllegalArgumentException("Parameter media package element must not be null");
     this.type = mediaPackageElement.getElementType().toString().toLowerCase();
     this.identifier = mediaPackageElement.getIdentifier();
+    if (identifier == null)
+      throw new IllegalArgumentException("Media package element must have an identifier");
     this.properties = new HashMap<String, String>();
   }
 

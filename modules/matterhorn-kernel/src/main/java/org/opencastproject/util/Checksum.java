@@ -173,8 +173,13 @@ public final class Checksum implements Serializable {
    *           if the file cannot be accessed
    */
   public static Checksum create(ChecksumType type, File file)
-          throws NoSuchAlgorithmException, IOException {
-    MessageDigest checksum = MessageDigest.getInstance(type.getName());
+          throws IOException {
+    MessageDigest checksum;
+    try {
+      checksum = MessageDigest.getInstance(type.getName());
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("This system does not support checksums of type " + type.getName());
+    }
     BufferedInputStream is = new BufferedInputStream(new FileInputStream(file));
     try {
       byte[] bytes = new byte[1024];

@@ -16,13 +16,14 @@
 package org.opencastproject.caption.api;
 
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobProducer;
 import org.opencastproject.mediapackage.Catalog;
 
 /**
  * Provides captioning support. This service makes use of {@link CaptionConverter} instances that need to be registered
  * in the OSGi registry.
  */
-public interface CaptionService {
+public interface CaptionService extends JobProducer {
 
   final String JOB_TYPE = "org.opencastproject.caption";
 
@@ -36,13 +37,15 @@ public interface CaptionService {
    *          format of imported captions
    * @param outputFormat
    *          format of exported captions
+   * @param block
+   *          <code>false</code> to make this an asynchronous call
    * @throws UnsupportedCaptionFormatException
    *           if there is no matching engine registered for given input or output
    * @throws CaptionConverterException
    *           if exception occurs while converting
    */
-  Job convert(Catalog input, String inputFormat, String outputFormat) throws UnsupportedCaptionFormatException,
-          CaptionConverterException;
+  Job convert(Catalog input, String inputFormat, String outputFormat, boolean block)
+          throws UnsupportedCaptionFormatException, CaptionConverterException;
 
   /**
    * Converts captions from one format to another. Language parameter is used for those formats that store information
@@ -56,12 +59,14 @@ public interface CaptionService {
    *          format of exported captions
    * @param language
    *          language of captions
+   * @param block
+   *          <code>false</code> to make this an asynchronous call
    * @throws UnsupportedCaptionFormatException
    *           if there is no matching engine registered for given input or output
    * @throws CaptionConverterException
    *           if exception occurs while converting
    */
-  Job convert(Catalog input, String inputFormat, String outputFormat, String language)
+  Job convert(Catalog input, String inputFormat, String outputFormat, String language, boolean block)
           throws UnsupportedCaptionFormatException, CaptionConverterException;
 
   /**

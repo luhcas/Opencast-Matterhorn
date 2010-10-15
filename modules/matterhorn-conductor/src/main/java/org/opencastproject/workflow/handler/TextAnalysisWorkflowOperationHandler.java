@@ -348,6 +348,8 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
       URI workspaceURI = workspace.put(mediaPackage.getIdentifier().toString(), catalog.getIdentifier(), filename, in);
       catalog.setURI(workspaceURI);
 
+      // TODO: Should the text analysis have a reference?  What is the appropriate element?
+      
       // Add flavor and target tags
       catalog.setFlavor(MediaPackageElements.TEXTS);
       for (String tag : targetTagSet) {

@@ -27,15 +27,16 @@ public class CaptionConverterException extends Exception {
     super();
   }
 
-  public CaptionConverterException(String arg0, Throwable arg1) {
-    super(arg0, arg1);
+  public CaptionConverterException(String msg, Throwable cause) {
+    super(msg, cause);
   }
 
-  public CaptionConverterException(String arg0) {
-    super(arg0);
+  public CaptionConverterException(String msg) {
+    super(msg);
   }
 
-  public CaptionConverterException(Throwable arg0) {
-    super(arg0);
+  public CaptionConverterException(Throwable cause) {
+    super(cause);
   }
+
 }

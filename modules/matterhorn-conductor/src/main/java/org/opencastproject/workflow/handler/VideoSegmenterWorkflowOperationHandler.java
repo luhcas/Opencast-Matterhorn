@@ -21,6 +21,7 @@ import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -130,6 +131,7 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
       mediaPackage.add(mpeg7Catalog);
       mpeg7Catalog.setURI(workspace.moveTo(mpeg7Catalog.getURI(), mediaPackage.getIdentifier().toString(), mpeg7Catalog
               .getIdentifier(), "segments.xml"));
+      mpeg7Catalog.setReference(new MediaPackageReferenceImpl(track));
     } catch (Exception e) {
       throw new WorkflowOperationException(e);
     }

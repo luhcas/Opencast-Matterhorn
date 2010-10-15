@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -267,12 +268,52 @@ public class MimeTypes {
    */
   public static MimeType fromURL(URL url) throws UnknownFileTypeException {
     if (url == null)
-      throw new IllegalArgumentException("Argument 'file' is null");
+      throw new IllegalArgumentException("Argument 'url' is null");
+    return fromString(url.getFile());
+  }
+  
+    /**
+     * Returns a mime type for the provided file.
+     * <p>
+     * This method tries various ways to extract mime type information from the files name or its contents.
+     * <p>
+     * If no mime type can be derived from either the file name or its contents, a <code>UnknownFileTypeException</code>
+     * is thrown.
+     * 
+     * @param uri
+     *          the file
+     * @return the corresponding mime type
+     * @throws UnknownFileTypeException
+     *           if the mime type cannot be derived from the file
+     */
+    public static MimeType fromURI(URI uri) throws UnknownFileTypeException {
+      if (uri == null)
+        throw new IllegalArgumentException("Argument 'uri' is null");
+      return fromString(uri.getPath());
+    }
+
+  /**
+   * Returns a mime type for the provided file name.
+   * <p>
+   * This method tries various ways to extract mime type information from the files name or its contents.
+   * <p>
+   * If no mime type can be derived from either the file name or its contents, a <code>UnknownFileTypeException</code>
+   * is thrown.
+   * 
+   * @param name
+   *          the file
+   * @return the corresponding mime type
+   * @throws UnknownFileTypeException
+   *           if the mime type cannot be derived from the file
+   */
+  public static MimeType fromString(String name) throws UnknownFileTypeException {
+    if (name == null)
+      throw new IllegalArgumentException("Argument 'name' is null");
 
     MimeType mimeType = null;
 
     // Extract suffix
-    String filename = url.getFile();
+    String filename = name;
     String suffix = null;
     int separatorPos = filename.lastIndexOf('.');
     if (separatorPos > 0 && separatorPos < filename.length() - 1) {
@@ -298,7 +339,7 @@ public class MimeTypes {
     // }
     // }
 
-    throw new UnknownFileTypeException("File '" + url + "' cannot be matched to any mime type");
+    throw new UnknownFileTypeException("File '" + name + "' cannot be matched to any mime type");
   }
 
   /**

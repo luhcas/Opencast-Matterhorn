@@ -28,6 +28,8 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.serviceregistry.api.RemoteBase;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
+import org.opencastproject.util.NotFoundException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -211,6 +213,10 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
         return r;
       }
     } catch (IOException e) {
+      throw new EncoderException(e);
+    } catch (NotFoundException e) {
+      throw new EncoderException(e);
+    } catch (ServiceRegistryException e) {
       throw new EncoderException(e);
     } finally {
       closeConnection(response);

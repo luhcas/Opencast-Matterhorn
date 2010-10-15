@@ -31,6 +31,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageSerializer;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
@@ -62,6 +63,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.parsers.DocumentBuilder;
@@ -314,6 +316,8 @@ public class ComposerRestService {
       r = composerService.getJob(id);
     } catch (NotFoundException e) {
       return Response.status(Response.Status.NOT_FOUND).build();
+    } catch (ServiceRegistryException e) {
+      throw new WebApplicationException(e);
     }
     return Response.ok().entity(r.toXml()).build();
   }
@@ -345,9 +349,18 @@ public class ComposerRestService {
   public Response count(@QueryParam("status") String status, @QueryParam("host") String host) {
     if (status == null)
       return Response.status(javax.ws.rs.core.Response.Status.BAD_REQUEST).build();
-    if (host == null)
-      return Response.ok(composerService.countJobs(Status.valueOf(status.toUpperCase()))).build();
-    return Response.ok(composerService.countJobs(Status.valueOf(status.toUpperCase()), host)).build();
+    long count;
+
+    try {
+      if (host == null) {
+        count = composerService.countJobs(Status.valueOf(status.toUpperCase()));
+      } else {
+        count = composerService.countJobs(Status.valueOf(status.toUpperCase()), host);
+      }
+      return Response.ok(count).build();
+    } catch (ServiceRegistryException e) {
+      throw new WebApplicationException(e);
+    }
   }
 
   @GET
@@ -358,8 +371,7 @@ public class ComposerRestService {
   }
 
   protected String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("Composer", "Composer Service", serviceUrl,
-            new String[] { "$Rev$" });
+    DocRestData data = new DocRestData("Composer", "Composer Service", serviceUrl, new String[] { "$Rev$" });
     // profiles
     RestEndpoint profilesEndpoint = new RestEndpoint("profiles", RestEndpoint.Method.GET, "/profiles.xml",
             "Retrieve the encoding profiles");

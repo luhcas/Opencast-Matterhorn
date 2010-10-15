@@ -246,7 +246,7 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
       }
       for (String language : languages) {
         if (!captionLanguages.contains(language)) {
-          Job receipt = captionService.convert(caption, flavor.getSubtype(), outputFormat, language);
+          Job receipt = captionService.convert(caption, flavor.getSubtype(), outputFormat, language, true);
           if (receipt == null || receipt.getStatus().equals(Job.Status.FAILED)) {
             throw new WorkflowOperationException("Caption converting failed.");
           }

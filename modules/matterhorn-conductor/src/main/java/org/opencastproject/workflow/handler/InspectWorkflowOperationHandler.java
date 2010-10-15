@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
+import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.Catalog;
@@ -122,7 +123,13 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
     for (Track track : mediaPackage.getTracks()) {
       
       logger.info("Inspecting track '{}' of {}", track.getIdentifier(), mediaPackage);
-      Job receipt = inspectionService.enrich(track, false, true);
+
+      Job receipt;
+      try {
+        receipt = inspectionService.enrich(track, false, true);
+      } catch (MediaInspectionException e) {
+        throw new WorkflowOperationException(e);
+      }
 
       // add this receipt's queue time to the total
       long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();

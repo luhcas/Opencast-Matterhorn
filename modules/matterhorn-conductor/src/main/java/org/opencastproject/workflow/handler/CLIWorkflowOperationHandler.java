@@ -423,6 +423,7 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
       return "ns";
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Iterator getPrefixes(String namespace) {
       return null;
