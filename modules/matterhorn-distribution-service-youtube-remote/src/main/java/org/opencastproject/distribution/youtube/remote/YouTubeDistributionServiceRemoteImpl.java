@@ -18,6 +18,7 @@ package org.opencastproject.distribution.youtube.remote;
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.serviceregistry.api.RemoteBase;
@@ -90,7 +91,7 @@ public class YouTubeDistributionServiceRemoteImpl extends RemoteBase implements 
       if (response != null) {
         logger.info("distributed {} to {}", mediaPackageId, distributionChannel);
         try {
-          receipt = remoteServiceManager.parseJob(response.getEntity().getContent());
+          receipt = JobParser.parseJob(response.getEntity().getContent());
           if (block) {
             receipt = poll(receipt.getId());
           }
@@ -134,7 +135,7 @@ public class YouTubeDistributionServiceRemoteImpl extends RemoteBase implements 
       if (response != null) {
         logger.info("retracted {} from {}", mediaPackageId, distributionChannel);
         try {
-          receipt = remoteServiceManager.parseJob(response.getEntity().getContent());
+          receipt = JobParser.parseJob(response.getEntity().getContent());
           if (block) {
             receipt = poll(receipt.getId());
           }

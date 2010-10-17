@@ -17,6 +17,7 @@ package org.opencastproject.inspection.remote;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.serviceregistry.api.RemoteBase;
@@ -67,7 +68,7 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
       HttpGet get = new HttpGet(url);
       response = getResponse(get);
       if (response != null) {
-        Job receipt = remoteServiceManager.parseJob(response.getEntity().getContent());
+        Job receipt = JobParser.parseJob(response.getEntity().getContent());
         if (block) {
           receipt = poll(receipt.getId());
         }
@@ -106,7 +107,7 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
       post.setEntity(entity);
       response = getResponse(post);
       if (response != null) {
-        Job receipt = remoteServiceManager.parseJob(response.getEntity().getContent());
+        Job receipt = JobParser.parseJob(response.getEntity().getContent());
         if (block) {
           receipt = poll(receipt.getId());
         }

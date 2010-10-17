@@ -50,10 +50,10 @@ import javax.management.ObjectName;
 public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionMXBean {
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(TrustedHttpClientImpl.class);
-  
+
   /** The configuration property specifying the digest authentication user */
   public static final String DIGEST_AUTH_USER_KEY = "org.opencastproject.security.digest.user";
-  
+
   /** The configuration property specifying the digest authentication password */
   public static final String DIGEST_AUTH_PASS_KEY = "org.opencastproject.security.digest.pass";
 
@@ -65,13 +65,14 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
 
   /** The map of open responses to their http clients, which need to be closed after we are finished with the response */
   protected Map<HttpResponse, HttpClient> responseMap = new ConcurrentHashMap<HttpResponse, HttpClient>();
-  
+
   public void activate(ComponentContext cc) {
     logger.debug("activate");
     user = cc.getBundleContext().getProperty(DIGEST_AUTH_USER_KEY);
     pass = cc.getBundleContext().getProperty(DIGEST_AUTH_PASS_KEY);
-    if(user == null || pass == null) throw new IllegalStateException("trusted communication is not properly configured");
-    
+    if (user == null || pass == null)
+      throw new IllegalStateException("trusted communication is not properly configured");
+
     // register with jmx
     try {
       MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
@@ -83,30 +84,32 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
       logger.warn("Unable to register {} as an mbean: {}", this, e);
     }
   }
-  
+
   public void deactivate() {
     logger.debug("deactivate");
   }
-  
-  public TrustedHttpClientImpl() {}
-  
+
+  public TrustedHttpClientImpl() {
+  }
+
   public TrustedHttpClientImpl(String user, String pass) {
     this.user = user;
     this.pass = pass;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.security.api.TrustedHttpClient#execute(org.apache.http.client.methods.HttpUriRequest)
    */
   @Override
-  public HttpResponse execute(HttpUriRequest httpUriRequest) {
+  public HttpResponse execute(HttpUriRequest httpUriRequest) throws TrustedHttpClientException {
     DefaultHttpClient httpClient = new DefaultHttpClient();
 
     // Add the request header to elicit a digest auth response
     httpUriRequest.addHeader(REQUESTED_AUTH_HEADER, DIGEST_AUTH);
 
-    if("GET".equalsIgnoreCase(httpUriRequest.getMethod()) || "HEAD".equalsIgnoreCase(httpUriRequest.getMethod())) {
+    if ("GET".equalsIgnoreCase(httpUriRequest.getMethod()) || "HEAD".equalsIgnoreCase(httpUriRequest.getMethod())) {
       // Set the user/pass
       UsernamePasswordCredentials creds = new UsernamePasswordCredentials(user, pass);
       httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
@@ -118,10 +121,7 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
         responseMap.put(response, httpClient);
         return response;
       } catch (IOException e) {
-        // if we have a response, remove it from the map
-        if(response != null) {
-          responseMap.remove(response);
-        }
+        responseMap.remove(response);
         // close the http connection(s)
         httpClient.getConnectionManager().shutdown();
         throw new TrustedHttpClientException(e);
@@ -139,15 +139,15 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
     digestRequest.setURI(httpUriRequest.getURI());
     digestRequest.addHeader(REQUESTED_AUTH_HEADER, DIGEST_AUTH);
     String[] realmAndNonce = getRealmAndNonce(digestRequest);
-    
-    if(realmAndNonce != null) {
+
+    if (realmAndNonce != null) {
       // Set the user/pass
       UsernamePasswordCredentials creds = new UsernamePasswordCredentials(user, pass);
 
       // Set up the digest authentication with the required values
       DigestScheme digestAuth = new DigestScheme();
       digestAuth.overrideParamter("realm", realmAndNonce[0]);
-      digestAuth.overrideParamter("nonce", realmAndNonce[1]);        
+      digestAuth.overrideParamter("nonce", realmAndNonce[1]);
 
       // Add the authentication header
       try {
@@ -165,7 +165,7 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
       return response;
     } catch (Exception e) {
       // if we have a response, remove it from the map
-      if(response != null) {
+      if (response != null) {
         responseMap.remove(response);
       }
       // close the http connection(s)
@@ -173,29 +173,33 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
       throw new TrustedHttpClientException(e);
     }
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.security.api.TrustedHttpClient#close(org.apache.http.HttpResponse)
    */
   @Override
   public void close(HttpResponse response) {
-    if(response == null) {
+    if (response == null) {
       logger.debug("Can not close a null response");
     } else {
       HttpClient httpClient = responseMap.remove(response);
-      if(httpClient != null) {
+      if (httpClient != null) {
         httpClient.getConnectionManager().shutdown();
       }
     }
   }
-  
+
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.security.api.TrustedHttpClient#execute(org.apache.http.client.methods.HttpUriRequest, org.apache.http.client.ResponseHandler)
+   * 
+   * @see org.opencastproject.security.api.TrustedHttpClient#execute(org.apache.http.client.methods.HttpUriRequest,
+   *      org.apache.http.client.ResponseHandler)
    */
   @Override
-  public <T> T execute(HttpUriRequest httpUriRequest, ResponseHandler<T> responseHandler) {
+  public <T> T execute(HttpUriRequest httpUriRequest, ResponseHandler<T> responseHandler)
+          throws TrustedHttpClientException {
     try {
       return responseHandler.handleResponse(execute(httpUriRequest));
     } catch (IOException e) {
@@ -206,10 +210,11 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
   /**
    * Perform a request, and extract the realm and nonce values
    * 
-   * @param request The request to execute in order to obtain the realm and nonce
+   * @param request
+   *          The request to execute in order to obtain the realm and nonce
    * @return A String[] containing the {realm, nonce}
    */
-  protected String[] getRealmAndNonce(HttpRequestBase request) {
+  protected String[] getRealmAndNonce(HttpRequestBase request) throws TrustedHttpClientException {
     DefaultHttpClient httpClient = new DefaultHttpClient();
     HttpResponse response;
     try {
@@ -219,7 +224,7 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
       throw new TrustedHttpClientException(e);
     }
     Header[] headers = response.getHeaders("WWW-Authenticate");
-    if(headers == null || headers.length == 0) {
+    if (headers == null || headers.length == 0) {
       logger.warn("URI {} does not support digest authentication", request.getURI());
       httpClient.getConnectionManager().shutdown();
       return null;
@@ -227,19 +232,20 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
     Header authRequiredResponseHeader = headers[0];
     String nonce = null;
     String realm = null;
-    for(HeaderElement element : authRequiredResponseHeader.getElements()) {
-      if("nonce".equals(element.getName())) {
+    for (HeaderElement element : authRequiredResponseHeader.getElements()) {
+      if ("nonce".equals(element.getName())) {
         nonce = element.getValue();
-      } else if("Digest realm".equals(element.getName())) {
+      } else if ("Digest realm".equals(element.getName())) {
         realm = element.getValue();
       }
     }
     httpClient.getConnectionManager().shutdown();
-    return new String[] {realm, nonce};
+    return new String[] { realm, nonce };
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.security.HttpConnectionMXBean#getOpenConnections()
    */
   @Override

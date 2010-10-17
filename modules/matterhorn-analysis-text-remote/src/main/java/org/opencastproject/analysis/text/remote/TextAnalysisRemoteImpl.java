@@ -18,6 +18,7 @@ package org.opencastproject.analysis.text.remote;
 import org.opencastproject.analysis.api.MediaAnalysisException;
 import org.opencastproject.analysis.api.MediaAnalysisService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.serviceregistry.api.RemoteBase;
@@ -96,7 +97,7 @@ public class TextAnalysisRemoteImpl extends RemoteBase implements MediaAnalysisS
       response = getResponse(post);
       if (response != null) {
         try {
-          receipt = remoteServiceManager.parseJob(response.getEntity().getContent());
+          receipt = JobParser.parseJob(response.getEntity().getContent());
           if (block) {
             receipt = poll(receipt.getId());
           }

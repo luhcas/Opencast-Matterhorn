@@ -17,6 +17,7 @@ package org.opencastproject.distribution.streaming.endpoint;
 
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.rest.RestPublisher;
@@ -69,30 +70,30 @@ public class StreamingDistributionRestService {
   @Produces(MediaType.TEXT_XML)
   public Response distribute(@FormParam("mediapackageId") String mediaPackageId, @FormParam("element") String elementXml)
           throws Exception {
-    Job receipt = null;
+    Job job = null;
 
     try {
       MediaPackageElement element = AbstractMediaPackageElement.getFromXml(elementXml);
-      receipt = service.distribute(mediaPackageId, element, false);
+      job = service.distribute(mediaPackageId, element, false);
     } catch (Exception e) {
       logger.warn("Error distributing element", e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
-    return Response.ok(receipt).build();
+    return Response.ok(JobParser.serializeToString(job)).build();
   }
 
   @POST
   @Path("/retract")
   @Produces(MediaType.TEXT_XML)
   public Response retract(@FormParam("mediapackageId") String mediaPackageId) throws Exception {
-    Job receipt = null;
+    Job job = null;
     try {
-      receipt = service.retract(mediaPackageId, false);
+      job = service.retract(mediaPackageId, false);
     } catch (Exception e) {
       logger.warn("Unable to retract mediapackage '{}' from streaming channel: {}", new Object[] { mediaPackageId, e });
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
-    return Response.ok(receipt).build();
+    return Response.ok(JobParser.serializeToString(job)).build();
   }
 
   @GET

@@ -23,6 +23,7 @@ import org.opencastproject.composer.api.EncodingProfileBuilder;
 import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageException;
@@ -101,7 +102,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
       response = getResponse(post);
       if (response != null) {
         String content = EntityUtils.toString(response.getEntity());
-        Job r = remoteServiceManager.parseJob(content);
+        Job r = JobParser.parseJob(content);
         logger.info("Encoding job {} started on a remote composer", r.getId());
         if (block) {
           r = poll(r.getId());
@@ -155,7 +156,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
       response = getResponse(post);
       if (response != null) {
         String content = EntityUtils.toString(response.getEntity());
-        Job r = remoteServiceManager.parseJob(content);
+        Job r = JobParser.parseJob(content);
         logger.info("Trimming job {} started on a remote composer", r.getId());
         if (block) {
           r = poll(r.getId());
@@ -205,7 +206,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
       response = getResponse(post);
       if (response != null) {
         String content = EntityUtils.toString(response.getEntity());
-        Job r = remoteServiceManager.parseJob(content);
+        Job r = JobParser.parseJob(content);
         logger.info("Muxing job {} started on a remote composer", r.getId());
         if (block) {
           r = poll(r.getId());
@@ -286,7 +287,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
     try {
       response = getResponse(post);
       if (response != null) {
-        Job r = remoteServiceManager.parseJob(response.getEntity().getContent());
+        Job r = JobParser.parseJob(response.getEntity().getContent());
         logger.info("Image extraction job {} started on a remote composer", r.getId());
         if (block) {
           r = poll(r.getId());
@@ -337,7 +338,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
     try {
       response = getResponse(post);
       if (response != null) {
-        Job r = remoteServiceManager.parseJob(response.getEntity().getContent());
+        Job r = JobParser.parseJob(response.getEntity().getContent());
         logger.info("Caption embedding job {} started on a remote composer", r.getId());
         if (block) {
           r = poll(r.getId());

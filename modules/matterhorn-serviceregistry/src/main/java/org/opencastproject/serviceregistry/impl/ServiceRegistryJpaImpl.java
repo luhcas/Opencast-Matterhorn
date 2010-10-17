@@ -15,24 +15,6 @@
  */
 package org.opencastproject.serviceregistry.impl;
 
-import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.Job.Status;
-import org.opencastproject.rest.RestPublisher;
-import org.opencastproject.serviceregistry.api.ServiceRegistration;
-import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.serviceregistry.api.ServiceStatistics;
-import org.opencastproject.util.UrlSupport;
-
-import org.apache.commons.lang.StringUtils;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -48,6 +30,23 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
+
+import org.apache.commons.lang.StringUtils;
+import org.opencastproject.job.api.JaxbJob;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.serviceregistry.api.ServiceRegistration;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceStatistics;
+import org.opencastproject.util.UrlSupport;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JPA implementation of the {@link ServiceRegistry}
@@ -130,34 +129,6 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#parseJob(java.io.InputStream)
-   */
-  @Override
-  public Job parseJob(InputStream in) {
-    try {
-      return JobBuilder.getInstance().parseJob(in);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#parseJob(java.lang.String)
-   */
-  @Override
-  public Job parseJob(String xml) {
-    try {
-      return JobBuilder.getInstance().parseJob(xml);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String)
    */
   @Override
@@ -166,8 +137,9 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      ServiceRegistrationImpl serviceRegistration = getServiceRegistration(em, type, this.hostName);
-      Job job = new JobImpl(Status.QUEUED, serviceRegistration);
+      ServiceRegistrationJpaImpl serviceRegistration = getServiceRegistration(em, type, this.hostName);
+      JobJpaImpl job = new JobJpaImpl(Status.QUEUED, serviceRegistration);
+      serviceRegistration.jobs.add(job);
       em.persist(job);
       tx.commit();
       return job;
@@ -184,12 +156,13 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    * 
    * @return the new job
    */
-  JobImpl createJob(ServiceRegistrationImpl serviceRegistration) {
+  JobJpaImpl createJob(ServiceRegistrationJpaImpl serviceRegistration) {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      JobImpl job = new JobImpl(serviceRegistration);
+      JobJpaImpl job = new JobJpaImpl(serviceRegistration);
+      serviceRegistration.jobs.add(job);
       em.persist(job);
       tx.commit();
       return job;
@@ -210,7 +183,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   public Job getJob(String id) {
     EntityManager em = emf.createEntityManager();
     try {
-      Job job = em.find(JobImpl.class, id);
+      Job job = em.find(JobJpaImpl.class, id);
       if (job != null) {
         // JPA's caches can be out of date if external changes (e.g. another node in the cluster) have been made to
         // this row in the database
@@ -233,13 +206,13 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      JobImpl fromDb;
+      JobJpaImpl fromDb;
       try {
-        fromDb = em.find(JobImpl.class, job.getId());
+        fromDb = em.find(JobJpaImpl.class, job.getId());
       } catch (NoResultException e) {
         throw new IllegalArgumentException("job " + job + " is not a persistent object.", e);
       }
-      update(fromDb, (JobImpl) job);
+      update(fromDb, (JaxbJob) job);
       tx.commit();
     } catch (RollbackException e) {
       if (tx.isActive())
@@ -259,32 +232,32 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    * @param job
    *          The in-memory job
    */
-  private void update(JobImpl fromDb, JobImpl job) {
+  private void update(JobJpaImpl fromDb, JaxbJob job) {
     Date now = new Date();
     Status status = job.getStatus();
     fromDb.setElement(job.getElement());
     fromDb.setStatus(job.getStatus());
     if (Status.QUEUED.equals(status)) {
-      job.dateCreated = now;
-      fromDb.dateCreated = now;
+      job.setDateCreated(now);
+      fromDb.setDateCreated(now);
     } else if (Status.RUNNING.equals(status)) {
-      job.dateStarted = now;
-      job.queueTime = now.getTime() - job.dateCreated.getTime();
-      fromDb.dateStarted = now;
-      fromDb.queueTime = now.getTime() - job.dateCreated.getTime();
+      job.setDateStarted(now);
+      job.setQueueTime(now.getTime() - job.getDateCreated().getTime());
+      fromDb.setDateStarted(now);
+      fromDb.setQueueTime(now.getTime() - job.getDateCreated().getTime());
     } else if (Status.FAILED.equals(status)) {
       // failed jobs may not have even started properly
-      if (job.dateStarted != null) {
-        job.dateCompleted = now;
-        job.runTime = now.getTime() - job.dateStarted.getTime();
-        fromDb.dateCompleted = now;
-        fromDb.runTime = now.getTime() - job.dateStarted.getTime();
+      if (job.getDateStarted() != null) {
+        job.setDateCompleted(now);
+        job.setRunTime(now.getTime() - job.getDateStarted().getTime());
+        fromDb.setDateCompleted(now);
+        fromDb.setRunTime(now.getTime() - job.getDateStarted().getTime());
       }
     } else if (Status.FINISHED.equals(status)) {
-      job.dateCompleted = now;
-      job.runTime = now.getTime() - job.dateStarted.getTime();
-      fromDb.dateCompleted = now;
-      fromDb.runTime = now.getTime() - job.dateStarted.getTime();
+      job.setDateCompleted(now);
+      job.setRunTime(now.getTime() - job.getDateStarted().getTime());
+      fromDb.setDateCompleted(now);
+      fromDb.setRunTime(now.getTime() - job.getDateStarted().getTime());
     }
   }
 
@@ -310,12 +283,12 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     return setOnlineStatus(serviceType, baseUrl, path, true, jobProducer);
   }
 
-  protected ServiceRegistrationImpl getServiceRegistration(EntityManager em, String serviceType, String baseUrl) {
+  protected ServiceRegistrationJpaImpl getServiceRegistration(EntityManager em, String serviceType, String host) {
     try {
       Query q = em.createNamedQuery("ServiceRegistration.getRegistration");
       q.setParameter("serviceType", serviceType);
-      q.setParameter("host", baseUrl);
-      return (ServiceRegistrationImpl) q.getSingleResult();
+      q.setParameter("host", host);
+      return (ServiceRegistrationJpaImpl) q.getSingleResult();
     } catch (NoResultException e) {
       return null;
     }
@@ -343,12 +316,12 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      ServiceRegistrationImpl registration = getServiceRegistration(em, serviceType, baseUrl);
+      ServiceRegistrationJpaImpl registration = getServiceRegistration(em, serviceType, baseUrl);
       if (registration == null) {
         if (jobProducer == null) { // if we are not provided a value, consider it to be false
-          registration = new ServiceRegistrationImpl(serviceType, baseUrl, path, false);
+          registration = new ServiceRegistrationJpaImpl(serviceType, baseUrl, path, false);
         } else {
-          registration = new ServiceRegistrationImpl(serviceType, baseUrl, path, jobProducer);
+          registration = new ServiceRegistrationJpaImpl(serviceType, baseUrl, path, jobProducer);
         }
         em.persist(registration);
       } else {
@@ -392,11 +365,11 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      ServiceRegistrationImpl reg = getServiceRegistration(em, serviceType, baseUrl);
+      ServiceRegistrationJpaImpl reg = getServiceRegistration(em, serviceType, baseUrl);
       if (reg == null) {
         throw new IllegalStateException("Can not set maintenance mode on a service that has not been registered");
       }
-      reg.setMaintenanceMode(maintenance);
+      reg.setInMaintenanceMode(maintenance);
       em.merge(reg);
       tx.commit();
     } catch (RollbackException e) {
@@ -470,17 +443,17 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceStatistics()
    */
-  @SuppressWarnings("unchecked")
   @Override
   public List<ServiceStatistics> getServiceStatistics() {
     EntityManager em = emf.createEntityManager();
     try {
       Query query = em.createNamedQuery("ServiceRegistration.statistics");
       Map<ServiceRegistration, ServiceStatisticsImpl> statsMap = new HashMap<ServiceRegistration, ServiceStatisticsImpl>();
+      @SuppressWarnings("rawtypes")
       List queryResults = query.getResultList();
       for (Object result : queryResults) {
         Object[] oa = (Object[]) result;
-        ServiceRegistrationImpl serviceRegistration = ((ServiceRegistrationImpl) oa[0]);
+        ServiceRegistrationJpaImpl serviceRegistration = ((ServiceRegistrationJpaImpl) oa[0]);
         Status status = ((Status) oa[1]);
         Number count = (Number) oa[2];
         Number meanQueueTime = (Number) oa[3];

@@ -24,6 +24,7 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.mediapackage.identifier.HandleException;
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.security.api.TrustedHttpClientException;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -161,8 +162,8 @@ public class IngestServiceRemoteImpl implements IngestService {
   }
 
   @Override
-  public WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID, Map<String,String> wfConfig)
-          throws MediaPackageException, FileNotFoundException, IOException, Exception {
+  public WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID,
+          Map<String, String> wfConfig) throws MediaPackageException, FileNotFoundException, IOException, Exception {
     logger.info("Adding and ingesting a zipped media package on a remote server: " + remoteHost);
     MultipartEntity mpEntity = new MultipartEntity();
     String remoteHostMethod = remoteHost + "/ingest/rest/addZippedMediaPackage/" + workflowDefinitionID;
@@ -178,19 +179,15 @@ public class IngestServiceRemoteImpl implements IngestService {
     logger.info("Creating a new media package on a remote server: " + remoteHost);
     String remoteHostMethod = remoteHost + "/ingest/rest/createMediaPackage";
     HttpGet get = new HttpGet(remoteHostMethod);
-    return trustedHttpClient.execute(get, mediaPackageResponseHandler);
+    try {
+      return trustedHttpClient.execute(get, mediaPackageResponseHandler);
+    } catch (TrustedHttpClientException e) {
+      throw new MediaPackageException("Unable to create a media package", e);
+    }
   }
 
   @Override
-  public WorkflowInstance getWorkflowInstance(String id) {
-    logger.info("Returning a workflow instance (" + id + ") from a remote server: " + remoteHost);
-    String remoteHostMethod = remoteHost + "/ingest/rest/getWorkflowInstance/" + id + ".xml";
-    HttpGet get = new HttpGet(remoteHostMethod);
-    return trustedHttpClient.execute(get, workflowInstanceResponseHandler);
-  }
-
-  @Override
-  public void discardMediaPackage(MediaPackage mediaPackage) {
+  public void discardMediaPackage(MediaPackage mediaPackage) throws IOException {
     String id = mediaPackage.getIdentifier().compact();
     logger.info("Discarding a media package (" + id + ") on a remote server: " + remoteHost);
 
@@ -205,7 +202,12 @@ public class IngestServiceRemoteImpl implements IngestService {
     }
     HttpPost post = new HttpPost(remoteHostMethod);
     post.setEntity(entity);
-    trustedHttpClient.execute(post);
+    HttpResponse response = null;
+    try {
+      response = trustedHttpClient.execute(post);
+    } finally {
+      trustedHttpClient.close(response);
+    }
   }
 
   @Override
@@ -272,7 +274,7 @@ public class IngestServiceRemoteImpl implements IngestService {
 
   protected MediaPackage addMediaPackageElement(String remoteHostMethod, InputStream file, String filename,
           MediaPackage mediaPackage, MediaPackageElementFlavor flavor) throws MediaPackageException,
-          UnsupportedEncodingException {
+          UnsupportedEncodingException, IOException {
     // build http entity
     MultipartEntity mpEntity = new MultipartEntity();
     mpEntity.addPart("mediaPackage", new StringBody(mediaPackage.toXml()));
@@ -295,7 +297,8 @@ public class IngestServiceRemoteImpl implements IngestService {
     }
   }
 
-  protected WorkflowInstance ingestMediaPackage(String remoteHostMethod, MultipartEntity mpEntity) {
+  protected WorkflowInstance ingestMediaPackage(String remoteHostMethod, MultipartEntity mpEntity)
+          throws TrustedHttpClientException {
     HttpPost httppost = new HttpPost(remoteHostMethod);
     httppost.setEntity(mpEntity);
     return trustedHttpClient.execute(httppost, workflowInstanceResponseHandler);
@@ -313,8 +316,10 @@ public class IngestServiceRemoteImpl implements IngestService {
       HttpEntity entity = response.getEntity();
       try {
         return entity == null ? null : mpBuilder.loadFromXml(entity.getContent());
-      } catch (Exception e) {
-        throw new RuntimeException(e);
+      } catch (MediaPackageException e) {
+        throw new IOException(e);
+      } finally {
+        trustedHttpClient.close(response);
       }
     }
   }
@@ -331,7 +336,9 @@ public class IngestServiceRemoteImpl implements IngestService {
       try {
         return entity == null ? null : wfBuilder.parseWorkflowInstance(entity.getContent());
       } catch (Exception e) {
-        throw new RuntimeException(e);
+        throw new IOException(e);
+      } finally {
+        trustedHttpClient.close(response);
       }
     }
   }

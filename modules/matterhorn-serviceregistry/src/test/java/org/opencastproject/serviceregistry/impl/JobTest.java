@@ -15,31 +15,27 @@
  */
 package org.opencastproject.serviceregistry.impl;
 
-import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.Job.Status;
-import org.opencastproject.mediapackage.Attachment;
-import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.mediapackage.Track;
-import org.opencastproject.serviceregistry.api.ServiceRegistration;
-import org.opencastproject.serviceregistry.impl.JobBuilder;
-import org.opencastproject.serviceregistry.impl.JobImpl;
-import org.opencastproject.serviceregistry.impl.ServiceRegistrationImpl;
-import org.opencastproject.serviceregistry.impl.ServiceRegistryJpaImpl;
-import org.opencastproject.util.UrlSupport;
-
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.job.api.JobParser;
+import org.opencastproject.mediapackage.Attachment;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.Track;
+import org.opencastproject.serviceregistry.api.ServiceRegistration;
+import org.opencastproject.util.UrlSupport;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class JobTest {
   private static final String JOB_TYPE_1 = "testing1";
@@ -51,10 +47,10 @@ public class JobTest {
   private ComboPooledDataSource pooledDataSource = null;
   private ServiceRegistryJpaImpl serviceRegistry = null;
 
-  private ServiceRegistrationImpl regType1Host1 = null;
-  private ServiceRegistrationImpl regType1Host2 = null;
-  private ServiceRegistrationImpl regType2Host1 = null;
-  private ServiceRegistrationImpl regType2Host2 = null;
+  private ServiceRegistrationJpaImpl regType1Host1 = null;
+  private ServiceRegistrationJpaImpl regType1Host2 = null;
+  private ServiceRegistrationJpaImpl regType2Host1 = null;
+  private ServiceRegistrationJpaImpl regType2Host2 = null;
 
   @Before
   public void setUp() throws Exception {
@@ -76,10 +72,10 @@ public class JobTest {
     serviceRegistry.activate(null);
 
     // register some service instances
-    regType1Host1 = (ServiceRegistrationImpl) serviceRegistry.registerService(JOB_TYPE_1, LOCALHOST, PATH);
-    regType1Host2 = (ServiceRegistrationImpl) serviceRegistry.registerService(JOB_TYPE_1, HOST_2, PATH);
-    regType2Host1 = (ServiceRegistrationImpl) serviceRegistry.registerService(JOB_TYPE_2, LOCALHOST, PATH);
-    regType2Host2 = (ServiceRegistrationImpl) serviceRegistry.registerService(JOB_TYPE_2, HOST_2, PATH);
+    regType1Host1 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_1, LOCALHOST, PATH);
+    regType1Host2 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_1, HOST_2, PATH);
+    regType2Host1 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_2, LOCALHOST, PATH);
+    regType2Host2 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_2, HOST_2, PATH);
   }
 
   @After
@@ -94,7 +90,7 @@ public class JobTest {
 
   @Test
   public void testMarshalling() throws Exception {
-    JobImpl job = (JobImpl) serviceRegistry.createJob(JOB_TYPE_1);
+    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1);
     Track t = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
             new URI("file://test.mov"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
     t.setIdentifier("track-1");
@@ -107,20 +103,20 @@ public class JobTest {
     job.setElement(t);
     job.setStatus(Status.FINISHED);
     serviceRegistry.updateJob(job);
-    String xml = job.toXml();
-    Job parsed = JobBuilder.getInstance().parseJob(xml);
+    String xml = JobParser.serializeToString(job);
+    Job parsed = JobParser.parseJob(xml);
     Assert.assertEquals(job.getId(), parsed.getId());
 
     // Unmarshall an attachment
     String attachmentXml = "<ns2:attachment xmlns:ns2=\"http://mediapackage.opencastproject.org\"><tags/><url>http://localhost:8080/camera25fpslowdl.jpg</url></ns2:attachment>";
-    JobImpl attachmentReceipt = new JobImpl();
+    JobJpaImpl attachmentReceipt = new JobJpaImpl();
     attachmentReceipt.setElementAsXml(attachmentXml);
     Assert.assertTrue(attachmentReceipt.getElement() instanceof Attachment);
   }
 
   @Test
   public void testGetReceipt() throws Exception {
-    JobImpl job = (JobImpl) serviceRegistry.createJob(JOB_TYPE_1);
+    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1);
 
     Job receiptFromDb = serviceRegistry.getJob(job.getId());
     Assert.assertEquals(Status.QUEUED, receiptFromDb.getStatus());
@@ -174,15 +170,15 @@ public class JobTest {
 
   @Test
   public void testGetHostsCount() throws Exception {
-    JobImpl localRunning1 = (JobImpl) serviceRegistry.createJob(JOB_TYPE_1);
+    JobJpaImpl localRunning1 = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1);
     localRunning1.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(localRunning1);
 
-    JobImpl localRunning2 = (JobImpl) serviceRegistry.createJob(JOB_TYPE_1);
+    JobJpaImpl localRunning2 = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1);
     localRunning2.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(localRunning2);
 
-    JobImpl localFinished = (JobImpl) serviceRegistry.createJob(JOB_TYPE_1);
+    JobJpaImpl localFinished = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1);
     // Simulate starting the job
     localFinished.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(localFinished);
@@ -190,11 +186,11 @@ public class JobTest {
     localFinished.setStatus(Status.FINISHED);
     serviceRegistry.updateJob(localFinished);
 
-    JobImpl remoteRunning = (JobImpl) serviceRegistry.createJob(regType1Host2);
+    JobJpaImpl remoteRunning = (JobJpaImpl) serviceRegistry.createJob(regType1Host2);
     remoteRunning.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(remoteRunning);
 
-    JobImpl remoteFinished = (JobImpl) serviceRegistry.createJob(regType1Host2);
+    JobJpaImpl remoteFinished = (JobJpaImpl) serviceRegistry.createJob(regType1Host2);
     // Simulate starting the job
     remoteFinished.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(remoteFinished);
@@ -202,11 +198,11 @@ public class JobTest {
     remoteFinished.setStatus(Status.FINISHED);
     serviceRegistry.updateJob(remoteFinished);
 
-    JobImpl otherTypeRunning = (JobImpl) serviceRegistry.createJob(JOB_TYPE_2);
+    JobJpaImpl otherTypeRunning = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_2);
     otherTypeRunning.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(otherTypeRunning);
 
-    JobImpl otherTypeFinished = (JobImpl) serviceRegistry.createJob(JOB_TYPE_2);
+    JobJpaImpl otherTypeFinished = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_2);
     // Simulate starting the job
     otherTypeFinished.setStatus(Status.RUNNING);
     serviceRegistry.updateJob(otherTypeFinished);

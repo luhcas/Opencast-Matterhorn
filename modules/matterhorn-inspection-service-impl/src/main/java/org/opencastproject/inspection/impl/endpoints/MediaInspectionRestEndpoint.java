@@ -17,6 +17,7 @@ package org.opencastproject.inspection.impl.endpoints;
 
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
@@ -85,8 +86,8 @@ public class MediaInspectionRestEndpoint {
   public Response inspectTrack(@QueryParam("uri") URI uri) {
     checkNotNull(service);
     try {
-      Job r = service.inspect(uri, false);
-      return Response.ok(r.toXml()).build();
+      Job job = service.inspect(uri, false);
+      return Response.ok(JobParser.serializeToString(job)).build();
     } catch (Exception e) {
       logger.info(e.getMessage());
       return Response.serverError().build();
@@ -104,8 +105,8 @@ public class MediaInspectionRestEndpoint {
       Document doc = docBuilder.parse(IOUtils.toInputStream(mediaPackageElement, "UTF-8"));
       MediaPackageElement mpe = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
               .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
-      Job r = service.enrich(mpe, override, false);
-      return Response.ok(r.toXml()).build();
+      Job job = service.enrich(mpe, override, false);
+      return Response.ok(JobParser.serializeToString(job)).build();
     } catch (Exception e) {
       logger.info(e.getMessage(), e);
       return Response.serverError().build();
@@ -119,7 +120,7 @@ public class MediaInspectionRestEndpoint {
     checkNotNull(service);
     try {
       Job r = service.getJob(id);
-      return Response.ok(r).build();
+      return Response.ok(JobParser.serializeToString(r)).build();
     } catch (NotFoundException e) {
       return Response.status(Response.Status.NOT_FOUND).build();
     } catch (Exception e) {

@@ -15,6 +15,28 @@
  */
 package org.opencastproject.composer.impl.endpoint;
 
+import static org.opencastproject.job.api.JobParser.serializeToString;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.apache.commons.io.IOUtils;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EmbedderException;
 import org.opencastproject.composer.api.EncoderException;
@@ -41,8 +63,6 @@ import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-
-import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,25 +70,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * A REST endpoint delegating functionality to the {@link ComposerService}
@@ -128,10 +129,10 @@ public class ComposerRestService {
     }
 
     // Asynchronously encode the specified tracks
-    Job receipt = composerService.encode((Track) sourceTrack, profileId);
-    if (receipt == null)
+    Job job = composerService.encode((Track) sourceTrack, profileId);
+    if (job == null)
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Encoding failed").build();
-    return Response.ok().entity(receipt.toXml()).build();
+    return Response.ok().entity(serializeToString(job)).build();
   }
 
   /**
@@ -175,10 +176,10 @@ public class ComposerRestService {
     }
 
     // Asynchronously encode the specified tracks
-    Job receipt = composerService.trim(sourceTrack, profileId, start, duration);
-    if (receipt == null)
+    Job job = composerService.trim(sourceTrack, profileId, start, duration);
+    if (job == null)
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Trimming failed").build();
-    return Response.ok().entity(receipt.toXml()).build();
+    return Response.ok().entity(serializeToString(job)).build();
   }
 
   /**
@@ -220,8 +221,8 @@ public class ComposerRestService {
     }
 
     // Asynchronously encode the specified tracks
-    Job receipt = composerService.mux((Track) videoSourceTrack, (Track) audioSourceTrack, profileId);
-    return Response.ok().entity(receipt.toXml()).build();
+    Job job = composerService.mux((Track) videoSourceTrack, (Track) audioSourceTrack, profileId);
+    return Response.ok().entity(serializeToString(job)).build();
   }
 
   /**
@@ -251,8 +252,8 @@ public class ComposerRestService {
     }
 
     try {
-      Job receipt = composerService.image((Track) sourceTrack, profileId, time);
-      return Response.ok().entity(receipt.toXml()).build();
+      Job job = composerService.image((Track) sourceTrack, profileId, time);
+      return Response.ok().entity(serializeToString(job)).build();
     } catch (EncoderException e) {
       logger.warn("Unable to extract image: " + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -299,8 +300,8 @@ public class ComposerRestService {
     }
 
     try {
-      Job receipt = composerService.captions((Track) mediaTrack, captions);
-      return Response.ok().entity(receipt.toXml()).build();
+      Job job = composerService.captions((Track) mediaTrack, captions);
+      return Response.ok().entity(serializeToString(job)).build();
     } catch (EmbedderException e) {
       logger.warn("Unable to embed captions: " + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -311,15 +312,15 @@ public class ComposerRestService {
   @Path("receipt/{id}.xml")
   @Produces(MediaType.TEXT_XML)
   public Response getJob(@PathParam("id") String id) {
-    Job r = null;
+    Job job = null;
     try {
-      r = composerService.getJob(id);
+      job = composerService.getJob(id);
+      return Response.ok().entity(serializeToString(job)).build();
     } catch (NotFoundException e) {
       return Response.status(Response.Status.NOT_FOUND).build();
-    } catch (ServiceRegistryException e) {
+    } catch (Exception e) {
       throw new WebApplicationException(e);
     }
-    return Response.ok().entity(r.toXml()).build();
   }
 
   @GET

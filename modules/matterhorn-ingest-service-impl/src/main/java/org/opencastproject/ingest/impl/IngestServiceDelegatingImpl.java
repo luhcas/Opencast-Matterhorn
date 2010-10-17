@@ -142,13 +142,14 @@ public class IngestServiceDelegatingImpl implements IngestService {
   }
 
   @Override
-  public WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID, Map<String,String> wfConfig)
-          throws MediaPackageException, FileNotFoundException, IOException, Exception {
+  public WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID,
+          Map<String, String> wfConfig) throws MediaPackageException, FileNotFoundException, IOException, Exception {
     return delegate.addZippedMediaPackage(ZippedMediaPackage, workflowDefinitionID, wfConfig);
   }
 
   @Override
-  public MediaPackage createMediaPackage() throws MediaPackageException, ConfigurationException, HandleException {
+  public MediaPackage createMediaPackage() throws MediaPackageException, ConfigurationException, HandleException,
+          IOException {
     return delegate.createMediaPackage();
   }
 
@@ -173,10 +174,4 @@ public class IngestServiceDelegatingImpl implements IngestService {
           throws IllegalStateException, Exception {
     return delegate.ingest(mediaPackage, workflowDefinitionID, properties);
   }
-
-  @Override
-  public WorkflowInstance getWorkflowInstance(String id) {
-    return delegate.getWorkflowInstance(id);
-  }
-
 }

@@ -15,13 +15,11 @@
  */
 package org.opencastproject.serviceregistry.api;
 
+import java.util.List;
+
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.util.NotFoundException;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
 
 /**
  * Manages clustered services and the {@link Job}s they may create to enable asynchronous job handling.
@@ -91,24 +89,6 @@ public interface ServiceRegistry {
    */
   void setMaintenanceStatus(String serviceType, String host, boolean maintenance) throws IllegalStateException,
           ServiceRegistryException;
-
-  /**
-   * Parses an xml string representing a Receipt
-   * 
-   * @param xml
-   *          The xml string
-   * @return The job TODO: Move this out of the service if possible
-   */
-  Job parseJob(String xml) throws IOException;
-
-  /**
-   * Parses an xml stream representing a Receipt
-   * 
-   * @param in
-   *          The xml input stream
-   * @return The receipt
-   */
-  Job parseJob(InputStream in) throws IOException;
 
   /**
    * Create and store a new job in {@link Status#QUEUED}

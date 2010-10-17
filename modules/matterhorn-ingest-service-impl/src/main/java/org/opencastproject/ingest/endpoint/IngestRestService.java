@@ -107,7 +107,7 @@ public class IngestRestService {
     this.persistenceProvider = persistenceProvider;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   public void setPersistenceProperties(Map persistenceProperties) {
     this.persistenceProperties = persistenceProperties;
   }
@@ -132,21 +132,6 @@ public class IngestRestService {
     try {
       mp = ingestService.createMediaPackage();
       return Response.ok(mp).build();
-    } catch (Exception e) {
-      logger.warn(e.getMessage(), e);
-      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-    }
-  }
-
-  @GET
-  @Produces(MediaType.TEXT_XML)
-  @Path("getWorkflowInstance/{id}.xml")
-  public Response getWorkflowInstance(@PathParam("id") String id) {
-    WorkflowInstance wf;
-    // id = id.substring(0, id.length()-4);
-    try {
-      wf = ingestService.getWorkflowInstance(id);
-      return Response.ok(wf).build();
     } catch (Exception e) {
       logger.warn(e.getMessage(), e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();

@@ -30,7 +30,7 @@ public interface TrustedHttpClient {
    * @param httpUriRequest The http request
    * @return the http response returned by the server
    */
-  HttpResponse execute(HttpUriRequest httpUriRequest);
+  HttpResponse execute(HttpUriRequest httpUriRequest) throws TrustedHttpClientException;
 
   /**
    * Executes an HttpRequest using a secure, but not necessarily encrypted, http connection.
@@ -38,7 +38,7 @@ public interface TrustedHttpClient {
    * @param httpUriRequest The http request
    * @return the http response returned by the server
    */
-  <T> T execute(HttpUriRequest httpUriRequest, ResponseHandler<T> responseHandler);
+  <T> T execute(HttpUriRequest httpUriRequest, ResponseHandler<T> responseHandler) throws TrustedHttpClientException;
   
   /**
    * Closes this response.  The caller must call close() once finished reading the response.

@@ -65,7 +65,4 @@ public interface Job {
 
   /** Sets the mediapackage element produced by this job. */
   void setElement(MediaPackageElement element);
-
-  /** Gets an xml representation of this receipt */
-  String toXml();
 }

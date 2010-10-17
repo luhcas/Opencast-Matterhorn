@@ -95,7 +95,7 @@ import javax.media.protocol.DataSource;
 public class VideoSegmenter extends MediaAnalysisServiceSupport implements ManagedService {
 
   /** Receipt type */
-  public static final String JOB_TYPE = "org.opencastproject.analysis.vsegmenter";
+  public static final String JOB_TYPE = "org.opencastproject.analysis.segmenter";
 
   /** Resulting collection in the working file repository */
   public static final String COLLECTION_ID = "vsegmenter";

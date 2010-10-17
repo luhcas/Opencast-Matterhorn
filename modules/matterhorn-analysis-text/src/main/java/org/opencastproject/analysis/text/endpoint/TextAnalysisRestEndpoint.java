@@ -15,9 +15,12 @@
  */
 package org.opencastproject.analysis.text.endpoint;
 
+import java.io.IOException;
+
 import org.opencastproject.analysis.api.MediaAnalysisService;
 import org.opencastproject.analysis.text.TextAnalyzer;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
@@ -90,8 +93,8 @@ public class TextAnalysisRestEndpoint {
       Document doc = docBuilder.parse(IOUtils.toInputStream(imageAsXml, "UTF-8"));
       MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
               .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
-      Job receipt = textAnalyzer.analyze(element, false);
-      return Response.ok(receipt.toXml()).build();
+      Job job = textAnalyzer.analyze(element, false);
+      return Response.ok(JobParser.serializeToString(job)).build();
     } catch (Exception e) {
       logger.warn(e.getMessage(), e);
       return Response.serverError().build();
@@ -113,7 +116,11 @@ public class TextAnalysisRestEndpoint {
     if (job == null) {
       return Response.status(Status.NOT_FOUND).build();
     } else {
-      return Response.ok(job.toXml()).build();
+      try {
+        return Response.ok(JobParser.serializeToString(job)).build();
+      } catch (IOException e) {
+        throw new WebApplicationException(e);
+      }
     }
   }
 

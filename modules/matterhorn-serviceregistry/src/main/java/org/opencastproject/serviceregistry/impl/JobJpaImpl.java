@@ -15,18 +15,6 @@
  */
 package org.opencastproject.serviceregistry.impl;
 
-import org.opencastproject.job.api.Job;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
-import org.opencastproject.mediapackage.Attachment;
-import org.opencastproject.mediapackage.Catalog;
-import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.mediapackage.Track;
-
-import org.apache.commons.io.IOUtils;
-import org.w3c.dom.Document;
-
 import java.util.Date;
 import java.util.UUID;
 
@@ -39,6 +27,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -49,77 +38,64 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.bind.annotation.XmlType;
+
+import org.opencastproject.job.api.JaxbJob;
+import org.opencastproject.mediapackage.AbstractMediaPackageElement;
+import org.opencastproject.mediapackage.Attachment;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.Track;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * A long running, asynchronously executed job.
+ * A long running, asynchronously executed job. This concrete implementations adds JPA annotations to {@link JaxbJob}.
  */
 @Entity(name = "Job")
 @Access(AccessType.PROPERTY)
 @Table(name = "JOB")
-@XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name = "job", namespace = "http://remote.opencastproject.org/")
-@NamedQueries( {
+@NamedQueries({
         @NamedQuery(name = "Job.count", query = "SELECT COUNT(j) FROM Job j "
                 + "where j.status = :status and j.serviceRegistration.serviceType = :serviceType"),
         @NamedQuery(name = "Job.countByHost", query = "SELECT COUNT(j) FROM Job j "
                 + "where j.status = :status and j.serviceRegistration.serviceType = :serviceType and "
                 + "j.serviceRegistration.host = :host") })
-public class JobImpl implements Job {
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlType(name = "job", namespace = "http://job.opencastproject.org/")
+@XmlRootElement(name = "job", namespace = "http://job.opencastproject.org/")
+public class JobJpaImpl extends JaxbJob {
+  
+  /** The logger */
+  private static final Logger logger = LoggerFactory.getLogger(JobJpaImpl.class);
 
   /** Default constructor needed by jaxb and jpa */
-  public JobImpl() {
+  public JobJpaImpl() {
+    super();
   }
 
   /**
    * Constructor with everything needed for a newly instantiated job, using a random ID and setting the status to
    * queued.
    */
-  public JobImpl(ServiceRegistrationImpl serviceRegistration) {
+  public JobJpaImpl(ServiceRegistrationJpaImpl serviceRegistration) {
     this();
     setId(UUID.randomUUID().toString());
     setStatus(Status.QUEUED);
     setDateCreated(new Date());
+    setHost(serviceRegistration.getHost());
+    setJobType(serviceRegistration.getServiceType());
     this.serviceRegistration = serviceRegistration;
   }
 
   /** Constructor with everything needed for a newly instantiated job, using a random ID. */
-  public JobImpl(Status status, ServiceRegistrationImpl serviceRegistration) {
+  public JobJpaImpl(Status status, ServiceRegistrationJpaImpl serviceRegistration) {
     this(serviceRegistration);
     setStatus(status);
   }
 
-  /** The job ID */
-  String id;
-
   /** The service that produced this job */
-  @ManyToOne
-  ServiceRegistrationImpl serviceRegistration;
-
-  /** The job status */
-  Status status;
-
-  /** The date this job was created */
-  Date dateCreated;
-
-  /** The date this job was started */
-  Date dateStarted;
-
-  /** The date this job was completed */
-  Date dateCompleted;
-
-  /** The queue time is denormalized in the database to enable cross-platform date arithmetic in JPA queries */
-  Long queueTime;
-
-  /** The run time is denormalized in the database to enable cross-platform date arithmetic in JPA queries */
-  Long runTime;
-
-  /** The job's context. Not currently utilized. See http://opencast.jira.com/browse/MH-4492 */
-  // String context;
-
-  /** The element produced by this job, or null if it has not yet been generated (or was not due to an exception) */
-  MediaPackageElement element;
+  ServiceRegistrationJpaImpl serviceRegistration;
 
   /**
    * {@inheritDoc}
@@ -137,16 +113,6 @@ public class JobImpl implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.Job#setId(java.lang.String)
-   */
-  @Override
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
    * @see org.opencastproject.job.api.Job#getStatus()
    */
   @Column
@@ -159,22 +125,13 @@ public class JobImpl implements Job {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.Job#setStatus(org.opencastproject.job.api.Job.Status)
-   */
-  @Override
-  public void setStatus(Status status) {
-    this.status = status;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
    * @see org.opencastproject.job.api.Job#getType()
    */
+  @Transient
   @XmlAttribute(name = "type")
   @Override
   public String getJobType() {
-    return serviceRegistration.getServiceType();
+    return jobType;
   }
 
   /**
@@ -182,10 +139,11 @@ public class JobImpl implements Job {
    * 
    * @see org.opencastproject.job.api.Job#getHost()
    */
+  @Transient
   @XmlElement
   @Override
   public String getHost() {
-    return serviceRegistration.getHost();
+    return host;
   }
 
   /**
@@ -236,51 +194,11 @@ public class JobImpl implements Job {
   }
 
   /**
-   * @param queueTime
-   *          the queueTime to set
-   */
-  public void setQueueTime(Long queueTime) {
-    this.queueTime = queueTime;
-  }
-
-  /**
    * @return the runTime
    */
   @Column
   public Long getRunTime() {
     return runTime;
-  }
-
-  /**
-   * @param runTime
-   *          the runTime to set
-   */
-  public void setRunTime(Long runTime) {
-    this.runTime = runTime;
-  }
-
-  /**
-   * @param dateCreated
-   *          the dateCreated to set
-   */
-  public void setDateCreated(Date dateCreated) {
-    this.dateCreated = dateCreated;
-  }
-
-  /**
-   * @param dateStarted
-   *          the dateStarted to set
-   */
-  public void setDateStarted(Date dateStarted) {
-    this.dateStarted = dateStarted;
-  }
-
-  /**
-   * @param dateCompleted
-   *          the dateCompleted to set
-   */
-  public void setDateCompleted(Date dateCompleted) {
-    this.dateCompleted = dateCompleted;
   }
 
   /**
@@ -315,10 +233,6 @@ public class JobImpl implements Job {
     }
   }
 
-  public void setTrack(Track track) {
-    this.element = track;
-  }
-
   @Transient
   @XmlElement(name = "attachment")
   public Attachment getAttachment() {
@@ -327,10 +241,6 @@ public class JobImpl implements Job {
     } else {
       return null;
     }
-  }
-
-  public void setAttachment(Attachment attachment) {
-    this.element = attachment;
   }
 
   @Transient
@@ -343,10 +253,6 @@ public class JobImpl implements Job {
     }
   }
 
-  public void setCatalog(Catalog catalog) {
-    this.element = catalog;
-  }
-
   @Lob
   @Column(name = "ELEMENT_XML")
   public String getElementAsXml() throws Exception {
@@ -355,35 +261,11 @@ public class JobImpl implements Job {
     return ((AbstractMediaPackageElement) element).getAsXml();
   }
 
-  public void setElementAsXml(String xml) throws Exception {
-    if (xml == null) {
-      element = null;
-    } else {
-      DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document doc = docBuilder.parse(IOUtils.toInputStream(xml, "UTF-8"));
-      element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromManifest(
-              doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.Job#toXml()
-   */
-  @Override
-  public String toXml() {
-    try {
-      return JobBuilder.getInstance().toXml(this);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   /**
    * @return the serviceRegistration
    */
-  public ServiceRegistrationImpl getServiceRegistration() {
+  @ManyToOne
+  public ServiceRegistrationJpaImpl getServiceRegistration() {
     return serviceRegistration;
   }
 
@@ -391,16 +273,17 @@ public class JobImpl implements Job {
    * @param serviceRegistration
    *          the serviceRegistration to set
    */
-  public void setServiceRegistration(ServiceRegistrationImpl serviceRegistration) {
+  public void setServiceRegistration(ServiceRegistrationJpaImpl serviceRegistration) {
     this.serviceRegistration = serviceRegistration;
   }
-  
-  /**
-   * {@inheritDoc}
-   * @see java.lang.Object#toString()
-   */
-  @Override
-  public String toString() {
-    return "Job {" + this.id + "}";
+
+  @PostLoad
+  public void postLoad() {
+    if(serviceRegistration == null) {
+      logger.warn("service registration is null");
+    } else {
+      super.host = serviceRegistration.getHost();
+      super.jobType = serviceRegistration.getServiceType();
+    }
   }
 }

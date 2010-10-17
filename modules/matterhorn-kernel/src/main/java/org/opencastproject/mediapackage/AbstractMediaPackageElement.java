@@ -15,23 +15,8 @@
  */
 package org.opencastproject.mediapackage;
 
-import org.opencastproject.util.Checksum;
-import org.opencastproject.util.MimeType;
-
-import org.apache.commons.io.IOUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLFilterImpl;
-import org.xml.sax.helpers.XMLReaderFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.net.URI;
@@ -49,7 +34,14 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.transform.sax.SAXSource;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.apache.commons.io.IOUtils;
+import org.opencastproject.util.Checksum;
+import org.opencastproject.util.MimeType;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * This class provides base functionality for media package elements.
@@ -601,92 +593,16 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
     }
   }
 
-  /**
-   * 
-   * @param xml
-   * @return
-   * @throws MediaPackageException
-   */
   public static AbstractMediaPackageElement getFromXml(String xml) throws MediaPackageException {
-    Unmarshaller unmarshaller = null;
     try {
-      unmarshaller = MediaPackageImpl.context.createUnmarshaller();
-      // since we often get xml without namespaces, add the namespace so jaxb can find the appropriate object type
-      NamespaceFilter nsFilter = new NamespaceFilter("http://mediapackage.opencastproject.org", true);
-      XMLReader reader = XMLReaderFactory.createXMLReader();
-      nsFilter.setParent(reader);
-      InputSource inputSource = new InputSource(IOUtils.toInputStream(xml, "UTF-8"));
-      SAXSource source = new SAXSource(nsFilter, inputSource);
-      return (AbstractMediaPackageElement) unmarshaller.unmarshal(source);
-    } catch (JAXBException e) {
-      throw new MediaPackageException(e.getLinkedException() != null ? e.getLinkedException() : e);
-    } catch (IOException e) {
+      Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+              .parse(IOUtils.toInputStream(xml, "UTF-8"));
+      MediaPackageElement element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+              .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
+      return (AbstractMediaPackageElement) element;
+    } catch (Exception e) {
       throw new MediaPackageException(e);
-    } catch (SAXException e) {
-      throw new MediaPackageException(e);
-    }
-  }
-
-  static class NamespaceFilter extends XMLFilterImpl {
-
-    private String usedNamespaceUri;
-    private boolean addNamespace;
-
-    // State variable
-    private boolean addedNamespace = false;
-
-    public NamespaceFilter(String namespaceUri, boolean addNamespace) {
-      super();
-
-      if (addNamespace)
-        this.usedNamespaceUri = namespaceUri;
-      else
-        this.usedNamespaceUri = "";
-      this.addNamespace = addNamespace;
-    }
-
-    @Override
-    public void startDocument() throws SAXException {
-      super.startDocument();
-      if (addNamespace) {
-        startControlledPrefixMapping();
-      }
-    }
-
-    @Override
-    public void startElement(String arg0, String arg1, String arg2, Attributes arg3) throws SAXException {
-
-      super.startElement(this.usedNamespaceUri, arg1, arg2, arg3);
-    }
-
-    @Override
-    public void endElement(String arg0, String arg1, String arg2) throws SAXException {
-
-      super.endElement(this.usedNamespaceUri, arg1, arg2);
-    }
-
-    @Override
-    public void startPrefixMapping(String prefix, String url) throws SAXException {
-
-      if (addNamespace) {
-        this.startControlledPrefixMapping();
-      } else {
-        // Remove the namespace, i.e. don´t call startPrefixMapping for parent!
-      }
-
-    }
-
-    private void startControlledPrefixMapping() throws SAXException {
-
-      if (this.addNamespace && !this.addedNamespace) {
-        // We should add namespace since it is set and has not yet been done.
-        super.startPrefixMapping("", this.usedNamespaceUri);
-
-        // Make sure we dont do it twice
-        this.addedNamespace = true;
-      }
     }
 
   }
-
 }

@@ -68,7 +68,7 @@ public interface IngestService {
 
   /**
    * Add an existing compressed MediaPackage to the repository.
-   *
+   * 
    * @param ZippedMediaPackage
    *          A zipped file containing manifest, tracks, catalogs and attachments
    * @param workflowDefinitionID
@@ -81,8 +81,8 @@ public interface IngestService {
    * @throws IOException
    * @throws Exception
    */
-  WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID, Map<String,String> wfConfig)
-          throws MediaPackageException, FileNotFoundException, IOException, Exception;
+  WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID,
+          Map<String, String> wfConfig) throws MediaPackageException, FileNotFoundException, IOException, Exception;
 
   /**
    * Create a new MediaPackage in the repository.
@@ -91,8 +91,9 @@ public interface IngestService {
    * @throws MediaPackageException
    * @throws HandleException
    * @throws ConfigurationException
+   * @throws IOException
    */
-  MediaPackage createMediaPackage() throws MediaPackageException, ConfigurationException, HandleException;
+  MediaPackage createMediaPackage() throws MediaPackageException, ConfigurationException, HandleException, IOException;
 
   /**
    * Add a media track to an existing MediaPackage in the repository
@@ -210,7 +211,7 @@ public interface IngestService {
    *          The specific Matterhorn MediaPackage being ingested
    * @return Workflow instance id.
    * @throws Exception
-   *           Exception that occured during MediaPackage serialization or happened in ConductorService durring
+   *           Exception that occured during MediaPackage serialization or happened in WorkflowService during
    *           MediaPackage processing
    */
   WorkflowInstance ingest(MediaPackage mediaPackage) throws IllegalStateException, Exception;
@@ -256,14 +257,5 @@ public interface IngestService {
    *          The specific Matterhorn MediaPackage
    */
   void discardMediaPackage(MediaPackage mediaPackage) throws IOException;
-
-  /**
-   * Get a workflow instance of a asynchronous job.
-   * 
-   * @param id
-   *          An id of the requested workflow instance
-   * @return Updated workflow instance.
-   */
-  WorkflowInstance getWorkflowInstance(String id);
 
 }

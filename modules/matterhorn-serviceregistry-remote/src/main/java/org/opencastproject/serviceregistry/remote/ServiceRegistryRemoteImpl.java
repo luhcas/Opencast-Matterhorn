@@ -20,14 +20,17 @@ import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.security.api.TrustedHttpClient;
 import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceStatistics;
 import org.opencastproject.util.UrlSupport;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.osgi.framework.ServiceException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -57,7 +60,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(ServiceRegistryRemoteImpl.class);
-  
+
   /** Configuration key for the service registry */
   public static final String OPT_SERVICE_REGISTRY_URL = "org.opencastproject.serviceregistry.url";
 
@@ -74,7 +77,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    *          the component context
    */
   protected void activate(ComponentContext context) {
-    String serviceURLProperty = StringUtils.trimToNull((String)context.getProperties().get(OPT_SERVICE_REGISTRY_URL));
+    String serviceURLProperty = StringUtils.trimToNull((String) context.getProperties().get(OPT_SERVICE_REGISTRY_URL));
     if (serviceURLProperty == null)
       throw new ServiceException("Remote service registry can't find " + OPT_SERVICE_REGISTRY_URL);
     try {
@@ -91,7 +94,8 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    *      java.lang.String)
    */
   @Override
-  public ServiceRegistration registerService(String serviceType, String host, String path) {
+  public ServiceRegistration registerService(String serviceType, String host, String path)
+          throws ServiceRegistryException {
     return registerService(serviceType, host, path, false);
   }
 
@@ -102,7 +106,8 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    *      java.lang.String, boolean)
    */
   @Override
-  public ServiceRegistration registerService(String serviceType, String host, String path, boolean jobProducer) {
+  public ServiceRegistration registerService(String serviceType, String host, String path, boolean jobProducer)
+          throws ServiceRegistryException {
     String servicePath = "register";
     HttpPost post = new HttpPost(UrlSupport.concat(serviceURL, servicePath));
     try {
@@ -110,13 +115,30 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
       params.add(new BasicNameValuePair("serviceType", serviceType));
       params.add(new BasicNameValuePair("host", host));
       params.add(new BasicNameValuePair("path", path));
+      params.add(new BasicNameValuePair("jobProducer", Boolean.toString(jobProducer)));
       UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
       post.setEntity(entity);
-      HttpResponse response = null;
-    } catch(UnsupportedEncodingException e) {
-       // TODO: Do something meaningful
+    } catch (UnsupportedEncodingException e) {
+      throw new ServiceRegistryException("Can not url encode post parameters", e);
     }
-    return null;
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(post);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_OK) {
+        logger.info("Registered '" + serviceType + "' on host '" + host + "' with path '" + path + "'.");
+        String jsonString = EntityUtils.toString(response.getEntity(), "UTF-8");
+        return new ServiceRegistrationRemoteImpl(jsonString);
+      }
+    } catch (Exception e) {
+      throw new ServiceRegistryException("Unable to register '" + serviceType + "' on host '" + host + "' with path '"
+              + path + "'.", e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to register '" + serviceType + "' on host '" + host + "' with path '"
+            + path + "'. HTTP status=" + responseStatusCode);
   }
 
   /**
@@ -126,9 +148,36 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    *      java.lang.String)
    */
   @Override
-  public void unRegisterService(String serviceType, String host, String path) {
-    // TODO Auto-generated method stub
-
+  public void unRegisterService(String serviceType, String host, String path) throws ServiceRegistryException {
+    String servicePath = "unregister";
+    HttpPost post = new HttpPost(UrlSupport.concat(serviceURL, servicePath));
+    try {
+      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+      params.add(new BasicNameValuePair("serviceType", serviceType));
+      params.add(new BasicNameValuePair("host", host));
+      params.add(new BasicNameValuePair("path", path));
+      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+      post.setEntity(entity);
+    } catch (UnsupportedEncodingException e) {
+      throw new ServiceRegistryException("Can not url encode post parameters", e);
+    }
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(post);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_NO_CONTENT) {
+        logger.info("Unregistered '" + serviceType + "' on host '" + host + "' with path '" + path + "'.");
+        return;
+      }
+    } catch (Exception e) {
+      throw new ServiceRegistryException("Unable to register " + serviceType + " from host " + host + " on path "
+              + path, e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to unregister '" + serviceType + "' on host '" + host + "' with path '"
+            + path + "'. HTTP status=" + responseStatusCode);
   }
 
   /**
@@ -138,31 +187,37 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    *      java.lang.String, boolean)
    */
   @Override
-  public void setMaintenanceStatus(String serviceType, String host, boolean maintenance) throws IllegalStateException {
-    // TODO Auto-generated method stub
-
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#parseJob(java.lang.String)
-   */
-  @Override
-  public Job parseJob(String xml) throws IOException {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#parseJob(java.io.InputStream)
-   */
-  @Override
-  public Job parseJob(InputStream in) throws IOException {
-    // TODO Auto-generated method stub
-    return null;
+  public void setMaintenanceStatus(String serviceType, String host, boolean maintenance) throws IllegalStateException,
+          ServiceRegistryException {
+    String servicePath = "maintenance";
+    HttpPost post = new HttpPost(UrlSupport.concat(serviceURL, servicePath));
+    try {
+      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+      params.add(new BasicNameValuePair("serviceType", serviceType));
+      params.add(new BasicNameValuePair("host", host));
+      params.add(new BasicNameValuePair("maintenance", Boolean.toString(maintenance)));
+      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+      post.setEntity(entity);
+    } catch (UnsupportedEncodingException e) {
+      throw new ServiceRegistryException("Can not url encode post parameters", e);
+    }
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(post);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_NO_CONTENT) {
+        logger.info("Set maintenance mode on '" + serviceType + "' host '" + host + "' to '" + maintenance + "'.");
+        return;
+      }
+    } catch (Exception e) {
+      throw new ServiceRegistryException("Unable to set maintenance mode on " + serviceType + " host " + host + " to '"
+              + maintenance + "'", e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to set maintenace mode on '" + serviceType + "' host '" + host
+            + "' to '" + maintenance + "'. HTTP status=" + responseStatusCode);
   }
 
   /**

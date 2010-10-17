@@ -6,9 +6,7 @@ import org.opencastproject.capture.api.StateService;
 import org.opencastproject.capture.impl.ConfigurationManager;
 import org.opencastproject.capture.impl.RecordingImpl;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.security.api.TrustedHttpClient;
-import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.util.XProperties;
 
 import org.apache.http.HttpResponse;
@@ -19,7 +17,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +25,7 @@ public class AgentStateJobTest {
   AgentStateJob job = null;
 
   @Before
-  public void setup() throws IllegalArgumentException, ConfigurationException, IOException, MediaPackageException {
+  public void setup() throws Exception {
     ConfigurationManager config = new ConfigurationManager();
     config.setItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL, "http://localhost:8080/");
     config.setItem(CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL, "http://localhost:8080/");

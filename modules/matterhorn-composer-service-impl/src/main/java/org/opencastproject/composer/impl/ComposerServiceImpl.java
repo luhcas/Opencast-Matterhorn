@@ -42,6 +42,7 @@ import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -278,7 +279,8 @@ public class ComposerServiceImpl implements ComposerService {
         InputStream in = null;
         try {
           in = new FileInputStream(encodingOutput);
-          returnURL = workspace.putInCollection(COLLECTION, encodingOutput.getName(), in);
+          returnURL = workspace.putInCollection(COLLECTION,
+                  job.getId() + "." + FilenameUtils.getExtension(encodingOutput.getAbsolutePath()), in);
           logger.info("Copied the trimmed file to the workspace at {}", returnURL);
           encodingOutput.delete();
           logger.info("Deleted the local copy of the trimmed file at {}", encodingOutput.getAbsolutePath());
@@ -452,7 +454,8 @@ public class ComposerServiceImpl implements ComposerService {
         InputStream in = null;
         try {
           in = new FileInputStream(encodingOutput);
-          returnURL = workspace.putInCollection(COLLECTION, encodingOutput.getName(), in);
+          returnURL = workspace.putInCollection(COLLECTION,
+                  job.getId() + "." + FilenameUtils.getExtension(encodingOutput.getAbsolutePath()), in);
           logger.info("Copied the encoded file to the workspace at {}", returnURL);
           encodingOutput.delete();
           logger.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
@@ -623,7 +626,8 @@ public class ComposerServiceImpl implements ComposerService {
         InputStream in = null;
         try {
           in = new FileInputStream(encodingOutput);
-          returnURL = workspace.putInCollection(COLLECTION, encodingOutput.getName(), in);
+          returnURL = workspace.putInCollection(COLLECTION,
+                  job.getId() + "." + FilenameUtils.getExtension(encodingOutput.getAbsolutePath()), in);
           logger.debug("Copied the encoded file to the workspace at {}", returnURL);
         } catch (Exception e) {
           throw new EncoderException("unable to put the encoded file into the workspace", e);
@@ -777,7 +781,8 @@ public class ComposerServiceImpl implements ComposerService {
         InputStream in = null;
         try {
           in = new FileInputStream(output);
-          returnURL = workspace.putInCollection(COLLECTION, output.getName(), in);
+          returnURL = workspace.putInCollection(COLLECTION,
+                  job.getId() + "." + FilenameUtils.getExtension(output.getAbsolutePath()), in);
           logger.info("Copied the encoded file to the workspace at {}", returnURL);
         } catch (Exception e) {
           throw new EmbedderException("Unable to put the encoded file into the workspace", e);
@@ -807,7 +812,7 @@ public class ComposerServiceImpl implements ComposerService {
 
         return null;
       }
-      
+
     };
 
     Future<?> future = executor.submit(command);

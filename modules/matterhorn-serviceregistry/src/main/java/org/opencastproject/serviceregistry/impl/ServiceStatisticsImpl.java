@@ -35,7 +35,7 @@ public class ServiceStatisticsImpl implements ServiceStatistics {
 
   /** The service registration **/
   @XmlElement
-  protected ServiceRegistrationImpl serviceRegistration;
+  protected ServiceRegistrationJpaImpl serviceRegistration;
 
   /** The mean run time for jobs **/
   @XmlAttribute(name="meanruntime")
@@ -63,7 +63,7 @@ public class ServiceStatisticsImpl implements ServiceStatistics {
    * 
    * @param serviceRegistration the service registration
    */
-  public ServiceStatisticsImpl(ServiceRegistrationImpl serviceRegistration) {
+  public ServiceStatisticsImpl(ServiceRegistrationJpaImpl serviceRegistration) {
     super();
     this.serviceRegistration = serviceRegistration;
   }
@@ -77,7 +77,7 @@ public class ServiceStatisticsImpl implements ServiceStatistics {
    * @param runningJobs
    * @param queuedJobs
    */
-  public ServiceStatisticsImpl(ServiceRegistrationImpl serviceRegistration, long meanRunTime, long meanQueueTime,
+  public ServiceStatisticsImpl(ServiceRegistrationJpaImpl serviceRegistration, long meanRunTime, long meanQueueTime,
           int runningJobs, int queuedJobs) {
     this(serviceRegistration);
     this.meanRunTime = meanRunTime;

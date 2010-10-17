@@ -179,8 +179,9 @@ public class CaptionServiceImpl implements CaptionService {
 
         URI exported;
         try {
-          exported = exportCaptions(collection, FilenameUtils.getBaseName(captionsFile.getAbsolutePath()),
-                  outputFormat, language);
+          exported = exportCaptions(collection,
+                  job.getId() + "." + FilenameUtils.getExtension(captionsFile.getAbsolutePath()), outputFormat,
+                  language);
           logger.debug("Exporting captions succeeding.");
         } catch (UnsupportedCaptionFormatException e) {
           throw new UnsupportedCaptionFormatException(outputFormat);
@@ -199,7 +200,7 @@ public class CaptionServiceImpl implements CaptionService {
         job.setElement(catalog);
         job.setStatus(Status.FINISHED);
         updateJob(job);
-        
+
         return catalog;
       }
     };
@@ -275,7 +276,6 @@ public class CaptionServiceImpl implements CaptionService {
 
     return languageList == null ? new String[0] : languageList;
   }
-  
 
   /**
    * {@inheritDoc}
@@ -309,7 +309,6 @@ public class CaptionServiceImpl implements CaptionService {
       throw new IllegalArgumentException("host must not be null");
     return jobManager.count(JOB_TYPE, status, host);
   }
-
 
   /**
    * Returns all registered {@link CaptionFormat}s.

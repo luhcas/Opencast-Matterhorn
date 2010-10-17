@@ -73,13 +73,12 @@ public class DistributionDownloadRestEndpointTest {
 
   @Test
   public void testDistribute() throws Exception {
-    HttpPost post = new HttpPost(BASE_URL + "/distribution/download/rest");
-    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-
     Document mp = getSampleMediaPackage();
     String mpId = (String)Utils.xPath(mp, "/oc:mediapackage/@id", XPathConstants.STRING);
     String track = Utils.nodeToString((Node)Utils.xPath(mp, "//media/track[@id=\"track-1\"]", XPathConstants.NODE));
     
+    HttpPost post = new HttpPost(BASE_URL + "/distribution/download/rest");
+    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     formParams.add(new BasicNameValuePair("mediapackageId", mpId));
     formParams.add(new BasicNameValuePair("element", track));
     post.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));

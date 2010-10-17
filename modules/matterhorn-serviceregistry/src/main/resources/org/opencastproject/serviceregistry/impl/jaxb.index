@@ -1,4 +1,3 @@
-JobImpl
-ServiceRegistrationImpl
+JobJpaImpl
+ServiceRegistrationJpaImpl
 ServiceStatisticsImpl
-ServiceStatisticsList

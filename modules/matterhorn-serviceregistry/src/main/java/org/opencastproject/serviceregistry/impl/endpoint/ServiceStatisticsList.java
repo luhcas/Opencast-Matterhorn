@@ -13,9 +13,10 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.serviceregistry.impl;
+package org.opencastproject.serviceregistry.impl.endpoint;
 
 import org.opencastproject.serviceregistry.api.ServiceStatistics;
+import org.opencastproject.serviceregistry.impl.ServiceStatisticsImpl;
 
 import java.util.ArrayList;
 import java.util.Collection;

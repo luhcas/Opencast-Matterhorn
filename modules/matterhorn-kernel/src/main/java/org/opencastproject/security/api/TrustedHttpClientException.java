@@ -15,10 +15,12 @@
  */
 package org.opencastproject.security.api;
 
+import java.io.IOException;
+
 /**
- * A RuntimeException indicating that the trusted http communication failed.
+ * An Exception indicating that the trusted http communication failed.
  */
-public class TrustedHttpClientException extends RuntimeException {
+public class TrustedHttpClientException extends IOException {
   public TrustedHttpClientException(Throwable t) {
     super(t);
   }

@@ -15,8 +15,18 @@
  */
 package org.opencastproject.distribution.download.endpoint;
 
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.rest.RestPublisher;
@@ -26,19 +36,9 @@ import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 /**
  * Rest endpoint for distributing media to the local distribution channel.
@@ -76,30 +76,29 @@ public class DownloadDistributionRestService {
   @Produces(MediaType.TEXT_XML)
   public Response distribute(@FormParam("mediapackageId") String mediaPackageId, @FormParam("element") String elementXml)
           throws Exception {
-    Job receipt = null;
-
+    Job job = null;
     try {
       MediaPackageElement element = AbstractMediaPackageElement.getFromXml(elementXml);
-      receipt = service.distribute(mediaPackageId, element, false);
+      job = service.distribute(mediaPackageId, element, false);
     } catch (Exception e) {
       logger.warn("Error distributing element", e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
-    return Response.ok(receipt).build();
+    return Response.ok(JobParser.serializeToString(job)).build();
   }
 
   @POST
   @Path("/retract")
   @Produces(MediaType.TEXT_XML)
   public Response retract(@FormParam("mediapackageId") String mediaPackageId) throws Exception {
-    Job receipt = null;
+    Job job = null;
     try {
-      receipt = service.retract(mediaPackageId, false);
+      job = service.retract(mediaPackageId, false);
     } catch (Exception e) {
       logger.warn("Unable to retract mediapackage '{}' from download channel: {}", new Object[] { mediaPackageId, e });
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
-    return Response.ok(receipt).build();
+    return Response.ok(JobParser.serializeToString(job)).build();
   }
 
   @GET
@@ -126,8 +125,8 @@ public class DownloadDistributionRestService {
     RestEndpoint endpoint = new RestEndpoint("distribute", RestEndpoint.Method.POST, "/",
             "Distribute a media package to this distribution channel");
     endpoint.addFormat(new Format("XML", null, null));
-    endpoint.addRequiredParam(new Param("mediapackageId", Param.Type.TEXT, null, "The media package identifier"));
-    endpoint.addRequiredParam(new Param("elementId", Param.Type.STRING, null, "A media package element"));
+    endpoint.addRequiredParam(new Param("mediapackageId", Param.Type.STRING, null, "The media package identifier"));
+    endpoint.addRequiredParam(new Param("element", Param.Type.TEXT, null, "A media package element"));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.ERROR(null));
     endpoint.setTestForm(RestTestForm.auto());

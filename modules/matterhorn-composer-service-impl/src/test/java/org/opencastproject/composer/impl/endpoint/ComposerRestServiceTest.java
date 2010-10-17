@@ -20,12 +20,13 @@ import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.serviceregistry.impl.JobImpl;
-import org.opencastproject.serviceregistry.impl.ServiceRegistrationImpl;
+import org.opencastproject.serviceregistry.impl.JobJpaImpl;
+import org.opencastproject.serviceregistry.impl.ServiceRegistrationJpaImpl;
 
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -43,7 +44,7 @@ import javax.ws.rs.core.Response.Status;
  */
 public class ComposerRestServiceTest {
 
-  Job receipt;
+  Job job;
   EncodingProfileImpl profile;
   EncodingProfileList profileList;
   Track audioTrack;
@@ -64,7 +65,7 @@ public class ComposerRestServiceTest {
     profileId = "profile1";
     
     // FIXME: Remove the test scoped dependency on matterhorn-serviceregistry and replace this code with mocks
-    receipt = new JobImpl(Job.Status.QUEUED, new ServiceRegistrationImpl(
+    job = new JobJpaImpl(Job.Status.QUEUED, new ServiceRegistrationJpaImpl(
             ComposerService.JOB_TYPE, "encoding_farm_server_456", "/composer/rest"));
     profile = new EncodingProfileImpl();
     profile.setIdentifier(profileId);
@@ -74,8 +75,8 @@ public class ComposerRestServiceTest {
 
     // Train a mock composer with some known behavior
     ComposerService composer = EasyMock.createNiceMock(ComposerService.class);
-    EasyMock.expect(composer.encode(videoTrack, profileId)).andReturn(receipt).anyTimes();
-    EasyMock.expect(composer.mux(videoTrack, audioTrack, profileId)).andReturn(receipt).anyTimes();
+    EasyMock.expect(composer.encode(videoTrack, profileId)).andReturn(job).anyTimes();
+    EasyMock.expect(composer.mux(videoTrack, audioTrack, profileId)).andReturn(job).anyTimes();
     EasyMock.expect(composer.listProfiles()).andReturn(list.toArray(new EncodingProfile[list.size()]));
     EasyMock.expect(composer.getProfile(profileId)).andReturn(profile);
     EasyMock.replay(composer);
@@ -109,14 +110,14 @@ public class ComposerRestServiceTest {
   public void testEncode() throws Exception {
     Response response = restService.encode(generateVideoTrack(), profileId);
     Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-    Assert.assertEquals(receipt.toXml(), response.getEntity());
+    Assert.assertEquals(JobParser.serializeToString(job), response.getEntity());
   }
 
   @Test
   public void testMux() throws Exception {
     Response response = restService.mux(generateAudioTrack(), generateVideoTrack(), profileId);
     Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-    Assert.assertEquals(receipt.toXml(), response.getEntity());
+    Assert.assertEquals(JobParser.serializeToString(job), response.getEntity());
   }
 
   @Test

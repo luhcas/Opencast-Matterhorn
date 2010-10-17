@@ -13,21 +13,8 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.serviceregistry.impl;
+package org.opencastproject.serviceregistry.api;
 
-import org.opencastproject.serviceregistry.api.ServiceRegistration;
-
-import java.util.Collection;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -40,54 +27,30 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlType(name="service", namespace="http://serviceregistry.opencastproject.org")
 @XmlRootElement(name="service", namespace="http://serviceregistry.opencastproject.org")
-@Entity(name = "ServiceRegistration")
-@Table(name = "SERVICE_REGISTRATION")
-@NamedQueries( {
-        @NamedQuery(name = "ServiceRegistration.statistics", query = "SELECT sr, job.status, "
-                + "count(job.status) as numJobs, " + "avg(job.queueTime) as meanQueue, "
-                + "avg(job.runTime) as meanRun " + "FROM ServiceRegistration sr LEFT OUTER JOIN sr.jobs job "
-                + "group by sr, job.status"),
-        @NamedQuery(name = "ServiceRegistration.getRegistration", query = "SELECT r from ServiceRegistration r "
-                + "where r.host = :host and r.serviceType = :serviceType"),
-        @NamedQuery(name = "ServiceRegistration.getAll", query = "SELECT rh FROM ServiceRegistration rh") })
-public class ServiceRegistrationImpl implements ServiceRegistration {
+public class JaxbServiceRegistration implements ServiceRegistration {
 
   @XmlElement(name="type")
-  @Id
-  @Column(name = "SERVICE_TYPE", nullable = false)
   protected String serviceType;
 
   @XmlElement(name="host")
-  @Id
-  @Column(name = "HOST", nullable = false)
   protected String host;
 
   @XmlElement(name="path")
-  @Id
-  @Column(name = "PATH", nullable = false)
   protected String path;
 
   @XmlElement(name="online")
-  @Column(name = "ONLINE", nullable = false)
   protected boolean online;
 
   @XmlElement(name="maintenance")
-  @Column(name = "MAINTENANCE", nullable = false)
   protected boolean maintenanceMode;
 
   @XmlElement(name="jobproducer")
-  @Column(name = "JOB_PRODUCER", nullable = false)
   protected boolean jobProducer;
-
-  @OneToMany
-  @JoinColumns( { @JoinColumn(name = "host", referencedColumnName = "host"),
-          @JoinColumn(name = "service_type", referencedColumnName = "service_type") })
-  protected Collection<JobImpl> jobs;
 
   /**
    * Creates a new service registration which is online and not in maintenance mode.
    */
-  public ServiceRegistrationImpl() {
+  public JaxbServiceRegistration() {
     this.online = true;
     this.maintenanceMode = false;
   }
@@ -100,7 +63,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
    * @param serviceId
    *          the job type
    */
-  public ServiceRegistrationImpl(String serviceType, String host, String path) {
+  public JaxbServiceRegistration(String serviceType, String host, String path) {
     this();
     this.serviceType = serviceType;
     this.host = host;
@@ -116,7 +79,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
    *          the job type
    * @param jobProducer
    */
-  public ServiceRegistrationImpl(String serviceType, String host, String path, boolean jobProducer) {
+  public JaxbServiceRegistration(String serviceType, String host, String path, boolean jobProducer) {
     this();
     this.serviceType = serviceType;
     this.host = host;
@@ -175,7 +138,7 @@ public class ServiceRegistrationImpl implements ServiceRegistration {
    * 
    * @param maintenanceMode
    */
-  public void setMaintenanceMode(boolean maintenanceMode) {
+  public void setInMaintenanceMode(boolean maintenanceMode) {
     this.maintenanceMode = maintenanceMode;
   }
 

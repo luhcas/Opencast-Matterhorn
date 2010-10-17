@@ -151,7 +151,7 @@ public class DownloadDistributionService implements DistributionService {
         } catch (IOException e) {
           throw new DistributionException("Error loading " + element.getURI() + " from the workspace", e);
         }
-        File destination = getDistributionFile(element);
+        File destination = getDistributionFile(mediaPackageId, element);
 
         // Put the file in place
         try {
@@ -170,7 +170,7 @@ public class DownloadDistributionService implements DistributionService {
         // Create a representation of the distributed file in the mediapackage
         MediaPackageElement distributedElement = (MediaPackageElement) element.clone();
         try {
-          distributedElement.setURI(getDistributionUri(element));
+          distributedElement.setURI(getDistributionUri(mediaPackageId, element));
         } catch (URISyntaxException e) {
           throw new DistributionException("Distributed element produces an invalid URI", e);
         }
@@ -321,8 +321,7 @@ public class DownloadDistributionService implements DistributionService {
    *          The mediapackage element being distributed
    * @return The file to copy the content to
    */
-  protected File getDistributionFile(MediaPackageElement element) {
-    String mediaPackageId = element.getMediaPackage().getIdentifier().compact();
+  protected File getDistributionFile(String mediaPackageId, MediaPackageElement element) {
     String elementId = element.getIdentifier();
     String fileName = FilenameUtils.getName(element.getURI().toString());
     String directoryName = distributionDirectory.getAbsolutePath();
@@ -334,14 +333,15 @@ public class DownloadDistributionService implements DistributionService {
   /**
    * Gets the URI for the element to be distributed.
    * 
+   * @param mediaPackageId
+   *          the mediapackage identifier
    * @param element
    *          The mediapackage element being distributed
    * @return The resulting URI after distribution
    * @throws URISyntaxException
    *           if the concrete implementation tries to create a malformed uri
    */
-  protected URI getDistributionUri(MediaPackageElement element) throws URISyntaxException {
-    String mediaPackageId = element.getMediaPackage().getIdentifier().compact();
+  protected URI getDistributionUri(String mediaPackageId, MediaPackageElement element) throws URISyntaxException {
     String elementId = element.getIdentifier();
     String fileName = FilenameUtils.getName(element.getURI().toString());
     String destinationURI = UrlSupport.concat(new String[] { serviceUrl, mediaPackageId, elementId, fileName });

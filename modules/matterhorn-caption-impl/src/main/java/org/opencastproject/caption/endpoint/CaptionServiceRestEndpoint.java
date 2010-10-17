@@ -17,6 +17,7 @@ package org.opencastproject.caption.endpoint;
 
 import org.opencastproject.caption.api.CaptionService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
@@ -115,7 +116,7 @@ public class CaptionServiceRestEndpoint {
       }
       Job job = service.convert((Catalog) element, inputType, outputType, lang, false);
 
-      return Response.ok().entity(job.toXml()).build();
+      return Response.ok().entity(JobParser.serializeToString(job)).build();
     } catch (Exception e) {
       logger.error(e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();

@@ -355,16 +355,6 @@ public class IngestServiceImpl implements IngestService {
     }
   }
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.ingest.api.IngestService#getWorkflowInstance(java.lang.String)
-   */
-  @Override
-  public WorkflowInstance getWorkflowInstance(String id) {
-    return workflowService.getWorkflowById(id);
-  }
-
   protected URI addContentToRepo(MediaPackage mp, String elementId, URI uri) throws IOException,
           UnsupportedElementException {
     InputStream in = null;

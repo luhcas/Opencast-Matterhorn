@@ -110,7 +110,8 @@
               *;resolution:=optional
             </Import-Package>
             <Service-Component>
-              OSGI-INF/textanalyzer.xml
+              OSGI-INF/textanalyzer.xml,
+              OSGI-INF/textanalyzer-rest.xml
             </Service-Component>
           </instructions>
         </configuration>

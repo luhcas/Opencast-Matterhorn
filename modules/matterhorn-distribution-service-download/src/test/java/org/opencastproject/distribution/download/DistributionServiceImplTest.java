@@ -15,15 +15,9 @@
  */
 package org.opencastproject.distribution.download;
 
-import org.opencastproject.distribution.download.DownloadDistributionService;
-import org.opencastproject.job.api.Job;
-import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.MediaPackageBuilder;
-import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.util.UrlSupport;
-import org.opencastproject.workspace.api.Workspace;
+import java.io.File;
+import java.net.URI;
+import java.util.concurrent.Executors;
 
 import junit.framework.Assert;
 
@@ -32,10 +26,14 @@ import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.net.URI;
-import java.util.concurrent.Executors;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilder;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.util.UrlSupport;
+import org.opencastproject.workspace.api.Workspace;
 
 public class DistributionServiceImplTest {
   
@@ -117,9 +115,9 @@ public class DistributionServiceImplTest {
 
     // Now retract the mediapackage and ensure that the distributed files have been removed
     service.retract(mp.getIdentifier().compact(), true);
-    Assert.assertFalse(service.getDistributionFile(mp.getElementById("track-1")).isFile());
-    Assert.assertFalse(service.getDistributionFile(mp.getElementById("catalog-1")).isFile());
-    Assert.assertFalse(service.getDistributionFile(mp.getElementById("catalog-2")).isFile());
-    Assert.assertFalse(service.getDistributionFile(mp.getElementById("notes")).isFile());
+    Assert.assertFalse(service.getDistributionFile(mp.getIdentifier().compact(), mp.getElementById("track-1")).isFile());
+    Assert.assertFalse(service.getDistributionFile(mp.getIdentifier().compact(), mp.getElementById("catalog-1")).isFile());
+    Assert.assertFalse(service.getDistributionFile(mp.getIdentifier().compact(), mp.getElementById("catalog-2")).isFile());
+    Assert.assertFalse(service.getDistributionFile(mp.getIdentifier().compact(), mp.getElementById("notes")).isFile());
   }
 }
