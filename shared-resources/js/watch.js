@@ -50,6 +50,11 @@ Opencast.Watch = (function() {
 	          Opencast.Analytics.setMediaPackageId(mediaPackageId);
 	          var dcExtent = parseInt($('#dc-extent').html());
 	          Opencast.Analytics.setDuration(parseInt(dcExtent/1000));
+			  Opencast.Annotation_Chapter.setDuration(parseInt(dcExtent/1000));
+	          $('#oc_body').bind('resize', function() {
+	            Opencast.AnalyticsPlugin.resizePlugin();
+	          });
+	          
 	          $('#oc_body').bind('resize', function() {
 	            Opencast.AnalyticsPlugin.resizePlugin();
 	          });
@@ -310,6 +315,44 @@ Opencast.Watch = (function() {
 
     $("#segment-tooltip").hide();
   }
+  
+  /**
+   * @memberOf Opencast.Watch
+   * @description Toggles the class segment-holder-over
+   * @param String
+   *          segmentId the id of the segment
+   */
+  function hoverDescription(segmentId,description) {
+    $("#" + segmentId).toggleClass("segment-holder");
+    $("#" + segmentId).toggleClass("segment-holder-over");
+
+    var index = parseInt(segmentId.substr(7)) - 1;
+
+    var imageHeight = 25;
+    var text = description;
+
+    $("#segment-tooltip").html(text);
+
+    var segmentLeft = $("#" + segmentId).offset().left;
+    var segmentTop = $("#" + segmentId).offset().top;
+    var segmentWidth = $("#" + segmentId).width();
+    var tooltipWidth = $("#segment-tooltip").width();
+    $("#segment-tooltip").css("left",(segmentLeft + segmentWidth / 2 - tooltipWidth / 2) + "px");
+    $("#segment-tooltip").css("top", segmentTop - (imageHeight + 7) + "px");
+    $("#segment-tooltip").show();
+  }
+
+  /**
+   * @memberOf Opencast.Watch
+   * @description Toggles the class segment-holder-over
+   * @param String
+   *          segmentId the id of the segment
+   */
+  function hoverOutDescription(segmentId, description) {
+    $("#" + segmentId).toggleClass("segment-holder");
+    $("#" + segmentId).toggleClass("segment-holder-over");
+    $("#segment-tooltip").hide();
+  }
 
   /**
    * @memberOf Opencast.Watch
@@ -369,6 +412,8 @@ Opencast.Watch = (function() {
     onPlayerReady : onPlayerReady,
     hoverSegment : hoverSegment,
     hoverOutSegment : hoverOutSegment,
+    hoverDescription : hoverDescription,
+    hoverOutDescription : hoverOutDescription,
     seekSegment : seekSegment,
     getClientShortcuts : getClientShortcuts
   };
