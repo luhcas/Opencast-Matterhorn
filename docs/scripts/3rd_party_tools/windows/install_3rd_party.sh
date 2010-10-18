@@ -6,7 +6,8 @@
 
 # ---- directories -----
 
-base_dir=$(pwd)
+relative=$(dirname $0)
+base_dir=$(pwd)/${relative##$(pwd)/}
 mkdir -p 3rd_party
 cd 3rd_party
 working_dir=$(pwd)
