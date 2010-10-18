@@ -16,7 +16,8 @@
 
       <div style="height: 25px">
               <span id="analytics" class="analytics" style="display: none;">Loading..</span>
-              <table class="segments" cellspacing="0" cellpadding="0" style="opacity:0.65; filter: alpha(opacity=65);">
+              <span id="annotation" class="annotation" style="display: none;">Annotation..</span>
+              <table class="segments" id="segmentstable" cellspacing="0" cellpadding="0" style="opacity:0.65; filter: alpha(opacity=65);">
                 <tr>
                   <xsl:choose>
                     <xsl:when test="ns2:search-results/result/segments/segment">
