@@ -21,8 +21,8 @@ package org.opencastproject.usertracking.api;
 public interface UserTrackingService {
 
   /**
-   * Adds a new annotation to the database and returns the event with an updated annotation-id, to make sure the
-   * annotation-id stays unique
+   * Adds a new annotation to the database and returns the event with an updated annotationId, to make sure the
+   * annotationId stays unique
    * 
    * @param a
    *          The Annotation that will be added to the database
