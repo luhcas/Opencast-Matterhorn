@@ -36,6 +36,7 @@ import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.serviceregistry.api.JaxbServiceStatistics;
 import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceStatistics;
@@ -448,7 +449,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     EntityManager em = emf.createEntityManager();
     try {
       Query query = em.createNamedQuery("ServiceRegistration.statistics");
-      Map<ServiceRegistration, ServiceStatisticsImpl> statsMap = new HashMap<ServiceRegistration, ServiceStatisticsImpl>();
+      Map<ServiceRegistration, JaxbServiceStatistics> statsMap = new HashMap<ServiceRegistration, JaxbServiceStatistics>();
       @SuppressWarnings("rawtypes")
       List queryResults = query.getResultList();
       for (Object result : queryResults) {
@@ -460,23 +461,23 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         Number meanRunTime = (Number) oa[4];
 
         // The statistics query returns a cartesian product, so we need to iterate over them to build up the objects
-        ServiceStatisticsImpl stats = statsMap.get(serviceRegistration);
+        JaxbServiceStatistics stats = statsMap.get(serviceRegistration);
         if (stats == null) {
-          stats = new ServiceStatisticsImpl(serviceRegistration);
+          stats = new JaxbServiceStatistics(serviceRegistration);
           statsMap.put(serviceRegistration, stats);
         }
         // the status will be null if there are no jobs at all associated with this service registration
         if (status != null) {
           switch (status) {
           case RUNNING:
-            stats.runningJobs = count.intValue();
+            stats.setRunningJobs(count.intValue());
             break;
           case QUEUED:
-            stats.queuedJobs = count.intValue();
+            stats.setQueuedJobs(count.intValue());
             break;
           case FINISHED:
-            stats.meanRunTime = meanRunTime.longValue();
-            stats.meanQueueTime = meanQueueTime.longValue();
+            stats.setMeanRunTime(meanRunTime.longValue());
+            stats.setMeanQueueTime(meanQueueTime.longValue());
             break;
           }
         }

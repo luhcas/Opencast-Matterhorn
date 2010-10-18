@@ -15,34 +15,39 @@
  */
 package org.opencastproject.serviceregistry.remote;
 
-import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.Job.Status;
-import org.opencastproject.security.api.TrustedHttpClient;
-import org.opencastproject.serviceregistry.api.ServiceRegistration;
-import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.serviceregistry.api.ServiceRegistryException;
-import org.opencastproject.serviceregistry.api.ServiceStatistics;
-import org.opencastproject.util.UrlSupport;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.osgi.framework.ServiceException;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.message.BasicNameValuePair;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.job.api.JobParser;
+import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.serviceregistry.api.JaxbServiceRegistrationList;
+import org.opencastproject.serviceregistry.api.JaxbServiceStatistics;
+import org.opencastproject.serviceregistry.api.ServiceRegistration;
+import org.opencastproject.serviceregistry.api.ServiceRegistrationParser;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
+import org.opencastproject.serviceregistry.api.ServiceStatistics;
+import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.UrlSupport;
+import org.osgi.framework.ServiceException;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This implementation of the remote service registry is able to provide the functionality specified by the api over
@@ -128,8 +133,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
       responseStatusCode = response.getStatusLine().getStatusCode();
       if (responseStatusCode == HttpStatus.SC_OK) {
         logger.info("Registered '" + serviceType + "' on host '" + host + "' with path '" + path + "'.");
-        String jsonString = EntityUtils.toString(response.getEntity(), "UTF-8");
-        return new ServiceRegistrationRemoteImpl(jsonString);
+        return ServiceRegistrationParser.parse(response.getEntity().getContent());
       }
     } catch (Exception e) {
       throw new ServiceRegistryException("Unable to register '" + serviceType + "' on host '" + host + "' with path '"
@@ -226,9 +230,33 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String)
    */
   @Override
-  public Job createJob(String type) {
-    // TODO Auto-generated method stub
-    return null;
+  public Job createJob(String type) throws ServiceRegistryException {
+    String servicePath = "job";
+    HttpPost post = new HttpPost(UrlSupport.concat(serviceURL, servicePath));
+    try {
+      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+      params.add(new BasicNameValuePair("jobType", type));
+      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+      post.setEntity(entity);
+    } catch (UnsupportedEncodingException e) {
+      throw new ServiceRegistryException("Can not url encode post parameters", e);
+    }
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(post);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_OK) {
+        Job job = JobParser.parseJob(response.getEntity().getContent());
+        logger.debug("Created a new job '{}'", job);
+        return job;
+      }
+    } catch (Exception e) {
+      throw new ServiceRegistryException("Unable to create a job of type '" + type, e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to create a job of type '" + type);
   }
 
   /**
@@ -237,9 +265,38 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#updateJob(org.opencastproject.job.api.Job)
    */
   @Override
-  public void updateJob(Job job) {
-    // TODO Auto-generated method stub
-
+  public void updateJob(Job job) throws ServiceRegistryException {
+    String servicePath = "job/" + job.getId() + ".xml";
+    String jobXml;
+    try {
+      jobXml = JobParser.serializeToString(job);
+    } catch (IOException e) {
+      throw new ServiceRegistryException("Can not serialize job " + job, e);
+    }
+    HttpPut put = new HttpPut(UrlSupport.concat(serviceURL, servicePath));
+    try {
+      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+      params.add(new BasicNameValuePair("job", jobXml));
+      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+      put.setEntity(entity);
+    } catch (UnsupportedEncodingException e) {
+      throw new ServiceRegistryException("Can not url encode post parameters", e);
+    }
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(put);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_NO_CONTENT) {
+        logger.info("Updated job '{}'", job);
+        return;
+      }
+    } catch (Exception e) {
+      throw new ServiceRegistryException("Unable to update " + job, e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to update " + job);
   }
 
   /**
@@ -248,9 +305,26 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getJob(java.lang.String)
    */
   @Override
-  public Job getJob(String id) {
-    // TODO Auto-generated method stub
-    return null;
+  public Job getJob(String id) throws NotFoundException, ServiceRegistryException {
+    String servicePath = "job/" + id + ".xml";
+    HttpGet get = new HttpGet(UrlSupport.concat(serviceURL, servicePath));
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(get);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_NOT_FOUND) {
+        throw new NotFoundException("Unable to locate job " + id);
+      }
+      if (responseStatusCode == HttpStatus.SC_OK) {
+        return JobParser.parseJob(response.getEntity().getContent());
+      }
+    } catch (IOException e) {
+      throw new ServiceRegistryException("Unable to get job id=" + id, e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to retrieve job " + id);
   }
 
   /**
@@ -259,9 +333,28 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrations(java.lang.String)
    */
   @Override
-  public List<ServiceRegistration> getServiceRegistrations(String serviceType) {
-    // TODO Auto-generated method stub
-    return null;
+  public List<ServiceRegistration> getServiceRegistrations(String serviceType) throws ServiceRegistryException {
+    String servicePath = "services.xml";
+    if (isNotBlank(serviceType)) {
+      servicePath += ("?serviceType=" + serviceType);
+    }
+    HttpGet get = new HttpGet(UrlSupport.concat(serviceURL, servicePath));
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(get);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_OK) {
+        JaxbServiceRegistrationList serviceList = ServiceRegistrationParser.parseRegistrations(response.getEntity()
+                .getContent());
+        return new ArrayList<ServiceRegistration>(serviceList.getRegistrations());
+      }
+    } catch (IOException e) {
+      throw new ServiceRegistryException("Unable to get service registrations", e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to get service registrations");
   }
 
   /**
@@ -271,7 +364,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    *      java.lang.String)
    */
   @Override
-  public ServiceRegistration getServiceRegistration(String serviceType, String host) {
+  public ServiceRegistration getServiceRegistration(String serviceType, String host) throws ServiceRegistryException {
     // TODO Auto-generated method stub
     return null;
   }
@@ -282,7 +375,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrations()
    */
   @Override
-  public List<ServiceRegistration> getServiceRegistrations() {
+  public List<ServiceRegistration> getServiceRegistrations() throws ServiceRegistryException {
     // TODO Auto-generated method stub
     return null;
   }
@@ -293,9 +386,25 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceStatistics()
    */
   @Override
-  public List<ServiceStatistics> getServiceStatistics() {
-    // TODO Auto-generated method stub
-    return null;
+  public List<ServiceStatistics> getServiceStatistics() throws ServiceRegistryException {
+    String servicePath = "statistics.xml";
+    HttpGet get = new HttpGet(UrlSupport.concat(serviceURL, servicePath));
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(get);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_OK) {
+        List<JaxbServiceStatistics> stats = ServiceRegistrationParser
+                .parseStatistics(response.getEntity().getContent()).getStats();
+        return new ArrayList<ServiceStatistics>(stats);
+      }
+    } catch (IOException e) {
+      throw new ServiceRegistryException("Unable to get service statistics", e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to get service statistics");
   }
 
   /**
@@ -305,7 +414,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    *      org.opencastproject.job.api.Job.Status)
    */
   @Override
-  public long count(String serviceType, Status status) {
+  public long count(String serviceType, Status status) throws ServiceRegistryException {
     // TODO Auto-generated method stub
     return 0;
   }
@@ -317,7 +426,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    *      org.opencastproject.job.api.Job.Status, java.lang.String)
    */
   @Override
-  public long count(String serviceType, Status status, String host) {
+  public long count(String serviceType, Status status, String host) throws ServiceRegistryException {
     // TODO Auto-generated method stub
     return 0;
   }

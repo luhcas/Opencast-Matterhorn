@@ -15,29 +15,40 @@
  */
 package org.opencastproject.serviceregistry.impl.endpoint;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobParser;
 import org.opencastproject.rest.RestPublisher;
+import org.opencastproject.serviceregistry.api.JaxbServiceRegistration;
+import org.opencastproject.serviceregistry.api.JaxbServiceRegistrationList;
+import org.opencastproject.serviceregistry.api.JaxbServiceStatisticsList;
+import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.impl.ServiceRegistrationJpaImpl;
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-
 import org.osgi.service.component.ComponentContext;
-
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
 /**
  * Displays hosts and the service IDs they provide.
@@ -79,7 +90,7 @@ public class ServiceRegistryEndpoint {
   @Produces(MediaType.APPLICATION_JSON)
   public Response getServicesAsJson() {
     try {
-      return Response.ok(new ServiceStatisticsList(serviceRegistry.getServiceStatistics())).build();
+      return Response.ok(new JaxbServiceStatisticsList(serviceRegistry.getServiceStatistics())).build();
     } catch (ServiceRegistryException e) {
       throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
     }
@@ -94,7 +105,7 @@ public class ServiceRegistryEndpoint {
 
   @POST
   @Path("/register")
-  @Produces(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.TEXT_XML)
   public ServiceRegistrationJpaImpl register(@FormParam("serviceType") String serviceType, @FormParam("host") String host,
           @FormParam("path") String path, @FormParam("jobProducer") boolean jobProducer) {
     try {
@@ -124,6 +135,67 @@ public class ServiceRegistryEndpoint {
       serviceRegistry.setMaintenanceStatus(serviceType, host, maintenance);
       return Response.status(Status.NO_CONTENT).build();
     } catch (ServiceRegistryException e) {
+      throw new WebApplicationException(e);
+    }
+  }
+  
+  @GET
+  @Path("/services.xml")
+  @Produces(MediaType.TEXT_XML)
+  public Response getRegistrations(@QueryParam("serviceType") String serviceType, @QueryParam("host") String host) {
+    JaxbServiceRegistrationList registrations = new JaxbServiceRegistrationList();
+    try {
+      if(isBlank(serviceType) && isBlank(host)) {
+        for(ServiceRegistration reg : serviceRegistry.getServiceRegistrations()) {
+          registrations.add((JaxbServiceRegistration)reg);
+        }
+        //FIXME: if one of these is not set, we return a JaxbServiceRegistrationList.
+      } else {
+        for(ServiceRegistration reg : serviceRegistry.getServiceRegistrations(serviceType)) {
+          registrations.add((JaxbServiceRegistration)reg);
+        }
+      }
+      return Response.ok(registrations).build();
+    } catch (ServiceRegistryException e) {
+      throw new WebApplicationException(e);
+    }
+  }
+
+  @POST
+  @Path("/job")
+  @Produces(MediaType.TEXT_XML)
+  public Response maintenance(@FormParam("jobType") String jobType) {
+    try {
+      Job job = serviceRegistry.createJob(jobType);
+      return Response.ok(JobParser.serializeToString(job)).build(); // TODO: include a Location header
+    } catch (Exception e) {
+      throw new WebApplicationException(e);
+    }
+  }
+
+  @PUT
+  @Path("/job/{id}.xml")
+  public Response updateJob(@PathParam("id") String id, @FormParam("jobType") String jobXml) {
+    try {
+      Job job = JobParser.parseJob(jobXml);
+      serviceRegistry.updateJob(job);
+      return Response.status(Status.NO_CONTENT).build();
+    } catch (NotFoundException e) {
+      return Response.status(Status.NOT_FOUND).build();
+    } catch (Exception e) {
+      throw new WebApplicationException(e);
+    }
+  }
+
+  @GET
+  @Path("/job/{id}.xml")
+  public Response getJob(@PathParam("id") String id) {
+    try {
+      Job job = serviceRegistry.getJob(id);
+      return Response.ok(JobParser.serializeToString(job)).build();
+    } catch (NotFoundException e) {
+      return Response.status(Status.NOT_FOUND).build();
+    } catch (Exception e) {
       throw new WebApplicationException(e);
     }
   }
