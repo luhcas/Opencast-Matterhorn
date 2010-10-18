@@ -121,6 +121,7 @@ ocRecordings.init = function() {
   if (show == '') {
     show='upcoming';
   }
+  $('#' + show + 'StateSelect').addClass('recordings-category-active');
   ocRecordings.currentState = show;
   ocRecordings.displayRecordingStats();
   ocUtils.getTemplate(show, function(template) {

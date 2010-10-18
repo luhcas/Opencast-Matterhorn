@@ -21,7 +21,7 @@
         ${rec.presenter}
       </td>
       <td class="ui-widget-content">
-        ${rec.seriesTitle}
+        ${rec.seriestitle}
       </td>
       <td class="td-TimeDate ui-widget-content">
         ${ocRecordings.formatRecordingDates(rec.startTime, rec.endTime)}
@@ -33,11 +33,15 @@
         Scheduled for automatic capture
       </td>
       <td class="ui-widget-content">
+        <a title="View Recording Info" href="/admin/viewevent.html?id=${rec.id}&type=${rec.itemType}">
+          View Info
+        </a>
+        <br>
         <a title="Edit Recording Info" href="/admin/scheduler.html?eventId=${rec.id}">
           Edit
         </a>
         <br>
-        <a title="Delete Recording" class="cursor" onclick="ocRecordings.removeScheduledRecording('${rec.id}','${rec.title}');">
+        <a title="Delete Recording" class="cursor" href="javascript:ocRecordings.removeScheduledRecording('${rec.id}','${rec.title}');">
           Delete
         </a>
       </td>

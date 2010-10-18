@@ -15,18 +15,15 @@
     <tr class="highlightable">
       <td class="ui-widget-content">${rec.title}</td>
       <td class="ui-widget-content">${rec.presenter}</td>
-      <td class="ui-widget-content">${rec.seriesTitle}</td>
+      <td class="ui-widget-content">${rec.seriestitle}</td>
       <td class="td-TimeDate ui-widget-content">${ocRecordings.formatRecordingDates(rec.startTime, rec.endTime)}</td>
       <td class="processingStatus ui-widget-content">
-        {if rec.errorMessages != []}
-        ${rec.failedOperation}
+        {if rec.errors}
+        Failed: ${rec.failedOperation}
         <br/>
-        <a onclick="$(this).text(($(this).text() == 'Show Details') ? 'Hide Details' : 'Show Details');$('#${rec.id}_error').toggleClass('hidden');"
-           onmouseover="this.className='cursor';">
-          Show Details
-        </a>
+        <a href="#" onclick="$(this).text(($(this).text() == 'Show Details') ? 'Hide Details' : 'Show Details');$('#${rec.id}_error').toggleClass('hidden');">Show Details</a>
         <div id="${rec.id}_error" class="hidden">
-          {for error in rec.errorMessages}
+          {for error in rec.errors}
           ${error}
           <br>
           {/for}
@@ -47,19 +44,19 @@
           Edit
         </a>
         <br>
-        <a title="Delete Recording" class="cursor" onclick="ocRecordings.removeScheduledRecording('${rec.id}', '${rec.title}');">
+        <a title="Delete Recording" href="javascript:ocRecordings.removeScheduledRecording('${rec.id}', '${rec.title}');">
           Delete
         </a>
         {elseif rec.recordingStatus == 'hold'}
-        <a class="cursor" onclick="ocRecordings.displayHoldActionPanel('${rec.holdActionPanelURL}','${rec.id}', this);">
+        <a href="javascript:ocRecordings.displayHoldActionPanel('${rec.holdActionPanelURL}','${rec.id}', this);">
           ${rec.holdActionTitle}
         </a>
         {elseif rec.recordingStatus == 'failed' && (rec.processingStatus == 'Failed during capture' || rec.processingStatus == 'Failed to start capture')}
-        <a title="Delete Recording" class="cursor" onclick="ocRecordings.removeScheduledRecording('${rec.id}', '${rec.title}');">
+        <a title="Delete Recording" href="javascript:ocRecordings.removeScheduledRecording('${rec.id}', '${rec.title}');">
           Delete
         </a>
         {elseif rec.recordingStatus == 'failed'}
-        <a title="Delete Recording" class="cursor" onclick="ocRecordings.removeRecording('${rec.id}');">
+        <a title="Delete Recording" href="javascript:ocRecordings.removeRecording('${rec.id}');">
           Delete
         </a>
         {/if}

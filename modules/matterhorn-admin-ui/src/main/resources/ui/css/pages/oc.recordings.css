@@ -55,3 +55,7 @@
   position:relative;
   clear:both;
 }
+
+.hidden {
+  display:none;
+}

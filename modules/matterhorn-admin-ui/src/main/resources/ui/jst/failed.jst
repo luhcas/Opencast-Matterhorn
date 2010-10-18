@@ -20,16 +20,28 @@
         ${rec.presenter}
       </td>
       <td class="ui-widget-content">
-        ${rec.seriesTitle}
+        ${rec.seriestitle}
       </td>
       <td class="td-TimeDate ui-widget-content">
         ${ocRecordings.formatRecordingDates(rec.startTime, rec.endTime)}
       </td>
       <td class="processingStatus ui-widget-content">
-        ${rec.processingStatus}
+        {if rec.errors}
+        Failed: ${rec.failedOperation}
+        <br/>
+        <a href="#" onclick="$(this).text(($(this).text() == 'Show Details') ? 'Hide Details' : 'Show Details');$('#${rec.id}_error').toggleClass('hidden');">Show Details</a>
+        <div id="${rec.id}_error" class="hidden">
+          {for error in rec.errors}
+          ${error}
+          <br>
+          {/for}
+        </div>
+        {else}
+        Failed: ${rec.processingStatus}
+        {/if}
       </td>
       <td class="ui-widget-content">
-        <a title="Delete Recording" class="cursor" onclick="ocRecordings.removeRecording('${rec.id}');">
+        <a title="Delete Recording" class="cursor" href="javascript:ocRecordings.removeRecording('${rec.id}');">
           Delete
         </a>
       </td>

@@ -1,12 +1,12 @@
 <table id="recordingsTable" class="ui-widget recordings-table" width="100%">
   <thead>
     <tr>
-      <th width="30%" id="th-Title" class="ui-widget-header oc-ui-sortable recordings-table-head">Title</th>
+      <th width="25%" id="th-Title" class="ui-widget-header oc-ui-sortable recordings-table-head">Title</th>
       <th width="15%" id="th-Presenter" class="ui-widget-header oc-ui-sortable recordings-table-head">Presenter</th>
       <th width="20%" id="th-Series" class="ui-widget-header oc-ui-sortable recordings-table-head">Course/Series</th>
       <th width="20%" id="th-StartDate" class="ui-widget-header oc-ui-sortable recordings-table-head">Upload / Recording Time</th>
       <th width="15%" id="th-HoldTitle" class="ui-widget-header oc-ui-sortable recordings-table-head">Status</th>
-      <th width="15%" id="th-Action" class="ui-widget-header recordings-table-head">Action</th>
+      <th width="20%" id="th-Action" class="ui-widget-header recordings-table-head">Action</th>
     </tr>
   </thead>
   <tbody>
@@ -20,20 +20,20 @@
         ${rec.presenter}
       </td>
       <td class="ui-widget-content">
-        ${rec.seriesTitle}
+        ${rec.seriestitle}
       </td>
       <td class="td-TimeDate ui-widget-content">
         ${ocRecordings.formatRecordingDates(rec.startTime, rec.endTime)}
       </td>
       <td class="ui-widget-content">
-        ${rec.HoldOperationTitle}
+        ${rec.processingStatus}
       </td>
       <td class="ui-widget-content">
         <a title="View Recording Info" href="/admin/viewevent.html?id=${rec.id}&type=${rec.itemType}">
           View Info
         </a>
         <br>
-        <a class="cursor" onclick="ocRecordings.displayHoldActionPanel('${rec.holdActionPanelURL}','${rec.id}', this);">
+        <a class="cursor" href="javascript:ocRecordings.displayHoldActionPanel('${rec.holdActionPanelURL}','${rec.id}', this);">
           ${rec.holdActionTitle}
         </a>
       </td>
