@@ -182,7 +182,7 @@ public class CLIWorkflowOperationHandlerTest {
     if (!isSane)
       return;
 
-    InstanceAndHandler tuple = createCLIWorkflow("/bin/echo", "/tmp/mp.xml");
+    InstanceAndHandler tuple = createCLIWorkflow("echo", "/tmp/mp.xml");
 
     // create a dummy mediapackage
     MediaPackageBuilderFactory factory = MediaPackageBuilderFactory.newInstance();
@@ -219,7 +219,7 @@ public class CLIWorkflowOperationHandlerTest {
       return;
 
     try {
-      InstanceAndHandler tuple = createCLIWorkflow("/bin/cat", "/tmp/mp.xml");
+      InstanceAndHandler tuple = createCLIWorkflow("cat", "/tmp/mp.xml");
 
       // create a dummy mediapackage
       MediaPackageBuilderFactory factory = MediaPackageBuilderFactory.newInstance();
@@ -253,7 +253,7 @@ public class CLIWorkflowOperationHandlerTest {
     if (!isSane)
       return;
     try {
-      InstanceAndHandler tuple = createCLIWorkflow("/usr/bin/touch", "");
+      InstanceAndHandler tuple = createCLIWorkflow("touch", "");
 
       // start the flow
       tuple.workflowHandler.start(tuple.workflowInstance).getMediaPackage();
@@ -268,7 +268,7 @@ public class CLIWorkflowOperationHandlerTest {
     if (!isSane)
       return;
     try {
-      InstanceAndHandler tuple = createCLIWorkflow("/usr/bin/touch", "/tmp/me");
+      InstanceAndHandler tuple = createCLIWorkflow("touch", "/tmp/me");
 
       // start the flow
       tuple.workflowHandler.start(tuple.workflowInstance).getMediaPackage();
@@ -289,7 +289,7 @@ public class CLIWorkflowOperationHandlerTest {
     if (!isSane)
       return;
     try {
-      InstanceAndHandler tuple = createCLIWorkflow("/usr/bin/touch", "/tmp/me /tmp/and /tmp/you");
+      InstanceAndHandler tuple = createCLIWorkflow("touch", "/tmp/me /tmp/and /tmp/you");
 
       // start the flow
       tuple.workflowHandler.start(tuple.workflowInstance).getMediaPackage();
@@ -317,7 +317,7 @@ public class CLIWorkflowOperationHandlerTest {
 
   @Test
   public void testParametersString() throws Exception {
-    InstanceAndHandler tuple = createCLIWorkflow("/usr/bin/touch", "/tmp/me /tmp/and /tmp/you");
+    InstanceAndHandler tuple = createCLIWorkflow("touch", "/tmp/me /tmp/and /tmp/you");
     CLIWorkflowOperationHandler handler = (CLIWorkflowOperationHandler) tuple.workflowHandler;
     Assert.assertTrue(handler.splitParameters("one two three").size() == 3);
     Assert.assertTrue(handler.splitParameters("\"one \'two\' three\"").get(0).equals("one \'two\' three"));
