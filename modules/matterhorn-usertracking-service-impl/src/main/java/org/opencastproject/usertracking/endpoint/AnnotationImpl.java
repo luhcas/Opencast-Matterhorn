@@ -66,19 +66,19 @@ public class AnnotationImpl implements Annotation {
   @Id
   @Column(name="ID")
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @XmlElement(name = "annotation-id")
+  @XmlElement(name = "annotationId")
   private int annotationId;
 
   @Column(name = "MEDIA_PACKAGE_ID", length = 36)
-  @XmlElement(name = "mediapackage-id")
+  @XmlElement(name = "mediapackageId")
   private String mediapackageId;
 
   @Column(name = "USER_ID")
-  @XmlElement(name = "user-id")
+  @XmlElement(name = "userId")
   private String userId;
 
   @Column(name = "SESSION_ID")
-  @XmlElement(name = "session-id")
+  @XmlElement(name = "sessionId")
   private String sessionId;
 
   @Column(name = "INPOINT")
