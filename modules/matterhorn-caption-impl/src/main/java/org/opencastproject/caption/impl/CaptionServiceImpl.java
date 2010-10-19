@@ -28,6 +28,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
+import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
@@ -144,6 +145,9 @@ public class CaptionServiceImpl implements CaptionService {
       job = jobManager.createJob(JOB_TYPE);
     } catch (ServiceRegistryException e) {
       throw new CaptionConverterException("Unable to create a job", e);
+    } catch (ServiceUnavailableException e) {
+      throw new CaptionConverterException("The " + JOB_TYPE
+              + " service is not registered on this host, so no job can be created", e);
     }
 
     Callable<Catalog> command = new Callable<Catalog>() {
@@ -453,6 +457,9 @@ public class CaptionServiceImpl implements CaptionService {
       jobManager.updateJob(job);
     } catch (NotFoundException notFound) {
       throw new CaptionConverterException("Unable to find job " + job, notFound);
+    } catch (ServiceUnavailableException e) {
+      throw new CaptionConverterException("The " + JOB_TYPE
+              + " service is not registered on this host, so the job can not be updated", e);
     } catch (ServiceRegistryException serviceRegException) {
       throw new CaptionConverterException("Unable to update job '" + job + "' in service registry", serviceRegException);
     }

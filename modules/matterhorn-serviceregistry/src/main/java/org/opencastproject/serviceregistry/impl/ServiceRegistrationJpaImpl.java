@@ -40,19 +40,23 @@ import org.opencastproject.serviceregistry.api.JaxbServiceRegistration;
  * A record of a service that creates and manages receipts.
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlType(name="service", namespace="http://serviceregistry.opencastproject.org")
-@XmlRootElement(name="service", namespace="http://serviceregistry.opencastproject.org")
+@XmlType(name = "service", namespace = "http://serviceregistry.opencastproject.org")
+@XmlRootElement(name = "service", namespace = "http://serviceregistry.opencastproject.org")
 @Entity(name = "ServiceRegistration")
 @Access(AccessType.PROPERTY)
 @Table(name = "SERVICE_REGISTRATION")
-@NamedQueries( {
+@NamedQueries({
         @NamedQuery(name = "ServiceRegistration.statistics", query = "SELECT sr, job.status, "
                 + "count(job.status) as numJobs, " + "avg(job.queueTime) as meanQueue, "
                 + "avg(job.runTime) as meanRun " + "FROM ServiceRegistration sr LEFT OUTER JOIN sr.jobs job "
                 + "group by sr, job.status"),
         @NamedQuery(name = "ServiceRegistration.getRegistration", query = "SELECT r from ServiceRegistration r "
                 + "where r.host = :host and r.serviceType = :serviceType"),
-        @NamedQuery(name = "ServiceRegistration.getAll", query = "SELECT rh FROM ServiceRegistration rh") })
+        @NamedQuery(name = "ServiceRegistration.getAll", query = "SELECT rh FROM ServiceRegistration rh"),
+        @NamedQuery(name = "ServiceRegistration.getByHost", query = "SELECT rh FROM ServiceRegistration rh "
+                + "where rh.host=:host"),
+        @NamedQuery(name = "ServiceRegistration.getByType", query = "SELECT rh FROM ServiceRegistration rh "
+                + "where rh.serviceType=:serviceType") })
 public class ServiceRegistrationJpaImpl extends JaxbServiceRegistration {
 
   protected Set<JobJpaImpl> jobs;
@@ -88,58 +92,58 @@ public class ServiceRegistrationJpaImpl extends JaxbServiceRegistration {
   public ServiceRegistrationJpaImpl(String serviceType, String host, String path, boolean jobProducer) {
     super(serviceType, host, path, jobProducer);
   }
-  
+
   @Id
   @Column(name = "SERVICE_TYPE", nullable = false)
-  @XmlElement(name="type")
+  @XmlElement(name = "type")
   @Override
   public String getServiceType() {
     return super.getServiceType();
   }
-  
+
   @Id
   @Column(name = "HOST", nullable = false)
-  @XmlElement(name="host")
+  @XmlElement(name = "host")
   @Override
   public String getHost() {
     return super.getHost();
   }
 
   @Column(name = "PATH", nullable = false)
-  @XmlElement(name="path")
+  @XmlElement(name = "path")
   @Override
   public String getPath() {
     return super.getPath();
   }
 
   @Column(name = "ONLINE", nullable = false)
-  @XmlElement(name="online")
+  @XmlElement(name = "online")
   @Override
   public boolean isOnline() {
     return super.isOnline();
   }
-  
+
   @Column(name = "MAINTENANCE", nullable = false)
-  @XmlElement(name="maintenance")
+  @XmlElement(name = "maintenance")
   @Override
   public boolean isInMaintenanceMode() {
     return super.isInMaintenanceMode();
   }
-  
+
   @Column(name = "JOB_PRODUCER", nullable = false)
-  @XmlElement(name="jobproducer")
+  @XmlElement(name = "jobproducer")
   @Override
   public boolean isJobProducer() {
     return super.isJobProducer();
   }
-  
-  @OneToMany(mappedBy="serviceRegistration")
-  @JoinColumns( { @JoinColumn(name = "host", referencedColumnName = "host"),
+
+  @OneToMany(mappedBy = "serviceRegistration")
+  @JoinColumns({ @JoinColumn(name = "host", referencedColumnName = "host"),
           @JoinColumn(name = "service_type", referencedColumnName = "service_type") })
   public Set<JobJpaImpl> getJobs() {
     return jobs;
   }
-  
+
   public void setJobs(Set<JobJpaImpl> jobs) {
     this.jobs = jobs;
   }

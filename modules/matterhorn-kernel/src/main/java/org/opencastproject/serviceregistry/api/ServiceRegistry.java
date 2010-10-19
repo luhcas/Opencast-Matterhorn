@@ -66,12 +66,10 @@ public interface ServiceRegistry {
    *          The service type
    * @param host
    *          The base URL where the service that can handle this job type can be found
-   * @param path
-   *          The path to the service endpoint
    * @throws ServiceRegistryException
    *           if communication with the service registry fails
    */
-  void unRegisterService(String serviceType, String host, String path) throws ServiceRegistryException;
+  void unRegisterService(String serviceType, String host) throws ServiceRegistryException;
 
   /**
    * Sets a registered host's maintenance status
@@ -82,27 +80,37 @@ public interface ServiceRegistry {
    *          The base URL where the service that can handle this service type can be found
    * @param maintenance
    *          the new maintenance status for this service
-   * @throws IllegalStateException
+   * @throws ServiceUnavailableException
    *           if this is called for a jobType and baseUrl that is not registered
    * @throws ServiceRegistryException
    *           if communication with the service registry fails
    */
-  void setMaintenanceStatus(String serviceType, String host, boolean maintenance) throws IllegalStateException,
+  void setMaintenanceStatus(String serviceType, String host, boolean maintenance) throws ServiceUnavailableException,
           ServiceRegistryException;
 
   /**
-   * Create and store a new job in {@link Status#QUEUED}
+   * Create and store a new job in {@link Status#QUEUED} state on this host.
    * 
    * @return the job
+   * @throws ServiceRegistryException
+   *           if there is a problem creating the job
+   * @throws ServiceUnavailableException
+   *           if no service registration exists for this job type on this host
    */
-  Job createJob(String type) throws ServiceRegistryException;
+  Job createJob(String type) throws ServiceUnavailableException, ServiceRegistryException;
 
   /**
    * Update the job in the database
    * 
    * @param job
+   * @throws ServiceRegistryException
+   *           if there is a problem updating the job
+   * @throws NotFoundException
+   *           if the job does not exist
+   * @throws ServiceUnavailableException
+   *           if no service registration exists for this job
    */
-  void updateJob(Job job) throws NotFoundException, ServiceRegistryException;
+  void updateJob(Job job) throws NotFoundException, ServiceRegistryException, ServiceUnavailableException;
 
   /**
    * Gets a receipt by its ID, or null if not found
@@ -119,24 +127,52 @@ public interface ServiceRegistry {
    * @param serviceType
    *          The type of service that must be handled by the hosts
    * @return A list of hosts that handle this job type, in order of their running and queued job load
+   * @throws ServiceRegistryException
+   *           if there is a problem accessing the service registry
    */
-  List<ServiceRegistration> getServiceRegistrations(String serviceType) throws ServiceRegistryException;
+  List<ServiceRegistration> getServiceRegistrationsByLoad(String serviceType) throws ServiceRegistryException;
 
   /**
-   * Finds a single service registration by host and type.
+   * Finds the service registrations for this kind of job, including offline services and those in maintenance mode.
+   * 
+   * @param serviceType
+   *          The type of service that must be handled by the hosts
+   * @return A list of hosts that handle this job type
+   * @throws ServiceRegistryException
+   *           if there is a problem accessing the service registry
+   */
+  List<ServiceRegistration> getServiceRegistrationsByType(String serviceType) throws ServiceRegistryException;
+
+  /**
+   * Finds the service registrations on the given host, including offline services and those in maintenance mode.
+   * 
+   * @param host
+   *          The host
+   * @return A list of service registrations on a single host
+   * @throws ServiceRegistryException
+   *           if there is a problem accessing the service registry
+   */
+  List<ServiceRegistration> getServiceRegistrationsByHost(String host) throws ServiceRegistryException;
+
+  /**
+   * Finds a single service registration by host and type, even if the service is offline or in maintenance mode.
    * 
    * @param serviceType
    *          The type of service
    * @param host
    *          the base URL of the host
    * @return The service registration, or null
+   * @throws ServiceRegistryException
+   *           if there is a problem accessing the service registry
    */
   ServiceRegistration getServiceRegistration(String serviceType, String host) throws ServiceRegistryException;
 
   /**
-   * Finds all service registrations.
+   * Finds all service registrations, including offline services and those in maintenance mode.
    * 
    * @return A list of service registrations
+   * @throws ServiceRegistryException
+   *           if there is a problem accessing the service registry
    */
   List<ServiceRegistration> getServiceRegistrations() throws ServiceRegistryException;
 
@@ -144,6 +180,8 @@ public interface ServiceRegistry {
    * Gets performance and runtime statistics for each known service registration.
    * 
    * @return the service statistics
+   * @throws ServiceRegistryException
+   *           if there is a problem accessing the service registry
    */
   List<ServiceStatistics> getServiceStatistics() throws ServiceRegistryException;
 
@@ -155,6 +193,8 @@ public interface ServiceRegistry {
    * @param status
    *          The status of the receipts
    * @return the number of jobs
+   * @throws ServiceRegistryException
+   *           if there is a problem accessing the service registry
    */
   long count(String serviceType, Status status) throws ServiceRegistryException;
 
@@ -168,6 +208,8 @@ public interface ServiceRegistry {
    * @param host
    *          The server that created and will be handling the job
    * @return the number of jobs
+   * @throws ServiceRegistryException
+   *           if there is a problem accessing the service registry
    */
   long count(String serviceType, Status status, String host) throws ServiceRegistryException;
 

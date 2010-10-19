@@ -17,7 +17,7 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-serviceregistry</artifactId>
+      <artifactId>matterhorn-kernel</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

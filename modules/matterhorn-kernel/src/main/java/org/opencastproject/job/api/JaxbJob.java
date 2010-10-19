@@ -49,6 +49,28 @@ public class JaxbJob implements Job {
   public JaxbJob() {
   }
 
+  /**
+   * Constructs a JaxbJob from an existing job
+   * 
+   * @param job the job to use as a template for constructing this JaxbJob
+   */
+  public JaxbJob(Job job) {
+    this();
+    this.dateCompleted = job.getDateCompleted();
+    this.dateCreated = job.getDateCreated();
+    this.dateStarted = job.getDateStarted();
+    this.element = job.getElement();
+    this.host = job.getHost();
+    this.id = job.getId();
+    this.jobType = job.getJobType();
+    if (this.dateCreated != null && this.dateStarted != null) {
+      this.queueTime = this.dateStarted.getTime() - this.dateCompleted.getTime();
+    }
+    if (this.dateStarted != null && this.dateCompleted != null) {
+      this.runTime = this.dateCompleted.getTime() - this.dateStarted.getTime();
+    }
+  }
+
   /** The job ID */
   protected String id;
 

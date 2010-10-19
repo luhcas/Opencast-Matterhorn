@@ -56,6 +56,19 @@ public class JaxbServiceRegistration implements ServiceRegistration {
   }
 
   /**
+   * Creates a new JAXB annotated service registration based on an existing service registration
+   * @param serviceRegistration
+   */
+  public JaxbServiceRegistration(ServiceRegistration serviceRegistration) {
+    this.host = serviceRegistration.getHost();
+    this.jobProducer = serviceRegistration.isJobProducer();
+    this.maintenanceMode = serviceRegistration.isInMaintenanceMode();
+    this.online = serviceRegistration.isOnline();
+    this.path = serviceRegistration.getPath();
+    this.serviceType = serviceRegistration.getServiceType();
+  }
+
+  /**
    * Creates a new service registration which is online and not in maintenance mode.
    * 
    * @param host

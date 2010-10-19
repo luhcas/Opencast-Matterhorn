@@ -42,6 +42,7 @@ import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
+import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.MimeType;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.NotFoundException;
@@ -271,6 +272,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
     final Job job;
     try {
       job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceUnavailableException e) {
+      throw new MediaAnalysisException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
       throw new MediaAnalysisException("Unable to create a job", e);
     }
@@ -723,6 +726,8 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
       serviceRegistry.updateJob(job);
     } catch (NotFoundException notFound) {
       throw new MediaAnalysisException("Unable to find job " + job, notFound);
+    } catch (ServiceUnavailableException e) {
+      throw new MediaAnalysisException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException serviceRegException) {
       throw new MediaAnalysisException("Unable to update job '" + job + "' in service registry", serviceRegException);
     }

@@ -15,6 +15,17 @@
  */
 package org.opencastproject.analysis.text;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import org.apache.commons.lang.StringUtils;
 import org.opencastproject.analysis.api.MediaAnalysisException;
 import org.opencastproject.analysis.api.MediaAnalysisServiceSupport;
 import org.opencastproject.analysis.text.ocropus.OcropusLine;
@@ -43,23 +54,12 @@ import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.metadata.mpeg7.VideoTextImpl;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
+import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
-
-import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Media analysis service that takes takes an image and returns text as extracted from that image.
@@ -140,6 +140,8 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
     final Job job;
     try {
       job = remoteServiceManager.createJob(JOB_TYPE);
+    } catch (ServiceUnavailableException e) {
+      throw new MediaAnalysisException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
       throw new MediaAnalysisException("Unable to create job", e);
     }
@@ -388,6 +390,8 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
       remoteServiceManager.updateJob(job);
     } catch (NotFoundException notFound) {
       throw new MediaAnalysisException("Unable to find job " + job, notFound);
+    } catch (ServiceUnavailableException e) {
+      throw new MediaAnalysisException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException serviceRegException) {
       throw new MediaAnalysisException("Unable to update job '" + job + "' in service registry", serviceRegException);
     }

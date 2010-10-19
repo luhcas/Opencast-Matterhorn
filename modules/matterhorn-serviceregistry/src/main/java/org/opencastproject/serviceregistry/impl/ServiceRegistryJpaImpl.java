@@ -15,6 +15,8 @@
  */
 package org.opencastproject.serviceregistry.impl;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,7 +33,6 @@ import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
 
-import org.apache.commons.lang.StringUtils;
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
@@ -39,7 +40,9 @@ import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.serviceregistry.api.JaxbServiceStatistics;
 import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceStatistics;
+import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.UrlSupport;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -133,12 +136,23 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String)
    */
   @Override
-  public Job createJob(String type) {
+  public Job createJob(String type) throws ServiceUnavailableException, ServiceRegistryException {
+    return createJob(type, this.hostName);
+  }
+
+  /**
+   * Creates a job on a remote host.
+   */
+  public Job createJob(String type, String host) throws ServiceUnavailableException, ServiceRegistryException {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      ServiceRegistrationJpaImpl serviceRegistration = getServiceRegistration(em, type, this.hostName);
+      ServiceRegistrationJpaImpl serviceRegistration = getServiceRegistration(em, type, host);
+      if (serviceRegistration == null) {
+        throw new ServiceUnavailableException("No service registration exists for type '" + type + "' on host '" + host
+                + "'");
+      }
       JobJpaImpl job = new JobJpaImpl(Status.QUEUED, serviceRegistration);
       serviceRegistration.jobs.add(job);
       em.persist(job);
@@ -310,8 +324,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    */
   protected ServiceRegistration setOnlineStatus(String serviceType, String baseUrl, String path, boolean online,
           Boolean jobProducer) {
-    if (StringUtils.isBlank(serviceType) || StringUtils.isBlank(baseUrl) || StringUtils.isBlank(path)) {
-      throw new IllegalArgumentException("job, baseUrl, and path must not be blank");
+    if (isBlank(serviceType) || isBlank(baseUrl)) {
+      throw new IllegalArgumentException("serviceType and baseUrl must not be blank");
     }
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
@@ -319,6 +333,10 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       tx.begin();
       ServiceRegistrationJpaImpl registration = getServiceRegistration(em, serviceType, baseUrl);
       if (registration == null) {
+        if (isBlank(path)) {
+          // we can not create a new registration without a path
+          throw new IllegalArgumentException("path must not be blank when registering new services");
+        }
         if (jobProducer == null) { // if we are not provided a value, consider it to be false
           registration = new ServiceRegistrationJpaImpl(serviceType, baseUrl, path, false);
         } else {
@@ -345,19 +363,18 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#unRegisterService(java.lang.String, java.lang.String,
-   *      java.lang.String)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#unRegisterService(java.lang.String, java.lang.String)
    */
   @Override
-  public void unRegisterService(String serviceType, String baseUrl, String path) {
-    setOnlineStatus(serviceType, baseUrl, path, false, null);
+  public void unRegisterService(String serviceType, String baseUrl) {
+    setOnlineStatus(serviceType, baseUrl, null, false, null);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#setMaintenanceStatus(java.lang.String, java.lang.String,
-   *      boolean)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#setMaintenanceStatus(java.lang.String,
+   *      java.lang.String, boolean)
    */
   @Override
   public void setMaintenanceStatus(String serviceType, String baseUrl, boolean maintenance)
@@ -501,10 +518,10 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrations(java.lang.String)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrationsByLoad(java.lang.String)
    */
   @Override
-  public List<ServiceRegistration> getServiceRegistrations(String serviceType) {
+  public List<ServiceRegistration> getServiceRegistrationsByLoad(String serviceType) {
     List<ServiceRegistration> registrations = new ArrayList<ServiceRegistration>();
     List<ServiceStatistics> stats = getServiceStatistics();
     Collections.sort(stats, new Comparator<ServiceStatistics>() {
@@ -526,7 +543,41 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistration(java.lang.String, java.lang.String)
+   *
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrationsByType(java.lang.String)
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<ServiceRegistration> getServiceRegistrationsByType(String serviceType) throws ServiceRegistryException {
+    EntityManager em = emf.createEntityManager();
+    try {
+      return em.createNamedQuery("ServiceRegistration.getByType").setParameter("serviceType", serviceType).getResultList();
+    } finally {
+      em.close();
+    }
+  }
+  
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrationsByHost(java.lang.String)
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<ServiceRegistration> getServiceRegistrationsByHost(String host) throws ServiceRegistryException {
+    EntityManager em = emf.createEntityManager();
+    try {
+      return em.createNamedQuery("ServiceRegistration.getByHost").setParameter("host", host).getResultList();
+    } finally {
+      em.close();
+    }
+  }
+  
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistration(java.lang.String,
+   *      java.lang.String)
    */
   @Override
   public ServiceRegistration getServiceRegistration(String serviceType, String host) {
@@ -535,12 +586,12 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       em = emf.createEntityManager();
       return getServiceRegistration(em, serviceType, host);
     } finally {
-      if(em != null) {
+      if (em != null) {
         em.close();
       }
     }
   }
-  
+
   /**
    * A custom ServiceTracker that registers all locally published servlets so clients can find the most appropriate
    * service on the network to handle new jobs.
@@ -553,20 +604,19 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
-      String serviceType = (String) reference.getProperty(RestPublisher.SERVICE_TYPE_PROPERTY);
-      String servicePath = (String) reference.getProperty(RestPublisher.SERVICE_PATH_PROPERTY);
-      boolean jobProducer = (Boolean)reference.getProperty(RestPublisher.SERVICE_JOBPRODUCER_PROPERTY);
-      registerService(serviceType, hostName, servicePath, jobProducer);
-      super.removedService(reference, service);
-    }
-
-    @Override
     public Object addingService(ServiceReference reference) {
       String serviceType = (String) reference.getProperty(RestPublisher.SERVICE_TYPE_PROPERTY);
       String servicePath = (String) reference.getProperty(RestPublisher.SERVICE_PATH_PROPERTY);
-      unRegisterService(serviceType, hostName, servicePath);
+      boolean jobProducer = (Boolean) reference.getProperty(RestPublisher.SERVICE_JOBPRODUCER_PROPERTY);
+      registerService(serviceType, hostName, servicePath, jobProducer);
       return super.addingService(reference);
+    }
+
+    @Override
+    public void removedService(ServiceReference reference, Object service) {
+      String serviceType = (String) reference.getProperty(RestPublisher.SERVICE_TYPE_PROPERTY);
+      unRegisterService(serviceType, hostName);
+      super.removedService(reference, service);
     }
   }
 }

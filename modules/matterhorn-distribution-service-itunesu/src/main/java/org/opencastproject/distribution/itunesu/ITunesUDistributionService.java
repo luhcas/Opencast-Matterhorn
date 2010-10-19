@@ -28,6 +28,7 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
+import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -190,6 +191,8 @@ public class ITunesUDistributionService implements DistributionService {
     final Job job;
     try {
       job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceUnavailableException e) {
+      throw new DistributionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
       throw new DistributionException("Unable to create a job", e);
     }
@@ -390,6 +393,8 @@ public class ITunesUDistributionService implements DistributionService {
       serviceRegistry.updateJob(job);
     } catch (NotFoundException notFound) {
       throw new DistributionException("Unable to find job " + job, notFound);
+    } catch (ServiceUnavailableException e) {
+      throw new DistributionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException serviceRegException) {
       throw new DistributionException("Unable to update job '" + job + "' in service registry", serviceRegException);
     }

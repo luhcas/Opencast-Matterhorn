@@ -15,7 +15,8 @@
  */
 package org.opencastproject.serviceregistry.remote;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang.StringUtils.isBlank;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -31,6 +32,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.job.api.JobParser;
@@ -43,6 +45,7 @@ import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceStatistics;
 import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.QueryStringBuilder;
 import org.opencastproject.util.UrlSupport;
 import org.osgi.framework.ServiceException;
 import org.osgi.service.component.ComponentContext;
@@ -75,6 +78,9 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
   /** Url of the actual service implementation */
   protected String serviceURL = null;
 
+  /** The base URL of this server */
+  protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
+
   /**
    * Callback for the OSGi environment that is called upon service activation.
    * 
@@ -90,6 +96,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     } catch (MalformedURLException e) {
       throw new ServiceException(OPT_SERVICE_REGISTRY_URL + " is malformed: " + serviceURLProperty);
     }
+    serverUrl = context.getBundleContext().getProperty("org.opencastproject.server.url");
   }
 
   /**
@@ -148,18 +155,16 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#unRegisterService(java.lang.String, java.lang.String,
-   *      java.lang.String)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#unRegisterService(java.lang.String, java.lang.String)
    */
   @Override
-  public void unRegisterService(String serviceType, String host, String path) throws ServiceRegistryException {
+  public void unRegisterService(String serviceType, String host) throws ServiceRegistryException {
     String servicePath = "unregister";
     HttpPost post = new HttpPost(UrlSupport.concat(serviceURL, servicePath));
     try {
       List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
       params.add(new BasicNameValuePair("serviceType", serviceType));
       params.add(new BasicNameValuePair("host", host));
-      params.add(new BasicNameValuePair("path", path));
       UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
       post.setEntity(entity);
     } catch (UnsupportedEncodingException e) {
@@ -171,17 +176,16 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
       response = client.execute(post);
       responseStatusCode = response.getStatusLine().getStatusCode();
       if (responseStatusCode == HttpStatus.SC_NO_CONTENT) {
-        logger.info("Unregistered '" + serviceType + "' on host '" + host + "' with path '" + path + "'.");
+        logger.info("Unregistered '" + serviceType + "' on host '" + host + "'.");
         return;
       }
     } catch (Exception e) {
-      throw new ServiceRegistryException("Unable to register " + serviceType + " from host " + host + " on path "
-              + path, e);
+      throw new ServiceRegistryException("Unable to register " + serviceType + " from host " + host, e);
     } finally {
       client.close(response);
     }
-    throw new ServiceRegistryException("Unable to unregister '" + serviceType + "' on host '" + host + "' with path '"
-            + path + "'. HTTP status=" + responseStatusCode);
+    throw new ServiceRegistryException("Unable to unregister '" + serviceType + "' on host '" + host
+            + "'. HTTP status=" + responseStatusCode);
   }
 
   /**
@@ -236,6 +240,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     try {
       List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
       params.add(new BasicNameValuePair("jobType", type));
+      params.add(new BasicNameValuePair("host", this.serverUrl));
       UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
       post.setEntity(entity);
     } catch (UnsupportedEncodingException e) {
@@ -330,14 +335,65 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrations(java.lang.String)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrationsByLoad(java.lang.String)
    */
   @Override
-  public List<ServiceRegistration> getServiceRegistrations(String serviceType) throws ServiceRegistryException {
-    String servicePath = "services.xml";
-    if (isNotBlank(serviceType)) {
-      servicePath += ("?serviceType=" + serviceType);
+  public List<ServiceRegistration> getServiceRegistrationsByLoad(String serviceType) throws ServiceRegistryException {
+    String servicePath = new QueryStringBuilder("available.xml").add("serviceType", serviceType).toString();
+    HttpGet get = new HttpGet(UrlSupport.concat(serviceURL, servicePath));
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(get);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_OK) {
+        JaxbServiceRegistrationList serviceList = ServiceRegistrationParser.parseRegistrations(response.getEntity()
+                .getContent());
+        return new ArrayList<ServiceRegistration>(serviceList.getRegistrations());
+      }
+    } catch (IOException e) {
+      throw new ServiceRegistryException("Unable to get service registrations", e);
+    } finally {
+      client.close(response);
     }
+    throw new ServiceRegistryException("Unable to get service registrations");
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrationsByHost(java.lang.String)
+   */
+  @Override
+  public List<ServiceRegistration> getServiceRegistrationsByHost(String host) throws ServiceRegistryException {
+    String servicePath = new QueryStringBuilder("services.xml").add("host", host).toString();
+    HttpGet get = new HttpGet(UrlSupport.concat(serviceURL, servicePath));
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(get);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_OK) {
+        JaxbServiceRegistrationList serviceList = ServiceRegistrationParser.parseRegistrations(response.getEntity()
+                .getContent());
+        return new ArrayList<ServiceRegistration>(serviceList.getRegistrations());
+      }
+    } catch (IOException e) {
+      throw new ServiceRegistryException("Unable to get service registrations", e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to get service registrations");
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrationsByType(java.lang.String)
+   */
+  @Override
+  public List<ServiceRegistration> getServiceRegistrationsByType(String serviceType) throws ServiceRegistryException {
+    String servicePath = new QueryStringBuilder("services.xml").add("serviceType", serviceType).toString();
     HttpGet get = new HttpGet(UrlSupport.concat(serviceURL, servicePath));
     HttpResponse response = null;
     int responseStatusCode;
@@ -365,8 +421,26 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    */
   @Override
   public ServiceRegistration getServiceRegistration(String serviceType, String host) throws ServiceRegistryException {
-    // TODO Auto-generated method stub
-    return null;
+    if (isBlank(serviceType) || isBlank(host)) {
+      throw new IllegalArgumentException("service type and host must be provided to locate service registrations");
+    }
+    String servicePath = new QueryStringBuilder("services.xml").add("serviceType", serviceType).add("host", host)
+            .toString();
+    HttpGet get = new HttpGet(UrlSupport.concat(serviceURL, servicePath));
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(get);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_OK) {
+        return ServiceRegistrationParser.parse(response.getEntity().getContent());
+      }
+    } catch (IOException e) {
+      throw new ServiceRegistryException("Unable to get service registrations", e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to get service registrations");
   }
 
   /**
@@ -376,8 +450,24 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    */
   @Override
   public List<ServiceRegistration> getServiceRegistrations() throws ServiceRegistryException {
-    // TODO Auto-generated method stub
-    return null;
+    String servicePath = "services.xml";
+    HttpGet get = new HttpGet(UrlSupport.concat(serviceURL, servicePath));
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(get);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_OK) {
+        JaxbServiceRegistrationList serviceList = ServiceRegistrationParser.parseRegistrations(response.getEntity()
+                .getContent());
+        return new ArrayList<ServiceRegistration>(serviceList.getRegistrations());
+      }
+    } catch (IOException e) {
+      throw new ServiceRegistryException("Unable to get service registrations", e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to get service registrations");
   }
 
   /**
@@ -415,8 +505,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    */
   @Override
   public long count(String serviceType, Status status) throws ServiceRegistryException {
-    // TODO Auto-generated method stub
-    return 0;
+    return count(serviceType, status, null);
   }
 
   /**
@@ -427,8 +516,26 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    */
   @Override
   public long count(String serviceType, Status status, String host) throws ServiceRegistryException {
-    // TODO Auto-generated method stub
-    return 0;
+    if (isBlank(serviceType) || status == null) {
+      throw new IllegalArgumentException("service type and host must not be null");
+    }
+    String servicePath = new QueryStringBuilder("count").add("serviceType", serviceType)
+            .add("status", status.toString()).add("host", host).toString();
+    HttpGet get = new HttpGet(UrlSupport.concat(serviceURL, servicePath));
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(get);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_OK) {
+        return Long.parseLong(EntityUtils.toString(response.getEntity()));
+      }
+    } catch (IOException e) {
+      throw new ServiceRegistryException("Unable to get service statistics", e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to get service statistics");
   }
 
   /**

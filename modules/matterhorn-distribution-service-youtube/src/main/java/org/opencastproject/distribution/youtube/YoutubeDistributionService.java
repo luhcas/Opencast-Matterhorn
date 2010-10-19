@@ -15,6 +15,16 @@
  */
 package org.opencastproject.distribution.youtube;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import org.apache.commons.lang.StringUtils;
 import org.opencastproject.deliver.schedule.Schedule;
 import org.opencastproject.deliver.schedule.Task;
 import org.opencastproject.deliver.youtube.YouTubeConfiguration;
@@ -28,22 +38,12 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
+import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
-
-import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Distributes media to a Youtube play list.
@@ -208,6 +208,8 @@ public class YoutubeDistributionService implements DistributionService {
     final Job job;
     try {
       job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceUnavailableException e) {
+      throw new DistributionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
       throw new DistributionException("Unable to create a job", e);
     }
@@ -409,6 +411,8 @@ public class YoutubeDistributionService implements DistributionService {
       serviceRegistry.updateJob(job);
     } catch (NotFoundException notFound) {
       throw new DistributionException("Unable to find job " + job, notFound);
+    } catch (ServiceUnavailableException e) {
+      throw new DistributionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException serviceRegException) {
       throw new DistributionException("Unable to update job '" + job + "' in service registry", serviceRegException);
     }

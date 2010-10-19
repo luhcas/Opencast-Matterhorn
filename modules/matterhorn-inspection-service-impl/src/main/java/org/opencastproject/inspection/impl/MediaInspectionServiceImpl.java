@@ -15,6 +15,21 @@
  */
 package org.opencastproject.inspection.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.inspection.impl.api.AudioStreamMetadata;
@@ -37,31 +52,16 @@ import org.opencastproject.mediapackage.track.TrackImpl;
 import org.opencastproject.mediapackage.track.VideoStreamImpl;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
+import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UnknownFileTypeException;
 import org.opencastproject.workspace.api.Workspace;
-
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Inspects media via the 3rd party MediaInfo tool by default, and can be configured to use other media analyzers.
@@ -80,7 +80,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
   public static final int DEFAULT_THREADS = 1;
 
   protected Workspace workspace;
-  protected ServiceRegistry jobManager;
+  protected ServiceRegistry serviceRegistry;
   protected ExecutorService executor = null;
   protected Map<String, Object> analyzerConfig = new ConcurrentHashMap<String, Object>();
 
@@ -90,7 +90,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
   }
 
   public void setRemoteServiceManager(ServiceRegistry jobManager) {
-    this.jobManager = jobManager;
+    this.serviceRegistry = jobManager;
   }
 
   public void activate(ComponentContext cc) {
@@ -122,7 +122,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
    * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
    */
   public Job getJob(String id) throws NotFoundException, ServiceRegistryException {
-    return jobManager.getJob(id);
+    return serviceRegistry.getJob(id);
   }
 
   /**
@@ -133,7 +133,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
   public long countJobs(Status status) throws ServiceRegistryException {
     if (status == null)
       throw new IllegalArgumentException("status must not be null");
-    return jobManager.count(JOB_TYPE, status);
+    return serviceRegistry.count(JOB_TYPE, status);
   }
 
   /**
@@ -146,7 +146,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
       throw new IllegalArgumentException("status must not be null");
     if (host == null)
       throw new IllegalArgumentException("host must not be null");
-    return jobManager.count(JOB_TYPE, status, host);
+    return serviceRegistry.count(JOB_TYPE, status, host);
   }
 
   /**
@@ -160,7 +160,9 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
     // Construct a receipt for this operation
     final Job job;
     try {
-      job = jobManager.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceUnavailableException e) {
+      throw new MediaInspectionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
       throw new MediaInspectionException(e);
     }
@@ -277,7 +279,9 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
     Callable<MediaPackageElement> command;
     final Job job;
     try {
-      job = jobManager.createJob(JOB_TYPE);
+      job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceUnavailableException e) {
+      throw new MediaInspectionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException e) {
       throw new MediaInspectionException(e);
     }
@@ -584,9 +588,11 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
    */
   private void updateJob(Job job) throws MediaInspectionException {
     try {
-      jobManager.updateJob(job);
+      serviceRegistry.updateJob(job);
     } catch (NotFoundException notFound) {
       throw new MediaInspectionException("Unable to find job " + job, notFound);
+    } catch (ServiceUnavailableException e) {
+      throw new MediaInspectionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException serviceRegException) {
       throw new MediaInspectionException("Unable to update job '" + job + "' in service registry", serviceRegException);
     }

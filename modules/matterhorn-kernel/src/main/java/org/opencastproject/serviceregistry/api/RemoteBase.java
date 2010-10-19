@@ -114,7 +114,7 @@ public class RemoteBase implements JobProducer {
   protected HttpResponse getResponse(HttpRequestBase httpRequest, Integer... expectedHttpStatus) {
     List<ServiceRegistration> remoteServices = null;
     try {
-      remoteServices = remoteServiceManager.getServiceRegistrations(serviceType);
+      remoteServices = remoteServiceManager.getServiceRegistrationsByLoad(serviceType);
     } catch (ServiceRegistryException e) {
       logger.warn("Unable to obtain a list of remote services", e);
       return null;

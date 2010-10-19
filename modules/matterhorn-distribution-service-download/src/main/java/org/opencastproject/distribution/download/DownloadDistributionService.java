@@ -15,26 +15,6 @@
  */
 package org.opencastproject.distribution.download;
 
-import org.opencastproject.distribution.api.DistributionException;
-import org.opencastproject.distribution.api.DistributionService;
-import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.Job.Status;
-import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.serviceregistry.api.ServiceRegistryException;
-import org.opencastproject.util.FileSupport;
-import org.opencastproject.util.NotFoundException;
-import org.opencastproject.util.PathSupport;
-import org.opencastproject.util.UrlSupport;
-import org.opencastproject.workspace.api.Workspace;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -43,6 +23,26 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
+import org.opencastproject.distribution.api.DistributionException;
+import org.opencastproject.distribution.api.DistributionService;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
+import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
+import org.opencastproject.util.FileSupport;
+import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.PathSupport;
+import org.opencastproject.util.UrlSupport;
+import org.opencastproject.workspace.api.Workspace;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Distributes media to the local media delivery directory.
@@ -128,6 +128,9 @@ public class DownloadDistributionService implements DistributionService {
     final Job job;
     try {
       job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceUnavailableException e) {
+      throw new DistributionException("The " + JOB_TYPE
+              + " service is not registered on this host, so no job can be created", e);
     } catch (ServiceRegistryException e) {
       throw new DistributionException("Unable to create a job", e);
     }
@@ -216,6 +219,9 @@ public class DownloadDistributionService implements DistributionService {
     final Job job;
     try {
       job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceUnavailableException e) {
+      throw new DistributionException("The " + JOB_TYPE
+              + " service is not registered on this host, so no job can be created", e);
     } catch (ServiceRegistryException e) {
       throw new DistributionException("Unable to create a job", e);
     }
@@ -373,6 +379,8 @@ public class DownloadDistributionService implements DistributionService {
       serviceRegistry.updateJob(job);
     } catch (NotFoundException notFound) {
       throw new DistributionException("Unable to find job " + job, notFound);
+    } catch (ServiceUnavailableException e) {
+      throw new DistributionException("No service of type '" + JOB_TYPE + "' available", e);
     } catch (ServiceRegistryException serviceRegException) {
       throw new DistributionException("Unable to update job '" + job + "' in service registry", serviceRegException);
     }

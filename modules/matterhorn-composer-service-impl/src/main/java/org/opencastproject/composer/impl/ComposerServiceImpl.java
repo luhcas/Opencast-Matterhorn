@@ -15,6 +15,23 @@
  */
 package org.opencastproject.composer.impl;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.Collection;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EmbedderEngine;
 import org.opencastproject.composer.api.EmbedderEngineFactory;
@@ -39,29 +56,12 @@ import org.opencastproject.mediapackage.identifier.IdBuilder;
 import org.opencastproject.mediapackage.identifier.IdBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
+import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workspace.api.Workspace;
-
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * Default implementation of the composer service api.
@@ -230,6 +230,9 @@ public class ComposerServiceImpl implements ComposerService {
     final Job job;
     try {
       job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceUnavailableException e) {
+      throw new EncoderException("The " + JOB_TYPE
+              + " service is not registered on this host, so no job can be created", e);
     } catch (ServiceRegistryException e) {
       throw new EncoderException("Unable to create a job", e);
     }
@@ -384,6 +387,9 @@ public class ComposerServiceImpl implements ComposerService {
     final Job job;
     try {
       job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceUnavailableException e) {
+      throw new EncoderException("The " + JOB_TYPE
+              + " service is not registered on this host, so no job can be created", e);
     } catch (ServiceRegistryException e) {
       throw new EncoderException("Unable to create a job", e);
     }
@@ -554,6 +560,9 @@ public class ComposerServiceImpl implements ComposerService {
     final Job job;
     try {
       job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceUnavailableException e) {
+      throw new EncoderException("The " + JOB_TYPE
+              + " service is not registered on this host, so no job can be created", e);
     } catch (ServiceRegistryException e) {
       throw new EncoderException("Unable to create a job", e);
     }
@@ -697,6 +706,9 @@ public class ComposerServiceImpl implements ComposerService {
     final Job job;
     try {
       job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceUnavailableException e) {
+      throw new EmbedderException("The " + JOB_TYPE
+              + " service is not registered on this host, so no job can be created", e);
     } catch (ServiceRegistryException e) {
       throw new EmbedderException("Unable to create a job", e);
     }
@@ -898,6 +910,8 @@ public class ComposerServiceImpl implements ComposerService {
       throw new EncoderException("Unable to find job " + job, notFound);
     } catch (ServiceRegistryException serviceRegException) {
       throw new EncoderException("Unable to update job '" + job + "' in service registry", serviceRegException);
+    } catch (ServiceUnavailableException e) {
+      throw new EncoderException("No service of type '" + JOB_TYPE + "' available", e);
     }
   }
 
@@ -917,6 +931,8 @@ public class ComposerServiceImpl implements ComposerService {
       throw new EmbedderException("Unable to find job " + job, notFound);
     } catch (ServiceRegistryException serviceRegException) {
       throw new EmbedderException("Unable to update job '" + job + "' in service registry", serviceRegException);
+    } catch (ServiceUnavailableException e) {
+      throw new EmbedderException("No service of type '" + JOB_TYPE + "' available", e);
     }
   }
 

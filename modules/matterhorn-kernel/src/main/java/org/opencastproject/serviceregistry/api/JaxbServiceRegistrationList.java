@@ -34,7 +34,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name="services", namespace="http://serviceregistry.opencastproject.org")
 public class JaxbServiceRegistrationList {
   /** A list of search items. */
-  @XmlElement(name="services")
+  @XmlElement(name="service")
   protected List<JaxbServiceRegistration> registrations = new ArrayList<JaxbServiceRegistration>();
 
   public JaxbServiceRegistrationList() {}
