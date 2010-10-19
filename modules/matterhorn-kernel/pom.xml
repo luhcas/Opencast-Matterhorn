@@ -11,7 +11,7 @@
     <relativePath>../../pom.xml</relativePath>
   </parent>
   <properties>
-    <matterhorn.basedir>${project.parent.basedir}</matterhorn.basedir>
+    <matterhorn.basedir>${project.basedir}/../..</matterhorn.basedir>
     <checkstyle.skip>false</checkstyle.skip>
   </properties>
 
