@@ -47,6 +47,9 @@ public class CLIWorkflowOperationHandlerTest {
 
   /** True if the environment provides the tools needed for the test suite */
   private static boolean isSane = true;
+  
+  /** The temp directory */
+  private final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
 
   /** Represents a tuple of handler and instance, useful for return types */
   protected class InstanceAndHandler {
@@ -182,7 +185,8 @@ public class CLIWorkflowOperationHandlerTest {
     if (!isSane)
       return;
 
-    InstanceAndHandler tuple = createCLIWorkflow("echo", "/tmp/mp.xml");
+    File file = new File(tmpDir, "mp.xml");
+    InstanceAndHandler tuple = createCLIWorkflow("echo", file.getAbsolutePath());
 
     // create a dummy mediapackage
     MediaPackageBuilderFactory factory = MediaPackageBuilderFactory.newInstance();
@@ -190,7 +194,6 @@ public class CLIWorkflowOperationHandlerTest {
     MediaPackage mp = builder.createNew();
 
     try {
-      File file = new File("/tmp/mp.xml");
       BufferedWriter output = new BufferedWriter(new FileWriter(file));
       output.write(mp.toXml());
       output.close();
@@ -204,8 +207,7 @@ public class CLIWorkflowOperationHandlerTest {
       }
     } finally {
       try {
-        File f = new File("/tmp/mp.xml");
-        f.delete();
+        file.delete();
       } catch (Exception e) {
         // Suppressed
       }
@@ -218,15 +220,15 @@ public class CLIWorkflowOperationHandlerTest {
     if (!isSane)
       return;
 
+    File file = new File(tmpDir, "mp.xml");
     try {
-      InstanceAndHandler tuple = createCLIWorkflow("cat", "/tmp/mp.xml");
+      InstanceAndHandler tuple = createCLIWorkflow("cat", file.getAbsolutePath());
 
       // create a dummy mediapackage
       MediaPackageBuilderFactory factory = MediaPackageBuilderFactory.newInstance();
       MediaPackageBuilder builder = factory.newMediaPackageBuilder();
       MediaPackage mp = builder.createNew();
 
-      File file = new File("/tmp/mp.xml");
       BufferedWriter output = new BufferedWriter(new FileWriter(file));
       output.write(mp.toXml());
       output.close();
@@ -240,8 +242,7 @@ public class CLIWorkflowOperationHandlerTest {
       }
     } finally {
       try {
-        File f = new File("/tmp/mp.xml");
-        f.delete();
+        file.delete();
       } catch (Exception e) {
         // Suppressed
       }
@@ -267,17 +268,16 @@ public class CLIWorkflowOperationHandlerTest {
   public void testNoMediaPackageOperation() throws Exception {
     if (!isSane)
       return;
+    File file = new File(tmpDir, "me");
     try {
-      InstanceAndHandler tuple = createCLIWorkflow("touch", "/tmp/me");
+      InstanceAndHandler tuple = createCLIWorkflow("touch", file.getAbsolutePath());
 
       // start the flow
       tuple.workflowHandler.start(tuple.workflowInstance).getMediaPackage();
-      File f = new File("/tmp/me");
-      Assert.assertTrue(f.exists());
+      Assert.assertTrue(file.exists());
     } finally {
       try {
-        File f = new File("/tmp/me");
-        f.delete();
+        file.delete();
       } catch (Exception e) {
         // Suppressed
       }
@@ -288,27 +288,22 @@ public class CLIWorkflowOperationHandlerTest {
   public void testNoMediaPackageOperationMultipleParameters() throws Exception {
     if (!isSane)
       return;
+    File f1 = new File(tmpDir, "me");
+    File f2 = new File(tmpDir, "and");
+    File f3 = new File(tmpDir, "you");
     try {
-      InstanceAndHandler tuple = createCLIWorkflow("touch", "/tmp/me /tmp/and /tmp/you");
+      InstanceAndHandler tuple = createCLIWorkflow("touch", f1 + " " + f2 + " " + f3);
 
       // start the flow
       tuple.workflowHandler.start(tuple.workflowInstance).getMediaPackage();
-      File f1 = new File("/tmp/me");
       Assert.assertTrue(f1.exists());
-      File f2 = new File("/tmp/and");
       Assert.assertTrue(f2.exists());
-      File f3 = new File("/tmp/you");
       Assert.assertTrue(f3.exists());
     } finally {
       try {
-        File f = new File("/tmp/me");
-        f.delete();
-
-        File f1 = new File("/tmp/and");
         f1.delete();
-
-        File f2 = new File("/tmp/you");
         f2.delete();
+        f3.delete();
       } catch (Exception e) {
         // Suppressed
       }
@@ -317,7 +312,7 @@ public class CLIWorkflowOperationHandlerTest {
 
   @Test
   public void testParametersString() throws Exception {
-    InstanceAndHandler tuple = createCLIWorkflow("touch", "/tmp/me /tmp/and /tmp/you");
+    InstanceAndHandler tuple = createCLIWorkflow("touch", "me and you");
     CLIWorkflowOperationHandler handler = (CLIWorkflowOperationHandler) tuple.workflowHandler;
     Assert.assertTrue(handler.splitParameters("one two three").size() == 3);
     Assert.assertTrue(handler.splitParameters("\"one \'two\' three\"").get(0).equals("one \'two\' three"));
