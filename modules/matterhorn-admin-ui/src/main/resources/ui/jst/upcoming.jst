@@ -1,9 +1,9 @@
 <table id="recordingsTable" class="ui-widget recordings-table" width="100%">
   <thead>
     <tr>
-      <th width="25%" id="th-Title" class="ui-widget-header oc-ui-sortable recordings-table-head">Title</th>
+      <th width="20%" id="th-Title" class="ui-widget-header oc-ui-sortable recordings-table-head">Title</th>
       <th width="15%" id="th-Presenter" class="ui-widget-header oc-ui-sortable recordings-table-head">Presenter</th>
-      <th width="20%" id="th-Series" class="ui-widget-header oc-ui-sortable recordings-table-head">Course/Series</th>
+      <th width="15%" id="th-Series" class="ui-widget-header oc-ui-sortable recordings-table-head">Course/Series</th>
       <th width="15%" id="th-StartDate" class="ui-widget-header oc-ui-sortable recordings-table-head">Upload / Recording Time</th>
       <th width="10%" id="th-CaptureAgent" class="ui-widget-header oc-ui-sortable recordings-table-head">Capture Agent</th>
       <th width="15%" id="th-ProcessingStatus" class="ui-widget-header oc-ui-sortable recordings-table-head">Status</th>
@@ -12,7 +12,7 @@
   </thead>
   <tbody>
     {for rec in recordingList}
-      {eval} rec = rec.recording {/eval}
+    {eval} rec = rec.recording {/eval}
     <tr class="highlightable">
       <td class="ui-widget-content">
         ${rec.title}
