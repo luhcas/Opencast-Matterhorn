@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009, 2010 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+
 package org.opencastproject.series.impl;
 
 import org.opencastproject.metadata.dublincore.DublinCore;
@@ -9,13 +25,12 @@ import org.opencastproject.series.api.SeriesMetadata;
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.InputStream;
@@ -26,7 +41,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 public class SeriesServiceImplTest {
-  private static final Logger logger = LoggerFactory.getLogger(SeriesServiceImplTest.class);
 
   SeriesServiceImpl service;
 
@@ -115,9 +129,14 @@ public class SeriesServiceImplTest {
   public void testDublinCoreParsing() throws Exception {
     // Load the DC catalog
     DublinCoreCatalogService dcService = new DublinCoreCatalogService();
-    InputStream in = getClass().getResourceAsStream("/dublincore.xml");
-    DublinCoreCatalog dc = dcService.load(in);
-    in.close();
+    DublinCoreCatalog dc = null;
+    InputStream in = null;
+    try {
+      in = getClass().getResourceAsStream("/dublincore.xml");
+      dc = dcService.load(in);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
 
     // Update the series
     series.updateMetadata(dc);

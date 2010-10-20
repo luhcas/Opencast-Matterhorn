@@ -19,6 +19,7 @@ import org.opencastproject.caption.api.CaptionCollection;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,7 +70,8 @@ public class SubRipConverterTest {
   
   @After
   public void tear() throws IOException{
-    inputStream.close();
-    outputStream.close();
+    IOUtils.closeQuietly(inputStream);
+    IOUtils.closeQuietly(outputStream);
   }
+
 }

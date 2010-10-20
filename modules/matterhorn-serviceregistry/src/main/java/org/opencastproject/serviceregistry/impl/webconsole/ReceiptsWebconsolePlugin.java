@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
  * Delivers the receipts user interface for the felix web console.
  */
 public class ReceiptsWebconsolePlugin extends HttpServlet {
+  
   /** Serialization version */
   private static final long serialVersionUID = 1L;
 
@@ -42,7 +43,7 @@ public class ReceiptsWebconsolePlugin extends HttpServlet {
     InputStream in = null;
     try {
       in = ReceiptsWebconsolePlugin.class.getResourceAsStream("/ui/index.html");
-      IOUtils.copy(in, resp.getWriter(), "UTF8");
+      IOUtils.copy(in, resp.getWriter(), "UTF-8");
     } finally {
       IOUtils.closeQuietly(in);
     }

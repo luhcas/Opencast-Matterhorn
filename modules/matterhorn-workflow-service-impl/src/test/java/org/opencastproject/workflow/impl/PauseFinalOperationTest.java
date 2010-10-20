@@ -23,15 +23,16 @@ import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandle
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
-import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 import org.opencastproject.workspace.api.Workspace;
 
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
@@ -39,6 +40,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Map;
@@ -71,7 +73,9 @@ public class PauseFinalOperationTest {
 
     MediaPackageBuilder mediaPackageBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("target/test-classes")));
-    mp = mediaPackageBuilder.loadFromXml(WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-1.xml"));
+    InputStream is = WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-1.xml");
+    mp = mediaPackageBuilder.loadFromXml(is);
+    IOUtils.closeQuietly(is);
 
     // create operation handlers for our workflows
     final Set<HandlerRegistration> handlerRegistrations = new HashSet<HandlerRegistration>();
@@ -95,8 +99,9 @@ public class PauseFinalOperationTest {
     service.setDao(dao);
     service.activate(null);
 
-    def = WorkflowBuilder.getInstance().parseWorkflowDefinition(
-            WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-pause-last.xml"));
+    is = WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-pause-last.xml");
+    def = WorkflowBuilder.getInstance().parseWorkflowDefinition(is);
+    IOUtils.closeQuietly(is);
     service.registerWorkflowDefinition(def);
   }
 
@@ -176,7 +181,8 @@ public class PauseFinalOperationTest {
      *      java.util.Map)
      */
     @Override
-    public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties) throws WorkflowOperationException {
+    public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
+            throws WorkflowOperationException {
       resumeCalled = true;
       return super.resume(workflowInstance, properties);
     }

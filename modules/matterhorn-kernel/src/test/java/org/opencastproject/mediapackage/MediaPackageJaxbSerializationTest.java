@@ -54,14 +54,19 @@ public class MediaPackageJaxbSerializationTest {
 
     // Load the simple media package
     MediaPackage mediaPackage = null;
-    InputStream is = getClass().getResourceAsStream("/manifest-simple.xml");
-    mediaPackage = mediaPackageBuilder.loadFromXml(is);
-
-    Assert.assertEquals(0, mediaPackage.getTracks().length);
-    Assert.assertEquals(1, mediaPackage.getCatalogs().length);
-    Assert.assertEquals(0, mediaPackage.getAttachments().length);
-
-    Assert.assertEquals("dublincore/episode", mediaPackage.getCatalogs()[0].getFlavor().toString());
+    InputStream is = null;
+    try {
+      is = getClass().getResourceAsStream("/manifest-simple.xml");
+      mediaPackage = mediaPackageBuilder.loadFromXml(is);
+  
+      Assert.assertEquals(0, mediaPackage.getTracks().length);
+      Assert.assertEquals(1, mediaPackage.getCatalogs().length);
+      Assert.assertEquals(0, mediaPackage.getAttachments().length);
+  
+      Assert.assertEquals("dublincore/episode", mediaPackage.getCatalogs()[0].getFlavor().toString());
+    } finally {
+      IOUtils.closeQuietly(is);
+    }
   }
 
   @Test
@@ -126,15 +131,20 @@ public class MediaPackageJaxbSerializationTest {
 
   @Test
   public void testJaxbUnmarshallingFromFile() throws Exception {
-    InputStream in = this.getClass().getResourceAsStream("/manifest.xml");
-    MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(in);
-    Assert.assertEquals(2, mp.getTracks().length);
-    Assert.assertTrue(mp.getTracks()[0].hasVideo());
-    Assert.assertTrue(!mp.getTracks()[0].hasAudio());
-    Assert.assertTrue(mp.getTracks()[1].hasAudio());
-    Assert.assertTrue(!mp.getTracks()[1].hasVideo());
-    Assert.assertEquals(3, mp.getCatalogs().length);
-    Assert.assertEquals(2, mp.getAttachments().length);
+    InputStream in = null;
+    try {
+      in = this.getClass().getResourceAsStream("/manifest.xml");
+      MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(in);
+      Assert.assertEquals(2, mp.getTracks().length);
+      Assert.assertTrue(mp.getTracks()[0].hasVideo());
+      Assert.assertTrue(!mp.getTracks()[0].hasAudio());
+      Assert.assertTrue(mp.getTracks()[1].hasAudio());
+      Assert.assertTrue(!mp.getTracks()[1].hasVideo());
+      Assert.assertEquals(3, mp.getCatalogs().length);
+      Assert.assertEquals(2, mp.getAttachments().length);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
   }
 
   @Test

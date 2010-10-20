@@ -109,10 +109,14 @@ public class WorkspaceImplTest {
     workspace.setRepository(repo);
 
     // Put a stream into the workspace (and hence, the repository)
-    InputStream in = getClass().getResourceAsStream("/opencast_header.gif");
-    Assert.assertNotNull(in);
-    workspace.put("foo", "bar", "header.gif", in);
-    IOUtils.closeQuietly(in);
+    InputStream in = null;
+    try {
+      in = getClass().getResourceAsStream("/opencast_header.gif");
+      Assert.assertNotNull(in);
+      workspace.put("foo", "bar", "header.gif", in);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
 
     // Ensure that the file was put into the working file repository
     EasyMock.verify(repo);
@@ -143,10 +147,14 @@ public class WorkspaceImplTest {
     workspace.setRepository(repo);
 
     // Put a stream into the workspace (and hence, the repository)
-    InputStream in = getClass().getResourceAsStream("/opencast_header.gif");
-    Assert.assertNotNull(in);
-    workspace.put("foo", "bar", "header.gif", in);
-    IOUtils.closeQuietly(in);
+    InputStream in = null;
+    try {
+      in = getClass().getResourceAsStream("/opencast_header.gif");
+      Assert.assertNotNull(in);
+      workspace.put("foo", "bar", "header.gif", in);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
 
     // Ensure that the file was put into the working file repository
     EasyMock.verify(repo);
@@ -170,14 +178,14 @@ public class WorkspaceImplTest {
     Assert.assertEquals(expected.getAbsolutePath(), workspaceFile.getAbsolutePath());
 
     workspaceFile = workspace.getWorkspaceFile(new URI("http://foo.com:8080/myaccount/videos/bar.mov"), true);
-    expected = new File(PathSupport.concat(new String[] { workspaceRoot, "http_foo.com_8080", "myaccount",
-            "videos", "bar.mov" }));
+    expected = new File(PathSupport.concat(new String[] { workspaceRoot, "http_foo.com_8080", "myaccount", "videos",
+            "bar.mov" }));
     Assert.assertEquals(expected.getAbsolutePath(), workspaceFile.getAbsolutePath());
 
     workspaceFile = workspace.getWorkspaceFile(new URI("http://localhost/files/collection/c1/bar.mov"), true);
     expected = new File(PathSupport.concat(new String[] { workspaceRoot, "collection", "c1", "bar.mov" }));
     Assert.assertEquals(expected.getAbsolutePath(), workspaceFile.getAbsolutePath());
-  
+
   }
 
   @Test
@@ -193,8 +201,8 @@ public class WorkspaceImplTest {
     Assert.assertEquals(expected.getAbsolutePath(), workspaceFile.getAbsolutePath());
 
     workspaceFile = workspace.getWorkspaceFile(new URI("http://foo.com:8080/myaccount/videos/bar.mov"), true);
-    expected = new File(PathSupport.concat(new String[] { workspaceRoot, "http_foo.com_8080", "myaccount",
-            "videos", "bar.mov" }));
+    expected = new File(PathSupport.concat(new String[] { workspaceRoot, "http_foo.com_8080", "myaccount", "videos",
+            "bar.mov" }));
     Assert.assertEquals(expected.getAbsolutePath(), workspaceFile.getAbsolutePath());
 
     workspaceFile = workspace.getWorkspaceFile(new URI("http://localhost:8080/files/collection/c1/bar.mov"), true);

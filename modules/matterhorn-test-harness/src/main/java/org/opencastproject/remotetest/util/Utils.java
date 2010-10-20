@@ -103,9 +103,15 @@ public class Utils {
   public static String schedulerEvent(Integer duration, String title, String id) throws Exception {
     Long start = System.currentTimeMillis() + 60000;
     Long end = start + duration;
-    String event = IOUtils.toString(Utils.class.getResourceAsStream("/scheduler-event.xml"), "UTF-8");
-    return event.replace("@@id@@", id).replace("@@title@@", title).replace("@@start@@", start.toString())
-            .replace("@@end@@", end.toString()).replace("@@duration@@", duration.toString());
+    InputStream is = null;
+    try {
+      is = Utils.class.getResourceAsStream("/scheduler-event.xml");
+      String event = IOUtils.toString(is, "UTF-8");
+      return event.replace("@@id@@", id).replace("@@title@@", title).replace("@@start@@", start.toString())
+              .replace("@@end@@", end.toString()).replace("@@duration@@", duration.toString());
+    } finally {
+      IOUtils.closeQuietly(is);
+    }
   }
 
   public static File getUrlAsFile(String url) throws IOException {

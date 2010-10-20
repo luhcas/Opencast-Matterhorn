@@ -28,6 +28,7 @@ import org.opencastproject.workspace.api.Workspace;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -37,6 +38,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -129,7 +131,10 @@ public class IngestServiceImplTest {
     EasyMock.replay(workflowService);
 
     HttpEntity entity = EasyMock.createMock(HttpEntity.class);
-    EasyMock.expect(entity.getContent()).andReturn(getClass().getResourceAsStream("/av.mov")).anyTimes();
+    InputStream is = getClass().getResourceAsStream("/av.mov");
+    byte[] movie = IOUtils.toByteArray(is);
+    IOUtils.closeQuietly(is);
+    EasyMock.expect(entity.getContent()).andReturn(new ByteArrayInputStream(movie)).anyTimes();
     EasyMock.replay(entity);
     
     StatusLine statusLine = EasyMock.createMock(StatusLine.class);

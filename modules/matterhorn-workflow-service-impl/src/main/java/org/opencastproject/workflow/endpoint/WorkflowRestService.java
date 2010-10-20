@@ -52,6 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -287,10 +288,14 @@ public class WorkflowRestService {
   }
 
   protected String generateWorkflowDefinition() {
+    InputStream is = null;
     try {
-      return IOUtils.toString(getClass().getResourceAsStream("/sample/compose-distribute-publish.xml"), "UTF-8");
+      is = getClass().getResourceAsStream("/sample/compose-distribute-publish.xml");
+      return IOUtils.toString(is, "UTF-8");
     } catch (IOException e) {
       throw new RuntimeException(e);
+    } finally {
+      IOUtils.closeQuietly(is);
     }
   }
 

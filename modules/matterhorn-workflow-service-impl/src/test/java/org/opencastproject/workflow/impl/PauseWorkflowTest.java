@@ -23,9 +23,9 @@ import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandle
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
-import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 import org.opencastproject.workspace.api.Workspace;
@@ -33,6 +33,7 @@ import org.opencastproject.workspace.api.Workspace;
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
@@ -40,6 +41,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
@@ -58,7 +60,7 @@ public class PauseWorkflowTest {
   private Workspace workspace = null;
   private SampleWorkflowOperationHandler firstHandler = null;
   private SampleWorkflowOperationHandler secondHandler = null;
-  
+
   @Before
   public void setup() throws Exception {
     // always start with a fresh solr root directory
@@ -72,7 +74,9 @@ public class PauseWorkflowTest {
 
     MediaPackageBuilder mediaPackageBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("target/test-classes")));
-    mp = mediaPackageBuilder.loadFromXml(WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-1.xml"));
+    InputStream is = WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-1.xml");
+    mp = mediaPackageBuilder.loadFromXml(is);
+    IOUtils.closeQuietly(is);
 
     // create operation handlers for our workflows
     final Set<HandlerRegistration> handlerRegistrations = new HashSet<HandlerRegistration>();
@@ -99,8 +103,9 @@ public class PauseWorkflowTest {
     service.setDao(dao);
     service.activate(null);
 
-    def = WorkflowBuilder.getInstance().parseWorkflowDefinition(
-            WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-pause.xml"));
+    is = WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-pause.xml");
+    def = WorkflowBuilder.getInstance().parseWorkflowDefinition(is);
+    IOUtils.closeQuietly(is);
     service.registerWorkflowDefinition(def);
   }
 
@@ -119,11 +124,14 @@ public class PauseWorkflowTest {
     service.suspend(workflow.getId());
 
     // Wait for the workflows to complete (should happen in roughly 1 second)
-    try {Thread.sleep(2000);} catch (InterruptedException e) {}
-    
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException e) {
+    }
+
     // Ensure that the first operation handler was called, but not the second
     Assert.assertTrue(firstHandler.called);
-    Assert.assertTrue( ! secondHandler.called);
+    Assert.assertTrue(!secondHandler.called);
 
     // The workflow should be in the paused state
     Assert.assertEquals(WorkflowState.PAUSED, service.getWorkflowById(workflow.getId()).getState());
@@ -138,13 +146,19 @@ public class PauseWorkflowTest {
     }
 
     @Override
-    public SortedMap<String, String> getConfigurationOptions() {return new TreeMap<String, String>();}
-    
-    @Override
-    public String getId() {return this.getClass().getName();}
+    public SortedMap<String, String> getConfigurationOptions() {
+      return new TreeMap<String, String>();
+    }
 
     @Override
-    public String getDescription() {return "ContinuingWorkflowOperationHandler";}
+    public String getId() {
+      return this.getClass().getName();
+    }
+
+    @Override
+    public String getDescription() {
+      return "ContinuingWorkflowOperationHandler";
+    }
 
     @Override
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {

@@ -26,6 +26,7 @@ import org.opencastproject.caption.impl.CaptionImpl;
 import org.opencastproject.caption.impl.TimeImpl;
 import org.opencastproject.caption.util.TimeUtil;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -204,12 +205,12 @@ public class DFXPCaptionConverter implements CaptionConverter {
     // get document builder factory and parse template
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     Document doc = null;
+    InputStream is = null;
     try {
       DocumentBuilder builder = factory.newDocumentBuilder();
       // load dfxp template from file
-      InputStream is = DFXPCaptionConverter.class.getResourceAsStream("/templates/template.dfxp.xml");
+      is = DFXPCaptionConverter.class.getResourceAsStream("/templates/template.dfxp.xml");
       doc = builder.parse(is);
-      is.close();
     } catch (ParserConfigurationException e) {
       // should not happen
       throw new RuntimeException(e);
@@ -219,6 +220,8 @@ public class DFXPCaptionConverter implements CaptionConverter {
     } catch (IOException e) {
       // should not happen
       throw new RuntimeException(e);
+    } finally {
+      IOUtils.closeQuietly(is);
     }
 
     // retrieve body element
@@ -255,16 +258,16 @@ public class DFXPCaptionConverter implements CaptionConverter {
     try {
       transformer = tfactory.newTransformer();
       transformer.transform(source, result);
+      osw.flush();
     } catch (TransformerConfigurationException e) {
       // should not happen
       throw new RuntimeException(e);
     } catch (TransformerException e) {
       // should not happen
       throw new RuntimeException(e);
+    } finally {
+      IOUtils.closeQuietly(osw);
     }
-
-    osw.flush();
-    osw.close();
   }
 
   /**
@@ -324,4 +327,5 @@ public class DFXPCaptionConverter implements CaptionConverter {
   public String getExtension() {
     return EXTENSION;
   }
+
 }

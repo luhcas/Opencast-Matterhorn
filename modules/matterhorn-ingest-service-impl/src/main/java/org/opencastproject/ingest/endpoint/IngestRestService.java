@@ -444,9 +444,11 @@ public class IngestRestService {
   @Path("filechooser-local.html")
   @Produces(MediaType.TEXT_HTML)
   public Response createUploadJobHtml() {
+    InputStream is = null;
     try {
       UploadJob job = createUploadJob();
-      String html = IOUtils.toString(getClass().getResourceAsStream("/templates/uploadform.html"), "UTF-8");
+      is = getClass().getResourceAsStream("/templates/uploadform.html");
+      String html = IOUtils.toString(is, "UTF-8");
       // String uploadURL = serverURL + "/ingest/rest/addElementMonitored/" + job.getId();
       String uploadURL = "addElementMonitored/" + job.getId();
       html = html.replaceAll("\\{uploadURL\\}", uploadURL);
@@ -457,6 +459,8 @@ public class IngestRestService {
     } catch (Exception ex) {
       logger.warn(ex.getMessage(), ex);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    } finally {
+      IOUtils.closeQuietly(is);
     }
   }
 
@@ -464,12 +468,16 @@ public class IngestRestService {
   @Path("filechooser-inbox.html")
   @Produces(MediaType.TEXT_HTML)
   public Response createInboxHtml() {
+    InputStream is = null;
     try {
-      String html = IOUtils.toString(getClass().getResourceAsStream("/templates/inboxform.html"), "UTF-8");
+      is = getClass().getResourceAsStream("/templates/inboxform.html");
+      String html = IOUtils.toString(is, "UTF-8");
       return Response.ok(html).build();
     } catch (Exception ex) {
       logger.warn(ex.getMessage(), ex);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    } finally {
+      IOUtils.closeQuietly(is);
     }
   }
 
@@ -536,9 +544,15 @@ public class IngestRestService {
                 logger.info("Adding Catalog: " + fileName + " - " + flavor);
                 mp = ingestService.addCatalog(item.openStream(), fileName, flavor, mp);
               }
-              String html = IOUtils.toString(getClass().getResourceAsStream("/templates/complete.html"), "UTF-8");
-              html = html.replaceAll("\\{mediaPackage\\}", mp.toXml());
-              return Response.ok(html).build();
+              InputStream is = null;
+              try {
+                is = getClass().getResourceAsStream("/templates/complete.html");
+                String html = IOUtils.toString(is, "UTF-8");
+                html = html.replaceAll("\\{mediaPackage\\}", mp.toXml());
+                return Response.ok(html).build();
+              } finally {
+                IOUtils.closeQuietly(is);
+              }
             }
           }
         }
@@ -561,12 +575,16 @@ public class IngestRestService {
    * @return HTML that calls the UploadListener.uploadFailed js function
    */
   private Response buildUploadFailedRepsonse() {
+    InputStream is = null;
     try {
-      String html = IOUtils.toString(getClass().getResourceAsStream("/templates/error.html"), "UTF-8");
+      is = getClass().getResourceAsStream("/templates/error.html");
+      String html = IOUtils.toString(is, "UTF-8");
       return Response.ok(html).build();
     } catch (IOException ex) {
       logger.error("Unable to build upload failed Response");
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    } finally {
+      IOUtils.closeQuietly(is);
     }
   }
 

@@ -15,17 +15,6 @@
  */
 package org.opencastproject.distribution.download;
 
-import java.io.File;
-import java.net.URI;
-import java.util.concurrent.Executors;
-
-import junit.framework.Assert;
-
-import org.apache.commons.io.FileUtils;
-import org.easymock.EasyMock;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -34,6 +23,20 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.workspace.api.Workspace;
+
+import junit.framework.Assert;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.easymock.EasyMock;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.concurrent.Executors;
 
 public class DistributionServiceImplTest {
   
@@ -46,7 +49,13 @@ public class DistributionServiceImplTest {
     File mediaPackageRoot = new File("./target/test-classes");
     MediaPackageBuilder builder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     builder.setSerializer(new DefaultMediaPackageSerializerImpl(mediaPackageRoot));
-    mp = builder.loadFromXml(this.getClass().getResourceAsStream("/mediapackage.xml"));
+    InputStream is = null;
+    try {
+      is = getClass().getResourceAsStream("/mediapackage.xml");
+      mp = builder.loadFromXml(is);
+    } finally {
+      IOUtils.closeQuietly(is);
+    }
     
     distributionRoot = new File("./target/static");
     service = new DownloadDistributionService();

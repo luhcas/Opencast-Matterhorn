@@ -21,6 +21,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.opencastproject.analysis.text.ocropus.OcropusTextFrame;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -64,8 +65,13 @@ public class OcropusTextFrameTest {
    */
   @Before
   public void setUp() throws Exception {
-    InputStream is = this.getClass().getResourceAsStream(testFile);
-    textFrame = OcropusTextFrame.parse(is);
+    InputStream is = null;
+    try {
+      is = getClass().getResourceAsStream(testFile);
+      textFrame = OcropusTextFrame.parse(is);
+    } finally {
+      IOUtils.closeQuietly(is);
+    }
   }
 
   /**

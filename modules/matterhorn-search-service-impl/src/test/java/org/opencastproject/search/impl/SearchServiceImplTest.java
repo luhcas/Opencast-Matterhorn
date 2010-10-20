@@ -35,6 +35,7 @@ import org.opencastproject.workspace.api.Workspace;
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.junit.After;
@@ -112,8 +113,13 @@ public class SearchServiceImplTest {
 
     // Load the simple media package
     MediaPackage mediaPackage = null;
-    InputStream is = SearchServiceImplTest.class.getResourceAsStream("/manifest-simple.xml");
-    mediaPackage = mediaPackageBuilder.loadFromXml(is);
+    InputStream is = null;
+    try {
+      is = SearchServiceImplTest.class.getResourceAsStream("/manifest-simple.xml");
+      mediaPackage = mediaPackageBuilder.loadFromXml(is);
+    } finally {
+      IOUtils.closeQuietly(is);
+    }
 
     // Add the media package to the search index
     service.add(mediaPackage);
@@ -155,11 +161,14 @@ public class SearchServiceImplTest {
 
     // Load the simple media package
     MediaPackage mediaPackage = null;
+    InputStream is = null;
     try {
-      InputStream is = SearchServiceImplTest.class.getResourceAsStream("/manifest-full.xml");
+      is = SearchServiceImplTest.class.getResourceAsStream("/manifest-full.xml");
       mediaPackage = mediaPackageBuilder.loadFromXml(is);
     } catch (MediaPackageException e) {
       fail("Error loading full media package");
+    } finally {
+      IOUtils.closeQuietly(is);
     }
 
     // Add the media package to the search index
@@ -187,11 +196,14 @@ public class SearchServiceImplTest {
 
     // Load the simple media package
     MediaPackage mediaPackage = null;
+    InputStream is = null;
     try {
-      InputStream is = SearchServiceImplTest.class.getResourceAsStream("/manifest-simple.xml");
+      is = SearchServiceImplTest.class.getResourceAsStream("/manifest-simple.xml");
       mediaPackage = mediaPackageBuilder.loadFromXml(is);
     } catch (MediaPackageException e) {
       fail("Error loading simple media package");
+    } finally {
+      IOUtils.closeQuietly(is);
     }
 
     // Add the media package to the search index
@@ -219,11 +231,14 @@ public class SearchServiceImplTest {
 
     // Load the simple media package
     MediaPackage mediaPackage = null;
+    InputStream is = null;
     try {
-      InputStream is = SearchServiceImplTest.class.getResourceAsStream("/manifest-full.xml");
+      is = SearchServiceImplTest.class.getResourceAsStream("/manifest-full.xml");
       mediaPackage = mediaPackageBuilder.loadFromXml(is);
     } catch (MediaPackageException e) {
       fail("Error loading full media package");
+    } finally {
+      IOUtils.closeQuietly(is);
     }
 
     // Add the media package to the search index

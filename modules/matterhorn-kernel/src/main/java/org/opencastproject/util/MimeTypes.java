@@ -16,6 +16,7 @@
 
 package org.opencastproject.util;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -92,31 +93,25 @@ public class MimeTypes {
    * Initializes the mime type registry from the given file.
    */
   static void initFromFile() {
+    InputStream is = null;
+    InputStreamReader isr = null;
     try {
       mimeTypes_ = new ArrayList<MimeType>();
       String definitions = null;
-      InputStream is = MimeTypes.class.getResourceAsStream(DEFINITION_FILE);
-      InputStreamReader isr = null;
+      is = MimeTypes.class.getResourceAsStream(DEFINITION_FILE);
       StringBuffer buf = new StringBuffer();
       if (is == null)
         throw new FileNotFoundException(DEFINITION_FILE);
 
-      try {
-        isr = new InputStreamReader(is);
-        char[] chars = new char[1024];
-        int count = 0;
-        while ((count = isr.read(chars)) > 0) {
-          for (int i = 0; i < count; buf.append(chars[i++]))
-            ;
-        }
-        definitions = buf.toString();
-      } finally {
-        try {
-          isr.close();
-          is.close();
-        } catch (Exception e) {
-        }
+      isr = new InputStreamReader(is);
+      char[] chars = new char[1024];
+      int count = 0;
+      while ((count = isr.read(chars)) > 0) {
+        for (int i = 0; i < count; buf.append(chars[i++]))
+          ;
       }
+
+      definitions = buf.toString();
       SAXParserFactory parserFactory = SAXParserFactory.newInstance();
       SAXParser parser = parserFactory.newSAXParser();
       DefaultHandler handler = new MimeTypeParser(mimeTypes_);
@@ -129,6 +124,9 @@ public class MimeTypes {
       logger.error("Configuration error while parsing mime type registry: " + e.getMessage());
     } catch (SAXException e) {
       logger.error("Error parsing mime type registry: " + e.getMessage());
+    } finally {
+      IOUtils.closeQuietly(isr);
+      IOUtils.closeQuietly(is);
     }
   }
 

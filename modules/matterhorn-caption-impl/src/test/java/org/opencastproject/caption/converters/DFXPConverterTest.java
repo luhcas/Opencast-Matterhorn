@@ -19,6 +19,7 @@ import org.opencastproject.caption.api.CaptionCollection;
 
 import junit.framework.Assert;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +42,7 @@ public class DFXPConverterTest {
   // resulting output stream
   private ByteArrayOutputStream outputStream;
   // expected output
-  
+
   private String expectedOutput = "<?xml version=\"1.0\" encoding=\"UTF-8\"";
 
   @Before
@@ -63,10 +64,11 @@ public class DFXPConverterTest {
       Assert.fail(e.getMessage());
     }
   }
-  
+
   @After
   public void tear() throws IOException {
-    inputStream.close();
-    outputStream.close();
+    IOUtils.closeQuietly(inputStream);
+    IOUtils.closeQuietly(outputStream);
   }
+
 }
