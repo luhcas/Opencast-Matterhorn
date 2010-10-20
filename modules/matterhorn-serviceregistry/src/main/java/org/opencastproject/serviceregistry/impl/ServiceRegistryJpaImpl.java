@@ -269,6 +269,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         fromDb.setRunTime(now.getTime() - job.getDateStarted().getTime());
       }
     } else if (Status.FINISHED.equals(status)) {
+      if (job.getDateStarted() == null)
+        throw new IllegalStateException("Job " + job + " was never started");
       job.setDateCompleted(now);
       job.setRunTime(now.getTime() - job.getDateStarted().getTime());
       fromDb.setDateCompleted(now);

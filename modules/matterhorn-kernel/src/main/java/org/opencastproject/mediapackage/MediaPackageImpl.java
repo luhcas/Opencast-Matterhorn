@@ -300,41 +300,28 @@ public final class MediaPackageImpl implements MediaPackage {
   /**
    * @see org.opencastproject.mediapackage.MediaPackage#add(org.opencastproject.mediapackage.Catalog)
    */
-  public void add(Catalog catalog) throws UnsupportedElementException {
-    try {
-      integrateCatalog(catalog);
-      manifest.add(catalog);
-      fireElementAdded(catalog);
-    } catch (IOException e) {
-      throw new UnsupportedElementException("Error integrating " + catalog + " into media package: " + e.getMessage());
-    }
+  public void add(Catalog catalog) {
+    integrateCatalog(catalog);
+    manifest.add(catalog);
+    fireElementAdded(catalog);
   }
 
   /**
    * @see org.opencastproject.mediapackage.MediaPackage#add(org.opencastproject.mediapackage.Track)
    */
-  public void add(Track track) throws UnsupportedElementException {
-    try {
-      integrateTrack(track);
-      manifest.add(track);
-      fireElementAdded(track);
-    } catch (IOException e) {
-      throw new UnsupportedElementException("Error integrating " + track + " into media package: " + e.getMessage());
-    }
+  public void add(Track track) {
+    integrateTrack(track);
+    manifest.add(track);
+    fireElementAdded(track);
   }
 
   /**
    * @see org.opencastproject.mediapackage.MediaPackage#add(org.opencastproject.mediapackage.Attachment)
    */
-  public void add(Attachment attachment) throws UnsupportedElementException {
-    try {
-      integrateAttachment(attachment);
-      manifest.add(attachment);
-      fireElementAdded(attachment);
-    } catch (IOException e) {
-      throw new UnsupportedElementException("Error integrating " + attachment + " into media package: "
-              + e.getMessage());
-    }
+  public void add(Attachment attachment) {
+    integrateAttachment(attachment);
+    manifest.add(attachment);
+    fireElementAdded(attachment);
   }
 
   /**
@@ -668,9 +655,10 @@ public final class MediaPackageImpl implements MediaPackage {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.mediapackage.MediaPackage#add(java.net.URI)
    */
-  public MediaPackageElement add(URI url) throws UnsupportedElementException {
+  public MediaPackageElement add(URI url) {
     if (url == null)
       throw new IllegalArgumentException("Argument 'url' may not be null");
 
@@ -687,8 +675,7 @@ public final class MediaPackageImpl implements MediaPackage {
    *      org.opencastproject.mediapackage.MediaPackageElement.Type,
    *      org.opencastproject.mediapackage.MediaPackageElementFlavor)
    */
-  public MediaPackageElement add(URI uri, Type type, MediaPackageElementFlavor flavor)
-          throws UnsupportedElementException {
+  public MediaPackageElement add(URI uri, Type type, MediaPackageElementFlavor flavor) {
     if (uri == null)
       throw new IllegalArgumentException("Argument 'url' may not be null");
     if (type == null)
@@ -707,34 +694,27 @@ public final class MediaPackageImpl implements MediaPackage {
    * 
    * @see org.opencastproject.mediapackage.MediaPackage#add(org.opencastproject.mediapackage.MediaPackageElement)
    */
-  public void add(MediaPackageElement element) throws UnsupportedElementException {
-    try {
-      if (element.getElementType().equals(MediaPackageElement.Type.Track) && element instanceof Track) {
-        integrateTrack((Track) element);
-      } else if (element.getElementType().equals(MediaPackageElement.Type.Catalog) && element instanceof Catalog) {
-        integrateCatalog((Catalog) element);
-      } else if (element.getElementType().equals(MediaPackageElement.Type.Attachment) && element instanceof Attachment) {
-        integrateAttachment((Attachment) element);
-      } else {
-        integrate(element);
-      }
-      manifest.add(element);
-      fireElementAdded(element);
-    } catch (IOException e) {
-      throw new UnsupportedElementException("Error integrating " + element + " into media package: " + e.getMessage());
+  public void add(MediaPackageElement element) {
+    if (element.getElementType().equals(MediaPackageElement.Type.Track) && element instanceof Track) {
+      integrateTrack((Track) element);
+    } else if (element.getElementType().equals(MediaPackageElement.Type.Catalog) && element instanceof Catalog) {
+      integrateCatalog((Catalog) element);
+    } else if (element.getElementType().equals(MediaPackageElement.Type.Attachment) && element instanceof Attachment) {
+      integrateAttachment((Attachment) element);
+    } else {
+      integrate(element);
     }
+    manifest.add(element);
+    fireElementAdded(element);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @throws UnsupportedElementException
-   * @throws MediaPackageException
    * @see org.opencastproject.mediapackage.MediaPackage#addDerived(org.opencastproject.mediapackage.MediaPackageElement,
    *      org.opencastproject.mediapackage.MediaPackageElement)
    */
-  public void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement)
-          throws UnsupportedElementException {
+  public void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement) {
     addDerived(derivedElement, sourceElement, null);
   }
 
@@ -746,7 +726,7 @@ public final class MediaPackageImpl implements MediaPackage {
    */
   @Override
   public void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement,
-          Map<String, String> properties) throws UnsupportedElementException {
+          Map<String, String> properties) {
     if (derivedElement == null)
       throw new IllegalArgumentException("The derived element is null");
     if (sourceElement == null)
@@ -835,10 +815,8 @@ public final class MediaPackageImpl implements MediaPackage {
    * 
    * @param element
    *          the element to integrate
-   * @throws IOException
-   *           if integration of the element failed
    */
-  private void integrate(MediaPackageElement element) throws IOException {
+  private void integrate(MediaPackageElement element) {
     if (element instanceof AbstractMediaPackageElement)
       ((AbstractMediaPackageElement) element).setMediaPackage(this);
   }
@@ -849,10 +827,8 @@ public final class MediaPackageImpl implements MediaPackage {
    * 
    * @param catalog
    *          the catalog to integrate
-   * @throws IOException
-   *           if integration of the catalog failed
    */
-  private void integrateCatalog(Catalog catalog) throws IOException {
+  private void integrateCatalog(Catalog catalog) {
     // Check (uniqueness of) catalog identifier
     String id = catalog.getIdentifier();
     if (id == null || contains(id)) {
@@ -868,10 +844,8 @@ public final class MediaPackageImpl implements MediaPackage {
    * 
    * @param track
    *          the track to integrate
-   * @throws IOException
-   *           if integration of the track failed
    */
-  private void integrateTrack(Track track) throws IOException {
+  private void integrateTrack(Track track) {
     // Check (uniqueness of) track identifier
     String id = track.getIdentifier();
     if (id == null || contains(id)) {
@@ -887,10 +861,8 @@ public final class MediaPackageImpl implements MediaPackage {
    * 
    * @param attachment
    *          the attachment to integrate
-   * @throws IOException
-   *           if integration of the attachment failed
    */
-  private void integrateAttachment(Attachment attachment) throws IOException {
+  private void integrateAttachment(Attachment attachment) {
     // Check (uniqueness of) attachment identifier
     String id = attachment.getIdentifier();
     if (id == null || contains(id)) {
@@ -949,7 +921,7 @@ public final class MediaPackageImpl implements MediaPackage {
    * 
    * @see org.opencastproject.mediapackage.MediaPackage#toXml()
    */
-  public String toXml() throws MediaPackageException {
+  public String toXml() {
     try {
       Marshaller marshaller = context.createMarshaller();
       marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, false);
@@ -957,7 +929,7 @@ public final class MediaPackageImpl implements MediaPackage {
       marshaller.marshal(this, writer);
       return writer.toString();
     } catch (JAXBException e) {
-      throw new MediaPackageException(e.getLinkedException() != null ? e.getLinkedException() : e);
+      throw new IllegalStateException(e.getLinkedException() != null ? e.getLinkedException() : e);
     }
   }
 

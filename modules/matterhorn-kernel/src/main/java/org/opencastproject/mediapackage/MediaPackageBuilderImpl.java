@@ -40,7 +40,7 @@ import javax.xml.xpath.XPathFactory;
 
 /**
  * This class provides factory methods for the creation of media packages from manifest files, directories or from
- * scratch.
+ * scratch.  This class is not thread safe, so create a new builder in each method invocation.
  */
 public class MediaPackageBuilderImpl implements MediaPackageBuilder {
 

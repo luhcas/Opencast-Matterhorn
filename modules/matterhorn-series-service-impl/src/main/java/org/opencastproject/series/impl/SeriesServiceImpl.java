@@ -49,7 +49,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   /** 
    * Properties that are updated by ManagedService updated method
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   protected Dictionary properties;
   
   /**
@@ -123,14 +123,11 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
    * @see org.opencastproject.series.api.SeriesService#addOrUpdate(org.opencastproject.metadata.dublincore.DublinCoreCatalog)
    */
   @Override
-  public Series addOrUpdate(DublinCoreCatalog dcCatalog) throws NotFoundException {
+  public Series addOrUpdate(DublinCoreCatalog dcCatalog) {
     String id = dcCatalog.get(DublinCoreCatalog.PROPERTY_IDENTIFIER).get(0).getValue();
-    SeriesImpl existingSeries = (SeriesImpl)getSeries(id);
-    if(existingSeries == null) {
-      Series series = SeriesImpl.buildSeries(dcCatalog);
-      addSeries(series);
-      return series;
-    } else {
+    SeriesImpl existingSeries;
+    try {
+      existingSeries = (SeriesImpl)getSeries(id);
       existingSeries.updateMetadata(dcCatalog);
       try {
         updateSeries(existingSeries);
@@ -140,6 +137,10 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
         logger.warn("Unable to find series {}: {}", existingSeries, e);
         throw new IllegalStateException(e);
       }
+    } catch (NotFoundException e1) {
+      Series series = SeriesImpl.buildSeries(dcCatalog);
+      addSeries(series);
+      return series;
     }
   }
 
@@ -234,7 +235,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
     return persistenceProvider;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
     this.properties = properties;

@@ -158,7 +158,7 @@ final class ManifestImpl {
    * @throws MediaPackageException
    *           if adding the element fails
    */
-  void add(MediaPackageElement element) throws UnsupportedElementException {
+  void add(MediaPackageElement element) {
     if (element == null)
       throw new IllegalArgumentException("Media package element must not be null");
     String id = null;

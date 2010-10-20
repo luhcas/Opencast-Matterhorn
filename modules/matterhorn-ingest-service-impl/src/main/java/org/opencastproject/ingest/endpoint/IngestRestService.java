@@ -18,7 +18,6 @@ package org.opencastproject.ingest.endpoint;
 import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.mediapackage.EName;
 import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
@@ -80,7 +79,6 @@ public class IngestRestService {
 
   private static final Logger logger = LoggerFactory.getLogger(IngestRestService.class);
   private MediaPackageBuilderFactory factory = null;
-  private MediaPackageBuilder builder = null;
   private IngestService ingestService = null;
   private DublinCoreCatalogService dublinCoreService;
   protected PersistenceProvider persistenceProvider;
@@ -91,7 +89,6 @@ public class IngestRestService {
 
   public IngestRestService() {
     factory = MediaPackageBuilderFactory.newInstance();
-    builder = factory.newMediaPackageBuilder();
     jobs = new HashMap<String, UploadJob>();
   }
 
@@ -143,7 +140,7 @@ public class IngestRestService {
   public Response discardMediaPackage(@FormParam("mediaPackage") String mpx) {
     logger.debug("discardMediaPackage(MediaPackage): {}", mpx);
     try {
-      MediaPackage mp = builder.loadFromXml(mpx);
+      MediaPackage mp = factory.newMediaPackageBuilder().loadFromXml(mpx);
       ingestService.discardMediaPackage(mp);
       return Response.ok().build();
     } catch (Exception e) {
@@ -158,7 +155,7 @@ public class IngestRestService {
   public Response addMediaPackageTrack(@FormParam("url") String url, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") String mpx) {
     try {
-      MediaPackage mp = builder.loadFromXml(mpx);
+      MediaPackage mp = factory.newMediaPackageBuilder().loadFromXml(mpx);
       mp = ingestService.addTrack(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
       return Response.ok(mp).build();
     } catch (Exception e) {
@@ -181,7 +178,7 @@ public class IngestRestService {
   public Response addMediaPackageCatalog(@FormParam("url") String url, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") String mpx) {
     try {
-      MediaPackage mp = builder.loadFromXml(mpx);
+      MediaPackage mp = factory.newMediaPackageBuilder().loadFromXml(mpx);
       MediaPackage resultingMediaPackage = ingestService.addCatalog(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
       return Response.ok(resultingMediaPackage).build();
     } catch (Exception e) {
@@ -204,7 +201,7 @@ public class IngestRestService {
   public Response addMediaPackageAttachment(@FormParam("url") String url, @FormParam("flavor") String flavor,
           @FormParam("mediaPackage") String mpx) {
     try {
-      MediaPackage mp = builder.loadFromXml(mpx);
+      MediaPackage mp = factory.newMediaPackageBuilder().loadFromXml(mpx);
       mp = ingestService.addAttachment(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
       return Response.ok(mp).build();
     } catch (Exception e) {
@@ -239,7 +236,7 @@ public class IngestRestService {
                 flavor = MediaPackageElementFlavor.parseFlavor(flavorString);
               }
             } else if ("mediaPackage".equals(fieldName)) {
-              mp = builder.loadFromXml(item.openStream());
+              mp = factory.newMediaPackageBuilder().loadFromXml(item.openStream());
             }
           } else {
             // once the body gets read iter.hasNext must not be invoked
@@ -376,7 +373,7 @@ public class IngestRestService {
   public Response ingest(@FormParam("mediaPackage") String mpx) {
     logger.debug("ingest(MediaPackage): {}", mpx);
     try {
-      MediaPackage mp = builder.loadFromXml(mpx);
+      MediaPackage mp = factory.newMediaPackageBuilder().loadFromXml(mpx);
       WorkflowInstance workflow = ingestService.ingest(mp);
       return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
     } catch (Exception e) {
@@ -408,7 +405,7 @@ public class IngestRestService {
       for (Iterator<String> i = params.keySet().iterator(); i.hasNext();) {
         String key = i.next();
         if (key.toUpperCase().equals("MEDIAPACKAGE")) { // does't feel good to have a 'special case' in the param list
-          mp = builder.loadFromXml(((String[]) params.get(key))[0]);
+          mp = factory.newMediaPackageBuilder().loadFromXml(((String[]) params.get(key))[0]);
         } else {
           wfConfig.put(key, ((String[]) params.get(key))[0]); // TODO how do we handle multiple values eg. resulting
           // from checkboxes
@@ -517,7 +514,7 @@ public class IngestRestService {
           FileItemStream item = iter.next();
           String fieldName = item.getFieldName();
           if (fieldName.equals("mediaPackage")) {
-            mp = builder.loadFromXml(item.openStream());
+            mp = factory.newMediaPackageBuilder().loadFromXml(item.openStream());
           } else if ("flavor".equals(fieldName)) {
             String flavorString = Streams.asString(item.openStream());
             if (flavorString != null) {

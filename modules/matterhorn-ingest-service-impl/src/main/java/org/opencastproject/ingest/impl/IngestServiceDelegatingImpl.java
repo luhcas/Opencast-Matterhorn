@@ -15,14 +15,13 @@
  */
 package org.opencastproject.ingest.impl;
 
+import org.opencastproject.ingest.api.IngestException;
 import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageException;
-import org.opencastproject.mediapackage.UnsupportedElementException;
 import org.opencastproject.mediapackage.identifier.HandleException;
 import org.opencastproject.util.ConfigurationException;
-import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 
 import org.osgi.service.component.ComponentContext;
@@ -32,15 +31,16 @@ import org.slf4j.LoggerFactory;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Map;
 
 /**
- * Delegates composer methods to either the local composer service impl, or to a remote service. If a "composer.remote"
- * property is provided during activation, the composer service at that URL will be used.
+ * Delegates ingest methods to either the local ingest service impl, or to a remote service. If a "remote.ingest"
+ * property is provided during activation, the ingest service at that URL will be used.
  */
 public class IngestServiceDelegatingImpl implements IngestService {
+
+  /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(IngestServiceRemoteImpl.class);
 
   /**
@@ -92,86 +92,84 @@ public class IngestServiceDelegatingImpl implements IngestService {
    */
   @Override
   public MediaPackage addAttachment(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, IOException {
+          throws MediaPackageException, IOException, IngestException {
     return delegate.addAttachment(uri, flavor, mediaPackage);
   }
 
   @Override
   public MediaPackage addAttachment(InputStream file, String fileName, MediaPackageElementFlavor flavor,
-          MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, MalformedURLException,
-          IOException {
+          MediaPackage mediaPackage) throws MediaPackageException, IOException, IngestException {
     return delegate.addAttachment(file, fileName, flavor, mediaPackage);
   }
 
   @Override
   public MediaPackage addCatalog(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, IOException, NotFoundException {
+          throws MediaPackageException, IOException, IngestException {
     return delegate.addCatalog(uri, flavor, mediaPackage);
   }
 
   @Override
   public MediaPackage addCatalog(InputStream catalog, String fileName, MediaPackageElementFlavor flavor,
-          MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, MalformedURLException,
-          IOException, NotFoundException {
+          MediaPackage mediaPackage) throws MediaPackageException, IOException, IngestException {
     return delegate.addCatalog(catalog, fileName, flavor, mediaPackage);
   }
 
   @Override
   public MediaPackage addTrack(URI uri, MediaPackageElementFlavor flavor, MediaPackage mediaPackage)
-          throws MediaPackageException, UnsupportedElementException, IOException {
+          throws MediaPackageException, IOException, IngestException {
     return delegate.addTrack(uri, flavor, mediaPackage);
   }
 
   @Override
   public MediaPackage addTrack(InputStream mediaFile, String fileName, MediaPackageElementFlavor flavor,
-          MediaPackage mediaPackage) throws MediaPackageException, UnsupportedElementException, MalformedURLException,
-          IOException {
+          MediaPackage mediaPackage) throws MediaPackageException, IOException, IngestException {
     return delegate.addTrack(mediaFile, fileName, flavor, mediaPackage);
   }
 
   @Override
   public WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage) throws MediaPackageException,
-          FileNotFoundException, IOException, Exception {
+          FileNotFoundException, IOException, IngestException {
     return delegate.addZippedMediaPackage(ZippedMediaPackage);
   }
 
   @Override
   public WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID)
-          throws MediaPackageException, FileNotFoundException, IOException, Exception {
+          throws MediaPackageException, FileNotFoundException, IOException, IngestException {
     return delegate.addZippedMediaPackage(ZippedMediaPackage, workflowDefinitionID);
   }
 
   @Override
   public WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID,
-          Map<String, String> wfConfig) throws MediaPackageException, FileNotFoundException, IOException, Exception {
+          Map<String, String> wfConfig) throws MediaPackageException, FileNotFoundException, IOException,
+          IngestException {
     return delegate.addZippedMediaPackage(ZippedMediaPackage, workflowDefinitionID, wfConfig);
   }
 
   @Override
   public MediaPackage createMediaPackage() throws MediaPackageException, ConfigurationException, HandleException,
-          IOException {
+          IOException, IngestException {
     return delegate.createMediaPackage();
   }
 
   @Override
-  public void discardMediaPackage(MediaPackage mediaPackage) throws IOException {
+  public void discardMediaPackage(MediaPackage mediaPackage) throws IOException, IngestException {
     delegate.discardMediaPackage(mediaPackage);
   }
 
   @Override
-  public WorkflowInstance ingest(MediaPackage mediaPackage) throws IllegalStateException, Exception {
+  public WorkflowInstance ingest(MediaPackage mediaPackage) throws IngestException {
     return delegate.ingest(mediaPackage);
   }
 
   @Override
-  public WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID) throws IllegalStateException,
-          Exception {
+  public WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID) throws IngestException {
     return delegate.ingest(mediaPackage, workflowDefinitionID);
   }
 
   @Override
   public WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID, Map<String, String> properties)
-          throws IllegalStateException, Exception {
+          throws IngestException {
     return delegate.ingest(mediaPackage, workflowDefinitionID, properties);
   }
+
 }

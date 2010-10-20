@@ -15,9 +15,12 @@
  */
 package org.opencastproject.ingest.impl;
 
+import org.opencastproject.job.api.JaxbJob;
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -142,11 +145,17 @@ public class IngestServiceImplTest {
     EasyMock.expect(httpClient.execute((HttpGet)EasyMock.anyObject())).andReturn(httpResponse).anyTimes();
     EasyMock.replay(httpClient);
     
+    Job job = new JaxbJob();
+    ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
+    EasyMock.expect(serviceRegistry.createJob((String)EasyMock.anyObject())).andReturn(job).anyTimes();
+    EasyMock.replay(serviceRegistry);
+    
     service = new IngestServiceImpl();
     service.setHttpClient(httpClient);
     service.setTempFolder("target/temp/");
     service.setWorkspace(workspace);
     service.setWorkflowService(workflowService);
+    service.setServiceRegistry(serviceRegistry);
   }
 
   @After

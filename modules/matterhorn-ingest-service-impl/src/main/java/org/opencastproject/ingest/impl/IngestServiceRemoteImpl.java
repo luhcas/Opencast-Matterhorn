@@ -15,6 +15,7 @@
  */
 package org.opencastproject.ingest.impl;
 
+import org.opencastproject.ingest.api.IngestException;
 import org.opencastproject.ingest.api.IngestService;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
@@ -142,8 +143,8 @@ public class IngestServiceRemoteImpl implements IngestService {
   }
 
   @Override
-  public WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage) throws MediaPackageException,
-          FileNotFoundException, IOException, Exception {
+  public WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage) throws FileNotFoundException,
+          IOException, IngestException {
     logger.info("Adding and ingesting a zipped media package on a remote server: " + remoteHost);
     String remoteHostMethod = remoteHost + "/ingest/rest/addZippedMediaPackage";
     MultipartEntity mpEntity = new MultipartEntity();
@@ -153,7 +154,7 @@ public class IngestServiceRemoteImpl implements IngestService {
 
   @Override
   public WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID)
-          throws MediaPackageException, FileNotFoundException, IOException, Exception {
+          throws FileNotFoundException, IOException, IngestException {
     logger.info("Adding and ingesting a zipped media package on a remote server: " + remoteHost);
     String remoteHostMethod = remoteHost + "/ingest/rest/addZippedMediaPackage/" + workflowDefinitionID;
     MultipartEntity mpEntity = new MultipartEntity();
@@ -163,7 +164,7 @@ public class IngestServiceRemoteImpl implements IngestService {
 
   @Override
   public WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID,
-          Map<String, String> wfConfig) throws MediaPackageException, FileNotFoundException, IOException, Exception {
+          Map<String, String> wfConfig) throws FileNotFoundException, IOException, IngestException {
     logger.info("Adding and ingesting a zipped media package on a remote server: " + remoteHost);
     MultipartEntity mpEntity = new MultipartEntity();
     String remoteHostMethod = remoteHost + "/ingest/rest/addZippedMediaPackage/" + workflowDefinitionID;
@@ -211,7 +212,7 @@ public class IngestServiceRemoteImpl implements IngestService {
   }
 
   @Override
-  public WorkflowInstance ingest(MediaPackage mediaPackage) throws IllegalStateException, Exception {
+  public WorkflowInstance ingest(MediaPackage mediaPackage) throws IngestException {
     String id = mediaPackage.getIdentifier().compact();
     logger.info("Ingesting a media package (" + id + ") on a remote server: " + remoteHost);
 
@@ -223,7 +224,7 @@ public class IngestServiceRemoteImpl implements IngestService {
 
   @Override
   public WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID) throws IllegalStateException,
-          Exception {
+          IngestException {
     String id = mediaPackage.getIdentifier().compact();
     logger.info("Ingesting a media package (" + id + ") with set workflow (" + workflowDefinitionID
             + ") on a remote server: " + remoteHost);
@@ -239,7 +240,7 @@ public class IngestServiceRemoteImpl implements IngestService {
 
   @Override
   public WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID, Map<String, String> properties)
-          throws IllegalStateException, Exception {
+          throws IngestException {
     String id = mediaPackage.getIdentifier().compact();
     logger.info("Ingesting a media package (" + id + ") with set workflow (" + workflowDefinitionID
             + ") on a remote server: " + remoteHost);
@@ -286,14 +287,18 @@ public class IngestServiceRemoteImpl implements IngestService {
     return trustedHttpClient.execute(httppost, mediaPackageResponseHandler);
   }
 
-  protected WorkflowInstance ingestMediaPackage(String remoteHostMethod, List<BasicNameValuePair> params) {
+  protected WorkflowInstance ingestMediaPackage(String remoteHostMethod, List<BasicNameValuePair> params)
+          throws IngestException {
+    UrlEncodedFormEntity entity;
     try {
-      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+      entity = new UrlEncodedFormEntity(params);
       HttpPost post = new HttpPost(remoteHostMethod);
       post.setEntity(entity);
       return trustedHttpClient.execute(post, workflowInstanceResponseHandler);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    } catch (UnsupportedEncodingException e) {
+      throw new IngestException(e);
+    } catch (TrustedHttpClientException e) {
+      throw new IngestException(e);
     }
   }
 

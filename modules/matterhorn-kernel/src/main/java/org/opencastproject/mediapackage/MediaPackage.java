@@ -472,10 +472,8 @@ public interface MediaPackage extends Cloneable {
    * 
    * @param uri
    *          the element location
-   * @throws UnsupportedElementException
-   *           if the element is of an unsupported format
    */
-  MediaPackageElement add(URI uri) throws UnsupportedElementException;
+  MediaPackageElement add(URI uri);
 
   /**
    * Adds an arbitrary {@link URI} to this media package, utilizing a {@link MediaPackageBuilder} to create a suitable
@@ -488,21 +486,16 @@ public interface MediaPackage extends Cloneable {
    *          the element type
    * @param flavor
    *          the element flavor
-   * @throws UnsupportedElementException
-   *           if the element is of an unsupported format
    */
-  MediaPackageElement add(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor)
-          throws UnsupportedElementException;
+  MediaPackageElement add(URI uri, MediaPackageElement.Type type, MediaPackageElementFlavor flavor);
 
   /**
    * Adds an arbitrary {@link MediaPackageElement} to this media package.
    * 
    * @param element
    *          the element
-   * @throws UnsupportedElementException
-   *           if the element is of an unsupported format
    */
-  void add(MediaPackageElement element) throws UnsupportedElementException;
+  void add(MediaPackageElement element);
 
   /**
    * Adds a track to this media package, actually <em>moving</em> the underlying file in the filesystem. Use this method
@@ -512,10 +505,8 @@ public interface MediaPackage extends Cloneable {
    * 
    * @param track
    *          the track
-   * @throws UnsupportedElementException
-   *           if the track is of an unsupported format
    */
-  void add(Track track) throws UnsupportedElementException;
+  void add(Track track);
 
   /**
    * Removes the track from the media package.
@@ -530,10 +521,8 @@ public interface MediaPackage extends Cloneable {
    * 
    * @param catalog
    *          the catalog
-   * @throws UnsupportedElementException
-   *           if the catalog is of an unsupported format
    */
-  void add(Catalog catalog) throws UnsupportedElementException;
+  void add(Catalog catalog);
 
   /**
    * Removes the catalog from the media package.
@@ -548,10 +537,8 @@ public interface MediaPackage extends Cloneable {
    * 
    * @param attachment
    *          the attachment
-   * @throws UnsupportedElementException
-   *           if the attachment is of an unsupported format
    */
-  void add(Attachment attachment) throws UnsupportedElementException;
+  void add(Attachment attachment);
 
   /**
    * Removes an arbitrary media package element.
@@ -581,11 +568,8 @@ public interface MediaPackage extends Cloneable {
    *          the derived element
    * @param sourceElement
    *          the source element
-   * @throws UnsupportedElementException
-   *           if for some reason <code>derivedElement</code> cannot be added to the media package
    */
-  void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement)
-          throws UnsupportedElementException;
+  void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement);
 
   /**
    * Adds an element to this media package that represents a derived version of <code>sourceElement</code>. Examples of
@@ -601,11 +585,8 @@ public interface MediaPackage extends Cloneable {
    *          the source element
    * @param properties
    *          properties for the reference that is being created
-   * @throws UnsupportedElementException
-   *           if for some reason <code>derivedElement</code> cannot be added to the media package
    */
-  void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement, Map<String, String> properties)
-          throws UnsupportedElementException;
+  void addDerived(MediaPackageElement derivedElement, MediaPackageElement sourceElement, Map<String, String> properties);
 
   /**
    * Returns those media package elements that are derivates of <code>sourceElement</code> and feature the flavor
@@ -651,7 +632,7 @@ public interface MediaPackage extends Cloneable {
    * @throws MediaPackageException
    *           if serializing or reading from a serialized media package fails
    */
-  String toXml() throws MediaPackageException;
+  String toXml();
 
   /**
    * Writes an xml representation of this MediaPackage to a stream.
