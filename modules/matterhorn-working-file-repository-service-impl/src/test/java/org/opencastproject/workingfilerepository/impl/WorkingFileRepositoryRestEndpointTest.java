@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009, 2010 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
+
 package org.opencastproject.workingfilerepository.impl;
 
 import org.opencastproject.util.UrlSupport;
@@ -19,9 +35,9 @@ import java.util.Arrays;
 import javax.ws.rs.core.Response;
 
 public class WorkingFileRepositoryRestEndpointTest {
-  
+
   WorkingFileRepositoryRestEndpoint endpoint = null;
-  
+
   @Before
   public void setup() throws Exception {
     endpoint = new WorkingFileRepositoryRestEndpoint();
@@ -30,10 +46,10 @@ public class WorkingFileRepositoryRestEndpointTest {
     endpoint.serverUrl = UrlSupport.DEFAULT_BASE_URL;
     endpoint.serviceUrl = new URI("http://localhost/files");
   }
-  
+
   @After
   public void tearDown() throws Exception {
-    FileUtils.forceDelete(new File(endpoint.rootDirectory));
+    FileUtils.deleteQuietly(new File(endpoint.rootDirectory));
   }
 
   @Test
@@ -47,12 +63,17 @@ public class WorkingFileRepositoryRestEndpointTest {
     Response response = endpoint.restGet(mediaPackageId, image, null);
 
     Assert.assertEquals("Gif content type", "image/gif", response.getMetadata().getFirst("Content-Type"));
-        
+
     // Make sure the image byte stream was not modified by the content type detection
-    InputStream in = getClass().getResourceAsStream("/opencast_header.gif");
-    byte[] bytesFromClasspath = IOUtils.toByteArray(in);
-    byte[] bytesFromRepo = IOUtils.toByteArray((InputStream)response.getEntity());
-    Assert.assertTrue(Arrays.equals(bytesFromClasspath, bytesFromRepo));
+    InputStream in = null;
+    try {
+      in = getClass().getResourceAsStream("/opencast_header.gif");
+      byte[] bytesFromClasspath = IOUtils.toByteArray(in);
+      byte[] bytesFromRepo = IOUtils.toByteArray((InputStream) response.getEntity());
+      Assert.assertTrue(Arrays.equals(bytesFromClasspath, bytesFromRepo));
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
   }
 
   @Test
@@ -67,12 +88,17 @@ public class WorkingFileRepositoryRestEndpointTest {
     Assert.assertEquals("Gif content type", "application/xml", response.getMetadata().getFirst("Content-Type"));
 
     // Make sure the image byte stream was not modified by the content type detection
-    InputStream imageIn = getClass().getResourceAsStream("/dublincore.xml");
-    byte[] imageBytesFromClasspath = IOUtils.toByteArray(imageIn);
-    byte[] imageBytesFromRepo = IOUtils.toByteArray((InputStream)response.getEntity());
-    Assert.assertTrue(Arrays.equals(imageBytesFromClasspath, imageBytesFromRepo));
+    InputStream imageIn = null;
+    try {
+      imageIn = getClass().getResourceAsStream("/dublincore.xml");
+      byte[] imageBytesFromClasspath = IOUtils.toByteArray(imageIn);
+      byte[] imageBytesFromRepo = IOUtils.toByteArray((InputStream) response.getEntity());
+      Assert.assertTrue(Arrays.equals(imageBytesFromClasspath, imageBytesFromRepo));
+    } finally {
+      IOUtils.closeQuietly(imageIn);
+    }
   }
-  
+
   public void testEtag() throws Exception {
     String mediaPackageId = "mp";
     String dc = "element1";

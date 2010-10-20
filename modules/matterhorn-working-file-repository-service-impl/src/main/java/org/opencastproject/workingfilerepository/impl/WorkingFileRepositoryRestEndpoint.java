@@ -347,12 +347,13 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
   public Response restGet(@PathParam("mediaPackageID") String mediaPackageID,
           @PathParam("mediaPackageElementID") String mediaPackageElementID, @PathParam("fileName") String fileName,
           @HeaderParam("If-None-Match") String ifNoneMatch) {
+    InputStream in = null;
     try {
+      in = get(mediaPackageID, mediaPackageElementID);
       String md5 = this.hashMediaPackageElement(mediaPackageID, mediaPackageElementID);
       if (md5.equals(ifNoneMatch)) {
         return Response.notModified().build();
       }
-      InputStream in = this.get(mediaPackageID, mediaPackageElementID);
       String contentType = mimeMap.getContentType(fileName);
       int contentLength = 0;
       contentLength = in.available();
@@ -366,6 +367,8 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
       logger.info("unable to get the content length for {}/{}/{}", new Object[] { mediaPackageElementID,
               mediaPackageElementID, fileName });
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    } finally {
+      IOUtils.closeQuietly(in);
     }
   }
 
@@ -375,19 +378,23 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
           @PathParam("fileName") String fileName) {
     InputStream in = null;
     try {
-      in = super.getFromCollection(collectionId, fileName);
-    } catch (NotFoundException e) {
-      return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+      try {
+        in = super.getFromCollection(collectionId, fileName);
+      } catch (NotFoundException e) {
+        return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+      }
+      String contentType = mimeMap.getContentType(fileName);
+      int contentLength = 0;
+      try {
+        contentLength = in.available();
+      } catch (IOException e) {
+        logger.info("unable to get the content length for collection/{}/{}", new Object[] { collectionId, fileName });
+      }
+      return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type",
+              contentType).header("Content-length", contentLength).entity(in).build();
+    } finally {
+      IOUtils.closeQuietly(in);
     }
-    String contentType = mimeMap.getContentType(fileName);
-    int contentLength = 0;
-    try {
-      contentLength = in.available();
-    } catch (IOException e) {
-      logger.info("unable to get the content length for collection/{}/{}", new Object[] { collectionId, fileName });
-    }
-    return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type",
-            contentType).header("Content-length", contentLength).entity(in).build();
   }
 
   @GET
