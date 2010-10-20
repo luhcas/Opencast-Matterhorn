@@ -57,7 +57,13 @@ public class WorkingFileRepositoryRestEndpointTest {
     String mediaPackageId = "mp";
     String image = "element1";
 
-    endpoint.put(mediaPackageId, image, "opencast_header.gif", getClass().getResourceAsStream("/opencast_header.gif"));
+    InputStream in = null;
+    try {
+      in = getClass().getResourceAsStream("/opencast_header.gif");
+      endpoint.put(mediaPackageId, image, "opencast_header.gif", in);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
 
     // execute gets, and ensure that the content types are correct
     Response response = endpoint.restGet(mediaPackageId, image, null);
@@ -65,7 +71,6 @@ public class WorkingFileRepositoryRestEndpointTest {
     Assert.assertEquals("Gif content type", "image/gif", response.getMetadata().getFirst("Content-Type"));
 
     // Make sure the image byte stream was not modified by the content type detection
-    InputStream in = null;
     try {
       in = getClass().getResourceAsStream("/opencast_header.gif");
       byte[] bytesFromClasspath = IOUtils.toByteArray(in);
@@ -80,7 +85,14 @@ public class WorkingFileRepositoryRestEndpointTest {
   public void testExtractXmlContentType() throws Exception {
     String mediaPackageId = "mp";
     String dc = "element1";
-    endpoint.put(mediaPackageId, dc, "dublincore.xml", getClass().getResourceAsStream("/dublincore.xml"));
+    
+    InputStream in = null;
+    try {
+      in = getClass().getResourceAsStream("/dublincore.xml");
+      endpoint.put(mediaPackageId, dc, "dublincore.xml", in);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
 
     // execute gets, and ensure that the content types are correct
     Response response = endpoint.restGet(mediaPackageId, dc, null);
@@ -88,14 +100,13 @@ public class WorkingFileRepositoryRestEndpointTest {
     Assert.assertEquals("Gif content type", "application/xml", response.getMetadata().getFirst("Content-Type"));
 
     // Make sure the image byte stream was not modified by the content type detection
-    InputStream imageIn = null;
     try {
-      imageIn = getClass().getResourceAsStream("/dublincore.xml");
-      byte[] imageBytesFromClasspath = IOUtils.toByteArray(imageIn);
+      in = getClass().getResourceAsStream("/dublincore.xml");
+      byte[] imageBytesFromClasspath = IOUtils.toByteArray(in);
       byte[] imageBytesFromRepo = IOUtils.toByteArray((InputStream) response.getEntity());
       Assert.assertTrue(Arrays.equals(imageBytesFromClasspath, imageBytesFromRepo));
     } finally {
-      IOUtils.closeQuietly(imageIn);
+      IOUtils.closeQuietly(in);
     }
   }
 
@@ -103,16 +114,27 @@ public class WorkingFileRepositoryRestEndpointTest {
     String mediaPackageId = "mp";
     String dc = "element1";
 
-    endpoint.put(mediaPackageId, dc, "dublincore.xml", getClass().getResourceAsStream("/dublincore.xml"));
+    InputStream in = null;
+    try {
+      in = getClass().getResourceAsStream("/dublincore.xml");
+      endpoint.put(mediaPackageId, dc, "dublincore.xml", in);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
 
-    String md5 = DigestUtils.md5Hex(getClass().getResourceAsStream("/dublincore.xml"));
-    Response response = endpoint.restGet(mediaPackageId, dc, md5);
-    Assert.assertEquals(Response.Status.NOT_MODIFIED.getStatusCode(), response.getStatus());
-    Assert.assertNull(response.getEntity());
+    try {
+      in = getClass().getResourceAsStream("/dublincore.xml");
+      String md5 = DigestUtils.md5Hex(in);
+      Response response = endpoint.restGet(mediaPackageId, dc, md5);
+      Assert.assertEquals(Response.Status.NOT_MODIFIED.getStatusCode(), response.getStatus());
+      Assert.assertNull(response.getEntity());
+      response = endpoint.restGet(mediaPackageId, dc, "foo");
+      Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+      Assert.assertNotNull(response.getEntity());
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
 
-    response = endpoint.restGet(mediaPackageId, dc, "foo");
-    Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-    Assert.assertNotNull(response.getEntity());
   }
 
 }

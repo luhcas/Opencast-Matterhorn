@@ -303,19 +303,21 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
     try {
       String md5 = this.hashMediaPackageElement(mediaPackageID, mediaPackageElementID);
       if (md5.equals(ifNoneMatch)) {
+        IOUtils.closeQuietly(in);
         return Response.notModified().build();
       }
       in = this.get(mediaPackageID, mediaPackageElementID);
       contentType = extractContentType(in);
       return Response.ok(this.get(mediaPackageID, mediaPackageElementID)).header("Content-Type", contentType).build();
     } catch (IllegalStateException e) {
+      IOUtils.closeQuietly(in);
       return Response.status(Response.Status.NOT_FOUND).build();
     } catch (IOException e) {
+      IOUtils.closeQuietly(in);
       return Response.status(500).build();
     } catch (NotFoundException e) {
-      return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-    } finally {
       IOUtils.closeQuietly(in);
+      return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
     }
   }
 
@@ -352,6 +354,7 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
       in = get(mediaPackageID, mediaPackageElementID);
       String md5 = this.hashMediaPackageElement(mediaPackageID, mediaPackageElementID);
       if (md5.equals(ifNoneMatch)) {
+        IOUtils.closeQuietly(in);
         return Response.notModified().build();
       }
       String contentType = mimeMap.getContentType(fileName);
@@ -360,15 +363,16 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
       return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type",
               contentType).header("Content-length", contentLength).entity(in).build();
     } catch (IllegalStateException e) {
+      IOUtils.closeQuietly(in);
       return Response.status(Response.Status.NOT_FOUND).build();
     } catch (NotFoundException e) {
+      IOUtils.closeQuietly(in);
       return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
     } catch (IOException e) {
+      IOUtils.closeQuietly(in);
       logger.info("unable to get the content length for {}/{}/{}", new Object[] { mediaPackageElementID,
               mediaPackageElementID, fileName });
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-    } finally {
-      IOUtils.closeQuietly(in);
     }
   }
 
@@ -378,23 +382,20 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
           @PathParam("fileName") String fileName) {
     InputStream in = null;
     try {
-      try {
-        in = super.getFromCollection(collectionId, fileName);
-      } catch (NotFoundException e) {
-        return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-      }
-      String contentType = mimeMap.getContentType(fileName);
-      int contentLength = 0;
-      try {
-        contentLength = in.available();
-      } catch (IOException e) {
-        logger.info("unable to get the content length for collection/{}/{}", new Object[] { collectionId, fileName });
-      }
-      return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type",
-              contentType).header("Content-length", contentLength).entity(in).build();
-    } finally {
+      in = super.getFromCollection(collectionId, fileName);
+    } catch (NotFoundException e) {
       IOUtils.closeQuietly(in);
+      return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
     }
+    String contentType = mimeMap.getContentType(fileName);
+    int contentLength = 0;
+    try {
+      contentLength = in.available();
+    } catch (IOException e) {
+      logger.info("unable to get the content length for collection/{}/{}", new Object[] { collectionId, fileName });
+    }
+    return Response.ok().header("Content-disposition", "attachment; filename=" + fileName).header("Content-Type",
+            contentType).header("Content-length", contentLength).entity(in).build();
   }
 
   @GET

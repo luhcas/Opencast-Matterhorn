@@ -28,18 +28,14 @@ import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.Arrays;
 
 public class WorkingFileRepositoryTest {
 
-  private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepositoryTest.class);
   private String mediaPackageID = "working-file-test-media-package-1";
   private String mediaPackageElementID = "working-file-test-element-1";
   private String collectionId = "collection-1";
@@ -58,11 +54,6 @@ public class WorkingFileRepositoryTest {
     try {
       in = getClass().getClassLoader().getResourceAsStream("opencast_header.gif");
       repo.put(mediaPackageID, mediaPackageElementID, "opencast_header.gif", in);
-      try {
-        in.close();
-      } catch (IOException e) {
-        logger.error(e.getMessage());
-      }
     } finally {
       IOUtils.closeQuietly(in);
     }
@@ -85,14 +76,16 @@ public class WorkingFileRepositoryTest {
   public void testPut() throws Exception {
     // Get the file back from the repository to check whether it's the same file that we put in.
     InputStream fromRepo = null;
+    InputStream headerIn = null;
     try {
       fromRepo = repo.get(mediaPackageID, mediaPackageElementID);
+      headerIn = getClass().getClassLoader().getResourceAsStream("opencast_header.gif");
       byte[] bytesFromRepo = IOUtils.toByteArray(fromRepo);
-      byte[] bytesFromClasspath = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
-              "opencast_header.gif"));
+      byte[] bytesFromClasspath = IOUtils.toByteArray(headerIn);
       Assert.assertEquals(bytesFromClasspath.length, bytesFromRepo.length);
     } finally {
       IOUtils.closeQuietly(fromRepo);
+      IOUtils.closeQuietly(headerIn);
     }
   }
 
@@ -138,14 +131,16 @@ public class WorkingFileRepositoryTest {
   public void testPutIntoCollection() throws Exception {
     // Get the file back from the repository to check whether it's the same file that we put in.
     InputStream fromRepo = null;
+    InputStream headerIn = null;
     try {
       fromRepo = repo.getFromCollection(collectionId, filename);
       byte[] bytesFromRepo = IOUtils.toByteArray(fromRepo);
-      byte[] bytesFromClasspath = IOUtils.toByteArray(getClass().getClassLoader().getResourceAsStream(
-              "opencast_header.gif"));
+      headerIn = getClass().getClassLoader().getResourceAsStream("opencast_header.gif");
+      byte[] bytesFromClasspath = IOUtils.toByteArray(headerIn);
       Assert.assertEquals(bytesFromClasspath.length, bytesFromRepo.length);
     } finally {
       IOUtils.closeQuietly(fromRepo);
+      IOUtils.closeQuietly(headerIn);
     }
   }
 
@@ -157,18 +152,34 @@ public class WorkingFileRepositoryTest {
   @Test
   public void testCopy() throws Exception {
     String newFileName = "newfile.gif";
-    byte[] bytesFromCollection = IOUtils.toByteArray(repo.getFromCollection(collectionId, filename));
-    repo.copyTo(collectionId, filename, "copied-mediapackage", "copied-element", newFileName);
-    byte[] bytesFromCopy = IOUtils.toByteArray(repo.get("copied-mediapackage", "copied-element"));
-    Assert.assertTrue(Arrays.equals(bytesFromCollection, bytesFromCopy));
+    byte[] bytesFromCollection = null;
+    InputStream in = null;
+    try {
+      in = repo.getFromCollection(collectionId, filename);
+      bytesFromCollection = IOUtils.toByteArray(in);
+      IOUtils.closeQuietly(in);
+      repo.copyTo(collectionId, filename, "copied-mediapackage", "copied-element", newFileName);
+      in = repo.get("copied-mediapackage", "copied-element");
+      byte[] bytesFromCopy = IOUtils.toByteArray(in);
+      Assert.assertTrue(Arrays.equals(bytesFromCollection, bytesFromCopy));
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
   }
 
   @Test
   public void testMove() throws Exception {
     String newFileName = "newfile.gif";
-    byte[] bytesFromCollection = IOUtils.toByteArray(repo.getFromCollection(collectionId, filename));
-    repo.moveTo(collectionId, filename, "moved-mediapackage", "moved-element", newFileName);
-    byte[] bytesFromMove = IOUtils.toByteArray(repo.get("moved-mediapackage", "moved-element"));
-    Assert.assertTrue(Arrays.equals(bytesFromCollection, bytesFromMove));
+    InputStream in = null;
+    try {
+      in = repo.getFromCollection(collectionId, filename);
+      byte[] bytesFromCollection = IOUtils.toByteArray(in);
+      IOUtils.closeQuietly(in);
+      repo.moveTo(collectionId, filename, "moved-mediapackage", "moved-element", newFileName);
+      byte[] bytesFromMove = IOUtils.toByteArray(repo.get("moved-mediapackage", "moved-element"));
+      Assert.assertTrue(Arrays.equals(bytesFromCollection, bytesFromMove));
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
   }
 }
