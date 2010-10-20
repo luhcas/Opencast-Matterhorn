@@ -56,8 +56,9 @@ public class WorkingFileRepositoryRestEndpointTest {
   public void testExtractImageContentType() throws Exception {
     String mediaPackageId = "mp";
     String image = "element1";
-
     InputStream in = null;
+    InputStream responseIn = null;
+
     try {
       in = getClass().getResourceAsStream("/opencast_header.gif");
       endpoint.put(mediaPackageId, image, "opencast_header.gif", in);
@@ -74,19 +75,21 @@ public class WorkingFileRepositoryRestEndpointTest {
     try {
       in = getClass().getResourceAsStream("/opencast_header.gif");
       byte[] bytesFromClasspath = IOUtils.toByteArray(in);
-      byte[] bytesFromRepo = IOUtils.toByteArray((InputStream) response.getEntity());
+      responseIn = (InputStream) response.getEntity();
+      byte[] bytesFromRepo = IOUtils.toByteArray(responseIn);
       Assert.assertTrue(Arrays.equals(bytesFromClasspath, bytesFromRepo));
     } finally {
       IOUtils.closeQuietly(in);
+      IOUtils.closeQuietly(responseIn);
     }
   }
 
   @Test
   public void testExtractXmlContentType() throws Exception {
     String mediaPackageId = "mp";
-    String dc = "element1";
-    
+    String dc = "element1";    
     InputStream in = null;
+    InputStream responseIn = null;
     try {
       in = getClass().getResourceAsStream("/dublincore.xml");
       endpoint.put(mediaPackageId, dc, "dublincore.xml", in);
@@ -103,18 +106,20 @@ public class WorkingFileRepositoryRestEndpointTest {
     try {
       in = getClass().getResourceAsStream("/dublincore.xml");
       byte[] imageBytesFromClasspath = IOUtils.toByteArray(in);
-      byte[] imageBytesFromRepo = IOUtils.toByteArray((InputStream) response.getEntity());
+      responseIn = (InputStream) response.getEntity();
+      byte[] imageBytesFromRepo = IOUtils.toByteArray(responseIn);
       Assert.assertTrue(Arrays.equals(imageBytesFromClasspath, imageBytesFromRepo));
     } finally {
       IOUtils.closeQuietly(in);
+      IOUtils.closeQuietly(responseIn);
     }
   }
 
   public void testEtag() throws Exception {
     String mediaPackageId = "mp";
     String dc = "element1";
-
     InputStream in = null;
+    InputStream responseIn = null;
     try {
       in = getClass().getResourceAsStream("/dublincore.xml");
       endpoint.put(mediaPackageId, dc, "dublincore.xml", in);
@@ -127,12 +132,15 @@ public class WorkingFileRepositoryRestEndpointTest {
       String md5 = DigestUtils.md5Hex(in);
       Response response = endpoint.restGet(mediaPackageId, dc, md5);
       Assert.assertEquals(Response.Status.NOT_MODIFIED.getStatusCode(), response.getStatus());
-      Assert.assertNull(response.getEntity());
+      responseIn = (InputStream)response.getEntity();
+      Assert.assertNull(responseIn);
       response = endpoint.restGet(mediaPackageId, dc, "foo");
       Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-      Assert.assertNotNull(response.getEntity());
+      responseIn = (InputStream)response.getEntity();
+      Assert.assertNotNull(responseIn);
     } finally {
       IOUtils.closeQuietly(in);
+      IOUtils.closeQuietly(responseIn);
     }
 
   }
