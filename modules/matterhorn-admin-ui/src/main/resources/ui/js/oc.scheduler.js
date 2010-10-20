@@ -41,7 +41,7 @@ var Agent     = Agent || {};
 
 Agent.tzDiff  = 0;
 
-ocScheduler.Init = function(){
+ocScheduler.init = function(){
   ocWorkflow.init($('#workflowSelector'), $('#workflowConfigContainer'));
   ocScheduler.Internationalize();
   ocScheduler.RegisterComponents();
@@ -116,11 +116,11 @@ ocScheduler.RegisterEventHandlers = function(){
     ocScheduler.ChangeRecordingType(MULTIPLE_EVENTS);
   });
   
-  $('.folder-head').click(
+  $('.oc-ui-collapsible-widget .ui-widget-header').click(
     function() {
-      $(this).children('.fl-icon').toggleClass('icon-arrow-right');
-      $(this).children('.fl-icon').toggleClass('icon-arrow-down');
-      $(this).next().toggle('fast');
+      $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-e');
+      $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-s');
+      $(this).next().toggle();
       return false;
     });
   
@@ -208,7 +208,7 @@ ocScheduler.ChangeRecordingType = function(recType){
   ocScheduler.RegisterComponents();
   ocScheduler.FormManager.components = ocScheduler.components;
   
-  $('.error').removeClass('error');
+  $('.ui-state-error-text').removeClass('ui-state-error-text');
   $('#missingFieldsContainer').hide();
   
   var d = new Date()
@@ -235,7 +235,7 @@ ocScheduler.ChangeRecordingType = function(recType){
     ocScheduler.inputList = '#recurInputList';
     $(ocScheduler.inputList).empty();
     if(!$('#seriesRequired')[0]){
-      $('#seriesContainer > label').prepend('<span id="seriesRequired" style="color: red;">* </span>'); //series is required, indicate as such.
+      $('#seriesContainer label').prepend('<span id="seriesRequired" class="scheduler-required-text">* </span>'); //series is required, indicate as such.
     }
     ocScheduler.components.recurrenceStart.setValue(d.getTime().toString());
     ocScheduler.FormManager.rootElm = MULTIPLE_EVENT_ROOT_ELM;
@@ -345,10 +345,11 @@ ocScheduler.HandleAgentChange = function(elm){
 };
 
 ocScheduler.DisplayCapabilities = function(capabilities){
-  ocUtils.log(capabilities);
+  $(ocScheduler.inputList).append('<ul class="oc-ui-checkbox-list">');
   $.each(capabilities, function(i, v){
-    $(ocScheduler.inputList).append('<input type="checkbox" id="' + v + '" value="' + v + '" checked="checked"><label for="' + v +'">' + v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() + '</label>');
+    $(ocScheduler.inputList).append('<li><input type="checkbox" id="' + v + '" value="' + v + '" checked="checked">&nbsp;<label for="' + v +'">' + v.charAt(0).toUpperCase() + v.slice(1).toLowerCase() + '</label></li>');
   });
+  $(ocScheduler.inputList).append('</ul>');
   ocScheduler.components.resources.setFields(capabilities);
   if(ocScheduler.selectedInputs && ocUtils.getURLParam('edit')){
     ocScheduler.components.resources.setValue(ocScheduler.selectedInputs);
@@ -357,21 +358,20 @@ ocScheduler.DisplayCapabilities = function(capabilities){
   ocScheduler.inputCount = $(ocScheduler.inputList).children('input:checkbox').size();
   total = ocScheduler.inputCount;
   $(ocScheduler.inputList).each(function(){
-        $(this).children("input:checkbox").click(function(){
-          
+        $(this).children('input:checkbox').click(function(){
           total = (this.checked) ? (total = (total < 3) ? total+=1 : total) : total-=1;
           if(total < 1) {
         	  var position = $('#help_input').position();
         	  $('#inputhelpBox').css('left',position.left + 100 +'px');
         	  $('#inputhelpBox').css('top',position.top);
-        	  $('#inputhelpTitle').text("Please Note");
-        	  $('#inputhelpText').text("You have to select at least one input in order to schedule a recording.");
+        	  $('#inputhelpTitle').text('Please Note');
+        	  $('#inputhelpText').text('You have to select at least one input in order to schedule a recording.');
         	  $('#inputhelpBox').show();
-        	  $('#submitButton').attr("disabled", "true");
+        	  $('#submitButton').attr('disabled', 'true');
           }
           else {
         	  $('#inputhelpBox').hide();
-        	  $('#submitButton').removeAttr("disabled");
+        	  $('#submitButton').removeAttr('disabled');
           }
         });
       });
@@ -482,8 +482,12 @@ ocScheduler.LoadEvent = function(doc){
     ocWorkflow.definitionSelected(workflowProperties['org.opencastproject.workflow.definition'],
       $('#workflowConfigContainer'),
       function(){
-        registerWorkflowComponents(ocScheduler.FormManager.workflowComponents);
-        setWorkflowComponentValues(workflowProperties, ocScheduler.FormManager.workflowComponents);
+        if(ocWorkflowPanel && ocWorkflowPanel.registerComponents && ocWorkflowPanel.setComponentValues){
+          ocWorkflowPanel.registerComponents(ocScheduler.FormManager.workflowComponents);
+          ocWorkflowPanel.setComponentValues(workflowProperties, ocScheduler.FormManager.workflowComponents);
+        } else {
+          ocUtils.log("Couldn't register workflow panel components");
+        }
       });
   }
   ocScheduler.FormManager.populate(metadata)
@@ -564,7 +568,7 @@ ocScheduler.CheckForConflictingEvents = function(){
 ocScheduler.RegisterComponents = function(){
   ocScheduler.components = {};
   
-  ocScheduler.components.title = new ocAdmin.Component(['title'], {label: 'titleLabel', required: true});
+  ocScheduler.components.title = new ocAdmin.Component(['title'], {label: 'titleLabel', errorField: 'missingTitle', required: true});
   ocScheduler.components.creator = new ocAdmin.Component(['creator'], {label: 'creatorLabel'});
   ocScheduler.components.contributor = new ocAdmin.Component(['contributor'], {label: 'contributorLabel'});
   ocScheduler.components.seriesId = new ocAdmin.Component(['series', 'seriesSelect'],

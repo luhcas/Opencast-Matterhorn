@@ -11,77 +11,82 @@
   <![CDATA[
     <fieldset>
       <legend>Holds</legend>
-      <span style="padding-left:5px">Processing should be paused to allow for:</span>
-      <ul class="no-bullets formField-list fl-controls-right">
-
-
-        <li class="ui-helper-clearfix"> 
-          <span id="trimholdconfig" style="float:left;">
-            <input id="trimHold" name="trimHold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;" style="float:left;">
+      <span>Processing should be paused to allow for:</span>
+      <ul class="oc-ui-checkbox-list">
+        <li class="ui-helper-clearfix">
+          <span id="trimholdconfig">
+            <input id="trimHold" name="trimHold" type="checkbox" class="configField holdCheckbox" value="true" />
             <span id="i18n_hold_for_trim">&nbsp;Trim before encoding (with option to edit info)</span>
           </span>
         </li>
-
-        <li class="ui-helper-clearfix"> 
-          <span id="holdconfig" style="float:left;">
-            <input id="reviewHold" name="reviewHold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;" style="float:left;">
+        <li class="ui-helper-clearfix">
+          <span id="holdconfig">
+            <input id="reviewHold" name="reviewHold" type="checkbox" class="configField holdCheckbox" value="true" />
             <span id="i18n_hold_for_review">&nbsp;Review after encoding (with option to edit info)</span>
           </span>
-         </li>
-         <li class="ui-helper-clearfix">
-          <span id="captionconfig" style="float:left;">
-            <input id="captionHold" name="captionHold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;">
+        </li>
+        <li class="ui-helper-clearfix">
+          <span id="captionconfig">
+            <input id="captionHold" name="captionHold" type="checkbox" class="configField holdCheckbox" value="true"/>
             <span id="i18n_hold_for_caption">&nbsp;Captions file upload</span>
           </span>
-         </li>
+        </li>
       </ul>
     </fieldset>
     <fieldset>
       <legend>Distribution</legend>
-      <ul class="no-bullets formField-list fl-controls-right">
+      <ul class="oc-ui-form-list">
         <!-- field: License -->
         <li class="ui-helper-clearfix">
-          <label class="fl-label"><span class="color-red">* </span><span id="i18n_dist_label">Distribution Channel(s)</span>:</label
-          <span id="dist" style="float:left;">
-            <input id="distribution" name="distribution" type="checkbox" checked="checked" disabled="disabled" class="configField" value="Matterhorn Media Module" style="width: inherit !important;">
+          <label class="scheduler-label"><span class="color-red">* </span><span id="i18n_dist_label">Distribution Channel(s)</span>:</label>
+          <span id="dist">
+            <input id="distribution" name="distribution" type="checkbox" checked="checked" disabled="disabled" class="configField" value="Matterhorn Media Module" />
             <span id="i18n_dist_mmm">&nbsp;Matterhorn Media Module</span>
-            <input id="youtube" name="youtube" type="checkbox" disabled="disabled" class="configField" value="Youtube" style="width: inherit !important;">
+            <input id="youtube" name="youtube" type="checkbox" disabled="disabled" class="configField" value="Youtube" />
             <span id="i18n_dist_mmm">&nbsp;Youtube</span>
-            <input id="itunesu" name="itunesu" type="checkbox" disabled="disabled" class="configField" value="iTunesU" style="width: inherit !important;">
+            <input id="itunesu" name="itunesu" type="checkbox" disabled="disabled" class="configField" value="iTunesU" />
             <span id="i18n_dist_mmm">&nbsp;iTunesU</span>
           </span>
-          <!-- span class="helpIcon" title="Click for help">&nbsp;</span -->
         </li>
         <!-- field: License -->
         <li class="ui-helper-clearfix">
-          <label class="fl-label"><span id="i18n_license_label">License</span>:</label>
-          <input type="text" class="formField" id="license" name="license" style="float:left;">
-          <!-- span class="helpIcon" title="Click for help">&nbsp;</span -->
+          <label class="scheduler-label"><span id="i18n_license_label">License</span>:</label>
+          <input type="text" class="formField" id="license" name="license">
         </li>
       </ul>
     </fieldset>
     <script type="text/javascript">
-      WorkflowPanel = WorkflowPanel || {};
-      function WorkflowPanel.registerPanelComponents(components){
-        components.reviewhold = new Component(
+      var ocWorkflowPanel = ocWorkflowPanel || {};
+      ocWorkflowPanel.registerComponents = function(components){
+        /* components with keys that begin with 'org.opencastproject.workflow.config' will be passed
+         * into the workflow. The component's nodeKey must match the components array key.
+         *
+         * Example:'org.opencastproject.workflow.config.myProperty' will be availible at ${my.property}
+         */
+        components['org.opencastproject.workflow.config.reviewHold'] = new ocAdmin.Component(
           ['reviewHold'],
           {nodeKey: 'org.opencastproject.workflow.config.reviewHold'},
           {getValue: function(){ return this.fields.reviewHold.is(":checked"); }
           });
 
-        components.trimhold = new Component(
+        components['org.opencastproject.workflow.config.trimHold'] = new ocAdmin.Component(
           ['trimHold'],
           {nodeKey: 'org.opencastproject.workflow.config.trimHold'},
           {getValue: function(){ return this.fields.trimHold.is(":checked"); }
           });
           
-        components.captionhold = new Component(
+        components['org.opencastproject.workflow.config.captionHold'] = new ocAdmin.Component(
           ['captionHold'],
           {nodeKey: 'org.opencastproject.workflow.config.captionHold'},
-          {getValue: function(){ return this.fields.reviewCaption.is(":checked");}
+          {getValue: function(){ return this.fields.captionHold.is(":checked");}
           });
           
           //etc...
+      }
+      ocWorkflowPanel.setComponentValues = function(values, components){
+        components['org.opencastproject.workflow.config.reviewHold'].setValue(values['org.opencastproject.workflow.config.reviewHold']);
+        components['org.opencastproject.workflow.config.captionHold'].setValue(values['org.opencastproject.workflow.config.captionHold']);
+        components['org.opencastproject.workflow.config.trimHold'].setValue(values['org.opencastproject.workflow.config.trimHold']);
       }
     </script>
   ]]>

@@ -12,10 +12,10 @@
 <![CDATA[
     <fieldset>
       <legend>DVD Specs</legend>
-      <ul class="no-bullets formField-list fl-controls-right">
+      <ul class="oc-ui-form-list">
         <li class="ui-helper-clearfix">
-          <label class="fl-label">TV Norm:</label>
-          <select id="dvdformat" name="dvd.format" class="configField">
+          <label class="scheduler-label">TV Norm:</label>
+          <select id="dvdFormat" name="dvd.format" class="configField">
             <option value="pal">PAL</option>
             <option value="ntsc">NTSC</option>
           </select>
@@ -23,16 +23,17 @@
       </ul>
     </fieldset>
     <script type="text/javascript">
-      function registerWorkflowComponents(components){
+      var ocWorkflowPanel = ocWorkflowPanel || {};
+      ocWorkflowPanel.registerComponents = function(components){
         /* components with keys that begin with 'org.opencastproject.workflow.config' will be passed
          * into the workflow. The component's nodeKey must match the components array key.
          *
-         * Example:'org.opencastproject.workflow.config.my.property' will be availible at ${my.property}
+         * Example:'org.opencastproject.workflow.config.myProperty' will be availible at ${my.property}
          */
-        components['org.opencastproject.workflow.config.dvd.format'] = new AdminForm.Component(['dvdFormat'], {nodeKey: 'org.opencastproject.workflow.config.dvd.format'});
+        components['org.opencastproject.workflow.config.dvdFormat'] = new ocAdmin.Component(['dvdFormat'], {nodeKey: 'org.opencastproject.workflow.config.dvdFormat'});
       }
-      function setWorkflowComponentValues(values, components){
-        components['org.opencastproject.workflow.config.dvd.format'].setValue(values['org.opencastproject.workflow.config.dvd.format']);
+      ocWorkflowPanel.setComponentValues = function(values, components){
+        components['org.opencastproject.workflow.config.dvdFormat'].setValue(values['org.opencastproject.workflow.config.dvdFormat']);
       }
     </script>
 ]]>
@@ -86,7 +87,7 @@
         <configuration key="source-flavor">presenter/work</configuration>
         <configuration key="target-flavor">presenter/dvd</configuration>
         <configuration key="target-tags">dvd</configuration>
-        <configuration key="encoding-profile">dvd-${dvd.format}.http</configuration>
+        <configuration key="encoding-profile">dvd-${dvdFormat}.http</configuration>
       </configurations>
     </operation>
 
@@ -99,7 +100,7 @@
         <configuration key="source-flavor">presentation/work</configuration>
         <configuration key="target-flavor">presenter/dvd</configuration>
         <configuration key="target-tags">dvd</configuration>
-        <configuration key="encoding-profile">dvd-${dvd.format}.http</configuration>
+        <configuration key="encoding-profile">dvd-${dvdFormat}.http</configuration>
       </configurations>
     </operation>
 

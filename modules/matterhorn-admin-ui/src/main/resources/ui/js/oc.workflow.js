@@ -55,11 +55,11 @@ ocWorkflow.definitionSelected = function(defId, container, callback) {
       if (callback) {
         callback();
       }
-      if(registerWorkflowComponents && typeof Scheduler != 'undefined' && typeof Scheduler.FormManager != 'undefined'){
-        Scheduler.FormManager.workflowComponents = {}; //Clear the previously selected panel's components
-        registerWorkflowComponents(Scheduler.FormManager.workflowComponents);
+      if(ocWorkflowPanel && ocWorkflowPanel.registerComponents && typeof ocScheduler != 'undefined' && typeof ocScheduler.FormManager != 'undefined'){
+        ocScheduler.FormManager.workflowComponents = {}; //Clear the previously selected panel's components
+        ocWorkflowPanel.registerComponents(ocScheduler.FormManager.workflowComponents);
       }else{
-        //ocUtils.log("component registration handler not found.");
+        ocUtils.log("component registration handler not found.", ocWorkflowPanel, ocWorkflowPanel.registerComponents);
       }
     }
   );

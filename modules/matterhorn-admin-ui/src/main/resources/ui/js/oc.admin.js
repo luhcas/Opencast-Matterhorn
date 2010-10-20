@@ -57,16 +57,16 @@ $.extend(ocAdmin.Manager.prototype, {
   validate: function(){
     var error = false;
     $('#missingFieldsContainer').hide();
-    $('.missing-fields-item').hide();
+    $('#missingFieldsContainer li').hide();
     for(var k in this.components){
       if(this.components[k].required && !this.components[k].validate()){
         $('#' + this.components[k].errorField).show();
-        $('#' + this.components[k].label).addClass('error');
+        $('#' + this.components[k].label).addClass('ui-state-error-text');
         error = true;
       }else{
         if(this.components[k].errorField && this.components[k].label){
           $('#' + this.components[k].errorField).hide();
-          $('#' + this.components[k].label).removeClass('error');
+          $('#' + this.components[k].label).removeClass('ui-state-error-text');
         }
       }
     }
