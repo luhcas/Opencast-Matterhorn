@@ -213,6 +213,59 @@
           }
         });
       });
+      
+    
+    
+    /**
+      * Returns the Input Time in Seconds
+      * @param data Data in the Format ab:cd:ef
+      * @return Time from the Data in Seconds
+      */
+      function getTimeInSeconds(data) {
+        var values = data.split(':');
+        
+        // If the Format is correct
+        if(values.length == 3) {
+            // Check and parse the Hours
+            values[0] = ((values[0] == '') || (values[0] == null)) ? 0 : parseInt(values[0]);
+            // Check and parse the Minutes
+            values[1] = ((values[1] == '') || (values[1] == null)) ? 0 : parseInt(values[1]);
+            // Check and parse the Seconds
+            values[2] = ((values[2] == '') || (values[2] == null)) ? 0 : parseInt(values[2]);
+        
+            // Convert Hours and Minutes to Seconds
+            values[0] *= 60 * 60; // 1 Hour = 60 Minutes = 60 * 60 Seconds
+            values[1] *= 60;      // 1 Minute = 60 Seconds
+        
+            // Add the Seconds and return it
+            return values[0] + values[1] + values[2];
+        } else {
+            return 0;
+        }
+      }
+      
+     /**
+      * Continues the Workflow
+      */
+	  function continueWorkflow() {
+        // Get Video Duration
+        var videoDurationData = $('#player-container').contents().find('#oc_duration').text();
+        // Format 'Trim From'
+        var trimFromData = $('#inPoint').val();
+        trimFromData = ((trimFromData == '') || (trimFromData == null)) ? '00:00:00' : trimFromData;
+        // Format 'Trim To'
+        var trimToData = $('#outPoint').val();
+        trimToData = ((trimToData == '') || (trimToData == null)) ? videoDurationData : trimToData;
+        
+        // If Input < Output
+        if(trimFromData < trimToData) {
+            postData['trimin'] = getTimeInSeconds(trimFromData);
+            postData['trimout'] = getTimeInSeconds(trimToData);
+            parent.ocRecordings.continueWorkflow(postData);
+        } else {
+            alert("The In-Point must not be bigger than the Out-Point");
+        }
+	  }
     </script>
   </head>
   <body>
@@ -270,7 +323,7 @@
           <input type="button" id="step-out-backward" title="Step backward one second" value="&lt;&lt;" class="ui-button ui-widget ui-state-default ui-corner-all" /><br />
          <input title="Move on to next steps in processing this recording" 
                 style="margin-right: 16px; width: 160px;" 
-                onclick="parent.ocRecordings.continueWorkflow(postData);" 
+                onclick="continueWorkflow();" 
                 id="continueBtn" 
                 type="button"
                 class="ui-button ui-widget ui-state-default ui-corner-all"
