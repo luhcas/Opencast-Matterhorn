@@ -4,6 +4,12 @@
     <link rel="stylesheet" type="text/css" href="/admin/infusion-1.1.2/fss/css/fss-reset.css">
     <link rel="stylesheet" type="text/css" href="/admin/infusion-1.1.2/fss/css/fss-layout.css">
     <link rel="stylesheet" type="text/css" href="/admin/css/admin.css">
+    <link rel="stylesheet" type="text/css" href="/admin/css/oc.layout.css" />
+    <link rel="stylesheet" type="text/css" href="/admin/css/themes/oc.default.css" />
+
+    <link rel="stylesheet" type="text/css" href="css/pages/oc.recordings.css" />
+    <link rel="stylesheet" type="text/css" href="css/tablesorter.css" />
+
     <style type="text/css">
       #player-container {clear:both; border:none; width:90%; height:300;}
       .hidden {display:none;}
@@ -17,9 +23,17 @@
       var PLAYER_URL = '/admin/embed.html';
 
       var postData = {'id' : parent.document.getElementById("holdWorkflowId").value};
+
+      var inpoint = 0;
+      var outpoint = 0;
       
       $(document).ready(function() {
         var id = postData.id;
+
+        var container = $('.paging-nav-container');
+        //alert(container);
+
+        $(".paging-nav-container").hide(0);
 
         // Event edit link clicked
         $('#edit-link').click( function () {
@@ -30,29 +44,27 @@
 
         // Event set inpoint clicked
         $('#set-trimin').click( function () {
-          var outpoint = $('#outPoint').val().split(':');
-          outpoint = parseInt(outpoint[0]) * 60 * 60 + parseInt(outpoint[1]) * 60 + parseInt(outpoint[2]);
-          var inpoint = $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime().split(':');
-          inpoint = parseInt(inpoint[0]) * 60 * 60 + parseInt(inpoint[1]) * 60 + parseInt(inpoint[2]);
-          if(inpoint > outpoint) {
+          var tmpinpoint = $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime().split(':');
+          tmpinpoint = parseInt(tmpinpoint[0]) * 60 * 60 + parseInt(tmpinpoint[1]) * 60 + parseInt(tmpinpoint[2]);
+          if(tmpinpoint > outpoint && outpoint != 0) {
             alert("In point cannot be bigger than oupoint");
           } else
           {
             $('#inPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
+            inpoint = tmpinpoint;
           }
         });
 
         //Event set outpoint clicked
         $('#set-trimout').click( function () {
-          var inpoint = $('#inPoint').val().split(':');
-          inpoint = parseInt(inpoint[0]) * 60 * 60 + parseInt(inpoint[1]) * 60 + parseInt(inpoint[2]);
-          var outpoint = $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime().split(':');
-          outpoint = parseInt(outpoint[0]) * 60 * 60 + parseInt(outpoint[1]) * 60 + parseInt(outpoint[2]);
-          if(inpoint > outpoint) {
+          var tmpoutpoint = $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime().split(':');
+          tmpoutpoint = parseInt(tmpoutpoint[0]) * 60 * 60 + parseInt(tmpoutpoint[1]) * 60 + parseInt(tmpoutpoint[2]);
+          if(tmpoutpoint < inpoint) {
             alert("Out point cannot be smaller than inpoint");
           } else
           {
             $('#outPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
+            outpoint = tmpoutpoint;
           }
         });
 
@@ -243,21 +255,28 @@
     </div>
     <div id="actions">
          <!-- control buttons -->
+
          <label for="inPoint">In point</label>
           <input type="text" id="inPoint" readonly="readonly"></input> 
-          <button type="button" id="set-trimin" title="Set to current time">Set to current time</button>
-          <button type="button" id="play-from-in" title="Start playing at current In point">&gt;Play from in</button> 
-          <button type="button" id="step-in-forward" title="Step forward one second">&gt;&gt;</button>
-          <button type="button" id="step-in-backward" title="Step backward one second">&lt;&lt;</button><br />
+          <input type="button" id="set-trimin" title="Set to current time" value="Set to current time" class="ui-button ui-widget ui-state-default ui-corner-all" />
+          <input type="button" id="play-from-in" title="Start playing at current In point" value="&gt;Play from in" class="ui-button ui-widget ui-state-default ui-corner-all" /> 
+          <input type="button" id="step-in-forward" title="Step forward one second" value="&gt;&gt;" class="ui-button ui-widget ui-state-default ui-corner-all" />
+          <input type="button" id="step-in-backward" title="Step backward one second" value="&lt;&lt;" class="ui-button ui-widget ui-state-default ui-corner-all" /><br />
          <label for="outPoint">Out point</label> 
           <input type="text" id="outPoint" readonly="readonly"></input> 
-          <button type="button" id="set-trimout" title="Set to current time">Set to current time</button> 
-          <button type="button" id="play-to-out" title="Play last 10 seconds to Out point">&gt;Play to out</button>
-          <button type="button" id="step-out-forward" title="Step forward one second">&gt;&gt;</button>
-          <button type="button" id="step-out-backward" title="Step backward one second">&lt;&lt;</button><br />
-         <button title="Move on to next steps in processing this recording" style="margin-right: 16px; width: 160px;" onclick="parent.ocRecordings.continueWorkflow(postData);" id="continueBtn" type="button">Continue processing</button>
-         <button  id="edit-link" type="button" style="margin-right: 16px;">Edit before continuing</button>
-         <button onclick="$('#holdActionPanel-container',top.document).toggle();$('#recordings-table-container',top.document).toggle();$('#oc_recordingmenu' ,top.document).toggle();$('.paging-nav-container',top.document).toggle();$('#refresh-controls-container',top.document).toggle();$('#category-selector-container',top.document).parent().toggle();" title="Cancel" style="margin-right: 16px;" type="button">Cancel</button>
+          <input type="button" id="set-trimout" title="Set to current time" value="Set to current time" class="ui-button ui-widget ui-state-default ui-corner-all" /> 
+          <input type="button" id="play-to-out" title="Play last 10 seconds to Out point" value="&gt;Play to out" class="ui-button ui-widget ui-state-default ui-corner-all" />
+          <input type="button" id="step-out-forward" title="Step forward one second" value="&gt;&gt;" class="ui-button ui-widget ui-state-default ui-corner-all" />
+          <input type="button" id="step-out-backward" title="Step backward one second" value="&lt;&lt;" class="ui-button ui-widget ui-state-default ui-corner-all" /><br />
+         <input title="Move on to next steps in processing this recording" 
+                style="margin-right: 16px; width: 160px;" 
+                onclick="parent.ocRecordings.continueWorkflow(postData);" 
+                id="continueBtn" 
+                type="button"
+                class="ui-button ui-widget ui-state-default ui-corner-all"
+                value="Continue processing" />
+         <input  id="edit-link" type="button" style="margin-right: 16px;" value="Edit before continuing" />
+         <input onclick="$('#holdActionPanel-container',top.document).toggle();$('#recordings-table-container',top.document).toggle();$('#oc_recordingmenu' ,top.document).toggle();$('.paging-nav-container',top.document).toggle();$('#refresh-controls-container',top.document).toggle();$('#category-selector-container',top.document).parent().toggle();" title="Cancel" style="margin-right: 16px;" type="button" value="Cancel" />
      </div>
   </body>
 </html>
