@@ -30,11 +30,6 @@
       $(document).ready(function() {
         var id = postData.id;
 
-        var container = $('.paging-nav-container');
-        //alert(container);
-
-        $(".paging-nav-container").hide(0);
-
         // Event edit link clicked
         $('#edit-link').click( function () {
           //parent.Recordings.retryRecording(id);
@@ -44,52 +39,54 @@
 
         // Event set inpoint clicked
         $('#set-trimin').click( function () {
-          var tmpinpoint = $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime().split(':');
-          tmpinpoint = parseInt(tmpinpoint[0]) * 60 * 60 + parseInt(tmpinpoint[1]) * 60 + parseInt(tmpinpoint[2]);
+          var tmpinpoint = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
+//          tmpinpoint = parseInt(tmpinpoint[0]) * 60 * 60 + parseInt(tmpinpoint[1]) * 60 + parseInt(tmpinpoint[2]);
           if(tmpinpoint > outpoint && outpoint != 0) {
-            alert("In point cannot be bigger than oupoint");
+            $('div#errorMessage').html("In point cannot be bigger than oupoint");
           } else
           {
             $('#inPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
             inpoint = tmpinpoint;
+            $('div#errorMessage').html('');
           }
         });
 
         //Event set outpoint clicked
         $('#set-trimout').click( function () {
-          var tmpoutpoint = $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime().split(':');
-          tmpoutpoint = parseInt(tmpoutpoint[0]) * 60 * 60 + parseInt(tmpoutpoint[1]) * 60 + parseInt(tmpoutpoint[2]);
+          var tmpoutpoint = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
+          //tmpoutpoint = parseInt(tmpoutpoint[0]) * 60 * 60 + parseInt(tmpoutpoint[1]) * 60 + parseInt(tmpoutpoint[2]);
           if(tmpoutpoint < inpoint) {
-            alert("Out point cannot be smaller than inpoint");
+            $('div#errorMessage').html("Out point cannot be smaller than inpoint");
           } else
           {
             $('#outPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
             outpoint = tmpoutpoint;
+            $('div#errorMessage').html('');
           }
         });
 
         //Event forward one second (inpoint)
         $('#step-in-forward').click( function () {
-          var currentTime = $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime().split(':');
-          $('#player-container')[0].contentWindow.Videodisplay.seek(parseInt(currentTime[0]) * 60 * 60 + parseInt(currentTime[1]) * 60 + parseInt(currentTime[2]) + 1);
+          var currentTime = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
+          $('#player-container')[0].contentWindow.Videodisplay.seek(currentTimer + 1);
           window.setTimeout( function () {
             $('#inPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
-          }, 300);
+          }, 500);
         });
 
         //Event backward one second (inpoint)
         $('#step-in-backward').click( function () {
-          var currentTime = $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime().split(':');
-          $('#player-container')[0].contentWindow.Videodisplay.seek(parseInt(currentTime[0]) * 60 * 60 + parseInt(currentTime[1]) * 60 + parseInt(currentTime[2]) - 1);
+          var currentTime = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
+          $('#player-container')[0].contentWindow.Videodisplay.seek(currentTime - 1);
           window.setTimeout( function () {
             $('#inPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
-          }, 300);
+          }, 500);
         });
 
         //Event forward one second (outpoint)
         $('#step-out-forward').click( function () {
-          var currentTime = $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime().split(':');
-          $('#player-container')[0].contentWindow.Videodisplay.seek(parseInt(currentTime[0]) * 60 * 60 + parseInt(currentTime[1]) * 60 + parseInt(currentTime[2]) + 1);
+          var currentTime = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
+          $('#player-container')[0].contentWindow.Videodisplay.seek(currentTime + 1);
           window.setTimeout( function () {
             $('#outPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
           }, 300);
@@ -97,8 +94,8 @@
 
         //Event backward one second (outpoint)
         $('#step-out-backward').click( function() {
-          var currentTime = $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime().split(':');
-          $('#player-container')[0].contentWindow.Videodisplay.seek(parseInt(currentTime[0]) * 60 * 60 + parseInt(currentTime[1]) * 60 + parseInt(currentTime[2]) - 1);
+          var currentTime = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
+          $('#player-container')[0].contentWindow.Videodisplay.seek(currentTime - 1);
           window.setTimeout( function () {
             $('#outPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
           }, 300);
@@ -112,8 +109,8 @@
         $('#play-from-in').click( function () {
           var videodisplay = $('#player-container')[0].contentWindow.Videodisplay;
           videodisplay.pause();
-          var seekTime = $('#inPoint').val().split(':');
-          videodisplay.seek(parseInt(seekTime[0]) * 60 * 60 + parseInt(seekTime[1]) * 60 + parseInt(seekTime[2]));
+          var seekTime = getTimeInSeconds($('#inPoint').val());
+          videodisplay.seek(seekTime);
           window.setTimeout( function () {
             videodisplay.play();
           }, 800);
@@ -123,8 +120,8 @@
         $('#play-to-out').click( function () {
           var videodisplay = $('#player-container')[0].contentWindow.Videodisplay;
           videodisplay.pause();
-          var seekTime = $('#outPoint').val().split(':');
-          videodisplay.seek(parseInt(seekTime[0]) * 60 * 60 + parseInt(seekTime[1]) * 60 + parseInt(seekTime[2]) - 10);
+          var seekTime = getTimeInSeconds($('#outPoint').val());
+          videodisplay.seek(seekTime - 10);
           window.setTimeout( function () {
             videodisplay.play();
             window.setTimeout( function () {
@@ -144,7 +141,7 @@
             $.ajax({
               url : catalogUrl,
               dataType: 'xml',
-              error: function(XMLHttpRequest, textStatus, errorThrown) {alert('error: ' + textStatus);},
+              error: function(XMLHttpRequest, textStatus, errorThrown) {$('div#errorMessage').html('error: ' + textStatus);},
               success: function(data) {
                 $(data.documentElement).children().each(function(index, elm) {
                   var tagName = elm.tagName.split(/:/)[1];
@@ -263,7 +260,7 @@
             postData['trimout'] = getTimeInSeconds(trimToData);
             parent.ocRecordings.continueWorkflow(postData);
         } else {
-            alert("The In-Point must not be bigger than the Out-Point");
+            $('div#errorMessage').html("The In-Point must not be bigger than the Out-Point");
         }
 	  }
     </script>
@@ -321,6 +318,9 @@
           <input type="button" id="play-to-out" title="Play last 10 seconds to Out point" value="&gt;Play to out" class="ui-button ui-widget ui-state-default ui-corner-all" />
           <input type="button" id="step-out-forward" title="Step forward one second" value="&gt;&gt;" class="ui-button ui-widget ui-state-default ui-corner-all" />
           <input type="button" id="step-out-backward" title="Step backward one second" value="&lt;&lt;" class="ui-button ui-widget ui-state-default ui-corner-all" /><br />
+          <br />
+         <div id="errorMessage" class="error">
+         </div><br />
          <input title="Move on to next steps in processing this recording" 
                 style="margin-right: 16px; width: 160px;" 
                 onclick="continueWorkflow();" 
@@ -328,8 +328,8 @@
                 type="button"
                 class="ui-button ui-widget ui-state-default ui-corner-all"
                 value="Continue processing" />
-         <input  id="edit-link" type="button" style="margin-right: 16px;" value="Edit before continuing" />
-         <input onclick="$('#holdActionPanel-container',top.document).toggle();$('#recordings-table-container',top.document).toggle();$('#oc_recordingmenu' ,top.document).toggle();$('.paging-nav-container',top.document).toggle();$('#refresh-controls-container',top.document).toggle();$('#category-selector-container',top.document).parent().toggle();" title="Cancel" style="margin-right: 16px;" type="button" value="Cancel" />
+         <input  id="edit-link" type="button" style="margin-right: 16px;" value="Edit before continuing" class="ui-button ui-widget ui-state-default ui-corner-all" />
+         <input onclick="$('#holdActionPanel-container',top.document).toggle();$('#recordings-table-container',top.document).toggle();$('#oc_recordingmenu' ,top.document).toggle();$('.paging-nav-container',top.document).toggle();$('#refresh-controls-container',top.document).toggle();$('#category-selector-container',top.document).parent().toggle();" title="Cancel" style="margin-right: 16px;" type="button" value="Cancel" class="ui-button ui-widget ui-state-default ui-corner-all" />
      </div>
   </body>
 </html>
