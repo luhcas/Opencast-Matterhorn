@@ -1,0 +1,89 @@
+<!-- PRIMARY METADATA -->
+<div class="ui-widget">
+  <div class="ui-widget-content">
+    <ul class="oc-ui-form-list">
+      <li>
+        <label id="i18n_title">Title</label>:
+        ${event.title}
+      </li>
+      <li>
+        <label id="i18n_series">Series</label>:
+        ${event.series}
+      </li>
+      <li>
+        <label id="i18n_creator">Presenter</label>:
+        ${event.creator}
+      </li>
+    </ul>
+  </div>
+</div>
+<!-- ADDITIONAL METADATA -->
+<div class="ui-widget">
+  <div class="ui-widget-header">
+    <label id="i18n_additional_label">Additional Descriptions</label>:
+  </div>
+  <div class="ui-widget-content">
+    <ul class="oc-ui-form-list">
+      <li>
+        <label id="i18n_contributor">Department</label>:
+        ${event.contributor}
+      </li>
+      <li>
+        <label id="i18n_subject">Subject</label>:
+        ${event.subject}
+      </li>
+      <li>
+        <label id="i18n_language">Language</label>:
+        ${event.language}
+      </li>
+      <li>
+        <label id="i18n_description">Description</label>:
+        ${event.description}
+      </li>
+    </ul>
+  </div>
+</div>
+<!-- CAPTURE INFORMATION -->
+{if type == 'scheduled event'}
+<div class="ui-widget">
+  <div class="ui-widget-header">
+    <label id="i18n_capture_label">Capture</label>:
+  </div>
+  <div class="ui-widget-content">
+    <ul class="oc-ui-form-list">
+      <li>
+        <label id="i18n_startdate">Start Date</label>:
+        ${event.timeStart}
+      </li>
+      <li>
+        <label id="i18n_enddate">End Date</label>:
+        ${event.timeEnd}
+      </li>
+      <li>
+        <label id="i18n_capture_agent">Capture Agent</label>:
+        ${event.agent}
+      </li>
+      <li>
+        <label id="i18n_inputs">Inputs</label>:
+        ${event.inputs}
+      </li>
+    </ul>
+  </div>
+</div>
+{/if}
+<!-- PROCESSING INFORMATION -->
+<!--
+<div class="ui-widget">
+  <div class="ui-widget-header">
+    <label id="i18n_processing">Processing</label>:
+  </div>
+  <div class="ui-widget-content">
+    <ul class="oc-ui-form-list">
+      <li>
+        <label id="i18n_"></label>:
+        <span></span>
+      </li>
+    </ul>
+  </div>
+</div>
+-->

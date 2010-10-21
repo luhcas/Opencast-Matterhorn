@@ -1,75 +1,75 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" >
-    <link rel="shortcut icon" href="img/favicon.ico"> 
-    <title>Opencast Matterhorn - View Recording Info</title>
-
-    <!-- style -->
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-reset.css">
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-layout.css">
-    <link rel="stylesheet" type="text/css" href="infusion-1.1.2/fss/css/fss-text.css">
-
-    <link rel="stylesheet" type="text/css" href="css/admin.css">
-    <link rel="stylesheet" type="text/css" href="css/scheduler.css">
-    <link rel="stylesheet" type="text/css" href="css/shared.css">
-
-    <!-- static library scripts -->
+    <!-- PAGE TITLE -->
+    <title id="i18n_window_title">Recordings</title>
+    <!-- META -->
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="css/oc.layout.css" />
+    <link rel="stylesheet" type="text/css" href="css/themes/oc.default.css" />
+    <link rel="stylesheet" type="text/css" href="css/pages/oc.view.css" />
+    <!-- SCRIPTS -->
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
-    <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
-
-    <!-- page script -->
-    <script type="text/javascript" src="js/viewevent.js"></script>
+    <script type="text/javascript" src="jquery/jquery-ui-1.8.5.custom.min.js"></script>
+    <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
+    <script type="text/javascript" src="js/version.js"></script>
     <script type="text/javascript" src="js/oc.utils.js"></script>
+    <script type="text/javascript" src="js/oc.view.js"></script>
     <script type="text/javascript">
-      var params = {};
-      if(document.location.search){
-        var query = document.location.search.substr(1).split('&');
-        for (var p in query) {
-          var pair = query[p].split('=');
-          if (pair.length > 1) {
-            params[pair[0]] = pair[1];
-          }
-        }
-      }
-      
-      $(document).ready(
-      function() {
-        if (params.type && params.id) {
-          if (params.type.toLowerCase() == 'workflow') {
-            $.get("/workflow/rest/instance/" + params.id + ".xml", handleWorkflow);
-          } else if (params.type.toLowerCase() == 'event') {
-            $.get("/scheduler/rest/event/" + params.id , handleEvent);
-          }
-        }
-      }
-    );
+      $(document).ready(ocView.init);
     </script>
+    <!-- NO SCRIPT -->
+    <noscript>
+      <center>
+        <div style="border:1px solid red;width:530px;margin:20px;">
+          <div style="text-align: left;background:red; color:white;padding-top:2px;padding-bottom:2px;">
+            <div class="icon icon-error" style="margin-left:5px;margin-right:5px;">&nbsp;</div>
+            JavaScript is disabled
+          </div>
+          <div style="padding:10px;">
+            JavaScript is turned off in your web browser, so this site won't work properly! <br />
+            <strong>
+              Please turn JavaScript on to use this site, then refresh the page.
+            </strong>
+          </div>
+        </div>
+      </center>
+    </noscript>
   </head>
   <body>
-    <div id="pageHeader">
-      <div id="currentVersion" style="float:left;"></div>
-      <div style="text-align:right; float: right;"><a href="/j_spring_security_logout" style="color:#FFFFFF">Log out</a></div>
-    </div>
-    <div id="header">
-      <div id="logotitle">
-        <a href="recordings.html">
-          <img src="img/MatterhornLogo.png" alt="Opencast Matterhorn" width="104" height="72" align="left">
-          <h1>Admin Tools</h1>
-        </a>
+    <div class="layout-page-container">
+      <!-- VERSION AND LOGOUT BAR -->
+      <div class="layout-page-header oc-ui-version-bar">
+        <div id="currentVersion" class="layout-inline"></div>
+        <div class="layout-inline layout-float-right"><a id="logout" href="/j_spring_security_logout">Log out</a></div>
       </div>
-      <div id="oclogo">
-        <a href="http://www.opencastproject.org">
-          <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community | Project">        </a>    </div>
+      <!-- BANNER -->
+      <div class="layout-page-header">
+        <div class="oc-ui-banner layout-inline">
+          <div onclick="document.location='/welcome.html'" class="oc-ui-cursor">
+            <img src="img/MatterhornLogo.png" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" class="layout-inline" />
+            <h1 id="i18n_logo_title" class="layout-inline layout-valign-top">Admin Tools</h1>
+          </div>
+        </div>
+        <div class="layout-page-banner layout-inline layout-float-right">
+          <a href="http://www.opencastproject.org">
+            <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project" />
+          </a>
+        </div>
+      </div>
+      <!-- PAGE TABS -->
+      <div class="layout-page-header">
+        <ul class="layout-page-tabs oc-ui-page-tabs">
+          <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_recording" onclick="document.location='recordings.html'">Recordings</li>
+          <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_series" onclick="document.location='series_list.html'">Series</li>
+          <li class="oc-ui-page-tab oc-ui-page-tab-active oc-ui-cursor ui-corner-top" id="i18n_tab_agent" onclick="document.location='agents_status.html'">Capture Agents</li>
+        </ul>
+      </div>
+      <!-- CONTENT AREA -->
+      <div class="layout-page-content">
+        
+      </div>
     </div>
-    <ul class="fl-tabs fl-tabs-left" style="background-color: white;">
-      <li class="oc_tabs fl-activeTab"><a class="oc_tabs" href="/admin/">Recordings</a></li>
-      <li class="oc_tabs"><a class="oc_tabs" href="series_list.html" id="i18n_tab_series">Series</a></li>
-      <li class="oc_tabs"><a class="oc_tabs" href="/admin/agents_status.html">Capture Agents</a></li>
-    </ul>
-    <div class="fl-container-850">
-      <div id="stage" class="fl-tab-content wu-tab-content fl-fix" style="background:white;" ></div>
-    </div>
-    <img id="chart" />
   </body>
 </html>
