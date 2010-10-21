@@ -55,6 +55,21 @@ public class ZipUtil {
   public static final int DEFAULT_COMPRESSION = Deflater.DEFAULT_COMPRESSION;
   public static final int NO_COMPRESSION = Deflater.NO_COMPRESSION;
 
+  
+  /**
+   * Utility class to ease the process of umounting a zip file
+   * @param zipFile The file to umount
+   * @throws IOException If some problem occurs on unmounting
+   */
+  private static void umount(File zipFile) throws IOException {
+    try {
+      File.umount(zipFile);
+    } catch (ArchiveException ae) {
+      logger.error("Unable to umount zip file: {}", zipFile.getCanonicalPath());
+      throw new IOException("Unable to umount zip file: " + zipFile.getCanonicalPath(), ae);
+    }
+  }
+  
   /***********************************************************************************/
   /* SERVICE CLASSES - The two following classes are the ones actually doing the job */
   /***********************************************************************************/
@@ -87,7 +102,7 @@ public class ZipUtil {
     }
 
     if (destination.exists()) {
-      logger.error("The destination file {} already exists", destination.getAbsolutePath());
+      logger.error("The destination file {} already exists", destination.getCanonicalPath());
       throw new IllegalArgumentException("The destination file already exists");
     }
     
@@ -104,10 +119,18 @@ public class ZipUtil {
     // Limits the compression support to ZIP only and sets the compression level
     ZipDriver zd = new ZipDriver(level);
     ArchiveDetector ad = new DefaultArchiveDetector(ArchiveDetector.NULL, "zip", zd);
-    File zipFile = new File (destination, ad);
+    File zipFile;
+    try {
+      zipFile = new File (destination.getCanonicalFile(), ad);
+    } catch (IOException ioe) {
+      logger.error("Unable to create the zip file: {}", destination.getAbsolutePath());
+      throw new IOException("Unable to create the zip file: {}" + destination.getAbsolutePath(), ioe);
+    }
     
     if (!zipFile.isArchive()) {
       logger.error("The destination file does not represent a valid zip archive (.zip extension is required)");
+      zipFile.deleteAll();
+      umount(zipFile);
       throw new IllegalArgumentException("The destination file does not represent a valid zip archive (.zip extension is required)");
     }
     
@@ -115,7 +138,8 @@ public class ZipUtil {
       if (!zipFile.mkdirs())
         throw new IOException();
     } catch (Exception e) {
-      logger.error("Couldn't create the destination file {}", zipFile.getAbsolutePath());
+      logger.error("Couldn't create the destination file {}", zipFile.getCanonicalPath());
+      umount(zipFile);
       throw new IOException("Couldn't create the destination file", e);
     }
 
@@ -124,10 +148,14 @@ public class ZipUtil {
       if (f == null) {
         logger.error ("Null inputfile in array");
         zipFile.deleteAll();
+        umount(zipFile);
         throw new IllegalArgumentException("Null inputfile in array");
       }
       
-      logger.debug("Attempting to zip file {}...", f.getAbsolutePath());
+      // May throw IOException --necessary for windows environments
+      f = f.getCanonicalFile();
+      
+      logger.debug("Attempting to zip file {}...", f.getCanonicalPath());
 
       // TrueZip manual says that (archiveC|copy)All(From|To) methods work with either directories or regular files
       // Therefore, one could do zipFile.archiveCopyAllFrom(f), where f is a regular file, and it would work. Well, it DOESN'T
@@ -138,34 +166,30 @@ public class ZipUtil {
           if (recursive)
             success = new File(zipFile, f.getName()).copyAllFrom(f);
           else {
-            logger.debug("Skipping directory {}", f.getAbsolutePath());
+            logger.debug("Skipping directory {}", f.getCanonicalPath());
             continue;
           }
         } else
           success = new File(zipFile,f.getName()).archiveCopyFrom(f);
           
         if (success) 
-          logger.debug("File {} zipped successfuly", f.getAbsolutePath());
+          logger.debug("File {} zipped successfuly", f.getCanonicalPath());
         else {
-          logger.error("File {} not zipped", f.getAbsolutePath());
+          logger.error("File {} not zipped", f.getCanonicalPath());
           zipFile.deleteAll();
-          throw new IOException("Failed to zip one of the input files: " + f.getAbsolutePath());
+          umount(zipFile);
+          throw new IOException("Failed to zip one of the input files: " + f.getCanonicalPath());
         }
         
       } else {
-        logger.error("Input file {} doesn't exist", f.getAbsolutePath());
+        logger.error("Input file {} doesn't exist", f.getCanonicalPath());
         zipFile.deleteAll();
-        throw new FileNotFoundException("One of the input files does not exist: " + f.getAbsolutePath());
+        umount(zipFile);
+        throw new FileNotFoundException("One of the input files does not exist: " + f.getCanonicalPath());
       }
     }
-    
-    try {
-      File.umount(zipFile);
-    } catch (ArchiveException e) {
-      logger.error("Cannot unmount virtual ZIP file: {}", e.getMessage());
-      zipFile.deleteAll();
-      throw new IOException("Cannot unmount virtual ZIP file", e);
-    }
+   
+    umount(zipFile);
 
     return destination;
   }
@@ -189,8 +213,8 @@ public class ZipUtil {
     }
 
     if (!zipFile.exists()) {
-      logger.error("The zip file does not exist: {}", zipFile.getAbsolutePath());
-      throw new FileNotFoundException("The zip file does not exist: " + zipFile.getAbsolutePath());
+      logger.error("The zip file does not exist: {}", zipFile.getCanonicalPath());
+      throw new FileNotFoundException("The zip file does not exist: " + zipFile.getCanonicalPath());
     }
     
     if (destination == null) {
@@ -199,13 +223,25 @@ public class ZipUtil {
     } 
 
     // FIXME Commented out for 3rd party compatibility. See comment in the zip method above -ruben.perez
-    // File f = new File(zipFile, new DefaultArchiveDetector(ArchiveDetector.NULL, "zip", new ZipDriver("utf-8")));
-    File f = new File(zipFile);
+    // File f = new File(zipFile.getCanonicalFile(), new DefaultArchiveDetector(ArchiveDetector.NULL, "zip", new ZipDriver("utf-8")));
+    File f;
+    try {    
+      f = new File(zipFile.getCanonicalFile());
+    } catch (IOException ioe) {
+      logger.error("Unable to create the zip file: {}", destination.getAbsolutePath());
+      throw new IOException("Unable to create the zip file: {}" + destination.getAbsolutePath(), ioe);
+    }
 
     if (f.isArchive() && f.isDirectory()) {
-      if (destination.exists()) {	
+      if (destination.exists()) {
         if (! destination.isDirectory()) {
           logger.error("Destination file must be a directory");
+          try {
+            File.umount(f);
+          } catch (ArchiveException e) {
+            logger.error("Error umounting the input zip file");
+            throw new IOException("Error mounting the input zip file", e);
+          }
           throw new IllegalArgumentException("Destination file must be a directory");
         }
       }
@@ -216,10 +252,10 @@ public class ZipUtil {
         success = f.archiveCopyAllTo(destination);
 
         if (success)
-          logger.debug("File {} unzipped successfully", zipFile.getAbsolutePath());
+          logger.debug("File {} unzipped successfully", zipFile.getCanonicalPath());
         else {
-          logger.warn("File {} was not correctly unzipped", zipFile.getAbsolutePath());
-          throw new IOException("File " + zipFile.getAbsolutePath() + " was not correctly unzipped");
+          logger.warn("File {} was not correctly unzipped", zipFile.getCanonicalPath());
+          throw new IOException("File " + zipFile.getCanonicalPath() + " was not correctly unzipped");
         }
 
         File.umount(f);
@@ -394,8 +430,8 @@ public class ZipUtil {
 
     return zip(files.toArray(new java.io.File[files.size()]), destination, recursive, level);
 
-  }	
-
+  }
+  
 
 
   /**
@@ -421,8 +457,8 @@ public class ZipUtil {
    */
   public static java.io.File zip(java.io.File[] sourceFiles, String destination, int level) throws IOException {
     return zip(sourceFiles,destination,false, level);
-  }		
-
+  }
+  
   /**
    * Compresses source files into a zip archive (default compression)
    * 

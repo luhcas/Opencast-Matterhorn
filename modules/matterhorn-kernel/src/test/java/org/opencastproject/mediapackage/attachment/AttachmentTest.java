@@ -47,7 +47,7 @@ public class AttachmentTest {
    */
   @Before
   public void setUp() throws Exception {
-    coverFile = new File(MediaPackageBuilderTest.class.getResource("/cover.png").getPath());
+    coverFile = new File(MediaPackageBuilderTest.class.getResource("/cover.png").toURI());
     assertTrue(coverFile.exists() && coverFile.canRead());
   }
   

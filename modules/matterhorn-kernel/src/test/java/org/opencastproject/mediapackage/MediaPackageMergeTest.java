@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,7 +95,7 @@ public class MediaPackageMergeTest {
    * @throws IOException
    * @throws MediaPackageException
    */
-  private void setUpSourceMediaPackage() throws IOException, MediaPackageException {
+  private void setUpSourceMediaPackage() throws Exception {
     // Create the media package directory
     packageDir1 = new File(tmpDir, Long.toString(System.currentTimeMillis()));
 
@@ -107,13 +108,14 @@ public class MediaPackageMergeTest {
     attachmentDir.mkdirs();
 
     // Setup test files
-    File sourceManifestFile = new File(MediaPackageBuilderTest.class.getResource("/source-manifest.xml").getPath());
-    File videoTestFile = new File(MediaPackageBuilderTest.class.getResource("/vonly.mov").getPath());
-    File audioTestFile = new File(MediaPackageBuilderTest.class.getResource("/aonly.mov").getPath());
-    File dcTestFile = new File(MediaPackageBuilderTest.class.getResource("/dublincore.xml").getPath());
-    File dcSeriesTestFile = new File(MediaPackageBuilderTest.class.getResource("/series-dublincore.xml").getPath());
-    File mpeg7TestFile = new File(MediaPackageBuilderTest.class.getResource("/mpeg-7.xml").getPath());
-    File coverTestFile = new File(MediaPackageBuilderTest.class.getResource("/cover.png").getPath());
+    File baseDir = new File(MediaPackageBuilderTest.class.getResource("/").toURI());
+    File sourceManifestFile = new File(baseDir, "source-manifest.xml");
+    File videoTestFile = new File(baseDir, "vonly.mov");
+    File audioTestFile = new File(baseDir, "aonly.mov");
+    File dcTestFile = new File(baseDir, "dublincore.xml");
+    File dcSeriesTestFile = new File(baseDir, "series-dublincore.xml");
+    File mpeg7TestFile = new File(baseDir, "mpeg-7.xml");
+    File coverTestFile = new File(baseDir, "cover.png");
 
     // Copy files into place
     File manifestFile = new File(packageDir1, MediaPackageElements.MANIFEST_FILENAME);
@@ -138,8 +140,9 @@ public class MediaPackageMergeTest {
    * 
    * @throws IOException
    * @throws MediaPackageException
+   * @throws URISyntaxException 
    */
-  private void setUpTargeMediaPackage() throws IOException, MediaPackageException {
+  private void setUpTargeMediaPackage() throws IOException, MediaPackageException, URISyntaxException {
     // Create the media package directory
     packageDir2 = new File(tmpDir, Long.toString(System.currentTimeMillis()));
 
@@ -152,13 +155,14 @@ public class MediaPackageMergeTest {
     attachmentDir.mkdirs();
 
     // Setup test files
-    File sourceManifestFile = new File(MediaPackageBuilderTest.class.getResource("/target-manifest.xml").getPath());
-    File videoTestFile = new File(MediaPackageBuilderTest.class.getResource("/vonly.mov").getPath());
-    File audioTestFile = new File(MediaPackageBuilderTest.class.getResource("/aonly.mov").getPath());
-    File dcTestFile = new File(MediaPackageBuilderTest.class.getResource("/dublincore.xml").getPath());
-    File dcSeriesTestFile = new File(MediaPackageBuilderTest.class.getResource("/series-dublincore.xml").getPath());
-    File mpeg7TestFile = new File(MediaPackageBuilderTest.class.getResource("/mpeg-7.xml").getPath());
-    File coverTestFile = new File(MediaPackageBuilderTest.class.getResource("/cover.png").getPath());
+    File baseDir = new File(MediaPackageBuilderTest.class.getResource("/").toURI());
+    File sourceManifestFile = new File(baseDir, "target-manifest.xml");
+    File videoTestFile = new File(baseDir, "vonly.mov");
+    File audioTestFile = new File(baseDir, "aonly.mov");
+    File dcTestFile = new File(baseDir, "dublincore.xml");
+    File dcSeriesTestFile = new File(baseDir, "series-dublincore.xml");
+    File mpeg7TestFile = new File(baseDir, "mpeg-7.xml");
+    File coverTestFile = new File(baseDir, "cover.png");
 
     // Copy files into place
     File manifestFile = new File(packageDir2, MediaPackageElements.MANIFEST_FILENAME);

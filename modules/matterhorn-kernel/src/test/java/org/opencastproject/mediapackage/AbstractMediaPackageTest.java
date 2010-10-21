@@ -31,6 +31,8 @@ import org.junit.Before;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  * Base class for media package tests.
@@ -97,7 +99,7 @@ public abstract class AbstractMediaPackageTest {
    * @throws java.lang.Exception
    */
   @Before
-  public void setUp() throws Exception {
+  public void setUp() throws IOException, MediaPackageException, URISyntaxException {
 
     // Create a media package builder
     MediaPackageBuilderFactory builderFactory = MediaPackageBuilderFactory.newInstance();
@@ -123,13 +125,14 @@ public abstract class AbstractMediaPackageTest {
     attachmentDir.mkdirs();
 
     // Setup test files
-    File manifestTestFile = new File(MediaPackageBuilderTest.class.getResource("/manifest.xml").getPath());
-    File videoTestFile = new File(MediaPackageBuilderTest.class.getResource("/vonly.mov").getPath());
-    File audioTestFile = new File(MediaPackageBuilderTest.class.getResource("/aonly.mov").getPath());
-    File dcTestFile = new File(MediaPackageBuilderTest.class.getResource("/dublincore.xml").getPath());
-    File dcSeriesTestFile = new File(MediaPackageBuilderTest.class.getResource("/series-dublincore.xml").getPath());
-    File mpeg7TestFile = new File(MediaPackageBuilderTest.class.getResource("/mpeg-7.xml").getPath());
-    File coverTestFile = new File(MediaPackageBuilderTest.class.getResource("/cover.png").getPath());
+    File baseDir = new File(MediaPackageBuilderTest.class.getResource("/").toURI());
+    File manifestTestFile = new File(baseDir, "manifest.xml");
+    File videoTestFile = new File(baseDir, "vonly.mov");
+    File audioTestFile = new File(baseDir, "aonly.mov");
+    File dcTestFile = new File(baseDir, "dublincore.xml");
+    File dcSeriesTestFile = new File(baseDir, "series-dublincore.xml");
+    File mpeg7TestFile = new File(baseDir, "mpeg-7.xml");
+    File coverTestFile = new File(baseDir, "cover.png");
 
     // Copy files into place
     manifestFile = FileSupport.copy(manifestTestFile, new File(packageDir, MediaPackageElements.MANIFEST_FILENAME));
