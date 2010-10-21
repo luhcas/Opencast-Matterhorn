@@ -30,6 +30,8 @@
       $(document).ready(function() {
         var id = postData.id;
 
+        window.parent.$('.paging-nav-container').hide(0);
+
         // Event edit link clicked
         $('#edit-link').click( function () {
           //parent.Recordings.retryRecording(id);
