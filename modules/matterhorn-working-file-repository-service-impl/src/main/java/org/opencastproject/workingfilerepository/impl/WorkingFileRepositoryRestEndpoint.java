@@ -318,6 +318,8 @@ public class WorkingFileRepositoryRestEndpoint extends WorkingFileRepositoryImpl
     } catch (NotFoundException e) {
       IOUtils.closeQuietly(in);
       return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+    } finally {
+      IOUtils.closeQuietly(in);
     }
   }
 

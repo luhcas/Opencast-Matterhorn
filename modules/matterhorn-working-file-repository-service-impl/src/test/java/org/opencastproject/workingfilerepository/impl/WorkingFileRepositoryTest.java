@@ -176,7 +176,8 @@ public class WorkingFileRepositoryTest {
       byte[] bytesFromCollection = IOUtils.toByteArray(in);
       IOUtils.closeQuietly(in);
       repo.moveTo(collectionId, filename, "moved-mediapackage", "moved-element", newFileName);
-      byte[] bytesFromMove = IOUtils.toByteArray(repo.get("moved-mediapackage", "moved-element"));
+      in = repo.get("moved-mediapackage", "moved-element");
+      byte[] bytesFromMove = IOUtils.toByteArray(in);
       Assert.assertTrue(Arrays.equals(bytesFromCollection, bytesFromMove));
     } finally {
       IOUtils.closeQuietly(in);
