@@ -71,7 +71,7 @@ Opencast.Analytics = ( function() {
         });
 
       $(".segments").css('top', '-25px');
-      $.sparkline_display_visible()
+      //$.sparkline_display_visible()
       $("#analytics").show();
   }
 

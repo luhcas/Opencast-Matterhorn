@@ -61,6 +61,12 @@ Opencast.segments = ( function() {
           $container
             .css('width', ($panels[0].offsetWidth * $panels.length))
             .css('left', "0px");
+		// Disable and grey out "Annotation" Tab
+         $("#oc_btn-annotation_chapter").removeClass("oc_btn-tabs");
+         $("#oc_btn-annotation_chapter").removeClass("handcursor");
+         $('#oc_btn-annotation_chapter').attr("disabled", "true");
+         $("#oc_btn-annotation_chapter").css("color", "#dddddd");
+         $("#oc_btn-annotation_chapter").css("background-color", "#aaaaaa");
        } else {
          // Disable and grey out "Slides" Tab
          $("#oc_btn-slides").removeClass("oc_btn-tabs");
