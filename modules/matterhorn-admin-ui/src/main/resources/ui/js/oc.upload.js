@@ -82,8 +82,8 @@ ocUpload.init = function() {
               ocUpload.metadata[$(this).attr('name')].push($(this).val());
             }
           } else {
-            if($(this).attr('id') === 'isPartOf'){
-              if($('#series').val() !== '' && $('#isPartOf').val() === ''){ //have text and no id
+            if($(this).attr('id') === 'ispartof'){
+              if($('#series').val() !== '' && $('#ispartof').val() === ''){ //have text and no id
                 ocUpload.createSeriesFromSearchText();
               }
             }
