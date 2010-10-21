@@ -356,7 +356,7 @@ public class PipelineFactory {
     Element filesink = ElementFactory.make("filesink", null);
     filesink.set("location", captureDevice.getOutputPath());
     Element mpegpsdemux = ElementFactory.make("mpegpsdemux", null);
-    Element muxer = ElementFactory.make("mpegtsmux", null);
+    Element muxer = ElementFactory.make("mpegpsmux", null);
 
     Element queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
     if (bufferCount != null) {
@@ -649,7 +649,7 @@ public class PipelineFactory {
       muxer = ElementFactory.make(container, null);
     }
     else {
-      muxer = ElementFactory.make("mpegtsmux", null);
+      muxer = ElementFactory.make("mpegpsmux", null);
     }
     
     Element filesink = ElementFactory.make("filesink", null);
@@ -915,7 +915,7 @@ public class PipelineFactory {
       muxer = ElementFactory.make(container, null);
     }
     else {
-      muxer = ElementFactory.make("mpegtsmux", null);
+      muxer = ElementFactory.make("mpegpsmux", null);
     }
     
     Element filesink = ElementFactory.make("filesink", null);
@@ -1078,7 +1078,7 @@ public class PipelineFactory {
       logger.debug("{} muxing to: {}", captureDevice.getName(), container);
       muxer = ElementFactory.make(container, null);
     } else {
-      muxer = ElementFactory.make("mpegtsmux", null);
+      muxer = ElementFactory.make("mpegpsmux", null);
     }
     
     Element filesink = ElementFactory.make("filesink", null);
