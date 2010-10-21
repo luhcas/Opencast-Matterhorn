@@ -114,7 +114,7 @@ ocIngest.addCatalog = function(mediaPackage, dcCatalog, flavor) {
     success    : function(data, status) {
       ocUtils.log("DublinCore catalog added");
       ocIngest.mediaPackage = data;
-      var seriesId = $('#isPartOf').val();
+      var seriesId = $('#ispartof').val();
       if (seriesId && ocIngest.seriesDC == null) {
         ocIngest.addSeriesCatalog(seriesId);
       } else {
@@ -128,7 +128,7 @@ ocIngest.addSeriesCatalog = function(seriesId) {
   ocUtils.log("Getting sweries DublinCore");
   ocUpload.setProgress('100%','Getting series Metadata',' ', ' ');
   $.ajax({
-    url        : '../series/rest/'+seriesId+'.xml',
+    url        : '../series/rest/'+seriesId+'/dublincore',
     type       : 'GET',
     error      : function(XHR,status,e){
       showFailedScreen('The metadata for the series you selected could not be retrieved.');

@@ -146,7 +146,7 @@ function handleWorkflow(workflowDoc){
 function handleEvent(doc) {
   var fieldMap = {
     title : 'title',
-    seriesId : 'isPartOf',
+    seriesId : 'ispartof',
     creator : 'creator',
     contributor : 'contributor',
     subject : "subject",
@@ -181,11 +181,11 @@ function handleEvent(doc) {
         eventDoc.documentElement.appendChild(elm);
       }
     });
-    var seriesId = $(eventDoc.documentElement).find("isPartOf").text();
+    var seriesId = $(eventDoc.documentElement).find("ispartof").text();
     if (seriesId) {
       $.get('../series/rest/series/' + seriesId, function(data) {
         var seriesTitle = $(data.documentElement).find("metadata > key:contains('title')").parent().find("value").text();
-        $(eventDoc.documentElement).find("isPartOf").text(seriesTitle + " (" + seriesId + ")");
+        $(eventDoc.documentElement).find("ispartof").text(seriesTitle + " (" + seriesId + ")");
         $('#stage').xslt(serialize(eventDoc), "xsl/viewevent.xsl", callback);
       });
     } else {
@@ -203,7 +203,7 @@ function handleEvent(doc) {
  *  @param {XML Document}
  */
 function handleDCMetadata(metadataDoc){
-  var fields = ['title', 'creator', 'contributor', 'description', 'isPartOf', 'license', 'language', 'subject'];
+  var fields = ['title', 'creator', 'contributor', 'description', 'ispartof', 'license', 'language', 'subject'];
   //TODO: This is a fast to code, but poor method of loading our values. Refactor.
   for( var i in fields ){
     var field = fields[i];
@@ -226,7 +226,7 @@ function handleDCMetadata(metadataDoc){
   }
   
   //Hopefully we've loaded an xml document with the values we want, transform and append this.
-    var seriesId = $(eventDoc.documentElement).find("isPartOf").text();
+    var seriesId = $(eventDoc.documentElement).find("ispartof").text();
     if (seriesId) {
       $.get('../series/rest/series/' + seriesId, function(data) {
         var seriesTitle = $(data.documentElement).find("metadata > key:contains('title')").parent().find("value").text();

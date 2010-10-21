@@ -127,10 +127,10 @@ ocUpload.init = function() {
   $('#series').autocomplete({
     source: '/series/rest/search',
     select: function(event, ui){
-      $('#isPartOf').val(ui.item.id);
+      $('#ispartof').val(ui.item.id);
     },
     search: function(){
-      $('#isPartOf').val('');
+      $('#ispartof').val('');
     }
   });
 
@@ -383,7 +383,7 @@ ocUpload.createSeriesFromSearchText = function(){
     data: { series: seriesXml },
     success: function(data){
       creationSucceeded = true;
-      $('#isPartOf').val(data.id);
+      $('#ispartof').val(data.id);
     }
   });
   return creationSucceeded;
