@@ -174,7 +174,7 @@ public class ServiceRegistryEndpoint {
   public Response getAvailableServicesAsJson(@QueryParam("serviceType") String serviceType) {
     return getAvailableServicesAsXml(serviceType);
   }
-  
+
   @GET
   @Path("/services.xml")
   @Produces(MediaType.TEXT_XML)
@@ -221,9 +221,10 @@ public class ServiceRegistryEndpoint {
   @POST
   @Path("/job")
   @Produces(MediaType.TEXT_XML)
-  public Response createJob(@FormParam("jobType") String jobType, @FormParam("host") String host) {
+  public Response createJob(@FormParam("jobType") String jobType, @FormParam("host") String host,
+          @FormParam("start") boolean start) {
     try {
-      Job job = ((ServiceRegistryJpaImpl) serviceRegistry).createJob(jobType, host);
+      Job job = ((ServiceRegistryJpaImpl) serviceRegistry).createJob(jobType, host, start);
       URI uri = new URI(UrlSupport.concat(new String[] { serverUrl, servicePath, "job", job.getId() + ".xml" }));
       return Response.ok(new JaxbJob(job)).location(uri).build();
     } catch (Exception e) {

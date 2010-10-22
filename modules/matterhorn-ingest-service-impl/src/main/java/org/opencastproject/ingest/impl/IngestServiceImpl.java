@@ -135,9 +135,7 @@ public class IngestServiceImpl implements IngestService {
     String tempPath = PathSupport.concat(tempFolder, UUID.randomUUID().toString());
 
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
-      job.setStatus(Job.Status.RUNNING);
-      serviceRegistry.updateJob(job);
+      job = serviceRegistry.createJob(JOB_TYPE, true);
 
       // locally unpack the mediaPackage
       // save inputStream to file
@@ -232,8 +230,6 @@ public class IngestServiceImpl implements IngestService {
     } catch (MediaPackageException e) {
       job.setStatus(Job.Status.FAILED);
       throw e;
-    } catch (NotFoundException e) {
-      throw new IngestException(e);
     } finally {
       try {
         removeDirectory(tempPath);
@@ -277,9 +273,7 @@ public class IngestServiceImpl implements IngestService {
           throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
-      job.setStatus(Job.Status.RUNNING);
-      serviceRegistry.updateJob(job);
+      job = serviceRegistry.createJob(JOB_TYPE, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track, flavor);
@@ -292,8 +286,6 @@ public class IngestServiceImpl implements IngestService {
     } catch (ServiceUnavailableException e) {
       throw new IngestException(e);
     } catch (ServiceRegistryException e) {
-      throw new IngestException(e);
-    } catch (NotFoundException e) {
       throw new IngestException(e);
     } finally {
       try {
@@ -315,9 +307,7 @@ public class IngestServiceImpl implements IngestService {
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
-      job.setStatus(Job.Status.RUNNING);
-      serviceRegistry.updateJob(job);
+      job = serviceRegistry.createJob(JOB_TYPE, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track, flavor);
@@ -330,8 +320,6 @@ public class IngestServiceImpl implements IngestService {
     } catch (ServiceUnavailableException e) {
       throw new IngestException(e);
     } catch (ServiceRegistryException e) {
-      throw new IngestException(e);
-    } catch (NotFoundException e) {
       throw new IngestException(e);
     } finally {
       try {
@@ -353,9 +341,7 @@ public class IngestServiceImpl implements IngestService {
           throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
-      job.setStatus(Job.Status.RUNNING);
-      serviceRegistry.updateJob(job);
+      job = serviceRegistry.createJob(JOB_TYPE, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       if (MediaPackageElements.SERIES.equals(flavor)) {
@@ -371,8 +357,6 @@ public class IngestServiceImpl implements IngestService {
     } catch (ServiceUnavailableException e) {
       throw new IngestException(e);
     } catch (ServiceRegistryException e) {
-      throw new IngestException(e);
-    } catch (NotFoundException e) {
       throw new IngestException(e);
     } finally {
       try {
@@ -413,9 +397,7 @@ public class IngestServiceImpl implements IngestService {
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
-      job.setStatus(Job.Status.RUNNING);
-      serviceRegistry.updateJob(job);
+      job = serviceRegistry.createJob(JOB_TYPE, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       if (MediaPackageElements.SERIES.equals(flavor)) {
@@ -431,8 +413,6 @@ public class IngestServiceImpl implements IngestService {
     } catch (ServiceUnavailableException e) {
       throw new IngestException(e);
     } catch (ServiceRegistryException e) {
-      throw new IngestException(e);
-    } catch (NotFoundException e) {
       throw new IngestException(e);
     } finally {
       try {
@@ -453,9 +433,7 @@ public class IngestServiceImpl implements IngestService {
           throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
-      job.setStatus(Job.Status.RUNNING);
-      serviceRegistry.updateJob(job);
+      job = serviceRegistry.createJob(JOB_TYPE, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment, flavor);
@@ -468,8 +446,6 @@ public class IngestServiceImpl implements IngestService {
     } catch (ServiceUnavailableException e) {
       throw new IngestException(e);
     } catch (ServiceRegistryException e) {
-      throw new IngestException(e);
-    } catch (NotFoundException e) {
       throw new IngestException(e);
     } finally {
       try {
@@ -490,9 +466,7 @@ public class IngestServiceImpl implements IngestService {
           MediaPackage mediaPackage) throws IOException, IngestException {
     Job job = null;
     try {
-      job = serviceRegistry.createJob(JOB_TYPE);
-      job.setStatus(Job.Status.RUNNING);
-      serviceRegistry.updateJob(job);
+      job = serviceRegistry.createJob(JOB_TYPE, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
       MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment, flavor);
@@ -505,8 +479,6 @@ public class IngestServiceImpl implements IngestService {
     } catch (ServiceUnavailableException e) {
       throw new IngestException(e);
     } catch (ServiceRegistryException e) {
-      throw new IngestException(e);
-    } catch (NotFoundException e) {
       throw new IngestException(e);
     } finally {
       try {

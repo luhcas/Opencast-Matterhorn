@@ -89,8 +89,11 @@ public interface ServiceRegistry {
           ServiceRegistryException;
 
   /**
-   * Create and store a new job in {@link Status#QUEUED} state on this host.
+   * Create and store a new job in {@link Status#QUEUED} state on this host. This is equivalent to calling
+   * createJob(type, false).
    * 
+   * @param type
+   *          the type of service responsible for this job
    * @return the job
    * @throws ServiceRegistryException
    *           if there is a problem creating the job
@@ -98,6 +101,22 @@ public interface ServiceRegistry {
    *           if no service registration exists for this job type on this host
    */
   Job createJob(String type) throws ServiceUnavailableException, ServiceRegistryException;
+
+  /**
+   * Create and store a new job on this host. If start is true, the job will be in the {@link Status#RUNNING} state.
+   * Otherwise, it will be {@link Status#QUEUED}.
+   * 
+   * @param type
+   *          the type of service responsible for this job
+   * @param start
+   *          whether the job should be created in the running state (true) or the queued state (false)
+   * @return the job
+   * @throws ServiceRegistryException
+   *           if there is a problem creating the job
+   * @throws ServiceUnavailableException
+   *           if no service registration exists for this job type on this host
+   */
+  Job createJob(String type, boolean start) throws ServiceUnavailableException, ServiceRegistryException;
 
   /**
    * Update the job in the database

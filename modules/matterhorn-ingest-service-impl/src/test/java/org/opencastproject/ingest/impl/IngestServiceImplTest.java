@@ -152,7 +152,7 @@ public class IngestServiceImplTest {
     
     Job job = new JaxbJob();
     ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
-    EasyMock.expect(serviceRegistry.createJob((String)EasyMock.anyObject())).andReturn(job).anyTimes();
+    EasyMock.expect(serviceRegistry.createJob((String)EasyMock.anyObject(), EasyMock.anyBoolean())).andReturn(job).anyTimes();
     EasyMock.replay(serviceRegistry);
     
     service = new IngestServiceImpl();

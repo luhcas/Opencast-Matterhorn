@@ -137,13 +137,13 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    */
   @Override
   public Job createJob(String type) throws ServiceUnavailableException, ServiceRegistryException {
-    return createJob(type, this.hostName);
+    return createJob(type, this.hostName, false);
   }
 
   /**
    * Creates a job on a remote host.
    */
-  public Job createJob(String type, String host) throws ServiceUnavailableException, ServiceRegistryException {
+  public Job createJob(String type, String host, boolean start) throws ServiceUnavailableException, ServiceRegistryException {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
@@ -153,7 +153,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         throw new ServiceUnavailableException("No service registration exists for type '" + type + "' on host '" + host
                 + "'");
       }
-      JobJpaImpl job = new JobJpaImpl(Status.QUEUED, serviceRegistration);
+      Status status = start ? Status.RUNNING : Status.QUEUED;
+      JobJpaImpl job = new JobJpaImpl(status, serviceRegistration);;
       serviceRegistration.jobs.add(job);
       em.persist(job);
       tx.commit();
@@ -166,6 +167,16 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     }
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, boolean)
+   */
+  @Override
+  public Job createJob(String type, boolean start) throws ServiceUnavailableException, ServiceRegistryException {
+    return createJob(type, this.hostName, start);
+  }
+  
   /**
    * Creates a job for a specific service registration.
    * 

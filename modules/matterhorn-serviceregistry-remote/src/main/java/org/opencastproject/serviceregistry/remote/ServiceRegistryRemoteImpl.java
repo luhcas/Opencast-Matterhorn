@@ -44,6 +44,7 @@ import org.opencastproject.serviceregistry.api.ServiceRegistrationParser;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceStatistics;
+import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.QueryStringBuilder;
 import org.opencastproject.util.UrlSupport;
@@ -234,13 +235,24 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String)
    */
   @Override
-  public Job createJob(String type) throws ServiceRegistryException {
+  public Job createJob(String type) throws ServiceUnavailableException, ServiceRegistryException {
+    return createJob(type, false);
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, boolean)
+   */
+  @Override
+  public Job createJob(String type, boolean start) throws ServiceUnavailableException, ServiceRegistryException {
     String servicePath = "job";
     HttpPost post = new HttpPost(UrlSupport.concat(serviceURL, servicePath));
     try {
       List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
       params.add(new BasicNameValuePair("jobType", type));
       params.add(new BasicNameValuePair("host", this.serverUrl));
+      params.add(new BasicNameValuePair("start", Boolean.toString(start)));
       UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
       post.setEntity(entity);
     } catch (UnsupportedEncodingException e) {
@@ -263,7 +275,6 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     }
     throw new ServiceRegistryException("Unable to create a job of type '" + type);
   }
-
   /**
    * {@inheritDoc}
    * 
