@@ -15,20 +15,8 @@
  */
 package org.opencastproject.serviceregistry.impl;
 
-import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.eclipse.persistence.jpa.PersistenceProvider;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
-import org.opencastproject.job.api.JobParser;
-import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
@@ -36,6 +24,17 @@ import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.util.UrlSupport;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+
+import org.eclipse.persistence.jpa.PersistenceProvider;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class JobTest {
   private static final String JOB_TYPE_1 = "testing1";
@@ -49,8 +48,6 @@ public class JobTest {
 
   private ServiceRegistrationJpaImpl regType1Host1 = null;
   private ServiceRegistrationJpaImpl regType1Host2 = null;
-  private ServiceRegistrationJpaImpl regType2Host1 = null;
-  private ServiceRegistrationJpaImpl regType2Host2 = null;
 
   @Before
   public void setUp() throws Exception {
@@ -74,8 +71,8 @@ public class JobTest {
     // register some service instances
     regType1Host1 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_1, LOCALHOST, PATH);
     regType1Host2 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_1, HOST_2, PATH);
-    regType2Host1 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_2, LOCALHOST, PATH);
-    regType2Host2 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_2, HOST_2, PATH);
+    serviceRegistry.registerService(JOB_TYPE_2, LOCALHOST, PATH);
+    serviceRegistry.registerService(JOB_TYPE_2, HOST_2, PATH);
   }
 
   @After
@@ -86,32 +83,6 @@ public class JobTest {
     serviceRegistry.unRegisterService(JOB_TYPE_2, HOST_2);
     serviceRegistry.deactivate();
     pooledDataSource.close();
-  }
-
-  @Test
-  public void testMarshalling() throws Exception {
-    JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1);
-    Track t = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
-            new URI("file://test.mov"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
-    t.setIdentifier("track-1");
-
-    // Simulate starting the job
-    job.setStatus(Status.RUNNING);
-    serviceRegistry.updateJob(job);
-
-    // Finish the job
-    job.setElement(t);
-    job.setStatus(Status.FINISHED);
-    serviceRegistry.updateJob(job);
-    String xml = JobParser.serializeToString(job);
-    Job parsed = JobParser.parseJob(xml);
-    Assert.assertEquals(job.getId(), parsed.getId());
-
-    // Unmarshall an attachment
-    String attachmentXml = "<ns2:attachment xmlns:ns2=\"http://mediapackage.opencastproject.org\"><tags/><url>http://localhost:8080/camera25fpslowdl.jpg</url></ns2:attachment>";
-    JobJpaImpl attachmentReceipt = new JobJpaImpl();
-    attachmentReceipt.setElementAsXml(attachmentXml);
-    Assert.assertTrue(attachmentReceipt.getElement() instanceof Attachment);
   }
 
   @Test

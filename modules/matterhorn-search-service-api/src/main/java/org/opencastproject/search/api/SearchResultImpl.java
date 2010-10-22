@@ -16,6 +16,7 @@
 
 package org.opencastproject.search.api;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +72,8 @@ public class SearchResultImpl implements SearchResult {
       return unmarshaller.unmarshal(source, SearchResultImpl.class).getValue();
     } catch (JAXBException e) {
       throw new RuntimeException(e.getLinkedException() != null ? e.getLinkedException() : e);
+    } finally {
+      IOUtils.closeQuietly(xml);
     }
   }
   

@@ -15,18 +15,15 @@
  */
 package org.opencastproject.job.api;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
-import java.io.Writer;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.apache.commons.io.IOUtils;
 
 /**
  * Marshals and unmarshals {@link Job}s.
@@ -75,36 +72,9 @@ public class JobParser {
       .getValue();
     } catch (Exception e) {
       throw new IOException(e);
+    } finally {
+      IOUtils.closeQuietly(in);
     }
   }
 
-  /**
-   * Gets a serialized representation of a {@link Job}
-   * 
-   * @param job
-   *          The job to marshall
-   * @return the serialized job
-   */
-  public static InputStream serialize(Job job) throws IOException {
-    return IOUtils.toInputStream(serializeToString(job), "UTF-8");
-  }
-
-  /**
-   * Gets an xml representation of a {@link Job}
-   * 
-   * @param job
-   *          The job to marshall
-   * @return the serialized job
-   */
-  public static String serializeToString(Job job) throws IOException {
-    Marshaller marshaller;
-    try {
-      marshaller = jaxbContext.createMarshaller();
-      Writer writer = new StringWriter();
-      marshaller.marshal(job, writer);
-      return writer.toString();
-    } catch (JAXBException e) {
-      throw new IOException(e);
-    }
-  }
 }

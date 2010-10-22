@@ -16,8 +16,8 @@
 package org.opencastproject.distribution.streaming.endpoint;
 
 import org.opencastproject.distribution.api.DistributionService;
+import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.rest.RestPublisher;
@@ -79,7 +79,7 @@ public class StreamingDistributionRestService {
       logger.warn("Error distributing element", e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
-    return Response.ok(JobParser.serializeToString(job)).build();
+    return Response.ok(new JaxbJob(job)).build();
   }
 
   @POST
@@ -93,7 +93,7 @@ public class StreamingDistributionRestService {
       logger.warn("Unable to retract mediapackage '{}' from streaming channel: {}", new Object[] { mediaPackageId, e });
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
-    return Response.ok(JobParser.serializeToString(job)).build();
+    return Response.ok(new JaxbJob(job)).build();
   }
 
   @GET

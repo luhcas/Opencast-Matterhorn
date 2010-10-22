@@ -15,18 +15,9 @@
  */
 package org.opencastproject.distribution.download.endpoint;
 
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import org.opencastproject.distribution.api.DistributionService;
+import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.rest.RestPublisher;
@@ -36,9 +27,19 @@ import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
+
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 /**
  * Rest endpoint for distributing media to the local distribution channel.
@@ -84,7 +85,7 @@ public class DownloadDistributionRestService {
       logger.warn("Error distributing element", e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
-    return Response.ok(JobParser.serializeToString(job)).build();
+    return Response.ok(new JaxbJob(job)).build();
   }
 
   @POST
@@ -98,7 +99,7 @@ public class DownloadDistributionRestService {
       logger.warn("Unable to retract mediapackage '{}' from download channel: {}", new Object[] { mediaPackageId, e });
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
     }
-    return Response.ok(JobParser.serializeToString(job)).build();
+    return Response.ok(new JaxbJob(job)).build();
   }
 
   @GET

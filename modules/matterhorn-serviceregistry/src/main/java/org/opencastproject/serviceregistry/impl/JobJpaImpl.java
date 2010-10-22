@@ -92,7 +92,9 @@ public class JobJpaImpl extends JaxbJob {
   public JobJpaImpl(Status status, ServiceRegistrationJpaImpl serviceRegistration) {
     this(serviceRegistration);
     setStatus(status);
-    setDateStarted(getDateCreated());
+    if(Status.RUNNING.equals(status)) {
+      setDateStarted(getDateCreated());
+    }
   }
 
   /** The service that produced this job */

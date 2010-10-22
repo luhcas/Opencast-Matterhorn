@@ -16,7 +16,6 @@
 package org.opencastproject.remotetest;
 
 import org.opencastproject.remotetest.security.TrustedHttpClient;
-import org.opencastproject.remotetest.security.TrustedHttpClientImpl;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -36,19 +35,21 @@ import java.util.List;
  * Runs all of the remote tests
  */
 public class Main {
+
   public static String BASE_URL = "http://localhost:8080";
   public static String USERNAME = "matterhorn_system_account";
   public static String PASSWORD = "CHANGE_ME";
 
-  protected static TrustedHttpClient client;
-  
   public static final TrustedHttpClient getClient() {
-    if(client == null) {
-      client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
-    }
-    return client;
+    return new TrustedHttpClient(USERNAME, PASSWORD);
   }
-  
+
+  public static final void returnClient(TrustedHttpClient client) {
+    if (client != null) {
+      client.shutdown();
+    }
+  }
+
   public static final String getBaseUrl() {
     return BASE_URL;
   }
@@ -74,47 +75,44 @@ public class Main {
       System.exit(1);
     }
 
-    if(line.hasOption("help")) {
+    if (line.hasOption("help")) {
       HelpFormatter formatter = new HelpFormatter();
-      formatter.printHelp( "java -jar matterhorn-test-harness-<version>-jar-with-dependencies.jar>", options );
+      formatter.printHelp("java -jar matterhorn-test-harness-<version>-jar-with-dependencies.jar>", options);
       System.exit(0);
     }
     // should we run the server-side tests
-    if(line.hasOption("withserver")) {
+    if (line.hasOption("withserver")) {
       System.out.println("Running with the 'server' test suite enabled");
       testClasses.add(ServerTests.class);
-      if(line.hasOption("withperf")) {
+      if (line.hasOption("withperf")) {
         System.out.println("Running with the server performance test suite enabled");
         testClasses.add(ServerPerformanceTests.class);
       }
     }
-    if(line.hasOption("withcapture")) {
+    if (line.hasOption("withcapture")) {
       System.out.println("Running 'capture' test suite");
       testClasses.add(CaptureAgentTests.class);
-      if(line.hasOption("withperf")) {
+      if (line.hasOption("withperf")) {
         // TODO: Add capture agent performance tests
-        //System.out.println("Running with the 'capture' performance test suite enabled");
+        // System.out.println("Running with the 'capture' performance test suite enabled");
       }
     }
     // if we don't have any test classes, add the server (not performance) tests... just so we have *something* to do
-    if(testClasses.size() ==0) {
+    if (testClasses.size() == 0) {
       System.out.println("No test suites specified... running server (not including performance) tests");
       testClasses.add(ServerTests.class);
     }
-    
-    if(line.hasOption("url")) {
+
+    if (line.hasOption("url")) {
       BASE_URL = line.getOptionValue("url");
     }
-    if(line.hasOption("username")) {
+    if (line.hasOption("username")) {
       USERNAME = line.getOptionValue("username");
     }
-    if(line.hasOption("password")) {
+    if (line.hasOption("password")) {
       PASSWORD = line.getOptionValue("password");
     }
 
-    // set up the shared http client
-    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
-    
     // run the tests
     System.out.println("Beginning matterhorn test suite on " + BASE_URL);
     Result result = JUnitCore.runClasses(testClasses.toArray(new Class<?>[testClasses.size()]));

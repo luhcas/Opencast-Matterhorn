@@ -15,34 +15,13 @@
  */
 package org.opencastproject.composer.impl.endpoint;
 
-import static org.opencastproject.job.api.JobParser.serializeToString;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.apache.commons.io.IOUtils;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EmbedderException;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
+import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.Catalog;
@@ -63,6 +42,8 @@ import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
+
+import org.apache.commons.io.IOUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +51,25 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * A REST endpoint delegating functionality to the {@link ComposerService}
@@ -109,7 +109,7 @@ public class ComposerRestService {
    *          The source track
    * @param profileId
    *          The profile to use in encoding this track
-   * @return A response containing the receipt for this encoding job in the response body.
+   * @return A response containing the job for this encoding job in the response body.
    * @throws Exception
    */
   @POST
@@ -132,7 +132,7 @@ public class ComposerRestService {
     Job job = composerService.encode((Track) sourceTrack, profileId);
     if (job == null)
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Encoding failed").build();
-    return Response.ok().entity(serializeToString(job)).build();
+    return Response.ok().entity(new JaxbJob(job)).build();
   }
 
   /**
@@ -146,7 +146,7 @@ public class ComposerRestService {
    *          the new trimming start time
    * @param duration
    *          the new video duration
-   * @return A response containing the receipt for this encoding job in the response body.
+   * @return A response containing the job for this encoding job in the response body.
    * @throws Exception
    */
   @POST
@@ -179,7 +179,7 @@ public class ComposerRestService {
     Job job = composerService.trim(sourceTrack, profileId, start, duration);
     if (job == null)
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Trimming failed").build();
-    return Response.ok().entity(serializeToString(job)).build();
+    return Response.ok().entity(new JaxbJob(job)).build();
   }
 
   /**
@@ -191,7 +191,7 @@ public class ComposerRestService {
    *          The video source track
    * @param profileId
    *          The profile to use in encoding this track
-   * @return A response containing the receipt for this encoding job in the response body.
+   * @return A response containing the job for this encoding job in the response body.
    * @throws Exception
    */
   @POST
@@ -222,7 +222,7 @@ public class ComposerRestService {
 
     // Asynchronously encode the specified tracks
     Job job = composerService.mux((Track) videoSourceTrack, (Track) audioSourceTrack, profileId);
-    return Response.ok().entity(serializeToString(job)).build();
+    return Response.ok().entity(new JaxbJob(job)).build();
   }
 
   /**
@@ -253,7 +253,7 @@ public class ComposerRestService {
 
     try {
       Job job = composerService.image((Track) sourceTrack, profileId, time);
-      return Response.ok().entity(serializeToString(job)).build();
+      return Response.ok().entity(new JaxbJob(job)).build();
     } catch (EncoderException e) {
       logger.warn("Unable to extract image: " + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -269,7 +269,7 @@ public class ComposerRestService {
    *          captions that will be embedded
    * @param language
    *          language of captions
-   * @return A response containing the receipt for this encoding job in the response body.
+   * @return A response containing the job for this encoding job in the response body.
    * @throws Exception
    */
   @POST
@@ -301,7 +301,7 @@ public class ComposerRestService {
 
     try {
       Job job = composerService.captions((Track) mediaTrack, captions);
-      return Response.ok().entity(serializeToString(job)).build();
+      return Response.ok().entity(new JaxbJob(job)).build();
     } catch (EmbedderException e) {
       logger.warn("Unable to embed captions: " + e.getMessage());
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -309,13 +309,13 @@ public class ComposerRestService {
   }
 
   @GET
-  @Path("receipt/{id}.xml")
+  @Path("job/{id}.xml")
   @Produces(MediaType.TEXT_XML)
   public Response getJob(@PathParam("id") String id) {
     Job job = null;
     try {
       job = composerService.getJob(id);
-      return Response.ok().entity(serializeToString(job)).build();
+      return Response.ok().entity(new JaxbJob(job)).build();
     } catch (NotFoundException e) {
       return Response.status(Response.Status.NOT_FOUND).build();
     } catch (Exception e) {
@@ -389,25 +389,25 @@ public class ComposerRestService {
     profileEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, profileEndpoint);
 
-    // receipt
-    RestEndpoint receiptEndpoint = new RestEndpoint("receipt", RestEndpoint.Method.GET, "/receipt/{id}.xml",
-            "Retrieve a receipt for an encoding task");
-    receiptEndpoint.addStatus(org.opencastproject.util.doc.Status
+    // job
+    RestEndpoint jobEndpoint = new RestEndpoint("job", RestEndpoint.Method.GET, "/job/{id}.xml",
+            "Retrieve a job for an encoding task");
+    jobEndpoint.addStatus(org.opencastproject.util.doc.Status
             .OK("Results in an xml document containing the status of the encoding job, and the track produced by this "
                     + "encoding job if it the task is finished"));
-    receiptEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "the receipt id"));
-    receiptEndpoint.addFormat(new Format("xml", null, null));
-    receiptEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, receiptEndpoint);
+    jobEndpoint.addPathParam(new Param("id", Param.Type.STRING, null, "the job id"));
+    jobEndpoint.addFormat(new Format("xml", null, null));
+    jobEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, jobEndpoint);
 
     // count
     RestEndpoint countEndpoint = new RestEndpoint("count", RestEndpoint.Method.GET, "/count",
-            "Count the number of receipts");
+            "Count the number of jobs");
     countEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Result body contains the number of receipts matching the query parameters"));
+            .OK("Result body contains the number of jobs matching the query parameters"));
     countEndpoint.addOptionalParam(new Param("status", Param.Type.STRING, "FINISHED",
-            "the receipt status (QUEUED, RUNNING, FINISHED, FAILED)"));
-    countEndpoint.addOptionalParam(new Param("host", Param.Type.STRING, "localhost",
+            "the job status (QUEUED, RUNNING, FINISHED, FAILED)"));
+    countEndpoint.addOptionalParam(new Param("host", Param.Type.STRING, serverUrl,
             "the host responsible for this encoding job"));
     countEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, countEndpoint);
@@ -416,7 +416,7 @@ public class ComposerRestService {
     RestEndpoint encodeEndpoint = new RestEndpoint("encode", RestEndpoint.Method.POST, "/encode",
             "Starts an encoding process, based on the specified encoding profile ID and the track");
     encodeEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Results in an xml document containing the receipt for the encoding task"));
+            .OK("Results in an xml document containing the job for the encoding task"));
     encodeEndpoint.addRequiredParam(new Param("sourceTrack", Type.STRING, generateVideoTrack(),
             "The track containing the stream"));
     encodeEndpoint.addRequiredParam(new Param("profileId", Type.STRING, "flash.http", "The encoding profile to use"));
@@ -427,7 +427,7 @@ public class ComposerRestService {
     RestEndpoint trimEndpoint = new RestEndpoint("trim", RestEndpoint.Method.POST, "/trim",
             "Starts a trimming process, based on the specified track, start time and duration in ms");
     trimEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Results in an xml document containing the receipt for the trimming task"));
+            .OK("Results in an xml document containing the job for the trimming task"));
     trimEndpoint.addStatus(org.opencastproject.util.doc.Status
             .BAD_REQUEST("if the start time is negative or exceeds the track duration"));
     trimEndpoint.addStatus(org.opencastproject.util.doc.Status
@@ -443,7 +443,7 @@ public class ComposerRestService {
     RestEndpoint muxEndpoint = new RestEndpoint("mux", RestEndpoint.Method.POST, "/mux",
             "Starts an encoding process, which will mux the two tracks using the given encoding profile");
     muxEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("Results in an xml document containing the receipt for the encoding task"));
+            .OK("Results in an xml document containing the job for the encoding task"));
     muxEndpoint.addRequiredParam(new Param("sourceAudioTrack", Type.STRING, generateAudioTrack(),
             "The track containing the audio stream"));
     muxEndpoint.addRequiredParam(new Param("sourceVideoTrack", Type.STRING, generateVideoTrack(),

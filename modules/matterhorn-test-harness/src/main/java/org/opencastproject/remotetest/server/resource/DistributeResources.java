@@ -16,6 +16,7 @@
 package org.opencastproject.remotetest.server.resource;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -43,7 +44,7 @@ public class DistributeResources {
    *          Distribution channel: local, youtube, itunesu
    * 
    */
-  public static HttpResponse distribute(String channel, String mediapackage, String... elementId) throws Exception {
+  public static HttpResponse distribute(TrustedHttpClient client, String channel, String mediapackage, String... elementId) throws Exception {
     HttpPost post = new HttpPost(getServiceUrl() + channel.toLowerCase() + "/rest/");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("mediapackage", mediapackage));
@@ -52,6 +53,6 @@ public class DistributeResources {
     }
     post.setEntity(new UrlEncodedFormEntity(params));
 
-    return Main.getClient().execute(post);
+    return client.execute(post);
   }
 }

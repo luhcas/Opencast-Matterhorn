@@ -108,7 +108,8 @@ public class IngestServiceImpl implements IngestService {
    * 
    * @see org.opencastproject.ingest.api.IngestService#addZippedMediaPackage(java.io.InputStream)
    */
-  public WorkflowInstance addZippedMediaPackage(InputStream zipStream) throws IngestException, IOException, MediaPackageException {
+  public WorkflowInstance addZippedMediaPackage(InputStream zipStream) throws IngestException, IOException,
+          MediaPackageException {
     return addZippedMediaPackage(zipStream, null, null);
   }
 
@@ -276,7 +277,8 @@ public class IngestServiceImpl implements IngestService {
       job = serviceRegistry.createJob(JOB_TYPE, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
-      MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track, flavor);
+      MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track,
+              flavor);
       job.setStatus(Job.Status.FINISHED);
       return mp;
     } catch (IOException e) {
@@ -310,7 +312,8 @@ public class IngestServiceImpl implements IngestService {
       job = serviceRegistry.createJob(JOB_TYPE, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
-      MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track, flavor);
+      MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Track,
+              flavor);
       job.setStatus(Job.Status.FINISHED);
       return mp;
     } catch (IOException e) {
@@ -347,7 +350,8 @@ public class IngestServiceImpl implements IngestService {
       if (MediaPackageElements.SERIES.equals(flavor)) {
         updateSeries(uri);
       }
-      MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Catalog, flavor);
+      MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Catalog,
+              flavor);
       job.setStatus(Job.Status.FINISHED);
       return mp;
     } catch (IOException e) {
@@ -375,13 +379,15 @@ public class IngestServiceImpl implements IngestService {
    */
   protected void updateSeries(URI uri) throws IOException {
     HttpResponse response = null;
+    InputStream in = null;
     try {
       HttpGet getDc = new HttpGet(uri);
       response = httpClient.execute(getDc);
-      InputStream in = response.getEntity().getContent();
+      in = response.getEntity().getContent();
       DublinCoreCatalog dc = dublinCoreService.load(in);
       seriesService.addOrUpdate(dc);
     } finally {
+      IOUtils.closeQuietly(in);
       httpClient.close(response);
     }
   }
@@ -403,7 +409,8 @@ public class IngestServiceImpl implements IngestService {
       if (MediaPackageElements.SERIES.equals(flavor)) {
         updateSeries(newUrl);
       }
-      MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Catalog, flavor);
+      MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Catalog,
+              flavor);
       job.setStatus(Job.Status.FINISHED);
       return mp;
     } catch (IOException e) {
@@ -436,7 +443,8 @@ public class IngestServiceImpl implements IngestService {
       job = serviceRegistry.createJob(JOB_TYPE, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, uri);
-      MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment, flavor);
+      MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment,
+              flavor);
       job.setStatus(Job.Status.FINISHED);
       return mp;
     } catch (IOException e) {
@@ -469,7 +477,8 @@ public class IngestServiceImpl implements IngestService {
       job = serviceRegistry.createJob(JOB_TYPE, true);
       String elementId = UUID.randomUUID().toString();
       URI newUrl = addContentToRepo(mediaPackage, elementId, fileName, in);
-      MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment, flavor);
+      MediaPackage mp = addContentToMediaPackage(mediaPackage, elementId, newUrl, MediaPackageElement.Type.Attachment,
+              flavor);
       job.setStatus(Job.Status.FINISHED);
       return mp;
     } catch (IOException e) {
@@ -552,21 +561,24 @@ public class IngestServiceImpl implements IngestService {
 
   protected URI addContentToRepo(MediaPackage mp, String elementId, URI uri) throws IOException {
     InputStream in = null;
-    if (uri.toString().startsWith("http")) {
-      HttpGet get = new HttpGet(uri);
-      HttpResponse response = httpClient.execute(get);
-      int httpStatusCode = response.getStatusLine().getStatusCode();
-      if (httpStatusCode != 200) {
-        throw new IOException(uri + " returns http " + httpStatusCode);
+    try {
+      if (uri.toString().startsWith("http")) {
+        HttpGet get = new HttpGet(uri);
+        HttpResponse response = httpClient.execute(get);
+        int httpStatusCode = response.getStatusLine().getStatusCode();
+        if (httpStatusCode != 200) {
+          throw new IOException(uri + " returns http " + httpStatusCode);
+        }
+        in = response.getEntity().getContent();
+      } else {
+        in = uri.toURL().openStream();
       }
-      in = response.getEntity().getContent();
-    } else {
-      in = uri.toURL().openStream();
+      URI returnedUri = workspace.put(mp.getIdentifier().compact(), elementId,
+              FilenameUtils.getName(uri.toURL().toString()), in);
+      return returnedUri;
+    } finally {
+      IOUtils.closeQuietly(in);
     }
-    URI returnedUri = workspace.put(mp.getIdentifier().compact(), elementId,
-            FilenameUtils.getName(uri.toURL().toString()), in);
-    IOUtils.closeQuietly(in);
-    return returnedUri;
   }
 
   private URI addContentToRepo(MediaPackage mp, String elementId, String filename, InputStream file) throws IOException {

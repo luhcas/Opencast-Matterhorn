@@ -72,8 +72,12 @@ public class EncodingProfileBuilder {
    */
   public EncodingProfile parseProfile(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-    return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-            EncodingProfileImpl.class).getValue();
+    try {
+      return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
+              EncodingProfileImpl.class).getValue();
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
   }
   
   /**
@@ -108,8 +112,12 @@ public class EncodingProfileBuilder {
    */
   public EncodingProfileList parseProfileList(InputStream in) throws Exception {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-    return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-            EncodingProfileList.class).getValue();
+    try {
+      return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
+              EncodingProfileList.class).getValue();
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
   }
   
   /**

@@ -16,10 +16,9 @@
 package org.opencastproject.remotetest.server.perf;
 
 import static org.opencastproject.remotetest.Main.BASE_URL;
-import static org.opencastproject.remotetest.Main.PASSWORD;
-import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.remotetest.security.TrustedHttpClientImpl;
+import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import junit.framework.Assert;
 
@@ -46,12 +45,12 @@ public class ConcurrentVideosegmenterTest {
   @Rule
   public ContiPerfRule i = new ContiPerfRule();
   
-  TrustedHttpClientImpl httpClient;
+  TrustedHttpClient httpClient;
   String trackXml = "<track id=\"track-1\"><mimetype>video/quicktime</mimetype><tags/><url>https://opencast.jira.com/svn/MH/trunk/modules/matterhorn-analysis-videosegmenter/src/test/resources/scene-change.mov</url><checksum type=\"md5\">89b99cf1efe6614e35b1a765b519f56d</checksum><duration>20000</duration><video id=\"video-1\"><device/><encoder type=\"M-JPEG\"/><bitrate>187396.0</bitrate><framerate>0.95</framerate><resolution>320x240</resolution></video></track>";
 
   @Before
   public void setup() throws Exception {
-    httpClient = new TrustedHttpClientImpl(USERNAME, PASSWORD);
+    httpClient = Main.getClient();
     
     // We run this once in the startup so we don't try to download the same file 10 times at once 
     httpClient.execute(getPost());
@@ -69,6 +68,7 @@ public class ConcurrentVideosegmenterTest {
   
   @After
   public void teardown() throws Exception {
+    Main.returnClient(httpClient);
   }
 
   @Test

@@ -16,10 +16,9 @@
 package org.opencastproject.remotetest.server.perf;
 
 import static org.opencastproject.remotetest.Main.BASE_URL;
-import static org.opencastproject.remotetest.Main.PASSWORD;
-import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.remotetest.security.TrustedHttpClientImpl;
+import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import junit.framework.Assert;
 
@@ -34,6 +33,7 @@ import org.databene.contiperf.PerfTest;
 import org.databene.contiperf.junit.ContiPerfRule;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -60,17 +60,22 @@ public class ConcurrentWorkflowTest {
   @Rule
   public ContiPerfRule i = new ContiPerfRule();
 
-  TrustedHttpClientImpl client;
+  TrustedHttpClient client;
 
   protected static Set<File> tempFiles = new HashSet<File>();
 
   @Before
   public void setup() throws Exception {
-    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
+    client = Main.getClient();
   }
-    
+
+  @After
+  public void tearDown() throws Exception {
+    Main.returnClient(client);
+  }
+
   @Test
-  @PerfTest(invocations=100, threads=100)
+  @PerfTest(invocations = 100, threads = 100)
   public void testStartAndRetrieveWorkflowInstance() throws Exception {
     // Start a workflow instance via the rest endpoint
     HttpPost postStart = new HttpPost(BASE_URL + "/workflow/rest/start");
@@ -94,18 +99,22 @@ public class ConcurrentWorkflowTest {
     HttpGet getWorkflowJson = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".json");
     String jsonResponse = EntityUtils.toString(client.execute(getWorkflowJson).getEntity());
     JSONObject json = (JSONObject) JSONValue.parse(jsonResponse);
-    if(json == null) Assert.fail("JSON response should not be null, but is " + jsonResponse);
+    if (json == null)
+      Assert.fail("JSON response should not be null, but is " + jsonResponse);
     Assert.assertEquals(id, json.get("workflow_id"));
-    
+
     // Ensure that the workflow finishes successfully
     int attempts = 0;
-    while(true) {
-      if(++attempts == 1000) Assert.fail("workflow rest endpoint test has hung");
+    while (true) {
+      if (++attempts == 1000)
+        Assert.fail("workflow rest endpoint test has hung");
       getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + id + ".xml");
       getResponse = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
       String state = getWorkflowInstanceStatus(getResponse);
-      if("FAILED".equals(state)) Assert.fail("workflow instance " + id + " failed");
-      if("SUCCEEDED".equals(state)) break;
+      if ("FAILED".equals(state))
+        Assert.fail("workflow instance " + id + " failed");
+      if ("SUCCEEDED".equals(state))
+        break;
       System.out.println("workflow " + id + " is " + state);
       Thread.sleep(5000);
     }
@@ -116,7 +125,8 @@ public class ConcurrentWorkflowTest {
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
     Document doc = builder.parse(IOUtils.toInputStream(xml, "UTF-8"));
-    return ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("id");
+    return ((Element) XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE))
+            .getAttribute("id");
   }
 
   protected String getWorkflowInstanceStatus(String xml) throws Exception {
@@ -124,7 +134,8 @@ public class ConcurrentWorkflowTest {
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
     Document doc = builder.parse(IOUtils.toInputStream(xml, "UTF-8"));
-    return ((Element)XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE)).getAttribute("state");
+    return ((Element) XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE))
+            .getAttribute("state");
   }
 
   protected String getSampleMediaPackage() throws Exception {
@@ -134,7 +145,8 @@ public class ConcurrentWorkflowTest {
     String xml = template.replaceFirst("@SAMPLES_URL@/screen.mpg", "file:" + mediaFile.getAbsolutePath());
 
     // Make a copy of the dulin core file
-    File dcFile = copyStreamToTempFile(getClass().getClassLoader().getResourceAsStream("dublincore.xml"), "dublincore", ".xml");
+    File dcFile = copyStreamToTempFile(getClass().getClassLoader().getResourceAsStream("dublincore.xml"), "dublincore",
+            ".xml");
     xml = xml.replaceFirst("@SAMPLES_URL@/dc-1.xml", "file:" + dcFile.getAbsolutePath());
     System.out.println("Using mediapackage " + xml);
     return xml;
@@ -149,6 +161,7 @@ public class ConcurrentWorkflowTest {
     tempFiles.add(f);
     return f;
   }
+
   protected String getSampleWorkflowDefinition() throws Exception {
     return IOUtils.toString(getClass().getClassLoader().getResourceAsStream("workflow-definition-1.xml"));
   }

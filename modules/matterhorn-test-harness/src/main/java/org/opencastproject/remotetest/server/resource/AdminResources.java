@@ -16,6 +16,7 @@
 package org.opencastproject.remotetest.server.resource;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -25,32 +26,32 @@ import org.apache.http.client.methods.HttpGet;
  */
 
 public class AdminResources {
-  public static HttpResponse recordingsInactive() {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "recordings/inactive"));
+  public static HttpResponse recordingsInactive(TrustedHttpClient client) {
+    return client.execute(new HttpGet(getServiceUrl() + "recordings/inactive"));
   }
   
-  public static HttpResponse recordingsUpcoming() {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "recordings/upcoming"));
+  public static HttpResponse recordingsUpcoming(TrustedHttpClient client) {
+    return client.execute(new HttpGet(getServiceUrl() + "recordings/upcoming"));
   }
   
-  public static HttpResponse recordingsCapturing() {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "recordings/capturing"));
+  public static HttpResponse recordingsCapturing(TrustedHttpClient client) {
+    return client.execute(new HttpGet(getServiceUrl() + "recordings/capturing"));
   }
   
-  public static HttpResponse recordingsProcessing() {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "recordings/capturing"));
+  public static HttpResponse recordingsProcessing(TrustedHttpClient client) {
+    return client.execute(new HttpGet(getServiceUrl() + "recordings/capturing"));
   }
   
-  public static HttpResponse recordingsFinished() {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "recordings/finished"));
+  public static HttpResponse recordingsFinished(TrustedHttpClient client) {
+    return client.execute(new HttpGet(getServiceUrl() + "recordings/finished"));
   }
   
-  public static HttpResponse recordingsErrors() {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "recordings/errors"));
+  public static HttpResponse recordingsErrors(TrustedHttpClient client) {
+    return client.execute(new HttpGet(getServiceUrl() + "recordings/errors"));
   }
   
-  public static HttpResponse countRecordings() {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "countRecordings"));
+  public static HttpResponse countRecordings(TrustedHttpClient client) {
+    return client.execute(new HttpGet(getServiceUrl() + "countRecordings"));
   }
   
   private static final String getServiceUrl() {

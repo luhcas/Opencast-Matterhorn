@@ -19,7 +19,8 @@ import static org.opencastproject.remotetest.Main.BASE_URL;
 import static org.opencastproject.remotetest.Main.PASSWORD;
 import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.remotetest.security.TrustedHttpClientImpl;
+import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -45,13 +46,13 @@ import java.util.Properties;
 @Ignore
 public class CaptureRestEndpointTest {
   
-  private TrustedHttpClientImpl httpClient;
+  private TrustedHttpClient httpClient;
   private ArrayList<NameValuePair> startParams = new ArrayList<NameValuePair>();
   private ArrayList<NameValuePair> stopParams = new ArrayList<NameValuePair>();
   
   @Before
   public void setup() throws Exception {
-    httpClient = new TrustedHttpClientImpl(USERNAME, PASSWORD);
+    httpClient = Main.getClient();
     String time = String.valueOf(System.currentTimeMillis());
 
     // Test Properties from resources
@@ -69,6 +70,7 @@ public class CaptureRestEndpointTest {
   
   @After
   public void tearDown() throws Exception {
+    Main.returnClient(httpClient);
   }
   
   @Test

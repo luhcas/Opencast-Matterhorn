@@ -16,10 +16,9 @@
 package org.opencastproject.remotetest.server;
 
 import static org.opencastproject.remotetest.Main.BASE_URL;
-import static org.opencastproject.remotetest.Main.PASSWORD;
-import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.remotetest.security.TrustedHttpClientImpl;
+import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import junit.framework.Assert;
 
@@ -43,15 +42,17 @@ import java.util.Arrays;
  * Tests the working file repository's rest endpoint
  */
 public class WorkingFileRepoRestEndpointTest {
-  TrustedHttpClientImpl client;
+
+  TrustedHttpClient client;
 
   @Before
   public void setup() throws Exception {
-    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
+    client = Main.getClient();
   }
 
   @After
   public void teardown() throws Exception {
+    Main.returnClient(client);
   }
 
   @Test

@@ -19,7 +19,8 @@ import static org.opencastproject.remotetest.Main.BASE_URL;
 import static org.opencastproject.remotetest.Main.PASSWORD;
 import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.remotetest.security.TrustedHttpClientImpl;
+import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import junit.framework.Assert;
 
@@ -28,6 +29,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -51,7 +53,19 @@ import javax.xml.xpath.XPathFactory;
  * 
  */
 public class EngageModuleTest {
-  TrustedHttpClientImpl client;
+  TrustedHttpClient client;
+
+  @Before
+  public void setup() throws Exception {
+    client = Main.getClient();
+    domFactory = DocumentBuilderFactory.newInstance();
+    domFactory.setNamespaceAware(false); // don't forget this!
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+    Main.returnClient(client);
+  }
 
   private static DocumentBuilderFactory domFactory = DocumentBuilderFactory.newInstance();
   private static XPathFactory factory = XPathFactory.newInstance();
@@ -59,21 +73,12 @@ public class EngageModuleTest {
   public static String ENGAGE_BASE_URL = BASE_URL + "/engage/ui";
 
   private void clearSearchIndex() throws Exception {
-    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
     HttpPost post = new HttpPost(BASE_URL + "/search/rest/clear");
 
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
     post.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
 
     client.execute(post);
-  }
-
-  @Before
-  public void setup() throws Exception {
-    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
-
-    domFactory = DocumentBuilderFactory.newInstance();
-    domFactory.setNamespaceAware(false); // don't forget this!
   }
 
   @Test

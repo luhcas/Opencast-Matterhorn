@@ -16,6 +16,7 @@
 package org.opencastproject.remotetest.server.resource;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -38,55 +39,55 @@ public class SchedulerResources {
     return Main.getBaseUrl() + "/scheduler/rest/";
   }
   
-  public static HttpResponse addEvent(String event) throws Exception {
+  public static HttpResponse addEvent(TrustedHttpClient client, String event) throws Exception {
     HttpPut put = new HttpPut(getServiceUrl() + "event");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("event", event));
     put.setEntity(new UrlEncodedFormEntity(params));
-    return Main.getClient().execute(put);
+    return client.execute(put);
   }
   
-  public static HttpResponse updateEvent(String event) throws Exception {
+  public static HttpResponse updateEvent(TrustedHttpClient client, String event) throws Exception {
     HttpPost post = new HttpPost(getServiceUrl() + "updateEvent");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("event", event));
     post.setEntity(new UrlEncodedFormEntity(params));
-    return Main.getClient().execute(post);
+    return client.execute(post);
   }
   
-  public static HttpResponse getEvent(String id) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "getEvent/" + id));
+  public static HttpResponse getEvent(TrustedHttpClient client, String id) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "getEvent/" + id));
   }
   
-  public static HttpResponse getDublinCoreMetadata(String id) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "getDublinCoreMetadata/" + id));
+  public static HttpResponse getDublinCoreMetadata(TrustedHttpClient client, String id) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "getDublinCoreMetadata/" + id));
   }
   
-  public static HttpResponse findConflictingEvents(String event) throws Exception {
+  public static HttpResponse findConflictingEvents(TrustedHttpClient client, String event) throws Exception {
     HttpPost post = new HttpPost(getServiceUrl() + "findConflictingEvents");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("event", event));
     post.setEntity(new UrlEncodedFormEntity(params));
-    return Main.getClient().execute(post);
+    return client.execute(post);
   }
   
-  public static HttpResponse removeEvent(String id) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "removeEvent/" + id));
+  public static HttpResponse removeEvent(TrustedHttpClient client, String id) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "removeEvent/" + id));
   }
   
-  public static HttpResponse getEvents() throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "getEvents"));
+  public static HttpResponse getEvents(TrustedHttpClient client) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "getEvents"));
   }
 
-  public static HttpResponse getUpcomingEvents() throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "getUpcomingEvents"));
+  public static HttpResponse getUpcomingEvents(TrustedHttpClient client) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "getUpcomingEvents"));
   }
   
-  public static HttpResponse getCalendarForCaptureAgent(String id) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "getCalendarForCaptureAgent/" + id));
+  public static HttpResponse getCalendarForCaptureAgent(TrustedHttpClient client, String id) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "getCalendarForCaptureAgent/" + id));
   }
   
-  public static HttpResponse getCaptureAgentMetadata(String id) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "getCaptureAgentMetadata/" + id));
+  public static HttpResponse getCaptureAgentMetadata(TrustedHttpClient client, String id) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "getCaptureAgentMetadata/" + id));
   }
 }

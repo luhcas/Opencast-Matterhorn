@@ -16,6 +16,7 @@
 package org.opencastproject.remotetest.server.resource;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -35,11 +36,11 @@ public class ComposerResources {
     return Main.getBaseUrl() + "/composer/rest/";
   }
 
-  public static HttpResponse profiles() {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "profiles"));
+  public static HttpResponse profiles(TrustedHttpClient client) {
+    return client.execute(new HttpGet(getServiceUrl() + "profiles"));
   }
   
-  public static HttpResponse encode(String mediapackage, 
+  public static HttpResponse encode(TrustedHttpClient client, String mediapackage, 
       String audioSourceTrackId, String videoSourceTrackId, String profileId) throws Exception {
     HttpPost post = new HttpPost(getServiceUrl() + "encode");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
@@ -48,14 +49,14 @@ public class ComposerResources {
     params.add(new BasicNameValuePair("videoSourceTrackId", videoSourceTrackId));
     params.add(new BasicNameValuePair("profileId", profileId));
     post.setEntity(new UrlEncodedFormEntity(params));
-    return Main.getClient().execute(post);
+    return client.execute(post);
   }
   
-  public static HttpResponse receipt(String id) {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "receipt" + id));
+  public static HttpResponse receipt(TrustedHttpClient client, String id) {
+    return client.execute(new HttpGet(getServiceUrl() + "receipt" + id));
   }
   
-  public static HttpResponse image(String mediapackage, 
+  public static HttpResponse image(TrustedHttpClient client, String mediapackage, 
       String time, String sourceTrackId, String profileId) throws Exception {
     HttpPost post = new HttpPost(getServiceUrl() + "encode");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
@@ -64,6 +65,6 @@ public class ComposerResources {
     params.add(new BasicNameValuePair("time", time));
     params.add(new BasicNameValuePair("profileId", profileId));
     post.setEntity(new UrlEncodedFormEntity(params));
-    return Main.getClient().execute(post);
+    return client.execute(post);
   }
 }

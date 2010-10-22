@@ -16,6 +16,7 @@
 package org.opencastproject.remotetest.server.resource;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -42,8 +43,8 @@ public class WorkflowResources {
    * @param format Response format: xml or json
    * 
    */
-  public static HttpResponse definitions(String format) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "definitions." + format.toLowerCase()));
+  public static HttpResponse definitions(TrustedHttpClient client, String format) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "definitions." + format.toLowerCase()));
   }
   
   /**
@@ -51,8 +52,8 @@ public class WorkflowResources {
    * @param format Response format: xml or json
    * 
    */
-  public static HttpResponse instances(String format) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "instances." + format.toLowerCase()));
+  public static HttpResponse instances(TrustedHttpClient client, String format) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "instances." + format.toLowerCase()));
   }
   
   /**
@@ -61,11 +62,11 @@ public class WorkflowResources {
    * @param format Response format: xml or json
    *
    */
-  public static HttpResponse instance(String id, String format) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "instance/" + id + format.toLowerCase()));
+  public static HttpResponse instance(TrustedHttpClient client, String id, String format) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "instance/" + id + format.toLowerCase()));
   }
   
-  public static HttpResponse start(String mediapackage, 
+  public static HttpResponse start(TrustedHttpClient client, String mediapackage, 
       String workflowDefinition, String properties) throws Exception {
     HttpPost post = new HttpPost(getServiceUrl() + "start");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
@@ -73,18 +74,18 @@ public class WorkflowResources {
     params.add(new BasicNameValuePair("definition", workflowDefinition));
     params.add(new BasicNameValuePair("properties", properties));
     post.setEntity(new UrlEncodedFormEntity(params));
-    return Main.getClient().execute(post);
+    return client.execute(post);
   }
   
-  public static HttpResponse suspend(String id) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "suspend/" + id));
+  public static HttpResponse suspend(TrustedHttpClient client, String id) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "suspend/" + id));
   }
   
-  public static HttpResponse resume(String id) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "resume/" + id));
+  public static HttpResponse resume(TrustedHttpClient client, String id) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "resume/" + id));
   }
   
-  public static HttpResponse stop(String id) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "stop/" + id));
+  public static HttpResponse stop(TrustedHttpClient client, String id) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "stop/" + id));
   }
 }

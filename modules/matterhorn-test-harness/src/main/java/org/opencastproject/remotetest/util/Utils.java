@@ -58,10 +58,14 @@ import javax.xml.xpath.XPathFactory;
 public class Utils {
 
   public static Document parseXml(InputStream in) throws Exception {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    factory.setNamespaceAware(true);
-    DocumentBuilder builder = factory.newDocumentBuilder();
-    return builder.parse(in);
+    try {
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      factory.setNamespaceAware(true);
+      DocumentBuilder builder = factory.newDocumentBuilder();
+      return builder.parse(in);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
   }
 
   /**
@@ -118,14 +122,16 @@ public class Utils {
     HttpGet get = new HttpGet(url);
     HttpResponse response = null;
     FileOutputStream out = null;
+    TrustedHttpClient client = null;
     try {
-      response = Main.getClient().execute(get);
+      client = Main.getClient();
+      response = client.execute(get);
       File f = File.createTempFile("testfile", ".tmp");
       out = new FileOutputStream(f);
       IOUtils.copy(response.getEntity().getContent(), out);
       return f;
     } finally {
-      Main.getClient().close(response);
+      Main.returnClient(client);
     }
   }
 
@@ -137,7 +143,7 @@ public class Utils {
       response = client.execute(get);
       return parseXml(response.getEntity().getContent());
     } finally {
-      client.close(response);
+      Main.returnClient(client);
     }
   }
 

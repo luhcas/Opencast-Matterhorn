@@ -71,6 +71,8 @@ public class ServiceRegistrationParser {
               JaxbServiceRegistration.class).getValue();
     } catch (Exception e) {
       throw new IOException(e);
+    } finally {
+      IOUtils.closeQuietly(in);
     }
   }
 
@@ -112,6 +114,8 @@ public class ServiceRegistrationParser {
               JaxbServiceStatisticsList.class).getValue();
     } catch (Exception e) {
       throw new IOException(e);
+    } finally {
+      IOUtils.closeQuietly(in);
     }
   }
 
@@ -123,6 +127,8 @@ public class ServiceRegistrationParser {
               JaxbServiceRegistrationList.class).getValue();
     } catch (Exception e) {
       throw new IOException(e);
+    } finally {
+      IOUtils.closeQuietly(in);
     }
   }
 }

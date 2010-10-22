@@ -17,10 +17,9 @@ package org.opencastproject.remotetest.server;
 
 import static org.junit.Assert.assertEquals;
 import static org.opencastproject.remotetest.Main.BASE_URL;
-import static org.opencastproject.remotetest.Main.PASSWORD;
-import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.remotetest.security.TrustedHttpClientImpl;
+import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
@@ -42,15 +41,16 @@ import javax.xml.xpath.XPathFactory;
  * Test the Capture Admin REST endpoints
  */
 public class CaptureAdminRestEndpointTest {
-  private TrustedHttpClientImpl httpClient;
+  private TrustedHttpClient httpClient;
   
   @Before
   public void setup() throws Exception {
-    httpClient = new TrustedHttpClientImpl(USERNAME, PASSWORD);
+    httpClient = Main.getClient();
   }
   
   @After
   public void tearDown() throws Exception {
+    Main.returnClient(httpClient);
   }
   
   @Test

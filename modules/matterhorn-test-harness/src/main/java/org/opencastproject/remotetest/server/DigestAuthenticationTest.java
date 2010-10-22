@@ -47,10 +47,14 @@ public class DigestAuthenticationTest {
     DefaultHttpClient httpclient = new DefaultHttpClient();
     HttpGet get = new HttpGet(BASE_URL + "/welcome.html");
     get.addHeader("X-Requested-Auth", "Digest");
-    httpclient.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
-    HttpResponse response = httpclient.execute(get);
-    String content = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-    Assert.assertTrue(content.contains("Start Climbing"));
+    try {
+      httpclient.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
+      HttpResponse response = httpclient.execute(get);
+      String content = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+      Assert.assertTrue(content.contains("Start Climbing"));
+    } finally {
+      httpclient.getConnectionManager().shutdown();
+    }
   }
 
   @Test
@@ -60,18 +64,26 @@ public class DigestAuthenticationTest {
     httpclient.getCredentialsProvider().setCredentials(AuthScope.ANY, creds);
     HttpGet get = new HttpGet(BASE_URL + "/welcome.html");
     get.addHeader("X-Requested-Auth", "Digest");
-    HttpResponse response = httpclient.execute(get);
-    Assert.assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatusLine().getStatusCode());
+    try {
+      HttpResponse response = httpclient.execute(get);
+      Assert.assertEquals(HttpStatus.SC_UNAUTHORIZED, response.getStatusLine().getStatusCode());
+    } finally {
+      httpclient.getConnectionManager().shutdown();
+    }
   }
 
   @Test
   public void testUnauthenticatedGet() throws Exception {
     DefaultHttpClient httpclient = new DefaultHttpClient();
     HttpGet get = new HttpGet(BASE_URL + "/welcome.html");
-    HttpResponse response = httpclient.execute(get);
-    String content = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-    Assert.assertTrue(content.contains("Login Page"));
-    Assert.assertTrue( ! content.contains("Start Climbing"));
+    try {
+      HttpResponse response = httpclient.execute(get);
+      String content = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+      Assert.assertTrue(content.contains("Login Page"));
+      Assert.assertTrue( ! content.contains("Start Climbing"));
+    } finally {
+      httpclient.getConnectionManager().shutdown();
+    }
   }
 
   @Test
@@ -110,10 +122,14 @@ public class DigestAuthenticationTest {
     localContext.setAttribute("preemptive-auth", digestAuth);
 
     // Send the POST
-    HttpResponse response = httpclient.execute(post, localContext);
-    String content = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
-    Assert.assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
-    Assert.assertEquals("testagent set to idle", content);
+    try {
+      HttpResponse response = httpclient.execute(post, localContext);
+      String content = IOUtils.toString(response.getEntity().getContent(), "UTF-8");
+      Assert.assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
+      Assert.assertEquals("testagent set to idle", content);
+    } finally {
+      httpclient.getConnectionManager().shutdown();
+    }
   }
   
 }

@@ -17,22 +17,6 @@ package org.opencastproject.serviceregistry.remote;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.job.api.JobParser;
@@ -48,10 +32,35 @@ import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.QueryStringBuilder;
 import org.opencastproject.util.UrlSupport;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.osgi.framework.ServiceException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 /**
  * This implementation of the remote service registry is able to provide the functionality specified by the api over
@@ -81,6 +90,21 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
 
   /** The base URL of this server */
   protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
+
+  private static final JAXBContext jaxbContext;
+
+  static {
+    StringBuilder sb = new StringBuilder();
+    sb.append("org.opencastproject.mediapackage");
+    sb.append(":org.opencastproject.mediapackage.attachment");
+    sb.append(":org.opencastproject.mediapackage.track");
+    sb.append(":org.opencastproject.job.api");
+    try {
+      jaxbContext = JAXBContext.newInstance(sb.toString(), JobParser.class.getClassLoader());
+    } catch (JAXBException e) {
+      throw new IllegalStateException(e);
+    }
+  }
 
   /**
    * Callback for the OSGi environment that is called upon service activation.
@@ -285,7 +309,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     String servicePath = "job/" + job.getId() + ".xml";
     String jobXml;
     try {
-      jobXml = JobParser.serializeToString(job);
+      jobXml = serializeToString(job);
     } catch (IOException e) {
       throw new ServiceRegistryException("Can not serialize job " + job, e);
     }
@@ -547,6 +571,36 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
       client.close(response);
     }
     throw new ServiceRegistryException("Unable to get service statistics");
+  }
+
+  /**
+   * Gets a serialized representation of a {@link Job}
+   * 
+   * @param job
+   *          The job to marshall
+   * @return the serialized job
+   */
+  public InputStream serialize(Job job) throws IOException {
+    return IOUtils.toInputStream(serializeToString(job), "UTF-8");
+  }
+
+  /**
+   * Gets an xml representation of a {@link Job}
+   * 
+   * @param job
+   *          The job to marshall
+   * @return the serialized job
+   */
+  private String serializeToString(Job job) throws IOException {
+    Marshaller marshaller;
+    try {
+      marshaller = jaxbContext.createMarshaller();
+      Writer writer = new StringWriter();
+      marshaller.marshal(job, writer);
+      return writer.toString();
+    } catch (JAXBException e) {
+      throw new IOException(e);
+    }
   }
 
   /**

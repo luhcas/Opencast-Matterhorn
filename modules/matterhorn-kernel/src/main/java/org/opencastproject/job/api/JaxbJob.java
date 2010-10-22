@@ -63,8 +63,9 @@ public class JaxbJob implements Job {
     this.host = job.getHost();
     this.id = job.getId();
     this.jobType = job.getJobType();
+    this.status = job.getStatus();
     if (this.dateCreated != null && this.dateStarted != null) {
-      this.queueTime = this.dateStarted.getTime() - this.dateCompleted.getTime();
+      this.queueTime = this.dateStarted.getTime() - this.dateCreated.getTime();
     }
     if (this.dateStarted != null && this.dateCompleted != null) {
       this.runTime = this.dateCompleted.getTime() - this.dateStarted.getTime();
@@ -348,7 +349,28 @@ public class JaxbJob implements Job {
               .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
     }
   }
+  
+  /**
+   * {@inheritDoc}
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof Job) {
+      return ((Job)obj).getId().equals(id);
+    }
+    return false;
+  }
 
+  /**
+   * {@inheritDoc}
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return id.hashCode();
+  }
+  
   /**
    * {@inheritDoc}
    * 

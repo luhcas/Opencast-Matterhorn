@@ -16,6 +16,7 @@
 package org.opencastproject.remotetest.server.resource;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -36,30 +37,30 @@ public class FilesResources {
     return Main.getBaseUrl() + "/files/";
   }
 
-  public static HttpResponse getFile(String mediaPackageID, String mediaPackageElementID) throws Exception {
-    return Main.getClient().execute(
+  public static HttpResponse getFile(TrustedHttpClient client, String mediaPackageID, String mediaPackageElementID) throws Exception {
+    return client.execute(
             new HttpGet(getServiceUrl() + "mediapackage/" + mediaPackageID + '/' + mediaPackageElementID));
   }
 
-  public static HttpResponse getFile(String mediaPackageID, String mediaPackageElementID, String fileName)
+  public static HttpResponse getFile(TrustedHttpClient client, String mediaPackageID, String mediaPackageElementID, String fileName)
           throws Exception {
-    return Main.getClient().execute(
+    return client.execute(
             new HttpGet(getServiceUrl() + "mediapackage/" + mediaPackageID + '/' + mediaPackageElementID + "/"
                     + fileName));
   }
 
   // FIXME
-  public static HttpResponse postFile(String mediaPackageID, String mediaPackageElementID, String media)
+  public static HttpResponse postFile(TrustedHttpClient client, String mediaPackageID, String mediaPackageElementID, String media)
           throws Exception {
     HttpPost post = new HttpPost(getServiceUrl() + "mediapackage/" + mediaPackageElementID + "/" + mediaPackageElementID);
     MultipartEntity entity = new MultipartEntity();
     entity.addPart("file", new FileBody(new File(media)));
     post.setEntity(entity);
-    return Main.getClient().execute(post);
+    return client.execute(post);
   }
 
-  public static HttpResponse deleteFile(String mediaPackageID, String mediaPackageElementID) throws Exception {
+  public static HttpResponse deleteFile(TrustedHttpClient client, String mediaPackageID, String mediaPackageElementID) throws Exception {
     HttpDelete delete = new HttpDelete(getServiceUrl() + "mediapackage/" + mediaPackageElementID + "/" + mediaPackageElementID);
-    return Main.getClient().execute(delete);
+    return client.execute(delete);
   }
 }

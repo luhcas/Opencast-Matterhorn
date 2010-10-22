@@ -16,6 +16,7 @@
 package org.opencastproject.remotetest.server.resource;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -26,20 +27,20 @@ import org.apache.http.client.methods.HttpGet;
 
 public class CaptureAdminResources {
 
-  public static HttpResponse agents() {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "agents"));
+  public static HttpResponse agents(TrustedHttpClient client) {
+    return client.execute(new HttpGet(getServiceUrl() + "agents"));
   }
   
-  public static HttpResponse agent(String id) {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "agents/" + id));
+  public static HttpResponse agent(TrustedHttpClient client, String id) {
+    return client.execute(new HttpGet(getServiceUrl() + "agents/" + id));
   }
   
-  public static HttpResponse recordings() {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "recordings"));
+  public static HttpResponse recordings(TrustedHttpClient client) {
+    return client.execute(new HttpGet(getServiceUrl() + "recordings"));
   }
   
-  public static HttpResponse recording(String id) {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "recordings/" + id));
+  public static HttpResponse recording(TrustedHttpClient client, String id) {
+    return client.execute(new HttpGet(getServiceUrl() + "recordings/" + id));
   }
   
   private static final String getServiceUrl() {

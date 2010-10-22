@@ -17,7 +17,8 @@ package org.opencastproject.remotetest.server;
 
 import static org.opencastproject.remotetest.Main.BASE_URL;
 
-import org.opencastproject.remotetest.security.TrustedHttpClientImpl;
+import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import junit.framework.Assert;
 
@@ -27,6 +28,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -36,22 +39,35 @@ import java.io.InputStream;
  */
 public class MultiPartTest {
 
+  /** The http client */
+  protected TrustedHttpClient httpClient;
+
+  @Before
+  public void setUp() throws Exception {
+    httpClient = Main.getClient();
+  }
+  
+  @After
+  public void tearDown() throws Exception {
+    Main.returnClient(httpClient);
+  }
+
   @Test
   public void testMultiPartPost() throws Exception {
+
     String mp = "<oc:mediapackage xmlns:oc=\"http://mediapackage.opencastproject.org\" id=\"10.0000/1\" start=\"2007-12-05T13:40:00\" duration=\"1004400000\"></oc:mediapackage>";
     
     InputStream is = null;
     try {
       is = getClass().getResourceAsStream("/av.mov");
       InputStreamBody fileContent = new InputStreamBody(is, "av.mov");
-      TrustedHttpClientImpl client = new TrustedHttpClientImpl("matterhorn_system_account", "CHANGE_ME");
       MultipartEntity mpEntity = new MultipartEntity();
       mpEntity.addPart("mediaPackage", new StringBody(mp));
       mpEntity.addPart("flavor", new StringBody("presentation/source"));
       mpEntity.addPart("userfile", fileContent);
       HttpPost httppost = new HttpPost(BASE_URL + "/ingest/rest/addAttachment");
       httppost.setEntity(mpEntity);
-      HttpResponse response = client.execute(httppost);
+      HttpResponse response = httpClient.execute(httppost);
       Assert.assertEquals(200, response.getStatusLine().getStatusCode());
     } finally {
       IOUtils.closeQuietly(is);

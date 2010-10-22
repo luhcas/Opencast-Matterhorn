@@ -16,6 +16,7 @@
 package org.opencastproject.remotetest.server.resource;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -41,28 +42,28 @@ public class CaptureResources {
     return Main.getBaseUrl() + "/capture/rest/";
   }
 
-  public static HttpResponse startCaptureGet() {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "startCapture"));
+  public static HttpResponse startCaptureGet(TrustedHttpClient client) {
+    return client.execute(new HttpGet(getServiceUrl() + "startCapture"));
   }
   
-  public static HttpResponse stopCapture() {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "stopCapture"));
+  public static HttpResponse stopCapture(TrustedHttpClient client) {
+    return client.execute(new HttpGet(getServiceUrl() + "stopCapture"));
   }
 
-  public static HttpResponse startCapturePost() throws Exception {
+  public static HttpResponse startCapturePost(TrustedHttpClient client) throws Exception {
     HttpPost post = new HttpPost(getServiceUrl() + "startCapture");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("config", captureProperties()));
     post.setEntity(new UrlEncodedFormEntity(params));
-    return Main.getClient().execute(post);
+    return client.execute(post);
   }
   
-  public static HttpResponse stopCapturePost(String id) throws Exception {
+  public static HttpResponse stopCapturePost(TrustedHttpClient client, String id) throws Exception {
     HttpPost post = new HttpPost(getServiceUrl() + "stopCapture");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("recordingID", id));
     post.setEntity(new UrlEncodedFormEntity(params));
-    return Main.getClient().execute(post);
+    return client.execute(post);
   }
   
   public static String captureProperties() throws Exception {

@@ -16,6 +16,7 @@
 package org.opencastproject.remotetest.server.resource;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -32,7 +33,7 @@ public class InspectionResources {
   }
 
   
-  public static HttpResponse inspect(String url) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "inspect?url=" + url));
+  public static HttpResponse inspect(TrustedHttpClient client, String url) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "inspect?url=" + url));
   }
 }

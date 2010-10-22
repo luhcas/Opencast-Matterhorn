@@ -16,6 +16,7 @@
 package org.opencastproject.remotetest.server.resource;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -29,11 +30,11 @@ public class StateResources {
     return Main.getBaseUrl() + "/state/rest/";
   }
   
-  public static HttpResponse getState() throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "state"));
+  public static HttpResponse getState(TrustedHttpClient client) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "state"));
   }
   
-  public static HttpResponse recordings() throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "recordings"));
+  public static HttpResponse recordings(TrustedHttpClient client) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "recordings"));
   }
 }

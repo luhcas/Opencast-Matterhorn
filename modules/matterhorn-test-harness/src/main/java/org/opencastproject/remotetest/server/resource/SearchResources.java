@@ -16,6 +16,7 @@
 package org.opencastproject.remotetest.server.resource;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -36,24 +37,24 @@ public class SearchResources {
     return Main.getBaseUrl() + "/search/rest/";
   }
   
-  public static HttpResponse add(String mediapackage) throws Exception {
+  public static HttpResponse add(TrustedHttpClient client, String mediapackage) throws Exception {
     HttpPost post = new HttpPost(getServiceUrl() + "add");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("mediapackage", mediapackage));
     post.setEntity(new UrlEncodedFormEntity(params));
-    return Main.getClient().execute(post);
+    return client.execute(post);
   }
   
   // TODO add remaining query parameters (episode and series)
-  public static HttpResponse episode(String id) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "episode?id=" + id));
+  public static HttpResponse episode(TrustedHttpClient client, String id) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "episode?id=" + id));
   }
   
-  public static HttpResponse all(String q) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "episode?q=" + q));
+  public static HttpResponse all(TrustedHttpClient client, String q) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "episode?q=" + q));
   }
   
-  public static HttpResponse series(String id) throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "series?id=" + id));
+  public static HttpResponse series(TrustedHttpClient client, String id) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "series?id=" + id));
   }
 }

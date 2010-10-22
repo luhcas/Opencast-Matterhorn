@@ -16,10 +16,9 @@
 package org.opencastproject.remotetest.server;
 
 import static org.opencastproject.remotetest.Main.BASE_URL;
-import static org.opencastproject.remotetest.Main.PASSWORD;
-import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.remotetest.security.TrustedHttpClientImpl;
+import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import junit.framework.Assert;
 
@@ -50,15 +49,16 @@ import javax.xml.xpath.XPathFactory;
  * Tests the functionality of a remote workflow service rest endpoint
  */
 public class WorkflowRestEndpointTest {
-  TrustedHttpClientImpl client;
+  TrustedHttpClient client;
 
   @Before
   public void setup() throws Exception {
-    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
+    client = Main.getClient();
   }
 
   @After
   public void teardown() throws Exception {
+    Main.returnClient(client);
   }
     
   @Test

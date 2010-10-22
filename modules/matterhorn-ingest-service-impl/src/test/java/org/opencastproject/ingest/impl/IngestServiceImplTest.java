@@ -34,7 +34,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpGet;
 import org.easymock.EasyMock;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -163,10 +162,6 @@ public class IngestServiceImplTest {
     service.setServiceRegistry(serviceRegistry);
   }
 
-  @After
-  public void teardown() {
-
-  }
 
   @Test
   public void testThinClient() throws Exception {

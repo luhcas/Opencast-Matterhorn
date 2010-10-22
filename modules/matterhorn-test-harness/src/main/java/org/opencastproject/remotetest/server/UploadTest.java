@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 import org.opencastproject.remotetest.server.resource.IngestResources;
 import org.opencastproject.remotetest.server.resource.SearchResources;
 import org.opencastproject.remotetest.util.Utils;
@@ -26,6 +27,8 @@ import org.opencastproject.remotetest.util.Utils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -34,8 +37,6 @@ import javax.xml.xpath.XPathConstants;
 
 /**
  * Integration test for file upload using thin client
- * 
- * @author jamiehodge
  */
 @Ignore // Until we can make the Jersey client work with digest auth, this must remain ignored
 public class UploadTest {
@@ -44,43 +45,51 @@ public class UploadTest {
   String attachmentUrl;
   String mediaPackage;
   String[] catalogKeys;
+  TrustedHttpClient client;
 
+  @Before
   public void setUp() throws Exception {
+    client = Main.getClient();
     trackUrl = Main.getBaseUrl() + "/workflow/samples/camera.mpg";
     catalogUrl = Main.getBaseUrl() + "/workflow/samples/dc-1.xml";
     attachmentUrl = Main.getBaseUrl() + "/workflow/samples/index.txt";
     catalogKeys = new String[] { "format", "promoted", "description", "subject", "publisher", "identifier", "title" };
   }
 
+  @After
+  public void teardown() throws Exception {
+    Main.returnClient(client);
+  }
+
   @Test
   public void testIngestThinClient() throws Exception {
 
     // Create Media Package
-    HttpResponse response = IngestResources.createMediaPackage();
+    HttpResponse response = IngestResources.createMediaPackage(client);
     assertEquals("Response code (createMediaPacakge):", 200, response.getStatusLine().getStatusCode());
     mediaPackage = EntityUtils.toString(response.getEntity(), "UTF-8");
     // TODO validate Media Package
 
     // Add Track
-    response = IngestResources.add("Track", trackUrl, "presenter/source", mediaPackage);
+    response = IngestResources.add(client, "Track", trackUrl, "presenter/source", mediaPackage);
     assertEquals("Response code (addTrack):", 200, response.getStatusLine().getStatusCode());
     mediaPackage = EntityUtils.toString(response.getEntity(), "UTF-8");
     // TODO validate Media Package
 
     // Add Catalog
-    response = IngestResources.add("Catalog", catalogUrl, "dublincore/episode", mediaPackage);
+    response = IngestResources.add(client, "Catalog", catalogUrl, "dublincore/episode", mediaPackage);
     assertEquals("Response code (addCatalog):", 200, response.getStatusLine().getStatusCode());
     mediaPackage = EntityUtils.toString(response.getEntity(), "UTF-8");
     // TODO validate Media Package
 
     // Add Attachment
-    response = IngestResources.add("Attachment", attachmentUrl, "attachment/txt", mediaPackage);
+    response = IngestResources.add(client, "Attachment", attachmentUrl, "attachment/txt", mediaPackage);
     assertEquals("Response code (addAttachment):", 200, response.getStatusLine().getStatusCode());
     mediaPackage = EntityUtils.toString(response.getEntity(), "UTF-8");
     // TODO validate Media Package
 
     // Ingest
-    response = IngestResources.ingest(mediaPackage);
+    response = IngestResources.ingest(client, mediaPackage);
     assertEquals("Response code (ingest):", 200, response.getStatusLine().getStatusCode());
     mediaPackage = EntityUtils.toString(response.getEntity(), "UTF-8");
     Document xml = Utils.parseXml(IOUtils.toInputStream(mediaPackage, "UTF-8"));
@@ -88,7 +97,7 @@ public class UploadTest {
     String mediaPackageId = (String) Utils.xPath(xml, "//mediapackage/@id", XPathConstants.STRING);
 
     // Confirm ingest
-    response = IngestResources.getWorkflowInstance(workflowId);
+    response = IngestResources.getWorkflowInstance(client, workflowId);
     assertEquals("Response code (workflow instance):", 200, response.getStatusLine().getStatusCode());
 
     // Compare Track
@@ -123,7 +132,7 @@ public class UploadTest {
       Thread.sleep(1000);
 
       // Check workflow instance status
-      response = SearchResources.episode(mediaPackageId);
+      response = SearchResources.episode(client, mediaPackageId);
       assertEquals("Response code (episode):", 200, response.getStatusLine().getStatusCode());
       xml = Utils.parseXml(response.getEntity().getContent());
       if (Utils.xPathExists(xml, "//ns2:result[@id='" + mediaPackageId + "']/ns2:mediapackage").equals(true)) {

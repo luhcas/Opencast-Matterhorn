@@ -16,10 +16,9 @@
 package org.opencastproject.remotetest.server;
 
 import static org.opencastproject.remotetest.Main.BASE_URL;
-import static org.opencastproject.remotetest.Main.PASSWORD;
-import static org.opencastproject.remotetest.Main.USERNAME;
 
-import org.opencastproject.remotetest.security.TrustedHttpClientImpl;
+import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import junit.framework.Assert;
 
@@ -31,6 +30,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -48,11 +48,16 @@ import javax.xml.xpath.XPathFactory;
  * Tests the functionality of a remote workflow service rest endpoint
  */
 public class ComposerRestEndpointTest {
-  TrustedHttpClientImpl client;
+  TrustedHttpClient client;
 
   @Before
   public void setup() throws Exception {
-    client = new TrustedHttpClientImpl(USERNAME, PASSWORD);
+    client = Main.getClient();
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    Main.returnClient(client);
   }
 
   @Test
@@ -64,22 +69,22 @@ public class ComposerRestEndpointTest {
     formParams.add(new BasicNameValuePair("profileId", "flash.http"));
     postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
 
-    // Grab the receipt from the response
+    // Grab the job from the response
     HttpResponse postResponse = client.execute(postEncode);
     Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
     String postResponseXml = EntityUtils.toString(postResponse.getEntity());
-    String receiptId = getReceiptId(postResponseXml);
+    String jobId = getJobId(postResponseXml);
 
-    // Poll the service for the status of the receipt.
+    // Poll the service for the status of the job.
     String status = null;
     while (status == null || "RUNNING".equals(status) || "QUEUED".equals(status)) {
       Thread.sleep(5000); // wait and try again
-      HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/receipt/" + receiptId + ".xml");
-      status = getReceiptStatus(client.execute(pollRequest));
-      System.out.println("encoding job " + receiptId + " is " + status);
+      HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/job/" + jobId + ".xml");
+      status = getJobStatus(client.execute(pollRequest));
+      System.out.println("encoding job " + jobId + " is " + status);
     }
     if (!"FINISHED".equals(status)) {
-      Assert.fail("receipt status terminated with status=" + status);
+      Assert.fail("job status terminated with status=" + status);
     }
   }
 
@@ -92,7 +97,7 @@ public class ComposerRestEndpointTest {
     formParams.add(new BasicNameValuePair("profileId", "feed-cover.http"));
     postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
 
-    // Grab the receipt from the response
+    // Grab the job from the response
     HttpResponse postResponse = client.execute(postEncode);
     String postResponseXml = EntityUtils.toString(postResponse.getEntity());
     Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
@@ -109,46 +114,46 @@ public class ComposerRestEndpointTest {
     formParams.add(new BasicNameValuePair("profileId", "trim.work"));
     postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
 
-    // Grab the receipt from the response
+    // Grab the job from the response
     HttpResponse postResponse = client.execute(postEncode);
     String postResponseXml = EntityUtils.toString(postResponse.getEntity());
     Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
     Assert.assertTrue(postResponseXml.contains("job"));
 
     // Poll for the finished composer job
-    // Poll the service for the status of the receipt.
-    String receiptId = getReceiptId(postResponseXml);
+    // Poll the service for the status of the job.
+    String jobId = getJobId(postResponseXml);
     String status = null;
     while (status == null || "RUNNING".equals(status) || "QUEUED".equals(status)) {
       Thread.sleep(5000); // wait and try again
-      HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/receipt/" + receiptId + ".xml");
-      status = getReceiptStatus(client.execute(pollRequest));
-      System.out.println("encoding job " + receiptId + " is " + status);
+      HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/job/" + jobId + ".xml");
+      status = getJobStatus(client.execute(pollRequest));
+      System.out.println("encoding job " + jobId + " is " + status);
     }
     if (!"FINISHED".equals(status)) {
-      Assert.fail("receipt status terminated with status=" + status);
+      Assert.fail("job status terminated with status=" + status);
     }
 
-    // Get the track xml from the receipt
-    HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/receipt/" + receiptId + ".xml");
+    // Get the track xml from the job
+    HttpGet pollRequest = new HttpGet(BASE_URL + "/composer/rest/job/" + jobId + ".xml");
     HttpResponse pollResponse = client.execute(pollRequest);
-    long duration = getDurationFromReceipt(pollResponse);
+    long duration = getDurationFromJob(pollResponse);
     Assert.assertTrue(duration < 14546);
   }
 
   /**
-   * Gets the mediapackage element from a receipt polling response
+   * Gets the mediapackage element from a job polling response
    * 
    * @param pollResponse
    *          the http response
    * @return the mediapackage elemet as an xml string
    */
-  protected long getDurationFromReceipt(HttpResponse pollResponse) throws Exception {
-    String receiptXml = EntityUtils.toString(pollResponse.getEntity());
+  protected long getDurationFromJob(HttpResponse pollResponse) throws Exception {
+    String jobXml = EntityUtils.toString(pollResponse.getEntity());
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
-    Document doc = builder.parse(IOUtils.toInputStream(receiptXml, "UTF-8"));
+    Document doc = builder.parse(IOUtils.toInputStream(jobXml, "UTF-8"));
     Element element = ((Element) XPathFactory.newInstance().newXPath().compile("//duration[1]")
             .evaluate(doc, XPathConstants.NODE));
     if (element == null)
@@ -157,7 +162,7 @@ public class ComposerRestEndpointTest {
     return Long.parseLong(element.getFirstChild().getNodeValue());
   }
 
-  protected String getReceiptId(String xml) throws Exception {
+  protected String getJobId(String xml) throws Exception {
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
     DocumentBuilder builder = factory.newDocumentBuilder();
@@ -166,7 +171,7 @@ public class ComposerRestEndpointTest {
             .getAttribute("id");
   }
 
-  protected String getReceiptStatus(HttpResponse pollResponse) throws Exception {
+  protected String getJobStatus(HttpResponse pollResponse) throws Exception {
     String xml = EntityUtils.toString(pollResponse.getEntity());
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);

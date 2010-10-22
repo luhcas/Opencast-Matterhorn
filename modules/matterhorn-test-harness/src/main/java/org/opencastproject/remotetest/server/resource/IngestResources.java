@@ -16,6 +16,7 @@
 package org.opencastproject.remotetest.server.resource;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -43,8 +44,8 @@ public class IngestResources {
     return Main.getBaseUrl() + "/ingest/rest/";
   }
 
-  public static HttpResponse createMediaPackage() throws Exception {
-    return Main.getClient().execute(new HttpGet(getServiceUrl() + "createMediaPackage"));
+  public static HttpResponse createMediaPackage(TrustedHttpClient client) throws Exception {
+    return client.execute(new HttpGet(getServiceUrl() + "createMediaPackage"));
   }
 
   /**
@@ -53,14 +54,14 @@ public class IngestResources {
    *          Type of media to add: Track, Catalog, Attachment
    * 
    */
-  public static HttpResponse add(String type, String url, String flavor, String mediaPackage) throws Exception {
+  public static HttpResponse add(TrustedHttpClient client, String type, String url, String flavor, String mediaPackage) throws Exception {
     HttpPost post = new HttpPost(getServiceUrl() + "add" + type);
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("url", url));
     params.add(new BasicNameValuePair("flavor", flavor));
     params.add(new BasicNameValuePair("mediaPackage", mediaPackage));
     post.setEntity(new UrlEncodedFormEntity(params));
-    return Main.getClient().execute(post);
+    return client.execute(post);
   }
 
   /**
@@ -69,36 +70,36 @@ public class IngestResources {
    *          Type of media to add: Track, Catalog, Attachment
    * 
    */
-  public static HttpResponse addTrack(String type, InputStream media, String flavor, String mediaPackage)
+  public static HttpResponse addTrack(TrustedHttpClient client, String type, InputStream media, String flavor, String mediaPackage)
           throws Exception {
     HttpPost post = new HttpPost(getServiceUrl() + "add" + type);
     MultipartEntity entity = new MultipartEntity();
     entity.addPart("flavor", new StringBody(flavor));
     entity.addPart("mediaPackage", new StringBody(mediaPackage));
     post.setEntity(entity);
-    return Main.getClient().execute(post);
+    return client.execute(post);
   }
 
   // TODO addMediaPackage
 
-  public static HttpResponse addZippedMediaPackage(InputStream mediaPackage) throws Exception {
+  public static HttpResponse addZippedMediaPackage(TrustedHttpClient client, InputStream mediaPackage) throws Exception {
     HttpPost post = new HttpPost(getServiceUrl() + "addZippedMediaPackage");
     MultipartEntity entity = new MultipartEntity();
     entity.addPart("mediaPackage", new InputStreamBody(mediaPackage, "mediapackage.zip"));
     post.setEntity(entity);
-    return Main.getClient().execute(post);
+    return client.execute(post);
   }
 
-  public static HttpResponse ingest(String mediaPackageId) throws Exception {
+  public static HttpResponse ingest(TrustedHttpClient client, String mediaPackageId) throws Exception {
     HttpPost post = new HttpPost(getServiceUrl() + "ingest");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("mediaPackage", mediaPackageId));
     post.setEntity(new UrlEncodedFormEntity(params));
-    return Main.getClient().execute(post);
+    return client.execute(post);
   }
 
-  public static HttpResponse getWorkflowInstance(String id) throws Exception {
-    return Main.getClient().execute(new HttpGet(Main.getBaseUrl() + "/workflow/rest/instance/" + id + ".xml"));
+  public static HttpResponse getWorkflowInstance(TrustedHttpClient client, String id) throws Exception {
+    return client.execute(new HttpGet(Main.getBaseUrl() + "/workflow/rest/instance/" + id + ".xml"));
   }
 
 }

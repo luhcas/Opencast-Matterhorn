@@ -19,8 +19,8 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfileImpl;
 import org.opencastproject.composer.api.EncodingProfileList;
+import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
-import org.opencastproject.job.api.JobParser;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
@@ -110,14 +110,14 @@ public class ComposerRestServiceTest {
   public void testEncode() throws Exception {
     Response response = restService.encode(generateVideoTrack(), profileId);
     Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-    Assert.assertEquals(JobParser.serializeToString(job), response.getEntity());
+    Assert.assertEquals(new JaxbJob(job), response.getEntity());
   }
 
   @Test
   public void testMux() throws Exception {
     Response response = restService.mux(generateAudioTrack(), generateVideoTrack(), profileId);
     Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-    Assert.assertEquals(JobParser.serializeToString(job), response.getEntity());
+    Assert.assertEquals(new JaxbJob(job), response.getEntity());
   }
 
   @Test
