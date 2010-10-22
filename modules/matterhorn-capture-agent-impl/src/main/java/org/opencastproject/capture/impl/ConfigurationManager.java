@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -248,11 +249,15 @@ public class ConfigurationManager implements ManagedService {
     // TODO: This URL might be protected.  In this case, the proper headers (e.g. X509) would need to be in place.
     // This isn't something that needs to be fixed today, but it needs to be addressed project-wide at some point (soon!). (jt)
     Properties p = new Properties();
+    InputStream is = null;
     try {
       URLConnection urlc = url.openConnection();
-      p.load(urlc.getInputStream());
+      is = urlc.getInputStream();
+      p.load(is);
     } catch (Exception e) {
       logger.warn("Could not get config file from server: {}.", e.getMessage());
+    } finally {
+      IOUtils.closeQuietly(is);
     }
     return p;
   }

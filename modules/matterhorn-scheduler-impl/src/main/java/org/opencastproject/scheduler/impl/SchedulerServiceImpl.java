@@ -15,10 +15,25 @@
  */
 package org.opencastproject.scheduler.impl;
 
+import org.opencastproject.scheduler.api.Event;
+import org.opencastproject.scheduler.api.RecurringEvent;
+import org.opencastproject.scheduler.api.SchedulerFilter;
+import org.opencastproject.series.api.SeriesService;
+
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.ValidationException;
+
+import org.apache.commons.io.IOUtils;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
+import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -31,22 +46,6 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.spi.PersistenceProvider;
-
-import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.ValidationException;
-import org.opencastproject.scheduler.api.Event;
-import org.opencastproject.scheduler.api.RecurringEvent;
-import org.opencastproject.scheduler.api.SchedulerFilter;
-import org.opencastproject.scheduler.impl.CalendarGenerator;
-import org.opencastproject.scheduler.impl.IncompleteDataException;
-
-import org.opencastproject.series.api.SeriesService;
-
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
-import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An implementation of the Scheduler service based on JPA. This version knows about series too.
@@ -79,7 +78,7 @@ public class SchedulerServiceImpl implements ManagedService{
   /** 
    * Properties that are updated by ManagedService updated method
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   protected Dictionary properties;
   
   /**
@@ -96,13 +95,17 @@ public class SchedulerServiceImpl implements ManagedService{
     this.componentContext = componentContext;
     URL dcMappingURL = componentContext.getBundleContext().getBundle().getResource("config/dublincoremapping.properties");
     logger.debug("Using Dublin Core Mapping from {}.",dcMappingURL);
+    InputStream is = null;
     try {
       if (dcMappingURL != null)  {
         URLConnection con = dcMappingURL.openConnection();
-        dcGenerator = new DublinCoreGenerator(con.getInputStream());
+        is = con.getInputStream();
+        dcGenerator = new DublinCoreGenerator(is);
       }
     } catch (IOException e) {
       logger.error("Could not open URL connection to Dublin Core Mapping File after activation");
+    } finally {
+      IOUtils.closeQuietly(is);
     }
     
     URL caMappingURL = componentContext.getBundleContext().getBundle().getResource("config/captureagentmetadatamapping.properties");
@@ -110,10 +113,13 @@ public class SchedulerServiceImpl implements ManagedService{
     try {
       if (caMappingURL != null) {
         URLConnection con = caMappingURL.openConnection();
-        caGenerator = new CaptureAgentMetadataGenerator(con.getInputStream());
+        is = con.getInputStream();
+        caGenerator = new CaptureAgentMetadataGenerator(is);
       }
     } catch (IOException e) {
       logger.error("Could not open URL connection to Capture Agent Metadata Mapping File after activation");
+    } finally {
+      IOUtils.closeQuietly(is);
     }
   } 
   
@@ -618,8 +624,8 @@ public class SchedulerServiceImpl implements ManagedService{
    * {@inheritDoc}
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
+  @SuppressWarnings("rawtypes")
   @Override
-  @SuppressWarnings("unchecked")
   public void updated(Dictionary properties) throws ConfigurationException {
     this.properties = properties;
   }

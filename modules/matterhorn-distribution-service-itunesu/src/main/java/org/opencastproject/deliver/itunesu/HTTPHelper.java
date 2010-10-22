@@ -15,6 +15,8 @@
  */
 package org.opencastproject.deliver.itunesu;
 
+import org.apache.commons.io.IOUtils;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -73,17 +75,22 @@ public class HTTPHelper
    */
   private String readResponse() throws IOException {
     // read the response
-    InputStream inputStream = connection.getInputStream();
-    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-    char [] buffer = new char[BUFFER_SIZE];
+    InputStream inputStream = null;
     StringBuffer stringBuffer = new StringBuffer();
-    for (int n = 0; n >= 0;) {
-      n = reader.read(buffer, 0, buffer.length);
-      if (n > 0) {
-        stringBuffer.append(buffer, 0, n);
+
+    try {
+      inputStream = connection.getInputStream();
+      BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+      char [] buffer = new char[BUFFER_SIZE];
+      for (int n = 0; n >= 0;) {
+        n = reader.read(buffer, 0, buffer.length);
+        if (n > 0) {
+          stringBuffer.append(buffer, 0, n);
+        }
       }
+    } finally {
+      IOUtils.closeQuietly(inputStream);
     }
-    inputStream.close();
 
     return stringBuffer.toString();
   }
