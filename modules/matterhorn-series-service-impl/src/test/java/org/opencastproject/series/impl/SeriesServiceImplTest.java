@@ -22,23 +22,20 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 import junit.framework.Assert;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.persistence.jpa.PersistenceProvider;
-import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-
-import javax.sql.DataSource;
 
 public class SeriesServiceImplTest {
 
@@ -46,25 +43,19 @@ public class SeriesServiceImplTest {
 
   SeriesImpl series;
 
-  private DataSource datasource;
+  private ComboPooledDataSource pooledDataSource = null;
 
-  private static final String storageRoot = "target" + File.separator + "service-test-db";
-
-  private DataSource connectToDatabase(File storageDirectory) {
-    JdbcConnectionPool cp = JdbcConnectionPool.create("jdbc:h2:" + storageDirectory + ";LOCK_MODE=1;MVCC=TRUE", "sa",
-            "sa");
-    return cp;
-  }
-  
   @Before
-  public void setup() {
-    File storageDir = new File(storageRoot);
-    storageDir.mkdirs();
-    datasource = connectToDatabase(new File(storageDir, "db"));
+  public void setup() throws Exception {
+    pooledDataSource = new ComboPooledDataSource();
+    pooledDataSource.setDriverClass("org.h2.Driver");
+    pooledDataSource.setJdbcUrl("jdbc:h2:./target/db" + System.currentTimeMillis() + ";LOCK_MODE=1;MVCC=TRUE");
+    pooledDataSource.setUser("sa");
+    pooledDataSource.setPassword("sa");
 
     // Collect the persistence properties
     Map<String, Object> props = new HashMap<String, Object>();
-    props.put("javax.persistence.nonJtaDataSource", datasource);
+    props.put("javax.persistence.nonJtaDataSource", pooledDataSource);
     props.put("eclipselink.ddl-generation", "create-tables");
     props.put("eclipselink.ddl-generation.output-mode", "database");
 
@@ -109,7 +100,7 @@ public class SeriesServiceImplTest {
   public void teardown() throws Exception {
     service.deactivate(null);
     service = null;
-    FileUtils.deleteDirectory(new File(storageRoot));
+    pooledDataSource.close();
   }
 
   @Test
