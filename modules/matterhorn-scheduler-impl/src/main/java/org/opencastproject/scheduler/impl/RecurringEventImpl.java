@@ -36,6 +36,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -253,9 +254,30 @@ public class RecurringEventImpl extends AbstractEvent implements RecurringEvent 
       DateList dates = recur.getDates(seed, period, Value.DATE_TIME);
       logger.debug("DateList: {}", dates);
       for (Object date : dates) {
-        // Dates in the DateList do not have times. Add the start time to the date so we know what time to start as well
-        // as what day.
         Date d = (Date) date;
+        logger.info("Date: {}", d);
+        //Adjust for DST, if start of event 
+        //Create timezone based on CA's reported TZ.
+        TimeZone tz = null;
+        try {
+          if(!this.getValue("agentTimeZone").isEmpty()){
+            tz = TimeZone.getTimeZone(this.getValue("agentTimeZone"));
+          }
+        } catch (IncompleteDataException e){
+          logger.debug("IncompleteDataException, Probably agentTimeZone doesn't exist... {}", e);
+        }
+        if(tz == null){ //No timezone was present, assume the serve's local timezone.
+            tz = TimeZone.getDefault();
+        }
+        if(tz.inDaylightTime(seed)){ //Event starts in DST
+          if(!tz.inDaylightTime(d)){//Date not in DST?
+            d.setTime(d.getTime() + tz.getDSTSavings()); //Ajust for Fall back one hour
+          }
+        }else{ //Event doesn't start in DST
+          if(tz.inDaylightTime(d)){
+            d.setTime(d.getTime() - tz.getDSTSavings()); //Adjust for Spring forward one hour
+          }
+        }
         generatedDates.add(d);
       }
     } catch (ParseException e) {

@@ -96,6 +96,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -1060,6 +1061,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         //TODO:  Do we need this?  What is it used for?  If nothing else the key should be in the capture parameters file...
         Calendar cal = Calendar.getInstance();
         p.setProperty("capture.device.timezone.offset", Integer.toString((cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET)) / (60 * 1000)));
+        p.setProperty("capture.device.timezone", TimeZone.getDefault().getID());
       } else {
         logger.warn("Returning null capabilities from capture agent...");
       }
