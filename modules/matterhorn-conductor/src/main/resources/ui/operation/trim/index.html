@@ -16,6 +16,7 @@
       #actions{margin: 0 auto; text-align:center; width:100%;}
     </style>
     <script type="text/javascript" src="/admin/jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="/admin/jquery/jquery-ui-1.8.5.custom.min.js"></script>
     <!--<script src="engage-hybrid-player/bridge/lib/FABridge.js" type="text/javascript"></script>
     <script src="engage-hybrid-player/bridge/Videodisplay.js" type="text/javascript"></script>-->
     <script type="text/javascript">
@@ -29,6 +30,9 @@
       
       $(document).ready(function() {
         var id = postData.id;
+
+        //create Buttons
+        $('.ui-button').button();
 
         window.parent.$('.paging-nav-container').hide(0);
         $('#trimming-hint').toggle();
@@ -77,7 +81,7 @@
         //Event forward one second (inpoint)
         $('#step-in-forward').click( function () {
           var currentTime = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
-          $('#player-container')[0].contentWindow.Videodisplay.seek(currentTimer + 1);
+          $('#player-container')[0].contentWindow.Videodisplay.seek(currentTime + 1);
           window.setTimeout( function () {
             $('#inPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
           }, 500);
@@ -272,6 +276,17 @@
             $('div#errorMessage').html("The In-Point must not be bigger than the Out-Point");
         }
 	  }
+
+    function cancel() 
+    {
+      //window.parent.$('#holdActionPanel-container').toggle();
+      //window.parent.$('#recordings-table-container').toggle();
+      //window.parent.$('#oc_recordingmenu').toggle();
+      //window.parent.$('.paging-nav-container').toggle();
+      //window.parent.$('#refresh-controls-container').toggle();
+      //window.parent.$('#category-selector-container').parent().toggle();
+      window.parent.location.reload(true);
+    }
     </script>
   </head>
   <body>
@@ -315,18 +330,18 @@
     <div id="actions">
          <!-- control buttons -->
 
-         <label for="inPoint">In point</label>
+         <label for="inPoint" style="padding-left: 10px">In point</label>
           <input type="text" id="inPoint" readonly="readonly"></input> 
-          <input type="button" id="set-trimin" title="Set to current time" value="Set to current time" class="ui-button ui-widget ui-state-default ui-corner-all" />
-          <input type="button" id="play-from-in" title="Start playing at current In point" value="&gt;Play from in" class="ui-button ui-widget ui-state-default ui-corner-all" /> 
-          <input type="button" id="step-in-forward" title="Step forward one second" value="&gt;&gt;" class="ui-button ui-widget ui-state-default ui-corner-all" />
-          <input type="button" id="step-in-backward" title="Step backward one second" value="&lt;&lt;" class="ui-button ui-widget ui-state-default ui-corner-all" /><br />
-         <label for="outPoint">Out point</label> 
+          <input type="button" style="width: 160px;" id="set-trimin" title="Set to current time" value="Set to current time" class="ui-button" />
+          <input type="button" id="play-from-in" style="width: 120px;"  title="Start playing at current In point" value="&gt;Play from in" class="ui-button" /> 
+          <input type="button" id="step-in-forward" title="Step forward one second" value="&gt;&gt;" class="ui-button" />
+          <input type="button" id="step-in-backward" title="Step backward one second" value="&lt;&lt;" class="ui-button" /><br />
+         <label for="outPoint" class="label">Out point</label> 
           <input type="text" id="outPoint" readonly="readonly"></input> 
-          <input type="button" id="set-trimout" title="Set to current time" value="Set to current time" class="ui-button ui-widget ui-state-default ui-corner-all" /> 
-          <input type="button" id="play-to-out" title="Play last 10 seconds to Out point" value="&gt;Play to out" class="ui-button ui-widget ui-state-default ui-corner-all" />
-          <input type="button" id="step-out-forward" title="Step forward one second" value="&gt;&gt;" class="ui-button ui-widget ui-state-default ui-corner-all" />
-          <input type="button" id="step-out-backward" title="Step backward one second" value="&lt;&lt;" class="ui-button ui-widget ui-state-default ui-corner-all" /><br />
+          <input type="button" style="width: 160px;" id="set-trimout" title="Set to current time" value="Set to current time" class="ui-button" /> 
+          <input type="button" id="play-to-out" style="width: 120px;" title="Play last 10 seconds to Out point" value="&gt;Play to out" class="ui-button" />
+          <input type="button" id="step-out-forward" title="Step forward one second" value="&gt;&gt;" class="ui-button" />
+          <input type="button" id="step-out-backward" title="Step backward one second" value="&lt;&lt;" class="ui-button" /><br />
           <br />
          <div id="errorMessage" class="error">
          </div>
@@ -334,14 +349,14 @@
           <p style="color:green;">This Recording will be trimmed according to the In and Outpoints you have set when you continue.</p>
          </div>
          <input title="Move on to next steps in processing this recording" 
-                style="margin-right: 16px; width: 160px;" 
+                style="margin-left: 205px; margin-right: 16px; width: 160px;" 
                 onclick="continueWorkflow();" 
                 id="continueBtn" 
                 type="button"
-                class="ui-button ui-widget ui-state-default ui-corner-all"
+                class="ui-button ui-corner-all"
                 value="Continue processing" />
-         <input  id="edit-link" type="button" style="margin-right: 16px;" value="Edit before continuing" class="ui-button ui-widget ui-state-default ui-corner-all" />
-         <input onclick="$('#holdActionPanel-container',top.document).toggle();$('#recordings-table-container',top.document).toggle();$('#oc_recordingmenu' ,top.document).toggle();$('.paging-nav-container',top.document).toggle();$('#refresh-controls-container',top.document).toggle();$('#category-selector-container',top.document).parent().toggle();" title="Cancel" style="margin-right: 16px;" type="button" value="Cancel" class="ui-button ui-widget ui-state-default ui-corner-all" />
+         <a id="edit-link" type="button" style="margin-right: 16px;">Edit before continuing</a>
+         <a onclick="cancel()" title="Cancel" style="margin-right: 16px;">Cancel</a>
      </div>
   </body>
 </html>
