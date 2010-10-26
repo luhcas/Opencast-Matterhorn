@@ -31,6 +31,7 @@
         var id = postData.id;
 
         window.parent.$('.paging-nav-container').hide(0);
+        $('#trimming-hint').toggle();
 
         // Event edit link clicked
         $('#edit-link').click( function () {
@@ -42,28 +43,34 @@
         // Event set inpoint clicked
         $('#set-trimin').click( function () {
           var tmpinpoint = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
-//          tmpinpoint = parseInt(tmpinpoint[0]) * 60 * 60 + parseInt(tmpinpoint[1]) * 60 + parseInt(tmpinpoint[2]);
           if(tmpinpoint > outpoint && outpoint != 0) {
-            $('div#errorMessage').html("In point cannot be bigger than oupoint");
+            $('div#errorMessage').html("In point must be earlier than Out point");
           } else
           {
             $('#inPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
             inpoint = tmpinpoint;
             $('div#errorMessage').html('');
+            if(outpoint != 0)
+            {
+              $('#trimming-hint').show(0);
+            }
           }
         });
 
         //Event set outpoint clicked
         $('#set-trimout').click( function () {
           var tmpoutpoint = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
-          //tmpoutpoint = parseInt(tmpoutpoint[0]) * 60 * 60 + parseInt(tmpoutpoint[1]) * 60 + parseInt(tmpoutpoint[2]);
           if(tmpoutpoint < inpoint) {
-            $('div#errorMessage').html("Out point cannot be smaller than inpoint");
+            $('div#errorMessage').html("Out point must be later than In point");
           } else
           {
             $('#outPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
             outpoint = tmpoutpoint;
             $('div#errorMessage').html('');
+            if(inpoint != 0)
+            {
+              $('#trimming-hint').show(0);
+            }
           }
         });
 
@@ -322,7 +329,10 @@
           <input type="button" id="step-out-backward" title="Step backward one second" value="&lt;&lt;" class="ui-button ui-widget ui-state-default ui-corner-all" /><br />
           <br />
          <div id="errorMessage" class="error">
-         </div><br />
+         </div>
+         <div id="trimming-hint">
+          <p style="color:green;">This Recording will be trimmed according to the In and Outpoints you have set when you continue.</p>
+         </div>
          <input title="Move on to next steps in processing this recording" 
                 style="margin-right: 16px; width: 160px;" 
                 onclick="continueWorkflow();" 
