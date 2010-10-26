@@ -26,11 +26,10 @@ Opencast.Analytics = ( function() {
   function showAnalytics()
   {
       $("#oc_btn-analytics").attr({ 
-          alt:   ANALYTICSHIDE,
           title: ANALYTICSHIDE,
-          value: ANALYTICSHIDE
       });
       $("#oc_btn-analytics").attr('aria-pressed', 'true');
+      $("#oc_btn-analytics").html(ANALYTICSHIDE);
 
       $.ajax( {
         type : 'GET',
@@ -82,11 +81,10 @@ Opencast.Analytics = ( function() {
   function hideAnalytics()
   {
       $("#oc_btn-analytics").attr({ 
-          alt: ANALYTICS,
           title: ANALYTICS,
-          value: ANALYTICS
       });
       $("#oc_btn-analytics").attr('aria-pressed', 'false');
+      $("#oc_btn-analytics").html(ANALYTICS);
       
       $("#analytics").hide();
       $(".segments").css('top', '0px');

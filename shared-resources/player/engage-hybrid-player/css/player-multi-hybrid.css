@@ -310,8 +310,10 @@ table
   width:                    130px;
   margin-right:             5px;
   margin-top:               2px;
-  border:                   1px solid #2D8F8B;
 }
+a.oc_btn-tabs:active  { outline: none; }
+a.oc_btn-tabs:link    { outline: none; }
+a.oc_btn-tabs:visited { outline: none; }
 
 .oc_tabTableLeft
 {
@@ -530,8 +532,6 @@ option:hover
 {
   overflow-x:               hidden;
   overflow-y:               hidden;
-  border:                   1px;
-  border-style:             solid;
 }
   
 .player-chrome 
@@ -837,3 +837,6 @@ option:hover
   text-align:               center;
   margin-bottom:            4px;
 }
+
+#oc_ui_tabs { margin-bottom: 10px; }
+ 

@@ -91,7 +91,7 @@ Opencast.Player = (function () {
     displayMode            = "",
     optionClassName        = "",
     seekState              = PAUSING;
-   
+    
    
      /**
      @memberOf Opencast.Player
@@ -411,13 +411,13 @@ Opencast.Player = (function () {
      */
     function showSlides()
     {
-        $("#oc_slides").attr("className", "oc_DisplayBlock");
         $("#oc_btn-slides").attr({ 
-            alt: SLIDESHIDE,
-            title: SLIDESHIDE,
-            value: SLIDESHIDE
+            title: SLIDESHIDE
         });
+        $("#oc_btn-slides").html(SLIDESHIDE);
         $("#oc_btn-slides").attr('aria-pressed', 'true');
+        // Sets slider container width after panels are displayed
+        setTimeout('Opencast.segments.sizeSliderContainer();', 500);
     }
     
     /**
@@ -426,12 +426,10 @@ Opencast.Player = (function () {
      */
     function hideSlides()
     {
-        $("#oc_slides").attr("className", "oc_DisplayNone");
         $("#oc_btn-slides").attr({ 
-            alt: SLIDES,
-            title: SLIDES,
-            value: SLIDES
+            title: SLIDES
         });
+        $("#oc_btn-slides").html(SLIDES);
         $("#oc_btn-slides").attr('aria-pressed', 'false');
     }
 
@@ -443,10 +441,9 @@ Opencast.Player = (function () {
     {
         $("#oc_notes").attr("className", "oc_DisplayBlock");
         $("#oc_btn-notes").attr({ 
-            alt: NOTESHIDE,
-            title: NOTESHIDE,
-            value: NOTESHIDE
+            title: NOTESHIDE
         });
+        $("#oc_btn-notes").html(NOTESHIDE);
         $("#oc_btn-notes").attr('aria-pressed', 'true');
     }
     
@@ -458,10 +455,9 @@ Opencast.Player = (function () {
     {
         $("#oc_notes").attr("className", "oc_DisplayNone");
         $("#oc_btn-notes").attr({ 
-            alt: NOTES,
-            title: NOTES,
-            value: NOTES
+            title: NOTES
         });
+        $("#oc_btn-notes").html(NOTES);
         $("#oc_btn-notes").attr('aria-pressed', 'false');
     }
 
@@ -473,13 +469,10 @@ Opencast.Player = (function () {
      */
     function showSlideText()
     {
-        $("#oc_slidetext").removeClass("oc_DisplayNone");
-        $("#oc_slidetext").addClass("oc_DisplayBlock-textleft");
         $("#oc_btn-slidetext").attr({ 
-            alt: SLIDETEXTHIDE,
-            title: SLIDETEXTHIDE,
-            value: SLIDETEXTHIDE
+            title: SLIDETEXTHIDE
         });
+        $("#oc_btn-slidetext").html(SLIDETEXTHIDE);
         $("#oc_btn-slidetext").attr('aria-pressed', 'true');
     }
     
@@ -489,13 +482,10 @@ Opencast.Player = (function () {
      */
     function hideSlideText()
     {
-        $("#oc_slidetext").removeClass("oc_DisplayBlock-textleft");
-        $("#oc_slidetext").addClass("oc_DisplayNone");
         $("#oc_btn-slidetext").attr({ 
-            alt: SLIDETEXT,
-            title: SLIDETEXT,
-            value: SLIDETEXT
+            title: SLIDETEXT
         });
+        $("#oc_btn-slidetext").html(SLIDETEXT);
         $("#oc_btn-slidetext").attr('aria-pressed', 'false');
     }
     
@@ -535,12 +525,10 @@ Opencast.Player = (function () {
      */
     function showShortcuts()
     {
-        $("#oc_shortcuts").attr("className", "oc_DisplayBlock-textleft");
         $("#oc_btn-shortcuts").attr({ 
-            alt: SHORTCUTSHIDE,
             title: SHORTCUTSHIDE,
-            value: SHORTCUTSHIDE
         });
+        $("#oc_btn-shortcuts").html(SHORTCUTSHIDE);
         $("#oc_btn-shortcuts").attr('aria-pressed', 'true');
         addAlert($("#oc_shortcuts").text());
     }
@@ -551,12 +539,10 @@ Opencast.Player = (function () {
      */
     function hideShortcuts()
     {
-        $("#oc_shortcuts").attr("className", "oc_DisplayNone");
         $("#oc_btn-shortcuts").attr({ 
-            alt: SHORTCUTS,
             title: SHORTCUTS,
-            value: SHORTCUTS
         });
+        $("#oc_btn-shortcuts").html(SHORTCUTS);
         $("#oc_btn-shortcuts").attr('aria-pressed', 'false');
     }
 
@@ -566,13 +552,13 @@ Opencast.Player = (function () {
      */
     function showEmbed()
     {
-        $("#oc_embed").attr("className", "oc_DisplayBlock");
         $("#oc_btn-embed").attr({ 
             alt: EMBEDHIDE,
             title: EMBEDHIDE,
-            value: EMBEDHIDE
+            "aria-pressed": true
         });
-        $("#oc_btn-embed").attr('aria-pressed', 'true');
+        $("#oc_btn-embed").html(EMBEDHIDE);
+        $("#oc_btn-embed").attr("aria-pressed", "true");
     }
     
     /**
@@ -581,13 +567,11 @@ Opencast.Player = (function () {
      */
     function hideEmbed()
     {
-        $("#oc_embed").attr("className", "oc_DisplayNone");
         $("#oc_btn-embed").attr({ 
-            alt: EMBED,
-            title: EMBED,
-            value: EMBED
+            title: EMBED
         });
-        $("#oc_btn-embed").attr('aria-pressed', 'false');
+        $("#oc_btn-embed").html(EMBED);
+        $("#oc_btn-embed").attr("aria-pressed", "false");;
     }
     
     /**
@@ -629,13 +613,11 @@ Opencast.Player = (function () {
      */
     function showDescription()
     {
-        $("#oc_description").attr("className", "oc_DisplayBlock-textleft");
         $("#oc_btn-description").attr({ 
-            alt: DESCRIPTIONHIDE,
-            title: DESCRIPTIONHIDE,
-            value: DESCRIPTIONHIDE
+            title: DESCRIPTIONHIDE
         });
-        $("#oc_btn-description").attr('aria-pressed', 'true');
+        $("#oc_btn-description").html(DESCRIPTIONHIDE);
+        $("#oc_btn-description").attr("aria-pressed", "true");
     }
 
     /**
@@ -644,13 +626,11 @@ Opencast.Player = (function () {
      */
     function hideDescription()
     {
-        $("#oc_description").attr("className", "oc_DisplayNone");
         $("#oc_btn-description").attr({ 
-            alt: DESCRIPTION,
-            title: DESCRIPTION,
-            value: DESCRIPTION
+            title: DESCRIPTION
         });
-        $("#oc_btn-description").attr('aria-pressed', 'false');
+        $("#oc_btn-description").html(DESCRIPTION);
+        $("#oc_btn-description").attr("aria-pressed", "false");
     }
     
     /**
@@ -666,17 +646,11 @@ Opencast.Player = (function () {
             hideSlideText();
             hideShortcuts();
             hideEmbed();
-            $(".oc_btn-tabs").css("color", "white");
-            $(".oc_btn-tabs").css("background-color", "#2D8F8B");
-            $("#oc_btn-slides").css("color", "#2D8F8B");
-            $("#oc_btn-slides").css("background-color", "white");
             setShowSections(true);
         }
         else
         {
             hideSlides();
-            $(".oc_btn-tabs").css("color", "white");
-            $(".oc_btn-tabs").css("background-color", "#2D8F8B");
             setShowSections(false);
         }
         Opencast.Initialize.doResize();
@@ -693,10 +667,12 @@ Opencast.Player = (function () {
             showNotes(); 
             hideShortcuts();
             hideDescription();
+            setShowSections(true);
         }
         else
         {
             hideNotes();
+            setShowSections(false);
         }
     }
 
@@ -713,17 +689,11 @@ Opencast.Player = (function () {
             hideDescription();
             hideShortcuts();
             hideEmbed();
-            $(".oc_btn-tabs").css("color", "white");
-            $(".oc_btn-tabs").css("background-color", "#2D8F8B");
-            $("#oc_btn-slidetext").css("color", "#2D8F8B");
-            $("#oc_btn-slidetext").css("background-color", "white");
-            setShowSections(true);       
+            setShowSections(true);
         }
         else
         {
             hideSlideText();
-            $(".oc_btn-tabs").css("color", "white");
-            $(".oc_btn-tabs").css("background-color", "#2D8F8B");
             setShowSections(false);
         }
         Opencast.Initialize.doResize();
@@ -738,11 +708,13 @@ Opencast.Player = (function () {
         if ($("#oc_btn-transcript").attr("title") === TRANSCRIPT)
         {
             showTranscript();
-            hideSlideText(); 
+            hideSlideText();
+            setShowSections(true); 
         }
         else
         {
             hideTranscript();
+            setShowSections(false);
         }
     }
 
@@ -759,17 +731,11 @@ Opencast.Player = (function () {
             hideSlides();
             hideDescription();
             hideEmbed();
-            $(".oc_btn-tabs").css("color", "white");
-            $(".oc_btn-tabs").css("background-color", "#2D8F8B");
-            $("#oc_btn-shortcuts").css("color", "#2D8F8B");
-            $("#oc_btn-shortcuts").css("background-color", "white");
             setShowSections(true);
         }
         else
         {
             hideShortcuts();
-            $(".oc_btn-tabs").css("color", "white");
-            $(".oc_btn-tabs").css("background-color", "#2D8F8B");
             setShowSections(false);
         }
         Opencast.Initialize.doResize();
@@ -788,17 +754,11 @@ Opencast.Player = (function () {
             hideSlideText();
             hideSlides();
             hideDescription();
-            $(".oc_btn-tabs").css("color", "white");
-            $(".oc_btn-tabs").css("background-color", "#2D8F8B");
-            $("#oc_btn-embed").css("color", "#2D8F8B");
-            $("#oc_btn-embed").css("background-color", "white");
             setShowSections(true);
         }
         else
         {
             hideEmbed();
-            $(".oc_btn-tabs").css("color", "white");
-            $(".oc_btn-tabs").css("background-color", "#2D8F8B");
             setShowSections(false);
         }
         Opencast.Initialize.doResize();
@@ -838,17 +798,11 @@ Opencast.Player = (function () {
             hideSlideText();
             hideShortcuts();
             hideEmbed();
-            $(".oc_btn-tabs").css("color", "white");
-            $(".oc_btn-tabs").css("background-color", "#2D8F8B");
-            $("#oc_btn-description").css("color", "#2D8F8B");
-            $("#oc_btn-description").css("background-color", "white");
             setShowSections(true);
         }
         else
         {
             hideDescription();
-            $(".oc_btn-tabs").css("color", "white");
-            $(".oc_btn-tabs").css("background-color", "#2D8F8B");
             setShowSections(false);
         }
         Opencast.Initialize.doResize();
@@ -1751,6 +1705,6 @@ Opencast.Player = (function () {
         setVolumeSlider : setVolumeSlider,
         setVideoSizeList : setVideoSizeList,
         currentTime : currentTime,
-        flashVars: flashVars
+        flashVars: flashVars,
     };
 }());

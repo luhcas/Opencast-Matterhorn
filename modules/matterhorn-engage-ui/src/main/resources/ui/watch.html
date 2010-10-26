@@ -14,6 +14,7 @@
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/opencast-reset.css" />
     <link rel="stylesheet" type="text/css" href="jquery/plugins/jwysiwyg/jquery.wysiwyg.css"  />
     <link rel="stylesheet" type="text/css" href="css/oc.segments.css">
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.5.custom.css">
     <style type="text/css">
       .scroll {height: 100px; overflow: scroll;}
     </style>
@@ -64,6 +65,26 @@
           $('#oc_btn-embed').hide();
           $('#oc_slidetext').addClass('scroll');
         }
+        
+        /* initalise closed tabs */
+        $("#oc_ui_tabs").tabs({ selected: -1});
+        $("#oc_ui_tabs").tabs( "option", "collapsible", true );
+        /* handle select event for each tab */
+        $("#oc_ui_tabs").tabs({
+            select: function(event, ui)
+            {
+              switch(ui.index)
+              {
+                case 0: Opencast.Player.doToggleDescription(); break;
+                case 1: Opencast.Player.doToggleSlides(); break;
+                case 2: Opencast.Player.doToggleSlideText(); break;
+                case 3: Opencast.Player.doToggleShortcuts(); break;
+                case 4: Opencast.Player.doToggleEmbed(); break;
+                case 5: Opencast.Analytics.doToggleAnalytics(event, ui); return false;
+                case 6: Opencast.Annotation_Chapter.doToggleAnnotation_Chapter(event, ui); return false;
+              }
+            }
+        });
       })
     </script>
   </head>
@@ -159,63 +180,68 @@
 
     <div class="clear"></div>
       
-    <div id="oc_tabs" class="oc_tabs-input">
-      <input id="oc_btn-description" class="oc_btn-tabs handcursor" type="submit" onClick="Opencast.Player.doToggleDescription()" name="Description" value="Description" alt="Description" title="Description"></input>
-      <input id="oc_btn-slides" class="oc_btn-tabs handcursor" type="submit" onClick="Opencast.Player.doToggleSlides()" name="Hide Segments" value="Hide Segments" alt="Hide Segments" title="Hide Segments"></input>
-      <input id="oc_btn-slidetext" class="oc_btn-tabs handcursor" type="submit" onClick="Opencast.Player.doToggleSlideText()" name="Segment Text" value="Segment Text" alt="Segment Text" title="Segment Text"></input>
-      <input id="oc_btn-shortcuts" class="oc_btn-tabs handcursor" type="submit" onClick="Opencast.Player.doToggleShortcuts()" name="Shortcuts" value="Shortcuts" alt="Shortcuts" title="Shortcuts"></input>
-      <input id="oc_btn-embed" class="oc_btn-tabs handcursor" type="submit" onClick="Opencast.Player.doToggleEmbed()" name="Embed" value="Embed" alt="Embed" title="Embed"></input>
-      <input id="oc_btn-analytics" class="oc_btn-tabs handcursor" type="submit" onClick="Opencast.Analytics.doToggleAnalytics()" name="Analytics" value="Analytics" alt="Analytics" title="Analytics"></input>
-      <input id="oc_btn-annotation_chapter" class="oc_btn-tabs handcursor" type="submit" onClick="Opencast.Annotation_Chapter.doToggleAnnotation_Chapter()" name="Annotation" value="Annotation" alt="Annotation" title="Annotation"></input>
-    </div>
+    <div id="oc_ui_tabs">
+      <div id="oc_tabs" class="oc_tabs-input">
+        <ul>
+          <li><a href="#oc_description" id="oc_btn-description" class="oc_btn-tabs handcursor" title="Description">Description</a></li>
+          <li><a href="#oc_slides" id="oc_btn-slides" class="oc_btn-tabs handcursor" title="Segments">Segments</a></li>
+          <li><a href="#oc_slidetext" id="oc_btn-slidetext" class="oc_btn-tabs handcursor" title="Segment Text">Segment Text</a></li>
+          <li><a href="#oc_shortcuts" id="oc_btn-shortcuts" class="oc_btn-tabs handcursor" title="Shortcuts">Shortcuts</a></li>
+          <li><a href="#oc_embed" id="oc_btn-embed" class="oc_btn-tabs handcursor" title="Embed">Embed</a></li>
+          <li><a href=":javascript" id="oc_btn-analytics" class="oc_btn-tabs handcursor" title="Analytics">Analytics</a></li>
+          <li><a href=":javascript" id="oc_btn-annotation_chapter" class="oc_btn-tabs handcursor" title="Annotation">Annotation</a></li>
+        </ul>
+      </div>
       
-    <div id="oc_description" class="oc_DisplayNone fl-fix">
-      <h4>Description</h4>
-    </div>
+      <div id="oc_description" class="fl-fix">
+        <h4>Description</h4>
+      </div>
 
-    <div id="oc_slides" class="oc_DisplayBlock">
-      <div id="segments-holder" class="oc-segments-holder">
-        <div id="oc_segment-table" class="oc-segments">
+      <div id="oc_slides" class="oc_DisplayBlock">
+        <div id="segments-holder" class="oc-segments-holder">
+          <div id="oc_segment-table" class="oc-segments">
+          </div>
         </div>
       </div>
-    </div>
-    
-    <div id="oc_slidetext" class="oc_DisplayNone fl-fix">
-      <div id="oc_slidetext-right" class="oc_slidetext-right">
-        <input id="oc_lecturer-search-field" class="oc_search-Field" type="text" onkeyup="Opencast.search.showResult(this.value)" size="30" value="Search this Recording"></input>
-      </div>
-      <div id="oc_slidetext-left" class="oc_slidetext-left"></div>
-    </div>
-
-    <div id=oc_shortcuts class="oc_DisplayNone fl-fix" >
-      <span id="skip">
-        <a name="shortcuts"></a>
-      </span>
-      <h4>Player-Shortcuts</h4>
-      <div id="oc_client_shortcuts"></div>
-    </div>
-
-    <div id="oc_embed" class="oc_DisplayNone fl-fix">
-      <div id="oc_embed-left">
-      <input id="oc_embed-icon-one" class="oc_embed-icon-one" type="submit" name="" alt="" title="" value=""> </input>
-      <input id="oc_embed-icon-two" class="oc_embed-icon-two" type="submit" name="" alt="" title="" value=""> </input>
-      <input id="oc_embed-icon-three" class="oc_embed-icon-three" type="submit" name="" alt="" title="" value="""> </input>
-      <input id="oc_embed-icon-four" class="oc_embed-icon-four" type="submit" name="" alt="" title="" value=""> </input>
-      <input id="oc_embed-icon-five" class="oc_embed-icon-five" type="submit" name="" alt="" title="" value=""> </input>
-       </div>
-     <div id="oc_embed-right">
-        <div id="oc_embed-custom-title">Custom Size:</div>
-        <input id="oc_costum-width" type="text" value="width:" disabled></input>
-        <input id="oc_embed-costum-width-textinput" maxlength="4" type="text" name="Costum width min 300px" alt="Costum width min 300px" title="Costum width min 300px" value=""></input>
-        <div class="clear"></div>
-        <input id="oc_costum-height" type="text" value="height:" disabled></input>
-        <input id="oc_embed-costum-height-textinput" maxlength="4" type="text" name="" alt="" title="" value=""></input>
       
-       </div>
-      <div class="clear"></div>
-      Choose your embed size. Copy the text and paste it in your html page. 
-      <textarea id="oc_embed-textarea" class="oc_embed-textarea" rows="2" cols="1"></textarea>
-    </div>
+      <div id="oc_slidetext" class="fl-fix">
+        <div id="oc_slidetext-right" class="oc_slidetext-right">
+          <input id="oc_lecturer-search-field" class="oc_search-Field" type="text" onkeyup="Opencast.search.showResult(this.value)" size="30" value="Search this Recording"></input>
+        </div>
+        <div id="oc_slidetext-left" class="oc_slidetext-left"></div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="oc_shortcuts" class="fl-fix" >
+        <span id="skip">
+          <a name="shortcuts"></a>
+        </span>
+        <h4>Player-Shortcuts</h4>
+        <div id="oc_client_shortcuts"></div>
+      </div>
+
+      <div id="oc_embed" class="fl-fix">
+        <div id="oc_embed-left">
+        <input id="oc_embed-icon-one" class="oc_embed-icon-one" type="submit" name="" alt="" title="" value=""> </input>
+        <input id="oc_embed-icon-two" class="oc_embed-icon-two" type="submit" name="" alt="" title="" value=""> </input>
+        <input id="oc_embed-icon-three" class="oc_embed-icon-three" type="submit" name="" alt="" title="" value="""> </input>
+        <input id="oc_embed-icon-four" class="oc_embed-icon-four" type="submit" name="" alt="" title="" value=""> </input>
+        <input id="oc_embed-icon-five" class="oc_embed-icon-five" type="submit" name="" alt="" title="" value=""> </input>
+         </div>
+       <div id="oc_embed-right">
+          <div id="oc_embed-custom-title">Custom Size:</div>
+          <input id="oc_costum-width" type="text" value="width:" disabled></input>
+          <input id="oc_embed-costum-width-textinput" maxlength="4" type="text" name="Costum width min 300px" alt="Costum width min 300px" title="Costum width min 300px" value=""></input>
+          <div class="clear"></div>
+          <input id="oc_costum-height" type="text" value="height:" disabled></input>
+          <input id="oc_embed-costum-height-textinput" maxlength="4" type="text" name="" alt="" title="" value=""></input>
+        
+         </div>
+        <div class="clear"></div>
+        Choose your embed size. Copy the text and paste it in your html page. 
+        <textarea id="oc_embed-textarea" class="oc_embed-textarea" rows="2" cols="1"></textarea>
+      </div>
+    </div><!-- END #oc_ui_tabs -->
   </div> 
   <div id="segment-tooltip" class="segment-tooltip" style="display: none;"></div>
   </body>

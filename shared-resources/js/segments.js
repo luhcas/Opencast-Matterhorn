@@ -61,26 +61,12 @@ Opencast.segments = ( function() {
           $container
             .css('width', ($panels[0].offsetWidth * $panels.length))
             .css('left', "0px");
-		// Disable and grey out "Annotation" Tab
-         $("#oc_btn-annotation_chapter").removeClass("oc_btn-tabs");
-         $("#oc_btn-annotation_chapter").removeClass("handcursor");
-         $('#oc_btn-annotation_chapter').attr("disabled", "true");
-         $("#oc_btn-annotation_chapter").css("color", "#dddddd");
-         $("#oc_btn-annotation_chapter").css("background-color", "#aaaaaa");
+          // Disable and grey out "Annotation" Tab
+          $("#oc_ui_tabs").tabs({disabled: [6]});
        } else {
          // Disable and grey out "Slides" Tab
-         $("#oc_btn-slides").removeClass("oc_btn-tabs");
-         $("#oc_btn-slides").removeClass("handcursor");
-         $('#oc_btn-slides').attr("disabled", "true");
-         $("#oc_btn-slides").css("color", "#dddddd");
-         $("#oc_btn-slides").css("background-color", "#aaaaaa");
-
          // Disable and grey out "Slides Text" Tab
-         $("#oc_btn-slidetext").removeClass("oc_btn-tabs");
-         $("#oc_btn-slidetext").removeClass("handcursor");
-         $('#oc_btn-slidetext').attr("disabled", "true");
-         $("#oc_btn-slidetext").css("color", "#dddddd");
-         $("#oc_btn-slidetext").css("background-color", "#aaaaaa");
+         $("#oc_ui_tabs").tabs({disabled: [1, 2]});
          
        }
       var scroll = $('#slider .scroll').css('overflow', 'hidden');
@@ -236,6 +222,19 @@ Opencast.segments = ( function() {
     }, 0);
 
   }
+  
+  /**
+   * @memberOf Opencast.segments
+   * @description Sets scrollContainer width
+   */
+  function sizeSliderContainer()
+    {
+      var $panels       = $('#slider .scrollContainer > div');
+      var $container      = $('#slider .scrollContainer');
+      $container
+            .css('width', ($panels[0].offsetWidth * $panels.length))
+            .css('left', "0px");
+    }
 
   /**
    * @memberOf Opencast.segments
@@ -272,6 +271,7 @@ Opencast.segments = ( function() {
     getSecondsBeforeSlide : getSecondsBeforeSlide,
     getSecondsNextSlide : getSecondsNextSlide,
     getSlideLength : getSlideLength,
-    initialize : initialize
+    initialize : initialize,
+    sizeSliderContainer : sizeSliderContainer
   };
 }());
