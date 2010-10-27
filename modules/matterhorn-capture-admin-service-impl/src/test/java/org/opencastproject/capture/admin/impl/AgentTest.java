@@ -59,7 +59,11 @@ public class AgentTest {
     Assert.assertEquals("test", agent.getName());
     Assert.assertEquals(AgentState.CAPTURING, agent.getState());
     Thread.sleep(1);
-    if (agent.getLastHeardFrom() <= time || agent.getLastHeardFrom() >= System.currentTimeMillis()) {
+    long value = System.currentTimeMillis();
+    System.out.println(agent.getLastHeardFrom() <= time);
+    System.out.println(agent.getLastHeardFrom() >= value);
+    if (agent.getLastHeardFrom() <= time || agent.getLastHeardFrom() > System.currentTimeMillis()) {
+      System.out.println("lastheard: " + agent.getLastHeardFrom() + "; current: " + value);
       Assert.fail("Invalid checkin time");
     }
   }  

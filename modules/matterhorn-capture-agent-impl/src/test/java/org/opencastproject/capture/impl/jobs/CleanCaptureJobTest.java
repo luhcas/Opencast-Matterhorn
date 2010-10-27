@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Vector;
 
 
@@ -48,15 +49,16 @@ public class CleanCaptureJobTest {
 
   int numberOfRecordings = 5;
 
-  File baseDir = new File(getClass().getClassLoader().getResource(".").getPath(), "cleanTest");
+  File baseDir; 
 
   @Before
-  public void setUp() {
+  public void setUp() throws URISyntaxException {
     // Define particular instances for the CleanCaptureJob required arguments
     props = new XProperties();
     theJob = new CleanCaptureJob();
     theRecordings = new Vector<AgentRecording>();
 
+    baseDir = new File(getClass().getClassLoader().getResource(".").toURI().getPath(), "cleanTest");
     baseDir.mkdir();
     if (!baseDir.exists()) {
       Assert.fail();

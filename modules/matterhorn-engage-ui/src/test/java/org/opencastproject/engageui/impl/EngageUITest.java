@@ -75,9 +75,9 @@ public class EngageUITest {
 
   @Test
   public void testEpisodesXSL() throws Exception {
-    File xsltFile = new File(this.getClass().getClassLoader().getResource("ui/xsl/episodes.xsl").getFile());
+    File xsltFile = new File(this.getClass().getClassLoader().getResource("ui/xsl/episodes.xsl").toURI());
 
-    File xmlFile = new File(this.getClass().getClassLoader().getResource("xml/episodes.xml").getFile());
+    File xmlFile = new File(this.getClass().getClassLoader().getResource("xml/episodes.xml").toURI());
 
     InputStream expectedStream = this.getClass().getClassLoader().getResourceAsStream(
             "xml" + File.separator + "episodes-expected.xml");

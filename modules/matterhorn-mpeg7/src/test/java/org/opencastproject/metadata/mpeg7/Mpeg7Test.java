@@ -55,7 +55,7 @@ public class Mpeg7Test {
    */
   @Before
   public void setUp() throws Exception {
-    catalogFile = new File(this.getClass().getResource(catalogName).getPath());
+    catalogFile = new File(this.getClass().getResource(catalogName).toURI());
     if (!catalogFile.exists() || !catalogFile.canRead())
       throw new Exception("Unable to access mpeg-7 test catalog '" + catalogName + "'");
   }

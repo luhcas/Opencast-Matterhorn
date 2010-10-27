@@ -147,7 +147,7 @@ public class ConfigurationManager implements ManagedService {
    * Creates the core Opencast directories.
    */
   void createCoreDirectories() {
-    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CACHE_URL, "cache/captures");
+    createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CACHE_URL, "cache" + File.separator + "captures");
     createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_VOLATILE_URL, "volatile");
   }
 
@@ -168,10 +168,10 @@ public class ConfigurationManager implements ManagedService {
     try {
       target = new File (this.getItem(key));
       FileUtils.forceMkdir(target);
-      this.setItem(key, target.toString());
       if (!target.exists()) {
         throw new RuntimeException("Unable to create directory " + target + ".");
       }
+      this.setItem(key, target.toString());
     } catch (IOException e) {
       logger.error("Unable to create directory: {}, because {} happened.", target, e.getMessage());
     } catch (NullPointerException e) {

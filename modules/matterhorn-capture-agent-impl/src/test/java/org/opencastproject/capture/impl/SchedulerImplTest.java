@@ -173,7 +173,7 @@ public class SchedulerImplTest {
   @Test
   public void testValidRemoteUTF8Calendar() throws IOException, ConfigurationException {
     String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
-    File testfile = setupTestCalendar("calendars/Opencast.ics", times);
+    File testfile = setupTestCalendar(new File("calendars/Opencast.ics").getPath(), times);
     //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, testfile.toURI().toURL().toString());
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
