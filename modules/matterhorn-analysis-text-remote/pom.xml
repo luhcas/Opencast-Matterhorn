@@ -87,7 +87,6 @@
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Import-Package>
               org.opencastproject.analysis.api;version=${project.version},
-              org.opencastproject.analysis.remote;version=${project.version},
               *;resolution:=optional
             </Import-Package>
             <Service-Component>
