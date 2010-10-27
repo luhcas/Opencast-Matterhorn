@@ -65,7 +65,11 @@
           $('#oc_btn-embed').hide();
           $('#oc_slidetext').addClass('scroll');
         }
-        
+        /* initalise embed buttons */
+        $( "#oc_embed-icon-one, #oc_embed-icon-two, #oc_embed-icon-three, #oc_embed-icon-four, #oc_embed-icon-five", "#oc_embed-left" ).button();
+        /* initalise search button */
+        $( "#oc_btn-search", "#oc_search" ).button();
+
         /* initalise closed tabs */
         $("#oc_ui_tabs").tabs({ selected: -1});
         $("#oc_ui_tabs").tabs( "option", "collapsible", true );
@@ -109,13 +113,14 @@
     <div id="oc_title-bar-heading">
       <h2 id="oc_title"></h2>
     </div>
-    <div id="oc_search">    
-      <form action="index.html">
-        <label id="skip" for="oc_searchField">Search Field</label>
-        <input id="oc_searchField" class="oc_search-Field handcursor" type="text" name="q" value="Search Matterhorn" />
-        <input id="oc_btn-search" class="handcursor" type="submit" name="search" alt="search" title="search" value="Search"></input>
-      </form>
-    </div>
+    
+    <form action="index.html">
+      <div id="oc_search">    
+          <label id="skip" for="oc_searchField">Search Field</label>
+          <input id="oc_searchField" class="oc_search-Field handcursor" type="text" name="q" value="Search Matterhorn" />
+          <input id="oc_btn-search" class="handcursor" type="submit" name="search" alt="search" title="search" value="Search"></input>
+      </div>
+    </form>
     </div>  
   </div>
   <div id="oc_body">

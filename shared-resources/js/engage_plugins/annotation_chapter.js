@@ -19,11 +19,10 @@ Opencast.Annotation_Chapter = (function(){
      */
     function showAnnotation_Chapter(){
         $("#oc_btn-annotation_chapter").attr({
-            alt: ANNOTATION_CHAPTERHIDE,
             title: ANNOTATION_CHAPTERHIDE,
-            value: ANNOTATION_CHAPTERHIDE
         });
         $("#oc_btn-annotation_chapter").attr('aria-pressed', 'true');
+        $("#oc_btn-annotation_chapter").html(ANNOTATION_CHAPTERHIDE);
 		//$.getJSON('../../usertracking/rest/annotations.json?key=chapter', function(data) {
         /*
          * Load some testing demodata
@@ -40,11 +39,10 @@ Opencast.Annotation_Chapter = (function(){
      */
     function hideAnnotation_Chapter(){
         $("#oc_btn-annotation_chapter").attr({
-            alt: ANNOTATION_CHAPTER,
             title: ANNOTATION_CHAPTER,
-            value: ANNOTATION_CHAPTER
         });
         $("#oc_btn-annotation_chapter").attr('aria-pressed', 'false');
+        $("#oc_btn-annotation_chapter").html(ANNOTATION_CHAPTER);
         $("#annotation").hide();
     }
     
