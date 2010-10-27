@@ -17,27 +17,26 @@ package org.opencastproject.deliver.schedule;
 
 /**
  * Exception thrown when an error occurs in an Action.
- *
- * @author Jonathan A. Smith
+ * 
  */
 
-public class ActionException extends RuntimeException {
+public class ActionException extends Exception {
 
-    public ActionException(Throwable cause) {
-        super(cause);
-    }
+  private static final long serialVersionUID = 2328951872034616834L;
 
-    public ActionException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public ActionException(Throwable cause) {
+    super(cause);
+  }
 
-    public ActionException(String message) {
-        super(message);
-    }
+  public ActionException(String message, Throwable cause) {
+    super(message, cause);
+  }
 
-    public ActionException() {
-    }
+  public ActionException(String message) {
+    super(message);
+  }
 
-
+  public ActionException() {
+  }
 
 }

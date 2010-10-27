@@ -16,14 +16,16 @@
 package org.opencastproject.deliver.itunesu;
 
 import org.opencastproject.deliver.actions.DeliveryAction;
-
 import org.opencastproject.deliver.schedule.FailedException;
 import org.opencastproject.deliver.schedule.RetryException;
+import org.opencastproject.deliver.store.InvalidKeyException;
 
 /**
  * DeliveryAction to upload iTunes media.
  */
 public class ITunesDeliveryAction extends DeliveryAction {
+
+  private static final long serialVersionUID = 751731610211924552L;
 
   /** URL for accessing uploaded track. */
   private String trackURL;
@@ -37,6 +39,7 @@ public class ITunesDeliveryAction extends DeliveryAction {
 
   /**
    * Returns the iTunes track URL or null if not yet set.
+   * 
    * @return track URL
    */
   public String getTrackURL() {
@@ -45,8 +48,9 @@ public class ITunesDeliveryAction extends DeliveryAction {
 
   /**
    * Sets the iTunes track URL.
-   *
-   * @param trackURL URL for uploaded track
+   * 
+   * @param trackURL
+   *          URL for uploaded track
    */
   public void setTrackURL(String trackURL) {
     this.trackURL = trackURL;
@@ -54,9 +58,12 @@ public class ITunesDeliveryAction extends DeliveryAction {
 
   /**
    * Delivers a media file to iTunesU.
+   * @throws FailedException 
+   * @throws RetryException 
+   * @throws InvalidKeyException 
    */
   @Override
-  protected void execute() {
+  protected void execute() throws RetryException, FailedException, InvalidKeyException {
     // update status
     status("Upload in progress");
 
@@ -65,21 +72,13 @@ public class ITunesDeliveryAction extends DeliveryAction {
 
     String url = "";
 
-    try {
-      url = api.uploadFile(getMediaPath());
-    } catch (RetryException e) {
-      status(e.getMessage());
-      throw e;
-    } catch (FailedException e) {
-      status(e.getMessage());
-      throw e;
-    }
+    url = api.uploadFile(getMediaPath());
 
     // add metadata
     String title = getTitle();
     String creator = getCreator();
     String comments = getAbstract();
-    String [] tags = getTags();
+    String[] tags = getTags();
 
     // attach tags to abstract
     comments += "\n\n";
@@ -89,23 +88,16 @@ public class ITunesDeliveryAction extends DeliveryAction {
 
     String trackHandle = url.substring(url.lastIndexOf('.') + 1);
 
-    try {
-      String xmlResponse = 
-          api.mergeTrack(trackHandle, title, creator, comments);
-      if (xmlResponse.indexOf("error") > 0) {
-        throw new Exception();
-      }
-    } catch (Exception e) {
-      status("Error in media metadata: " + e.getMessage());
+    String xmlResponse = api.mergeTrack(trackHandle, title, creator, comments);
+    if (xmlResponse.indexOf("error") > 0) {
+      status("Error in media metadata");
       api.deleteTrack(trackHandle);
-      throw new FailedException(e);
+    } else {
+      // skip "xxx.edu."
+      int index = api.getSiteURL().length() + 1;
+      setTrackURL(url.substring(index + 1));
+      status("Media uploaded");
+      succeed("Media delivered: " + getMediaPath() + " - " + url);
     }
-
-    // skip "xxx.edu."
-    int index = api.getSiteURL().length() + 1;
-    setTrackURL(url.substring(index + 1));
-
-    status("Media uploaded");
-    succeed("Media delivered: " + getMediaPath() + " - " + url);
   }
 }

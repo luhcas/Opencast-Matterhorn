@@ -445,6 +445,8 @@ public class WorkflowRestService {
       return Response.ok("stopped " + workflowInstanceId).build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
+    } catch(WorkflowDatabaseException e) {
+      throw new WebApplicationException(e);
     }
   }
 
@@ -457,6 +459,8 @@ public class WorkflowRestService {
       return Response.ok("suspended " + workflowInstanceId).build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
+    } catch(WorkflowDatabaseException e) {
+      throw new WebApplicationException(e);
     }
   }
 
@@ -475,6 +479,8 @@ public class WorkflowRestService {
       return Response.ok("resumed " + workflowInstanceId).build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
+    } catch(WorkflowDatabaseException e) {
+      throw new WebApplicationException(e);
     }
   }
 

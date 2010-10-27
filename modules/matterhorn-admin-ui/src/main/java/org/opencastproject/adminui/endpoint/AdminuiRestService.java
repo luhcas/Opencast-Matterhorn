@@ -45,6 +45,7 @@ import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.util.doc.Status;
+import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -52,7 +53,6 @@ import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -73,6 +73,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -261,7 +262,12 @@ public class AdminuiRestService {
     LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
     if (workflowService != null) {
       logger.debug("getting recordings from workflowService");
-      WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery().withState(state).withCount(100000)).getItems();
+      WorkflowInstance[] workflows;
+      try {
+        workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery().withState(state).withCount(100000)).getItems();
+      } catch (WorkflowDatabaseException e) {
+        throw new WebApplicationException(e);
+      }
       // next line is for debuging: return all workflowInstaces
       //WorkflowInstance[] workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery()).getItems();
       for (int i = 0; i < workflows.length; i++) {
@@ -404,7 +410,12 @@ public class AdminuiRestService {
     // get statistics from workflowService if present
     if (workflowService != null) {
       WorkflowQuery q = workflowService.newWorkflowQuery().withStartPage(0).withCount(100000);
-      WorkflowInstance[] workflows = workflowService.getWorkflowInstances(q).getItems();
+      WorkflowInstance[] workflows;
+      try {
+        workflows = workflowService.getWorkflowInstances(q).getItems();
+      } catch (WorkflowDatabaseException e) {
+        throw new WebApplicationException(e);
+      }
       int i = 0, processing = 0, inactive = 0, finished = 0, errors = 0, paused = 0;
       for (; i < workflows.length; i++) {
         switch (workflows[i].getState()) {

@@ -25,8 +25,10 @@ import java.util.List;
  * Helper class to execute processes on the host system and outside of the java vm. Since there are problems with
  * reading stdin, stdout and stderr that need to be taken into account when running on various platforms, this helper
  * class is used to deal with those.
+ * 
+ * A generic Exception should be used to indicate what types of checked exceptions might be thrown from this process.
  */
-public abstract class ProcessExecutor {
+public abstract class ProcessExecutor<T extends Exception> {
 
   private boolean redirectErrorStream = true;
   private String[] commandLine;
@@ -62,7 +64,7 @@ public abstract class ProcessExecutor {
     this.redirectErrorStream = redirectErrorStream;
   }
 
-  public void execute() {
+  public void execute() throws T {
     BufferedReader in = null;
     Process process = null;
     try {
@@ -100,7 +102,7 @@ public abstract class ProcessExecutor {
     return false;
   }
 
-  protected void onProcessFinished(int exitCode) {
+  protected void onProcessFinished(int exitCode) throws T {
   }
 
   protected void onError(Exception e) {

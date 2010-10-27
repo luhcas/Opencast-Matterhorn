@@ -19,17 +19,19 @@ package org.opencastproject.deliver.schedule;
  * Exception thrown if an Action is invalid.
  */
 
-public class InvalidException extends RuntimeException {
+public class InvalidException extends Exception {
 
-    public InvalidException(String message) {
-        super(message);
-    }
+  private static final long serialVersionUID = 9096922271115197861L;
 
-    public InvalidException(String message, Throwable throwable) {
-        super(message, throwable);
-    }
+  public InvalidException(String message) {
+    super(message);
+  }
 
-    public InvalidException(Throwable throwable) {
-        super(throwable);
-    }
+  public InvalidException(String message, Throwable throwable) {
+    super(message, throwable);
+  }
+
+  public InvalidException(Throwable throwable) {
+    super(throwable);
+  }
 }

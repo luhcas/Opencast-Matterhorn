@@ -122,7 +122,13 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
       }
     }
 
-    if (countWorkflowInstances() == 0) {
+    long instances = 0;
+    try {
+      instances = countWorkflowInstances();
+    } catch(WorkflowDatabaseException e) {
+      throw new IllegalStateException(e);
+    }
+    if (instances == 0) {
       // this may be a new index, so get all of the existing workflows and index them
       WorkflowBuilder builder = WorkflowBuilder.getInstance();
       URI[] uris = null;

@@ -22,6 +22,7 @@ import org.opencastproject.deliver.schedule.FailedException;
 import org.opencastproject.deliver.schedule.InvalidException;
 import org.opencastproject.deliver.schedule.RetryException;
 import org.opencastproject.deliver.schedule.Task;
+import org.opencastproject.deliver.store.InvalidKeyException;
 
 import com.google.gdata.client.youtube.YouTubeService;
 import com.google.gdata.data.youtube.VideoEntry;
@@ -33,136 +34,145 @@ import java.net.URL;
 
 public class YouTubeRemoveAction extends RemoveAction {
 
-    /** Configuration parameters for YouTube service. */
-    private YouTubeConfiguration configuration;
+  private static final long serialVersionUID = -7860732499233289816L;
 
-    /** YouTube service connector. */
-    private YouTubeService service;
+  /** Configuration parameters for YouTube service. */
+  private YouTubeConfiguration configuration;
 
-    /** The name of the task that published the video clip. */
-    private String publish_task;
+  /** YouTube service connector. */
+  private YouTubeService service;
 
-    /**
-     * Constructs a YouTubeRemoveAction.
-     */
+  /** The name of the task that published the video clip. */
+  private String publish_task;
 
-    public YouTubeRemoveAction() {
-        super();
-        this.configuration = YouTubeConfiguration.getInstance();
-        service = new YouTubeService(configuration.getClientId(),
-                configuration.getDeveloperKey());
+  /**
+   * Constructs a YouTubeRemoveAction.
+   */
+
+  public YouTubeRemoveAction() {
+    super();
+    this.configuration = YouTubeConfiguration.getInstance();
+    service = new YouTubeService(configuration.getClientId(), configuration.getDeveloperKey());
+  }
+
+  /**
+   * Returns the name of the task that published the clip to be removed.
+   * 
+   * @return task name
+   */
+
+  public String getPublishTask() {
+    return publish_task;
+  }
+
+  /**
+   * Sets the name of the task that published the clip to be removed.
+   * 
+   * @param publish_task
+   *          Task name
+   */
+
+  public void setPublishTask(String publish_task) {
+    this.publish_task = publish_task;
+  }
+
+  /**
+   * Checks the members of the action.
+   * 
+   * @throws InvalidException
+   */
+
+  public void validate() throws InvalidException {
+    if (publish_task == null || publish_task.equals(""))
+      throw new InvalidException("Missing publish task");
+  }
+
+  /**
+   * Execute the action.
+   * 
+   * @throws FailedException
+   * @throws RetryException
+   * @throws InvalidKeyException 
+   */
+
+  @Override
+  protected void execute() throws FailedException, RetryException, InvalidKeyException {
+    authenticate(configuration.getUserId(), configuration.getPassword());
+    VideoEntry entry = getVideoEntry();
+
+    // Delete the video entry
+    try {
+      entry.delete();
+      status("Video removed");
+      succeed("Video removed");
+    } catch (IOException except) {
+      throw new FailedException(except);
+    } catch (ServiceException except) {
+      throw new FailedException(except);
     }
+  }
 
-    /**
-     * Returns the name of the task that published the clip to be removed.
-     *
-     * @return task name
-     */
+  /**
+   * Authenticate the delivery user.
+   * 
+   * @param user
+   *          YouTube user id or gmail name
+   * @param password
+   *          user's password
+   * @throws RetryException
+   */
 
-    public String getPublishTask() {
-        return publish_task;
+  private void authenticate(String user, String password) throws RetryException {
+    log("Auth user=" + user);
+    try {
+      service.setUserCredentials(user, password);
+    } catch (AuthenticationException except) {
+      throw new RetryException(except);
     }
+  }
 
-    /**
-     * Sets the name of the task that published the clip to be removed.
-     *
-     * @param publish_task Task name
-     */
+  /**
+   * Gets a new copy of the video entry.
+   * 
+   * @return current entry
+   * @throws FailedException
+   * @throws InvalidKeyException 
+   */
 
-    public void setPublishTask(String publish_task) {
-        this.publish_task = publish_task;
+  private VideoEntry getVideoEntry() throws FailedException, InvalidKeyException {
+    String entry_url = getEntryURL();
+    try {
+      return service.getEntry(new URL(entry_url), VideoEntry.class);
+    } catch (IOException except) {
+      throw new FailedException(except);
+    } catch (ServiceException except) {
+      throw new FailedException(except);
     }
+  }
 
-    /**
-     * Checks the members of the action.
-     */
+  /**
+   * Obtains the YouTube entry URL from the publish task.
+   * 
+   * @return YouTube entry URL
+   * @throws FailedException
+   * @throws InvalidKeyException 
+   */
 
-    public void validate() {
-        if (publish_task == null || publish_task.equals(""))
-            throw new InvalidException("Missing publish task");
-    }
+  private String getEntryURL() throws FailedException, InvalidKeyException {
+    // Get the publish task
+    Task task = getTaskNamed(publish_task);
+    if (publish_task == null)
+      throw new FailedException("Missing task: " + publish_task);
 
-    /**
-     * Execute the action.
-     */
+    // Get the action
+    Action action = task.getAction();
+    if (!(action instanceof YouTubeDeliveryAction))
+      throw new FailedException("Invalid action type" + action.getClass().getName());
 
-    @Override
-    protected void execute() {
-        authenticate(configuration.getUserId(), configuration.getPassword());
-        VideoEntry entry = getVideoEntry();
+    String url = ((YouTubeDeliveryAction) action).getEntryUrl();
+    if (url == null)
+      throw new FailedException("Unknown entry URL");
 
-        // Delete the video entry
-        try {
-            entry.delete();
-            status("Video removed");
-            succeed("Video removed");
-        }
-        catch (IOException except) {
-            throw new FailedException(except);
-        }
-        catch (ServiceException except) {
-            throw new FailedException(except);
-        }
-    }
-
-    /**
-     * Authenticate the delivery user.
-     *
-     * @param user YouTube user id or gmail name
-     * @param password user's password
-     */
-
-    private void authenticate(String user, String password) {
-        log("Auth user=" + user);
-        try {
-            service.setUserCredentials(user, password);
-        }
-        catch (AuthenticationException except) {
-            throw new RetryException(except);
-        }
-    }
-
-     /**
-     * Gets a new copy of the video entry.
-     *
-     * @return current entry
-     */
-
-    private VideoEntry getVideoEntry() {
-        String entry_url = getEntryURL();
-        try {
-            return service.getEntry(new URL(entry_url), VideoEntry.class);
-        }
-        catch (IOException except) {
-            throw new FailedException(except);
-        }
-        catch (ServiceException except) {
-            throw new FailedException(except);
-        }
-    }
-
-    /**
-     * Obtains the YouTube entry URL from the publish task.
-     *
-     * @return YouTube entry URL
-     */
-
-    private String getEntryURL() {
-        // Get the publish task
-        Task task = getTaskNamed(publish_task);
-        if (publish_task == null)
-            throw new FailedException("Missing task: " + publish_task);
-
-        // Get the action
-        Action action = task.getAction();
-        if (!(action instanceof YouTubeDeliveryAction))
-            throw new FailedException("Invalid action type" +
-                    action.getClass().getName());
-
-        String url = ((YouTubeDeliveryAction)action).getEntryUrl();
-        if (url == null)
-            throw new FailedException("Unknown entry URL");
-
-        return url;
-    }
+    return url;
+  }
 }

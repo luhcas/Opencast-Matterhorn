@@ -15,6 +15,8 @@
  */
 package org.opencastproject.deliver.schedule;
 
+import org.opencastproject.deliver.store.InvalidKeyException;
+
 import flexjson.JSON;
 import flexjson.JSONSerializer;
 
@@ -23,404 +25,424 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * <p>Tasks represent things to be done over a period of time. Note "Task" is
- * used in the sense of something to do, not an operating system task. Tasks
- * subclass Runnable and are run one or more times by thread pool threads.
- * Tasks are designed to be executed more than once with a delay between
- * execution episodes.</p>
- *
- * <p>Task instances are generally created by a Schedule and need not be
- * overridden in an application. Instead, create a subclass of Action that
- * performs the desired action. Task is thread safe, Action, by design
- * is not.</p>
- *
- * <p>Task instances are serialized and stored in persistent storage between
- * execution episodes. If the application restarts all active Tasks are
- * reloaded and execution resumes. For this reason both Task and Action
- * objects must be serializable by the storage system.</p>
- *
+ * <p>
+ * Tasks represent things to be done over a period of time. Note "Task" is used in the sense of something to do, not an
+ * operating system task. Tasks subclass Runnable and are run one or more times by thread pool threads. Tasks are
+ * designed to be executed more than once with a delay between execution episodes.
+ * </p>
+ * 
+ * <p>
+ * Task instances are generally created by a Schedule and need not be overridden in an application. Instead, create a
+ * subclass of Action that performs the desired action. Task is thread safe, Action, by design is not.
+ * </p>
+ * 
+ * <p>
+ * Task instances are serialized and stored in persistent storage between execution episodes. If the application
+ * restarts all active Tasks are reloaded and execution resumes. For this reason both Task and Action objects must be
+ * serializable by the storage system.
+ * </p>
+ * 
  * @author Jonathan A. Smith
  */
 
 public class Task implements Runnable, Serializable {
 
-    /** Task execution state. */
-    public enum State {INITIAL, ACTIVE, COMPLETE, FAILED}
+  private static final long serialVersionUID = 6074999198466279317L;
 
-    /** The Schedule that owns this task. */
-    private Schedule schedule;
+  /** Task execution state. */
+  public enum State {
+    INITIAL, ACTIVE, COMPLETE, FAILED
+  }
 
-    /** Current task state */
-    private State state = State.INITIAL;
+  /** The Schedule that owns this task. */
+  private Schedule schedule;
 
-    /** Seconds delay before task is resumed. */
-    private long resume_seconds;
+  /** Current task state */
+  private State state = State.INITIAL;
 
-    /** Time after which task should be resumed. */
-    private Date resume_time;
+  /** Seconds delay before task is resumed. */
+  private long resume_seconds;
 
-    /** Action to carry out when resumed. */
-    private Action action;
+  /** Time after which task should be resumed. */
+  private Date resume_time;
 
-    /** Time when completion is required. */
-    private Date deadline;
+  /** Action to carry out when resumed. */
+  private Action action;
 
-    /** Status message (for human review.) */
-    private String status;
+  /** Time when completion is required. */
+  private Date deadline;
 
-    /** Number of times Task has been resumed. */
-    private int resume_count = 0;
+  /** Status message (for human review.) */
+  private String status;
 
-    /** Number of times this task has been resumed after an exception. */
-    private int retry_count = 0;
+  /** Number of times Task has been resumed. */
+  private int resume_count = 0;
 
-    /** Time to when task was started. */
-    private Date start_time;
+  /** Number of times this task has been resumed after an exception. */
+  private int retry_count = 0;
 
-    /** Time when task was last active. */
-    private Date active_time;
+  /** Time to when task was started. */
+  private Date start_time;
 
-    // **** Object Creation
+  /** Time when task was last active. */
+  private Date active_time;
 
-    /**
-     * Constructs a task.
-     */
+  // **** Object Creation
 
-    public Task() {
+  /**
+   * Constructs a task.
+   */
+
+  public Task() {
+  }
+
+  // *** Accessors
+
+  public Action getAction() {
+    return action;
+  }
+
+  public synchronized void setAction(Action action) {
+    this.action = action;
+  }
+
+  public Date getDeadline() {
+    return deadline;
+  }
+
+  public synchronized void setDeadline(Date deadline) {
+    this.deadline = deadline;
+  }
+
+  @JSON(include = false)
+  public Schedule getSchedule() {
+    return schedule;
+  }
+
+  public synchronized void setSchedule(Schedule schedule) {
+    this.schedule = schedule;
+  }
+
+  public Date getStartTime() {
+    return start_time;
+  }
+
+  public synchronized void setStartTime(Date start_time) {
+    this.start_time = start_time;
+  }
+
+  public State getState() {
+    return state;
+  }
+
+  public synchronized void setState(State state) {
+    this.state = state;
+  }
+
+  public String getStatus() {
+    return status;
+  }
+
+  public synchronized void setStatus(String status) throws InvalidKeyException {
+    this.status = status;
+    save();
+  }
+
+  public int getResumeCount() {
+    return resume_count;
+  }
+
+  public synchronized void setResumeCount(int resume_count) {
+    this.resume_count = resume_count;
+  }
+
+  public Date getResumeTime() {
+    return resume_time;
+  }
+
+  public synchronized void setResumeTime(Date resume_time) {
+    this.resume_time = resume_time;
+  }
+
+  public int getRetryCount() {
+    return retry_count;
+  }
+
+  public synchronized void setRetryCount(int retry_count) {
+    this.retry_count = retry_count;
+  }
+
+  public Date getActiveTime() {
+    return active_time;
+  }
+
+  public synchronized void setActiveTime(Date active_time) {
+    this.active_time = active_time;
+  }
+
+  @JSON(include = false)
+  public String getName() {
+    return action.getName();
+  }
+
+  // **** Execution
+
+  /**
+   * Executes this task's peridic action. Nore that this is called in a worker thread and should not rely on having
+   * private access to any data other than the Task and its Action.
+   */
+
+  public synchronized void run() {
+    try {
+      checkTime();
+    } catch (InvalidKeyException e) {
+      throw new IllegalStateException(e);
     }
-
-    // *** Accessors
-
-    public Action getAction() {
-        return action;
+    resume_seconds = 0;
+    action.setTask(this);
+    try {
+      execute();
+    } catch (InvalidKeyException e1) {
+      // TODO Auto-generated catch block
+      e1.printStackTrace();
     }
-
-    public synchronized void setAction(Action action) {
-        this.action = action;
+    if (state == State.ACTIVE && resume_seconds > 0)
+      scheduleResume();
+    try {
+      schedule.saveTask(this);
+    } catch (InvalidKeyException e) {
+      throw new IllegalStateException(e);
     }
+  }
 
-    public Date getDeadline() {
-        return deadline;
+  /**
+   * Schedule resumption of the task after resume_seconds seconds.
+   */
+
+  private void scheduleResume() {
+    Calendar calendar = Calendar.getInstance();
+    calendar.add(Calendar.SECOND, (int) resume_seconds);
+    resume_time = calendar.getTime();
+    schedule.resumeTaskAfter(this, resume_seconds);
+  }
+
+  /**
+   * Records the current time (and start time if not set). Checks the current time against the deadline. If the current
+   * time is after the deadline, singles Task failure.
+   * @throws InvalidKeyException 
+   */
+
+  private void checkTime() throws InvalidKeyException {
+    active_time = new Date();
+    resume_count += 1;
+    if (start_time == null)
+      start_time = active_time;
+    if (deadline != null && active_time.after(deadline))
+      fail("Deadline reached");
+  }
+
+  /**
+   * Execute the action.
+   * @throws InvalidKeyException 
+   */
+
+  private void execute() throws InvalidKeyException {
+    try {
+      switch (state) {
+      case INITIAL:
+        state = State.ACTIVE;
+        action.start();
+      case ACTIVE:
+        action.execute();
+        break;
+      }
+    } catch (RetryException except) {
+      retry(except);
+    } catch (Throwable except) {
+      log("Task failed", except);
+      fail();
+    } finally {
+      if (state == State.COMPLETE || state == State.FAILED)
+        finish();
     }
+  }
 
-    public synchronized void setDeadline(Date deadline) {
-        this.deadline = deadline;
+  private void retry(RetryException except) throws InvalidKeyException {
+    final int limit = action.retryLimit();
+    log("Retry exception caught: count = " + retry_count + ", limit = " + limit, except);
+    retry_count += 1;
+    if (retry_count >= limit)
+      fail("Retry count exceeded.");
+    else
+      resume_seconds = Math.max(1, except.getRetryDelay());
+  }
+
+  /**
+   * Calls the finish method on the action. Catches exceptions to handle task failure or retries.
+   * @throws InvalidKeyException 
+   */
+
+  private void finish() throws InvalidKeyException {
+    try {
+      action.finish();
+    } catch (Throwable except) {
+      fail();
     }
+  }
 
-    @JSON(include=false)
-    public Schedule getSchedule() {
-        return schedule;
-    }
+  /**
+   * Sets the number of seconds before Task is resumed. This should be called by the Action. Note that the task is not
+   * rescheduled until execution is finished. This just sets the delay time that will be used when execution is done.
+   * 
+   * @param seconds
+   *          delay before Task is resumed in seconds
+   */
 
-    public synchronized void setSchedule(Schedule schedule) {
-        this.schedule = schedule;
-    }
+  void resumeAfter(long seconds) {
+    resume_seconds = seconds;
+  }
 
-    public Date getStartTime() {
-        return start_time;
-    }
+  // **** Logging and Status
 
-    public synchronized void setStartTime(Date start_time) {
-        this.start_time = start_time;
-    }
+  /**
+   * Indicates that the Task is complete and succeeded.
+   * 
+   * @param message
+   *          Information about success or null
+   * @throws InvalidKeyException 
+   */
 
-    public State getState() {
-        return state;
-    }
+  void succeed(String message) throws InvalidKeyException {
+    state = State.COMPLETE;
+    save();
+    if (message != null)
+      log("Action succeeded: " + message);
+    else
+      log("Action succeeded");
+  }
 
-    public synchronized void setState(State state) {
-        this.state = state;
-    }
+  /**
+   * Indicates that the Task is complete and succeeded.
+   * @throws InvalidKeyException 
+   */
 
-    public String getStatus() {
-        return status;
-    }
+  void succeed() throws InvalidKeyException {
+    succeed(null);
+  }
 
-    public synchronized void setStatus(String status) {
-        this.status = status;
-        save();
-    }
+  /**
+   * Indicates that the Task is complete and failed.
+   * 
+   * @param message
+   *          indicates reason for failure or null
+   * @throws InvalidKeyException 
+   */
 
-    public int getResumeCount() {
-        return resume_count;
-    }
+  void fail(String message) throws InvalidKeyException {
+    state = State.FAILED;
+    save();
+    if (message != null)
+      log("Action failed: " + message);
+    else
+      log("Action failed");
+  }
 
-    public synchronized void setResumeCount(int resume_count) {
-        this.resume_count = resume_count;
-    }
+  /**
+   * Indicates that the Task is complete and failed.
+   * @throws InvalidKeyException 
+   */
 
-    public Date getResumeTime() {
-        return resume_time;
-    }
+  void fail() throws InvalidKeyException {
+    fail(null);
+  }
 
-    public synchronized void setResumeTime(Date resume_time) {
-        this.resume_time = resume_time;
-    }
+  /**
+   * Saves the state of the task (including the Action)
+   * @throws InvalidKeyException 
+   */
 
-    public int getRetryCount() {
-        return retry_count;
-    }
+  synchronized void save() throws InvalidKeyException {
+    if (schedule != null)
+      schedule.saveTask(this);
+  }
 
-    public synchronized void setRetryCount(int retry_count) {
-        this.retry_count = retry_count;
-    }
+  // **** Logging
 
-    public Date getActiveTime() {
-        return active_time;
-    }
+  /**
+   * Logs a message related to this task.
+   * 
+   * @param message
+   */
 
-    public synchronized void setActiveTime(Date active_time) {
-        this.active_time = active_time;
-    }
+  void log(String message) {
+    String log_message = action.getName() + ": " + message;
+    schedule.log(log_message);
+  }
 
-    @JSON(include=false)
-    public String getName() {
-        return action.getName();
-    }
+  /**
+   * Logs an exception related to this task.
+   * 
+   * @param message
+   *          description of error
+   * @param cause
+   *          Throwable to be logged
+   */
 
-    // **** Execution
-    
-    /**
-     * Executes this task's peridic action. Nore that this is called
-     * in a worker thread and should not rely on having private access
-     * to any data other than the Task and its Action.
-     */
+  void log(String message, Throwable cause) {
+    String log_message = action.getName() + ": " + message;
+    schedule.log(log_message, cause);
+  }
 
-    public synchronized void run() {
-        checkTime();
-        resume_seconds = 0;
-        action.setTask(this);
-        execute();
-        if (state == State.ACTIVE && resume_seconds > 0)
-            scheduleResume();
-        schedule.saveTask(this);
-    }
-    
-    /**
-     * Schedule resumption of the task after resume_seconds seconds.
-     */
+  /**
+   * Logs an exception related to this task.
+   * 
+   * @param cause
+   *          Throwable to be logged
+   */
 
-    private void scheduleResume() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.SECOND, (int)resume_seconds);
-        resume_time = calendar.getTime();
-        schedule.resumeTaskAfter(this, resume_seconds);
-    }
+  void log(Throwable cause) {
+    String log_message = action.getName() + ": Exception";
+    schedule.log(log_message, cause);
+  }
 
-    /**
-     * Records the current time (and start time if not set). Checks the current
-     * time against the deadline. If the current time is after the deadline,
-     * singles Task failure.
-     */
+  // **** Callbacks
 
-    private void checkTime() {
-        active_time = new Date();
-        resume_count += 1;
-        if (start_time == null)
-            start_time = active_time;
-        if (deadline != null && active_time.after(deadline))
-            fail("Deadline reached");
-    }
+  /**
+   * Finds and returns a task by name.
+   * 
+   * @param name
+   *          name of task to find.
+   * @return Task object or nil if not found.
+   * @throws InvalidKeyException 
+   */
 
-    /**
-     * Execute the action.
-     */
+  protected Task getTaskNamed(String name) throws InvalidKeyException {
+    if (schedule == null)
+      return null;
+    return schedule.getTask(name);
+  }
 
-    private void execute() {
-        try {
-            switch (state) {
-                case INITIAL:
-                    state = State.ACTIVE;
-                    action.start();
-                case ACTIVE:
-                    action.execute();
-                    break;
-            }
-        }
-        catch (RetryException except) {
-            retry(except);
-        }
-        catch (Throwable except) {
-            log("Task failed", except);
-            fail();
-        }
-        finally {
-            if (state == State.COMPLETE || state == State.FAILED)
-                finish();
-        }
-    }
+  // **** String Representation
 
-    private void retry(RetryException except) {
-        final int limit = action.retryLimit();
-        log("Retry exception caught: count = " + retry_count +
-                ", limit = " + limit, except);
-        retry_count += 1;
-        if (retry_count >= limit)
-            fail("Retry count exceeded.");
-        else
-            resume_seconds = Math.max(1, except.getRetryDelay());
-    }
+  /**
+   * Returns a JSON String representation of this Task.
+   * 
+   * @return JSON String
+   */
 
-    /**
-     * Calls the finish method on the action. Catches exceptions to handle
-     * task failure or retries.
-     */
+  public synchronized String toJSON() {
+    return new JSONSerializer().serialize(this);
+  }
 
-    private void finish() {
-        try {
-            action.finish();
-        }
-        catch (RetryException except) {
-            retry(except);
-        }
-        catch (Throwable except) {
-            fail();
-        }
-    }
+  /**
+   * Returns a JSON String representation of this Task.
+   * 
+   * @return JSON String
+   */
 
-    /**
-     * Sets the number of seconds before Task is resumed. This should be called
-     * by the Action. Note that the task is not rescheduled until execution is
-     * finished. This just sets the delay time that will be used when execution
-     * is done.
-     *
-     * @param seconds delay before Task is resumed in seconds
-     */
-
-    void resumeAfter(long seconds) {
-        resume_seconds = seconds;
-    }
-
-    // **** Logging and Status
-
-    /**
-     * Indicates that the Task is complete and succeeded.
-     *
-     * @param message Information about success or null
-     */
-
-    void succeed(String message) {
-        state = State.COMPLETE;
-        save();
-        if (message != null)
-            log("Action succeeded: " + message);
-        else
-            log("Action succeeded");
-    }
-    
-    /**
-     * Indicates that the Task is complete and succeeded.
-     */
-
-    void succeed() {
-        succeed(null);
-    }
-
-    /**
-     * Indicates that the Task is complete and failed.
-     *
-     * @param message indicates reason for failure or null
-     */
-
-    void fail(String message) {
-        state = State.FAILED;
-        save();
-        if (message != null)
-            log("Action failed: " + message);
-        else
-            log("Action failed");
-    }
-    
-    /**
-     * Indicates that the Task is complete and failed.
-     */
-
-    void fail() {
-        fail(null);
-    }
-
-    /**
-     * Saves the state of the task (including the Action)
-     */
-
-    synchronized void save() {
-        if (schedule != null)
-            schedule.saveTask(this);
-    }
-
-    // **** Logging
-
-    /**
-     * Logs a message related to this task.
-     * 
-     * @param message
-     */
-
-    void log(String message) {
-        String log_message = action.getName() + ": " + message;
-        schedule.log(log_message);
-    }
-
-    /**
-     * Logs an exception related to this task.
-     *
-     * @param message description of error
-     * @param cause Throwable to be logged
-     */
-
-    void log(String message, Throwable cause) {
-        String log_message = action.getName() + ": " + message;
-        schedule.log(log_message, cause);
-    }
-
-     /**
-     * Logs an exception related to this task.
-     *
-     * @param cause Throwable to be logged
-     */
-
-    void log(Throwable cause) {
-        String log_message = action.getName() + ": Exception";
-        schedule.log(log_message, cause);
-    }
-
-    // **** Callbacks
-
-    /**
-     * Finds and returns a task by name.
-     *
-     * @param name name of task to find.
-     * @return Task object or nil if not found.
-     */
-
-    protected Task getTaskNamed(String name) {
-        if (schedule == null)
-            return null;
-        return schedule.getTask(name);
-    }
-
-    // **** String Representation
-
-    /**
-     * Returns a JSON String representation of this Task.
-     *
-     * @return JSON String
-     */
-
-    public synchronized String toJSON() {
-        return new JSONSerializer().serialize(this);
-    }
-
-    /**
-     * Returns a JSON String representation of this Task.
-     * 
-     * @return JSON String
-     */
-
-    @Override
-    public String toString() {
-        return toJSON();
-    }
-
+  @Override
+  public String toString() {
+    return toJSON();
+  }
 
 }

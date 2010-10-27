@@ -19,7 +19,7 @@ package org.opencastproject.analysis.api;
 /**
  * This exception is thrown during media analyis.
  */
-public class MediaAnalysisException extends RuntimeException {
+public class MediaAnalysisException extends Exception {
 
   /** The serial version ui */
   private static final long serialVersionUID = 8647839276281407394L;

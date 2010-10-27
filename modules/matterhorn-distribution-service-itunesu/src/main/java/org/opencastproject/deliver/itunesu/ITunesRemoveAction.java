@@ -16,16 +16,19 @@
 package org.opencastproject.deliver.itunesu;
 
 import org.opencastproject.deliver.actions.RemoveAction;
-
+import org.opencastproject.deliver.schedule.Action;
 import org.opencastproject.deliver.schedule.FailedException;
 import org.opencastproject.deliver.schedule.InvalidException;
+import org.opencastproject.deliver.schedule.RetryException;
 import org.opencastproject.deliver.schedule.Task;
-import org.opencastproject.deliver.schedule.Action;
+import org.opencastproject.deliver.store.InvalidKeyException;
 
 /**
  * RemoveAction to remove iTunes media.
  */
 public class ITunesRemoveAction extends RemoveAction {
+
+  private static final long serialVersionUID = -5651447188361524574L;
 
   /** The name of the task that published the video clip. */
   private String publish_task;
@@ -57,17 +60,21 @@ public class ITunesRemoveAction extends RemoveAction {
 
   /**
    * Checks the members of the action.
+   * @throws InvalidException 
    */
-  public void validate() {
+  public void validate() throws InvalidException {
     if (publish_task == null || publish_task.equals(""))
       throw new InvalidException("Missing publish task");
   }
 
   /**
    * Execute the action.
+   * @throws FailedException 
+   * @throws RetryException 
+   * @throws InvalidKeyException 
    */
   @Override
-  protected void execute() {
+  protected void execute() throws FailedException, RetryException, InvalidKeyException {
     String destination = getTrackURL(); 
     // separate the URL
     int index = destination.lastIndexOf(".");
@@ -88,8 +95,9 @@ public class ITunesRemoveAction extends RemoveAction {
    * Obtains the track handle from the publish task.
    *
    * @return iTunes track handle
+   * @throws InvalidKeyException 
    */
-  private String getTrackURL() {
+  private String getTrackURL() throws FailedException, InvalidKeyException {
     // Get the publish task
     Task task = getTaskNamed(publish_task);
     if (publish_task == null) {

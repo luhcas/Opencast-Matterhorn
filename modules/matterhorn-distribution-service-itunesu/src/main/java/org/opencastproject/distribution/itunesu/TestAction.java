@@ -18,6 +18,7 @@ package org.opencastproject.distribution.itunesu;
 import org.opencastproject.deliver.schedule.Action;
 // import org.opencastproject.deliver.schedule.RetryException;
 // import org.opencastproject.deliver.schedule.FailedException;
+import org.opencastproject.deliver.store.InvalidKeyException;
 
 public class TestAction extends Action {
 
@@ -75,7 +76,7 @@ public class TestAction extends Action {
         return deadline_seconds;
     }
 
-    protected void execute() {
+    protected void execute() throws InvalidKeyException {
         execute_count += 1;
         System.out.println("Execute #" + execute_count
                 + ", limit=" + execute_limit);

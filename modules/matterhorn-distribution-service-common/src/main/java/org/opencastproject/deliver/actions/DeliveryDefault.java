@@ -15,6 +15,8 @@
  */
 package org.opencastproject.deliver.actions;
 
+import org.opencastproject.deliver.store.InvalidKeyException;
+
 /**
  * A simple DeliveryAction that always succeeds. Used as a mock action for
  * testing.
@@ -26,10 +28,11 @@ public class DeliveryDefault extends DeliveryAction {
 
     /**
      * Execute the action. Sets the status to "Published Test" and succeeds.
+     * @throws InvalidKeyException 
      */
 
     @Override
-    protected void execute() {
+    protected void execute() throws InvalidKeyException {
         status("Published Test");
         succeed();
     }

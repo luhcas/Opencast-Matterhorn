@@ -19,7 +19,7 @@ package org.opencastproject.inspection.impl.api;
 /**
  * Exception thrown by the {@link MediaAnalyzer}.
  */
-public class MediaAnalyzerException extends RuntimeException {
+public class MediaAnalyzerException extends Exception {
 
   /** Serial version uid */
   private static final long serialVersionUID = 1336936343567817393L;

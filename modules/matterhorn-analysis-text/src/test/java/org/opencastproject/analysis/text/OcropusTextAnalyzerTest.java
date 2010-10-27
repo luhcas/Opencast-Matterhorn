@@ -112,7 +112,7 @@ public class OcropusTextAnalyzerTest {
    * Test method for {@link org.opencastproject.analysis.text.ocropus.OcropusTextAnalyzer#analyze(java.io.File)}.
    */
   @Test
-  public void testAnalyze() {
+  public void testAnalyze() throws Exception {
     if (!ocropusInstalled)
       return;
     

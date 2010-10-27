@@ -27,17 +27,20 @@ import java.util.Set;
 
 public interface Store<ValueClass> {
 
-    /** Inserts a new value into the store. */
-    void put(String key, ValueClass value);
+    /** Inserts a new value into the store. 
+     * @throws InvalidKeyException */
+    void put(String key, ValueClass value) throws InvalidKeyException;
 
-    /** Returns a stored value. */
-    ValueClass get(String key);
+    /** Returns a stored value. 
+     * @throws InvalidKeyException */
+    ValueClass get(String key) throws InvalidKeyException;
 
-    /** Removes a value with a specified key. */
-    ValueClass remove(String key);
+    /** Removes a value with a specified key. 
+     * @throws InvalidKeyException */
+    ValueClass remove(String key) throws InvalidKeyException;
 
     /** Determines if the Store contains a value with a specified key. */
-    boolean containsKey(String key);
+    boolean containsKey(String key) throws InvalidKeyException;
 
     /**
      * Returns the number of milliseconds since value associated with
@@ -45,9 +48,10 @@ public interface Store<ValueClass> {
      *
      * @param key key string
      * @return milliseconds since the value was modified
+     * @throws InvalidKeyException 
      */
 
-    public long modified(String key);
+    public long modified(String key) throws InvalidKeyException;
 
     /** Returns the set of all keys. */
     Set<String> keySet();

@@ -551,7 +551,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     return dao.countWorkflowInstances();
   }
 
-  public WorkflowSet getWorkflowInstances(WorkflowQuery query)throws WorkflowDatabaseException {
+  public WorkflowSet getWorkflowInstances(WorkflowQuery query) throws WorkflowDatabaseException {
     return dao.getWorkflowInstances(query);
   }
 
@@ -564,7 +564,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     return new WorkflowQueryImpl();
   }
 
-  public void handleOperationException(WorkflowInstance workflow, WorkflowOperationException e) {
+  public void handleOperationException(WorkflowInstance workflow, Exception e) {
     // Add the exception's localized message to the workflow instance
     workflow.addErrorMessage(e.getLocalizedMessage());
 
@@ -587,14 +587,20 @@ public class WorkflowServiceImpl implements WorkflowService {
       }
     }
     currentOperation.setState(OperationState.FAILED);
-    dao.update(workflow);
-    handleOperationResult(workflow, new WorkflowOperationResultImpl(workflow.getMediaPackage(), null, Action.CONTINUE,
-            0));
+    try {
+      dao.update(workflow);
+      handleOperationResult(workflow, new WorkflowOperationResultImpl(workflow.getMediaPackage(), null,
+              Action.CONTINUE, 0));
+    } catch (WorkflowDatabaseException dbException) {
+      // There is nothing we can do at this point.
+      logger.warn("Unable to save the workflow instance state to the database.");
+    }
   }
 
   /**
    */
-  void handleOperationResult(WorkflowInstance workflow, WorkflowOperationResult result) {
+  void handleOperationResult(WorkflowInstance workflow, WorkflowOperationResult result)
+          throws WorkflowDatabaseException {
     if (result == null) {
       // Just continue using the workflow's current mediapackage, but log a warning
       logger.warn("Handling a null operation result for workflow {}", workflow);
@@ -636,7 +642,8 @@ public class WorkflowServiceImpl implements WorkflowService {
     try {
       dbState = getWorkflowById(workflow.getId()).getState();
     } catch (WorkflowDatabaseException e) {
-      throw new IllegalStateException("The workflow with ID " + workflow.getId() + " can not be accessed in the database");
+      throw new IllegalStateException("The workflow with ID " + workflow.getId()
+              + " can not be accessed in the database");
     } catch (NotFoundException e) {
       throw new IllegalStateException("The workflow with ID " + workflow.getId() + " can not be found in the database");
     }
@@ -698,7 +705,8 @@ public class WorkflowServiceImpl implements WorkflowService {
    *      org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
-  public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage) {
+  public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage)
+          throws WorkflowDatabaseException {
     if (workflowDefinition == null)
       throw new IllegalArgumentException("workflow definition must not be null");
     if (mediaPackage == null)
@@ -714,7 +722,8 @@ public class WorkflowServiceImpl implements WorkflowService {
    *      java.util.Map)
    */
   @Override
-  public WorkflowInstance start(MediaPackage mediaPackage, Map<String, String> properties) {
+  public WorkflowInstance start(MediaPackage mediaPackage, Map<String, String> properties)
+          throws WorkflowDatabaseException {
     if (mediaPackage == null)
       throw new IllegalArgumentException("mediapackage must not be null");
     WorkflowDefinition def = getWorkflowDefinition(mediaPackage, properties);
@@ -727,7 +736,7 @@ public class WorkflowServiceImpl implements WorkflowService {
    * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
-  public WorkflowInstance start(MediaPackage mediaPackage) {
+  public WorkflowInstance start(MediaPackage mediaPackage) throws WorkflowDatabaseException {
     if (mediaPackage == null)
       throw new IllegalArgumentException("mediapackage must not be null");
     Map<String, String> properties = new HashMap<String, String>();

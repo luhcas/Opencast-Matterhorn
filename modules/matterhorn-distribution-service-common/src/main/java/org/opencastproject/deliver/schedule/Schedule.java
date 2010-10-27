@@ -16,6 +16,7 @@
 package org.opencastproject.deliver.schedule;
 
 import org.opencastproject.deliver.store.FileSystemStore;
+import org.opencastproject.deliver.store.InvalidKeyException;
 import org.opencastproject.deliver.store.MemoryStore;
 import org.opencastproject.deliver.store.Store;
 
@@ -73,9 +74,10 @@ public class Schedule {
      *
      * @param active_store Store used to save active tasks
      * @param completed_store Store used to save completed and failed tasks
+     * @throws InvalidKeyException 
      */
 
-    public Schedule(Store<Task> active_store, Store<Task> completed_store) {
+    public Schedule(Store<Task> active_store, Store<Task> completed_store) throws InvalidKeyException {
         this.active_store = active_store;
         this.completed_store = completed_store;
         executor = new ScheduledThreadPoolExecutor(POOL_SIZE);
@@ -87,9 +89,10 @@ public class Schedule {
      * Constructs a Schedule using FileSystemStores to store task information.
      * 
      * @param directory Directory where task information is to be stored.
+     * @throws InvalidKeyException 
      */
 
-    public Schedule(File directory) {
+    public Schedule(File directory) throws InvalidKeyException {
         this(new FileSystemStore<Task>(new File(directory, "active"),
                 new TaskSerializer(), true),
              new FileSystemStore<Task>(new File(directory, "complete"),
@@ -100,9 +103,10 @@ public class Schedule {
      * Constructs a Schedule using MemoryStore to keep task information in
      * memory. Note that this version will not survive a restart and is used
      * mainly for testing.
+     * @throws InvalidKeyException 
      */
 
-    public Schedule() {
+    public Schedule() throws InvalidKeyException {
         this(new MemoryStore<Task>(new TaskSerializer()),
              new MemoryStore<Task>(new TaskSerializer()));
     }
@@ -110,9 +114,10 @@ public class Schedule {
     /**
      * Called when a Schedule is created. Scans the active store for all
      * Tasks and re-inserts them into the schedule (so they will be resumed).
+     * @throws InvalidKeyException 
      */
 
-    private void resumeAll() {
+    private void resumeAll() throws InvalidKeyException {
         long now = System.currentTimeMillis();
         for (String name : active_store.keySet()) {
             Task task = active_store.get(name);
@@ -134,9 +139,10 @@ public class Schedule {
      *
      * @param name Task Name
      * @return Task with the specified name or null if not found
+     * @throws InvalidKeyException 
      */
 
-    public Task getTask(String name) {
+    public Task getTask(String name) throws InvalidKeyException {
         Task task = task_cache.get(name);
         if (task != null)
             return task;
@@ -151,9 +157,10 @@ public class Schedule {
      *
      * @param name Task name
      * @return Copy of Task with specified name, or null if not found
+     * @throws InvalidKeyException 
      */
 
-    public Task getSavedTask(String name) {
+    public Task getSavedTask(String name) throws InvalidKeyException {
         Task task = active_store.get(name);
         if (task != null)
             return task;
@@ -165,9 +172,10 @@ public class Schedule {
      *
      * @param action The action to execute
      * @return started Task
+     * @throws InvalidKeyException 
      */
 
-    public Task start(Action action) {
+    public Task start(Action action) throws InvalidKeyException {
         Task task = action.makeTask();
         task.setSchedule(this);
         task.setResumeTime(new Date());
@@ -197,9 +205,10 @@ public class Schedule {
      * restart.
      *
      * @param task Task to be saved.
+     * @throws InvalidKeyException 
      */
 
-    void saveTask(Task task) {
+    void saveTask(Task task) throws InvalidKeyException {
         String task_name = task.getName();
         switch (task.getState()) {
             case INITIAL:

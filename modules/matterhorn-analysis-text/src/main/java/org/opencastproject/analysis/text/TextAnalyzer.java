@@ -280,7 +280,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
    * @throws IOException
    *           if accessing the image fails
    */
-  protected VideoText[] analyze(File imageFile, String id) {
+  protected VideoText[] analyze(File imageFile, String id) throws MediaAnalysisException {
     boolean languagesInstalled;
     if (dictionaryService.getLanguages().length == 0) {
       languagesInstalled = false;

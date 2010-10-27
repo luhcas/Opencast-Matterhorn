@@ -27,6 +27,7 @@ import java.util.concurrent.Future;
 import org.apache.commons.lang.StringUtils;
 import org.opencastproject.deliver.schedule.Schedule;
 import org.opencastproject.deliver.schedule.Task;
+import org.opencastproject.deliver.store.InvalidKeyException;
 import org.opencastproject.deliver.youtube.YouTubeConfiguration;
 import org.opencastproject.deliver.youtube.YouTubeDeliveryAction;
 import org.opencastproject.deliver.youtube.YouTubeRemoveAction;
@@ -121,7 +122,11 @@ public class YoutubeDistributionService implements DistributionService {
     logger.info("Task file directory: {}", directory_name);
     File data_directory = new File(directory_name);
     data_directory.mkdirs();
-    schedule = new Schedule(data_directory);
+    try {
+      schedule = new Schedule(data_directory);
+    } catch (InvalidKeyException e) {
+      throw new IllegalStateException(e);
+    }
 
     int threads = 1;
     String threadsConfig = StringUtils.trimToNull(cc.getBundleContext().getProperty(
@@ -171,10 +176,19 @@ public class YoutubeDistributionService implements DistributionService {
     YouTubeRemoveAction ract = new YouTubeRemoveAction();
     ract.setName(name + "_r");
     ract.setPublishTask(name);
-    schedule.start(ract);
+    try {
+      schedule.start(ract);
+    } catch (InvalidKeyException e) {
+      throw new DistributionException(e);
+    }
 
     while (true) {
-      Task rTask = schedule.getTask(name + "_r");
+      Task rTask;
+      try {
+        rTask = schedule.getTask(name + "_r");
+      } catch (InvalidKeyException e) {
+        throw new DistributionException(e);
+      }
       synchronized (rTask) {
         Task.State state = rTask.getState();
         if (state == Task.State.INITIAL || state == Task.State.ACTIVE) {
@@ -238,7 +252,12 @@ public class YoutubeDistributionService implements DistributionService {
         String name = getTaskID(mediaPackageId, element.getIdentifier());
 
         // check if the file has already been delivered
-        Task savedTask = schedule.getSavedTask(name);
+        Task savedTask;
+        try {
+          savedTask = schedule.getSavedTask(name);
+        } catch (InvalidKeyException e) {
+          throw new DistributionException(e);
+        }
 
         if (savedTask != null && savedTask.getState() == Task.State.COMPLETE) {
           // has been successfully delivered
@@ -267,10 +286,19 @@ public class YoutubeDistributionService implements DistributionService {
         logger.info("Delivering from {}", sourceFile.getAbsolutePath());
 
         // start the scheduler
-        schedule.start(act);
+        try {
+          schedule.start(act);
+        } catch (InvalidKeyException e) {
+          throw new DistributionException(e);
+        }
 
         while (true) {
-          Task task = schedule.getTask(name);
+          Task task;
+          try {
+            task = schedule.getTask(name);
+          } catch (InvalidKeyException e) {
+            throw new DistributionException(e);
+          }
           synchronized (task) {
             Task.State state = task.getState();
             if (state == Task.State.INITIAL || state == Task.State.ACTIVE) {

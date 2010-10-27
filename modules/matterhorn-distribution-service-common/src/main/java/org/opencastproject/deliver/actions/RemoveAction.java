@@ -62,7 +62,7 @@ public abstract class RemoveAction extends Action {
      * Checks the members of the action.
      */
 
-    public void validate() {
+    public void validate() throws InvalidException {
         if (publish_task == null || publish_task.equals(""))
             throw new InvalidException("Missing publish task");
     }

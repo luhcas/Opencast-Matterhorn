@@ -19,7 +19,7 @@ package org.opencastproject.workflow.api;
 /**
  * Exception that is thrown for failing database operations.
  */
-public class WorkflowDatabaseException extends RuntimeException {
+public class WorkflowDatabaseException extends Exception {
 
   /** Serial version uid */
   private static final long serialVersionUID = -7411693851983157126L;

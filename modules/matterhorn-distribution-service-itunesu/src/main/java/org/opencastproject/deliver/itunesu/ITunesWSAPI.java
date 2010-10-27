@@ -93,8 +93,10 @@ public class ITunesWSAPI {
    *
    * @param fileName full path of the file
    * @return handle of the uploaded track
+   * @throws FailedException 
+   * @throws RetryException 
    */ 
-  public String uploadFile(String fileName)
+  public String uploadFile(String fileName) throws FailedException, RetryException
   {
     // get an authorization token
     String token = getAuthorizationToken(false);
@@ -126,8 +128,10 @@ public class ITunesWSAPI {
    * overhead and avoid external jar files such as jdom in the OSGi setting.
    *
    * @return list of ITUnesTrack objects.
+   * @throws RetryException 
+   * @throws FailedException 
    */
-  public List<ITunesTrack> listTracks() {
+  public List<ITunesTrack> listTracks() throws RetryException, FailedException {
     // get an authorization token
     String token = getAuthorizationToken(false);
 
@@ -176,8 +180,10 @@ public class ITunesWSAPI {
    *
    * @param handle handle of the track to be deleted
    * @return response from the Web service
+   * @throws FailedException 
+   * @throws RetryException 
    */
-  public String deleteTrack(String handle) {
+  public String deleteTrack(String handle) throws FailedException, RetryException {
     StringBuffer buffer = new StringBuffer();
 
     // construct the XML request
@@ -200,8 +206,10 @@ public class ITunesWSAPI {
    *
    * @param handle handle of the parent (course)
    * @return response from the Web service
+   * @throws FailedException 
+   * @throws RetryException 
    */
-  public String addFeedGroup(String handle, String groupName, String feedURL) {
+  public String addFeedGroup(String handle, String groupName, String feedURL) throws FailedException, RetryException {
     StringBuffer buffer = new StringBuffer();
 
     // construct the XML request
@@ -235,8 +243,10 @@ public class ITunesWSAPI {
    *
    * @param handle handle of the track
    * @return response from the Web service
+   * @throws FailedException 
+   * @throws RetryException 
    */
-  public String updateFeedGroup(String handle) {
+  public String updateFeedGroup(String handle) throws FailedException, RetryException {
     StringBuffer buffer = new StringBuffer();
 
     // construct the XML request
@@ -259,8 +269,10 @@ public class ITunesWSAPI {
    *
    * @param handle handle of the group
    * @return response from the Web service
+   * @throws FailedException 
+   * @throws RetryException 
    */
-  public String updateFeed(String handle) {
+  public String updateFeed(String handle) throws FailedException, RetryException {
     StringBuffer buffer = new StringBuffer();
 
     // construct the XML request
@@ -289,8 +301,10 @@ public class ITunesWSAPI {
    * @param albumName name of the album
    * @param artistName name of the artist
    * @return response from the Web service
+   * @throws FailedException 
+   * @throws RetryException 
    */
-  public String addTrack(String handle, String name, int durationMilliseconds, String albumName, String artistName) {
+  public String addTrack(String handle, String name, int durationMilliseconds, String albumName, String artistName) throws FailedException, RetryException {
     StringBuffer buffer = new StringBuffer();
 
     // construct the XML request
@@ -337,8 +351,10 @@ public class ITunesWSAPI {
    * @param creator creator of the media
    * @param comment comment
    * @return response from the Web service
+   * @throws FailedException 
+   * @throws RetryException 
    */
-  public String mergeTrack(String handle, String title, String creator, String comment) {
+  public String mergeTrack(String handle, String title, String creator, String comment) throws FailedException, RetryException {
     StringBuffer buffer = new StringBuffer();
 
     // construct the XML request
@@ -368,8 +384,10 @@ public class ITunesWSAPI {
    *
    * @param wsDocument string content of the Web service document
    * @return response from the Web service
+   * @throws FailedException 
+   * @throws RetryException 
    */
-  public String uploadWSDocument(String wsDocument) {
+  public String uploadWSDocument(String wsDocument) throws FailedException, RetryException {
     // get an authorization token - true for WS XML document
     String token = getAuthorizationToken(true);
 
@@ -531,8 +549,9 @@ public class ITunesWSAPI {
    *
    * @param xmlControlFile whether this is for iTunes U Web service or for media file uploading 
    * @return the authorization token
+   * @throws FailedException 
    */
-  private String getAuthorizationToken(boolean xmlControlFile) 
+  private String getAuthorizationToken(boolean xmlControlFile) throws FailedException 
   {
     // log("Auth user=" + user);
 
@@ -587,8 +606,10 @@ public class ITunesWSAPI {
    *
    * @param token the authorization token
    * @return the upload URL
+   * @throws RetryException 
+   * @throws FailedException 
    */
-  private String getUploadURL(String token)
+  private String getUploadURL(String token) throws RetryException, FailedException
   {
     String urlString = 
       WS_URL + GET_UPLOAD_URL + "/" + configuration.getSiteURL() + "." + destination;

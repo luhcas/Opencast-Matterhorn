@@ -59,7 +59,7 @@ public class MediaAnalysisServiceSupportTest extends TestCase {
    * {@link org.opencastproject.analysis.api.MediaAnalysisServiceSupport#analyze(org.opencastproject.mediapackage.MediaPackage, java.lang.String)}
    * .
    */
-  public void testAnalyzeMediaPackageString() {
+  public void testAnalyzeMediaPackageString() throws Exception {
     assertNotNull(analyzer.analyze(track, true));
   }
 

@@ -28,7 +28,7 @@ import org.opencastproject.deliver.store.Serializer;
 
 public class DistributionSchedulerTest {
   @Test
-  public void testSchedule() throws InterruptedException {
+  public void testSchedule() throws Exception {
     Schedule s = new Schedule();
     TestAction action = new TestAction("A1");
     s.start(action);
@@ -40,7 +40,7 @@ public class DistributionSchedulerTest {
   }
 
   @Test
-  public void testFails() throws InterruptedException {
+  public void testFails() throws Exception {
     Schedule s = new Schedule();
     TestAction action = new TestAction("A2");
     action.setExecuteLimit(2);
@@ -54,7 +54,7 @@ public class DistributionSchedulerTest {
   }
 
   @Test
-  public void testRestart() throws InterruptedException {
+  public void testRestart() throws Exception {
     Store<Task> active_store = new MemoryStore<Task>(new TaskSerializer());
     Store<Task> complete_store = new MemoryStore<Task>(new TaskSerializer());
     Schedule s1 = new Schedule(active_store, complete_store);
@@ -83,60 +83,60 @@ public class DistributionSchedulerTest {
   }
 
   @Test
-  public void testDeadline() throws InterruptedException {
+  public void testDeadline() throws Exception {
     Schedule s1 = new Schedule();
     TestAction a1 = new TestAction("A1");
     a1.setDeadlineSeconds(1L);
     Task t1 = s1.start(a1);
-  
+
     Thread.sleep(2 * 1000);
     // Assert.assertEquals(State.FAILED, t1.getState());
   }
 
   @Test
-  public void testRetries() throws InterruptedException {
+  public void testRetries() throws Exception {
     Schedule s = new Schedule();
     TestAction a1 = new TestAction("A1");
     a1.setExecuteCount(2);
     a1.setRetries(true);
     Task t1 = s.start(a1);
-  
+
     Thread.sleep(4 * 1000);
-  
+
     // Assert.assertEquals(3, t1.getRetryCount());
     // Assert.assertEquals(State.FAILED, t1.getState());
-    
+
     s.start(a1);
     s.shutdown();
   }
-  
+
   @Test
   public void testMakeTask() {
     TestAction a1 = new TestAction("T1");
     Task t1 = a1.makeTask();
     Assert.assertEquals(a1, t1.getAction());
   }
-  
+
   @Test
-  public void testToFromJSON() {
+  public void testToFromJSON() throws Exception {
     TestAction a1 = new TestAction("T2");
     a1.setExecuteLimit(8);
-  
+
     Task t1 = a1.makeTask();
     t1.setStatus("testing");
-  
+
     Serializer<Task> s = new TaskSerializer();
     String json = s.toString(t1);
-  
+
     Task t2 = s.fromString(json);
     Assert.assertEquals(State.INITIAL, t2.getState());
     Assert.assertEquals("testing", t2.getStatus());
-  
+
     Action a2 = t2.getAction();
     Assert.assertTrue(a2 instanceof TestAction);
-    Assert.assertEquals(8, ((TestAction)a2).getExecuteLimit());
-    Assert.assertEquals(0, ((TestAction)a2).getExecuteCount());
-    Assert.assertFalse(((TestAction)a2).getFails());
+    Assert.assertEquals(8, ((TestAction) a2).getExecuteLimit());
+    Assert.assertEquals(0, ((TestAction) a2).getExecuteCount());
+    Assert.assertFalse(((TestAction) a2).getFails());
   }
 
 }

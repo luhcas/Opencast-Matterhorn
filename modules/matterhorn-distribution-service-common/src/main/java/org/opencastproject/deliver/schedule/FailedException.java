@@ -17,21 +17,22 @@ package org.opencastproject.deliver.schedule;
 
 /**
  * Exception thrown when a Task fails.
- *
- * @author Jonathan A. Smith
+ * 
  */
 
-public class FailedException extends RuntimeException {
+public class FailedException extends Exception {
 
-    public FailedException(Throwable cause) {
-        super(cause);
-    }
+  private static final long serialVersionUID = -5469568161350489305L;
 
-    public FailedException(String message, Throwable cause) {
-        super(message, cause);
-    }
+  public FailedException(Throwable cause) {
+    super(cause);
+  }
 
-    public FailedException(String message) {
-        super(message);
-    }
+  public FailedException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public FailedException(String message) {
+    super(message);
+  }
 }

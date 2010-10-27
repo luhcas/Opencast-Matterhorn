@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
+import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
@@ -78,14 +79,14 @@ final class WorkflowOperationWorker implements Runnable {
       if (result == null || Action.CONTINUE.equals(result.getAction()))
         handler.destroy(workflow);
       service.handleOperationResult(workflow, result);
-    } catch (WorkflowOperationException e) {
+    } catch (Exception e) {
       logger.error("Workflow operation '{}' failed with error: {}", new Object[] { handler, e.getMessage(), e });
       e.printStackTrace();
       service.handleOperationException(workflow, e);
     }
   }
 
-  public WorkflowOperationResult start() throws WorkflowOperationException {
+  public WorkflowOperationResult start() throws WorkflowOperationException, WorkflowDatabaseException {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
     operation.setState(OperationState.RUNNING);
     service.update(workflow);
@@ -105,7 +106,7 @@ final class WorkflowOperationWorker implements Runnable {
     }
   }
 
-  public WorkflowOperationResult resume() throws WorkflowOperationException {
+  public WorkflowOperationResult resume() throws WorkflowOperationException, WorkflowDatabaseException {
     if (!(handler instanceof ResumableWorkflowOperationHandler)) {
       throw new IllegalStateException("an attempt was made to resume a non-resumable operation");
     }

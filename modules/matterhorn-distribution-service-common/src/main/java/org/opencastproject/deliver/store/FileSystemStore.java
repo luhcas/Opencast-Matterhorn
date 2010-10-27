@@ -57,7 +57,7 @@ public class FileSystemStore<ValueClass> implements Store<ValueClass> {
         this(directory, serializer, false);
     }
 
-    public void put(String key, ValueClass value) {
+    public void put(String key, ValueClass value) throws InvalidKeyException {
         File data_file = dataFile(key);
         String representation = serializer.toString(value);
         try {
@@ -70,7 +70,7 @@ public class FileSystemStore<ValueClass> implements Store<ValueClass> {
         }
     }
 
-    public ValueClass get(String key) {
+    public ValueClass get(String key) throws InvalidKeyException {
         File data_file = dataFile(key);
         String text = readFile(data_file);
         if (text == null)
@@ -111,7 +111,7 @@ public class FileSystemStore<ValueClass> implements Store<ValueClass> {
         return null;
     }
 
-    public ValueClass remove(String key) {
+    public ValueClass remove(String key) throws InvalidKeyException {
         File data_file = dataFile(key);
         if (!data_file.exists())
             return null;
@@ -120,12 +120,12 @@ public class FileSystemStore<ValueClass> implements Store<ValueClass> {
         return value;
     }
 
-    public boolean containsKey(String key) {
+    public boolean containsKey(String key) throws InvalidKeyException {
         File data_file = dataFile(key);
         return data_file.exists();
     }
 
-    public long modified(String key) {
+    public long modified(String key) throws InvalidKeyException {
         File data_file = dataFile(key);
         if (!data_file.exists())
             return -1L;
@@ -151,9 +151,10 @@ public class FileSystemStore<ValueClass> implements Store<ValueClass> {
      *
      * @param key key string
      * @return File
+     * @throws InvalidKeyException 
      */
 
-    private File dataFile(String key) {
+    private File dataFile(String key) throws InvalidKeyException {
         if (!key.matches("^[\\w\\-]+$"))
             throw new InvalidKeyException(key);
         return new File(directory, key + extension);

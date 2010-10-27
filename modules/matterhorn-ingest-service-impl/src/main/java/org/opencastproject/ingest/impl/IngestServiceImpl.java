@@ -37,6 +37,7 @@ import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.ZipUtil;
+import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -507,7 +508,11 @@ public class IngestServiceImpl implements IngestService {
    */
   @Override
   public WorkflowInstance ingest(MediaPackage mp) throws IngestException {
-    return workflowService.start(mp);
+    try {
+      return workflowService.start(mp);
+    } catch (WorkflowDatabaseException e) {
+      throw new IngestException(e);
+    }
   }
 
   /**
@@ -529,16 +534,15 @@ public class IngestServiceImpl implements IngestService {
    */
   @Override
   public WorkflowInstance ingest(MediaPackage mp, String wd, Map<String, String> properties) throws IngestException {
-    WorkflowInstance workflowInst;
     WorkflowDefinition workflowDef = workflowService.getWorkflowDefinitionById(wd);
     if (workflowDef == null)
       throw new IllegalStateException(wd + " is not a registered workflow definition");
-    if (properties == null) {
-      workflowInst = workflowService.start(workflowDef, mp);
-    } else {
-      workflowInst = workflowService.start(workflowDef, mp, properties);
+    try {
+      return (properties == null) ? workflowService.start(workflowDef, mp) :
+        workflowService.start(workflowDef, mp, properties);
+    } catch (WorkflowDatabaseException e) {
+      throw new IngestException(e);
     }
-    return workflowInst;
   }
 
   /**

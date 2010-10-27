@@ -83,14 +83,14 @@ public class OcropusTextAnalyzer {
    * @throws IllegalStateException
    *           if the binary is not set
    */
-  public OcropusTextFrame analyze(File image) {
+  public OcropusTextFrame analyze(File image) throws MediaAnalysisException {
     if (binary == null)
       throw new IllegalStateException("Binary is not set");
     
     ocrocmdOutput = new StringBuffer();
 
     // Analyze
-    new ProcessExecutor(binary, getAnalysisOptions(image)) {
+    new ProcessExecutor<MediaAnalysisException>(binary, getAnalysisOptions(image)) {
       @Override
       protected boolean onLineRead(String line) {
         onAnalysis(line);
@@ -98,13 +98,8 @@ public class OcropusTextAnalyzer {
       }
 
       @Override
-      protected void onProcessFinished(int exitCode) {
+      protected void onProcessFinished(int exitCode) throws MediaAnalysisException {
         onFinished(exitCode);
-      }
-
-      @Override
-      protected void onError(Exception e) {
-        OcropusTextAnalyzer.this.onError(e);
       }
     }.execute();
 
@@ -115,12 +110,12 @@ public class OcropusTextAnalyzer {
   /**
    * Override this method to do any post processing on the gathered metadata. The default implementation does nothing.
    */
-  protected void postProcess() {
+  protected void postProcess() throws MediaAnalysisException {
     try {
       InputStream is = IOUtils.toInputStream(ocrocmdOutput.toString(), "UTF-8");
       textFrame = OcropusTextFrame.parse(is);
     } catch (IOException e) {
-      onError(e);
+      throw new MediaAnalysisException(e);
     }
   }
 
@@ -152,24 +147,13 @@ public class OcropusTextAnalyzer {
    * 
    * @param exitCode
    *          the exit code
+   *          @throws MediaAnalysisException if the exit code indicates a problem with execution of the binary
    */
-  protected void onFinished(int exitCode) {
+  protected void onFinished(int exitCode) throws MediaAnalysisException {
     // Windows binary will return -1 when queried for options
     if (exitCode != -1 && exitCode != 0 && exitCode != 255) {
       logger.error(ocrocmdOutput.toString());
       throw new MediaAnalysisException("Text analyzer " + binary + " exited with code " + exitCode);
     }
   }
-
-  /**
-   * Exception handler callback. Any occuring {@link org.opencastproject.inspection.impl.api.MediaAnalyzerException}
-   * will <em>not</em> be passed to this handler.
-   * 
-   * @param e
-   *          the exception
-   */
-  protected void onError(Exception e) {
-    throw new MediaAnalysisException(e);
-  }
-
 }

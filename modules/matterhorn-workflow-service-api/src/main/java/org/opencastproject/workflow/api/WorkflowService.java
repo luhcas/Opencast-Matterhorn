@@ -178,7 +178,7 @@ public interface WorkflowService {
    * @throws WorkflowDatabaseException
    *           if there is a problem accessing the workflow instance in persistence
    */
-  void suspend(String workflowInstanceId) throws NotFoundException;
+  void suspend(String workflowInstanceId) throws WorkflowDatabaseException, NotFoundException;
 
   /**
    * Resumes a suspended workflow instance.

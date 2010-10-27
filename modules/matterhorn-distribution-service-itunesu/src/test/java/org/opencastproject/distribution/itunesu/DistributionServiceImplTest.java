@@ -28,7 +28,7 @@ import org.opencastproject.deliver.store.Store;
 
 public class DistributionServiceImplTest {
   @Test
-  public void testSchedule() throws InterruptedException {
+  public void testSchedule() throws Exception {
     Schedule s = new Schedule();
     TestAction action = new TestAction("A1");
     s.start(action);
@@ -40,7 +40,7 @@ public class DistributionServiceImplTest {
   }
 
   @Test
-  public void testFails() throws InterruptedException {
+  public void testFails() throws Exception {
     Schedule s = new Schedule();
     TestAction action = new TestAction("A2");
     action.setExecuteLimit(2);
@@ -54,7 +54,7 @@ public class DistributionServiceImplTest {
   }
 
   @Test
-  public void testRestart() throws InterruptedException {
+  public void testRestart() throws Exception {
     Store<Task> active_store = new MemoryStore<Task>(new TaskSerializer());
     Store<Task> complete_store = new MemoryStore<Task>(new TaskSerializer());
     Schedule s1 = new Schedule(active_store, complete_store);
@@ -83,7 +83,7 @@ public class DistributionServiceImplTest {
   }
 
   @Test
-  public void testDeadline() throws InterruptedException {
+  public void testDeadline() throws Exception {
     Schedule s1 = new Schedule();
     TestAction a1 = new TestAction("A1");
     a1.setDeadlineSeconds(1L);
@@ -94,7 +94,7 @@ public class DistributionServiceImplTest {
   }
 
   @Test
-  public void testRetries() throws InterruptedException {
+  public void testRetries() throws Exception {
     Schedule s = new Schedule();
     TestAction a1 = new TestAction("A1");
     a1.setExecuteCount(2);
@@ -118,7 +118,7 @@ public class DistributionServiceImplTest {
   }
   
   @Test
-  public void testToFromJSON() {
+  public void testToFromJSON() throws Exception {
     TestAction a1 = new TestAction("T2");
     a1.setExecuteLimit(8);
   

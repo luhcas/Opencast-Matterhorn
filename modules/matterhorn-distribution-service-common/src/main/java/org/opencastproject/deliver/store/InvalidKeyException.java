@@ -17,20 +17,21 @@ package org.opencastproject.deliver.store;
 
 /**
  * Exception thrown when an invalid key is used.
- *
- * @author Jonathan A. Smith
  */
 
-public class InvalidKeyException extends RuntimeException {
-    
-    /**
-     * Constructs an InvalidKeyException.
-     * 
-     * @param message description of key error
-     */
+public class InvalidKeyException extends Exception {
 
-    public InvalidKeyException(String message) {
-        super(message);
-    }
+  private static final long serialVersionUID = -2045810715836988340L;
+
+  /**
+   * Constructs an InvalidKeyException.
+   * 
+   * @param message
+   *          description of key error
+   */
+
+  public InvalidKeyException(String message) {
+    super(message);
+  }
 
 }

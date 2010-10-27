@@ -17,20 +17,22 @@ package org.opencastproject.deliver.actions;
 
 import org.opencastproject.deliver.schedule.FailedException;
 import org.opencastproject.deliver.schedule.Task;
+import org.opencastproject.deliver.store.InvalidKeyException;
 
 /**
- * Simple RemoveAction which always succeeds. This is used in the servlet's
- * test mode.
+ * Simple RemoveAction which always succeeds. This is used in the servlet's test mode.
  */
 
 public class RemoveDefault extends RemoveAction {
 
-    @Override
-    protected void execute() {
-        Task publish_task = this.getTaskNamed(this.getPublishTask());
-        if (publish_task == null)
-            throw new FailedException("Not found: " + this.getPublishTask());
-        status("Publication removed");
-        succeed("Publication removed");
-    }
+  private static final long serialVersionUID = -692635492910300118L;
+
+  @Override
+  protected void execute() throws FailedException, InvalidKeyException {
+    Task publish_task = this.getTaskNamed(this.getPublishTask());
+    if (publish_task == null)
+      throw new FailedException("Not found: " + this.getPublishTask());
+    status("Publication removed");
+    succeed("Publication removed");
+  }
 }

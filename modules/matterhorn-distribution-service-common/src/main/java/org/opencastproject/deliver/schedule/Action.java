@@ -15,6 +15,8 @@
  */
 package org.opencastproject.deliver.schedule;
 
+import org.opencastproject.deliver.store.InvalidKeyException;
+
 import flexjson.JSONSerializer;
 
 import java.io.Serializable;
@@ -156,7 +158,7 @@ public abstract class Action implements Serializable {
      * Execute this action.
      */
 
-    protected abstract void execute();
+    protected abstract void execute() throws Exception;
 
     /**
      * Method called first time Action is executed. Override if needed.
@@ -190,17 +192,19 @@ public abstract class Action implements Serializable {
      * Sets the human-readable Task status message.
      *
      * @param status Human readable Task status message
+     * @throws InvalidKeyException 
      */
 
-    protected void status(String status) {
+    protected void status(String status) throws InvalidKeyException {
         task.setStatus(status);
     }
 
     /**
      * Signals that the Task has succeeded.
+     * @throws InvalidKeyException 
      */
     
-    protected void succeed() {
+    protected void succeed() throws InvalidKeyException {
         task.succeed();
     }
 
@@ -208,9 +212,10 @@ public abstract class Action implements Serializable {
      * Signals that the Task has succeeded.
      *
      * @param message message indicating success
+     * @throws InvalidKeyException 
      */
 
-    protected void succeed(String message) {
+    protected void succeed(String message) throws InvalidKeyException {
         task.succeed(message);
     }
 
@@ -232,9 +237,10 @@ public abstract class Action implements Serializable {
      *
      * @param name name of task to find.
      * @return Task object or nil if not found.
+     * @throws InvalidKeyException 
      */
 
-    protected Task getTaskNamed(String name) {
+    protected Task getTaskNamed(String name) throws InvalidKeyException {
         return task.getTaskNamed(name);
     }
 

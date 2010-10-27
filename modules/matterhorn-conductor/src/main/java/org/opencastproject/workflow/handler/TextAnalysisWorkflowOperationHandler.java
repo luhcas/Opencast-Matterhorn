@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
+import org.opencastproject.analysis.api.MediaAnalysisException;
 import org.opencastproject.analysis.api.MediaAnalysisService;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
@@ -215,7 +216,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    */
   protected WorkflowOperationResult extractVideoText(final MediaPackage mediaPackage,
           WorkflowOperationInstance operation) throws EncoderException, InterruptedException, ExecutionException,
-          IOException, NotFoundException {
+          IOException, NotFoundException, MediaAnalysisException {
     long totalTimeInQueue = 0;
 
     List<String> sourceTagSet = asList(operation.getConfiguration("source-tags"));
