@@ -33,9 +33,13 @@
 
         //create Buttons
         $('.ui-button').button();
-
+        
+        //hide some stuff we don't want to see
         window.parent.$('.paging-nav-container').hide(0);
         $('#trimming-hint').toggle();
+
+        window.parent.$('.recordings-button-container').hide(0);
+        window.parent.$('.layout-inline').hide(0);
 
         // Event edit link clicked
         $('#edit-link').click( function () {
