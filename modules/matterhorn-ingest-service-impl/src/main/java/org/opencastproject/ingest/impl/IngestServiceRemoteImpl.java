@@ -195,12 +195,8 @@ public class IngestServiceRemoteImpl implements IngestService {
     String remoteHostMethod = remoteHost + "/ingest/rest/discardMediaPackage";
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     UrlEncodedFormEntity entity;
-    try {
-      params.add(new BasicNameValuePair("mediaPackage", mediaPackage.toXml()));
-      entity = new UrlEncodedFormEntity(params);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    params.add(new BasicNameValuePair("mediaPackage", mediaPackage.toXml()));
+    entity = new UrlEncodedFormEntity(params);
     HttpPost post = new HttpPost(remoteHostMethod);
     post.setEntity(entity);
     HttpResponse response = null;
@@ -258,19 +254,15 @@ public class IngestServiceRemoteImpl implements IngestService {
 
   // ------------------- helper methods ------------------
   protected MediaPackage addMediaPackageElement(String remoteHostMethod, URI uri, MediaPackage mediaPackage,
-          MediaPackageElementFlavor flavor) throws MediaPackageException {
+          MediaPackageElementFlavor flavor) throws MediaPackageException, IOException {
     HttpPost post = new HttpPost(remoteHostMethod);
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     params.add(new BasicNameValuePair("url", uri.toString()));
     params.add(new BasicNameValuePair("mediaPackage", mediaPackage.toXml()));
     params.add(new BasicNameValuePair("flavor", flavor.toString()));
-    try {
-      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
-      post.setEntity(entity);
-      return trustedHttpClient.execute(post, mediaPackageResponseHandler);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+    post.setEntity(entity);
+    return trustedHttpClient.execute(post, mediaPackageResponseHandler);
   }
 
   protected MediaPackage addMediaPackageElement(String remoteHostMethod, InputStream file, String filename,

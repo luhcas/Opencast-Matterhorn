@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.MalformedURLException;
 import java.text.SimpleDateFormat;
 
 import javax.servlet.ServletException;
@@ -105,8 +104,6 @@ public class ResourceServlet extends HttpServlet {
       FileInputStream in = new FileInputStream(f);
       try {
         IOUtils.copyLarge(in, resp.getOutputStream());
-      } catch (MalformedURLException e) {
-        throw new RuntimeException(e);
       } finally {
         IOUtils.closeQuietly(in);
       }

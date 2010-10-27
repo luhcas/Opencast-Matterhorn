@@ -86,7 +86,7 @@ public class TextAnalysisRemoteImpl extends RemoteBase implements MediaAnalysisS
       params.add(new BasicNameValuePair("image", getXML(element)));
       entity = new UrlEncodedFormEntity(params);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new MediaAnalysisException(e);
     }
     Job receipt = null;
     logger.info("Analyzing {} on a remote analysis server", element);

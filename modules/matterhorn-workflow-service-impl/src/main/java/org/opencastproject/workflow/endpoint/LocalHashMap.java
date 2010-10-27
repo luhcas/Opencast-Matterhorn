@@ -27,18 +27,37 @@ import java.util.Map.Entry;
  * See this JAXB bug for the full explanation: https://jaxb.dev.java.net/issues/show_bug.cgi?id=223
  */
 public class LocalHashMap {
+
+  /** The internal backing map */
   protected Map<String, String> map = new HashMap<String, String>();
-  public Map<String, String> getMap() {return map;}
-  public LocalHashMap() {}
-  public LocalHashMap(String in) {
+
+  /** Returns the internal map storing the properties */
+  public Map<String, String> getMap() {
+    return map;
+  }
+
+  /** No-arg constructor needed by JAXB */
+  public LocalHashMap() {
+  }
+
+  /**
+   * Constructs this map from a properties list, expressed as a string:
+   * 
+   * <code>
+   * foo=bar
+   * this=that
+   * </code>
+   * 
+   * @param in
+   *          The properties list
+   * @throws IOException
+   *           if parsing the string fails
+   */
+  public LocalHashMap(String in) throws IOException {
     Properties properties = new Properties();
-    try {
-      properties.load(IOUtils.toInputStream(in, "UTF-8"));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    for(Entry<Object, Object> e : properties.entrySet()) {
-      map.put((String)e.getKey(), (String)e.getValue());
+    properties.load(IOUtils.toInputStream(in, "UTF-8"));
+    for (Entry<Object, Object> e : properties.entrySet()) {
+      map.put((String) e.getKey(), (String) e.getValue());
     }
   }
 }

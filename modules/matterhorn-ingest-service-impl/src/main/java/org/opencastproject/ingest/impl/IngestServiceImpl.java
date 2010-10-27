@@ -624,26 +624,18 @@ public class IngestServiceImpl implements IngestService {
     return null;
   }
 
-  private File createDirectory(String dir) {
+  private File createDirectory(String dir) throws IOException {
     File f = new File(dir);
     if (!f.exists()) {
-      try {
-        FileUtils.forceMkdir(f);
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
+      FileUtils.forceMkdir(f);
     }
     return f;
   }
 
-  private void removeDirectory(String dir) {
+  private void removeDirectory(String dir) throws IOException {
     File f = new File(dir);
-    if (f.exists()) {
-      try {
-        FileUtils.deleteDirectory(f);
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
+    if (f.isDirectory()) {
+      FileUtils.deleteDirectory(f);
     }
   }
 

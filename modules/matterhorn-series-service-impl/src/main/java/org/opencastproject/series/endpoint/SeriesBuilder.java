@@ -56,7 +56,7 @@ public class SeriesBuilder {
         instance = new SeriesBuilder();
       }
       catch (JAXBException e) {
-        throw new RuntimeException(e.getLinkedException() != null ? e.getLinkedException() : e);
+        throw new IllegalStateException(e.getLinkedException() != null ? e.getLinkedException() : e);
       }
     }
     return instance;

@@ -222,7 +222,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
     String targetTrackFlavor = StringUtils.trimToNull(operation.getConfiguration("target-flavor"));
 
     if (composedTrack == null)
-      throw new RuntimeException("unable to retrieve composed track");
+      throw new IllegalStateException("unable to retrieve composed track");
 
     // Add the flavor, either from the operation configuration or from the
     // composer

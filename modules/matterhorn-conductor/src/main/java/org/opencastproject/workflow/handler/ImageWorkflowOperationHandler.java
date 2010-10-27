@@ -182,7 +182,7 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
 
       Attachment composedImage = (Attachment) receipt.getElement();
       if (composedImage == null)
-        throw new RuntimeException("Composer service did not return an image");
+        throw new IllegalStateException("Composer service did not return an image");
 
       // Add the flavor, either from the operation configuration or from the composer
       if (targetImageFlavor != null)

@@ -100,15 +100,13 @@ public class EncodingProfileScanner implements ArtifactInstaller {
    *          the properties
    * @return the profiles found in the properties
    */
-  Map<String, EncodingProfile> loadFromProperties(File artifact) {
+  Map<String, EncodingProfile> loadFromProperties(File artifact) throws IOException {
     // Format name
     FileInputStream in = null;
     Properties properties = new Properties();
     try {
       in = new FileInputStream(artifact);
       properties.load(in);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
     } finally {
       IOUtils.closeQuietly(in);
     }

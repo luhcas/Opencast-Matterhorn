@@ -54,7 +54,7 @@ public class SearchResultImpl implements SearchResult {
     try {
       context = JAXBContext.newInstance("org.opencastproject.search.api", SearchResultImpl.class.getClassLoader());
     } catch (JAXBException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
     }
   }
 
@@ -71,7 +71,7 @@ public class SearchResultImpl implements SearchResult {
       Source source = new StreamSource(xml);
       return unmarshaller.unmarshal(source, SearchResultImpl.class).getValue();
     } catch (JAXBException e) {
-      throw new RuntimeException(e.getLinkedException() != null ? e.getLinkedException() : e);
+      throw new IllegalStateException(e.getLinkedException() != null ? e.getLinkedException() : e);
     } finally {
       IOUtils.closeQuietly(xml);
     }

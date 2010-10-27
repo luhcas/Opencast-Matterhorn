@@ -19,6 +19,7 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -150,7 +151,7 @@ public class WorkflowServiceImplTest {
   }
 
   @Test
-  public void testGetWorkflowInstanceById() {
+  public void testGetWorkflowInstanceById() throws Exception {
     WorkflowInstance instance = service.start(workingDefinition, mediapackage1, null);
     WorkflowInstance instance2 = service.start(workingDefinition, mediapackage1, null);
 
@@ -177,13 +178,19 @@ public class WorkflowServiceImplTest {
     service.removeFromDatabase(instance2.getId());
 
     // And ensure that they are really gone
-    Assert.assertNull(service.getWorkflowById(instance.getId()));
-    Assert.assertNull(service.getWorkflowById(instance2.getId()));
+    try {
+      service.getWorkflowById(instance.getId());
+      Assert.fail();
+    } catch(NotFoundException e) {}
+    try {
+      service.getWorkflowById(instance2.getId());
+      Assert.fail();
+    } catch(NotFoundException e) {}
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
   @Test
-  public void testGetWorkflowByMediaPackageId() {
+  public void testGetWorkflowByMediaPackageId() throws Exception {
     // Ensure that the database doesn't have a workflow instance with this media package
     Assert.assertEquals(0, service.countWorkflowInstances());
     Assert.assertEquals(
@@ -245,12 +252,15 @@ public class WorkflowServiceImplTest {
     service.removeFromDatabase(instance3.getId());
 
     // And ensure that it's really gone
-    Assert.assertNull(service.getWorkflowById(instance.getId()));
+    try {
+      service.getWorkflowById(instance.getId());
+      Assert.fail();
+    } catch(NotFoundException e) {}
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
   @Test
-  public void testParentWorkflow() {
+  public void testParentWorkflow() throws Exception {
     WorkflowInstance originalInstance = service.start(workingDefinition, mediapackage1, null);
     WorkflowInstance childInstance = service.start(workingDefinition, mediapackage1, originalInstance.getId(), null);
     Assert.assertEquals(originalInstance.getId(), service.getWorkflowById(childInstance.getId()).getParentId());
@@ -258,7 +268,7 @@ public class WorkflowServiceImplTest {
     try {
       service.start(workingDefinition, mediapackage1, "bad parent ID", null);
       Assert.fail("Workflows should not be started with bad parent IDs");
-    } catch (IllegalArgumentException e) {
+    } catch (NotFoundException e) {
     } // the exception is expected
 
     // Wait for the workflows to finish running
@@ -277,7 +287,7 @@ public class WorkflowServiceImplTest {
   }
 
   @Test
-  public void testGetWorkflowByEpisodeId() {
+  public void testGetWorkflowByEpisodeId() throws Exception {
     String mediaPackageId = mediapackage1.getIdentifier().toString();
 
     // Ensure that the database doesn't have a workflow instance with this episode
@@ -304,14 +314,17 @@ public class WorkflowServiceImplTest {
     service.removeFromDatabase(instance.getId());
 
     // And ensure that it's really gone
-    Assert.assertNull(service.getWorkflowById(instance.getId()));
+    try {
+      service.getWorkflowById(instance.getId());
+      Assert.fail();
+    } catch(NotFoundException e) {}
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
   // TODO This test requires a hold state
   @Test
   @Ignore
-  public void testGetWorkflowByCurrentOperation() {
+  public void testGetWorkflowByCurrentOperation() throws Exception {
     // Ensure that the database doesn't have a workflow instance in the "op2" operation
     Assert.assertEquals(0, service.countWorkflowInstances());
     Assert.assertEquals(0, service.getWorkflowInstances(service.newWorkflowQuery().withCurrentOperation("op2")).size());
@@ -339,7 +352,7 @@ public class WorkflowServiceImplTest {
   }
 
   @Test
-  public void testGetWorkflowByText() {
+  public void testGetWorkflowByText() throws Exception {
     // Ensure that the database doesn't have any workflow instances
     Assert.assertEquals(0, service.countWorkflowInstances());
     Assert.assertEquals(
@@ -366,11 +379,14 @@ public class WorkflowServiceImplTest {
     service.removeFromDatabase(instance.getId());
 
     // And ensure that it's really gone
-    Assert.assertNull(service.getWorkflowById(instance.getId()));
+    try {
+      service.getWorkflowById(instance.getId());
+      Assert.fail();
+    } catch(NotFoundException e) {}
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
-  protected WorkflowInstance startAndWait(WorkflowDefinition definition, MediaPackage mp) {
+  protected WorkflowInstance startAndWait(WorkflowDefinition definition, MediaPackage mp) throws Exception {
     WorkflowInstance instance = service.start(definition, mp, null);
     while (!service.getWorkflowById(instance.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
       System.out.println("Waiting for workflow to complete...");
@@ -383,7 +399,7 @@ public class WorkflowServiceImplTest {
   }
 
   @Test
-  public void testPagedGetWorkflowByText() {
+  public void testPagedGetWorkflowByText() throws Exception {
     // Ensure that the database doesn't have any workflow instances
     Assert.assertEquals(0, service.countWorkflowInstances());
     Assert.assertEquals(
@@ -449,7 +465,7 @@ public class WorkflowServiceImplTest {
   }
 
   @Test
-  public void testGetAllWorkflowInstances() {
+  public void testGetAllWorkflowInstances() throws Exception {
     Assert.assertEquals(0, service.countWorkflowInstances());
     Assert.assertEquals(0, service.getWorkflowInstances(service.newWorkflowQuery()).size());
 
@@ -474,13 +490,19 @@ public class WorkflowServiceImplTest {
     service.removeFromDatabase(instance2.getId());
 
     // And ensure that it's really gone
-    Assert.assertNull(service.getWorkflowById(instance1.getId()));
-    Assert.assertNull(service.getWorkflowById(instance2.getId()));
+    try {
+      service.getWorkflowById(instance1.getId());
+      Assert.fail();
+    } catch(NotFoundException e) {}
+    try {
+      service.getWorkflowById(instance2.getId());
+      Assert.fail();
+    } catch(NotFoundException e) {}
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
   @Test
-  public void testFailingOperationWithErrorHandler() {
+  public void testFailingOperationWithErrorHandler() throws Exception {
     WorkflowInstance instance = service.start(failingDefinitionWithErrorHandler, mediapackage1, null);
     while (!service.getWorkflowById(instance.getId()).getState().equals(WorkflowState.FAILED)) {
       System.out.println("Waiting for workflow to fail... current state is "
@@ -507,7 +529,7 @@ public class WorkflowServiceImplTest {
   }
 
   @Test
-  public void testFailingOperationWithoutErrorHandler() {
+  public void testFailingOperationWithoutErrorHandler() throws Exception {
     WorkflowInstance instance = service.start(failingDefinitionWithoutErrorHandler, mediapackage1, null);
     while (!service.getWorkflowById(instance.getId()).getState().equals(WorkflowState.FAILED)) {
       System.out.println("Waiting for workflow to fail... current state is "

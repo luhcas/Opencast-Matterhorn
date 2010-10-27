@@ -43,121 +43,179 @@ public interface WorkflowService {
 
   /**
    * Gets a {@link WorkflowInstance} by its ID.
+   * 
+   * @return the workflow instance
+   * @throws WorkflowDatabaseException
+   *           if there is a problem accessing the workflow instance from persistence
+   * @throws NotFoundException
+   *           if there is no workflow instance with this identifier
    */
-  WorkflowInstance getWorkflowById(String workflowId);
+  WorkflowInstance getWorkflowById(String workflowId) throws WorkflowDatabaseException, NotFoundException;
 
   /**
    * Finds workflow instances based on the specified query.
-   * @param query The query parameters
+   * 
+   * @param query
+   *          The query parameters
    * @return The {@link WorkflowSet} containing the workflow instances matching the query parameters
+   * @throws WorkflowDatabaseException
+   *           if there is a problem accessing the workflow instances from persistence
    */
-  WorkflowSet getWorkflowInstances(WorkflowQuery query);
-  
+  WorkflowSet getWorkflowInstances(WorkflowQuery query) throws WorkflowDatabaseException;
+
   /**
    * Constructs a new {@link WorkflowQuery}
+   * 
    * @return The {@link WorkflowQuery}
    */
   WorkflowQuery newWorkflowQuery();
-  
+
   /**
    * Creates a new workflow instance and starts the workflow.
    * 
-   * @param workflowDefinition the workflow definition
-   * @param mediaPackage the mediapackage to process
-   * @param properties any properties to apply to the workflow definition
+   * @param workflowDefinition
+   *          the workflow definition
+   * @param mediaPackage
+   *          the mediapackage to process
+   * @param properties
+   *          any properties to apply to the workflow definition
    * @return The new workflow instance
+   * @throws WorkflowDatabaseException
+   *           if there is a problem storing the workflow instance in persistence
    */
   WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
-          Map<String, String> properties);
+          Map<String, String> properties) throws WorkflowDatabaseException;
 
   /**
    * Creates a new workflow instance and starts the workflow.
    * 
-   * @param workflowDefinition the workflow definition
-   * @param mediaPackage the mediapackage to process
-   * @param parentWorkflowId An existing workflow to associate with the new workflow instance
-   * @param properties any properties to apply to the workflow definition
+   * @param workflowDefinition
+   *          the workflow definition
+   * @param mediaPackage
+   *          the mediapackage to process
+   * @param parentWorkflowId
+   *          An existing workflow to associate with the new workflow instance
+   * @param properties
+   *          any properties to apply to the workflow definition
    * @return The new workflow instance
+   * @throws NotFoundException
+   *           if the parent workflow does not exist
+   * @throws WorkflowDatabaseException
+   *           if there is a problem storing the workflow instance in persistence
    */
   WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage, String parentWorkflowId,
-          Map<String, String> properties);
+          Map<String, String> properties) throws WorkflowDatabaseException, NotFoundException;
 
   /**
    * Creates a new workflow instance and starts the workflow.
    * 
-   * @param workflowDefinition the workflow definition
-   * @param mediaPackage the mediapackage to process
+   * @param workflowDefinition
+   *          the workflow definition
+   * @param mediaPackage
+   *          the mediapackage to process
    * @return The new workflow instance
+   * @throws WorkflowDatabaseException
+   *           if there is a problem storing the workflow instance in persistence
    */
-  WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage);
+  WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage)
+          throws WorkflowDatabaseException;
 
   /**
-   * Creates a new workflow instance using the default workflow definition (which can be configured through the use of
-   * a {@link WorkflowSelectionStrategy}), and starts the workflow.  The supplied properties are applied to the workflow
+   * Creates a new workflow instance using the default workflow definition (which can be configured through the use of a
+   * {@link WorkflowSelectionStrategy}), and starts the workflow. The supplied properties are applied to the workflow
    * instance immediately.
    * 
-   * @param mediaPackage the mediapackage to process
-   * @param properties any properties to apply to the workflow definition
+   * @param mediaPackage
+   *          the mediapackage to process
+   * @param properties
+   *          any properties to apply to the workflow definition
    * @return The new workflow instance
+   * @throws WorkflowDatabaseException
+   *           if there is a problem storing the workflow instance in persistence
    */
-  WorkflowInstance start(MediaPackage mediaPackage, Map<String, String> properties);
+  WorkflowInstance start(MediaPackage mediaPackage, Map<String, String> properties) throws WorkflowDatabaseException;
 
   /**
-   * Creates a new workflow instance using the default workflow definition (which can be configured through the use of
-   * a {@link WorkflowSelectionStrategy}), and starts the workflow.
+   * Creates a new workflow instance using the default workflow definition (which can be configured through the use of a
+   * {@link WorkflowSelectionStrategy}), and starts the workflow.
    * 
-   * @param mediaPackage the mediapackage to process
+   * @param mediaPackage
+   *          the mediapackage to process
    * @return The new workflow instance
+   * @throws WorkflowDatabaseException
+   *           if there is a problem storing the workflow instance in persistence
    */
-  WorkflowInstance start(MediaPackage mediaPackage);
+  WorkflowInstance start(MediaPackage mediaPackage) throws WorkflowDatabaseException;
 
   /**
    * Gets the total number of workflows that have been created to date.
    * 
    * @return The number of workflow instances, regardless of their state
+   * @throws WorkflowDatabaseException
+   *           if there is a problem accessing the workflow instances in persistence
    */
-  long countWorkflowInstances();
-  
+  long countWorkflowInstances() throws WorkflowDatabaseException;
+
   /**
    * Stops a running workflow instance.
    * 
    * @param workflowInstanceId
+   *          the workflow instance identifier
    * @throws NotFoundException
+   *           if no running workflow with this identifier exists
+   * @throws WorkflowDatabaseException
+   *           if there is a problem accessing the workflow instance in persistence
    */
-  void stop(String workflowInstanceId) throws NotFoundException;
+  void stop(String workflowInstanceId) throws WorkflowDatabaseException, NotFoundException;
 
   /**
    * Temporarily suspends a started workflow instance.
    * 
    * @param workflowInstanceId
+   *          the workflow instance identifier
    * @throws NotFoundException
+   *           if no running workflow with this identifier exists
+   * @throws WorkflowDatabaseException
+   *           if there is a problem accessing the workflow instance in persistence
    */
   void suspend(String workflowInstanceId) throws NotFoundException;
 
   /**
    * Resumes a suspended workflow instance.
    * 
-   * @param id the workflow to resume
+   * @param workflowInstanceId
+   *          the workflow instance identifier
    * @throws NotFoundException
+   *           if no paused workflow with this identifier exists
+   * @throws WorkflowDatabaseException
+   *           if there is a problem accessing the workflow instance in persistence
    */
-  void resume(String id) throws NotFoundException;
+  void resume(String workflowInstanceId) throws NotFoundException, WorkflowDatabaseException;
 
   /**
    * Resumes a suspended workflow instance, applying new properties to the workflow.
    * 
-   * @param workflowInstanceId the workflow to resume
-   * @param properties the properties to apply to the resumed workflow
+   * @param workflowInstanceId
+   *          the workflow to resume
+   * @param properties
+   *          the properties to apply to the resumed workflow
    * @throws NotFoundException
+   *           if no paused workflow with this identifier exists
+   * @throws WorkflowDatabaseException
+   *           if there is a problem accessing the workflow instance in persistence
    */
-  void resume(String workflowInstanceId, Map<String, String> properties) throws NotFoundException;
+  void resume(String workflowInstanceId, Map<String, String> properties) throws NotFoundException,
+          WorkflowDatabaseException;
 
   /**
    * Updates the given workflow instance with regard to the media package, the properties and the operations involved.
    * 
    * @param workflowInstance
    *          the workflow instance
+   * @throws WorkflowDatabaseException
+   *           if there is a problem storing the workflow instance in persistence
    */
-  void update(WorkflowInstance workflowInstance);
+  void update(WorkflowInstance workflowInstance) throws WorkflowDatabaseException;
 
   /**
    * Gets the list of available workflow definitions. In order to be "available", a workflow definition must be
@@ -187,8 +245,7 @@ public interface WorkflowService {
   void registerWorkflowDefinition(WorkflowDefinition definition);
 
   /**
-   * Removes the {@link WorkflowDefinition} specified by this ID from the list of available
-   * {@link WorkflowDefinition}s.
+   * Removes the {@link WorkflowDefinition} specified by this ID from the list of available {@link WorkflowDefinition}s.
    * 
    * @param workflowDefinitionId
    *          The identifier of the {@link WorkflowDefinition} to unregister

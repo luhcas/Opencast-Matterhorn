@@ -15,6 +15,8 @@
  */
 package org.opencastproject.workflow.impl;
 
+import org.opencastproject.util.NotFoundException;
+import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
@@ -28,38 +30,61 @@ public interface WorkflowServiceImplDao {
 
   /** Destroy the DAO, if necessary */
   void deactivate();
-  
+
   /**
    * Update the workflow instance, or add it to persistence if it is not already stored.
-   * @param instance The workflow instance to store
+   * 
+   * @param instance
+   *          The workflow instance to store
+   * @throws WorkflowDatabaseException
+   *           if there is a problem storing the workflow instance
    */
-  void update(WorkflowInstance instance);
-  
+  void update(WorkflowInstance instance) throws WorkflowDatabaseException;
+
   /**
    * Remove the workflow instance with this id.
-   * @param id The workflow instance id
+   * 
+   * @param id
+   *          The workflow instance id
+   * @throws WorkflowDatabaseException
+   *           if there is a problem removing the workflow instance from persistence
+   * @throws NotFoundException
+   *           if there is no workflow instance with this identifier
    */
-  void remove(String id);
+  void remove(String id) throws WorkflowDatabaseException, NotFoundException;
 
   /**
    * Gets a WorkflowInstace by its ID.
+   * 
+   * @param workflowId
+   *          the workflow instance identifier
+   * @return the workflow instance
+   * @throws WorkflowDatabaseException
+   *           if there is a problem retrieving the workflow instance from persistence
+   * @throws NotFoundException
+   *           if there is no workflow instance with this identifier
    */
-  WorkflowInstance getWorkflowById(String workflowId);
+  WorkflowInstance getWorkflowById(String workflowId) throws WorkflowDatabaseException, NotFoundException;
 
   /**
    * Gets the total number of workflows that have been created to date.
    * 
    * @return The number of workflow instances, regardless of their state
+   * @throws WorkflowDatabaseException
+   *           if there is a problem retrieving the workflow instance count from persistence
    */
-  long countWorkflowInstances();
+  long countWorkflowInstances() throws WorkflowDatabaseException;
 
   /**
    * Gets a set of workflow instances using a custom query
    * 
-   * @param query the query to use in the search for workflow instances
+   * @param query
+   *          the query to use in the search for workflow instances
    * 
    * @return the set of matching workflow instances
+   * @throws WorkflowDatabaseException
+   *           if there is a problem retrieving the workflow instances from persistence
    */
-  WorkflowSet getWorkflowInstances(WorkflowQuery query);
+  WorkflowSet getWorkflowInstances(WorkflowQuery query) throws WorkflowDatabaseException;
 
 }

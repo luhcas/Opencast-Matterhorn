@@ -110,11 +110,11 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
         return r;
       }
     } catch (Exception e) {
-      throw new RuntimeException("Unable to encode track " + sourceTrack + " using a remote composer service", e);
+      throw new EncoderException("Unable to encode track " + sourceTrack + " using a remote composer service", e);
     } finally {
       closeConnection(response);
     }
-    throw new RuntimeException("Unable to encode track " + sourceTrack + " using a remote composer service");
+    throw new EncoderException("Unable to encode track " + sourceTrack + " using a remote composer service");
   }
 
   /**
@@ -164,11 +164,11 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
         return r;
       }
     } catch (Exception e) {
-      throw new RuntimeException("Unable to trim track " + sourceTrack + " using a remote composer service", e);
+      throw new EncoderException("Unable to trim track " + sourceTrack + " using a remote composer service", e);
     } finally {
       closeConnection(response);
     }
-    throw new RuntimeException("Unable to trim track " + sourceTrack + " using a remote composer service");
+    throw new EncoderException("Unable to trim track " + sourceTrack + " using a remote composer service");
   }
 
   /**

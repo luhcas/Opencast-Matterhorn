@@ -231,15 +231,9 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
         Catalog[] segmentCatalogs = mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS, trackReference);
         Mpeg7Catalog mpeg7 = null;
         if (segmentCatalogs.length > 0) {
-          try {
-            mpeg7 = loadMpeg7Catalog(segmentCatalogs[0]);
-          } catch (Exception e) {
-            throw new RuntimeException(e);
-          }
+          mpeg7 = loadMpeg7Catalog(segmentCatalogs[0]);
           if (segmentCatalogs.length > 1)
-            logger
-                    .warn("More than one segments catalog found for track {}. Resuming with the first one ({})", t,
-                            mpeg7);
+            logger.warn("More than one segments catalog found for track {}. Resuming with the first one ({})", t, mpeg7);
         } else {
           logger.debug("No segments catalog found for track {}", t);
           continue;
@@ -279,11 +273,11 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
 
             // add this receipt's queue time to the total
             long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
-            totalTimeInQueue+=timeInQueue;
-            
+            totalTimeInQueue += timeInQueue;
+
             Attachment composedImage = (Attachment) receipt.getElement();
             if (composedImage == null)
-              throw new RuntimeException("Unable to compose image");
+              throw new IllegalStateException("Unable to compose image");
 
             // Add the flavor, either from the operation configuration or from the composer
             if (targetImageFlavor != null) {

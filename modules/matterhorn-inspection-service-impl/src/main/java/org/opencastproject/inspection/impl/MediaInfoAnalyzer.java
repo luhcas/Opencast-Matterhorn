@@ -16,6 +16,7 @@
 
 package org.opencastproject.inspection.impl;
 
+import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.impl.api.AudioStreamMetadata;
 import org.opencastproject.inspection.impl.api.VideoStreamMetadata;
 import org.opencastproject.inspection.impl.api.util.CmdlineMediaAnalyzerSupport;
@@ -240,28 +241,28 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
     return new URL(value);
   }
 
-  static FrameRateMode convertFrameRateMode(String value) {
+  static FrameRateMode convertFrameRateMode(String value) throws MediaInspectionException {
     if ("cfr".equalsIgnoreCase(value))
       return FrameRateMode.ConstantFrameRate;
     if ("vfr".equalsIgnoreCase(value))
       return FrameRateMode.VariableFrameRate;
-    throw new RuntimeException("Cannot parse FrameRateMode " + value);
+    throw new MediaInspectionException("Cannot parse FrameRateMode " + value);
   }
 
-  static ScanType convertScanType(String value) {
+  static ScanType convertScanType(String value) throws MediaInspectionException {
     if ("interlaced".equalsIgnoreCase(value))
       return ScanType.Interlaced;
     if ("progressive".equalsIgnoreCase(value))
       return ScanType.Progressive;
-    throw new RuntimeException("Cannot parse ScanType " + value);
+    throw new MediaInspectionException("Cannot parse ScanType " + value);
   }
 
-  static BitRateMode convertBitRateMode(String value) {
+  static BitRateMode convertBitRateMode(String value) throws MediaInspectionException {
     if ("vbr".equalsIgnoreCase(value))
       return BitRateMode.VariableBitRate;
     if ("cbr".equalsIgnoreCase(value))
       return BitRateMode.ConstantBitRate;
-    throw new RuntimeException("Cannot parse BitRateMode " + value);
+    throw new MediaInspectionException("Cannot parse BitRateMode " + value);
   }
 
   static Date convertDate(String value) throws ParseException {

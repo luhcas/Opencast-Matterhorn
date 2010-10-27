@@ -18,6 +18,7 @@ package org.opencastproject.workflow.impl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
@@ -57,7 +58,7 @@ import java.net.URI;
  */
 public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
   private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceImplDaoFileImpl.class);
-  
+
   protected static final String COLLECTION_ID = "workflows";
   protected static final String COUNT_TOKEN = "COUNT_TOKEN";
 
@@ -65,29 +66,30 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
   protected Workspace workspace;
   protected Directory directory;
   protected Analyzer analyzer;
-  
+
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
-  
+
   public void setStorageRoot(String storageRoot) {
     this.storageRoot = storageRoot;
   }
 
   public void activate(ComponentContext cc) {
-    String storageRoot = (String)cc.getBundleContext().getProperty("org.opencastproject.storage.dir");
+    String storageRoot = (String) cc.getBundleContext().getProperty("org.opencastproject.storage.dir");
     logger.info("{}.activate() with storage root {}", WorkflowServiceImplDaoFileImpl.class.getName(), storageRoot);
-    if(storageRoot == null) throw new IllegalStateException("storage directory not defined");
+    if (storageRoot == null)
+      throw new IllegalStateException("storage directory not defined");
     File searchRoot = new File(storageRoot, "workflow");
     try {
       FileUtils.forceMkdir(searchRoot);
-      this.storageRoot=searchRoot.getAbsolutePath();
+      this.storageRoot = searchRoot.getAbsolutePath();
     } catch (IOException e) {
       throw new IllegalStateException("unable to create storage directory: ", e);
     }
     activate();
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -107,20 +109,20 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
         FileUtils.forceMkdir(new File(storageRoot));
         directory = FSDirectory.getDirectory(storageRoot);
         indexWriter = new IndexWriter(directory, analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
-      } catch(IOException ioe) {
+      } catch (IOException ioe) {
         logger.warn("Unable to rebuild the search index", ioe);
       }
     } finally {
-      if(indexWriter != null) {
+      if (indexWriter != null) {
         try {
           indexWriter.close();
         } catch (IOException e) {
-          throw new RuntimeException(e);
+          throw new IllegalStateException(e);
         }
       }
     }
-    
-    if(countWorkflowInstances() == 0) {
+
+    if (countWorkflowInstances() == 0) {
       // this may be a new index, so get all of the existing workflows and index them
       WorkflowBuilder builder = WorkflowBuilder.getInstance();
       URI[] uris = null;
@@ -129,7 +131,7 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
       } catch (IOException e) {
         throw new IllegalStateException("Error accessing workspace collection '" + COLLECTION_ID + "'", e);
       }
-      if(uris.length > 0) {
+      if (uris.length > 0) {
         logger.info("The workflow search index is empty.  Populating it now with {} workflows.", uris.length);
       }
       for (URI uri : uris) {
@@ -146,7 +148,7 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
           IOUtils.closeQuietly(in);
         }
       }
-      if(uris.length > 0) {
+      if (uris.length > 0) {
         logger.info("Finished populating the workflow search index with {} workflows.", uris.length);
       }
     }
@@ -166,7 +168,7 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
     }
   }
 
-  public synchronized void index(WorkflowInstance instance) {
+  public synchronized void index(WorkflowInstance instance) throws WorkflowDatabaseException {
     IndexWriter indexWriter = null;
     try {
       indexWriter = new IndexWriter(directory, analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
@@ -176,13 +178,13 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
       indexWriter.commit();
     } catch (Exception e) {
       logger.warn("unable to index workflow", e);
-      throw new RuntimeException(e);
+      throw new WorkflowDatabaseException(e);
     } finally {
-      if(indexWriter != null) {
+      if (indexWriter != null) {
         try {
           indexWriter.close();
         } catch (IOException e) {
-          throw new RuntimeException(e);
+          throw new WorkflowDatabaseException(e);
         }
       }
     }
@@ -193,49 +195,51 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
     String xml = WorkflowBuilder.getInstance().toXml(instance);
     doc.add(new Field("id", instance.getId(), Field.Store.YES, Field.Index.NOT_ANALYZED));
     doc.add(new Field("text", instance.getId(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-    
+
     doc.add(new Field("state", instance.getState().toString(), Field.Store.YES, Field.Index.ANALYZED));
     doc.add(new Field("text", instance.getState().toString(), Field.Store.YES, Field.Index.ANALYZED));
-    
+
     WorkflowOperationInstance op = instance.getCurrentOperation();
-    if(op != null) doc.add(new Field("operation", op.getId(), Field.Store.YES, Field.Index.ANALYZED));
-    if(op != null) doc.add(new Field("text", op.getId(), Field.Store.YES, Field.Index.ANALYZED));
+    if (op != null)
+      doc.add(new Field("operation", op.getId(), Field.Store.YES, Field.Index.ANALYZED));
+    if (op != null)
+      doc.add(new Field("text", op.getId(), Field.Store.YES, Field.Index.ANALYZED));
     MediaPackage mp = instance.getMediaPackage();
     doc.add(new Field("mp", mp.getIdentifier().toString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
     doc.add(new Field("text", mp.getIdentifier().toString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-    if(mp.getSeries() != null) {
+    if (mp.getSeries() != null) {
       doc.add(new Field("series", mp.getSeries(), Field.Store.YES, Field.Index.NOT_ANALYZED));
       doc.add(new Field("text", mp.getSeries(), Field.Store.YES, Field.Index.ANALYZED));
     }
-    if(mp.getTitle() != null) {
+    if (mp.getTitle() != null) {
       doc.add(new Field("text", mp.getTitle(), Field.Store.YES, Field.Index.ANALYZED));
     }
-    if(mp.getLicense() != null) {
+    if (mp.getLicense() != null) {
       doc.add(new Field("text", mp.getLicense(), Field.Store.YES, Field.Index.ANALYZED));
     }
-    if(mp.getLanguage() != null) {
+    if (mp.getLanguage() != null) {
       doc.add(new Field("text", mp.getLanguage(), Field.Store.YES, Field.Index.ANALYZED));
     }
-    if(mp.getContributors() != null && mp.getContributors().length > 0) {
-      for(String contributor : mp.getContributors()) {
+    if (mp.getContributors() != null && mp.getContributors().length > 0) {
+      for (String contributor : mp.getContributors()) {
         doc.add(new Field("text", contributor, Field.Store.YES, Field.Index.ANALYZED));
       }
     }
-    if(mp.getCreators() != null && mp.getCreators().length > 0) {
-      for(String creator : mp.getCreators()) {
+    if (mp.getCreators() != null && mp.getCreators().length > 0) {
+      for (String creator : mp.getCreators()) {
         doc.add(new Field("text", creator, Field.Store.YES, Field.Index.ANALYZED));
       }
     }
-    if(mp.getSubjects() != null && mp.getSubjects().length > 0) {
-      for(String subject : mp.getSubjects()) {
+    if (mp.getSubjects() != null && mp.getSubjects().length > 0) {
+      for (String subject : mp.getSubjects()) {
         doc.add(new Field("text", subject, Field.Store.YES, Field.Index.ANALYZED));
       }
     }
     doc.add(new Field("xml", xml, Field.Store.YES, Field.Index.NOT_ANALYZED));
-    
+
     // Finally, we add a known field so we can count the total number of workflows easily
     doc.add((new Field(COUNT_TOKEN, COUNT_TOKEN, Field.Store.YES, Field.Index.NOT_ANALYZED)));
-  
+
     return doc;
   }
 
@@ -245,19 +249,20 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#countWorkflowInstances()
    */
   @Override
-  public long countWorkflowInstances() {
+  public long countWorkflowInstances() throws WorkflowDatabaseException {
     IndexSearcher searcher = null;
     try {
       searcher = new IndexSearcher(directory);
       TopDocs docs = searcher.search(new TermQuery(new Term(COUNT_TOKEN, COUNT_TOKEN)), 100000);
       return docs.totalHits;
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new WorkflowDatabaseException(e);
     } finally {
       try {
-        if(searcher != null) searcher.close();
+        if (searcher != null)
+          searcher.close();
       } catch (IOException e) {
-        throw new RuntimeException(e);
+        throw new WorkflowDatabaseException(e);
       }
     }
   }
@@ -268,22 +273,30 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowById(java.lang.String)
    */
   @Override
-  public WorkflowInstance getWorkflowById(String workflowId) {
+  public WorkflowInstance getWorkflowById(String workflowId) throws WorkflowDatabaseException, NotFoundException {
     IndexSearcher isearcher = null;
     try {
       isearcher = new IndexSearcher(directory);
       Query q = new TermQuery(new Term("id", workflowId));
       TopDocs topDocs = isearcher.search(q, 1);
-      if(topDocs.scoreDocs.length == 0) return null;
+      if (topDocs.scoreDocs.length == 0) {
+        throw new NotFoundException("No workflow instance with id=" + workflowId);
+      }
       String xml = isearcher.doc(topDocs.scoreDocs[0].doc).get("xml");
       return WorkflowBuilder.getInstance().parseWorkflowInstance(xml);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      if(e instanceof NotFoundException) {
+        throw (NotFoundException)e;
+      } else if(e instanceof WorkflowDatabaseException) {
+        throw (WorkflowDatabaseException)e;
+      } else {
+        throw new WorkflowDatabaseException(e);
+      }
     } finally {
-      if(isearcher != null) {
+      if (isearcher != null) {
         try {
           isearcher.close();
-        } catch(IOException e) {
+        } catch (IOException e) {
           logger.warn("unable to close index searcher", e);
         }
       }
@@ -296,26 +309,26 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowInstances(org.opencastproject.workflow.api.WorkflowQuery)
    */
   @Override
-  public WorkflowSet getWorkflowInstances(WorkflowQuery query) {
-    int count = query.getCount() > 0 ? (int)query.getCount() : 20; // default to 20 items if not specified
-    int startPage = query.getStartPage() > 0 ? (int)query.getStartPage() : 0; // default to page zero
+  public WorkflowSet getWorkflowInstances(WorkflowQuery query) throws WorkflowDatabaseException {
+    int count = query.getCount() > 0 ? (int) query.getCount() : 20; // default to 20 items if not specified
+    int startPage = query.getStartPage() > 0 ? (int) query.getStartPage() : 0; // default to page zero
     BooleanQuery q = new BooleanQuery();
-    if(query.getMediaPackage() != null) {
+    if (query.getMediaPackage() != null) {
       q.add(new TermQuery(new Term("mp", query.getMediaPackage())), Occur.MUST);
     }
-    if(query.getSeries() != null) {
+    if (query.getSeries() != null) {
       q.add(new TermQuery(new Term("series", query.getSeries())), Occur.MUST);
     }
-    if(query.getCurrentOperation() != null) {
+    if (query.getCurrentOperation() != null) {
       q.add(new TermQuery(new Term("operation", query.getCurrentOperation().toLowerCase())), Occur.MUST);
     }
-    if(query.getState() != null) {
+    if (query.getState() != null) {
       q.add(new TermQuery(new Term("state", query.getState().toString().toLowerCase())), Occur.MUST);
     }
-    if(query.getText() != null) {
+    if (query.getText() != null) {
       q.add(new TermQuery(new Term("text", query.getText().toLowerCase())), Occur.MUST);
     }
-    if(q.getClauses().length == 0) {
+    if (q.getClauses().length == 0) {
       q.add(new TermQuery(new Term(COUNT_TOKEN, COUNT_TOKEN)), Occur.MUST);
     }
     IndexSearcher isearcher = null;
@@ -344,12 +357,12 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
         set.addItem(builder.parseWorkflowInstance(hitDoc.get("xml")));
       }
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new WorkflowDatabaseException(e);
     } finally {
-      if(isearcher != null) {
+      if (isearcher != null) {
         try {
           isearcher.close();
-        } catch(IOException e) {
+        } catch (IOException e) {
           logger.warn("unable to close index searcher", e);
         }
       }
@@ -363,7 +376,7 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#remove(java.lang.String)
    */
   @Override
-  public void remove(String id) {
+  public void remove(String id) throws WorkflowDatabaseException, NotFoundException {
     IndexWriter indexWriter = null;
     try {
       indexWriter = new IndexWriter(directory, analyzer, IndexWriter.MaxFieldLength.UNLIMITED);
@@ -371,19 +384,15 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
       indexWriter.expungeDeletes();
       indexWriter.commit();
       String fileName = getFilename(id);
-      try {
-        workspace.deleteFromCollection(COLLECTION_ID, fileName);
-      } catch (NotFoundException e) {
-        logger.warn("Tried to delete a non existing serialized workflow: " + fileName);
-      }
+      workspace.deleteFromCollection(COLLECTION_ID, fileName);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new WorkflowDatabaseException(e);
     } finally {
-      if(indexWriter != null) {
+      if (indexWriter != null) {
         try {
           indexWriter.close();
         } catch (IOException e) {
-          throw new RuntimeException(e);
+          throw new WorkflowDatabaseException(e);
         }
       }
     }
@@ -395,18 +404,18 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#update(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
-  public void update(WorkflowInstance instance) {
+  public void update(WorkflowInstance instance) throws WorkflowDatabaseException {
     String xml;
     try {
       xml = WorkflowBuilder.getInstance().toXml(instance);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new WorkflowDatabaseException(e);
     }
     try {
       workspace.putInCollection(COLLECTION_ID, getFilename(instance.getId()), IOUtils.toInputStream(xml, "UTF-8"));
       index(instance);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    } catch (IOException e) {
+      throw new WorkflowDatabaseException(e);
     }
   }
 

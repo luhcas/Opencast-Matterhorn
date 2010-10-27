@@ -15,6 +15,7 @@
  */
 package org.opencastproject.inspection.remote;
 
+import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobParser;
@@ -58,7 +59,7 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
    * @see org.opencastproject.inspection.api.MediaInspectionService#inspect(java.net.URI, boolean)
    */
   @Override
-  public Job inspect(URI uri, boolean block) {
+  public Job inspect(URI uri, boolean block) throws MediaInspectionException {
     List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
     queryStringParams.add(new BasicNameValuePair("uri", uri.toString()));
     String url = "/inspection/rest/inspect?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
@@ -76,11 +77,11 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
         return receipt;
       }
     } catch (Exception e) {
-      throw new RuntimeException("Unable to inspect " + uri + " using a remote inspection service");
+      throw new MediaInspectionException("Unable to inspect " + uri + " using a remote inspection service", e);
     } finally {
       closeConnection(response);
     }
-    throw new RuntimeException("Unable to inspect " + uri + " using a remote inspection service");
+    throw new MediaInspectionException("Unable to inspect " + uri + " using a remote inspection service");
   }
 
   /**
@@ -90,13 +91,13 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
    *      boolean, boolean)
    */
   @Override
-  public Job enrich(MediaPackageElement original, boolean override, boolean block) {
+  public Job enrich(MediaPackageElement original, boolean override, boolean block) throws MediaInspectionException {
     String url = "/inspection/rest/enrich";
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     try {
       params.add(new BasicNameValuePair("mediaPackageElement", ((AbstractMediaPackageElement) original).getAsXml()));
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new MediaInspectionException(e);
     }
     params.add(new BasicNameValuePair("override", new Boolean(override).toString()));
     logger.info("Enriching {} using a remote media inspection service", original);
@@ -116,11 +117,11 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
         return receipt;
       }
     } catch (Exception e) {
-      throw new RuntimeException("Unable to enrich " + original + " using a remote inspection service", e);
+      throw new MediaInspectionException("Unable to enrich " + original + " using a remote inspection service", e);
     } finally {
       closeConnection(response);
     }
-    throw new RuntimeException("Unable to enrich " + original + " using a remote inspection service");
+    throw new MediaInspectionException("Unable to enrich " + original + " using a remote inspection service");
   }
 
 }

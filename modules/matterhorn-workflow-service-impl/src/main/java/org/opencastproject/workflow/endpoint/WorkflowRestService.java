@@ -29,6 +29,7 @@ import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.workflow.api.Configurable;
 import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -67,6 +68,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -111,12 +113,10 @@ public class WorkflowRestService {
   }
 
   protected String generateDocs(String serviceUrl) {
-    DocRestData data = new DocRestData("Workflow", "Workflow Service", serviceUrl,
-            new String[] { "$Rev$" });
+    DocRestData data = new DocRestData("Workflow", "Workflow Service", serviceUrl, new String[] { "$Rev$" });
 
     // abstract
-    data
-            .setAbstract("This service lists available workflows and starts, stops, suspends and resumes workflow instances.");
+    data.setAbstract("This service lists available workflows and starts, stops, suspends and resumes workflow instances.");
     // Workflow Definitions
     RestEndpoint defsEndpoint = new RestEndpoint("defs", RestEndpoint.Method.GET, "/definitions.{format}",
             "List all available workflow definitions");
@@ -185,8 +185,14 @@ public class WorkflowRestService {
     startEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("OK, workflow running or queued"));
     startEndpoint.addRequiredParam(new Param("mediapackage", Type.TEXT, generateMediaPackage(),
             "The media package upon which to perform the workflow"));
-    startEndpoint.addRequiredParam(new Param("definition", Type.TEXT, generateWorkflowDefinition(),
-            "The workflow definition"));
+    String sampleDefinition = null;
+    try {
+      sampleDefinition = generateWorkflowDefinition();
+    } catch (IOException e) {
+      logger.warn("Unable to find the sample workflow definition.  The rest docs will not include a sample by default",
+              e);
+    }
+    startEndpoint.addRequiredParam(new Param("definition", Type.TEXT, sampleDefinition, "The workflow definition"));
     startEndpoint.addOptionalParam(new Param("parent", Type.STRING, null, "An optional parent workflow instance"));
     startEndpoint.addRequiredParam(new Param("properties", Type.TEXT, "dvd.format=pal",
             "Configuration properties for this workflow instance"));
@@ -287,13 +293,11 @@ public class WorkflowRestService {
             + "  </metadata>\n" + "</ns2:mediapackage>";
   }
 
-  protected String generateWorkflowDefinition() {
+  protected String generateWorkflowDefinition() throws IOException {
     InputStream is = null;
     try {
       is = getClass().getResourceAsStream("/sample/compose-distribute-publish.xml");
       return IOUtils.toString(is, "UTF-8");
-    } catch (IOException e) {
-      throw new RuntimeException(e);
     } finally {
       IOUtils.closeQuietly(is);
     }
@@ -407,8 +411,8 @@ public class WorkflowRestService {
     if (instance == null)
       return Response.status(Status.NOT_FOUND).entity("Workflow instance " + id + " does not exist").build();
     if ("json".equals(output)) {
-      return Response.ok(getWorkflowInstanceAsJson(instance, true).toString()).header("Content-Type",
-              MediaType.APPLICATION_JSON).build();
+      return Response.ok(getWorkflowInstanceAsJson(instance, true).toString())
+              .header("Content-Type", MediaType.APPLICATION_JSON).build();
     } else {
       return Response.ok(WorkflowBuilder.getInstance().toXml(instance)).header("Content-Type", MediaType.TEXT_XML)
               .build();
@@ -422,8 +426,14 @@ public class WorkflowRestService {
           @FormParam("mediapackage") MediaPackageImpl mp, @FormParam("parent") String parentWorkflowId,
           @FormParam("properties") LocalHashMap localMap) {
     Map<String, String> properties = localMap.getMap();
-    return (WorkflowInstanceImpl) service.start(workflowDefinition, mp, StringUtils.trimToNull(parentWorkflowId),
-            properties);
+    try {
+      return (WorkflowInstanceImpl) service.start(workflowDefinition, mp, StringUtils.trimToNull(parentWorkflowId),
+              properties);
+    } catch (WorkflowDatabaseException e) {
+      throw new WebApplicationException(e);
+    } catch (NotFoundException e) {
+      throw new WebApplicationException(e);
+    }
   }
 
   @POST
@@ -479,14 +489,16 @@ public class WorkflowRestService {
     } else {
       map = properties.getMap();
     }
-    if (mediaPackage != null) {
-      WorkflowInstance workflow = service.getWorkflowById(workflowInstanceId);
-      workflow.setMediaPackage(mediaPackage);
-      service.update(workflow);
-    }
     try {
+      if (mediaPackage != null) {
+        WorkflowInstance workflow = service.getWorkflowById(workflowInstanceId);
+        workflow.setMediaPackage(mediaPackage);
+        service.update(workflow);
+      }
       service.resume(workflowInstanceId, map);
       return Response.ok("resumed " + workflowInstanceId).build();
+    } catch (WorkflowDatabaseException e) {
+      throw new WebApplicationException(e);
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
     }

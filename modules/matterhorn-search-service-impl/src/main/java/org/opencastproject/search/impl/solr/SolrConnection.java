@@ -77,8 +77,8 @@ public class SolrConnection {
       IndexSchema schema = new IndexSchema(config, solrDir + "/conf/schema.xml", null);
       core = new SolrCore(null, dataDir, config, schema, null);
       parser = new SolrRequestParsers(config);
-    } catch (Exception ee) {
-      throw new RuntimeException(ee);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -215,8 +215,8 @@ public class SolrConnection {
       writer.write(bos, req, rsp);
       BinaryResponseParser parser = new BinaryResponseParser();
       return parser.processResponse(new ByteArrayInputStream(bos.toByteArray()), "UTF-8");
-    } catch (Exception ex) {
-      throw new RuntimeException(ex);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
     }
   }
 

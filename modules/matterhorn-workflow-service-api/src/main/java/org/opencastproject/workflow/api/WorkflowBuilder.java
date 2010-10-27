@@ -59,7 +59,7 @@ public class WorkflowBuilder {
       try {
         instance = new WorkflowBuilder();
       } catch (JAXBException e) {
-        throw new RuntimeException(e.getLinkedException() != null ? e.getLinkedException() : e);
+        throw new IllegalStateException(e.getLinkedException() != null ? e.getLinkedException() : e);
       }
     }
     return instance;
