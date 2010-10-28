@@ -139,7 +139,7 @@ export JAVA_HOME=$JAVA_PREFIX/`ls $JAVA_PREFIX | grep ^$JAVA_PATTERN$`
 # Log the list of installed packages
 echo >> $LOG_FILE
 echo "# Installed packages" >> $LOG_FILE
-echo "$(cat $PKG_BACKUP)" >> $LOG_FILE
+[[ -e $PKG_BACKUP ]] && echo "$(cat $PKG_BACKUP)" >> $LOG_FILE
 
 # Setup felix
 echo -n "Downloading Felix... "

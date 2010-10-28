@@ -121,12 +121,11 @@ fi
 #chown $USERNAME:$USERNAME $HOME/.bashrc
 
 # Change permissions and owner of the $CA_DIR folder
-chmod -R 770 "$CA_DIR"
-chown -R $USERNAME:$USERNAME "$CA_DIR"
+chmod -R 770 "$OC_DIR"
+chown -R $USERNAME:$USERNAME "$OC_DIR"
 
 # Add a link to the capture agent folder in the user home folder
-ln -s $CA_DIR "$HOME"/"${CA_DIR##*/}"
-chown $USERNAME:$USERNAME "$HOME"/"${CA_DIR##*/}"
+[[ -e "${HOME}/${OC_DIR##*/}" ]] || (ln -s $OC_DIR "$HOME" && chown $USERNAME:$USERNAME "$HOME"/"${OC_DIR##*/}*")
 
 echo "Done"
 
