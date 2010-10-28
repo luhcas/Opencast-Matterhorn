@@ -49,7 +49,7 @@ import java.util.zip.Deflater;
 public class ZipUtil {
 
   private static final Logger logger = LoggerFactory.getLogger(ZipUtil.class);
-  
+
   public static final int BEST_SPEED = Deflater.BEST_SPEED; 
   public static final int BEST_COMPRESSION = Deflater.BEST_COMPRESSION;
   public static final int DEFAULT_COMPRESSION = Deflater.DEFAULT_COMPRESSION;
@@ -105,7 +105,7 @@ public class ZipUtil {
       logger.error("The destination file {} already exists", destination.getCanonicalPath());
       throw new IllegalArgumentException("The destination file already exists");
     }
-    
+
     if (level < -1) {
       logger.warn("Compression level cannot be less than 0 (or -1 for default)");
       logger.warn("Reverting to default...");
@@ -126,70 +126,54 @@ public class ZipUtil {
       logger.error("Unable to create the zip file: {}", destination.getAbsolutePath());
       throw new IOException("Unable to create the zip file: {}" + destination.getAbsolutePath(), ioe);
     }
-    
+
     if (!zipFile.isArchive()) {
       logger.error("The destination file does not represent a valid zip archive (.zip extension is required)");
       zipFile.deleteAll();
       umount(zipFile);
       throw new IllegalArgumentException("The destination file does not represent a valid zip archive (.zip extension is required)");
     }
-    
+
     try {
       if (!zipFile.mkdirs())
-        throw new IOException();
-    } catch (Exception e) {
-      logger.error("Couldn't create the destination file {}", zipFile.getCanonicalPath());
-      umount(zipFile);
-      throw new IOException("Couldn't create the destination file", e);
-    }
+        throw new IOException("Couldn't create the destination file");
 
-    for(java.io.File f : sourceFiles) {
-      
-      if (f == null) {
-        logger.error ("Null inputfile in array");
-        zipFile.deleteAll();
-        umount(zipFile);
-        throw new IllegalArgumentException("Null inputfile in array");
-      }
-      
-      // May throw IOException --necessary for windows environments
-      f = f.getCanonicalFile();
-      
-      logger.debug("Attempting to zip file {}...", f.getCanonicalPath());
+      for(java.io.File f : sourceFiles) {
 
-      // TrueZip manual says that (archiveC|copy)All(From|To) methods work with either directories or regular files
-      // Therefore, one could do zipFile.archiveCopyAllFrom(f), where f is a regular file, and it would work. Well, it DOESN'T
-      // This is why we have to tell if a file is a regular file or a directory BEFORE copying it with the appropriate method
-      boolean success;
-      if (f.exists()) {
-        if (f.isDirectory()) {
-          if (recursive)
-            success = new File(zipFile, f.getName()).copyAllFrom(f);
-          else {
-            logger.debug("Skipping directory {}", f.getCanonicalPath());
-            continue;
-          }
-        } else
-          success = new File(zipFile,f.getName()).archiveCopyFrom(f);
-          
-        if (success) 
-          logger.debug("File {} zipped successfuly", f.getCanonicalPath());
-        else {
-          logger.error("File {} not zipped", f.getCanonicalPath());
+        if (f == null) {
+          logger.error ("Null inputfile in array");
           zipFile.deleteAll();
-          umount(zipFile);
-          throw new IOException("Failed to zip one of the input files: " + f.getCanonicalPath());
+          throw new IllegalArgumentException("Null inputfile in array");
         }
-        
-      } else {
-        logger.error("Input file {} doesn't exist", f.getCanonicalPath());
-        zipFile.deleteAll();
-        umount(zipFile);
-        throw new FileNotFoundException("One of the input files does not exist: " + f.getCanonicalPath());
+
+        logger.debug("Attempting to zip file {}...", f.getAbsolutePath());
+
+        // TrueZip manual says that (archiveC|copy)All(From|To) methods work with either directories or regular files
+        // Therefore, one could do zipFile.archiveCopyAllFrom(f), where f is a regular file, and it would work. Well, it DOESN'T
+        // This is why we have to tell if a file is a regular file or a directory BEFORE copying it with the appropriate method
+        boolean success = false;
+        if (f.exists()) {
+          if (! f.isDirectory() || recursive) {
+            success = new File(zipFile,f.getName()).archiveCopyAllFrom(f);
+            if (success) 
+              logger.debug("File {} zipped successfuly", f.getAbsolutePath());
+            else {
+              logger.error("File {} not zipped", f.getAbsolutePath());
+              zipFile.deleteAll();
+              throw new IOException("Failed to zip one of the input files: " + f.getAbsolutePath());
+            }
+          }
+        } else {
+          logger.error("Input file {} doesn't exist", f.getAbsolutePath());
+          zipFile.deleteAll();
+          throw new FileNotFoundException("One of the input files does not exist: " + f.getAbsolutePath());
+        }
       }
+    } catch (IOException e) {
+      throw e;
+    } finally {
+      umount(zipFile);
     }
-   
-    umount(zipFile);
 
     return destination;
   }
@@ -202,6 +186,7 @@ public class ZipUtil {
    * @param destination the destination to extract the zip archive.  If this destination directory does not exist, it
    * will be created.
    * @throws IOException 
+   * @throws Exception 
    */
   public static void unzip(java.io.File zipFile, java.io.File destination) throws IOException {
 
@@ -216,7 +201,7 @@ public class ZipUtil {
       logger.error("The zip file does not exist: {}", zipFile.getCanonicalPath());
       throw new FileNotFoundException("The zip file does not exist: " + zipFile.getCanonicalPath());
     }
-    
+
     if (destination == null) {
       logger.error("The destination file cannot be null");
       throw new IllegalArgumentException("Destination file cannot be null");
@@ -232,22 +217,21 @@ public class ZipUtil {
       throw new IOException("Unable to create the zip file: {}" + destination.getAbsolutePath(), ioe);
     }
 
-    if (f.isArchive() && f.isDirectory()) {
-      if (destination.exists()) {
-        if (! destination.isDirectory()) {
-          logger.error("Destination file must be a directory");
-          try {
-            File.umount(f);
-          } catch (ArchiveException e) {
-            logger.error("Error umounting the input zip file");
-            throw new IOException("Error mounting the input zip file", e);
+    try {
+      if (f.isArchive() && f.isDirectory()) {
+        if (destination.exists()) {	
+          if (! destination.isDirectory()) {
+            logger.error("Destination file must be a directory");
+            throw new IllegalArgumentException("Destination file must be a directory");
           }
-          throw new IllegalArgumentException("Destination file must be a directory");
         }
-      }
-      
-      try {
-        destination.mkdirs();
+
+        try {
+          destination.mkdirs();
+        } catch (SecurityException e) {
+          logger.error("Cannot create destination directory: {}", e.getMessage());
+          throw new IOException("Cannot create destination directory", e);
+        }
 
         success = f.archiveCopyAllTo(destination);
 
@@ -257,19 +241,16 @@ public class ZipUtil {
           logger.warn("File {} was not correctly unzipped", zipFile.getCanonicalPath());
           throw new IOException("File " + zipFile.getCanonicalPath() + " was not correctly unzipped");
         }
-
-        File.umount(f);
-      } catch (SecurityException e) {
-        logger.error("Cannot create destination directory: {}", e.getMessage());
-        throw new IOException("Cannot create destination directory", e);
-      } catch (ArchiveException e) {
-        logger.error("Cannot unmount virtual ZIP filesystem: {}", e.getMessage());
-        throw new IOException("Cannot unmount virtual ZIP filesystem", e);
+      } else {
+        logger.error("The input file doesis not a valid zip file");
+        throw new IllegalArgumentException("The input file is not a valid zip file");
       }
-    } else {
-      logger.error("The input file doesis not a valid zip file");
-      throw new IllegalArgumentException("The input file is not a valid zip file");
+    } catch (IOException e) {
+      throw (e);
+    } finally {
+      umount(f);
     }
+
   }
 
 
@@ -283,7 +264,7 @@ public class ZipUtil {
    * @param sourceFiles The file names to include in the root of the archive
    * @param destination The path name of the resulting zip file
    * @return A {java.io.File} descriptor of the zip archive file
-   * @throws IOException 
+   * @throws Exception 
    */
   public static java.io.File zip(String[] sourceFiles, String destination) throws IOException {
     return zip(sourceFiles,destination, false, DEFAULT_COMPRESSION);
@@ -296,7 +277,7 @@ public class ZipUtil {
    * @param destination The path name of the resulting zip file
    * @param level The zip algorithm compression level. Ranges between 0 (no compression) and 9 (max. compression)
    * @return A {java.io.File} descriptor of the zip archive file
-   * @throws IOException 
+   * @throws Exception 
    */
   public static java.io.File zip(String[] sourceFiles, String destination, int level) throws IOException {
     return zip(sourceFiles,destination, false, level);
@@ -309,7 +290,7 @@ public class ZipUtil {
    * @param destination The path name of the resulting zip file
    * @param recursive Indicate whether or not recursively zipping nested directories
    * @return A {java.io.File} descriptor of the zip archive file
-   * @throws IOException 
+   * @throws Exception 
    */
   public static java.io.File zip(String[] sourceFiles, String destination, boolean recursive) throws IOException {
     return zip(sourceFiles, destination, recursive, DEFAULT_COMPRESSION);
@@ -323,7 +304,7 @@ public class ZipUtil {
    * @param recursive Indicate whether or not recursively zipping nested directories
    * @param level The zip algorithm compression level. Ranges between 0 (no compression) and 9 (max. compression)
    * @return A {java.io.File} descriptor of the zip archive file
-   * @throws IOException 
+   * @throws Exception 
    */
   public static java.io.File zip(String[] sourceFiles, String destination, boolean recursive, int level) throws IOException {
 
