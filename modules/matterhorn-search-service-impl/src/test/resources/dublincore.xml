@@ -26,7 +26,7 @@
     video/x-dv
   </dcterms:format>
   <dcterms:isPartOf>
-    10.0000/foobar-serie
+    foobar-serie
   </dcterms:isPartOf>
 
 </dublincore>

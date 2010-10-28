@@ -51,11 +51,12 @@ import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.request.UpdateRequest;
-import org.apache.solr.client.solrj.request.UpdateRequest.ACTION;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.params.SolrParams;
+import org.apache.solr.servlet.SolrRequestParsers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,9 +71,9 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 /**
  * Utility class used to manage the search index.
@@ -83,7 +84,7 @@ public class SolrIndexManager {
   static Logger logger = LoggerFactory.getLogger(SolrIndexManager.class);
 
   /** Connection to the database */
-  private SolrConnection solrConnection = null;
+  private SolrServer solrServer = null;
 
   /**
    * Factor multiplied to fine tune relevance and confidence impact on important keyword decision. importance =
@@ -124,12 +125,12 @@ public class SolrIndexManager {
    * @param connection
    *          connection to the database
    */
-  public SolrIndexManager(SolrConnection connection, Workspace workspace) {
+  public SolrIndexManager(SolrServer connection, Workspace workspace) {
     if (connection == null)
       throw new IllegalArgumentException("Unable to manage solr with null connection");
     if (workspace == null)
       throw new IllegalArgumentException("Unable to manager solr without a workspace");
-    this.solrConnection = connection;
+    this.solrServer = connection;
     this.workspace = workspace;
   }
 
@@ -140,13 +141,11 @@ public class SolrIndexManager {
    *           if an errors occurs while talking to solr
    */
   public void clear() throws SolrServerException {
-    UpdateRequest solrRequest = new UpdateRequest();
-    solrRequest.deleteByQuery("*:*");
-    solrRequest.setAction(ACTION.COMMIT, true, true);
     try {
-      solrConnection.update(solrRequest);
-    } catch (Exception e) {
-      logger.error("Cannot clear solr index", e);
+      solrServer.deleteByQuery("*:*");
+      solrServer.commit();
+    } catch (IOException e) {
+      throw new SolrServerException(e);
     }
   }
 
@@ -158,16 +157,12 @@ public class SolrIndexManager {
    * @throws SolrServerException
    *           if an errors occurs while talking to solr
    */
-  public boolean delete(String id) throws SolrServerException {
-    UpdateRequest solrRequest = new UpdateRequest();
-    solrRequest.deleteById(id);
-    solrRequest.setAction(ACTION.COMMIT, true, true);
+  public void delete(String id) throws SolrServerException {
     try {
-      solrConnection.update(solrRequest);
-      return true;
-    } catch (Exception e) {
-      logger.error("Cannot clear solr index");
-      return false;
+      solrServer.deleteById(id);
+      solrServer.commit();
+    } catch (IOException e) {
+      throw new SolrServerException(e);
     }
   }
 
@@ -183,9 +178,6 @@ public class SolrIndexManager {
    *           if an errors occurs while talking to solr
    */
   public boolean add(MediaPackage sourceMediaPackage) throws SolrServerException {
-    UpdateRequest solrRequest = new UpdateRequest();
-    solrRequest.setAction(ACTION.COMMIT, true, true);
-
     SolrUpdateableInputDocument episodeDocument = null;
     SolrUpdateableInputDocument seriesDocument = null;
     try {
@@ -206,20 +198,18 @@ public class SolrIndexManager {
     if (episodeDocument != null) {
       if (seriesDocument != null)
         episodeDocument.setField(SolrFields.DC_IS_PART_OF, seriesDocument.getFieldValue(SolrFields.ID));
-      solrRequest.add(episodeDocument);
     }
-
-    // Has a series dublincore been included?
-    if (seriesDocument != null)
-      solrRequest.add(seriesDocument);
 
     // Post everything to the search index
     try {
-      solrConnection.update(solrRequest);
+      if (episodeDocument != null)
+        solrServer.add(episodeDocument);
+      if (seriesDocument != null)
+        solrServer.add(seriesDocument);
+      solrServer.commit();
       return true;
     } catch (Exception e) {
-      logger.error("Cannot clear solr index");
-      return false;
+      throw new SolrServerException(e);
     }
   }
 
@@ -343,7 +333,8 @@ public class SolrIndexManager {
     try {
       StringBuffer query = new StringBuffer("q=");
       query = query.append(SolrFields.ID).append(":").append(SolrUtils.clean(seriesId));
-      QueryResponse solrResponse = solrConnection.request(query.toString());
+      SolrParams params = SolrRequestParsers.parseQueryString(query.toString());
+      QueryResponse solrResponse = solrServer.query(params);
       if (solrResponse.getResults().size() > 0) {
         SolrDocument existingsolrDocument = solrResponse.getResults().get(0);
         for (String fieldName : existingsolrDocument.getFieldNames()) {

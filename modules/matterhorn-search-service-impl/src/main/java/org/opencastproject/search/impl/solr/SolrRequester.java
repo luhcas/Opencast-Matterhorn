@@ -24,14 +24,15 @@ import org.opencastproject.search.api.MediaSegmentImpl;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultImpl;
-import org.opencastproject.search.api.SearchResultItemImpl;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
+import org.opencastproject.search.api.SearchResultItemImpl;
 import org.opencastproject.search.impl.SearchQueryImpl;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
+import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.slf4j.Logger;
@@ -42,8 +43,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,7 +57,7 @@ public class SolrRequester {
   private static Logger logger = LoggerFactory.getLogger(SolrRequester.class);
 
   /** The connection to the solr database */
-  private SolrConnection solrConnection = null;
+  private SolrServer solrServer = null;
 
   /**
    * Creates a new requester for solr that will be using the given connection object to query the search index.
@@ -64,10 +65,10 @@ public class SolrRequester {
    * @param connection
    *          the solr connection
    */
-  public SolrRequester(SolrConnection connection) {
+  public SolrRequester(SolrServer connection) {
     if (connection == null)
       throw new IllegalStateException("Unable to run queries on null connection");
-    this.solrConnection = connection;
+    this.solrServer = connection;
   }
 
   /**
@@ -102,7 +103,7 @@ public class SolrRequester {
     // Execute the query and try to get hold of a query response
     QueryResponse solrResponse = null;
     try {
-      solrResponse = solrConnection.request(query.toString());
+      solrResponse = solrServer.query(query);
     } catch (Exception e1) {
       throw new SolrServerException(e1);
     }

@@ -29,7 +29,6 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchResultItem;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.util.IoSupport;
 import org.opencastproject.workspace.api.Workspace;
 
 import junit.framework.Assert;
@@ -73,10 +72,9 @@ public class SearchServiceImplTest {
     EasyMock.replay(workspace);
 
     service = new SearchServiceImpl();
-    service.solrRoot = IoSupport.getSystemTmpDir() + "opencast" + File.separator + "searchindex";
     service.setDublincoreService(new DublinCoreCatalogService());
     service.setWorkspace(workspace);
-    service.setupSolr(solrRoot);
+    service.setupSolr(new File(solrRoot));
     ServiceRegistry remote = EasyMock.createNiceMock(ServiceRegistry.class);
     EasyMock.replay(remote);
     service.setRemoteServiceManager(remote);
