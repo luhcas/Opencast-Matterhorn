@@ -94,10 +94,10 @@ public class JaxbJob implements Job {
   protected Date dateCompleted;
 
   /** The queue time is denormalized in the database to enable cross-platform date arithmetic in JPA queries */
-  protected Long queueTime;
+  protected Long queueTime = 0L;
 
   /** The run time is denormalized in the database to enable cross-platform date arithmetic in JPA queries */
-  protected Long runTime;
+  protected Long runTime = 0L;
 
   /** The element produced by this job, or null if it has not yet been generated (or was not due to an exception) */
   protected MediaPackageElement element;
