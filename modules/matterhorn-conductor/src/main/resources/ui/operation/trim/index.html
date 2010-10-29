@@ -50,7 +50,7 @@
 
         // Event set inpoint clicked
         $('#set-trimin').click( function () {
-          var tmpinpoint = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
+          var tmpinpoint = getTimeInMilliseconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
           if(tmpinpoint > outpoint && outpoint != 0) {
             $('div#errorMessage').html("In point must be earlier than Out point");
           } else
@@ -67,7 +67,7 @@
 
         //Event set outpoint clicked
         $('#set-trimout').click( function () {
-          var tmpoutpoint = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
+          var tmpoutpoint = getTimeInMilliseconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
           if(tmpoutpoint < inpoint) {
             $('div#errorMessage').html("Out point must be later than In point");
           } else
@@ -84,7 +84,7 @@
 
         //Event forward one second (inpoint)
         $('#step-in-forward').click( function () {
-          var currentTime = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
+          var currentTime = getTimeInMilliseconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
           $('#player-container')[0].contentWindow.Videodisplay.seek(currentTime + 1);
           window.setTimeout( function () {
             $('#inPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
@@ -93,7 +93,7 @@
 
         //Event backward one second (inpoint)
         $('#step-in-backward').click( function () {
-          var currentTime = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
+          var currentTime = getTimeInMilliseconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
           $('#player-container')[0].contentWindow.Videodisplay.seek(currentTime - 1);
           window.setTimeout( function () {
             $('#inPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
@@ -102,7 +102,7 @@
 
         //Event forward one second (outpoint)
         $('#step-out-forward').click( function () {
-          var currentTime = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
+          var currentTime = getTimeInMilliseconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
           $('#player-container')[0].contentWindow.Videodisplay.seek(currentTime + 1);
           window.setTimeout( function () {
             $('#outPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
@@ -111,7 +111,7 @@
 
         //Event backward one second (outpoint)
         $('#step-out-backward').click( function() {
-          var currentTime = getTimeInSeconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
+          var currentTime = getTimeInMilliseconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
           $('#player-container')[0].contentWindow.Videodisplay.seek(currentTime - 1);
           window.setTimeout( function () {
             $('#outPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
@@ -126,7 +126,7 @@
         $('#play-from-in').click( function () {
           var videodisplay = $('#player-container')[0].contentWindow.Videodisplay;
           videodisplay.pause();
-          var seekTime = getTimeInSeconds($('#inPoint').val());
+          var seekTime = getTimeInMilliseconds($('#inPoint').val());
           videodisplay.seek(seekTime);
           window.setTimeout( function () {
             videodisplay.play();
@@ -137,7 +137,7 @@
         $('#play-to-out').click( function () {
           var videodisplay = $('#player-container')[0].contentWindow.Videodisplay;
           videodisplay.pause();
-          var seekTime = getTimeInSeconds($('#outPoint').val());
+          var seekTime = getTimeInMilliseconds($('#outPoint').val());
           videodisplay.seek(seekTime - 10);
           window.setTimeout( function () {
             videodisplay.play();
@@ -231,11 +231,11 @@
     
     
     /**
-      * Returns the Input Time in Seconds
+      * Returns the Input Time in Milliseconds
       * @param data Data in the Format ab:cd:ef
-      * @return Time from the Data in Seconds
+      * @return Time from the Data in Milliseconds
       */
-      function getTimeInSeconds(data) {
+      function getTimeInMilliseconds(data) {
         var values = data.split(':');
         
         // If the Format is correct
@@ -247,11 +247,12 @@
             // Check and parse the Seconds
             values[2] = ((values[2] == '') || (values[2] == null)) ? 0 : parseInt(values[2]);
         
-            // Convert Hours and Minutes to Seconds
-            values[0] *= 60 * 60; // 1 Hour = 60 Minutes = 60 * 60 Seconds
-            values[1] *= 60;      // 1 Minute = 60 Seconds
+            // Convert Hours, Minutes and Seconds to Milliseconds
+            values[0] *= 60 * 60 * 1000;    // 1 Hour = 60 Minutes = 60 * 60 Seconds = 60 * 60 * 1000 Milliseconds
+            values[1] *= 60 * 1000;         // 1 Minute = 60 Seconds = 60 * 1000 Milliseconds
+            values[2] *= 1000;              // 1 Second = 1000 Milliseconds
         
-            // Add the Seconds and return it
+            // Add the Milliseconds and return it
             return values[0] + values[1] + values[2];
         } else {
             return 0;
@@ -273,8 +274,8 @@
         
         // If Input < Output
         if(trimFromData < trimToData) {
-            postData['trimin'] = getTimeInSeconds(trimFromData);
-            postData['trimout'] = getTimeInSeconds(trimToData);
+            postData['trimin'] = getTimeInMilliseconds(trimFromData);
+            postData['trimout'] = getTimeInMilliseconds(trimToData);
             parent.ocRecordings.continueWorkflow(postData);
         } else {
             $('div#errorMessage').html("The In-Point must not be bigger than the Out-Point");
