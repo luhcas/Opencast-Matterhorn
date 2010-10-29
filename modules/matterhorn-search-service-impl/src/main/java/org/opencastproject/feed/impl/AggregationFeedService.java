@@ -16,8 +16,8 @@
 
 package org.opencastproject.feed.impl;
 
-import org.opencastproject.feed.api.FeedGenerator;
 import org.opencastproject.feed.api.Feed.Type;
+import org.opencastproject.feed.api.FeedGenerator;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.impl.solr.SolrFields;
 

@@ -17,11 +17,11 @@
 package org.opencastproject.feed.impl;
 
 import org.opencastproject.feed.api.Content;
+import org.opencastproject.feed.api.Content.Mode;
 import org.opencastproject.feed.api.Enclosure;
 import org.opencastproject.feed.api.Feed;
 import org.opencastproject.feed.api.FeedEntry;
 import org.opencastproject.feed.api.FeedGenerator;
-import org.opencastproject.feed.api.Content.Mode;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;

@@ -1,17 +1,18 @@
 package org.opencastproject.feed.impl;
 
-import java.util.LinkedList;
-import java.util.List;
+import org.opencastproject.feed.api.Content;
+import org.opencastproject.feed.api.Content.Mode;
+import org.opencastproject.feed.api.Feed.Type;
+import org.opencastproject.feed.api.FeedEntry;
 
 import junit.framework.Assert;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opencastproject.feed.api.Content;
-import org.opencastproject.feed.api.FeedEntry;
-import org.opencastproject.feed.api.Content.Mode;
-import org.opencastproject.feed.api.Feed.Type;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class FeedImplTest {
 

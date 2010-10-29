@@ -77,7 +77,7 @@ public class HoldStateTest {
 
     MediaPackageBuilder mediaPackageBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("target/test-classes")));
-    InputStream is = WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-1.xml");
+    InputStream is = HoldStateTest.class.getResourceAsStream("/mediapackage-1.xml");
     mp = mediaPackageBuilder.loadFromXml(is);
     IOUtils.closeQuietly(is);
 
@@ -99,7 +99,7 @@ public class HoldStateTest {
     EasyMock.replay(workspace);
     dao = new WorkflowServiceImplDaoFileImpl();
     dao.setWorkspace(workspace);
-    dao.setStorageRoot(storageRoot + File.separator + "lucene");
+    dao.solrRoot = storageRoot + File.separator + "solr";
     dao.activate();
     service.setDao(dao);
     service.activate(null);

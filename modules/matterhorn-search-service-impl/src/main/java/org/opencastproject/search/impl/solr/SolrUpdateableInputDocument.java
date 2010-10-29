@@ -18,6 +18,7 @@ package org.opencastproject.search.impl.solr;
 
 import org.apache.solr.common.SolrInputDocument;
 
+
 /**
  * Solr input document which adds not existing fields.
  */

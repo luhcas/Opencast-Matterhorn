@@ -31,6 +31,25 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-solr</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-core</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>woodstox</groupId>
+          <artifactId>wstx-asl</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-solrj</artifactId>
+    </dependency>
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
     </dependency>
@@ -42,10 +61,6 @@
       <groupId>org.apache.servicemix.specs</groupId>
       <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
     </dependency>
-		<dependency>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>com.springsource.org.apache.lucene</artifactId>
-		</dependency>
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
@@ -103,7 +118,6 @@
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Import-Package>
               javax.sql.*,
-              org.apache.lucene.*,
               org.opencastproject.workflow.api;version=${project.version},
               org.opencastproject.http;version=${project.version},
               org.opencastproject.mediapackage;version=${project.version},
@@ -126,9 +140,6 @@
               OSGI-INF/workflow-service-rest.xml,
               OSGI-INF/workflow-samples.xml
             </Service-Component>
-            <JPA-PersistenceUnits>
-              workflow
-            </JPA-PersistenceUnits>
           </instructions>
         </configuration>
       </plugin>

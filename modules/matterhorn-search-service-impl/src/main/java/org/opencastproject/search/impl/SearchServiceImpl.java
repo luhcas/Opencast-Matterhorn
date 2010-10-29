@@ -23,11 +23,10 @@ import org.opencastproject.search.api.SearchException;
 import org.opencastproject.search.api.SearchQuery;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchService;
-import org.opencastproject.search.impl.solr.EmbeddedSolrServerWrapper;
 import org.opencastproject.search.impl.solr.SolrIndexManager;
 import org.opencastproject.search.impl.solr.SolrRequester;
-import org.opencastproject.search.impl.solr.SolrServerFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.solr.SolrServerFactory;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -142,14 +141,15 @@ public class SearchServiceImpl implements SearchService {
     }
   }
 
+  /**
+   * Service deactivator, called via declarative services configuration.
+   */
   public void deactivate() {
-    if (solrServer instanceof EmbeddedSolrServerWrapper) {
-      ((EmbeddedSolrServerWrapper) solrServer).shutdown();
-    }
+    SolrServerFactory.shutdown(solrServer);
   }
 
   /**
-   * Prepares the solr environment.
+   * Prepares the embedded solr environment.
    * 
    * @param solrRoot
    *          the solr root directory
@@ -209,6 +209,7 @@ public class SearchServiceImpl implements SearchService {
     solrIndexManager.setMpeg7Service(mpeg7Service);
   }
 
+  // TODO: generalize this method
   private void copyClasspathResourceToFile(String classpath, File dir) {
     InputStream in = null;
     FileOutputStream fos = null;

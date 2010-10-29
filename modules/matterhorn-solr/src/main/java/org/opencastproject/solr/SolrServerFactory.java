@@ -13,7 +13,9 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.search.impl.solr;
+package org.opencastproject.solr;
+
+import org.opencastproject.solr.internal.EmbeddedSolrServerWrapper;
 
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -75,6 +77,20 @@ public final class SolrServerFactory {
       return server;
     } catch (Exception e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Shuts down a solr server or, in the case of a connection to a remote server, closes the connection.
+   * 
+   * @param solrServer
+   *          the solr server instance
+   */
+  public static void shutdown(SolrServer solrServer) {
+    if (solrServer instanceof EmbeddedSolrServerWrapper) {
+      ((EmbeddedSolrServerWrapper) solrServer).shutdown();
+    } else {
+      // TODO: there doesn't appear to be any mechanism to close a remote connection to a solr server.
     }
   }
 

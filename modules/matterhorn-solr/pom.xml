@@ -1,8 +1,8 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>matterhorn-search-service-impl</artifactId>
-  <name>matterhorn-search-service-impl</name>
+  <artifactId>matterhorn-solr</artifactId>
+  <name>matterhorn-solr</name>
   <packaging>bundle</packaging>
   <parent>
     <groupId>org.opencastproject</groupId>
@@ -16,36 +16,12 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-search-service-api</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-solr</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-dublincore</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-mpeg7</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.solr</groupId>
@@ -62,32 +38,29 @@
       <artifactId>solr-solrj</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-core</artifactId>
+      <version>2.9.3</version>
     </dependency>
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-analyzers</artifactId>
+      <version>2.9.3</version>
     </dependency>
     <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-highlighter</artifactId>
+      <version>2.9.3</version>
     </dependency>
     <dependency>
-      <groupId>rome</groupId>
-      <artifactId>rome</artifactId>
-      <version>1.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.syndication.feed.module</groupId>
-      <artifactId>itunes</artifactId>
-      <version>0.4</version>
+      <groupId>org.apache.lucene</groupId>
+      <artifactId>lucene-snowball</artifactId>
+      <version>2.9.3</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
-    <!-- Test-scoped dependencies -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
@@ -121,21 +94,16 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Import-Package>
-              org.opencastproject.search.api;version=${project.version},
-              org.opencastproject.mediapackage.*;version=${project.version},
-              *;resolution:=optional
-            </Import-Package>
             <Private-Package>
               org.tartarus;-split-package:=merge-first,
               org.tartarus.snowball;-split-package:=merge-first,
               org.tartarus.snowball.ext;-split-package:=merge-first,
-              org.apache.solr.*;-split-package:=merge-first
+              org.apache.solr.*;-split-package:=merge-first,
+              org.opencastproject.solr.internal,
             </Private-Package>
             <Export-Package>
-              org.opencastproject.feed.impl.*;version=${project.version},
-              org.opencastproject.search.impl.*;version=${project.version},
-              org.opencastproject.search.endpoint;version=${project.version}
+              org.opencastproject.solr;version=${project.version},
+              org.apache.solr;version=1.4.1
             </Export-Package>
             <Embed-Dependency>
               solr-core;inline=true,
@@ -143,15 +111,8 @@
               lucene-core;inline=true,
               lucene-analyzers;inline=true,
               lucene-highlighter;inline=true,
-              lucene-snowball;inline=true,
-              rome;inline=true,
-              itunes;inline=true
+              lucene-snowball;inline=true
             </Embed-Dependency>
-            <Service-Component>
-              OSGI-INF/search-service.xml,
-              OSGI-INF/search-service-rest.xml,
-              OSGI-INF/feed-service.xml
-            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

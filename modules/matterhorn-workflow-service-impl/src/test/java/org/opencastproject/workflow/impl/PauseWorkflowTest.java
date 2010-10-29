@@ -98,7 +98,7 @@ public class PauseWorkflowTest {
 
     dao = new WorkflowServiceImplDaoFileImpl();
     dao.setWorkspace(workspace);
-    dao.setStorageRoot(storageRoot + File.separator + "lucene");
+    dao.solrRoot = storageRoot + File.separator + "solr";
     dao.activate();
     service.setDao(dao);
     service.activate(null);

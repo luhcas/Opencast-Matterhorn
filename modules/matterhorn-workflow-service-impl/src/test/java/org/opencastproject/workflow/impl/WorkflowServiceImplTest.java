@@ -57,9 +57,6 @@ import java.util.TreeMap;
 
 public class WorkflowServiceImplTest {
 
-  /** The solr root directory */
-  protected static final String storageRoot = "." + File.separator + "target" + File.separator + "workflow-test-db";
-
   private WorkflowServiceImpl service = null;
   private WorkflowDefinition workingDefinition = null;
   private WorkflowDefinition failingDefinitionWithoutErrorHandler = null;
@@ -75,9 +72,10 @@ public class WorkflowServiceImplTest {
   @Before
   public void setup() throws Exception {
     // always start with a fresh solr root directory
+    String storageRoot = "." + File.separator + "target" + File.separator + "workflow-test-db" + File.separator
+            + System.currentTimeMillis();
     File sRoot = new File(storageRoot);
     try {
-      FileUtils.deleteDirectory(sRoot);
       FileUtils.forceMkdir(sRoot);
     } catch (IOException e) {
       Assert.fail(e.getMessage());
@@ -103,7 +101,7 @@ public class WorkflowServiceImplTest {
 
     dao = new WorkflowServiceImplDaoFileImpl();
     dao.setWorkspace(workspace);
-    dao.setStorageRoot(storageRoot + File.separator + "lucene." + System.currentTimeMillis());
+    dao.solrRoot = storageRoot + File.separator + "solr." + System.currentTimeMillis();
     dao.activate();
     service.setDao(dao);
     service.activate(null);
@@ -135,7 +133,7 @@ public class WorkflowServiceImplTest {
 
       is = WorkflowServiceImplTest.class.getResourceAsStream("/mediapackage-2.xml");
       mediapackage2 = mediaPackageBuilder.loadFromXml(is);
-      
+
       Assert.assertNotNull(mediapackage1.getIdentifier());
       Assert.assertNotNull(mediapackage2.getIdentifier());
     } catch (Exception e) {
@@ -181,11 +179,13 @@ public class WorkflowServiceImplTest {
     try {
       service.getWorkflowById(instance.getId());
       Assert.fail();
-    } catch(NotFoundException e) {}
+    } catch (NotFoundException e) {
+    }
     try {
       service.getWorkflowById(instance2.getId());
       Assert.fail();
-    } catch(NotFoundException e) {}
+    } catch (NotFoundException e) {
+    }
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
@@ -255,7 +255,8 @@ public class WorkflowServiceImplTest {
     try {
       service.getWorkflowById(instance.getId());
       Assert.fail();
-    } catch(NotFoundException e) {}
+    } catch (NotFoundException e) {
+    }
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
@@ -317,7 +318,8 @@ public class WorkflowServiceImplTest {
     try {
       service.getWorkflowById(instance.getId());
       Assert.fail();
-    } catch(NotFoundException e) {}
+    } catch (NotFoundException e) {
+    }
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
@@ -382,7 +384,8 @@ public class WorkflowServiceImplTest {
     try {
       service.getWorkflowById(instance.getId());
       Assert.fail();
-    } catch(NotFoundException e) {}
+    } catch (NotFoundException e) {
+    }
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
@@ -493,11 +496,13 @@ public class WorkflowServiceImplTest {
     try {
       service.getWorkflowById(instance1.getId());
       Assert.fail();
-    } catch(NotFoundException e) {}
+    } catch (NotFoundException e) {
+    }
     try {
       service.getWorkflowById(instance2.getId());
       Assert.fail();
-    } catch(NotFoundException e) {}
+    } catch (NotFoundException e) {
+    }
     Assert.assertEquals(0, service.countWorkflowInstances());
   }
 
