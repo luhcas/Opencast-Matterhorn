@@ -99,7 +99,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
   public static final String JOB_TYPE = "org.opencastproject.analysis.segmenter";
 
   /** Resulting collection in the working file repository */
-  public static final String COLLECTION_ID = "vsegmenter";
+  public static final String COLLECTION_ID = "videosegments";
 
   /** Constant used to retreive the frame positioning control */
   public static final String FRAME_POSITIONING = "javax.media.control.FramePositioningControl";
