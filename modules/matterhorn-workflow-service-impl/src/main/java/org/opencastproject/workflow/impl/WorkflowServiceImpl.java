@@ -555,15 +555,6 @@ public class WorkflowServiceImpl implements WorkflowService {
     return dao.getWorkflowInstances(query);
   }
 
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowService#newWorkflowQuery()
-   */
-  public WorkflowQuery newWorkflowQuery() {
-    return new WorkflowQueryImpl();
-  }
-
   public void handleOperationException(WorkflowInstance workflow, Exception e) {
     // Add the exception's localized message to the workflow instance
     workflow.addErrorMessage(e.getLocalizedMessage());

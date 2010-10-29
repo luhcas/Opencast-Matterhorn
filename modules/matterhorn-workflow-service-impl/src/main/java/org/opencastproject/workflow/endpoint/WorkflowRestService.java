@@ -378,7 +378,7 @@ public class WorkflowRestService {
     // CHECKSTYLE:ON
     if (count < 1 || count > MAX_LIMIT)
       count = DEFAULT_LIMIT;
-    WorkflowQuery q = service.newWorkflowQuery();
+    WorkflowQuery q = new WorkflowQuery();
     q.withCount(count);
     q.withStartPage(startPage);
     if (state != null)

@@ -18,35 +18,88 @@ package org.opencastproject.workflow.api;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
 /**
- * A query used for finding workflow instances.  See {@link WorkflowService#getWorkflowInstances(WorkflowQuery)}
+ * A fluent API for issuing WorkflowInstance queries.
  */
-public interface WorkflowQuery {
+public class WorkflowQuery {
+  protected long count;
+  protected long startPage;
+  protected String text;
+  protected WorkflowState state;
+  protected String seriesId;
+  protected String mediaPackageId;
+  protected String currentOperation;
+
+  public WorkflowQuery() {
+  }
 
   /** Include a limit for the number of items to return in the result */
-  WorkflowQuery withCount(long count);
-  long getCount();
+  public WorkflowQuery withCount(long count) {
+    this.count = count;
+    return this;
+  }
 
   /** Include a paging offset for the items returned */
-  WorkflowQuery withStartPage(long startPage);
-  long getStartPage();
-  
+  public WorkflowQuery withStartPage(long startPage) {
+    this.startPage = startPage;
+    return this;
+  }
+
   /** Limit results to workflow instances matching a free text search */
-  WorkflowQuery withText(String text);
-  String getText();
+  public WorkflowQuery withText(String text) {
+    this.text = text;
+    return this;
+  }
 
   /** Limit results to workflow instances in a specific state */
-  WorkflowQuery withState(WorkflowState state);
-  WorkflowState getState();
+  public WorkflowQuery withState(WorkflowState state) {
+    this.state = state;
+    return this;
+  }
 
   /** Limit results to workflow instances for a specific series */
-  WorkflowQuery withSeries(String seriesId);
-  String getSeries();
+  public WorkflowQuery withSeries(String seriesId) {
+    this.seriesId = seriesId;
+    return this;
+  }
 
   /** Limit results to workflow instances for a specific media package */
-  WorkflowQuery withMediaPackage(String mediaPackageId);
-  String getMediaPackage();
+  public WorkflowQuery withMediaPackage(String mediaPackageId) {
+    this.mediaPackageId = mediaPackageId;
+    return this;
+  }
 
   /** Limit results to workflow instances that are currently handling the specified operation */
-  WorkflowQuery withCurrentOperation(String currentOperation);
-  String getCurrentOperation();
+  public WorkflowQuery withCurrentOperation(String currentOperation) {
+    this.currentOperation = currentOperation;
+    return this;
+  }
+
+  public long getCount() {
+    return count;
+  }
+
+  public long getStartPage() {
+    return startPage;
+  }
+
+  public String getText() {
+    return text;
+  }
+
+  public WorkflowState getState() {
+    return state;
+  }
+
+  public String getCurrentOperation() {
+    return currentOperation;
+  }
+
+  public String getMediaPackage() {
+    return mediaPackageId;
+  }
+
+  public String getSeries() {
+    return seriesId;
+  }
+
 }

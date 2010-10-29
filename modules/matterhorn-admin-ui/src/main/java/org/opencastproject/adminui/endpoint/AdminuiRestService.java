@@ -264,7 +264,7 @@ public class AdminuiRestService {
       logger.debug("getting recordings from workflowService");
       WorkflowInstance[] workflows;
       try {
-        workflows = workflowService.getWorkflowInstances(workflowService.newWorkflowQuery().withState(state).withCount(100000)).getItems();
+        workflows = workflowService.getWorkflowInstances(new WorkflowQuery().withState(state).withCount(100000)).getItems();
       } catch (WorkflowDatabaseException e) {
         throw new WebApplicationException(e);
       }
@@ -409,7 +409,7 @@ public class AdminuiRestService {
 
     // get statistics from workflowService if present
     if (workflowService != null) {
-      WorkflowQuery q = workflowService.newWorkflowQuery().withStartPage(0).withCount(100000);
+      WorkflowQuery q = new WorkflowQuery().withStartPage(0).withCount(100000);
       WorkflowInstance[] workflows;
       try {
         workflows = workflowService.getWorkflowInstances(q).getItems();

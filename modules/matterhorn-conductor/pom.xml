@@ -101,20 +101,6 @@
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.fileinstall</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.osgi.core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.felix</groupId>
-          <artifactId>org.osgi.compendium</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -132,11 +118,9 @@
               *;resolution:=optional
             </Import-Package>
             <Export-Package>
-              org.opencastproject.scanner;version=${project.version},
               org.opencastproject.workflow.handler;version=${project.version}
             </Export-Package>
             <Service-Component>
-              OSGI-INF/workflow-definition-scanner.xml,
               OSGI-INF/operations/caption.xml,
               OSGI-INF/operations/cli.xml,
               OSGI-INF/operations/cleanup.xml,

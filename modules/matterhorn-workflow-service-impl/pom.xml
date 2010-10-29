@@ -79,6 +79,20 @@
       <version>1.1</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.fileinstall</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>org.osgi.core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.felix</groupId>
+          <artifactId>org.osgi.compendium</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -135,6 +149,7 @@
               json_simple;inline=true
             </Embed-Dependency>
             <Service-Component>
+              OSGI-INF/workflow-definition-scanner.xml,
               OSGI-INF/workflow-service.xml,
               OSGI-INF/workflow-service-dao.xml,
               OSGI-INF/workflow-service-rest.xml,

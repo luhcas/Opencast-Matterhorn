@@ -5,6 +5,7 @@
   <property name="service.description" value="Workflow Service" />
   <service>
     <provide interface="org.opencastproject.workflow.api.WorkflowService" />
+    <provide interface="org.opencastproject.workflow.impl.WorkflowServiceImpl" />
   </service>
   <reference name="dao" interface="org.opencastproject.workflow.impl.WorkflowServiceImplDao"
     cardinality="1..1" policy="static" bind="setDao" />

@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.scanner;
+package org.opencastproject.workflow.impl;
 
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -55,7 +55,7 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
     try {
       stream = new FileInputStream(artifact);
       WorkflowDefinition def = WorkflowBuilder.getInstance().parseWorkflowDefinition(stream);
-      workflowService.registerWorkflowDefinition(def);
+      ((WorkflowServiceImpl)workflowService).registerWorkflowDefinition(def);
       installedWorkflows.put(artifact, def);
     } catch(Exception e) {
       logger.warn("Unable to install workflow from {}, {}", artifact, e.getMessage());
@@ -72,7 +72,7 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
     // Since the artifact is gone, we can't open it to read its ID.  So we look in the local map.
     WorkflowDefinition def = installedWorkflows.get(artifact);
     logger.info("Uninstalling workflow '{}' from file {}", def.getId(), artifact.getAbsolutePath());
-    workflowService.unregisterWorkflowDefinition(def.getId());
+    ((WorkflowServiceImpl)workflowService).unregisterWorkflowDefinition(def.getId());
   }
 
   /**

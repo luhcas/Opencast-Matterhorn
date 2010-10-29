@@ -64,13 +64,6 @@ public interface WorkflowService {
   WorkflowSet getWorkflowInstances(WorkflowQuery query) throws WorkflowDatabaseException;
 
   /**
-   * Constructs a new {@link WorkflowQuery}
-   * 
-   * @return The {@link WorkflowQuery}
-   */
-  WorkflowQuery newWorkflowQuery();
-
-  /**
    * Creates a new workflow instance and starts the workflow.
    * 
    * @param workflowDefinition
@@ -224,31 +217,4 @@ public interface WorkflowService {
    * @return The list of currently available workflow definitions, sorted by title
    */
   List<WorkflowDefinition> listAvailableWorkflowDefinitions();
-
-  /**
-   * Whether a workflow definition may be run at this moment. Every {@link WorkflowOperationDefinition} returned by
-   * {@link WorkflowDefinition#getOperations()} must be registered as a {@link WorkflowOperationHandler} for this
-   * {@link WorkflowDefinition} to be runnable.
-   * 
-   * @param workflowDefinition
-   *          The workflow definition to inspect for runnability
-   * @return Whether this workflow may be run
-   */
-  boolean isRunnable(WorkflowDefinition workflowDefinition);
-
-  /**
-   * Registers a new {@link WorkflowDefinition}
-   * 
-   * @param definition
-   *          The definition to register
-   */
-  void registerWorkflowDefinition(WorkflowDefinition definition);
-
-  /**
-   * Removes the {@link WorkflowDefinition} specified by this ID from the list of available {@link WorkflowDefinition}s.
-   * 
-   * @param workflowDefinitionId
-   *          The identifier of the {@link WorkflowDefinition} to unregister
-   */
-  void unregisterWorkflowDefinition(String workflowDefinitionId);
 }
