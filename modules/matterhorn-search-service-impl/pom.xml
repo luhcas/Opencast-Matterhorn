@@ -124,26 +124,15 @@
             <Import-Package>
               org.opencastproject.search.api;version=${project.version},
               org.opencastproject.mediapackage.*;version=${project.version},
+              org.opencastproject.solr;version=${project.version},
               *;resolution:=optional
             </Import-Package>
-            <Private-Package>
-              org.tartarus;-split-package:=merge-first,
-              org.tartarus.snowball;-split-package:=merge-first,
-              org.tartarus.snowball.ext;-split-package:=merge-first,
-              org.apache.solr.*;-split-package:=merge-first
-            </Private-Package>
             <Export-Package>
               org.opencastproject.feed.impl.*;version=${project.version},
               org.opencastproject.search.impl.*;version=${project.version},
               org.opencastproject.search.endpoint;version=${project.version}
             </Export-Package>
             <Embed-Dependency>
-              solr-core;inline=true,
-              solr-solrj;inline=true,
-              lucene-core;inline=true,
-              lucene-analyzers;inline=true,
-              lucene-highlighter;inline=true,
-              lucene-snowball;inline=true,
               rome;inline=true,
               itunes;inline=true
             </Embed-Dependency>

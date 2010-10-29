@@ -94,16 +94,20 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
+            <Import-Package>
+              *;resolution:=optional
+            </Import-Package>
             <Private-Package>
               org.tartarus;-split-package:=merge-first,
               org.tartarus.snowball;-split-package:=merge-first,
               org.tartarus.snowball.ext;-split-package:=merge-first,
-              org.apache.solr.*;-split-package:=merge-first,
-              org.opencastproject.solr.internal,
+              org.opencastproject.solr.internal
             </Private-Package>
             <Export-Package>
               org.opencastproject.solr;version=${project.version},
-              org.apache.solr;version=1.4.1
+              org.apache.solr;version=1.4.1,
+              org.apache.solr.*;-split-package:=merge-first,
+              org.apache.solr.client.solrj;version=1.4.1
             </Export-Package>
             <Embed-Dependency>
               solr-core;inline=true,
