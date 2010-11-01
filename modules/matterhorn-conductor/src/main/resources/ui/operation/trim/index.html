@@ -29,7 +29,18 @@
       var outpoint = 0;
       
       $(document).ready(function() {
+        /*
+        $('#player-container').load(function() {
+            $('#inPoint').val("00:00:00");
+            $('#outPoint').val($('#player-container').contents().find('#oc_duration').text());
+        });
+        */
+      
         var id = postData.id;
+        
+        // Variables for the "In point"- and "Out point"- increase-/decrease-Buttons
+        var secondsForward = 1;
+        var secondsBackward = 1;
 
         //create Buttons
         $('.ui-button').button();
@@ -84,38 +95,22 @@
 
         //Event forward one second (inpoint)
         $('#step-in-forward').click( function () {
-          var currentTime = getTimeInMilliseconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
-          $('#player-container')[0].contentWindow.Videodisplay.seek(currentTime + 1);
-          window.setTimeout( function () {
-            $('#inPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
-          }, 500);
+            in_de_creaseObject($('#inPoint'), secondsForward);
         });
 
         //Event backward one second (inpoint)
         $('#step-in-backward').click( function () {
-          var currentTime = getTimeInMilliseconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
-          $('#player-container')[0].contentWindow.Videodisplay.seek(currentTime - 1);
-          window.setTimeout( function () {
-            $('#inPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
-          }, 500);
+            in_de_creaseObject($('#inPoint'), -secondsForward);
         });
 
         //Event forward one second (outpoint)
         $('#step-out-forward').click( function () {
-          var currentTime = getTimeInMilliseconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
-          $('#player-container')[0].contentWindow.Videodisplay.seek(currentTime + 1);
-          window.setTimeout( function () {
-            $('#outPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
-          }, 300);
+            in_de_creaseObject($('#outPoint'), secondsBackward);
         });
 
         //Event backward one second (outpoint)
         $('#step-out-backward').click( function() {
-          var currentTime = getTimeInMilliseconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
-          $('#player-container')[0].contentWindow.Videodisplay.seek(currentTime - 1);
-          window.setTimeout( function () {
-            $('#outPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
-          }, 300);
+            in_de_creaseObject($('#outPoint'), -secondsBackward);
         });
 
         function setValue(input, value) {
@@ -228,8 +223,6 @@
         });
       });
       
-    
-    
     /**
       * Returns the Input Time in Milliseconds
       * @param data Data in the Format ab:cd:ef
@@ -240,22 +233,113 @@
         
         // If the Format is correct
         if(values.length == 3) {
-            // Check and parse the Hours
-            values[0] = ((values[0] == '') || (values[0] == null)) ? 0 : parseInt(values[0]);
-            // Check and parse the Minutes
-            values[1] = ((values[1] == '') || (values[1] == null)) ? 0 : parseInt(values[1]);
+            // Try to convert to Numbers
+            var val0 = values[0] * 1;
+            var val1 = values[1] * 1;
+            var val2 = values[2] * 1;
             // Check and parse the Seconds
-            values[2] = ((values[2] == '') || (values[2] == null)) ? 0 : parseInt(values[2]);
+            if(!isNaN(val0) && !isNaN(val1) && !isNaN(val2)) {    
+                // Convert Hours, Minutes and Seconds to Milliseconds
+                val0 *= 60 * 60 * 1000;    // 1 Hour = 60 Minutes = 60 * 60 Seconds = 60 * 60 * 1000 Milliseconds
+                val1 *= 60 * 1000;         // 1 Minute = 60 Seconds = 60 * 1000 Milliseconds
+                val2 *= 1000;              // 1 Second = 1000 Milliseconds
         
-            // Convert Hours, Minutes and Seconds to Milliseconds
-            values[0] *= 60 * 60 * 1000;    // 1 Hour = 60 Minutes = 60 * 60 Seconds = 60 * 60 * 1000 Milliseconds
-            values[1] *= 60 * 1000;         // 1 Minute = 60 Seconds = 60 * 1000 Milliseconds
-            values[2] *= 1000;              // 1 Second = 1000 Milliseconds
-        
-            // Add the Milliseconds and return it
-            return values[0] + values[1] + values[2];
+                // Add the Milliseconds and return it
+                return val0 + val1 + val2;
+            } else {
+                return 0;
+            }
         } else {
             return 0;
+        }
+      }
+      
+    /**
+      * Increases or decreases the current In point by val
+      * @param obj Object with Function .val()
+      * @param val Value in Seconds to increase (val > 0) or decrease (val < 0), val < 20 Seconds
+      */
+      function in_de_creaseObject(obj, val) {
+        if((val != 0) && (Math.abs(val < 20))) {
+            // Get current In point data
+            var data = obj.val();
+            // If data contains something
+            if(data != '') {
+                var values = data.split(':');
+                if(values.length == 3) {
+                    // Try to convert to Numbers
+                    var val0 = values[0] * 1;
+                    var val1 = values[1] * 1;
+                    var val2 = values[2] * 1;
+                    // Check and parse the Seconds
+                    if(!isNaN(val0) && !isNaN(val1) && !isNaN(val2)) {
+                        // Increase
+                        if((val > 0) && ((val0 >= 0) || (val1 >= 0) || (val2 >= 0))) {
+                            // If >= 59 Seconds
+                            if((val2 + val) > 59) {
+                                // If >= 59 Minutes
+                                if((val1 + 1) > 59) {
+                                    // Increase Hours and set Minutes and Seconds to 0
+                                    obj.val(getTimeString(val0 + 1, 0, Math.abs(val - (60 - val2))));
+                                } else {
+                                    // Increase Minutes and set Seconds to the Difference
+                                    obj.val(getTimeString(val0, val1 + 1, Math.abs(val - (60 - val2))));
+                                }
+                            } else {
+                                // Increase Seconds
+                                obj.val(getTimeString(val0, val1, val2 + val));
+                            }
+                        }
+                        // Decrease
+                        else if((val0 > 0) || (val1 > 0) || (val2 > 0)) {
+                            // If <= 0 Seconds
+                            if((val2 + val) < 0) {
+                                // If <= 0 Minutes
+                                if((val1 - 1) < 0) {
+                                    // Decrease Hours and set Minutes and Seconds to 0
+                                    obj.val(getTimeString(val0 - 1, 59, 60 - Math.abs(60 - Math.abs(val - (60 - val2)))));
+                                } else {
+                                    // Decrease Minutes and set Seconds to 0
+                                    obj.val(getTimeString(val0, val1 - 1, 60 - Math.abs(60 - Math.abs(val - (60 - val2)))));
+                                }
+                            } else {
+                                // Decrease Seconds
+                                obj.val(getTimeString(val0, val1, val2 + val));
+                            }
+                        } else {
+                            obj.val("00:00:00");
+                        }
+                    } else {
+                        obj.val("00:00:00");
+                    }
+                } else {
+                    obj.val("00:00:00");
+                }
+            }
+        }
+      }
+      
+     /**
+      * Returns a correct formatted Time String in the Format ab:cd:ef
+      * @param val0 Hours element (0, 99)
+      * @param val0 Mintes element (0, 60)
+      * @param val0 Seconds element (0, 60)
+      * @return a correct formatted Time String in the Format ab:cd:ef
+      */
+      function getTimeString(val0, val1, val2) {
+        if((val0 >= 0) && (val0 < 100) && (val1 >= 0) && (val1 < 60) && (val2 >= 0) && (val2 < 60)) {
+            if(val0 <= 9) {
+                val0 = "0" + val0.toString();
+            }
+            if(val1 <= 9) {
+                val1 = "0" + val1.toString();
+            }
+            if(val2 <= 9) {
+                val2 = "0" + val2.toString();
+            }
+            return val0 + ":" + val1 + ":" + val2;
+        } else {
+            return "00:00:00";
         }
       }
       
@@ -339,14 +423,14 @@
           <input type="text" id="inPoint" readonly="readonly"></input> 
           <input type="button" style="width: 160px;" id="set-trimin" title="Set to current time" value="Set to current time" class="ui-button" />
           <input type="button" id="play-from-in" style="width: 120px;"  title="Start playing at current In point" value="&gt;Play from in" class="ui-button" /> 
-          <input type="button" id="step-in-forward" title="Step forward one second" value="&gt;&gt;" class="ui-button" />
-          <input type="button" id="step-in-backward" title="Step backward one second" value="&lt;&lt;" class="ui-button" /><br />
+          <input type="button" id="step-in-forward" title="Increase In point by one second" value="&gt;&gt;" class="ui-button" />
+          <input type="button" id="step-in-backward" title="Decrease In point by one second" value="&lt;&lt;" class="ui-button" /><br />
          <label for="outPoint" class="label">Out point</label> 
           <input type="text" id="outPoint" readonly="readonly"></input> 
           <input type="button" style="width: 160px;" id="set-trimout" title="Set to current time" value="Set to current time" class="ui-button" /> 
           <input type="button" id="play-to-out" style="width: 120px;" title="Play last 10 seconds to Out point" value="&gt;Play to out" class="ui-button" />
-          <input type="button" id="step-out-forward" title="Step forward one second" value="&gt;&gt;" class="ui-button" />
-          <input type="button" id="step-out-backward" title="Step backward one second" value="&lt;&lt;" class="ui-button" /><br />
+          <input type="button" id="step-out-forward" title="Increase Out point by one second" value="&gt;&gt;" class="ui-button" />
+          <input type="button" id="step-out-backward" title="Decrease Out point by one second" value="&lt;&lt;" class="ui-button" /><br />
           <br />
          <div id="errorMessage" class="error">
          </div>
