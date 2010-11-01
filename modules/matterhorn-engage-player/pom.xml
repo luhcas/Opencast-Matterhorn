@@ -79,39 +79,6 @@
 					</sourcePaths> 
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.4.1</version>
-				<executions>
-					<execution>
-						<id>copy-resources</id>
-						<phase>install</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>../../shared-resources/player</outputDirectory>
-							<resources>
-								<resource>
-									<directory>src/main/html/html-release</directory>
-									<filtering>true</filtering>
-									<includes>
-										<include>engage-hybrid-player/</include>
-									</includes>
-								</resource>
-								<resource>
-									<directory>src/main/flex/</directory>
-									<filtering>true</filtering>
-									<includes>
-										<include>style/</include>
-									</includes>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -338,7 +305,7 @@
 		<dependency>
 			<groupId>com.adobe.osmf</groupId>
 			<artifactId>MediaFramework</artifactId>
-			<version>0.9.3</version>
+			<version>1.5.0</version>
 			<type>swc</type>
 		</dependency>
 		<dependency>
