@@ -17,11 +17,11 @@ package org.opencast.engage.videodisplay.control.command
 {
 
     import bridge.ExternalFunction;
-
+    
     import flash.external.ExternalInterface;
-
+    
     import mx.core.Application;
-
+    
     import org.opencast.engage.videodisplay.control.event.InitMediaPlayerEvent;
     import org.opencast.engage.videodisplay.control.util.OpencastMediaPlayer;
     import org.opencast.engage.videodisplay.model.VideodisplayModel;
@@ -30,11 +30,10 @@ package org.opencast.engage.videodisplay.control.command
     import org.opencast.engage.videodisplay.state.PlayerState;
     import org.opencast.engage.videodisplay.state.VideoState;
     import org.osmf.elements.AudioElement;
+    import org.osmf.elements.LightweightVideoElement;
     import org.osmf.elements.VideoElement;
     import org.osmf.media.MediaElement;
     import org.osmf.media.URLResource;
-    import org.osmf.net.DynamicStreamingItem;
-    import org.osmf.net.DynamicStreamingResource;
     import org.swizframework.Swiz;
 
     /**
@@ -101,8 +100,11 @@ package org.opencast.engage.videodisplay.control.command
                 {
                     case "video":
 
-                        var newVideoElement : VideoElement = new VideoElement( new URLResource( event.mediaURLOne ) );
+                        //var newVideoElement : VideoElement = new VideoElement( new URLResource( event.mediaURLOne ) );
+                        // Using OSMFs new LightweightVideoElelemt -> red5 rtmp stream not starting
+                        var newVideoElement : LightweightVideoElement = new LightweightVideoElement( new URLResource( event.mediaURLOne ) );
                         newVideoElement.smoothing = true;
+                        newVideoElement.defaultDuration = 1000;
                         var mediaElementVideo : MediaElement = newVideoElement;
 
                         model.mediaPlayer.setSingleMediaElement( mediaElementVideo );
@@ -157,15 +159,16 @@ package org.opencast.engage.videodisplay.control.command
 
                 model.mediaPlayer = new OpencastMediaPlayer( VideoState.MULTI );
 
-                var newVideoElementOne : VideoElement = new VideoElement( new URLResource( event.mediaURLOne ) );
-
+                //var newVideoElementOne : VideoElement = new VideoElement( new URLResource( event.mediaURLOne ) );
+                var newVideoElementOne : LightweightVideoElement = new LightweightVideoElement( new URLResource( event.mediaURLOne ) );
                 newVideoElementOne.smoothing = true;
+                newVideoElementOne.defaultDuration = 1000;
                 var mediaElementVideoOne : MediaElement = newVideoElementOne;
                 model.mediaPlayer.setMediaElementOne( mediaElementVideoOne );
 
-                var newVideoElementTwo : VideoElement = new VideoElement( new URLResource( event.mediaURLTwo ) );
-
+                var newVideoElementTwo : LightweightVideoElement = new LightweightVideoElement( new URLResource( event.mediaURLTwo ) );
                 newVideoElementTwo.smoothing = true;
+                newVideoElementTwo.defaultDuration = 1000;
                 var mediaElementVideoTwo : MediaElement = newVideoElementTwo;
                 model.mediaPlayer.setMediaElementTwo( mediaElementVideoTwo );
             }

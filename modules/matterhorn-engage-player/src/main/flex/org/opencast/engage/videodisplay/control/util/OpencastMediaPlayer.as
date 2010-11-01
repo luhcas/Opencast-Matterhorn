@@ -115,15 +115,19 @@ package org.opencast.engage.videodisplay.control.util
             }
             else if( videoState == VideoState.MULTI )
             {
+
                 mediaPlayerOne = new MediaPlayer();
                 mediaPlayerOne.autoRewind = true;
                 mediaPlayerOne.autoPlay = false;
                 mediaPlayerOne.volume = 0;
-
+              	
                 mediaPlayerTwo = new MediaPlayer();
                 mediaPlayerTwo.autoRewind = true;
                 mediaPlayerTwo.autoPlay = false;
                 mediaPlayerTwo.volume = 0;
+                
+                
+                
 
                 // Set the default Player
                 setDefaultPlayer( DefaultPlayerState.PLAYERONE );
@@ -307,6 +311,19 @@ package org.opencast.engage.videodisplay.control.util
          */
         public function play() : void
         {
+        	 if( videoState == VideoState.SINGLE )
+                {
+                	 mediaPlayerSingle.play();
+                	
+                }
+        	else if( videoState == VideoState.MULTI )
+                {
+                	mediaPlayerOne.play();
+                	mediaPlayerOne.autoPlay = true;
+                    mediaPlayerTwo.play();
+                    mediaPlayerTwo.autoPlay = true;
+                }
+        	/*
             if( model.startPlay == true )
             {
                 if( videoState == VideoState.SINGLE )
@@ -331,7 +348,11 @@ package org.opencast.engage.videodisplay.control.util
                 else if( videoState == VideoState.MULTI )
                 {
                     mediaPlayerOne.play();
+                    //mediaPlayerOne.bufferTime = 0.1;
+                    
+                    
                     mediaPlayerTwo.play();
+                	
 
                     if( model.playerSeekBool == true )
                     {
@@ -394,8 +415,11 @@ package org.opencast.engage.videodisplay.control.util
                     {
                         model.startPlay = true;
                         mediaPlayerOne.play();
+                        //mediaPlayerOne.bufferTime = 0.1;
+                        
                         mediaPlayerOne.seek( model.startSeek );
                         mediaPlayerTwo.play();
+                        
                         mediaPlayerTwo.seek( model.startSeek );
                     }
                     catch( error : Error )
@@ -409,7 +433,7 @@ package org.opencast.engage.videodisplay.control.util
             if( firstStart == false )
             {
                 firstStart = true;
-            }
+            }*/
         }
 
         /**
@@ -440,8 +464,10 @@ package org.opencast.engage.videodisplay.control.util
 
                 model.startPlay = true;
                 mediaPlayerOne.play();
+                //mediaPlayerOne.bufferTime = 0.1;
+                
                 mediaPlayerTwo.play();
-
+				
                 model.currentPlayerState = PlayerState.PLAYING;
                 ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PAUSED );
                
@@ -468,7 +494,10 @@ package org.opencast.engage.videodisplay.control.util
             {
                 model.startPlay = true;
                 mediaPlayerOne.play();
+               // mediaPlayerOne.bufferTime = 0.1;
+                
                 mediaPlayerTwo.play();
+                
                 mediaPlayerOne.pause();
                 mediaPlayerTwo.pause();
                 model.mediaPlayer.setVolume( 1 );
@@ -533,7 +562,11 @@ package org.opencast.engage.videodisplay.control.util
         public function seek( value : Number ) : void
         {
             model.currentSeekPosition = value;
-
+            
+            mediaPlayerOne.seek(value);
+            mediaPlayerTwo.seek(value);
+            
+/*
             if( videoState == VideoState.SINGLE )
             {
                 if( model.playerSeekBool == false && mediaPlayerSingle.paused && model.mediaTypeSingle == model.RTMP )
@@ -586,7 +619,7 @@ package org.opencast.engage.videodisplay.control.util
                 {
                     mediaPlayerTwo.seek( valueTwo );
                 }
-            }
+            }*/
         }
 
         /**
@@ -732,9 +765,9 @@ package org.opencast.engage.videodisplay.control.util
          */
         public function onBuffer() : void
         {
-            bufferTimer = new Timer( 3000, 1 );
-            bufferTimer.addEventListener( TimerEvent.TIMER_COMPLETE, onBufferTimerComplete );
-            bufferTimer.start();
+         //   bufferTimer = new Timer( 3000, 1 );
+         //   bufferTimer.addEventListener( TimerEvent.TIMER_COMPLETE, onBufferTimerComplete );
+         //   bufferTimer.start();
         }
 
         /**
