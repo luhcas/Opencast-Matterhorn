@@ -29,13 +29,6 @@
       var outpoint = 0;
       
       $(document).ready(function() {
-        /*
-        $('#player-container').load(function() {
-            $('#inPoint').val("00:00:00");
-            $('#outPoint').val($('#player-container').contents().find('#oc_duration').text());
-        });
-        */
-      
         var id = postData.id;
         
         // Variables for the "In point"- and "Out point"- increase-/decrease-Buttons
@@ -61,57 +54,53 @@
 
         // Event set inpoint clicked
         $('#set-trimin').click( function () {
-          var tmpinpoint = getTimeInMilliseconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
-          if(tmpinpoint > outpoint && outpoint != 0) {
-            $('div#errorMessage').html("In point must be earlier than Out point");
-          } else
-          {
             $('#inPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
-            inpoint = tmpinpoint;
-            $('div#errorMessage').html('');
-            if(outpoint != 0)
-            {
-              $('#trimming-hint').show(0);
-            }
-          }
+            checkInOutPoint();
         });
 
         //Event set outpoint clicked
         $('#set-trimout').click( function () {
-          var tmpoutpoint = getTimeInMilliseconds($('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime());
-          if(tmpoutpoint < inpoint) {
-            $('div#errorMessage').html("Out point must be later than In point");
-          } else
-          {
             $('#outPoint').val( $('#player-container')[0].contentWindow.Opencast.Player.getCurrentTime() );
-            outpoint = tmpoutpoint;
-            $('div#errorMessage').html('');
-            if(inpoint != 0)
-            {
-              $('#trimming-hint').show(0);
-            }
-          }
+            checkInOutPoint();
         });
 
         //Event forward one second (inpoint)
         $('#step-in-forward').click( function () {
             in_de_creaseObject($('#inPoint'), secondsForward);
+            checkInOutPoint();
         });
 
         //Event backward one second (inpoint)
         $('#step-in-backward').click( function () {
             in_de_creaseObject($('#inPoint'), -secondsForward);
+            checkInOutPoint();
         });
 
         //Event forward one second (outpoint)
         $('#step-out-forward').click( function () {
             in_de_creaseObject($('#outPoint'), secondsBackward);
+            checkInOutPoint();
         });
 
         //Event backward one second (outpoint)
         $('#step-out-backward').click( function() {
             in_de_creaseObject($('#outPoint'), -secondsBackward);
+            checkInOutPoint();
         });
+        
+       /**
+        * Checks if In point is bigger than Out point and prints an Error Message if this is the case
+        */
+        function checkInOutPoint() {
+            if(getTimeInMilliseconds($('#inPoint').val()) >= getTimeInMilliseconds($('#outPoint').val())) {
+                $('div#errorMessage').html("Out point must be later than In point");
+                $('#trimming-hint').hide();
+                $('div#errorMessage').show();
+            } else {
+                $('div#errorMessage').hide();
+                $('#trimming-hint').show();
+            }
+        }
 
         function setValue(input, value) {
           $('#' + input).val(value);
@@ -122,7 +111,7 @@
           var videodisplay = $('#player-container')[0].contentWindow.Videodisplay;
           videodisplay.pause();
           var seekTime = getTimeInMilliseconds($('#inPoint').val());
-          videodisplay.seek(seekTime);
+          videodisplay.seek(seekTime / 1000);
           window.setTimeout( function () {
             videodisplay.play();
           }, 800);
@@ -132,13 +121,20 @@
         $('#play-to-out').click( function () {
           var videodisplay = $('#player-container')[0].contentWindow.Videodisplay;
           videodisplay.pause();
-          var seekTime = getTimeInMilliseconds($('#outPoint').val());
-          videodisplay.seek(seekTime - 10);
+          var seekTime = getTimeInMilliseconds($('#outPoint').val()) / 1000;
+          var timeOut = 10000;
+          // If Out point < 10 Seconds
+          if((seekTime - 10) <= 0) {
+            videodisplay.seek(0);
+            timeOut = seekTime * 1000;
+          } else {
+            videodisplay.seek(seekTime - 10);
+          }
           window.setTimeout( function () {
             videodisplay.play();
             window.setTimeout( function () {
               videodisplay.pause();
-            }, 10000);
+            }, timeOut);
             
           }, 800);
         });
@@ -422,13 +418,13 @@
          <label for="inPoint" style="padding-left: 10px">In point</label>
           <input type="text" id="inPoint" readonly="readonly"></input> 
           <input type="button" style="width: 160px;" id="set-trimin" title="Set to current time" value="Set to current time" class="ui-button" />
-          <input type="button" id="play-from-in" style="width: 120px;"  title="Start playing at current In point" value="&gt;Play from in" class="ui-button" /> 
+          <input type="button" id="play-from-in" style="width: 160px;"  title="Start playing at current In point" value="&gt; Play from In point" class="ui-button" /> 
           <input type="button" id="step-in-forward" title="Increase In point by one second" value="&gt;&gt;" class="ui-button" />
           <input type="button" id="step-in-backward" title="Decrease In point by one second" value="&lt;&lt;" class="ui-button" /><br />
          <label for="outPoint" class="label">Out point</label> 
           <input type="text" id="outPoint" readonly="readonly"></input> 
           <input type="button" style="width: 160px;" id="set-trimout" title="Set to current time" value="Set to current time" class="ui-button" /> 
-          <input type="button" id="play-to-out" style="width: 120px;" title="Play last 10 seconds to Out point" value="&gt;Play to out" class="ui-button" />
+          <input type="button" id="play-to-out" style="width: 160px;" title="Play last 10 seconds to Out point" value="&gt; Play to Out point" class="ui-button" />
           <input type="button" id="step-out-forward" title="Increase Out point by one second" value="&gt;&gt;" class="ui-button" />
           <input type="button" id="step-out-backward" title="Decrease Out point by one second" value="&lt;&lt;" class="ui-button" /><br />
           <br />
@@ -437,15 +433,15 @@
          <div id="trimming-hint">
           <p style="color:green;">This Recording will be trimmed according to the In and Outpoints you have set when you continue.</p>
          </div>
-         <input title="Move on to next steps in processing this recording" 
+         <input title="Start trimming this recording" 
                 style="margin-left: 205px; margin-right: 16px; width: 160px;" 
                 onclick="continueWorkflow();" 
                 id="continueBtn" 
                 type="button"
                 class="ui-button ui-corner-all"
                 value="Continue processing" />
-         <a id="edit-link" type="button" style="margin-right: 16px;">Edit before continuing</a>
-         <a onclick="cancel()" title="Cancel" style="margin-right: 16px;">Cancel</a>
+         <a id="edit-link" type="button" class="ui-button ui-corner-all" style="margin-right: 16px;">Edit before continuing</a>
+         <a onclick="cancel()" title="Cancel" class="ui-button ui-corner-all" style="margin-right: 16px;">Cancel</a>
      </div>
   </body>
 </html>
