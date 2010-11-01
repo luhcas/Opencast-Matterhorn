@@ -653,7 +653,7 @@ Opencast.Player = (function () {
             hideSlides();
             setShowSections(false);
         }
-        Opencast.Initialize.doResize();
+        // Opencast.Initialize.doResize();
     }
 
     /**
@@ -696,7 +696,7 @@ Opencast.Player = (function () {
             hideSlideText();
             setShowSections(false);
         }
-        Opencast.Initialize.doResize();
+        // Opencast.Initialize.doResize();
     }
     
     /**
@@ -738,7 +738,7 @@ Opencast.Player = (function () {
             hideShortcuts();
             setShowSections(false);
         }
-        Opencast.Initialize.doResize();
+        // Opencast.Initialize.doResize();
     }
 
     /**
@@ -761,7 +761,7 @@ Opencast.Player = (function () {
             hideEmbed();
             setShowSections(false);
         }
-        Opencast.Initialize.doResize();
+        // Opencast.Initialize.doResize();
     }
     
     /**
@@ -782,7 +782,7 @@ Opencast.Player = (function () {
             hideBookmarks();
             setShowSections(false);
         }
-        Opencast.Initialize.doResize();
+        // Opencast.Initialize.doResize();
     }
     
     /**
@@ -805,7 +805,7 @@ Opencast.Player = (function () {
             hideDescription();
             setShowSections(false);
         }
-        Opencast.Initialize.doResize();
+        // Opencast.Initialize.doResize();
     }
     
    
