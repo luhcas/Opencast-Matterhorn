@@ -77,14 +77,24 @@ public class StreamingDistributionService implements DistributionService {
   protected void activate(ComponentContext cc) {
     // Get the configured streaming and server URLs
     if (cc != null) {
-      streamingUrl = cc.getBundleContext().getProperty("org.opencastproject.streaming.url");
+      streamingUrl = StringUtils.trimToNull(cc.getBundleContext().getProperty("org.opencastproject.streaming.url"));
       if (streamingUrl == null)
         throw new IllegalStateException("Stream url must be set (org.opencastproject.streaming.url)");
       logger.info("streaming url is {}", streamingUrl);
 
-      distributionDirectory = new File(cc.getBundleContext().getProperty("org.opencastproject.streaming.directory"));
-      if (distributionDirectory == null)
-        throw new IllegalStateException("Distribution directory must be set (org.opencastproject.streaming.directory)");
+      String distributionDirectoryPath = StringUtils.trimToNull(cc.getBundleContext().getProperty("org.opencastproject.streaming.directory"));
+      if (distributionDirectoryPath == null)
+        throw new IllegalStateException("Streaming distribution directory must be set (org.opencastproject.streaming.directory)");
+      
+      distributionDirectory = new File(distributionDirectoryPath);
+      if (!distributionDirectory.isDirectory()) {
+        try {
+          FileUtils.forceMkdir(distributionDirectory);
+        } catch (IOException e) {
+          throw new IllegalStateException("Distribution directory does not exist and can't be created", e);
+        }
+      }
+
       logger.info("Streaming distribution directory is {}", distributionDirectory);
 
       int threads = 1;
