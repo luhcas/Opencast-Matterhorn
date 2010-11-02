@@ -128,23 +128,6 @@
     </profile>
 
     <profile>
-      <id>ingest</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <modules>
-        <module>modules/matterhorn-db</module>
-        <module>modules/matterhorn-dublincore</module>
-        <module>modules/matterhorn-ingest-service-api</module>
-        <module>modules/matterhorn-ingest-service-impl</module>
-        <module>modules/matterhorn-kernel</module>
-        <module>modules/matterhorn-metadata-api</module>
-        <module>modules/matterhorn-serviceregistry</module>
-        <module>modules/matterhorn-workflow-service-remote</module>
-      </modules>
-    </profile>
-
-    <profile>
       <id>engage</id>
       <activation>
         <activeByDefault>true</activeByDefault>

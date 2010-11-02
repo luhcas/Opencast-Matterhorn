@@ -31,10 +31,9 @@ public interface WorkflowService {
    */
   final String WORKFLOW_OPERATION_PROPERTY = "workflow.operation";
 
-  /**
-   * The job identifier for running workflow instances.
-   */
-  final String JOB_TYPE = "org.opencastproject.composer";
+
+  /** Identifier for workflow jobs */
+  final String JOB_TYPE = "org.opencastproject.workflow";
 
   /**
    * Returns the {@link WorkflowDefinition} identified by <code>name</code> or <code>null</code> if no such definition

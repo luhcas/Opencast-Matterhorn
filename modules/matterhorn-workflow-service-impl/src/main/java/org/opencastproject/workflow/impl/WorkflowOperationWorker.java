@@ -42,6 +42,18 @@ final class WorkflowOperationWorker implements Runnable {
   protected WorkflowServiceImpl service = null;
   protected Map<String, String> properties = null;
 
+  /**
+   * Creates a worker that will execute the given handler and thereby the current operation of the workflow instance.
+   * When the worker is finished, a callback will be made to the workflow service reporting either success or failure of
+   * the current workflow operation.
+   * 
+   * @param handler
+   *          the workflow operation handler
+   * @param workflow
+   *          the workflow instance
+   * @param service
+   *          the workflow service.
+   */
   public WorkflowOperationWorker(WorkflowOperationHandler handler, WorkflowInstance workflow,
           WorkflowServiceImpl service) {
     this.handler = handler;
@@ -49,6 +61,20 @@ final class WorkflowOperationWorker implements Runnable {
     this.service = service;
   }
 
+  /**
+   * Creates a worker that will execute the given handler and thereby the current operation of the workflow instance.
+   * When the worker is finished, a callback will be made to the workflow service reporting either success or failure of
+   * the current workflow operation.
+   * 
+   * @param handler
+   *          the workflow operation handler
+   * @param workflow
+   *          the workflow instance
+   * @param properties
+   *          the properties used to execute the operation
+   * @param service
+   *          the workflow service.
+   */
   public WorkflowOperationWorker(WorkflowOperationHandler handler, WorkflowInstance workflow,
           Map<String, String> properties, WorkflowServiceImpl service) {
     this(handler, workflow, service);
@@ -82,10 +108,25 @@ final class WorkflowOperationWorker implements Runnable {
     } catch (Exception e) {
       logger.error("Workflow operation '{}' failed with error: {}", new Object[] { handler, e.getMessage(), e });
       e.printStackTrace();
-      service.handleOperationException(workflow, e);
+      try {
+        service.handleOperationException(workflow, e);
+      } catch (Exception e2) {
+        logger.error("Error handling workflow operation '{}' failure: {}",
+                new Object[] { handler, e2.getMessage(), e2 });
+        e.printStackTrace();
+      }
     }
   }
 
+  /**
+   * Starts executing the workflow operation.
+   * 
+   * @return the workflow operation result
+   * @throws WorkflowOperationException
+   *           if executing the workflow operation handler fails
+   * @throws WorkflowDatabaseException
+   *           if updating the workflow fails
+   */
   public WorkflowOperationResult start() throws WorkflowOperationException, WorkflowDatabaseException {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
     operation.setState(OperationState.RUNNING);
@@ -106,7 +147,20 @@ final class WorkflowOperationWorker implements Runnable {
     }
   }
 
-  public WorkflowOperationResult resume() throws WorkflowOperationException, WorkflowDatabaseException {
+  /**
+   * Resumes a previously suspended workflow operation. Note that only workflow operation handlers that implement
+   * {@link ResumableWorkflowOperationHandler} can be resumed.
+   * 
+   * @return the workflow operation result
+   * @throws WorkflowOperationException
+   *           if executing the workflow operation handler fails
+   * @throws WorkflowDatabaseException
+   *           if updating the workflow fails
+   * @throws IllegalStateException
+   *           if the workflow operation cannot be resumed
+   */
+  public WorkflowOperationResult resume() throws WorkflowOperationException, WorkflowDatabaseException,
+          IllegalStateException {
     if (!(handler instanceof ResumableWorkflowOperationHandler)) {
       throw new IllegalStateException("an attempt was made to resume a non-resumable operation");
     }
@@ -114,6 +168,7 @@ final class WorkflowOperationWorker implements Runnable {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
     operation.setState(OperationState.RUNNING);
     service.update(workflow);
+
     try {
       WorkflowOperationResult result = resumableHandler.resume(workflow, properties);
       if (result == null || Action.CONTINUE.equals(result.getAction())) {
@@ -130,4 +185,5 @@ final class WorkflowOperationWorker implements Runnable {
       throw new WorkflowOperationException(e);
     }
   }
+
 }

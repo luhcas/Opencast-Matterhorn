@@ -25,7 +25,7 @@ import java.util.Date;
 public interface Job {
   /** The status of the job that this receipt represents */
   static enum Status {
-    QUEUED, RUNNING, FINISHED, FAILED
+    QUEUED, PAUSED, RUNNING, FINISHED, FAILED
   }
 
   /** Gets the receipt identifier */

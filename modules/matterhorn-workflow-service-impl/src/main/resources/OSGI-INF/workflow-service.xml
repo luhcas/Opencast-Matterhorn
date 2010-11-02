@@ -11,4 +11,6 @@
     cardinality="1..1" policy="static" bind="setDao" />
   <reference name="metadata" interface="org.opencastproject.metadata.api.MediaPackageMetadataService"
     cardinality="1..n" policy="dynamic" bind="addMetadataService" unbind="removeMetadataService" />
+  <reference name="serviceregistry" interface="org.opencastproject.serviceregistry.api.ServiceRegistry"
+    cardinality="1..1" policy="static" bind="setServiceRegistry" />
 </scr:component>

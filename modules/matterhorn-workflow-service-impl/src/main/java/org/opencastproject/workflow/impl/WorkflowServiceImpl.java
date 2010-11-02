@@ -15,9 +15,14 @@
  */
 package org.opencastproject.workflow.impl;
 
+import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageMetadata;
 import org.opencastproject.metadata.api.MediaPackageMetadataService;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.serviceregistry.api.ServiceRegistryException;
+import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -40,6 +45,7 @@ import org.opencastproject.workflow.api.WorkflowSelectionStrategy;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 
+import org.apache.commons.codec.EncoderException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
@@ -58,8 +64,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.UUID;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -85,6 +90,13 @@ public class WorkflowServiceImpl implements WorkflowService {
   /** The metadata services */
   private SortedSet<MediaPackageMetadataService> metadataServices;
 
+  /** The thread pool */
+  protected ExecutorService executorService;
+  
+  /** The service registry, managing jobs */
+  private ServiceRegistry serviceRegistry = null;
+
+  
   /**
    * A tuple of a workflow operation handler and the name of the operation it handles
    */
@@ -181,12 +193,29 @@ public class WorkflowServiceImpl implements WorkflowService {
    */
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
+    int threads = 1;
+    if(componentContext == null) {
+      executorService = Executors.newFixedThreadPool(threads);
+    } else {
+      String threadsConfig = componentContext.getBundleContext().getProperty("org.opencastproject.workflow.threads");
+      if(threadsConfig != null) {
+        try {
+          threads = Integer.parseInt(threadsConfig);
+        } catch(NumberFormatException e) {
+          logger.warn("Invalid thread configuration '{}'.  Using the default value of one thread.", threadsConfig);
+        }
+      }
+      executorService = Executors.newFixedThreadPool(threads);
+    }
   }
 
   /**
    * Deactivate this service.
    */
   public void deactivate() {
+    if(executorService != null && ! executorService.isShutdown()) {
+      executorService.shutdown();
+    }
   }
 
   /**
@@ -358,22 +387,48 @@ public class WorkflowServiceImpl implements WorkflowService {
     if (parentWorkflowId != null && getWorkflowById(parentWorkflowId) == null)
       throw new IllegalArgumentException("Parent workflow " + parentWorkflowId + " not found");
 
-    String id = UUID.randomUUID().toString();
+    final Job job;
+    try {
+      job = serviceRegistry.createJob(JOB_TYPE);
+    } catch (ServiceUnavailableException e) {
+      throw new WorkflowDatabaseException("The " + JOB_TYPE
+              + " service is not registered on this host, so no job can be created", e);
+    } catch (ServiceRegistryException e) {
+      throw new WorkflowDatabaseException("Unable to create a job", e);
+    }
+
+    String id = job.getId();
     logger.info("Starting a new workflow instance with ID={}", id);
 
-    WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage,
-            parentWorkflowId, properties);
-    workflowInstance.setId(id);
-    workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
+    try {
+      WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl(workflowDefinition, mediaPackage,
+              parentWorkflowId, properties);
+      workflowInstance.setId(id);
+      workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
 
-    WorkflowInstance configuredInstance = updateConfiguration(workflowInstance, properties);
+      WorkflowInstance configuredInstance = updateConfiguration(workflowInstance, properties);
 
-    // Before we persist this, extract the metadata
-    populateMediaPackageMetadata(configuredInstance.getMediaPackage());
+      // Before we persist this, extract the metadata
+      populateMediaPackageMetadata(configuredInstance.getMediaPackage());
+      dao.update(configuredInstance);
 
-    dao.update(configuredInstance);
-    run(configuredInstance);
-    return configuredInstance;
+      // Update the job status
+      job.setStatus(Status.RUNNING);
+      updateJob(job);
+
+      // Have the job exectued
+      run(configuredInstance);
+
+      return configuredInstance;
+    } catch (Throwable t) {
+      try {
+        job.setStatus(Status.FAILED);
+        updateJob(job);
+      } catch (Exception failureToFail) {
+        logger.warn("Unable to update job to failed state", failureToFail);
+      }
+      throw new WorkflowDatabaseException(t);
+    }
   }
 
   /**
@@ -441,8 +496,6 @@ public class WorkflowServiceImpl implements WorkflowService {
     return null;
   }
 
-  Executor ex = Executors.newCachedThreadPool();
-
   protected void run(final WorkflowInstance wfi) {
     run(wfi, null);
   }
@@ -457,7 +510,7 @@ public class WorkflowServiceImpl implements WorkflowService {
       logger.warn("No handler available to execute operation {}", operation);
       throw new IllegalStateException("Unable to find a workflow handler for " + operation);
     }
-    ex.execute(new WorkflowOperationWorker(operationHandler, wfi, properties, this));
+    executorService.execute(new WorkflowOperationWorker(operationHandler, wfi, properties, this));
   }
 
   /**
@@ -480,8 +533,20 @@ public class WorkflowServiceImpl implements WorkflowService {
     WorkflowInstanceImpl instance = (WorkflowInstanceImpl) getWorkflowById(workflowInstanceId);
     if (instance == null)
       throw new NotFoundException("Workflow ID='" + workflowInstanceId + "' does not exist");
+
+    // Update the workflow instance
     instance.setState(WorkflowState.STOPPED);
     update(instance);
+
+    // Update the job status
+    Job job;
+    try {
+      job = serviceRegistry.getJob(instance.getId());
+      job.setStatus(Status.FINISHED);
+      updateJob(job);
+    } catch (ServiceRegistryException e) {
+      throw new WorkflowDatabaseException("Unable to update job status ", e);
+    }
   }
 
   /**
@@ -493,8 +558,20 @@ public class WorkflowServiceImpl implements WorkflowService {
     WorkflowInstanceImpl instance = (WorkflowInstanceImpl) getWorkflowById(workflowInstanceId);
     if (instance == null)
       throw new NotFoundException("Workflow ID='" + workflowInstanceId + "' does not exist");
+
+    // Update the workflow instance
     instance.setState(WorkflowState.PAUSED);
     update(instance);
+
+    // Update the job status
+    Job job;
+    try {
+      job = serviceRegistry.getJob(instance.getId());
+      job.setStatus(Status.PAUSED);
+      updateJob(job);
+    } catch (ServiceRegistryException e) {
+      throw new WorkflowDatabaseException("Unable to update job status ", e);
+    }
   }
 
   /**
@@ -518,9 +595,21 @@ public class WorkflowServiceImpl implements WorkflowService {
             getWorkflowById(workflowInstanceId), properties);
     if (workflowInstance == null)
       throw new NotFoundException("Workflow ID='" + workflowInstanceId + "' does not exist");
+
+    // Update the workflow instance
     workflowInstance.setState(WorkflowInstance.WorkflowState.RUNNING);
     dao.update(workflowInstance);
     run(workflowInstance, properties);
+
+    // Update the job status
+    Job job;
+    try {
+      job = serviceRegistry.getJob(workflowInstance.getId());
+      job.setStatus(Status.RUNNING);
+      updateJob(job);
+    } catch (ServiceRegistryException e) {
+      throw new WorkflowDatabaseException("Unable to update job status ", e);
+    }
   }
 
   /**
@@ -551,17 +640,32 @@ public class WorkflowServiceImpl implements WorkflowService {
     return dao.countWorkflowInstances();
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowInstances(org.opencastproject.workflow.api.WorkflowQuery)
+   */
   public WorkflowSet getWorkflowInstances(WorkflowQuery query) throws WorkflowDatabaseException {
     return dao.getWorkflowInstances(query);
   }
 
-  public void handleOperationException(WorkflowInstance workflow, Exception e) {
+  /**
+   * Callback for workflow operations that were throwing an exception.
+   * 
+   * @param workflow
+   *          the workflow instance
+   * @param e
+   *          the exception
+   */
+  void handleOperationException(WorkflowInstance workflow, Exception e) throws WorkflowDatabaseException {
     // Add the exception's localized message to the workflow instance
     workflow.addErrorMessage(e.getLocalizedMessage());
 
     WorkflowOperationInstance currentOperation = workflow.getCurrentOperation();
     if (currentOperation.isFailWorkflowOnException()) {
       String errorDefId = currentOperation.getExceptionHandlingWorkflow();
+
+      // Is there an error handler for this operation
       if (errorDefId != null) {
         int currentOperationPosition = workflow.getOperations().indexOf(currentOperation);
         List<WorkflowOperationInstance> operations = new ArrayList<WorkflowOperationInstance>();
@@ -576,7 +680,23 @@ public class WorkflowServiceImpl implements WorkflowService {
         workflow.getOperations().clear();
         workflow.getOperations().addAll(operations);
       }
+
+      // Update the job status
+      Job job;
+      try {
+        job = serviceRegistry.getJob(workflow.getId());
+        job.setStatus(Status.FAILED);
+        updateJob(job);
+      } catch (ServiceRegistryException e2) {
+        throw new WorkflowDatabaseException("Unable to update status of job " + workflow + " to 'failed'", e2);
+      } catch (WorkflowDatabaseException e2) {
+        throw new WorkflowDatabaseException("Unable to update status of job " + workflow + " to 'failed'", e2);
+      } catch (NotFoundException e2) {
+        throw new WorkflowDatabaseException("Job " + workflow + " not found", e2);
+      }
+
     }
+
     currentOperation.setState(OperationState.FAILED);
     try {
       dao.update(workflow);
@@ -584,11 +704,19 @@ public class WorkflowServiceImpl implements WorkflowService {
               Action.CONTINUE, 0));
     } catch (WorkflowDatabaseException dbException) {
       // There is nothing we can do at this point.
-      logger.warn("Unable to save the workflow instance state to the database.");
+      logger.error("Unable to save the workflow instance state to the database.");
     }
   }
 
   /**
+   * Callback for workflow operation handlers that executed and finishd without exception.
+   * 
+   * @param workflow
+   *          the workflow instance
+   * @param result
+   *          the workflow operation result
+   * @throws WorkflowDatabaseException
+   *           if updating the workflow fails
    */
   void handleOperationResult(WorkflowInstance workflow, WorkflowOperationResult result)
           throws WorkflowDatabaseException {
@@ -648,7 +776,7 @@ public class WorkflowServiceImpl implements WorkflowService {
       return;
     }
 
-    // If the workflow was stopped while the operation was still working, accept the updated mediapckage
+    // If the workflow was stopped while the operation was still working, accept the updated mediapackage
     // and properties, but do not continue on.
     if (WorkflowState.STOPPED.equals(dbState)) {
       workflow.setState(WorkflowState.STOPPED);
@@ -672,6 +800,23 @@ public class WorkflowServiceImpl implements WorkflowService {
             }
           }
         }
+
+        // Update the job status
+        Job job;
+        Job.Status status = null;
+        try {
+          status = workflow.getState() == WorkflowState.SUCCEEDED ? Status.FINISHED : Status.FAILED;
+          job = serviceRegistry.getJob(workflow.getId());
+          job.setStatus(status);
+          updateJob(job);
+        } catch (ServiceRegistryException e2) {
+          throw new IllegalStateException("Unable to update status of job " + workflow + " to '" + status + "'", e2);
+        } catch (WorkflowDatabaseException e2) {
+          throw new IllegalStateException("Unable to update status of job " + workflow + " to '" + status + "'", e2);
+        } catch (NotFoundException e2) {
+          throw new IllegalStateException("Job " + workflow + " not found", e2);
+        }
+
       } else {
         workflow.setState(WorkflowState.PAUSED);
       }
@@ -802,4 +947,36 @@ public class WorkflowServiceImpl implements WorkflowService {
       }
     }
   }
+
+  /**
+   * Callback for the OSGi environment to register with the <code>ServiceRegistry</code>.
+   * 
+   * @param registry
+   *          the service registry
+   */
+  protected void setServiceRegistry(ServiceRegistry registry) {
+    this.serviceRegistry = registry;
+  }
+
+  /**
+   * Updates the job in the service registry. The exceptions that are possibly been thrown are wrapped in a
+   * {@link EncoderException}.
+   * 
+   * @param job
+   *          the job to update
+   * @throws EncoderException
+   *           the exception that is being thrown
+   */
+  private void updateJob(Job job) throws WorkflowDatabaseException {
+    try {
+      serviceRegistry.updateJob(job);
+    } catch (NotFoundException notFound) {
+      throw new WorkflowDatabaseException("Unable to find job " + job, notFound);
+    } catch (ServiceRegistryException serviceRegException) {
+      throw new WorkflowDatabaseException("Unable to update job '" + job + "' in service registry", serviceRegException);
+    } catch (ServiceUnavailableException e) {
+      throw new WorkflowDatabaseException("No service of type '" + JOB_TYPE + "' available", e);
+    }
+  }
+
 }
