@@ -53,6 +53,7 @@ ocView.displayEvent = function(event) {
 };
 
 ocView.displayWorkflow = function(workflow) {
+  /* TODO: Get mediapackage's episode.xml Dubline Core metadata and display it here. Should probably use XSLT */
   ocUtils.getTemplate('viewworkflow', function(template){
     template.process(event);
   });

@@ -18,15 +18,16 @@ var ocRecordings = ocRecordings || {};
 
 ocRecordings.statsInterval = null;
 ocRecordings.updateRequested = false;
-ocRecordings.currentState = null;
+ocRecordings.currentState = "upcoming";
 ocRecordings.sortBy = "startDate";
-ocRecordings.sortOrder = "Descending";
+ocRecordings.sortOrder = "Ascending";
 ocRecordings.lastCount = null;
 ocRecordings.tableInterval = null;
-ocRecordings.tableUpdateRequested = false;
 ocRecordings.changedMediaPackage = null;
 ocRecordings.configuration = null;
 ocRecordings.tableTemplate = null;
+ocRecordings.filter = "";
+ocRecordings.filterFields = "";
 
 
 /** Initialize the Recordings page.
@@ -44,13 +45,13 @@ ocRecordings.init = function() {
   ocUtils.internationalize(i18n, 'i18n');
   
   // get config
-  $.getJSON("/info/rest/components.json", function(data) {
+  $.getJSON('/info/rest/components.json', function(data) {
     ocRecordings.configuration = data;
     $('#engagelink').attr('href', data.engage + '/engage/ui');
   });
 
   // get 'me'
-  $.getJSON("/info/rest/me.json", function(data) {
+  $.getJSON('/info/rest/me.json', function(data) {
     ocRecordings.me = data;
     $('#logout').append(" '" + data.username + "'");
   });
@@ -60,8 +61,8 @@ ocRecordings.init = function() {
   //    $('#holdActionPanelContainer').fadeOut('fast');
   //  });
   
-  $("#buttonSchedule").button({icons:{primary:'ui-icon-circle-plus'}});
-  $("#buttonUpload").button({icons:{primary:'ui-icon-circle-plus'}});
+  $('#buttonSchedule').button({icons:{primary:'ui-icon-circle-plus'}});
+  $('#buttonUpload').button({icons:{primary:'ui-icon-circle-plus'}});
 
   /* Event: Scheduler button clicked */
   $('#buttonSchedule').click( function() {
@@ -74,10 +75,14 @@ ocRecordings.init = function() {
   });
 
   /* Event: Recording State selector clicked */
-  $('.state-selector').click( function() {
+  $('.recordings-category').click( function() {
     var state = $(this).attr('state');
+    if(!$(this).hasClass('recordings-category-active')){
+      $('.recordings-category').removeClass('recordings-category-active');
+      $(this).addClass('recordings-category-active');
+    }
     ocUtils.log('state', state);
-    window.location.href = 'recordings.html?show='+state+'&sortBy='+ocRecordings.sortBy+'&sortOrder='+ocRecordings.sortOrder+'&pageSize='+ocPager.pageSize;
+    ocRecordings.displayRecordings($(this).attr('state'));
     return false;
   });
 
@@ -90,12 +95,19 @@ ocRecordings.init = function() {
       $('#refreshInterval').attr('disabled','true');
       $('.refresh-text').removeClass('refresh-text-enabled').addClass('refresh-text-disabled');
       window.clearInterval(ocRecordings.tableInterval);
-      ocRecordings.tableUpdateRequested = false;
     }
   });
 
   $('#refreshInterval').change(function() {
     ocRecordings.initTableRefresh($(this).val());
+  });
+
+  $('.oc-ui-collapsible-widget .ui-widget-header').click(
+    function() {
+      $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-e');
+      $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-s');
+      $(this).next().toggle();
+      return false;
   });
 
   var sort = ocUtils.getURLParam('sortBy');
@@ -121,21 +133,17 @@ ocRecordings.init = function() {
   if (show == '') {
     show='upcoming';
   }
-  $('#' + show + 'StateSelect').addClass('recordings-category-active');
+  $('.recordings-category[state=' + show + ']').addClass('recordings-category-active');
   ocRecordings.currentState = show;
   ocRecordings.displayRecordingStats();
-  ocUtils.getTemplate(show, function(template) {
-    ocRecordings.tableTemplate = template;
-    ocRecordings.displayRecordings(show, false);
-  });
 
-  if (ocRecordings.currentState == "upcoming" || ocRecordings.currentState == "finished") {
-    $('#infoBox').css("display", "block");
-    $('#'+ ocRecordings.currentState +'TableInfoBox').css("display","block");
+  if (ocRecordings.currentState == 'finished') {
+    $('#infoBox').css('display', 'block');
+    $('#'+ ocRecordings.currentState +'TableInfoBox').css('display','block');
   }
 
   // init update interval for recording stats
-  ocRecordings.statsInterval = window.setInterval( 'ocRecordings.displayRecordingStats();', 3000 );
+  ocRecordings.statsInterval = window.setInterval('ocRecordings.displayRecordingStats();', 3000 );
   if (show == 'all' || show == 'capturing' || show == 'processing') {
     $('#refreshControlsContainer').css('display','block');
     if ($('#refreshEnabled').is(':visible') && $('#refreshEnabled').is(':checked')) {
@@ -154,7 +162,7 @@ ocRecordings.initTableRefresh = function(time) {
   if (ocRecordings.tableInterval != null) {
     window.clearInterval(ocRecordings.tableInterval);
   }
-  ocRecordings.tableInterval = window.setInterval('ocRecordings.displayRecordings("' + ocRecordings.currentState + '",true);', time*1000);
+  ocRecordings.tableInterval = window.setInterval('ocRecordings.displayRecordings("' + ocRecordings.currentState + '");', time*1000);
 }
 
 /** get and display recording statistics. If the number of recordings in the
@@ -174,7 +182,7 @@ ocRecordings.displayRecordingStats = function() {
             if (ocRecordings.lastCount !== data[key]) {
               ocRecordings.lastCount = data[key];
               ocPager.update(ocPager.pageSize, ocPager.currentPageIdx);
-              ocRecordings.displayRecordings(ocRecordings.currentState, true);
+              ocRecordings.displayRecordings(ocRecordings.currentState);
             } else {
               ocRecordings.lastCount = data[key];
             }
@@ -192,27 +200,41 @@ ocRecordings.displayRecordingStats = function() {
 /** Request a list of recordings in a certain state and render the response as a table.
  *  While we are waiting for a response, a little animation is displayed.
  */
-ocRecordings.displayRecordings = function(state, reload) {
-  if (!ocRecordings.tableUpdateRequested && ocRecordings.tableTemplate != null) {
-    ocRecordings.tableUpdateRequested = true;
-    var page = ocPager.currentPageIdx;
-    var psize = ocPager.pageSize;
-    var sort = ocRecordings.sortBy;
-    var order = ocRecordings.sortOrder;
-    var recordingsUrl = "rest/recordings/"+ocRecordings.currentState+".json?ps="+psize+"&pn="+page+"&sb="+sort+"&so="+order;
-    $.ajax({
-      url : recordingsUrl,
-      type : 'get',
-      dataType : 'json',
-      error : function(xhr) {
-        ocUtils.log('Error: Could not get Recordings');   // TODO more detailed debug info
-      },
-      success : function(data) {
-        var container = document.getElementById('recordingsTableContainer');
-        container.innerHTML = ocRecordings.tableTemplate.process(data);
-      }
-    });
+ocRecordings.displayRecordings = function(state) {
+  var page = ocPager.currentPageIdx;
+  var psize = ocPager.pageSize;
+  var sort = ocRecordings.sortBy;
+  var order = ocRecordings.sortOrder;
+  var recordingsUrl = '';
+  if(state == 'bulkaction'){
+    recordingsUrl = 'rest/recordings/upcoming.json';
+  } else {
+    recordingsUrl = 'rest/recordings/' + state + '.json';
   }
+  recordingsUrl += '?ps=' + psize + '&pn=' + page + '&sb=' + sort + '&so=' + order;
+  if((state === 'upcoming' || state === 'bulkaction') && ocRecordings.filter !== '' && ocRecordings.filterField !== '') {
+    recordingsUrl += '&filter=' + ocRecordings.filter + '&' + ocRecordings.filterField + '=true';
+  }
+  if(ocRecordings.currentState !== state || ocRecordings.tableTemplate == null) {
+    ocUtils.getTemplate(state, function(template) {
+      ocRecordings.tableTemplate = template;
+      ocRecordings.displayRecordings(state);
+    });
+    ocRecordings.currentState = state;
+    return;
+  }
+  $.ajax({
+    url : recordingsUrl,
+    type : 'get',
+    dataType : 'json',
+    error : function(xhr) {
+      ocUtils.log('Error: Could not get Recordings');   // TODO more detailed debug info
+    },
+    success : function(data) {
+      var container = document.getElementById('recordingsTableContainer');
+      container.innerHTML = ocRecordings.tableTemplate.process(data);
+    }
+  });
 }
 
 /** Displays Hold Operation UI
@@ -241,7 +263,7 @@ ocRecordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
  *
  */
 ocRecordings.adjustHoldActionPanelHeight = function() {
-  var height = $("#holdActionPanelIframe").contents().find("html").height();
+  var height = $('#holdActionPanelIframe').contents().find('html').height();
   $('#holdActionPanelIframe').height(height+10);
 //alert("Hold action panel height: " + height);
 }
@@ -267,7 +289,7 @@ ocRecordings.continueWorkflow = function(postData) {
   props.properties = "";
   $.each(postData, function(key, value) {
     if(key != 'id') {
-      props.properties = props.properties + key + "=" + value + "\n"; 
+      props.properties = props.properties + key + '=' + value + '\n'; 
     }
   });
   
@@ -336,4 +358,14 @@ ocRecordings.formatRecordingDates = function(startTime, endTime) {
     startDate.getHours() + ":" + ocUtils.padString(startDate.getMinutes(), "0", 2) + ' - ' +
     endDate.getHours() + ":" + ocUtils.padString(endDate.getMinutes(), "0", 2);
   return out;
+}
+
+ocRecordings.filterRecordings = function() {
+  ocRecordings.filter = $("#filter").val();
+  ocRecordings.filterField = $("#filterField").val();
+  ocRecordings.displayRecordings(ocRecordings.currentState);
+}
+
+ocRecordings.displayBulkAction = function(filter) {
+  $("#bulk");
 }

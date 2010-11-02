@@ -34,6 +34,7 @@ import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.impl.EventImpl;
 import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
+import org.opencastproject.scheduler.impl.SchedulerFilterImpl;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.api.SeriesService;
@@ -148,8 +149,22 @@ public class AdminuiRestService {
           @QueryParam("pn") int pageNumber,
           @QueryParam("ps") int pageSize,
           @QueryParam("sb") String sortBy,
-          @QueryParam("so") String sortOrder) {
-    return getRecordings(state, pageNumber, pageSize, sortBy, sortOrder);
+          @QueryParam("so") String sortOrder,
+          @QueryParam("filter") String filterString,
+          @QueryParam("title") boolean filterTitle,
+          @QueryParam("creator") boolean filterCreator,
+          @QueryParam("series") boolean filterSeries) {
+    SchedulerFilter filter = new SchedulerFilterImpl();
+    if (filterTitle) {
+      filter.setTitleFilter(filterString);
+    }
+    if (filterCreator) {
+      filter.setCreatorFilter(filterString);
+    }
+    if (filterSeries) {
+      //todo series;
+    }
+    return getRecordings(state, pageNumber, pageSize, sortBy, sortOrder, filter);
   }
 
   @GET
@@ -159,8 +174,22 @@ public class AdminuiRestService {
           @QueryParam("pn") int pageNumber,
           @QueryParam("ps") int pageSize,
           @QueryParam("sb") String sortBy,
-          @QueryParam("so") String sortOrder) {
-    return getRecordings(state, pageNumber, pageSize, sortBy, sortOrder);
+          @QueryParam("so") String sortOrder,
+          @QueryParam("filter") String filterString,
+          @QueryParam("title") boolean filterTitle,
+          @QueryParam("creator") boolean filterCreator,
+          @QueryParam("series") boolean filterSeries) {
+    SchedulerFilter filter = new SchedulerFilterImpl();
+    if (filterTitle) {
+      filter.setTitleFilter(filterString);
+    }
+    if (filterCreator) {
+      filter.setCreatorFilter(filterString);
+    }
+    if (filterSeries) {
+      //todo series;
+    }
+    return getRecordings(state, pageNumber, pageSize, sortBy, sortOrder, filter);
   }
 
   private String ensureString(String in) {
@@ -180,7 +209,8 @@ public class AdminuiRestService {
           int pageNumber,
           int pageSize,
           String sortBy,
-          String sortOrder) {
+          String sortOrder,
+          SchedulerFilter filter) {
 
     AdminRecordingListImpl out;
     try {
@@ -192,7 +222,7 @@ public class AdminuiRestService {
     }
     boolean allRecordings = state.toUpperCase().equals("ALL");
     if ((state.toUpperCase().equals("UPCOMING")) || allRecordings) {
-      out.addAll(addRecordingStatusForAll("upcoming", getUpcomingRecordings()));
+      out.addAll(addRecordingStatusForAll("upcoming", getUpcomingRecordings(filter)));
     }
     if ((state.toUpperCase().equals("CAPTURING")) || allRecordings) {
       out.addAll(addRecordingStatusForAll("capturing", getCapturingRecordings()));
@@ -533,11 +563,12 @@ public class AdminuiRestService {
    * is not present an empty list is returned.
    * @return AdminRecordingList list of upcoming recordings
    */
-  private LinkedList<AdminRecording> getUpcomingRecordings() {
+  private LinkedList<AdminRecording> getUpcomingRecordings(SchedulerFilter filter) {
     LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
+    filter.setStart(new Date(System.currentTimeMillis()));
     if (schedulerService != null) {
       logger.debug("getting upcoming recordings from scheduler");
-      List<Event> events = schedulerService.getUpcomingEvents();
+      List<Event> events = schedulerService.getEvents(filter);
       for (Event event : events) {
         if (event.getStartdate() != null && System.currentTimeMillis() < event.getStartdate().getTime()) {
           AdminRecording item = new AdminRecordingImpl();

@@ -44,6 +44,15 @@
 .recordings-button-container {
 }
 
+.recordings-table-head {
+  text-align: left;
+  font-weight: normal;
+}
+
+.recordings-table-head a {
+  color: #666666;
+}
+
 .recordings-table {
   margin-top: 8px;
 }
@@ -62,4 +71,19 @@
 #holdActionPanelIframe {
   border: medium none;
   width: 100%;
+}
+
+.recordings-bulk-action {
+  border: 1px solid #CCCCCC;
+  padding: 20px;
+  width: 840px;
+  display: none;
+}
+
+.recordings-bulk-action .ui-widget {
+  width: 800px;
+}
+
+.recordings-selection-column {
+  text-align: center;
 }
