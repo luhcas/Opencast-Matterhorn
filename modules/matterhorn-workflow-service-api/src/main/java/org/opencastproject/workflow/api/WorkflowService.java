@@ -32,14 +32,24 @@ public interface WorkflowService {
   final String WORKFLOW_OPERATION_PROPERTY = "workflow.operation";
 
   /**
+   * The job identifier for running workflow instances.
+   */
+  final String JOB_TYPE = "org.opencastproject.composer";
+
+  /**
    * Returns the {@link WorkflowDefinition} identified by <code>name</code> or <code>null</code> if no such definition
    * was found.
    * 
-   * @param name
-   *          the workflow definition name
+   * @param id
+   *          the workflow definition id
    * @return the workflow
+   * @throws WorkflowDatabaseException
+   *           if there is a problem accessing the workflow definition
+   * @throws NotFoundException
+   *           if there is no registered workflow definition with this identifier
+   * 
    */
-  WorkflowDefinition getWorkflowDefinitionById(String name);
+  WorkflowDefinition getWorkflowDefinitionById(String id) throws WorkflowDatabaseException, NotFoundException;
 
   /**
    * Gets a {@link WorkflowInstance} by its ID.
@@ -215,6 +225,8 @@ public interface WorkflowService {
    * registered and must have registered workflow operation handlers for each of the workflow definition's operations.
    * 
    * @return The list of currently available workflow definitions, sorted by title
+   * @throws WorkflowDatabaseException
+   *           if there is a problem storing the registered workflow definitions
    */
-  List<WorkflowDefinition> listAvailableWorkflowDefinitions();
+  List<WorkflowDefinition> listAvailableWorkflowDefinitions() throws WorkflowDatabaseException;
 }

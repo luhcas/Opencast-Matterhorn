@@ -534,9 +534,14 @@ public class IngestServiceImpl implements IngestService {
    */
   @Override
   public WorkflowInstance ingest(MediaPackage mp, String wd, Map<String, String> properties) throws IngestException {
-    WorkflowDefinition workflowDef = workflowService.getWorkflowDefinitionById(wd);
-    if (workflowDef == null)
-      throw new IllegalStateException(wd + " is not a registered workflow definition");
+    WorkflowDefinition workflowDef;
+    try {
+      workflowDef = workflowService.getWorkflowDefinitionById(wd);
+    } catch (WorkflowDatabaseException e) {
+      throw new IngestException(e);
+    } catch (NotFoundException e) {
+      throw new IllegalArgumentException(wd + " is not a registered workflow definition");
+    }
     try {
       return (properties == null) ? workflowService.start(workflowDef, mp) :
         workflowService.start(workflowDef, mp, properties);

@@ -63,11 +63,11 @@ public class AdminProxyRestEndpointTest {
     // GET json from workflow/instances
     getJson = new HttpGet(BASE_URL + "/workflow/rest/instances.json");
     jsonResponse = EntityUtils.toString(client.execute(getJson).getEntity());
-    JSONArray workflowJSON = (JSONArray) JSONValue.parse(jsonResponse);
+    JSONObject workflowJSON = (JSONObject) JSONValue.parse(jsonResponse);
     if(workflowJSON == null) Assert.fail("Not able to parse response: " + jsonResponse);
 
     // test if both equals
-    HashMap<String,Long> workflowStats = countWorkflowInstances(workflowJSON);
+    HashMap<String,Long> workflowStats = countWorkflowInstances((JSONObject)workflowJSON.get("workflows"));
     Assert.assertEquals(adminJSON.get("processing"), workflowStats.get("INSTANTIATED") + workflowStats.get("RUNNING"));
     Assert.assertEquals(adminJSON.get("inactive"), workflowStats.get("STOPPED"));
     //Assert.assertEquals(adminJSON.get("hold"), workflowStats.get("PAUSED"));  // TODO only count WFs that are PAUSED when they are in a HoldOperation
@@ -81,7 +81,7 @@ public class AdminProxyRestEndpointTest {
    * @return out HashMap<String,Long>
    */
   @SuppressWarnings("unchecked")
-  private HashMap<String,Long> countWorkflowInstances(JSONArray in) {
+  private HashMap<String,Long> countWorkflowInstances(JSONObject in) {
     HashMap<String,Long> out = new HashMap<String,Long>();    // Long here because JSONArray.get("a_number") returns long (so we don't have to cast in the test above)
     out.put("INSTANTIATED", Long.valueOf(0L));
     out.put("RUNNING", Long.valueOf(0L));
@@ -90,9 +90,9 @@ public class AdminProxyRestEndpointTest {
     out.put("SUCCEEDED", Long.valueOf(0L));
     out.put("FAILED", Long.valueOf(0L));
     out.put("FAILING", Long.valueOf(0L));
-    for (Iterator<JSONObject> i = in.iterator(); i.hasNext();) {
+    for (Iterator<JSONObject> i = ((JSONArray)in.get("workflow")).iterator(); i.hasNext();) {
       JSONObject instance = i.next();
-      String state = ((String) instance.get("workflow_state")).toUpperCase();
+      String state = ((String) instance.get("@state")).toUpperCase();
       out.put(state, out.get(state)+1);
     }
     return out;

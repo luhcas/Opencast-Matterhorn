@@ -23,6 +23,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -63,6 +64,24 @@ public class WorkflowBuilder {
       }
     }
     return instance;
+  }
+
+  /**
+   * Loads workflow definitions from the given input stream.
+   * 
+   * @param in
+   * @return the list of workflow definitions
+   */
+  public List<WorkflowDefinition> parseWorkflowDefinitions(InputStream in) throws Exception {
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+    WorkflowDefinitionImpl[] impls = unmarshaller.unmarshal(
+            DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in), WorkflowDefinitionImpl[].class)
+            .getValue();
+    List<WorkflowDefinition> list = new ArrayList<WorkflowDefinition>();
+    for (WorkflowDefinitionImpl impl : impls) {
+      list.add(impl);
+    }
+    return list;
   }
 
   /**
@@ -115,12 +134,41 @@ public class WorkflowBuilder {
    * 
    * @param in
    *          xml stream of the workflow instance
-   * @return the workflow definition
+   * @return the workflow instance
    * @throws Exception
    *           if creating the workflow instance fails
    */
   public WorkflowInstance parseWorkflowInstance(String in) throws Exception {
     return parseWorkflowInstance(IOUtils.toInputStream(in, "UTF8"));
+  }
+
+  /**
+   * Loads a set of workflow instances from the given input stream.
+   * 
+   * @param in
+   *          the input stream
+   * @return the set of workflow instances
+   * @throws Exception
+   *           if creating the workflow instance set fails
+   */
+  public WorkflowSet parseWorkflowSet(InputStream in) throws Exception {
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+    WorkflowSetImpl workflowSet = unmarshaller.unmarshal(
+            DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in), WorkflowSetImpl.class).getValue();
+    return workflowSet;
+  }
+
+  /**
+   * Loads a set of workflow instances from the xml string.
+   * 
+   * @param in
+   *          xml string of the workflow instance set
+   * @return the workflow set
+   * @throws Exception
+   *           if creating the workflow instance set fails
+   */
+  public WorkflowSet parseWorkflowSet(String in) throws Exception {
+    return parseWorkflowSet(IOUtils.toInputStream(in, "UTF8"));
   }
 
   public String toXml(WorkflowInstance workflowInstance) throws Exception {

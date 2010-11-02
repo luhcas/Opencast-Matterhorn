@@ -381,7 +381,7 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
 
   private StringBuilder append(StringBuilder sb, String key, String value) {
     if(sb.length() > 0) {
-      sb.append("&");
+      sb.append(" AND ");
     }
     sb.append(key);
     sb.append(":");
@@ -404,19 +404,19 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
     solrQuery.setStart(startPage * count);
 
     StringBuilder sb = new StringBuilder();
-    if (query.getMediaPackage() != null) {
+    if (StringUtils.isNotBlank(query.getMediaPackage())) {
       append(sb, MEDIAPACKAGE_KEY, query.getMediaPackage());
     }
-    if (query.getSeries() != null) {
+    if (StringUtils.isNotBlank(query.getSeries())) {
       append(sb, SERIES_KEY, query.getSeries());
     }
-    if (query.getCurrentOperation() != null) {
+    if (StringUtils.isNotBlank(query.getCurrentOperation())) {
       append(sb, OPERATION_KEY, query.getCurrentOperation());
     }
     if (query.getState() != null) {
       append(sb, STATE_KEY, query.getState().toString());
     }
-    if (query.getText() != null) {
+    if (StringUtils.isNotBlank(query.getText())) {
       append(sb, FULLTEXT_KEY, query.getText());
     }
 

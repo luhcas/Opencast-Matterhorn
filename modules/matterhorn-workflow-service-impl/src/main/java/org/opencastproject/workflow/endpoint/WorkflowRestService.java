@@ -15,7 +15,6 @@
  */
 package org.opencastproject.workflow.endpoint;
 
-import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
@@ -141,7 +140,7 @@ public class WorkflowRestService {
     instancesEndpoint.addOptionalParam(new Param("mp", Type.STRING, null, "Filter results by media package ID"));
     instancesEndpoint.addOptionalParam(new Param("op", Type.STRING, "inspect", "Filter results by current operation"));
     instancesEndpoint.addOptionalParam(new Param("count", Type.STRING, "20", "Results per page (max 100)"));
-    instancesEndpoint.addOptionalParam(new Param("startPage", Type.STRING, "1", "Page offset"));
+    instancesEndpoint.addOptionalParam(new Param("startPage", Type.STRING, "0", "Page offset"));
     instancesEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, instancesEndpoint);
 
@@ -202,7 +201,7 @@ public class WorkflowRestService {
     // Stop a Workflow Instance
     RestEndpoint stopEndpoint = new RestEndpoint("stop", RestEndpoint.Method.POST, "/stop",
             "Stop a running workflow instance");
-    stopEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Workflow stopped"));
+    stopEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("workflow stopped"));
     stopEndpoint.addStatus(org.opencastproject.util.doc.Status
             .NOT_FOUND("A workflow instance with this ID was not found"));
     stopEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
@@ -212,7 +211,7 @@ public class WorkflowRestService {
     // Suspend a Workflow Instance
     RestEndpoint suspendEndpoint = new RestEndpoint("suspend", RestEndpoint.Method.POST, "/suspend",
             "Suspend a running workflow instance");
-    suspendEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Workflow suspended"));
+    suspendEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Workflow suspended"));
     suspendEndpoint.addStatus(org.opencastproject.util.doc.Status
             .NOT_FOUND("A workflow instance with this ID was not found"));
     suspendEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
@@ -222,7 +221,7 @@ public class WorkflowRestService {
     // Resume a Workflow Instance
     RestEndpoint resumeAndReplaceEndpoint = new RestEndpoint("replaceAndresume", RestEndpoint.Method.POST,
             "/replaceAndresume", "Resume a suspended workflow instance, replacing the mediapackage");
-    resumeAndReplaceEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Suspended workflow has now resumed"));
+    resumeAndReplaceEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Suspended workflow has now resumed"));
     resumeAndReplaceEndpoint.addStatus(org.opencastproject.util.doc.Status
             .NOT_FOUND("A workflow instance with this ID was not found"));
     resumeAndReplaceEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
@@ -235,7 +234,7 @@ public class WorkflowRestService {
 
     RestEndpoint resumeEndpoint = new RestEndpoint("resume", RestEndpoint.Method.POST, "/resume",
             "Resume a suspended workflow instance");
-    resumeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Suspended workflow has now resumed"));
+    resumeEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Suspended workflow has now resumed"));
     resumeEndpoint.addStatus(org.opencastproject.util.doc.Status
             .NOT_FOUND("A workflow instance with this ID was not found"));
     resumeEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
@@ -243,6 +242,14 @@ public class WorkflowRestService {
             "The properties to set for this workflow instance"));
     resumeEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, resumeEndpoint);
+
+    // Update a Workflow Instance
+    RestEndpoint updateEndpoint = new RestEndpoint("update", RestEndpoint.Method.POST, "/update",
+            "Update a workflow instance.  This is typically used by remote workflow service implementations only.");
+    updateEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Workflow updated"));
+    updateEndpoint.addRequiredParam(new Param("workflow", Type.TEXT, null, "The workflow instance as xml"));
+    updateEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, updateEndpoint);
 
     return DocUtil.generate(data);
   }
@@ -303,6 +310,18 @@ public class WorkflowRestService {
     }
   }
 
+  @GET
+  @Produces(MediaType.TEXT_PLAIN)
+  @Path("/count")
+  public Response getCount() {
+    try {
+      Long count = service.countWorkflowInstances();
+      return Response.ok(count).build();
+    } catch (WorkflowDatabaseException e) {
+      throw new WebApplicationException(e);
+    }
+  }
+  
   @SuppressWarnings("unchecked")
   @GET
   @Path("definitions.{output:.*}")
@@ -368,13 +387,13 @@ public class WorkflowRestService {
   }
 
   // CHECKSTYLE:OFF (The number of method parameters is large because we need to handle many potential query parameters)
-  @SuppressWarnings("unchecked")
   @GET
-  @Path("instances.{output:.*}")
-  public Response getWorkflows(@QueryParam("state") String state, @QueryParam("q") String text,
+  @Produces(MediaType.TEXT_XML)
+  @Path("instances.xml")
+  public Response getWorkflowsAsXml(@QueryParam("state") String state, @QueryParam("q") String text,
           @QueryParam("series") String seriesId, @QueryParam("mp") String mediapackageId,
           @QueryParam("op") String currentOperation, @QueryParam("startPage") int startPage,
-          @QueryParam("count") int count, @PathParam("output") String output) throws Exception {
+          @QueryParam("count") int count) throws Exception {
     // CHECKSTYLE:ON
     if (count < 1 || count > MAX_LIMIT)
       count = DEFAULT_LIMIT;
@@ -392,31 +411,41 @@ public class WorkflowRestService {
     if (currentOperation != null)
       q.withCurrentOperation(currentOperation);
     WorkflowSet set = service.getWorkflowInstances(q);
+    return Response.ok(set).build();
+  }
 
-    if ("json".equals(output)) {
-      JSONArray json = new JSONArray();
-      for (WorkflowInstance workflow : set.getItems()) {
-        json.add(getWorkflowInstanceAsJson(workflow, false));
-      }
-      return Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
-    } else {
-      return Response.ok(WorkflowBuilder.getInstance().toXml(set)).header("Content-Type", MediaType.TEXT_XML).build();
-    }
+  // CHECKSTYLE:OFF (The number of method parameters is large because we need to handle many potential query parameters)
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("instances.json")
+  public Response getWorkflowsAsJson(@QueryParam("state") String state, @QueryParam("q") String text,
+          @QueryParam("series") String seriesId, @QueryParam("mp") String mediapackageId,
+          @QueryParam("op") String currentOperation, @QueryParam("startPage") int startPage,
+          @QueryParam("count") int count) throws Exception {
+    // CHECKSTYLE:ON
+    return getWorkflowsAsXml(state, text, seriesId, mediapackageId, currentOperation, startPage, count);
   }
 
   @GET
-  @Path("instance/{id}.{output:.*}")
-  public Response getWorkflow(@PathParam("id") String id, @PathParam("output") String output) throws Exception {
-    WorkflowInstance instance = service.getWorkflowById(id);
-    if (instance == null)
+  @Produces(MediaType.TEXT_XML)
+  @Path("instance/{id}.xml")
+  public Response getWorkflowAsXml(@PathParam("id") String id) {
+    WorkflowInstance instance;
+    try {
+      instance = service.getWorkflowById(id);
+    } catch (WorkflowDatabaseException e) {
+      throw new WebApplicationException(e);
+    } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).entity("Workflow instance " + id + " does not exist").build();
-    if ("json".equals(output)) {
-      return Response.ok(getWorkflowInstanceAsJson(instance, true).toString())
-              .header("Content-Type", MediaType.APPLICATION_JSON).build();
-    } else {
-      return Response.ok(WorkflowBuilder.getInstance().toXml(instance)).header("Content-Type", MediaType.TEXT_XML)
-              .build();
     }
+    return Response.ok(instance).build();
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("instance/{id}.json")
+  public Response getWorkflowAsJson(@PathParam("id") String id) {
+    return getWorkflowAsXml(id);
   }
 
   @POST
@@ -442,7 +471,7 @@ public class WorkflowRestService {
   public Response stop(@FormParam("id") String workflowInstanceId) {
     try {
       service.stop(workflowInstanceId);
-      return Response.ok("stopped " + workflowInstanceId).build();
+      return Response.noContent().build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
     } catch(WorkflowDatabaseException e) {
@@ -456,7 +485,7 @@ public class WorkflowRestService {
   public Response suspend(@FormParam("id") String workflowInstanceId) {
     try {
       service.suspend(workflowInstanceId);
-      return Response.ok("suspended " + workflowInstanceId).build();
+      return Response.noContent().build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
     } catch(WorkflowDatabaseException e) {
@@ -476,7 +505,7 @@ public class WorkflowRestService {
     }
     try {
       service.resume(workflowInstanceId, map);
-      return Response.ok("resumed " + workflowInstanceId).build();
+      return Response.noContent().build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
     } catch(WorkflowDatabaseException e) {
@@ -502,11 +531,22 @@ public class WorkflowRestService {
         service.update(workflow);
       }
       service.resume(workflowInstanceId, map);
-      return Response.ok("resumed " + workflowInstanceId).build();
+      return Response.noContent().build();
     } catch (WorkflowDatabaseException e) {
       throw new WebApplicationException(e);
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
+    }
+  }
+
+  @POST
+  @Path("update")
+  public Response resume(@FormParam("workflow") WorkflowInstance workflowInstance) {
+    try {
+      service.update(workflowInstance);
+      return Response.noContent().build();
+    } catch (WorkflowDatabaseException e) {
+      throw new WebApplicationException(e);
     }
   }
 
@@ -530,25 +570,6 @@ public class WorkflowRestService {
     return Response.ok(jsonArray.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
   }
 
-  @SuppressWarnings("unchecked")
-  protected JSONObject getWorkflowInstanceAsJson(WorkflowInstance workflow, boolean includeDublinCoreFields)
-          throws Exception {
-    MediaPackage mp = workflow.getMediaPackage();
-
-    JSONObject jsInstance = new JSONObject();
-    jsInstance.put("workflow_id", workflow.getId());
-    jsInstance.put("workflow_title", workflow.getTitle());
-    WorkflowOperationInstance opInstance = workflow.getCurrentOperation();
-    if (opInstance != null) {
-      jsInstance.put("workflow_current_operation", opInstance.getId());
-    }
-    jsInstance.put("workflow_state", workflow.getState().name().toLowerCase());
-    List<WorkflowOperationInstance> operations = workflow.getOperations();
-    jsInstance.put("operations", getOperationsAsJson(operations));
-    jsInstance.put("mediapackage_title", mp.getTitle());
-    // TODO: do we need more metadata here?
-    return jsInstance;
-  }
 
   @SuppressWarnings("unchecked")
   protected JSONArray getOperationsAsJson(List<WorkflowOperationInstance> operations) {

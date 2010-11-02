@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.impl;
 
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
@@ -35,7 +36,7 @@ import javax.ws.rs.core.Response;
 public class WorkflowRestEndpointTest {
   WorkflowRestService restService;
   WorkflowInstanceImpl workflow;
-  
+
   @Before
   public void setup() throws Exception {
     // Create a workflow for the service to return
@@ -46,7 +47,8 @@ public class WorkflowRestEndpointTest {
     // Mock up the behavior of the workflow service
     WorkflowService service = EasyMock.createNiceMock(WorkflowService.class);
     EasyMock.expect(service.listAvailableWorkflowDefinitions()).andReturn(new ArrayList<WorkflowDefinition>());
-    EasyMock.expect(service.getWorkflowById((String)EasyMock.anyObject())).andReturn(null).times(2).andReturn(workflow);
+    EasyMock.expect(service.getWorkflowById((String) EasyMock.anyObject())).andThrow(new NotFoundException()).times(2)
+            .andReturn(workflow);
     EasyMock.replay(service);
 
     // Set up the rest endpoint
@@ -68,14 +70,14 @@ public class WorkflowRestEndpointTest {
 
   @Test
   public void testGetWorkflowInstance() throws Exception {
-    Response json404Response = restService.getWorkflow("unknown_id", "json");
+    Response json404Response = restService.getWorkflowAsJson("unknown_id");
     Assert.assertEquals(404, json404Response.getStatus());
 
-    Response xml404Response = restService.getWorkflow("unknown_id", "xml");
+    Response xml404Response = restService.getWorkflowAsXml("unknown_id");
     Assert.assertEquals(404, xml404Response.getStatus());
-    
-    Response xmlResponse = restService.getWorkflow("workflow1", "xml");
+
+    Response xmlResponse = restService.getWorkflowAsXml("workflow1");
     Assert.assertEquals(200, xmlResponse.getStatus());
-    Assert.assertEquals(WorkflowBuilder.getInstance().toXml(workflow), xmlResponse.getEntity());
+    Assert.assertEquals(workflow, xmlResponse.getEntity());
   }
 }
