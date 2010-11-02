@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Properties;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -93,18 +94,22 @@ public class XProperties extends Properties {
       return null;
     }
     Pattern p = Pattern.compile(START_REPLACEMENT + subkey + END_REPLACEMENT, Pattern.LITERAL);
+    String replacement = null;
+    
     if (System.getProperty(subkey) != null) {
-      return p.matcher(value).replaceAll(System.getProperty(subkey));
+      replacement = System.getProperty(subkey);
     } else if (this.getProperty(subkey) != null) {
-      return p.matcher(value).replaceAll(this.getProperty(subkey));
+      replacement = this.getProperty(subkey);
     } else if (this.context != null && this.bundle != null && this.bundle.getState() == Bundle.ACTIVE &&
             this.context.getProperty(subkey) != null) {
-      return p.matcher(value).replaceAll(this.context.getProperty(subkey));
+      replacement = this.context.getProperty(subkey);
     } else if (System.getenv(subkey) != null) {
-      return p.matcher(value).replaceAll(System.getenv(subkey));
-    } else {
-      return null;
-    }    
+      replacement = System.getenv(subkey);
+    }
+    
+    if (replacement != null)
+      return p.matcher(value).replaceAll(Matcher.quoteReplacement(replacement));
+    else return null;
   }
 
   /**
