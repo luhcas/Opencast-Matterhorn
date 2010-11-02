@@ -28,12 +28,44 @@
       var inpoint = 0;
       var outpoint = 0;
       
+      // Variables for the "In point"- and "Out point"- increase-/decrease-Buttons
+      var secondsForward = 1;
+      var secondsBackward = 1;
+      
+      var intervalTimer = 0;
+      // Timeout of the Intervall Timer
+      var timerTimeout = 1500;
+      var timerSet = false; // -> temporary solution. clearInterval(timer) does not work properly
       $(document).ready(function() {
         var id = postData.id;
         
-        // Variables for the "In point"- and "Out point"- increase-/decrease-Buttons
-        var secondsForward = 1;
-        var secondsBackward = 1;
+        
+        // Set default Values for In point and Out point
+        $('#player-container').load(function() {
+            $('#inPoint').val("00:00:00");
+        
+            // Set a Timer for the while-Loop
+            this.intervalTimer = window.setInterval(function() {
+                // Ask if a default Out Point has been set
+                if(setOutPointDefaultValue()) {
+                    // Clear the Intervall
+                    window.clearIntervall(this.intervalTimer);
+                }
+            }, timerTimeout);
+        });
+        
+       /**
+        * Tries to set the default Out point value
+        */
+        function setOutPointDefaultValue() {
+            // If Duration has been set
+            if(($('#player-container')[0].contentWindow.Opencast.Player.getDuration() != 0) && !timerSet) {
+                $('#outPoint').val($('#player-container').contents().find('#oc_duration').text());
+                timerSet = true;
+                return true;
+            }
+            return false;
+        }
 
         //create Buttons
         $('.ui-button').button();
@@ -92,6 +124,14 @@
         * Checks if In point is bigger than Out point and prints an Error Message if this is the case
         */
         function checkInOutPoint() {
+            // Check if Out point is larger than the Video Duration
+            if(getTimeInMilliseconds($('#outPoint').val()) > getTimeInMilliseconds($('#player-container').contents().find('#oc_duration').text())) {
+                $('#outPoint').val($('#player-container').contents().find('#oc_duration').text());
+            }
+            // Check if In point is larger than the Video Duration
+            if(getTimeInMilliseconds($('#inPoint').val()) > getTimeInMilliseconds($('#player-container').contents().find('#oc_duration').text())) {
+                $('#inPoint').val($('#player-container').contents().find('#oc_duration').text());
+            }
             if(getTimeInMilliseconds($('#inPoint').val()) >= getTimeInMilliseconds($('#outPoint').val())) {
                 $('div#errorMessage').html("Out point must be later than In point");
                 $('#trimming-hint').hide();
@@ -431,7 +471,7 @@
          <div id="errorMessage" class="error">
          </div>
          <div id="trimming-hint">
-          <p style="color:green;">This Recording will be trimmed according to the In and Outpoints you have set when you continue.</p>
+          <p style="color:green;">This Recording will be trimmed according to the In and Out points you have set when you continue.</p>
          </div>
          <input title="Start trimming this recording" 
                 style="margin-left: 205px; margin-right: 16px; width: 160px;" 
