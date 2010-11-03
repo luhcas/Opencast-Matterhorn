@@ -23,9 +23,9 @@ import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Param.Type;
 
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;

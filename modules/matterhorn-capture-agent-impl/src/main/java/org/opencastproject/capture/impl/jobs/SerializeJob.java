@@ -23,6 +23,7 @@ import org.quartz.Job;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +56,9 @@ public class SerializeJob implements Job {
     
     // Obtains the CaptureAgentImpl from the context
     CaptureAgentImpl ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
+
+    // The scheduler to use when scheduling the next job
+    Scheduler sched = (Scheduler)ctx.getMergedJobDataMap().get(JobParameters.SCHEDULER);
     
     // Creates manifest
     boolean manifestCreated;
@@ -82,11 +86,11 @@ public class SerializeJob implements Job {
     String postfix = ctx.getMergedJobDataMap().getString(JobParameters.JOB_POSTFIX);
 
     // Schedules Ingestion
-    JobDetail job = new JobDetail("IngestJob-" + postfix, JobParameters.OTHER_TYPE, IngestJob.class);
+    JobDetail job = new JobDetail("IngestJob-" + postfix, JobParameters.CAPTURE_RELATED_TYPE, IngestJob.class);
     CronTrigger trigger;
     try {
       trigger = new CronTrigger();
-      trigger.setGroup(JobParameters.OTHER_TYPE);
+      trigger.setGroup(JobParameters.CAPTURE_RELATED_TYPE);
       trigger.setName("IngestJobTrigger-" + postfix);
       trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
 
@@ -95,14 +99,17 @@ public class SerializeJob implements Job {
       trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, ca);
       trigger.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
       trigger.getJobDataMap().put(JobParameters.JOB_POSTFIX, postfix);
+      trigger.getJobDataMap().put(JobParameters.SCHEDULER, sched);
 
       //Schedule the update
-      ctx.getScheduler().scheduleJob(job, trigger);
+      sched.scheduleJob(job, trigger);
 
       //Remove this job from the system
       JobDetail mine = ctx.getJobDetail();
       try {
-        ctx.getScheduler().deleteJob(mine.getName(), mine.getGroup());
+        if (!ctx.getScheduler().isShutdown()) {
+          ctx.getScheduler().deleteJob(mine.getName(), mine.getGroup());
+        }
       } catch (SchedulerException e) {
         logger.warn("Unable to delete serialize job {}!", mine.getName());
         e.printStackTrace();

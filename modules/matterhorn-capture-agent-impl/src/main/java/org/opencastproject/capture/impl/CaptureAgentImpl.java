@@ -65,7 +65,6 @@ import org.osgi.service.cm.ManagedService;
 import org.osgi.service.command.CommandProcessor;
 import org.osgi.service.component.ComponentContext;
 import org.quartz.JobDetail;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.quartz.impl.StdSchedulerFactory;
@@ -119,7 +118,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
 
   /** The default maximum length to capture, measured in seconds. */
-  public static final long DEFAULT_MAX_CAPTURE_LENGTH = 8 * 60 * 60;
+  public static final long DEFAULT_MAX_CAPTURE_LENGTH = 8 * CaptureParameters.HOURS;
 
   /** The number of nanoseconds in a second.  This is a borrowed constant from gStreamer and is used in the pipeline initialisation routines */
   public static final long GST_SECOND = 1000000000L;
@@ -148,10 +147,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   String agentState = null;
 
   /** A pointer to the scheduler. */
-  SchedulerImpl scheduler = null;
+  org.opencastproject.capture.api.Scheduler scheduler = null;
 
   /** The scheduler the agent will use to schedule any recurring events */
-  Scheduler agentScheduler = null;
+  org.quartz.Scheduler agentScheduler = null;
 
   /** The configuration manager for the agent. */
   ConfigurationManager configService = null;
@@ -184,8 +183,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * Sets the scheduler service which this service uses to schedule stops for unscheduled captures.
    * @param s The scheduler service.
    */
-  public void setScheduler(SchedulerImpl s) {
-    scheduler = s;
+  public void setScheduler(org.opencastproject.capture.api.Scheduler scheduler) {
+    this.scheduler = scheduler;
   }
 
   /**
@@ -323,7 +322,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @param properties The properties of the recording
    * @return The RecordingImpl instance, or null in the case of an error
    */
-  RecordingImpl createRecording(MediaPackage mediaPackage, Properties properties) {
+  protected RecordingImpl createRecording(MediaPackage mediaPackage, Properties properties) {
     // Creates a new recording object, checking if it was correctly initialized
     RecordingImpl newRec = null;
     try {
@@ -352,7 +351,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @param newRec The RecordingImpl of the capture we wish to perform.
    * @return The recording ID (equal to newRec.getID()) or null in the case of an error
    */
-  String initPipeline(RecordingImpl newRec) {
+  protected String initPipeline(RecordingImpl newRec) {
     //Create the pipeline
     try {
       pipe = PipelineFactory.create(newRec.getProperties(), false, this);
@@ -427,7 +426,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * Convenience method to reset an agent when a capture fails to start.
    * @param recordingID The recordingID of the capture which failed to start.
    */
-  void resetOnFailure(String recordingID) {
+  protected void resetOnFailure(String recordingID) {
     setAgentState(AgentState.IDLE);
     setRecordingState(recordingID, RecordingState.CAPTURE_ERROR);
     currentRecID = null;
@@ -438,7 +437,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @param recordingID The recordingID to stop.
    * @return true if the stop was scheduled, false otherwise.
    */
-  boolean scheduleStop(String recordingID) {
+  protected boolean scheduleStop(String recordingID) {
     String maxLength = pendingRecordings.get(recordingID).getProperty(CaptureParameters.CAPTURE_MAX_LENGTH);
     long length = 0L;
     if (maxLength != null) {
@@ -863,11 +862,21 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
 
     serializeRecording(recID);
-    completedRecordings.put(recID, recording);
-    pendingRecordings.remove(recID);
+    if (retValue == 200) {
+      completedRecordings.put(recID, recording);
+      pendingRecordings.remove(recID);
+    }
     return retValue;
   }
-
+  
+  /**
+   * Returns the number of captures that the capture agent is aware of that are upcoming.
+   * @return The number of captures that are waiting to fire.
+   */
+  public int getPendingRecordingSize(){
+    return pendingRecordings.size();
+  }
+  
   /**
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.StateService#getAgentName()
@@ -887,7 +896,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @param state The state of the agent.  Should be defined in AgentState.
    * @see org.opencastproject.capture.admin.api.AgentState
    */
-  void setAgentState(String state) {
+  protected void setAgentState(String state) {
     if (confidence) {
       if (state.equalsIgnoreCase(AgentState.CAPTURING) && confidencePipe != null) {
         confidencePipe.stop();
@@ -951,7 +960,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * Serializes a recording to disk
    * @param newRec The recording object.  The output object will be written to the recording's directory and will be named $recordingID.recording.
    */
-  void serializeRecording(String id) {
+  protected void serializeRecording(String id) {
     if (id == null) {
       logger.error("Unable to serialize recording, bad id parameter: null!");
       return;
@@ -979,7 +988,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @param recording The directory containing the serialized recording and all of its files.
    * @return The deserialized {@code RecordingImpl}, or null in the case of an error.
    */
-  RecordingImpl loadRecording(File recording) {
+  protected RecordingImpl loadRecording(File recording) {
     RecordingImpl rec = null;
     try {
       logger.debug("Loading {}.", recording.getAbsolutePath());
@@ -1005,7 +1014,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @param state The state for the recording.  Defined in RecordingState.
    * @see org.opencastproject.capture.admin.api.RecordingState
    */
-  void setRecordingState(String recordingID, String state) {
+  protected void setRecordingState(String recordingID, String state) {
     if (recordingID != null && state != null) {
       AgentRecording rec = pendingRecordings.get(recordingID);
       if (rec != null) {
@@ -1268,7 +1277,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @param jobname
    * @param jobtype
    */
-  void createScheduler(Properties schedulerProps, String jobname, String jobtype) {
+  private void createScheduler(Properties schedulerProps, String jobname, String jobtype) {
     //Either create the scheduler or empty out the existing one
     try {
       if (agentScheduler != null) {
@@ -1322,7 +1331,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * Creates the Quartz task which pushes the agent's state to the state server.
    * @param schedulerProps The properties for the Quartz scheduler
    */
-  void createPushTask(Properties schedulerProps) {
+  private void createPushTask(Properties schedulerProps) {
     createScheduler(schedulerProps, "agentStateUpdate", JobParameters.RECURRING_TYPE);
     if (agentScheduler == null) {
       return;
@@ -1438,5 +1447,18 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    */
   public String getCoreUrl() {
     return configService.getItem(CaptureParameters.CAPTURE_CORE_URL);
+  }
+  
+  /**
+    * Determines if the current agent state is idle.
+    * @return returns true if the capture agent is idle.
+    */
+  public boolean isIdle(){
+    if(getAgentState() == null){
+        return false;
+    }
+    else{
+      return getAgentState().equals(AgentState.IDLE);  
+    }
   }
 }

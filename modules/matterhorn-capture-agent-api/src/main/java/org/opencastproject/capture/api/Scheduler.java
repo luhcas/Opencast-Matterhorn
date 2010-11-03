@@ -16,6 +16,7 @@
 package org.opencastproject.capture.api;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -58,12 +59,13 @@ public interface Scheduler {
    * Checks to see if the is set to automatically poll for new scheduling data.
    * @return True if the system is set to poll for new data, false otherwise.
    */
-  boolean isPollingEnabled();
+  boolean isCalendarPollingEnabled();
 
   /**
    * Starts the scheduling system.  Calling this enables scheduled captures.
+   * @return True if the start succeeds, false otherwise.
    */
-  void startScheduler();
+  boolean startScheduler();
 
   /**
    * Checks to see if the system is set to capture from its calendar data.
@@ -73,12 +75,35 @@ public interface Scheduler {
 
   /**
    * Stops the scheduling system.  Calling this disables scheduled captures.
+   * @return True if the stop succeeds, false otherwise.
    */
-  void stopScheduler();
+  boolean stopScheduler();
 
   /**
    * Returns the current schedule in a {@code List} of {@code ScheduledEvent}s.
    * @return The current schedule in a {@code List} of {@code ScheduledEvent}s or null in the case of an error.
    */
   List<ScheduledEvent> getSchedule();
+  
+  /**
+   * Schedules an immediate {@code IngestJob} for the recording.  This method does not create a manifest or zip the recording.
+   * @param recordingID The ID of the recording to it ingest.
+   * @return True if the job was scheduled correctly, false otherwise.
+   */
+  boolean scheduleIngest(String id);
+
+  /**
+   * Schedules a {@code StopCaptureJob} to stop a capture at a given time.
+   * @param recordingID The recordingID of the recording you wish to stop.
+   * @param stop The time (in seconds since 1970) in a {@code Date} at which to stop the capture.
+   * @return True if the job was scheduled, false otherwise.
+   */
+  boolean scheduleUnscheduledStopCapture(String recordingID, Date stop);
+
+  /**
+   * Schedules an immediate {@code SerializeJob} for the recording.  This method will manifest and zip the recording before ingesting it.
+   * @param recordingID The ID of the recording to it ingest.
+   * @return True if the job was scheduled correctly, false otherwise.
+   */
+  boolean scheduleSerializationAndIngest(String id);
 }

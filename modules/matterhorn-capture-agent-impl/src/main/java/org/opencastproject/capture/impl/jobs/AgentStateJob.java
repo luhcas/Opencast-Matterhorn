@@ -157,10 +157,15 @@ public class AgentStateJob implements Job {
     try {
       remoteServer.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
     } catch (UnsupportedEncodingException e) {
-      logger.error("Unable to send agent state because the URL encoding is not supported");
+      logger.error("Unable to send data because the URL encoding is not supported.");
       return;
     }
     try {
+      if (client == null) {
+        logger.error("Unable to send data because http client is null.");
+        return;
+      }
+
       resp = client.execute(remoteServer);
       if (resp.getStatusLine().getStatusCode() != 200) {
         logger.info("State push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());

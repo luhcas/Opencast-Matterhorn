@@ -15,6 +15,7 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
+import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.RecordingImpl;
@@ -41,8 +42,6 @@ public class CleanCaptureJobTest {
 
   private static final Logger logger = LoggerFactory.getLogger(CleanCaptureJobTest.class);
 
-  private static final long CONVERSION_RATE =  5 * 1000; // five seconds
-
   XProperties props = null;
   CleanCaptureJob theJob = null;
   Vector<AgentRecording> theRecordings = null;
@@ -55,6 +54,7 @@ public class CleanCaptureJobTest {
   public void setUp() throws URISyntaxException {
     // Define particular instances for the CleanCaptureJob required arguments
     props = new XProperties();
+    props.setProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, new File(System.getProperty("java.io.tmpdir"), "clean-capture-test").getAbsolutePath());
     theJob = new CleanCaptureJob();
     theRecordings = new Vector<AgentRecording>();
 
@@ -65,36 +65,25 @@ public class CleanCaptureJobTest {
     }
 
     try {
-      for (int i = 0; i < numberOfRecordings; i++) {
-        // Create the directory for the new recording 
-        File recDir = new File(baseDir, new String("recording" + i));
-        recDir.mkdir();
+      RecordingImpl rec = new RecordingImpl(null, props);
+      rec.setState(RecordingState.UPLOAD_FINISHED);
+      theRecordings.add(rec);
 
-        // Set the created directory in the properties file passed to the recording
-        props.setProperty(CaptureParameters.RECORDING_ROOT_URL, recDir.getAbsolutePath());
+      rec = new RecordingImpl(null, props);
+      rec.setState(RecordingState.UPLOAD_FINISHED);
+      theRecordings.add(rec);
+      
+      rec = new RecordingImpl(null, props);
+      rec.setState(RecordingState.CAPTURING);
+      theRecordings.add(rec);
 
-        // Create the capture.ingested file only for the upper half of the array
-        // This is to simulate that the "central" value was ingested in the current time, the lower indexes, some time ago,
-        // and the upper indexes are not ingested yet
-        if (i <= numberOfRecordings/2) {
-          File ingestFile = new File(recDir,CaptureParameters.CAPTURE_INGESTED_FILE);
+      rec = new RecordingImpl(null, props);
+      rec.setState(RecordingState.MANIFEST);
+      theRecordings.add(rec);
 
-          // Set the modification date for the file
-          long modifDate = System.currentTimeMillis() + (i - numberOfRecordings/2)*CONVERSION_RATE; 
-
-          // Check the "capture.ingested" file is created and its 'last modified' date set
-          if (!ingestFile.isFile()) {
-            Assert.assertTrue(ingestFile.createNewFile());
-          }
-          Assert.assertTrue(ingestFile.setLastModified(modifDate));
-        }
-
-        // Creates the recording
-        theRecordings.add(new RecordingImpl(null, props));
-      }
-    } catch (IllegalArgumentException e) {
-      logger.error("Unexpected Illegal Argument Exception when creating test recordings: {}", e.getMessage());
-      return;
+      rec = new RecordingImpl(null, props);
+      rec.setState(RecordingState.UPLOADING);
+      theRecordings.add(rec);
     } catch (IOException e) {
       logger.error("Unexpected I/O Exception when creating test recordings: {}", e.getMessage());
       return;
@@ -103,11 +92,8 @@ public class CleanCaptureJobTest {
 
   @After
   public void tearDown() {
+    FileUtils.deleteQuietly(new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL)));
     props = null;
-    for (int i = 0; i < numberOfRecordings; i++) {
-      FileUtils.deleteQuietly(theRecordings.get(i).getBaseDir());
-    }
-
     theRecordings = null;
   }
 
@@ -125,8 +111,8 @@ public class CleanCaptureJobTest {
 
     // Check the cleaning was OK
     for (int i = 0; i < numberOfRecordings; i++) 
-      if (i <= numberOfRecordings/2) {
-        Assert.assertFalse(theRecordings.get(i).getBaseDir().exists());
+      if (i < numberOfRecordings/2) {
+        Assert.assertFalse("Recording " + i + " exists when it should not.", theRecordings.get(i).getBaseDir().exists());
       }
       else {
         Assert.assertTrue(theRecordings.get(i).getBaseDir().exists());
@@ -159,17 +145,10 @@ public class CleanCaptureJobTest {
     // Insert properties for this test
     props.setProperty(CaptureParameters.CAPTURE_CLEANER_MAX_ARCHIVAL_DAYS, String.valueOf(Long.MAX_VALUE));
     props.setProperty(CaptureParameters.CAPTURE_CLEANER_MIN_DISK_SPACE, String.valueOf(Long.MAX_VALUE));
-    try {
-      // Create a capture.ingested file for the recordings that don't have it
-      for (AgentRecording aRec : theRecordings) {
-        File ingested = new File(aRec.getBaseDir(), CaptureParameters.CAPTURE_INGESTED_FILE);
-        if (!ingested.isFile())
-          Assert.assertTrue(ingested.createNewFile());
-      }       
-    } catch (IOException e) {
-      logger.error("Unexpected I/O exception: {}", e.getMessage());
-      Assert.fail();
-    }
+    // Create a capture.ingested file for the recordings that don't have it
+    for (AgentRecording aRec : theRecordings) {
+      aRec.setState(RecordingState.UPLOAD_FINISHED);
+    }       
     
     // Should clean all the recordings *because of the disk space*
     theJob.doCleaning(props,theRecordings);
@@ -193,7 +172,7 @@ public class CleanCaptureJobTest {
 
     // Check the cleaning was OK
     for (int i = 0; i < numberOfRecordings; i++) 
-      if (i <= numberOfRecordings/2)
+      if (i < numberOfRecordings/2)
         Assert.assertFalse(theRecordings.get(i).getBaseDir().exists());
       else
         Assert.assertTrue(theRecordings.get(i).getBaseDir().exists());

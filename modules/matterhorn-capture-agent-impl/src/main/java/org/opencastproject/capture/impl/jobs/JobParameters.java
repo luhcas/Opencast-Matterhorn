@@ -20,38 +20,41 @@ package org.opencastproject.capture.impl.jobs;
  */
 public interface JobParameters {
   /** Constant used to define the key for the pointer to the state service. */
-  public static final String STATE_SERVICE = "state_service";
+  static final String STATE_SERVICE = "state_service";
 
   /** Constant used to define the key for the pointer to the configuration service. */
-  public static final String CONFIG_SERVICE = "config_service";
+  static final String CONFIG_SERVICE = "config_service";
 
   /** Constant used to define the key for the properties object which is pulled out of the execution context. */
-  public static final String CAPTURE_PROPS = "capture_props";
+  static final String CAPTURE_PROPS = "capture_props";
 
   /** Constant used to define the key for the media package object which is pulled out of the execution context. */
-  public static final String MEDIA_PACKAGE = "media_package";
+  static final String MEDIA_PACKAGE = "media_package";
 
-  /** A constant which defines the key to retrieve a pointer to this object in the Quartz job classes.  This is required for PollCalendarJob to know who to push updated calendar data to. */
-  public static final String SCHEDULER = "scheduler";
+  /** A constant which defines the key to retrieve a pointer to this object in the Quartz job classes. */
+  static final String SCHEDULER = "scheduler";
 
   /** Constant used to define the key for the CaptureAgentImpl object which is pulled out of the execution context. */
-  public static final String CAPTURE_AGENT = "capture_agent";
+  static final String CAPTURE_AGENT = "capture_agent";
 
   /** Constant used to define the key for the TrustedHttpClient object which is pulled out of the execution context. */
-  public static final String TRUSTED_CLIENT = "trusted_client";
+  static final String TRUSTED_CLIENT = "trusted_client";
 
   /** Constant used to define the scheduler which should be used to schedule post-capture jobs in the appropriate classes. */
-  public static final String JOB_SCHEDULER = "job_scheduler";
+  static final String JOB_SCHEDULER = "job_scheduler";
 
   /** Constant used to define the postfix applied to all job names */
-  public static final String JOB_POSTFIX = "job_postfix";
+  static final String JOB_POSTFIX = "job_postfix";
 
   /** Constant defining the job type for capture jobs. */
-  public static final String CAPTURE_TYPE = "captures";
+  static final String CAPTURE_TYPE = "captures";
+
+  /** Constant defining the job type for capture related jobs (stop, manifest, serialize, ingest) */
+  static final String CAPTURE_RELATED_TYPE = "capture_related";
 
   /** Constant defining the job type for recurring jobs. */
-  public static final String RECURRING_TYPE = "recurring";
+  static final String RECURRING_TYPE = "recurring";
 
   /** Constant defining the job type or jobs which do not fit in the above types. */
-  public static final String OTHER_TYPE = "other";
+  static final String OTHER_TYPE = "other";
 }

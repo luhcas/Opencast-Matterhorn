@@ -15,6 +15,7 @@
  */
 package org.opencastproject.capture.impl;
 
+import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.ScheduledEvent;
 
@@ -42,11 +43,11 @@ import java.util.List;
 import java.util.Properties;
 
 public class SchedulerImplTest {
-
   SchedulerImpl schedulerImpl = null;
   ConfigurationManager configurationManager = null;
   Properties schedulerProperties = null;
   CaptureAgentImpl captureAgentImpl = null;
+  SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
 
   @Before
   public void setup() {
@@ -79,9 +80,11 @@ public class SchedulerImplTest {
     // We need this line so we can load the schedules correctly
     // If we don't have it then the locations get turned into /tmp/valid-whatever/demo_capture_agent
     configurationManager.setItem(CaptureParameters.AGENT_NAME, "");
+    configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, "60");
     configurationManager.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"),
             "capture-sched-test").getAbsolutePath());
     configurationManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
+    configurationManager.setItem("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());
   }
 
   private void setupCaptureAgentImpl() {
@@ -118,24 +121,74 @@ public class SchedulerImplTest {
   @After
   public void tearDown() {
     schedulerImpl.deactivate();
-    schedulerImpl.finalize();
     schedulerImpl = null;
     configurationManager = null;
     schedulerProperties = null;
   }
 
-  private String[] formatDate(Date d) {
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-    String[] times = new String[5];
-    times[0] = sdf.format(d);
-    d.setTime(d.getTime() + 60000L);
-    times[1] = sdf.format(d);
-    d.setTime(d.getTime() + 60000L);
-    times[2] = sdf.format(d);
-    d.setTime(d.getTime() + 60000L);
-    times[3] = sdf.format(d);
-    d.setTime(new Date().getTime() - 60000L);
-    times[4] = sdf.format(d);
+  private String formatDate(Date d, long offset) {
+    return sdf.format(new Date(d.getTime() + offset));
+  }
+
+  /**
+   * Sets up a set of valid calendar times.
+   * Assumes edge case calendar is being used, but values will still be usable by 'normal' calendars
+   * @throws IOException
+   * @throws ConfigurationException
+   */
+  private String[] setupValidTimes(Date d) {
+    String[] times = new String[7];
+    //Note:  When adding time to this offset, remember to add $desired_time + 1*MINUTES
+    //The scheduler is enforcing a 1 minute buffer between events
+    long offset = 0;
+    //Event with no end and a hardcoded 5-minute duration
+    times[0] = formatDate(d, offset);
+    offset += 6 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
+    //Event with a longer-than-max capture time
+    times[1] = formatDate(d, offset);
+    offset += schedulerImpl.getMaxScheduledCaptureLength() + 2 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
+    //Event with a longer-than-max capture time
+    times[2] = formatDate(d, offset);
+    offset += schedulerImpl.getMaxScheduledCaptureLength() + 2 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
+    //Another 5 minute event
+    times[3] = formatDate(d, offset);
+    offset += 6 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
+    //A time which can be used as an erroneous end
+    times[4] = formatDate(d, offset);
+    offset += 6 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
+    //A time which can be used as an erroneous start
+    times[5] = formatDate(d, offset);
+    //A start 5 minutes in the past
+    times[6] = formatDate(d, -1 * (d.getTime() + 5 * CaptureParameters.MINUTES + CaptureParameters.MILLISECONDS));
+    return times;
+  }
+
+  private String[] setupDurationBoundCheckTimes(Date d) {
+    String[] times = new String[8];
+    long offset = 0;
+    //Start time #1
+    times[0] = formatDate(d, offset);
+    offset += 1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
+    //End time #1
+    times[1] = formatDate(d, offset);
+    offset += 2 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
+    //End time #2
+    times[2] = formatDate(d, offset);
+    offset += 1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
+    //End time #3
+    times[3] = formatDate(d, offset);
+    offset += 1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS - 1;
+    //Start time #2, too close to end time #3 to schedule
+    times[4] = formatDate(d, offset);
+    offset += 1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
+    //End time #4
+    times[5] = formatDate(d, offset);
+    offset += 1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
+    //Start time #3, event will be too short
+    times[6] = formatDate(d, offset);
+    offset += (1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS - 1 /*second */ * CaptureParameters.MILLISECONDS);
+    //End time # 5
+    times[7] = formatDate(d, offset);
     return times;
   }
 
@@ -152,14 +205,34 @@ public class SchedulerImplTest {
   private File setupTestCalendar(String calLocation, String[] times) throws IOException {
     String source = readFile(this.getClass().getClassLoader().getResource(calLocation));
 
-    //TODO:  Fix this
-    source = source.replace("@START@", times[0]);
-    source = source.replace("@END@", times[1]);
+    source = source.replace("@START1@", times[0]);
     source = source.replace("@START2@", times[1]);
-    source = source.replace("@END2@", times[2]);
     source = source.replace("@START3@", times[2]);
+    source = source.replace("@START4@", times[3]);
+    source = source.replace("@ERROR_END@", times[4]);
+    source = source.replace("@ERROR_START@", times[5]);
+    source = source.replace("@PAST_START@", times[6]);
+    
+    File output = File.createTempFile("scheduler-test-", ".ics");
+    FileWriter out = null;
+    out = new FileWriter(output);
+    out.write(source);
+    out.close();
+
+    return output;
+  }
+
+  private File setupDurationBoundCheckCalendar(String calLocation, String[] times) throws IOException {
+    String source = readFile(this.getClass().getClassLoader().getResource(calLocation));
+
+    source = source.replace("@START1@", times[0]);
+    source = source.replace("@END1@", times[1]);
+    source = source.replace("@END2@", times[2]);
     source = source.replace("@END3@", times[3]);
-    source = source.replace("@PAST@", times[4]);
+    source = source.replace("@START2@", times[4]);
+    source = source.replace("@END4@", times[5]);
+    source = source.replace("@START3@", times[6]);
+    source = source.replace("@END5@", times[7]);
     
     File output = File.createTempFile("scheduler-test-", ".ics");
     FileWriter out = null;
@@ -172,19 +245,15 @@ public class SchedulerImplTest {
 
   @Test
   public void testValidRemoteUTF8Calendar() throws IOException, ConfigurationException {
-    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    String[] times = setupValidTimes(new Date(System.currentTimeMillis() + 2 * CaptureParameters.HOURS * CaptureParameters.MILLISECONDS));
     File testfile = setupTestCalendar(new File("calendars/Opencast.ics").getPath(), times);
     //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, testfile.toURI().toURL().toString());
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
     schedulerImpl.updated(schedulerProperties);
-    //TODO:  Figure out why this fails 1/3 times on some machines without the sleep() here.
-    try {
-      Thread.sleep(200);
-    } catch (InterruptedException e) {
-      Assert.fail();
-    }
-    String[] schedule = schedulerImpl.getCaptureSchedule();
+    schedulerImpl.updateCalendar();
+    String[] schedule = null;
+    schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("c3a1c747-5501-44ff-b57a-67a4854a39b0", schedule[0]);
     testfile.delete();
@@ -192,7 +261,7 @@ public class SchedulerImplTest {
 
   @Test
   public void testValidLocalUTF8Calendar() throws IOException, ConfigurationException {
-    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    String[] times = setupValidTimes(new Date(System.currentTimeMillis() + 2 * CaptureParameters.HOURS * CaptureParameters.MILLISECONDS));
     File testfile = setupTestCalendar("calendars/Opencast.ics", times);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
@@ -214,7 +283,7 @@ public class SchedulerImplTest {
 
   @Test
   public void test0LengthRemoteUTF8Calendar() throws IOException, ConfigurationException {
-    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    String[] times = setupValidTimes(new Date(System.currentTimeMillis() + 2 * CaptureParameters.HOURS * CaptureParameters.MILLISECONDS));
     times[1] = times[0];
     File testfile = setupTestCalendar("calendars/Opencast.ics", times);
     //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
@@ -234,7 +303,7 @@ public class SchedulerImplTest {
 
   @Test
   public void test0LengthLocalUTF8Calendar() throws IOException, ConfigurationException {
-    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    String[] times = setupValidTimes(new Date(System.currentTimeMillis() + 2 * CaptureParameters.HOURS * CaptureParameters.MILLISECONDS));
     times[1] = times[0];
     File testfile = setupTestCalendar("calendars/Opencast.ics", times);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
@@ -247,7 +316,7 @@ public class SchedulerImplTest {
 
   @Test
   public void testNegativeLengthRemoteUTF8Calendar() throws IOException, ConfigurationException {
-    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    String[] times = setupValidTimes(new Date(System.currentTimeMillis() + 2 * CaptureParameters.HOURS * CaptureParameters.MILLISECONDS));
     String temp = times[0];
     times[0] = times[1];
     times[1] = temp;
@@ -269,7 +338,7 @@ public class SchedulerImplTest {
 
   @Test
   public void testNegativeLengthLocalUTF8Calendar() throws IOException, ConfigurationException {
-    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    String[] times = setupValidTimes(new Date(System.currentTimeMillis() + 2 * CaptureParameters.HOURS * CaptureParameters.MILLISECONDS));
     String temp = times[0];
     times[0] = times[1];
     times[1] = temp;
@@ -284,7 +353,7 @@ public class SchedulerImplTest {
 
   @Test @Ignore
   public void testValidRemoteUTF16Calendar() throws IOException, ConfigurationException {
-    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    String[] times = setupValidTimes(new Date(System.currentTimeMillis() + 2 * CaptureParameters.HOURS * CaptureParameters.MILLISECONDS));
     times[1] = times[0];
     File testfile = setupTestCalendar("calendars/Opencast-UTF16.ics", times);
     //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
@@ -304,7 +373,7 @@ public class SchedulerImplTest {
 
   @Test @Ignore
   public void testValidLocalUTF16Calendar() throws IOException, ConfigurationException {
-    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    String[] times = setupValidTimes(new Date(System.currentTimeMillis() + 2 * CaptureParameters.HOURS * CaptureParameters.MILLISECONDS));
     File testfile = setupTestCalendar("calendars/Opencast-UTF16.ics", times);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
@@ -404,18 +473,13 @@ public class SchedulerImplTest {
 
   @Test
   public void testValidRemoteDuplicateCalendar() throws IOException, ConfigurationException {
-    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    String[] times = setupValidTimes(new Date(System.currentTimeMillis() + 2 * CaptureParameters.HOURS * CaptureParameters.MILLISECONDS));
     File testfile = setupTestCalendar("calendars/Opencast-with-dups.ics", times);
     //Yes, I know this isn't actually remote.  The point is to test the two different paths for loading calendar data
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, testfile.toURI().toURL().toString());
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, null);
     schedulerImpl.updated(schedulerProperties);
-    //TODO:  Figure out why this fails 1/3 times on some machines without the sleep() here.
-    try {
-      Thread.sleep(200);
-    } catch (InterruptedException e) {
-      Assert.fail();
-    }
+    schedulerImpl.updateCalendar();
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("one", schedule[0]);
@@ -424,7 +488,7 @@ public class SchedulerImplTest {
 
   @Test
   public void testValidLocalDuplicateCalendar() throws IOException, ConfigurationException {
-    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    String[] times = setupValidTimes(new Date(System.currentTimeMillis() + 2 * CaptureParameters.HOURS * CaptureParameters.MILLISECONDS));
     File testfile = setupTestCalendar("calendars/Opencast-with-dups.ics", times);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
@@ -437,18 +501,34 @@ public class SchedulerImplTest {
 
   @Test
   public void testEdgecases() throws IOException, ConfigurationException {
-    String[] times = formatDate(new Date(System.currentTimeMillis() + 120000L));
+    String[] times = setupValidTimes(new Date(System.currentTimeMillis() + 2 * CaptureParameters.HOURS * CaptureParameters.MILLISECONDS));
     File testfile = setupTestCalendar("calendars/Edge-Cases.ics", times);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
     schedulerImpl.updated(schedulerProperties);
     String[] schedule = schedulerImpl.getCaptureSchedule();
-    Assert.assertEquals(4, schedule.length);
+    Assert.assertEquals(5, schedule.length);
     Arrays.sort(schedule);
     Assert.assertEquals("Longer-than-max-capture-time-using-DTEND", schedule[0]);
     Assert.assertEquals("Longer-than-max-capture-time-using-duration", schedule[1]);
     Assert.assertEquals("No-attachments", schedule[2]);
     Assert.assertEquals("No-end-but-duration", schedule[3]);
+    Assert.assertEquals("No-end-no-duration", schedule[4]);
+    testfile.delete();
+  }
+
+  @Test
+  public void testOverlappingEdgeCases() throws IOException, ConfigurationException {
+    File testfile = setupDurationBoundCheckCalendar("calendars/Overlapping-Cases.ics", setupDurationBoundCheckTimes(new Date(System.currentTimeMillis() + 12000L)));
+    configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
+    configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
+    schedulerImpl.updated(schedulerProperties);
+    String[] schedule = schedulerImpl.getCaptureSchedule();
+    Assert.assertEquals(3, schedule.length);
+    Arrays.sort(schedule);
+    Assert.assertEquals("Scheduled-Event-1", schedule[0]);
+    Assert.assertEquals("Started-at-end-of-Scheduled-Event-1-and-should-shorten", schedule[1]);
+    Assert.assertEquals("Too-close-to-other-capture", schedule[2]);    
     testfile.delete();
   }
 
@@ -496,30 +576,31 @@ public class SchedulerImplTest {
   }
 
   @Test
-  public void testBadPolling() throws Exception {
+  public void testBadCalendarPolling() throws Exception {
+    configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, "60");
     schedulerImpl.updated(schedulerProperties);
     Thread.sleep(10);
-    Assert.assertTrue(schedulerImpl.isPollingEnabled());
+    Assert.assertTrue(schedulerImpl.isCalendarPollingEnabled());
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, "0");
     schedulerImpl.updated(schedulerProperties);
-    Assert.assertFalse(schedulerImpl.isPollingEnabled());
+    Assert.assertFalse(schedulerImpl.isCalendarPollingEnabled());
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, "?asewrtk5fw5");
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, "60");
     schedulerImpl.updated(schedulerProperties);
-    Assert.assertFalse(schedulerImpl.isPollingEnabled());
+    Assert.assertFalse(schedulerImpl.isCalendarPollingEnabled());
     configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, "0");
     schedulerImpl.updated(schedulerProperties);
-    Assert.assertFalse(schedulerImpl.isPollingEnabled());
+    Assert.assertFalse(schedulerImpl.isCalendarPollingEnabled());
   }
   
   @Test
   public void scheduleRendersCaptureTimesCorrectly() throws IOException, ConfigurationException, InterruptedException {
     Calendar start = Calendar.getInstance();
-    int firstMinuteOffset = -20;
-    int secondMinuteOffset = 10;
-    int thirdMinuteOffset = 20;
+    int firstMinuteOffset = 20;
+    int secondMinuteOffset = -5;
+    int thirdMinuteOffset = 30;
     setupThreeCaptureCalendar(firstMinuteOffset, secondMinuteOffset, thirdMinuteOffset);
-    Thread.sleep(10);
+    Thread.sleep(100);
     List<ScheduledEvent> events = schedulerImpl.getSchedule();
     Assert.assertTrue("There should be some events in the schedule.", events.size() > 0);
     for (ScheduledEvent scheduleEvent : events) {
@@ -534,25 +615,21 @@ public class SchedulerImplTest {
   }
 
   private void checkTime(Calendar start, int offset, ScheduledEvent scheduleEvent) {
-    Calendar before = Calendar.getInstance();
-    before.setTime(start.getTime());
-    Calendar after = Calendar.getInstance();
-    after.setTime(start.getTime());
+    Date before = new Date();
+    Date after = new Date();
     // Create a calendar event a second before the time we expect.
-    before.set(Calendar.MINUTE, before.get(Calendar.MINUTE) + offset);
-    before.set(Calendar.SECOND, before.get(Calendar.SECOND) - 1);
+    before = new Date(before.getTime() + (CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS * offset) - 3000);
     // Create a calendar event a second after the time we expect.
-    after.set(Calendar.MINUTE, after.get(Calendar.MINUTE) + offset);
-    after.set(Calendar.SECOND, after.get(Calendar.SECOND) + 1);
-
+    after = new Date(after.getTime() + (CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS * offset) + 3000);
+    Date time = new Date(scheduleEvent.getStartTime());
+    System.out.println(before + ":" + time + ":" + after);
+    System.out.println(before.before(time) + ":" + after.after(time));
     Assert.assertTrue("getSchedule() returned " + new Date(scheduleEvent.getStartTime()).toString()
             + " as a start time for the event when it should have been " + offset
-            + " minutes after right now and 1 second after " + before.getTime().toString(), before.getTime().before(
-            new Date(scheduleEvent.getStartTime())));
+            + " minutes after right now and 1 second after " + before, before.before(time));
     Assert.assertTrue("getSchedule() returned " + new Date(scheduleEvent.getStartTime()).toString()
             + " as a start time for the event when it should have been " + offset
-            + " minutes before right now and 1 second before " + before.getTime().toString(), after.getTime().after(
-            new Date(scheduleEvent.getStartTime())));
+            + " minutes before right now and 1 second before " + after.toString(), after.after(time));
   }
 
   private void setupThreeCaptureCalendar(int firstMinuteOffset, int secondMinuteOffset, int thirdMinuteOffset)
@@ -567,20 +644,21 @@ public class SchedulerImplTest {
   }
 
   private String[] createThreeCaptures(int firstMinuteOffset, int secondMinuteOffset, int thirdMinuteOffset) {
-    Calendar calendar = Calendar.getInstance();
+    Date startTime;
     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
     String[] times = new String[3];
-    /* Setup first calendar value */
-    calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE) + firstMinuteOffset);
-    times[0] = sdf.format(calendar.getTime());
-    /* Setup second calendar value. */
-    calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE) - firstMinuteOffset);
-    calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE) + secondMinuteOffset);
-    times[1] = sdf.format(calendar.getTime());
+    /* Setup first start time value */
+    startTime = new Date();
+    startTime = new Date(startTime.getTime() + CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS * firstMinuteOffset);
+    times[0] = sdf.format(startTime);
+    /* Setup second start time value. */
+    startTime = new Date();
+    startTime = new Date(startTime.getTime() + CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS * secondMinuteOffset);
+    times[1] = sdf.format(startTime);
     /* Setup third calendar value. */
-    calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE) - secondMinuteOffset);
-    calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE) + thirdMinuteOffset);
-    times[2] = sdf.format(calendar.getTime());
+    startTime = new Date();
+    startTime = new Date(startTime.getTime() + CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS * thirdMinuteOffset);
+    times[2] = sdf.format(startTime);
     return times;
   }
 
@@ -598,5 +676,44 @@ public class SchedulerImplTest {
     out.close();
 
     return output;
+  }
+  
+  @Test
+  public void testCaptureAgentStatusPollingDoesNotFireIfCaptureIsInFuture() throws IOException, ConfigurationException,
+              InterruptedException {
+    setupThreeCaptureCalendar(10, 20, 30);
+    captureAgentImpl.activate(null);
+    Assert.assertEquals(AgentState.IDLE, captureAgentImpl.getAgentState());
+    Thread.sleep(100);
+    Assert.assertEquals(AgentState.IDLE, captureAgentImpl.getAgentState());
+  }
+  
+  @Test
+  public void testCaptureAgentStatusPollingDoesNotFireIfCaptureWasInPast() throws IOException, ConfigurationException,
+              InterruptedException {
+    setupThreeCaptureCalendar(-1000, -100, -10);
+    captureAgentImpl.activate(null);
+    Assert.assertEquals(AgentState.IDLE, captureAgentImpl.getAgentState());
+    Thread.sleep(100);
+    Assert.assertEquals(AgentState.IDLE, captureAgentImpl.getAgentState());
+  }
+  
+  @Test
+  public void testCaptureAgentStatusPollingDoesNotFireIfCapturesAreInPastAndFuture() throws IOException,
+              ConfigurationException, InterruptedException {
+    setupThreeCaptureCalendar(-20, 10, 20);
+    captureAgentImpl.activate(null);
+    Assert.assertEquals(AgentState.IDLE, captureAgentImpl.getAgentState());
+    Thread.sleep(100);
+    Assert.assertEquals(AgentState.IDLE, captureAgentImpl.getAgentState());
+  }
+  
+  @Test
+  public void testCaptureAgentStatusPollingDoesFireIfCaptureIsJustPast() throws IOException, ConfigurationException, InterruptedException {
+    captureAgentImpl.setConfigService(configurationManager);
+    captureAgentImpl.activate(null);
+    setupThreeCaptureCalendar(-10, -1, 10);
+    Thread.sleep(6000);
+    Assert.assertEquals(AgentState.CAPTURING, captureAgentImpl.getAgentState());
   }
 }

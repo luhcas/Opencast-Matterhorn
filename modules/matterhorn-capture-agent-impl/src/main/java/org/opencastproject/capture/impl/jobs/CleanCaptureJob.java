@@ -15,6 +15,7 @@
  */
 package org.opencastproject.capture.impl.jobs;
 
+import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.impl.CaptureAgentImpl;
@@ -113,10 +114,9 @@ public class CleanCaptureJob implements Job {
     // Gets all the recording IDs for this agent, and iterates over them
     for (AgentRecording theRec : recordings) {
       File recDir = theRec.getBaseDir();
-      File ingested = new File(recDir, CaptureParameters.CAPTURE_INGESTED_FILE);
-
+      
       // If the capture.ingested file does not exist we cannot delete the data
-      if (!ingested.exists()) {
+      if (!theRec.getState().equals(RecordingState.UPLOAD_FINISHED)) {
         logger.info("Skipped cleaning for {}. Ingestion has not been completed.", theRec.getID());
         continue;
       }
@@ -141,7 +141,7 @@ public class CleanCaptureJob implements Job {
 
       // Clean up capture if its age of ingestion is higher than max archival days property
       if (checkArchivalDays) {
-        long age = ingested.lastModified();
+        long age = theRec.getLastCheckinTime();
         long currentTime = System.currentTimeMillis();
         if (currentTime - age > maxArchivalDays * DAY_LENGTH_MILLIS) {
           logger.info("Removing capture {} archives at {}.\nExceeded the maximum archival days.", theRec.getID(), recDir.getAbsolutePath());

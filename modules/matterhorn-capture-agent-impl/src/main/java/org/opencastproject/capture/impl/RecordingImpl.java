@@ -50,33 +50,33 @@ import java.util.TimeZone;
  */
 public class RecordingImpl implements AgentRecording, Serializable {
 
-  static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-  transient static final Logger logger = LoggerFactory.getLogger(RecordingImpl.class);
+  private static transient final Logger logger = LoggerFactory.getLogger(RecordingImpl.class);
 
   /** Date formatter for the metadata file */
-  transient static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
+  private static transient final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
 
   /** Unique identifier for this ID */
-  String id = null;
+  protected String id = null;
 
   /** Directory in the filesystem where the files related with this recording are */
-  File baseDir = null;
+  protected File baseDir = null;
 
   /** The recording's state.  Defined in {@code RecordingState}. */
-  String state = RecordingState.UNKNOWN;
+  protected String state = RecordingState.UNKNOWN;
 
   /**
    * The time at which the recording last checked in with this service.
    * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in). 
    */
-  Long lastHeardFrom; 
+  protected Long lastHeardFrom; 
 
   /** Keeps the properties associated with this recording */
-  XProperties props = null;
+  protected XProperties props = null;
 
   /** The MediaPackage containing all the metadata/attachments/any file related with this recording */
-  transient MediaPackage mPkg = null;
+  protected transient MediaPackage mPkg = null;
 
   /** 
    * Constructs a RecordingImpl object using the Properties and MediaPackage provided
@@ -147,7 +147,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
    * Determines the root URL and ID from the recording's properties
    * //TODO:  What if the properties object contains a character in the recording id or root url fields that is invalid for the filesystem? 
    */
-  void determineRootURLandID() {
+  private void determineRootURLandID() {
     if (props == null) {
       logger.info("Properties are null for recording, guessing that the root capture dir is java.io.tmpdir...");
       props = new XProperties();
@@ -290,7 +290,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
    * @param d The Date to format
    * @return The formatted Date
    */
-  static synchronized String formatDate(Date d) {
+  private static synchronized String formatDate(Date d) {
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
     return sdf.format(d);
   }

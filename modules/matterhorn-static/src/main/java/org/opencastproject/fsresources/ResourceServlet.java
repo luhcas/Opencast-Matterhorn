@@ -41,8 +41,8 @@ public class ResourceServlet extends HttpServlet {
 
   protected String root;
   protected String serverAlias;
-  protected SimpleDateFormat sdf;
-
+  private static final String dateFormat = "yyyy-MM-dd HH:mm:ss Z";
+  
   public ResourceServlet() {
   }
 
@@ -76,8 +76,6 @@ public class ResourceServlet extends HttpServlet {
       throw new IllegalStateException("Unable to create servlet for " + serverAlias + " because "
               + rootDir.getAbsolutePath() + " is not a file or directory!");
     }
-    sdf = new SimpleDateFormat();
-    sdf.applyPattern("yyyy-MM-dd HH:mm:ss Z");
   }
 
   public void deactivate() {
@@ -116,7 +114,7 @@ public class ResourceServlet extends HttpServlet {
       out.write("<body>");
       out.write("<pre>");
       SimpleDateFormat sdf = new SimpleDateFormat();
-      sdf.applyPattern("yyyy-MM-dd HH:mm:ss Z");
+      sdf.applyPattern(dateFormat);
       for (File child : f.listFiles()) {
         StringBuffer sb = new StringBuffer();
         sb.append("<a href=\"");

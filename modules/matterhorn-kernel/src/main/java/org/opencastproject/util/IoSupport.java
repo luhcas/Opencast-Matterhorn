@@ -16,14 +16,25 @@
 
 package org.opencastproject.util;
 
+import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.security.api.TrustedHttpClientException;
+
+import de.schlichtherle.io.FileWriter;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * Contains operations concerning IO.
@@ -138,4 +149,98 @@ public class IoSupport {
     return outputMsg.toString();
   }
 
+  /**
+   * Writes the contents variable to the {@code URL}.  Note that the URL must be a local {@code URL}.
+   * @param file The {@code URL} of the local file you wish to write to.
+   * @param contents The contents of the file you wish to create.
+   */
+  public static void writeUTF8File(URL file, String contents) throws IOException {
+    writeUTF8File(file.getFile(), contents);
+  }
+
+  /**
+   * Writes the contents variable to the {@code File}.
+   * @param file The {@code File} of the local file you wish to write to.
+   * @param contents The contents of the file you wish to create.
+   */
+  public static void writeUTF8File(File file, String contents) throws IOException {
+    writeUTF8File(file.getAbsolutePath(), contents);
+  }
+
+  /**
+   * Writes the contents variable to the {@code File} located at the filename.
+   * @param file The {@code File} of the local file you wish to write to.
+   * @param contents The contents of the file you wish to create.
+   */
+  public static void writeUTF8File(String filename, String contents) throws IOException {
+    FileWriter out = new FileWriter(filename);
+    out.write(contents);
+    closeQuietly(out);
+  }
+
+  /**
+   * Convenience method to read in a file from a local source.
+   * @param url The {@code URL} to read the source data from.
+   * @return A String containing the source data or null in the case of an error.
+   */
+  public static String readFileFromURL(URL url) {
+    return readFileFromURL(url, null);
+  }
+
+  /**
+   * Convenience method to read in a file from either a remote or local source.
+   * @param url The {@code URL} to read the source data from.
+   * @param trustedClient
+       The {@code TrustedHttpClient} which should be used to communicate with the remote server.  This can be null for local file reads.
+   * @return A String containing the source data or null in the case of an error.
+   */
+  public static String readFileFromURL(URL url, TrustedHttpClient trustedClient) {
+    StringBuilder sb = new StringBuilder();
+    DataInputStream in = null;
+    HttpResponse response = null;
+    try {
+      //Do different things depending on what we're reading...
+      if (url.getProtocol().equals("file")) {
+        in = new DataInputStream(url.openStream());
+      } else {
+        if (trustedClient == null) {
+          logger.error("Unable to read from remote source {} because trusted client is null!", url.getFile());
+          return null;
+        }
+        HttpGet get = new HttpGet(url.toURI());
+        try {
+          response = trustedClient.execute(get);
+        } catch (TrustedHttpClientException e) {
+          logger.warn("Unable to fetch file from {}.", url, e);
+          if (response != null) {
+            trustedClient.close(response);
+          }
+          return null;
+        }
+        in = new DataInputStream(response.getEntity().getContent());
+      }
+      int c = 0;
+      while ((c = in.read()) != -1) {
+        sb.append((char) c);
+      }
+    } catch (IOException e) {
+      logger.warn("IOException attempting to get file from {}.", url);
+      return null;
+    } catch (URISyntaxException e) {
+      logger.warn("URI error attempting to get file from {}.", url);
+      return null;
+    } catch (NullPointerException e) {
+      logger.warn("Nullpointer attempting to get file from {}.", url);
+      return null;
+    } finally {
+      IOUtils.closeQuietly(in);
+ 
+      if (response != null && trustedClient != null) {
+        trustedClient.close(response);
+        response = null;
+      }
+    }
+
+    return sb.toString();
+  }
 }

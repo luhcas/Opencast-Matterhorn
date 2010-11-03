@@ -46,32 +46,35 @@ public class StartCaptureJob implements Job {
    * @throws JobExecutionException
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-
+    
     logger.info("Initiating StartCaptureJob.");
-    CaptureAgentImpl ca = null;
-    MediaPackage mp = null;
-    Properties props = null;
+    CaptureAgentImpl captureAgentImpl = null;
+    MediaPackage mediaPackage = null;
+    Properties properties = null;
+    Scheduler sched = null;
 
     //// Extracts the necessary parameters for calling startCapture()
     // The capture agent
-    ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
+    captureAgentImpl = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
     // The MediaPackage
-    mp = (MediaPackage)ctx.getMergedJobDataMap().get(JobParameters.MEDIA_PACKAGE);
+    mediaPackage = (MediaPackage)ctx.getMergedJobDataMap().get(JobParameters.MEDIA_PACKAGE);
     // The capture Properties
-    props = (Properties)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_PROPS);
+    properties = (Properties)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_PROPS);
+    // The scheduler to use.  We do not use ctx.getScheduler() because this job's scheduler might be gone (see SchedulerImpl)
+    sched = (Scheduler)ctx.getMergedJobDataMap().get(JobParameters.SCHEDULER);
 
-    if (ca == null) {
+    if (captureAgentImpl == null) {
       logger.error("No capture agent provided! Capture Interrupted");
       return;
     }
 
     //We require both objects to exist, if either of them doesn't then the scheduler didn't do its job properly
-    if (props == null || mp == null) {
+    if (properties == null || mediaPackage == null) {
       logger.error("Insufficient parameters provided. startCapture() needs Properties and a MediaPackage to proceed");
       return;
     }
 
-    String postfix = props.getProperty(JobParameters.JOB_POSTFIX);
+    String postfix = properties.getProperty(JobParameters.JOB_POSTFIX);
     if (postfix == null) {
       logger.error("Key {} not found in job properties, cannot continue!", JobParameters.JOB_POSTFIX);
       return;
@@ -80,17 +83,18 @@ public class StartCaptureJob implements Job {
     try {
 
       // Get the stopCaptureJob scheduling ready in case something happens, so we don't need to stop the capture afterwards
-      String time2Stop = props.getProperty(CaptureParameters.RECORDING_END);
+      String time2Stop = properties.getProperty(CaptureParameters.RECORDING_END);
 
-      JobDetail job = new JobDetail("StopCapture-" + postfix, JobParameters.OTHER_TYPE, StopCaptureJob.class);
-      CronTrigger trigger = new CronTrigger("StopCaptureTrigger-" + postfix, JobParameters.OTHER_TYPE, time2Stop);
+      JobDetail job = new JobDetail("StopCapture-" + postfix, JobParameters.CAPTURE_RELATED_TYPE, StopCaptureJob.class);
+      CronTrigger trigger = new CronTrigger("StopCaptureTrigger-" + postfix, JobParameters.CAPTURE_RELATED_TYPE, time2Stop);
       trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
 
-      trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, ca);
+      trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captureAgentImpl);
       trigger.getJobDataMap().put(JobParameters.JOB_POSTFIX, postfix);
+      trigger.getJobDataMap().put(JobParameters.SCHEDULER, sched);
 
       // Actually does the service
-      String recordingID = ca.startCapture(mp, props);
+      String recordingID = captureAgentImpl.startCapture(mediaPackage, properties);
       if (recordingID == null) {
         logger.error("Capture agent returned null when trying to start capture!");
         return;
@@ -100,14 +104,15 @@ public class StartCaptureJob implements Job {
       trigger.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
 
       // Schedules the stop event
-      Scheduler jobScheduler = (Scheduler) ctx.getMergedJobDataMap().get(JobParameters.JOB_SCHEDULER);
-      jobScheduler.scheduleJob(job, trigger);
+      sched.scheduleJob(job, trigger);
       logger.debug("stopCapture scheduled for: {}", trigger);
 
-      //Remove this job from the system
+      //Remove this job from the system if my scheduler still exists
       JobDetail mine = ctx.getJobDetail();
       try {
-        ctx.getScheduler().deleteJob(mine.getName(), mine.getGroup());
+        if (!ctx.getScheduler().isShutdown()) {
+          ctx.getScheduler().deleteJob(mine.getName(), mine.getGroup());
+        }
       } catch (SchedulerException e) {
         logger.warn("Unable to delete start capture job {}!", mine.getName());
         e.printStackTrace();
@@ -117,7 +122,7 @@ public class StartCaptureJob implements Job {
       logger.error("Couldn't schedule task: {}", e.getMessage());
       //e.printStackTrace();
     } catch (ParseException e) {
-      logger.error("Invalid time for stopping capture: {}. Aborting.\n{}", props.get(CaptureParameters.RECORDING_END), e.getMessage());
+      logger.error("Invalid time for stopping capture: {}. Aborting.\n{}", properties.get(CaptureParameters.RECORDING_END), e.getMessage());
       //e.printStackTrace();
     } catch (Exception e) {
       logger.error("Unexpected exception: {}\nJob may have not been executed", e.getMessage());

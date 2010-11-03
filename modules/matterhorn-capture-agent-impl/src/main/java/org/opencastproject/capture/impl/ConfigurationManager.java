@@ -146,7 +146,7 @@ public class ConfigurationManager implements ManagedService {
   /**
    * Creates the core Opencast directories.
    */
-  void createCoreDirectories() {
+  protected void createCoreDirectories() {
     createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_CACHE_URL, "cache" + File.separator + "captures");
     createFileObj(CaptureParameters.CAPTURE_FILESYSTEM_VOLATILE_URL, "volatile");
   }
@@ -156,7 +156,7 @@ public class ConfigurationManager implements ManagedService {
    * @param key    The key to set in this configuration manager.  Key is set equal to name.
    * @param fallback The directory structure that should be created under java.io.tmpdir should the key not be found in the configuration data.
    */
-  void createFileObj(String key, String fallback) {
+  protected void createFileObj(String key, String fallback) {
     if (this.getItem(key) == null) {
       File parent = new File(System.getProperty("java.io.tmpdir"));
       File dir = new File(parent, fallback);

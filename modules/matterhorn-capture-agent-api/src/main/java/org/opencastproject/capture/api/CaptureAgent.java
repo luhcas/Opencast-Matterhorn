@@ -118,5 +118,9 @@ public interface CaptureAgent {
    * @return The current schedule in a {@code List} of {@code ScheduledEvent}s or null in the case of an error.
    */
   List<ScheduledEvent> getAgentSchedule();
+  /**
+   * Set the scheduler that the capture agent will use.
+   */
+  void setScheduler(Scheduler scheduler);
 }
 
