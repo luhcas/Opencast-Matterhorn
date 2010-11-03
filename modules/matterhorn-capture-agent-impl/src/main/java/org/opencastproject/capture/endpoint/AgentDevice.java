@@ -20,27 +20,32 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 /**
  * A representation of the devices associated with a capture agent
  */
-@XmlType(name="agent-device", namespace="http://capture.opencastproject.org")
-@XmlRootElement(name="agent-device")
+@XmlType(name = "agent-device", namespace = "http://capture.opencastproject.org")
+@XmlRootElement(name = "agent-device")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AgentDevice {
-  
+
   /**
    * The device's friendly name as defined in the property capture.device.names
    */
-  @XmlElement(name="name")
+  @XmlElement(name = "name")
   private String name;
-
   /**
    * Used to classify the device as video or audio
    */
-  @XmlElement(name="type")
+  @XmlElement(name = "type")
   private String type;
-  
+
   /**
    * Default constructor for serialization. Do not use it otherwise.
    */
@@ -57,7 +62,7 @@ public class AgentDevice {
     this.name = device;
     this.type = type;
   }
-  
+
   /**
    * Get device friendly name.
    * @return device friendly name
@@ -65,7 +70,7 @@ public class AgentDevice {
   public String getDevice() {
     return this.name;
   }
-  
+
   /**
    * Get device capture type.
    * @return device capture type
@@ -74,5 +79,22 @@ public class AgentDevice {
    */
   public String getType() {
     return this.type;
+  }
+
+  /**
+   * Get {@link AgentDevice} as a {@link org.w3c.dom.Node} representation.
+   * @return XML {@link org.w3c.dom.Node} representation of the {@link AgentDevice}
+   */
+  public Node toXml(Document document) {
+    Element agentDevice = document.createElement("agent-device");
+
+    Element deviceName = document.createElement("name");
+    deviceName.appendChild(document.createTextNode(getDevice()));
+    agentDevice.appendChild(deviceName);
+
+    Element deviceType = document.createElement("type");
+    deviceType.appendChild(document.createTextNode(getType()));
+    agentDevice.appendChild(deviceType);
+    return agentDevice;
   }
 }

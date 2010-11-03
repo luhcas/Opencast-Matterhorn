@@ -15,6 +15,7 @@
  */
 package org.opencastproject.capture.endpoint;
 
+import java.io.StringWriter;
 import org.opencastproject.capture.api.ConfidenceMonitor;
 import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
@@ -30,7 +31,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -40,6 +40,18 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 
 @Path("/")
@@ -143,18 +155,42 @@ public class ConfidenceMonitorRestService {
   @Produces(MediaType.TEXT_XML)
   @Path("devices")
   public Response getDevices() {
+
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity("Confidence monitor unavailable, please wait...").build();
     }
-    
-    //TODO:  Should we be storing this list of device names as a list of AgentDevice objects instead?
-    LinkedList<AgentDevice> devices = new LinkedList<AgentDevice>();
+
     List<String> names = service.getFriendlyNames();
-    for (String name : names) {
-      String nameType[] = name.split(",");
-      devices.add(new AgentDevice(nameType[0], nameType[1]));
+    try {
+      DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();
+      docBuilderFactory.setNamespaceAware(true);
+      DocumentBuilder docBuilder = docBuilderFactory.newDocumentBuilder();
+      Document document = docBuilder.newDocument();
+
+      Element devices = document.createElement("agent-devices");
+      for (String name : names) {
+        String nameType[] = name.split(",");
+        AgentDevice device = new AgentDevice(nameType[0], nameType[1]);
+        Node deviceNode = device.toXml(document);
+        if (deviceNode != null)
+          devices.appendChild(deviceNode);
+      }
+      document.appendChild(devices);
+
+      DOMSource ds = new DOMSource(document);
+      StreamResult result = new StreamResult(new StringWriter());
+      Transformer transformer = TransformerFactory.newInstance().newTransformer();
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      transformer.transform(ds, result);
+      return Response.ok(result.getWriter().toString()).build();
+
+    } catch (TransformerException ex) {
+      logger.error("", ex);
+      return Response.serverError().entity(ex.getMessage()).build();
+    } catch (ParserConfigurationException ex) {
+      logger.error("", ex);
+      return Response.serverError().entity(ex.getMessage()).build();
     }
-    return Response.ok(devices).build();
   }
   
   /**
