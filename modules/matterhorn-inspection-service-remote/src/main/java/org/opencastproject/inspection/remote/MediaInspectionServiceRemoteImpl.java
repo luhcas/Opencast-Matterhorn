@@ -62,7 +62,7 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
   public Job inspect(URI uri, boolean block) throws MediaInspectionException {
     List<NameValuePair> queryStringParams = new ArrayList<NameValuePair>();
     queryStringParams.add(new BasicNameValuePair("uri", uri.toString()));
-    String url = "/inspection/rest/inspect?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
+    String url = "/inspect?" + URLEncodedUtils.format(queryStringParams, "UTF-8");
     logger.info("Inspecting media file at {} using a remote media inspection service", uri);
     HttpResponse response = null;
     try {
@@ -92,7 +92,7 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
    */
   @Override
   public Job enrich(MediaPackageElement original, boolean override, boolean block) throws MediaInspectionException {
-    String url = "/inspection/rest/enrich";
+    String url = "/enrich";
     List<NameValuePair> params = new ArrayList<NameValuePair>();
     try {
       params.add(new BasicNameValuePair("mediaPackageElement", ((AbstractMediaPackageElement) original).getAsXml()));

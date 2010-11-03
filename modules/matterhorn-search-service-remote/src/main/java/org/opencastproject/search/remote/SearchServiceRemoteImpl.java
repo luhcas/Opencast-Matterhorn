@@ -87,7 +87,7 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
   public void clear() throws SearchException {
     HttpResponse response = null;
     try {
-      HttpPost post = new HttpPost("/search/rest/clear");
+      HttpPost post = new HttpPost("/clear");
       response = getResponse(post, HttpStatus.SC_NO_CONTENT);
       if (response == null)
         throw new SearchException("Unable to clear remote search index");
@@ -109,8 +109,7 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
    */
   @Override
   public void delete(String mediaPackageId) throws SearchException {
-    String urlprefix = "/search/rest/" + mediaPackageId;
-    HttpDelete del = new HttpDelete(urlprefix);
+    HttpDelete del = new HttpDelete(mediaPackageId);
     HttpResponse response = null;
     try {
       response = getResponse(del, HttpStatus.SC_NO_CONTENT);
@@ -144,11 +143,11 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
     queryStringParams.add(new BasicNameValuePair("limit", Integer.toString(q.getLimit())));
     queryStringParams.add(new BasicNameValuePair("offset", Integer.toString(q.getOffset())));
     if (!q.isIncludeEpisodes() && q.isIncludeSeries()) {
-      url.append("/search/rest/series?");
+      url.append("/series?");
     } else if (q.isIncludeEpisodes() && !q.isIncludeSeries()) {
-      url.append("/search/rest/episode?");
+      url.append("/episode?");
     } else {
-      url.append("/search/rest/?");
+      url.append("/?");
     }
     url.append(URLEncodedUtils.format(queryStringParams, "UTF-8"));
     HttpGet get = new HttpGet(url.toString());
@@ -179,7 +178,7 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
     queryStringParams.add(new BasicNameValuePair("offset", Integer.toString(offset)));
 
     StringBuilder url = new StringBuilder();
-    url.append("/search/rest/lucene?");
+    url.append("/lucene?");
     url.append(URLEncodedUtils.format(queryStringParams, "UTF-8"));
 
     HttpGet get = new HttpGet(url.toString());
@@ -197,4 +196,5 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
     }
     throw new SearchException("Unable to perform getByQuery from remote search index");
   }
+  
 }

@@ -86,7 +86,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    *      java.lang.String, boolean)
    */
   public Job encode(Track sourceTrack, String profileId, boolean block) throws EncoderException {
-    String url = "/composer/rest/encode";
+    String url = "/encode";
     HttpPost post = new HttpPost(url);
     try {
       List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
@@ -138,7 +138,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
   @Override
   public Job trim(Track sourceTrack, String profileId, long start, long duration, boolean block)
           throws EncoderException {
-    String url = "/composer/rest/trim";
+    String url = "/trim";
     HttpPost post = new HttpPost(url);
     try {
       List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
@@ -189,7 +189,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    */
   public Job mux(Track sourceVideoTrack, Track sourceAudioTrack, String profileId, boolean block)
           throws EncoderException {
-    String url = "/composer/rest/mux";
+    String url = "/mux";
     HttpPost post = new HttpPost(url);
     try {
       List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
@@ -233,7 +233,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    */
   @Override
   public EncodingProfile getProfile(String profileId) {
-    String url = "/composer/rest/profile/" + profileId + ".xml";
+    String url = "/profile/" + profileId + ".xml";
     HttpGet get = new HttpGet(url);
     HttpResponse response = null;
     try {
@@ -272,7 +272,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
   public Job image(Track sourceTrack, String profileId, long time, boolean block) throws EncoderException {
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     UrlEncodedFormEntity entity = null;
-    String url = "/composer/rest/image";
+    String url = "/image";
     HttpPost post = new HttpPost(url);
     try {
       params.add(new BasicNameValuePair("sourceTrack", getXML(sourceTrack)));
@@ -324,7 +324,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
   public Job captions(Track mediaTrack, Catalog[] captions, boolean block) throws EmbedderException {
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
     UrlEncodedFormEntity entity = null;
-    String url = "/composer/rest/captions";
+    String url = "/captions";
     HttpPost post = new HttpPost(url);
     try {
       params.add(new BasicNameValuePair("mediaTrack", getXML(mediaTrack)));
@@ -361,7 +361,7 @@ public class ComposerServiceRemoteImpl extends RemoteBase implements ComposerSer
    */
   @Override
   public EncodingProfile[] listProfiles() {
-    String url = "/composer/rest/profiles.xml";
+    String url = "/profiles.xml";
     HttpGet get = new HttpGet(url);
     HttpResponse response = null;
     try {
