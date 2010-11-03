@@ -48,6 +48,8 @@ import org.opencastproject.workflow.api.WorkflowSet;
 import org.apache.commons.codec.EncoderException;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +58,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -64,8 +67,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Implements WorkflowService with in-memory data structures to hold WorkflowOperations and WorkflowInstances.
@@ -74,7 +77,7 @@ import java.util.concurrent.Executors;
  * WorkflowOperation.getName(), then the factory returns a WorkflowOperationRunner to handle that operation. This allows
  * for custom runners to be added or modified without affecting the workflow service itself.
  */
-public class WorkflowServiceImpl implements WorkflowService {
+public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceImpl.class);
@@ -91,12 +94,35 @@ public class WorkflowServiceImpl implements WorkflowService {
   private SortedSet<MediaPackageMetadataService> metadataServices;
 
   /** The thread pool */
-  protected ExecutorService executorService;
-  
+  protected ThreadPoolExecutor executorService;
+
   /** The service registry, managing jobs */
   private ServiceRegistry serviceRegistry = null;
 
-  
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
+   */
+  @Override
+  public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
+    String threadPoolConfig = (String) properties.get("org.opencastproject.concurrent.jobs");
+    if (threadPoolConfig != null) {
+      try {
+        int threads = Integer.parseInt(threadPoolConfig);
+        if (this.executorService == null) {
+          logger.debug("Creating a new thread pool of size {}", threads);
+          this.executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(threads);
+        } else {
+          logger.debug("Setting thread pool to size {}", threads);
+          this.executorService.setCorePoolSize(threads);
+        }
+      } catch (NumberFormatException e) {
+        logger.warn(e.getMessage());
+      }
+    }
+  }
+
   /**
    * A tuple of a workflow operation handler and the name of the operation it handles
    */
@@ -193,27 +219,15 @@ public class WorkflowServiceImpl implements WorkflowService {
    */
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
-    int threads = 1;
-    if(componentContext == null) {
-      executorService = Executors.newFixedThreadPool(threads);
-    } else {
-      String threadsConfig = componentContext.getBundleContext().getProperty("org.opencastproject.workflow.threads");
-      if(threadsConfig != null) {
-        try {
-          threads = Integer.parseInt(threadsConfig);
-        } catch(NumberFormatException e) {
-          logger.warn("Invalid thread configuration '{}'.  Using the default value of one thread.", threadsConfig);
-        }
-      }
-      executorService = Executors.newFixedThreadPool(threads);
-    }
+    logger.debug("Creating a new thread pool with default size: 1");
+    executorService = (ThreadPoolExecutor)Executors.newFixedThreadPool(1);
   }
 
   /**
    * Deactivate this service.
    */
   public void deactivate() {
-    if(executorService != null && ! executorService.isShutdown()) {
+    if (executorService != null && !executorService.isShutdown()) {
       executorService.shutdown();
     }
   }
