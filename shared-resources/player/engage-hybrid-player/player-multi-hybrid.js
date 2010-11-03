@@ -92,6 +92,8 @@ Opencast.Player = (function () {
     optionClassName        = "",
     seekState              = PAUSING;
     
+    var shareDisplayed = false;
+    
    
      /**
      @memberOf Opencast.Player
@@ -518,33 +520,6 @@ Opencast.Player = (function () {
         });
         $("#oc_btn-transcript").attr('aria-pressed', 'false');
     }
-    
-    /**
-        @memberOf Opencast.Player
-        @description Show the shortcuts
-     */
-    function showShortcuts()
-    {
-        $("#oc_btn-shortcuts").attr({ 
-            title: SHORTCUTSHIDE,
-        });
-        $("#oc_btn-shortcuts").html(SHORTCUTSHIDE);
-        $("#oc_btn-shortcuts").attr('aria-pressed', 'true');
-        addAlert($("#oc_shortcuts").text());
-    }
-    
-    /**
-        @memberOf Opencast.Player
-        @description Hide the shortcuts
-     */
-    function hideShortcuts()
-    {
-        $("#oc_btn-shortcuts").attr({ 
-            title: SHORTCUTS,
-        });
-        $("#oc_btn-shortcuts").html(SHORTCUTS);
-        $("#oc_btn-shortcuts").attr('aria-pressed', 'false');
-    }
 
      /**
         @memberOf Opencast.Player
@@ -644,7 +619,6 @@ Opencast.Player = (function () {
             showSlides();
             hideDescription();
             hideSlideText();
-            hideShortcuts();
             hideEmbed();
             setShowSections(true);
         }
@@ -665,7 +639,6 @@ Opencast.Player = (function () {
         if ($("#oc_btn-notes").attr("title") === NOTES)
         {
             showNotes(); 
-            hideShortcuts();
             hideDescription();
             setShowSections(true);
         }
@@ -687,7 +660,6 @@ Opencast.Player = (function () {
             showSlideText();
             hideSlides();
             hideDescription();
-            hideShortcuts();
             hideEmbed();
             setShowSections(true);
         }
@@ -720,29 +692,6 @@ Opencast.Player = (function () {
 
     /**
         @memberOf Opencast.Player
-        @description Toggle the shortcuts
-     */
-    function doToggleShortcuts()
-    {
-        if ($("#oc_btn-shortcuts").attr("title") === SHORTCUTS)
-        {
-            showShortcuts();
-            hideSlideText();
-            hideSlides();
-            hideDescription();
-            hideEmbed();
-            setShowSections(true);
-        }
-        else
-        {
-            hideShortcuts();
-            setShowSections(false);
-        }
-        // Opencast.Initialize.doResize();
-    }
-
-    /**
-        @memberOf Opencast.Player
         @description Toggle the embed
      */
     function doToggleEmbed()
@@ -750,7 +699,6 @@ Opencast.Player = (function () {
         if ($("#oc_btn-embed").attr("title") === EMBED)
         {
             showEmbed();
-            hideShortcuts();
             hideSlideText();
             hideSlides();
             hideDescription();
@@ -796,7 +744,6 @@ Opencast.Player = (function () {
             showDescription();
             hideSlides();
             hideSlideText();
-            hideShortcuts();
             hideEmbed();
             setShowSections(true);
         }
@@ -806,6 +753,30 @@ Opencast.Player = (function () {
             setShowSections(false);
         }
         // Opencast.Initialize.doResize();
+    }
+    
+    /**
+        @memberOf Opencast.Player
+        @description Toggle the Share layer
+     */
+    function doToggleShare()
+    {
+        if (this.shareDisplayed)
+        {
+            $('#oc_share-layer').hide();
+            this.shareDisplayed = false;
+        }
+        else
+        {
+            $('#oc_share-layer').removeClass('ui-helper-hidden-accessible');
+            $( "#oc_share-layer" ).position({
+              of: $( "#oc_share-button" ),
+              my: 'right top',
+              at: 'right bottom'
+            });
+            $('#oc_share-layer').show();
+            this.shareDisplayed = true;
+        }
     }
     
    
@@ -1645,10 +1616,10 @@ Opencast.Player = (function () {
         doToggleNotes : doToggleNotes,
         doToggleSlideText : doToggleSlideText,
         doToggleTranscript : doToggleTranscript,
-        doToggleShortcuts : doToggleShortcuts,
         doToggleEmbed : doToggleEmbed,
         doToggleBookmarks : doToggleBookmarks,
         doToggleDescription : doToggleDescription,
+        doToggleShare : doToggleShare,
         removeOldAlert : removeOldAlert,
         refreshScrubberPosition : refreshScrubberPosition,
         addAlert : addAlert,

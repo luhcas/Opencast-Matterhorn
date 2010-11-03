@@ -62,7 +62,7 @@ Opencast.segments = ( function() {
             .css('width', ($panels[0].offsetWidth * $panels.length))
             .css('left', "0px");
           // Disable and grey out "Annotation" Tab
-          $("#oc_ui_tabs").tabs({disabled: [6]});
+          $("#oc_ui_tabs").tabs({disabled: [4]});
        } else {
          // Disable and grey out "Slides" Tab
          // Disable and grey out "Slides Text" Tab

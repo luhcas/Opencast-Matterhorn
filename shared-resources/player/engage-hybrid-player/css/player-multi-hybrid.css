@@ -76,6 +76,14 @@ table
   width:                    150px !important;
 }
 
+#oc_title { float: left; font-weight: normal; margin: 0px; padding: 5px 15px 5px; max-width: 70%; }
+#oc_player-head { padding: 5px; }
+#oc_player-head-right { float: right; }
+#oc_share-layer { position: absolute;}
+#oc_share-list { list-style:none outside none; padding: 0}
+#oc_share-list li { padding: 5px 0; }
+
+
 
 #oc_btn-search
 {
@@ -87,13 +95,19 @@ table
   clear:                    both;   
 }
 
-#oc_body
+#oc_body, #oc_ui_tabs
 {
   min-width:                756px;
-  height:                   510px;
   margin-left:              10%;
   margin-right:             10%;
+  padding:                  5px;
   position:                 relative; 
+}
+
+#oc_ui_tabs 
+{
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 #oc_flash-player
