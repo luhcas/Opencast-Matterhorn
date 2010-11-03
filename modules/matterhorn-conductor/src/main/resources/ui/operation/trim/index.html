@@ -13,6 +13,7 @@
     <style type="text/css">
       #player-container {clear:both; border:none; width:90%; height:300;}
       .hidden {display:none;}
+			input.pointInput{width: 60px; border: 0px solid white;}
       #actions{margin: 0 auto; text-align:center; width:100%;}
     </style>
     <script type="text/javascript" src="/admin/jquery/jquery-1.4.2.min.js"></script>
@@ -75,7 +76,8 @@
         $('#trimming-hint').toggle();
 
         window.parent.$('.recordings-button-container').hide(0);
-        window.parent.$('.layout-inline').hide(0);
+        window.parent.$('.recordings-categories').hide(0);
+				window.parent.$('input#filter').parent().hide(0);
 
         // Event edit link clicked
         $('#edit-link').click( function () {
@@ -404,13 +406,7 @@
 
     function cancel() 
     {
-      //window.parent.$('#holdActionPanel-container').toggle();
-      //window.parent.$('#recordings-table-container').toggle();
-      //window.parent.$('#oc_recordingmenu').toggle();
-      //window.parent.$('.paging-nav-container').toggle();
-      //window.parent.$('#refresh-controls-container').toggle();
-      //window.parent.$('#category-selector-container').parent().toggle();
-      window.parent.location.reload(true);
+      window.parent.location.href = window.parent.location.href;
     }
     </script>
   </head>
@@ -456,13 +452,13 @@
          <!-- control buttons -->
 
          <label for="inPoint" style="padding-left: 10px">In point</label>
-          <input type="text" id="inPoint" readonly="readonly"></input> 
+          <input type="text" id="inPoint" readonly="readonly" class="pointInput"></input> 
           <input type="button" style="width: 160px;" id="set-trimin" title="Set to current time" value="Set to current time" class="ui-button" />
           <input type="button" id="play-from-in" style="width: 160px;"  title="Start playing at current In point" value="&gt; Play from In point" class="ui-button" /> 
           <input type="button" id="step-in-forward" title="Increase In point by one second" value="&gt;&gt;" class="ui-button" />
           <input type="button" id="step-in-backward" title="Decrease In point by one second" value="&lt;&lt;" class="ui-button" /><br />
          <label for="outPoint" class="label">Out point</label> 
-          <input type="text" id="outPoint" readonly="readonly"></input> 
+          <input type="text" id="outPoint" readonly="readonly" class="pointInput"></input> 
           <input type="button" style="width: 160px;" id="set-trimout" title="Set to current time" value="Set to current time" class="ui-button" /> 
           <input type="button" id="play-to-out" style="width: 160px;" title="Play last 10 seconds to Out point" value="&gt; Play to Out point" class="ui-button" />
           <input type="button" id="step-out-forward" title="Increase Out point by one second" value="&gt;&gt;" class="ui-button" />
@@ -474,14 +470,14 @@
           <p style="color:green;">This Recording will be trimmed according to the In and Out points you have set when you continue.</p>
          </div>
          <input title="Start trimming this recording" 
-                style="margin-left: 205px; margin-right: 16px; width: 160px;" 
+                style="margin-left: 65px; margin-right: 16px; width: 160px;" 
                 onclick="continueWorkflow();" 
                 id="continueBtn" 
                 type="button"
                 class="ui-button ui-corner-all"
                 value="Continue processing" />
-         <a id="edit-link" type="button" class="ui-button ui-corner-all" style="margin-right: 16px;">Edit before continuing</a>
-         <a onclick="cancel()" title="Cancel" class="ui-button ui-corner-all" style="margin-right: 16px;">Cancel</a>
+         <a id="edit-link" style="margin-right: 16px;">Edit before continuing</a>
+         <a onclick="cancel()" title="Cancel" style="margin-right: 16px;">Cancel</a>
      </div>
   </body>
 </html>
