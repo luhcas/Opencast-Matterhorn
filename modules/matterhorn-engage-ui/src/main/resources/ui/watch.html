@@ -104,25 +104,29 @@
   </div>
     <div id="skip">
   <a href="#shortcuts" onclick="Opencast.Player.doToggleShortcuts()">Skip to Shortcuts</a>
-  </div>   
-  <div id="oc_title-bar" style="padding-top:5px;">
-      <div id="oc_title-bar-container">
-      <div id="oc_title-bar-logo">
-      <a href="index.html"><img src="img/MatterhornLogo_80x57.png" alt="Back to Media Module" title="Back to Media Module" style="float:left;"></a>
-    </div>
-    <div id="oc_title-bar-heading">
-      <h2 id="oc_title"></h2>
-    </div>
-    
-    <form action="index.html">
-      <div id="oc_search">    
-          <label id="skip" for="oc_searchField">Search Field</label>
-          <input id="oc_searchField" class="oc_search-Field handcursor" type="text" name="q" value="Search Matterhorn" />
-          <input id="oc_btn-search" class="handcursor" type="submit" name="search" alt="search" title="search" value="Search"></input>
-      </div>
-    </form>
-    </div>  
   </div>
+
+  <div id="oc_title-bar" class="ui-widget ui-widget-header ui-corner-all">
+    <div id="oc_title-bar-container" class="">
+    
+      <div id="oc_title-bar-logo">
+        <img src="img/MatterhornLogo_42x30.png" alt="Back to Media Module" title="Back to Media Module" />
+      </div>
+  
+      <div id="oc_search">    
+        <form action="index.html">
+          <label id="skip" for="oc_searchField">Search Field</label>
+          <input id="oc_searchField" class="oc_search-Field handcursor ui-corner-all" type="text" name="q" value="Search Matterhorn" />
+          <input id="oc_btn-search" class="handcursor" type="submit" name="search" alt="search" title="search" value="Search"></input>
+        </form>
+      </div>
+        
+      <div id="oc_title-bar-gallery-link">
+        <div id="oc_gallery" class="ui-helper-reset">Go to <a href="index.html" title="Video Gallery">Video Gallery</a></div>
+      </div>
+    </div>
+    <div class="clear"></div>  
+  </div><!-- END #oc_title-bar -->
   <div id="oc_body">
       
    <div id="oc_flash-player">
