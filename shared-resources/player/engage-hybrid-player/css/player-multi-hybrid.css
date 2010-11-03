@@ -27,58 +27,55 @@ table
 #oc_title-bar
 {
   min-width:                760px;
-  margin-left:              10%;
-  margin-right:             10%;
+  margin:             5px 10%;
+  
 }
 
-#oc_title-bar-container
+#oc_title-bar-container    
 {
-  display:                  table-row; 
-  width:                    100%
+  width: 100%;
 }
 
 #oc_title-bar-logo
 {
-  display:                  table-cell; 
+  padding: 10px;
+  float: left;
 }
 
-#oc_title-bar-heading
+#oc_title-bar-gallery-link 
 {
-  display:                  table-cell; 
-  width:                    100%;
-  padding-left:             10px;
+  margin: 5px;
+  padding: 5px;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  float: right;
+  height: 30px;
+  font-weight: normal;
 }
 
-#oc_title
+#oc_title-bar-gallery-link #oc_gallery 
 {
-  margin:                   0px;
-  padding-left:             5px;
-  text-align:               left;
-  height:                   100%;
-  vertical-align:           bottom;
-  font-weight:              normal;
+  padding: 5px; 
 }
 
 #oc_search
 {
-  float:                    right;
-  height:                   100%;
-  padding-top:              3px;
-  display:                  table-cell;
-  white-space:              nowrap;
-  float:                    right;
+  float: right;
+  height: 30px;
+  white-space: nowrap;
+  margin: 5px;
+  padding: 3px 5px;
 }
 
 .oc_search-Field
 {
   border:                   1px solid #000000;
-  background-color:         #E3E3D7;
+  background:               url("../icons/magnifier.png") no-repeat scroll 2px 0.4em #FFF;
   color:                    #000000;
-  background-image:         url(../icons/magnifier.png);
-  background-repeat:        no-repeat;
-  padding-left:             20px;
+  padding:                  0.4em 5px 0.4em 20px;
   width:                    150px !important;
 }
+
 
 #oc_btn-search
 {
