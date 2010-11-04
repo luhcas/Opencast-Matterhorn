@@ -44,6 +44,9 @@ Opencast.Watch = (function(){
             sd.setSeconds(parseInt(timeDate.substring(17, 19), 10));
             
             Opencast.Analytics.setMediaPackageId(mediaPackageId);
+
+            Opencast.Description.setMediaPackageId(mediaPackageId);
+
             var dcExtent = parseInt($('#dc-extent').html());
             Opencast.Analytics.setDuration(parseInt(dcExtent / 1000));
             Opencast.Annotation_Chapter.setDuration(parseInt(dcExtent / 1000));
@@ -195,7 +198,8 @@ Opencast.Watch = (function(){
             
             getClientShortcuts();
             
-            $.ajax({
+            //can be removed due to trimpath
+            /*$.ajax({
                 type: 'GET',
                 contentType: 'text/xml',
                 url: "../../usertracking/rest/stats.xml",
@@ -216,7 +220,7 @@ Opencast.Watch = (function(){
                 error: function(a, b, c){
                     // Some error while trying to get the views
                 }
-            });
+            });*/
             
             
             // init

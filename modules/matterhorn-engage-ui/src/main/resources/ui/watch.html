@@ -41,6 +41,8 @@
     <script type="text/javascript" src="js/engage_plugins/analytics.js"></script>
     <script type="text/javascript" src="js/engage_plugins/annotation_chapter-plugin.js"></script>
     <script type="text/javascript" src="js/engage_plugins/annotation_chapter.js"></script>
+    <script type="text/javascript" src="js/engage_plugins/description-plugin.js"></script>
+    <script type="text/javascript" src="js/engage_plugins/description.js"></script>
     <script type="text/javascript" src="js/search.js"></script>
     <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-initialize.js"></script>
     <script type="text/javascript" src="js/watch.js"></script>
@@ -81,7 +83,7 @@
             {
               switch(ui.index)
               {
-                case 0: Opencast.Player.doToggleDescription(); break;
+                case 0: Opencast.Description.doToggleDescription(); break;
                 case 1: Opencast.Player.doToggleSlides(); break;
                 case 2: Opencast.Player.doToggleSlideText(); break;
                 case 3: Opencast.Analytics.doToggleAnalytics(event, ui); return false;
