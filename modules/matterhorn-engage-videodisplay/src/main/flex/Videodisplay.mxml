@@ -1,0 +1,66 @@
+<?xml version = "1.0" encoding = "utf-8"?>
+<mx:Application 
+    xmlns:mx = "http://www.adobe.com/2006/mxml"
+    width = "100%"
+    height = "100%"
+    layout = "absolute"
+    verticalScrollPolicy = "off"
+    horizontalScrollPolicy = "off"
+    backgroundColor = "#000000"
+    creationComplete = "init();"
+    xmlns:business = "org.opencast.engage.videodisplay.business.*"
+    xmlns:control = "org.opencast.engage.videodisplay.control.*"
+    xmlns:view = "org.opencast.engage.videodisplay.view.*"
+    pageTitle = "Matterhorn Engage Mediaplayer"
+    frameRate = "30"
+    viewSourceURL="srcview/index.html"
+    >
+
+    <mx:Style 
+        source = "style/standard_videodisplay.css"
+        />
+
+    <mx:Script>
+        <![CDATA[
+            import org.opencast.engage.videodisplay.model.VideodisplayModel;
+            import org.opencast.engage.videodisplay.event.MyEvent;
+            import org.opencast.engage.videodisplay.event.InitMediaPlayerEvent;
+            import mx.controls.Alert;
+            import mx.events.CloseEvent;
+            
+            import com.adobe.cairngorm.control.CairngormEventDispatcher;     
+
+            [Bindable]
+            public var model:VideodisplayModel = VideodisplayModel.getInstance();
+
+            public function init():void
+            {
+
+                var myEvent:MyEvent = new MyEvent();
+                var initMediaPlayerEvent:InitMediaPlayerEvent = new InitMediaPlayerEvent("rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/matterhorn/0a78520a-3c23-4379-bcc7-eb7c0a803070/track-6/dozent.flv", "rtmp://freecom.serv.uni-osnabrueck.de/oflaDemo/matterhorn/0a78520a-3c23-4379-bcc7-eb7c0a803070/track-6/dozent.flv");
+                //CairngormEventDispatcher.getInstance().dispatchEvent( myEvent );
+                 CairngormEventDispatcher.getInstance().dispatchEvent( initMediaPlayerEvent );
+                
+                
+
+            }
+        ]]>
+    </mx:Script>
+    
+    <!-- the ServiceLocator where we specify the remote services -->
+    <business:Services id="addcontactServices"/>
+
+    <!-- the FrontController, containing Commands specific to this appliation -->
+    <control:VideodisplayController 
+        id = "controller"
+        />
+        
+        <view:ParallelView 
+        id = "bx_multi"
+        visible = "true"
+        includeInLayout = "true"
+        width = "100%"
+        height = "100%"
+        
+        />
+</mx:Application>
