@@ -16,13 +16,7 @@
         <li class="ui-helper-clearfix">
           <span id="trimholdconfig">
             <input id="trimHold" name="trimHold" type="checkbox" class="configField holdCheckbox" value="true" />
-            <span id="i18n_hold_for_trim">&nbsp;Trim before encoding (with option to edit info)</span>
-          </span>
-        </li>
-        <li class="ui-helper-clearfix">
-          <span id="holdconfig">
-            <input id="reviewHold" name="reviewHold" type="checkbox" class="configField holdCheckbox" value="true" />
-            <span id="i18n_hold_for_review">&nbsp;Review after encoding (with option to edit info)</span>
+            <span id="i18n_hold_for_trim">&nbsp;Review / Trim before encoding (with option to edit info)</span>
           </span>
         </li>
         <li class="ui-helper-clearfix">
@@ -63,12 +57,6 @@
          *
          * Example:'org.opencastproject.workflow.config.myProperty' will be availible at ${my.property}
          */
-        components['org.opencastproject.workflow.config.reviewHold'] = new ocAdmin.Component(
-          ['reviewHold'],
-          {nodeKey: 'org.opencastproject.workflow.config.reviewHold'},
-          {getValue: function(){ return this.fields.reviewHold.is(":checked"); }
-          });
-
         components['org.opencastproject.workflow.config.trimHold'] = new ocAdmin.Component(
           ['trimHold'],
           {nodeKey: 'org.opencastproject.workflow.config.trimHold'},
@@ -84,7 +72,6 @@
           //etc...
       }
       ocWorkflowPanel.setComponentValues = function(values, components){
-        components['org.opencastproject.workflow.config.reviewHold'].setValue(values['org.opencastproject.workflow.config.reviewHold']);
         components['org.opencastproject.workflow.config.captionHold'].setValue(values['org.opencastproject.workflow.config.captionHold']);
         components['org.opencastproject.workflow.config.trimHold'].setValue(values['org.opencastproject.workflow.config.trimHold']);
       }
@@ -193,7 +180,7 @@
       id="trim"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Waiting for user to trim recording">
+      description="Waiting for user to review / trim recording">
       <configurations>
         <configuration key="source-flavor">*/work</configuration>
         <configuration key="target-flavor-subtype">trimmed</configuration>
@@ -201,19 +188,6 @@
         <configuration key="required-property">${trimHold}</configuration>
       </configurations>
     </operation>  
-
-    <!-- hold to review media-->
-   
-    <operation
-      id="review"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Waiting for user to review recording">
-      <configurations>
-        <configuration key="source-tag">preview</configuration>
-        <configuration key="required-property">${reviewHold}</configuration>
-      </configurations>
-    </operation>
 
     <!-- hold for captions -->
  

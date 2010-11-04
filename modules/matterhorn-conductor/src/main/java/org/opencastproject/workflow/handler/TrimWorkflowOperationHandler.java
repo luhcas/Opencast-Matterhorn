@@ -88,9 +88,9 @@ public class TrimWorkflowOperationHandler extends AbstractResumableWorkflowOpera
 
   public void activate(ComponentContext cc) {
     super.activate(cc);
-    setHoldActionTitle("Trim");
+    setHoldActionTitle("Review / Trim");
     registerHoldStateUserInterface(HOLD_UI_PATH);
-    logger.info("Registering trim hold state ui from classpath {}", HOLD_UI_PATH);
+    logger.info("Registering review / trim hold state ui from classpath {}", HOLD_UI_PATH);
   }
 
   /**
@@ -120,7 +120,7 @@ public class TrimWorkflowOperationHandler extends AbstractResumableWorkflowOpera
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
     }
 
-    logger.info("Holding for trim...");
+    logger.info("Holding for review / trim...");
 
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
   }
