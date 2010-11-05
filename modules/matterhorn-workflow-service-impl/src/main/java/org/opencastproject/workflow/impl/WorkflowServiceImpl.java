@@ -82,8 +82,15 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceImpl.class);
 
+  /** The configuration key that defines the default workflow definition */
   protected static final String WORKFLOW_DEFINITION_DEFAULT = "org.opencastproject.workflow.default.definition";
 
+  /** The number of threads to start with in the workflow instance thread pool */
+  protected static final int DEFAULT_THREADS = 1;
+
+  /** The configuration key that defines the number of threads to use in the workflow instance thread pool */
+  protected static final String WORKFLOW_THREADS_CONFIGURATION = "org.opencastproject.concurrent.jobs";
+  
   /** TODO: Remove references to the component context once felix scr 1.2 becomes available */
   protected ComponentContext componentContext = null;
 
@@ -106,7 +113,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   @Override
   public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
-    String threadPoolConfig = (String) properties.get("org.opencastproject.concurrent.jobs");
+    String threadPoolConfig = (String) properties.get(WORKFLOW_THREADS_CONFIGURATION);
     if (threadPoolConfig != null) {
       try {
         int threads = Integer.parseInt(threadPoolConfig);
@@ -114,7 +121,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
           logger.debug("Creating a new thread pool of size {}", threads);
           this.executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(threads);
         } else {
-          logger.debug("Setting thread pool to size {}", threads);
+          logger.debug("Resetting thread pool size to {}", threads);
           this.executorService.setCorePoolSize(threads);
         }
       } catch (NumberFormatException e) {
@@ -219,8 +226,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    */
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
-    logger.debug("Creating a new thread pool with default size: 1");
-    executorService = (ThreadPoolExecutor)Executors.newFixedThreadPool(1);
+    logger.debug("Creating a new thread pool with default size of {}", DEFAULT_THREADS);
+    executorService = (ThreadPoolExecutor)Executors.newFixedThreadPool(DEFAULT_THREADS);
   }
 
   /**
