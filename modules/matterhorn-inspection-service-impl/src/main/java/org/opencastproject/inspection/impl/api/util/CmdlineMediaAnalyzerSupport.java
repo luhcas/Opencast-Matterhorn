@@ -19,6 +19,7 @@ package org.opencastproject.inspection.impl.api.util;
 import org.opencastproject.inspection.impl.api.MediaAnalyzer;
 import org.opencastproject.inspection.impl.api.MediaAnalyzerException;
 import org.opencastproject.inspection.impl.api.MediaContainerMetadata;
+import org.opencastproject.util.ProcessExcecutorException;
 import org.opencastproject.util.ProcessExecutor;
 
 import java.io.File;
@@ -48,39 +49,57 @@ public abstract class CmdlineMediaAnalyzerSupport implements MediaAnalyzer {
     if (binary == null) {
       throw new IllegalStateException("Binary is not set");
     }
+    
+    ProcessExecutor<MediaAnalyzerException> mediaAnalyzer = null;
+    
     // Version check (optional)
     String versionCheck = getVersionCheckOptions();
     if (versionCheck != null) {
+
+      // This is an array only because it needs to be final and hold a modifiable boolean
       final boolean[] ok = new boolean[] { false };
-      new ProcessExecutor<MediaAnalyzerException>(binary, versionCheck) {
+      mediaAnalyzer = new ProcessExecutor<MediaAnalyzerException>(binary, versionCheck) {
         @Override
         protected boolean onLineRead(String line) {
           ok[0] |= onVersionCheck(line);
           return true;
         }
-
         @Override
         protected void onProcessFinished(int exitCode) throws MediaAnalyzerException {
           onFinished(exitCode);
         }
-      }.execute();
+      };
+      
+      try {
+        mediaAnalyzer.execute();
+      } catch (ProcessExcecutorException e) {
+        throw new MediaAnalyzerException("Excecuting the version check on " + binary + " failed", e);
+      }
+      
       if (!ok[0]) {
         throw new MediaAnalyzerException(this.getClass().getSimpleName() + ": Binary does not have the right version");
       }
     }
+    
     // Analyze
-    new ProcessExecutor<MediaAnalyzerException>(binary, getAnalysisOptions(media)) {
+    mediaAnalyzer = new ProcessExecutor<MediaAnalyzerException>(binary, getAnalysisOptions(media)) {
       @Override
       protected boolean onLineRead(String line) {
         onAnalysis(line);
         return true;
       }
-
       @Override
       protected void onProcessFinished(int exitCode) throws MediaAnalyzerException {
         onFinished(exitCode);
       }
-    }.execute();
+    };
+    
+    try {
+      mediaAnalyzer.execute();
+    } catch (ProcessExcecutorException e) {
+      throw new MediaAnalyzerException("Error while running media analyzer " + binary, e);
+    }
+
     postProcess();
     return metadata;
   }

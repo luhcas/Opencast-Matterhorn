@@ -28,7 +28,7 @@ import java.util.List;
  * 
  * A generic Exception should be used to indicate what types of checked exceptions might be thrown from this process.
  */
-public abstract class ProcessExecutor<T extends Exception> {
+public class ProcessExecutor<T extends Exception> {
 
   private boolean redirectErrorStream = true;
   private String[] commandLine;
@@ -64,9 +64,10 @@ public abstract class ProcessExecutor<T extends Exception> {
     this.redirectErrorStream = redirectErrorStream;
   }
 
-  public void execute() throws T {
+  public final void execute() throws ProcessExcecutorException {
     BufferedReader in = null;
     Process process = null;
+    StreamHelper errorStreamHelper = null;
     try {
       // create process.
       // no special working dir is set which means the working dir of the
@@ -76,7 +77,7 @@ public abstract class ProcessExecutor<T extends Exception> {
       process = pbuilder.start();
       // Consume error stream if necessary
       if (!redirectErrorStream) {
-        new StreamHelper(process.getErrorStream());
+        errorStreamHelper = new StreamHelper(process.getErrorStream());
       }
       // Read input and
       in = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -90,8 +91,15 @@ public abstract class ProcessExecutor<T extends Exception> {
       process.waitFor();
       int exitCode = process.exitValue();
       onProcessFinished(exitCode);
-    } catch (Exception e) {
-      onError(e);
+    } catch (Throwable t) {
+      String msg = null;
+      if (errorStreamHelper != null) {
+        msg = errorStreamHelper.contentBuffer.toString();
+      }
+      
+      // TODO: What if the error stream has been redirected? Can we still get the error messgae?
+      
+      throw new ProcessExcecutorException(msg, t);
     } finally {
       IoSupport.closeQuietly(process);
       IoSupport.closeQuietly(in);
@@ -103,10 +111,6 @@ public abstract class ProcessExecutor<T extends Exception> {
   }
 
   protected void onProcessFinished(int exitCode) throws T {
-  }
-
-  protected void onError(Exception e) {
-    throw new RuntimeException(e);
   }
 
 }

@@ -17,6 +17,7 @@
 package org.opencastproject.analysis.text.ocropus;
 
 import org.opencastproject.analysis.api.MediaAnalysisException;
+import org.opencastproject.util.ProcessExcecutorException;
 import org.opencastproject.util.ProcessExecutor;
 
 import org.apache.commons.io.IOUtils;
@@ -90,18 +91,23 @@ public class OcropusTextAnalyzer {
     ocrocmdOutput = new StringBuffer();
 
     // Analyze
-    new ProcessExecutor<MediaAnalysisException>(binary, getAnalysisOptions(image)) {
+    ProcessExecutor<MediaAnalysisException> analyzer = new ProcessExecutor<MediaAnalysisException>(binary, getAnalysisOptions(image)) {
       @Override
       protected boolean onLineRead(String line) {
         onAnalysis(line);
         return true;
       }
-
       @Override
       protected void onProcessFinished(int exitCode) throws MediaAnalysisException {
         onFinished(exitCode);
       }
-    }.execute();
+    };
+    
+    try {
+      analyzer.execute();
+    } catch (ProcessExcecutorException e) {
+      throw new MediaAnalysisException("Error running text analyzer " + binary, e);
+    }
 
     postProcess();
     return textFrame;
