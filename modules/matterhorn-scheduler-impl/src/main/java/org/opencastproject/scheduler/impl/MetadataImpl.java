@@ -24,6 +24,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
@@ -38,6 +39,7 @@ public class MetadataImpl implements Metadata {
   @Id
   @Column(name = "ID", length=128)
   @GeneratedValue
+  @XmlTransient
   protected long id;
   
   @Column(name="MD_KEY")

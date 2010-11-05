@@ -34,7 +34,6 @@ import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.impl.EventImpl;
 import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
-import org.opencastproject.scheduler.impl.SchedulerFilterImpl;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.api.SeriesService;
@@ -154,12 +153,12 @@ public class AdminuiRestService {
           @QueryParam("title") boolean filterTitle,
           @QueryParam("creator") boolean filterCreator,
           @QueryParam("series") boolean filterSeries) {
-    SchedulerFilter filter = new SchedulerFilterImpl();
+    SchedulerFilter filter = new SchedulerFilter();
     if (filterTitle) {
-      filter.setTitleFilter(filterString);
+      filter.withTitleFilter(filterString);
     }
     if (filterCreator) {
-      filter.setCreatorFilter(filterString);
+      filter.withCreatorFilter(filterString);
     }
     if (filterSeries) {
       //todo series;
@@ -179,25 +178,17 @@ public class AdminuiRestService {
           @QueryParam("title") boolean filterTitle,
           @QueryParam("creator") boolean filterCreator,
           @QueryParam("series") boolean filterSeries) {
-    SchedulerFilter filter = new SchedulerFilterImpl();
+    SchedulerFilter filter = new SchedulerFilter();
     if (filterTitle) {
-      filter.setTitleFilter(filterString);
+      filter.withTitleFilter(filterString);
     }
     if (filterCreator) {
-      filter.setCreatorFilter(filterString);
+      filter.withCreatorFilter(filterString);
     }
     if (filterSeries) {
-      //todo series;
+      filter.withSeriesFilter(filterString);
     }
     return getRecordings(state, pageNumber, pageSize, sortBy, sortOrder, filter);
-  }
-
-  private String ensureString(String in) {
-    if (in != null) {
-      return in;
-    } else {
-      return "";
-    }
   }
 
   /**
@@ -487,8 +478,8 @@ public class AdminuiRestService {
       int upcoming = 0;
       List<Event> events = schedulerService.getUpcomingEvents();
       for (Event event : events) {
-        if (event.getStartdate() != null) {
-          if (System.currentTimeMillis() < ((EventImpl) event).getStartdate().getTime()) {
+        if (event.getStartDate() != null) {
+          if (System.currentTimeMillis() < ((EventImpl) event).getStartDate().getTime()) {
             upcoming++;
             total++;
           }
@@ -517,8 +508,8 @@ public class AdminuiRestService {
   private LinkedList<AdminRecording> getFailedCaptureJobs() {
     LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
     if ((schedulerService != null) && (captureAdminService != null)) {
-      SchedulerFilter filter = schedulerService.getNewSchedulerFilter();
-      filter.setEnd(new Date(System.currentTimeMillis() + CAPTURE_AGENT_DELAY));
+      SchedulerFilter filter = new SchedulerFilter();
+      filter.withStop(new Date(System.currentTimeMillis() + CAPTURE_AGENT_DELAY));
       List<Event> events = schedulerService.getEvents(filter);
       for (Event event : events) {
         Recording recording = captureAdminService.getRecordingState(event.getEventId());
@@ -535,14 +526,14 @@ public class AdminuiRestService {
           AdminRecordingImpl item = new AdminRecordingImpl();
           item.setItemType(AdminRecording.ItemType.SCHEDULER_EVENT);
           item.setId(event.getEventId());
-          item.setTitle(event.getValue("title"));
-          item.setPresenter(event.getValue("creator"));
+          item.setTitle(event.getTitle());
+          item.setPresenter(event.getCreator());
           item.setSeriesTitle(getSeriesNameFromEvent(event));
-          if (event.getStartdate() != null) {
-            item.setStartTime(Long.toString(event.getStartdate().getTime()));
+          if (event.getStartDate() != null) {
+            item.setStartTime(Long.toString(event.getStartDate().getTime()));
           }
-          if (event.getEnddate() != null) {
-            item.setEndTime(Long.toString(event.getEnddate().getTime()));
+          if (event.getEndDate() != null) {
+            item.setEndTime(Long.toString(event.getEndDate().getTime()));
           }
           if (recording != null) {
             item.setProcessingStatus("Failed during capture" /*recording.getState()*/);
@@ -565,21 +556,21 @@ public class AdminuiRestService {
    */
   private LinkedList<AdminRecording> getUpcomingRecordings(SchedulerFilter filter) {
     LinkedList<AdminRecording> out = new LinkedList<AdminRecording>();
-    filter.setStart(new Date(System.currentTimeMillis()));
+    filter.withStart(new Date(System.currentTimeMillis()));
     if (schedulerService != null) {
       logger.debug("getting upcoming recordings from scheduler");
       List<Event> events = schedulerService.getEvents(filter);
       for (Event event : events) {
-        if (event.getStartdate() != null && System.currentTimeMillis() < event.getStartdate().getTime()) {
+        if (event.getStartDate() != null && System.currentTimeMillis() < event.getStartDate().getTime()) {
           AdminRecording item = new AdminRecordingImpl();
           item.setId(event.getEventId());
           item.setItemType(AdminRecording.ItemType.SCHEDULER_EVENT);
-          item.setTitle(event.getValue("title"));
-          item.setPresenter(event.getValue("creator"));
+          item.setTitle(event.getTitle());
+          item.setPresenter(event.getCreator());
           item.setSeriesTitle(getSeriesNameFromEvent(event));
-          item.setStartTime(Long.toString(event.getStartdate().getTime()));
-          item.setEndTime(Long.toString(event.getEnddate().getTime()));
-          item.setCaptureAgent(event.getValue("device"));
+          item.setStartTime(Long.toString(event.getStartDate().getTime()));
+          item.setEndTime(Long.toString(event.getEndDate().getTime()));
+          item.setCaptureAgent(event.getDevice());
           item.setProcessingStatus("Scheduled");
           item.setDistributionStatus("not distributed");
           out.add(item);
@@ -611,12 +602,12 @@ public class AdminuiRestService {
               AdminRecording item = new AdminRecordingImpl();
               item.setId(event.getEventId());
               item.setItemType(AdminRecording.ItemType.SCHEDULER_EVENT);
-              item.setTitle(event.getValue("title"));
-              item.setPresenter(event.getValue("creator"));
+              item.setTitle(event.getTitle());
+              item.setPresenter(event.getCreator());
               item.setSeriesTitle(getSeriesNameFromEvent(event));
-              item.setStartTime(Long.toString(event.getStartdate().getTime()));
-              item.setEndTime(Long.toString(event.getEnddate().getTime()));
-              item.setCaptureAgent(event.getValue("device"));
+              item.setStartTime(Long.toString(event.getStartDate().getTime()));
+              item.setEndTime(Long.toString(event.getEndDate().getTime()));
+              item.setCaptureAgent(event.getDevice());
               item.setProcessingStatus(r.getState());
               out.add(item);
             } else {
@@ -756,7 +747,7 @@ public class AdminuiRestService {
   }
 
   public String getSeriesNameFromEvent(Event event) {
-    String seriesId = event.getValue("seriesId");
+    String seriesId = event.getSeriesId();
     if (seriesId != null && !seriesId.isEmpty()) {
       return getSeriesNameById(seriesId);
     }

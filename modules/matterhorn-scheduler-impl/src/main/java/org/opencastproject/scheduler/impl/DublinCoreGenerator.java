@@ -87,12 +87,12 @@ public class DublinCoreGenerator {
    */
   public DublinCoreCatalog generate (Event event) {
     logger.debug("creating Dublin Core  information for event {}", event.getEventId());
-    Hashtable<String, String> dcMetadata =  mapper.convert(event.getMetadata());
+    Hashtable<String, String> dcMetadata =  mapper.convert(event.getMetadataList());
     
     DublinCoreCatalog dcCatalog = DublinCoreCatalogImpl.newInstance();
 
     dcCatalog.add(DublinCore.PROPERTY_IDENTIFIER, new DublinCoreValue(event.getEventId()));
-    dcCatalog.add(DublinCore.PROPERTY_CREATED, EncodingSchemeUtils.encodeDate(event.getStartdate(), Precision.Second));
+    dcCatalog.add(DublinCore.PROPERTY_CREATED, EncodingSchemeUtils.encodeDate(event.getStartDate(), Precision.Second));
     for (String key : dcMetadata.keySet()) {  
       if (validDcKey(key)) {
         DublinCoreValue value = new DublinCoreValue(dcMetadata.get(key));

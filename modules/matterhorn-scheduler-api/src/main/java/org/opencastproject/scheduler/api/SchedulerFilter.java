@@ -17,177 +17,154 @@ package org.opencastproject.scheduler.api;
 
 import java.util.Date;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ParameterExpression;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
 /**
  * The Scheduler Filter is used to filter the events that would come back from an search operation on the database.
- *
+ * 
  */
-public interface SchedulerFilter {
-  /**
-   * Gets the event ID for which should be filtered (will probably deliver only one event).
-   * @return The ID of the event
-   */
-  public String getEventIDFilter();
-  
-  /**
-   * Sets the event ID for which should be filtered (will probably deliver only one event). Only a complete ID can be entered not a pattern.
-   * @param eventID The ID of the event
-   */
-  public void setEventIDFilter(String eventID);
-  
+public class SchedulerFilter {
+
+  protected String devicePattern;
+  protected String titlePattern;
+  protected String creatorPattern;
+  protected String seriesPattern;
+  protected String order;
+  protected Date start;
+  protected Date stop;
+
   /**
    * Gets the search Pattern for the device ID. Can be a part of the device ID.
+   * 
    * @return The pattern for which the device ID should be filtered
    */
-  public String getDeviceFilter();
-  
+  public String getDeviceFilter() {
+    return devicePattern;
+  }
+
   /**
-   * Sets the search Pattern for the device ID. Can be a part of the device ID. Every device ID that has this pattern as a part will be returned.
-   * @param devicePattern The pattern for which device ID should be filtered
+   * Sets the search Pattern for the device ID. Can be a part of the device ID. Every device ID that has this pattern as
+   * a part will be returned.
+   * 
+   * @param devicePattern
+   *          The pattern for which device ID should be filtered
    */
-  public void setDeviceFilter(String devicePattern);
-  
+  public SchedulerFilter withDeviceFilter(String devicePattern) {
+    this.devicePattern = devicePattern;
+    return this;
+  }
+
+  public String getCreatorFilter() {
+    return creatorPattern;
+  }
+
+  public SchedulerFilter withCreatorFilter(String creatorPattern) {
+    this.creatorPattern = creatorPattern;
+    return this;
+  }
+
   /**
    * Gets the search Pattern for the title. Can be a part of the title.
+   * 
    * @return The pattern for which the title should be filtered
    */
-  public String getTitleFilter();
+  public String getTitleFilter() {
+    return titlePattern;
+  }
+
+  /**
+   * Sets the search pattern for the title. Can be a part of the title. Every title that has this pattern as a part will
+   * be returned.
+   * 
+   * @param titlePattern
+   *          The pattern for which title should be filtered
+   */
+  public SchedulerFilter withTitleFilter(String titlePattern) {
+    this.titlePattern = titlePattern;
+    return this;
+  }
+  
+  public String getSeriesFilter() {
+    return seriesPattern;
+  }
   
   /**
-   * Sets the search pattern for the title. Can be a part of the title. Every title that has this pattern as a part will be returned.
-   * @param titlePattern The pattern for which title should be filtered
+   * Sets the search pattern for the series title. Can be a part of the series title. Every series title that has
+   * a part of this pattern will be returned.
+   *
+   * @param seriesPattern
+   *        The pattern for which series title should be filtered.
    */
-  public void setTitleFilter(String titlePattern);
-  
-  /**
-   * Gets the search pattern for the creator. Can be a part of the creator.
-   * @return The pattern for which the creator should be filtered
-   */
-  public String getCreatorFilter();
-  
-  /**
-   * Sets the search pattern for the creator. Can be a part of the creator. Every creator that has this pattern as a part will be returned.
-   * @param creatorPattern The pattern for which the creator should be filtered
-   */
-  public void setCreatorFilter(String creatorPattern);
-  
-  /**
-   * Gets the search pattern for the abstract. Can be a part of the abstract.
-   * @return The pattern for which the abstract should be filtered
-   */
-  public String getAbstractFilter();
-  
-  /**
-   * Sets the search pattern for the abstract. Can be a part of the abstract. Every abstract that has this pattern as a part will be returned.
-   * @param text The pattern for which the abstract should be filtered
-   */
-  public void setAbstractFilter(String text);
-  
+  public SchedulerFilter withSeriesFilter(String seriesPattern) {
+    this.seriesPattern = seriesPattern;
+    return this;
+  }
+
   /**
    * Gets the beginning of the period in which the event should be that will be returned
+   * 
    * @return The beginning of the period
    */
-  public Date getStart();
-  
+  public Date getStart() {
+    return start;
+  }
+
   /**
    * Sets the beginning of the period in which the event should be that will be returned
-   * @param start The beginning of the period
+   * 
+   * @param start
+   *          The beginning of the period
    */
-  public void setStart(Date start);
-  
+  public SchedulerFilter withStart(Date start) {
+    this.start = start;
+    return this;
+  }
+
   /**
    * Gets the end of the period in which the event should be that will be returned
+   * 
    * @return The end of the period
    */
-  public Date getEnd();
-  
+  public Date getStop() {
+    return stop;
+  }
+
   /**
    * Sets the end of the period in which the event should be that will be returned
-   * @param end The end of the period
+   * 
+   * @param end
+   *          The end of the period
    */
-  public void setEnd(Date end);
-  
+  public SchedulerFilter withStop(Date stop) {
+    this.stop = stop;
+    return this;
+  }
+
   /**
-   * Gets the search pattern for the contributor. Can be a part of the contributor.
-   * @return The pattern for which the contributor should be filtered
+   * Sets the attribute by which the results should be ordered
+   * 
+   * @param order
+   *          eventID | seriesID | channelID | deviceID | location | creator | contributor | date
    */
-  public String getContributorFilter();
-  
+  public SchedulerFilter withOrder(String order) {
+    this.order = order;
+    return this;
+  }
+
   /**
-   * Sets the search pattern for the contributor. Can be a part of the contributor. Every contributor that has this pattern as a part will be returned.
-   * @param contributorPattern The pattern for which the contributor should be filtered
-   */
-  public void setContributorFilter(String contributorPattern);
-  
-  /**
-   * Gets the ID of the series for which the event should be filtered. Has to be the complete ID 
-   * @return The ID of the Series
-   */
-  public String getSeriesIDFilter();
-  
-  /**
-   * Sets the ID of the series for which the event should be filtered. Has to be the complete ID 
-   * @param seriesID The ID of the Series
-   */
-  public void setSeriesIDFilter(String seriesID);
-  
-  /**
-   *  Gets the ID of the channel for which the event should be filtered. Has to be the complete ID
-   * @return channelID of the channel
-   */
-  public String getChannelIDFilter();
-  
-  /**
-   * Sets the ID of the channel for which the event should be filtered. Has to be the complete ID
-   * @param channelID ChannelID of the channel
-   */
-  public void setChannelIDFilter(String channelID);
-  
-  /**
-   * Gets the search pattern for the location. Can be a part of the location.
-   * @return The pattern for which the location should be filtered
-   */
-  public String getLocationFilter();
-  
-  /**
-   * Sets the search pattern for the location. Can be a part of the location. Every location that has this pattern as a part will be returned.
-   * @param locationPattern The pattern for which the location should be filtered
-   */
-  public void setLocationFilter(String locationPattern);
-  
-  /**
-   * Gets the search pattern for the resources. Can be a part of a single resources entry.
-   * @return The pattern for which the resources should be filtered
-   */
-  public String getResourceFilter();
-  
-  /**
-   * Sets the search pattern for the resources. Can be a part of the resources. Every resource that has this pattern as a part will be returned.
-   * @param resourcePattern The pattern for which the resources should be filtered
-   */
-  public void setResourceFilter (String resourcePattern);
-  
-  /**
-   * Gets the search pattern for the attendee. Can be a part of a single attendee entry.
-   * @return The pattern for which the attendees should be filtered
-   */
-  public String getAttendeeFilter();
-  
-  /**
-   * Sets the search pattern for the attendee. Can be a part of the attendees. Every attendee that has this pattern as a part will be returned.
-   * @param attendeePattern The pattern for which the attendees should be filtered
-   */
-  public void setAttendeeFilter (String attendeePattern);
-  
-  /**
-   * Sets the attribute by which the results should be ordered 
-   * @param order eventID | seriesID | channelID | deviceID | location | creator | contributor | date
-   */
-  public boolean setOrderBy (String order);
-  
-  /**
-   * Gets the attribute by which the results should be ordered 
+   * Gets the attribute by which the results should be ordered
+   * 
    * @return eventID | seriesID | channelID | deviceID | location | creator | contributor | date
    */
-  public String getOrderBy ();
-  
+  public String getOrder() {
+    return order;
+  }
+
 }

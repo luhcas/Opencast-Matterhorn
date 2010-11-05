@@ -13,23 +13,19 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.scheduler.endpoint;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
+package org.opencastproject.scheduler.api;
 
-/**
- * JaxB implementation of metadata fields in the Scheduler Event 
- *
- */
-@XmlType(name="metadata")
-@XmlAccessorType(XmlAccessType.FIELD)
-public class SchedulerEventMetadataJaxbImpl {
-  @XmlAttribute(name="key")
-  String key;
-  @XmlElement
-  String value;
+public class IncompleteDataException extends Exception {
+
+  private static final long serialVersionUID = 1L;
+  
+  public IncompleteDataException () {
+    super();
+  }
+  
+  public IncompleteDataException (String message) {
+    super (message);
+  }
+
 }

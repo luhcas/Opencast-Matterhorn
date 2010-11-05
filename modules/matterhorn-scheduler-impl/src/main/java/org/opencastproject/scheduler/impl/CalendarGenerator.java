@@ -106,8 +106,8 @@ public class CalendarGenerator {
    */
   public boolean addEvent (Event e) {
     logger.debug("creating iCal VEvent from SchedulerEvent: {}", e.toString());
-    Date start = e.getStartdate();
-    Date end = e.getEnddate();
+    Date start = e.getStartDate();
+    Date end = e.getEndDate();
     if(start == null){
       logger.debug("Couldn't get startdate from event!");
       return false;
@@ -122,24 +122,24 @@ public class CalendarGenerator {
     endDate.setUtc(true);
     String seriesID = null;
     
-    VEvent event = new VEvent(startDate, endDate, e.getValue("title"));
+    VEvent event = new VEvent(startDate, endDate, e.getTitle());
     try {
       ParameterList pl = new ParameterList();
-      pl.add(new Cn(e.getValue("creator")));
+      pl.add(new Cn(e.getCreator()));
       event.getProperties().add(new Uid(e.getEventId()));
       
       // TODO Organizer should be URI (email-address?) created fake address
-      if (e.containsKey("creator") && ! e.getValue("creator").equalsIgnoreCase("null")) {
-        event.getProperties().add(new Organizer(pl ,e.getValue("creator").replace(" ", "_")+"@matterhorn.opencast"));
+      if (!e.getCreator().equalsIgnoreCase("null")) {
+        event.getProperties().add(new Organizer(pl ,e.getCreator().replace(" ", "_")+"@matterhorn.opencast"));
       }
-      if (e.containsKey("abstract") && ! e.getValue("abstract").equalsIgnoreCase("null")) {
-        event.getProperties().add(new Description(e.getValue("abstract")));
+      if (!e.getDescription().equalsIgnoreCase("null")) {
+        event.getProperties().add(new Description(e.getDescription()));
       }
-      if (e.containsKey("location") && ! e.getValue("location").equalsIgnoreCase("null")) {
-        event.getProperties().add(new Location(e.getValue("location")));
+      if (e.containsKey("location") && !e.getMetadataValueByKey("location").equalsIgnoreCase("null")) {
+        event.getProperties().add(new Location(e.getMetadataValueByKey("location")));
       }
-      if (e.containsKey("seriesId") && ! e.getValue("seriesId").equalsIgnoreCase("null")) {
-        seriesID = e.getValue("seriesId");
+      if (!e.getSeries().equalsIgnoreCase("null")) {
+        seriesID = e.getSeries();
         event.getProperties().add(new RelatedTo(seriesID));
       }
 

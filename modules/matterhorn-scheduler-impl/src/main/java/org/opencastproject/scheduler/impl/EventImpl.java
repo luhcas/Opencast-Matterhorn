@@ -17,19 +17,25 @@ package org.opencastproject.scheduler.impl;
 
 import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.Metadata;
-import org.opencastproject.scheduler.api.RecurringEvent;
+import org.opencastproject.scheduler.api.IncompleteDataException;
 import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
-import org.opencastproject.scheduler.impl.IncompleteDataException;
 
+import net.fortuna.ical4j.model.DateList;
+import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Recur;
+import net.fortuna.ical4j.model.parameter.Value;
+import net.fortuna.ical4j.model.property.RRule;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
+import java.util.TimeZone;
+import java.text.ParseException;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -39,7 +45,6 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -47,16 +52,15 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 /**
  * An Event has a unique ID, a relation to the recurring event from which it was created and a set of metadata. Even the
  * start- and end-time is stored in the set of metadata, with the keys "timeStart" and "timeEnd" as long value
@@ -69,67 +73,280 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @Entity(name = "Event")
 @Access(AccessType.FIELD)
 @Table(name = "SCHED_EVENT")
-public class EventImpl extends AbstractEvent implements Event {
-
-  public EventImpl() {
-
-  }
-
+public class EventImpl implements Event {
+  
+  @XmlID
+  @Id
+  @Column(name = "ID", length = 128)
+  protected String eventId;
+  
+  @XmlElement(name="contributor")
+  protected String contributor;
+  @XmlElement(name="creator")
+  protected String creator;
+  @XmlElement(name="description")
+  @Column(columnDefinition = "CLOB")
+  protected String description;
+  @XmlElement(name="device")
+  protected String device;
+  @XmlElement(name="duration")
+  protected long duration;
+  @XmlElement(name="endDate")
+  @XmlJavaTypeAdapter(value=DateAdapter.class, type=Date.class)
+  @Temporal(TemporalType.TIMESTAMP)
+  protected Date   endDate;
+  @XmlElement(name="language")
+  protected String language;
+  @XmlElement(name="license")
+  protected String license;
+  @XmlElement(name="recurrence")
+  protected String recurrence;
+  @XmlElement(name="recurrencePattern")
+  protected String recurrencePattern;
+  @XmlElement(name="resources")
+  protected String resources;
+  @XmlElement(name="series")
+  protected String series;
+  @XmlElement(name="seriesId")
+  protected String seriesId;
+  @XmlElement(name="startDate")
+  @XmlJavaTypeAdapter(value=DateAdapter.class, type=Date.class)
+  @Temporal(TemporalType.TIMESTAMP)
+  protected Date   startDate;
+  @XmlElement(name="subject")
+  protected String subject;
+  @XmlElement(name="title")
+  protected String title;
+  
+  // FIXME: Do we really need a join table here? How about a composite key (event id + metadata key) in the metadata
+  // table?
+  @XmlElementWrapper(name = "additionalMetadata")
+  @XmlElement(name = "metadata")
+  @OneToMany(fetch = FetchType.EAGER, targetEntity = MetadataImpl.class, cascade = CascadeType.ALL)
+  @JoinTable(name = "SCHED_EVENT_METADATA", joinColumns = { @JoinColumn(name = "EVENT_ID") },
+             inverseJoinColumns = { @JoinColumn(name = "METADATA_ID") })
+  protected List<MetadataImpl> additionalMetadata = new LinkedList<MetadataImpl>();
+  
+  public EventImpl() {}
+  
   public EventImpl(String xml) {
     try {
       EventImpl e = EventImpl.valueOf(xml);
       this.setEventId(e.getEventId());
-      this.setMetadata(e.getCompleteMetadata());
+      initializeFromEvent(e);
     } catch (Exception e) {
       logger.warn("Could not parse Event XML {}", xml);
     }
   }
-
+  
   private static final Logger logger = LoggerFactory.getLogger(Event.class);
-
-  @XmlID
-  @Id
-  @GeneratedValue
-  @Column(name = "ID", length = 128)
-  protected String eventId;
-
-  @Transient
-  @XmlTransient
-  RecurringEvent recurringEvent = null;
-
-  // FIXME: Do we really need a join table here? How about a composite key (event id + metadata key) in the metadata
-  // table?
-  @XmlElementWrapper(name = "metadataList")
-  @XmlElement(name = "metadata")
-  @OneToMany(fetch = FetchType.EAGER, targetEntity = MetadataImpl.class, cascade = CascadeType.ALL)
-  @JoinTable(name = "SCHED_EVENT_METADATA", joinColumns = { @JoinColumn(name = "EVENT_ID") },
-          inverseJoinColumns = { @JoinColumn(name = "METADATA_ID") })
-  protected List<MetadataImpl> metadata = new LinkedList<MetadataImpl>();
-
+  
   /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.Event#getRecurringEventId()
+   * @return Event contributor
    */
-  @Override
-  public String getRecurringEventId() {
-    Metadata m = findMetadata("recurrenceId");
-    if (m == null) {
-      logger.debug("recurring event for event {} not found", getEventId());
-      return null;
-    }
-    return m.getValue();
+  public String getContributor() {
+    return contributor;
   }
   /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.Event#setRecurringEventId()
+   * @param Event contributor
    */
-  @Override
-  public void setRecurringEventId(String recurringEventId) {
-    updateMetadata(new MetadataImpl("recurrenceId", recurringEventId));
+  public void setContributor(String contributor){
+    this.contributor = contributor;
+  }
+  /**
+   * @return Event creator
+   */
+  public String getCreator(){
+    return creator;
+  }
+  /**
+   * @param Event creator
+   */
+  public void setCreator(String creator){
+    this.creator = creator;
+  }
+  /**
+   * @return Event description
+   */
+  public String getDescription(){
+    return description;
+  }
+  /**
+   * @param Event description
+   */
+  public void setDescription(String description){
+    this.description = description;
+  }
+  /**
+   * @return Event capture device name
+   */
+  public String getDevice(){
+    return device;
+  }
+  /**
+   * @param Event capture device name
+   */
+  public void setDevice(String device){
+    this.device = device;
+  }
+  /**
+   * @return Event duration
+   */
+  public long getDuration(){
+    if(duration == 0 && endDate != null && startDate != null){
+      duration = endDate.getTime() - startDate.getTime();
+    }
+    return duration;
+  }
+  /**
+   * @param Event duration
+   */
+  public void setDuration(long duration){
+    this.duration = duration;
+  }
+  /**
+   * @return Event end date
+   */
+  public Date getEndDate(){
+    return endDate;
+  }
+  /**
+   * @param Event end date
+   */
+  public void setEndDate(Date endDate){
+    this.endDate = endDate;
+  }
+  /**
+   * @return Event id
+   */
+  public String getEventId(){
+    return eventId;
+  }
+  /**
+   * @param eventId
+   */
+  public void setEventId(String eventId){
+    this.eventId = eventId;
+  }
+  /**
+   * @return Event langauge
+   */
+  public String getLanguage(){
+    return language;
+  }
+  /**
+   * @param Event languge
+   */
+  public void setLanguage(String language){
+    this.language = language;
+  }
+  /**
+   * @return Event license
+   */
+  public String getLicense(){
+    return license;
+  }
+  /**
+   * @param Event license
+   */
+  public void setLicense(String license){
+    this.license = license;
+  }
+  /**
+   * @return Event recurrence name
+   */
+  public String getRecurrence(){
+    return recurrence;
+  }
+  /**
+   * @param Event recurrence name
+   */
+  public void setRecurrence(String recurrence){
+    this.recurrence = recurrence;
+  }
+  /**
+   * @return Event recurrence pattern
+   */
+  public String getRecurrencePattern(){
+    return recurrencePattern;
+  }
+  /**
+   * @param Event recurrence pattern
+   */
+  public void setRecurrencePattern(String recurrence){
+    this.recurrencePattern = recurrence;
+  }
+  /**
+   * @return Capture agent resources
+   */
+  public String getResources(){
+    return resources;
+  }
+  /**
+   * @param Capture agent resources
+   */
+  public void setResources(String resources){
+    this.resources = resources;
+  }
+  /**
+   * @return Event series name
+   */
+  public String getSeries(){
+    return series;
+  }
+  /**
+   * @param Event series name
+   */
+  public void setSeries(String series){
+    this.series = series;
+  }
+  /**
+   * @return Event series id
+   */
+  public String getSeriesId(){
+    return seriesId;
+  }
+  /**
+   * @param Event series id
+   */
+  public void setSeriesId(String seriesId){
+    this.seriesId = seriesId;
+  }
+  /**
+   * @return Event start date
+   */
+  public Date getStartDate(){
+    return startDate;
+  }
+  /**
+   * @param Event start date
+   */
+  public void setStartDate(Date startDate){
+    this.startDate = startDate;
+  }
+  /**
+   * @return String Event subject
+   */
+  public String getSubject(){
+    return subject;
+  }
+  /**
+   * @param Event subject
+   */
+  public void setSubject(String subject){
+    this.subject = subject;
+  }
+  /**
+   * @return String Event title
+   */
+  public String getTitle(){
+    return title;
+  }
+  /**
+   * @param Event title
+   */
+  public void setTitle(String title){
+    this.title = title;
   }
   /**
    * 
@@ -137,128 +354,13 @@ public class EventImpl extends AbstractEvent implements Event {
    * 
    * @see org.opencastproject.scheduler.api.Event#updateMetadata()
    */
-  @Override
   public void updateMetadata(Metadata data) {
-    if (containsKey(data.getKey())) {
-      for (Metadata olddata : getCompleteMetadata()) {
-        if (olddata.getKey().equals(data.getKey())) {
-          olddata.setValue(data.getValue());
-          break;
-        }
-      }
+    Metadata found = findMetadata(data.getKey());
+    if (found != null) {
+      found.setValue(data.getValue());
     } else {
-      metadata.add((MetadataImpl)data);
+      additionalMetadata.add((MetadataImpl)data);
     }
-    metadataTable = null;
-  }
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.Event#getPositionInRecurrence()
-   */
-  @Override
-  public int getPositionInRecurrence() {
-    if (!containsKey("recurrencePosition"))
-      return 0;
-    try {
-      return Integer.parseInt(getValue("recurrencePosition"));
-    } catch (NumberFormatException e) {
-      logger.warn("Could not parse value for recurrence position: {}", getValue("recurrencePosition"));
-      return 0;
-    }
-  }
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.Event#setPositionInRecurrence()
-   */
-  @Override
-  public void setPositionInRecurrence(int positionInRecurrence) {
-    updateMetadata(new MetadataImpl("recurrencePosition", new Integer(positionInRecurrence).toString()));
-  }
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.Event#getEventId()
-   */
-  @Override
-  public String getEventId() {
-    return eventId;
-  }
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.Event#setEventId()
-   */
-  @Override
-  public void setEventId(String eventId) {
-    this.eventId = eventId;
-  }
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.Event#generateId()
-   */
-  @Override
-  public String generateId() {
-    return eventId = super.generateId();
-  }
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.Event#getRecurringEvent()
-   */
-  @Override
-  public RecurringEvent getRecurringEvent() {
-    if (recurringEvent != null) return recurringEvent;
-    if (getRecurringEventId() != null && recurringEvent == null) {
-      recurringEvent = RecurringEventImpl.find(getRecurringEventId(), emf);
-      metadataTable = null;
-    }
-    return recurringEvent;
-  }
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.Event#setRecurringEvent()
-   */
-  @Override
-  public void setRecurringEvent(RecurringEvent recurringEvent) {
-    this.recurringEvent = recurringEvent;
-    if (getRecurringEventId() != null)
-      setRecurringEventId(recurringEvent.getRecurringEventId());
-  }
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.Event#getCompleteMetadata()
-   */
-  @Override
-  @XmlElementWrapper(name = "completeMetadata")
-  @XmlElement(name = "metadata")
-  @XmlJavaTypeAdapter(MetadataImpl.Adapter.class)
-  public List<Metadata> getCompleteMetadata() {
-    Hashtable<String, Metadata> m = new Hashtable<String, Metadata>();
-    for (Metadata data : getMetadata()) {
-      m.put(data.getKey(), data);
-    }
-    if (getRecurringEvent() != null) {
-      for (Metadata data : getRecurringEvent().getMetadata()) {
-        m.put(data.getKey(), data);
-      }
-      m.put("timeStart", new MetadataImpl("timeStart", "" + getStartdate().getTime()));
-      m.put("timeEnd", new MetadataImpl("timeEnd", "" + getEnddate().getTime()));
-    }
-    m.put("timeDuration", new MetadataImpl("timeDuration", "" + (getEnddate().getTime() - getStartdate().getTime())));
-    return new LinkedList<Metadata>(m.values());
   }
   /**
    * 
@@ -266,11 +368,10 @@ public class EventImpl extends AbstractEvent implements Event {
    * 
    * @see org.opencastproject.scheduler.api.Event#getMetadata()
    */
-  @Override
-  public List<Metadata> getMetadata() {
-    List<Metadata> list = new LinkedList<Metadata>();
-    for(Metadata m :metadata) list.add(m);
-    return list;
+  public List<Metadata> getMetadataList() {
+    List<Metadata> events = new LinkedList<Metadata>();
+    events.addAll(additionalMetadata);
+    return events;
   }
   /**
    * 
@@ -278,140 +379,95 @@ public class EventImpl extends AbstractEvent implements Event {
    * 
    * @see org.opencastproject.scheduler.api.Event#setMetadata()
    */
-  @Override
-  public void setMetadata(List<Metadata> metadata) {
-    metadataTable = null;
-    this.metadata = new LinkedList<MetadataImpl>();
-    for(Metadata m :metadata) this.metadata.add((MetadataImpl) m);
-  }
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.Event#buildMetadataTable()
-   */
-  @Override
-  public void buildMetadataTable() {
-    RecurringEvent rEvent = getRecurringEvent(); // if recurring event is not yet set, this method has the sideeffect
-                                                 // that the metadata table is nulled
-    if (metadataTable == null)
-      metadataTable = new Hashtable<String, String>();
-    if (rEvent != null) {
-      for (Metadata data : rEvent.getMetadata()) {
-        if (data != null && data.getKey() != null && data.getValue() != null)
-          metadataTable.put(data.getKey(), data.getValue()); // Inherit values
-      }
+  public void setMetadataList(List<Metadata> metadata) {
+    for(Metadata m : metadata){
+      this.additionalMetadata.add((MetadataImpl)m);
     }
-    super.buildMetadataTable(getMetadata());
   }
-  
   /**
    * 
    * {@inheritDoc}
    * 
    * @see org.opencastproject.scheduler.api.Event#getValue()
    */
-  @Override
-  public String getValue(String key) {
-    if (metadataTable == null)
-      buildMetadataTable();
-    try {
-      return super.getValue(key);
-    } catch (IncompleteDataException e) {
-      logger.warn("MetadataTable could not be build");
-      return null;
+  public String getMetadataValueByKey(String key) {
+    Metadata m = this.findMetadata(key);
+    if(m != null) {
+      return m.getValue();
     }
+    return null;
   }
-  
   /**
    * 
    * {@inheritDoc}
    * 
    * @see org.opencastproject.scheduler.api.Event#getKeySet()
    */
-  @Override
   public Set<String> getKeySet() {
-    if (metadataTable == null)
-      buildMetadataTable();
-    try {
-      return super.getKeySet();
-    } catch (IncompleteDataException e) {
-      logger.warn("MetadataTable could not be build");
-      return null;
-    }
+    //TODO
+    return null;
   }
-
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.Event#getValueAsDate()
-   */
-  @Override
-  public Date getValueAsDate(String key) {
-    if (metadataTable == null)
-      buildMetadataTable();
-    try {
-      return super.getValueAsDate(key);
-    } catch (IncompleteDataException e) {
-      logger.warn("MetadataTable could not be build");
-      return null;
-    }
-  }
-
   /**
    * 
    * {@inheritDoc}
    * 
    * @see org.opencastproject.scheduler.api.Event#containsKey()
    */
-  @Override
   public boolean containsKey(String key) {
-    if (metadataTable == null)
-      buildMetadataTable();
-    try {
-      return super.containsKey(key);
-    } catch (IncompleteDataException e) {
-      logger.warn("MetadataTable could not be build");
-      return false;
-    } catch (NullPointerException e) {
-      logger.warn("could not find key {}", key);
-      return false;
+    for(Metadata m : additionalMetadata){
+      if(m.getKey().equals(key)){
+        return true;
+      }
     }
+    return false;
   }
-
+  
   /**
    * 
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.scheduler.api.Event#getRecurringEventId()
+   * @see org.opencastproject.scheduler.api.Event#findMetadata()
    */
-  @Override
   public Metadata findMetadata(String key) {
-    for (Metadata m : metadata) {
-      if (m.getKey().equals(key))
+    for (Metadata m : additionalMetadata) {
+      if (m.getKey().equals(key)){
         return m;
+      }
     }
     return null;
   }
-
+  
   /**
    * 
    * {@inheritDoc}
    * 
    * @see org.opencastproject.scheduler.api.Event#update()
    */
-  @Override
   public void update(Event e) {
+    this.setEventId(e.getEventId());
+    this.setCreator(e.getCreator());
+    this.setContributor(e.getContributor());
+    this.setDescription(e.getDescription());
+    this.setDevice(e.getDevice());
+    this.setDuration(e.getDuration());
+    this.setEndDate(e.getEndDate());
+    this.setLanguage(e.getLanguage());
+    this.setLicense(e.getLicense());
+    this.setRecurrence(e.getRecurrence());
+    this.setRecurrencePattern(e.getRecurrencePattern());
+    this.setResources(e.getResources());
+    this.setSeries(e.getSeries());
+    this.setStartDate(e.getStartDate());
+    this.setSubject(e.getSubject());
+    this.setTitle(e.getTitle());
     // eliminate removed keys
-    for (Metadata m : getMetadata()) {
+    for (Metadata m : getMetadataList()) {
       if (e.findMetadata(m.getKey()) == null) {
         removeMetadata(m);
       }
     }
-    logger.debug("Updating stored event with new metadata.");
     // update the list
-    for (Metadata data : e.getMetadata()) {
+    for (Metadata data : e.getMetadataList()) {
       Metadata found = findMetadata(data.getKey());
       if (found != null) {
         found.setValue(data.getValue());
@@ -419,68 +475,13 @@ public class EventImpl extends AbstractEvent implements Event {
         addMetadata(data);
       }
     }
-    // metadata = e.getMetadata();
-    metadataTable = null;
-    // currently there is no reason to assume that ID or the parent recurringEvent can change;
   }
-
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.Event#getStartdate()
-   */
-  @Override
-  public Date getStartdate() {
-    if (containsKey("timeStart")) {
-      return getValueAsDate("timeStart");
-    }
-    if (recurringEvent != null || (getRecurringEventId() != null && getRecurringEventId().length() > 0)) {
-      return getRecurringEvent().getDateForEventByIndex(getPositionInRecurrence());
-    }
-    return null;
-  }
-
-  /**
-   * 
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.api.Event#getEnddate()
-   */
-  @Override
-  public Date getEnddate() {
-    if (containsKey("timeEnd")) {
-      return getValueAsDate("timeEnd");
-    }
-    if (getRecurringEventId() != null) {
-      try {
-        if (!containsKey("recurrenceDuration")) {
-          logger.error("No default duration set in recurrent event {}.", getRecurringEventId());
-        }
-        return new Date(getRecurringEvent().getDateForEventByIndex(getPositionInRecurrence()).getTime()
-                + Long.parseLong(getValue("recurrenceDuration")));
-      } catch (NumberFormatException e) {
-        logger.warn("Could not parse recurring event default duration");
-        return null;
-      }
-    }
-    return null;
-  }
-
-  @Override
+  
   public String toString() {
-    String result;
-    result = getEventId();
-    if (getRecurringEventId() != null)
-      result += ", Recurring Event: " + getRecurringEventId();
-    else
-      result += ", no recuring event";
-    for (Metadata data : metadata) {
-      result += ", " + data.toString();
-    }
-    return result;
+    //TODO
+    return "";
   }
-
+  
   public static EventImpl find(String eventId, EntityManagerFactory emf) {
     logger.debug("loading event with the ID {}", eventId);
     if (eventId == null || emf == null) {
@@ -494,14 +495,12 @@ public class EventImpl extends AbstractEvent implements Event {
     } finally {
       em.close();
     }
-    if (e != null){
-      e.setEntityManagerFactory(emf);
-    }else{
+    if (e == null){
       logger.warn("No event found for {}", eventId);
     }
     return e;
   }
-
+  
   /**
    * valueOf function is called by JAXB to bind values. This function calls the ScheduleEvent factory.
    * 
@@ -512,22 +511,22 @@ public class EventImpl extends AbstractEvent implements Event {
   public static EventImpl valueOf(String xmlString) throws Exception {
     return SchedulerBuilder.getInstance().parseEvent(xmlString);
   }
-
-  @Override
+  
   public boolean equals(Object o) {
-    if (!(o instanceof Event))
-      return false;
-    Event e = (Event) o;
-    if (e.getEventId() != this.getEventId())
-      return false;
-    for (Metadata m : metadata) {
-      if (!e.containsKey(m.getKey()) || (!e.getValue(m.getKey()).equals(m.getValue())))
-        return false;
-    }
-    return true;
+    //TODO
+    /*if (!(o instanceof Event))
+     return false;
+     Event e = (Event) o;
+     if (e.getEventId() != this.getEventId())
+     return false;
+     for (Metadata m : metadata) {
+     if (!e.containsKey(m.getKey()) || (!e.getValue(m.getKey()).equals(m.getValue())))
+     return false;
+     }
+     return true;*/
+    return false;
   }
-
-  @Override
+  
   public int hashCode() {
     return this.getEventId().hashCode();
   }
@@ -538,9 +537,8 @@ public class EventImpl extends AbstractEvent implements Event {
    * 
    * @see org.opencastproject.scheduler.api.Event#addMetadata()
    */
-  @Override
   public void addMetadata(Metadata m){
-    this.metadata.add((MetadataImpl)m);
+    this.additionalMetadata.add((MetadataImpl)m);
   }
   
   /**
@@ -549,9 +547,85 @@ public class EventImpl extends AbstractEvent implements Event {
    * 
    * @see org.opencastproject.scheduler.api.Event#removeMetadata()
    */
-  @Override
   public void removeMetadata(Metadata m){
-    this.metadata.remove(m);
+    this.additionalMetadata.remove(m);
+  }
+  
+  public String generateId() {
+    return UUID.randomUUID().toString();
+  }
+  
+  public void initializeFromEvent(Event e) {
+    this.setCreator(e.getCreator());
+    this.setContributor(e.getContributor());
+    this.setDescription(e.getDescription());
+    this.setDevice(e.getDevice());
+    this.setDuration(e.getDuration());
+    this.setEndDate(e.getEndDate());
+    this.setLanguage(e.getLanguage());
+    this.setLicense(e.getLicense());
+    this.setRecurrence(e.getRecurrence());
+    this.setRecurrencePattern(e.getRecurrencePattern());
+    this.setResources(e.getResources());
+    this.setSeries(e.getSeries());
+    this.setStartDate(e.getStartDate());
+    this.setSubject(e.getSubject());
+    this.setTitle(e.getTitle());
+    this.setMetadataList(e.getMetadataList());
+  }
+  
+  public List<Event> createEventsFromRecurrence() throws ParseException, IncompleteDataException {
+    if(getRecurrencePattern() == null || getRecurrencePattern().isEmpty()){
+      throw new IncompleteDataException("Event has no recurrence pattern.");
+    }
+    Recur recur = new RRule(getRecurrencePattern()).getRecur();
+    Date start = getStartDate();
+    if (start == null) {
+      start = new Date(System.currentTimeMillis());
+    }
+    Date end = getEndDate();
+    if (end == null) {
+      throw new IncompleteDataException("Event has no end date.");
+    }
+    DateTime seed = new DateTime(start.getTime());
+    seed.setUtc(true);
+    DateTime period = new DateTime(end.getTime());
+    period.setUtc(true);
+    DateList dates = recur.getDates(seed, period, Value.DATE_TIME);
+    logger.debug("DateList: {}", dates);
+    List<Event> events = new LinkedList<Event>();
+    int i = 1;
+    for (Object date : dates) {
+      Date d = (Date) date;
+      //Adjust for DST, if start of event 
+      //Create timezone based on CA's reported TZ.
+      TimeZone tz = null;
+      if(!this.getMetadataValueByKey("agentTimeZone").isEmpty()){
+        tz = TimeZone.getTimeZone(this.getMetadataValueByKey("agentTimeZone"));
+      }
+      if(tz == null){ //No timezone was present, assume the serve's local timezone.
+        tz = TimeZone.getDefault();
+      }
+      if(tz.inDaylightTime(seed)){ //Event starts in DST
+        if(!tz.inDaylightTime(d)){//Date not in DST?
+          d.setTime(d.getTime() + tz.getDSTSavings()); //Ajust for Fall back one hour
+        }
+      }else{ //Event doesn't start in DST
+        if(tz.inDaylightTime(d)){
+          d.setTime(d.getTime() - tz.getDSTSavings()); //Adjust for Spring forward one hour
+        }
+      }
+      Event event = new EventImpl();
+      event.setEventId(generateId());
+      event.initializeFromEvent((Event)this);
+      event.setTitle(getTitle() + " " + i);
+      event.setStartDate(d);
+      d.setTime(d.getTime() + getDuration());
+      event.setEndDate(d);
+      events.add((Event)event);
+      i++;
+    }
+    return events;
   }
   
 }

@@ -18,7 +18,6 @@ package org.opencastproject.scheduler.endpoint;
 import org.apache.commons.io.IOUtils;
 import org.opencastproject.scheduler.impl.EventImpl;
 import org.opencastproject.scheduler.impl.MetadataImpl;
-import org.opencastproject.scheduler.impl.RecurringEventImpl;
 
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -60,46 +59,6 @@ public class SchedulerBuilder {
     }
     return instance;
   }
-  
-  /**
-   * This loads an event from an input stream containing an XML representation of an event.
-   *
-   * @param   in - the input stream
-   * @return  a SchedulerEventJaxImpl
-   * @throws   And exception if creation of the event fails.
-   *
-  public SchedulerEventJaxbImpl parseSchedulerEventJaxbImpl(InputStream in) throws Exception {
-    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-    return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-                                  SchedulerEventJaxbImpl.class).getValue();
-  }
-  
-  /**
-   * Take a string, convert to input stream and pass to parseSchedulerEventJaxbImpl()
-   *
-   * @param   in - a string containing event representation
-   * @return  a SchedulerEventJaxbImpl
-   * @throws  Exception if creation fails
-   *
-  public SchedulerEventJaxbImpl parseSchedulerEventJaxbImpl(String in) throws Exception {
-    return parseSchedulerEventJaxbImpl(IOUtils.toInputStream(in, "UTF8"));
-  }*/
-  
-  /**
-   * todo: Comment me!
-   */
-  public SchedulerFilterJaxbImpl parseSchedulerFilterJaxbImpl(InputStream in) throws Exception {
-    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-    return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-                                  SchedulerFilterJaxbImpl.class).getValue();
-  }
-  
-  /**
-   * Todo: comment me!
-   */
-  public SchedulerFilterJaxbImpl parseSchedulerFilterJaxbImpl(String in) throws Exception {
-    return parseSchedulerFilterJaxbImpl(IOUtils.toInputStream(in, "UTF8"));
-  }
 
   public EventImpl parseEvent(String in) throws Exception {
     return parseEvent(IOUtils.toInputStream(in, "UTF8"));
@@ -109,23 +68,6 @@ public class SchedulerBuilder {
     Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
     return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
                                   EventImpl.class).getValue();
-  }
-  
-  public RecurringEventImpl parseRecurringEvent(String in) throws Exception {
-    return parseRecurringEvent(IOUtils.toInputStream(in, "UTF8"));
-  }
-  
-  public RecurringEventImpl parseRecurringEvent(InputStream in) throws Exception {
-    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-    return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in),
-                                  RecurringEventImpl.class).getValue();
-  } 
-  
-  public String marshallRecurringEvent (RecurringEventImpl e) throws Exception {
-    Marshaller marshaller = jaxbContext.createMarshaller();
-    StringWriter writer = new StringWriter();
-    marshaller.marshal(e, writer);
-    return writer.toString();
   }
   
   public String marshallEvent (EventImpl e) throws Exception {

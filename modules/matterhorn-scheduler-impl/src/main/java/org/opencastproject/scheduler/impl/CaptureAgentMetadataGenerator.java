@@ -60,10 +60,10 @@ public class CaptureAgentMetadataGenerator {
   public Properties generate (Event event) {
     logger.debug("generating Capture Agent metadata");
     
-    Hashtable<String, String> caMetadata =  mapper.convert(event.getMetadata());
+    Hashtable<String, String> caMetadata =  mapper.convert(event.getMetadataList());
     
     // pass through all workflow metadata to capture agent 
-    for (Metadata m : event.getMetadata()) {
+    for (Metadata m : event.getMetadataList()) {
       String key = m.getKey();
       if (key.startsWith("org.opencastproject.workflow.")) {
         caMetadata.put(key, m.getValue());
@@ -72,7 +72,7 @@ public class CaptureAgentMetadataGenerator {
     
     Properties caCatalog = new Properties();
     if (event.containsKey("resources"))
-      caCatalog.setProperty("capture.device.names", event.getValue("resources"));
+      caCatalog.setProperty("capture.device.names", event.getResources());
     for (Entry<String, String> e : caMetadata.entrySet()) {
       caCatalog.put (e.getKey(), e.getValue());
     }       
