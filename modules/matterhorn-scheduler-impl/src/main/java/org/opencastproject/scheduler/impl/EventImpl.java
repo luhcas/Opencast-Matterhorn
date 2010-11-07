@@ -49,6 +49,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -79,7 +80,7 @@ public class EventImpl implements Event {
   @XmlID
   @Id
   @GeneratedValue
-  @Column(name = "ID", length = 128)
+  @Column(name = "EVENT_ID", length = 36)
   protected String eventId;
   
   @XmlElement(name="contributor")
@@ -87,7 +88,8 @@ public class EventImpl implements Event {
   @XmlElement(name="creator")
   protected String creator;
   @XmlElement(name="description")
-  @Column(columnDefinition = "CLOB")
+  @Lob
+  @Column
   protected String description;
   @XmlElement(name="device")
   protected String device;
