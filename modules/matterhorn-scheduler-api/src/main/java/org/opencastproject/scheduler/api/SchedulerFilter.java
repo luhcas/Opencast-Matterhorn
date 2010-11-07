@@ -17,15 +17,6 @@ package org.opencastproject.scheduler.api;
 
 import java.util.Date;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.ParameterExpression;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import javax.persistence.metamodel.EntityType;
 /**
  * The Scheduler Filter is used to filter the events that would come back from an search operation on the database.
  * 
@@ -90,17 +81,17 @@ public class SchedulerFilter {
     this.titlePattern = titlePattern;
     return this;
   }
-  
+
   public String getSeriesFilter() {
     return seriesPattern;
   }
-  
+
   /**
-   * Sets the search pattern for the series title. Can be a part of the series title. Every series title that has
-   * a part of this pattern will be returned.
-   *
+   * Sets the search pattern for the series title. Can be a part of the series title. Every series title that has a part
+   * of this pattern will be returned.
+   * 
    * @param seriesPattern
-   *        The pattern for which series title should be filtered.
+   *          The pattern for which series title should be filtered.
    */
   public SchedulerFilter withSeriesFilter(String seriesPattern) {
     this.seriesPattern = seriesPattern;

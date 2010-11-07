@@ -45,6 +45,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -77,6 +78,7 @@ public class EventImpl implements Event {
   
   @XmlID
   @Id
+  @GeneratedValue
   @Column(name = "ID", length = 128)
   protected String eventId;
   
@@ -512,25 +514,42 @@ public class EventImpl implements Event {
     return SchedulerBuilder.getInstance().parseEvent(xmlString);
   }
   
-  public boolean equals(Object o) {
-    //TODO
-    /*if (!(o instanceof Event))
-     return false;
-     Event e = (Event) o;
-     if (e.getEventId() != this.getEventId())
-     return false;
-     for (Metadata m : metadata) {
-     if (!e.containsKey(m.getKey()) || (!e.getValue(m.getKey()).equals(m.getValue())))
-     return false;
-     }
-     return true;*/
-    return false;
-  }
   
+  /**
+   * {@inheritDoc}
+   *
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
   public int hashCode() {
-    return this.getEventId().hashCode();
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((eventId == null) ? 0 : eventId.hashCode());
+    return result;
   }
-  
+
+  /**
+   * {@inheritDoc}
+   *
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    EventImpl other = (EventImpl) obj;
+    if (eventId == null) {
+      if (other.eventId != null)
+        return false;
+    } else if (!eventId.equals(other.eventId))
+      return false;
+    return true;
+  }
+
   /**
    * 
    * {@inheritDoc}

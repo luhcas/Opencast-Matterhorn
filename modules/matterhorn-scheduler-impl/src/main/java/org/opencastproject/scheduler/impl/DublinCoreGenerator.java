@@ -15,7 +15,6 @@
  */
 package org.opencastproject.scheduler.impl;
 
-import org.opencastproject.mediapackage.EName;
 import org.opencastproject.metadata.dublincore.DublinCore;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
@@ -87,21 +86,43 @@ public class DublinCoreGenerator {
    */
   public DublinCoreCatalog generate (Event event) {
     logger.debug("creating Dublin Core  information for event {}", event.getEventId());
-    Hashtable<String, String> dcMetadata =  mapper.convert(event.getMetadataList());
-    
     DublinCoreCatalog dcCatalog = DublinCoreCatalogImpl.newInstance();
-
     dcCatalog.add(DublinCore.PROPERTY_IDENTIFIER, new DublinCoreValue(event.getEventId()));
     dcCatalog.add(DublinCore.PROPERTY_CREATED, EncodingSchemeUtils.encodeDate(event.getStartDate(), Precision.Second));
-    for (String key : dcMetadata.keySet()) {  
-      if (validDcKey(key)) {
-        DublinCoreValue value = new DublinCoreValue(dcMetadata.get(key));
-        EName property = new EName("http://purl.org/dc/terms/", key);
-        dcCatalog.add(property, value);
-      } else {
-        logger.debug("Key {} is not a valid Dublin Core identifier", key );
-      }
-    }   
+    dcCatalog.add(DublinCore.PROPERTY_TITLE, new DublinCoreValue(event.getTitle()));
+    if(event.getContributor() != null) {
+      dcCatalog.add(DublinCore.PROPERTY_CONTRIBUTOR, new DublinCoreValue(event.getContributor()));
+    }
+    if(event.getCreator() != null) {
+      dcCatalog.add(DublinCore.PROPERTY_CREATOR, new DublinCoreValue(event.getCreator()));
+    }
+    if(event.getDescription() != null) {
+      dcCatalog.add(DublinCore.PROPERTY_DESCRIPTION, new DublinCoreValue(event.getDescription()));
+    }
+    if(event.getDevice() != null) {
+      dcCatalog.add(DublinCore.PROPERTY_SPATIAL, new DublinCoreValue(event.getDevice())); // TODO Is this right?
+    }
+    if(event.getLanguage() != null) {
+      dcCatalog.add(DublinCore.PROPERTY_LANGUAGE, new DublinCoreValue(event.getLanguage()));
+    }
+    if(event.getLicense() != null) {
+      dcCatalog.add(DublinCore.PROPERTY_LICENSE, new DublinCoreValue(event.getLicense()));
+    }
+    if(event.getSeriesId() != null) {
+      dcCatalog.add(DublinCore.PROPERTY_IS_PART_OF, new DublinCoreValue(event.getSeriesId()));
+    }
+    if(event.getSubject() != null) {
+      dcCatalog.add(DublinCore.PROPERTY_SUBJECT, new DublinCoreValue(event.getSubject()));
+    }
+//    for (String key : dcMetadata.keySet()) {  
+//      if (validDcKey(key)) {
+//        DublinCoreValue value = new DublinCoreValue(dcMetadata.get(key));
+//        EName property = new EName("http://purl.org/dc/terms/", key);
+//        dcCatalog.add(property, value);
+//      } else {
+//        logger.debug("Key {} is not a valid Dublin Core identifier", key );
+//      }
+//    }   
     return dcCatalog;
 
   }

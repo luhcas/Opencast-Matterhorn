@@ -61,6 +61,21 @@ public class CaptureAgentMetadataGenerator {
     logger.debug("generating Capture Agent metadata");
     
     Hashtable<String, String> caMetadata =  mapper.convert(event.getMetadataList());
+
+    // add to (and override, if necessary) the metadata values defined in the event properties.
+    // TODO: I think it's time to remove the mapper altogether (jmh)
+    caMetadata.put("event.title", event.getTitle());
+    if(event.getSeriesId() != null) caMetadata.put("event.series", event.getSeriesId());
+    caMetadata.put("capture.device.id", event.getDevice());
+    
+    // Not sure about these mappings
+    //title = event.title
+    //seriesId = event.series
+    //device = capture.device.id
+    //channelId = event.source
+    //location = capture.device.location
+    //ingest-url = capture.ingest.endpoint.url
+    //distribution = distribution.channel
     
     // pass through all workflow metadata to capture agent 
     for (Metadata m : event.getMetadataList()) {
@@ -78,7 +93,7 @@ public class CaptureAgentMetadataGenerator {
     }       
     return caCatalog;
   }
-  
+
   /**
    * Generates a Properties list with the Capture Agent metadata from the provided event 
    * @param event The SchedulerEvent from which the metadata should be generated as Capture Agent specific data 
