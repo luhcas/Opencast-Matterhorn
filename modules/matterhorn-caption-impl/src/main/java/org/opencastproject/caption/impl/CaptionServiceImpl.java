@@ -152,60 +152,77 @@ public class CaptionServiceImpl implements CaptionService {
 
     Callable<Catalog> command = new Callable<Catalog>() {
       public Catalog call() throws CaptionConverterException, UnsupportedCaptionFormatException {
-
-        // check parameters
-        if (StringUtils.isBlank(inputFormat))
-          throw new UnsupportedCaptionFormatException("Input format is null");
-        if (StringUtils.isBlank(outputFormat))
-          throw new UnsupportedCaptionFormatException("Output format is null");
-
-        // get input file
-        File captionsFile;
         try {
-          captionsFile = workspace.get(input.getURI());
-        } catch (NotFoundException e) {
-          throw new CaptionConverterException("Requested media package element " + input + " could not be found.");
-        } catch (IOException e) {
-          throw new CaptionConverterException("Requested media package element " + input + "could not be accessed.");
+          // check parameters
+          if (StringUtils.isBlank(inputFormat))
+            throw new UnsupportedCaptionFormatException("Input format is null");
+          if (StringUtils.isBlank(outputFormat))
+            throw new UnsupportedCaptionFormatException("Output format is null");
+
+          // get input file
+          File captionsFile;
+          try {
+            captionsFile = workspace.get(input.getURI());
+          } catch (NotFoundException e) {
+            throw new CaptionConverterException("Requested media package element " + input + " could not be found.");
+          } catch (IOException e) {
+            throw new CaptionConverterException("Requested media package element " + input + "could not be accessed.");
+          }
+
+          logger.debug("Atempting to convert from {} to {}...", inputFormat, outputFormat);
+
+          CaptionCollection collection;
+          try {
+            collection = importCaptions(captionsFile, inputFormat, language);
+            logger.debug("Parsing to collection succeeded.");
+          } catch (UnsupportedCaptionFormatException e) {
+            throw new UnsupportedCaptionFormatException(inputFormat);
+          } catch (CaptionConverterException e) {
+            throw e;
+          }
+
+          URI exported;
+          try {
+            exported = exportCaptions(collection,
+                    job.getId() + "." + FilenameUtils.getExtension(captionsFile.getAbsolutePath()), outputFormat,
+                    language);
+            logger.debug("Exporting captions succeeding.");
+          } catch (UnsupportedCaptionFormatException e) {
+            throw new UnsupportedCaptionFormatException(outputFormat);
+          } catch (IOException e) {
+            throw new CaptionConverterException("Could not export caption collection.", e);
+          }
+
+          // create catalog and set properties
+          MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance()
+                  .newElementBuilder();
+          Catalog catalog = (Catalog) elementBuilder.elementFromURI(exported, Catalog.TYPE,
+                  new MediaPackageElementFlavor("captions", outputFormat));
+          String[] mimetype = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(exported.getPath())
+                  .split("/");
+          catalog.setMimeType(new MimeType(mimetype[0], mimetype[1]));
+          catalog.addTag("lang:" + language);
+
+          job.setElement(catalog);
+          job.setStatus(Status.FINISHED);
+          updateJob(job);
+
+          return catalog;
+        } catch (Exception e) {
+          try {
+            job.setStatus(Status.FAILED);
+            updateJob(job);
+          } catch (Exception failureToFail) {
+            logger.warn("Unable to update job to failed state", failureToFail);
+          }
+          if (e instanceof CaptionConverterException) {
+            throw (CaptionConverterException) e;
+          } else if (e instanceof UnsupportedCaptionFormatException) {
+            throw (UnsupportedCaptionFormatException) e;
+          } else {
+            throw new CaptionConverterException(e);
+          }
         }
-
-        logger.debug("Atempting to convert from {} to {}...", inputFormat, outputFormat);
-
-        CaptionCollection collection;
-        try {
-          collection = importCaptions(captionsFile, inputFormat, language);
-          logger.debug("Parsing to collection succeeded.");
-        } catch (UnsupportedCaptionFormatException e) {
-          throw new UnsupportedCaptionFormatException(inputFormat);
-        } catch (CaptionConverterException e) {
-          throw e;
-        }
-
-        URI exported;
-        try {
-          exported = exportCaptions(collection,
-                  job.getId() + "." + FilenameUtils.getExtension(captionsFile.getAbsolutePath()), outputFormat,
-                  language);
-          logger.debug("Exporting captions succeeding.");
-        } catch (UnsupportedCaptionFormatException e) {
-          throw new UnsupportedCaptionFormatException(outputFormat);
-        } catch (IOException e) {
-          throw new CaptionConverterException("Could not export caption collection.", e);
-        }
-
-        // create catalog and set properties
-        MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-        Catalog catalog = (Catalog) elementBuilder.elementFromURI(exported, Catalog.TYPE,
-                new MediaPackageElementFlavor("captions", outputFormat));
-        String[] mimetype = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(exported.getPath()).split("/");
-        catalog.setMimeType(new MimeType(mimetype[0], mimetype[1]));
-        catalog.addTag("lang:" + language);
-
-        job.setElement(catalog);
-        job.setStatus(Status.FINISHED);
-        updateJob(job);
-
-        return catalog;
       }
     };
 

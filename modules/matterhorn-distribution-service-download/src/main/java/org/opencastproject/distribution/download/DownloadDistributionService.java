@@ -143,48 +143,62 @@ public class DownloadDistributionService implements DistributionService {
        */
       @Override
       public Void call() throws DistributionException {
-        job.setStatus(Status.RUNNING);
-        updateJob(job);
-
-        File sourceFile;
         try {
-          sourceFile = workspace.get(element.getURI());
-        } catch (NotFoundException e) {
-          throw new DistributionException("Unable to find " + element.getURI() + " in the workspace", e);
-        } catch (IOException e) {
-          throw new DistributionException("Error loading " + element.getURI() + " from the workspace", e);
+          job.setStatus(Status.RUNNING);
+          updateJob(job);
+
+          File sourceFile;
+          try {
+            sourceFile = workspace.get(element.getURI());
+          } catch (NotFoundException e) {
+            throw new DistributionException("Unable to find " + element.getURI() + " in the workspace", e);
+          } catch (IOException e) {
+            throw new DistributionException("Error loading " + element.getURI() + " from the workspace", e);
+          }
+          File destination = getDistributionFile(mediaPackageId, element);
+
+          // Put the file in place
+          try {
+            FileUtils.forceMkdir(destination.getParentFile());
+          } catch (IOException e) {
+            throw new DistributionException("Unable to create " + destination.getParentFile(), e);
+          }
+          logger.info("Distributing {} to {}", element, destination);
+
+          try {
+            FileSupport.copy(sourceFile, destination);
+          } catch (IOException e) {
+            throw new DistributionException("Unable to copy " + sourceFile + " to " + destination, e);
+          }
+
+          // Create a representation of the distributed file in the mediapackage
+          MediaPackageElement distributedElement = (MediaPackageElement) element.clone();
+          try {
+            distributedElement.setURI(getDistributionUri(mediaPackageId, element));
+          } catch (URISyntaxException e) {
+            throw new DistributionException("Distributed element produces an invalid URI", e);
+          }
+          distributedElement.setIdentifier(null);
+
+          job.setElement(distributedElement);
+          job.setStatus(Status.FINISHED);
+          updateJob(job);
+
+          logger.info("Finished distribution of {}", element);
+          return null;
+        } catch(Exception e) {
+          try {
+            job.setStatus(Status.FAILED);
+            updateJob(job);
+          } catch (Exception failureToFail) {
+            logger.warn("Unable to update job to failed state", failureToFail);
+          }
+          if (e instanceof DistributionException) {
+            throw (DistributionException) e;
+          } else {
+            throw new DistributionException(e);
+          }
         }
-        File destination = getDistributionFile(mediaPackageId, element);
-
-        // Put the file in place
-        try {
-          FileUtils.forceMkdir(destination.getParentFile());
-        } catch (IOException e) {
-          throw new DistributionException("Unable to create " + destination.getParentFile(), e);
-        }
-        logger.info("Distributing {} to {}", element, destination);
-
-        try {
-          FileSupport.copy(sourceFile, destination);
-        } catch (IOException e) {
-          throw new DistributionException("Unable to copy " + sourceFile + " to " + destination, e);
-        }
-
-        // Create a representation of the distributed file in the mediapackage
-        MediaPackageElement distributedElement = (MediaPackageElement) element.clone();
-        try {
-          distributedElement.setURI(getDistributionUri(mediaPackageId, element));
-        } catch (URISyntaxException e) {
-          throw new DistributionException("Distributed element produces an invalid URI", e);
-        }
-        distributedElement.setIdentifier(null);
-
-        job.setElement(distributedElement);
-        job.setStatus(Status.FINISHED);
-        updateJob(job);
-
-        logger.info("Finished distribution of {}", element);
-        return null;
       }
     };
 
@@ -234,15 +248,29 @@ public class DownloadDistributionService implements DistributionService {
        */
       @Override
       public Void call() throws DistributionException {
-        job.setStatus(Status.RUNNING);
-        updateJob(job);
-        if (!FileSupport.delete(getMediaPackageDirectory(mediaPackageId), true)) {
-          throw new DistributionException("Unable to retract mediapackage " + mediaPackageId);
+        try {
+          job.setStatus(Status.RUNNING);
+          updateJob(job);
+          if (!FileSupport.delete(getMediaPackageDirectory(mediaPackageId), true)) {
+            throw new DistributionException("Unable to retract mediapackage " + mediaPackageId);
+          }
+          job.setStatus(Status.FINISHED);
+          updateJob(job);
+          logger.info("Finished rectracting media package {}", mediaPackageId);
+          return null;
+        } catch(Exception e) {
+          try {
+            job.setStatus(Status.FAILED);
+            updateJob(job);
+          } catch (Exception failureToFail) {
+            logger.warn("Unable to update job to failed state", failureToFail);
+          }
+          if (e instanceof DistributionException) {
+            throw (DistributionException) e;
+          } else {
+            throw new DistributionException(e);
+          }
         }
-        job.setStatus(Status.FINISHED);
-        updateJob(job);
-        logger.info("Finished rectracting media package {}", mediaPackageId);
-        return null;
       }
     };
 

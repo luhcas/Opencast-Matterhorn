@@ -219,105 +219,119 @@ public class ITunesUDistributionService implements DistributionService {
        */
       @Override
       public Void call() throws DistributionException {
-        job.setStatus(Status.RUNNING);
-        updateJob(job);
-
-        File sourceFile;
         try {
-          sourceFile = workspace.get(element.getURI());
-        } catch (NotFoundException e) {
-          throw new DistributionException("Unable to find " + element.getURI() + " in the workspace", e);
-        } catch (IOException e) {
-          throw new DistributionException("Error loading " + element.getURI() + " from the workspace", e);
-        }
+          job.setStatus(Status.RUNNING);
+          updateJob(job);
 
-        // get task name
-        String name = getTaskID(mediaPackageId, element.getIdentifier());
-
-        // check if the file has already been delivered
-        Task savedTask;
-        try {
-          savedTask = schedule.getSavedTask(name);
-        } catch (InvalidKeyException e) {
-          throw new DistributionException(e);
-        }
-
-        if (savedTask != null && savedTask.getState() == Task.State.COMPLETE) {
-          // has been successfully delivered
-          // remove the media
-          remove(name);
-        }
-
-        ITunesDeliveryAction act = new ITunesDeliveryAction();
-        act.setName(name);
-        act.setTitle(sourceFile.getName());
-        // CHNAGE ME: set metadata elements here
-        act.setCreator("Opencast Project");
-        act.setTags(new String[] { "whatever" });
-        act.setAbstract("Opencast Distribution Service - iTunes U");
-        act.setMediaPath(sourceFile.getAbsolutePath());
-
-        // get playlist ID from context strategy
-        String contextDestination = contextStrategy.getContextName(mediaPackageId);
-        if (contextDestination != null) {
-          // use the destination from context strategy
-          destination = contextDestination;
-        }
-
-        // deliver to a tab
-        act.setDestination(destination); // FIXME: replace this with a tab based on the episode's series
-
-        logger.info("Delivering from {}", sourceFile.getAbsolutePath());
-
-        // start the scheduler
-        try {
-          schedule.start(act);
-        } catch (InvalidKeyException e) {
-          throw new DistributionException(e);
-        }
-
-        while (true) {
-          Task task;
+          File sourceFile;
           try {
-            task = schedule.getTask(name);
+            sourceFile = workspace.get(element.getURI());
+          } catch (NotFoundException e) {
+            throw new DistributionException("Unable to find " + element.getURI() + " in the workspace", e);
+          } catch (IOException e) {
+            throw new DistributionException("Error loading " + element.getURI() + " from the workspace", e);
+          }
+
+          // get task name
+          String name = getTaskID(mediaPackageId, element.getIdentifier());
+
+          // check if the file has already been delivered
+          Task savedTask;
+          try {
+            savedTask = schedule.getSavedTask(name);
           } catch (InvalidKeyException e) {
             throw new DistributionException(e);
           }
-          synchronized (task) {
-            Task.State state = task.getState();
-            if (state == Task.State.INITIAL || state == Task.State.ACTIVE) {
-              try {
-                Thread.sleep(1000L);
-              } catch (Exception e) {
-                throw new RuntimeException(e);
-              }
-              // still running
-              continue;
-            } else if (state == Task.State.COMPLETE) {
-              logger.info("Succeeded delivering from {}", sourceFile.getAbsolutePath());
-              String videoURL = act.getTrackURL();
-              URI newTrackUri;
-              try {
-                newTrackUri = new URI(videoURL);
-              } catch (URISyntaxException e) {
-                throw new DistributionException("Distributed element produces an invalid URI", e);
-              }
-              MediaPackageElement newElement = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-                      .elementFromURI(newTrackUri, element.getElementType(), element.getFlavor());
-              newElement.setIdentifier(element.getIdentifier() + "-dist");
 
-              job.setElement(newElement);
-              job.setStatus(Status.FINISHED);
-              updateJob(job);
-
-              break;
-            } else if (state == Task.State.FAILED) {
-              throw new DistributionException("Failed delivering " + sourceFile.getAbsolutePath());
-            }
+          if (savedTask != null && savedTask.getState() == Task.State.COMPLETE) {
+            // has been successfully delivered
+            // remove the media
+            remove(name);
           }
-        } // end of schedule loop
 
-        return null;
+          ITunesDeliveryAction act = new ITunesDeliveryAction();
+          act.setName(name);
+          act.setTitle(sourceFile.getName());
+          // CHNAGE ME: set metadata elements here
+          act.setCreator("Opencast Project");
+          act.setTags(new String[] { "whatever" });
+          act.setAbstract("Opencast Distribution Service - iTunes U");
+          act.setMediaPath(sourceFile.getAbsolutePath());
+
+          // get playlist ID from context strategy
+          String contextDestination = contextStrategy.getContextName(mediaPackageId);
+          if (contextDestination != null) {
+            // use the destination from context strategy
+            destination = contextDestination;
+          }
+
+          // deliver to a tab
+          act.setDestination(destination); // FIXME: replace this with a tab based on the episode's series
+
+          logger.info("Delivering from {}", sourceFile.getAbsolutePath());
+
+          // start the scheduler
+          try {
+            schedule.start(act);
+          } catch (InvalidKeyException e) {
+            throw new DistributionException(e);
+          }
+
+          while (true) {
+            Task task;
+            try {
+              task = schedule.getTask(name);
+            } catch (InvalidKeyException e) {
+              throw new DistributionException(e);
+            }
+            synchronized (task) {
+              Task.State state = task.getState();
+              if (state == Task.State.INITIAL || state == Task.State.ACTIVE) {
+                try {
+                  Thread.sleep(1000L);
+                } catch (Exception e) {
+                  throw new RuntimeException(e);
+                }
+                // still running
+                continue;
+              } else if (state == Task.State.COMPLETE) {
+                logger.info("Succeeded delivering from {}", sourceFile.getAbsolutePath());
+                String videoURL = act.getTrackURL();
+                URI newTrackUri;
+                try {
+                  newTrackUri = new URI(videoURL);
+                } catch (URISyntaxException e) {
+                  throw new DistributionException("Distributed element produces an invalid URI", e);
+                }
+                MediaPackageElement newElement = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+                        .elementFromURI(newTrackUri, element.getElementType(), element.getFlavor());
+                newElement.setIdentifier(element.getIdentifier() + "-dist");
+
+                job.setElement(newElement);
+                job.setStatus(Status.FINISHED);
+                updateJob(job);
+
+                break;
+              } else if (state == Task.State.FAILED) {
+                throw new DistributionException("Failed delivering " + sourceFile.getAbsolutePath());
+              }
+            }
+          } // end of schedule loop
+
+          return null;
+        } catch(Exception e) {
+          try {
+            job.setStatus(Status.FAILED);
+            updateJob(job);
+          } catch (Exception failureToFail) {
+            logger.warn("Unable to update job to failed state", failureToFail);
+          }
+          if (e instanceof DistributionException) {
+            throw (DistributionException) e;
+          } else {
+            throw new DistributionException(e);
+          }
+        }
       }
     };
 

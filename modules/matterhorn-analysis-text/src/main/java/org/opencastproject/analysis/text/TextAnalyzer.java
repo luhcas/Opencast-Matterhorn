@@ -157,59 +157,73 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
       @SuppressWarnings("unchecked")
       @Override
       public Void call() throws MediaAnalysisException {
-        job.setStatus(Status.RUNNING);
-        updateJob(job);
-
-        Mpeg7CatalogImpl mpeg7 = Mpeg7CatalogImpl.newInstance();
-
-        logger.info("Starting text extraction from {}", imageUrl);
-
-        File imageFile;
         try {
-          imageFile = workspace.get(imageUrl);
-        } catch (NotFoundException e) {
-          throw new MediaAnalysisException("Image " + imageUrl + " not found in workspace", e);
-        } catch (IOException e) {
-          throw new MediaAnalysisException("Unable to access " + imageUrl + " in workspace", e);
+          job.setStatus(Status.RUNNING);
+          updateJob(job);
+
+          Mpeg7CatalogImpl mpeg7 = Mpeg7CatalogImpl.newInstance();
+
+          logger.info("Starting text extraction from {}", imageUrl);
+
+          File imageFile;
+          try {
+            imageFile = workspace.get(imageUrl);
+          } catch (NotFoundException e) {
+            throw new MediaAnalysisException("Image " + imageUrl + " not found in workspace", e);
+          } catch (IOException e) {
+            throw new MediaAnalysisException("Unable to access " + imageUrl + " in workspace", e);
+          }
+          VideoText[] videoTexts = analyze(imageFile, element.getIdentifier());
+
+          // Create a temporal decomposition
+          MediaTime mediaTime = new MediaTimeImpl(0, 0);
+          Video avContent = mpeg7.addVideoContent(element.getIdentifier(), mediaTime, null);
+          TemporalDecomposition<VideoSegment> temporalDecomposition = (TemporalDecomposition<VideoSegment>) avContent
+                  .getTemporalDecomposition();
+
+          // Add a segment
+          VideoSegment videoSegment = temporalDecomposition.createSegment("segment-0");
+          videoSegment.setMediaTime(mediaTime);
+
+          // Add the video text to the spacio temporal decomposition of the segment
+          SpatioTemporalDecomposition spatioTemporalDecomposition = videoSegment.createSpatioTemporalDecomposition(
+                  true, false);
+          for (VideoText videoText : videoTexts) {
+            spatioTemporalDecomposition.addVideoText(videoText);
+          }
+
+          logger.info("Text extraction of {} finished, {} lines found", attachment.getURI(), videoTexts.length);
+
+          URI uri;
+          try {
+            uri = workspace.putInCollection(COLLECTION_ID, job.getId() + ".xml",
+                    mpeg7CatalogService.serialize(mpeg7));
+          } catch (IOException e) {
+            throw new MediaAnalysisException("Unable to put mpeg7 into the workspace", e);
+          }
+          Catalog catalog = (Catalog) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+                  .newElement(Catalog.TYPE, MediaPackageElements.TEXTS);
+          catalog.setURI(uri);
+
+          job.setElement(catalog);
+          job.setStatus(Status.FINISHED);
+          updateJob(job);
+
+          logger.info("Finished text extraction of {}", imageUrl);
+          return null;
+        } catch(Exception e) {
+          try {
+            job.setStatus(Status.FAILED);
+            updateJob(job);
+          } catch (Exception failureToFail) {
+            logger.warn("Unable to update job to failed state", failureToFail);
+          }
+          if (e instanceof MediaAnalysisException) {
+            throw (MediaAnalysisException) e;
+          } else {
+            throw new MediaAnalysisException(e);
+          }
         }
-        VideoText[] videoTexts = analyze(imageFile, element.getIdentifier());
-
-        // Create a temporal decomposition
-        MediaTime mediaTime = new MediaTimeImpl(0, 0);
-        Video avContent = mpeg7.addVideoContent(element.getIdentifier(), mediaTime, null);
-        TemporalDecomposition<VideoSegment> temporalDecomposition = (TemporalDecomposition<VideoSegment>) avContent
-                .getTemporalDecomposition();
-
-        // Add a segment
-        VideoSegment videoSegment = temporalDecomposition.createSegment("segment-0");
-        videoSegment.setMediaTime(mediaTime);
-
-        // Add the video text to the spacio temporal decomposition of the segment
-        SpatioTemporalDecomposition spatioTemporalDecomposition = videoSegment.createSpatioTemporalDecomposition(
-                true, false);
-        for (VideoText videoText : videoTexts) {
-          spatioTemporalDecomposition.addVideoText(videoText);
-        }
-
-        logger.info("Text extraction of {} finished, {} lines found", attachment.getURI(), videoTexts.length);
-
-        URI uri;
-        try {
-          uri = workspace.putInCollection(COLLECTION_ID, job.getId() + ".xml",
-                  mpeg7CatalogService.serialize(mpeg7));
-        } catch (IOException e) {
-          throw new MediaAnalysisException("Unable to put mpeg7 into the workspace", e);
-        }
-        Catalog catalog = (Catalog) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-                .newElement(Catalog.TYPE, MediaPackageElements.TEXTS);
-        catalog.setURI(uri);
-
-        job.setElement(catalog);
-        job.setStatus(Status.FINISHED);
-        updateJob(job);
-
-        logger.info("Finished text extraction of {}", imageUrl);
-        return null;
       }
     };
 

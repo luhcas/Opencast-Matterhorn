@@ -245,75 +245,89 @@ public class ComposerServiceImpl implements ComposerService {
        */
       @Override
       public Void call() throws EncoderException {
-        job.setStatus(Status.RUNNING);
-        updateJob(job);
+        try {
+          job.setStatus(Status.RUNNING);
+          updateJob(job);
 
-        // Get the track and make sure it exists
-        final File trackFile;
-        if (sourceTrack == null) {
-          trackFile = null;
-        } else {
+          // Get the track and make sure it exists
+          final File trackFile;
+          if (sourceTrack == null) {
+            trackFile = null;
+          } else {
+            try {
+              trackFile = workspace.get(sourceTrack.getURI());
+            } catch (NotFoundException e) {
+              throw new EncoderException("Requested track " + sourceTrack + " is not found");
+            } catch (IOException e) {
+              throw new EncoderException("Unable to access track " + sourceTrack);
+            }
+          }
+
+          // Get the encoding profile
+          final EncodingProfile profile = profileScanner.getProfile(profileId);
+          if (profile == null) {
+            throw new EncoderException("Profile '" + profileId + " is unkown");
+          }
+
+          // Create the engine
+          final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
+          if (encoderEngine == null) {
+            throw new EncoderException(encoderEngine, "No encoder engine available for profile '" + profileId + "'");
+          }
+
+          // Do the work
+          File encodingOutput = encoderEngine.trim(trackFile, profile, start, duration, null);
+
+          // Put the file in the workspace
+          URI returnURL = null;
+          InputStream in = null;
           try {
-            trackFile = workspace.get(sourceTrack.getURI());
-          } catch (NotFoundException e) {
-            throw new EncoderException("Requested track " + sourceTrack + " is not found");
+            in = new FileInputStream(encodingOutput);
+            returnURL = workspace.putInCollection(COLLECTION,
+                    job.getId() + "." + FilenameUtils.getExtension(encodingOutput.getAbsolutePath()), in);
+            logger.info("Copied the trimmed file to the workspace at {}", returnURL);
+            encodingOutput.delete();
+            logger.info("Deleted the local copy of the trimmed file at {}", encodingOutput.getAbsolutePath());
+          } catch (FileNotFoundException e) {
+            throw new EncoderException("Encoded file " + encodingOutput + " not found", e);
           } catch (IOException e) {
-            throw new EncoderException("Unable to access track " + sourceTrack);
+            throw new EncoderException("Error putting " + encodingOutput + " into the workspace", e);
+          } finally {
+            IOUtils.closeQuietly(in);
+          }
+          if (encodingOutput != null)
+            encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
+
+          // Have the encoded track inspected and return the result
+          Job inspectionJob = null;
+          try {
+            inspectionJob = inspectionService.inspect(returnURL, true);
+          } catch (MediaInspectionException e) {
+            throw new EncoderException("Media inspection of " + returnURL + " failed", e);
+          }
+          if (inspectionJob.getStatus() == Job.Status.FAILED)
+            throw new EncoderException("Media inspection of " + returnURL + " failed");
+          Track inspectedTrack = (Track) inspectionJob.getElement();
+          inspectedTrack.setIdentifier(targetTrackId);
+
+          job.setElement(inspectedTrack);
+          job.setStatus(Status.FINISHED);
+          updateJob(job);
+
+          return null;
+        } catch(Exception e) {
+          try {
+            job.setStatus(Status.FAILED);
+            updateJob(job);
+          } catch (Exception failureToFail) {
+            logger.warn("Unable to update job to failed state", failureToFail);
+          }
+          if (e instanceof EncoderException) {
+            throw (EncoderException) e;
+          } else {
+            throw new EncoderException(e);
           }
         }
-
-        // Get the encoding profile
-        final EncodingProfile profile = profileScanner.getProfile(profileId);
-        if (profile == null) {
-          throw new EncoderException("Profile '" + profileId + " is unkown");
-        }
-
-        // Create the engine
-        final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
-        if (encoderEngine == null) {
-          throw new EncoderException(encoderEngine, "No encoder engine available for profile '" + profileId + "'");
-        }
-
-        // Do the work
-        File encodingOutput = encoderEngine.trim(trackFile, profile, start, duration, null);
-
-        // Put the file in the workspace
-        URI returnURL = null;
-        InputStream in = null;
-        try {
-          in = new FileInputStream(encodingOutput);
-          returnURL = workspace.putInCollection(COLLECTION,
-                  job.getId() + "." + FilenameUtils.getExtension(encodingOutput.getAbsolutePath()), in);
-          logger.info("Copied the trimmed file to the workspace at {}", returnURL);
-          encodingOutput.delete();
-          logger.info("Deleted the local copy of the trimmed file at {}", encodingOutput.getAbsolutePath());
-        } catch (FileNotFoundException e) {
-          throw new EncoderException("Encoded file " + encodingOutput + " not found", e);
-        } catch (IOException e) {
-          throw new EncoderException("Error putting " + encodingOutput + " into the workspace", e);
-        } finally {
-          IOUtils.closeQuietly(in);
-        }
-        if (encodingOutput != null)
-          encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
-
-        // Have the encoded track inspected and return the result
-        Job inspectionJob = null;
-        try {
-          inspectionJob = inspectionService.inspect(returnURL, true);
-        } catch (MediaInspectionException e) {
-          throw new EncoderException("Media inspection of " + returnURL + " failed", e);
-        }
-        if (inspectionJob.getStatus() == Job.Status.FAILED)
-          throw new EncoderException("Media inspection of " + returnURL + " failed");
-        Track inspectedTrack = (Track) inspectionJob.getElement();
-        inspectedTrack.setIdentifier(targetTrackId);
-
-        job.setElement(inspectedTrack);
-        job.setStatus(Status.FINISHED);
-        updateJob(job);
-
-        return null;
       }
     };
 
@@ -402,97 +416,111 @@ public class ComposerServiceImpl implements ComposerService {
        */
       @Override
       public Void call() throws EncoderException {
-        job.setStatus(Status.RUNNING);
-        updateJob(job);
+        try {
+          job.setStatus(Status.RUNNING);
+          updateJob(job);
 
-        // Get the tracks and make sure they exist
-        final File audioFile;
-        if (audioTrack == null) {
-          audioFile = null;
-        } else {
+          // Get the tracks and make sure they exist
+          final File audioFile;
+          if (audioTrack == null) {
+            audioFile = null;
+          } else {
+            try {
+              audioFile = workspace.get(audioTrack.getURI());
+            } catch (NotFoundException e) {
+              throw new EncoderException("Requested audio track " + audioTrack + " is not found");
+            } catch (IOException e) {
+              throw new EncoderException("Unable to access audio track " + audioTrack);
+            }
+          }
+
+          final File videoFile;
+          if (videoTrack == null) {
+            videoFile = null;
+          } else {
+            try {
+              videoFile = workspace.get(videoTrack.getURI());
+            } catch (NotFoundException e) {
+              throw new EncoderException("Requested video track " + videoTrack + " is not found");
+            } catch (IOException e) {
+              throw new EncoderException("Unable to access audio track " + audioTrack);
+            }
+          }
+
+          // Create the engine
+          final EncodingProfile profile = profileScanner.getProfile(profileId);
+          if (profile == null) {
+            throw new EncoderException(null, "Profile '" + profileId + " is unkown");
+          }
+          final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
+          if (encoderEngine == null) {
+            throw new EncoderException(null, "No encoder engine available for profile '" + profileId + "'");
+          }
+
+          if (audioTrack != null && videoTrack != null)
+            logger.info("Muxing audio track {} and video track {} into {}", new String[] { audioTrack.getIdentifier(),
+                    videoTrack.getIdentifier(), targetTrackId });
+          else if (audioTrack == null)
+            logger.info("Encoding video track {} to {} using profile '{}'", new String[] { videoTrack.getIdentifier(),
+                    targetTrackId, profileId });
+          else if (videoTrack == null)
+            logger.info("Encoding audio track {} to {} using profile '{}'", new String[] { audioTrack.getIdentifier(),
+                    targetTrackId, profileId });
+
+          // Do the work
+          File encodingOutput = encoderEngine.mux(audioFile, videoFile, profile, null);
+
+          // Put the file in the workspace
+          URI returnURL = null;
+          InputStream in = null;
           try {
-            audioFile = workspace.get(audioTrack.getURI());
-          } catch (NotFoundException e) {
-            throw new EncoderException("Requested audio track " + audioTrack + " is not found");
-          } catch (IOException e) {
-            throw new EncoderException("Unable to access audio track " + audioTrack);
+            in = new FileInputStream(encodingOutput);
+            returnURL = workspace.putInCollection(COLLECTION,
+                    job.getId() + "." + FilenameUtils.getExtension(encodingOutput.getAbsolutePath()), in);
+            logger.info("Copied the encoded file to the workspace at {}", returnURL);
+            encodingOutput.delete();
+            logger.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
+          } catch (Exception e) {
+            throw new EncoderException("Unable to put the encoded file into the workspace", e);
+          } finally {
+            IOUtils.closeQuietly(in);
+          }
+
+          // clean up the encoding output, since the file is now safely stored in the file repo
+          if (encodingOutput != null && !encodingOutput.delete()) {
+            logger.warn("Unable to delete the encoding output at {}", encodingOutput);
+          }
+
+          // Have the encoded track inspected and return the result
+          Job inspectionJob = null;
+          try {
+            inspectionJob = inspectionService.inspect(returnURL, true);
+          } catch (MediaInspectionException e) {
+            throw new EncoderException("Media inspection of " + returnURL + " failed", e);
+          }
+          if (inspectionJob.getStatus() == Job.Status.FAILED)
+            throw new EncoderException("Media inspection of " + returnURL + " failed");
+          Track inspectedTrack = (Track) inspectionJob.getElement();
+          inspectedTrack.setIdentifier(targetTrackId);
+
+          job.setElement(inspectedTrack);
+          job.setStatus(Status.FINISHED);
+          updateJob(job);
+
+          return null;
+        } catch(Exception e) {
+          try {
+            job.setStatus(Status.FAILED);
+            updateJob(job);
+          } catch (Exception failureToFail) {
+            logger.warn("Unable to update job to failed state", failureToFail);
+          }
+          if (e instanceof EncoderException) {
+            throw (EncoderException) e;
+          } else {
+            throw new EncoderException(e);
           }
         }
-
-        final File videoFile;
-        if (videoTrack == null) {
-          videoFile = null;
-        } else {
-          try {
-            videoFile = workspace.get(videoTrack.getURI());
-          } catch (NotFoundException e) {
-            throw new EncoderException("Requested video track " + videoTrack + " is not found");
-          } catch (IOException e) {
-            throw new EncoderException("Unable to access audio track " + audioTrack);
-          }
-        }
-
-        // Create the engine
-        final EncodingProfile profile = profileScanner.getProfile(profileId);
-        if (profile == null) {
-          throw new EncoderException(null, "Profile '" + profileId + " is unkown");
-        }
-        final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
-        if (encoderEngine == null) {
-          throw new EncoderException(null, "No encoder engine available for profile '" + profileId + "'");
-        }
-
-        if (audioTrack != null && videoTrack != null)
-          logger.info("Muxing audio track {} and video track {} into {}", new String[] { audioTrack.getIdentifier(),
-                  videoTrack.getIdentifier(), targetTrackId });
-        else if (audioTrack == null)
-          logger.info("Encoding video track {} to {} using profile '{}'", new String[] { videoTrack.getIdentifier(),
-                  targetTrackId, profileId });
-        else if (videoTrack == null)
-          logger.info("Encoding audio track {} to {} using profile '{}'", new String[] { audioTrack.getIdentifier(),
-                  targetTrackId, profileId });
-
-        // Do the work
-        File encodingOutput = encoderEngine.mux(audioFile, videoFile, profile, null);
-
-        // Put the file in the workspace
-        URI returnURL = null;
-        InputStream in = null;
-        try {
-          in = new FileInputStream(encodingOutput);
-          returnURL = workspace.putInCollection(COLLECTION,
-                  job.getId() + "." + FilenameUtils.getExtension(encodingOutput.getAbsolutePath()), in);
-          logger.info("Copied the encoded file to the workspace at {}", returnURL);
-          encodingOutput.delete();
-          logger.info("Deleted the local copy of the encoded file at {}", encodingOutput.getAbsolutePath());
-        } catch (Exception e) {
-          throw new EncoderException("Unable to put the encoded file into the workspace", e);
-        } finally {
-          IOUtils.closeQuietly(in);
-        }
-
-        // clean up the encoding output, since the file is now safely stored in the file repo
-        if (encodingOutput != null && !encodingOutput.delete()) {
-          logger.warn("Unable to delete the encoding output at {}", encodingOutput);
-        }
-
-        // Have the encoded track inspected and return the result
-        Job inspectionJob = null;
-        try {
-          inspectionJob = inspectionService.inspect(returnURL, true);
-        } catch (MediaInspectionException e) {
-          throw new EncoderException("Media inspection of " + returnURL + " failed", e);
-        }
-        if (inspectionJob.getStatus() == Job.Status.FAILED)
-          throw new EncoderException("Media inspection of " + returnURL + " failed");
-        Track inspectedTrack = (Track) inspectionJob.getElement();
-        inspectedTrack.setIdentifier(targetTrackId);
-
-        job.setElement(inspectedTrack);
-        job.setStatus(Status.FINISHED);
-        updateJob(job);
-
-        return null;
       }
     };
 
@@ -575,86 +603,100 @@ public class ComposerServiceImpl implements ComposerService {
        */
       @Override
       public Void call() throws EncoderException {
-        job.setStatus(Status.RUNNING);
-        updateJob(job);
-
-        if (sourceTrack == null)
-          throw new EncoderException("SourceTrack cannot be null");
-
-        logger.info("creating an image using video track {}", sourceTrack.getIdentifier());
-
-        job.setStatus(Status.RUNNING);
-        updateJob(job);
-
-        // Get the encoding profile
-        final EncodingProfile profile = profileScanner.getProfile(profileId);
-        if (profile == null) {
-          throw new EncoderException("Profile '" + profileId + "' is unknown");
-        }
-
-        // Create the encoding engine
-        final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
-        if (encoderEngine == null) {
-          throw new EncoderException("No encoder engine available for profile '" + profileId + "'");
-        }
-
-        // make sure there is a video stream in the track
-        if (sourceTrack != null && !sourceTrack.hasVideo()) {
-          throw new EncoderException("Cannot extract an image without a video stream");
-        }
-
-        // The time should not be outside of the track's duration
-        if (time < 0 || time > sourceTrack.getDuration()) {
-          throw new EncoderException("Can not extract an image at time " + Long.valueOf(time)
-                  + " from a track with duration " + Long.valueOf(sourceTrack.getDuration()));
-        }
-
-        // Finally get the file that needs to be encoded
-        final File videoFile;
         try {
-          videoFile = workspace.get(sourceTrack.getURI());
-        } catch (NotFoundException e) {
-          throw new EncoderException("Requested video track " + sourceTrack + " was not found", e);
-        } catch (IOException e) {
-          throw new EncoderException("Error accessing video track " + sourceTrack, e);
+          job.setStatus(Status.RUNNING);
+          updateJob(job);
+
+          if (sourceTrack == null)
+            throw new EncoderException("SourceTrack cannot be null");
+
+          logger.info("creating an image using video track {}", sourceTrack.getIdentifier());
+
+          job.setStatus(Status.RUNNING);
+          updateJob(job);
+
+          // Get the encoding profile
+          final EncodingProfile profile = profileScanner.getProfile(profileId);
+          if (profile == null) {
+            throw new EncoderException("Profile '" + profileId + "' is unknown");
+          }
+
+          // Create the encoding engine
+          final EncoderEngine encoderEngine = encoderEngineFactory.newEncoderEngine(profile);
+          if (encoderEngine == null) {
+            throw new EncoderException("No encoder engine available for profile '" + profileId + "'");
+          }
+
+          // make sure there is a video stream in the track
+          if (sourceTrack != null && !sourceTrack.hasVideo()) {
+            throw new EncoderException("Cannot extract an image without a video stream");
+          }
+
+          // The time should not be outside of the track's duration
+          if (time < 0 || time > sourceTrack.getDuration()) {
+            throw new EncoderException("Can not extract an image at time " + Long.valueOf(time)
+                    + " from a track with duration " + Long.valueOf(sourceTrack.getDuration()));
+          }
+
+          // Finally get the file that needs to be encoded
+          final File videoFile;
+          try {
+            videoFile = workspace.get(sourceTrack.getURI());
+          } catch (NotFoundException e) {
+            throw new EncoderException("Requested video track " + sourceTrack + " was not found", e);
+          } catch (IOException e) {
+            throw new EncoderException("Error accessing video track " + sourceTrack, e);
+          }
+
+          Map<String, String> properties = new HashMap<String, String>();
+          String timeAsString = Long.toString(time);
+          properties.put("time", timeAsString);
+
+          // Do the work
+          File encodingOutput = encoderEngine.encode(videoFile, profile, properties);
+
+          if (encodingOutput == null || !encodingOutput.isFile()) {
+            throw new EncoderException("Image extraction failed: encoding output doesn't exist at " + encodingOutput);
+          }
+
+          // Put the file in the workspace
+          URI returnURL = null;
+          InputStream in = null;
+          try {
+            in = new FileInputStream(encodingOutput);
+            returnURL = workspace.putInCollection(COLLECTION,
+                    job.getId() + "." + FilenameUtils.getExtension(encodingOutput.getAbsolutePath()), in);
+            logger.debug("Copied the encoded file to the workspace at {}", returnURL);
+          } catch (Exception e) {
+            throw new EncoderException("unable to put the encoded file into the workspace", e);
+          } finally {
+            IOUtils.closeQuietly(in);
+          }
+          if (encodingOutput != null && !encodingOutput.delete()) {
+            logger.warn("Unable to delete encoded file '{}'", encodingOutput);
+          }
+
+          MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
+          Attachment attachment = (Attachment) builder.elementFromURI(returnURL, Attachment.TYPE, null);
+
+          job.setElement(attachment);
+          job.setStatus(Status.FINISHED);
+          updateJob(job);
+
+          return null;
+        } catch(Exception e) {
+          try {
+            job.setStatus(Status.FAILED);
+            updateJob(job);
+          } catch (Exception failureToFail) {
+            logger.warn("Unable to update job to failed state", failureToFail);
+          }
+          if (e instanceof EncoderException) {
+            throw (EncoderException) e;
+          } else {
+            throw new EncoderException(e);
+          }
         }
-
-        Map<String, String> properties = new HashMap<String, String>();
-        String timeAsString = Long.toString(time);
-        properties.put("time", timeAsString);
-
-        // Do the work
-        File encodingOutput = encoderEngine.encode(videoFile, profile, properties);
-
-        if (encodingOutput == null || !encodingOutput.isFile()) {
-          throw new EncoderException("Image extraction failed: encoding output doesn't exist at " + encodingOutput);
-        }
-
-        // Put the file in the workspace
-        URI returnURL = null;
-        InputStream in = null;
-        try {
-          in = new FileInputStream(encodingOutput);
-          returnURL = workspace.putInCollection(COLLECTION,
-                  job.getId() + "." + FilenameUtils.getExtension(encodingOutput.getAbsolutePath()), in);
-          logger.debug("Copied the encoded file to the workspace at {}", returnURL);
-        } catch (Exception e) {
-          throw new EncoderException("unable to put the encoded file into the workspace", e);
-        } finally {
-          IOUtils.closeQuietly(in);
-        }
-        if (encodingOutput != null && !encodingOutput.delete()) {
-          logger.warn("Unable to delete encoded file '{}'", encodingOutput);
-        }
-
-        MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
-        Attachment attachment = (Attachment) builder.elementFromURI(returnURL, Attachment.TYPE, null);
-
-        job.setElement(attachment);
-        job.setStatus(Status.FINISHED);
-        updateJob(job);
-
-        return null;
       }
     };
 
@@ -721,110 +763,123 @@ public class ComposerServiceImpl implements ComposerService {
        */
       @Override
       public Void call() throws EmbedderException {
-        job.setStatus(Status.RUNNING);
-        updateEmbedderJob(job);
-
-        logger.info("Atempting to create and embed subtitles to video track");
-
-        // get embedder engine
-        final EmbedderEngine engine = embedderEngineFactory.newEmbedderEngine();
-        if (engine == null) {
-          throw new EmbedderException("Embedder engine not available");
-        }
-
-        // check if media file has video track
-        if (mediaTrack == null || !mediaTrack.hasVideo()) {
-          throw new EmbedderException("Media track must contain video stream");
-        }
-        // get video height
-        Integer videoHeigth = null;
-        for (Stream s : mediaTrack.getStreams()) {
-          if (s instanceof VideoStream) {
-            videoHeigth = ((VideoStream) s).getFrameHeight();
-            break;
-          }
-        }
-        final int subHeight;
-        if (videoHeigth != null) {
-          // get 1/8 of track height
-          // smallest size is 60 pixels
-          subHeight = videoHeigth > 8 * 60 ? videoHeigth / 8 : 60;
-        } else {
-          // no information about video height retrieved, use 60 pixels
-          subHeight = 60;
-        }
-
-        // retrieve media file
-        final File mediaFile;
         try {
-          mediaFile = workspace.get(mediaTrack.getURI());
-        } catch (NotFoundException e) {
-          throw new EmbedderException("Could not find track: " + mediaTrack);
-        } catch (IOException e) {
-          throw new EmbedderException("Error accessing track: " + mediaTrack);
-        }
+          job.setStatus(Status.RUNNING);
+          updateEmbedderJob(job);
 
-        final File[] captionFiles = new File[captions.length];
-        final String[] captionLanguages = new String[captions.length];
-        for (int i = 0; i < captions.length; i++) {
-          // get file
+          logger.info("Atempting to create and embed subtitles to video track");
+
+          // get embedder engine
+          final EmbedderEngine engine = embedderEngineFactory.newEmbedderEngine();
+          if (engine == null) {
+            throw new EmbedderException("Embedder engine not available");
+          }
+
+          // check if media file has video track
+          if (mediaTrack == null || !mediaTrack.hasVideo()) {
+            throw new EmbedderException("Media track must contain video stream");
+          }
+          // get video height
+          Integer videoHeigth = null;
+          for (Stream s : mediaTrack.getStreams()) {
+            if (s instanceof VideoStream) {
+              videoHeigth = ((VideoStream) s).getFrameHeight();
+              break;
+            }
+          }
+          final int subHeight;
+          if (videoHeigth != null) {
+            // get 1/8 of track height
+            // smallest size is 60 pixels
+            subHeight = videoHeigth > 8 * 60 ? videoHeigth / 8 : 60;
+          } else {
+            // no information about video height retrieved, use 60 pixels
+            subHeight = 60;
+          }
+
+          // retrieve media file
+          final File mediaFile;
           try {
-            captionFiles[i] = workspace.get(captions[i].getURI());
+            mediaFile = workspace.get(mediaTrack.getURI());
           } catch (NotFoundException e) {
-            throw new EmbedderException("Could not found captions at: " + captions[i]);
+            throw new EmbedderException("Could not find track: " + mediaTrack);
           } catch (IOException e) {
-            throw new EmbedderException("Error accessing captions at: " + captions[i]);
+            throw new EmbedderException("Error accessing track: " + mediaTrack);
           }
-          // get language
-          captionLanguages[i] = getLanguageFromTags(captions[i].getTags());
-          if (captionLanguages[i] == null) {
-            throw new EmbedderException("Missing caption language information for captions at: " + captions[i]);
+
+          final File[] captionFiles = new File[captions.length];
+          final String[] captionLanguages = new String[captions.length];
+          for (int i = 0; i < captions.length; i++) {
+            // get file
+            try {
+              captionFiles[i] = workspace.get(captions[i].getURI());
+            } catch (NotFoundException e) {
+              throw new EmbedderException("Could not found captions at: " + captions[i]);
+            } catch (IOException e) {
+              throw new EmbedderException("Error accessing captions at: " + captions[i]);
+            }
+            // get language
+            captionLanguages[i] = getLanguageFromTags(captions[i].getTags());
+            if (captionLanguages[i] == null) {
+              throw new EmbedderException("Missing caption language information for captions at: " + captions[i]);
+            }
+          }
+
+          // set properties
+          Map<String, String> properties = new HashMap<String, String>();
+          properties.put("param.trackh", String.valueOf(subHeight));
+          properties.put("param.offset", String.valueOf(subHeight / 2));
+
+          File output = engine.embed(mediaFile, captionFiles, captionLanguages, properties);
+
+          URI returnURL = null;
+          InputStream in = null;
+          try {
+            in = new FileInputStream(output);
+            returnURL = workspace.putInCollection(COLLECTION,
+                    job.getId() + "." + FilenameUtils.getExtension(output.getAbsolutePath()), in);
+            logger.info("Copied the encoded file to the workspace at {}", returnURL);
+          } catch (Exception e) {
+            throw new EmbedderException("Unable to put the encoded file into the workspace", e);
+          } finally {
+            IOUtils.closeQuietly(in);
+            logger.info("Deleting the local copy of the embedded file at {}", output.getAbsolutePath());
+            if (!output.delete()) {
+              logger.warn("Could not delete local copy of file at {}", output.getAbsolutePath());
+            }
+          }
+
+          // Have the encoded track inspected and return the result
+          Job inspectionReceipt;
+          try {
+            inspectionReceipt = inspectionService.inspect(returnURL, true);
+          } catch (MediaInspectionException e) {
+            throw new EmbedderException("Media inspection of " + returnURL + " failed", e);
+          }
+          if (inspectionReceipt.getStatus() == Job.Status.FAILED)
+            throw new EmbedderException("Media inspection failed");
+          Track inspectedTrack = (Track) inspectionReceipt.getElement();
+          inspectedTrack.setIdentifier(targetTrackId);
+
+          job.setElement(inspectedTrack);
+          job.setStatus(Status.FINISHED);
+          updateEmbedderJob(job);
+
+          return null;
+        } catch(Exception e) {
+          try {
+            job.setStatus(Status.FAILED);
+            updateJob(job);
+          } catch (Exception failureToFail) {
+            logger.warn("Unable to update job to failed state", failureToFail);
+          }
+          if (e instanceof EncoderException) {
+            throw (EmbedderException) e;
+          } else {
+            throw new EmbedderException(e);
           }
         }
-
-        // set properties
-        Map<String, String> properties = new HashMap<String, String>();
-        properties.put("param.trackh", String.valueOf(subHeight));
-        properties.put("param.offset", String.valueOf(subHeight / 2));
-
-        File output = engine.embed(mediaFile, captionFiles, captionLanguages, properties);
-
-        URI returnURL = null;
-        InputStream in = null;
-        try {
-          in = new FileInputStream(output);
-          returnURL = workspace.putInCollection(COLLECTION,
-                  job.getId() + "." + FilenameUtils.getExtension(output.getAbsolutePath()), in);
-          logger.info("Copied the encoded file to the workspace at {}", returnURL);
-        } catch (Exception e) {
-          throw new EmbedderException("Unable to put the encoded file into the workspace", e);
-        } finally {
-          IOUtils.closeQuietly(in);
-          logger.info("Deleting the local copy of the embedded file at {}", output.getAbsolutePath());
-          if (!output.delete()) {
-            logger.warn("Could not delete local copy of file at {}", output.getAbsolutePath());
-          }
-        }
-
-        // Have the encoded track inspected and return the result
-        Job inspectionReceipt;
-        try {
-          inspectionReceipt = inspectionService.inspect(returnURL, true);
-        } catch (MediaInspectionException e) {
-          throw new EmbedderException("Media inspection of " + returnURL + " failed", e);
-        }
-        if (inspectionReceipt.getStatus() == Job.Status.FAILED)
-          throw new EmbedderException("Media inspection failed");
-        Track inspectedTrack = (Track) inspectionReceipt.getElement();
-        inspectedTrack.setIdentifier(targetTrackId);
-
-        job.setElement(inspectedTrack);
-        job.setStatus(Status.FINISHED);
-        updateEmbedderJob(job);
-
-        return null;
       }
-
     };
 
     Future<?> future = executor.submit(command);

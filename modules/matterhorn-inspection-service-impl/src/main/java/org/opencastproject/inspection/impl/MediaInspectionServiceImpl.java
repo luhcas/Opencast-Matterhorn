@@ -169,77 +169,90 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
 
     Callable<Track> command = new Callable<Track>() {
       public Track call() throws MediaInspectionException {
-
-        job.setStatus(Status.RUNNING);
-        updateJob(job);
-
-        // Get the file from the URL (runtime exception if invalid)
-        File file = null;
         try {
-          file = workspace.get(uri);
-        } catch (NotFoundException notFound) {
-          throw new MediaInspectionException("Unable to find resource " + uri, notFound);
-        } catch (IOException ioe) {
-          throw new MediaInspectionException("Error reading " + uri + " from workspace", ioe);
-        }
-
-        // Make sure the file has an extension. Otherwise, tools like ffmpeg will not work.
-        // TODO: Try to guess the extension from the container's metadata
-        if ("".equals(FilenameUtils.getExtension(file.getName()))) {
-          throw new MediaInspectionException("Can not inspect files without a filename extension");
-        }
-
-        MediaContainerMetadata metadata = getFileMetadata(file);
-        if (metadata == null) {
-          throw new MediaInspectionException("Media analyzer returned no metadata from " + file);
-        } else {
-          MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance()
-                  .newElementBuilder();
-          TrackImpl track;
-          MediaPackageElement element;
-          try {
-            element = elementBuilder.elementFromURI(uri, Type.Track, null);
-          } catch (UnsupportedElementException e) {
-            throw new MediaInspectionException("Unable to create track element from " + file, e);
-          }
-          track = (TrackImpl) element;
-
-          // Duration
-          if (metadata.getDuration() != null)
-            track.setDuration(metadata.getDuration());
-
-          // Checksum
-          try {
-            track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
-          } catch (IOException e) {
-            throw new MediaInspectionException("Unable to read " + file, e);
-          }
-
-          // Mimetype
-          try {
-            track.setMimeType(MimeTypes.fromURL(file.toURI().toURL()));
-          } catch (Exception e) {
-            logger.info("Unable to find mimetype for {}", file.getAbsolutePath());
-          }
-
-          // Audio metadata
-          try {
-            addAudioStreamMetadata(track, metadata);
-          } catch (Exception e) {
-            throw new MediaInspectionException("Unable to extract audio metadata from " + file, e);
-          }
-
-          // Videometadata
-          try {
-            addVideoStreamMetadata(track, metadata);
-          } catch (Exception e) {
-            throw new MediaInspectionException("Unable to extract video metadata from " + file, e);
-          }
-
-          job.setElement(track);
-          job.setStatus(Status.FINISHED);
+          job.setStatus(Status.RUNNING);
           updateJob(job);
-          return track;
+
+          // Get the file from the URL (runtime exception if invalid)
+          File file = null;
+          try {
+            file = workspace.get(uri);
+          } catch (NotFoundException notFound) {
+            throw new MediaInspectionException("Unable to find resource " + uri, notFound);
+          } catch (IOException ioe) {
+            throw new MediaInspectionException("Error reading " + uri + " from workspace", ioe);
+          }
+
+          // Make sure the file has an extension. Otherwise, tools like ffmpeg will not work.
+          // TODO: Try to guess the extension from the container's metadata
+          if ("".equals(FilenameUtils.getExtension(file.getName()))) {
+            throw new MediaInspectionException("Can not inspect files without a filename extension");
+          }
+
+          MediaContainerMetadata metadata = getFileMetadata(file);
+          if (metadata == null) {
+            throw new MediaInspectionException("Media analyzer returned no metadata from " + file);
+          } else {
+            MediaPackageElementBuilder elementBuilder = MediaPackageElementBuilderFactory.newInstance()
+                    .newElementBuilder();
+            TrackImpl track;
+            MediaPackageElement element;
+            try {
+              element = elementBuilder.elementFromURI(uri, Type.Track, null);
+            } catch (UnsupportedElementException e) {
+              throw new MediaInspectionException("Unable to create track element from " + file, e);
+            }
+            track = (TrackImpl) element;
+
+            // Duration
+            if (metadata.getDuration() != null)
+              track.setDuration(metadata.getDuration());
+
+            // Checksum
+            try {
+              track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+            } catch (IOException e) {
+              throw new MediaInspectionException("Unable to read " + file, e);
+            }
+
+            // Mimetype
+            try {
+              track.setMimeType(MimeTypes.fromURL(file.toURI().toURL()));
+            } catch (Exception e) {
+              logger.info("Unable to find mimetype for {}", file.getAbsolutePath());
+            }
+
+            // Audio metadata
+            try {
+              addAudioStreamMetadata(track, metadata);
+            } catch (Exception e) {
+              throw new MediaInspectionException("Unable to extract audio metadata from " + file, e);
+            }
+
+            // Videometadata
+            try {
+              addVideoStreamMetadata(track, metadata);
+            } catch (Exception e) {
+              throw new MediaInspectionException("Unable to extract video metadata from " + file, e);
+            }
+
+            job.setElement(track);
+            job.setStatus(Status.FINISHED);
+            updateJob(job);
+            return track;
+          }
+        } catch(Exception e) {
+          try {
+            job.setStatus(Status.FAILED);
+            updateJob(job);
+          } catch (Exception failureToFail) {
+            logger.warn("Unable to update job to failed state", failureToFail);
+          }
+          if (e instanceof MediaInspectionException) {
+            throw (MediaInspectionException) e;
+          } else {
+            throw new MediaInspectionException(e);
+          }
         }
       }
     };
@@ -330,104 +343,118 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
 
     return new Callable<MediaPackageElement>() {
       public MediaPackageElement call() throws MediaInspectionException {
-        // Set the job state to running
-        job.setStatus(Status.RUNNING);
-        updateJob(job);
-
-        URI originalTrackUrl = originalTrack.getURI();
-        MediaPackageElementFlavor flavor = originalTrack.getFlavor();
-        logger.debug("enrich(" + originalTrackUrl + ") called");
-
-        // Get the file from the URL
-        File file = null;
         try {
-          file = workspace.get(originalTrackUrl);
-        } catch (NotFoundException e) {
-          throw new MediaInspectionException("File " + file + " was not found and can therefore not be inspected", e);
-        } catch (IOException e) {
-          throw new MediaInspectionException("Error accessing " + file, e);
-        }
-
-        // Make sure the file has an extension. Otherwise, tools like ffmpeg will not work.
-        // TODO: Try to guess the extension from the container's metadata
-        if (StringUtils.trimToNull(FilenameUtils.getExtension(file.getName())) == null) {
-          throw new MediaInspectionException("Element " + file + " has no file extension");
-        }
-
-        MediaContainerMetadata metadata = getFileMetadata(file);
-        if (metadata == null) {
-          throw new MediaInspectionException("Unable to acquire media metadata for " + originalTrackUrl);
-        } else if (metadata.getAudioStreamMetadata().size() == 0 && metadata.getVideoStreamMetadata().size() == 0) {
-          throw new MediaInspectionException("File at " + originalTrackUrl + " does not seem to be a/v media");
-        } else {
-          TrackImpl track = null;
-          try {
-            track = (TrackImpl) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-                    .elementFromURI(originalTrackUrl, Type.Track, flavor);
-          } catch (UnsupportedElementException e) {
-            throw new MediaInspectionException("Unable to create track element from " + file, e);
-          }
-
-          // init the new track with old
-          track.setChecksum(originalTrack.getChecksum());
-          track.setDuration(originalTrack.getDuration());
-          track.setElementDescription(originalTrack.getElementDescription());
-          track.setFlavor(flavor);
-          track.setIdentifier(originalTrack.getIdentifier());
-          track.setMimeType(originalTrack.getMimeType());
-          track.setReference(originalTrack.getReference());
-          track.setSize(originalTrack.getSize());
-          track.setURI(originalTrackUrl);
-          for (String tag : originalTrack.getTags()) {
-            track.addTag(tag);
-          }
-
-          // enrich the new track with basic info
-          if (track.getDuration() == -1L || override)
-            track.setDuration(metadata.getDuration());
-          if (track.getChecksum() == null || override) {
-            try {
-              track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
-            } catch (IOException e) {
-              throw new MediaInspectionException("Unable to read " + file, e);
-            }
-          }
-
-          // Add the mime type if it's not already present
-          if (track.getMimeType() == null || override) {
-            try {
-              track.setMimeType(MimeTypes.fromURI(track.getURI()));
-            } catch (UnknownFileTypeException e) {
-              logger.info("Unable to detect the mimetype for track {} at {}", track.getIdentifier(), track.getURI());
-            }
-          }
-
-          // find all streams
-          Dictionary<String, Stream> streamsId2Stream = new Hashtable<String, Stream>();
-          for (Stream stream : originalTrack.getStreams()) {
-            streamsId2Stream.put(stream.getIdentifier(), stream);
-          }
-
-          // audio list
-          try {
-            addAudioStreamMetadata(track, metadata);
-          } catch (Exception e) {
-            throw new MediaInspectionException("Unable to extract audio metadata from " + file, e);
-          }
-
-          // video list
-          try {
-            addVideoStreamMetadata(track, metadata);
-          } catch (Exception e) {
-            throw new MediaInspectionException("Unable to extract video metadata from " + file, e);
-          }
-
-          job.setElement(track);
-          job.setStatus(Status.FINISHED);
+          // Set the job state to running
+          job.setStatus(Status.RUNNING);
           updateJob(job);
 
-          logger.info("Successfully inspected track {}", track);
-          return track;
+          URI originalTrackUrl = originalTrack.getURI();
+          MediaPackageElementFlavor flavor = originalTrack.getFlavor();
+          logger.debug("enrich(" + originalTrackUrl + ") called");
+
+          // Get the file from the URL
+          File file = null;
+          try {
+            file = workspace.get(originalTrackUrl);
+          } catch (NotFoundException e) {
+            throw new MediaInspectionException("File " + file + " was not found and can therefore not be inspected", e);
+          } catch (IOException e) {
+            throw new MediaInspectionException("Error accessing " + file, e);
+          }
+
+          // Make sure the file has an extension. Otherwise, tools like ffmpeg will not work.
+          // TODO: Try to guess the extension from the container's metadata
+          if (StringUtils.trimToNull(FilenameUtils.getExtension(file.getName())) == null) {
+            throw new MediaInspectionException("Element " + file + " has no file extension");
+          }
+
+          MediaContainerMetadata metadata = getFileMetadata(file);
+          if (metadata == null) {
+            throw new MediaInspectionException("Unable to acquire media metadata for " + originalTrackUrl);
+          } else if (metadata.getAudioStreamMetadata().size() == 0 && metadata.getVideoStreamMetadata().size() == 0) {
+            throw new MediaInspectionException("File at " + originalTrackUrl + " does not seem to be a/v media");
+          } else {
+            TrackImpl track = null;
+            try {
+              track = (TrackImpl) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+                      .elementFromURI(originalTrackUrl, Type.Track, flavor);
+            } catch (UnsupportedElementException e) {
+              throw new MediaInspectionException("Unable to create track element from " + file, e);
+            }
+
+            // init the new track with old
+            track.setChecksum(originalTrack.getChecksum());
+            track.setDuration(originalTrack.getDuration());
+            track.setElementDescription(originalTrack.getElementDescription());
+            track.setFlavor(flavor);
+            track.setIdentifier(originalTrack.getIdentifier());
+            track.setMimeType(originalTrack.getMimeType());
+            track.setReference(originalTrack.getReference());
+            track.setSize(originalTrack.getSize());
+            track.setURI(originalTrackUrl);
+            for (String tag : originalTrack.getTags()) {
+              track.addTag(tag);
+            }
+
+            // enrich the new track with basic info
+            if (track.getDuration() == -1L || override)
+              track.setDuration(metadata.getDuration());
+            if (track.getChecksum() == null || override) {
+              try {
+                track.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+              } catch (IOException e) {
+                throw new MediaInspectionException("Unable to read " + file, e);
+              }
+            }
+
+            // Add the mime type if it's not already present
+            if (track.getMimeType() == null || override) {
+              try {
+                track.setMimeType(MimeTypes.fromURI(track.getURI()));
+              } catch (UnknownFileTypeException e) {
+                logger.info("Unable to detect the mimetype for track {} at {}", track.getIdentifier(), track.getURI());
+              }
+            }
+
+            // find all streams
+            Dictionary<String, Stream> streamsId2Stream = new Hashtable<String, Stream>();
+            for (Stream stream : originalTrack.getStreams()) {
+              streamsId2Stream.put(stream.getIdentifier(), stream);
+            }
+
+            // audio list
+            try {
+              addAudioStreamMetadata(track, metadata);
+            } catch (Exception e) {
+              throw new MediaInspectionException("Unable to extract audio metadata from " + file, e);
+            }
+
+            // video list
+            try {
+              addVideoStreamMetadata(track, metadata);
+            } catch (Exception e) {
+              throw new MediaInspectionException("Unable to extract video metadata from " + file, e);
+            }
+
+            job.setElement(track);
+            job.setStatus(Status.FINISHED);
+            updateJob(job);
+
+            logger.info("Successfully inspected track {}", track);
+            return track;
+          }
+        } catch (Exception e) {
+          try {
+            job.setStatus(Status.FAILED);
+            updateJob(job);
+          } catch (Exception failureToFail) {
+            logger.warn("Unable to update job to failed state", failureToFail);
+          }
+          if (e instanceof MediaInspectionException) {
+            throw (MediaInspectionException) e;
+          } else {
+            throw new MediaInspectionException(e);
+          }
         }
       }
     };
@@ -512,42 +539,56 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
 
     return new Callable<MediaPackageElement>() {
       public MediaPackageElement call() throws MediaInspectionException {
-        job.setStatus(Status.RUNNING);
-        updateJob(job);
-
-        File file;
         try {
-          file = workspace.get(element.getURI());
-        } catch (NotFoundException e) {
-          throw new MediaInspectionException("Unable to find " + element.getURI() + " in the workspace", e);
-        } catch (IOException e) {
-          throw new MediaInspectionException("Error accessing " + element.getURI() + " in the workspace", e);
-        }
+          job.setStatus(Status.RUNNING);
+          updateJob(job);
 
-        // Checksum
-        if (element.getChecksum() == null || override) {
+          File file;
           try {
-            element.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+            file = workspace.get(element.getURI());
+          } catch (NotFoundException e) {
+            throw new MediaInspectionException("Unable to find " + element.getURI() + " in the workspace", e);
           } catch (IOException e) {
-            throw new MediaInspectionException("Error generating checksum for " + element.getURI(), e);
+            throw new MediaInspectionException("Error accessing " + element.getURI() + " in the workspace", e);
           }
-        }
 
-        // Mimetype
-        if (element.getMimeType() == null || override) {
+          // Checksum
+          if (element.getChecksum() == null || override) {
+            try {
+              element.setChecksum(Checksum.create(ChecksumType.DEFAULT_TYPE, file));
+            } catch (IOException e) {
+              throw new MediaInspectionException("Error generating checksum for " + element.getURI(), e);
+            }
+          }
+
+          // Mimetype
+          if (element.getMimeType() == null || override) {
+            try {
+              element.setMimeType(MimeTypes.fromURI(file.toURI()));
+            } catch (UnknownFileTypeException e) {
+              logger.info("unable to determine the mime type for {}", file.getName());
+            }
+          }
+
+          job.setElement(element);
+          job.setStatus(Status.FINISHED);
+          updateJob(job);
+          logger.info("Successfully inspected element {}", element);
+
+          return element;
+        } catch(Exception e) {
           try {
-            element.setMimeType(MimeTypes.fromURI(file.toURI()));
-          } catch (UnknownFileTypeException e) {
-            logger.info("unable to determine the mime type for {}", file.getName());
+            job.setStatus(Status.FAILED);
+            updateJob(job);
+          } catch (Exception failureToFail) {
+            logger.warn("Unable to update job to failed state", failureToFail);
+          }
+          if (e instanceof MediaInspectionException) {
+            throw (MediaInspectionException) e;
+          } else {
+            throw new MediaInspectionException(e);
           }
         }
-
-        job.setElement(element);
-        job.setStatus(Status.FINISHED);
-        updateJob(job);
-        logger.info("Successfully inspected element {}", element);
-
-        return element;
       }
     };
 

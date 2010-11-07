@@ -295,133 +295,147 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
        */
       @Override
       public Void call() throws MediaAnalysisException {
-        job.setStatus(Status.RUNNING);
-        updateJob(job);
-
-        PlayerListener processorListener = null;
-        Track mjpegTrack = null;
-        Mpeg7Catalog mpeg7 = mpeg7CatalogService.newInstance();
-
-        logger.info("Encoding {} to {}", track, MJPEG_MIMETYPE);
         try {
-          mjpegTrack = prepare(track);
-        } catch (EncoderException encoderException) {
-          throw new MediaAnalysisException("Error creating a mjpeg", encoderException);
+          job.setStatus(Status.RUNNING);
+          updateJob(job);
+
+          PlayerListener processorListener = null;
+          Track mjpegTrack = null;
+          Mpeg7Catalog mpeg7 = mpeg7CatalogService.newInstance();
+
+          logger.info("Encoding {} to {}", track, MJPEG_MIMETYPE);
+          try {
+            mjpegTrack = prepare(track);
+          } catch (EncoderException encoderException) {
+            throw new MediaAnalysisException("Error creating a mjpeg", encoderException);
+          }
+
+          // Create a player
+          File mediaFile = null;
+          URL mediaUrl = null;
+          try {
+            mediaFile = workspace.get(mjpegTrack.getURI());
+            mediaUrl = mediaFile.toURI().toURL();
+          } catch (NotFoundException e) {
+            throw new MediaAnalysisException("Error finding the mjpeg in the workspace", e);
+          } catch (IOException e) {
+            throw new MediaAnalysisException("Error reading the mjpeg in the workspace", e);
+          }
+          
+          DataSource ds;
+          try {
+            ds = Manager.createDataSource(mediaUrl);
+          } catch (NoDataSourceException e) {
+            throw new MediaAnalysisException("Error obtaining a JMF datasource", e);
+          } catch (IOException e) {
+            throw new MediaAnalysisException("Problem creating a JMF datasource", e);
+          }
+          Processor processor = null;
+          try {
+            processor = Manager.createProcessor(ds);
+            processorListener = new PlayerListener(processor);
+            processor.addControllerListener(processorListener);
+          } catch (Exception e) {
+            throw new MediaAnalysisException(e);
+          }
+
+          // Configure the processor
+          processor.configure();
+          if (!processorListener.waitForState(Processor.Configured)) {
+            throw new MediaAnalysisException("Unable to configure processor");
+          }
+
+          // Set the processor to RAW content
+          processor.setContentDescriptor(new ContentDescriptor(ContentDescriptor.RAW));
+
+          // Realize the processor
+          processor.realize();
+          if (!processorListener.waitForState(Processor.Realized)) {
+            throw new MediaAnalysisException("Unable to realize the processor");
+          }
+
+          // Get the output DataSource from the processor and
+          // hook it up to the DataSourceHandler.
+          DataSource outputDataSource = processor.getDataOutput();
+          FrameGrabber dsh = new FrameGrabber();
+
+          try {
+            dsh.setSource(outputDataSource);
+          } catch (IncompatibleSourceException e) {
+            throw new MediaAnalysisException("Cannot handle the output data source from the processor: "
+                    + outputDataSource);
+          }
+
+          // Load the movie and change the processor to prefetched state
+          processor.prefetch();
+          if (!processorListener.waitForState(Controller.Prefetched)) {
+            throw new MediaAnalysisException("Unable to switch player into 'prefetch' state");
+          }
+
+          // Get the movie duration
+          Time duration = processor.getDuration();
+          if (duration == Duration.DURATION_UNKNOWN) {
+            throw new MediaAnalysisException("Java media framework is unable to detect movie duration");
+          }
+
+          long durationInSeconds = Math.min(track.getDuration() / 1000, (long) duration.getSeconds());
+          logger.info("Track {} loaded, duration is {} s", mediaUrl, duration.getSeconds());
+
+          MediaTime contentTime = new MediaRelTimeImpl(0, (long) durationInSeconds * 1000);
+          MediaLocator contentLocator = new MediaLocatorImpl(mjpegTrack.getURI());
+          Video videoContent = mpeg7.addVideoContent("videosegment", contentTime, contentLocator);
+
+          logger.info("Starting video segmentation of {}", mediaUrl);
+
+          processor.setRate(1.0f);
+          processor.start();
+          dsh.start();
+          List<Segment> segments;
+          try {
+            segments = segment(videoContent, dsh);
+          } catch (IOException e) {
+            throw new MediaAnalysisException("Unable to access a frame in the mjpeg", e);
+          }
+
+          logger.info("Segmentation of {} yields {} segments", mediaUrl, segments.size());
+
+          MediaPackageElement mpeg7Catalog = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+                  .newElement(Catalog.TYPE, MediaPackageElements.SEGMENTS);
+          URI uri;
+          try {
+            uri = workspace.putInCollection(COLLECTION_ID, job.getId() + ".xml", mpeg7CatalogService.serialize(mpeg7));
+          } catch (IOException e) {
+            throw new MediaAnalysisException("Unable to put the mpeg7 catalog into the workspace", e);
+          }
+          mpeg7Catalog.setURI(uri);
+
+          try {
+            workspace.delete(mjpegTrack.getURI());
+          } catch (NotFoundException e) {
+            throw new MediaAnalysisException("Unable to find the mjpeg in the workspace", e);
+          } catch (IOException e) {
+            throw new MediaAnalysisException("Unable to delete the mjpeg from the workspace", e);
+          }
+
+          job.setElement(mpeg7Catalog);
+          job.setStatus(Status.FINISHED);
+          updateJob(job);
+
+          logger.info("Finished video segmentation of {}", mediaUrl);
+          return null;
+        } catch(Exception e) {
+          try {
+            job.setStatus(Status.FAILED);
+            updateJob(job);
+          } catch (Exception failureToFail) {
+            logger.warn("Unable to update job to failed state", failureToFail);
+          }
+          if (e instanceof MediaAnalysisException) {
+            throw (MediaAnalysisException) e;
+          } else {
+            throw new MediaAnalysisException(e);
+          }
         }
-
-        // Create a player
-        File mediaFile = null;
-        URL mediaUrl = null;
-        try {
-          mediaFile = workspace.get(mjpegTrack.getURI());
-          mediaUrl = mediaFile.toURI().toURL();
-        } catch (NotFoundException e) {
-          throw new MediaAnalysisException("Error finding the mjpeg in the workspace", e);
-        } catch (IOException e) {
-          throw new MediaAnalysisException("Error reading the mjpeg in the workspace", e);
-        }
-        
-        DataSource ds;
-        try {
-          ds = Manager.createDataSource(mediaUrl);
-        } catch (NoDataSourceException e) {
-          throw new MediaAnalysisException("Error obtaining a JMF datasource", e);
-        } catch (IOException e) {
-          throw new MediaAnalysisException("Problem creating a JMF datasource", e);
-        }
-        Processor processor = null;
-        try {
-          processor = Manager.createProcessor(ds);
-          processorListener = new PlayerListener(processor);
-          processor.addControllerListener(processorListener);
-        } catch (Exception e) {
-          throw new MediaAnalysisException(e);
-        }
-
-        // Configure the processor
-        processor.configure();
-        if (!processorListener.waitForState(Processor.Configured)) {
-          throw new MediaAnalysisException("Unable to configure processor");
-        }
-
-        // Set the processor to RAW content
-        processor.setContentDescriptor(new ContentDescriptor(ContentDescriptor.RAW));
-
-        // Realize the processor
-        processor.realize();
-        if (!processorListener.waitForState(Processor.Realized)) {
-          throw new MediaAnalysisException("Unable to realize the processor");
-        }
-
-        // Get the output DataSource from the processor and
-        // hook it up to the DataSourceHandler.
-        DataSource outputDataSource = processor.getDataOutput();
-        FrameGrabber dsh = new FrameGrabber();
-
-        try {
-          dsh.setSource(outputDataSource);
-        } catch (IncompatibleSourceException e) {
-          throw new MediaAnalysisException("Cannot handle the output data source from the processor: "
-                  + outputDataSource);
-        }
-
-        // Load the movie and change the processor to prefetched state
-        processor.prefetch();
-        if (!processorListener.waitForState(Controller.Prefetched)) {
-          throw new MediaAnalysisException("Unable to switch player into 'prefetch' state");
-        }
-
-        // Get the movie duration
-        Time duration = processor.getDuration();
-        if (duration == Duration.DURATION_UNKNOWN) {
-          throw new MediaAnalysisException("Java media framework is unable to detect movie duration");
-        }
-
-        long durationInSeconds = Math.min(track.getDuration() / 1000, (long) duration.getSeconds());
-        logger.info("Track {} loaded, duration is {} s", mediaUrl, duration.getSeconds());
-
-        MediaTime contentTime = new MediaRelTimeImpl(0, (long) durationInSeconds * 1000);
-        MediaLocator contentLocator = new MediaLocatorImpl(mjpegTrack.getURI());
-        Video videoContent = mpeg7.addVideoContent("videosegment", contentTime, contentLocator);
-
-        logger.info("Starting video segmentation of {}", mediaUrl);
-
-        processor.setRate(1.0f);
-        processor.start();
-        dsh.start();
-        List<Segment> segments;
-        try {
-          segments = segment(videoContent, dsh);
-        } catch (IOException e) {
-          throw new MediaAnalysisException("Unable to access a frame in the mjpeg", e);
-        }
-
-        logger.info("Segmentation of {} yields {} segments", mediaUrl, segments.size());
-
-        MediaPackageElement mpeg7Catalog = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-                .newElement(Catalog.TYPE, MediaPackageElements.SEGMENTS);
-        URI uri;
-        try {
-          uri = workspace.putInCollection(COLLECTION_ID, job.getId() + ".xml", mpeg7CatalogService.serialize(mpeg7));
-        } catch (IOException e) {
-          throw new MediaAnalysisException("Unable to put the mpeg7 catalog into the workspace", e);
-        }
-        mpeg7Catalog.setURI(uri);
-
-        try {
-          workspace.delete(mjpegTrack.getURI());
-        } catch (NotFoundException e) {
-          throw new MediaAnalysisException("Unable to find the mjpeg in the workspace", e);
-        } catch (IOException e) {
-          throw new MediaAnalysisException("Unable to delete the mjpeg from the workspace", e);
-        }
-
-        job.setElement(mpeg7Catalog);
-        job.setStatus(Status.FINISHED);
-        updateJob(job);
-
-        logger.info("Finished video segmentation of {}", mediaUrl);
-        return null;
       }
     };
 
