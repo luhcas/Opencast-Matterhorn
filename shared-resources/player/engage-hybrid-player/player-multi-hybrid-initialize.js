@@ -1015,8 +1015,8 @@ Opencast.Initialize = (function ()
      */
     function setCostumEmbedWidth()
     {
-    	var embedHeight = $('#oc_embed-costum-height-textinput').val() - OTHERDIVHEIGHT;
-        var embedWidth = Math.round(embedHeight * getMaxFormat());
+        var embedHeight = $('#oc_embed-costum-height-textinput').val();
+        var embedWidth = Math.round((embedHeight - OTHERDIVHEIGHT) * getMaxFormat());
         
         if(embedWidth >= MINWIDTH)
         {
