@@ -513,7 +513,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       int index = (int) Math.round((handlerList.size() - 1) * Math.random());
       return handlerList.get(index);
     }
-    logger.warn("No workflow operation handlers found for operation {}", operation.getId());
+    logger.warn("No workflow operation handlers found for operation '{}'", operation.getId());
     return null;
   }
 
@@ -528,8 +528,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     WorkflowOperationHandler operationHandler = selectOperationHandler(operation);
     // If there is no handler for the operation, mark this workflow as failed
     if (operationHandler == null) {
-      logger.warn("No handler available to execute operation {}", operation);
-      throw new IllegalStateException("Unable to find a workflow handler for " + operation);
+      logger.warn("No handler available to execute operation '{}'", operation.getId());
+      throw new IllegalStateException("Unable to find a workflow handler for '" + operation.getId() + "'");
     }
     executorService.execute(new WorkflowOperationWorker(operationHandler, wfi, properties, this));
   }

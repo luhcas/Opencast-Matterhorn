@@ -122,7 +122,7 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
    */
   @Override
   public String toString() {
-    return "'" + getId() + "' Operation Handler";
+    return getId();
   }
   
 }

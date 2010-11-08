@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0"
+   name="org.opencastproject.videosegmenter.impl.endpoint.VideoSegmenterRestEndpoint"
+  immediate="true" activate="activate" deactivate="deactivate">
+  <implementation class="org.opencastproject.videosegmenter.impl.endpoint.VideoSegmenterRestEndpoint" />
+  <property name="service.description" value="Video Segmentation REST Endpoint" />
+
+  <property name="opencast.service.type" value="org.opencastproject.videosegmenter" />
+  <property name="opencast.service.path" value="/analysis/videosegmenter/rest" />
+  <property name="opencast.service.jobproducer" value="true" />
+
+  <service>
+    <provide interface="org.opencastproject.videosegmenter.impl.endpoint.VideoSegmenterRestEndpoint" />
+  </service>
+
+  <reference name="segmenter" interface="org.opencastproject.videosegmenter.api.VideoSegmenterService"
+    cardinality="1..1" policy="static" bind="setVideoSegmenter" />
+</scr:component>

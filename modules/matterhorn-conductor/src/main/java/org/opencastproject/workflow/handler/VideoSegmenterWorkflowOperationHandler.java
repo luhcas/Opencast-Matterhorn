@@ -15,7 +15,6 @@
  */
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.analysis.api.MediaAnalysisService;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -23,6 +22,7 @@ import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
+import org.opencastproject.videosegmenter.api.VideoSegmenterService;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -64,7 +64,7 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
   }
 
   /** The composer service */
-  private MediaAnalysisService videosegmenter = null;
+  private VideoSegmenterService videosegmenter = null;
 
   /** The local workspace */
   private Workspace workspace = null;
@@ -122,7 +122,7 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
     Catalog mpeg7Catalog = null;
     long timeInQueue = 0;
     try {
-      Job receipt = videosegmenter.analyze(track, true);
+      Job receipt = videosegmenter.segment(track, true);
       if (receipt.getStatus().equals(Job.Status.FAILED)) {
         throw new WorkflowOperationException("Videosegmentation on " + track + " failed");
       }
@@ -147,7 +147,7 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
    * @param videosegmenter
    *          the video segmenter
    */
-  protected void setVideoSegmenter(MediaAnalysisService videosegmenter) {
+  protected void setVideoSegmenter(VideoSegmenterService videosegmenter) {
     this.videosegmenter = videosegmenter;
   }
 
@@ -161,4 +161,5 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
+  
 }

@@ -53,7 +53,12 @@
     </dependency>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-analysis-api</artifactId>
+      <artifactId>matterhorn-textanalyzer-api</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.opencastproject</groupId>
+      <artifactId>matterhorn-videosegmenter-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -121,6 +126,8 @@
               org.opencastproject.workflow.handler;version=${project.version}
             </Export-Package>
             <Service-Component>
+              OSGI-INF/operations/analyze-text.xml,
+              OSGI-INF/operations/analyze-videosegments.xml,
               OSGI-INF/operations/caption.xml,
               OSGI-INF/operations/cli.xml,
               OSGI-INF/operations/cleanup.xml,
@@ -137,9 +144,7 @@
               OSGI-INF/operations/prepare-av.xml,
               OSGI-INF/operations/publish.xml,
               OSGI-INF/operations/review.xml,
-              OSGI-INF/operations/segment.xml,
               OSGI-INF/operations/segmentpreviews.xml,
-              OSGI-INF/operations/textanalysis.xml,
               OSGI-INF/operations/trim.xml,
               OSGI-INF/operations/zip.xml
             </Service-Component>

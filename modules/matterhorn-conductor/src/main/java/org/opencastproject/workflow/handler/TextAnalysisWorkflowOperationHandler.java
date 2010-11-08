@@ -15,8 +15,6 @@
  */
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.analysis.api.MediaAnalysisException;
-import org.opencastproject.analysis.api.MediaAnalysisService;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.job.api.Job;
@@ -46,6 +44,8 @@ import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
+import org.opencastproject.textanalyzer.api.TextAnalyzerException;
+import org.opencastproject.textanalyzer.api.TextAnalyzerService;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -76,9 +76,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -89,7 +89,7 @@ import java.util.concurrent.ExecutionException;
 public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
 
   /** The logging facility */
-  private static final Logger logger = LoggerFactory.getLogger(SegmentPreviewsWorkflowOperationHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(TextAnalysisWorkflowOperationHandler.class);
 
   /** Name of the encoding profile that extracts a still image from a movie */
   public static final String IMAGE_EXTRACTION_PROFILE = "text-analysis.http";
@@ -123,7 +123,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
   private Mpeg7CatalogService mpeg7CatalogService = null;
 
   /** The text analysis service */
-  private MediaAnalysisService analysisService = null;
+  private TextAnalyzerService analysisService = null;
 
   /** The composer service */
   protected ComposerService composer = null;
@@ -144,7 +144,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    * @param analysisService
    *          the text analysis service
    */
-  protected void setTextAnalyzer(MediaAnalysisService analysisService) {
+  protected void setTextAnalyzer(TextAnalyzerService analysisService) {
     this.analysisService = analysisService;
   }
 
@@ -216,7 +216,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    */
   protected WorkflowOperationResult extractVideoText(final MediaPackage mediaPackage,
           WorkflowOperationInstance operation) throws EncoderException, InterruptedException, ExecutionException,
-          IOException, NotFoundException, MediaAnalysisException {
+          IOException, NotFoundException, TextAnalyzerException {
     long totalTimeInQueue = 0;
 
     List<String> sourceTagSet = asList(operation.getConfiguration("source-tags"));
@@ -297,7 +297,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         }
 
         // If there is a corresponding spaciotemporal decomposition, remove all the videotext elements
-        Job receipt = analysisService.analyze(image, true);
+        Job receipt = analysisService.extract(image, true);
 
         // add this receipt's queue time to the total
         long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
