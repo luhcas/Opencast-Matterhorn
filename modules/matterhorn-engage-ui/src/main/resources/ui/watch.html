@@ -6,7 +6,7 @@
 
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-    <link rel="shortcut icon" href="img/favicon.ico"> 
+    <link rel="shortcut icon" href="img/favicon.ico">
 
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/player-multi-hybrid.css" />
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/player-multi-hybrid-icons.css" />
@@ -27,13 +27,13 @@
     <script type="text/javascript" src="jquery/plugins/jARIA.js"></script>
     <script type="text/javascript" src="jquery/jquery-ui-1.8.1.custom.min.js"></script>
     <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-scubber.js"></script>
-    <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid.js"></script> 
-    <script type="text/javascript" src="engage-hybrid-player/aria/js/ariaSlider.js"></script>     
+    <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/aria/js/ariaSlider.js"></script>
     <script type="text/javascript" src="jquery/plugins/jwysiwyg/jquery.wysiwyg.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.client.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.sparkline.min.js"></script>
     <script type="text/javascript" src="js/engage-ui.js"></script>
-    <script type="text/javascript" src="js/version.js"></script>  
+    <script type="text/javascript" src="js/version.js"></script>
     <script type="text/javascript" src="js/jquery.timers-1.2.js"></script>
     <script type="text/javascript" src="js/segments.js"></script>
     <script type="text/javascript" src="js/bookmarks.js"></script>
@@ -46,7 +46,7 @@
     <script type="text/javascript" src="js/search.js"></script>
     <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-initialize.js"></script>
     <script type="text/javascript" src="js/watch.js"></script>
-    <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script> 
+    <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
     <script type="text/javascript">
       $(document).ready(function(){
           // parse the query string (TODO: move this into a js utility class)
@@ -92,6 +92,7 @@
             }
         });
         $('#oc_share-button').click(function() { Opencast.Player.doToggleShare(); });
+        $('#oc_btn-email').click(function() { Opencast.Player.doToggleShare(); });
         //bind click events to show dialog
         $('#oc_shortcuts').dialog({ autoOpen: false, width: 600});
         $('#oc_shortcut-button').click(function() {$('#oc_shortcuts').dialog('open'); $('#oc_shortcut-button').removeClass('ui-state-focus'); return true;});
@@ -116,26 +117,26 @@
 
   <div id="oc_title-bar" class="ui-widget ui-widget-header ui-corner-all">
     <div id="oc_title-bar-container" class="">
-    
+
       <div id="oc_title-bar-logo">
         <img src="img/MatterhornLogo_42x30.png" alt="Back to Media Module" title="Back to Media Module" />
       </div>
-  
-      <div id="oc_search">    
+
+      <div id="oc_search">
         <form action="index.html">
           <label id="skip" for="oc_searchField">Search Field</label>
           <input id="oc_searchField" class="oc_search-Field handcursor ui-corner-all" type="text" name="q" value="Search Matterhorn" />
           <input id="oc_btn-search" class="handcursor" type="submit" name="search" alt="search" title="search" value="Search"></input>
         </form>
       </div>
-        
+
       <div id="oc_title-bar-gallery-link">
         <div id="oc_gallery" class="ui-helper-reset">Go to <a href="index.html" title="Video Gallery">Video Gallery</a></div>
       </div>
     </div>
-    <div class="clear"></div>  
+    <div class="clear"></div>
   </div><!-- END #oc_title-bar -->
-  
+
   <div id="oc_body" class="ui-widget ui-widget-content ui-corner-all">
     <div id="oc_player-head">
       <h2 id="oc_title"></h2>
@@ -146,20 +147,20 @@
       <div class="clear"></div>
     </div>
    <div id="oc_flash-player">
-      <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-flash.js"></script> 
+      <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-flash.js"></script>
     </div>
-    
-    <div id="oc_video-player-controls"> 
-      
+
+    <div id="oc_video-player-controls">
+
       <div id="oc_video-time">
-        <div id="simpleEdit">    
+        <div id="simpleEdit">
           <input id="oc_current-time" class="oc_current-time handcursor" type="submit" name="Current Time" title="Current Time" value="00:00:00" tabIndex="0"></input>
-          <input id="oc_edit-time" class="oc_edit-time-hide handcursor" type="text" maxlength="8" size="8" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="00:00:00"></input> 
+          <input id="oc_edit-time" class="oc_edit-time-hide handcursor" type="text" maxlength="8" size="8" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="00:00:00"></input>
           of
           <span id="oc_duration" class="oc_duration" name="Duration" title="Duration" tabIndex="0">00:00:00</span>
         </div>
       </div>
- 
+
       <div id="oc_video-controls">
         <span id="skip">
             <a name="controls"></a>
@@ -170,8 +171,8 @@
         <input id="oc_btn-play-pause" class="oc_btn-play handcursor" type="submit" name="Play: Control + Alt + P"  alt="Play: Control + Alt + P" title="Play: Control + Alt + P" value=""></input>
         <input id="oc_btn-fast-forward" class="oc_btn-fast-forward handcursor" type="submit" name="Jump Forward: Control + Alt + F" alt="Jump Forward: Control + Alt + F" title="Jump Forward: Control + Alt + F" value=""></input>
         <input id="oc_btn-skip-forward" class="oc_btn-skip-forward handcursor" type="submit" name="Jump To The Next Slide"  alt="Jump To The Next Slide" title="Jump To The Next Slide" value=""></input>
-      </div> 
-     
+      </div>
+
       <div id="oc_sound">
         <span id="oc_volume-dropdown">
             <input id="oc_btn-volume" class="oc_btn-volume-high handcursor" type="submit" name="Unmute: Control + Alt + M" alt="Unmute: Control + Alt + M" title="Unmute: Control + Alt + M" value=""></input>
@@ -187,7 +188,7 @@
             </div>
         </span>
       </div>
-          
+
       <div id="oc_video-cc">
         <input id="oc_btn-cc" class="oc_btn-cc-off" type="submit" name="Closed Caption Off: Control + Alt + C" alt="Closed Caption Off: Control + Alt + C" title="Closed Caption Off: Control + Alt + C" value=""></input>
       </div>
@@ -201,9 +202,9 @@
     <div id="oc_player_video-dropdown"></div>
 
     <div id="data"></div>
-    
+
     <div class="ui-helper-clearfix"></div>
-  </div> 
+  </div>
   <div id="oc_ui_tabs">
       <div id="oc_tabs" class="oc_tabs-input">
         <ul>
@@ -214,7 +215,7 @@
           <li><a href=":javascript" id="oc_btn-annotation_chapter" class="oc_btn-tabs handcursor" title="Annotation">Annotation</a></li>
         </ul>
       </div>
-      
+
       <div id="oc_description" class="fl-fix">
         <h4>Description</h4>
       </div>
@@ -225,7 +226,7 @@
           </div>
         </div>
       </div>
-      
+
       <div id="oc_slidetext" class="fl-fix">
         <div id="oc_slidetext-right" class="oc_slidetext-right">
           <input id="oc_lecturer-search-field" class="oc_search-Field" type="text" onkeyup="Opencast.search.showResult(this.value)" size="30" value="Search this Recording"></input>
@@ -244,18 +245,18 @@
         <div id="oc_client_shortcuts"></div>
   </div>
   <!-- #share-button-layer dialog -->
-  <div id="oc_share-layer" class="fl-fix ui-widget ui-widget-content ui-corner-all ui-helper-hidden" title="Shortcuts">
+  <div id="oc_share-layer" class="ui-widget ui-widget-content ui-corner-all" title="Shortcuts">
     <ul id="oc_share-list">
       <li><a href="javascript: " id="oc_btn-embed" class="handcursor" title="Embed">Embed</a></li>
       <li><a href="javascript: " id="oc_btn-email" class="handcursor" title="Email">Email</a></li>
     </ul>
   </div>
   <!-- Embed Dialog -->
-  <div id="oc_embed" class="fl-fix" title="Embed">
+  <div id="oc_embed" title="Embed">
     <div id="oc_embed-left">
     <input id="oc_embed-icon-one" class="oc_embed-icon-one" type="submit" name="" alt="" title="" value=""> </input>
     <input id="oc_embed-icon-two" class="oc_embed-icon-two" type="submit" name="" alt="" title="" value=""> </input>
-    <input id="oc_embed-icon-three" class="oc_embed-icon-three" type="submit" name="" alt="" title="" value="""> </input>
+    <input id="oc_embed-icon-three" class="oc_embed-icon-three" type="submit" name="" alt="" title="" value=""> </input>
     <input id="oc_embed-icon-four" class="oc_embed-icon-four" type="submit" name="" alt="" title="" value=""> </input>
     <input id="oc_embed-icon-five" class="oc_embed-icon-five" type="submit" name="" alt="" title="" value=""> </input>
      </div>
@@ -268,7 +269,7 @@
       <input id="oc_embed-costum-height-textinput" maxlength="4" type="text" name="" alt="" title="" value=""></input>
     </div>
      <div class="clear"></div>
-        Choose your embed size. Copy the text and paste it in your html page. 
+        Choose your embed size. Copy the text and paste it in your html page.
         <textarea id="oc_embed-textarea" class="oc_embed-textarea" rows="2" cols="1"></textarea>
       </div>
   </body>

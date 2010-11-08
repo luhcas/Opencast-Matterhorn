@@ -13,25 +13,25 @@
  *  permissions and limitations under the License.
  *
  */
- 
+
 body
 {
   font-family:              Verdana;
   padding-top:              5px;
-}   
+}
 
 table
 {
   border-spacing:           0;
-} 
+}
 #oc_title-bar
 {
   min-width:                760px;
   margin:             5px 10%;
-  
+
 }
 
-#oc_title-bar-container    
+#oc_title-bar-container
 {
   width: 100%;
 }
@@ -42,7 +42,7 @@ table
   float: left;
 }
 
-#oc_title-bar-gallery-link 
+#oc_title-bar-gallery-link
 {
   margin: 5px;
   padding: 5px;
@@ -53,9 +53,9 @@ table
   font-weight: normal;
 }
 
-#oc_title-bar-gallery-link #oc_gallery 
+#oc_title-bar-gallery-link #oc_gallery
 {
-  padding: 5px; 
+  padding: 5px;
 }
 
 #oc_search
@@ -79,7 +79,7 @@ table
 #oc_title { float: left; font-weight: normal; margin: 0px; padding: 5px 15px 5px; max-width: 70%; }
 #oc_player-head { padding: 5px; }
 #oc_player-head-right { float: right; }
-#oc_share-layer { position: absolute;}
+#oc_share-layer { position: absolute; left: 0; top: -100px; }
 #oc_share-list { list-style:none outside none; padding: 0}
 #oc_share-list li { padding: 5px 0; }
 
@@ -91,8 +91,8 @@ table
 }
 
 .clear
-{   
-  clear:                    both;   
+{
+  clear:                    both;
 }
 
 #oc_body, #oc_ui_tabs
@@ -101,10 +101,10 @@ table
   margin-left:              10%;
   margin-right:             10%;
   padding:                  5px;
-  position:                 relative; 
+  position:                 relative;
 }
 
-#oc_ui_tabs 
+#oc_ui_tabs
 {
   margin-top: 5px;
   margin-bottom: 5px;
@@ -136,7 +136,7 @@ table
   height:                   30px;
 }
 
-#simpleEdit 
+#simpleEdit
 {
   margin-left:              10px;
   font-size:                1.2em;
@@ -150,7 +150,7 @@ table
   background-color:         transparent !important;
   color:                    #FFFFFF;
   text-decoration: 			underline;
-  float: 					left;	
+  float: 					left;
 }
 
 .oc_current-time-hide
@@ -168,8 +168,8 @@ table
 .oc_edit-time-error
 {
   width:                    64px !important;
-  background-color:         #ff0000;  
-  color:                    #ffffff; 
+  background-color:         #ff0000;
+  color:                    #ffffff;
 }
 .oc_edit-time-hide
 {
@@ -205,7 +205,7 @@ table
 
 #oc_player_video-dropdown
 {
-  position:                 absolute; 
+  position:                 absolute;
   background-color:         black;
   z-index:                  10000;
   visibility:               hidden;
@@ -221,7 +221,7 @@ table
 }
 
 #oc_volume-dropdown-div
-{   
+{
   height:                   28px;
   text-align:               center;
   margin-left:              -50px;
@@ -234,7 +234,7 @@ table
   float:                    left;
 }
 
-.oc_slider-volume-Rail 
+.oc_slider-volume-Rail
 {
   width:                    55px;
   height:                   2px;
@@ -256,13 +256,13 @@ table
   background-position:      -30px -270px;
   margin:                   0px;
   padding:                  0px;
-  width:                    10px; 
+  width:                    10px;
   height:                   10px;
   position:                 absolute;
   margin-top:               -3px;
 }
 
-.oc-slider-volume-Rail 
+.oc-slider-volume-Rail
 {
   width:                    55px;
   height:                   2px;
@@ -284,7 +284,7 @@ table
   background-position:      -30px -270px;
   margin:                   0px;
   padding:                  0px;
-  width:                    10px; 
+  width:                    10px;
   height:                   10px;
   position:                 absolute;
   margin-top:               -3px;
@@ -402,21 +402,21 @@ option
   margin:                   2px;
 }
 
-.oc_option-myBookmark 
+.oc_option-myBookmark
 {
   background-color:         #90ee90;
   display:                  block;
   visibility:               visible;
 }
 
-.oc_option-publicBookmark 
+.oc_option-publicBookmark
 {
   background-color:         #87cefa;
   display:                  block;
   visibility:               visible;
 }
 
-option:hover 
+option:hover
 {
   color :                   #ffffff;
 }
@@ -449,7 +449,7 @@ option:hover
 }
 
 #oc_video-size-dropdown-div
-{   
+{
   height:                   28px;
   text-align:               center;
 }
@@ -462,9 +462,9 @@ option:hover
   outline-color:            -moz-use-text-color;
   outline-style:            none;
   outline-width:            none;
-  display:                  inline; 
-  position:                 absolute; 
-  height:                   0.8em; 
+  display:                  inline;
+  position:                 absolute;
+  height:                   0.8em;
   word-spacing:             1px;
   background-color:         rgb(255, 255, 255);
  -moz-border-radius:        0.2em;
@@ -472,13 +472,13 @@ option:hover
   background-color:         #7B7EAE;
 }
 
-.oc_offScreen-hidden 
+.oc_offScreen-hidden
 {
-  position:                 absolute; 
-  left:                     -10000px; 
-  top:                      auto; 
-  width:                    1px; 
-  height:                   1px; 
+  position:                 absolute;
+  left:                     -10000px;
+  top:                      auto;
+  width:                    1px;
+  height:                   1px;
   overflow:                 hidden;
 }
 
@@ -487,7 +487,7 @@ option:hover
   display:                  block;
   text-align:               center;
   padding:                  5px;
-  overflow:                 auto; 
+  overflow:                 auto;
   border:                   1px solid #000000;
   background-color:         #E3E3D7;
   margin-bottom:            5px;
@@ -498,7 +498,7 @@ option:hover
   display:                  block;
   text-align:               left;
   padding:                  5px;
-  overflow:                 auto; 
+  overflow:                 auto;
   border:                   1px solid #000000;
   background-color:         #E3E3D7;
 }
@@ -512,12 +512,12 @@ option:hover
 
 .oc_slidetext-left
 {
-  float:                    left; 
+  float:                    left;
   width:                    75%;
 }
 
 .oc_slidetext-right
-{  
+{
   float:                    right
 }
 
@@ -526,16 +526,16 @@ option:hover
   display:                  none;
 }
 
-.oc-segment-table 
-{ 
+.oc-segment-table
+{
   border-style:             none;
   border:                   0px;
   margin:                   0px;
   background:               #ffffff;
 }
 
-.oc-segment-td 
-{ 
+.oc-segment-td
+{
   border-style:             none;
 }
 
@@ -544,8 +544,8 @@ option:hover
   overflow-x:               hidden;
   overflow-y:               hidden;
 }
-  
-.player-chrome 
+
+.player-chrome
 {
   height:                   1px;
 }
@@ -554,7 +554,7 @@ option:hover
   background-color:         #B8B8B8;
 }
 
-.progress-segment 
+.progress-segment
 {
   border-bottom-color:      #BDBDBD;
   border-bottom-style:      solid;
@@ -583,35 +583,35 @@ option:hover
   padding-top:              0;
 }
 
-.scrubber-button 
+.scrubber-button
 {
   background:               transparent url("../img/oc_icons.png");
   background-position:      -60px -360px;
   height:                   19px;
   width:                    9px;
-  position:                 relative; 
+  position:                 relative;
   border:                   0px;
-  top:                      0px; 
+  top:                      0px;
   z-index:                  2;
   margin-left:              -4px;
 }
 
-#draggable 
-{ 
+#draggable
+{
   background:               transparent url("../img/oc_icons.png");
   background-position:      -60px -360px;
   height:                   19px;
   width:                    9px;
-  position:                 relative; 
+  position:                 relative;
   border:                   0px;
   top:                      -19px;
   z-index:                  3;
   margin-left:              -4px;
 }
 
-#draggable:focus 
+#draggable:focus
 {
-	outline: 2px solid #FA6E23; 
+	outline: 2px solid #FA6E23;
 }
 
 #divToolTip
@@ -631,7 +631,7 @@ option:hover
   width:                    64px;
 }
 
-.play-segment 
+.play-segment
 {
   border-bottom-color:      #BDBDBD;
   border-bottom-style:      solid;
@@ -659,7 +659,7 @@ option:hover
   border-top-width:         1px;
 }
 
-.progress-segment 
+.progress-segment
 {
   border-bottom-color:      #BDBDBD;
   border-bottom-style:      solid;
@@ -682,13 +682,13 @@ option:hover
   padding-top:              0;
 }
 
-.progress-list 
+.progress-list
 {
   background-color:         #FFFFFF;
   height:                   6px;
 }
 
-.load-progress 
+.load-progress
 {
   background-color:         #E99A8F;
   height:                   7px;
@@ -698,7 +698,7 @@ option:hover
   width:                    0;
 }
 
-.play-progress 
+.play-progress
 {
   background-color:         #DE6555;
   display:                  block;
@@ -707,7 +707,7 @@ option:hover
   position:                 relative;
 }
 
-.scrubber-channel 
+.scrubber-channel
 {
   display:                  block;
   margin-top:               0;
@@ -717,14 +717,14 @@ option:hover
   height:                   7px;
 }
 
-.progress-text 
+.progress-text
 {
   display:                  block;
   font-family:              Lucida Grande,Lucida San Unicode,Helvetica,Arial,sans-serif;
   font-size:                10px;
 }
 
-.duration-segment 
+.duration-segment
 {
   border-bottom-color:      #BDBDBD;
   border-bottom-style:      solid;
@@ -743,7 +743,7 @@ option:hover
   border-top-width:         1px;
 }
 
-.segment-holder 
+.segment-holder
 {
   height:                   25px;
   border-bottom-color:      #000000;
@@ -764,7 +764,7 @@ option:hover
   font-size:                10px;
 }
 
-.segment-holder-over 
+.segment-holder-over
 {
   background-color:         #d8d8d8;
   height:                   25px;
@@ -850,4 +850,4 @@ option:hover
 }
 
 #oc_ui_tabs { margin-bottom: 10px; }
- 
+
