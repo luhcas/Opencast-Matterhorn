@@ -245,7 +245,7 @@
     <!-- run the videosegmentation -->
     
     <operation
-      id="segment"
+      id="segment-video"
       fail-on-error="true"
       exception-handler-workflow="error"
       description="Extracting segments from presentation">
@@ -388,7 +388,7 @@
     <!-- Run text analysis -->
 
     <operation
-      id="textanalysis"
+      id="extract-text"
       fail-on-error="true"
       exception-handler-workflow="error"
       description="Extracting text from presentation segments">

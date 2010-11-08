@@ -183,9 +183,10 @@
         <activeByDefault>true</activeByDefault>
       </activation>
       <modules>
-        <module>modules/matterhorn-analysis-api</module>
-        <module>modules/matterhorn-analysis-text</module>
-        <module>modules/matterhorn-analysis-videosegmenter</module>
+        <module>modules/matterhorn-textanalyzer-api</module>
+        <module>modules/matterhorn-textanalyzer-impl</module>
+        <module>modules/matterhorn-videosegmenter-api</module>
+        <module>modules/matterhorn-videosegmenter-impl</module>
         <module>modules/matterhorn-caption-api</module>
         <module>modules/matterhorn-caption-impl</module>
         <module>modules/matterhorn-composer-service-api</module>
@@ -212,9 +213,10 @@
         <activeByDefault>false</activeByDefault>
       </activation>
       <modules>
-        <module>modules/matterhorn-analysis-api</module>
-        <module>modules/matterhorn-analysis-text-remote</module>
-        <module>modules/matterhorn-analysis-videosegmenter-remote</module>
+        <module>modules/matterhorn-textanalyzer-api</module>
+        <module>modules/matterhorn-textanalyzer-remote</module>
+        <module>modules/matterhorn-videosegmenter-api</module>
+        <module>modules/matterhorn-videosegmenter-remote</module>
         <module>modules/matterhorn-caption-api</module>
         <module>modules/matterhorn-caption-impl</module>
         <module>modules/matterhorn-composer-service-api</module>
