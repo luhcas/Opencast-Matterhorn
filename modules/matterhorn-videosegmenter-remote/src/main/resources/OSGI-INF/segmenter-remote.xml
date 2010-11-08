@@ -5,7 +5,7 @@
     class="org.opencastproject.videosegmenter.remote.VideoSegmenterRemoteImpl" />
   <property name="service.description" value="VideoSegmenter Remote Service Proxy" />
   <service>
-    <provice interface="org.opencastproject.videosegmenter.api.VideoSegmenterService" />
+    <provide interface="org.opencastproject.videosegmenter.api.VideoSegmenterService" />
   </service>
   <reference name="trustedHttpClient" interface="org.opencastproject.security.api.TrustedHttpClient"
     cardinality="1..1" policy="static" bind="setTrustedHttpClient" />
