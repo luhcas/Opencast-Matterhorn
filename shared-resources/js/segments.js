@@ -62,12 +62,6 @@ Opencast.segments = ( function() {
             .css('width', ($panels[0].offsetWidth * $panels.length))
             .css('left', "0px");
           // Disable and grey out "Annotation" Tab
-          $("#oc_ui_tabs").tabs({disabled: [4]});
-       } else {
-         // Disable and grey out "Slides" Tab
-         // Disable and grey out "Slides Text" Tab
-         $("#oc_ui_tabs").tabs({disabled: [1, 2]});
-         
        }
       var scroll = $('#slider .scroll').css('overflow', 'hidden');
 
@@ -231,9 +225,11 @@ Opencast.segments = ( function() {
     {
       var $panels       = $('#slider .scrollContainer > div');
       var $container      = $('#slider .scrollContainer');
-      $container
-            .css('width', ($panels[0].offsetWidth * $panels.length))
-            .css('left', "0px");
+      if($panels[0] !== undefined) {
+        $container
+              .css('width', ($panels[0].offsetWidth * $panels.length))
+              .css('left', "0px");
+      }
     }
 
   /**

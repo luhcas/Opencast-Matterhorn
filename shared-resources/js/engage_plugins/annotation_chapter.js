@@ -14,15 +14,15 @@ Opencast.Annotation_Chapter = (function(){
     var mediaPackageId, duration, ANNOTATION_CHAPTER = "Annotation", ANNOTATION_CHAPTERHIDE = "Annotation off";
     
     /**
+     * true if annotation chapter is displayed
+     */
+    var annotationChapterDisplayed = false;
+    
+    /**
      * @memberOf Opencast.Annotation_Chapter
      * @description Show Annotation_Chapter
      */
     function showAnnotation_Chapter(){
-        $("#oc_btn-annotation_chapter").attr({
-            title: ANNOTATION_CHAPTERHIDE,
-        });
-        $("#oc_btn-annotation_chapter").attr('aria-pressed', 'true');
-        $("#oc_btn-annotation_chapter").html(ANNOTATION_CHAPTERHIDE);
 		//$.getJSON('../../usertracking/rest/annotations.json?key=chapter', function(data) {
         /*
          * Load some testing demodata
@@ -38,11 +38,6 @@ Opencast.Annotation_Chapter = (function(){
      * @description Hide the Annotation
      */
     function hideAnnotation_Chapter(){
-        $("#oc_btn-annotation_chapter").attr({
-            title: ANNOTATION_CHAPTER,
-        });
-        $("#oc_btn-annotation_chapter").attr('aria-pressed', 'false');
-        $("#oc_btn-annotation_chapter").html(ANNOTATION_CHAPTER);
         $("#annotation").hide();
     }
     
@@ -51,11 +46,16 @@ Opencast.Annotation_Chapter = (function(){
      * @description Toggle Analytics
      */
     function doToggleAnnotation_Chapter(){
-        if ($("#oc_btn-annotation_chapter").attr("title") === ANNOTATION_CHAPTER) {
-            showAnnotation_Chapter()
+        if (!annotationChapterDisplayed) {
+            showAnnotation_Chapter();
+            annotationChapterDisplayed = true;
+            $('#oc_checkbox-annotations').attr('checked', 'checked');
+            
         }
         else {
-            hideAnnotation_Chapter()
+            hideAnnotation_Chapter();
+            annotationChapterDisplayed = false;
+            $('#oc_checkbox-annotations').removeAttr('checked');
         }
     }
     

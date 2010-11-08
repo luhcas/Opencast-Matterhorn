@@ -86,18 +86,18 @@
                 case 0: Opencast.Description.doToggleDescription(); break;
                 case 1: Opencast.Player.doToggleSlides(); break;
                 case 2: Opencast.Player.doToggleSlideText(); break;
-                case 3: Opencast.Analytics.doToggleAnalytics(event, ui); return false;
-                case 4: Opencast.Annotation_Chapter.doToggleAnnotation_Chapter(event, ui); return false;
               }
             }
         });
         $('#oc_share-button').click(function() { Opencast.Player.doToggleShare(); });
         $('#oc_btn-email').click(function() { Opencast.Player.doToggleShare(); });
+        $('label[for="oc_checkbox-statistics"]').click(function() { Opencast.Analytics.doToggleAnalytics(); return false;});
+        $('label[for="oc_checkbox-annotations"]').click(function() { Opencast.Annotation_Chapter.doToggleAnnotation_Chapter(); return false;});
         //bind click events to show dialog
         $('#oc_shortcuts').dialog({ autoOpen: false, width: 600});
         $('#oc_shortcut-button').click(function() {$('#oc_shortcuts').dialog('open'); $('#oc_shortcut-button').removeClass('ui-state-focus'); return true;});
         $('#oc_embed').dialog({ autoOpen: false, width: 800});
-        $('#oc_btn-embed').click(function() {$('#oc_embed').dialog('open'); Opencast.Player.doToggleShare(); return true;})
+        $('#oc_btn-embed').click(function() {$('#oc_embed').dialog('open'); Opencast.Player.doToggleShare(); return false;})
       });
     </script>
   </head>
@@ -150,7 +150,7 @@
       <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-flash.js"></script>
     </div>
 
-    <div id="oc_video-player-controls">
+    <div id="oc_video-player-controls" class="ui-widget ui-widget-header">
 
       <div id="oc_video-time">
         <div id="simpleEdit">
@@ -202,17 +202,23 @@
     <div id="oc_player_video-dropdown"></div>
 
     <div id="data"></div>
+    <div id="oc_video-view">
+      <ul>
+        <li><label for="oc_checkbox-statistics"><input id="oc_checkbox-statistics" type="checkbox"> Viewing Statistics</label></li>
+        <li><label for="oc_checkbox-annotations"><input id="oc_checkbox-annotations" type="checkbox"> Annotations</label></li>
+        <li><strong>View:</strong></li>
+      </ul>
+      <div class="clear"></div>
+    </div>
 
-    <div class="ui-helper-clearfix"></div>
   </div>
+  
   <div id="oc_ui_tabs">
       <div id="oc_tabs" class="oc_tabs-input">
         <ul>
           <li><a href="#oc_description" id="oc_btn-description" class="oc_btn-tabs handcursor" title="Description">Description</a></li>
           <li><a href="#oc_slides" id="oc_btn-slides" class="oc_btn-tabs handcursor" title="Segments">Segments</a></li>
           <li><a href="#oc_slidetext" id="oc_btn-slidetext" class="oc_btn-tabs handcursor" title="Segment Text">Segment Text</a></li>
-          <li><a href=":javascript" id="oc_btn-analytics" class="oc_btn-tabs handcursor" title="Analytics">Analytics</a></li>
-          <li><a href=":javascript" id="oc_btn-annotation_chapter" class="oc_btn-tabs handcursor" title="Annotation">Annotation</a></li>
         </ul>
       </div>
 

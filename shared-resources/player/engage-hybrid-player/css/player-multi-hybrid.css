@@ -82,6 +82,9 @@ table
 #oc_share-layer { position: absolute; left: 0; top: -100px; }
 #oc_share-list { list-style:none outside none; padding: 0}
 #oc_share-list li { padding: 5px 0; }
+#oc_video-view ul { list-style:none outside none;}
+#oc_video-view ul li { padding: 2px 5px; float: right; }
+#oc_video-view ul input { vertical-align: middle; }
 
 
 

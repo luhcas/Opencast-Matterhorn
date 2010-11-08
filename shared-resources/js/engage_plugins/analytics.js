@@ -18,6 +18,10 @@ Opencast.Analytics = ( function() {
   duration,
   ANALYTICS              = "Analytics",
   ANALYTICSHIDE          = "Analytics off";
+  /**
+   * true if analytics are displayed
+   */
+  var analyticsDisplayed = false;
 
   /**
   * @memberOf Opencast.Analytics
@@ -25,12 +29,6 @@ Opencast.Analytics = ( function() {
   */
   function showAnalytics()
   {
-      $("#oc_btn-analytics").attr({ 
-          title: ANALYTICSHIDE,
-      });
-      $("#oc_btn-analytics").attr('aria-pressed', 'true');
-      $("#oc_btn-analytics").html(ANALYTICSHIDE);
-
       $.ajax( {
         type : 'GET',
         contentType : 'text/xml',
@@ -80,12 +78,6 @@ Opencast.Analytics = ( function() {
    */
   function hideAnalytics()
   {
-      $("#oc_btn-analytics").attr({ 
-          title: ANALYTICS,
-      });
-      $("#oc_btn-analytics").attr('aria-pressed', 'false');
-      $("#oc_btn-analytics").html(ANALYTICS);
-      
       $("#analytics").hide();
       $(".segments").css('top', '0px');
   }
@@ -97,13 +89,17 @@ Opencast.Analytics = ( function() {
    */
   function doToggleAnalytics()
   {
-      if ($("#oc_btn-analytics").attr("title") === ANALYTICS)
+      if (!analyticsDisplayed)
       {
-          showAnalytics(); 
+          showAnalytics();
+          analyticsDisplayed = true;
+          $('#oc_checkbox-statistics').attr('checked', 'checked');
       }
       else
       {
           hideAnalytics();
+          analyticsDisplayed = false;
+           $('#oc_checkbox-statistics').removeAttr('checked');
       }
   }
 
