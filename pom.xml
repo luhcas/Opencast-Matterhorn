@@ -1180,6 +1180,17 @@
       </roles>
       <timezone>+1</timezone>
     </developer>
+    <developer>
+      <id>akm220</id>
+      <name>Adam McKenzie</name>
+      <email>akm220@mail.usask.ca</email>
+      <organization>University of Saskatchewan</organization>
+      <organizationUrl>http://www.usask.ca</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>-6</timezone>
+    </developer>
   </developers>
 
   <contributors><!-- TODO? -->
