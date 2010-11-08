@@ -242,6 +242,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
             return track;
           }
         } catch(Exception e) {
+          logger.warn("Error inspecting " + uri, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);
@@ -310,7 +311,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
     if (block) {
       try {
         future.get();
-      } catch (Exception e) {
+      } catch (Throwable e) {
         try {
           job.setStatus(Status.FAILED);
           updateJob(job);
@@ -444,6 +445,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
             return track;
           }
         } catch (Exception e) {
+          logger.warn("Error enriching track " + originalTrack, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);
@@ -577,6 +579,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
 
           return element;
         } catch(Exception e) {
+          logger.warn("Error enriching element " + element, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);

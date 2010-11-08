@@ -212,6 +212,7 @@ public class TextAnalyzer extends MediaAnalysisServiceSupport {
           logger.info("Finished text extraction of {}", imageUrl);
           return null;
         } catch(Exception e) {
+          logger.warn("Error extracting text from " + imageUrl, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);

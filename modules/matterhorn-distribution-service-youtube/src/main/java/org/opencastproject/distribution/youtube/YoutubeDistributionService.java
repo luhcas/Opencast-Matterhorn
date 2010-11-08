@@ -339,6 +339,7 @@ public class YoutubeDistributionService implements DistributionService {
 
           return null;
         } catch (Exception e) {
+          logger.warn("Error distributing " + element, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);

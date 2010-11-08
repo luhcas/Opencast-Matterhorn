@@ -209,6 +209,7 @@ public class CaptionServiceImpl implements CaptionService {
 
           return catalog;
         } catch (Exception e) {
+          logger.warn("Error converting captions in " + input, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);

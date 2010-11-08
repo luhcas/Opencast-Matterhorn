@@ -424,6 +424,7 @@ public class VideoSegmenter extends MediaAnalysisServiceSupport implements Manag
           logger.info("Finished video segmentation of {}", mediaUrl);
           return null;
         } catch(Exception e) {
+          logger.warn("Error segmenting " + track, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);

@@ -187,6 +187,7 @@ public class DownloadDistributionService implements DistributionService {
           logger.info("Finished distribution of {}", element);
           return null;
         } catch(Exception e) {
+          logger.warn("Error distributing " + element, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);
@@ -259,6 +260,7 @@ public class DownloadDistributionService implements DistributionService {
           logger.info("Finished rectracting media package {}", mediaPackageId);
           return null;
         } catch(Exception e) {
+          logger.warn("Error retracting mediapackage " + mediaPackageId, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);

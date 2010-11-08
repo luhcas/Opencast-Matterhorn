@@ -201,6 +201,7 @@ public class StreamingDistributionService implements DistributionService {
 
           return null;
         } catch (Exception e) {
+          logger.warn("Error distributing " + element, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);
@@ -278,6 +279,7 @@ public class StreamingDistributionService implements DistributionService {
 
           return null;
         } catch(Exception e) {
+          logger.warn("Error retracting mediapackage " + mediaPackageId, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);

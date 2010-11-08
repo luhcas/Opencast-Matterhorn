@@ -316,6 +316,7 @@ public class ComposerServiceImpl implements ComposerService {
 
           return null;
         } catch(Exception e) {
+          logger.warn("Error trimming " + sourceTrack, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);
@@ -509,6 +510,7 @@ public class ComposerServiceImpl implements ComposerService {
 
           return null;
         } catch(Exception e) {
+          logger.warn("Error encoding " + videoTrack + " and " + audioTrack, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);
@@ -685,6 +687,7 @@ public class ComposerServiceImpl implements ComposerService {
 
           return null;
         } catch(Exception e) {
+          logger.warn("Error extracting image from " + sourceTrack, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);
@@ -867,6 +870,7 @@ public class ComposerServiceImpl implements ComposerService {
 
           return null;
         } catch(Exception e) {
+          logger.warn("Error embedding captions into " + mediaTrack, e);
           try {
             job.setStatus(Status.FAILED);
             updateJob(job);
