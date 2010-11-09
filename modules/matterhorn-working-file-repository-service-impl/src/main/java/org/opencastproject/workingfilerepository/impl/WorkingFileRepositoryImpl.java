@@ -27,6 +27,7 @@ import org.opencastproject.workingfilerepository.api.WorkingFileRepository;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,22 +90,19 @@ public class WorkingFileRepositoryImpl implements WorkingFileRepository, PathMap
 
     // server url
     serverUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
-    if (serverUrl == null)
+    if (StringUtils.isBlank(serverUrl))
       throw new IllegalStateException("Server URL must be set");
 
     // working file repository 'facade' configuration
+    String servicePath = (String)cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
     String canonicalFileRepositoryUrl = cc.getBundleContext().getProperty("org.opencastproject.file.repo.url");
-    if (canonicalFileRepositoryUrl != null) {
-      String serviceUrlString = canonicalFileRepositoryUrl;
+    if (StringUtils.isNotBlank(canonicalFileRepositoryUrl)) {
       try {
-        this.serviceUrl = new URI(serviceUrlString);
+        this.serviceUrl = new URI(UrlSupport.concat(canonicalFileRepositoryUrl, servicePath));
       } catch (URISyntaxException e) {
-        throw new IllegalStateException("Service URL must be a valid URI, but is " + serviceUrlString, e);
+        throw new IllegalStateException("Service URL must be a valid URI, but is " + canonicalFileRepositoryUrl, e);
       }
-    }
-    
-    if (this.serviceUrl == null) {
-      String servicePath = (String)cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+    } else {
       try {
         serviceUrl = new URI(UrlSupport.concat(serverUrl, servicePath));
       } catch (URISyntaxException e) {
