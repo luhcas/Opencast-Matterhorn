@@ -11,46 +11,71 @@
   <![CDATA[
     <fieldset>
       <legend>Holds</legend>
-      <span style="padding-left:5px">Processing should be paused to allow for:</span>
-      <ul class="no-bullets formField-list fl-controls-right">
-        <li class="ui-helper-clearfix"> 
-          <span id="holdconfig" style="float:left;">
-            <input id="review.hold" name="review.hold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;" style="float:left;">
-            <span id="i18n_hold_for_review">&nbsp;Review before encoding (with option to edit info)</span>
+      <span>Processing should be paused to allow for:</span>
+      <ul class="oc-ui-checkbox-list">
+        <li class="ui-helper-clearfix">
+          <span id="trimholdconfig">
+            <input id="trimHold" name="trimHold" type="checkbox" class="configField holdCheckbox" value="true" />
+            <span id="i18n_hold_for_trim">&nbsp;Review / Trim before encoding (with option to edit info)</span>
           </span>
-         </li>
-         <li class="ui-helper-clearfix">
-          <span id="captionconfig" style="float:left;">
-            <input id="caption.hold" name="caption.hold" type="checkbox" class="configField holdCheckbox" value="true" style="width: inherit !important;">
+        </li>
+        <li class="ui-helper-clearfix">
+          <span id="captionconfig">
+            <input id="captionHold" name="captionHold" type="checkbox" class="configField holdCheckbox" value="true"/>
             <span id="i18n_hold_for_caption">&nbsp;Captions file upload</span>
           </span>
-         </li>
+        </li>
       </ul>
     </fieldset>
     <fieldset>
       <legend>Distribution</legend>
-      <ul class="no-bullets formField-list fl-controls-right">
+      <ul class="oc-ui-form-list">
         <!-- field: License -->
         <li class="ui-helper-clearfix">
-          <label class="fl-label"><span class="color-red">* </span><span id="i18n_dist_label">Distribution Channel(s)</span>:</label
-          <span id="dist" style="float:left;">
-            <input id="distribution" name="distribution" type="checkbox" checked="checked" disabled="disabled" class="configField" value="Matterhorn Media Module" style="width: inherit !important;">
+          <label class="scheduler-label"><span class="color-red">* </span><span id="i18n_dist_label">Distribution Channel(s)</span>:</label>
+          <span id="dist">
+            <input id="distribution" name="distribution" type="checkbox" checked="checked" disabled="disabled" class="configField" value="Matterhorn Media Module" />
             <span id="i18n_dist_mmm">&nbsp;Matterhorn Media Module</span>
-            <input id="youtube" name="youtube" type="checkbox" disabled="disabled" class="configField" value="Youtube" style="width: inherit !important;">
+            <input id="youtube" name="youtube" type="checkbox" disabled="disabled" class="configField" value="Youtube" />
             <span id="i18n_dist_mmm">&nbsp;Youtube</span>
-            <input id="itunesu" name="itunesu" type="checkbox" disabled="disabled" class="configField" value="iTunesU" style="width: inherit !important;">
+            <input id="itunesu" name="itunesu" type="checkbox" disabled="disabled" class="configField" value="iTunesU" />
             <span id="i18n_dist_mmm">&nbsp;iTunesU</span>
           </span>
-          <!-- span class="helpIcon" title="Click for help">&nbsp;</span -->
         </li>
         <!-- field: License -->
         <li class="ui-helper-clearfix">
-          <label class="fl-label"><span id="i18n_license_label">License</span>:</label>
-          <input type="text" class="formField" id="license" name="license" style="float:left;">
-          <!-- span class="helpIcon" title="Click for help">&nbsp;</span -->
+          <label class="scheduler-label"><span id="i18n_license_label">License</span>:</label>
+          <input type="text" class="formField" id="license" name="license">
         </li>
       </ul>
     </fieldset>
+    <script type="text/javascript">
+      var ocWorkflowPanel = ocWorkflowPanel || {};
+      ocWorkflowPanel.registerComponents = function(components){
+        /* components with keys that begin with 'org.opencastproject.workflow.config' will be passed
+         * into the workflow. The component's nodeKey must match the components array key.
+         *
+         * Example:'org.opencastproject.workflow.config.myProperty' will be availible at ${my.property}
+         */
+        components['org.opencastproject.workflow.config.trimHold'] = new ocAdmin.Component(
+          ['trimHold'],
+          {nodeKey: 'org.opencastproject.workflow.config.trimHold'},
+          {getValue: function(){ return this.fields.trimHold.is(":checked"); }
+          });
+          
+        components['org.opencastproject.workflow.config.captionHold'] = new ocAdmin.Component(
+          ['captionHold'],
+          {nodeKey: 'org.opencastproject.workflow.config.captionHold'},
+          {getValue: function(){ return this.fields.captionHold.is(":checked");}
+          });
+          
+          //etc...
+      }
+      ocWorkflowPanel.setComponentValues = function(values, components){
+        components['org.opencastproject.workflow.config.captionHold'].setValue(values['org.opencastproject.workflow.config.captionHold']);
+        components['org.opencastproject.workflow.config.trimHold'].setValue(values['org.opencastproject.workflow.config.trimHold']);
+      }
+    </script>
   ]]>
   </configuration_panel>
 
@@ -75,7 +100,8 @@
       <configurations>
         <configuration key="source-flavor">presenter/source</configuration>
         <configuration key="target-flavor">presenter/work</configuration>
-        <configuration key="rewrite">true</configuration>
+        <configuration key="rewrite">false</configuration>
+        <configuration key="promiscuous-audio-muxing">true</configuration>
       </configurations>
     </operation>
 
@@ -87,7 +113,8 @@
       <configurations>
         <configuration key="source-flavor">presentation/source</configuration>
         <configuration key="target-flavor">presentation/work</configuration>
-        <configuration key="rewrite">true</configuration>
+        <configuration key="rewrite">false</configuration>
+        <configuration key="promiscuous-audio-muxing">true</configuration>
       </configurations>
     </operation>
 
@@ -115,17 +142,6 @@
         <configuration key="encoding-profile">flash-preview.http</configuration>
       </configurations>
     </operation>
-    <!-- operation     do we need this anymore?
-      id="compose"
-      fail-on-error="true"
-      exception-handler-workflow="error"
-      description="Encoding presenter audio for preview">
-      <configurations>
-        <configuration key="source-flavor">presenter/work</configuration>
-        <configuration key="target-flavor">presenter/preview</configuration>
-        <configuration key="encoding-profile">flash-preview.http</configuration>
-      </configurations>
-    </operation -->
 
     <!-- encode to engage player preview images -->
  
@@ -158,17 +174,19 @@
       </configurations>
     </operation>
 
-    <!-- hold to review media-->
+    <!-- hold to trim media-->
    
     <operation
-      id="review"
+      id="trim"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Waiting for user to review recording">
+      description="Waiting for user to review / trim recording">
       <configurations>
-        <configuration key="source-tag">preview</configuration>
-        <configuration key="required-property">${review.hold}</configuration>
-        </configurations>
+        <configuration key="source-flavor">*/work</configuration>
+        <configuration key="target-flavor-subtype">trimmed</configuration>
+        <configuration key="encoding-profile">trim.work</configuration>
+        <configuration key="required-property">${trimHold}</configuration>
+      </configurations>
     </operation>  
 
     <!-- hold for captions -->
@@ -180,7 +198,7 @@
       description="Waiting for user to upload captions">
       <configurations>
         <configuration key="caption-flavor">caption/dfxp</configuration>
-        <configuration key="required-property">${caption.hold}</configuration>
+        <configuration key="required-property">${captionHold}</configuration>
       </configurations>
     </operation>
 
@@ -192,7 +210,7 @@
       exception-handler-workflow="error"
       description="Encoding presenter (camera) video to Flash download">
       <configurations>
-        <configuration key="source-flavor">presenter/work</configuration>
+        <configuration key="source-flavor">presenter/trimmed</configuration>
         <configuration key="target-flavor">presenter/delivery</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash.http</configuration>
@@ -204,22 +222,35 @@
       exception-handler-workflow="error"
       description="Encoding presentation (screen) to Flash download">
       <configurations>
-        <configuration key="source-flavor">presentation/work</configuration>
+        <configuration key="source-flavor">presentation/trimmed</configuration>
         <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">engage</configuration>
         <configuration key="encoding-profile">flash-vga.http</configuration>
       </configurations>
     </operation>
+    <operation
+      id="compose"
+      fail-on-error="false"
+      exception-handler-workflow="error"
+      description="Encoding presentation (screen) to flash audio download">
+      <configurations>
+        <configuration key="source-flavor">presenter/trimmed</configuration>
+        <configuration key="target-flavor">presenter/delivery</configuration>
+        <configuration key="target-tags">engage</configuration>
+        <configuration key="encoding-profile">flash-audio.http</configuration>
+      </configurations>
+    </operation>   
+     
 
     <!-- run the videosegmentation -->
     
     <operation
-      id="segment"
+      id="segment-video"
       fail-on-error="true"
       exception-handler-workflow="error"
       description="Extracting segments from presentation">
       <configurations>
-        <configuration key="source-flavor">presentation/work</configuration>
+        <configuration key="source-flavor">presentation/trimmed</configuration>
       </configurations>
     </operation>
 
@@ -231,7 +262,7 @@
       exception-handler-workflow="error"
       description="Encoding presenter (camera) to search result preview image">
       <configurations>
-        <configuration key="source-flavor">presenter/work</configuration>
+        <configuration key="source-flavor">presenter/trimmed</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">presenter/search+preview</configuration>
         <configuration key="target-tags">engage</configuration>
@@ -243,9 +274,9 @@
       id="image"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encoding presentation (vga) to search result preview image">
+      description="Encoding presentation (screen) to search result preview image">
       <configurations>
-        <configuration key="source-flavor">presentation/work</configuration>
+        <configuration key="source-flavor">presentation/trimmed</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">presentation/search+preview</configuration>
         <configuration key="target-tags">engage</configuration>
@@ -260,9 +291,9 @@
       id="compose"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encoding presentation (screen) to mpeg4 audio download">
+      description="Encoding presenter (camera) to mpeg4 audio download">
       <configurations>
-        <configuration key="source-flavor">presenter/work</configuration>
+        <configuration key="source-flavor">presenter/trimmed</configuration>
         <configuration key="target-flavor">presenter/delivery</configuration>
         <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">feed-m4a.http</configuration>
@@ -274,7 +305,7 @@
       exception-handler-workflow="error"
       description="Encoding presentation (screen) to mpeg4 audio download">
       <configurations>
-        <configuration key="source-flavor">presentation/work</configuration>
+        <configuration key="source-flavor">presentation/trimmed</configuration>
         <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">feed-m4a.http</configuration>
@@ -286,7 +317,7 @@
       exception-handler-workflow="error"
       description="Encoding presenter (camera) to avi/mpeg4 download">
       <configurations>
-        <configuration key="source-flavor">presenter/work</configuration>
+        <configuration key="source-flavor">presenter/trimmed</configuration>
         <configuration key="target-flavor">presenter/delivery</configuration>
         <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">feed-avi.http</configuration>
@@ -298,7 +329,7 @@
       exception-handler-workflow="error"
       description="Encoding presentation (screen) to avi/mpeg4 download">
       <configurations>
-        <configuration key="source-flavor">presentation/work</configuration>
+        <configuration key="source-flavor">presentation/trimmed</configuration>
         <configuration key="target-flavor">presentation/delivery</configuration>
         <configuration key="target-tags">rss, atom</configuration>
         <configuration key="encoding-profile">feed-avi.http</configuration>
@@ -313,7 +344,7 @@
       exception-handler-workflow="error"
       description="Encoding presenter (camera) to feed preview image">
       <configurations>
-        <configuration key="source-flavor">presenter/work</configuration>
+        <configuration key="source-flavor">presenter/trimmed</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">presenter/feed+preview</configuration>
         <configuration key="target-tags">rss, atom</configuration>
@@ -325,9 +356,9 @@
       id="image"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Encoding presentation (vga) to feed preview image">
+      description="Encoding presentation (screen) to feed preview image">
       <configurations>
-        <configuration key="source-flavor">presentation/work</configuration>
+        <configuration key="source-flavor">presentation/trimmed</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">presentation/feed+preview</configuration>
         <configuration key="target-tags">rss, atom</configuration>
@@ -344,7 +375,7 @@
       exception-handler-workflow="error"
       description="Encoding presentation (screen) to segment preview image">
       <configurations>
-        <configuration key="source-flavor">presentation/work</configuration>
+        <configuration key="source-flavor">presentation/trimmed</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-flavor">presentation/segment+preview</configuration>
         <configuration key="reference-flavor">presentation/delivery</configuration>
@@ -357,12 +388,12 @@
     <!-- Run text analysis -->
 
     <operation
-      id="textanalysis"
+      id="extract-text"
       fail-on-error="true"
       exception-handler-workflow="error"
       description="Extracting text from presentation segments">
       <configurations>
-        <configuration key="source-flavor">presentation/work</configuration>
+        <configuration key="source-flavor">presentation/trimmed</configuration>
         <configuration key="source-tags"></configuration>
         <configuration key="target-tags">engage</configuration>
       </configurations>
