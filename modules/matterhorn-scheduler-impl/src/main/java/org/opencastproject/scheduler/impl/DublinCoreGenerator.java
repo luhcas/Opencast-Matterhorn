@@ -34,7 +34,6 @@ import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -87,7 +86,7 @@ public class DublinCoreGenerator {
   public DublinCoreCatalog generate (Event event) {
     logger.debug("creating Dublin Core  information for event {}", event.getEventId());
     DublinCoreCatalog dcCatalog = DublinCoreCatalogImpl.newInstance();
-    dcCatalog.add(DublinCore.PROPERTY_IDENTIFIER, new DublinCoreValue(event.getEventId()));
+    dcCatalog.add(DublinCore.PROPERTY_IDENTIFIER, new DublinCoreValue(Long.toString(event.getEventId())));
     dcCatalog.add(DublinCore.PROPERTY_CREATED, EncodingSchemeUtils.encodeDate(event.getStartDate(), Precision.Second));
     dcCatalog.add(DublinCore.PROPERTY_TITLE, new DublinCoreValue(event.getTitle()));
     if(event.getContributor() != null) {

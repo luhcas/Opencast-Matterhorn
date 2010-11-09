@@ -512,7 +512,7 @@ public class AdminuiRestService {
       filter.withStop(new Date(System.currentTimeMillis() + CAPTURE_AGENT_DELAY));
       List<Event> events = schedulerService.getEvents(filter);
       for (Event event : events) {
-        Recording recording = captureAdminService.getRecordingState(event.getEventId());
+        Recording recording = captureAdminService.getRecordingState(event.getEventId().toString());
         if ((recording == null)
                 || (recording.getState().equals(RecordingState.CAPTURE_ERROR))
                 || (recording.getState().equals(RecordingState.COMPRESSING_ERROR))
@@ -525,7 +525,7 @@ public class AdminuiRestService {
                 || recording.getState().equals(RecordingState.UPLOADING)))) {
           AdminRecordingImpl item = new AdminRecordingImpl();
           item.setItemType(AdminRecording.ItemType.SCHEDULER_EVENT);
-          item.setId(event.getEventId());
+          item.setId(event.getEventId().toString());
           item.setTitle(event.getTitle());
           item.setPresenter(event.getCreator());
           item.setSeriesTitle(getSeriesNameFromEvent(event));
@@ -563,7 +563,7 @@ public class AdminuiRestService {
       for (Event event : events) {
         if (event.getStartDate() != null && System.currentTimeMillis() < event.getStartDate().getTime()) {
           AdminRecording item = new AdminRecordingImpl();
-          item.setId(event.getEventId());
+          item.setId(event.getEventId().toString());
           item.setItemType(AdminRecording.ItemType.SCHEDULER_EVENT);
           item.setTitle(event.getTitle());
           item.setPresenter(event.getCreator());
@@ -588,7 +588,7 @@ public class AdminuiRestService {
       //logger.debug("getting capturing recordings from scheduler");
       Map<String, Recording> recordings = captureAdminService.getKnownRecordings();
       for (Entry<String, Recording> recording : recordings.entrySet()) {
-        Event event = schedulerService.getEvent(recording.getKey());
+        Event event = schedulerService.getEvent(Long.parseLong(recording.getKey()));
         try {
           Recording r = recording.getValue();
           if (r != null) {
@@ -600,7 +600,7 @@ public class AdminuiRestService {
                     || state.equals(RecordingState.MANIFEST)
                     || state.equals(RecordingState.UPLOADING)) {
               AdminRecording item = new AdminRecordingImpl();
-              item.setId(event.getEventId());
+              item.setId(event.getEventId().toString());
               item.setItemType(AdminRecording.ItemType.SCHEDULER_EVENT);
               item.setTitle(event.getTitle());
               item.setPresenter(event.getCreator());

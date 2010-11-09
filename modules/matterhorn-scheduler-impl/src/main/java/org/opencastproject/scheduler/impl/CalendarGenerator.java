@@ -126,7 +126,7 @@ public class CalendarGenerator {
     try {
       ParameterList pl = new ParameterList();
       pl.add(new Cn(e.getCreator()));
-      event.getProperties().add(new Uid(e.getEventId()));
+      event.getProperties().add(new Uid(Long.toString(e.getEventId())));
       
       // TODO Organizer should be URI (email-address?) created fake address
       if (!e.getCreator().equalsIgnoreCase("null")) {

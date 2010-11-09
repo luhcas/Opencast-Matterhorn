@@ -83,10 +83,6 @@ ocScheduler.init = function(){
         $('#noticeContainer').hide();
         $.get(CAPTURE_ADMIN_URL + '/agents/' + $('#agent option:selected').val(), ocScheduler.CheckAgentStatus);
       });
-  }else{
-    $.get(SCHEDULER_URL + '/uuid', function(data){
-      $('#eventId').val(data.id);
-    });
   }
 };
 
@@ -249,13 +245,13 @@ ocScheduler.SubmitForm = function(){
   if(eventXML){
     if(ocScheduler.type === SINGLE_EVENT){
       if(ocUtils.getURLParam('edit')){
-        $.post( SCHEDULER_URL + '/event/' + $('#eventId').val(), {
+        $.post( SCHEDULER_URL + '/' + $('#eventId').val(), {
                event: eventXML
                }, ocScheduler.EventSubmitComplete );
       }else{
         $.ajax({
                type: "PUT",
-               url: SCHEDULER_URL + '/event/' + $('#eventId').val(),
+               url: SCHEDULER_URL + '/',
                data: {
                event: eventXML
                },
@@ -264,7 +260,7 @@ ocScheduler.SubmitForm = function(){
       }
     }else{
       if(ocUtils.getURLParam('edit')){
-        $.post( SCHEDULER_URL + '/event/' + $('#eventId').val(), {
+        $.post( SCHEDULER_URL + '/' + $('#eventId').val(), {
                recurringEvent: eventXML
                }, ocScheduler.EventSubmitComplete );
       }else{
@@ -288,7 +284,7 @@ ocScheduler.CancelForm = function(){
 ocScheduler.DeleteForm = function(){
   var title, series, creator;
   if(confirm(i18n.del.confirm)){
-    $.get(SCHEDULER_URL + '/removeEvent/' + $('#eventId').val(), function(){
+    $.ajax(SCHEDULER_URL + '/removeEvent/' + $('#eventId').val(), function(){
       title = ocScheduler.components.title.asString() || 'No Title';
       series = ocScheduler.components.seriesId.asString() || 'No Series';
       creator = ocScheduler.components.creator.asString() || 'No Creator';
@@ -441,7 +437,7 @@ ocScheduler.HandleAgentList = function(data) {
   if(eventId && ocUtils.getURLParam('edit')) {
     $.ajax({
       type: "GET",
-      url: SCHEDULER_URL + '/event/' + eventId + '.xml',
+      url: SCHEDULER_URL + '/' + eventId + '.xml',
       success: ocScheduler.LoadEvent,
       cache: false
     });

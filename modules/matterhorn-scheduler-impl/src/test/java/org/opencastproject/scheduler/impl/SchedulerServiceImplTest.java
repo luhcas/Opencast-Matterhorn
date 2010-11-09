@@ -161,7 +161,6 @@ public class SchedulerServiceImplTest {
       Assert.fail(e.getMessage());
     }
     event = new EventImpl();
-    event.generateId();
     event.setTitle("new recording");
     event.setStartDate(new Date());
     event.setEndDate(new Date(System.currentTimeMillis() + 5000000));

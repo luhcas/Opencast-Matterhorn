@@ -202,12 +202,27 @@ public class SchedulerServiceImpl implements ManagedService{
 
   
   /**
-   * @param eventID
-   * @return An event that matches eventID
+   * @param eventId
+   * @return An event that matches eventId
    */
-  public Event getEvent(String eventID) {
-    return EventImpl.find(eventID, emf);
-  }  
+  public Event getEvent(Long eventId) {
+    logger.debug("loading event with the ID {}", eventId);
+    if (eventId == null || emf == null) {
+      logger.warn("could not find event {}. Null Pointer exeption");
+      return null;
+    }
+    EntityManager em = emf.createEntityManager();
+    EventImpl e = null;
+    try {
+      e = em.find(EventImpl.class, eventId);
+    } finally {
+      em.close();
+    }
+    if (e == null){
+      logger.warn("No event found for {}", eventId);
+    }
+    return e;
+  }
   
   /**
    * @param filter
@@ -343,7 +358,7 @@ public class SchedulerServiceImpl implements ManagedService{
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.impl.SchedulerServiceImpl#removeEvent(java.lang.String)
    */
-  public boolean removeEvent(String eventID) {
+  public boolean removeEvent(Long eventID) {
     logger.info("Removing event with the ID {}", eventID);
     Event event;
     EntityManager em = emf.createEntityManager();
@@ -444,7 +459,7 @@ public class SchedulerServiceImpl implements ManagedService{
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerService#getDublinCoreMetadata(java.lang.String)
    */
-  public String getDublinCoreMetadata (String eventID) {
+  public String getDublinCoreMetadata (Long eventID) {
     Event event = getEvent(eventID);
     if (dcGenerator == null){
       logger.error("Dublin Core generator not initialized");
@@ -457,7 +472,7 @@ public class SchedulerServiceImpl implements ManagedService{
    * {@inheritDoc}
    * @see org.opencastproject.scheduler.api.SchedulerService#getDublinCoreMetadata(java.lang.String)
    */
-  public String getCaptureAgentMetadata (String eventID) {
+  public String getCaptureAgentMetadata (Long eventID) {
     Event event = getEvent(eventID);
     if (caGenerator == null){
       logger.error("Capture Agent Metadata generator not initialized");

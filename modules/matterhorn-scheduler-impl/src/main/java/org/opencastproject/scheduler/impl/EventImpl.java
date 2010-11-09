@@ -16,8 +16,8 @@
 package org.opencastproject.scheduler.impl;
 
 import org.opencastproject.scheduler.api.Event;
-import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.api.IncompleteDataException;
+import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
 
 import net.fortuna.ical4j.model.DateList;
@@ -29,21 +29,19 @@ import net.fortuna.ical4j.model.property.RRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.TimeZone;
-import java.text.ParseException;
+import java.util.UUID;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -58,9 +56,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 /**
@@ -77,11 +75,11 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @Table(name = "SCHED_EVENT")
 public class EventImpl implements Event {
   
-  @XmlID
+  @XmlAttribute(name="id")
   @Id
   @GeneratedValue
   @Column(name = "EVENT_ID", length = 36)
-  protected String eventId;
+  protected Long eventId;
   
   @XmlElement(name="contributor")
   protected String contributor;
@@ -223,13 +221,13 @@ public class EventImpl implements Event {
   /**
    * @return Event id
    */
-  public String getEventId(){
+  public Long getEventId(){
     return eventId;
   }
   /**
    * @param eventId
    */
-  public void setEventId(String eventId){
+  public void setEventId(Long eventId){
     this.eventId = eventId;
   }
   /**
@@ -486,25 +484,6 @@ public class EventImpl implements Event {
     return "";
   }
   
-  public static EventImpl find(String eventId, EntityManagerFactory emf) {
-    logger.debug("loading event with the ID {}", eventId);
-    if (eventId == null || emf == null) {
-      logger.warn("could not find event {}. Null Pointer exeption");
-      return null;
-    }
-    EntityManager em = emf.createEntityManager();
-    EventImpl e = null;
-    try {
-      e = em.find(EventImpl.class, eventId);
-    } finally {
-      em.close();
-    }
-    if (e == null){
-      logger.warn("No event found for {}", eventId);
-    }
-    return e;
-  }
-  
   /**
    * valueOf function is called by JAXB to bind values. This function calls the ScheduleEvent factory.
    * 
@@ -637,7 +616,6 @@ public class EventImpl implements Event {
         }
       }
       Event event = new EventImpl();
-      event.setEventId(generateId());
       event.initializeFromEvent((Event)this);
       event.setTitle(getTitle() + " " + i);
       event.setStartDate(d);

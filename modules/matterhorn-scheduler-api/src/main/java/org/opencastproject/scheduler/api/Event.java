@@ -29,161 +29,155 @@ public interface Event {
   /**
    * @return Event contributor
    */
-  public String getContributor();
+  String getContributor();
   /**
    * @param Event contributor
    */
-  public void setContributor(String contributor);
+  void setContributor(String contributor);
   /**
    * @return Event creator
    */
-  public String getCreator();
+  String getCreator();
   /**
    * @param Event creator
    */
-  public void setCreator(String creator);
+  void setCreator(String creator);
   /**
    * @return Event description
    */
-  public String getDescription();
+  String getDescription();
   /**
    * @param Event description
    */
-  public void setDescription(String description);
+  void setDescription(String description);
   /**
    * @return Event capture device name
    */
-  public String getDevice();
+  String getDevice();
   /**
    * @param Event capture device name
    */
-  public void setDevice(String device);
+  void setDevice(String device);
   /**
    * @return Event duration
    */
-  public long getDuration();
+  long getDuration();
   /**
    * @param Event duration
    */
-  public void setDuration(long duration);
+  void setDuration(long duration);
   /**
    * @return Event end date
    */
-  public Date getEndDate();
+  Date getEndDate();
   /**
    * @param Event end date
    */
-  public void setEndDate(Date endDate);
+  void setEndDate(Date endDate);
   /**
    * @return Event id
    */
-  public String getEventId();
+  Long getEventId();
   /**
    * @param eventId
    */
-  public void setEventId(String eventId);
+  void setEventId(Long eventId);
   /**
    * @return Event langauge
    */
-  public String getLanguage();
+  String getLanguage();
   /**
    * @param Event languge
    */
-  public void setLanguage(String langauge);
+  void setLanguage(String langauge);
   /**
    * @return Event license
    */
-  public String getLicense();
+  String getLicense();
   /**
    * @param Event license
    */
-  public void setLicense(String license);
+  void setLicense(String license);
   /**
    * @return Event recurrence name
    */
-  public String getRecurrence();
+  String getRecurrence();
   /**
    * @param Event recurrence name
    */
-  public void setRecurrence(String recurrence);
+  void setRecurrence(String recurrence);
   /**
    * @return Event recurrence pattern
    */
-  public String getRecurrencePattern();
+  String getRecurrencePattern();
   /**
    * @param Event recurrence pattern
    */
-  public void setRecurrencePattern(String recurrence);
+  void setRecurrencePattern(String recurrence);
   /**
    * @return Capture agent resources
    */
-  public String getResources();
+  String getResources();
   /**
    * @param Capture agent resources
    */
-  public void setResources(String resources);
+  void setResources(String resources);
   /**
    * @return Event series name
    */
-  public String getSeries();
+  String getSeries();
   /**
    * @param Event series name
    */
-  public void setSeries(String series);
+  void setSeries(String series);
   /**
    * @return Event series id
    */
-  public String getSeriesId();
+  String getSeriesId();
   /**
    * @param Event series id
    */
-  public void setSeriesId(String seriesId);
+  void setSeriesId(String seriesId);
   /**
    * @return Event start date
    */
-  public Date getStartDate();
+  Date getStartDate();
   /**
    * @param Event start date
    */
-  public void setStartDate(Date startDate);
+  void setStartDate(Date startDate);
   /**
    * @return String Event subject
    */
-  public String getSubject();
+  String getSubject();
   /**
    * @param Event subject
    */
-  public void setSubject(String subject);
+  void setSubject(String subject);
   /**
    * @return String Event title
    */
-  public String getTitle();
+  String getTitle();
   /**
    * @param Event title
    */
-  public void setTitle(String title);
+  void setTitle(String title);
 
   /**
    * Update a specific metadata field in the Event.
    * @param data
    */
-  public void updateMetadata(Metadata data);
-
-  /**
-   * Create a new UUID and set this events Id to it.
-   * @return This events Id.
-   */
-  public String generateId();
+  void updateMetadata(Metadata data);
 
   /**
    * @return List containing this events additional metadata
    */
-  public List<Metadata> getMetadataList();
+  List<Metadata> getMetadataList();
 
   /**
    * @param metadata
    */
-  public void setMetadataList(List<Metadata> metadata);
+  void setMetadataList(List<Metadata> metadata);
 
 
   /**
@@ -191,51 +185,51 @@ public interface Event {
    *        The name of a specific metadata field
    * @return The value of a specific metadata field in the metadataTable
    */
-  public String getMetadataValueByKey(String key);
+  String getMetadataValueByKey(String key);
 
   /**
    * @return Set of all metadata keys
    */
-  public Set<String> getKeySet();
+  Set<String> getKeySet();
 
   /**
    * @param key
    * @return True if a specific metadata key exists in the metadataTable
    */
-  public boolean containsKey(String key);
+  boolean containsKey(String key);
 
   /**
    * @param key
    * @return A specific metadata field in the metadata list for this event (not metadataTable)
    */
-  public Metadata findMetadata(String key);
+  Metadata findMetadata(String key);
   
   /**
    * Add new metadata to this event's metadata list.
    * @param m
    */
-  public void addMetadata(Metadata m);
+  void addMetadata(Metadata m);
   
   /**
    * Remove a specific metadata field from this event's metadata list.
    * @param m
    */
-  public void removeMetadata(Metadata m);
+  void removeMetadata(Metadata m);
 
   /**
    * Update the event and persist it in the database
    * @param e
    *        Event to update this one with
    */
-  public void update(Event e);
+  void update(Event e);
 
-  public String toString();
+  String toString();
 
-  public boolean equals(Object o);
+  boolean equals(Object o);
 
-  public int hashCode();
+  int hashCode();
     
-  public void initializeFromEvent(Event e);
+  void initializeFromEvent(Event e);
   
-  public List<Event> createEventsFromRecurrence() throws ParseException, IncompleteDataException;
+  List<Event> createEventsFromRecurrence() throws ParseException, IncompleteDataException;
 }
