@@ -27,7 +27,7 @@ var MULTIPLE_EVENTS   = 4;
 
 // XML Namespaces
 var SINGLE_EVENT_ROOT_ELM   = "event"
-var MULTIPLE_EVENT_ROOT_ELM = "recurringEvent";
+var MULTIPLE_EVENT_ROOT_ELM = "event";
 
 
 /* @namespace Scheduluer Namespace */
@@ -42,12 +42,13 @@ var Agent     = Agent || {};
 Agent.tzDiff  = 0;
 
 ocScheduler.init = function(){
-  ocWorkflow.init($('#workflowSelector'), $('#workflowConfigContainer'));
   ocScheduler.Internationalize();
   ocScheduler.RegisterComponents();
   ocScheduler.RegisterEventHandlers();
 
-  ocScheduler.FormManager = new ocAdmin.Manager(SINGLE_EVENT_ROOT_ELM, '', ocScheduler.components);
+  ocScheduler.FormManager = new ocAdmin.Manager(SINGLE_EVENT_ROOT_ELM, '', ocScheduler.components, ocScheduler.additionalMetadataComponents);
+  
+  ocWorkflow.init($('#workflowSelector'), $('#workflowConfigContainer'));
   
   if(ocScheduler.type === SINGLE_EVENT){
     ocScheduler.agentList = '#agent';
@@ -203,6 +204,7 @@ ocScheduler.ChangeRecordingType = function(recType){
   
   ocScheduler.RegisterComponents();
   ocScheduler.FormManager.components = ocScheduler.components;
+  ocScheduler.FormManager.additionalMetadataComponents = ocScheduler.additionalMetadataComponents;
   
   $('.ui-state-error-text').removeClass('ui-state-error-text');
   $('#missingFieldsContainer').hide();
@@ -243,34 +245,16 @@ ocScheduler.SubmitForm = function(){
   var eventXML = null;
   eventXML = ocScheduler.FormManager.serialize();
   if(eventXML){
-    if(ocScheduler.type === SINGLE_EVENT){
-      if(ocUtils.getURLParam('edit')){
-        $.post( SCHEDULER_URL + '/' + $('#eventId').val(), {
-               event: eventXML
-               }, ocScheduler.EventSubmitComplete );
-      }else{
-        $.ajax({
-               type: "PUT",
-               url: SCHEDULER_URL + '/',
-               data: {
-               event: eventXML
-               },
-               success: ocScheduler.EventSubmitComplete
-               });
-      }
+    if(ocUtils.getURLParam('edit')){
+      $.post( SCHEDULER_URL + '/' + $('#eventId').val(), {
+             event: eventXML
+             }, ocScheduler.EventSubmitComplete );
     }else{
-      if(ocUtils.getURLParam('edit')){
-        $.post( SCHEDULER_URL + '/' + $('#eventId').val(), {
-               recurringEvent: eventXML
-               }, ocScheduler.EventSubmitComplete );
-      }else{
-        $.ajax({
-          type: "PUT",
-          url: SCHEDULER_URL + '/recurring/' + $('#eventId').val(),
-          data: { recurringEvent: eventXML },
-          success: ocScheduler.EventSubmitComplete
-        });
-      }
+      $.ajax({type: "PUT",
+              url: SCHEDULER_URL + '/',
+              data: { event: eventXML },
+              success: ocScheduler.EventSubmitComplete
+             });
     }
   }
   return true;
@@ -299,7 +283,7 @@ ocScheduler.HandleAgentChange = function(elm){
   var time;
   var agent = elm.target.value;
   $(ocScheduler.inputList).empty();
-  ocScheduler.components.agentTimeZone.setValue('');
+  ocScheduler.additionalMetadataComponents.agentTimeZone.setValue('');
   if(agent){
     $.get('/capture-admin/rest/agents/' + agent + '/capabilities',
       function(doc){
@@ -317,7 +301,7 @@ ocScheduler.HandleAgentChange = function(elm){
               ocUtils.log("Couldn't parse TZ");
             }
           } else if(s == 'capture.device.timezone') {
-            ocScheduler.components.agentTimeZone.setValue($(i).text());
+            ocScheduler.additionalMetadataComponents.agentTimeZone.setValue($(i).text());
           }
         });
         if(capabilities.length){
@@ -329,7 +313,7 @@ ocScheduler.HandleAgentChange = function(elm){
       });
   }else{
     // no valid agent, change time to local form what ever it was before.
-    ocScheduler.compoonents.agentTimeZone.setValue(''); //Being empty will end up defaulting to the server's Timezone.
+    ocScheduler.additionalMetadataComponents.agentTimeZone.setValue(''); //Being empty will end up defaulting to the server's Timezone.
     if(ocScheduler.type === SINGLE_EVENT){
       time = ocScheduler.components.timeStart.getValue();
     }else if(ocScheduler.type === MULTIPLE_EVENTS){
@@ -478,7 +462,7 @@ ocScheduler.LoadEvent = function(doc){
     ocScheduler.components.recurrencePosition = new ocAdmin.Component(['recurrencePosition']);
   }
   if(workflowProperties['org.opencastproject.workflow.definition']){
-    ocScheduler.components.workflowDefinition.setValue(workflowProperties['org.opencastproject.workflow.definition']);
+    ocScheduler.additionalMetadataComponents.workflowDefinition.setValue(workflowProperties['org.opencastproject.workflow.definition']);
     ocWorkflow.definitionSelected(workflowProperties['org.opencastproject.workflow.definition'],
       $('#workflowConfigContainer'),
       function(){
@@ -567,12 +551,13 @@ ocScheduler.CheckForConflictingEvents = function(){
 
 ocScheduler.RegisterComponents = function(){
   ocScheduler.components = {};
+  ocScheduler.additionalMetadataComponents = {};
   
   ocScheduler.components.title = new ocAdmin.Component(['title'], {label: 'titleLabel', errorField: 'missingTitle', required: true});
   ocScheduler.components.creator = new ocAdmin.Component(['creator'], {label: 'creatorLabel'});
   ocScheduler.components.contributor = new ocAdmin.Component(['contributor'], {label: 'contributorLabel'});
   ocScheduler.components.seriesId = new ocAdmin.Component(['series', 'seriesSelect'],
-    { label: 'seriesLabel', errorField: 'missingSeries', required: true, nodeKey: 'seriesId' },
+    { label: 'seriesLabel', errorField: 'missingSeries', required: true, nodeKey: ['seriesId', 'series']},
     { getValue: function(){ 
         if(this.fields.series){
           this.value = this.fields.series.val();
@@ -594,6 +579,25 @@ ocScheduler.RegisterComponents = function(){
           return this.createSeriesFromSearchText();
         }
         return true; //nothing, or we have an id.
+      },
+      toNode: function(parent){
+        if(parent){
+          doc = parent.ownerDocument;
+        }else{
+          doc = document;
+        }
+        if(this.getValue() != "" && this.asString() != ""){ //only add series if we have both id and name.
+          seriesId = doc.createElement(this.nodeKey[0]);
+          seriesId.appendChild(doc.createTextNode(this.getValue()));
+          seriesName = doc.createElement(this.nodeKey[1]);
+          seriesName.appendChild(doc.createTextNode(this.asString()));
+          if(parent && parent.nodeType){
+            parent.appendChild(seriesId);
+            parent.appendChild(seriesName);
+          }else{
+            ocUtils.log('Unable to append node to document. ', parent, seriesId, seriesName);
+          }
+        }
       },
       createSeriesFromSearchText: function(){
         var series, seriesComponent, seriesId;
@@ -660,8 +664,8 @@ ocScheduler.RegisterComponents = function(){
         return checked;
       }
     });
-  ocScheduler.components.workflowDefinition = new ocAdmin.Component(['workflowSelector'], {nodeKey: 'org.opencastproject.workflow.definition'});
-  ocScheduler.components.agentTimeZone = new ocAdmin.Component(['agentTimeZone']);
+  ocScheduler.additionalMetadataComponents.workflowDefinition = new ocAdmin.Component(['workflowSelector'], {nodeKey: 'org.opencastproject.workflow.definition'});
+  ocScheduler.additionalMetadataComponents.agentTimeZone = new ocAdmin.Component(['agentTimeZone']);
   
   if(ocScheduler.type === MULTIPLE_EVENTS){
     //Series validation override for recurring events.
@@ -674,7 +678,7 @@ ocScheduler.RegisterComponents = function(){
       return false; //nothing
     };
     ocScheduler.components.recurrenceStart = new ocAdmin.Component(['recurStart', 'recurStartTimeHour', 'recurStartTimeMin'],
-      { label: 'recurStartLabel', errorField: 'missingStartdate', required: true, nodeKey: 'recurrenceStart' },
+      { label: 'recurStartLabel', errorField: 'missingStartdate', required: true, nodeKey: 'startDate' },
       { getValue: function(){
           var date, start;
           date = this.fields.recurStart.datepicker('getDate');
@@ -724,7 +728,7 @@ ocScheduler.RegisterComponents = function(){
       });
     
     ocScheduler.components.recurrenceDuration = new ocAdmin.Component(['recurDurationHour', 'recurDurationMin'],
-      { label: 'recurDurationLabel', errorField: 'missingDuration', required: true, nodeKey: 'recurrenceDuration' },
+      { label: 'recurDurationLabel', errorField: 'missingDuration', required: true, nodeKey: 'duration' },
       { getValue: function(){
           if(this.validate()){
             duration = this.fields.recurDurationHour.val() * 3600; // seconds per hour
@@ -765,7 +769,7 @@ ocScheduler.RegisterComponents = function(){
       });
 
     ocScheduler.components.recurrenceEnd = new ocAdmin.Component(['recurEnd', 'recurStart', 'recurStartTimeHour', 'recurStartTimeMin'],
-      { label: 'recurEndLabel', errorField: 'errorRecurStartEnd', required: true, nodeKey: 'recurrenceEnd' },
+      { label: 'recurEndLabel', errorField: 'errorRecurStartEnd', required: true, nodeKey: 'endDate' },
       { getValue: function(){
           var date, end;
           if(this.validate()){
@@ -841,7 +845,7 @@ ocScheduler.RegisterComponents = function(){
       });
 
     ocScheduler.components.recurrence = new ocAdmin.Component(['scheduleRepeat', 'repeatSun', 'repeatMon', 'repeatTue', 'repeatWed', 'repeatThu', 'repeatFri', 'repeatSat'],
-      { label: 'i18n_sched_days', errorField: 'error-recurrence', required: true, nodeKey: 'recurrence' },
+      { label: 'i18n_sched_days', errorField: 'error-recurrence', required: true, nodeKey: 'recurrencePattern' },
       { getValue: function(){
           var rrule, dotw, days, date, hour, min, dayOffset;
           if(this.validate()){
@@ -967,7 +971,7 @@ ocScheduler.RegisterComponents = function(){
         }
       });
     ocScheduler.components.timeStart = new ocAdmin.Component(['startDate', 'startTimeHour', 'startTimeMin'],
-      { label: 'startDateLabel', errorField: 'missingStartDate', required: true, nodeKey: 'timeStart' },
+      { label: 'startDateLabel', errorField: 'missingStartDate', required: true, nodeKey: 'startDate' },
       { getValue: function(){
           var date = 0;
           date = this.fields.startDate.datepicker('getDate').getTime() / 1000; // Get date in milliseconds, convert to seconds.
@@ -1017,7 +1021,7 @@ ocScheduler.RegisterComponents = function(){
       });
 
     ocScheduler.components.timeDuration = new ocAdmin.Component(['durationHour', 'durationMin'],
-      { label: 'durationLabel', errorField: 'missingDuration', required: true, nodeKey: 'timeEnd' },
+      { label: 'durationLabel', errorField: 'missingDuration', required: true, nodeKey: 'endDate' },
       { getValue: function(){
           if(this.validate()){
             duration = this.fields.durationHour.val() * 3600; // seconds per hour

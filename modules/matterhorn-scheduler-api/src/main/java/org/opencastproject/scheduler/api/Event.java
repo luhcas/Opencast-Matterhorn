@@ -61,7 +61,7 @@ public interface Event {
   /**
    * @return Event duration
    */
-  long getDuration();
+  Long getDuration();
   /**
    * @param Event duration
    */

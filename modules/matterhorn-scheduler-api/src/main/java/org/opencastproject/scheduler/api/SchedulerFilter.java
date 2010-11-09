@@ -28,6 +28,7 @@ public class SchedulerFilter {
   protected String creatorPattern;
   protected String seriesPattern;
   protected String order;
+  protected boolean isAscending = true;
   protected Date start;
   protected Date stop;
 
@@ -139,13 +140,26 @@ public class SchedulerFilter {
   }
 
   /**
-   * Sets the attribute by which the results should be ordered
+   * Sets the attribute by which the results should be ordered (ascending)
    * 
    * @param order
    *          eventID | seriesID | channelID | deviceID | location | creator | contributor | date
    */
   public SchedulerFilter withOrder(String order) {
+    return withOrderAscending(order, true);
+  }
+  
+    /**
+   * Sets the attribute by which the results should be ordered and in what direction.
+   * 
+   * @param order
+   *          eventID | seriesID | channelID | deviceID | location | creator | contributor | date
+   * @param isAsc
+   *          True if order should be ascending, false if descending.
+   */
+  public SchedulerFilter withOrderAscending(String order, boolean isAsc) {
     this.order = order;
+    this.isAscending = isAsc;
     return this;
   }
 
@@ -157,5 +171,8 @@ public class SchedulerFilter {
   public String getOrder() {
     return order;
   }
-
+  
+  public boolean isOrderAscending() {
+    return isAscending;
+  }
 }

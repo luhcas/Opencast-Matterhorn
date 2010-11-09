@@ -19,10 +19,11 @@ var ocAdmin = {} || ocAdmin;
 
 ocAdmin.components = {};
 
-ocAdmin.Manager = function(rootElm, rootNs, components, workflowComponents){
+ocAdmin.Manager = function(rootElm, rootNs, components, additionalMetadataComponents, workflowComponents){
   this.rootElm = rootElm;
   this.rootNs = rootNs;
   this.components = components;
+  this.additionalMetadataComponents = additionalMetadataComponents || {};
   this.workflowComponents = workflowComponents || {};
 };
 
@@ -30,17 +31,19 @@ $.extend(ocAdmin.Manager.prototype, {
   serialize: function(){
     if(this.validate()){
       var doc = this.createDoc();
-      var mdlist = doc.createElement('metadataList');
+      //The standard set of metadata
       for(var c in this.components){
-        if(c === 'recurrence' || c === 'eventId'){
-          this.components[c].toNode(doc.documentElement)
-        } else {
-          this.components[c].toNode(mdlist);
-        }
+        this.components[c].toNode(doc.documentElement, false)
+      }
+      var mdlist = doc.createElement('additionalMetadata');
+      //Additional Metadata
+      ocUtils.log(this.additionalMetadataComponents);
+      for(var am in this.additionalMetadataComponents){
+        this.additionalMetadataComponents[am].toNode(mdlist, true);
       }
       //handle OC Workflow specialness
       for(var wc in this.workflowComponents){
-        this.workflowComponents[wc].toNode(mdlist);
+        this.workflowComponents[wc].toNode(mdlist, true);
       }
       doc.documentElement.appendChild(mdlist);
       return ocUtils.xmlToString(doc);
@@ -233,25 +236,31 @@ $.extend(ocAdmin.Component.prototype, {
    *  @return DOM Node created from this Component.
    *	@type DOM Node
    */
-  toNode: function(parent){
-    var doc, container, value, key;
+  toNode: function(parent, isAdditionalMetadata){
+    var doc, container, value, key, keyName;
     for(var el in this.fields){
       if(parent){
         doc = parent.ownerDocument;
       }else{
         doc = document;
       }
-      container = doc.createElement('metadata');
-      value = doc.createElement('value');
-      key = doc.createElement('key');
-      value.appendChild(doc.createTextNode(this.getValue()));
       if(this.nodeKey !== null){
-         key.appendChild(doc.createTextNode(this.nodeKey));
+         keyName = this.nodeKey;
       }else{
-         key.appendChild(doc.createTextNode(el));
+         keyName = el;
       }
-      container.appendChild(value);
-      container.appendChild(key);
+      if(isAdditionalMetadata){
+        container = doc.createElement('metadata');
+        value = doc.createElement('value');
+        key = doc.createElement('key');
+        value.appendChild(doc.createTextNode(this.getValue()));
+        key.appendChild(doc.createTextNode(keyName));
+        container.appendChild(value);
+        container.appendChild(key);
+      } else {
+        container = doc.createElement(keyName);
+        container.appendChild(doc.createTextNode(this.getValue()));
+      }
     }
     if(parent && parent.nodeType && container){
       parent.appendChild(container); //license bug
