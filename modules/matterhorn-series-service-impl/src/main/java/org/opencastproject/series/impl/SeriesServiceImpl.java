@@ -161,6 +161,8 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
     } finally {
       em.close();
     }
+    if (s == null)
+      throw new NotFoundException("Series " + seriesID);
     return s;
   }
 
