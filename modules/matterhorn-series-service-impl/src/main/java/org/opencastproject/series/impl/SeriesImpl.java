@@ -94,8 +94,7 @@ public class SeriesImpl implements Series {
   /**
    * Default constructor without any import.
    */
-  public SeriesImpl() {
-  }
+  public SeriesImpl() {}
 
   public SeriesImpl(String seriesXml) {
     try {

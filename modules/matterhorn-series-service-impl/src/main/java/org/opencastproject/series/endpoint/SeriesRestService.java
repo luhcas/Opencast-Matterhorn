@@ -209,7 +209,14 @@ public class SeriesRestService {
    */
   @PUT
   @Path("/")
-  public Response addSeries(@FormParam("series") SeriesImpl series) {
+  public Response addSeries(@FormParam("series") String s) {
+    logger.info("Series XML: {}", s);
+    SeriesImpl series = null;
+    try {
+      series = SeriesBuilder.getInstance().parseSeriesImpl(s);
+    } catch ( Exception e ){
+      logger.error("Failed to parse series: {}", e);
+    }
     if (series == null) {
       logger.error("series that should be added is null");
       return Response.status(Status.BAD_REQUEST).build();
