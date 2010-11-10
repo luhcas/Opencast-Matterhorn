@@ -24,12 +24,12 @@ ocView.init = function(){
   var type = ocUtils.getURLParam('type');
   if(id && type === 'EVENT'){
     $('head').append('<script id="eventJsonp" src="' + SCHEDULER_SERVICE_URL + '/event/' + id + '.json?jsonp=ocView.displayEvent"></script>');
-    $.ajax({
+    /*$.ajax({
       url: 'SCHEDULER_SERVICE_URL' + '/event/' + id + '.json',
       type: 'jsonp',
       jsonp: 'jsonp',
       jsonpCallback: 'ocView.displayEvent'
-    });
+    });*/
   } else if(id && type === 'WORKFLOW') {
     $('head').append('<script id="workflowJsonp" src="' + WORKFLOW_SERVICE_URL + '/instance/' + id + '.json?jsonp=ocView.displayWorkflow"></script>');
     /*$.ajax({
