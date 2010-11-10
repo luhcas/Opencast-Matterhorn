@@ -22,22 +22,23 @@ import java.util.List;
 
 public interface Series extends Comparable<Series> {
 
-  public abstract String getSeriesId();
+  String getSeriesId();
 
-  public abstract void setSeriesId(String seriesId);
+  void setSeriesId(String seriesId);
 
-  public abstract void addToMetadata(String key, String value);
+  void addToMetadata(String key, String value);
 
-  public abstract List<SeriesMetadata> getMetadata();
+  List<SeriesMetadata> getMetadata();
 
-  public abstract void setMetadata(List<SeriesMetadata> metadata);
+  void setMetadata(List<SeriesMetadata> metadata);
 
-  public abstract DublinCoreCatalog getDublinCore();
+  DublinCoreCatalog getDublinCore();
 
-  public abstract boolean valid();
+  boolean valid();
   
-  public String getDescription();
+  String getBriefDescription();
   
-  public String getFromMetadata(String key);
+  String getFromMetadata(String key);
 
+  String getDescription();
 }

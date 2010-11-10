@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
@@ -174,8 +173,8 @@ public class SeriesRestService {
       for (Series s : list) {
         JSONObject j = new JSONObject();
         j.put("id", s.getSeriesId());
-        j.put("label", s.getDescription());
-        j.put("value", s.getDescription());
+        j.put("label", s.getBriefDescription());
+        j.put("value", s.getBriefDescription());
         a.add(j);
       }
       return Response.ok(a.toJSONString()).build();
@@ -201,17 +200,6 @@ public class SeriesRestService {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("new/id")
-  public Response newSeriesId() {
-    logger.debug("create new Series Id");
-    JSONObject j = new JSONObject();
-    j.put("id", UUID.randomUUID().toString());
-    return Response.ok(j.toString()).build();
-  }
-
   /**
    * Stores a new series in the database.
    * 
@@ -220,19 +208,16 @@ public class SeriesRestService {
    * @return json object, success: true and uuid if succeeded
    */
   @PUT
-  @Path("{seriesID}")
-  // TODO: Figure out why we can't just accept a SeriesImpl instead of using a stupid form param on a PUT
-  public Response addSeries(@PathParam("seriesID") String seriesId, @FormParam("series") SeriesImpl series) {
+  @Path("/")
+  public Response addSeries(@FormParam("series") SeriesImpl series) {
     if (series == null) {
       logger.error("series that should be added is null");
       return Response.status(Status.BAD_REQUEST).build();
     }
-    series.setSeriesId(seriesId);
-    logger.debug("Created Series: {}", series.getSeriesId());
     try {
       service.addSeries(series);
-      logger.debug("Adding series {} ", series.getSeriesId());
-      return Response.status(Status.CREATED).type("").build(); // get rid of content type
+      logger.debug("Added series {} ", series.getSeriesId());
+      return Response.status(Status.CREATED).entity(series).build();
     } catch (IllegalArgumentException e) {
       return Response.serverError().build();
     }
@@ -349,13 +334,13 @@ public class SeriesRestService {
     RestEndpoint addEndpoint = new RestEndpoint(
             "addSeries",
             RestEndpoint.Method.PUT,
-            "/{seriesId}",
-            "Accepts an XML or JSON form parameter representing a new Series and stores it in the database. Returns HTTP Status 201 (Created) if successful. 400 (Bad Request) if the no seriesId is supplied. 500 (Internal Server Error) if there was an error creating the series.");
+            "/",
+            "Accepts an XML or JSON form parameter representing a new Series and stores it in the database. " +
+            "Returns HTTP Status 201 (Created) if successful. 400 (Bad Request) if the no seriesId is supplied. " +
+            "500 (Internal Server Error) if there was an error creating the series.");
     addEndpoint.addStatus(org.opencastproject.util.doc.Status.CREATED("Series was created successfully."));
     addEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("No seriesId was supplied."));
     addEndpoint.addStatus(org.opencastproject.util.doc.Status.ERROR("The series was not created successfully."));
-    addEndpoint.addPathParam(new Param("seriesId", Type.STRING, "bfa99465-b81d-4391-9c6a-a5149d3b195a",
-            "A UUID to use for the new Series."));
     addEndpoint.addRequiredParam(new Param("series", Type.TEXT, generateSeries(),
             "The XML or JSON representation of the series to be stored."));
     addEndpoint.setTestForm(RestTestForm.auto());
@@ -415,14 +400,6 @@ public class SeriesRestService {
     getAllEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, getAllEndpoint);
 
-    // get new seriesID
-    RestEndpoint newIdEndpoint = new RestEndpoint("newSeriesId", RestEndpoint.Method.GET, "/new/id",
-            "returns a new UUID for a new series in a JSON Wrapper");
-    newIdEndpoint.addFormat(Format.json("JSON containg the new ID"));
-    newIdEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("UUID for a new seriesID"));
-    newIdEndpoint.setTestForm(RestTestForm.auto());
-    data.addEndpoint(RestEndpoint.Type.READ, newIdEndpoint);
-
     // get Dublin Core for Series
     RestEndpoint dcEndpoint = new RestEndpoint("getDublinCoreForSeries", RestEndpoint.Method.GET,
             "/{seriesID}/dublincore", "Get the DublinCore metdata for a specific Series.");
@@ -450,8 +427,17 @@ public class SeriesRestService {
     try {
       SeriesBuilder builder = SeriesBuilder.getInstance();
 
-      Series series = new SeriesImpl();
-
+      SeriesImpl series = new SeriesImpl();
+      series.setDescription("A rather long description that would overwhelm a typical 255 character varchar column. " +
+      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
+      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
+      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
+      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
+      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
+      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
+      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
+      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
+      		"A rather long description that would overwhelm a typical 255 character varchar column. ");
       LinkedList<SeriesMetadata> metadata = new LinkedList<SeriesMetadata>();
 
       metadata.add(new SeriesMetadataImpl(series, "title", "demo title"));
@@ -467,20 +453,18 @@ public class SeriesRestService {
       metadata.add(new SeriesMetadataImpl(series, "extent", "3600000"));
       metadata.add(new SeriesMetadataImpl(series, "created", "" + System.currentTimeMillis()));
       metadata.add(new SeriesMetadataImpl(series, "language", "demo"));
-      metadata.add(new SeriesMetadataImpl(series, "identifier", "demo"));
       metadata.add(new SeriesMetadataImpl(series, "isReplacedBy", "demo"));
       metadata.add(new SeriesMetadataImpl(series, "type", "demo"));
       metadata.add(new SeriesMetadataImpl(series, "available", "" + System.currentTimeMillis()));
       metadata.add(new SeriesMetadataImpl(series, "modified", "" + System.currentTimeMillis()));
       metadata.add(new SeriesMetadataImpl(series, "replaces", "demo"));
       metadata.add(new SeriesMetadataImpl(series, "contributor", "demo"));
-      metadata.add(new SeriesMetadataImpl(series, "description", "demo"));
       metadata.add(new SeriesMetadataImpl(series, "issued", "" + System.currentTimeMillis()));
 
       series.setMetadata(metadata);
 
       String result = builder.marshallSeries(series);
-      logger.info("Series: " + result);
+      logger.debug("Series: " + result);
       return result;
     } catch (Exception e1) {
       logger.warn("Could not marshall example series: {}", e1.getMessage());

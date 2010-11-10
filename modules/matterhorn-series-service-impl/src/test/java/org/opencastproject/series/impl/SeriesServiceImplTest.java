@@ -68,7 +68,7 @@ public class SeriesServiceImplTest {
 
     series = new SeriesImpl();
     series.setSeriesId("10.0000/5819"); // see dublincore.xml in src/test/resources
-
+    series.setDescription("demo");
     LinkedList<SeriesMetadata> metadata = new LinkedList<SeriesMetadata>();
 
     metadata.add(new SeriesMetadataImpl(series, "title", "demo title"));
@@ -91,7 +91,6 @@ public class SeriesServiceImplTest {
     metadata.add(new SeriesMetadataImpl(series, "modified", "" + System.currentTimeMillis()));
     metadata.add(new SeriesMetadataImpl(series, "replaces", "demo"));
     metadata.add(new SeriesMetadataImpl(series, "contributor", "demo"));
-    metadata.add(new SeriesMetadataImpl(series, "description", "demo"));
     metadata.add(new SeriesMetadataImpl(series, "issued", "" + System.currentTimeMillis()));
     series.setMetadata(metadata);
   }
@@ -133,8 +132,8 @@ public class SeriesServiceImplTest {
     series.updateMetadata(dc);
 
     // Ensure that the in-memory series has been updated to reflect the xml catalog's values
-    Assert.assertEquals(dc.getFirst(DublinCore.PROPERTY_DESCRIPTION), series
-            .getFromMetadata(DublinCore.PROPERTY_DESCRIPTION.getLocalName()));
+    Assert.assertEquals(dc.getFirst(DublinCore.PROPERTY_TITLE), series
+            .getFromMetadata(DublinCore.PROPERTY_TITLE.getLocalName()));
   }
 
 }

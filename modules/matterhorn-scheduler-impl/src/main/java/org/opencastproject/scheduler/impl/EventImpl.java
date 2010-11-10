@@ -194,7 +194,7 @@ public class EventImpl implements Event {
   /**
    * @return Event duration
    */
-  public long getDuration(){
+  public Long getDuration(){
     if(duration == 0 && endDate != null && startDate != null){
       duration = endDate.getTime() - startDate.getTime();
     }

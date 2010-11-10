@@ -42,20 +42,20 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Data type for a Series that stores the metadata that belongs to the series
@@ -72,15 +72,21 @@ public class SeriesImpl implements Series {
   private static final Logger logger = LoggerFactory.getLogger(SeriesImpl.class);
   
   @Id
-  @GeneratedValue
-  @Column(name="ID", length=128)
-  @XmlElement
+  @GeneratedValue(strategy=GenerationType.AUTO)
+  @Column(name="ID", length=36)
+  @XmlID
+  @XmlAttribute(name="id")
   String seriesId;
+  
+  @Lob
+  @Column
+  @XmlElement
+  String description;
   
   @Transient
   DublinCoreCatalog dublinCore;
   
-  @OneToMany(cascade=CascadeType.ALL, targetEntity=SeriesMetadataImpl.class, mappedBy="series")
+  @OneToMany(cascade=CascadeType.ALL, targetEntity=SeriesMetadataImpl.class, mappedBy="series", fetch=FetchType.EAGER)
   @XmlElementWrapper(name="metadataList")
   @XmlElement(name="metadata")
   List<SeriesMetadataImpl> metadata;
@@ -89,7 +95,6 @@ public class SeriesImpl implements Series {
    * Default constructor without any import.
    */
   public SeriesImpl() {
-    metadata = new LinkedList<SeriesMetadataImpl>();
   }
   
   public SeriesImpl(String seriesXml){
@@ -97,6 +102,7 @@ public class SeriesImpl implements Series {
       SeriesImpl series = SeriesImpl.valueOf(seriesXml);
       setSeriesId(series.getSeriesId());
       setMetadata(series.getMetadata());
+      setDescription(series.getDescription());
     } catch (Exception e) {
       logger.debug("Unable to load series: {}", e);
     }
@@ -116,7 +122,6 @@ public class SeriesImpl implements Series {
    */
   public void setSeriesId (String seriesId) {
     this.seriesId = seriesId;
-    addToMetadata("identifier", seriesId);
   }
   
   /**
@@ -242,6 +247,7 @@ public class SeriesImpl implements Series {
     DublinCoreCatalog dc = DublinCoreCatalogImpl.newInstance();
     
     dc.add(DublinCoreCatalog.PROPERTY_IDENTIFIER, new DublinCoreValue(getSeriesId()));
+    dc.add(DublinCoreCatalog.PROPERTY_DESCRIPTION, new DublinCoreValue(description));
     for (SeriesMetadata m : getMetadata()) {
       String v = null;
       if (isDateKey(m.getKey())) v = formatW3CDTF(new Date(Long.parseLong(m.getValue())));
@@ -257,6 +263,7 @@ public class SeriesImpl implements Series {
   public static SeriesImpl buildSeries(DublinCoreCatalog dc) {
     SeriesImpl s = new SeriesImpl();
     s.setSeriesId(dc.getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER));
+    s.setDescription(dc.getFirst(DublinCoreCatalog.PROPERTY_DESCRIPTION));
     s.updateMetadata(dc);
     return s;
   }
@@ -268,7 +275,7 @@ public class SeriesImpl implements Series {
   }
 
   @Override
-  public String getDescription() {
+  public String getBriefDescription() {
     String result = getFromMetadata("title");
     String creator = getFromMetadata("creator");
     String temporal = getFromMetadata("temporal");
@@ -281,9 +288,26 @@ public class SeriesImpl implements Series {
     return result;
   }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.series.api.Series#getDescription()
+   */
+  @Override
+  public String getDescription() {
+    return description;
+  }
+  
+  /**
+   * @param description the description to set
+   */
+  public void setDescription(String description) {
+    this.description = description;
+  }
+  
   @Override
   public int compareTo(Series o) {
-    return getDescription().compareTo(o.getDescription());
+    return getBriefDescription().compareTo(o.getBriefDescription());
   }
   
   /**

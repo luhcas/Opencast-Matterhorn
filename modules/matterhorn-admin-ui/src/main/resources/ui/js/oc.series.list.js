@@ -29,10 +29,10 @@ ocSeriesList.buildSeriesView = function(data) {
       data.seriesList.series = [data.seriesList.series]
     }
     $.each(data.seriesList.series, function(i,series){
-      var s = ocSeriesList.views.seriesView[series.seriesId] = {};
-      s.id = series.seriesId;
-      for(m in series.metadataList.metadata){
-        var metadata = series.metadataList.metadata[m];
+      var s = ocSeriesList.views.seriesView[series['@id']] = {};
+      s.id = series['@id'];
+      for(var j=0; j < series.metadataList.metadata.length; j++){
+        var metadata = series.metadataList.metadata[j];
         if(metadata.key === 'title'){
           s.title = metadata.value;
         } else if(metadata.key === 'creator') {

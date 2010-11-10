@@ -51,16 +51,12 @@ ocSeries.Init = function(){
     ocSeries.mode = EDIT_MODE;
   }
   
-  if(ocSeries.mode === CREATE_MODE){
-    $.get(SERIES_SERVICE_URL + '/new/id', function(data){ $('#seriesId').val(data.id); });
-  } else {
-    $('#submitButton').val('Update Series');
-    $('#i18n_page_title').text(i18n.page.title.edit);
-    var seriesId = ocUtils.getURLParam('seriesId');
-    if(seriesId !== '') {
-      $('#seriesId').val(seriesId);
-      $.getJSON(SERIES_SERVICE_URL + "/" + seriesId + ".json", ocSeries.loadSeries);
-    }
+  $('#submitButton').val('Update Series');
+  $('#i18n_page_title').text(i18n.page.title.edit);
+  var seriesId = ocUtils.getURLParam('seriesId');
+  if(seriesId !== '') {
+    $('#seriesId').val(seriesId);
+    $.getJSON(SERIES_SERVICE_URL + "/" + seriesId + ".json", ocSeries.loadSeries);
   }
 }
 
@@ -88,6 +84,8 @@ ocSeries.SelectMetaTab = function(elm){
 }
 
 ocSeries.loadSeries = function(data) {
+  ocSeries.components.seriesId.setValue(data.series.@id);
+  ocSeries.components['description'].setValue(data.series.description);
   for(m in data.series.metadataList.metadata){
     var metadata = data.series.metadataList.metadata[m];
     if(ocSeries.components[metadata.key]){
@@ -168,16 +166,20 @@ ocSeries.SubmitForm = function(){
   var seriesXml = ocSeries.FormManager.serialize();
   if(seriesXml){
     if(ocSeries.mode === CREATE_MODE) {
-      method = "PUT";
-    } else {
-      method = "POST";
-    }
     $.ajax({
-      type: method,
+      type: 'PUT',
+      url: SERIES_SERVICE_URL + '/',
+      data: { series: seriesXml },
+      complete: ocSeries.SeriesSubmitComplete
+    });
+    } else {
+    $.ajax({
+      type: 'POST',
       url: SERIES_SERVICE_URL + '/' + $('#seriesId').val(),
       data: { series: seriesXml },
       complete: ocSeries.SeriesSubmitComplete
     });
+    }
   }
 }
 
