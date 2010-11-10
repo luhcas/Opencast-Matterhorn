@@ -25,37 +25,37 @@
       var currentFile = null;
       
       // Captions upload
-      var UploadListener = {};
-      UploadListener.filename = null;
-      UploadListener.mediaPackage = '';
-      UploadListener.flavor = 'captions/timedtext';
-      UploadListener.initUpload = function() {
+      var ocUploadListener = {};
+      ocUploadListener.filename = null;
+      ocUploadListener.mediaPackage = '';
+      ocUploadListener.flavor = 'captions/timedtext';
+      ocUploadListener.initUpload = function() {
         // TODO: if there aleady is a captions file, remove it from the mediaPackage
       }
-      UploadListener.startUpload = function() {
-        if (UploadListener.filename != null) {
+      ocUploadListener.startUpload = function() {
+        if (ocUploadListener.filename != null) {
           $('#upload-container').css('display','none');
           $('#loading-container').css('display','table-cell');
           var uploadFrame = document.getElementById("filechooser-ajax");
-          uploadFrame.contentWindow.document.uploadForm.flavor.value = UploadListener.flavor;
-          uploadFrame.contentWindow.document.uploadForm.mediaPackage.value = UploadListener.mediaPackage;
+          uploadFrame.contentWindow.document.uploadForm.flavor.value = ocUploadListener.flavor;
+          uploadFrame.contentWindow.document.uploadForm.mediaPackage.value = ocUploadListener.mediaPackage;
           uploadFrame.contentWindow.document.uploadForm.elementType.value = 'catalog';
           uploadFrame.contentWindow.document.uploadForm.submit();
         }
       }
-      UploadListener.fileSelectedAjax = function(filename, jobId) {
-        UploadListener.filename = filename;
+      ocUploadListener.fileSelectedAjax = function(filename, jobId) {
+        ocUploadListener.filename = filename;
       }
-      UploadListener.uploadComplete = function () {
+      ocUploadListener.uploadComplete = function () {
         $('#file-upload-container').css('display','none');
         $('#file-display-container').removeClass('hidden');
-        $('#filename-container').text(UploadListener.filename);
+        $('#filename-container').text(ocUploadListener.filename);
         var uploadFrame = document.getElementById("filechooser-ajax");
         var mp = uploadFrame.contentWindow.document.getElementById("mp").value;
-        parent.Recordings.changedMediaPackage = mp;
+        parent.ocRecordings.changedMediaPackage = mp;
         //alert(mp);
       }
-      UploadListener.uploadFailed = function() {
+      ocUploadListener.uploadFailed = function() {
         $('#loading-container').css('display','none');
         $('#upload-container').css('display','table-cell');
         $('#filechooser-ajax').attr('src','/ingest/rest/filechooser-local.html');
@@ -76,7 +76,7 @@
         var id = parent.document.getElementById("holdWorkflowId").value;
         // Event edit link clicked
         $('#edit-link').click( function() {
-          //parent.Recordings.retryRecording(id);
+          //parent.ocRecordings.retryRecording(id);
           parent.location.href = "/admin/upload.html?retry=" + id;
           return false;
         });
@@ -87,7 +87,7 @@
           success : function(data) {
             // put mediapackge into form (for upload of captions file)
             var mp = xmlToString(data).match(/<mediapackage(.*)mediapackage>/)[0];
-            UploadListener.mediaPackage = mp;
+            ocUploadListener.mediaPackage = mp;
             // load metadata
             var catalogUrl = $(data.documentElement).find("mediapackage > metadata > catalog[type='dublincore/episode'] > url").text();
             $.ajax({
@@ -107,7 +107,7 @@
                     }
                   }
                 });
-                parent.Recordings.adjustHoldActionPanelHeight();
+                parent.ocRecordings.adjustHoldActionPanelHeight();
               }
             });
             // look for already uploaded captions file
@@ -184,11 +184,11 @@
       <div id="upload-container" style="display:table-cell;float:left;">
         <iframe name="filechooserAjax" id="filechooser-ajax" frameborder="0" scrolling="no" src="/ingest/rest/filechooser-local.html" style="float:left;height:30px;width:400px;padding:0px;overflow:hidden;border:none;">
         </iframe>
-        <button type="button" id="btn-start-upload" onclick="UploadListener.startUpload();">Upload</button>
+        <button type="button" id="btn-start-upload" onclick="ocUploadListener.startUpload();">Upload</button>
       </div>
     </div>
     <div id="actions" style="padding-top:26px;padding-left:40px;">
-        <button type="button" id="continueBtn" onclick="parent.Recordings.continueWorkflow();" style="margin-right:16px;width:160px;" title="Move on to next steps in processing this recording">Continue processing</button>
+        <button type="button" id="continueBtn" onclick="parent.ocRecordings.continueWorkflow();" style="margin-right:16px;width:160px;" title="Move on to next steps in processing this recording">Continue processing</button>
         <button type="button" "style="margin-right:16px;" title="Cancel" onclick="$('#holdActionPanel-container',top.document).toggle();$('#recordings-table-container',top.document).toggle();$('#oc_recordingmenu' ,top.document).toggle();$('.paging-nav-container',top.document).toggle();$('#refresh-controls-container',top.document).toggle();$('#category-selector-container',top.document).parent().toggle();">Cancel</button>
     </div>
     <!-- <a href="javascript: return false;" id="edit-link">Edit before continuing</a> -->
