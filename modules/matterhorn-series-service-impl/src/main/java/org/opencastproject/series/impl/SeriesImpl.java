@@ -73,7 +73,7 @@ public class SeriesImpl implements Series {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "ID", length = 36)
+  @Column(name = "ID", length = 128)
   @XmlID
   @XmlAttribute(name = "id")
   String seriesId;
@@ -123,6 +123,10 @@ public class SeriesImpl implements Series {
    * @see org.opencastproject.series.api.Series#setSeriesId(java.lang.String)
    */
   public void setSeriesId(String seriesId) {
+    if (seriesId == null)
+      throw new IllegalArgumentException("Series id can't be null");
+    if (seriesId.length() > 128)
+      throw new IllegalArgumentException("Series id can't be longer than 128 characters");
     this.seriesId = seriesId;
   }
 
