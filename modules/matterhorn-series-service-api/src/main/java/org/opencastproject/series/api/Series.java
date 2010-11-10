@@ -34,8 +34,6 @@ public interface Series extends Comparable<Series> {
 
   DublinCoreCatalog getDublinCore();
 
-  boolean valid();
-  
   String getBriefDescription();
   
   String getFromMetadata(String key);
