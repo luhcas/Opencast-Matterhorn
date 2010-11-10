@@ -16,7 +16,8 @@
 }
 
 .oc-ui-banner h1 {
-  padding-left: 3em;
+  margin-left: 3em;
+  font-size: 18px;
 }
 
 .oc-ui-cursor {
