@@ -21,6 +21,7 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
+import org.opencastproject.series.endpoint.SeriesBuilder;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -133,6 +134,18 @@ public class SeriesServiceImplTest {
     // Ensure that the in-memory series has been updated to reflect the xml catalog's values
     Assert.assertEquals(dc.getFirst(DublinCore.PROPERTY_TITLE), series
             .getFromMetadata(DublinCore.PROPERTY_TITLE.getLocalName()));
+  }
+  
+  @Test
+  public void testSeriesBuilder() throws Exception {
+    String seriesXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><series><description>Description</description><metadataList><metadata><key>title</key><value>title</value></metadata></metadataList></series>";
+    SeriesBuilder builder = SeriesBuilder.getInstance();
+    Series s = builder.parseSeriesImpl(seriesXml);
+    Assert.assertNotNull(s.getMetadata());
+    Assert.assertEquals("Description", s.getDescription());
+    Assert.assertEquals("title", s.getFromMetadata("title"));
+    String marshalledSeries = builder.marshallSeries(s);
+    Assert.assertEquals(seriesXml,marshalledSeries);
   }
 
 }

@@ -429,15 +429,15 @@ public class SeriesRestService {
 
       SeriesImpl series = new SeriesImpl();
       series.setDescription("A rather long description that would overwhelm a typical 255 character varchar column. " +
-      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
-      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
-      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
-      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
-      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
-      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
-      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
-      		"A rather long description that would overwhelm a typical 255 character varchar column. " +
-      		"A rather long description that would overwhelm a typical 255 character varchar column. ");
+        "A rather long description that would overwhelm a typical 255 character varchar column. " +
+        "A rather long description that would overwhelm a typical 255 character varchar column. " +
+        "A rather long description that would overwhelm a typical 255 character varchar column. " +
+        "A rather long description that would overwhelm a typical 255 character varchar column. " +
+        "A rather long description that would overwhelm a typical 255 character varchar column. " +
+        "A rather long description that would overwhelm a typical 255 character varchar column. " +
+        "A rather long description that would overwhelm a typical 255 character varchar column. " +
+        "A rather long description that would overwhelm a typical 255 character varchar column. " +
+        "A rather long description that would overwhelm a typical 255 character varchar column. ");
       LinkedList<SeriesMetadata> metadata = new LinkedList<SeriesMetadata>();
 
       metadata.add(new SeriesMetadataImpl(series, "title", "demo title"));

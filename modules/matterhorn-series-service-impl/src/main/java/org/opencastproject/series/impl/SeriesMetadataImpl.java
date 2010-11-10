@@ -35,19 +35,19 @@ import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity(name = "SeriesMetadataImpl")
 @Table(name = "SERIES_METADATA")
 @Access(AccessType.FIELD)
 @XmlType(name = "seriesMetadata", namespace = "http://series.opencastproject.org")
-@XmlRootElement(name = "series")
+@XmlRootElement(name="metadata")
 @XmlAccessorType(XmlAccessType.NONE)
 public class SeriesMetadataImpl implements SeriesMetadata {
 
   private static final Logger logger = LoggerFactory.getLogger(SeriesMetadataImpl.class);
-
+  
   @Id
   @Column(name = "METADATA_KEY", length = 128)
   @XmlElement(name = "key")

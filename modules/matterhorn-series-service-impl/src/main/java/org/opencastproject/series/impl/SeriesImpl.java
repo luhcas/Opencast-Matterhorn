@@ -73,7 +73,7 @@ public class SeriesImpl implements Series {
 
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "ID", length = 128)
+  @Column(name = "SERIES_ID", length = 128)
   @XmlID
   @XmlAttribute(name = "id")
   String seriesId;
@@ -86,10 +86,10 @@ public class SeriesImpl implements Series {
   @Transient
   DublinCoreCatalog dublinCore;
 
-  @OneToMany(cascade = CascadeType.ALL, targetEntity = SeriesMetadataImpl.class, mappedBy = "series", fetch = FetchType.EAGER)
   @XmlElementWrapper(name = "metadataList")
   @XmlElement(name = "metadata")
-  List<SeriesMetadata> metadata;
+  @OneToMany(cascade = CascadeType.ALL, targetEntity = SeriesMetadataImpl.class, mappedBy = "series", fetch = FetchType.EAGER)
+  List<SeriesMetadataImpl> metadata;
 
   /**
    * Default constructor without any import.
@@ -147,7 +147,7 @@ public class SeriesImpl implements Series {
 
     // If there has been no metadata at all, creat it.
     if (metadata == null) {
-      metadata = new LinkedList<SeriesMetadata>();
+      metadata = new LinkedList<SeriesMetadataImpl>();
     }
 
     // See if this is an update
@@ -195,11 +195,13 @@ public class SeriesImpl implements Series {
    * @see org.opencastproject.series.api.Series#setMetadata(java.util.List)
    */
   public void setMetadata(List<SeriesMetadata> metadata) {
-    this.metadata = metadata;
-    if (metadata == null)
+    if(metadata == null) {
+      this.metadata = null;
       return;
-    for (SeriesMetadata m : metadata) {
+    }
+    for(SeriesMetadata m : metadata) {
       m.setSeries(this);
+      this.getMetadata().add((SeriesMetadataImpl) m);
     }
     dublinCore = null;
   }

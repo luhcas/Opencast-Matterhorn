@@ -18,7 +18,6 @@ package org.opencastproject.series.endpoint;
 import org.apache.commons.io.IOUtils;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.impl.SeriesImpl;
-import org.opencastproject.series.impl.SeriesListImpl;
 import org.opencastproject.series.impl.SeriesMetadataImpl;
 
 import java.io.InputStream;
