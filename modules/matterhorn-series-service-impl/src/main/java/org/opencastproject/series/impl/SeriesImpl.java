@@ -59,45 +59,45 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * Data type for a Series that stores the metadata that belongs to the series
- *
+ * 
  */
- 
-@Entity(name="SeriesImpl")
-@Table(name="SERIES")
+
+@Entity(name = "SeriesImpl")
+@Table(name = "SERIES")
 @Access(AccessType.FIELD)
-@XmlType(name="series", namespace="http://series.opencastproject.org")
-@XmlRootElement(name="series")
+@XmlType(name = "series", namespace = "http://series.opencastproject.org")
+@XmlRootElement(name = "series")
 @XmlAccessorType(XmlAccessType.NONE)
 public class SeriesImpl implements Series {
   private static final Logger logger = LoggerFactory.getLogger(SeriesImpl.class);
-  
+
   @Id
-  @GeneratedValue(strategy=GenerationType.AUTO)
-  @Column(name="ID", length=36)
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "ID", length = 36)
   @XmlID
-  @XmlAttribute(name="id")
+  @XmlAttribute(name = "id")
   String seriesId;
-  
+
   @Lob
   @Column
   @XmlElement
   String description;
-  
+
   @Transient
   DublinCoreCatalog dublinCore;
-  
-  @OneToMany(cascade=CascadeType.ALL, targetEntity=SeriesMetadataImpl.class, mappedBy="series", fetch=FetchType.EAGER)
-  @XmlElementWrapper(name="metadataList")
-  @XmlElement(name="metadata")
-  List<SeriesMetadataImpl> metadata;
-  
+
+  @OneToMany(cascade = CascadeType.ALL, targetEntity = SeriesMetadataImpl.class, mappedBy = "series", fetch = FetchType.EAGER)
+  @XmlElementWrapper(name = "metadataList")
+  @XmlElement(name = "metadata")
+  List<SeriesMetadata> metadata;
+
   /**
    * Default constructor without any import.
    */
   public SeriesImpl() {
   }
-  
-  public SeriesImpl(String seriesXml){
+
+  public SeriesImpl(String seriesXml) {
     try {
       SeriesImpl series = SeriesImpl.valueOf(seriesXml);
       setSeriesId(series.getSeriesId());
@@ -107,34 +107,46 @@ public class SeriesImpl implements Series {
       logger.debug("Unable to load series: {}", e);
     }
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.series.api.Series#getSeriesId()
    */
-  public String getSeriesId () {
+  public String getSeriesId() {
     return seriesId;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.series.api.Series#setSeriesId(java.lang.String)
    */
-  public void setSeriesId (String seriesId) {
+  public void setSeriesId(String seriesId) {
     this.seriesId = seriesId;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.series.api.Series#addToMetadata(java.lang.String, java.lang.String)
    */
-  public void addToMetadata (String key, String value) {
+  public void addToMetadata(String key, String value) {
+    if (key == null)
+      throw new IllegalArgumentException("Metadata key must not be null");
+    if (key.length() > 128)
+      throw new IllegalArgumentException("Metadata key cannot be longer than 128 characters");
+    if (value == null)
+      throw new IllegalArgumentException("Metadata value must not be null");
+
     boolean updated = false;
-    if (getMetadata() == null) {
-      LinkedList<SeriesMetadataImpl> metadata = new LinkedList<SeriesMetadataImpl>();
-      metadata.add(new SeriesMetadataImpl(this, key, value));
-      return;
+
+    // If there has been no metadata at all, creat it.
+    if (metadata == null) {
+      metadata = new LinkedList<SeriesMetadata>();
     }
+
+    // See if this is an update
     for (SeriesMetadata m : getMetadata()) {
       if (m.getKey().equals(key)) {
         m.setValue(value);
@@ -142,124 +154,96 @@ public class SeriesImpl implements Series {
         break;
       }
     }
-    if (! updated) {
+
+    // Seems to be a new entry
+    if (!updated) {
       metadata.add(new SeriesMetadataImpl(this, key, value));
     }
   }
-  
-  public String getFromMetadata (String key) {
-    for (SeriesMetadata m: getMetadata()) 
-      if (m.getKey().equals(key)) return m.getValue();
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.series.api.Series#getFromMetadata(java.lang.String)
+   */
+  public String getFromMetadata(String key) {
+    for (SeriesMetadata m : getMetadata())
+      if (m.getKey().equals(key))
+        return m.getValue();
     return null;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.series.api.Series#getMetadata()
    */
-  public  List<SeriesMetadata> getMetadata () {
-    if (metadata == null) return null;
+  public List<SeriesMetadata> getMetadata() {
     LinkedList<SeriesMetadata> list = new LinkedList<SeriesMetadata>();
-    for (SeriesMetadata m : metadata) 
-      list.add(m);
+    if (metadata != null)
+      list.addAll(metadata);
     return list;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.series.api.Series#setMetadata(java.util.List)
    */
-  public void setMetadata (List<SeriesMetadata> metadata) {
-    LinkedList<SeriesMetadataImpl> list = new LinkedList<SeriesMetadataImpl>();
+  public void setMetadata(List<SeriesMetadata> metadata) {
+    this.metadata = metadata;
+    if (metadata == null)
+      return;
     for (SeriesMetadata m : metadata) {
       m.setSeries(this);
-      list.add((SeriesMetadataImpl)m);
     }
-    this.metadata = list;
     dublinCore = null;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.series.api.Series#getDublinCore()
    */
-  public DublinCoreCatalog getDublinCore () {
-      if (dublinCore == null) dublinCore = buildDublinCore();
-      return dublinCore;
+  public DublinCoreCatalog getDublinCore() {
+    if (dublinCore == null)
+      dublinCore = buildDublinCore();
+    return dublinCore;
   }
-  
-  /**
-   * {@inheritDoc}
-   * @see org.opencastproject.series.api.Series#valid()
-   */
-  public boolean valid () {
-    for (SeriesMetadata m : getMetadata())  {
-      if (! validMetadata(m)) {
-        logger.warn("Metadata not valid for series: {}", m);
-        return false;
-      }
-    }
-    return true;
-  }
-  
-  /**
-   * Checks if the provided key is a valid Dublin Core XML tag
-   * @param metadata the metadata that should be checked
-   * @return true if the key is valid
-   */
-  private boolean validMetadata (SeriesMetadata m) {
-    // check if key is valid for series at all
-    String [] validKeys = new String [] {"license", "valid", "publisher", "creator", "subject", "temporal", "title", "audience", "spatial", "rightsHolder", "extent",
-                           "created", "language", "identifier", "isReplacedBy", "type", "available", "modified", "replaces", "contributor", "description", "issued"};
-    List<String> vk = Arrays.asList(validKeys);
-    if (! vk.contains(m.getKey())) return false;
-   
 
-    //check value for fields that expect a date.
-    String [] numberKeys = new String [] {"valid", "extent", "created", "available", "modified", "issued"};
-    List<String> nk = Arrays.asList(numberKeys);   
-    if (nk.contains(m.getKey())){
-      try {
-        Long.parseLong(m.getValue());
-      } catch (NumberFormatException e) {
-        return false;
-      }
-    }
-    
-    return true;
-  }  
-  
-  private static boolean isDateKey (String key) {
-    String [] dateKeys = new String [] {"valid", "extent", "created", "available", "modified", "issued"};
-    List<String> dk = Arrays.asList(dateKeys);   
-    if (dk.contains(key)) return true;
+  private static boolean isDateKey(String key) {
+    String[] dateKeys = new String[] { "valid", "extent", "created", "available", "modified", "issued" };
+    List<String> dk = Arrays.asList(dateKeys);
+    if (dk.contains(key))
+      return true;
     return false;
   }
-  
+
   public static String formatW3CDTF(Date date) {
-    SimpleDateFormat  dateFormater = new SimpleDateFormat(
-            "yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+    SimpleDateFormat dateFormater = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
     dateFormater.setTimeZone(TimeZone.getTimeZone("GMT"));
     return dateFormater.format(date);
   }
-  
-  private DublinCoreCatalog buildDublinCore () {
+
+  private DublinCoreCatalog buildDublinCore() {
     DublinCoreCatalog dc = DublinCoreCatalogImpl.newInstance();
-    
+
     dc.add(DublinCoreCatalog.PROPERTY_IDENTIFIER, new DublinCoreValue(getSeriesId()));
     dc.add(DublinCoreCatalog.PROPERTY_DESCRIPTION, new DublinCoreValue(description));
     for (SeriesMetadata m : getMetadata()) {
       String v = null;
-      if (isDateKey(m.getKey())) v = formatW3CDTF(new Date(Long.parseLong(m.getValue())));
-      else v = m.getValue();
+      if (isDateKey(m.getKey()))
+        v = formatW3CDTF(new Date(Long.parseLong(m.getValue())));
+      else
+        v = m.getValue();
       DublinCoreValue value = new DublinCoreValue(v);
       EName property = new EName("http://purl.org/dc/terms/", m.getKey());
       dc.add(property, value);
     }
-    
+
     return dc;
   }
-  
+
   public static SeriesImpl buildSeries(DublinCoreCatalog dc) {
     SeriesImpl s = new SeriesImpl();
     s.setSeriesId(dc.getFirst(DublinCoreCatalog.PROPERTY_IDENTIFIER));
@@ -267,10 +251,18 @@ public class SeriesImpl implements Series {
     s.updateMetadata(dc);
     return s;
   }
-  
+
+  /**
+   * Adds the metadata found in the dublin core catalog to the series. Note that only the first value of every metadata
+   * item will be store.
+   * 
+   * @param dc
+   *          the dublin core catalog
+   */
   public void updateMetadata(DublinCoreCatalog dc) {
-    for(EName prop : dc.getProperties()) {
-      addToMetadata(prop.getLocalName(), dc.getFirst(prop));
+    for (EName prop : dc.getProperties()) {
+      if (dc.get(prop).size() > 0)
+        addToMetadata(prop.getLocalName(), dc.getFirst(prop));
     }
   }
 
@@ -279,10 +271,10 @@ public class SeriesImpl implements Series {
     String result = getFromMetadata("title");
     String creator = getFromMetadata("creator");
     String temporal = getFromMetadata("temporal");
-    if(creator != null && !creator.isEmpty()) {
+    if (creator != null && !creator.isEmpty()) {
       result += " - " + creator;
     }
-    if(temporal != null && !temporal.isEmpty()){
+    if (temporal != null && !temporal.isEmpty()) {
       result += " (" + temporal + ")";
     }
     return result;
@@ -290,33 +282,36 @@ public class SeriesImpl implements Series {
 
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.series.api.Series#getDescription()
    */
   @Override
   public String getDescription() {
     return description;
   }
-  
+
   /**
-   * @param description the description to set
+   * @param description
+   *          the description to set
    */
   public void setDescription(String description) {
     this.description = description;
   }
-  
+
   @Override
   public int compareTo(Series o) {
     return getBriefDescription().compareTo(o.getBriefDescription());
   }
-  
+
   /**
    * valueOf function is called by JAXB to bind values. This function calls the series factory.
-   *
-   *  @param    xmlString string representation of an series.
-   *  @return   instantiated event SeriesJaxbImpl.
+   * 
+   * @param xmlString
+   *          string representation of an series.
+   * @return instantiated event SeriesJaxbImpl.
    */
   public static SeriesImpl valueOf(String xmlString) throws Exception {
     return SeriesBuilder.getInstance().parseSeriesImpl(xmlString);
   }
+  
 }

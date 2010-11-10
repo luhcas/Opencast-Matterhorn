@@ -29,6 +29,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -37,123 +38,196 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-@Entity(name="SeriesMetadataImpl")
-@Table(name="SERIES_METADATA")
+@Entity(name = "SeriesMetadataImpl")
+@Table(name = "SERIES_METADATA")
 @Access(AccessType.FIELD)
-@XmlType(name="seriesMetadata", namespace="http://series.opencastproject.org")
-@XmlRootElement(name="series")
+@XmlType(name = "seriesMetadata", namespace = "http://series.opencastproject.org")
+@XmlRootElement(name = "series")
 @XmlAccessorType(XmlAccessType.NONE)
 public class SeriesMetadataImpl implements SeriesMetadata {
-  private static final Logger logger = LoggerFactory.getLogger(SeriesImpl.class);
-    
+
+  private static final Logger logger = LoggerFactory.getLogger(SeriesMetadataImpl.class);
+
   @Id
-  @Column(name="METADATA_KEY", length=128)
-  @XmlElement(name="key")
+  @Column(name = "METADATA_KEY", length = 128)
+  @XmlElement(name = "key")
   protected String key;
 
-  @Column(name="METADATA_VAL", length=256)
-  @XmlElement(name="value")
+  @Lob
+  @Column(name = "METADATA_VAL")
+  @XmlElement(name = "value")
   protected String value;
-  
+
   @Id
   @ManyToOne
-  @JoinColumn(name="SERIES_ID")
+  @JoinColumn(name = "SERIES_ID")
   protected SeriesImpl series;
 
-  public SeriesMetadataImpl () {
+  /**
+   * Empty constructor for use by JPA and/or JAXB only.
+   */
+  public SeriesMetadataImpl() {
     super();
   }
-  
-  public SeriesMetadataImpl (String seriesMetadataXml) {
-    try {
-    SeriesMetadataImpl smd = SeriesMetadataImpl.valueOf(seriesMetadataXml);
-    setKey(smd.getKey());
-    setValue(smd.getValue());
-    } catch (Exception e) {
-      logger.debug("Unable to load series metadata: {}", e);
+
+  /**
+   * Adds a metadata item to the series metadata.
+   * 
+   * @param key
+   *          the metadata item identifier
+   * @param value
+   *          the metadata value
+   * @throws IllegalArgumentException
+   *           if either one of <code>key</code>, <code>value</code> are <code>null</code>
+   * @throws IllegalArgumentException
+   *           if <code>key</code> is more than 128 characters long
+   */
+  public SeriesMetadataImpl(String key, String value) {
+    this(null, key, value);
+  }
+
+  /**
+   * Adds a metadata item to the series metadata.
+   * 
+   * @param the
+   *          series object
+   * @param key
+   *          the metadata item identifier
+   * @param value
+   *          the metadata value
+   * @throws IllegalArgumentException
+   *           if either one of <code>key</code>, <code>value</code> are <code>null</code>
+   * @throws IllegalArgumentException
+   *           if <code>key</code> is more than 128 characters long
+   */
+  public SeriesMetadataImpl(Series series, String key, String value) {
+    if (key == null)
+      throw new IllegalArgumentException("Metadata key must not be null");
+    if (key.length() > 128)
+      throw new IllegalArgumentException("Metadata key cannot be longer than 128 characters");
+    if (value == null)
+      throw new IllegalArgumentException("Metadata value must not be null");
+    this.key = key;
+    this.value = value;
+    if (series != null) {
+      setSeries(series);
     }
   }
 
-  public SeriesMetadataImpl (String key, String value) {
-    this.key = key;
-    this.value = value;
-  }
-
-  public SeriesMetadataImpl (Series series, String key, String value) {
-    this.key = key;
-    this.value = value;
-    setSeries(series);
-  }
-  
-  public SeriesImpl getSeries() {
+  /**
+   * Returns the series object or <code>null</code> if no series has been associated.
+   * 
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.series.api.SeriesMetadata#getSeries()
+   */
+  public Series getSeries() {
     return series;
   }
 
+  /**
+   * Sets the series.
+   * 
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.series.api.SeriesMetadata#setSeries(org.opencastproject.series.api.Series)
+   */
   public void setSeries(Series series) {
     logger.debug("Set series: {}", series.getSeriesId());
     if (series instanceof SeriesImpl) {
       this.series = (SeriesImpl) series;
+    } else {
+      throw new IllegalStateException("This code is not meant to be associated with external series implementations");
     }
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.series.api.SeriesMetadata#getKey()
    */
   public String getKey() {
     return key;
   }
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.series.api.SeriesMetadata#setKey(java.lang.String)
    */
   public void setKey(String key) {
+    if (key == null)
+      throw new IllegalArgumentException("Metadata key must not be null");
+    if (key.length() > 128)
+      throw new IllegalArgumentException("Metadata key cannot be longer than 128 characters");
     this.key = key;
   }
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.series.api.SeriesMetadata#getValue()
    */
   public String getValue() {
     return value;
   }
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.series.api.SeriesMetadata#setValue(java.lang.String)
    */
   public void setValue(String value) {
+    if (value == null)
+      throw new IllegalArgumentException("Metadata value must not be null");
     this.value = value;
-  }  
-  
+  }
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.series.api.SeriesMetadata#toString()
    */
-  public String toString () {
-    return "("+ series +") "+key+":"+value;
+  public String toString() {
+    return "(" + series + ") " + key + ":" + value;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.series.api.SeriesMetadata#equals(java.lang.Object)
    */
-  public boolean equals (Object o) {
-    if (o == null) return false;
-    if (! (o instanceof SeriesMetadataImpl)) return false;
+  public boolean equals(Object o) {
+    if (o == null)
+      return false;
+    if (!(o instanceof SeriesMetadataImpl))
+      return false;
     SeriesMetadata m = (SeriesMetadata) o;
-    if (m.getKey().equals(getKey()) && m.getValue().equals(getValue())) return true;
+    if (m.getKey().equals(getKey()) && m.getValue().equals(getValue()))
+      return true;
     return false;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.series.api.SeriesMetadata#hashCode()
    */
-  public int hashCode () {
+  public int hashCode() {
     return getKey().hashCode();
   }
-  
+
+  /**
+   * Creates a new series metadata item from <code>xmlString</code>.
+   * 
+   * @param xmlString
+   *          the serialized metadata item
+   * @return the object representation
+   * @throws Exception
+   *           if deserialization failed
+   */
   public static SeriesMetadataImpl valueOf(String xmlString) throws Exception {
     return SeriesBuilder.getInstance().parseSeriesMetadataImpl(xmlString);
   }
+
 }

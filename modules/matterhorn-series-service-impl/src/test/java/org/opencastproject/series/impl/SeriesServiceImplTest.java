@@ -107,7 +107,6 @@ public class SeriesServiceImplTest {
     Assert.assertNotNull(series.getSeriesId());
     Assert.assertNotNull(series.getMetadata());
     Assert.assertNotNull(series.getDublinCore());
-    Assert.assertTrue(series.valid());
 
     service.addSeries(series);
     Series loaded = service.getSeries(series.getSeriesId());
