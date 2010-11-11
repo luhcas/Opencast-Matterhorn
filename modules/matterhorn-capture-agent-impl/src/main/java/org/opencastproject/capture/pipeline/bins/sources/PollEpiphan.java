@@ -13,18 +13,15 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.pipeline;
+package org.opencastproject.capture.pipeline.bins.sources;
 
-import net.luniks.linux.jv4linfo.JV4LInfo;
-import net.luniks.linux.jv4linfo.JV4LInfoException;
-import net.luniks.linux.jv4linfo.V4LInfo;
-
+import org.gstreamer.Bin;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Event;
 import org.gstreamer.Pad;
-import org.gstreamer.Pipeline;
 import org.gstreamer.State;
+import org.opencastproject.capture.pipeline.PipelineFactory;
 
 /**
  * Thread that will continually poll to check if a VGA signal has been
@@ -37,7 +34,7 @@ class PollEpiphan implements Runnable {
   private String location;
 
   /** The main capture agent's running pipeline */
-  private Pipeline pipeline;
+  private Bin pipeline;
 
   /** Object used to manage race conditions when trying to access pipeline */
   public static Object enabled = new Object();
@@ -47,32 +44,11 @@ class PollEpiphan implements Runnable {
    * @param pipeline
    * @param location
    */
-  public PollEpiphan(Pipeline pipeline, String location) {
+  public PollEpiphan(Bin pipeline, String location) {
     this.location = location;
     this.pipeline = pipeline;
   }
 
-  /**
-   * When we have lost a VGA signal, this method can be continually executed
-   * to test for a new signal.
-   * 
-   * @param device the absolute path to the device
-   * @return true iff there is a VGA signal
-   */
-  private boolean check_epiphan(String device) {
-    try {
-      V4LInfo v4linfo = JV4LInfo.getV4LInfo(device);
-      String deviceName = v4linfo.getVideoCapability().getName();
-      if (deviceName.equals("Epiphan VGA2USB")) {
-        return true;
-      }
-    } catch (JV4LInfoException e) {
-      return false;
-    }
-    return false;
-  }
-
-  
   /**
    * {@inheritDoc}
    * @see java.lang.Runnable#run()
@@ -84,7 +60,7 @@ class PollEpiphan implements Runnable {
       synchronized (enabled) {
         if (PipelineFactory.broken) {
           // Check to see if the Epiphan device has been reconnected to the machine
-          if (check_epiphan(location)) {
+          if (EpiphanVGA2USBV4LSrcBin.check_epiphan(location)) {
             // Indicate to the pipeline that the Epiphan card is no longer disconnected
             PipelineFactory.broken = false;
 

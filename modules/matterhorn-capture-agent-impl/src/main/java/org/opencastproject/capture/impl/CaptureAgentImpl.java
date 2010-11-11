@@ -29,6 +29,7 @@ import org.opencastproject.capture.impl.jobs.AgentStateJob;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.impl.jobs.LoadRecordingsJob;
 import org.opencastproject.capture.pipeline.AudioMonitoring;
+import org.opencastproject.capture.pipeline.InvalidDeviceNameException;
 import org.opencastproject.capture.pipeline.PipelineFactory;
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -358,8 +359,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     } catch (UnsatisfiedLinkError e) {
       logger.error(e.getMessage() + " : please add libjv4linfo.so to /usr/lib to correct this issue.");
       return null;
-    }
-
+    } 
+    
     //Check if the pipeline came up ok
     if (pipe == null) {
       logger.error("Capture {} could not start, pipeline was null!", newRec.getID());

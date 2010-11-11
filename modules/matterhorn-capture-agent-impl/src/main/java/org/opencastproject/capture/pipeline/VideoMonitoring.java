@@ -17,9 +17,11 @@ package org.opencastproject.capture.pipeline;
 
 
 import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 
 import com.sun.jna.Pointer;
 
+import org.gstreamer.Bin;
 import org.gstreamer.Buffer;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
@@ -53,7 +55,7 @@ public class VideoMonitoring {
    * Add a method for confidence monitoring to a {@code Pipeline} capturing video by
    * teeing the raw data a pulling it to the appsink element.
    * 
-   * @param pipeline {@code Pipeline} to add video monitoring to
+   * @param bin {@code Pipeline} to add video monitoring to
    * @param src the source {@code Element} which will be tee'd
    * @param sink the sink {@code Element} which the src originally sent data to
    * @param interval how often to grab data from the pipeline
@@ -61,7 +63,7 @@ public class VideoMonitoring {
    * @param device name of device; used to name the jpeg file
    * @return True if the pipeline worked, or null on failure
    */
-  public static boolean addVideoMonitor(Pipeline pipeline, Element src, Element sink, final long interval, final String location,
+  public static boolean addVideoMonitor(Bin bin, Element src, Element sink, final long interval, final String location,
           final String device, final boolean trace) {
           
       Element tee, queue0, queue1, decodebin, capsfilter, jpegenc, queue2;
@@ -82,7 +84,7 @@ public class VideoMonitoring {
       tee.set("silent", "false");
       appsink.set("emit-signals", "true");
       
-      pipeline.addMany(tee, queue0, queue1, decodebin, ffmpegcolorspace, capsfilter, jpegenc, queue2, appsink);
+      bin.addMany(tee, queue0, queue1, decodebin, ffmpegcolorspace, capsfilter, jpegenc, queue2, appsink);
       src.unlink(sink);
       appsink.set("drop", "true");
       

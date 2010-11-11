@@ -16,7 +16,9 @@
 package org.opencastproject.capture.pipeline;
 
 import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 
+import org.gstreamer.Bin;
 import org.gstreamer.Bus;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
@@ -84,7 +86,7 @@ public class AudioMonitoring {
    * Add a method for confidence monitoring to a pipeline capturing audio by
    * teeing the raw data a pulling it to the appsink element.
    * 
-   * @param pipeline {@code Pipeline} to add audio monitoring to
+   * @param bin {@code Bin} to add audio monitoring to
    * @param src the source {@code Element} which will be tee'd
    * @param sink the sink {@code Element} which the src originally sent data to
    * @param interval how often to grab data from the pipeline
@@ -92,7 +94,7 @@ public class AudioMonitoring {
    * @param name The friendly name of the device to add audio monitoring to
    * @return the {@code Pipeline} with the audio monitoring added, or null on failure
    */
-  public static boolean addAudioMonitor(Pipeline pipeline, Element src, Element sink, final long interval, final long maxLength, final String name) {
+  public static boolean addAudioMonitor(Bin bin, Element src, Element sink, final long interval, final long maxLength, final String name) {
           
       Element tee, queue0, queue1, decodebin, fakesink;
       final Element level;
@@ -114,7 +116,7 @@ public class AudioMonitoring {
       tee.set("silent", "false");
       level.set("message", "true");
       
-      pipeline.addMany(tee, queue0, queue1, decodebin, level, fakesink);
+      bin.addMany(tee, queue0, queue1, decodebin, level, fakesink);
       src.unlink(sink);
       
       decodebin.connect(new Element.PAD_ADDED() {
@@ -154,7 +156,7 @@ public class AudioMonitoring {
       
       // callback to listen for messages from the level element, giving us
       // information about the audio being recorded
-      Bus bus = pipeline.getBus();
+      Bus bus = bin.getBus();
       bus.connect(new Bus.MESSAGE() {
         long previous = -1;
         public void busMessage(Bus bus, Message msg) {

@@ -18,6 +18,7 @@ package org.opencastproject.capture.pipeline;
 import junit.framework.Assert;
 
 import org.junit.Test;
+import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 
 /**
  * Simple test the constructor and get methods for this basic class that 
@@ -27,7 +28,7 @@ public class CaptureDeviceTest {
   
   @Test
   public void testCaptureDevice() {
-    DeviceName device = DeviceName.FILE;
+    SourceDeviceName device = SourceDeviceName.FILE;
     String source = "source";
     String dest = "destination";
     String fname = "TEST";

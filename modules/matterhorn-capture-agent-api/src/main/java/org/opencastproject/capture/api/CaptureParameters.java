@@ -157,6 +157,9 @@ public interface CaptureParameters {
   /** String prefix used when specify capture device properties */
   static final String CAPTURE_DEVICE_PREFIX = "capture.device.";
   
+  /** Property specifying the type of the source for this device e.g. V4L2_Src **/
+  static final String CAPTURE_DEVICE_TYPE = ".type";
+  
   /** Property specifying the source location of the device e.g., /dev/video0 */
   static final String CAPTURE_DEVICE_SOURCE = ".src";
 

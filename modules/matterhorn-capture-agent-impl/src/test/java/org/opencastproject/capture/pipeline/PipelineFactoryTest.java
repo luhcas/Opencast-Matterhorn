@@ -15,7 +15,13 @@
  */
 package org.opencastproject.capture.pipeline;
 
+import static org.easymock.EasyMock.createMock;
+
+import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.impl.ConfigurationManager;
+import org.opencastproject.util.XProperties;
+import org.osgi.service.cm.ConfigurationException;
 
 import org.gstreamer.Pipeline;
 import org.junit.AfterClass;
@@ -26,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -125,8 +133,43 @@ public class PipelineFactoryTest {
     Assert.assertNull(PipelineFactory.create(p, false, null));
   }
   
-  /*
+  
   @Test
+  public void initDevicesCreatesDevicesSuccessfullyWithCorrectTypes(){
+    ConfigurationManager config = new ConfigurationManager();
+    
+    Properties p = null;
+    try {
+      p = loadProperties("config/capture.properties");
+    } catch (IOException e) {
+      e.printStackTrace();
+      Assert.fail();
+    }
+    p.put("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "capture-agent-test").getAbsolutePath());
+    p.put("org.opencastproject.server.url", "http://localhost:8080");
+    p.put(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, -1);
+    p.put("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());
+    try {
+      config.updated(p);
+    } catch (ConfigurationException e) {
+      e.printStackTrace();
+      Assert.fail();
+    }
+    CaptureAgent captureAgentMock = createMock(CaptureAgent.class);
+    PipelineFactory.create(config.getAllProperties(), false, captureAgentMock);
+  }
+  
+  private XProperties loadProperties(String location) throws IOException {
+    XProperties props = new XProperties();
+    InputStream s = getClass().getClassLoader().getResourceAsStream(location);
+    if (s == null) {
+      throw new RuntimeException("Unable to load configuration file from " + location);
+    }
+    props.load(s);
+    return props;
+  }
+  
+  /*@Test
   public void testWithInvalidFileSource() {
     Properties properties = new Properties();
     properties.setProperty(CaptureParameters.CAPTURE_DEVICE_NAMES, "INVALID");
@@ -169,7 +212,5 @@ public class PipelineFactoryTest {
       ret = PipelineFactory.addPipeline(captureDevice, pipeline);
       Assert.assertTrue(ret);
     }
-  }
-  */
-  
+  }*/
 }
