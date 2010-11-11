@@ -1,13 +1,13 @@
 /**
  *  Copyright 2009 The Regents of the University of California
  *  Licensed under the Educational Community License, Version 2.0
- *  (the "License"); you may not use this file except in compliance
+ *  (the 'License'); you may not use this file except in compliance
  *  with the License. You may obtain a copy of the License at
  *
  *  http://www.osedu.org/licenses/ECL-2.0
  *
  *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an "AS IS"
+ *  software distributed under the License is distributed on an 'AS IS'
  *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
  *  or implied. See the License for the specific language governing
  *  permissions and limitations under the License.
@@ -18,16 +18,16 @@ var ocRecordings = ocRecordings || {};
 
 ocRecordings.statsInterval = null;
 ocRecordings.updateRequested = false;
-ocRecordings.currentState = "upcoming";
-ocRecordings.sortBy = "startDate";
-ocRecordings.sortOrder = "Ascending";
+ocRecordings.currentState = 'upcoming';
+ocRecordings.sortBy = 'startDate';
+ocRecordings.sortOrder = 'Ascending';
 ocRecordings.lastCount = null;
 ocRecordings.tableInterval = null;
 ocRecordings.changedMediaPackage = null;
 ocRecordings.configuration = null;
 ocRecordings.tableTemplate = null;
-ocRecordings.filter = "";
-ocRecordings.filterFields = "";
+ocRecordings.filter = '';
+ocRecordings.filterFields = '';
 
 
 /** Initialize the Recordings page.
@@ -53,7 +53,7 @@ ocRecordings.init = function() {
   // get 'me'
   $.getJSON('/info/rest/me.json', function(data) {
     ocRecordings.me = data;
-    $('#logout').append(" '" + data.username + "'");
+    $('#logout').append(' "' + data.username + '"');
   });
 
   // Event: clicked somewhere
@@ -84,6 +84,7 @@ ocRecordings.init = function() {
 
   /* Event: Recording State selector clicked */
   $('.recordings-category').click( function() {
+    ocRecordings.resetBulkActionPanel();
     var state = $(this).attr('state');
     if(!$(this).hasClass('recordings-category-active')){
       $('.recordings-category').removeClass('recordings-category-active');
@@ -109,6 +110,8 @@ ocRecordings.init = function() {
   $('#refreshInterval').change(function() {
     ocRecordings.initTableRefresh($(this).val());
   });
+  
+  // Bulk Action Event Handlers
 
   $('.oc-ui-collapsible-widget .ui-widget-header').click(
     function() {
@@ -117,6 +120,12 @@ ocRecordings.init = function() {
       $(this).next().toggle();
       return false;
     });
+    
+  $('#bulkActionSelect').change(function(){
+    ocRecordings.bulkActionHandler($(this).val());
+  });
+  
+  $('.recordings-cancel-bulk-action').click(ocRecordings.cancelBulkAction);
 
   var sort = ocUtils.getURLParam('sortBy');
   if (sort == '') {
@@ -180,8 +189,8 @@ ocRecordings.displayRecordingStats = function() {
   if (!ocRecordings.updateRequested) {
     ocRecordings.updateRequested = true;
     $.ajax({
-      url: "rest/countRecordings",
-      type: "GET",
+      url: 'rest/countRecordings',
+      type: 'GET',
       cache: false,
       success: function(data) {
         ocRecordings.updateRequested = false;
@@ -273,7 +282,7 @@ ocRecordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
 ocRecordings.adjustHoldActionPanelHeight = function() {
   var height = $('#holdActionPanelIframe').contents().find('html').height();
   $('#holdActionPanelIframe').height(height+10);
-//alert("Hold action panel height: " + height);
+//alert('Hold action panel height: ' + height);
 }
 
 /** Calls workflow endpoint to end hold operation and continue the workflow
@@ -332,7 +341,7 @@ ocRecordings.continueWorkflow = function(postData) {
  *
  */
 ocRecordings.retryRecording = function(workflowId) {
-  location.href = "upload.html?retry=" + workflowId;
+  location.href = 'upload.html?retry=' + workflowId;
 }
 
 ocRecordings.removeRecording = function(workflowId) {
@@ -372,19 +381,52 @@ ocRecordings.formatRecordingDates = function(startTime, endTime) {
   var endDate = new Date();
   endDate.setTime(endTime);
   var out = startDate.getFullYear() + '-' +
-  ocUtils.padString(startDate.getMonth()+1, "0", 2) + '-' +
-  ocUtils.padString(startDate.getDate(), "0", 2) + ' ' +
-  startDate.getHours() + ":" + ocUtils.padString(startDate.getMinutes(), "0", 2) + ' - ' +
-  endDate.getHours() + ":" + ocUtils.padString(endDate.getMinutes(), "0", 2);
+  ocUtils.padString(startDate.getMonth()+1, '0', 2) + '-' +
+  ocUtils.padString(startDate.getDate(), '0', 2) + ' ' +
+  startDate.getHours() + ':' + ocUtils.padString(startDate.getMinutes(), '0', 2) + ' - ' +
+  endDate.getHours() + ':' + ocUtils.padString(endDate.getMinutes(), '0', 2);
   return out;
 }
 
-ocRecordings.filterRecordings = function() {
-  ocRecordings.filter = $("#filter").val();
-  ocRecordings.filterField = $("#filterField").val();
-  ocRecordings.displayRecordings(ocRecordings.currentState);
+ocRecordings.filterRecordings = function(state) {
+  if(!state){
+    state = ocRecordings.currentState;
+  }
+  ocRecordings.filter = $('#filter').val();
+  ocRecordings.filterField = $('#filterField').val();
+  ocRecordings.displayRecordings(state);
 }
 
 ocRecordings.displayBulkAction = function(filter) {
-  $("#bulk");
+  $('#bulkEditPanel').hide();
+  $('#bulkDeletePanel').hide();
+  ocRecordings.filterRecordings('bulkaction');
+  $('#bulkActionPanel').show();
+}
+
+ocRecordings.cancelBulkAction = function() {
+  ocRecordings.resetBulkActionPanel();
+  ocRecordings.filterRecordings('upcoming');
+}
+
+ocRecordings.resetBulkActionPanel = function() {
+  $('#bulkActionPanel').hide();
+  $('#bulkActionSelect').val('select');
+  $('#bulkActionSelect').change();
+}
+
+ocRecordings.bulkActionHandler = function(action) {
+  if(action === 'edit'){
+    $('#bulkEditPanel').show();
+    $('#bulkDeletePanel').hide();
+    $('#cancelBulkAction').hide();
+  } else if (action === 'delete') {
+    $('#bulkEditPanel').hide();
+    $('#bulkDeletePanel').show();
+    $('#cancelBulkAction').hide();
+  } else if (action === 'select') {
+    $('#bulkEditPanel').hide();
+    $('#bulkDeletePanel').hide();
+    $('#cancelBulkAction').show();
+  }
 }
