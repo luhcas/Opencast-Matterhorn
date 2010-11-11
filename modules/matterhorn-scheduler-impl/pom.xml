@@ -151,10 +151,14 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.scheduler.*;version=${project.version}</Export-Package>
+            <Export-Package>
+              org.opencastproject.scheduler.impl;version=${project.version},
+              org.opencastproject.scheduler.endpoint;version=${project.version},
+            </Export-Package>
             <Import-Package>
               org.opencastproject.http;version=${project.version},
               org.opencastproject.metadata.dublincore;version=${project.version},
+              org.opencastproject.scheduler.api;version=${project.version},
               *;resolution:=optional
             </Import-Package>
             <Private-Package>
