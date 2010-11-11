@@ -61,8 +61,16 @@ ocRecordings.init = function() {
   //    $('#holdActionPanelContainer').fadeOut('fast');
   //  });
   
-  $('#buttonSchedule').button({icons:{primary:'ui-icon-circle-plus'}});
-  $('#buttonUpload').button({icons:{primary:'ui-icon-circle-plus'}});
+  $('#buttonSchedule').button({
+    icons:{
+      primary:'ui-icon-circle-plus'
+    }
+  });
+  $('#buttonUpload').button({
+    icons:{
+      primary:'ui-icon-circle-plus'
+    }
+  });
 
   /* Event: Scheduler button clicked */
   $('#buttonSchedule').click( function() {
@@ -108,7 +116,7 @@ ocRecordings.init = function() {
       $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-s');
       $(this).next().toggle();
       return false;
-  });
+    });
 
   var sort = ocUtils.getURLParam('sortBy');
   if (sort == '') {
@@ -272,33 +280,42 @@ ocRecordings.adjustHoldActionPanelHeight = function() {
  *
  */
 ocRecordings.continueWorkflow = function(postData) {
-  var workflowId = $('#holdWorkflowId').val();
-  if(postData===null) {
-    postData = {
-      id : workflowId
-    };
-  }
+  // data must include workflow id
+  var data = {
+    id : $('#holdWorkflowId').val()
+  };
+
+  // add updated MP to data, if hold operation changed the MP
   if (ocRecordings.changedMediaPackage != null) {
-    postData['mediapackage'] = ocRecordings.changedMediaPackage;
+    data['mediapackage'] = ocRecordings.changedMediaPackage;
     ocRecordings.changedMediaPackage = null;
   }
-  
-  // resume expects a "properties" form field with one key=value pair per line
-  var props = {};
-  props.id = workflowId;
-  props.properties = "";
-  $.each(postData, function(key, value) {
-    if(key != 'id') {
-      props.properties = props.properties + key + '=' + value + '\n'; 
-    }
-  });
+
+  // add properties for workflow resum if provided by hold operation
+  if (postData) {
+    data.properties = {};
+    $.each(postData, function(key, value) {
+      if(key != 'id') {
+        data.properties += key + '=' + value + '\n';
+      }
+    });
+  }
   
   $.ajax({
     type       : 'POST',
-    url        : '../workflow/rest/resume/',
-    data       : props,
+    url        : '../workflow/rest/replaceAndresume/',
+    data       : data,
     error      : function(XHR,status,e){
-      alert('Could not resume Workflow: ' + status);
+      if (XHR.status == '204') {
+        $('#holdActionPanelContainer').toggle();
+        $('#recordingsTableContainer').toggle();
+        $('#oc_recordingmenu').toggle();
+        $('.pagingNavContainer').toggle();
+        $('#refreshControlsContainer').toggle();
+        location.reload();
+      } else {
+        alert('Could not resume Workflow: ' + status);
+      }
     },
     success    : function(data) {
       $('#holdActionPanelContainer').toggle();
@@ -350,13 +367,15 @@ ocRecordings.removeScheduledRecording = function(eventId, title) {
 }
 
 ocRecordings.formatRecordingDates = function(startTime, endTime) {
-  var startDate = new Date(); startDate.setTime(startTime);
-  var endDate = new Date(); endDate.setTime(endTime);
+  var startDate = new Date();
+  startDate.setTime(startTime);
+  var endDate = new Date();
+  endDate.setTime(endTime);
   var out = startDate.getFullYear() + '-' +
-    ocUtils.padString(startDate.getMonth()+1, "0", 2) + '-' +
-    ocUtils.padString(startDate.getDate(), "0", 2) + ' ' +
-    startDate.getHours() + ":" + ocUtils.padString(startDate.getMinutes(), "0", 2) + ' - ' +
-    endDate.getHours() + ":" + ocUtils.padString(endDate.getMinutes(), "0", 2);
+  ocUtils.padString(startDate.getMonth()+1, "0", 2) + '-' +
+  ocUtils.padString(startDate.getDate(), "0", 2) + ' ' +
+  startDate.getHours() + ":" + ocUtils.padString(startDate.getMinutes(), "0", 2) + ' - ' +
+  endDate.getHours() + ":" + ocUtils.padString(endDate.getMinutes(), "0", 2);
   return out;
 }
 
