@@ -654,13 +654,22 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * {@inheritDoc}
-   * 
    * @see org.opencastproject.workflow.api.WorkflowService#countWorkflowInstances()
    */
+  @Override
   public long countWorkflowInstances() throws WorkflowDatabaseException {
-    return dao.countWorkflowInstances();
+    return dao.countWorkflowInstances(null, null);
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#countWorkflowInstances(org.opencastproject.workflow.api.WorkflowInstance.WorkflowState, java.lang.String)
+   */
+  @Override
+  public long countWorkflowInstances(WorkflowState state, String operation) throws WorkflowDatabaseException {
+    return dao.countWorkflowInstances(state, operation);
+  }
+  
   /**
    * {@inheritDoc}
    * 

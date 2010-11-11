@@ -26,6 +26,7 @@ import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowSetImpl;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
@@ -167,7 +168,7 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
     // If the solr is empty, add all of the workflows found in the COLLECTION_ID collection
     long instances = 0;
     try {
-      instances = countWorkflowInstances();
+      instances = countWorkflowInstances(null, null);
     } catch (WorkflowDatabaseException e) {
       throw new IllegalStateException(e);
     }
@@ -290,7 +291,7 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
 
     String xml = WorkflowBuilder.getInstance().toXml(instance);
     doc.addField(XML_KEY, xml);
-    
+
     WorkflowOperationInstance op = instance.getCurrentOperation();
     if (op != null)
       doc.addField(OPERATION_KEY, op.getId());
@@ -329,18 +330,36 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#countWorkflowInstances()
+   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#countWorkflowInstances(org.opencastproject.workflow.api.WorkflowInstance.WorkflowState,
+   *      java.lang.String)
    */
   @Override
-  public long countWorkflowInstances() throws WorkflowDatabaseException {
-    SolrQuery query = new SolrQuery("*:*");
+  public long countWorkflowInstances(WorkflowState state, String operation) throws WorkflowDatabaseException {
+    StringBuffer query = new StringBuffer();
+
+    // Consider the workflow state
+    if (state != null) {
+      query.append(STATE_KEY).append(":").append(state.toString());
+    } 
+    
+    // Consider the current operation
+    if (StringUtils.isNotBlank(operation)) {
+      if (query.length() > 0)
+        query.append(" AND ");
+      query.append(OPERATION_KEY).append(":").append(operation);
+    }
+    
+    // We want all available workflows
+    if (query.length() == 0) {
+      query.append("*:*");
+    }
+    
     try {
-      QueryResponse response = solrServer.query(query);
+      QueryResponse response = solrServer.query(new SolrQuery(query.toString()));
       return response.getResults().getNumFound();
     } catch (SolrServerException e) {
       throw new WorkflowDatabaseException(e);
     }
-
   }
 
   /**
@@ -352,10 +371,10 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
   public WorkflowInstance getWorkflowById(String workflowId) throws WorkflowDatabaseException, NotFoundException {
     try {
       QueryResponse response = solrServer.query(new SolrQuery(ID_KEY + ":" + workflowId));
-      if(response.getResults().size() == 0) {
+      if (response.getResults().size() == 0) {
         throw new NotFoundException("Unable to find a workflow with id=" + workflowId);
       } else {
-        String xml = (String)response.getResults().get(0).get(XML_KEY);
+        String xml = (String) response.getResults().get(0).get(XML_KEY);
         try {
           return WorkflowBuilder.getInstance().parseWorkflowInstance(xml);
         } catch (Exception e) {
@@ -380,7 +399,7 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
   }
 
   private StringBuilder append(StringBuilder sb, String key, String value) {
-    if(sb.length() > 0) {
+    if (sb.length() > 0) {
       sb.append(" AND ");
     }
     sb.append(key);
@@ -388,7 +407,7 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
     sb.append(ClientUtils.escapeQueryChars(value));
     return sb;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -421,10 +440,10 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
     }
 
     // If we're looking for anything, set the query to a wildcard search
-    if(sb.length() == 0) {
+    if (sb.length() == 0) {
       sb.append("*:*");
     }
-    
+
     solrQuery.setQuery(sb.toString());
     long totalHits;
     long time = System.currentTimeMillis();
@@ -443,7 +462,7 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
       set.setSearchTime(time);
 
       for (SolrDocument doc : items) {
-        String xml = (String)doc.get(XML_KEY);
+        String xml = (String) doc.get(XML_KEY);
         try {
           set.addItem(WorkflowBuilder.getInstance().parseWorkflowInstance(xml));
         } catch (Exception e) {

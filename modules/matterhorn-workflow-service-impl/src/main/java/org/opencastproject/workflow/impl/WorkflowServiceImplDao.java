@@ -20,6 +20,7 @@ import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
 /**
  * Provides persistence services to the workflow service implementation.
@@ -69,11 +70,15 @@ public interface WorkflowServiceImplDao {
   /**
    * Gets the total number of workflows that have been created to date.
    * 
+   * @param state
+   *          the workflow state
+   * @param operation
+   *          the current operation identifier
    * @return The number of workflow instances, regardless of their state
    * @throws WorkflowDatabaseException
    *           if there is a problem retrieving the workflow instance count from persistence
    */
-  long countWorkflowInstances() throws WorkflowDatabaseException;
+  long countWorkflowInstances(WorkflowState state, String operation) throws WorkflowDatabaseException;
 
   /**
    * Gets a set of workflow instances using a custom query

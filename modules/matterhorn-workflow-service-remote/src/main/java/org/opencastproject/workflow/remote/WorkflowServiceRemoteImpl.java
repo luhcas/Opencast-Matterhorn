@@ -22,6 +22,7 @@ import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
@@ -35,6 +36,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +52,7 @@ import java.util.Map.Entry;
  * An implementation of the workflow service that communicates with a remote workflow service via HTTP.
  */
 public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowService {
+
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceRemoteImpl.class);
 
@@ -278,7 +281,23 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
    */
   @Override
   public long countWorkflowInstances() throws WorkflowDatabaseException {
+    return countWorkflowInstances(null, null);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowService#countWorkflowInstances(org.opencastproject.workflow.api.WorkflowInstance.WorkflowState,
+   *      java.lang.String)
+   */
+  @Override
+  public long countWorkflowInstances(WorkflowState state, String operation) throws WorkflowDatabaseException {
     HttpGet get = new HttpGet("/count");
+    HttpParams params = get.getParams();
+    if (state != null)
+      params.setParameter("state", state.toString());
+    if (operation != null)
+      params.setParameter("operation", operation);
     HttpResponse response = getResponse(get);
     if (response == null) {
       throw new WorkflowDatabaseException("Unable to count workflow instances");

@@ -15,6 +15,8 @@
  */
 package org.opencastproject.workflow.impl;
 
+import static org.junit.Assert.assertEquals;
+
 import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
@@ -52,14 +54,13 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class HoldStateTest {
+public class CountWorkflowsTest {
 
   /** The solr root directory */
   protected static final String storageRoot = "." + File.separator + "target" + File.separator + "workflow-test-db";
 
   private WorkflowServiceImpl service = null;
   private WorkflowDefinition def = null;
-  private WorkflowInstance workflow = null;
   private MediaPackage mp = null;
   private WorkflowServiceImplDaoFileImpl dao = null;
   private Workspace workspace = null;
@@ -78,7 +79,7 @@ public class HoldStateTest {
 
     MediaPackageBuilder mediaPackageBuilder = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder();
     mediaPackageBuilder.setSerializer(new DefaultMediaPackageSerializerImpl(new File("target/test-classes")));
-    InputStream is = CountWorkflowsTest.class.getResourceAsStream("/mediapackage-1.xml");
+    InputStream is = HoldStateTest.class.getResourceAsStream("/mediapackage-1.xml");
     mp = mediaPackageBuilder.loadFromXml(is);
     IOUtils.closeQuietly(is);
 
@@ -116,14 +117,6 @@ public class HoldStateTest {
 
   @After
   public void teardown() throws Exception {
-    System.out.println("All tests finished... tearing down...");
-    if (workflow != null) {
-      while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
-        System.out.println("Waiting for workflow to complete, current state is "
-                + service.getWorkflowById(workflow.getId()).getState());
-        Thread.sleep(500);
-      }
-    }
     dao.deactivate();
     service.deactivate();
   }
@@ -132,78 +125,52 @@ public class HoldStateTest {
   public void testHoldAndResume() throws Exception {
     Map<String, String> initialProps = new HashMap<String, String>();
     initialProps.put("testproperty", "foo");
-    workflow = service.start(def, mp, initialProps);
-    while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.PAUSED)) {
-      System.out.println("Waiting for workflow to enter paused state...");
+    WorkflowInstance workflow1 = service.start(def, mp, initialProps);
+    WorkflowInstance workflow2 = service.start(def, mp, initialProps);
+
+    // Wait for both workflows to be in paused state
+    boolean waitForEverybody = true;
+    while (waitForEverybody) {
+      System.out.println("Waiting for both workflows to enter paused state...");
       try {
+        waitForEverybody = !service.getWorkflowById(workflow1.getId()).getState().equals(WorkflowState.PAUSED);
+        waitForEverybody |= !service.getWorkflowById(workflow2.getId()).getState().equals(WorkflowState.PAUSED);
         Thread.sleep(500);
       } catch (InterruptedException e) {
       }
     }
 
-    // The variable "testproperty" should have been replaced by "foo", but not "anotherproperty"
-    String xml = WorkflowBuilder.getInstance().toXml(workflow);
-    Assert.assertTrue(xml.contains("foo"));
-    Assert.assertTrue(xml.contains("anotherproperty"));
+    // Test for two paused workflows in "op1"
+    assertEquals(2, service.countWorkflowInstances());
+    assertEquals(2, service.countWorkflowInstances(WorkflowState.PAUSED, null));
+    assertEquals(2, service.countWorkflowInstances(null, "op1"));
+    assertEquals(2, service.countWorkflowInstances(WorkflowState.PAUSED, "op1"));
+    assertEquals(0, service.countWorkflowInstances(WorkflowState.SUCCEEDED, null));
+    assertEquals(0, service.countWorkflowInstances(null, "op2"));
+    assertEquals(0, service.countWorkflowInstances(WorkflowState.SUCCEEDED, "op1"));
 
-    // Simulate a user resuming and submitting new properties (this time, with a value for "anotherproperty") to the
-    // workflow
-    Map<String, String> resumeProps = new HashMap<String, String>();
-    resumeProps.put("anotherproperty", "bar");
-    service.resume(workflow.getId(), resumeProps);
+    // Continue one of the two worfkows
+    service.resume(workflow1.getId());
+    while (!service.getWorkflowById(workflow1.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
+      System.out.println("Waiting for workflow 1 to finish...");
+      try {
+        Thread.sleep(500);
+      } catch (InterruptedException e) {
+        // Nothing to be done here
+      }
+    }
 
-    WorkflowInstance fromDb = service.getWorkflowById(workflow.getId());
-    String xmlFromDb = WorkflowBuilder.getInstance().toXml(fromDb);
-    Assert.assertTrue(!xmlFromDb.contains("anotherproperty"));
-    Assert.assertTrue(xmlFromDb.contains("foo"));
-    Assert.assertTrue(xmlFromDb.contains("bar"));
+    // Make sure one workflow is still on hold, the other is finished.
+    assertEquals(2, service.countWorkflowInstances());
+    assertEquals(1, service.countWorkflowInstances(WorkflowState.PAUSED, null));
+    assertEquals(1, service.countWorkflowInstances(WorkflowState.PAUSED, "op1"));
+    assertEquals(1, service.countWorkflowInstances(WorkflowState.SUCCEEDED, null));
   }
 
-  @Test
-  public void testMultipleHolds() throws Exception {
-    workflow = service.start(def, mp);
-    while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.PAUSED)) {
-      System.out.println("Waiting for workflow to enter paused state...");
-      try {
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-      }
-    }
-
-    // Simulate a user resuming the workflow, but the handler still keeps the workflow in a hold state
-    holdingOperationHandler.pauseOnResume = true;
-    service.resume(workflow.getId());
-
-    // The workflow is running again, but should very quickly reenter the paused state
-    while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.PAUSED)) {
-      System.out.println("Waiting for workflow to reenter paused state...");
-      try {
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-      }
-    }
-
-    WorkflowInstance fromDb = service.getWorkflowById(workflow.getId());
-    Assert.assertEquals(WorkflowState.PAUSED, fromDb.getState());
-
-    // Resume the workflow again, and this time continue with the workflow
-    holdingOperationHandler.pauseOnResume = false;
-    service.resume(workflow.getId());
-
-    while (!service.getWorkflowById(workflow.getId()).getState().equals(WorkflowState.SUCCEEDED)) {
-      System.out.println("Waiting for workflow to finish...");
-      try {
-        Thread.sleep(500);
-      } catch (InterruptedException e) {
-      }
-    }
-    Assert.assertEquals(WorkflowState.SUCCEEDED, service.getWorkflowById(workflow.getId()).getState());
-  }
-
+  /**
+   * Test implementation for a workflow operation handler that will do nothing and not hold.
+   */
   class HoldingWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
-
-    /** Whether to return pause or continue when {@link #resume(WorkflowInstance)} is called */
-    boolean pauseOnResume;
 
     public SortedMap<String, String> getConfigurationOptions() {
       return new TreeMap<String, String>();
@@ -218,11 +185,13 @@ public class HoldStateTest {
     @Override
     public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
             throws WorkflowOperationException {
-      Action action = pauseOnResume ? Action.PAUSE : Action.CONTINUE;
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(action);
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
     }
   }
 
+  /**
+   * Test implementatio for a workflow operation handler that will go on hold, and continue when resume() is called.
+   */
   class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
     @Override
     public SortedMap<String, String> getConfigurationOptions() {

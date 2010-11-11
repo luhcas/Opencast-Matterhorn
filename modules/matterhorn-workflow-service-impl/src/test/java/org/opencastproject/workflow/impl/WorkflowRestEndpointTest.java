@@ -16,7 +16,6 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.util.NotFoundException;
-import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowService;

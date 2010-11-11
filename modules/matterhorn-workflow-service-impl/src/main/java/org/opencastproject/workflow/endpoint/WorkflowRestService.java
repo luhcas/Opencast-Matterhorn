@@ -221,7 +221,8 @@ public class WorkflowRestService {
     // Resume a Workflow Instance
     RestEndpoint resumeAndReplaceEndpoint = new RestEndpoint("replaceAndresume", RestEndpoint.Method.POST,
             "/replaceAndresume", "Resume a suspended workflow instance, replacing the mediapackage");
-    resumeAndReplaceEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Suspended workflow has now resumed"));
+    resumeAndReplaceEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .NO_CONTENT("Suspended workflow has now resumed"));
     resumeAndReplaceEndpoint.addStatus(org.opencastproject.util.doc.Status
             .NOT_FOUND("A workflow instance with this ID was not found"));
     resumeAndReplaceEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
@@ -313,15 +314,17 @@ public class WorkflowRestService {
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("/count")
-  public Response getCount() {
+  public Response getCount(
+          @QueryParam("state") WorkflowInstance.WorkflowState state,
+          @QueryParam("operation") String operation) {
     try {
-      Long count = service.countWorkflowInstances();
+      Long count = service.countWorkflowInstances(state, operation);
       return Response.ok(count).build();
     } catch (WorkflowDatabaseException e) {
       throw new WebApplicationException(e);
     }
   }
-  
+
   @SuppressWarnings("unchecked")
   @GET
   @Path("definitions.{output:.*}")
@@ -474,7 +477,7 @@ public class WorkflowRestService {
       return Response.noContent().build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
-    } catch(WorkflowDatabaseException e) {
+    } catch (WorkflowDatabaseException e) {
       throw new WebApplicationException(e);
     }
   }
@@ -488,7 +491,7 @@ public class WorkflowRestService {
       return Response.noContent().build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
-    } catch(WorkflowDatabaseException e) {
+    } catch (WorkflowDatabaseException e) {
       throw new WebApplicationException(e);
     }
   }
@@ -508,7 +511,7 @@ public class WorkflowRestService {
       return Response.noContent().build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
-    } catch(WorkflowDatabaseException e) {
+    } catch (WorkflowDatabaseException e) {
       throw new WebApplicationException(e);
     }
   }
@@ -569,7 +572,6 @@ public class WorkflowRestService {
     }
     return Response.ok(jsonArray.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
   }
-
 
   @SuppressWarnings("unchecked")
   protected JSONArray getOperationsAsJson(List<WorkflowOperationInstance> operations) {

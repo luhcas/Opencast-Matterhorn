@@ -17,6 +17,7 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.util.NotFoundException;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,6 @@ public interface WorkflowService {
    * should handle.
    */
   final String WORKFLOW_OPERATION_PROPERTY = "workflow.operation";
-
 
   /** Identifier for workflow jobs */
   final String JOB_TYPE = "org.opencastproject.workflow";
@@ -157,6 +157,20 @@ public interface WorkflowService {
    *           if there is a problem accessing the workflow instances in persistence
    */
   long countWorkflowInstances() throws WorkflowDatabaseException;
+
+  /**
+   * Gets the total number of workflows that have been created to date and that match all of the specified criterias
+   * such as the workflow state or the current operation, both of which might be <code>null</code>.
+   * 
+   * @param state
+   *          the workflow state
+   * @param operation
+   *          the current operation identifier
+   * @return The number of workflow instances, regardless of their state
+   * @throws WorkflowDatabaseException
+   *           if there is a problem accessing the workflow instances in persistence
+   */
+  long countWorkflowInstances(WorkflowState state, String operation) throws WorkflowDatabaseException;
 
   /**
    * Stops a running workflow instance.
