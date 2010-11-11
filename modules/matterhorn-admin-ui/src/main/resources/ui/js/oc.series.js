@@ -17,46 +17,49 @@
 /*    NAMSPACES    */
 var ocSeries        = ocSeries || {};
 ocSeries.components = {};
+ocSeries.additionalComponents = {};
 
 /*    PAGE CONFIGURATION    */
 var SERIES_SERVICE_URL = "/series/rest";
+var SERIES_LIST_URL = "/admin/series_list.html";
 var CREATE_MODE = 1;
 var EDIT_MODE   = 2;
 
 ocSeries.mode = CREATE_MODE;
 
 /*    UI FUNCTIONS    */
-ocSeries.Init = function(){
+ocSeries.init = function(){
   //Load i18n strings and replace default english
   ocSeries.Internationalize();
   
   //Add folding action for hidden sections.
-  $('.folder-head').click(
+  $('.oc-ui-collapsible-widget .ui-widget-header').click(
     function() {
-      $(this).children('.fl-icon').toggleClass('icon-arrow-right');
-      $(this).children('.fl-icon').toggleClass('icon-arrow-down');
-      $(this).next().toggle('fast');
+      $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-e');
+      $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-s');
+      $(this).next().toggle();
       return false;
-  });
+    });
+    
+  $('#additionalContentTabs').tabs();
   
   ocSeries.RegisterComponents();
-  ocSeries.FormManager = new ocAdmin.Manager('series', '', ocSeries.components);
+  ocSeries.FormManager = new ocAdmin.Manager('series', '', ocSeries.components, ocSeries.additionalComponents);
   $('#submitButton').click(ocSeries.SubmitForm);
   $('#cancelButton').click(function() {
-    document.location = 'recordings.html';
+    document.location = SERIES_LIST_URL;
   });
   
-  ocUtils.log(ocUtils.getURLParam('edit'));
   if(ocUtils.getURLParam('edit') === 'true'){
     ocSeries.mode = EDIT_MODE;
-  }
-  
-  $('#submitButton').val('Update Series');
-  $('#i18n_page_title').text(i18n.page.title.edit);
-  var seriesId = ocUtils.getURLParam('seriesId');
-  if(seriesId !== '') {
-    $('#seriesId').val(seriesId);
-    $.getJSON(SERIES_SERVICE_URL + "/" + seriesId + ".json", ocSeries.loadSeries);
+    $('#submitButton').val('Update Series');
+    $('#i18n_page_title').text(i18n.page.title.edit);
+    $('#i18n_window_title').text(i18n.page.title.edit);
+    var seriesId = ocUtils.getURLParam('seriesId');
+    if(seriesId !== '') {
+      $('#seriesId').val(seriesId);
+      $.getJSON(SERIES_SERVICE_URL + "/" + seriesId + ".json", ocSeries.loadSeries);
+    }
   }
 }
 
@@ -71,73 +74,46 @@ ocSeries.Internationalize = function(){
   $('#i18n_page_title').text(i18n.page.title.add);
 }
 
-ocSeries.SelectMetaTab = function(elm){
-  $(elm).siblings().removeClass('selected');
-  $(elm).addClass('selected');
-  if(elm.id == "metaCommonTab"){
-    $("#commonDescriptors").show();
-    $("#additionalMetadata").hide();
-  }else{
-    $("#commonDescriptors").hide();
-    $("#additionalMetadata").show();
-  }
-}
-
 ocSeries.loadSeries = function(data) {
-  ocSeries.components.seriesId.setValue(data.series.@id);
+  $("#id").val(data.series.@id);
   ocSeries.components['description'].setValue(data.series.description);
-  for(m in data.series.metadataList.metadata){
-    var metadata = data.series.metadataList.metadata[m];
-    if(ocSeries.components[metadata.key]){
-      ocSeries.components[metadata.key].setValue(metadata.value);
+  for(m in data.series.additionalMetadata.metadata){
+    var metadata = data.series.additionalMetadata.metadata[m];
+    if(ocSeries.additionalComponents[metadata.key]){
+      ocSeries.additionalComponents[metadata.key].setValue(metadata.value);
     }
   }
 }
 
 ocSeries.RegisterComponents = function(){
-  ocSeries.components.seriesId = new ocAdmin.Component(
-    ['seriesId'],
-    { required: true, nodeKey: 'seriesId' },
-    { toNode: function(parent) {
-        for(var el in this.fields){
-          var container = parent.ownerDocument.createElement(this.nodeKey);
-          container.appendChild(parent.ownerDocument.createTextNode(this.getValue()));
-        }
-        if(parent && parent.nodeType){
-          parent.ownerDocument.documentElement.appendChild(container);
-        }
-        return container;
-      }
-    }
-  );
   //Core Metadata
-  ocSeries.components.title = new ocAdmin.Component(
+  ocSeries.additionalComponents.title = new ocAdmin.Component(
     ['title'],
     {label:'seriesLabel',required:true}
   );
   
-  ocSeries.components.contributor = new ocAdmin.Component(
+  ocSeries.additionalComponents.contributor = new ocAdmin.Component(
     ['contributor'],
     {label:'contributorLabel'}
   );
   
-  ocSeries.components.creator = new ocAdmin.Component(
+  ocSeries.additionalComponents.creator = new ocAdmin.Component(
     ['creator'],
     {label: 'creatorLabel'}
   );
   
   //Additional Metadata
-  ocSeries.components.subject = new ocAdmin.Component(
+  ocSeries.additionalComponents.subject = new ocAdmin.Component(
     ['subject'],
     {label: 'subjectLabel'}
   )
   
-  ocSeries.components.language = new ocAdmin.Component(
+  ocSeries.additionalComponents.language = new ocAdmin.Component(
     ['language'],
     {label: 'languageLabel'}
   )
   
-  ocSeries.components.license = new ocAdmin.Component(
+  ocSeries.additionalComponents.license = new ocAdmin.Component(
     ['license'],
     {label: 'licenseLabel'}
   )
@@ -149,16 +125,16 @@ ocSeries.RegisterComponents = function(){
   
   /*
   //Extended Metadata
-  ocAdmin.components.type
-  //ocAdmin.components.subtype
-  ocAdmin.components.publisher
-  ocAdmin.components.audience
-  //ocAdmin.components.duration
-  //ocAdmin.components.startdate
-  //ocAdmin.components.enddate
-  ocAdmin.components.spatial
-  ocAdmin.components.temporal
-  ocAdmin.components.rights
+  ocAdmin.additionalComponents.type
+  //ocAdmin.additionalComponents.subtype
+  ocAdmin.additionalComponents.publisher
+  ocAdmin.additionalComponents.audience
+  //ocAdmin.additionalComponents.duration
+  //ocAdmin.additionalComponents.startdate
+  //ocAdmin.additionalComponents.enddate
+  ocAdmin.additionalComponents.spatial
+  ocAdmin.additionalComponents.temporal
+  ocAdmin.additionalComponents.rights
   */
 }
 
@@ -175,7 +151,7 @@ ocSeries.SubmitForm = function(){
     } else {
     $.ajax({
       type: 'POST',
-      url: SERIES_SERVICE_URL + '/' + $('#seriesId').val(),
+      url: SERIES_SERVICE_URL + '/' + $('#id').val(),
       data: { series: seriesXml },
       complete: ocSeries.SeriesSubmitComplete
     });
@@ -183,8 +159,11 @@ ocSeries.SubmitForm = function(){
   }
 }
 
-ocSeries.SeriesSubmitComplete = function(){
-  for(var k in ocSeries.components){
+ocSeries.SeriesSubmitComplete = function(xhr, status){
+  if(status == "success"){
+    document.location = SERIES_LIST_URL;
+  }
+  /*for(var k in ocSeries.components){
     if(i18n[k]){
       $("#data-" + k).show();
       $("#data-" + k + " > .data-label").text(i18n[k].label + ":");
@@ -193,5 +172,5 @@ ocSeries.SeriesSubmitComplete = function(){
   }
   $("#schedulerLink").attr('href',$("#schedulerLink").attr('href') + '?seriesId=' + ocSeries.components.seriesId.getValue());
   $("#submissionSuccess").siblings().hide();
-  $("#submissionSuccess").show();
+  $("#submissionSuccess").show();*/
 }

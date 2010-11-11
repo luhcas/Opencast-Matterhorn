@@ -28,11 +28,6 @@
   vertical-align: top;
 }
 
-.scheduler-form-field {
-  border: 1px #aaa solid;
-  width: 500px;
-}
-
 .scheduler-radio-list {
   width: 200px;
   display: inline-block;
@@ -107,7 +102,7 @@
 /* TO HERE */
 
 /* scheduler specific overrides */
-.ui-widget {
+.layout-page-content > .ui-widget {
   width: 800px;
 }
 

@@ -1,0 +1,11 @@
+.layout-page-content > .ui-widget {
+  width: 800px;
+}
+
+.ui-widget {
+  border: 0 none;
+}
+
+.ui-tabs .ui-tabs-panel {
+  padding: 1em 0;
+}

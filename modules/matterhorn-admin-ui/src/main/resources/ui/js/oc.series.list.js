@@ -31,8 +31,8 @@ ocSeriesList.buildSeriesView = function(data) {
     $.each(data.seriesList.series, function(i,series){
       var s = ocSeriesList.views.seriesView[series['@id']] = {};
       s.id = series['@id'];
-      for(var j=0; j < series.metadataList.metadata.length; j++){
-        var metadata = series.metadataList.metadata[j];
+      for(var j=0; j < series.additionalMetadata.metadata.length; j++){
+        var metadata = series.additionalMetadata.metadata[j];
         if(metadata.key === 'title'){
           s.title = metadata.value;
         } else if(metadata.key === 'creator') {

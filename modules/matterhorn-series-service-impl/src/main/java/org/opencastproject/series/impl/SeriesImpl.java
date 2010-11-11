@@ -80,7 +80,7 @@ public class SeriesImpl implements Series {
   @Transient
   DublinCoreCatalog dublinCore;
 
-  @XmlElementWrapper(name = "metadataList")
+  @XmlElementWrapper(name = "additionalMetadata")
   @XmlElement(name = "metadata")
   @OneToMany(cascade = CascadeType.ALL, targetEntity = SeriesMetadataImpl.class, mappedBy = "series", fetch = FetchType.EAGER)
   List<SeriesMetadataImpl> metadata;

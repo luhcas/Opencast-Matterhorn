@@ -199,6 +199,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
       em.getTransaction().begin();
       SeriesImpl storedSeries = em.find(SeriesImpl.class, s.getSeriesId()); 
       if (storedSeries == null) throw new NotFoundException("Series " + s + " does not exist");
+      storedSeries.setDescription(s.getDescription());
       storedSeries.setMetadata(s.getMetadata());
       em.merge(storedSeries);
       em.getTransaction().commit();

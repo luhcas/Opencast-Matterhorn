@@ -1,5 +1,5 @@
 /* scheduler specific overrides */
-.ui-widget {
+.layout-page-content > .ui-widget {
   width: 800px;
 }
 
