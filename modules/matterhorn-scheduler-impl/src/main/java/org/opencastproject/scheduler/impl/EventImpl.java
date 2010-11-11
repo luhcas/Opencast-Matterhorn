@@ -571,7 +571,14 @@ public class EventImpl implements Event {
     this.setStartDate(e.getStartDate());
     this.setSubject(e.getSubject());
     this.setTitle(e.getTitle());
-    this.setMetadataList(e.getMetadataList());
+    List<Metadata> metadata = new LinkedList<Metadata>();
+    for(Metadata m : e.getMetadataList()){
+      MetadataImpl md = new MetadataImpl();
+      md.setKey(m.getKey());
+      md.setValue(m.getValue());
+      metadata.add(md);
+    }
+    this.setMetadataList(metadata);
   }
   
   public List<Event> createEventsFromRecurrence() throws ParseException, IncompleteDataException {
@@ -619,8 +626,7 @@ public class EventImpl implements Event {
       event.initializeFromEvent((Event)this);
       event.setTitle(getTitle() + " " + i);
       event.setStartDate(d);
-      d.setTime(d.getTime() + getDuration());
-      event.setEndDate(d);
+      event.setEndDate(new Date(d.getTime() + getDuration()));
       events.add((Event)event);
       i++;
     }

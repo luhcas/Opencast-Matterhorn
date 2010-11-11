@@ -51,6 +51,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -228,7 +229,7 @@ public class SchedulerRestService {
       if (event.getRecurrencePattern() != null && !event.getRecurrencePattern().isEmpty()) {
         // try to create event and it's recurrences
         service.addRecurringEvent(event);
-        return Response.status(Status.BAD_REQUEST).build();
+        return Response.status(Status.CREATED).build();
       } else {
         Event result = service.addEvent(event);
         if (result != null) { // TODO: addEvent never returns null. When it's updated to throw EntityExistsException
@@ -315,36 +316,60 @@ public class SchedulerRestService {
    *          to search for pattern to search for
    *          title|creator|series|time-asc|time-desc|contributor|channel|location|device">
    * @return List of SchedulerEvents as XML
-   * 
-   @POST
-   * @Produces(MediaType.TEXT_XML)
-   * @Path("filter.xml") public Response filterEventsXml(@FormParam("filter") SchedulerFilterJaxbImpl filter) { return
-   *                     filterEvents(filter); }
-   * 
-   *                     /** returns scheduled events, that pass the filter. filter: an xml definition of the filter.
-   *                     Tags that are not included will not be filtered. Possible values for order by are
-   *                     title,creator,series,time-asc,time-desc,contributor,channel,location,device
-   * @param filter
-   *          exact id to search for pattern to search for pattern to search for A short description of the content of
-   *          the lecture begin of the period of valid events end of the period of valid events pattern to search for ID
-   *          of the series which will be filtered ID of the channel that will be filtered pattern to search for pattern
-   *          to search for pattern to search for
-   *          title|creator|series|time-asc|time-desc|contributor|channel|location|device">
-   * @return List of SchedulerEvents as JSON
-   * 
-   @POST
-   * @Produces(MediaType.APPLICATION_JSON)
-   * @Path("filter.json") public Response filterEventsJson(@FormParam("filter") SchedulerFilterJaxbImpl filter) { return
-   *                      filterEvents(filter); }
-   * 
-   *                      private Response filterEvents(SchedulerFilterJaxbImpl filter) { if (filter != null) { try {
-   *                      logger.debug("Filter events with {}",filter.getFilter()); EventListImpl eventList = new
-   *                      EventListImpl(service.getEvents(filter.getFilter())); return
-   *                      Response.ok(eventList).type("").build(); } catch (Exception e) { return
-   *                      Response.serverError().build(); } } else { return Response.status(Status.BAD_REQUEST).build();
-   *                      } }
-   */
+   */ 
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("filter.xml")
+  public Response filterEventsXml(@QueryParam("co") String contributor,
+                                  @QueryParam("cr") String creator,
+                                  @QueryParam("de") String device,
+                                  @QueryParam("se") String series,
+                                  @QueryParam("st") Long startDate,
+                                  @QueryParam("ti") String title,
+                                  @QueryParam("so") boolean isAsc) {
+    return filterEvents(contributor, creator, device, series, startDate, title, isAsc);
+  }
+   
+  /** 
+  * returns scheduled events, that pass the filter. filter: an xml definition of the filter.
+  * Tags that are not included will not be filtered. Possible values for order by are
+  * title,creator,series,time-asc,time-desc,contributor,channel,location,device
+  * @param filter
+  *          exact id to search for pattern to search for pattern to search for A short description of the content of
+  *          the lecture begin of the period of valid events end of the period of valid events pattern to search for ID
+  *          of the series which will be filtered ID of the channel that will be filtered pattern to search for pattern
+  *          to search for pattern to search for
+  *          title|creator|series|time-asc|time-desc|contributor|channel|location|device">
+  * @return List of SchedulerEvents as JSON
+  */
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("filter.json") 
+  public Response filterEventsJson(@QueryParam("co") String contributor,
+                                  @QueryParam("cr") String creator,
+                                  @QueryParam("de") String device,
+                                  @QueryParam("se") String series,
+                                  @QueryParam("st") Long startDate,
+                                  @QueryParam("ti") String title,
+                                  @QueryParam("so") boolean isAsc) {
+    return filterEvents(contributor, creator, device, series, startDate, title, isAsc);
+  }
 
+  private Response filterEvents(String contributor, String creator, String device, String series, Long startDate, String title, boolean isAsc) {
+    /*if (filter != null) {
+      try {
+        logger.debug("Filter events with {}",filter);
+        EventListImpl eventList = new EventListImpl(service.getEvents(filter));
+        return Response.ok(eventList).type("").build();
+      } catch (Exception e) { return
+        Response.serverError().build();
+      }
+    } else {
+      return Response.status(Status.BAD_REQUEST).build();
+    }*/
+    return Response.status(Status.BAD_REQUEST).build();
+  }
+   
   /**
    * Looks for events that are conflicting with the given event, because they use the same recorder at the same time.
    * 
@@ -487,22 +512,6 @@ public class SchedulerRestService {
       }
     } else {
       return Response.status(Status.BAD_REQUEST).build();
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("uuid")
-  public Response getUniqueId() {
-    try {
-      String id = UUID.randomUUID().toString();
-      JSONObject j = new JSONObject();
-      j.put("id", id);
-      return Response.ok(j.toString()).build();
-    } catch (Exception e) {
-      logger.warn("could not create new seriesID");
-      return Response.status(Status.SERVICE_UNAVAILABLE).build();
     }
   }
 

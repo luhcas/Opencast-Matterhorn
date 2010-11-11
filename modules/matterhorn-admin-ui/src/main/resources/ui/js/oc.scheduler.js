@@ -284,6 +284,7 @@ ocScheduler.HandleAgentChange = function(elm){
   var agent = elm.target.value;
   $(ocScheduler.inputList).empty();
   ocScheduler.additionalMetadataComponents.agentTimeZone.setValue('');
+  ocUtils.log("Agent changed to: ", agent);
   if(agent){
     $.get('/capture-admin/rest/agents/' + agent + '/capabilities',
       function(doc){
@@ -602,22 +603,18 @@ ocScheduler.RegisterComponents = function(){
       createSeriesFromSearchText: function(){
         var series, seriesComponent, seriesId;
         var creationSucceeded = false;
-        if(Math.uuid){
-          seriesId = Math.uuid();
-        } else { //Client generated uuid could be done, call the series service.
-          $.ajax({async: false, type: 'GET', url: SERIES_URL + '/new/id', success: function(data){ seriesId = data.id; }});
-        }
         if(this.fields.seriesSelect !== ''){
           series = '<series><metadataList><metadata><key>title</key><value>' + this.fields.seriesSelect.val() + '</value></metadata></metadataList></series>';
           seriesComponent = this;
           $.ajax({
             async: false,
             type: 'PUT',
-            url: SERIES_URL + '/' + seriesId,
+            url: SERIES_URL + '/',
             data: { series: series },
-            success: function(){
+            dataType: 'json',
+            success: function(data){
               creationSucceeded = true;
-              seriesComponent.fields.series.val(seriesId);
+              seriesComponent.fields.series.val(data.series.@id);
             }
           });
         }

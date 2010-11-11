@@ -281,6 +281,15 @@ public class SchedulerServiceImpl implements ManagedService{
     }
     
     query.where(wherePred);
+    
+    if(filter.getOrder() != null){
+      if(filter.isOrderAscending()){
+        query.orderBy(builder.asc(rootEvent.get(Event_.getSingularAttribute(filter.getOrder()))));
+      } else {
+        query.orderBy(builder.desc(rootEvent.get(Event_.getSingularAttribute(filter.getOrder()))));
+      }
+    }
+    
     TypedQuery<EventImpl> eventQuery = em.createQuery(query);
     
     if(creatorParam != null){
@@ -503,7 +512,7 @@ public class SchedulerServiceImpl implements ManagedService{
    */
   protected SchedulerFilter getFilterForCaptureAgent(String captureAgentID) {
     SchedulerFilter filter = new SchedulerFilter();
-    filter.withDeviceFilter(captureAgentID).withOrder("time-desc").withStart(new Date(System.currentTimeMillis()));
+    filter.withDeviceFilter(captureAgentID).withOrder("startDate").withStart(new Date(System.currentTimeMillis()));
     return filter;
   }
   

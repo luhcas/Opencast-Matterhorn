@@ -21,6 +21,7 @@ import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -37,8 +38,8 @@ import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
 @XmlType(name="Metadata")
 public class MetadataImpl implements Metadata {
   @Id
-  @Column(name = "ID", length=128)
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  @Column(name = "METADATA_ID", length=36)
   @XmlTransient
   protected long id;
   
