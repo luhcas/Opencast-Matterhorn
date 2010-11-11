@@ -29,6 +29,7 @@ import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowStatistics;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowOperationDefinition;
@@ -668,6 +669,15 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   @Override
   public long countWorkflowInstances(WorkflowState state, String operation) throws WorkflowDatabaseException {
     return dao.countWorkflowInstances(state, operation);
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#getStatistics()
+   */
+  @Override
+  public WorkflowStatistics getStatistics() throws WorkflowDatabaseException {
+    return dao.getStatistics();
   }
   
   /**

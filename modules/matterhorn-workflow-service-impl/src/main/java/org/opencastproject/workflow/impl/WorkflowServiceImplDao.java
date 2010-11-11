@@ -21,6 +21,7 @@ import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowStatistics;
 
 /**
  * Provides persistence services to the workflow service implementation.
@@ -91,5 +92,14 @@ public interface WorkflowServiceImplDao {
    *           if there is a problem retrieving the workflow instances from persistence
    */
   WorkflowSet getWorkflowInstances(WorkflowQuery query) throws WorkflowDatabaseException;
+
+  /**
+   * Returns the workflow statistics.
+   * 
+   * @return workflow statistics
+   * @throws WorkflowDatabaseException
+   *           if there is a problem accessing the workflow instances in persistence
+   */
+  WorkflowStatistics getStatistics() throws WorkflowDatabaseException;
 
 }

@@ -26,6 +26,7 @@ import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowSetImpl;
+import org.opencastproject.workflow.api.WorkflowStatistics;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -360,6 +361,16 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
     } catch (SolrServerException e) {
       throw new WorkflowDatabaseException(e);
     }
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getStatistics()
+   */
+  @Override
+  public WorkflowStatistics getStatistics() throws WorkflowDatabaseException {
+    // TODO: Implement loading of statistics data
+    return new WorkflowStatisticsImpl();
   }
 
   /**

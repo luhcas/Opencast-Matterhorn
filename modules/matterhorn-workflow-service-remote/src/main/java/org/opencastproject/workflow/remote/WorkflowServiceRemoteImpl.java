@@ -22,6 +22,7 @@ import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowStatistics;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -147,6 +148,18 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
       }
     }
 
+  }
+  
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowService#getStatistics()
+   */
+  @Override
+  public WorkflowStatistics getStatistics() throws WorkflowDatabaseException {
+    HttpGet get = new HttpGet("/statistics");
+    HttpResponse response = getResponse(get, HttpStatus.SC_OK);
+    // TODO Implement
+    return null;
   }
 
   /**

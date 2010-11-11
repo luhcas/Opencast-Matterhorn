@@ -40,6 +40,7 @@ import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
+import org.opencastproject.workflow.api.WorkflowStatistics;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 
@@ -320,6 +321,17 @@ public class WorkflowRestService {
     try {
       Long count = service.countWorkflowInstances(state, operation);
       return Response.ok(count).build();
+    } catch (WorkflowDatabaseException e) {
+      throw new WebApplicationException(e);
+    }
+  }
+
+  @GET
+  @Path("/statistics")
+  public Response getStatistics() {
+    try {
+      WorkflowStatistics statistics = service.getStatistics();
+      return Response.ok(statistics).build();
     } catch (WorkflowDatabaseException e) {
       throw new WebApplicationException(e);
     }
