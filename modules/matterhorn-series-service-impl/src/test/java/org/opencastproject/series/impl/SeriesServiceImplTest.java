@@ -21,7 +21,6 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.metadata.dublincore.DublinCoreCatalogService;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
-import org.opencastproject.series.endpoint.SeriesBuilder;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 

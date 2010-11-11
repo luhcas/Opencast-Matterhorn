@@ -13,12 +13,10 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.series.endpoint;
+package org.opencastproject.series.impl;
 
 import org.apache.commons.io.IOUtils;
 import org.opencastproject.series.api.Series;
-import org.opencastproject.series.impl.SeriesImpl;
-import org.opencastproject.series.impl.SeriesMetadataImpl;
 
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -62,7 +60,7 @@ public class SeriesBuilder {
   }
   
   public SeriesImpl parseSeriesImpl(String in) throws Exception {
-    return parseSeriesImpl(IOUtils.toInputStream(in, "UTF8"));
+    return parseSeriesImpl(IOUtils.toInputStream(in, "UTF-8"));
   }
   
   public SeriesImpl parseSeriesImpl(InputStream in) throws Exception {
@@ -73,7 +71,7 @@ public class SeriesBuilder {
       
   
   public SeriesMetadataImpl parseSeriesMetadataImpl(String in) throws Exception {
-    return parseSeriesMetadataImpl(IOUtils.toInputStream(in, "UTF8"));
+    return parseSeriesMetadataImpl(IOUtils.toInputStream(in, "UTF-8"));
   }
   
   public SeriesMetadataImpl parseSeriesMetadataImpl(InputStream in) throws Exception {

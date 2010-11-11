@@ -17,8 +17,8 @@ package org.opencastproject.series.impl;
 
 import org.opencastproject.series.api.Series;
 
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;

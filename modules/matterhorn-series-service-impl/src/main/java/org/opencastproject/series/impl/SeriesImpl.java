@@ -22,10 +22,6 @@ import org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl;
 import org.opencastproject.metadata.dublincore.DublinCoreValue;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
-import org.opencastproject.series.endpoint.SeriesBuilder;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -69,8 +65,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "series")
 @XmlAccessorType(XmlAccessType.NONE)
 public class SeriesImpl implements Series {
-  private static final Logger logger = LoggerFactory.getLogger(SeriesImpl.class);
-
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "SERIES_ID", length = 128)
@@ -97,14 +91,17 @@ public class SeriesImpl implements Series {
   public SeriesImpl() {}
 
   public SeriesImpl(String seriesXml) {
+    SeriesImpl series = null;
     try {
-      SeriesImpl series = SeriesImpl.valueOf(seriesXml);
-      setSeriesId(series.getSeriesId());
-      setMetadata(series.getMetadata());
-      setDescription(series.getDescription());
+      series = SeriesImpl.valueOf(seriesXml);
     } catch (Exception e) {
-      logger.debug("Unable to load series: {}", e);
+      throw new IllegalArgumentException("Invalid xml provided.  Unable to build a series object.");
     }
+    if(series.getSeriesId() != null) {
+      setSeriesId(series.getSeriesId());
+    }
+    setMetadata(series.getMetadata());
+    setDescription(series.getDescription());
   }
 
   /**
@@ -198,9 +195,16 @@ public class SeriesImpl implements Series {
       this.metadata = null;
       return;
     }
+    if(this.metadata == null) {
+      this.metadata = new LinkedList<SeriesMetadataImpl>();
+    } else {
+      this.metadata.clear();
+    }
     for(SeriesMetadata m : metadata) {
       m.setSeries(this);
-      this.getMetadata().add((SeriesMetadataImpl) m);
+//      This does not work, because getMetadata() produces a new list
+//      this.getMetadata().add((SeriesMetadataImpl) m);
+      this.metadata.add(new SeriesMetadataImpl(m.getSeries(), m.getKey(), m.getValue()));
     }
     dublinCore = null;
   }

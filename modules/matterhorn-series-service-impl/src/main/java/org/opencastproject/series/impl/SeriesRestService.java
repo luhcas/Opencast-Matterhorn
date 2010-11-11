@@ -13,16 +13,13 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.series.endpoint;
+package org.opencastproject.series.impl;
 
 import org.opencastproject.metadata.dublincore.DublinCoreCatalog;
 import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.api.SeriesService;
-import org.opencastproject.series.impl.SeriesImpl;
-import org.opencastproject.series.impl.SeriesListImpl;
-import org.opencastproject.series.impl.SeriesMetadataImpl;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
@@ -72,15 +69,6 @@ public class SeriesRestService {
    */
   public void setService(SeriesService service) {
     this.service = service;
-  }
-
-  /**
-   * Method to unset the service this REST endpoint uses
-   * 
-   * @param service
-   */
-  public void unsetService(SeriesService service) {
-    this.service = null;
   }
 
   /**
@@ -209,18 +197,12 @@ public class SeriesRestService {
    */
   @PUT
   @Path("/")
-  public Response addSeries(@FormParam("series") String s) {
-    logger.info("Series XML: {}", s);
-    SeriesImpl series = null;
-    try {
-      series = SeriesBuilder.getInstance().parseSeriesImpl(s);
-    } catch ( Exception e ){
-      logger.error("Failed to parse series: {}", e);
-    }
+  public Response addSeries(@FormParam("series") SeriesImpl series) {
     if (series == null) {
       logger.error("series that should be added is null");
       return Response.status(Status.BAD_REQUEST).build();
     }
+    logger.info("Series metadata = {}", series.getMetadata());
     try {
       service.addSeries(series);
       logger.debug("Added series {} ", series.getSeriesId());
@@ -342,8 +324,8 @@ public class SeriesRestService {
             "addSeries",
             RestEndpoint.Method.PUT,
             "/",
-            "Accepts an XML or JSON form parameter representing a new Series and stores it in the database. " +
-            "Returns HTTP Status 201 (Created) if successful. 400 (Bad Request) if the no seriesId is supplied. " +
+            "Accepts an XML form parameter representing a new Series and stores it in the database. " +
+            "Returns HTTP Status 201 (Created) if successful. 400 (Bad Request) if the no series is supplied. " +
             "500 (Internal Server Error) if there was an error creating the series.");
     addEndpoint.addStatus(org.opencastproject.util.doc.Status.CREATED("Series was created successfully."));
     addEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("No seriesId was supplied."));
@@ -358,7 +340,8 @@ public class SeriesRestService {
             "updateSeries",
             RestEndpoint.Method.POST,
             "/{seriesId}",
-            "Accepts an XML or JSON form parameter representing the series to be updated. The seriesId has to be stored in the database already.");
+            "Accepts an XML or JSON form parameter representing the series to be updated. The series has to be stored " +
+            "in the database already.");
     updateEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Series has be successfully updated."));
     updateEndpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST("No seriesId was supplied."));
     updateEndpoint.addStatus(org.opencastproject.util.doc.Status

@@ -145,7 +145,6 @@
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Export-Package>
-              org.opencastproject.series.endpoint;version=${project.version},
               org.opencastproject.series.impl;version=${project.version}
             </Export-Package>
             <Import-Package>

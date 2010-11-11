@@ -18,7 +18,6 @@ package org.opencastproject.series.impl;
 
 import org.opencastproject.series.api.Series;
 import org.opencastproject.series.api.SeriesMetadata;
-import org.opencastproject.series.endpoint.SeriesBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
