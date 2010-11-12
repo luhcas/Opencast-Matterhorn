@@ -17,6 +17,8 @@ package org.opencastproject.workflow.handler;
 
 import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
 
+import org.osgi.service.component.ComponentContext;
+
 /**
  * Workflow operation handler that signifies a workflow that is currently in the process of ingesting a recording.
  * <p>
@@ -28,9 +30,16 @@ public class IngestWorkflowOperationHandler extends AbstractResumableWorkflowOpe
   public static final String UI_RESOURCE_PATH = "/ui/operation/ingest/index.html";
 
   /**
-   * Creates a new schedule workflow operation handler.
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler#activate(org.osgi.service.component.ComponentContext)
    */
-  public IngestWorkflowOperationHandler() {
+  @Override
+  public void activate(ComponentContext componentContext) {
+    super.activate(componentContext);
+
+    // Set the operation's action link title
+    setHoldActionTitle("Monitor ingest");
 
     // Add the ui piece that displays the ingest information
     registerHoldStateUserInterface(UI_RESOURCE_PATH);

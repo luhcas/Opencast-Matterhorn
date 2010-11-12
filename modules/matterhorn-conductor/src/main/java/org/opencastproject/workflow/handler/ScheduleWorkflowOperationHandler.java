@@ -17,6 +17,8 @@ package org.opencastproject.workflow.handler;
 
 import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
 
+import org.osgi.service.component.ComponentContext;
+
 /**
  * Workflow operation handler that signifies a workflow that is currently scheduled and is waiting for the capture
  * process to happen.
@@ -42,10 +44,16 @@ public class ScheduleWorkflowOperationHandler extends AbstractResumableWorkflowO
   public static final String UI_RESOURCE_PATH = "/ui/operation/schedule/index.html";
 
   /**
-   * Creates a new schedule workflow operation handler.
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler#activate(org.osgi.service.component.ComponentContext)
    */
-  public ScheduleWorkflowOperationHandler() {
-    setHoldActionTitle("Edit schedule");
+  @Override
+  public void activate(ComponentContext componentContext) {
+    super.activate(componentContext);
+
+    // Set the operation's action link title
+    setHoldActionTitle("View schedule");
     
     // Register the supported configuration options
     addConfigurationOption(OPT_SCHEDULE_START, "Schedule start date");

@@ -17,6 +17,8 @@ package org.opencastproject.workflow.handler;
 
 import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
 
+import org.osgi.service.component.ComponentContext;
+
 /**
  * Workflow operation handler that signifies a workflow that is currently in recording state and is waiting for the
  * capture process to finish.
@@ -36,9 +38,16 @@ public class CaptureWorkflowOperationHandler extends AbstractResumableWorkflowOp
   public static final String UI_RESOURCE_PATH = "/ui/operation/capture/index.html";
 
   /**
-   * Creates a new capture workflow operation handler.
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler#activate(org.osgi.service.component.ComponentContext)
    */
-  public CaptureWorkflowOperationHandler() {
+  @Override
+  public void activate(ComponentContext componentContext) {
+    super.activate(componentContext);
+
+    // Set the operation's action link title
+    setHoldActionTitle("Monitor capture");
 
     // Register the supported configuration options
     addConfigurationOption(OPT_CAPTURE_AGENT, "Schedule start date");
@@ -46,7 +55,6 @@ public class CaptureWorkflowOperationHandler extends AbstractResumableWorkflowOp
 
     // Add the ui piece that displays the capture information
     registerHoldStateUserInterface(UI_RESOURCE_PATH);
-
   }
 
 }
