@@ -225,6 +225,10 @@ public class HoldStateTest {
 
   class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
     @Override
+    public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+    }
+    @Override
     public SortedMap<String, String> getConfigurationOptions() {
       return new TreeMap<String, String>();
     }
