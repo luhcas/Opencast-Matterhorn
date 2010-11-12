@@ -25,7 +25,7 @@ import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandle
 public class IngestWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
 
   /** Path to the hold state ui */
-  public static final String UI_RESOURCE_PATH = "/workflow/ui/ingest/hold/index.html";
+  public static final String UI_RESOURCE_PATH = "/ui/operation/ingest/index.html";
 
   /**
    * Creates a new schedule workflow operation handler.

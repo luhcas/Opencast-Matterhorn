@@ -39,12 +39,13 @@ public class ScheduleWorkflowOperationHandler extends AbstractResumableWorkflowO
   public static final String OPT_SCHEDULE_WORKFLOW = "schedule.workflow";
 
   /** Path to the hold state ui  */
-  public static final String UI_RESOURCE_PATH = "/workflow/ui/schedule/hold/index.html";
+  public static final String UI_RESOURCE_PATH = "/ui/operation/schedule/index.html";
 
   /**
    * Creates a new schedule workflow operation handler.
    */
   public ScheduleWorkflowOperationHandler() {
+    setHoldActionTitle("Edit schedule");
     
     // Register the supported configuration options
     addConfigurationOption(OPT_SCHEDULE_START, "Schedule start date");

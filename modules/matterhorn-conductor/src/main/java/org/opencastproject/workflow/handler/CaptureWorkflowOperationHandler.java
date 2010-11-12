@@ -33,7 +33,7 @@ public class CaptureWorkflowOperationHandler extends AbstractResumableWorkflowOp
   public static final String OPT_CAPTURE_MONITOR = "capture.monitor";
 
   /** Path to the hold state ui */
-  public static final String UI_RESOURCE_PATH = "/workflow/ui/capture/hold/index.html";
+  public static final String UI_RESOURCE_PATH = "/ui/operation/capture/index.html";
 
   /**
    * Creates a new capture workflow operation handler.
