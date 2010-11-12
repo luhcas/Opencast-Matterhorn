@@ -370,7 +370,7 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
   @Override
   public WorkflowStatistics getStatistics() throws WorkflowDatabaseException {
     // TODO: Implement loading of statistics data
-    return new WorkflowStatisticsImpl();
+    return new WorkflowStatistics();
   }
 
   /**

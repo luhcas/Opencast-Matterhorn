@@ -19,6 +19,7 @@ import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
+import org.opencastproject.workflow.api.WorkflowService;
 //import org.opencastproject.capture.admin.api.RecordingStateUpdate;
 
 import org.osgi.service.cm.ConfigurationException;
@@ -55,26 +56,41 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   protected PersistenceProvider persistenceProvider;
 
   /** The persistence properties */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "rawtypes" })
   protected Map persistenceProperties;
 
   /** The factory used to generate the entity manager */
   protected EntityManagerFactory emf = null;
 
+  /** The workflow service */
+  protected WorkflowService workflowService;
+
   private HashMap<String, Agent> agents;
   private HashMap<String, Recording> recordings;
 
   /**
-   * @param persistenceProvider the persistenceProvider to set
+   * @param persistenceProvider
+   *          the persistenceProvider to set
    */
   public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
     this.persistenceProvider = persistenceProvider;
   }
 
   /**
-   * @param persistenceProperties the persistenceProperties to set
+   * Sets the workflow service
+   * 
+   * @param workflowService
+   *          the workflowService to set
    */
-  @SuppressWarnings("unchecked")
+  public void setWorkflowService(WorkflowService workflowService) {
+    this.workflowService = workflowService;
+  }
+
+  /**
+   * @param persistenceProperties
+   *          the persistenceProperties to set
+   */
+  @SuppressWarnings({ "rawtypes" })
   public void setPersistenceProperties(Map persistenceProperties) {
     this.persistenceProperties = persistenceProperties;
   }
@@ -87,9 +103,10 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   @SuppressWarnings("unchecked")
   public void activate(ComponentContext cc) {
-    emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl", persistenceProperties);
+    emf = persistenceProvider.createEntityManagerFactory(
+            "org.opencastproject.capture.admin.impl.CaptureAgentStateServiceImpl", persistenceProperties);
 
-    //Pull all the existing agents into the in-memory structure
+    // Pull all the existing agents into the in-memory structure
     EntityManager em = emf.createEntityManager();
     List<AgentImpl> dbResults = null;
     Query q = em.createNamedQuery("AgentImpl.getAll");
@@ -113,11 +130,12 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getAgentState(java.lang.String)
    */
   public Agent getAgentState(String agentName) {
     Agent req = agents.get(agentName);
-    //If that agent doesn't exist, return an unknown agent, else return the known agent
+    // If that agent doesn't exist, return an unknown agent, else return the known agent
     if (req == null) {
       logger.debug("Agent {} does not exist in the system.", agentName);
     } else {
@@ -128,7 +146,9 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#setAgentState(java.lang.String, java.lang.String)
+   * 
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#setAgentState(java.lang.String,
+   *      java.lang.String)
    */
   public int setAgentState(String agentName, String state) {
 
@@ -140,16 +160,15 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       logger.debug("Unable to set agent state, agent name is blank or null.");
       return BAD_PARAMETER;
     }
- 
 
     Agent req = agents.get(agentName);
-    //if the agent is known set the state
+    // if the agent is known set the state
     if (req != null) {
       logger.debug("Setting Agent {} to state {}.", agentName, state);
       req.setState(state);
       agents.put(agentName, req);
       updateAgentInDatabase(req);
-    } else {     
+    } else {
       // If the agent doesn't exists, but the name is not null nor empty, create a new one.
       logger.debug("Creating Agent {} with state {}.", agentName, state);
       Agent a = new AgentImpl(agentName, state, "", new Properties());
@@ -159,10 +178,10 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
     return OK;
   }
-  
+
   public boolean setAgentUrl(String agentName, String agentUrl) {
     Agent req = agents.get(agentName);
-    if(req != null) {
+    if (req != null) {
       req.setUrl(agentUrl);
       agents.put(agentName, req);
       updateAgentInDatabase(req);
@@ -174,6 +193,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#removeAgent(java.lang.String)
    */
   public int removeAgent(String agentName) {
@@ -188,6 +208,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getKnownAgents()
    */
   public Map<String, Agent> getKnownAgents() {
@@ -196,12 +217,13 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getAgentCapabilities(java.lang.String)
    */
   public Properties getAgentCapabilities(String agentName) {
 
     Agent req = agents.get(agentName);
-    //if the agent is known set the state
+    // if the agent is known set the state
     if (req != null) {
       Properties temp = agents.get(agentName).getCapabilities();
       return temp;
@@ -212,6 +234,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#setAgentCapabilities
    */
   public int setAgentCapabilities(String agentName, Properties capabilities) {
@@ -238,7 +261,9 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   /**
    * Updates or adds an agent to the database.
-   * @param a The Agent you wish to modify or add in the database.
+   * 
+   * @param a
+   *          The Agent you wish to modify or add in the database.
    */
   private synchronized void updateAgentInDatabase(Agent a) {
     EntityManager em = emf.createEntityManager();
@@ -265,7 +290,9 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   /**
    * Removes an agent from the database.
-   * @param agentName The name of the agent you wish to remove.
+   * 
+   * @param agentName
+   *          The name of the agent you wish to remove.
    */
   private synchronized void deleteAgentFromDatabase(String agentName) {
     EntityManager em = emf.createEntityManager();
@@ -287,22 +314,25 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getRecordingState(java.lang.String)
    */
   public Recording getRecordingState(String id) {
     Recording req = recordings.get(id);
-    //If that recording doesn't exist, return null
+    // If that recording doesn't exist, return null
     if (req == null)
       logger.debug("Recording {} does not exist in the system.", id);
     else
       logger.debug("Recording {} found, returning state.", id);
-    
+
     return req;
   }
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#setRecordingState(java.lang.String, java.lang.String)
+   * 
+   * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#setRecordingState(java.lang.String,
+   *      java.lang.String)
    */
   public boolean setRecordingState(String id, String state) {
     Recording req = recordings.get(id);
@@ -327,6 +357,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#removeRecording(java.lang.String)
    */
   public boolean removeRecording(String id) {
@@ -340,12 +371,13 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#getKnownRecordings()
    */
-  public Map<String,Recording> getKnownRecordings() {
+  public Map<String, Recording> getKnownRecordings() {
     return recordings;
   }
-  
+
   public List<String> getKnownRecordingsIds() {
     LinkedList<String> ids = new LinkedList<String>();
     for (Entry<String, Recording> e : recordings.entrySet()) {
@@ -354,8 +386,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     return ids;
   }
 
-  @SuppressWarnings("unchecked")
-  public void updated(Dictionary props) throws ConfigurationException {
+  public void updated(@SuppressWarnings("rawtypes") Dictionary props) throws ConfigurationException {
 
   }
 }

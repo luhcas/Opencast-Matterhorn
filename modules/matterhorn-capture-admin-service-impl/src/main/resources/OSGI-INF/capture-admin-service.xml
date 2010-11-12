@@ -12,4 +12,6 @@
     cardinality="1..1" policy="static" bind="setPersistenceProvider" />
   <reference name="props" interface="java.util.Map"
     cardinality="1..1" policy="static" target="(type=persistence)" bind="setPersistenceProperties" />
+  <reference name="workflow" interface="org.opencastproject.workflow.api.WorkflowService"
+    cardinality="1..1" policy="static" bind="setWorkflowService" />
 </scr:component>

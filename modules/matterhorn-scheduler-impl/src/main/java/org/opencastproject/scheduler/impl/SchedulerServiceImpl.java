@@ -16,9 +16,10 @@
 package org.opencastproject.scheduler.impl;
 
 import org.opencastproject.scheduler.api.Event;
-import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.IncompleteDataException;
+import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.series.api.SeriesService;
+import org.opencastproject.workflow.api.WorkflowService;
 
 import net.fortuna.ical4j.model.ValidationException;
 
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -40,12 +42,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import java.text.ParseException;
-
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import javax.persistence.EntityExistsException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -58,41 +58,55 @@ import javax.persistence.spi.PersistenceProvider;
 
 /**
  * An implementation of the Scheduler service based on JPA. This version knows about series too.
- *
+ * 
  */
-public class SchedulerServiceImpl implements ManagedService{
-  
+public class SchedulerServiceImpl implements ManagedService {
+
+  /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImpl.class);
 
+  /** The JPA persistence provider */
   protected PersistenceProvider persistenceProvider;
+
+  /** The JPA persistence properties */
   protected Map<String, Object> persistenceProperties;
+
+  /** JPA entity manager factory */
   protected EntityManagerFactory emf = null;
-    
-  /**
-   * The component context that is passed when activate is called
-   */
-  protected ComponentContext componentContext;  
-  
+
+  /** The component context that is passed when activate is called */
+  protected ComponentContext componentContext;
+
+  /** The dublin core generator */
   protected DublinCoreGenerator dcGenerator;
+
+  /** The metadata generator to feed the capture agents */
   protected CaptureAgentMetadataGenerator caGenerator;
+
+  /** The series service */
   protected SeriesService seriesService;
-  
+
+  /** The workflow service */
+  protected WorkflowService workflowService;
+
+  // FIXME: The calendar caching should be removed, see MH-5823.
   private long updated = System.currentTimeMillis();
   private long updatedCalendar = 0;
   private long updatedAllEvents = 0;
-  
   private Hashtable<String, String> calendars;
   private List<Event> cachedEvents;
-  
-  /** 
+
+  /**
    * Properties that are updated by ManagedService updated method
    */
   @SuppressWarnings("rawtypes")
   protected Dictionary properties;
-  
+
   /**
    * This method will be called, when the bundle gets loaded from OSGI
-   * @param componentContext The ComponetnContext of the OSGI bundle
+   * 
+   * @param componentContext
+   *          The ComponetnContext of the OSGI bundle
    */
   public void activate(ComponentContext componentContext) {
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.scheduler.impl", persistenceProperties);
@@ -102,11 +116,12 @@ public class SchedulerServiceImpl implements ManagedService{
       return;
     }
     this.componentContext = componentContext;
-    URL dcMappingURL = componentContext.getBundleContext().getBundle().getResource("config/dublincoremapping.properties");
-    logger.debug("Using Dublin Core Mapping from {}.",dcMappingURL);
+    URL dcMappingURL = componentContext.getBundleContext().getBundle()
+            .getResource("config/dublincoremapping.properties");
+    logger.debug("Using Dublin Core Mapping from {}.", dcMappingURL);
     InputStream is = null;
     try {
-      if (dcMappingURL != null)  {
+      if (dcMappingURL != null) {
         URLConnection con = dcMappingURL.openConnection();
         is = con.getInputStream();
         dcGenerator = new DublinCoreGenerator(is);
@@ -116,8 +131,9 @@ public class SchedulerServiceImpl implements ManagedService{
     } finally {
       IOUtils.closeQuietly(is);
     }
-    
-    URL caMappingURL = componentContext.getBundleContext().getBundle().getResource("config/captureagentmetadatamapping.properties");
+
+    URL caMappingURL = componentContext.getBundleContext().getBundle()
+            .getResource("config/captureagentmetadatamapping.properties");
     logger.debug("Using Capture Agent Metadata Mapping from {}.", caMappingURL);
     try {
       if (caMappingURL != null) {
@@ -130,8 +146,8 @@ public class SchedulerServiceImpl implements ManagedService{
     } finally {
       IOUtils.closeQuietly(is);
     }
-  } 
-  
+  }
+
   public Map<String, Object> getPersistenceProperties() {
     return persistenceProperties;
   }
@@ -139,26 +155,30 @@ public class SchedulerServiceImpl implements ManagedService{
   public void setPersistenceProperties(Map<String, Object> persistenceProperties) {
     this.persistenceProperties = persistenceProperties;
   }
-  
+
   public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
     this.persistenceProvider = persistenceProvider;
   }
-  
+
   public PersistenceProvider getPersistenceProvider() {
     return persistenceProvider;
   }
- 
+
   /**
    * Sets a DublinCoreGenerator
-   * @param dcGenerator The DublinCoreGenerator that should be used
+   * 
+   * @param dcGenerator
+   *          The DublinCoreGenerator that should be used
    */
   public void setDublinCoreGenerator(DublinCoreGenerator dcGenerator) {
     this.dcGenerator = dcGenerator;
   }
 
   /**
-   * Sets the CaptureAgentMetadataGenerator 
-   * @param caGenerator The CaptureAgentMetadataGenerator that should be used
+   * Sets the CaptureAgentMetadataGenerator
+   * 
+   * @param caGenerator
+   *          The CaptureAgentMetadataGenerator that should be used
    */
   public void setCaptureAgentMetadataGenerator(CaptureAgentMetadataGenerator caGenerator) {
     this.caGenerator = caGenerator;
@@ -166,12 +186,14 @@ public class SchedulerServiceImpl implements ManagedService{
 
   /**
    * Persist an event
-   * @param Event e
+   * 
+   * @param Event
+   *          e
    * @return The event that has been persisted
    */
   public Event addEvent(Event e) throws EntityExistsException {
     EntityManager em = emf.createEntityManager();
-    EventImpl event = (EventImpl)e;
+    EventImpl event = (EventImpl) e;
     EntityTransaction tx = em.getTransaction();
     tx.begin();
     em.persist(event);
@@ -180,27 +202,28 @@ public class SchedulerServiceImpl implements ManagedService{
     updated = System.currentTimeMillis();
     return event;
   }
-  
+
   /**
    * Persist a recurring event
-   * @param RecurringEvent e
+   * 
+   * @param RecurringEvent
+   *          e
    * @return The recurring event that has been persisted
    */
   public void addRecurringEvent(Event recurrence) throws ParseException, IncompleteDataException, EntityExistsException {
     EntityManager em = emf.createEntityManager();
     List<Event> events = recurrence.createEventsFromRecurrence();
-    for(Event e : events) {
+    for (Event e : events) {
       logger.debug("Adding recurring event {}", e.getEventId());
       EntityTransaction tx = em.getTransaction();
       tx.begin();
-      em.persist((EventImpl)e);
+      em.persist((EventImpl) e);
       tx.commit();
     }
     em.close();
     updated = System.currentTimeMillis();
   }
 
-  
   /**
    * @param eventId
    * @return An event that matches eventId
@@ -218,18 +241,19 @@ public class SchedulerServiceImpl implements ManagedService{
     } finally {
       em.close();
     }
-    if (e == null){
+    if (e == null) {
       logger.warn("No event found for {}", eventId);
     }
     return e;
   }
-  
+
   /**
    * @param filter
    * @return List of events that match the supplied filter, or all events if no filter is supplied
    */
-  public List<Event> getEvents (SchedulerFilter filter) {
-    if (updatedCalendar < updated) calendars = new Hashtable<String, String>(); // reset all calendars, if data has been changed 
+  public List<Event> getEvents(SchedulerFilter filter) {
+    if (updatedCalendar < updated)
+      calendars = new Hashtable<String, String>(); // reset all calendars, if data has been changed
     if (filter == null) {
       logger.debug("returning all events");
       return getAllEvents();
@@ -241,89 +265,94 @@ public class SchedulerServiceImpl implements ManagedService{
     Root<EventImpl> rootEvent = query.from(EventImpl.class);
     EntityType<EventImpl> Event_ = rootEvent.getModel();
     Predicate wherePred = builder.conjunction();
-    
+
     ParameterExpression<String> creatorParam = null;
-    if(filter.getCreatorFilter() != null && !filter.getCreatorFilter().isEmpty()){
+    if (filter.getCreatorFilter() != null && !filter.getCreatorFilter().isEmpty()) {
       creatorParam = builder.parameter(String.class);
-      wherePred = builder.and(wherePred, builder.like(rootEvent.get(Event_.getSingularAttribute("creator", String.class)), creatorParam));
+      wherePred = builder.and(wherePred,
+              builder.like(rootEvent.get(Event_.getSingularAttribute("creator", String.class)), creatorParam));
     }
-    
+
     ParameterExpression<String> deviceParam = null;
-    if(filter.getDeviceFilter() != null && !filter.getDeviceFilter().isEmpty()){
+    if (filter.getDeviceFilter() != null && !filter.getDeviceFilter().isEmpty()) {
       deviceParam = builder.parameter(String.class);
-      wherePred = builder.and(wherePred, builder.like(rootEvent.get(Event_.getSingularAttribute("device", String.class)), deviceParam));
+      wherePred = builder.and(wherePred,
+              builder.like(rootEvent.get(Event_.getSingularAttribute("device", String.class)), deviceParam));
     }
-    
+
     ParameterExpression<String> titleParam = null;
-    if(filter.getTitleFilter() != null && !filter.getTitleFilter().isEmpty()){
+    if (filter.getTitleFilter() != null && !filter.getTitleFilter().isEmpty()) {
       titleParam = builder.parameter(String.class);
-      wherePred = builder.and(wherePred, builder.like(rootEvent.get(Event_.getSingularAttribute("title", String.class)), titleParam));
+      wherePred = builder.and(wherePred,
+              builder.like(rootEvent.get(Event_.getSingularAttribute("title", String.class)), titleParam));
     }
-    
+
     ParameterExpression<String> seriesParam = null;
-    if(filter.getSeriesFilter() != null && !filter.getSeriesFilter().isEmpty()){
+    if (filter.getSeriesFilter() != null && !filter.getSeriesFilter().isEmpty()) {
       seriesParam = builder.parameter(String.class);
-      wherePred = builder.and(wherePred, builder.like(rootEvent.get(Event_.getSingularAttribute("series", String.class)), seriesParam));
+      wherePred = builder.and(wherePred,
+              builder.like(rootEvent.get(Event_.getSingularAttribute("series", String.class)), seriesParam));
     }
-    
+
     ParameterExpression<Date> startParam = null;
     ParameterExpression<Date> stopParam = null;
-    if(filter.getStart() != null && filter.getStop() != null) { // Events with dates between start and stop
+    if (filter.getStart() != null && filter.getStop() != null) { // Events with dates between start and stop
       startParam = builder.parameter(Date.class);
       stopParam = builder.parameter(Date.class);
-      wherePred = builder.between(rootEvent.get(Event_.getSingularAttribute("startDate", Date.class)), startParam, stopParam);
-    } else if( filter.getStart() != null && filter.getStop() == null) { //All events with dates after start
+      wherePred = builder.between(rootEvent.get(Event_.getSingularAttribute("startDate", Date.class)), startParam,
+              stopParam);
+    } else if (filter.getStart() != null && filter.getStop() == null) { // All events with dates after start
       startParam = builder.parameter(Date.class);
       wherePred = builder.greaterThan(rootEvent.get(Event_.getSingularAttribute("startDate", Date.class)), startParam);
-    } else if( filter.getStart() != null && filter.getStop() == null) { //All events with dates after start
+    } else if (filter.getStart() != null && filter.getStop() == null) { // All events with dates after start
       stopParam = builder.parameter(Date.class);
       wherePred = builder.lessThan(rootEvent.get(Event_.getSingularAttribute("endDate", Date.class)), stopParam);
     }
-    
+
     query.where(wherePred);
-    
-    if(filter.getOrder() != null){
-      if(filter.isOrderAscending()){
+
+    if (filter.getOrder() != null) {
+      if (filter.isOrderAscending()) {
         query.orderBy(builder.asc(rootEvent.get(Event_.getSingularAttribute(filter.getOrder()))));
       } else {
         query.orderBy(builder.desc(rootEvent.get(Event_.getSingularAttribute(filter.getOrder()))));
       }
     }
-    
+
     TypedQuery<EventImpl> eventQuery = em.createQuery(query);
-    
-    if(creatorParam != null){
+
+    if (creatorParam != null) {
       eventQuery.setParameter(creatorParam, filter.getCreatorFilter());
     }
-    if(deviceParam != null){
+    if (deviceParam != null) {
       eventQuery.setParameter(deviceParam, filter.getDeviceFilter());
     }
-    if(titleParam != null){
+    if (titleParam != null) {
       eventQuery.setParameter(titleParam, filter.getTitleFilter());
     }
-    if(seriesParam != null){
+    if (seriesParam != null) {
       eventQuery.setParameter(seriesParam, filter.getSeriesFilter());
     }
-    if(startParam != null){
+    if (startParam != null) {
       eventQuery.setParameter(startParam, filter.getStart());
     }
-    if(stopParam != null){
+    if (stopParam != null) {
       eventQuery.setParameter(stopParam, filter.getStop());
     }
-    
+
     List<EventImpl> results = eventQuery.getResultList();
     List<Event> returnList = new LinkedList<Event>();
-    for(EventImpl event : results){
-      returnList.add((Event)event);
+    for (EventImpl event : results) {
+      returnList.add((Event) event);
     }
     return returnList;
-  }  
-  
+  }
+
   /**
    * @return A list of all events
    */
   @SuppressWarnings("unchecked")
-  public List<Event> getAllEvents () {
+  public List<Event> getAllEvents() {
     if (updatedAllEvents > updated && cachedEvents != null) {
       return cachedEvents;
     }
@@ -339,7 +368,7 @@ public class SchedulerServiceImpl implements ManagedService{
     updatedAllEvents = System.currentTimeMillis();
     return cachedEvents;
   }
-  
+
   /**
    * @return List of all events that start after the current time.
    */
@@ -349,7 +378,7 @@ public class SchedulerServiceImpl implements ManagedService{
     List<Event> events = getEvents(upcoming);
     return events;
   }
-  
+
   /**
    * @param list
    * @return The list of events in a list of events that occur after the current time.
@@ -358,13 +387,15 @@ public class SchedulerServiceImpl implements ManagedService{
     Date now = new Date(System.currentTimeMillis());
     for (Event e : list) {
       Date enddate = e.getEndDate();
-      if (!(enddate == null) && ! enddate.after(now)) list.remove(e);
+      if (!(enddate == null) && !enddate.after(now))
+        list.remove(e);
     }
     return list;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.scheduler.impl.SchedulerServiceImpl#removeEvent(java.lang.String)
    */
   public boolean removeEvent(Long eventID) {
@@ -374,56 +405,59 @@ public class SchedulerServiceImpl implements ManagedService{
     try {
       em.getTransaction().begin();
       event = em.find(EventImpl.class, eventID);
-      if (event == null) return false; // Event not in database
+      if (event == null)
+        return false; // Event not in database
       em.remove(event);
-      
+
       em.getTransaction().commit();
     } finally {
       em.close();
       updated = System.currentTimeMillis();
     }
-    return true; 
+    return true;
   }
-  
+
   /**
    * @param e
    * @return True if the event was updated
    */
   public boolean updateEvent(Event e) {
-    
+
     EntityManager em = emf.createEntityManager();
     try {
       em.getTransaction().begin();
-      Event storedEvent =  getEvent(e.getEventId());
+      Event storedEvent = getEvent(e.getEventId());
       logger.debug("Found stored event. {} -", storedEvent);
-      if (storedEvent == null) return false; //nothing found to update
+      if (storedEvent == null)
+        return false; // nothing found to update
       storedEvent.update(e);
       em.merge(storedEvent);
       em.getTransaction().commit();
     } catch (Exception e1) {
-      logger.warn("Could not update event {}. Reason: {}",e,e1.getMessage());
+      logger.warn("Could not update event {}. Reason: {}", e, e1.getMessage());
       return false;
     } finally {
       em.close();
       updated = System.currentTimeMillis();
     }
     return true;
-  }  
-  
+  }
+
   /**
    * @param e
    * @return A list of events that conflict with the start, or end dates of provided event.
    */
-  public List<Event> findConflictingEvents (Event e) {
+  public List<Event> findConflictingEvents(Event e) {
     return null;
   }
-  
+
   public void destroy() {
     emf.close();
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
   @SuppressWarnings("rawtypes")
@@ -431,83 +465,100 @@ public class SchedulerServiceImpl implements ManagedService{
   public void updated(Dictionary properties) throws ConfigurationException {
     this.properties = properties;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.scheduler.api.SchedulerService#getCalendarForCaptureAgent(java.lang.String)
    */
   public String getCalendarForCaptureAgent(String captureAgentID) {
     if (updatedCalendar > updated && calendars.containsKey(captureAgentID) && calendars.get(captureAgentID) != null) {
       logger.debug("Using cached calendar for {}", captureAgentID);
       return calendars.get(captureAgentID);
-    } 
-    if (updatedCalendar < updated) calendars = new Hashtable<String, String>(); // reset all calendars, if data has been changed 
-    
-    SchedulerFilter filter = getFilterForCaptureAgent (captureAgentID); 
+    }
+    if (updatedCalendar < updated)
+      calendars = new Hashtable<String, String>(); // reset all calendars, if data has been changed
+
+    SchedulerFilter filter = getFilterForCaptureAgent(captureAgentID);
     CalendarGenerator cal = new CalendarGenerator(dcGenerator, caGenerator, seriesService);
     List<Event> events = getEvents(filter);
     logger.debug("Events with CA '{}': {}", captureAgentID, events);
     for (Event event : events) {
       cal.addEvent(event);
     }
-    
+
     try {
       cal.getCalendar().validate();
     } catch (ValidationException e1) {
       logger.warn("Could not validate Calendar: {}", e1.getMessage());
     }
-    
+
     String result = cal.getCalendar().toString(); // CalendarOutputter performance sucks (jmh)
-    
+
     updatedCalendar = System.currentTimeMillis();
     calendars.put(captureAgentID, result);
     return result;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.scheduler.api.SchedulerService#getDublinCoreMetadata(java.lang.String)
    */
-  public String getDublinCoreMetadata (Long eventID) {
+  public String getDublinCoreMetadata(Long eventID) {
     Event event = getEvent(eventID);
-    if (dcGenerator == null){
+    if (dcGenerator == null) {
       logger.error("Dublin Core generator not initialized");
       return null;
     }
     return dcGenerator.generateAsString(event);
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.scheduler.api.SchedulerService#getDublinCoreMetadata(java.lang.String)
    */
-  public String getCaptureAgentMetadata (Long eventID) {
+  public String getCaptureAgentMetadata(Long eventID) {
     Event event = getEvent(eventID);
-    if (caGenerator == null){
+    if (caGenerator == null) {
       logger.error("Capture Agent Metadata generator not initialized");
       return null;
     }
     return caGenerator.generateAsString(event);
-  }  
-  
+  }
+
   /**
    * Sets the series service
+   * 
    * @param s
    */
-  public void setSeriesService (SeriesService s) {
+  public void setSeriesService(SeriesService s) {
     seriesService = s;
   }
-  
+
+  /**
+   * Sets the workflow service
+   * 
+   * @param workflowService
+   *          the workflowService to set
+   */
+  public void setWorkflowService(WorkflowService workflowService) {
+    this.workflowService = workflowService;
+  }
+
   /**
    * @return An empty Event
    */
-  public Event getNewEvent () {
+  public Event getNewEvent() {
     return new EventImpl();
   }
-  
+
   /**
-   * resolves the appropriate Filter for the Capture Agent 
-   * @param captureAgentID The ID as provided by the capture agent 
+   * resolves the appropriate Filter for the Capture Agent
+   * 
+   * @param captureAgentID
+   *          The ID as provided by the capture agent
    * @return the Filter for this capture Agent.
    */
   protected SchedulerFilter getFilterForCaptureAgent(String captureAgentID) {
@@ -515,5 +566,5 @@ public class SchedulerServiceImpl implements ManagedService{
     filter.withDeviceFilter(captureAgentID).withOrder("startDate").withStart(new Date(System.currentTimeMillis()));
     return filter;
   }
-  
+
 }

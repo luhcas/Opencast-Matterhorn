@@ -6,3 +6,4 @@ WorkflowOperationDefinitionImpl
 WorkflowOperationInstanceImpl
 WorkflowOperationResultImpl
 WorkflowSetImpl
+WorkflowStatistics

@@ -219,4 +219,12 @@ public class WorkflowBuilder {
           Map<String, String> properties, Action action, long timeInQueue) {
     return new WorkflowOperationResultImpl(mediaPackage, properties, action, timeInQueue);
   }
+
+  public String toXml(WorkflowStatistics stats) throws Exception {
+    Marshaller marshaller = jaxbContext.createMarshaller();
+    Writer writer = new StringWriter();
+    marshaller.marshal(stats, writer);
+    return writer.toString();
+  }
+
 }
