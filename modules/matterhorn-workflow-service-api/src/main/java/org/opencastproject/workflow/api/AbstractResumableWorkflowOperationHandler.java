@@ -38,35 +38,69 @@ import javax.servlet.Servlet;
  */
 public abstract class AbstractResumableWorkflowOperationHandler extends AbstractWorkflowOperationHandler implements
         ResumableWorkflowOperationHandler {
-  protected ComponentContext componentContext;
-  protected ServiceRegistration staticResourceRegistration;
-  protected StaticResource staticResource;
-  protected String holdActionTitle;
-  
+
+  /** OSGi component context, obtained during component activation */
+  protected ComponentContext componentContext = null;
+
+  /** Reference to the static resource service */
+  protected ServiceRegistration staticResourceRegistration = null;
+
+  /** The static resource representing the hold state ui */
+  protected StaticResource staticResource = null;
+
+  /** Title of this hold state */
+  protected String holdActionTitle = null;
+
   private static final String DEFAULT_TITLE = "Action"; // TODO maybe there's a better default action title?
 
   /** Name of the configuration option that determines whether this operation is run at all */
   protected static final String REQUIRED_PROPERTY = "required-property";
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#activate(org.osgi.service.component.ComponentContext)
+   */
   public void activate(ComponentContext componentContext) {
     this.componentContext = componentContext;
     super.activate(componentContext);
   }
-  
+
+  /**
+   * Callback from the OSGi environment on component shutdown. Make sure to call this super implementation when
+   * overwriting this class.
+   */
   public void deactivate() {
-    if(staticResourceRegistration != null) staticResourceRegistration.unregister();
+    if (staticResourceRegistration != null)
+      staticResourceRegistration.unregister();
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#getHoldStateUserInterfaceURL(org.opencastproject.workflow.api.WorkflowInstance)
+   */
   public URL getHoldStateUserInterfaceURL(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     if (staticResource == null)
       return null;
     return staticResource.getDefaultUrl();
   }
 
+  /**
+   * Sets the title that is displayed on the hold state ui.
+   * 
+   * @param title
+   *          the title
+   */
   protected void setHoldActionTitle(String title) {
     this.holdActionTitle = title;
   }
 
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#getHoldActionTitle()
+   */
   public String getHoldActionTitle() {
     if (holdActionTitle == null) {
       return DEFAULT_TITLE;
@@ -75,6 +109,13 @@ public abstract class AbstractResumableWorkflowOperationHandler extends Abstract
     }
   }
 
+  /**
+   * Registers the resource identified by <code>resourcePath</code> as the ui to be displayed during hold.
+   * 
+   * @param resourcePath
+   *          the path to the resource
+   * @return the URL that was created when registering the resource
+   */
   protected URL registerHoldStateUserInterface(final String resourcePath) {
     String alias = "/workflow/hold/" + getClass().getName().toLowerCase();
     if (resourcePath == null)
@@ -93,6 +134,8 @@ public abstract class AbstractResumableWorkflowOperationHandler extends Abstract
   /**
    * {@inheritDoc}
    * 
+   * This default implementation will put the workflow into the hold state.
+   * 
    * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
@@ -102,10 +145,13 @@ public abstract class AbstractResumableWorkflowOperationHandler extends Abstract
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance, java.util.Map)
+   * 
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance,
+   *      java.util.Map)
    */
   @Override
-  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties) throws WorkflowOperationException {
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
+          throws WorkflowOperationException {
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
   }
 

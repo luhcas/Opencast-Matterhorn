@@ -15,7 +15,6 @@
  */
 package org.opencastproject.workflow.api;
 
-
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
@@ -26,6 +25,8 @@ import org.osgi.service.component.ComponentContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * Abstract base implementation for an operation handler, which implements a simple start operation that returns a
@@ -34,61 +35,102 @@ import java.util.List;
 public abstract class AbstractWorkflowOperationHandler implements WorkflowOperationHandler {
 
   /** The ID of this operation handler */
-  protected String id;
+  protected String id = null;
 
   /** The description of what this handler actually does */
-  protected String description;
+  protected String description = null;
+
+  /** The configuration options for this operation handler */
+  protected SortedMap<String, String> options = new TreeMap<String, String>();
 
   /**
    * Activates this component with its properties once all of the collaborating services have been set
-   * @param cc The component's context, containing the properties used for configuration
+   * 
+   * @param cc
+   *          The component's context, containing the properties used for configuration
    */
   protected void activate(ComponentContext cc) {
-    this.id = (String)cc.getProperties().get(WorkflowService.WORKFLOW_OPERATION_PROPERTY);
-    this.description = (String)cc.getProperties().get(Constants.SERVICE_DESCRIPTION);
+    this.id = (String) cc.getProperties().get(WorkflowService.WORKFLOW_OPERATION_PROPERTY);
+    this.description = (String) cc.getProperties().get(Constants.SERVICE_DESCRIPTION);
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.CONTINUE);
-  }
-  
+  public abstract WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException;
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#destroy(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
-  public void destroy(WorkflowInstance workflowInstance) throws WorkflowOperationException {}
-  
+  public void destroy(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+  }
+
   /**
-   * Converts a comma separated string into a set of values.  Useful for converting operation configuration strings into
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
+   */
+  @Override
+  public SortedMap<String, String> getConfigurationOptions() {
+    return options;
+  }
+
+  /**
+   * Adds a configuration option to the list of possible configuration options.
+   * 
+   * @param name
+   *          the option name
+   * @param description
+   *          the option description
+   */
+  public void addConfigurationOption(String name, String description) {
+    options.put(name, description);
+  }
+
+  /**
+   * Removes the configuration option from the list of possible configuration options.
+   * 
+   * @param name
+   *          the option name
+   */
+  public void removeConfigurationOption(String name) {
+    options.remove(name);
+  }
+
+  /**
+   * Converts a comma separated string into a set of values. Useful for converting operation configuration strings into
    * multi-valued sets.
    * 
-   * @param commaSeparated The comma separated string
+   * @param commaSeparated
+   *          The comma separated string
    * @return the set of values
    */
   protected List<String> asList(String commaSeparated) {
     commaSeparated = StringUtils.trimToNull(commaSeparated);
     List<String> list = new ArrayList<String>();
     if (commaSeparated != null) {
-      for(String s : commaSeparated.split(",")) {
-        if(StringUtils.trimToNull(s) != null) {
+      for (String s : commaSeparated.split(",")) {
+        if (StringUtils.trimToNull(s) != null) {
           list.add(s.trim());
         }
       }
     }
     return list;
   }
-  
+
   /**
    * Generates a filename using the base name of a source element and the extension of a derived element.
    * 
-   * @param source the source mediapackage element
-   * @param derived the derived mediapackage element
+   * @param source
+   *          the source mediapackage element
+   * @param derived
+   *          the derived mediapackage element
    * @return the filename
    */
   protected String getFileNameFromElements(MediaPackageElement source, MediaPackageElement derived) {
@@ -96,33 +138,35 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
     String fileExtension = FilenameUtils.getExtension(derived.getURI().toString());
     return fileName + "." + fileExtension;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getId()
    */
   @Override
   public String getId() {
     return id;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getDescription()
    */
   @Override
   public String getDescription() {
     return description;
   }
-  
 
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#toString()
    */
   @Override
   public String toString() {
     return getId();
   }
-  
+
 }
