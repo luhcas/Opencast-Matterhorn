@@ -128,6 +128,7 @@
             <Service-Component>
               OSGI-INF/operations/analyze-text.xml,
               OSGI-INF/operations/analyze-videosegments.xml,
+              OSGI-INF/operations/capture.xml,
               OSGI-INF/operations/caption.xml,
               OSGI-INF/operations/cli.xml,
               OSGI-INF/operations/cleanup.xml,
@@ -140,10 +141,12 @@
               OSGI-INF/operations/embed.xml,
               OSGI-INF/operations/error-handler.xml,
               OSGI-INF/operations/image.xml,
+              OSGI-INF/operations/ingest.xml,
               OSGI-INF/operations/inspect.xml,
               OSGI-INF/operations/prepare-av.xml,
               OSGI-INF/operations/publish.xml,
               OSGI-INF/operations/review.xml,
+              OSGI-INF/operations/schedule.xml,
               OSGI-INF/operations/segmentpreviews.xml,
               OSGI-INF/operations/trim.xml,
               OSGI-INF/operations/zip.xml
