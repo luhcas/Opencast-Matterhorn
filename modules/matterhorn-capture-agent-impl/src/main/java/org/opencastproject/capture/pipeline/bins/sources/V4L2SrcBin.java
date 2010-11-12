@@ -1,3 +1,18 @@
+/**
+ *  Copyright 2009, 2010 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
 package org.opencastproject.capture.pipeline.bins.sources;
 
 import java.util.Properties;
@@ -9,11 +24,11 @@ import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 
 
-public class V4l2srcDeviceBin extends VideoDeviceBin{
+public class V4L2SrcBin extends VideoSrcBin{
 
   Element v4l2src;
 
-  public V4l2srcDeviceBin(CaptureDevice captureDevice, Properties properties) throws Exception {
+  public V4L2SrcBin(CaptureDevice captureDevice, Properties properties) throws Exception {
     super(captureDevice, properties);
   }
   
@@ -30,7 +45,8 @@ public class V4l2srcDeviceBin extends VideoDeviceBin{
 
   @Override
   protected void linkElements() throws Exception {
-    /*if (!v4l2src.link(queue))
+	  /** TODO - akm220 - Check to see if this queue negatively effects performance. **/
+	  /*if (!v4l2src.link(queue))
       throw new Exception(CaptureDeviceBin.formatBinError(captureDevice, v4l2src, queue));
     else if (!queue.link(videorate))
       throw new Exception(CaptureDeviceBin.formatBinError(captureDevice, queue, videorate));

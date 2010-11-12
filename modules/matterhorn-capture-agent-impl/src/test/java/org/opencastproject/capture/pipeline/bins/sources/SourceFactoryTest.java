@@ -126,7 +126,7 @@ CaptureAgent captureAgentMock;
     captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.V4LSRC, "V4L Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof V4lsrcBin);
+    Assert.assertTrue(srcBin instanceof V4LSrcBin);
     checkCorrectnessOfVideoSource(srcBin);
   }
   
@@ -138,7 +138,7 @@ CaptureAgent captureAgentMock;
     captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.V4LSRC, "V4L Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof V4lsrcBin);
+    Assert.assertTrue(srcBin instanceof V4LSrcBin);
     checkCorrectnessOfVideoSource(srcBin);
   }
   
