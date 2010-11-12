@@ -23,6 +23,7 @@ import org.opencastproject.capture.impl.ConfigurationManager;
 import org.opencastproject.util.XProperties;
 import org.osgi.service.cm.ConfigurationException;
 
+import org.gstreamer.Gst;
 import org.gstreamer.Pipeline;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -47,9 +48,17 @@ public class PipelineFactoryTest {
   private static ArrayList<String> devices;
   
   private Pipeline testPipeline;
+  private static boolean gstreamerInstalled;
   
   @BeforeClass
   public static void setup() {
+    try {
+      Gst.init();
+    } catch (Throwable t) {
+      logger.warn("Skipping agent tests due to unsatisifed gstreamer installation");
+      gstreamerInstalled = false;
+    }
+ 
     devices = new ArrayList<String>();
     // determine devices to test from command line parameters
     if (System.getProperty("testHauppauge") != null) {
@@ -94,6 +103,9 @@ public class PipelineFactoryTest {
   
   @AfterClass
   public static void tearDown() {
+    if (gstreamerInstalled) {
+      Gst.deinit();
+    }
     devices = null;
   }
   
@@ -135,9 +147,12 @@ public class PipelineFactoryTest {
   
   
   @Test
-  public void initDevicesCreatesDevicesSuccessfullyWithCorrectTypes(){
-    ConfigurationManager config = new ConfigurationManager();
+  public void initDevicesCreatesDevicesSuccessfullyWithCorrectTypes(){  
     
+    if (!gstreamerInstalled) return;
+    
+    ConfigurationManager config = new ConfigurationManager();
+ 
     Properties p = null;
     try {
       p = loadProperties("config/capture.properties");

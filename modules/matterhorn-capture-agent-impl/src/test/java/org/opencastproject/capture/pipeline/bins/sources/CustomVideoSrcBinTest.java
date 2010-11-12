@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import org.gstreamer.Gst;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -41,7 +42,14 @@ public class CustomVideoSrcBinTest {
       gstreamerInstalled = false;
     }
   }
-   
+
+  @AfterClass
+  public static void tearDownGst() {
+    if (gstreamerInstalled) {
+      Gst.deinit();
+    }
+  }
+  
   @Before
   public void setup() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
@@ -64,6 +72,7 @@ public class CustomVideoSrcBinTest {
   
   @Test
   public void nullSettingForCustomSourceResultsInException() {
+    if (!gstreamerInstalled) return;
     Properties captureDeviceProperties = createProperties(null);
     captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
@@ -72,6 +81,7 @@ public class CustomVideoSrcBinTest {
 
   @Test
   public void garbageSettingForCustomSourceResultsInException() {
+    if (!gstreamerInstalled) return;
     Properties captureDeviceProperties = createProperties("This is not really a source");
     captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
@@ -80,6 +90,7 @@ public class CustomVideoSrcBinTest {
   
   @Test
   public void singleItemInStringResultsInCorrectPipeline() {
+    if (!gstreamerInstalled) return;
     Properties captureDeviceProperties = createProperties("fakesrc");
     captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
@@ -88,6 +99,7 @@ public class CustomVideoSrcBinTest {
   
   @Test
   public void multiItemInStringResultsInCorrectPipeline() {
+    if (!gstreamerInstalled) return;
     Properties captureDeviceProperties = createProperties("fakesrc ! queue");
     captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
