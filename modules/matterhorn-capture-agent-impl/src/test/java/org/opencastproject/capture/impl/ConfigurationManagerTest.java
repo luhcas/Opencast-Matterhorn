@@ -40,7 +40,6 @@ import java.util.Properties;
 /**
  * Test the functionality of the ConfigurationManager
  */
-@Ignore
 public class ConfigurationManagerTest {
   
   /** the singleton object to test with */
@@ -74,22 +73,8 @@ public class ConfigurationManagerTest {
     IOUtils.closeQuietly(is);
     p.put("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
 
-    String varName= CaptureParameters.CAPTURE_DEVICE_PREFIX + "MOCK_SCREEN" + CaptureParameters.CAPTURE_DEVICE_SOURCE;
-    System.out.println("Before calling method updated(p):");
-    System.out.println("M2_REPO is " + configManager.getItem("M2_REPO"));
-    System.out.println("... which is a prefix for " + varName);
-    System.out.println("... which has a literal value of " + configManager.getUninterpretedItem(varName));
-    System.out.println("... and is expanded as " + configManager.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + "MOCK_SCREEN" + CaptureParameters.CAPTURE_DEVICE_SOURCE));
-    configManager.updated(p);
-    System.out.println("After calling method updated(p):");
-    System.out.println("M2_REPO is " + configManager.getItem("M2_REPO"));
-    System.out.println("... which is a prefix for " + varName);
-    System.out.println("... which has a literal value of " + configManager.getUninterpretedItem(varName));
-    System.out.println("... and is expanded as " + configManager.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + "MOCK_SCREEN" + CaptureParameters.CAPTURE_DEVICE_SOURCE));
-    
+    configManager.updated(p);    
     configManager.updated(null);
-    System.out.println("Terceiro: " + configManager.getItem("M2_REPO"));
-    System.out.println("Terceiro: " + configManager.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + "MOCK_SCREEN" + CaptureParameters.CAPTURE_DEVICE_SOURCE));
   }
 
   @After
@@ -180,11 +165,7 @@ public class ConfigurationManagerTest {
     configManager.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
     configManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
     configManager.setItem("M2_REPO", getClass().getClassLoader().getResource("m2_repo").toURI().getPath());
-    System.out.println("todo xunto1: " + configManager.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + "MOCK_SCREEN" + CaptureParameters.CAPTURE_DEVICE_SOURCE));
     configManager.updated(sourceProps);
-    System.out.println("prefixo: " + configManager.getItem("M2_REPO"));
-    System.out.println("todo xunto2: " + configManager.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + "MOCK_SCREEN" + CaptureParameters.CAPTURE_DEVICE_SOURCE));
-
     
     Properties caps = configManager.getCapabilities();
     Assert.assertNotNull(caps);
@@ -195,8 +176,6 @@ public class ConfigurationManagerTest {
 
   private void assertCaps(Properties caps, String name, String baseVar, String relPath, String dest, String flavour) {
     Assert.assertEquals("${"+baseVar+"}"+ "/" + relPath, configManager.getUninterpretedItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE));
-    File cousa = new File(configManager.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE));
-    System.out.println("merda: " + configManager.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE));
     Assert.assertTrue(new File(configManager.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE)).exists());
     Assert.assertEquals(configManager.getVariable(baseVar) + "/" + relPath, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE));
     Assert.assertEquals(dest, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_DEST));
@@ -251,9 +230,6 @@ public class ConfigurationManagerTest {
 
     XProperties testProps = new XProperties();
     InputStream testInput = new FileInputStream(configManager.getItem(CaptureParameters.CAPTURE_CONFIG_CACHE_URL));
-    if (is == null) {
-      Assert.fail();
-    }
     testProps.load(testInput);
     IOUtils.closeQuietly(testInput);
 

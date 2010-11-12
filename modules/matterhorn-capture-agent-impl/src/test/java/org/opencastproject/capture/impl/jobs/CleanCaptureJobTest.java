@@ -25,6 +25,7 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,10 +52,10 @@ public class CleanCaptureJobTest {
   File baseDir; 
 
   @Before
-  public void setUp() throws URISyntaxException {
+  public void setUp() throws URISyntaxException, IOException {
     // Define particular instances for the CleanCaptureJob required arguments
     props = new XProperties();
-    props.setProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, new File(System.getProperty("java.io.tmpdir"), "clean-capture-test").getAbsolutePath());
+    props.setProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, new File(System.getProperty("java.io.tmpdir"), "clean-capture-test").getCanonicalPath());
     theJob = new CleanCaptureJob();
     theRecordings = new Vector<AgentRecording>();
 

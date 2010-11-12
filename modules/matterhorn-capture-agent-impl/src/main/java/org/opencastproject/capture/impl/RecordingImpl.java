@@ -39,6 +39,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
@@ -146,8 +150,11 @@ public class RecordingImpl implements AgentRecording, Serializable {
   /**
    * Determines the root URL and ID from the recording's properties
    * //TODO:  What if the properties object contains a character in the recording id or root url fields that is invalid for the filesystem? 
+   * @throws URISyntaxException 
+   * @throws IOException 
    */
-  private void determineRootURLandID() {
+  private void determineRootURLandID() throws IOException {
+
     if (props == null) {
       logger.info("Properties are null for recording, guessing that the root capture dir is java.io.tmpdir...");
       props = new XProperties();
@@ -167,20 +174,21 @@ public class RecordingImpl implements AgentRecording, Serializable {
         props.put(CaptureParameters.RECORDING_ID, id);
       }
     } else {
+      File cacheDir = new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL));
       //If there is a recording ID use it, otherwise it's unscheduled so just grab a timestamp
       if (props.containsKey(CaptureParameters.RECORDING_ID)) {
         id = props.getProperty(CaptureParameters.RECORDING_ID);
-        baseDir = new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), id);
+        baseDir = new File(cacheDir, id);
       } else {
         //Unscheduled capture, use a timestamp value instead
         id = "Unscheduled-" + props.getProperty(CaptureParameters.AGENT_NAME) + "-" + System.currentTimeMillis();
         props.setProperty(CaptureParameters.RECORDING_ID, id);
-        baseDir = new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), id);
+        baseDir = new File(cacheDir, id);
       }
-      props.put(CaptureParameters.RECORDING_ROOT_URL, baseDir.getAbsolutePath());
+      props.put(CaptureParameters.RECORDING_ROOT_URL, baseDir.getCanonicalPath());
     }
   }
-  
+
   /**
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.AgentRecording#getProperties()
@@ -209,7 +217,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
     }
     this.props = new XProperties();
     this.props.setBundleContext(ctx);
-    
+
     for (String key : props.stringPropertyNames()) {
       props.put(key, props.getProperty(key));
     }
@@ -222,7 +230,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
   public MediaPackage getMediaPackage() {
     return mPkg;
   }
-  
+
   /**
    * {@inheritDoc}
    * @see org.opencastproject.capture.admin.api.Recording#getID()
@@ -239,7 +247,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
     return baseDir;
   }
 
-  
+
   /**
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.AgentRecording#getProperty(java.lang.String)
@@ -247,7 +255,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
   public String getProperty(String key) {
     return props.getProperty(key);
   }
-  
+
   /**
    * {@inheritDoc}
    * @see org.opencastproject.capture.api.AgentRecording#setProperty(java.lang.String, java.lang.String)
@@ -255,7 +263,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
   public String setProperty(String key, String value) {
     return (String) props.setProperty(key, value);
   }
-  
+
   /**
    * {@inheritDoc}
    * @see org.opencastproject.capture.admin.api.Recording#setState(java.lang.String)

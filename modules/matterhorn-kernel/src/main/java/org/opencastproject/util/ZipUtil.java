@@ -55,7 +55,7 @@ public class ZipUtil {
   public static final int DEFAULT_COMPRESSION = Deflater.DEFAULT_COMPRESSION;
   public static final int NO_COMPRESSION = Deflater.NO_COMPRESSION;
 
-  
+
   /**
    * Utility class to ease the process of umounting a zip file
    * @param zipFile The file to umount
@@ -69,7 +69,7 @@ public class ZipUtil {
       throw new IOException("Unable to umount zip file: " + zipFile.getCanonicalPath(), ae);
     }
   }
-  
+
   /***********************************************************************************/
   /* SERVICE CLASSES - The two following classes are the ones actually doing the job */
   /***********************************************************************************/
@@ -127,14 +127,13 @@ public class ZipUtil {
       throw new IOException("Unable to create the zip file: {}" + destination.getAbsolutePath(), ioe);
     }
 
-    if (!zipFile.isArchive()) {
-      logger.error("The destination file does not represent a valid zip archive (.zip extension is required)");
-      zipFile.deleteAll();
-      umount(zipFile);
-      throw new IllegalArgumentException("The destination file does not represent a valid zip archive (.zip extension is required)");
-    }
-
     try {
+      if (!zipFile.isArchive()) {
+        logger.error("The destination file does not represent a valid zip archive (.zip extension is required)");
+        zipFile.deleteAll();
+        throw new IllegalArgumentException("The destination file does not represent a valid zip archive (.zip extension is required)");
+      }
+
       if (!zipFile.mkdirs())
         throw new IOException("Couldn't create the destination file");
 
@@ -412,7 +411,7 @@ public class ZipUtil {
     return zip(files.toArray(new java.io.File[files.size()]), destination, recursive, level);
 
   }
-  
+
 
 
   /**
@@ -439,7 +438,7 @@ public class ZipUtil {
   public static java.io.File zip(java.io.File[] sourceFiles, String destination, int level) throws IOException {
     return zip(sourceFiles,destination,false, level);
   }
-  
+
   /**
    * Compresses source files into a zip archive (default compression)
    * 
