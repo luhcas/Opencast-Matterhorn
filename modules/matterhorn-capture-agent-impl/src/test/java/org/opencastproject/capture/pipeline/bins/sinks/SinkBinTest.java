@@ -54,7 +54,7 @@ public class SinkBinTest {
   @AfterClass
   public static void tearDownGst() {
     if (gstreamerInstalled) {
-      Gst.deinit();
+      //Gst.deinit();
     }
   }
   

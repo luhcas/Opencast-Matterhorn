@@ -50,7 +50,7 @@ public class AudioFileSinkBinTest {
   @AfterClass
   public static void tearDownGst() {
     if (gstreamerInstalled) {
-      Gst.deinit();
+      //Gst.deinit();
     }
   }
   

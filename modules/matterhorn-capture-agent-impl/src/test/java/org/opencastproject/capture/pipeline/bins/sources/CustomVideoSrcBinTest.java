@@ -46,7 +46,7 @@ public class CustomVideoSrcBinTest {
   @AfterClass
   public static void tearDownGst() {
     if (gstreamerInstalled) {
-      Gst.deinit();
+      //Gst.deinit();
     }
   }
   

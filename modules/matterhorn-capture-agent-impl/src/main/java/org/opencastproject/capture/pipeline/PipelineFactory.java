@@ -333,7 +333,6 @@ public class PipelineFactory {
    
     if(captureDeviceBin != null){
       pipeline.add(captureDeviceBin.getBin());
-      logger.error("We have added " + captureDevice.getName() + " device from a bin.");
       return true;
     }
     

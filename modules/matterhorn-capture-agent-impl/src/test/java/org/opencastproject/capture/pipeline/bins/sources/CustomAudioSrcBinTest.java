@@ -41,16 +41,10 @@ public class CustomAudioSrcBinTest {
     }
   }
    
-  @Before @Ignore
-  public void setup() throws ConfigurationException, IOException, URISyntaxException {
-    if (!gstreamerInstalled)
-      return;
-  }
-
   @AfterClass
   public static void tearDownGst() {
     if (gstreamerInstalled) {
-      Gst.deinit();
+      //Gst.deinit();
     }
   }
   
@@ -64,7 +58,7 @@ public class CustomAudioSrcBinTest {
   /** Salient encoder properties are codec and bitrate **/
   /** Salient muxer properties are codec and container **/
   private Properties createProperties(String customSource){
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(customSource, null, null, null, null, null, null, null, null);
+	Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(customSource, null, null, null, null, null, null, null, null);
     return captureDeviceProperties;
   }
   
