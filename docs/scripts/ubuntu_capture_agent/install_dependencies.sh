@@ -163,12 +163,12 @@ while [[ true ]]; do
     fi
     # Else, ask for the actions to take
     echo
-    yesno -d yes "Error retrieving the Felix files from the web. Retry?" ok
-    if [[ "$ok" ]]; then
-	echo "You must download Felix manually and install it under $OC_DIR, in order for matterhorn to work"
-	break;
+    yesno -d yes "Error retrieving the Felix files from the web. Retry?" retry
+    if [[ "$retry" ]]; then
+    	echo -n "Retrying... "
     else
-	echo -n "Retrying... "
+    	echo "You must download Felix manually and install it under $OC_DIR, in order for matterhorn to work"
+	break
     fi
 done
 
