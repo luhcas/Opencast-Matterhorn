@@ -40,6 +40,7 @@ PAX_CONFMAN_OPTS="-Dbundles.configuration.location=$FELIX/conf"
 PAX_LOGGING_OPTS="-Dorg.ops4j.pax.logging.DefaultServiceLog.level=WARN -Dopencast.logdir=$LOGDIR"
 UTIL_LOGGING_OPTS="-Djava.util.logging.config.file=$FELIX/conf/services/java.util.logging.properties"
 GRAPHICS_OPTS="-Djava.awt.headless=true -Dawt.toolkit=sun.awt.HeadlessToolkit"
+JAVA_OPTS="-Xms256m -Xmx256m -XX:MaxPermSize=128m"
 
 FELIX_CACHE="$FELIX/felix-cache"
 
