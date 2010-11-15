@@ -90,8 +90,12 @@ ocRecordings.init = function() {
       $('.recordings-category').removeClass('recordings-category-active');
       $(this).addClass('recordings-category-active');
     }
-    ocUtils.log('state', state);
-    ocRecordings.displayRecordings($(this).attr('state'));
+    ocRecordings.currentState = state;
+    ocRecordings.initTableRefresh($('#refreshInterval').val());
+    ocUtils.getTemplate(state, function(template) {
+      ocRecordings.tableTemplate = template;
+      ocRecordings.displayRecordings(state);
+    });
     return false;
   });
 
@@ -145,13 +149,12 @@ ocRecordings.init = function() {
   }
   ocPager.pageSize = psize;
   ocPager.init();
-
-  var show = ocUtils.getURLParam('show');
-  if (show == '') {
-    show='upcoming';
+  
+  if(ocUtils.getURLParam('state') !== ''){
+    ocRecordings.currentState = ocUtils.getURLParam('state');
   }
-  $('.recordings-category[state=' + show + ']').addClass('recordings-category-active');
-  ocRecordings.currentState = show;
+
+  $('.recordings-category[state=' + ocRecordings.currentState + ']').addClass('recordings-category-active');
   ocRecordings.displayRecordingStats();
 
   if (ocRecordings.currentState == 'finished') {
@@ -161,7 +164,7 @@ ocRecordings.init = function() {
 
   // init update interval for recording stats
   ocRecordings.statsInterval = window.setInterval('ocRecordings.displayRecordingStats();', 3000 );
-  if (show == 'all' || show == 'capturing' || show == 'processing') {
+  if (ocRecordings.currentState == 'all' || ocRecordings.currentState == 'capturing' || ocRecordings.currentState == 'processing') {
     $('#refreshControlsContainer').css('display','block');
     if ($('#refreshEnabled').is(':visible') && $('#refreshEnabled').is(':checked')) {
       $('.refresh-text').removeClass('refresh-text-disabled').addClass('refresh-text-enabled');
@@ -232,7 +235,7 @@ ocRecordings.displayRecordings = function(state) {
   if((state === 'upcoming' || state === 'bulkaction') && ocRecordings.filter !== '' && ocRecordings.filterField !== '') {
     recordingsUrl += '&filter=' + ocRecordings.filter + '&' + ocRecordings.filterField + '=true';
   }
-  if(ocRecordings.currentState !== state || ocRecordings.tableTemplate == null) {
+  if(ocRecordings.tableTemplate == null) {
     ocUtils.getTemplate(state, function(template) {
       ocRecordings.tableTemplate = template;
       ocRecordings.displayRecordings(state);
