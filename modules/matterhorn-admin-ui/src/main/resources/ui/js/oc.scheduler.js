@@ -18,6 +18,7 @@ var SCHEDULER_URL     = '/scheduler/rest';
 var WORKFLOW_URL      = '/workflow/rest';
 var CAPTURE_ADMIN_URL = '/capture-admin/rest';
 var SERIES_URL        = '/series/rest';
+var RECORDINGS_URL    = '/admin/recordings.html';
 
 // Constants
 var CREATE_MODE       = 1;
@@ -246,14 +247,18 @@ ocScheduler.SubmitForm = function(){
   eventXML = ocScheduler.FormManager.serialize();
   if(eventXML){
     if(ocUtils.getURLParam('edit')){
-      $.post( SCHEDULER_URL + '/' + $('#eventId').val(), {
-             event: eventXML
-             }, ocScheduler.EventSubmitComplete );
+      $.post({type: "POST",
+              url: SCHEDULER_URL + '/' + $('#eventId').val(),
+              dataType: 'text',
+              data: {event: eventXML},
+              complete: ocScheduler.EventSubmitComplete
+              });
     }else{
       $.ajax({type: "PUT",
               url: SCHEDULER_URL + '/',
+              dataType: 'text',
               data: { event: eventXML },
-              success: ocScheduler.EventSubmitComplete
+              complete: ocScheduler.EventSubmitComplete
              });
     }
   }
@@ -284,7 +289,6 @@ ocScheduler.HandleAgentChange = function(elm){
   var agent = elm.target.value;
   $(ocScheduler.inputList).empty();
   ocScheduler.additionalMetadataComponents.agentTimeZone.setValue('');
-  ocUtils.log("Agent changed to: ", agent);
   if(agent){
     $.get('/capture-admin/rest/agents/' + agent + '/capabilities',
       function(doc){
@@ -479,14 +483,11 @@ ocScheduler.LoadEvent = function(doc){
   $('#agent').change(); //update the selected agent's capabilities
 }
 
-ocScheduler.EventSubmitComplete = function(){
-  for(var k in ocScheduler.components){
-    $('#data-'+ k).show();
-    //$("#data-" + k + " > .data-label").text(i18n[k].label + ":");
-    $('#data-' + k + ' > .data-value').text(ocScheduler.components[k].asString());
+ocScheduler.EventSubmitComplete = function(xhr, status){
+  ocUtils.log(status);
+  if(status == "success") {
+    document.location = RECORDINGS_URL;
   }
-  $('#submissionSuccess').siblings().hide();
-  $('#submissionSuccess').show();
 }
 
 ocScheduler.CheckForConflictingEvents = function(){
