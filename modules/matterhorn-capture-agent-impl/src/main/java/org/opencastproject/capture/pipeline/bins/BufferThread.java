@@ -51,7 +51,8 @@ public class BufferThread extends Thread {
 
   public void run() {
     while (run) {
-      log.trace(queue.getName() + "," + queue.get("current-level-buffers") + "," + queue.get("current-level-bytes") + "," + queue.get("current-level-time"));
+      log.trace(queue.getName() + "," + queue.get("current-level-buffers") + "," + queue.get("current-level-bytes")
+              + "," + queue.get("current-level-time"));
       try {
         Thread.sleep(60000);
       } catch (InterruptedException e) {

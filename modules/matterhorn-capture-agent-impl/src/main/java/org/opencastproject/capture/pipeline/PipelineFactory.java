@@ -46,7 +46,7 @@ public class PipelineFactory {
   
   public static boolean broken;
   
-  public static int v4lsrc_index;
+  public static int v4LSrcIndex;
   
   protected static CaptureAgent captureAgent = null;
 
@@ -85,13 +85,15 @@ public class PipelineFactory {
   /**
    * Splits the device names from the pipeline's properties.
    * @return The device names to capture from.
-   * @throws NoCaptureDevicesSpecifiedException - If there are no capture devices specified in the configuration file we throw an exception. 
+   * @throws NoCaptureDevicesSpecifiedException - If there are no capture devices 
+   * specified in the configuration file we throw an exception. 
    */
   private static String[] getDeviceNames() throws NoCaptureDevicesSpecifiedException {
     // Setup pipeline for all the devices specified
     String deviceNames = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
     if (deviceNames == null) {
-      throw new NoCaptureDevicesSpecifiedException("No capture devices specified in " + CaptureParameters.CAPTURE_DEVICE_NAMES);
+      throw new NoCaptureDevicesSpecifiedException("No capture devices specified in "
+              + CaptureParameters.CAPTURE_DEVICE_NAMES);
     }
 
     //Sanity checks for the device list
@@ -109,18 +111,20 @@ public class PipelineFactory {
   }
 
   /**
-   * Returns an {@code ArrayList} of {@code CaptureDevice}s which contain everything the rest of this class needs to start the pipeline
+   * Returns an {@code ArrayList} of {@code CaptureDevice}s which contain everything the rest of this class needs 
+   * to start the pipeline
    * @param friendlyNames  The list of friendly names we will be capturing from.
    * @param outputDirectory  The destination directory of the captures.
    * @param confidence  True to enable confidence monitoring, false otherwise.
    * @return A list of {@code CaptureDevice}s which can be captured from.
-   * @throws InvalidDeviceNameException The device name specified in the list of devices could not be found in the properties list.
+   * @throws InvalidDeviceNameException The device name specified in the list of devices could not be found in 
+   * the properties list.
    * @throws UnrecognizedDeviceException JV4L could not recognize the device after the type was not specified.
    * @throws UnableToCreateSampleOutputFileException Failure while trying to create a test capture file.
    */
-  protected static ArrayList<CaptureDevice> initDevices(String[] friendlyNames, String outputDirectory, boolean confidence) {
+  protected static ArrayList<CaptureDevice> initDevices(String[] friendlyNames, String outputDirectory,
+          boolean confidence) {
     ArrayList<CaptureDevice> devices = new ArrayList<CaptureDevice>();
-
     for (String name : friendlyNames) {
       try {
         name = createDevice(outputDirectory, confidence, devices, name);
@@ -150,10 +154,12 @@ public class PipelineFactory {
     String typeProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_TYPE;
     
     if (outputDirectory == null && confidence == false) {
-      logger.warn("Output directory is null, this may not work because we may not be able to write to the current output dir!");
+      logger.warn("Output directory is null, this may not work because we may not be able to write to the current " +
+        "output dir!");
     }
     if (!properties.containsKey(outputProperty)) {
-      throw new InvalidDeviceNameException("Invalid device name: " + name + ".  No keys named " + CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + " exist in the properties!");
+      throw new InvalidDeviceNameException("Invalid device name: " + name + ".  No keys named " 
+              + CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + " exist in the properties!");
     }
     String srcLoc = properties.getProperty(srcProperty);
     File outputFile = new File(outputDirectory, properties.getProperty(outputProperty));
@@ -168,17 +174,20 @@ public class PipelineFactory {
     if (!confidence) {
       try {
         if(!outputFile.createNewFile()){
-          throw new UnableToCreateSampleOutputFileException("Could not create ouput file for " + name + " file may already exist.");
+          throw new UnableToCreateSampleOutputFileException("Could not create ouput file for " + name
+                  + " file may already exist.");
         }
       } catch (IOException e) {
-        throw new UnableToCreateSampleOutputFileException("An error occured while creating output file for " + name + ". " + e.getMessage());
+        throw new UnableToCreateSampleOutputFileException("An error occured while creating output file for " + name
+                + ". " + e.getMessage());
       }
     }
     String outputLoc = outputFile.getAbsolutePath();
         
   
     if (srcLoc == null) {
-      throw new CannotFindSourceFileOrDeviceException("Unable to create pipeline for " + name + " because its source file/device does not exist!");
+      throw new CannotFindSourceFileOrDeviceException("Unable to create pipeline for " + name
+              + " because its source file/device does not exist!");
     }
     
     if(type != null){
@@ -272,17 +281,20 @@ public class PipelineFactory {
   }
 
   //TODO:  Document me!
-  public static CaptureDevice createCaptureDevice(String srcLoc, SourceDeviceName devName, String name, String outputLoc) {
+  public static CaptureDevice createCaptureDevice(String srcLoc, SourceDeviceName devName, String name, 
+          String outputLoc) {
     CaptureDevice capdev = new CaptureDevice(srcLoc, devName, name, outputLoc);
-    String codecProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_CODEC;
-    String containerProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_CONTAINER;
+    String codecProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_CODEC;
+    String containerProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name
+            + CaptureParameters.CAPTURE_DEVICE_CONTAINER;
     String bitrateProperty = codecProperty + CaptureParameters.CAPTURE_DEVICE_BITRATE;
     String quantizerProperty = codecProperty + CaptureParameters.CAPTURE_DEVICE_QUANTIZER;
-    String bufferProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_BUFFER;
+    String bufferProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_BUFFER;
     String bufferCountProperty = bufferProperty + CaptureParameters.CAPTURE_DEVICE_BUFFER_MAX_BUFFERS;
     String bufferByteProperty = bufferProperty + CaptureParameters.CAPTURE_DEVICE_BUFFER_MAX_BYTES;
     String bufferTimeProperty = bufferProperty + CaptureParameters.CAPTURE_DEVICE_BUFFER_MAX_TIME;
-    String framerateProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_FRAMERATE;
+    String framerateProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name
+            + CaptureParameters.CAPTURE_DEVICE_FRAMERATE;
     String codec = properties.getProperty(codecProperty);
     String container = properties.getProperty(containerProperty);
     String bitrate = properties.getProperty(bitrateProperty);

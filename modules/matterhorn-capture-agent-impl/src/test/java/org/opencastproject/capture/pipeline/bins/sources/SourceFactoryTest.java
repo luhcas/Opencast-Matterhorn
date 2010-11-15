@@ -1,30 +1,42 @@
+/**
+ *  Copyright 2009, 2010 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
 package org.opencastproject.capture.pipeline.bins.sources;
 
 import static org.easymock.EasyMock.createMock;
 
-import org.opencastproject.capture.api.CaptureAgent;
-import org.opencastproject.capture.api.CaptureParameters;
-import org.opencastproject.capture.pipeline.SourceDeviceName;
-import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
-import org.opencastproject.capture.pipeline.bins.CaptureDevice;
-import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Properties;
 
 import org.gstreamer.Gst;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.opencastproject.capture.api.CaptureAgent;
+import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.pipeline.SourceDeviceName;
+import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
+import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Properties;
-
-@Ignore
 public class SourceFactoryTest {
 
 CaptureAgent captureAgentMock;
@@ -59,8 +71,10 @@ CaptureAgent captureAgentMock;
       return;
     
     captureAgentMock = createMock(CaptureAgent.class);
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, null, null, null, null, null, null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.EPIPHAN_VGA2USB, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, null, null, null, null, null, null, 
+            null, null);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.EPIPHAN_VGA2USB, 
+            "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
     
     // setup testing properties
     properties = new Properties();
@@ -87,7 +101,8 @@ CaptureAgent captureAgentMock;
     if (!gstreamerInstalled)
       return;
     // Setup properties for an videotestsrc card.
-    captureDevice = BinTestHelpers.createCaptureDevice(null, SourceDeviceName.VIDEOTESTSRC, "Video Test Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice(null, SourceDeviceName.VIDEOTESTSRC, "Video Test Source", 
+            "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
     Assert.assertTrue(srcBin instanceof VideoTestSrc);
@@ -99,7 +114,8 @@ CaptureAgent captureAgentMock;
     if (!gstreamerInstalled)
       return;
     // Setup properties for an epiphan card.
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.EPIPHAN_VGA2USB, "Epiphan VGA 2 USB", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.EPIPHAN_VGA2USB, 
+            "Epiphan VGA 2 USB", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
     Assert.assertTrue(srcBin instanceof EpiphanVGA2USBV4LSrcBin);
@@ -111,7 +127,8 @@ CaptureAgent captureAgentMock;
     if (!gstreamerInstalled)
       return;
     // Setup properties for an epiphan card.
-    captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.EPIPHAN_VGA2USB, "Epiphan VGA 2 USB", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/woot/video0", SourceDeviceName.EPIPHAN_VGA2USB, 
+            "Epiphan VGA 2 USB", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
     Assert.assertTrue(srcBin instanceof EpiphanVGA2USBV4LSrcBin);
@@ -123,7 +140,8 @@ CaptureAgent captureAgentMock;
     if (!gstreamerInstalled)
       return;
     // Setup properties for an v4lsource
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.V4LSRC, "V4L Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.V4LSRC, "V4L Source",
+            "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
     Assert.assertTrue(srcBin instanceof V4LSrcBin);
@@ -135,7 +153,8 @@ CaptureAgent captureAgentMock;
     if (!gstreamerInstalled)
       return;
     // Setup properties for an v4lsource
-    captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.V4LSRC, "V4L Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.V4LSRC, "V4L Source", 
+            "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
     Assert.assertTrue(srcBin instanceof V4LSrcBin);
@@ -147,7 +166,8 @@ CaptureAgent captureAgentMock;
     if (!gstreamerInstalled)
       return;
     // Setup properties for an hauppage source.
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.HAUPPAUGE_WINTV, "Hauppage Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.HAUPPAUGE_WINTV, 
+            "Hauppage Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
     Assert.assertTrue(srcBin instanceof HauppaugeSrcBin);
@@ -159,7 +179,8 @@ CaptureAgent captureAgentMock;
     if (!gstreamerInstalled)
       return;
     // Setup properties for an hauppage source.
-    captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.HAUPPAUGE_WINTV, "Hauppage Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.HAUPPAUGE_WINTV, 
+            "Hauppage Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
     Assert.assertTrue(srcBin instanceof HauppaugeSrcBin);
@@ -171,7 +192,8 @@ CaptureAgent captureAgentMock;
     if (!gstreamerInstalled)
       return;
     // Setup properties for an bluecherry card.
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.BLUECHERRY_PROVIDEO, "Bluecherry Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.BLUECHERRY_PROVIDEO, 
+            "Bluecherry Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
     Assert.assertTrue(srcBin instanceof BlueCherrySrcBin);
@@ -183,7 +205,8 @@ CaptureAgent captureAgentMock;
     if (!gstreamerInstalled)
       return;
     // Setup properties for an bluecherry card.
-    captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.BLUECHERRY_PROVIDEO, "Bluecherry Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.BLUECHERRY_PROVIDEO, 
+            "Bluecherry Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
     Assert.assertTrue(srcBin instanceof BlueCherrySrcBin);
@@ -205,7 +228,8 @@ CaptureAgent captureAgentMock;
     if (!gstreamerInstalled)
       return;
     // Setup properties for an alsa source
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.ALSASRC, "Alsa Source", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.ALSASRC, "Alsa Source", 
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
     Assert.assertTrue(srcBin instanceof AlsaSrcBin);
@@ -218,7 +242,8 @@ CaptureAgent captureAgentMock;
     if (!gstreamerInstalled)
       return;
     // Setup properties for an alsa source
-    captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.ALSASRC, "Alsa Source", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.ALSASRC, "Alsa Source",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
     Assert.assertTrue(srcBin instanceof AlsaSrcBin);
@@ -231,8 +256,10 @@ CaptureAgent captureAgentMock;
   public void testExistingV4L2CustomVideoSource() throws Exception{
     if (!gstreamerInstalled)
       return;
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties("v4l2src device=" + BinTestHelpers.V4L2_LOCATION, null, null, null, null, null, null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video1", SourceDeviceName.CUSTOM_VIDEO_SRC, "Custom Video Bin Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties("v4l2src device=" + 
+            BinTestHelpers.V4L2_LOCATION, null, null, null, null, null, null, null, null);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video1", SourceDeviceName.CUSTOM_VIDEO_SRC, 
+            "Custom Video Bin Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
     Assert.assertTrue(srcBin instanceof CustomVideoSrcBin);
@@ -243,8 +270,10 @@ CaptureAgent captureAgentMock;
   public void testExistingPulseCustomAudioSource() throws Exception{
     if (!gstreamerInstalled)
       return;
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties("pulsesrc", null, null, null, null, null, null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.CUSTOM_AUDIO_SRC, "Custom Audio Bin Source", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties("pulsesrc", null, null, null, null, null, 
+            null, null, null);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.CUSTOM_AUDIO_SRC, 
+            "Custom Audio Bin Source", "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
     Assert.assertTrue(srcBin instanceof CustomAudioSrcBin);
@@ -255,7 +284,8 @@ CaptureAgent captureAgentMock;
   public void testFileSrcBin() throws Exception{
     if (!gstreamerInstalled)
       return;
-    captureDevice = BinTestHelpers.createCaptureDevice(BinTestHelpers.HAUPPAGE_LOCATION, SourceDeviceName.FILE_DEVICE, "File Device Source", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice(BinTestHelpers.HAUPPAGE_LOCATION, SourceDeviceName.FILE_DEVICE, 
+            "File Device Source", "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
     Assert.assertTrue(srcBin instanceof FileSrcBin);

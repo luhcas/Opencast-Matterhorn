@@ -59,7 +59,7 @@ class PollEpiphan implements Runnable {
    * @param device the absolute path to the device
    * @return true iff there is a VGA signal
    */
-  private boolean check_epiphan(String device) {
+  private boolean checkEpiphan(String device) {
     try {
       V4LInfo v4linfo = JV4LInfo.getV4LInfo(device);
       String deviceName = v4linfo.getVideoCapability().getName();
@@ -84,18 +84,20 @@ class PollEpiphan implements Runnable {
       synchronized (enabled) {
         if (PipelineFactory.broken) {
           // Check to see if the Epiphan device has been reconnected to the machine
-          if (check_epiphan(location)) {
+          if (checkEpiphan(location)) {
             // Indicate to the pipeline that the Epiphan card is no longer disconnected
             PipelineFactory.broken = false;
 
             // Reconnect the device
             PipelineFactory.logger.debug("Attempting to reconnect to v4lsrc.");
-            Element src = ElementFactory.make("v4lsrc", "v4lsrc_" + location + "_" + ++PipelineFactory.v4lsrc_index);
-            Pad v4lsrc_pad = src.getStaticPad("src");
-            v4lsrc_pad.addEventProbe(new Pad.EVENT_PROBE() {
+            Element src = ElementFactory.make("v4lsrc", "v4lsrc_" + location + "_" + ++PipelineFactory.v4LSrcIndex);
+            Pad v4lsrcPad = src.getStaticPad("src");
+            v4lsrcPad.addEventProbe(new Pad.EVENT_PROBE() {
               public boolean eventReceived(Pad pad, Event event) {
                 //TODO: Why do we have to supress all messages coming out of this source?
-                return false;  //TODO: Understand wtf this is false instead of true, the underlying library negates the value we return, but why!?!
+                // TODO: Understand wtf this is false instead of true, the underlying library negates the value we
+                // return, but why!?!
+                return false;  
               }
             });
             
@@ -108,8 +110,8 @@ class PollEpiphan implements Runnable {
 
             // Tell the input-selector
             Element selector = pipeline.getElementByName(location + "_selector");
-            Pad new_pad = selector.getStaticPad("sink0");
-            selector.set("active-pad", new_pad);
+            Pad newPad = selector.getStaticPad("sink0");
+            selector.set("active-pad", newPad);
           }
         }
         try {

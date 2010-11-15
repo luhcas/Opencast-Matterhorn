@@ -68,7 +68,8 @@ public class HauppaugeSrcBin extends FileSrcBin {
             try {
               throw new UnableToLinkGStreamerElementsException(captureDevice, mpegpsdemux, mpegvideoparse);
             } catch (UnableToLinkGStreamerElementsException e) {
-              logger.error(e.getMessage() + " because PadLinkReturn was " + padLinkReturn.toString() + " on Pad " + newPad.getName());
+              logger.error(e.getMessage() + " because PadLinkReturn was " + padLinkReturn.toString() + " on Pad "
+                      + newPad.getName());
             }
           }
         }

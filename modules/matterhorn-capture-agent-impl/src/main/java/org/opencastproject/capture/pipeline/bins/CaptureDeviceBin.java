@@ -47,12 +47,15 @@ public class CaptureDeviceBin {
   private CaptureDevice captureDevice;
   private static final boolean USE_XV_IMAGE_SINK = false;
   
-  public CaptureDeviceBin(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgent) throws Exception{
+  public CaptureDeviceBin(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgent)
+          throws Exception {
     this.captureDevice = captureDevice;
     if(captureDevice.getName() == SourceDeviceName.FILE){
       addFileBin(captureDevice, properties);
     }
-    else if(captureDevice.getName() == SourceDeviceName.HAUPPAUGE_WINTV &&  captureDevice.properties.getProperty("codec") == null && captureDevice.properties.getProperty("container") == null){
+ else if (captureDevice.getName() == SourceDeviceName.HAUPPAUGE_WINTV
+            && captureDevice.properties.getProperty("codec") == null
+            && captureDevice.properties.getProperty("container") == null) {
       addFileBin(captureDevice, properties);
     }
     else{
@@ -70,7 +73,8 @@ public class CaptureDeviceBin {
     }
   }
 
-  private void getSinkBins(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgentMock) throws Exception {
+  private void getSinkBins(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgentMock)
+          throws Exception {
     SinkBin fileSinkBin;
     try {
       fileSinkBin = createFileSinkBin(captureDevice, properties);
@@ -116,7 +120,8 @@ public class CaptureDeviceBin {
     return sinkBin;
   }
   
-  private void getSrcBin(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgentMock) throws Exception  {
+  private void getSrcBin(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgentMock)
+          throws Exception {
       srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
   }
   

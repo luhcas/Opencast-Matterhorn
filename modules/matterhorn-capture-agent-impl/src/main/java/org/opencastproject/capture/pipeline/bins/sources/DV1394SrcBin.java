@@ -34,7 +34,8 @@ public class DV1394SrcBin extends VideoSrcBin {
   /**
    * Adds a pipeline specifically designed to captured from a DV Camera attached by firewire to the main pipeline
    * 
-   * @deprecated  This function has not been maintained in a long time and has many problems.  If you need DV support let the list know.
+   * @deprecated  This function has not been maintained in a long time and has many problems.  
+   * If you need DV support let the list know.
    * @param captureDevice
    *          DV Camera attached to firewire {@code CaptureDevice} to create pipeline around
    * @param properties

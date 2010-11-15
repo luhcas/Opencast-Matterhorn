@@ -40,7 +40,8 @@ public class SourceFactory {
     return null;
   }
   
-  public SrcBin getSource(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgent) throws Exception {
+  public SrcBin getSource(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgent)
+          throws Exception {
     if (captureDevice.getName() == SourceDeviceName.EPIPHAN_VGA2USB)
       return new EpiphanVGA2USBV4LSrcBin(captureDevice, properties, captureAgent);
     else if (captureDevice.getName() == SourceDeviceName.HAUPPAUGE_WINTV)

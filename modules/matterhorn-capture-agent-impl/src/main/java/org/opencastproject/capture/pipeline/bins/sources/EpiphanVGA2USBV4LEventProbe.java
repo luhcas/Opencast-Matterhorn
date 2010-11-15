@@ -72,14 +72,15 @@ public class EpiphanVGA2USBV4LEventProbe implements EVENT_PROBE{
       broken = true;
       
       // Remove the broken v4lsrc
-      Element src = bin.getElementByName("v4lsrc_" + captureDevice.getLocation() + "_" + EpiphanVGA2USBV4LSrcBin.v4lsrc_index); 
+      Element src = bin.getElementByName("v4lsrc_" + captureDevice.getLocation() + "_"
+              + EpiphanVGA2USBV4LSrcBin.v4lsrcIndex); 
       src.unlink(bin.getElementByName(captureDevice.getLocation() + "_v4l_identity"));
       bin.remove(src);
       
       // Tell the input-selector to change its active-pad
       Element selector = bin.getElementByName(captureDevice.getLocation() + "_selector");
-      Pad new_pad = selector.getStaticPad("sink1");
-      selector.set("active-pad", new_pad);
+      Pad newPad = selector.getStaticPad("sink1");
+      selector.set("active-pad", newPad);
       
       // Do not propagate the EOS down the pipeline
       //return false;  

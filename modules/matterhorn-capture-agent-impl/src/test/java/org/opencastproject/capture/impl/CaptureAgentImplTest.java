@@ -55,7 +55,7 @@ public class CaptureAgentImplTest {
   private static Properties properties = null;
   
   /** Define a recording ID for the test */
-  private final static String recordingID = "UnitTest1";
+  private static final String recordingID = "UnitTest1";
   
   /** True to run the tests */
   private static boolean gstreamerInstalled = true;
@@ -82,7 +82,8 @@ public class CaptureAgentImplTest {
     config = new ConfigurationManager();
 
     Properties p = loadProperties("config/capture.properties");
-    p.put("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "capture-agent-test").getAbsolutePath());
+    p.put("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "capture-agent-test")
+            .getAbsolutePath());
     p.put("org.opencastproject.server.url", "http://localhost:8080");
     p.put(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, -1);
     p.put("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());
@@ -152,14 +153,16 @@ public class CaptureAgentImplTest {
     Assert.assertFalse(devnames[0].equals(""));
 
     for (String devname : devnames) {
-      File outputfile = new File(outputdir, config.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + devname + CaptureParameters.CAPTURE_DEVICE_DEST));
+      File outputfile = new File(outputdir, config.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + devname
+              + CaptureParameters.CAPTURE_DEVICE_DEST));
       Assert.assertTrue(outputfile.exists());
     }
 
     // the appropriate files exists, so the capture can be stopped. The agent's state should return to idle.
     Assert.assertTrue(agent.stopCapture(recordingID, true));
     Assert.assertEquals(AgentState.IDLE, agent.getAgentState());
-    Assert.assertEquals(RecordingState.CAPTURE_FINISHED, agent.loadRecording(new File(agent.getKnownRecordings().get(id).getBaseDir(), id + ".recording")).getState());
+    Assert.assertEquals(RecordingState.CAPTURE_FINISHED, agent.loadRecording(
+            new File(agent.getKnownRecordings().get(id).getBaseDir(), id + ".recording")).getState());
 
     Thread.sleep(1000);
 

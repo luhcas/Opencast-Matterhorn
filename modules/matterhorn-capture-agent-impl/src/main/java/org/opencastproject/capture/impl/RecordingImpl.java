@@ -15,6 +15,18 @@
  */
 package org.opencastproject.capture.impl;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Properties;
+import java.util.TimeZone;
+
+import org.apache.commons.io.FileUtils;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.CaptureParameters;
@@ -27,26 +39,9 @@ import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.mediapackage.identifier.IdImpl;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.util.XProperties;
-
-import org.apache.commons.io.FileUtils;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Properties;
-import java.util.TimeZone;
 
 /**
  * This class is a container for the properties relating a certain recording -- 
@@ -56,10 +51,10 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private static transient final Logger logger = LoggerFactory.getLogger(RecordingImpl.class);
+  private static transient Logger logger = LoggerFactory.getLogger(RecordingImpl.class);
 
   /** Date formatter for the metadata file */
-  private static transient final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
+  private static transient SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
 
   /** Unique identifier for this ID */
   protected String id = null;

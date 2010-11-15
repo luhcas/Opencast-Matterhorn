@@ -1,3 +1,18 @@
+/**
+ *  Copyright 2009, 2010 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
 package org.opencastproject.capture.pipeline.bins.sources;
 
 import java.io.IOException;
@@ -23,13 +38,13 @@ public class CustomVideoSrcBinTest {
 
   /** Capture Device Properties created for unit testing **/
   CaptureDevice captureDevice = null;
-  
+
   /** Properties specifically designed for unit testing */
-  //private static Properties properties = null;
-  
+  // private static Properties properties = null;
+
   /** True to run the tests */
   private static boolean gstreamerInstalled = true;
-  
+
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(CaptureDeviceBinTest.class);
 
@@ -46,10 +61,10 @@ public class CustomVideoSrcBinTest {
   @AfterClass
   public static void tearDownGst() {
     if (gstreamerInstalled) {
-      //Gst.deinit();
+      // Gst.deinit();
     }
   }
-  
+
   @Before
   public void setup() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
@@ -62,50 +77,59 @@ public class CustomVideoSrcBinTest {
       return;
     captureDevice = null;
   }
-  
+
   /** Salient encoder properties are codec and bitrate **/
   /** Salient muxer properties are codec and container **/
-  private Properties createProperties(String customSource){
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(customSource, null, null, null, null, null, null, null, null);
+  private Properties createProperties(String customSource) {
+    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(customSource, null, null, null,
+            null, null, null, null, null);
     return captureDeviceProperties;
   }
-  
+
   @Test
   public void nullSettingForCustomSourceResultsInException() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createProperties(null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
     CustomVideoSrcBin customVideoSrcBin = createCustomVideoSrcBinWantException(captureDeviceProperties);
   }
 
   @Test
   public void garbageSettingForCustomSourceResultsInException() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createProperties("This is not really a source");
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
     CustomVideoSrcBin customVideoSrcBin = createCustomVideoSrcBinWantException(captureDeviceProperties);
   }
-  
+
   @Test
   public void singleItemInStringResultsInCorrectPipeline() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createProperties("fakesrc");
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
     CustomVideoSrcBin customVideoSrcBin = createCustomVideoSrcBinDontWantException(captureDeviceProperties);
   }
-  
+
   @Test
   public void multiItemInStringResultsInCorrectPipeline() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createProperties("fakesrc ! queue");
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
     CustomVideoSrcBin customVideoSrcBin = createCustomVideoSrcBinDontWantException(captureDeviceProperties);
   }
-  
+
   private CustomVideoSrcBin createCustomVideoSrcBinDontWantException(Properties captureDeviceProperties) {
     CustomVideoSrcBin customVideoSrcBin = null;
     try {
@@ -116,14 +140,14 @@ public class CustomVideoSrcBinTest {
     }
     return customVideoSrcBin;
   }
-  
+
   private CustomVideoSrcBin createCustomVideoSrcBinWantException(Properties captureDeviceProperties) {
     CustomVideoSrcBin customVideoSrcBin = null;
     try {
       customVideoSrcBin = createCustomVideoSrcBin(captureDeviceProperties);
       Assert.fail();
     } catch (Exception e) {
-      
+
     }
     return customVideoSrcBin;
   }

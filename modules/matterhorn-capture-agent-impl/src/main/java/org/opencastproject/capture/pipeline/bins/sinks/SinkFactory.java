@@ -39,7 +39,8 @@ public class SinkFactory {
     return null;
   }
   
-  public SinkBin getSink(SinkDeviceName sinkDeviceName, CaptureDevice captureDevice, Properties properties) throws Exception {
+  public SinkBin getSink(SinkDeviceName sinkDeviceName, CaptureDevice captureDevice, Properties properties)
+          throws Exception {
     if (sinkDeviceName == SinkDeviceName.AUDIO_FILE_SINK)
       return new AudioFileSinkBin(captureDevice, properties);
     else if(sinkDeviceName == SinkDeviceName.XVIMAGESINK)

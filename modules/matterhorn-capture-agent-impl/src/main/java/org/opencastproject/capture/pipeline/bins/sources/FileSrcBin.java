@@ -54,7 +54,8 @@ public class FileSrcBin extends VideoSrcBin{
               try {
                 throw new UnableToLinkGStreamerElementsException(captureDevice, decodebin, videorate);
               } catch (UnableToLinkGStreamerElementsException e) {
-                logger.error(e.getMessage() + " because PadLinkReturn was " + padLinkReturn.toString() + " on Pad " + newPad.getName());
+              logger.error(e.getMessage() + " because PadLinkReturn was " + padLinkReturn.toString() + " on Pad "
+                      + newPad.getName());
               }
             }
           }

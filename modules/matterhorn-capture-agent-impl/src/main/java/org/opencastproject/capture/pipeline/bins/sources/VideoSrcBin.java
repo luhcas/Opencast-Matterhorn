@@ -44,8 +44,8 @@ public abstract class VideoSrcBin extends SrcBin {
     createFramerateCaps();
   }
  
-  /** Creates a videorate gst Element that correctly adjusts the timestamps in case of a FPS change in the output file. **/
-  private void createVideoRate(){
+  /* Creates a videorate GST Element that adjusts the timestamps in case of a FPS change in the output file.*/
+  private void createVideoRate() {
     videorate = ElementFactory.make("videorate", null);
   }
   

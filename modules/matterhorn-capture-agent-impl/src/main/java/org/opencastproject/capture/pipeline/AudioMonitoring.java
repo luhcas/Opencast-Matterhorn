@@ -94,7 +94,8 @@ public class AudioMonitoring {
    * @param name The friendly name of the device to add audio monitoring to
    * @return the {@code Pipeline} with the audio monitoring added, or null on failure
    */
-  public static boolean addAudioMonitor(Bin bin, Element src, Element sink, final long interval, final long maxLength, final String name) {
+  public static boolean addAudioMonitor(Bin bin, Element src, Element sink, final long interval, final long maxLength,
+          final String name) {
           
       Element tee, queue0, queue1, decodebin, fakesink;
       final Element level;
@@ -220,8 +221,10 @@ public class AudioMonitoring {
     Element alsasrc, queue, decodebin, fakesink;
     final Element level;
     boolean success = true;
-    final int interval = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + c.getFriendlyName() + CaptureParameters.CAPTURE_DEVICE_CONFIDENCE_INTERVAL, "30"));
-    final int maxLength = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_AUDIO_LENGTH, "60"));
+    final int interval = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX
+            + c.getFriendlyName() + CaptureParameters.CAPTURE_DEVICE_CONFIDENCE_INTERVAL, "30"));
+    final int maxLength = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_AUDIO_LENGTH,
+            "60"));
     final String name = c.getFriendlyName();
     
     if (deviceRMSValues == null) {
@@ -267,7 +270,8 @@ public class AudioMonitoring {
       return;
     }
 
-    //FIXME:  This looks like duplicated code.  Can we move it out into a private function or is there a reason for the duplication?  
+    // FIXME: This looks like duplicated code. Can we move it out into a private function or is there a reason for the
+    // duplication?  
     // callback to listen for messages from the level element, giving us
     // information about the audio being recorded
     Bus bus = pipeline.getBus();

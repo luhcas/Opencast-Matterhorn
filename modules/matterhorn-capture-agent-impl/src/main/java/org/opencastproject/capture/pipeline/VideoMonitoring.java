@@ -153,7 +153,7 @@ public class VideoMonitoring {
             if (text.split("\\.").length > 1)
               text = text.split("\\.")[0];
             try {
-              byte bytes[] = new byte[buffer.getSize()];
+              byte[] bytes = new byte[buffer.getSize()];
               ByteBuffer byteBuffer = buffer.getByteBuffer();
               byteBuffer.get(bytes, 0, buffer.getSize());
               BufferedImage br = ImageIO.read(new ByteArrayInputStream(bytes));
@@ -191,15 +191,22 @@ public class VideoMonitoring {
       final Element ffmpegcolorspace;
       AppSink appsink;
       boolean success = true;
-      final int interval = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + capdev.getFriendlyName() + CaptureParameters.CAPTURE_DEVICE_CONFIDENCE_INTERVAL, "30"));
+    final int interval = Integer.parseInt(properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX
+            + capdev.getFriendlyName() + CaptureParameters.CAPTURE_DEVICE_CONFIDENCE_INTERVAL, "30"));
       final String device = new File(capdev.getOutputPath()).getName();
       final String location = properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
       final boolean trace = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG));
 
       switch (capdev.getName()) {
         case EPIPHAN_VGA2USB: src = ElementFactory.make("v4lsrc", null); src.set("device", capdev.getLocation()); break;
-        case HAUPPAUGE_WINTV: src = ElementFactory.make("filesrc", null); src.set("location", capdev.getLocation()); break;
-        case BLUECHERRY_PROVIDEO: src = ElementFactory.make("v4l2src", null); src.set("device", capdev.getLocation()); break;
+    case HAUPPAUGE_WINTV:
+      src = ElementFactory.make("filesrc", null);
+      src.set("location", capdev.getLocation());
+      break;
+    case BLUECHERRY_PROVIDEO:
+      src = ElementFactory.make("v4l2src", null);
+      src.set("device", capdev.getLocation());
+      break;
         case DV_1394: src = ElementFactory.make("dv1394src", null); break;
         default: return;
       }
@@ -251,7 +258,8 @@ public class VideoMonitoring {
         return;
       }
 
-      //FIXME:  This looks like duplicated code.  Can we move it out into a private function or is there a reason for the duplication?
+    // FIXME: This looks like duplicated code. Can we move it out into a private function or is there a reason for the
+    // duplication?
       // Callback that will be executed every time a new buffer is received
       // from the pipeline capturing the video. For confidence monitoring
       // it is not necessary to use every buffer
@@ -269,7 +277,7 @@ public class VideoMonitoring {
             if (text.split("\\.").length > 1)
               text = text.split("\\.")[0];
             try {
-              byte bytes[] = new byte[buffer.getSize()];
+              byte[] bytes = new byte[buffer.getSize()];
               ByteBuffer byteBuffer = buffer.getByteBuffer();
               byteBuffer.get(bytes, 0, buffer.getSize());
               BufferedImage br = ImageIO.read(new ByteArrayInputStream(bytes));

@@ -15,64 +15,6 @@
  */
 package org.opencastproject.capture.impl;
 
-import org.opencastproject.capture.admin.api.AgentState;
-import org.opencastproject.capture.admin.api.Recording;
-import org.opencastproject.capture.admin.api.RecordingState;
-import org.opencastproject.capture.api.AgentRecording;
-import org.opencastproject.capture.api.CaptureAgent;
-import org.opencastproject.capture.api.CaptureParameters;
-import org.opencastproject.capture.api.ConfidenceMonitor;
-import org.opencastproject.capture.api.ScheduledEvent;
-import org.opencastproject.capture.api.StateService;
-import org.opencastproject.capture.impl.jobs.AgentCapabilitiesJob;
-import org.opencastproject.capture.impl.jobs.AgentStateJob;
-import org.opencastproject.capture.impl.jobs.JobParameters;
-import org.opencastproject.capture.impl.jobs.LoadRecordingsJob;
-import org.opencastproject.capture.pipeline.AudioMonitoring;
-import org.opencastproject.capture.pipeline.InvalidDeviceNameException;
-import org.opencastproject.capture.pipeline.PipelineFactory;
-import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.mediapackage.MediaPackageElementBuilder;
-import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.mediapackage.MediaPackageElementFlavor;
-import org.opencastproject.mediapackage.MediaPackageException;
-import org.opencastproject.mediapackage.MediaPackageSerializer;
-import org.opencastproject.mediapackage.UnsupportedElementException;
-import org.opencastproject.mediapackage.track.TrackImpl;
-import org.opencastproject.security.api.TrustedHttpClient;
-import org.opencastproject.security.api.TrustedHttpClientException;
-import org.opencastproject.util.Checksum;
-import org.opencastproject.util.ChecksumType;
-import org.opencastproject.util.MimeType;
-import org.opencastproject.util.XProperties;
-import org.opencastproject.util.ZipUtil;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.entity.mime.content.StringBody;
-import org.gstreamer.Bus;
-import org.gstreamer.GstObject;
-import org.gstreamer.Pipeline;
-import org.gstreamer.State;
-import org.gstreamer.event.EOSEvent;
-import org.osgi.service.cm.ConfigurationException;
-import org.osgi.service.cm.ManagedService;
-import org.osgi.service.command.CommandProcessor;
-import org.osgi.service.component.ComponentContext;
-import org.quartz.JobDetail;
-import org.quartz.SchedulerException;
-import org.quartz.SimpleTrigger;
-import org.quartz.impl.StdSchedulerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -110,6 +52,62 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.gstreamer.Bus;
+import org.gstreamer.GstObject;
+import org.gstreamer.Pipeline;
+import org.gstreamer.State;
+import org.gstreamer.event.EOSEvent;
+import org.opencastproject.capture.admin.api.AgentState;
+import org.opencastproject.capture.admin.api.Recording;
+import org.opencastproject.capture.admin.api.RecordingState;
+import org.opencastproject.capture.api.AgentRecording;
+import org.opencastproject.capture.api.CaptureAgent;
+import org.opencastproject.capture.api.CaptureParameters;
+import org.opencastproject.capture.api.ConfidenceMonitor;
+import org.opencastproject.capture.api.ScheduledEvent;
+import org.opencastproject.capture.api.StateService;
+import org.opencastproject.capture.impl.jobs.AgentCapabilitiesJob;
+import org.opencastproject.capture.impl.jobs.AgentStateJob;
+import org.opencastproject.capture.impl.jobs.JobParameters;
+import org.opencastproject.capture.impl.jobs.LoadRecordingsJob;
+import org.opencastproject.capture.pipeline.AudioMonitoring;
+import org.opencastproject.capture.pipeline.PipelineFactory;
+import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageElementBuilder;
+import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageException;
+import org.opencastproject.mediapackage.MediaPackageSerializer;
+import org.opencastproject.mediapackage.UnsupportedElementException;
+import org.opencastproject.mediapackage.track.TrackImpl;
+import org.opencastproject.security.api.TrustedHttpClient;
+import org.opencastproject.security.api.TrustedHttpClientException;
+import org.opencastproject.util.Checksum;
+import org.opencastproject.util.ChecksumType;
+import org.opencastproject.util.MimeType;
+import org.opencastproject.util.XProperties;
+import org.opencastproject.util.ZipUtil;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
+import org.osgi.service.command.CommandProcessor;
+import org.osgi.service.component.ComponentContext;
+import org.quartz.JobDetail;
+import org.quartz.SchedulerException;
+import org.quartz.SimpleTrigger;
+import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+
 /**
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines
  * to store several tracks from a certain recording.
@@ -121,7 +119,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   /** The default maximum length to capture, measured in seconds. */
   public static final long DEFAULT_MAX_CAPTURE_LENGTH = 8 * CaptureParameters.HOURS;
 
-  /** The number of nanoseconds in a second.  This is a borrowed constant from gStreamer and is used in the pipeline initialisation routines */
+  /**
+   * The number of nanoseconds in a second. This is a borrowed constant from gStreamer and is used in the pipeline
+   * initialisation routines
+   */
   public static final long GST_SECOND = 1000000000L;
   
   /** The capture type for audio devices */
@@ -166,7 +167,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   boolean confidence = false;
 
   /** Stores the start time of the current recording */
-  long startTime = -1l;
+  long startTime = -1L;
 
   /** Stores the current bundle context */
   ComponentContext context = null;
@@ -484,11 +485,12 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         return false;
       }
       long startWait = System.currentTimeMillis();
-      long timeout = 60000l;
+      long timeout = 60000L;
       if (configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT) == null) {
-        logger.warn("Unable to find shutdown timeout value.  Assuming 1 minute.  Missing key is {}.", CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT);
+        logger.warn("Unable to find shutdown timeout value.  Assuming 1 minute.  Missing key is {}.", 
+                CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT);
       } else {
-        timeout = Long.parseLong(configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT)) * 1000l;
+        timeout = Long.parseLong(configService.getItem(CaptureParameters.RECORDING_SHUTDOWN_TIMEOUT)) * 1000L;
       }
       while (pipe != null) {
         try {
@@ -527,7 +529,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     serializeRecording(theRec.getID());
 
     theRec.setProperty(CaptureParameters.RECORDING_DURATION, String.valueOf(System.currentTimeMillis() - startTime));
-    startTime = -1l;
+    startTime = -1L;
 
     logger.info("Recording \"{}\" succesfully stopped", theRec.getID());
 
@@ -1289,10 +1291,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
           }
         }
       } else {
-        StdSchedulerFactory sched_fact = new StdSchedulerFactory(schedulerProps);
+        StdSchedulerFactory scheduleFactory = new StdSchedulerFactory(schedulerProps);
 
         //Create and start the scheduler
-        agentScheduler = sched_fact.getScheduler();
+        agentScheduler = scheduleFactory.getScheduler();
         agentScheduler.start();
       }
     } catch (SchedulerException e) {
@@ -1317,7 +1319,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     loadJob.getJobDataMap().put(JobParameters.CAPTURE_AGENT, this);
 
     //Create a new trigger                          Name              Group name               Start
-    SimpleTrigger loadTrigger = new SimpleTrigger("recording_load", JobParameters.OTHER_TYPE, new Date(System.currentTimeMillis() + delay * 1000l));
+    SimpleTrigger loadTrigger = new SimpleTrigger("recording_load", JobParameters.OTHER_TYPE, 
+            new Date(System.currentTimeMillis() + delay * 1000L));
     loadTrigger.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
 
     //Schedule the update

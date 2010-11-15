@@ -42,7 +42,7 @@ import java.util.Properties;
 
 /**
  * The unit test for scheduling the workflow
- *
+ * 
  */
 public class SchedulingTest {
   private static final Logger logger = LoggerFactory.getLogger(SchedulingTest.class);
@@ -51,20 +51,20 @@ public class SchedulingTest {
   private static Properties props = null;;
   private final File outDir = new File(this.getClass().getResource("/.").getFile(), "capture_tmp");
   private static MediaPackage mp;
-  
+
   @Before
-  public void init() throws ConfigurationException, MediaPackageException{
+  public void init() throws ConfigurationException, MediaPackageException {
     try {
       sched = new StdSchedulerFactory().getScheduler();
       sched.start();
     } catch (SchedulerException e) {
       logger.error("Error creating scheduler");
       e.printStackTrace();
-    } 
-    
+    }
+
     mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-    long time = TriggerUtils.getNextGivenSecondDate(null,10).getTime();
-    
+    long time = TriggerUtils.getNextGivenSecondDate(null, 10).getTime();
+
     props = new Properties();
     props.setProperty(CaptureParameters.RECORDING_ID, "TestID");
     props.setProperty(CaptureParameters.RECORDING_END, DateFormat.getDateInstance().format(new Date(time)));
@@ -76,7 +76,8 @@ public class SchedulingTest {
     props.setProperty("capture.device.SCREEN.outputfile", "screen.mpg");
     props.setProperty("capture.device.AUDIO.src", this.getClass().getResource("/capture/audio.mp3").getFile());
     props.setProperty("capture.device.AUDIO.outputfile", "microphone.mp3");
-    props.setProperty(CaptureParameters.INGEST_ENDPOINT_URL, "http://nightly.opencastproject.org/ingest/rest/addZippedMediaPackage");
+    props.setProperty(CaptureParameters.INGEST_ENDPOINT_URL,
+            "http://nightly.opencastproject.org/ingest/rest/addZippedMediaPackage");
   }
 
   @After
@@ -89,21 +90,22 @@ public class SchedulingTest {
     }
   }
 
-  @Test @Ignore
+  @Test
+  @Ignore
   public void testTest() {
-    
-    //Setup the job
+
+    // Setup the job
     JobDetail job = new JobDetail("starting_capture", Scheduler.DEFAULT_GROUP, StartCaptureJob.class);
-    
-    long time = TriggerUtils.getNextGivenSecondDate(null,5).getTime();
-    //Create a new trigger                    Name       Group name               Start       End   # of times to repeat               Repeat interval
+
+    long time = TriggerUtils.getNextGivenSecondDate(null, 5).getTime();
+    // Create a new trigger Name Group name Start End # of times to repeat Repeat interval
     SimpleTrigger trigger = new SimpleTrigger("starting_capture", Scheduler.DEFAULT_GROUP, new Date(time));
 
     trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captAg);
     trigger.getJobDataMap().put(JobParameters.CAPTURE_PROPS, props);
     trigger.getJobDataMap().put(JobParameters.MEDIA_PACKAGE, mp);
 
-    //Schedule the update
+    // Schedule the update
     try {
       sched.scheduleJob(job, trigger);
       Thread.sleep(60000);
@@ -113,6 +115,6 @@ public class SchedulingTest {
     } catch (InterruptedException e) {
       logger.error("Interrupted Exception: {}", e.getMessage());
       e.printStackTrace();
-    }    
+    }
   }
 }

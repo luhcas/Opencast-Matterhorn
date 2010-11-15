@@ -1,3 +1,18 @@
+/**
+ *  Copyright 2009, 2010 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
 package org.opencastproject.capture.pipeline.bins.sinks;
 
 import java.io.IOException;
@@ -27,11 +42,10 @@ public class SinkBinTest {
 
   /** Capture Device Properties created for unit testing **/
   CaptureDevice captureDevice = null;
-  
-  
+
   /** True to run the tests */
   private static boolean gstreamerInstalled = true;
-  
+
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(CaptureDeviceBinTest.class);
 
@@ -50,14 +64,14 @@ public class SinkBinTest {
       gstreamerInstalled = false;
     }
   }
-   
+
   @AfterClass
   public static void tearDownGst() {
     if (gstreamerInstalled) {
-      //Gst.deinit();
+      // Gst.deinit();
     }
   }
-  
+
   @Before
   public void setup() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
@@ -66,7 +80,7 @@ public class SinkBinTest {
     maxSizeBuffersDefault = testQueue.getPropertyDefaultValue("max-size-buffers").toString();
     maxSizeBytesDefault = testQueue.getPropertyDefaultValue("max-size-bytes").toString();
     maxSizeTimeDefault = testQueue.get("max-size-time").toString();
-    
+
   }
 
   @After
@@ -75,178 +89,214 @@ public class SinkBinTest {
       return;
     captureDevice = null;
   }
-  
+
   /** Salient queue properties to test are bufferCount, bufferBytes and bufferTime. **/
-  private Properties createQueueProperties(String bufferCount, String bufferBytes, String bufferTime){
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, null, null, null, null, bufferCount, bufferBytes, bufferTime, null);
+  private Properties createQueueProperties(String bufferCount, String bufferBytes, String bufferTime) {
+    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, null, null, null, null,
+            bufferCount, bufferBytes, bufferTime, null);
     return captureDeviceProperties;
   }
 
   @Test
   public void testSetQueuePropertiesAllNull() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties(null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SinkBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
-    checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault, maxSizeTimeDefault); 
+    checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault, maxSizeTimeDefault);
   }
 
-  /** Test setting the max buffer size  of the queue to different values **/ 
+  /** Test setting the max buffer size of the queue to different values **/
   @Test
   public void testSetQueuePropertieMaxSizeBuffersToBelowMinimum() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties("-1", null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SinkBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
-    checkQueueProperties(sinkBin, "-1", maxSizeBytesDefault, maxSizeTimeDefault); 
+    checkQueueProperties(sinkBin, "-1", maxSizeBytesDefault, maxSizeTimeDefault);
   }
-  
+
   @Test
   public void testSetQueuePropertieMaxSizeBuffersToMinimum() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties("0", null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SinkBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
-    checkQueueProperties(sinkBin, "0", maxSizeBytesDefault, maxSizeTimeDefault); 
+    checkQueueProperties(sinkBin, "0", maxSizeBytesDefault, maxSizeTimeDefault);
   }
-  
+
   @Test
   public void testSetQueuePropertieMaxSizeBuffersToNormalValue() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties("250", null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SinkBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
-    checkQueueProperties(sinkBin, "250", maxSizeBytesDefault, maxSizeTimeDefault); 
+    checkQueueProperties(sinkBin, "250", maxSizeBytesDefault, maxSizeTimeDefault);
   }
-  
+
   @Test
   public void testSetQueuePropertieMaxSizeBuffersToMaximumValue() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties("" + Integer.MAX_VALUE, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SinkBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
-    checkQueueProperties(sinkBin, "" + Integer.MAX_VALUE, maxSizeBytesDefault, maxSizeTimeDefault); 
+    checkQueueProperties(sinkBin, "" + Integer.MAX_VALUE, maxSizeBytesDefault, maxSizeTimeDefault);
   }
-  
+
   @Test
   public void testSetQueuePropertieMaxSizeBuffersToGarbageValue() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties("Invalid String", null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
     SinkBin sinkBin = createSinkBinWantException(captureDeviceProperties);
   }
-  
+
   /** Test setting the max bytes size of the queue to different values **/
   @Test
   public void testSetQueuePropertieMaxSizeBytesToBelowMinimum() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties(null, "-1", null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SinkBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
-    checkQueueProperties(sinkBin, maxSizeBuffersDefault, "-1", maxSizeTimeDefault); 
-    
+    checkQueueProperties(sinkBin, maxSizeBuffersDefault, "-1", maxSizeTimeDefault);
+
   }
-  
+
   @Test
   public void testSetQueuePropertieMaxSizeBytesToMinimum() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties(null, "0", null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SinkBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
-    checkQueueProperties(sinkBin, maxSizeBuffersDefault, "0", maxSizeTimeDefault); 
+    checkQueueProperties(sinkBin, maxSizeBuffersDefault, "0", maxSizeTimeDefault);
   }
-  
+
   @Test
   public void testSetQueuePropertieMaxSizeBytesToNormalValue() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties(null, "12485760", null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SinkBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
-    checkQueueProperties(sinkBin, maxSizeBuffersDefault, "12485760", maxSizeTimeDefault); 
-    
+    checkQueueProperties(sinkBin, maxSizeBuffersDefault, "12485760", maxSizeTimeDefault);
+
   }
-  
+
   @Test
   public void testSetQueuePropertieMaxSizeBytesToMaximumValue() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties(null, "" + Integer.MAX_VALUE, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SinkBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
-    checkQueueProperties(sinkBin, maxSizeBuffersDefault, "" + Integer.MAX_VALUE, maxSizeTimeDefault); 
-    
+    checkQueueProperties(sinkBin, maxSizeBuffersDefault, "" + Integer.MAX_VALUE, maxSizeTimeDefault);
+
   }
-  
+
   @Test
   public void testSetQueuePropertieMaxSizeBytesToGarbageValue() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties(null, "Invalid String", null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
     SinkBin sinkBin = createSinkBinWantException(captureDeviceProperties);
   }
- 
+
   /** Test setting the max time size of the queue to different values **/
   @Test
   public void testSetQueuePropertieMaxSizeTimeToBelowMinimum() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties(null, null, "-1");
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SinkBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
-    checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault,"-1"); 
-    
+    checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault, "-1");
+
   }
-  
+
   @Test
   public void testSetQueuePropertieMaxSizeTimeToMinimum() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties(null, null, "0");
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SinkBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
-    checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault, "0"); 
+    checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault, "0");
   }
-  
+
   @Test
   public void testSetQueuePropertieMaxSizeTimeToNormalValue() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties(null, null, "1000000");
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SinkBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
-    checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault, "1000000"); 
-    
+    checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault, "1000000");
+
   }
-  
+
   @Test
   public void testSetQueuePropertieMaxSizeTimeToMaximumValue() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties(null, null, "" + Integer.MAX_VALUE);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SinkBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
-    checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault, "" + Integer.MAX_VALUE); 
-    
+    checkQueueProperties(sinkBin, maxSizeBuffersDefault, maxSizeBytesDefault, "" + Integer.MAX_VALUE);
+
   }
-  
+
   @Test
   public void testSetQueuePropertieMaxSizeTimeToGarbageValue() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties(null, "Invalid String", null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     @SuppressWarnings("unused")
     SinkBin sinkBin = createSinkBinWantException(captureDeviceProperties);
   }
-  
+
   @Test
   public void testGhostPadIsCreated() {
-    if (!gstreamerInstalled) return;
+    if (!gstreamerInstalled)
+      return;
     Properties captureDeviceProperties = createQueueProperties(null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", captureDeviceProperties);
     SinkBin sinkBin = createSinkBinDontWantException(captureDeviceProperties);
     List<Pad> binPads = sinkBin.getBin().getPads();
     Assert.assertEquals(1, binPads.size());
     Assert.assertEquals(SinkBin.GHOST_PAD_NAME, binPads.get(0).getName());
   }
-  
-  private void checkQueueProperties(SinkBin sinkBin, String expectedMaxSizeBuffer, String expectedMaxSizeBytes, String expectedMaxSizeTime) {
+
+  private void checkQueueProperties(SinkBin sinkBin, String expectedMaxSizeBuffer, String expectedMaxSizeBytes,
+          String expectedMaxSizeTime) {
     Assert.assertEquals(expectedMaxSizeBuffer, sinkBin.queue.get("max-size-buffers").toString());
     Assert.assertEquals(expectedMaxSizeBytes, sinkBin.queue.get("max-size-bytes").toString());
     Assert.assertEquals(expectedMaxSizeTime, sinkBin.queue.get("max-size-time").toString());
@@ -262,14 +312,14 @@ public class SinkBinTest {
     }
     return sinkBin;
   }
-  
+
   private SinkBin createSinkBinWantException(Properties captureDeviceProperties) {
     SinkBin sinkBin = null;
     try {
       sinkBin = createSinkBin(captureDeviceProperties);
       Assert.fail();
     } catch (Exception e) {
-      
+
     }
     return sinkBin;
   }
@@ -277,17 +327,17 @@ public class SinkBinTest {
   private SinkBin createSinkBin(Properties captureDeviceProperties) throws Exception {
     SinkBin sinkBin;
     sinkBin = new SinkBin(captureDevice, captureDeviceProperties) {
-      
+
       @Override
       protected void linkElements() throws Exception {
-        
+
       }
-      
+
       @Override
       protected void addElementsToBin() {
-        
+
       }
-      
+
       @Override
       public Element getSrc() {
         return queue;

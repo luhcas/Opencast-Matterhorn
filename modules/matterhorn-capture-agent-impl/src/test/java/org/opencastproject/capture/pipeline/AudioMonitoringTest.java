@@ -23,21 +23,41 @@ import org.gstreamer.Pipeline;
 import org.gstreamer.elements.FakeSink;
 import org.gstreamer.elements.FakeSrc;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
+@Ignore
 public class AudioMonitoringTest {
   
+  /** Logging facility */
+  private static final Logger logger = LoggerFactory.getLogger(CaptureDeviceBinTest.class);
+
+  /** True to run the tests */
+  private static boolean gstreamerInstalled = true;
+
   @BeforeClass
   public static void setup() {
-    if (!new File("/usr/lib/libjv4linfo.so").exists())
+    try {
+      Gst.init();
+    } catch (Throwable t) {
+      logger.warn("Skipping agent tests due to unsatisifed gstreamer installation");
+      gstreamerInstalled = false;
+    }
+    if (!new File("/usr/lib/libjv4linfo.so").exists()) {
       return;
+    }
     Gst.init();
   }
   
   @Test
   public void testAudioMonitor() {
+    if (!gstreamerInstalled)
+      return;
     if (!new File("/usr/lib/libjv4linfo.so").exists())
       return;
     Pipeline pipeline = new Pipeline();
@@ -47,10 +67,9 @@ public class AudioMonitoringTest {
     if (!src.link(sink)) {
       Assert.fail();
     }
-    
+
     boolean ret = AudioMonitoring.addAudioMonitor(pipeline, src, sink, 0, 0, "test");
     Assert.assertTrue(ret);
     Assert.assertEquals(8, pipeline.getElements().size());
   }
-  
 }

@@ -49,17 +49,17 @@ public abstract class PartialBin {
     confidenceMonitoringProperties = new ConfidenceMonitoringProperties(captureDevice, properties);
   }
   
-  abstract protected void createElements();
-  abstract protected void setElementProperties() throws Exception;
+  protected abstract void createElements();
+  protected abstract void setElementProperties() throws Exception;
   
   /** Descendents will use this to add all the elements they create to the Bin. **/
-  abstract protected void addElementsToBin();
+  protected abstract void addElementsToBin();
   
-  abstract protected void createGhostPads() throws Exception;
+  protected abstract void createGhostPads() throws Exception;
   
   /** Descendants will implement this to link all of their elements together in the proper order. 
    * @throws Exception **/
-  abstract protected void linkElements() throws Exception;
+  protected abstract void linkElements() throws Exception;
   
   public Bin getBin(){
     return bin;

@@ -28,7 +28,10 @@ public abstract class AudioSrcBin extends SrcBin{
     super(captureDevice, properties);
   }
 
-  /** Audio convert is used to convert any input audio into a format usable by gstreamer. Might not be strictly necessary. **/
+  /**
+   * Audio convert is used to convert any input audio into a format usable by gstreamer. Might not be strictly
+   * necessary.
+   **/
   Element audioconvert;
   
   /** Create all the common elements necessary for audio sources including a queue and an audio converter. **/

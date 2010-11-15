@@ -169,7 +169,7 @@ public class ConfidenceMonitorRestService {
 
       Element devices = document.createElement("agent-devices");
       for (String name : names) {
-        String nameType[] = name.split(",");
+        String[] nameType = name.split(",");
         AgentDevice device = new AgentDevice(nameType[0], nameType[1]);
         Node deviceNode = device.toXml(document);
         if (deviceNode != null)
@@ -207,14 +207,15 @@ public class ConfidenceMonitorRestService {
     JSONObject jsonOutput = new JSONObject();
     if (service == null) {
       // Error code 500 -> 503
-      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity("Confidence monitor unavailable, please wait...").build();
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity(
+              "Confidence monitor unavailable, please wait...").build();
     }
     // Attempt to grab audio information, if exception is thrown the device does not exist
     try {
       List<Double> rmsValues = service.getRMSValues(device, timestamp);
       for (int i = 0; i < rmsValues.size(); i++) {
-        double value_db = rmsValues.get(i);
-        double rms = Math.pow(10, value_db / 20);
+        double valueDB = rmsValues.get(i);
+        double rms = Math.pow(10, valueDB / 20);
         rms = Math.round(rms * 100.00) / 100.00;
         rmsValues.set(i, rms);
       }

@@ -1,3 +1,18 @@
+/**
+ *  Copyright 2009, 2010 The Regents of the University of California
+ *  Licensed under the Educational Community License, Version 2.0
+ *  (the "License"); you may not use this file except in compliance
+ *  with the License. You may obtain a copy of the License at
+ *
+ *  http://www.osedu.org/licenses/ECL-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing,
+ *  software distributed under the License is distributed on an "AS IS"
+ *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ *  or implied. See the License for the specific language governing
+ *  permissions and limitations under the License.
+ *
+ */
 package org.opencastproject.capture.pipeline.bins;
 
 import java.util.Properties;
@@ -10,7 +25,30 @@ public class BinTestHelpers {
   public static final String V4L2_LOCATION = "/dev/video0";
   public static final String HAUPPAGE_LOCATION = "/dev/video1";
   
-  public static Properties createCaptureDeviceProperties(String customSource, String codec, String bitrate, String quantizer, String container, String bufferCount, String bufferBytes, String bufferTime, String framerate){
+ 
+  private static String operatingSystemName = null;
+  
+  public static String getOsName()
+  {
+    if(operatingSystemName == null) { 
+      operatingSystemName = System.getProperty("os.name");
+    }
+    return operatingSystemName;
+  }
+
+  public static boolean isWindows(){
+    return getOsName().startsWith("Windows");
+  }
+
+  public static boolean isLinux() {
+    return getOsName().startsWith("Linux");
+  }
+  
+
+  
+  public static Properties createCaptureDeviceProperties(String customSource, String codec, String bitrate, 
+          String quantizer, String container, String bufferCount, String bufferBytes, String bufferTime, 
+          String framerate){
     Properties properties = new Properties();
    
     if (customSource != null)
@@ -34,7 +72,8 @@ public class BinTestHelpers {
     return properties;
   }
   
-  public static CaptureDevice createCaptureDevice(String sourceLocation, SourceDeviceName sourceDeviceName, String friendlyName, String outputLocation, Properties captureDeviceProperties) {
+  public static CaptureDevice createCaptureDevice(String sourceLocation, SourceDeviceName sourceDeviceName, 
+          String friendlyName, String outputLocation, Properties captureDeviceProperties) {
     CaptureDevice captureDevice = new CaptureDevice(sourceLocation, sourceDeviceName, friendlyName, outputLocation);
     captureDevice.properties = captureDeviceProperties;
     return captureDevice;

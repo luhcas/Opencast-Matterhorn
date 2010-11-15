@@ -45,13 +45,13 @@ public class V4L2SrcBin extends VideoSrcBin{
 
   @Override
   protected void linkElements() throws Exception {
-	  /** TODO - akm220 - Check to see if this queue negatively effects performance. **/
-	  /*if (!v4l2src.link(queue))
-      throw new Exception(CaptureDeviceBin.formatBinError(captureDevice, v4l2src, queue));
-    else if (!queue.link(videorate))
-      throw new Exception(CaptureDeviceBin.formatBinError(captureDevice, queue, videorate));
-    else if (!videorate.link(fpsfilter))
-      throw new Exception(CaptureDeviceBin.formatBinError(captureDevice, videorate, fpsfilter));*/
+    /** TODO - akm220 - Check to see if this queue negatively effects performance. **/
+    /*
+     * if (!v4l2src.link(queue)) throw new Exception(CaptureDeviceBin.formatBinError(captureDevice, v4l2src, queue));
+     * else if (!queue.link(videorate)) throw new Exception(CaptureDeviceBin.formatBinError(captureDevice, queue,
+     * videorate)); else if (!videorate.link(fpsfilter)) throw new
+     * Exception(CaptureDeviceBin.formatBinError(captureDevice, videorate, fpsfilter));
+     */
     if (!v4l2src.link(videorate))
       throw new UnableToLinkGStreamerElementsException(captureDevice, v4l2src, videorate);
     else if (!videorate.link(fpsfilter))

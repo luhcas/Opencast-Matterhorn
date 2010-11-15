@@ -35,15 +35,15 @@ import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsEx
 
 public class EpiphanVGA2USBV4LSrcBin extends V4LSrcBin {
   // This was never set to anything else, should be moved to a constant?
-  public static int v4lsrc_index = 0;
+  public static int v4lsrcIndex = 0;
   
   private CaptureAgent captureAgent = null;
   private Element v4lsrc;
-  private Element v4l_identity;
-  private Pad v4l_identity_sink_pad;
+  private Element v4lIdentity;
+  private Pad v4lIdentitySinkPad;
   private Element videotestsrc;
   private Element resolutionCapsfilter;
-  private Element static_identity;
+  private Element staticIdentity;
   private Element selector;
   private Element segment;
   private Element ffmpegcolorspace;
@@ -61,7 +61,8 @@ public class EpiphanVGA2USBV4LSrcBin extends V4LSrcBin {
    *          signal in case the Epiphan card disapears. 
    * @throws Exception - If our elements fail to link together we will throw an exception.
    */
-  public EpiphanVGA2USBV4LSrcBin(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgent) throws Exception {
+  public EpiphanVGA2USBV4LSrcBin(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgent)
+          throws Exception {
     super(captureDevice, properties);
     this.captureAgent = captureAgent;
     setEventProbe();
@@ -86,22 +87,22 @@ public class EpiphanVGA2USBV4LSrcBin extends V4LSrcBin {
    *  backup video source
    */
   private void setEventProbe() {
-    v4l_identity_sink_pad.addEventProbe(new EpiphanVGA2USBV4LEventProbe(captureAgent, captureDevice, bin));
+    v4lIdentitySinkPad.addEventProbe(new EpiphanVGA2USBV4LEventProbe(captureAgent, captureDevice, bin));
   }
 
   /** Create all of the Elements that we will need to use for our Epiphan source **/
   protected void createElements(){
     super.createElements();
     // The source for the epiphan card
-    v4lsrc = ElementFactory.make("v4lsrc", "v4lsrc_" + captureDevice.getLocation() + "_" + v4lsrc_index);
+    v4lsrc = ElementFactory.make("v4lsrc", "v4lsrc_" + captureDevice.getLocation() + "_" + v4lsrcIndex);
     // An identity to stick between the epiphan card and the rest of the pipeline so that we can detect a disconnect.
-    v4l_identity = ElementFactory.make("identity", captureDevice.getLocation() + "_v4l_identity");
+    v4lIdentity = ElementFactory.make("identity", captureDevice.getLocation() + "_v4l_identity");
     // The pad through which to catch the disconnection
-    v4l_identity_sink_pad = v4l_identity.getStaticPad("sink");
+    v4lIdentitySinkPad = v4lIdentity.getStaticPad("sink");
     // Elements that enable VGA signal hotswapping
     videotestsrc = ElementFactory.make("videotestsrc", null);
     resolutionCapsfilter = setupResolutionFilter();
-    static_identity = ElementFactory.make("identity", captureDevice.getLocation() + "_static_identity");
+    staticIdentity = ElementFactory.make("identity", captureDevice.getLocation() + "_static_identity");
     // The input-selector which allows us to choose which source we want to capture from
     selector = ElementFactory.make("input-selector", captureDevice.getLocation() + "_selector");
     segment = ElementFactory.make("identity", captureDevice.getLocation() + "_identity-segment");
@@ -111,21 +112,21 @@ public class EpiphanVGA2USBV4LSrcBin extends V4LSrcBin {
   /** Set the element properties for our Epiphan source **/
   protected void setElementProperties(){
     v4lsrc.set("device", captureDevice.getLocation());
-    v4l_identity.set("sync", true);
+    v4lIdentity.set("sync", true);
     videotestsrc.set("pattern", 0);
     // Make the test source live, or images just queue up and reconnecting won't work
     videotestsrc.set("is-live", true);
     // Tell identity elements to be false, this shouldn't be required as it is the default
-    v4l_identity.set("sync", false);
-    static_identity.set("sync", false);
+    v4lIdentity.set("sync", false);
+    staticIdentity.set("sync", false);
     segment.set("sync", false);
   }
   
   /** Add all of our elements to the source bin. **/
   @Override
   protected void addElementsToBin(){
-    bin.addMany(v4lsrc, v4l_identity, queue, videotestsrc, resolutionCapsfilter, 
-            static_identity, selector, segment, videorate, fpsfilter, 
+    bin.addMany(v4lsrc, v4lIdentity, queue, videotestsrc, resolutionCapsfilter, 
+            staticIdentity, selector, segment, videorate, fpsfilter, 
             ffmpegcolorspace);
   }
   
@@ -161,10 +162,10 @@ public class EpiphanVGA2USBV4LSrcBin extends V4LSrcBin {
     // Add backup video source in case we lose the VGA signal
     if (!videotestsrc.link(resolutionCapsfilter))
       error = CaptureDeviceBin.formatBinError(captureDevice, videotestsrc, resolutionCapsfilter);
-    else if (!resolutionCapsfilter.link(static_identity))
-      error = CaptureDeviceBin.formatBinError(captureDevice, resolutionCapsfilter, static_identity);
-    else if (!static_identity.link(selector))
-      error = CaptureDeviceBin.formatBinError(captureDevice, static_identity, selector);
+    else if (!resolutionCapsfilter.link(staticIdentity))
+      error = CaptureDeviceBin.formatBinError(captureDevice, resolutionCapsfilter, staticIdentity);
+    else if (!staticIdentity.link(selector))
+      error = CaptureDeviceBin.formatBinError(captureDevice, staticIdentity, selector);
     return error;
   }
   
@@ -181,7 +182,8 @@ public class EpiphanVGA2USBV4LSrcBin extends V4LSrcBin {
       //error = addBackupTestSource(error, selector, segment, videorate, fpsfilter);
     if (captureDeviceProperties.confidence) {
       boolean trace = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG));
-      if (!VideoMonitoring.addVideoMonitor(bin, fpsfilter, ffmpegcolorspace, confidenceMonitoringProperties.interval, confidenceMonitoringProperties.imageloc, confidenceMonitoringProperties.device, trace))
+      if (!VideoMonitoring.addVideoMonitor(bin, fpsfilter, ffmpegcolorspace, confidenceMonitoringProperties.interval, 
+      confidenceMonitoringProperties.imageloc, confidenceMonitoringProperties.device, trace))
         error = CaptureDeviceBin.formatBinError(captureDevice, fpsfilter, ffmpegcolorspace);
     } else {
       if (!fpsfilter.link(ffmpegcolorspace))
@@ -196,10 +198,10 @@ public class EpiphanVGA2USBV4LSrcBin extends V4LSrcBin {
    * **/
   @Override
   protected void linkElements() throws Exception{
-    if (!v4lsrc.link(v4l_identity))
-      throw new UnableToLinkGStreamerElementsException(captureDevice, v4lsrc, v4l_identity);
-    else if (!v4l_identity.link(queue))
-      throw new UnableToLinkGStreamerElementsException(captureDevice, v4l_identity, queue);
+    if (!v4lsrc.link(v4lIdentity))
+      throw new UnableToLinkGStreamerElementsException(captureDevice, v4lsrc, v4lIdentity);
+    else if (!v4lIdentity.link(queue))
+      throw new UnableToLinkGStreamerElementsException(captureDevice, v4lIdentity, queue);
     else if (!queue.link(selector))
       throw new UnableToLinkGStreamerElementsException(captureDevice, queue, selector);
     else if (!selector.link(segment))
@@ -213,16 +215,16 @@ public class EpiphanVGA2USBV4LSrcBin extends V4LSrcBin {
     // Add backup video source in case we lose the VGA signal
     else if (!videotestsrc.link(resolutionCapsfilter))
       throw new UnableToLinkGStreamerElementsException(captureDevice, videotestsrc, resolutionCapsfilter);
-    else if (!resolutionCapsfilter.link(static_identity))
-      throw new UnableToLinkGStreamerElementsException(captureDevice, resolutionCapsfilter, static_identity);
-    else if (!static_identity.link(selector))
-      throw new UnableToLinkGStreamerElementsException(captureDevice, static_identity, selector);
+    else if (!resolutionCapsfilter.link(staticIdentity))
+      throw new UnableToLinkGStreamerElementsException(captureDevice, resolutionCapsfilter, staticIdentity);
+    else if (!staticIdentity.link(selector))
+      throw new UnableToLinkGStreamerElementsException(captureDevice, staticIdentity, selector);
   }
 
   /** Checks to see if the Epiphan card is present, if not we will use the videotestsrc instead. **/
   private void checkVGASignalAtStartUp(Element selector) {
     // Check it see if there is a VGA signal on startup
-    if (check_epiphan(captureDevice.getLocation())) {
+    if (checkEpiphan(captureDevice.getLocation())) {
       useEpiphanAsSource(selector);
     } else {
       doNotUseEpiphanAsSource(selector);
@@ -231,17 +233,17 @@ public class EpiphanVGA2USBV4LSrcBin extends V4LSrcBin {
 
   private void useEpiphanAsSource(Element selector) {
     logger.debug("Have signal on startup");
-    Pad new_pad = selector.getStaticPad("sink0");
-    selector.set("active-pad", new_pad);
+    Pad newPad = selector.getStaticPad("sink0");
+    selector.set("active-pad", newPad);
   }
 
   private void doNotUseEpiphanAsSource(Element selector) {
     // No VGA signal on start up, remove Epiphan source
     /** Adam - He didn't seem to be using broken broken = true; **/
-    Element src = bin.getElementByName("v4lsrc_" + captureDevice.getLocation() + "_" + v4lsrc_index);
+    Element src = bin.getElementByName("v4lsrc_" + captureDevice.getLocation() + "_" + v4lsrcIndex);
     bin.remove(src);
-    Pad new_pad = selector.getStaticPad("sink1");
-    selector.set("active-pad", new_pad);
+    Pad newPad = selector.getStaticPad("sink1");
+    selector.set("active-pad", newPad);
   }
 
   private void createThreadToCheckNewVGASignal() {
@@ -256,7 +258,7 @@ public class EpiphanVGA2USBV4LSrcBin extends V4LSrcBin {
    * @param device the absolute path to the device
    * @return true iff there is a VGA signal
    */
-  protected static synchronized boolean check_epiphan(String device) {
+  protected static synchronized boolean checkEpiphan(String device) {
     try {
       V4LInfo v4linfo = JV4LInfo.getV4LInfo(device);
       String deviceName = v4linfo.getVideoCapability().getName();
