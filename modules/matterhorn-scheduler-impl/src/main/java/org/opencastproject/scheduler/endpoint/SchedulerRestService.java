@@ -24,6 +24,7 @@ import org.opencastproject.scheduler.impl.EventListImpl;
 import org.opencastproject.scheduler.impl.MetadataImpl;
 import org.opencastproject.scheduler.impl.SchedulerServiceImpl;
 import org.opencastproject.util.DocUtil;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
@@ -263,11 +264,10 @@ public class SchedulerRestService {
       return Response.status(Status.BAD_REQUEST).build();
     } else {
       try {
-        if (service.removeEvent(eventId)) {
-          return Response.noContent().type("").build(); // remove content-type, no message-body.
-        } else {
-          return Response.status(Status.NOT_FOUND).build();
-        }
+        service.removeEvent(eventId);
+        return Response.noContent().type("").build(); // remove content-type, no message-body.
+      } catch(NotFoundException e) {
+        return Response.status(Status.NOT_FOUND).build();
       } catch (Exception e) {
         logger.warn("Unable to delete event with id '{}': {}", eventId, e);
         return Response.serverError().build();
@@ -288,12 +288,11 @@ public class SchedulerRestService {
   public Response updateEvent(@PathParam("eventId") String eventId, @FormParam("event") EventImpl event) {
     if (!eventId.isEmpty() && event != null) {
       try {
-        if (service.updateEvent(event)) {
-          return Response.noContent().type("").build(); // remove content-type, no message-body.
-        } else {
-          return Response.status(Status.NOT_FOUND).build();
-        }
-      } catch (Exception e) {
+        service.updateEvent(event);
+        return Response.noContent().type("").build(); // remove content-type, no message-body.
+      } catch (NotFoundException e) {
+        return Response.status(Status.NOT_FOUND).build();
+      } catch(Exception e) {
         logger.warn("Unable to update event with id '{}': {}", eventId, e);
         return Response.serverError().build();
       }

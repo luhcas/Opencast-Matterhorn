@@ -181,7 +181,7 @@ public class ComposeWorkflowOperationHandlerTest {
           throws WorkflowOperationException {
     // Add the mediapackage to a workflow instance
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl();
-    workflowInstance.setId("workflow-encode-test");
+    workflowInstance.setId(1);
     workflowInstance.setState(WorkflowState.RUNNING);
     workflowInstance.setMediaPackage(mp);
     WorkflowOperationInstanceImpl operationInstance = new WorkflowOperationInstanceImpl();

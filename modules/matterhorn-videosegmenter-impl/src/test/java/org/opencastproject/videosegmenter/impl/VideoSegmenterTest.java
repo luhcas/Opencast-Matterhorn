@@ -122,7 +122,7 @@ public class VideoSegmenterTest {
       }
     });
     EasyMock.replay(workspace);
-    Job receipt = new ReceiptStub();
+    Job receipt = new JobStub();
 
     ServiceRegistry remoteServiceManager = EasyMock.createNiceMock(ServiceRegistry.class);
     EasyMock.expect(remoteServiceManager.createJob((String) EasyMock.anyObject())).andReturn(receipt).anyTimes();
@@ -187,7 +187,7 @@ public class VideoSegmenterTest {
     assertFalse("Found an unexpected third video segment", si.hasNext());
   }
 
-  class ReceiptStub implements Job {
+  class JobStub implements Job {
     MediaPackageElement element;
     Status status;
 
@@ -199,8 +199,8 @@ public class VideoSegmenterTest {
       return null;
     }
 
-    public String getId() {
-      return null;
+    public long getId() {
+      return -1;
     }
 
     public Status getStatus() {
@@ -218,7 +218,7 @@ public class VideoSegmenterTest {
     public void setHost(String host) {
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
     }
 
     public void setStatus(Status status) {

@@ -200,9 +200,7 @@
               *;resolution:=optional
             </Import-Package>
             <Service-Component>
-              OSGI-INF/ingest-service-delegating.xml,
-              OSGI-INF/ingest-service-local.xml,
-              OSGI-INF/ingest-service-remote.xml,
+              OSGI-INF/ingest-service.xml,
               OSGI-INF/ingest-service-rest.xml,
               OSGI-INF/inbox-scanner.xml
             </Service-Component>

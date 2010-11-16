@@ -58,9 +58,9 @@ public class IngestServiceImplTest {
   private URI urlAttachment;
   private URI urlPackage;
 
-  private static String workflowInstanceID = "junit_workflow_instance_id";
+  private static long workflowInstanceID = 1L;
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Before
   public void setup() throws Exception {
 

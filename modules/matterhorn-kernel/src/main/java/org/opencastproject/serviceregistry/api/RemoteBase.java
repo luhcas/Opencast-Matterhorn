@@ -162,17 +162,17 @@ public class RemoteBase implements JobProducer {
   }
 
   /**
-   * Polls for receipts until they return a status of {@link Status#FINISHED} or {@link Status#FAILED}
+   * Polls for a job until they return a status of {@link Status#FINISHED} or {@link Status#FAILED}
    * 
-   * @param r
-   *          The receipt id
+   * @param id
+   *          The job identifier
    * @return The receipt
    * @throws NotFoundException
    *           if the job doesn't exist
    * @throws ServiceRegistryException
    *           if communication with the service registry fails
    */
-  protected Job poll(String id) throws NotFoundException, ServiceRegistryException {
+  protected Job poll(long id) throws NotFoundException, ServiceRegistryException {
     while (true) {
       try {
         Job r = getJob(id);
@@ -189,9 +189,9 @@ public class RemoteBase implements JobProducer {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#getJob(long)
    */
-  public Job getJob(String id) throws NotFoundException, ServiceRegistryException {
+  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
     return remoteServiceManager.getJob(id);
   }
 

@@ -15,19 +15,6 @@
  */
 package org.opencastproject.job.api;
 
-import java.util.Date;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlID;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.apache.commons.io.IOUtils;
 import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
@@ -35,7 +22,20 @@ import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.Track;
+
+import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
+
+import java.util.Date;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * A long running, asynchronously executed job.
@@ -73,7 +73,7 @@ public class JaxbJob implements Job {
   }
 
   /** The job ID */
-  protected String id;
+  protected long id;
 
   /** The job type */
   protected String jobType;
@@ -107,20 +107,19 @@ public class JaxbJob implements Job {
    * 
    * @see org.opencastproject.job.api.Job#getId()
    */
-  @XmlID
   @XmlAttribute
   @Override
-  public String getId() {
+  public long getId() {
     return id;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.Job#setId(java.lang.String)
+   * @see org.opencastproject.job.api.Job#setId(long)
    */
   @Override
-  public void setId(String id) {
+  public void setId(long id) {
     this.id = id;
   }
 
@@ -357,7 +356,7 @@ public class JaxbJob implements Job {
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof Job) {
-      return ((Job)obj).getId().equals(id);
+      return ((Job)obj).getId() == id;
     }
     return false;
   }
@@ -368,7 +367,7 @@ public class JaxbJob implements Job {
    */
   @Override
   public int hashCode() {
-    return id.hashCode();
+    return (int)id >> 32;
   }
   
   /**

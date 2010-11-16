@@ -107,7 +107,7 @@ public class VideoSegmenterRestEndpoint {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("/{id}.xml")
-  public Response getJob(@PathParam("id") String id) {
+  public Response getJob(@PathParam("id") long id) {
     Job job;
     try {
       job = videoSegmenter.getJob(id);

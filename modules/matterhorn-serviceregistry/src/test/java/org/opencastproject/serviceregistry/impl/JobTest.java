@@ -111,7 +111,7 @@ public class JobTest {
 
   @Test
   public void testGetReceipts() throws Exception {
-    String id = serviceRegistry.createJob(JOB_TYPE_1).getId();
+    long id = serviceRegistry.createJob(JOB_TYPE_1).getId();
     long queuedJobs = serviceRegistry.count(JOB_TYPE_1, Status.QUEUED);
     Assert.assertEquals(1, queuedJobs);
 

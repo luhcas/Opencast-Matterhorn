@@ -41,12 +41,12 @@ public class WorkflowRestEndpointTest {
     // Create a workflow for the service to return
     workflow = new WorkflowInstanceImpl();
     workflow.setTitle("a workflow instance");
-    workflow.setId("workflow1");
+    workflow.setId(1);
 
     // Mock up the behavior of the workflow service
     WorkflowService service = EasyMock.createNiceMock(WorkflowService.class);
     EasyMock.expect(service.listAvailableWorkflowDefinitions()).andReturn(new ArrayList<WorkflowDefinition>());
-    EasyMock.expect(service.getWorkflowById((String) EasyMock.anyObject())).andThrow(new NotFoundException()).times(2)
+    EasyMock.expect(service.getWorkflowById(EasyMock.anyLong())).andThrow(new NotFoundException()).times(2)
             .andReturn(workflow);
     EasyMock.replay(service);
 
@@ -69,13 +69,13 @@ public class WorkflowRestEndpointTest {
 
   @Test
   public void testGetWorkflowInstance() throws Exception {
-    Response json404Response = restService.getWorkflowAsJson("unknown_id");
+    Response json404Response = restService.getWorkflowAsJson(-1);
     Assert.assertEquals(404, json404Response.getStatus());
 
-    Response xml404Response = restService.getWorkflowAsXml("unknown_id");
+    Response xml404Response = restService.getWorkflowAsXml(-1);
     Assert.assertEquals(404, xml404Response.getStatus());
 
-    Response xmlResponse = restService.getWorkflowAsXml("workflow1");
+    Response xmlResponse = restService.getWorkflowAsXml(1);
     Assert.assertEquals(200, xmlResponse.getStatus());
     Assert.assertEquals(workflow, xmlResponse.getEntity());
   }

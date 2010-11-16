@@ -63,7 +63,7 @@ public class PublishWorkflowOperationHandlerTest {
   public void testPublishOperation() throws Exception {
     // Add the mediapackage to a workflow instance
     workflowInstance = new WorkflowInstanceImpl();
-    workflowInstance.setId("workflow-1");
+    workflowInstance.setId(1);
     workflowInstance.setState(WorkflowState.RUNNING);
     workflowInstance.setMediaPackage(mp);
     WorkflowOperationInstanceImpl operationInstance = new WorkflowOperationInstanceImpl();

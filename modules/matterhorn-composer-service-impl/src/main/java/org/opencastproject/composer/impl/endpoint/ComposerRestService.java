@@ -311,7 +311,7 @@ public class ComposerRestService {
   @GET
   @Path("job/{id}.xml")
   @Produces(MediaType.TEXT_XML)
-  public Response getJob(@PathParam("id") String id) {
+  public Response getJob(@PathParam("id") long id) {
     Job job = null;
     try {
       job = composerService.getJob(id);

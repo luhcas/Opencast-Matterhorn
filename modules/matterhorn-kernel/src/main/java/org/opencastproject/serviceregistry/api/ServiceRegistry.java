@@ -138,7 +138,7 @@ public interface ServiceRegistry {
    *          the job id
    * @return the job or null
    */
-  Job getJob(String id) throws NotFoundException, ServiceRegistryException;
+  Job getJob(long id) throws NotFoundException, ServiceRegistryException;
 
   /**
    * Finds the service registrations for this kind of job, ordered by load (lightest to heaviest).

@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.api;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -68,7 +69,7 @@ public class WorkflowStatistics {
   /** The workflow definition reports */
   @XmlElementWrapper(name = "definitions")
   @XmlElement(name = "definition")
-  List<WorkflowDefinitionReport> definitions;
+  List<WorkflowDefinitionReport> definitions = new ArrayList<WorkflowStatistics.WorkflowDefinitionReport>();
 
   /**
    * @return the total
@@ -251,7 +252,7 @@ public class WorkflowStatistics {
     /** The workflow operation reports */
     @XmlElementWrapper(name = "operations")
     @XmlElement(name = "operation")
-    List<OperationReport> operations;
+    List<OperationReport> operations = new ArrayList<WorkflowStatistics.WorkflowDefinitionReport.OperationReport>();
 
     /**
      * @return the id

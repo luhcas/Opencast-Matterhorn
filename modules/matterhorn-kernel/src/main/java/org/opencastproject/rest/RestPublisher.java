@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -115,8 +116,12 @@ public class RestPublisher {
     factory.setBus(bus);
     
     // Remove namespaces from json, since it's not useful for us
+    Map<String, String> namespaceMap = new HashMap<String, String>();
+    namespaceMap.put("http://www.w3.org/2001/XMLSchema-instance", "");
+
     JSONProvider jsonProvider = new JSONProvider();
     jsonProvider.setIgnoreNamespaces(true);
+    jsonProvider.setNamespaceMap(namespaceMap);
     factory.setProvider(jsonProvider);
     
     // Set the service class

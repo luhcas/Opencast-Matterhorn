@@ -84,10 +84,10 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowById(java.lang.String)
+   * @see org.opencastproject.workflow.api.WorkflowService#getWorkflowById(long)
    */
   @Override
-  public WorkflowInstance getWorkflowById(String id) throws WorkflowDatabaseException, NotFoundException {
+  public WorkflowInstance getWorkflowById(long id) throws WorkflowDatabaseException, NotFoundException {
     HttpGet get = new HttpGet("/instance/" + id + ".xml");
     HttpResponse response = getResponse(get, HttpStatus.SC_NOT_FOUND, HttpStatus.SC_OK);
     if (HttpStatus.SC_NOT_FOUND == response.getStatusLine().getStatusCode()) {
@@ -158,8 +158,13 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
   public WorkflowStatistics getStatistics() throws WorkflowDatabaseException {
     HttpGet get = new HttpGet("/statistics");
     HttpResponse response = getResponse(get, HttpStatus.SC_OK);
-    // TODO Implement
-    return null;
+    try {
+      return WorkflowBuilder.getInstance().parseWorkflowStatistics(response.getEntity().getContent());
+    } catch (Exception e) {
+      throw new WorkflowDatabaseException("Unable to load workflow statistics", e);
+    } finally {
+      closeConnection(response);
+    }
   }
 
   /**
@@ -201,11 +206,11 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
    * {@inheritDoc}
    * 
    * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.workflow.api.WorkflowDefinition,
-   *      org.opencastproject.mediapackage.MediaPackage, java.lang.String, java.util.Map)
+   *      org.opencastproject.mediapackage.MediaPackage, Long, java.util.Map)
    */
   @Override
   public WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage,
-          String parentWorkflowId, Map<String, String> properties) throws WorkflowDatabaseException, NotFoundException {
+          Long parentWorkflowId, Map<String, String> properties) throws WorkflowDatabaseException, NotFoundException {
     String url = "/start";
     HttpPost post = new HttpPost(url);
     try {
@@ -215,7 +220,7 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
       }
       params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
       if (parentWorkflowId != null) {
-        params.add(new BasicNameValuePair("parent", parentWorkflowId));
+        params.add(new BasicNameValuePair("parent", parentWorkflowId.toString()));
       }
       if (properties != null) {
         params.add(new BasicNameValuePair("properties", mapToString(properties)));
@@ -327,6 +332,8 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
         return Long.parseLong(body);
       } catch (NumberFormatException e) {
         throw new WorkflowDatabaseException("Unable to parse the response body as a long: " + body);
+      } finally {
+        closeConnection(response);
       }
     }
   }
@@ -334,39 +341,45 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowService#stop(java.lang.String)
+   * @see org.opencastproject.workflow.api.WorkflowService#stop(long)
    */
   @Override
-  public void stop(String workflowInstanceId) throws WorkflowDatabaseException, NotFoundException {
+  public WorkflowInstance stop(long workflowInstanceId) throws WorkflowDatabaseException, NotFoundException {
     HttpPost post = new HttpPost("/stop");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-    params.add(new BasicNameValuePair("id", workflowInstanceId));
+    params.add(new BasicNameValuePair("id", Long.toString(workflowInstanceId)));
     try {
       post.setEntity(new UrlEncodedFormEntity(params));
     } catch (UnsupportedEncodingException e) {
       throw new IllegalStateException("Unable to assemble a remote workflow service request", e);
     }
-    HttpResponse response = getResponse(post, HttpStatus.SC_NO_CONTENT, HttpStatus.SC_NOT_FOUND);
+    HttpResponse response = getResponse(post, HttpStatus.SC_OK, HttpStatus.SC_NOT_FOUND);
     if (response == null) {
       throw new WorkflowDatabaseException("Unexpected HTTP response code");
     } else if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
       throw new NotFoundException("Workflow instance with id='" + workflowInstanceId + "' not found");
     } else {
       logger.info("Workflow '{}' stopped", workflowInstanceId);
-      return;
+      try {
+        return WorkflowBuilder.getInstance().parseWorkflowInstance(response.getEntity().getContent());
+      } catch(Exception e) {
+        throw new WorkflowDatabaseException(e);
+      } finally {
+        closeConnection(response);
+      }
     }
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowService#suspend(java.lang.String)
+   * @see org.opencastproject.workflow.api.WorkflowService#suspend(long)
    */
   @Override
-  public void suspend(String workflowInstanceId) throws WorkflowDatabaseException, NotFoundException {
+  public WorkflowInstance suspend(long workflowInstanceId) throws WorkflowDatabaseException, NotFoundException {
     HttpPost post = new HttpPost("/suspend");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-    params.add(new BasicNameValuePair("id", workflowInstanceId));
+    params.add(new BasicNameValuePair("id", Long.toString(workflowInstanceId)));
     try {
       post.setEntity(new UrlEncodedFormEntity(params));
     } catch (UnsupportedEncodingException e) {
@@ -379,31 +392,37 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
       throw new NotFoundException("Workflow instance with id='" + workflowInstanceId + "' not found");
     } else {
       logger.info("Workflow '{}' suspended", workflowInstanceId);
-      return;
+      try {
+        return WorkflowBuilder.getInstance().parseWorkflowInstance(response.getEntity().getContent());
+      } catch(Exception e) {
+        throw new WorkflowDatabaseException(e);
+      } finally {
+        closeConnection(response);
+      }
     }
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowService#resume(java.lang.String)
+   * @see org.opencastproject.workflow.api.WorkflowService#resume(long)
    */
   @Override
-  public void resume(String workflowInstanceId) throws NotFoundException, WorkflowDatabaseException {
-    resume(workflowInstanceId, null);
+  public WorkflowInstance resume(long workflowInstanceId) throws NotFoundException, WorkflowDatabaseException {
+    return resume(workflowInstanceId, null);
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowService#resume(java.lang.String, java.util.Map)
+   * @see org.opencastproject.workflow.api.WorkflowService#resume(long, java.util.Map)
    */
   @Override
-  public void resume(String workflowInstanceId, Map<String, String> properties) throws NotFoundException,
+  public WorkflowInstance resume(long workflowInstanceId, Map<String, String> properties) throws NotFoundException,
           WorkflowDatabaseException {
     HttpPost post = new HttpPost("/resume");
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-    params.add(new BasicNameValuePair("id", workflowInstanceId));
+    params.add(new BasicNameValuePair("id", Long.toString(workflowInstanceId)));
     params.add(new BasicNameValuePair("properties", mapToString(properties)));
     try {
       post.setEntity(new UrlEncodedFormEntity(params));
@@ -417,7 +436,13 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
       throw new NotFoundException("Workflow instance with id='" + workflowInstanceId + "' not found");
     } else {
       logger.info("Workflow '{}' resumed", workflowInstanceId);
-      return;
+      try {
+        return WorkflowBuilder.getInstance().parseWorkflowInstance(response.getEntity().getContent());
+      } catch(Exception e) {
+        throw new WorkflowDatabaseException(e);
+      } finally {
+        closeConnection(response);
+      }
     }
   }
 

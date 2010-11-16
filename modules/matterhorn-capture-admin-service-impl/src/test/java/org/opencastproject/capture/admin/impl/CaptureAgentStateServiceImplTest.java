@@ -4,18 +4,20 @@ import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
+import org.opencastproject.workflow.api.WorkflowQuery;
+import org.opencastproject.workflow.api.WorkflowService;
+import org.opencastproject.workflow.api.WorkflowSetImpl;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import junit.framework.Assert;
 
+import org.easymock.EasyMock;
 import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.osgi.service.cm.ConfigurationException;
 
-import java.beans.PropertyVetoException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -27,7 +29,7 @@ public class CaptureAgentStateServiceImplTest {
   private long timestamp = -1L;
 
   @Before
-  public void setup() throws PropertyVetoException {
+  public void setup() throws Exception {
     timestamp = System.currentTimeMillis();
     setupService();
 
@@ -37,7 +39,7 @@ public class CaptureAgentStateServiceImplTest {
     capabilities.setProperty("AUDIO", "hw:0");
   }
 
-  private void setupService() throws PropertyVetoException {
+  private void setupService() throws Exception {
     pooledDataSource = new ComboPooledDataSource();
     pooledDataSource.setDriverClass("org.h2.Driver");
     pooledDataSource.setJdbcUrl("jdbc:h2:./target/db" + timestamp + ";LOCK_MODE=1;MVCC=TRUE");
@@ -54,6 +56,12 @@ public class CaptureAgentStateServiceImplTest {
     service.setPersistenceProvider(new PersistenceProvider());
     service.setPersistenceProperties(props);
     service.activate(null);
+
+    WorkflowService workflowService = EasyMock.createNiceMock(WorkflowService.class);
+    EasyMock.expect(workflowService.getWorkflowInstances((WorkflowQuery) EasyMock.anyObject()))
+            .andReturn(new WorkflowSetImpl()).anyTimes();
+    EasyMock.replay(workflowService);
+    service.setWorkflowService(workflowService);
 
     Assert.assertNotNull(service);
   }
@@ -97,7 +105,7 @@ public class CaptureAgentStateServiceImplTest {
 
   private void verifyAgent(String name, String state, Properties caps) {
     Agent agent = service.getAgentState(name);
-    
+
     if (agent != null) {
       Assert.assertEquals(name, agent.getName());
       Assert.assertEquals(state, agent.getState());
@@ -117,10 +125,10 @@ public class CaptureAgentStateServiceImplTest {
     service.setAgentState("agent1", AgentState.CAPTURING);
     Assert.assertEquals(1, service.getKnownAgents().size());
 
-    verifyAgent("notAgent1",null, null);
+    verifyAgent("notAgent1", null, null);
     verifyAgent("agent1", AgentState.CAPTURING, new Properties());
   }
-  
+
   @Test
   public void oneAgentCapabilities() {
     service.setAgentCapabilities("agent1", capabilities);
@@ -132,16 +140,15 @@ public class CaptureAgentStateServiceImplTest {
     service.setAgentState("agent1", AgentState.IDLE);
     Assert.assertEquals(1, service.getKnownAgents().size());
 
-    verifyAgent("notAgent1",null, null);
+    verifyAgent("notAgent1", null, null);
     verifyAgent("agent1", AgentState.IDLE, capabilities);
-    
+
     service.setAgentCapabilities("agent1", new Properties());
     Assert.assertEquals(1, service.getKnownAgents().size());
-    
+
     verifyAgent("notAnAgent", null, null);
     verifyAgent("agent1", AgentState.IDLE, new Properties());
   }
-
 
   @Test
   public void removeAgent() {
@@ -177,7 +184,7 @@ public class CaptureAgentStateServiceImplTest {
   }
 
   @Test
-  public void stickyAgents() throws PropertyVetoException, ConfigurationException {
+  public void stickyAgents() throws Exception {
     Assert.assertEquals(0, service.getKnownAgents().size());
 
     Properties cap1 = new Properties();
@@ -187,7 +194,7 @@ public class CaptureAgentStateServiceImplTest {
     Properties cap3 = new Properties();
     cap3.put("bam", "bam");
 
-    //Setup the two agents and persist them
+    // Setup the two agents and persist them
     service.setAgentState("sticky1", AgentState.IDLE);
     service.setAgentCapabilities("sticky1", cap1);
     service.setAgentState("sticky2", AgentState.CAPTURING);
@@ -195,7 +202,7 @@ public class CaptureAgentStateServiceImplTest {
     service.setAgentState("sticky3", AgentState.UPLOADING);
     service.setAgentCapabilities("sticky3", cap3);
 
-    //Make sure they're set right
+    // Make sure they're set right
     Assert.assertEquals(cap1, service.getAgentCapabilities("sticky1"));
     Assert.assertEquals(AgentState.IDLE, service.getAgentState("sticky1").getState());
     Assert.assertEquals(cap2, service.getAgentCapabilities("sticky2"));
@@ -205,16 +212,16 @@ public class CaptureAgentStateServiceImplTest {
     Assert.assertNull(service.getAgentCapabilities("sticky4"));
     Assert.assertNull(service.getAgentState("sticky4"));
 
-    //Shut down the service completely
+    // Shut down the service completely
     service.deactivate();
     service = null;
 
-    //Restart the service with the same configuration as before
+    // Restart the service with the same configuration as before
     setupService();
 
     Assert.assertEquals(3, service.getKnownAgents().size());
 
-    //The agents should still be there
+    // The agents should still be there
     Assert.assertEquals(cap1, service.getAgentCapabilities("sticky1"));
     Assert.assertEquals(AgentState.IDLE, service.getAgentState("sticky1").getState());
     Assert.assertEquals(cap2, service.getAgentCapabilities("sticky2"));
@@ -241,7 +248,6 @@ public class CaptureAgentStateServiceImplTest {
     Assert.assertEquals(0, service.getKnownRecordings().size());
   }
 
-
   @Test
   public void noRecordings() {
     Assert.assertEquals(0, service.getKnownRecordings().size());
@@ -249,7 +255,7 @@ public class CaptureAgentStateServiceImplTest {
 
   private void verifyRecording(String id, String state) {
     Recording recording = service.getRecordingState(id);
-    
+
     if (state != null) {
       Assert.assertEquals(id, recording.getID());
       Assert.assertEquals(state, recording.getState());

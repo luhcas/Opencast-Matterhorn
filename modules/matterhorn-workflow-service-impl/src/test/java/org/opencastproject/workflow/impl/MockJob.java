@@ -19,7 +19,6 @@ import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.MediaPackageElement;
 
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * A mock job implementation for unit testing.
@@ -27,10 +26,10 @@ import java.util.UUID;
 public class MockJob implements Job {
 
   MockJob() {
-    this.id = UUID.randomUUID().toString();
+    this.id = (long)(Math.random()*Long.MAX_VALUE);
   }
 
-  String id;
+  long id;
   MediaPackageElement element;
   Status status;
 
@@ -42,7 +41,7 @@ public class MockJob implements Job {
     return null;
   }
 
-  public String getId() {
+  public long getId() {
     return id;
   }
 
@@ -61,7 +60,7 @@ public class MockJob implements Job {
   public void setHost(String host) {
   }
 
-  public void setId(String id) {
+  public void setId(long id) {
   }
 
   public void setStatus(Status status) {
@@ -86,4 +85,5 @@ public class MockJob implements Job {
   public Date getDateStarted() {
     return null;
   }
+
 }

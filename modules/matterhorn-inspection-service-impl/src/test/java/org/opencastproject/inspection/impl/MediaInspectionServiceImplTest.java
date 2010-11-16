@@ -159,8 +159,8 @@ public class MediaInspectionServiceImplTest {
       return null;
     }
 
-    public String getId() {
-      return null;
+    public long getId() {
+      return -1;
     }
 
     public Status getStatus() {
@@ -178,7 +178,7 @@ public class MediaInspectionServiceImplTest {
     public void setHost(String host) {
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
     }
 
     public void setStatus(Status status) {

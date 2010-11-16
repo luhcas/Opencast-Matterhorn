@@ -250,7 +250,7 @@ public class ServiceRegistryEndpoint {
   @GET
   @Path("/job/{id}.xml")
   @Produces(MediaType.TEXT_XML)
-  public Response getJobAsXml(@PathParam("id") String id) {
+  public Response getJobAsXml(@PathParam("id") long id) {
     try {
       Job job = serviceRegistry.getJob(id);
       return Response.ok(new JaxbJob(job)).build();
@@ -264,7 +264,7 @@ public class ServiceRegistryEndpoint {
   @GET
   @Path("/job/{id}.json")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getJobAsJson(@PathParam("id") String id) {
+  public Response getJobAsJson(@PathParam("id") long id) {
     try {
       Job job = serviceRegistry.getJob(id);
       if (job == null) {

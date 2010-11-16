@@ -19,8 +19,12 @@ import org.opencastproject.capture.admin.api.Agent;
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
+import org.opencastproject.capture.admin.api.RecordingState;
+import org.opencastproject.workflow.api.WorkflowDatabaseException;
+import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
-//import org.opencastproject.capture.admin.api.RecordingStateUpdate;
 
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
@@ -30,11 +34,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -335,6 +339,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    *      java.lang.String)
    */
   public boolean setRecordingState(String id, String state) {
+    resumeWorkflow(id, state);
     Recording req = recordings.get(id);
     if (req != null) {
       logger.debug("Setting Recording {} to state {}.", id, state);
@@ -352,6 +357,53 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       Recording r = new RecordingImpl(id, state);
       recordings.put(id, r);
       return true;
+    }
+  }
+
+  /**
+   * Resumes a workflow instance associated with this capture, if one exists.
+   * 
+   * @param recordingId
+   *          the recording id, which is assumed to correspond to the scheduled event id
+   * @param state
+   *          the new state for this recording
+   */
+  protected void resumeWorkflow(String recordingId, String state) {
+    if (!RecordingState.CAPTURING.equals(state) && !RecordingState.UPLOADING.equals(state)) {
+      // TODO: Update workflows on capture failures too
+      logger.info("Recording state updated to {}.  Not updating an associated workflow.", state);
+      return;
+    }
+    String operation = null;
+    if (RecordingState.CAPTURING.equals(state)) {
+      operation = "schedule";
+    } else {
+      operation = "capture";
+    }
+    WorkflowQuery query = new WorkflowQuery().withCurrentOperation("schedule");
+    WorkflowInstance[] candidates = null;
+    try {
+      candidates = workflowService.getWorkflowInstances(query).getItems();
+    } catch (WorkflowDatabaseException e) {
+      logger.warn("Unable to update workflow for recording {}: {}", recordingId, e);
+      return;
+    }
+    WorkflowInstance workflowToUpdate = null;
+    for (WorkflowInstance wfInstance : candidates) {
+      WorkflowOperationInstance op = wfInstance.getCurrentOperation();
+      if (recordingId.equals(op.getConfiguration("schedule.id"))) {
+        workflowToUpdate = wfInstance;
+        break;
+      }
+    }
+    if (workflowToUpdate == null) {
+      logger.warn("Unable to find a workflow in operation {} with a recording.id '{}'", operation, recordingId);
+    } else {
+      try {
+        workflowService.resume(workflowToUpdate.getId());
+      } catch (Exception e) {
+        logger.warn("Unable to update workflow {}: {}", workflowToUpdate.getId(), e);
+      }
     }
   }
 

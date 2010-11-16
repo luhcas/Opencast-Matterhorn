@@ -28,7 +28,6 @@ public interface WorkflowDefinition {
    * The variable in a workflow definition that is to be replaced by the reason for an operation's failure.
    */
   final String FAILURE_KEY = "failure.message";
-  
 
   /**
    * The short title of this workflow definition
@@ -36,18 +35,41 @@ public interface WorkflowDefinition {
   String getId();
 
   /**
+   * Sets the identifier
+   * 
+   * @param id
+   *          the workflow definition identifier
+   */
+  void setId(String id);
+
+  /**
    * The title for this workflow definition
    */
   String getTitle();
-  
+
+  /**
+   * Sets the title
+   * 
+   * @param title
+   *          the workflow definition title
+   */
+  void setTitle(String title);
+
   /**
    * A longer description of this workflow definition
    */
   String getDescription();
 
   /**
-   * An XML String describing the configuration parameter/panel for this
-   * WorkflowDefinition.
+   * Sets the description
+   * 
+   * @param description
+   *          the workflow definition description
+   */
+  void setDescription(String description);
+
+  /**
+   * An XML String describing the configuration parameter/panel for this WorkflowDefinition.
    */
   String getConfigurationPanel();
 
@@ -57,9 +79,9 @@ public interface WorkflowDefinition {
   List<WorkflowOperationDefinition> getOperations();
 
   /**
-   * Whether this definition is published.  This information is useful for user interfaces.
+   * Whether this definition is published. This information is useful for user interfaces.
+   * 
    * @return Whether this is a published workflow definition
    */
   boolean isPublished();
 }
-

@@ -143,6 +143,35 @@ public class WorkflowBuilder {
   }
 
   /**
+   * Loads workflow statistics from the given input stream.
+   * 
+   * @param in
+   *          the input stream
+   * @return the workflow statistics
+   * @throws Exception
+   *           if creating the workflow statistics fails
+   */
+  public WorkflowStatistics parseWorkflowStatistics(InputStream in) throws Exception {
+    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+    WorkflowStatistics stats = unmarshaller.unmarshal(
+            DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in), WorkflowStatistics.class).getValue();
+    return stats;
+  }
+
+  /**
+   * Loads workflow statistics from the given xml string.
+   * 
+   * @param xml
+   *          the xml serialized representation of the workflow statistics
+   * @return the workflow statistics
+   * @throws Exception
+   *           if creating the workflow statistics fails
+   */
+  public WorkflowStatistics parseWorkflowStatistics(String xml) throws Exception {
+    return parseWorkflowStatistics(IOUtils.toInputStream(xml, "UTF8"));
+  }
+
+  /**
    * Loads a set of workflow instances from the given input stream.
    * 
    * @param in

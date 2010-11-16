@@ -153,7 +153,7 @@ public class DistributeWorkflowOperationHandlerTest {
   private WorkflowInstance getWorkflowInstance(String sourceTags, String targetTags) {
     // Add the mediapackage to a workflow instance
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl();
-    workflowInstance.setId("workflow-distribute-test");
+    workflowInstance.setId(1);
     workflowInstance.setState(WorkflowState.RUNNING);
     workflowInstance.setMediaPackage(mp);
     WorkflowOperationInstanceImpl operationInstance = new WorkflowOperationInstanceImpl();

@@ -15,13 +15,23 @@
  */
 package org.opencastproject.serviceregistry.impl;
 
+import org.opencastproject.job.api.JaxbJob;
+import org.opencastproject.mediapackage.AbstractMediaPackageElement;
+import org.opencastproject.mediapackage.Attachment;
+import org.opencastproject.mediapackage.Catalog;
+import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.Track;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Date;
-import java.util.UUID;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -36,18 +46,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-
-import org.opencastproject.job.api.JaxbJob;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
-import org.opencastproject.mediapackage.Attachment;
-import org.opencastproject.mediapackage.Catalog;
-import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.mediapackage.Track;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A long running, asynchronously executed job. This concrete implementations adds JPA annotations to {@link JaxbJob}.
@@ -80,7 +80,6 @@ public class JobJpaImpl extends JaxbJob {
    */
   public JobJpaImpl(ServiceRegistrationJpaImpl serviceRegistration) {
     this();
-    setId(UUID.randomUUID().toString());
     setStatus(Status.QUEUED);
     setDateCreated(new Date());
     setHost(serviceRegistration.getHost());
@@ -106,10 +105,10 @@ public class JobJpaImpl extends JaxbJob {
    * @see org.opencastproject.job.api.Job#getId()
    */
   @Id
-  @XmlID
+  @GeneratedValue
   @XmlAttribute
   @Override
-  public String getId() {
+  public long getId() {
     return id;
   }
 

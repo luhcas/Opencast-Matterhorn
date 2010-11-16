@@ -269,10 +269,11 @@ public class WorkflowServiceImplTest {
   public void testParentWorkflow() throws Exception {
     WorkflowInstance originalInstance = service.start(workingDefinition, mediapackage1, null);
     WorkflowInstance childInstance = service.start(workingDefinition, mediapackage1, originalInstance.getId(), null);
-    Assert.assertEquals(originalInstance.getId(), service.getWorkflowById(childInstance.getId()).getParentId());
+    Assert.assertNotNull(service.getWorkflowById(childInstance.getId()).getParentId());
+    Assert.assertEquals(originalInstance.getId(), (long)service.getWorkflowById(childInstance.getId()).getParentId());
 
     try {
-      service.start(workingDefinition, mediapackage1, "bad parent ID", null);
+      service.start(workingDefinition, mediapackage1, new Long(1876234678), null);
       Assert.fail("Workflows should not be started with bad parent IDs");
     } catch (NotFoundException e) {
     } // the exception is expected

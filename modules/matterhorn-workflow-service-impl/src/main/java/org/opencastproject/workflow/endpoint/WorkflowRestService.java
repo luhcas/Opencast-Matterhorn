@@ -45,7 +45,6 @@ import org.opencastproject.workflow.impl.WorkflowServiceImpl;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.osgi.service.component.ComponentContext;
@@ -158,6 +157,16 @@ public class WorkflowRestService {
     instanceEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, instanceEndpoint);
 
+    // Workflow statistics
+    RestEndpoint statisticsEndpoint = new RestEndpoint("stats", RestEndpoint.Method.GET, "/statistics.{format}",
+    "Get workflow instance statistics");
+    statisticsEndpoint.addFormat(new Format("xml", null, null));
+    statisticsEndpoint.addFormat(new Format("json", null, null));
+    statisticsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Valid request, results returned"));
+    statisticsEndpoint.addPathParam(new Param("format", Type.STRING, "xml", "The format of the results: xml or json"));
+    statisticsEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, statisticsEndpoint);
+    
     // Operation Handlers
     RestEndpoint handlersEndpoint = new RestEndpoint("handlers", RestEndpoint.Method.GET, "/handlers.json",
             "List all registered workflow operation handlers (implementations)");
@@ -202,7 +211,7 @@ public class WorkflowRestService {
     // Stop a Workflow Instance
     RestEndpoint stopEndpoint = new RestEndpoint("stop", RestEndpoint.Method.POST, "/stop",
             "Stop a running workflow instance");
-    stopEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("workflow stopped"));
+    stopEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("the stopped workflow"));
     stopEndpoint.addStatus(org.opencastproject.util.doc.Status
             .NOT_FOUND("A workflow instance with this ID was not found"));
     stopEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
@@ -212,7 +221,7 @@ public class WorkflowRestService {
     // Suspend a Workflow Instance
     RestEndpoint suspendEndpoint = new RestEndpoint("suspend", RestEndpoint.Method.POST, "/suspend",
             "Suspend a running workflow instance");
-    suspendEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Workflow suspended"));
+    suspendEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("the suspended workflow"));
     suspendEndpoint.addStatus(org.opencastproject.util.doc.Status
             .NOT_FOUND("A workflow instance with this ID was not found"));
     suspendEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
@@ -223,7 +232,7 @@ public class WorkflowRestService {
     RestEndpoint resumeAndReplaceEndpoint = new RestEndpoint("replaceAndresume", RestEndpoint.Method.POST,
             "/replaceAndresume", "Resume a suspended workflow instance, replacing the mediapackage");
     resumeAndReplaceEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .NO_CONTENT("Suspended workflow has now resumed"));
+            .OK("the resumed workflow"));
     resumeAndReplaceEndpoint.addStatus(org.opencastproject.util.doc.Status
             .NOT_FOUND("A workflow instance with this ID was not found"));
     resumeAndReplaceEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
@@ -236,7 +245,7 @@ public class WorkflowRestService {
 
     RestEndpoint resumeEndpoint = new RestEndpoint("resume", RestEndpoint.Method.POST, "/resume",
             "Resume a suspended workflow instance");
-    resumeEndpoint.addStatus(org.opencastproject.util.doc.Status.NO_CONTENT("Suspended workflow has now resumed"));
+    resumeEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("the resumed workflow"));
     resumeEndpoint.addStatus(org.opencastproject.util.doc.Status
             .NOT_FOUND("A workflow instance with this ID was not found"));
     resumeEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
@@ -327,14 +336,22 @@ public class WorkflowRestService {
   }
 
   @GET
-  @Path("/statistics")
-  public Response getStatistics() {
+  @Produces(MediaType.TEXT_XML)
+  @Path("/statistics.xml")
+  public Response getStatisticsAsXml() {
     try {
       WorkflowStatistics statistics = service.getStatistics();
       return Response.ok(statistics).build();
     } catch (WorkflowDatabaseException e) {
       throw new WebApplicationException(e);
     }
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("/statistics.json")
+  public Response getStatisticsAsJson() {
+    return getStatisticsAsXml();
   }
 
   @SuppressWarnings("unchecked")
@@ -444,7 +461,7 @@ public class WorkflowRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("instance/{id}.xml")
-  public Response getWorkflowAsXml(@PathParam("id") String id) {
+  public Response getWorkflowAsXml(@PathParam("id") long id) {
     WorkflowInstance instance;
     try {
       instance = service.getWorkflowById(id);
@@ -459,7 +476,7 @@ public class WorkflowRestService {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("instance/{id}.json")
-  public Response getWorkflowAsJson(@PathParam("id") String id) {
+  public Response getWorkflowAsJson(@PathParam("id") long id) {
     return getWorkflowAsXml(id);
   }
 
@@ -470,8 +487,16 @@ public class WorkflowRestService {
           @FormParam("mediapackage") MediaPackageImpl mp, @FormParam("parent") String parentWorkflowId,
           @FormParam("properties") LocalHashMap localMap) {
     Map<String, String> properties = localMap.getMap();
+    Long parentIdAsLong = null;
+    if(parentWorkflowId != null) {
+      try {
+        parentIdAsLong = Long.parseLong(parentWorkflowId);
+      } catch(NumberFormatException e) {
+        throw new WebApplicationException(e);
+      }
+    }
     try {
-      return (WorkflowInstanceImpl) service.start(workflowDefinition, mp, StringUtils.trimToNull(parentWorkflowId),
+      return (WorkflowInstanceImpl) service.start(workflowDefinition, mp, parentIdAsLong,
               properties);
     } catch (WorkflowDatabaseException e) {
       throw new WebApplicationException(e);
@@ -482,11 +507,11 @@ public class WorkflowRestService {
 
   @POST
   @Path("stop")
-  @Produces(MediaType.TEXT_PLAIN)
-  public Response stop(@FormParam("id") String workflowInstanceId) {
+  @Produces(MediaType.TEXT_XML)
+  public Response stop(@FormParam("id") long workflowInstanceId) {
     try {
-      service.stop(workflowInstanceId);
-      return Response.noContent().build();
+      WorkflowInstance workflow = service.stop(workflowInstanceId);
+      return Response.ok(workflow).build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
     } catch (WorkflowDatabaseException e) {
@@ -496,11 +521,11 @@ public class WorkflowRestService {
 
   @POST
   @Path("suspend")
-  @Produces(MediaType.TEXT_PLAIN)
-  public Response suspend(@FormParam("id") String workflowInstanceId) {
+  @Produces(MediaType.TEXT_XML)
+  public Response suspend(@FormParam("id") long workflowInstanceId) {
     try {
-      service.suspend(workflowInstanceId);
-      return Response.noContent().build();
+      WorkflowInstance workflow = service.suspend(workflowInstanceId);
+      return Response.ok(workflow).build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
     } catch (WorkflowDatabaseException e) {
@@ -510,8 +535,8 @@ public class WorkflowRestService {
 
   @POST
   @Path("resume")
-  @Produces(MediaType.TEXT_PLAIN)
-  public Response resume(@FormParam("id") String workflowInstanceId, @FormParam("properties") LocalHashMap properties) {
+  @Produces(MediaType.TEXT_XML)
+  public Response resume(@FormParam("id") long workflowInstanceId, @FormParam("properties") LocalHashMap properties) {
     Map<String, String> map;
     if (properties == null) {
       map = new HashMap<String, String>();
@@ -519,8 +544,8 @@ public class WorkflowRestService {
       map = properties.getMap();
     }
     try {
-      service.resume(workflowInstanceId, map);
-      return Response.noContent().build();
+      WorkflowInstance workflow = service.resume(workflowInstanceId, map);
+      return Response.ok(workflow).build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
     } catch (WorkflowDatabaseException e) {
@@ -530,8 +555,8 @@ public class WorkflowRestService {
 
   @POST
   @Path("replaceAndresume")
-  @Produces(MediaType.TEXT_PLAIN)
-  public Response resume(@FormParam("id") String workflowInstanceId,
+  @Produces(MediaType.TEXT_XML)
+  public Response resume(@FormParam("id") long workflowInstanceId,
           @FormParam("mediapackage") MediaPackageImpl mediaPackage, @FormParam("properties") LocalHashMap properties) {
     Map<String, String> map;
     if (properties == null) {
@@ -540,13 +565,13 @@ public class WorkflowRestService {
       map = properties.getMap();
     }
     try {
+      WorkflowInstance workflow = service.getWorkflowById(workflowInstanceId);
       if (mediaPackage != null) {
-        WorkflowInstance workflow = service.getWorkflowById(workflowInstanceId);
         workflow.setMediaPackage(mediaPackage);
         service.update(workflow);
       }
       service.resume(workflowInstanceId, map);
-      return Response.noContent().build();
+      return Response.ok(workflow).build();
     } catch (WorkflowDatabaseException e) {
       throw new WebApplicationException(e);
     } catch (NotFoundException e) {
@@ -556,7 +581,7 @@ public class WorkflowRestService {
 
   @POST
   @Path("update")
-  public Response resume(@FormParam("workflow") WorkflowInstance workflowInstance) {
+  public Response update(@FormParam("workflow") WorkflowInstance workflowInstance) {
     try {
       service.update(workflowInstance);
       return Response.noContent().build();

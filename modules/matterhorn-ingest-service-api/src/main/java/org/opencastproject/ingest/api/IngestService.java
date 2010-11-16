@@ -20,11 +20,12 @@ import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.identifier.HandleException;
 import org.opencastproject.util.ConfigurationException;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Map;
 
@@ -34,22 +35,24 @@ import java.util.Map;
 public interface IngestService {
 
   /**
-   * Add an existing compressed MediaPackage to the repository.
+   * Ingests the compressed mediapackage and starts the default workflow as defined by the
+   * <code>org.opencastproject.workflow.default.definition</code> key, found in the system configuration.
    * 
    * @param ZippedMediaPackage
    *          A zipped file containing manifest, tracks, catalogs and attachments
    * @return Workflow instance.
    * @throws MediaPackageException
-   * @throws FileNotFoundException
+   *           if the mediapackage contained in the zip stream is invalid
    * @throws IOException
+   *           if reading from the input stream fails
    * @throws IngestException
    *           if an unexpected error occurs
    */
-  WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage) throws MediaPackageException,
-          FileNotFoundException, IOException, IngestException;
+  WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage) throws MediaPackageException, IOException,
+          IngestException;
 
   /**
-   * Add an existing compressed MediaPackage to the repository.
+   * Ingests the compressed mediapackage and starts the workflow as defined by <code>workflowDefinitionID</code>.
    * 
    * @param ZippedMediaPackage
    *          A zipped file containing manifest, tracks, catalogs and attachments
@@ -57,17 +60,20 @@ public interface IngestService {
    *          workflow to be used with this media package
    * @return WorkflowInstance the workflow instance resulting from this ingested mediapackage
    * @throws MediaPackageException
-   *           If the zipped mediapackage is malformed
+   *           if the mediapackage contained in the zip stream is invalid
    * @throws IOException
-   *           if a low-level I/O exception occurs reading or writing streams
+   *           if reading from the input stream fails
    * @throws IngestException
    *           if an unexpected error occurs
+   * @throws NotFoundException
+   *           if the workflow definition was not found
    */
   WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID)
-          throws MediaPackageException, IngestException, IOException;
+          throws MediaPackageException, IngestException, IOException, NotFoundException;
 
   /**
-   * Add an existing compressed MediaPackage to the repository.
+   * Ingests the compressed mediapackage and starts the workflow as defined by <code>workflowDefinitionID</code>. The
+   * properties specified in <code>properties</code> will be submitted as configuration data to the workflow.
    * 
    * @param ZippedMediaPackage
    *          A zipped file containing manifest, tracks, catalogs and attachments
@@ -77,14 +83,46 @@ public interface IngestService {
    *          configuration parameters for the workflow
    * @return Workflow instance.
    * @throws MediaPackageException
-   * @throws FileNotFoundException
+   *           if the mediapackage contained in the zip stream is invalid
    * @throws IOException
+   *           if reading from the input stream fails
    * @throws IngestException
    *           if an unexpected error occurs
+   * @throws NotFoundException
+   *           if the workflow definition was not found
    */
   WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID,
-          Map<String, String> wfConfig) throws MediaPackageException, FileNotFoundException, IOException,
-          IngestException;
+          Map<String, String> wfConfig) throws MediaPackageException, IOException, IngestException, NotFoundException;
+
+  /**
+   * Ingests the compressed mediapackage and starts the workflow as defined by <code>workflowDefinitionID</code>. The
+   * properties specified in <code>properties</code> will be submitted as configuration data to the workflow.
+   * <p>
+   * The steps defined in that workflow will be appended to the already running workflow instance
+   * <code>workflowId</code>. If that workflow can't be found, a {@link NotFoundException} will be thrown. If the
+   * <code>workflowId</code> is null, a new {@link WorkflowInstance} is created.
+   * 
+   * @param ZippedMediaPackage
+   *          A zipped file containing manifest, tracks, catalogs and attachments
+   * @param workflowDefinitionID
+   *          workflow to be used with this media package
+   * @param wfConfig
+   *          configuration parameters for the workflow
+   * @param workflowId
+   *          the workflow instance
+   * @return Workflow instance.
+   * @throws MediaPackageException
+   *           if the mediapackage contained in the zip stream is invalid
+   * @throws IOException
+   *           if reading from the input stream fails
+   * @throws IngestException
+   *           if an unexpected error occurs
+   * @throws NotFoundException
+   *           if either one of the workflow definition or workflow instance was not found
+   */
+  WorkflowInstance addZippedMediaPackage(InputStream ZippedMediaPackage, String workflowDefinitionID,
+          Map<String, String> wfConfig, Long worfklowId) throws MediaPackageException, IOException, IngestException,
+          NotFoundException;
 
   /**
    * Create a new MediaPackage in the repository.
@@ -211,8 +249,8 @@ public interface IngestService {
           MediaPackage mediaPackage) throws MediaPackageException, IOException, IngestException;
 
   /**
-   * Broadcasts an event, that media package is ingested. After broadcast ACK message is expected from ConductorService.
-   * If message contains exception, it will be thrown.
+   * Ingests the mediapackage and starts the default workflow as defined by the
+   * <code>org.opencastproject.workflow.default.definition</code> key, found in the system configuration.
    * 
    * @param mediaPackage
    *          The specific Matterhorn MediaPackage being ingested
@@ -223,8 +261,7 @@ public interface IngestService {
   WorkflowInstance ingest(MediaPackage mediaPackage) throws IllegalStateException, IngestException;
 
   /**
-   * Broadcasts an event, that media package is ingested. After broadcast ACK message is expected from ConductorService.
-   * If message contains exception, it will be thrown.
+   * Ingests the mediapackage and starts the workflow as defined by <code>workflowDefinitionID</code>.
    * 
    * @param mediaPackage
    *          The specific Matterhorn MediaPackage being ingested
@@ -233,13 +270,15 @@ public interface IngestService {
    * @return Workflow instance id.
    * @throws IngestException
    *           if an unexpected error occurs
+   * @throws NotFoundException
+   *           if the workflow defintion can't be found
    */
   WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID) throws IllegalStateException,
-          IngestException;
+          IngestException, NotFoundException;
 
   /**
-   * Broadcasts an event, that media package is ingested. After broadcast ACK message is expected from ConductorService.
-   * If message contains exception, it will be thrown.
+   * Ingests the mediapackage and starts the workflow as defined by <code>workflowDefinitionID</code>. The properties
+   * specified in <code>properties</code> will be submitted as configuration data to the workflow.
    * 
    * @param mediaPackage
    *          The specific Matterhorn MediaPackage being ingested
@@ -250,9 +289,36 @@ public interface IngestService {
    * @return Workflow instance id.
    * @throws IngestException
    *           if an unexpected error occurs
+   * @throws NotFoundException
+   *           if the workflow defintion can't be found
    */
   WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID, Map<String, String> properties)
-          throws IllegalStateException, IngestException;
+          throws IllegalStateException, IngestException, NotFoundException;
+
+  /**
+   * Ingests the mediapackage and starts the workflow as defined by <code>workflowDefinitionID</code>. The properties
+   * specified in <code>properties</code> will be submitted as configuration data to the workflow.
+   * <p>
+   * The steps defined in that workflow will be appended to the already running workflow instance
+   * <code>workflowId</code>. If that workflow can't be found, a {@link NotFoundException} will be thrown. If the
+   * <code>workflowId</code> is null, a new {@link WorkflowInstance} is created.
+   * 
+   * @param mediaPackage
+   *          The specific Matterhorn MediaPackage being ingested
+   * @param workflowDefinitionID
+   *          workflow to be used with this media package
+   * @param properties
+   *          configuration properties for the workflow
+   * @param workflowId
+   *          the workflow identifier
+   * @return Workflow instance id.
+   * @throws IngestException
+   *           if an unexpected error occurs
+   * @throws NotFoundException
+   *           if either one of the workflow definition or workflow instance was not found
+   */
+  WorkflowInstance ingest(MediaPackage mediaPackage, String workflowDefinitionID, Map<String, String> properties,
+          Long workflowId) throws IllegalStateException, IngestException, NotFoundException;
 
   /**
    * Delete an existing MediaPackage and any linked files from the temporary ingest filestore.

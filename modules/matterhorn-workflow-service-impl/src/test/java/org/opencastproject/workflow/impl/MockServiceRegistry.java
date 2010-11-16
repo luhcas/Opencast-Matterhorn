@@ -31,7 +31,7 @@ import java.util.Map;
  * An in-memory mock service registry.
  */
 public class MockServiceRegistry implements ServiceRegistry {
-  Map<String, Job> map = new HashMap<String, Job>();
+  Map<Long, Job> map = new HashMap<Long, Job>();
 
   @Override
   public long count(String serviceType, Job.Status status) throws ServiceRegistryException {
@@ -44,7 +44,7 @@ public class MockServiceRegistry implements ServiceRegistry {
   }
 
   @Override
-  public Job getJob(String id) throws NotFoundException, ServiceRegistryException {
+  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
     Job j = map.get(id);
     if (j == null)
       throw new NotFoundException();

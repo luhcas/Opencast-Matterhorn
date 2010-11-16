@@ -15,9 +15,6 @@
  */
 package org.opencastproject.workflow.api;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,8 +34,6 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 @XmlRootElement(name="definition", namespace="http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class WorkflowDefinitionImpl implements WorkflowDefinition {
-  private static final Logger logger = LoggerFactory.getLogger(WorkflowDefinitionImpl.class);
-
   public WorkflowDefinitionImpl() {}
 
   @XmlID

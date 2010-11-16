@@ -342,10 +342,10 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getJob(java.lang.String)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getJob(long)
    */
   @Override
-  public Job getJob(String id) throws NotFoundException, ServiceRegistryException {
+  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
     String servicePath = "job/" + id + ".xml";
     HttpGet get = new HttpGet(UrlSupport.concat(serviceURL, servicePath));
     HttpResponse response = null;

@@ -926,9 +926,9 @@ public class ComposerServiceImpl implements ComposerService {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.JobProducer#getJob(java.lang.String)
+   * @see org.opencastproject.job.api.JobProducer#getJob(long)
    */
-  public Job getJob(String id) throws NotFoundException, ServiceRegistryException {
+  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
     return serviceRegistry.getJob(id);
   }
 

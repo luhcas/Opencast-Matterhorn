@@ -37,6 +37,7 @@ import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
 @Access(AccessType.FIELD)
 @XmlType(name="Metadata")
 public class MetadataImpl implements Metadata {
+  
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(name = "METADATA_ID", length=36)

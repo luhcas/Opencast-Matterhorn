@@ -838,7 +838,14 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     logger.debug("Sending the file " + fileDesc.getAbsolutePath() + " with a size of "+ fileDesc.length());
 
     setRecordingState(recID, RecordingState.UPLOADING);
-
+    
+    // Post the 
+    try {
+      entities.addPart("workflowId", new StringBody(recID));
+    } catch (UnsupportedEncodingException e) {
+      logger.warn("What's an exception anyway?");
+    }
+    
     postMethod.setEntity(entities);
 
     // Send the file

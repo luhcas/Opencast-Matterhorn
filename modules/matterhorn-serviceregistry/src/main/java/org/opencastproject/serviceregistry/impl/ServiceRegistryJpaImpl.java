@@ -43,6 +43,7 @@ import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceStatistics;
 import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
@@ -203,19 +204,21 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getJob(java.lang.String)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getJob(long)
    */
   @Override
-  public Job getJob(String id) {
+  public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
     EntityManager em = emf.createEntityManager();
     try {
       Job job = em.find(JobJpaImpl.class, id);
-      if (job != null) {
-        // JPA's caches can be out of date if external changes (e.g. another node in the cluster) have been made to
-        // this row in the database
-        em.refresh(job);
-      }
+      if (job == null)
+        throw new NotFoundException("Job " + id + " not found");
+      // JPA's caches can be out of date if external changes (e.g. another node in the cluster) have been made to
+      // this row in the database
+      em.refresh(job);
       return job;
+    } catch (Exception e) {
+      throw new ServiceRegistryException(e);
     } finally {
       em.close();
     }
@@ -227,7 +230,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#updateJob(org.opencastproject.job.api.Job)
    */
   @Override
-  public void updateJob(Job job) {
+  public void updateJob(Job job) throws ServiceRegistryException {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
@@ -236,14 +239,14 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       try {
         fromDb = em.find(JobJpaImpl.class, job.getId());
       } catch (NoResultException e) {
-        throw new IllegalArgumentException("job " + job + " is not a persistent object.", e);
+        throw new NotFoundException("job " + job + " is not a persistent object.", e);
       }
       update(fromDb, (JaxbJob) job);
       tx.commit();
-    } catch (RollbackException e) {
+    } catch (Exception e) {
       if (tx.isActive())
         tx.rollback();
-      throw e;
+      throw new ServiceRegistryException(e);
     } finally {
       em.close();
     }
@@ -296,7 +299,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    *      java.lang.String)
    */
   @Override
-  public ServiceRegistration registerService(String serviceType, String baseUrl, String path) {
+  public ServiceRegistration registerService(String serviceType, String baseUrl, String path) throws ServiceRegistryException {
     return setOnlineStatus(serviceType, baseUrl, path, true, false);
   }
 
@@ -307,7 +310,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    *      java.lang.String, boolean)
    */
   @Override
-  public ServiceRegistration registerService(String serviceType, String baseUrl, String path, boolean jobProducer) {
+  public ServiceRegistration registerService(String serviceType, String baseUrl, String path, boolean jobProducer) throws ServiceRegistryException {
     return setOnlineStatus(serviceType, baseUrl, path, true, jobProducer);
   }
 
@@ -336,7 +339,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    * @return the service registration
    */
   protected ServiceRegistration setOnlineStatus(String serviceType, String baseUrl, String path, boolean online,
-          Boolean jobProducer) {
+          Boolean jobProducer) throws ServiceRegistryException {
     if (isBlank(serviceType) || isBlank(baseUrl)) {
       throw new IllegalArgumentException("serviceType and baseUrl must not be blank");
     }
@@ -365,9 +368,10 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       }
       tx.commit();
       return registration;
-    } catch (RollbackException e) {
-      tx.rollback();
-      throw e;
+    } catch (Exception e) {
+      if (tx.isActive())
+        tx.rollback();
+      throw new ServiceRegistryException(e);
     } finally {
       em.close();
     }
@@ -379,7 +383,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#unRegisterService(java.lang.String, java.lang.String)
    */
   @Override
-  public void unRegisterService(String serviceType, String baseUrl) {
+  public void unRegisterService(String serviceType, String baseUrl) throws ServiceRegistryException {
     setOnlineStatus(serviceType, baseUrl, null, false, null);
   }
 
@@ -621,14 +625,22 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       String serviceType = (String) reference.getProperty(RestPublisher.SERVICE_TYPE_PROPERTY);
       String servicePath = (String) reference.getProperty(RestPublisher.SERVICE_PATH_PROPERTY);
       boolean jobProducer = (Boolean) reference.getProperty(RestPublisher.SERVICE_JOBPRODUCER_PROPERTY);
-      registerService(serviceType, hostName, servicePath, jobProducer);
+      try {
+        registerService(serviceType, hostName, servicePath, jobProducer);
+      } catch (ServiceRegistryException e) {
+        logger.warn("Unable to register job producer of type " + serviceType + " on host " + hostName);
+      }
       return super.addingService(reference);
     }
 
     @Override
     public void removedService(ServiceReference reference, Object service) {
       String serviceType = (String) reference.getProperty(RestPublisher.SERVICE_TYPE_PROPERTY);
-      unRegisterService(serviceType, hostName);
+      try {
+        unRegisterService(serviceType, hostName);
+      } catch (ServiceRegistryException e) {
+        logger.warn("Unable to unregister job producer of type " + serviceType + " on host " + hostName);
+      }
       super.removedService(reference, service);
     }
   }

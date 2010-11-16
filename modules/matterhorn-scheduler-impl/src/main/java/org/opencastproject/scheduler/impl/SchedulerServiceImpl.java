@@ -15,10 +15,20 @@
  */
 package org.opencastproject.scheduler.impl;
 
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.IncompleteDataException;
+import org.opencastproject.scheduler.api.SchedulerException;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.series.api.SeriesService;
+import org.opencastproject.util.NotFoundException;
+import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowDatabaseException;
+import org.opencastproject.workflow.api.WorkflowDefinition;
+import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowService;
 
 import net.fortuna.ical4j.model.ValidationException;
@@ -37,6 +47,7 @@ import java.net.URLConnection;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,6 +75,24 @@ public class SchedulerServiceImpl implements ManagedService {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImpl.class);
+
+  /** The metadata key used to store the workflow identifier in an event's metadata */
+  public static final String WORKFLOW_INSTANCE_ID_KEY = "org.opencastproject.workflow.id";
+
+  /** The metadata key used to store the workflow definition in an event's metadata */
+  public static final String WORKFLOW_DEFINITION_ID_KEY = "org.opencastproject.workflow.definition";
+  
+  /** The schedule workflow operation identifier */
+  public static final String SCHEDULE_OPERATION_ID = "schedule";
+
+  /** The workflow operation property that stores the event start time, as milliseconds since 1970 */
+  public static final String WORKFLOW_OPERATION_KEY_SCHEDULE_START = "schedule.start";
+
+  /** The workflow operation property that stores the event stop time, as milliseconds since 1970 */
+  public static final String WORKFLOW_OPERATION_KEY_SCHEDULE_STOP = "schedule.stop";
+
+  /** The workflow operation property that stores the event location */
+  public static final String WORKFLOW_OPERATION_KEY_SCHEDULE_LOCATION = "schedule.location";
 
   /** The JPA persistence provider */
   protected PersistenceProvider persistenceProvider;
@@ -110,7 +139,8 @@ public class SchedulerServiceImpl implements ManagedService {
    */
   public void activate(ComponentContext componentContext) {
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.scheduler.impl", persistenceProperties);
-    logger.info("SchedulerService activated.");
+    logger.debug("SchedulerService activating.");
+
     if (componentContext == null) {
       logger.warn("Could not activate because of missing ComponentContext");
       return;
@@ -146,6 +176,55 @@ public class SchedulerServiceImpl implements ManagedService {
     } finally {
       IOUtils.closeQuietly(is);
     }
+  }
+  
+  protected WorkflowDefinition getPreProcessingWorkflowDefinition() throws IllegalStateException {
+    InputStream in = null;
+    try {
+      in = getClass().getResourceAsStream("/scheduler-workflow-definition.xml");
+      return WorkflowBuilder.getInstance().parseWorkflowDefinition(in);
+    } catch (Exception e) {
+      throw new IllegalStateException("Unable to load the preprocessing workflow definition", e);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+  }
+
+  /**
+   * Create a custom workflow definition with the scheduled, capturing, and ingesting operations prepended to the
+   * processing operations.
+   * 
+   * @param event
+   *          The scheduled event
+   * @return the workflow definition
+   */
+  protected WorkflowDefinition getWorkflowDefinition(Event event) {
+    // Get a new instance of the preprocessing workflow definition
+    WorkflowDefinition def = getPreProcessingWorkflowDefinition();
+
+    // Get the chosen workflow definition for this event
+    String chosenWorkflowId = event.getMetadataValueByKey(WORKFLOW_DEFINITION_ID_KEY);
+    if(chosenWorkflowId == null) {
+      logger.warn("No workflow definition chosen for scheduled event {}", event);
+      return def;
+    }
+
+    // Load the chosen workflow definition
+    WorkflowDefinition chosenWorkflowDefinition = null;
+    try {
+      chosenWorkflowDefinition = workflowService.getWorkflowDefinitionById(chosenWorkflowId);
+    } catch (Exception e) {
+      logger.warn("Unable to load the workflow definition {}", chosenWorkflowId);
+      return def;
+    }
+
+    // Merge the the chosen definition
+    def.setId(chosenWorkflowDefinition.getId());
+    def.setTitle(chosenWorkflowDefinition.getTitle());
+    def.setDescription(chosenWorkflowDefinition.getDescription());
+    def.getOperations().addAll(chosenWorkflowDefinition.getOperations());
+
+    return def;
   }
 
   public Map<String, Object> getPersistenceProperties() {
@@ -187,20 +266,96 @@ public class SchedulerServiceImpl implements ManagedService {
   /**
    * Persist an event
    * 
-   * @param Event
-   *          e
+   * @param event
+   *          the event to add
+   * 
    * @return The event that has been persisted
    */
-  public Event addEvent(Event e) throws EntityExistsException {
-    EntityManager em = emf.createEntityManager();
-    EventImpl event = (EventImpl) e;
-    EntityTransaction tx = em.getTransaction();
-    tx.begin();
-    em.persist(event);
-    tx.commit();
-    em.close();
+  public Event addEvent(Event event) throws SchedulerException {
+    EntityManager em = null;
+    EntityTransaction tx = null;
+
+    // Start a workflow so we have an event id that we can associate the event with
+    WorkflowInstance workflow = null;
+    try {
+      workflow = startWorkflowInstance(event);
+    } catch (WorkflowDatabaseException workflowException) {
+      throw new SchedulerException(workflowException);
+    } catch (MediaPackageException mediaPackageException) {
+      throw new SchedulerException(mediaPackageException);
+    }
+
+    try {
+      event.setEventId(workflow.getId());
+      em = emf.createEntityManager();
+      tx = em.getTransaction();
+      event = (EventImpl) event;
+      tx.begin();
+      em.persist(event);
+      tx.commit();
+    } catch (Exception ex) {
+      if (tx != null) {
+        tx.rollback();
+      }
+      throw new SchedulerException("Unable to add event", ex);
+    } finally {
+      if (em != null) {
+        em.close();
+      }
+    }
+
     updated = System.currentTimeMillis();
     return event;
+  }
+
+  /**
+   * Starts a workflow to track this scheduled event.
+   * 
+   * @param event
+   *          the scheduled event
+   * @return the workflow instance
+   * @throws WorkflowDatabaseException
+   *           if the workflow can not be created
+   * @throws MediaPackageException
+   *           if the mediapackage can not be created
+   */
+  protected WorkflowInstance startWorkflowInstance(Event event) throws WorkflowDatabaseException, MediaPackageException {
+    // Build a mediapackage using the event metadata
+    MediaPackage mediapackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
+    mediapackage.setTitle(event.getTitle());
+    mediapackage.setLanguage(event.getLanguage());
+    mediapackage.setLicense(event.getLicense());
+    mediapackage.setSeries(event.getSeriesId());
+    mediapackage.setSeriesTitle(event.getSeries());
+
+    // Build a properties set for this event
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put(WORKFLOW_OPERATION_KEY_SCHEDULE_START, Long.toString(event.getStartDate().getTime()));
+    properties.put(WORKFLOW_OPERATION_KEY_SCHEDULE_STOP, Long.toString(event.getEndDate().getTime()));
+    properties.put(WORKFLOW_OPERATION_KEY_SCHEDULE_LOCATION, event.getDevice());
+
+    // Add the operations from the chosen workflow
+
+    // Start the workflow
+    return workflowService.start(getWorkflowDefinition(event), mediapackage, properties);
+  }
+
+  /**
+   * Removes the workflow associated with a scheduled event that is being removed.
+   * 
+   * @param event
+   *          the scheduled event
+   * @throws NotFoundException
+   *           if the workflow associated with this scheduled event can not be found
+   * @throws WorkflowDatabaseException
+   *           if the workflow can not be stopped
+   */
+  protected void stopWorkflowInstance(Event event) throws NotFoundException {
+    try {
+      workflowService.stop(event.getEventId());
+    } catch (WorkflowDatabaseException e) {
+      logger.warn("can not stop workflow {}, {}", event.getEventId(), e);
+    }
   }
 
   /**
@@ -225,14 +380,24 @@ public class SchedulerServiceImpl implements ManagedService {
   }
 
   /**
+   * Gets an event by its identifier
+   * 
    * @param eventId
+   *          the event identifier
    * @return An event that matches eventId
+   * @throws IllegalArgumentException
+   *           if the eventId is null
+   * @throws IllegalStateException
+   *           if the entity manager factory is not available
+   * @throws NotFoundException
+   *           if no event with this identifier exists
    */
-  public Event getEvent(Long eventId) {
-    logger.debug("loading event with the ID {}", eventId);
-    if (eventId == null || emf == null) {
-      logger.warn("could not find event {}. Null Pointer exeption");
-      return null;
+  public Event getEvent(Long eventId) throws NotFoundException {
+    if (eventId == null) {
+      throw new IllegalArgumentException("eventId must not be null");
+    }
+    if (emf == null) {
+      throw new IllegalStateException("entity manager factory is missing");
     }
     EntityManager em = emf.createEntityManager();
     EventImpl e = null;
@@ -242,7 +407,7 @@ public class SchedulerServiceImpl implements ManagedService {
       em.close();
     }
     if (e == null) {
-      logger.warn("No event found for {}", eventId);
+      throw new NotFoundException("No event found for " + eventId);
     }
     return e;
   }
@@ -398,7 +563,7 @@ public class SchedulerServiceImpl implements ManagedService {
    * 
    * @see org.opencastproject.scheduler.impl.SchedulerServiceImpl#removeEvent(java.lang.String)
    */
-  public boolean removeEvent(Long eventID) {
+  public void removeEvent(Long eventID) throws NotFoundException {
     logger.info("Removing event with the ID {}", eventID);
     Event event;
     EntityManager em = emf.createEntityManager();
@@ -406,7 +571,8 @@ public class SchedulerServiceImpl implements ManagedService {
       em.getTransaction().begin();
       event = em.find(EventImpl.class, eventID);
       if (event == null)
-        return false; // Event not in database
+        throw new NotFoundException("Event " + eventID + " does not exist");
+      stopWorkflowInstance(event);
       em.remove(event);
 
       em.getTransaction().commit();
@@ -414,33 +580,85 @@ public class SchedulerServiceImpl implements ManagedService {
       em.close();
       updated = System.currentTimeMillis();
     }
-    return true;
   }
 
   /**
+   * Updates an event.
+   * 
    * @param e
-   * @return True if the event was updated
+   *          The event
+   * @throws NotFoundException
+   *           if the event hasn't previously been saved
+   * @throws SchedulerException
+   *           if the event's persistent representation can not be updated
    */
-  public boolean updateEvent(Event e) {
+  public void updateEvent(Event e) throws NotFoundException, SchedulerException {
+    updateEvent(e, true); // true, since we want to update the workflow instance too
+  }
 
-    EntityManager em = emf.createEntityManager();
+  /**
+   * Updates an event.
+   * 
+   * @param e
+   *          The event
+   * @param updateWorkflow
+   *          Whether to also update the associated workflow for this event
+   * @throws SchedulerException
+   *           if the scheduled event can not be persisted
+   * @throws NotFoundException
+   *           if this event hasn't previously been saved
+   */
+  protected void updateEvent(Event e, boolean updateWorkflow) throws NotFoundException, SchedulerException {
+    EntityManager em = null;
+    EntityTransaction tx = null;
+    Event storedEvent = getEvent(e.getEventId());
     try {
-      em.getTransaction().begin();
-      Event storedEvent = getEvent(e.getEventId());
-      logger.debug("Found stored event. {} -", storedEvent);
-      if (storedEvent == null)
-        return false; // nothing found to update
+      em = emf.createEntityManager();
+      tx = em.getTransaction();
+      tx.begin();
       storedEvent.update(e);
       em.merge(storedEvent);
-      em.getTransaction().commit();
-    } catch (Exception e1) {
-      logger.warn("Could not update event {}. Reason: {}", e, e1.getMessage());
-      return false;
+      tx.commit();
+      if (updateWorkflow) {
+        updateWorkflow(storedEvent);
+      }
+    } catch (Exception ex) {
+      throw new SchedulerException(ex);
     } finally {
       em.close();
       updated = System.currentTimeMillis();
     }
-    return true;
+  }
+
+  protected void updateWorkflow(Event event) throws NotFoundException, WorkflowDatabaseException, SchedulerException {
+    WorkflowInstance workflow = workflowService.getWorkflowById(event.getEventId());
+    WorkflowOperationInstance scheduleOperation = workflow.getCurrentOperation();
+
+    // if the workflow is not in the hold state with 'schedule' as the current operation, we can't update the event
+    if (!WorkflowInstance.WorkflowState.PAUSED.equals(workflow.getState())) {
+      throw new SchedulerException("The workflow is not in the paused state, so it can not be updated");
+    }
+    if (!SCHEDULE_OPERATION_ID.equals(scheduleOperation.getId())) {
+      throw new SchedulerException("The workflow is not in the paused state, so it can not be updated");
+    }
+    MediaPackage mediapackage = workflow.getMediaPackage();
+
+    // update the mediapackage
+    mediapackage.setTitle(event.getTitle());
+    mediapackage.setLanguage(event.getLanguage());
+    mediapackage.setLicense(event.getLicense());
+    mediapackage.setSeries(event.getSeriesId());
+    mediapackage.setSeriesTitle(event.getSeries());
+
+    // Update the properties
+    scheduleOperation.setConfiguration(WORKFLOW_OPERATION_KEY_SCHEDULE_START,
+            Long.toString(event.getStartDate().getTime()));
+    scheduleOperation.setConfiguration(WORKFLOW_OPERATION_KEY_SCHEDULE_STOP,
+            Long.toString(event.getEndDate().getTime()));
+    scheduleOperation.setConfiguration(WORKFLOW_OPERATION_KEY_SCHEDULE_LOCATION, event.getDevice());
+
+    // update the workflow
+    workflowService.update(workflow);
   }
 
   /**
@@ -505,7 +723,7 @@ public class SchedulerServiceImpl implements ManagedService {
    * 
    * @see org.opencastproject.scheduler.api.SchedulerService#getDublinCoreMetadata(java.lang.String)
    */
-  public String getDublinCoreMetadata(Long eventID) {
+  public String getDublinCoreMetadata(Long eventID) throws NotFoundException {
     Event event = getEvent(eventID);
     if (dcGenerator == null) {
       logger.error("Dublin Core generator not initialized");
@@ -519,7 +737,7 @@ public class SchedulerServiceImpl implements ManagedService {
    * 
    * @see org.opencastproject.scheduler.api.SchedulerService#getDublinCoreMetadata(java.lang.String)
    */
-  public String getCaptureAgentMetadata(Long eventID) {
+  public String getCaptureAgentMetadata(Long eventID) throws NotFoundException {
     Event event = getEvent(eventID);
     if (caGenerator == null) {
       logger.error("Capture Agent Metadata generator not initialized");

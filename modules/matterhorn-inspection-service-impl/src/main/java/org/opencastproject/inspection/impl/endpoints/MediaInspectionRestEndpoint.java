@@ -116,7 +116,7 @@ public class MediaInspectionRestEndpoint {
   @GET
   @Path("receipt/{id}.xml")
   @Produces(MediaType.TEXT_XML)
-  public Response getJob(@PathParam("id") String id) {
+  public Response getJob(@PathParam("id") long id) {
     checkNotNull(service);
     try {
       Job job = service.getJob(id);

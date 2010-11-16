@@ -23,16 +23,17 @@ import java.util.Date;
  * A receipt for an long running, asynchronous job. A Receipt may be used to track any task once it has been queued.
  */
 public interface Job {
+
   /** The status of the job that this receipt represents */
   static enum Status {
     QUEUED, PAUSED, RUNNING, FINISHED, FAILED
   }
 
   /** Gets the receipt identifier */
-  String getId();
+  long getId();
 
   /** Sets the receipt identifier */
-  void setId(String id);
+  void setId(long id);
 
   /** Gets the job type, which determines the type of service that runs the job */
   String getJobType();
@@ -65,4 +66,5 @@ public interface Job {
 
   /** Sets the mediapackage element produced by this job. */
   void setElement(MediaPackageElement element);
+
 }

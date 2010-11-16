@@ -111,7 +111,8 @@ public class IngestRestService {
 
   public void activate(ComponentContext context) {
     try {
-      emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.ingest.endpoint", persistenceProperties);
+      emf = persistenceProvider
+              .createEntityManagerFactory("org.opencastproject.ingest.endpoint", persistenceProperties);
     } catch (Exception e) {
       logger.error("Unable to initialize JPA EntityManager: " + e.getMessage());
     }
@@ -179,7 +180,8 @@ public class IngestRestService {
           @FormParam("mediaPackage") String mpx) {
     try {
       MediaPackage mp = factory.newMediaPackageBuilder().loadFromXml(mpx);
-      MediaPackage resultingMediaPackage = ingestService.addCatalog(new URI(url), MediaPackageElementFlavor.parseFlavor(flavor), mp);
+      MediaPackage resultingMediaPackage = ingestService.addCatalog(new URI(url),
+              MediaPackageElementFlavor.parseFlavor(flavor), mp);
       return Response.ok(resultingMediaPackage).build();
     } catch (Exception e) {
       logger.warn(e.getMessage(), e);
@@ -250,17 +252,17 @@ public class IngestRestService {
           }
         }
         switch (type) {
-          case Attachment:
-            mp = ingestService.addAttachment(in, fileName, flavor, mp);
-            break;
-          case Catalog:
-            mp = ingestService.addCatalog(in, fileName, flavor, mp);
-            break;
-          case Track:
-            mp = ingestService.addTrack(in, fileName, flavor, mp);
-            break;
-          default:
-            throw new IllegalStateException("Type must be one of track, catalog, or attachment");
+        case Attachment:
+          mp = ingestService.addAttachment(in, fileName, flavor, mp);
+          break;
+        case Catalog:
+          mp = ingestService.addCatalog(in, fileName, flavor, mp);
+          break;
+        case Track:
+          mp = ingestService.addTrack(in, fileName, flavor, mp);
+          break;
+        default:
+          throw new IllegalStateException("Type must be one of track, catalog, or attachment");
         }
         // ingestService.ingest(mp);
         return Response.ok(mp.toXml()).build();
@@ -346,16 +348,27 @@ public class IngestRestService {
   public Response addZippedMediaPackage(@Context HttpServletRequest request, @PathParam("wdID") String wdID) {
     logger.debug("addZippedMediaPackage(InputStream, ID) called.");
     try {
-      Map<String,String> workflowConfig = new HashMap<String,String>();
+      Long workflowInstanceId = null;
+      Map<String, String> workflowConfig = new HashMap<String, String>();
       if (ServletFileUpload.isMultipartContent(request)) {
         for (FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
           FileItemStream item = iter.next();
           if (item.isFormField()) {
-            workflowConfig.put(item.getFieldName(), IOUtils.toString(item.openStream(), "UTF-8"));
-            logger.info("Processing form field: " + item.getFieldName());
+            if ("workflowId".equals(item.getName())) {
+              String workflowIdAsString = IOUtils.toString(item.openStream(), "UTF-8");
+              try {
+                workflowInstanceId = Long.parseLong(workflowIdAsString);
+              } catch (NumberFormatException e) {
+                logger.warn("workflowId '{}' is not numeric", workflowIdAsString);
+              }
+            } else {
+              logger.info("Processing form field: " + item.getFieldName());
+              workflowConfig.put(item.getFieldName(), IOUtils.toString(item.openStream(), "UTF-8"));
+            }
           } else {
             logger.info("Processing file item");
-            WorkflowInstance workflow = ingestService.addZippedMediaPackage(item.openStream(), wdID, workflowConfig);
+            WorkflowInstance workflow = ingestService.addZippedMediaPackage(item.openStream(), wdID, workflowConfig,
+                    workflowInstanceId);
             return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
           }
         }
@@ -537,7 +550,7 @@ public class IngestRestService {
             fileName = item.getName();
             job.setFilename(fileName);
             if ((mp != null) && (flavor != null) && (fileName != null)) {
-              // decide which element type to add 
+              // decide which element type to add
               if (elementType.toUpperCase().equals("TRACK")) {
                 mp = ingestService.addTrack(item.openStream(), fileName, flavor, mp);
               } else if (elementType.toUpperCase().equals("CATALOG")) {
@@ -602,12 +615,13 @@ public class IngestRestService {
   @Produces(MediaType.TEXT_XML)
   @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
   @Path("addDCCatalog")
-  public Response addDCCatalog(@FormParam("mediaPackage") String mp, @FormParam("dublinCore") String dc, @FormParam("flavor") String flavor) {
+  public Response addDCCatalog(@FormParam("mediaPackage") String mp, @FormParam("dublinCore") String dc,
+          @FormParam("flavor") String flavor) {
     MediaPackageElementFlavor dcFlavor = MediaPackageElements.EPISODE;
-    if(flavor != null) {
+    if (flavor != null) {
       try {
         dcFlavor = MediaPackageElementFlavor.parseFlavor(flavor);
-      } catch(IllegalArgumentException e) {
+      } catch (IllegalArgumentException e) {
         logger.warn("Unable to set dublin core flavor to {}, using {} instead", flavor, MediaPackageElements.EPISODE);
       }
     }
@@ -617,7 +631,8 @@ public class IngestRestService {
       // mp
       // yields
       // Exception
-      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc, "UTF-8"), "dublincore.xml", dcFlavor, mediaPackage);
+      mediaPackage = ingestService.addCatalog(IOUtils.toInputStream(dc, "UTF-8"), "dublincore.xml", dcFlavor,
+              mediaPackage);
       return Response.ok(mediaPackage).build();
     } catch (Exception e) {
       logger.error(e.getMessage());
@@ -656,9 +671,10 @@ public class IngestRestService {
         logger.warn("UploadJob not found for Id: " + jobId);
         return Response.status(Status.NOT_FOUND).build();
       }
-      /* String json = "{total:" + Long.toString(job.getBytesTotal()) + ", received:"
-      + Long.toString(job.getBytesReceived()) + "}";
-      return Response.ok(json).build();*/
+      /*
+       * String json = "{total:" + Long.toString(job.getBytesTotal()) + ", received:" +
+       * Long.toString(job.getBytesReceived()) + "}"; return Response.ok(json).build();
+       */
       JSONObject out = new JSONObject();
       out.put("total", Long.toString(job.getBytesTotal()));
       out.put("received", Long.toString(job.getBytesReceived()));
@@ -677,11 +693,12 @@ public class IngestRestService {
   public String getDocumentation() {
     return docs;
   }
+
   protected String docs;
   private String[] notes = {
-    "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
-    "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
-    "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>",};
+          "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
+          "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
+          "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
 
   // CHECKSTYLE:OFF
   private String generateDocs(String serviceUrl) {
@@ -807,7 +824,10 @@ public class IngestRestService {
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
     // ingest with workflow
-    endpoint = new RestEndpoint("ingest", RestEndpoint.Method.POST, "/ingest/{wdID}",
+    endpoint = new RestEndpoint(
+            "ingest",
+            RestEndpoint.Method.POST,
+            "/ingest/{wdID}",
             "Ingest the completed media package into the system, retrieving all URL-referenced files, and starting a specified workflow");
     endpoint.addFormat(new Format("XML", null, null));
     endpoint.addPathParam(new Param("wdID", Param.Type.STRING, null, "Workflow definition id"));
@@ -953,10 +973,15 @@ public class IngestRestService {
             RestEndpoint.Method.POST,
             "/addTrackMonitored/{jobId}",
             "Adds a track to the specified MediaPackage while counting the bytes received during the upload of the file. POSTs to this method must be of type multipart/form-data.");
-    endpoint.addFormat(new Format("HTML", "HTML that triggers a javascript function in the parent site (upload form lives in an iframe) to indicate the POST to this method was successfully finished.", null));
+    endpoint.addFormat(new Format(
+            "HTML",
+            "HTML that triggers a javascript function in the parent site (upload form lives in an iframe) to indicate the POST to this method was successfully finished.",
+            null));
     endpoint.addPathParam(new Param("jobId", Param.Type.STRING, null, "Upload job id"));
-    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null, "Id of the MediaPackage to which the file should be added"));
-    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null, "The flavor of the file in the MediaPackage (eg. presenter/source, presentation/source etc)"));
+    endpoint.addRequiredParam(new Param("mediaPackage", Param.Type.STRING, null,
+            "Id of the MediaPackage to which the file should be added"));
+    endpoint.addRequiredParam(new Param("flavor", Param.Type.STRING, null,
+            "The flavor of the file in the MediaPackage (eg. presenter/source, presentation/source etc)"));
     endpoint.addBodyParam(false, "presenter/source", "flavor : ");
     endpoint.addBodyParam(true, null, "file : binary content of the uploaded file");
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
@@ -966,12 +991,10 @@ public class IngestRestService {
     data.addEndpoint(RestEndpoint.Type.WRITE, endpoint);
 
     // getUploadProgress
-    endpoint = new RestEndpoint(
-            "getUploadProgress",
-            RestEndpoint.Method.GET,
-            "/getUploadProgress/{jobId}",
+    endpoint = new RestEndpoint("getUploadProgress", RestEndpoint.Method.GET, "/getUploadProgress/{jobId}",
             "Returns a JSON object reporting the status of the upload with the provided upload job id.");
-    endpoint.addFormat(new Format("JSON", "JSON object reporting the status of the upload with the provided upload job id.", null));
+    endpoint.addFormat(new Format("JSON",
+            "JSON object reporting the status of the upload with the provided upload job id.", null));
     endpoint.addPathParam(new Param("jobId", Param.Type.STRING, null, "Upload job id."));
     endpoint.addStatus(org.opencastproject.util.doc.Status.OK(null));
     endpoint.addStatus(org.opencastproject.util.doc.Status.BAD_REQUEST(null));

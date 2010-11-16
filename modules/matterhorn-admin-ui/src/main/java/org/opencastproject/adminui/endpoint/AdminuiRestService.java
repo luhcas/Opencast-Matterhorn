@@ -294,7 +294,7 @@ public class AdminuiRestService {
       for (int i = 0; i < workflows.length; i++) {
         MediaPackage mediapackage = workflows[i].getMediaPackage();
         AdminRecording item = new AdminRecordingImpl();
-        item.setId(workflows[i].getId());
+        item.setId(Long.toString(workflows[i].getId()));
         item.setItemType(AdminRecording.ItemType.WORKFLOW);
         item.setTitle(mediapackage.getTitle());
         item.setPresenter(joinStringArray(mediapackage.getCreators()));
@@ -588,8 +588,8 @@ public class AdminuiRestService {
       //logger.debug("getting capturing recordings from scheduler");
       Map<String, Recording> recordings = captureAdminService.getKnownRecordings();
       for (Entry<String, Recording> recording : recordings.entrySet()) {
-        Event event = schedulerService.getEvent(Long.parseLong(recording.getKey()));
         try {
+          Event event = schedulerService.getEvent(Long.parseLong(recording.getKey()));
           Recording r = recording.getValue();
           if (r != null) {
             String state = r.getState();

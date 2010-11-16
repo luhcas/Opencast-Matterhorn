@@ -53,7 +53,7 @@ public interface WorkflowServiceImplDao {
    * @throws NotFoundException
    *           if there is no workflow instance with this identifier
    */
-  void remove(String id) throws WorkflowDatabaseException, NotFoundException;
+  void remove(long id) throws WorkflowDatabaseException, NotFoundException;
 
   /**
    * Gets a WorkflowInstace by its ID.
@@ -66,7 +66,7 @@ public interface WorkflowServiceImplDao {
    * @throws NotFoundException
    *           if there is no workflow instance with this identifier
    */
-  WorkflowInstance getWorkflowById(String workflowId) throws WorkflowDatabaseException, NotFoundException;
+  WorkflowInstance getWorkflowById(long workflowId) throws WorkflowDatabaseException, NotFoundException;
 
   /**
    * Gets the total number of workflows that have been created to date.

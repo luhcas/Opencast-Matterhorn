@@ -35,7 +35,7 @@ public interface JobProducer {
    * @throws ServiceRegistryException
    *           if an error occurs while communicating with the backing data source
    */
-  Job getJob(String id) throws NotFoundException, ServiceRegistryException;
+  Job getJob(long id) throws NotFoundException, ServiceRegistryException;
 
   /**
    * Get the number of encoding jobs in a current status on all nodes.

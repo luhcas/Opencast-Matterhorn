@@ -15,6 +15,8 @@
  */
 package org.opencastproject.scheduler.impl;
 
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.api.SchedulerFilter;
@@ -23,6 +25,15 @@ import org.opencastproject.series.api.SeriesMetadata;
 import org.opencastproject.series.impl.SeriesImpl;
 import org.opencastproject.series.impl.SeriesMetadataImpl;
 import org.opencastproject.series.impl.SeriesServiceImpl;
+import org.opencastproject.util.NotFoundException;
+import org.opencastproject.workflow.api.WorkflowDefinition;
+import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowInstanceImpl;
+import org.opencastproject.workflow.api.WorkflowOperationInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
+import org.opencastproject.workflow.api.WorkflowOperationInstanceImpl;
+import org.opencastproject.workflow.api.WorkflowService;
 
 import junit.framework.Assert;
 
@@ -37,6 +48,7 @@ import net.fortuna.ical4j.model.component.VEvent;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.easymock.EasyMock;
 import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
@@ -51,6 +63,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -87,8 +100,9 @@ public class SchedulerServiceImplTest {
     return cp;
   }
 
+  @SuppressWarnings("unchecked")
   @Before
-  public void setup() {
+  public void setup() throws Exception {
     // Clean up database
     logger.info("----- Setting up tests -----");
     try {
@@ -114,11 +128,23 @@ public class SchedulerServiceImplTest {
     seriesService.setPersistenceProperties(props);
     seriesService.activate(null);
     service.setSeriesService(seriesService);
-    logger.info("Adding new series...");
+
+    WorkflowInstance workflowInstance = getSampleWorkflowInstance();
+
+    WorkflowService workflowService = EasyMock.createMock(WorkflowService.class);
+    EasyMock.expect(
+            workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject(),
+                    (Map<String, String>) EasyMock.anyObject())).andReturn(workflowInstance);
+    EasyMock.expect(workflowService.getWorkflowById(EasyMock.anyLong())).andReturn(workflowInstance)
+            .anyTimes();
+    EasyMock.expect(workflowService.stop(EasyMock.anyLong())).andReturn(workflowInstance);
+    workflowService.update((WorkflowInstance) EasyMock.anyObject());
+    EasyMock.replay(workflowService);
+    service.setWorkflowService(workflowService);
+
+    // Add a series
     Series series = new SeriesImpl();
-
     LinkedList<SeriesMetadata> metadata = new LinkedList<SeriesMetadata>();
-
     metadata.add(new SeriesMetadataImpl(series, "title", "demo title"));
     metadata.add(new SeriesMetadataImpl(series, "license", "demo"));
     metadata.add(new SeriesMetadataImpl(series, "valid", "" + System.currentTimeMillis()));
@@ -140,8 +166,8 @@ public class SchedulerServiceImplTest {
     metadata.add(new SeriesMetadataImpl(series, "contributor", "demo"));
     metadata.add(new SeriesMetadataImpl(series, "description", "demo"));
     metadata.add(new SeriesMetadataImpl(series, "issued", "" + System.currentTimeMillis()));
-
     series.setMetadata(metadata);
+    logger.info("Adding new series...");
     seriesService.addSeries(series);
 
     // now that the series has been persisted, grab its ID
@@ -180,8 +206,23 @@ public class SchedulerServiceImplTest {
     service = null;
   }
 
+  protected WorkflowInstance getSampleWorkflowInstance() throws Exception {
+    WorkflowInstanceImpl instance = new WorkflowInstanceImpl();
+    instance.setId(System.currentTimeMillis());
+    instance.setMediaPackage(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
+    instance.setState(WorkflowState.PAUSED);
+
+    WorkflowOperationInstanceImpl op = new WorkflowOperationInstanceImpl();
+    op.setId(SchedulerServiceImpl.SCHEDULE_OPERATION_ID);
+    op.setState(OperationState.PAUSED);
+    List<WorkflowOperationInstance> operations = new ArrayList<WorkflowOperationInstance>();
+    operations.add(op);
+    instance.setOperations(operations);
+    return instance;
+  }
+
   @Test
-  public void testPersistence() {
+  public void testPersistence() throws Exception {
     Event eventStored = service.addEvent(event);
     Assert.assertNotNull(eventStored);
     Assert.assertNotNull(eventStored.getEventId());
@@ -206,7 +247,7 @@ public class SchedulerServiceImplTest {
   }
 
   @Test
-  public void testEventManagement() {
+  public void testEventManagement() throws Exception {
 
     // add event
     Event eventUpdated = service.addEvent(event);
@@ -306,7 +347,7 @@ public class SchedulerServiceImplTest {
     eventUpdated.setEndDate(new Date(System.currentTimeMillis() + 900000));
     eventUpdated.setStartDate(new Date(System.currentTimeMillis() + 20000));
     eventUpdated.setContributor("Matterhorn");
-    Assert.assertTrue(service.updateEvent(eventUpdated));
+    service.updateEvent(eventUpdated);
     Assert.assertEquals(service.getEvent(eventUpdated.getEventId()).getContributor(), "Matterhorn");
     Assert.assertNotNull(service.getEvents(null));
 
@@ -323,11 +364,16 @@ public class SchedulerServiceImplTest {
 
     // delete event
     service.removeEvent(eventUpdated.getEventId());
-    Assert.assertNull(service.getEvent(eventUpdated.getEventId()));
+    try {
+      service.getEvent(eventUpdated.getEventId());
+      Assert.fail();
+    } catch(NotFoundException e) {
+      // this is an expected exception
+    }
   }
 
   @Test
-  public void testMetadataExport() {
+  public void testMetadataExport() throws Exception {
     service.addEvent(event);
     String dc = service.getDublinCoreMetadata(event.getEventId());
     System.out.println("DC-String: " + dc);

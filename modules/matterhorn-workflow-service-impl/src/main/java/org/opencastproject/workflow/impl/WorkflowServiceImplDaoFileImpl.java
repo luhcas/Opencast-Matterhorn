@@ -28,6 +28,8 @@ import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowSetImpl;
 import org.opencastproject.workflow.api.WorkflowStatistics;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowStatistics.WorkflowDefinitionReport;
+import org.opencastproject.workflow.api.WorkflowStatistics.WorkflowDefinitionReport.OperationReport;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
@@ -370,16 +372,23 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
   @Override
   public WorkflowStatistics getStatistics() throws WorkflowDatabaseException {
     // TODO: Implement loading of statistics data
-    return new WorkflowStatistics();
+    WorkflowStatistics stats = new WorkflowStatistics();
+    WorkflowDefinitionReport defReport = new WorkflowDefinitionReport();
+    defReport.setId("def1");
+    OperationReport opReport = new OperationReport();
+    opReport.setId("operation1");
+    defReport.getOperations().add(opReport);
+    stats.getDefinitions().add(defReport);
+    return stats;
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowById(java.lang.String)
+   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getWorkflowById(long)
    */
   @Override
-  public WorkflowInstance getWorkflowById(String workflowId) throws WorkflowDatabaseException, NotFoundException {
+  public WorkflowInstance getWorkflowById(long workflowId) throws WorkflowDatabaseException, NotFoundException {
     try {
       QueryResponse response = solrServer.query(new SolrQuery(ID_KEY + ":" + workflowId));
       if (response.getResults().size() == 0) {
@@ -405,7 +414,7 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
    * @return the URI to the workflow. Note that there may not be a file at this URI. If so, calling
    *         {@link Workspace#get(URI)} will throw a {@link NotFoundException}
    */
-  private URI getWorkflowFileUri(String workflowId) {
+  private URI getWorkflowFileUri(long workflowId) {
     return workspace.getCollectionURI(COLLECTION_ID, getFilename(workflowId));
   }
 
@@ -489,12 +498,12 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#remove(java.lang.String)
+   * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#remove(long)
    */
   @Override
-  public void remove(String id) throws WorkflowDatabaseException, NotFoundException {
+  public void remove(long id) throws WorkflowDatabaseException, NotFoundException {
     try {
-      solrServer.deleteById(id);
+      solrServer.deleteById(Long.toString(id));
       solrServer.commit();
       URI uri = getWorkflowFileUri(id);
       workspace.delete(uri);
@@ -532,7 +541,8 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
    * @param workflowId
    * @return
    */
-  private String getFilename(String workflowId) {
+  private String getFilename(long workflowId) {
     return workflowId + ".xml";
   }
+
 }

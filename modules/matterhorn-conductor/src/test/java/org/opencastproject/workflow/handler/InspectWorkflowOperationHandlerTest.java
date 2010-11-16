@@ -59,7 +59,7 @@ public class InspectWorkflowOperationHandlerTest {
   private MediaPackage mp;
   private MediaPackage mpUpdatedDC;
   private Track newTrack;
-  private Job receipt;
+  private Job job;
 
   // mock services and objects
   private Workspace workspace = null;
@@ -119,17 +119,17 @@ public class InspectWorkflowOperationHandlerTest {
     operationHandler.setDublincoreService(dcService);
 
     // set up mock receipt and inspect service providing it
-    receipt = EasyMock.createNiceMock(Job.class);
-    EasyMock.expect(receipt.getElement()).andReturn(newTrack);
-    EasyMock.expect(receipt.getId()).andReturn("123");
-    EasyMock.expect(receipt.getStatus()).andReturn(Status.FINISHED);
-    EasyMock.expect(receipt.getDateCreated()).andReturn(new Date());
-    EasyMock.expect(receipt.getDateStarted()).andReturn(new Date());
-    EasyMock.replay(receipt);
+    job = EasyMock.createNiceMock(Job.class);
+    EasyMock.expect(job.getElement()).andReturn(newTrack);
+    EasyMock.expect(job.getId()).andReturn(new Long(123));
+    EasyMock.expect(job.getStatus()).andReturn(Status.FINISHED);
+    EasyMock.expect(job.getDateCreated()).andReturn(new Date());
+    EasyMock.expect(job.getDateStarted()).andReturn(new Date());
+    EasyMock.replay(job);
     inspectionService = EasyMock.createNiceMock(MediaInspectionService.class);
     EasyMock.expect(
             inspectionService.enrich((Track) EasyMock.anyObject(), EasyMock.anyBoolean(), EasyMock.anyBoolean()))
-            .andReturn(receipt);
+            .andReturn(job);
     EasyMock.replay(inspectionService);
     operationHandler.setInspectionService(inspectionService);
 
@@ -173,7 +173,7 @@ public class InspectWorkflowOperationHandlerTest {
   private WorkflowOperationResult getWorkflowOperationResult(MediaPackage mp) throws WorkflowOperationException {
     // Add the mediapackage to a workflow instance
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl();
-    workflowInstance.setId("workflow-inspect-test");
+    workflowInstance.setId(1);
     workflowInstance.setState(WorkflowState.RUNNING);
     workflowInstance.setMediaPackage(mp);
     WorkflowOperationInstanceImpl operationInstance = new WorkflowOperationInstanceImpl();

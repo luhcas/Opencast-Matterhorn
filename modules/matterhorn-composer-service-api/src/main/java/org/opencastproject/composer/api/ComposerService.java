@@ -35,7 +35,7 @@ public interface ComposerService extends JobProducer {
    *          The source track
    * @param profileId
    *          The profile to use for encoding
-   * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getJob(String)}
+   * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getJob(long)}
    *         to obtain the status of an encoding job.
    * @throws EncoderException
    */
@@ -99,7 +99,7 @@ public interface ComposerService extends JobProducer {
    *          start time in miliseconds
    * @param duration
    *          duration in miliseconds
-   * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getJob(String)}
+   * @return The receipt for this encoding job. The receipt can be used with {@link ComposerService#getJob(long)}
    *         to obtain the status of an encoding job.
    * @throws EncoderException
    *           if trimming fails

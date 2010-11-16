@@ -27,16 +27,15 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlID;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
@@ -49,7 +48,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
 
   public WorkflowInstanceImpl() {}
   
-  public WorkflowInstanceImpl(WorkflowDefinition def, MediaPackage mediaPackage, String parentWorkflowId, Map<String, String> properties) {
+  public WorkflowInstanceImpl(WorkflowDefinition def, MediaPackage mediaPackage, Long parentWorkflowId, Map<String, String> properties) {
     this.title = def.getTitle();
     this.template = def.getId();
     this.description = def.getDescription();
@@ -68,9 +67,8 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     }    
   }
 
-  @XmlID
   @XmlAttribute()
-  private String id;
+  private long id;
   
   @XmlAttribute()
   private WorkflowState state;
@@ -85,7 +83,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   private String description;
 
   @XmlElement(name="parent", nillable=true)
-  private String parentId;
+  private Long parentId;
   
   @XmlElement(name="mediapackage")
   private MediaPackage mediaPackage;
@@ -108,7 +106,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * {@inheritDoc}
    * @see org.opencastproject.workflow.api.WorkflowInstance#getId()
    */
-  public String getId() {
+  public long getId() {
     return id;
   }
 
@@ -117,7 +115,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * 
    * @param id
    */
-  public void setId(String id) {
+  public void setId(long id) {
     this.id = id;
   }
 
@@ -157,14 +155,14 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
   /**
    * @return the parentId
    */
-  public String getParentId() {
+  public Long getParentId() {
     return parentId;
   }
 
   /**
    * @param parentId the parentId to set
    */
-  public void setParentId(String parentId) {
+  public void setParentId(Long parentId) {
     this.parentId = parentId;
   }
 
@@ -337,10 +335,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    */
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
-    return result;
+    return (int)(id >> 32);
   }
 
   /**
@@ -356,10 +351,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     if (!(obj instanceof WorkflowInstanceImpl))
       return false;
     WorkflowInstanceImpl other = (WorkflowInstanceImpl) obj;
-    if (id == null) {
-      if (other.id != null)
-        return false;
-    } else if (!id.equals(other.id))
+    if (id != other.id)
       return false;
     return true;
   }
@@ -433,4 +425,16 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     errors[errors.length-1] = localizedMessage;
     this.errorMessages = errors;
   }
+
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.WorkflowInstance#extend(org.opencastproject.workflow.api.WorkflowDefinition)
+   */
+  @Override
+  public void extend(WorkflowDefinition workflowDefinition) {
+    for (WorkflowOperationDefinition operationDefintion : workflowDefinition.getOperations()) {
+      this.operations.add(new WorkflowOperationInstanceImpl(operationDefintion));
+    }
+  }
+  
 }

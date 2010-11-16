@@ -232,4 +232,5 @@ public interface Event {
   void initializeFromEvent(Event e);
   
   List<Event> createEventsFromRecurrence() throws ParseException, IncompleteDataException;
+
 }

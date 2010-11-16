@@ -69,12 +69,12 @@ public class MediaInspectionServiceRemoteImpl extends RemoteBase implements Medi
       HttpGet get = new HttpGet(url);
       response = getResponse(get);
       if (response != null) {
-        Job receipt = JobParser.parseJob(response.getEntity().getContent());
+        Job job = JobParser.parseJob(response.getEntity().getContent());
         if (block) {
-          receipt = poll(receipt.getId());
+          job = poll(job.getId());
         }
         logger.info("Completing inspection of media file at {} using a remote media inspection service", uri);
-        return receipt;
+        return job;
       }
     } catch (Exception e) {
       throw new MediaInspectionException("Unable to inspect " + uri + " using a remote inspection service", e);

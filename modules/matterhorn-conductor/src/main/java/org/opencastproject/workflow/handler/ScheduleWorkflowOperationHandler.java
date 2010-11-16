@@ -37,8 +37,6 @@ public class ScheduleWorkflowOperationHandler extends AbstractResumableWorkflowO
   /** Configuration key for the schedule location */
   public static final String OPT_SCHEDULE_LOCATION = "schedule.location";
 
-  /** Configuration key for the schedule location */
-  public static final String OPT_SCHEDULE_WORKFLOW = "schedule.workflow";
 
   /** Path to the hold state ui  */
   public static final String UI_RESOURCE_PATH = "/ui/operation/schedule/index.html";
@@ -59,7 +57,6 @@ public class ScheduleWorkflowOperationHandler extends AbstractResumableWorkflowO
     addConfigurationOption(OPT_SCHEDULE_START, "Schedule start date");
     addConfigurationOption(OPT_SCHEDULE_END, "Schedule end date");
     addConfigurationOption(OPT_SCHEDULE_LOCATION, "Recording location");
-    addConfigurationOption(OPT_SCHEDULE_WORKFLOW, "Processing workflow");
 
     // Add the ui piece that displays the schedule information
     registerHoldStateUserInterface(UI_RESOURCE_PATH);  

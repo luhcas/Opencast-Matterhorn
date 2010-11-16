@@ -94,7 +94,7 @@ public class CLIWorkflowOperationHandlerTest {
     WorkflowOperationHandler cliHandler = new CLIWorkflowOperationHandler();
 
     WorkflowInstanceImpl workflowInstance = new WorkflowInstanceImpl();
-    workflowInstance.setId("workflow-cli-test");
+    workflowInstance.setId(1);
     workflowInstance.setState(WorkflowState.RUNNING);
     WorkflowOperationInstanceImpl operation = new WorkflowOperationInstanceImpl();
     List<WorkflowOperationInstance> operationsList = new ArrayList<WorkflowOperationInstance>();

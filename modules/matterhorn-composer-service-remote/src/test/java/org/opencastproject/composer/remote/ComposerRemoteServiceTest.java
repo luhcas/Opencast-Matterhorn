@@ -58,7 +58,7 @@ public class ComposerRemoteServiceTest {
     mp.add(track);
     Job r = service.encode(track, "feed-m4a.http.http");
     Assert.assertNotNull(service.getJob(r.getId()));
-    Assert.assertNull(service.getJob("badId"));
+    Assert.assertNull(service.getJob(-87656));
   }
   
 }
