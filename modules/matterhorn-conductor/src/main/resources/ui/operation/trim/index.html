@@ -405,15 +405,15 @@
 
     function cancel() 
     {
-      window.parent.location.href = window.parent.location.href;
-      /*var videodisplay = $('#player-container')[0].contentWindow.Videodisplay;
+      var videodisplay = $('#player-container')[0].contentWindow.Videodisplay;
       videodisplay.pause();
+      window.parent.$('#holdActionPanelContainer iframe').attr('src', '');
       window.parent.$('.paging-nav-container').show(0);
       window.parent.$('#holdActionPanelContainer').hide(0); 
       window.parent.$('#recordingsTableContainer').show(0); 
       window.parent.$('.recordings-button-container').show(0);
       window.parent.$('.recordings-categories').show(0);
-		  window.parent.$('input#filter').parent().show(0);*/
+      window.parent.$('input#filter').parent().show(0);
     }
     </script>
   </head>
