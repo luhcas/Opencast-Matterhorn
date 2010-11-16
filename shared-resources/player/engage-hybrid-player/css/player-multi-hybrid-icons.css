@@ -13,12 +13,12 @@
  *  permissions and limitations under the License.
  *
  */
- 
+
 input
 {
   margin:                   0;
   border:                   0 none;
-  onfocus:                  none;  
+  onfocus:                  none;
   overflow:                 hidden;
   background:               #2D8F8B;
   color:                    #FFFFFF;
@@ -37,86 +37,73 @@ input
   margin-right:             2px;
 }
 
-.oc_btn-skip-backward
+.oc_btn-skip-backward, .oc_btn-skip-backward-over, .oc_btn-skip-backward-clicked
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      0 -30px;
-  width:                    16px;
-  height:                   15px;
-  margin-top:               3px;
+  background:               url("../img/oc_icons_2.png") no-repeat 0px -10px transparent;
+  width:                    30px;
+  height:                   40px;
 }
 
+/*
 .oc_btn-skip-backward-over
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -30px -30px;
-  width:                    16px;
-  height:                   15px;
-  margin-top:               3px;
+  background:               url("../img/oc_icons_2.png") no-repeat 0px -70px transparent;
+  width:                    30px;
+  height:                   40px;
 }
 
 .oc_btn-skip-backward-clicked
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -60px -30px;
-  width:                    16px;
-  height:                   15px;
-  margin-top:               3px;
+  background:               url("../img/oc_icons_2.png") no-repeat 0px -70px transparent;
+  width:                    30px;
+  height:                   40px;
 }
+*/
 
-.oc_btn-rewind
+.oc_btn-rewind, .oc_btn-rewind-over, .oc_btn-rewind-clicked
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      0 -60px;
-  width:                    21px;
-  height:                   14px;
-  margin-top:               4px;
+  background:               url("../img/oc_icons_2.png") no-repeat -30px -10px transparent;
+  width:                    30px;
+  height:                   40px;
 }
 
+/*
 .oc_btn-rewind-over
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -30px -60px;
-  width:                    21px;
-  height:                   14px;
-  margin-top:               4px;
+  background:               url("../img/oc_icons_2.png") no-repeat -30px -70px transparent;
+  width:                    30px;
+  height:                   40px;
 }
 
 .oc_btn-rewind-clicked
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -60px -60px;
-  width:                    21px;
-  height:                   14px;
-  margin-top:               4px;
+  background:               url("../img/oc_icons_2.png") no-repeat -30px -70px transparent;
+  width:                    30px;
+  height:                   40px;
+}
+*/
+
+.oc_btn-play, .oc_btn-pause
+{
+  background:               url("../img/oc_icons_2.png") no-repeat -60px -12px transparent;
+  width:                    60px;
+  height:                   40px;
 }
 
-.oc_btn-play
+.oc_btn-play-clicked, .oc_btn-pause-clicked
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      0px -210px;
-  width:                    16px;
-  height:                   16px;
-  margin-top:               2px;
+  background:               url("../img/oc_icons_2.png") no-repeat -60px -72px transparent;
+  width:                    60px;
+  height:                   40px;
 }
 
-.oc_btn-play-clicked
+.oc_btn-play-over, .oc_btn-pause-over
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -60px -210px;
-  width:                    16px;
-  height:                   16px;
-  margin-top:               2px;
+  background:               url("../img/oc_icons_2.png") no-repeat -60px -72px transparent;
+  width:                    60px;
+  height:                   40px;
 }
-
-.oc_btn-play-over
-{
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -30px -210px;
-  width:                    16px;
-  height:                   16px;
-  margin-top:               2px;
-}
+/*
 
 .oc_btn-pause
 {
@@ -144,115 +131,80 @@ input
   height:                   16px;
   margin-top:               2px;
 }
+*/
 
-.oc_btn-fast-forward
+.oc_btn-fast-forward, .oc_btn-fast-forward-over, .oc_btn-fast-forward-clicked
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      0px -120px;
-  width:                    21px;
-  height:                   14px;
-  margin-top:               4px;
+  background:               url("../img/oc_icons_2.png") no-repeat -120px -10px transparent;
+  width:                    30px;
+  height:                   40px;
 }
 
+/*
 .oc_btn-fast-forward-over
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -30px -120px;
-  width:                    21px;
-  height:                   14px;
-  margin-top:               4px;
+  background:               url("../img/oc_icons_2.png") no-repeat -120px -70px transparent;
+  width:                    30px;
+  height:                   40px;
 }
 
 .oc_btn-fast-forward-clicked
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -60px -120px;
-  width:                    21px;
-  height:                   14px;
-  margin-top:               4px;
+  background:               url("../img/oc_icons_2.png") no-repeat -120px -70px transparent;
+  width:                    30px;
+  height:                   40px;
 }
+*/
 
-.oc_btn-skip-forward
+.oc_btn-skip-forward, .oc_btn-skip-forward-over, .oc_btn-skip-forward-clicked
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      0px -150px;
-  width:                    16px;
-  height:                   15px;
-  margin-top:               4px;
+  background:               url("../img/oc_icons_2.png") no-repeat -150px -10px transparent;
+  width:                    30px;
+  height:                   40px;
 }
+/*
 
 .oc_btn-skip-forward-over
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -30px -150px;
-  width:                    16px;
-  height:                   15px;
-  margin-top:               4px;
+  background:               url("../img/oc_icons_2.png") no-repeat -150px -70px transparent;
+  width:                    30px;
+  height:                   40px;
 }
 
 .oc_btn-skip-forward-clicked
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -60px -150px;
-  width:                    16px;
-  height:                   15px;
-  margin-top:               4px;
+  background:               url("../img/oc_icons_2.png") no-repeat -150px -70px transparent;
+  width:                    30px;
+  height:                   40px;
 }
+*/
 
 .oc_btn-volume-high
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -0px -240px;
-  width:                    18px;
-  height:                   18px;
+  background:               url("../img/oc_icons_2.png") no-repeat -90px -120px transparent;
+  width:                    30px;
+  height:                   30px;
 }
 
 .oc_btn-volume-mute
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -90px -240px;
-  width:                    18px;
-  height:                   18px;
+  background:               url("../img/oc_icons_2.png") no-repeat -60px -120px transparent;
+  width:                    30px;
+  height:                   30px;
 }
 
 .oc_btn-volume-low
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -30px -240px;
-  width:                    18px;
-  height:                   18px;
+  background:               url("../img/oc_icons_2.png") no-repeat -60px -150px transparent;
+  width:                    30px;
+  height:                   30px;
 }
 
 .oc_btn-volume-none
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -90px -240px;
-  width:                    18px;
-  height:                   18px;
-}
-
-.oc_btn-cc-off
-{
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -0px -180px;
-  width:                    22px;
-  height:                   17px;
-}
-
-.oc_btn-cc-over
-{
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -30px -180px;
-  width:                    22px;
-  height:                   17px;
-}
-
-.oc_btn-cc-on
-{
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -60px -180px;
-  width:                    22px;
-  height:                   17px;
+  background:               url("../img/oc_icons_2.png") no-repeat -90px -150px transparent;
+  width:                    30px;
+  height:                   30px;
 }
 
 #oc_btn-dropdown
@@ -329,7 +281,7 @@ input
   width:                    18px;
   heigth:                   19px;
   margin-right:             5px;
-  margin-left:              5px; 
+  margin-left:              5px;
 }
 
 #oc_embed-sections input
@@ -346,3 +298,5 @@ input
 {
   display:                  inline;
 }
+
+#oc_time-chooser { width: 30px; height: 10px; background: url("../img/oc_icons_2.png") no-repeat -180px -162px transparent;}

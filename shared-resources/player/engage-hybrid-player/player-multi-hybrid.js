@@ -97,6 +97,11 @@ Opencast.Player = (function () {
      */
     var shareDisplayed = false;
 
+    /**
+     * true if time layer is displayed, false if not
+     */
+    var timeLayerDisplayed = false;
+
 
      /**
      @memberOf Opencast.Player
@@ -757,27 +762,70 @@ Opencast.Player = (function () {
         }
         // Opencast.Initialize.doResize();
     }
-    
+
     /**
         @memberOf Opencast.Player
         @description Toggle the Share layer
      */
     function doToggleShare()
     {
-        if (this.shareDisplayed)
+        if (shareDisplayed)
         {
-            $('#oc_share-layer').css({ 'left': 0, 'top': -100});
-            this.shareDisplayed = false;
+           showShare();
         }
         else
         {
-            $( "#oc_share-layer" ).position({
-              of: $( "#oc_share-button" ),
-              my: 'center top',
-              at: 'center bottom'
-            });
-            this.shareDisplayed = true;
+            hideShare();
         }
+    }
+
+    function showShare()
+    {
+       $('#oc_share-layer').css({ 'left': 0, 'top': -100});
+       shareDisplayed = false;
+    }
+
+    function hideShare()
+    {
+      $( "#oc_share-layer" ).position({
+        of: $( "#oc_share-button" ),
+        my: 'center top',
+        at: 'center bottom'
+      });
+      shareDisplayed = true;
+    }
+    /**
+        @memberOf Opencast.Player
+        @description Toggle the time layer
+     */
+    function doToggleTimeLayer()
+    {
+        if (timeLayerDisplayed)
+        {
+            hideTimeLayer();
+        }
+        else
+        {
+            showTimeLayer();
+        }
+    }
+
+    function hideTimeLayer()
+    {
+      $('#oc_time-chooser-layer').css({ 'left': 0, 'top': -100});
+      $('#oc_time-chooser').attr('aria-pressed', 'false');
+      timeLayerDisplayed = false;
+    }
+
+    function showTimeLayer()
+    {
+      $( "#oc_time-chooser-layer" ).position({
+        of: $( "#oc_time-chooser" ),
+        my: 'center top',
+        at: 'center bottom'
+      });
+      $('#oc_time-chooser').attr('aria-pressed', 'true');
+      timeLayerDisplayed = true;
     }
 
 
@@ -1028,11 +1076,9 @@ Opencast.Player = (function () {
     function setCCIconOn()
     {
         $("#oc_btn-cc").attr({
-            alt: CCON,
             title: CCON
         });
-        $("#oc_btn-cc").attr("className", "oc_btn-cc-on");
-        $("#oc_btn-cc").attr('aria-pressed', 'true');
+        $('#oc_video-cc').button('option', 'label',  'Show Caption');
         setCaptionsBool(true);
     }
 
@@ -1043,11 +1089,9 @@ Opencast.Player = (function () {
     function setCCIconOff()
     {
         $("#oc_btn-cc").attr({
-            alt: CCOFF,
             title: CCOFF
         });
-        $("#oc_btn-cc").attr("className", "oc_btn-cc-off");
-        $("#oc_btn-cc").attr('aria-pressed', 'false');
+        $( "#oc_video-cc" ).button('option', 'label', 'Hide Caption');
         setCaptionsBool(false);
     }
 
@@ -1284,8 +1328,8 @@ Opencast.Player = (function () {
      */
     function showEditTime()
     {
-        $("#oc_current-time").attr("className", "oc_current-time-hide");
-        $("#oc_edit-time").attr("className", "oc_edit-time");
+        $("#oc_current-time").toggleClass("oc_current-time-hide").toggleClass('oc_current-time');
+        $("#oc_edit-time").toggleClass("oc_edit-time-hide").toggleClass("oc_edit-time");
 
         backupPlayPauseState = getCurrentPlayPauseState();
 
@@ -1303,8 +1347,8 @@ Opencast.Player = (function () {
      */
     function hideEditTime()
     {
-        $("#oc_current-time").attr("className", "oc_current-time");
-        $("#oc_edit-time").attr("className", "oc_edit-time-hide");
+        $("#oc_current-time").toggleClass("oc_current-time-hide").toggleClass('oc_current-time');
+        $("#oc_edit-time").toggleClass("oc_edit-time-hide").toggleClass("oc_edit-time");
 
         if (backupPlayPauseState === PLAYING)
         {
@@ -1621,6 +1665,7 @@ Opencast.Player = (function () {
         doToggleBookmarks : doToggleBookmarks,
         doToggleDescription : doToggleDescription,
         doToggleShare : doToggleShare,
+        doToggleTimeLayer : doToggleTimeLayer,
         removeOldAlert : removeOldAlert,
         refreshScrubberPosition : refreshScrubberPosition,
         addAlert : addAlert,

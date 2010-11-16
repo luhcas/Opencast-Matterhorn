@@ -79,7 +79,7 @@ Opencast.Analytics = ( function() {
   function hideAnalytics()
   {
       $("#analytics").hide();
-      $(".segments").css('top', '0px');
+      $(".segments").css('top', '0');
   }
 
 
@@ -93,13 +93,11 @@ Opencast.Analytics = ( function() {
       {
           showAnalytics();
           analyticsDisplayed = true;
-          $('#oc_checkbox-statistics').attr('checked', 'checked');
       }
       else
       {
           hideAnalytics();
           analyticsDisplayed = false;
-           $('#oc_checkbox-statistics').removeAttr('checked');
       }
   }
 

@@ -119,7 +119,6 @@ table
   color:                    #FFFFFF;
   margin-top:               7px;
   width:                    37%;
-  height:                   32px;
 }
 
 #simpleEdit 
@@ -163,6 +162,10 @@ table
 {
   display:                  none;
 }
+#oc_time-chooser { width: 30px; height: 10px; background: url("../img/oc_icons_2.png") no-repeat -180px -162px transparent;}
+.oc_popuplayer { position: absolute; left: 0; top: -100px; }
+.oc_popuplayer-list { list-style:none outside none; padding: 0}
+.oc_popuplayer-list li { padding: 5px 0; }
 
 #oc_video-controls
 {
@@ -299,9 +302,6 @@ table
 #oc_video-cc
 {
   margin-top:               7px;
-  float:                    left;
-  width:                    9%;
-  text-align:               center;
   visibility:               hidden;
 }
 
@@ -398,7 +398,7 @@ table
 .progress-list 
 {
   background-color:         #FFFFFF;
-  height:                   7px;
+  height:                   10px;
 }
 
 .load-progress 

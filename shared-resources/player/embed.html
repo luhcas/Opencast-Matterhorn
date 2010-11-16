@@ -14,6 +14,8 @@
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/opencast-reset.css" />
     <link rel="stylesheet" type="text/css" href="jquery/plugins/jwysiwyg/jquery.wysiwyg.css"  />
     <link rel="stylesheet" type="text/css" href="css/oc.segments.css">
+     <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.6.custom.css">
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-orange-custom.css">
 
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
@@ -34,6 +36,12 @@
     <script type="text/javascript" src="js/segments.js"></script>
     <script type="text/javascript" src="js/search.js"></script>
     <script type="text/javascript" src="js/embed.js"></script>
+     <script type="text/javascript">
+     $(document).ready(function(){
+        //bind click functions
+        $('#oc_time-chooser').click(function() { Opencast.Player.doToggleTimeLayer(); });
+      });
+    </script>
     
   </head>
 
@@ -75,6 +83,10 @@
           <input id="oc_edit-time" class="oc_edit-time-hide" type="text" maxlength="8" size="8" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="00:00:00"></input> 
           of
           <span id="oc_duration" class="oc_duration" name="Duration" title="Duration" tabIndex="0">00:00:00</span>
+          <input id="oc_time-chooser" type="image" name="Choose Time" src="img/space.png" title="Choose Time" alt="Choose Time" role="button" aria-disabled="false" aria-pressed="false"/>
+          <span id="oc_video-cc">
+            <input id="oc_btn-cc" class="oc_btn-cc-off" type="submit" name="Closed Caption Off: Control + Alt + C" alt="Closed Caption Off: Control + Alt + C" title="Closed Caption Off: Control + Alt + C" value=""></input>
+          </span>
         </div>
       </div>
  
@@ -105,10 +117,6 @@
             </div>
         </span>
       </div>
-          
-      <div id="oc_video-cc">
-        <input id="oc_btn-cc" class="oc_btn-cc-off" type="submit" name="Closed Caption Off: Control + Alt + C" alt="Closed Caption Off: Control + Alt + C" title="Closed Caption Off: Control + Alt + C" value=""></input>
-      </div>
       <div id="oc_video-size-controls" >
         <span id="oc_video-size-dropdown">
             <input id="oc_btn-dropdown" class="oc_btn-centerDisplay" type="submit" name="Video Size Controls" alt="Video Size Controls" title="Video Size Controls" value=""></input>
@@ -121,6 +129,12 @@
     <div id="data"></div>
     </div>
     <div id="segment-tooltip" class="segment-tooltip" style="display: none;"></div>
+    <div id="oc_time-chooser-layer" class="ui-widget ui-widget-content ui-corner-all oc_popuplayer" title="Shortcuts">
+      <ul id="oc_time-chooser-list" class="oc_popuplayer-list">
+        <li><a href="javascript: " id="oc_btn-embed" onclick="Opencast.Player.doToggleTimeLayer();" class="handcursor" title="Embed">View player time</a></li>
+        <li><a href="javascript: " id="oc_btn-email" onclick="Opencast.Player.doToggleTimeLayer();" class="handcursor" title="Email">View session time</a></li>
+      </ul>
+    </div>
 
   </body>
   

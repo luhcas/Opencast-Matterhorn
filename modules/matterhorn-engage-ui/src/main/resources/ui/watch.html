@@ -14,7 +14,8 @@
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/opencast-reset.css" />
     <link rel="stylesheet" type="text/css" href="jquery/plugins/jwysiwyg/jquery.wysiwyg.css"  />
     <link rel="stylesheet" type="text/css" href="css/oc.segments.css">
-    <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.5.custom.css">
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.6.custom.css">
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-orange-custom.css">
     <style type="text/css">
       .scroll {height: 100px; overflow: scroll;}
     </style>
@@ -73,6 +74,8 @@
         $( "#oc_btn-search", "#oc_search" ).button();
         /* initalise share button */
         $( "#oc_share-button, #oc_shortcut-button", "#oc_player-head-right" ).button();
+        /* initalise share button */
+        $( "#oc_btn-cc", "#oc_video-time" ).button();
 
         /* initalise closed tabs */
         $("#oc_ui_tabs").tabs({ selected: -1});
@@ -89,10 +92,13 @@
               }
             }
         });
+        $("#oc_ui_tabs .ui-tabs-nav li").last().css('float', 'right');
+        //bind click functions
         $('#oc_share-button').click(function() { Opencast.Player.doToggleShare(); });
         $('#oc_btn-email').click(function() { Opencast.Player.doToggleShare(); });
-        $('label[for="oc_checkbox-statistics"]').click(function() { Opencast.Analytics.doToggleAnalytics(); return false;});
-        $('label[for="oc_checkbox-annotations"]').click(function() { Opencast.Annotation_Chapter.doToggleAnnotation_Chapter(); return false;});
+        $('#oc_time-chooser').click(function() { Opencast.Player.doToggleTimeLayer(); });
+        $('#oc_checkbox-statistics').click(function() { Opencast.Analytics.doToggleAnalytics();});
+        $('#oc_checkbox-annotations').click(function() { Opencast.Annotation_Chapter.doToggleAnnotation_Chapter();});
         //bind click events to show dialog
         $('#oc_shortcuts').dialog({ autoOpen: false, width: 600});
         $('#oc_shortcut-button').click(function() {$('#oc_shortcuts').dialog('open'); $('#oc_shortcut-button').removeClass('ui-state-focus'); return true;});
@@ -154,10 +160,14 @@
 
       <div id="oc_video-time">
         <div id="simpleEdit">
-          <input id="oc_current-time" class="oc_current-time handcursor" type="submit" name="Current Time" title="Current Time" value="00:00:00" tabIndex="0"></input>
-          <input id="oc_edit-time" class="oc_edit-time-hide handcursor" type="text" maxlength="8" size="8" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="00:00:00"></input>
-          of
-          <span id="oc_duration" class="oc_duration" name="Duration" title="Duration" tabIndex="0">00:00:00</span>
+            <input id="oc_current-time" class="oc_current-time handcursor ui-corner-all" type="text" name="Current Time" title="Current Time" value="00:00:00" tabIndex="0"></input>
+            <input id="oc_edit-time" class="oc_edit-time-hide handcursor ui-corner-all" type="text" maxlength="8" size="8" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="00:00:00"></input>
+            of
+            <span id="oc_duration" class="oc_duration" name="Duration" title="Duration" tabIndex="0">00:00:00</span>
+            <input id="oc_time-chooser" type="image" name="Choose Time" src="img/space.png" title="Choose Time" alt="Choose Time"></input>
+            <span id="oc_video-cc">
+             <input id="oc_btn-cc" class="oc_btn-cc-off" type="checkbox" name="Closed Caption Off: Control + Alt + C" title="Closed Caption Off: Control + Alt + C" value="" /> <label for="oc_btn-cc" title="Closed Caption Off: Control + Alt + C">Show Caption</label>
+            </span>
         </div>
       </div>
 
@@ -166,11 +176,11 @@
             <a name="controls"></a>
             <h2>Video Player Controls</h2>
         </span>
-        <input id="oc_btn-skip-backward" class="oc_btn-skip-backward handcursor" type="submit" name="Jump To The Previous Slide" alt="Jump To The Previous Slide" title="Jump To The Previous Slide" value=""></input>
-        <input id="oc_btn-rewind" class="oc_btn-rewind handcursor" type="submit" name="Jump Back: Control + Alt + R" alt="Jump Back: Control + Alt + R" title="Jump Back: Control + Alt + R" value=""></input>
-        <input id="oc_btn-play-pause" class="oc_btn-play handcursor" type="submit" name="Play: Control + Alt + P"  alt="Play: Control + Alt + P" title="Play: Control + Alt + P" value=""></input>
-        <input id="oc_btn-fast-forward" class="oc_btn-fast-forward handcursor" type="submit" name="Jump Forward: Control + Alt + F" alt="Jump Forward: Control + Alt + F" title="Jump Forward: Control + Alt + F" value=""></input>
-        <input id="oc_btn-skip-forward" class="oc_btn-skip-forward handcursor" type="submit" name="Jump To The Next Slide"  alt="Jump To The Next Slide" title="Jump To The Next Slide" value=""></input>
+        <input id="oc_btn-skip-backward" class="oc_btn-skip-backward handcursor" type="image" src="img/space.png" name="Jump To The Previous Slide" alt="Jump To The Previous Slide" title="Jump To The Previous Slide" value=""></input>
+        <input id="oc_btn-rewind" class="oc_btn-rewind handcursor" type="image" src="img/space.png" name="Jump Back: Control + Alt + R" alt="Jump Back: Control + Alt + R" title="Jump Back: Control + Alt + R" value=""></input>
+        <input id="oc_btn-play-pause" class="oc_btn-play handcursor" type="image" src="img/space.png" name="Play: Control + Alt + P"  alt="Play: Control + Alt + P" title="Play: Control + Alt + P" value=""></input>
+        <input id="oc_btn-fast-forward" class="oc_btn-fast-forward handcursor" type="image" src="img/space.png" name="Jump Forward: Control + Alt + F" alt="Jump Forward: Control + Alt + F" title="Jump Forward: Control + Alt + F" value=""></input>
+        <input id="oc_btn-skip-forward" class="oc_btn-skip-forward handcursor" type="image" src="img/space.png"  alt="Jump To The Next Slide" title="Jump To The Next Slide" value=""></input>
       </div>
 
       <div id="oc_sound">
@@ -189,10 +199,6 @@
         </span>
       </div>
 
-      <div id="oc_video-cc">
-        <input id="oc_btn-cc" class="oc_btn-cc-off" type="submit" name="Closed Caption Off: Control + Alt + C" alt="Closed Caption Off: Control + Alt + C" title="Closed Caption Off: Control + Alt + C" value=""></input>
-      </div>
-
       <div id="oc_video-size-controls" >
         <span id="oc_video-size-dropdown">
             <input id="oc_btn-dropdown" class="oc_btn-centerDisplay" type="submit" name="Video Size Controls" alt="Video Size Controls" title="Video Size Controls" value=""></input>
@@ -204,21 +210,22 @@
     <div id="data"></div>
     <div id="oc_video-view">
       <ul>
-        <li><label for="oc_checkbox-statistics"><input id="oc_checkbox-statistics" type="checkbox"> Viewing Statistics</label></li>
-        <li><label for="oc_checkbox-annotations"><input id="oc_checkbox-annotations" type="checkbox"> Annotations</label></li>
+        <li><input id="oc_checkbox-statistics" type="checkbox"> <label for="oc_checkbox-statistics">Viewing Statistics</label></li>
+        <li><input id="oc_checkbox-annotations" type="checkbox"> <label for="oc_checkbox-annotations">Annotations</label></li>
         <li><strong>View:</strong></li>
       </ul>
       <div class="clear"></div>
     </div>
 
   </div>
-  
+
   <div id="oc_ui_tabs">
       <div id="oc_tabs" class="oc_tabs-input">
         <ul>
           <li><a href="#oc_description" id="oc_btn-description" class="oc_btn-tabs handcursor" title="Description">Description</a></li>
           <li><a href="#oc_slides" id="oc_btn-slides" class="oc_btn-tabs handcursor" title="Segments">Segments</a></li>
           <li><a href="#oc_slidetext" id="oc_btn-slidetext" class="oc_btn-tabs handcursor" title="Segment Text">Segment Text</a></li>
+          <li class="ui-state-default ui-corner-top"><input id="oc_lecturer-search-field" type="text" onkeyup="Opencast.search.showResult(this.value)" size="30" value="Search this Recording" /></li>
         </ul>
       </div>
 
@@ -235,7 +242,7 @@
 
       <div id="oc_slidetext" class="fl-fix">
         <div id="oc_slidetext-right" class="oc_slidetext-right">
-          <input id="oc_lecturer-search-field" class="oc_search-Field" type="text" onkeyup="Opencast.search.showResult(this.value)" size="30" value="Search this Recording"></input>
+
         </div>
         <div id="oc_slidetext-left" class="oc_slidetext-left"></div>
       </div>
@@ -251,10 +258,17 @@
         <div id="oc_client_shortcuts"></div>
   </div>
   <!-- #share-button-layer dialog -->
-  <div id="oc_share-layer" class="ui-widget ui-widget-content ui-corner-all" title="Shortcuts">
-    <ul id="oc_share-list">
+  <div id="oc_share-layer" class="ui-widget ui-widget-content ui-corner-all oc_popuplayer ui-state-hover" title="Shortcuts">
+    <ul id="oc_share-list" class="oc_popuplayer-list">
       <li><a href="javascript: " id="oc_btn-embed" class="handcursor" title="Embed">Embed</a></li>
       <li><a href="javascript: " id="oc_btn-email" class="handcursor" title="Email">Email</a></li>
+    </ul>
+  </div>
+  <!-- #time-chooser-layer dialog -->
+  <div id="oc_time-chooser-layer" class="ui-widget ui-widget-content ui-corner-all oc_popuplayer ui-state-hover" title="Shortcuts">
+    <ul id="oc_time-chooser-list" class="oc_popuplayer-list">
+      <li><a href="javascript: " id="oc_btn-embed" onclick="Opencast.Player.doToggleTimeLayer();" class="handcursor" title="Embed">View player time</a></li>
+      <li><a href="javascript: " id="oc_btn-email" onclick="Opencast.Player.doToggleTimeLayer();" class="handcursor" title="Email">View session time</a></li>
     </ul>
   </div>
   <!-- Embed Dialog -->

@@ -12,12 +12,12 @@ Opencast.Annotation_Chapter = (function(){
      *  variables
      */
     var mediaPackageId, duration, ANNOTATION_CHAPTER = "Annotation", ANNOTATION_CHAPTERHIDE = "Annotation off";
-    
+
     /**
      * true if annotation chapter is displayed
      */
     var annotationChapterDisplayed = false;
-    
+
     /**
      * @memberOf Opencast.Annotation_Chapter
      * @description Show Annotation_Chapter
@@ -30,17 +30,19 @@ Opencast.Annotation_Chapter = (function(){
         $.getJSON('js/engage_plugins/demodata/annotation_demo.json', function(data){
             Opencast.Annotation_ChapterPlugin.addAsPlugin('#annotation', data, duration);
         });
+        $('#segmentstable').hide();
         $("#annotation").show();
     }
-    
+
     /**
      * @memberOf Opencast.Annotation_Chapter
      * @description Hide the Annotation
      */
     function hideAnnotation_Chapter(){
         $("#annotation").hide();
+        $('#segmentstable').show();
     }
-    
+
     /**
      * @memberOf Opencast.Analytics
      * @description Toggle Analytics
@@ -49,16 +51,14 @@ Opencast.Annotation_Chapter = (function(){
         if (!annotationChapterDisplayed) {
             showAnnotation_Chapter();
             annotationChapterDisplayed = true;
-            $('#oc_checkbox-annotations').attr('checked', 'checked');
-            
+
         }
         else {
             hideAnnotation_Chapter();
             annotationChapterDisplayed = false;
-            $('#oc_checkbox-annotations').removeAttr('checked');
         }
     }
-    
+
     /**
      * @memberOf Opencast.Analytics
      * @description Set the mediaPackageId
@@ -67,7 +67,7 @@ Opencast.Annotation_Chapter = (function(){
     function setMediaPackageId(id){
         mediaPackageId = id;
     }
-    
+
     /**
      * @memberOf Annotation_Chapter
      * @description Set the duration
@@ -76,8 +76,8 @@ Opencast.Annotation_Chapter = (function(){
     function setDuration(val){
         duration = val;
     }
-    
-    
+
+
     return {
         hideAnnotation_Chapter: hideAnnotation_Chapter,
         showAnnotation_Chapter: showAnnotation_Chapter,

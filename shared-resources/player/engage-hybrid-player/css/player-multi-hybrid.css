@@ -75,16 +75,28 @@ table
   padding:                  0.4em 5px 0.4em 20px;
   width:                    150px !important;
 }
+#oc_lecturer-search-field
+{
+  background:               url("../icons/magnifier.png") no-repeat scroll 4px 0.5em transparent;
+  width:                    150px !important;
+  padding:                  0.5em 2px 0.5em 25px;
+  float:                    left;
+  margin: 4px 5px 0 0;
+}
 
 #oc_title { float: left; font-weight: normal; margin: 0px; padding: 5px 15px 5px; max-width: 70%; }
 #oc_player-head { padding: 5px; }
 #oc_player-head-right { float: right; }
-#oc_share-layer { position: absolute; left: 0; top: -100px; }
-#oc_share-list { list-style:none outside none; padding: 0}
-#oc_share-list li { padding: 5px 0; }
+
 #oc_video-view ul { list-style:none outside none;}
 #oc_video-view ul li { padding: 2px 5px; float: right; }
 #oc_video-view ul input { vertical-align: middle; }
+
+.oc_popuplayer { position: absolute; left: 0; top: -100px; font-weight: bold!important;}
+.oc_popuplayer-list { list-style:none outside none; padding: 0}
+.oc_popuplayer-list li { padding: 5px 0; }
+
+#oc_caption-link { height: 30px; padding: 10px; border-left: 1px solid #000; border-right: 1px solid #000; text-decoration: none; }
 
 
 
@@ -121,11 +133,15 @@ table
 
 #oc_video-player-controls
 {
-  height:                   30px;
+  height:                   40px;
+/*
   width:                    100%;
-  background-position:      0 0px;
+*/
   visibility:               hidden;
+/*
+  background-position:      0 0px;
   background-image:         url("../img/oc_icons.png");
+*/
 }
 
 #oc_video-time
@@ -141,19 +157,18 @@ table
 
 #simpleEdit
 {
+  vertical-align: middle;
   margin-left:              10px;
   font-size:                1.2em;
 }
 
 .oc_current-time
 {
-  cursor:                   pointer;
-  cursor:                   hand;
-  width:                    64px !important;
-  background-color:         transparent !important;
-  color:                    #FFFFFF;
-  text-decoration: 			underline;
-  float: 					left;
+  width:                    60px;
+  background-color:         #4A4847;
+  border:                   1px solid #000;
+  color:                    #FFF;
+  padding:                  5px;
 }
 
 .oc_current-time-hide
@@ -163,9 +178,11 @@ table
 
 .oc_edit-time
 {
-  width:                    64px !important;
-  background-color:         #E3E3D7 !important;
-  color:                    #000000;
+  width:                    60px;
+  background-color:         #FFF;
+  border:                   1px solid #000;
+  color:                    #000;
+  padding:                  5px;
 }
 
 .oc_edit-time-error
@@ -178,10 +195,12 @@ table
 {
   display:                  none;
 }
+#oc_time-wrapper {
+    padding-right: 30px;
+    }
 
 #oc_video-controls
 {
-  margin-top:               4px;
   float:                    left;
   width:                    30%;
   text-align:               right;
@@ -252,6 +271,10 @@ table
   border:                   0px solid #999999;
   background-color:         #EEEEEE;
 }
+#slider_volume_Rail
+{
+  margin-top: 15px;
+}
 
 .oc_slider-volume-Thumb
 {
@@ -295,10 +318,6 @@ table
 
 #oc_video-cc
 {
-  margin-top:               7px;
-  float:                    left;
-  width:                    5%;
-  text-align:               left;
   visibility:               hidden;
 }
 
@@ -853,4 +872,5 @@ option:hover
 }
 
 #oc_ui_tabs { margin-bottom: 10px; }
+div input:focus { outline: none!important; }
 
