@@ -16,7 +16,7 @@
 package org.opencastproject.remotetest.server.resource;
 
 import org.opencastproject.remotetest.Main;
-import org.opencastproject.remotetest.security.TrustedHttpClient;
+import org.opencastproject.remotetest.util.TrustedHttpClient;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;

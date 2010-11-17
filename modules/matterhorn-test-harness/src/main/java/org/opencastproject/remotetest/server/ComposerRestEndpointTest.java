@@ -18,7 +18,7 @@ package org.opencastproject.remotetest.server;
 import static org.opencastproject.remotetest.Main.BASE_URL;
 
 import org.opencastproject.remotetest.Main;
-import org.opencastproject.remotetest.security.TrustedHttpClient;
+import org.opencastproject.remotetest.util.TrustedHttpClient;
 
 import junit.framework.Assert;
 

@@ -20,11 +20,11 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.opencastproject.remotetest.Main;
-import org.opencastproject.remotetest.security.TrustedHttpClient;
 import org.opencastproject.remotetest.server.resource.AdminResources;
 import org.opencastproject.remotetest.server.resource.CaptureAdminResources;
 import org.opencastproject.remotetest.server.resource.CaptureResources;
 import org.opencastproject.remotetest.server.resource.StateResources;
+import org.opencastproject.remotetest.util.TrustedHttpClient;
 import org.opencastproject.remotetest.util.Utils;
 
 import org.apache.http.HttpResponse;

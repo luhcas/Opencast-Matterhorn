@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remotetest.security;
+package org.opencastproject.remotetest.util;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -66,7 +66,7 @@ public class TrustedHttpClient {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.security.api.TrustedHttpClient#execute(org.apache.http.client.methods.HttpUriRequest)
+   * @see org.opencastproject.remotetest.util.security.api.TrustedHttpClient#execute(org.apache.http.client.methods.HttpUriRequest)
    */
   public HttpResponse execute(HttpUriRequest httpUriRequest) {
     // Add the request header to elicit a digest auth response

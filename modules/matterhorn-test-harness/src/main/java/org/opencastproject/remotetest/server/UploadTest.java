@@ -19,9 +19,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.opencastproject.remotetest.Main;
-import org.opencastproject.remotetest.security.TrustedHttpClient;
 import org.opencastproject.remotetest.server.resource.IngestResources;
 import org.opencastproject.remotetest.server.resource.SearchResources;
+import org.opencastproject.remotetest.util.TrustedHttpClient;
 import org.opencastproject.remotetest.util.Utils;
 
 import org.apache.commons.io.IOUtils;

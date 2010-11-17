@@ -16,7 +16,6 @@
 package org.opencastproject.remotetest.util;
 
 import org.opencastproject.remotetest.Main;
-import org.opencastproject.remotetest.security.TrustedHttpClient;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -89,6 +88,10 @@ public class Utils {
     return IOUtils.toString(in, "UTF-8");
   }
 
+  public static Object xPath(String document, String path, QName returnType) throws Exception {
+    return xPath(parseXml(IOUtils.toInputStream(document, "UTF-8")), path, returnType);
+  }
+  
   public static Object xPath(Document document, String path, QName returnType) throws XPathExpressionException,
           TransformerException {
     XPath xPath = XPathFactory.newInstance().newXPath();

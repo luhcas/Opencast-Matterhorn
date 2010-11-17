@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.remotetest.security;
+package org.opencastproject.remotetest.util;
 
 /**
  * A RuntimeException indicating that the trusted http communication failed.
