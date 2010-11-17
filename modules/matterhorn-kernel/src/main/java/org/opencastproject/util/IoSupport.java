@@ -153,9 +153,14 @@ public class IoSupport {
    * Writes the contents variable to the {@code URL}.  Note that the URL must be a local {@code URL}.
    * @param file The {@code URL} of the local file you wish to write to.
    * @param contents The contents of the file you wish to create.
+   * @throws URISyntaxException 
    */
   public static void writeUTF8File(URL file, String contents) throws IOException {
-    writeUTF8File(file.getFile(), contents);
+    try {
+      writeUTF8File(new File(file.toURI()), contents);
+    } catch (URISyntaxException e) {
+      throw new IOException("Couldn't parse the URL", e);
+    }
   }
 
   /**
