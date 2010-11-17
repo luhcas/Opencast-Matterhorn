@@ -145,6 +145,8 @@ Opencast.Watch = (function(){
             
             slideLength = Opencast.segments.getSlideLength();
             
+            
+                      
             Opencast.Player.setMediaURL(coverUrlOne, coverUrlTwo, mediaUrlOne, mediaUrlTwo, mimetypeOne, mimetypeTwo, PLAYERSTYLE, slideLength);
             
             if (mediaUrlOne !== '' && mediaUrlTwo !== '') {
