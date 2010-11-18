@@ -930,26 +930,6 @@ Opencast.Initialize = (function ()
 
 
 
-        //
-        var margin = 0;
-        var controlswith = 0;
-
-        margin = $('#oc_video-controls').width();
-
-        if (Opencast.segments.getSlideLength() === 0)
-        {
-            controlswith = 58;
-            margin = ((margin - controlswith) / 2) - 8;
-            $(".oc_btn-rewind").css("margin-left", margin + "px");
-        }
-        else
-        {
-            controlswith = 90;
-            margin = ((margin - controlswith) / 2) - 8;
-            $('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
-        }
-
-        $("#oc_body").trigger("resize", []);
     }
 
     /**

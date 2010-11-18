@@ -14,14 +14,14 @@ Opencast.segments = ( function() {
    currentSlide = 0,
    nextSlide = 0,
    slideLength = 0;
-  
+
   var segmentPreviews;
 
   function getSegmentPreview(segmentId)
   {
     return segmentPreviews[segmentId];
   }
-  
+
   function getSecondsBeforeSlide(){
     return beforeSlide;
   }
@@ -29,12 +29,12 @@ Opencast.segments = ( function() {
   function getSecondsNextSlide(){
     return nextSlide;
   }
-  
+
   function getSlideLength()
   {
 	  return slideLength;
   }
-  
+
   function setSlideLength(length)
   {
 	  slideLength = length;
@@ -66,7 +66,7 @@ Opencast.segments = ( function() {
       var scroll = $('#slider .scroll').css('overflow', 'hidden');
 
       //when the left/right arrows are clicked
-      $(".right").click(function(){ change(true); }); 
+      $(".right").click(function(){ change(true); });
       $(".left").click(function(){ change(false); });
     }
 
@@ -77,7 +77,7 @@ Opencast.segments = ( function() {
       segmentTimes[i] = seconds;
     });
 
-    segmentPreviews= new Array(); 
+    segmentPreviews= new Array();
     var url;
     $('.oc-segments-preview').each( function(i) {
       url = $(this).html();
@@ -86,8 +86,8 @@ Opencast.segments = ( function() {
 
     // set the slide length
     setSlideLength(segmentTimes.length);
-   
-    
+
+
     $('#oc_video-player-controls').css('display', 'block');
 
     // Hide Slide Tab, if there are no slides
@@ -95,82 +95,6 @@ Opencast.segments = ( function() {
       Opencast.Player.doToggleSlides();
       $(".oc_btn-skip-backward").hide();
       $(".oc_btn-skip-forward").hide();
-    }
-
- // set the center of the controls
-    var margin = $('#oc_video-controls').width();
-    var controlswith = 0;
-    var playerWidth = $('#oc_video-player-controls').width();
-    
-  
-    
-    if (Opencast.segments.getSlideLength() === 0)
-    {
-        controlswith = 58;
-        margin = ((margin - controlswith) / 2 ) - 8;
-        $(".oc_btn-rewind").css("margin-left", margin + "px");
-    }
-    else
-    {
-        controlswith = 90;
-        margin = ((margin - controlswith) / 2 ) - 8;
-        $('#oc_btn-skip-backward').css("margin-left", (margin + "px"));
-    }
-    
-    // set the controls visible
-    $('#oc_video-player-controls').css('visibility', 'visible');
-    
-    
- // player size
-    if( playerWidth < 460 && playerWidth >= 380)
-    {
-        $(".oc_btn-skip-backward").css('display','none');
-        $(".oc_btn-skip-forward").css('display','none');
-        $('#oc_video-controls').css('width','20%');
-        $('#oc_video-cc').css('width','12%');
-        $('#oc_video-time').css('width','40%');
-        $('.oc_slider-volume-Rail').css('width', '45px');
-        controlswith = 58;
-        margin = $('#oc_video-controls').width();
-        margin = ((margin - controlswith) / 2 ) - 8;
-        $(".oc_btn-rewind").css("margin-left", margin + "px");
-    }
-    else if (playerWidth < 380 && playerWidth >= 300)
-    {
-        $(".oc_btn-skip-backward").css('display','none');
-        $(".oc_btn-skip-forward").css('display','none');
-        
-        $(".oc_btn-rewind").css('display','none');
-        $(".oc_btn-fast-forward").css('display','none');
-        
-        $("#oc_video-cc").css('display','none');
-        $("#oc_video-cc").css('width','0%');
-        
-        
-        
-        $('#simpleEdit').css('font-size','0.8em');
-        $('#simpleEdit').css('margin-left','1px');
-        
-        $('#oc_current-time').css('width','45px');
-        $('#oc_edit-time').css('width','45px');
-        $('#oc_duration').css('width','45px');
-        $('#oc_edit-time-error').css('width','45px');
-        
-        
-        
-        $('#oc_sound').css('width','27%');
-        
-        $('#oc_video-controls').css('width','8%');
-        
-        
-        $('#oc_video-time').css('width','48%');
-        
-        $('.oc_slider-volume-Rail').css('width', '45px');
-        
-        controlswith = 16;
-        margin = $('#oc_video-controls').width();
-        margin = ((margin - controlswith) / 2 ) - 8;
-        $("#oc_btn-play-pause").css("margin-left", margin + "px");
     }
 
 
@@ -196,9 +120,9 @@ Opencast.segments = ( function() {
         for (i in segmentTimes)
         {
           cur = segmentTimes[i];
-          
+
           if (last <= currentPosition && currentPosition < cur){
-            
+
             if (last <= currentPosition && currentPosition < parseInt(last) + 3)
               lastIndex = 2;
             else
@@ -216,7 +140,7 @@ Opencast.segments = ( function() {
     }, 0);
 
   }
-  
+
   /**
    * @memberOf Opencast.segments
    * @description Sets scrollContainer width
@@ -242,9 +166,9 @@ Opencast.segments = ( function() {
     var scrollContainerWidth    = parseFloat( $(".scrollContainer").css("width"), 10);
     var sliderWidth    = parseFloat($(".scroll").css("width"), 10);
     var dif = sliderWidth - scrollContainerWidth;
-    
+
       //if not at the first or last panel
-    if((!direction && (leftValue>=0)) || (direction && (leftValue<= dif))) { return false; }  
+    if((!direction && (leftValue>=0)) || (direction && (leftValue<= dif))) { return false; }
 
     //if not currently moving
     if (($("#slider").data("currentlyMoving") == false)) {
