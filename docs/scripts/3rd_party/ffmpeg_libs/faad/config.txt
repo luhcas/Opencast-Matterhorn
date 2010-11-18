@@ -1,0 +1,5 @@
+URL: http://downloads.sourceforge.net/project/faac/faad2-src/faad2-2.7/faad2-2.7.tar.gz
+PKG: faad2-2.7.tar.gz
+SHA: 80eaaa5cc576c35dd28863767b795c50cbcc0511
+DIR: faad2-2.7
+PCP: pc-faad.zip

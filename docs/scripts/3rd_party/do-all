@@ -1,0 +1,33 @@
+#!/bin/bash
+set -x
+source "${HOME3P}/utilx"
+[ $? -ne 0 ] && exit 1
+#
+./check-prereq
+[ $? -ne 0 ] && exit 1
+#
+./download-sources
+[ $? -ne 0 ] && exit 1
+#
+case `uname` in
+  Linux )
+    ./linux-compile
+    [ $? -ne 0 ] && exit 1
+    #
+    ./win32-compile
+    [ $? -ne 0 ] && exit 1
+    #
+    cd "$HOME3P"
+    [ $? -ne 0 ] && exit 1
+    rm -f 3rd_party_windows.zip
+    zip -r 3rd_party_windows.zip usr
+    [ $? -ne 0 ] && exit 1
+    cp ffmpeg/_ffmpeg.zip .
+    [ $? -ne 0 ] && exit 1
+    ;;
+  Darwin )
+    ./mac-compile
+    [ $? -ne 0 ] && exit 1
+    ;;
+esac
+exit 0

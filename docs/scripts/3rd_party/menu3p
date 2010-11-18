@@ -1,0 +1,121 @@
+#!/bin/bash
+export HOME3P=`cd "${0%/*}" 2>/dev/null; echo $PWD`
+export SUDOPWD=""
+#
+source "${HOME3P}/utilx"
+[ $? -ne 0 ] && exit 1
+#
+PAGER=less
+LESS=-feMX
+chkprog $PAGER || PAGER=more
+#
+# These programs are absolutely necessary!
+chkprog wget  || exit 1
+chkprog zcat  || exit 1
+chkprog bzcat || exit 1
+chkprog unzip || exit 1
+chkprog zip   || exit 1
+#
+ACT=0
+while [ true ]; do
+  clear
+  echo "------------------------------------------------------------------------"
+  echo "Possible actions:"
+  echo "  0) check & install prerequisites"
+  echo "  1) download sources"
+  echo "  2) compile for Linux"
+  echo "  3) cross-compile for Windows"
+  echo "  3z) create packages for Windows"
+  echo "  4) compile for Mac"
+  echo "  a) do all for current platform"
+  echo "  l) view log of last action"
+  echo "  r) reset intermediate marks"
+  echo "  c) clean up build directories"
+  echo "  ca) clean up all (including downloads)"
+  echo "  q) quit"
+  echo ""
+  ACT=`getans "Select action [$ACT]: "`
+  ERRTXT="..."
+  case "$ACT" in
+    0 ) chksudo
+        LOGFILE=`mktemp /tmp/${0##*/}-prereq.log.XXXXX`
+        time ./check-prereq 2>&1 | tee $LOGFILE
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else ERRTXT=" (success)..."; ACT=1; fi
+        ;;
+    1 ) LOGFILE=`mktemp /tmp/${0##*/}-download.log.XXXXX`
+        time ./download-sources 2>&1 | tee $LOGFILE
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else ERRTXT=" (success)..."; ACT=2; fi
+        ;;
+    2 ) chksudo
+        LOGFILE=`mktemp /tmp/${0##*/}-linux.log.XXXXX`
+        time ./linux-compile 2>&1 | tee $LOGFILE
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else ERRTXT=" (success)..."; ACT=3; fi
+        ;;
+    3 ) chksudo
+        LOGFILE=`mktemp /tmp/${0##*/}-win32.log.XXXXX`
+        time ./win32-compile 2>&1 | tee $LOGFILE
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else ERRTXT=" (success)..."; ACT=3z; fi
+        ;;
+    3z) cd "$HOME3P"
+        if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else
+          LOGFILE=`mktemp /tmp/${0##*/}-zip.log.XXXXX`
+          rm -f 3rd_party_windows.zip
+          zip -r 3rd_party_windows.zip usr 2>&1 | tee $LOGFILE
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+          else
+            cp ffmpeg/_ffmpeg.zip . | tee -a $LOGFILE
+            if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+            else ERRTXT=" (success)..."; ACT=q; fi
+          fi
+        fi
+        ;;
+    4 ) chksudo
+        LOGFILE=`mktemp /tmp/${0##*/}-mac.log.XXXXX`
+        time ./mac-compile 2>&1 | tee $LOGFILE
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else ERRTXT=" (success)..."; ACT=q; fi
+        ;;
+    a ) chksudo
+        LOGFILE=`mktemp /tmp/${0##*/}-all.log.XXXXX`
+        time ./do-all 2>&1 | tee $LOGFILE
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else ERRTXT=" (success)..."; ACT=q; fi
+        ;;
+    l ) $PAGER $LOGFILE
+        ACT=l
+        ;;
+    r ) find . -name '.done-*' -exec rm -f {} \;
+        echo "All intermediate marks removed"
+        ACT=1
+        ;;
+    c ) LOGFILE=`mktemp /tmp/${0##*/}-clean.log.XXXXX`
+        time ./clean-up 2>&1 | tee $LOGFILE
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else ERRTXT=" (success)..."; ACT=1; fi
+        ;;
+    ca) LOGFILE=`mktemp /tmp/${0##*/}-clean-all.log.XXXXX`
+        time ./clean-up all 2>&1 | tee $LOGFILE
+        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else ERRTXT=" (success)..."; ACT=1; fi
+        ;;
+    xyzzy ) # See http://en.wikipedia.org/wiki/xyzzy
+        echo "Nothing happens"
+        ACT=1
+        ;;
+    q ) exit 0
+        ;;
+    * ) echo "Unknown action: $ACT"
+        ACT=1
+        ;;
+  esac
+  echo ""
+  echo -n "Press <Enter> to continue${ERRTXT}"
+  read ANS
+  [ "$ANS" = "q" ] && exit 0
+done
+exit 0

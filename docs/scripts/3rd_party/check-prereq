@@ -1,0 +1,363 @@
+#!/bin/bash
+set -x
+source  "${HOME3P}/utilx"
+[ $? -ne 0 ] && exit 1
+#
+install_rpms() {
+  name=`echo "$1" | awk '{sub("-[0-9.]+.*",""); print $0}'`
+  name_ver=`echo "$1" | awk '{sub("\\\.(i386|noarch)\\\.rpm$",""); print $0}'`
+  case `os` in
+    CentOS | RHEL )
+      installed=`rpm -q "$name"`
+      if [ ! "$installed" = "$name_ver" ]; then
+        sudox rpm -iv --force "$@"
+        [ $? -ne 0 ] && return 1
+      fi
+      ;;
+    Ubuntu )
+      installed=`dpkg --get-selections "$name" | awk '{print $1}'`
+      if [ ! "$installed" = "$name" ]; then
+        for rpm in $@; do
+          sudox alien -i $rpm
+          [ $? -ne 0 ] && return 1
+        done
+      fi
+      ;;
+    Debian )
+      ;;
+    openSUSE )
+      ;;
+    MacOS )
+      ;;
+    * )
+      echo "Don't know how to install $1 on `os`" 1>&2
+      return 1
+      ;;
+  esac
+  return 0
+}
+#
+install_prog() {
+  cd "$HOME3P"
+  [ $? -ne 0 ] && return 1
+  mkdir -p packages
+  [ $? -ne 0 ] && return 1
+  cd packages
+  [ $? -ne 0 ] && return 1
+  #
+  case `os` in
+    CentOS | RHEL )
+      case "$1" in
+        xz )
+          URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+          rpms="xz-4.999.9-0.3.beta.20091007git.el5.i386.rpm xz-libs-4.999.9-0.3.beta.20091007git.el5.i386.rpm"
+          ;;
+        git ) 
+          URL=http://packages.sw.be/git
+          rpms="git-1.7.3-1.el5.rf.i386.rpm perl-Git-1.7.3-1.el5.rf.i386.rpm"
+          ;;
+        jam ) 
+          URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/i386
+          rpms=jam-2.5-4.el5.i386.rpm
+          ;;
+        yasm ) 
+          URL=http://packages.sw.be/yasm
+          rpms=yasm-1.0.1-1.el5.rf.i386.rpm
+          ;;
+        gsl )
+          URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+          rpms="gsl-1.13-3.el5.i386.rpm gsl-devel-1.13-3.el5.i386.rpm"
+          ;;
+        * )
+          echo "Don't know how to install $1 on `os`" 1>&2
+          return 1
+          ;;
+      esac
+      for rpm in $rpms; do
+        if [ ! -f "$rpm" ]; then
+          copypkg "$rpm"
+          if [ $? -ne 0 ]; then
+            wget -4O "$rpm" "$URL/$rpm"
+            [ $? -ne 0 ] && return 1
+          fi
+        fi
+      done
+      install_rpms $rpms
+      [ $? -ne 0 ] && return 1
+      ;;
+    Ubuntu )
+      case "$1" in
+        xz ) prog=xz-utils ;;
+        yacc ) prog="flex bison" ;;
+        git ) prog=git-core ;;
+        gsl ) prog=libgsl0-dev ;;
+        * ) prog="$1" ;;
+      esac
+      sudox apt-get -y install $prog
+      [ $? -ne 0 ] && return 1
+      ;;
+    Debian )
+      ;;
+    openSUSE )
+      ;;
+    MacOS )
+      ;;
+    * )
+      echo "Don't know how to install $1 on `os`" 1>&2
+      return 1
+      ;;
+  esac
+  return 0
+}
+#
+preinstall_scons() {
+  cd "$HOME3P/base_libs/scons"
+  [ $? -ne 0 ] && return 1
+  #
+  case `os` in
+    CentOS | RHEL | Ubuntu | Debian | openSUSE )
+      download .
+      [ $? -ne 0 ] && return 1
+      ./linux-compile
+      [ $? -ne 0 ] && return 1
+      ;;
+    MacOS )
+      ;;
+    * )
+      echo "Don't know how to preinstall scons on `os`" 1>&2
+      return 1
+      ;;
+  esac
+  return 0
+}
+#
+check_prereq() {
+  case `os` in
+    CentOS | RHEL )
+      chkprog xz    || install_prog xz    || return 1
+      chkprog git   || install_prog git   || return 1
+      # These are needed for Windows compile
+      chkprog jam   || install_prog jam   || return 1
+      chkprog yasm  || install_prog yasm  || return 1
+      chkprog scons || preinstall_scons   || return 1
+      #fix_scons || return 1
+      #
+      # gsl devel is needed by ocropus
+      chkprog gsl-config || install_prog gsl   || return 1
+      ;;
+    Ubuntu )
+      chkprog alien || install_prog alien || return 1
+      chkprog g++   || install_prog g++   || return 1
+      chkprog yacc  || install_prog yacc  || return 1
+      chkprog patch || install_prog patch || return 1
+      chkprog git   || install_prog git   || return 1
+      # These are needed for Windows compile
+      chkprog jam   || install_prog jam   || return 1
+      chkprog yasm  || install_prog yasm  || return 1
+      chkprog scons || preinstall_scons   || return 1
+      #fix_scons || return 1
+      #
+      # gsl devel is needed by ocropus
+      chkprog gsl-config || install_prog gsl   || return 1
+      ;;
+    Debian )
+      ;;
+    openSUSE )
+      ;;
+    MacOS )
+      # convert (part of ImageMagick) is needed by ocropus_libs/iulib
+      chkprog convert || install ImageMagick || return 1
+      if [ ! -x /usr/bin/convert ]; then
+        ln -fs /opt/local/bin/convert /usr/bin/convert
+        [ $? -ne 0 ] && return 1
+      fi
+      ;;
+    * )
+      echo "Don't know how to check prerequisites on `os`" 1>&2
+      return 1
+      ;;
+  esac
+  return 0
+}
+#
+install_mingw32() {
+  cd "$HOME3P"
+  [ $? -ne 0 ] && return 1
+  mkdir -p packages
+  [ $? -ne 0 ] && return 1
+  cd packages
+  [ $? -ne 0 ] && return 1
+  #
+  case `os` in
+    CentOS | RHEL | Ubuntu )
+      URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/i386
+      rpms="mingw32-gcc-4.3.2-12.el5.i386.rpm mingw32-binutils-2.19-3.el5.i386.rpm mingw32-cpp-4.3.2-12.el5.i386.rpm mingw32-filesystem-56-1.el5.noarch.rpm mingw32-runtime-3.15.1-10.el5.noarch.rpm mingw32-w32api-3.12-8.el5.noarch.rpm rpmlint-0.91-1.el5.noarch.rpm"
+      for rpm in $rpms; do
+        if [ ! -f "$rpm" ]; then
+          copypkg "$rpm"
+          if [ $? -ne 0 ]; then
+            wget -4O "$rpm" "$URL/$rpm"
+            [ $? -ne 0 ] && return 1
+          fi
+        fi
+      done
+      install_rpms $rpms
+      [ $? -ne 0 ] && return 1
+      #
+      URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/i386
+      rpms=mingw32-gcc-c++-4.3.2-12.el5.i386.rpm
+      for rpm in $rpms; do
+        if [ ! -f "$rpm" ]; then
+          copypkg "$rpm"
+          if [ $? -ne 0 ]; then
+            wget -4O "$rpm" "$URL/$rpm"
+            [ $? -ne 0 ] && return 1
+          fi
+        fi
+      done
+      install_rpms $rpms
+      [ $? -ne 0 ] && return 1
+      #
+      URL=http://downloads.sourceforge.net/project/mingw/MinGW/BaseSystem/RuntimeLibrary/Win32-API/w32api-3.15
+      pkg=w32api-3.15-1-mingw32-dev.tar.lzma
+      if [ ! -f "$pkg" -a ! -f "${pkg%.lzma}" ]; then
+        copypkg "$pkg"
+        if [ $? -ne 0 ]; then
+          wget -4O "$pkg" "$URL/$pkg"
+          [ $? -ne 0 ] && return 1
+        fi
+      fi
+      if [ ! -f "${pkg%.lzma}" ]; then
+        xz -d "$pkg"
+        [ $? -ne 0 ] && return 1
+      fi
+      cd $MINGW32_PREFIX
+      [ $? -ne 0 ] && return 1
+      sudox tar -xvf "${HOME3P}/packages/w32api-3.15-1-mingw32-dev.tar"
+      [ $? -ne 0 ] && return 1
+      ;;
+    Debian )
+      ;;
+    openSUSE )
+      ;;
+    MacOS )
+      ;;
+    * )
+      echo "Don't know how to install mingw32 on `os`" 1>&2
+      return 1
+      ;;
+  esac
+  return 0
+}
+#
+fix_libs() {
+  cd "$HOME3P"
+  [ $? -ne 0 ] && return 1
+  mkdir -p packages
+  [ $? -ne 0 ] && return 1
+  cd packages
+  [ $? -ne 0 ] && return 1
+  #
+  # Install patchelf 0.5
+  #
+  if [ ! "`patchelf --version 2>/dev/null`" = "patchelf 0.5" ]; then
+    URL=http://hydra.nixos.org/build/114505/download/3
+    pkg=patchelf-0.5.tar.gz
+    if [ ! -f "$pkg" ]; then
+      copypkg "$pkg"
+      if [ $? -ne 0 ]; then
+        wget -4O "$pkg" "$URL/$pkg"
+        [ $? -ne 0 ] && return 1
+      fi
+    fi
+    zcat "$pkg" | tar -xv
+    [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
+    cd patchelf-0.5
+    [ $? -ne 0 ] && return 1
+    ./configure
+    [ $? -ne 0 ] && return 1
+    sudox make install
+    [ $? -ne 0 ] && return 1
+  fi
+  #
+  case `os` in
+    CentOS | RHEL )
+      # Check & set /usr/local/lib in LD_LIBRARY_PATH
+      grep '/usr/local/lib' /etc/ld.so.conf.d/* >/dev/null
+      if [ $? -ne 0 ]; then
+        cat > local.conf << EOF
+/usr/local/lib
+EOF
+        [ $? -ne 0 ] && return 1
+        if [ -s /etc/ld.so.conf.d/local.conf ]; then
+          echo "File /etc/ld.so.conf.d/local.conf already exists"
+          return 1
+        fi
+        sudox cp local.conf /etc/ld.so.conf.d
+        [ $? -ne 0 ] && return 1
+        rm -f local.conf
+        [ $? -ne 0 ] && return 1
+      fi
+      sudox /sbin/ldconfig
+      [ $? -ne 0 ] && return 1
+      ;;
+    Ubuntu )
+      if [ ! -d /usr/libx ]; then
+        URL=ftp://mirror.switch.ch/pool/3/mirror/centos/5.5/os/i386/CentOS
+        rpm=gmp-4.1.4-10.el5.i386.rpm
+        if [ ! -f "$rpm" ]; then
+          copypkg "$rpm"
+          if [ $? -ne 0 ]; then
+            wget -4O "$rpm" "$URL/$rpm"
+            [ $? -ne 0 ] && return 1
+          fi
+        fi
+        rpm2cpio "$rpm" | cpio -i -dmuv
+        [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
+        sudox mv usr/lib /usr/libx
+        [ $? -ne 0 ] && return 1
+        rm -fr usr
+        [ $? -ne 0 ] && return 1
+        cd /usr/libexec/gcc/i686-pc-mingw32/4.3.2
+        [ $? -ne 0 ] && return 1
+        if [ -f cc1 ]; then
+          sudox patchelf --set-rpath /usr/libx:/usr/lib:/lib cc1
+          [ $? -ne 0 ] && return 1
+        fi
+        if [ -f cc1plus ]; then
+          sudox patchelf --set-rpath /usr/libx:/usr/lib:/lib cc1plus
+          [ $? -ne 0 ] && return 1
+        fi
+      fi
+      #
+      # Check & set /usr/local/lib in LD_LIBRARY_PATH
+      grep '/usr/local/lib' /etc/ld.so.conf.d/* >/dev/null
+      if [ $? -ne 0 ]; then
+        [ -s /etc/ld.so.conf.d/local.conf ] && return 1
+        sudox cat > /etc/ld.so.conf.d/local.conf << EOF
+/usr/local/lib
+EOF
+        [ $? -ne 0 ] && return 1
+      fi
+      sudox /sbin/ldconfig
+      [ $? -ne 0 ] && return 1
+      ;;
+    Debian )
+      ;;
+    openSUSE )
+      ;;
+    MacOS )
+      ;;
+    * )
+      echo "Don't know how to fix libraries on `os`" 1>&2
+      return 1
+      ;;
+  esac
+  return 0
+}
+#
+check_prereq    || exit 1
+install_mingw32 || exit 1
+fix_libs        || exit 1
+#
+exit 0
