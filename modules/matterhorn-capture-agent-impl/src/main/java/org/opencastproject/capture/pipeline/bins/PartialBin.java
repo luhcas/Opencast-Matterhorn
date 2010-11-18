@@ -30,8 +30,15 @@ public abstract class PartialBin {
   protected CaptureDeviceProperties captureDeviceProperties;
   protected ConfidenceMonitoringProperties confidenceMonitoringProperties;
   
-  public PartialBin(CaptureDevice captureDevice, Properties properties) throws Exception{
-    this.captureDevice = captureDevice;
+  public PartialBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
+          UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
+          CaptureDeviceNullPointerException {
+    if(captureDevice != null){
+      this.captureDevice = captureDevice;
+    }
+    else{
+      throw new CaptureDeviceNullPointerException();
+    }
     this.properties = properties;
     getCaptureProperties();
     createElements();
@@ -49,17 +56,28 @@ public abstract class PartialBin {
     confidenceMonitoringProperties = new ConfidenceMonitoringProperties(captureDevice, properties);
   }
   
-  protected abstract void createElements();
-  protected abstract void setElementProperties() throws Exception;
+  protected void createElements(){
+    
+  }
+  
+  protected void setElementProperties() throws UnableToSetElementPropertyBecauseElementWasNullException{
+    
+  }
   
   /** Descendents will use this to add all the elements they create to the Bin. **/
-  protected abstract void addElementsToBin();
+  protected void addElementsToBin(){
+    
+  }
   
-  protected abstract void createGhostPads() throws Exception;
+  protected void createGhostPads() throws UnableToCreateGhostPadsForBinException{
+    
+  }
   
   /** Descendants will implement this to link all of their elements together in the proper order. 
    * @throws Exception **/
-  protected abstract void linkElements() throws Exception;
+  protected void linkElements() throws UnableToLinkGStreamerElementsException{
+    
+  }
   
   public Bin getBin(){
     return bin;

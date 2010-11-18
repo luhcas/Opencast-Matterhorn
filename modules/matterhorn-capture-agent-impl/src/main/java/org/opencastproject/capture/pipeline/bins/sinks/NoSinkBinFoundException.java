@@ -13,15 +13,19 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.pipeline;
+package org.opencastproject.capture.pipeline.bins.sinks;
 
-/**
- * The gstreamer sinks that are currently supported and tested with this code
- */
-public enum SinkDeviceName {
-  AUDIO_CONFIDENCE_MONITORING,
-  VIDEO_CONFIDENCE_MONITORING,
-  XVIMAGE_SINK,
-  AUDIO_FILE_SINK,
-  VIDEO_FILE_SINK
+
+public class NoSinkBinFoundException extends Exception {
+  private static final long serialVersionUID = 7225881836258836049L;
+  String message; 
+  
+  public NoSinkBinFoundException(String message) {
+    this.message = message;
+  }
+  
+  @Override
+  public String getMessage(){
+    return message;
+  }
 }

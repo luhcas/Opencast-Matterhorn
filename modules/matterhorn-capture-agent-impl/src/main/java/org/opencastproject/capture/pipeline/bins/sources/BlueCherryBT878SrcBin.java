@@ -21,9 +21,14 @@ import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
-public class BlueCherrySrcBin extends V4L2SrcBin{
+public class BlueCherryBT878SrcBin extends V4L2SrcBin{
   Element v4l2src;
   /**
    * Adds a pipeline specifically designed to captured from the Bluecherry Provideo cards to the main pipeline
@@ -33,9 +38,15 @@ public class BlueCherrySrcBin extends V4L2SrcBin{
    * @param properties
    *          The {@code Properties} of the confidence monitoring.
    * @return True, if successful
+   * @throws UnableToSetElementPropertyBecauseElementWasNullException 
+   * @throws UnableToCreateGhostPadsForBinException 
+   * @throws UnableToLinkGStreamerElementsException 
+   * @throws CaptureDeviceNullPointerException 
    * @throws Exception - When something in the bin doesn't link together correctly.
    */
-  public BlueCherrySrcBin(CaptureDevice captureDevice, Properties properties) throws Exception {
+  public BlueCherryBT878SrcBin(CaptureDevice captureDevice, Properties properties)
+          throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
     super(captureDevice, properties);
   }
 
@@ -43,7 +54,7 @@ public class BlueCherrySrcBin extends V4L2SrcBin{
   @Override
   protected void createElements(){
     super.createElements();
-    v4l2src = ElementFactory.make("v4l2src", null);
+    v4l2src = ElementFactory.make(GStreamerElements.V4L2SRC, null);
   }
   
   /** Add the v4l2src, queue, videorate corrector and fpsfilter to the source bin. **/
@@ -56,7 +67,7 @@ public class BlueCherrySrcBin extends V4L2SrcBin{
    * them as a source.
    * @throws Exception - When something in the bin doesn't link together correctly we throw an exception. **/ 
   @Override
-  protected void linkElements() throws Exception {
+  protected void linkElements() throws UnableToLinkGStreamerElementsException {
     if (!v4l2src.link(queue)){
       throw new UnableToLinkGStreamerElementsException(captureDevice, v4l2src, queue);
     }
@@ -71,6 +82,6 @@ public class BlueCherrySrcBin extends V4L2SrcBin{
   /** Returns the fpsfilter element as the sink for this source bin since it is the last part of this source. **/ 
   @Override
   public Pad getSrcPad() {
-    return fpsfilter.getStaticPad("src");
+    return fpsfilter.getStaticPad(GStreamerProperties.SRC);
   }
 }

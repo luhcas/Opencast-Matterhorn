@@ -154,43 +154,45 @@ public class AudioMonitoring {
         logger.error("Could not link {} with {}", level.toString(), fakesink.toString());
         return false;
       }
-      
-      // callback to listen for messages from the level element, giving us
-      // information about the audio being recorded
       Bus bus = bin.getBus();
-      bus.connect(new Bus.MESSAGE() {
-        long previous = -1;
-        public void busMessage(Bus bus, Message msg) {
-          if (msg.getSource().equals(level)) {
-            Element level = (Element) msg.getSource();
-            long seconds = level.getClock().getTime().getSeconds();
-            //If we're on the division between intervals and we're not in the same second as the last entry
-            if (seconds % interval == 0 && seconds != previous) {
-              previous = seconds;
-              String data = msg.getStructure().toString();
-              //TODO:  Can we get an example of what the output of .getStructure().toString() looks like?
-              int start = data.indexOf("rms");
-              int end = data.indexOf("}", start);
-              String rms = data.substring(start, end+1);
-              start = rms.indexOf("{");
-              end = rms.indexOf("}");
-              double value = Double.parseDouble(rms.substring(start+1, end).split(",")[0]);
-              
-              // add the new value (timestamp, rms) value pair to the hashmap for this device
-              TreeSet<Pair> deviceRMS = (TreeSet<Pair>) deviceRMSValues.get(name);
-              deviceRMS.add(new Pair(System.currentTimeMillis(), value));
-              
-              // keep the maximum number of pairs stored to be 1000 / interval
-              
-              if (deviceRMS.size() > (1 / interval)) {
-                deviceRMS.remove(deviceRMS.first());
-              }
+      setupBusMonitoring(bus, interval, name, level);
+      return true;
+  }
+
+  private static void setupBusMonitoring(Bus bus, final long interval, final String name, final Element level) {
+    // callback to listen for messages from the level element, giving us
+    // information about the audio being recorded
+    bus.connect(new Bus.MESSAGE() {
+      long previous = -1;
+      public void busMessage(Bus bus, Message msg) {
+        if (msg.getSource().equals(level)) {
+          Element level = (Element) msg.getSource();
+          long seconds = level.getClock().getTime().getSeconds();
+          //If we're on the division between intervals and we're not in the same second as the last entry
+          if (seconds % interval == 0 && seconds != previous) {
+            previous = seconds;
+            String data = msg.getStructure().toString();
+            //TODO:  Can we get an example of what the output of .getStructure().toString() looks like?
+            int start = data.indexOf("rms");
+            int end = data.indexOf("}", start);
+            String rms = data.substring(start, end+1);
+            start = rms.indexOf("{");
+            end = rms.indexOf("}");
+            double value = Double.parseDouble(rms.substring(start+1, end).split(",")[0]);
+            
+            // add the new value (timestamp, rms) value pair to the hashmap for this device
+            TreeSet<Pair> deviceRMS = (TreeSet<Pair>) deviceRMSValues.get(name);
+            deviceRMS.add(new Pair(System.currentTimeMillis(), value));
+            
+            // keep the maximum number of pairs stored to be 1000 / interval
+            
+            if (deviceRMS.size() > (1 / interval)) {
+              deviceRMS.remove(deviceRMS.first());
             }
           }
         }
-      });
-      
-      return true;
+      }
+    });
   }
   
   /**
@@ -270,41 +272,9 @@ public class AudioMonitoring {
       return;
     }
 
-    // FIXME: This looks like duplicated code. Can we move it out into a private function or is there a reason for the
-    // duplication?  
     // callback to listen for messages from the level element, giving us
     // information about the audio being recorded
     Bus bus = pipeline.getBus();
-    bus.connect(new Bus.MESSAGE() {
-      long previous = -1;
-      public void busMessage(Bus bus, Message msg) {
-        if (msg.getSource().equals(level)) {
-          Element level = (Element) msg.getSource();
-          long seconds = level.getClock().getTime().getSeconds();
-          //If we're on the division between intervals and we're not in the same second as the last entry
-          if (seconds % interval == 0 && seconds != previous) {
-            previous = seconds;
-            String data = msg.getStructure().toString();
-            //TODO:  Can we get an example of what the output of .getStructure().toString() looks like?
-            int start = data.indexOf("rms");
-            int end = data.indexOf("}", start);
-            String rms = data.substring(start, end+1);
-            start = rms.indexOf("{");
-            end = rms.indexOf("}");
-            double value = Double.parseDouble(rms.substring(start+1, end).split(",")[0]);
-            
-            // add the new value (timestamp, rms) value pair to the hashmap for this device
-            TreeSet<Pair> deviceRMS = (TreeSet<Pair>) deviceRMSValues.get(name);
-            deviceRMS.add(new Pair(System.currentTimeMillis(), value));
-            
-            // keep the maximum number of pairs stored to be 1000 / interval
-            
-            if (deviceRMS.size() > (1 / interval)) {
-              deviceRMS.remove(deviceRMS.first());
-            }
-          }
-        }
-      }
-    });
+    setupBusMonitoring(bus, interval, name, level);
   }
 }

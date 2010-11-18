@@ -92,7 +92,7 @@ public class SinkFactoryTest {
       return;
     if (!gstreamerInstalled)
       return;
-    SinkBin sinkBin = getSink(SinkDeviceName.XVIMAGESINK);
+    SinkBin sinkBin = getSink(SinkDeviceName.XVIMAGE_SINK);
     Assert.assertTrue(sinkBin instanceof XVImageSinkBin);
     Assert.assertTrue(sinkBin.getSrc() != null);
   }
@@ -121,7 +121,7 @@ public class SinkFactoryTest {
       sinkBin = SinkFactory.getInstance().getSink(sinkDeviceName, captureDevice, properties);
     } catch (Exception e) {
       e.printStackTrace();
-      Assert.fail();
+      Assert.fail(e.getMessage());
     }
     return sinkBin;
   }

@@ -20,7 +20,11 @@ import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
 public class AlsaSrcBin extends AudioSrcBin {
   Element alsasrc;
@@ -32,9 +36,14 @@ public class AlsaSrcBin extends AudioSrcBin {
    *          The ALSA source {@code CaptureDevice} to create source around
    * @param properties 
    *          The {@code Properties} properties such as confidence monitoring necessary to create the source. 
-   * @throws Exception if it failed to create the alsa source. 
+   * @throws UnableToSetElementPropertyBecauseElementWasNullException 
+   * @throws UnableToCreateGhostPadsForBinException 
+   * @throws UnableToLinkGStreamerElementsException 
+   * @throws CaptureDeviceNullPointerException 
    */
-  public AlsaSrcBin(CaptureDevice captureDevice, Properties properties) throws Exception {
+  public AlsaSrcBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
+          UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
+          CaptureDeviceNullPointerException {
     super(captureDevice, properties);
   }
   
@@ -49,10 +58,16 @@ public class AlsaSrcBin extends AudioSrcBin {
     alsasrc = ElementFactory.make("alsasrc", null);
   }
   
-  /** Set the correct properties for the ALSA source **/
+  /** Set the correct properties for the ALSA source 
+   * @throws UnableToSetElementPropertyBecauseElementWasNullException **/
   @Override
-  protected void setElementProperties(){
-    alsasrc.set("device", captureDevice.getLocation());
+  protected void setElementProperties() throws UnableToSetElementPropertyBecauseElementWasNullException{
+    if(alsasrc != null){
+      alsasrc.set(GStreamerProperties.DEVICE, captureDevice.getLocation());
+    }
+    else{
+      throw new UnableToSetElementPropertyBecauseElementWasNullException(alsasrc, GStreamerProperties.DEVICE);
+    }
   }
   
   /** Add all the necessary elements to the bin. **/
@@ -64,7 +79,7 @@ public class AlsaSrcBin extends AudioSrcBin {
    * @throws If any of the elements will not link together it throws an exception. 
    */
   @Override
-  protected void linkElements() throws Exception{
+  protected void linkElements() throws UnableToLinkGStreamerElementsException{
     if (!alsasrc.link(queue)){
       throw new UnableToLinkGStreamerElementsException(captureDevice, alsasrc, queue);
     }

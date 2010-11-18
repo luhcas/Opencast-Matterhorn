@@ -21,6 +21,12 @@ import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
+import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
 
 
@@ -29,13 +35,16 @@ public abstract class VideoSrcBin extends SrcBin {
   Element fpsfilter;
   Element videorate;
   
-  public VideoSrcBin(CaptureDevice captureDevice, Properties properties) throws Exception{
+  public VideoSrcBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
+          UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
+          CaptureDeviceNullPointerException {
     super(captureDevice, properties);
   }
   
-  /* All Video Capture Devices will need to support changes in FPS and some more logic for the muxer if 
-   * they are using H264. 
-   * @see org.opencastproject.capture.pipeline.bins.CaptureDeviceBin#createElements()
+  /*
+   * The main difference between this and a general source bin is that we will need a caps filter to support being able
+   * to change the FPS of the output media and a videorate Element to fix the output media's timestamp in case of an fps
+   * change. 
    */
   @Override
   protected void createElements() {
@@ -46,11 +55,11 @@ public abstract class VideoSrcBin extends SrcBin {
  
   /* Creates a videorate GST Element that adjusts the timestamps in case of a FPS change in the output file.*/
   private void createVideoRate() {
-    videorate = ElementFactory.make("videorate", null);
+    videorate = ElementFactory.make(GStreamerElements.VIDEORATE, null);
   }
   
   private void createFramerateCaps() {
-    fpsfilter = ElementFactory.make("capsfilter", null);
+    fpsfilter = ElementFactory.make(GStreamerElements.CAPSFILTER, null);
   }
   
   @Override
@@ -62,7 +71,8 @@ public abstract class VideoSrcBin extends SrcBin {
   private void setFramerateCapsProperties() {
     Caps fpsCaps;
     if (captureDeviceProperties.framerate != null) {
-      fpsCaps = new Caps("video/x-raw-yuv, framerate=" + captureDeviceProperties.framerate + "/1");
+      fpsCaps = new Caps(GStreamerProperties.VIDEO_X_RAW_YUV + ", " + GStreamerProperties.FRAMERATE + "="
+              + captureDeviceProperties.framerate + "/1");
       logger.debug("{} fps: {}", captureDevice.getName(), captureDeviceProperties.framerate);
     }
     else{

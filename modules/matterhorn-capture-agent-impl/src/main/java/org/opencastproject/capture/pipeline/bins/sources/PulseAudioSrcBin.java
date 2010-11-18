@@ -21,43 +21,37 @@ import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
+import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
+/** PulseAudioSrcBin captures from a pulse audio source such as a desktop linux distro. **/
 public class PulseAudioSrcBin extends AudioSrcBin {
 
   Element pulseAudioSrc;
   
-  public PulseAudioSrcBin(CaptureDevice captureDevice, Properties properties) throws Exception {
+  public PulseAudioSrcBin(CaptureDevice captureDevice, Properties properties)
+          throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
     super(captureDevice, properties);
   }
 
   @Override
   protected void createElements(){
-    pulseAudioSrc = ElementFactory.make("pulsesrc", null);
+    pulseAudioSrc = ElementFactory.make(GStreamerElements.PULSESRC, null);
   }
   
   @Override
   public Pad getSrcPad() {
-    return pulseAudioSrc.getStaticPad("src");
+    return pulseAudioSrc.getStaticPad(GStreamerProperties.SRC);
   }
 
   @Override
   protected void addElementsToBin() {
     bin.add(pulseAudioSrc);
-  }
-
-  @Override
-  protected void linkElements() throws Exception {
-
-  }
-
-  @Override
-  protected void setElementProperties() {
-
-  }
-
-  @Override
-  public boolean isVideoDevice(){
-    return false;
   }
   
   @Override

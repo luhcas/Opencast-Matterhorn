@@ -20,12 +20,18 @@ import java.util.Properties;
 import org.gstreamer.Bin;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
+import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
 public class CustomVideoSrcBin extends SrcBin {
 
   private static final boolean LINK_UNUSED_GHOST_PADS = true;
   
-  public CustomVideoSrcBin(CaptureDevice captureDevice, Properties properties) throws Exception {
+  public CustomVideoSrcBin(CaptureDevice captureDevice, Properties properties)
+          throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
     super(captureDevice, properties);
   }
 
@@ -44,24 +50,10 @@ public class CustomVideoSrcBin extends SrcBin {
     bin = Bin.launch(captureDeviceProperties.customSource, LINK_UNUSED_GHOST_PADS);
   }
   
+ /** Need an empty method for createGhostPads because the Bin.launch will create the ghost pads all on its own.**/
   @Override
-  protected void addElementsToBin() {
-
-  }
-
-  @Override
-  protected void createGhostPads() throws Exception {
+  protected void createGhostPads() throws UnableToCreateGhostPadsForBinException {
     
-  }
-  
-  @Override
-  protected void linkElements() throws Exception {
-
-  }
-
-  @Override
-  protected void setElementProperties() throws Exception {
-
   }
 
   @Override

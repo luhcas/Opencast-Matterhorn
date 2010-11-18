@@ -129,13 +129,13 @@ public class PipelineFactory {
       try {
         name = createDevice(outputDirectory, confidence, devices, name);
       } catch (CannotFindSourceFileOrDeviceException e) {
-        logger.error(e.getMessage());
+        logger.error("Can't find source file or device: ", e);
       } catch (InvalidDeviceNameException e) {
-        logger.error(e.getMessage());
+        logger.error("Invalid device name: " + name, e);
       } catch (UnableToCreateSampleOutputFileException e) {
-        logger.error(e.getMessage());
+        logger.error("Unable to create sample output file " + outputDirectory, e);
       } catch (UnrecognizedDeviceException e) {
-        logger.error(e.getMessage());
+        logger.error("Unrecognized device ", e);
       }
     }
 

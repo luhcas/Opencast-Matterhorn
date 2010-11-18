@@ -20,14 +20,26 @@ import java.util.Properties;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
+/**
+ * AudioFileSinkBin dumps the audio source into a file. It is used when a SrcBin has the isAudioFlag set to true. The
+ * main difference between this class and the VideoFileSinkBin is the defaults for the encoder (default=twolame) and
+ * muxer(default=capsfilter). This class is not intended to be inherited.
+ */
 public class AudioFileSinkBin extends SinkBin {
 
-  public static final String DEFAULT_ENCODER = "twolame";
-  public static final String DEFAULT_MUXER = "capsfilter";
+  public static final String DEFAULT_ENCODER = GStreamerElements.TWOLAME;
+  public static final String DEFAULT_MUXER = GStreamerElements.CAPSFILTER;
   
-  public AudioFileSinkBin(CaptureDevice captureDevice, Properties properties) throws Exception {
+  public AudioFileSinkBin(CaptureDevice captureDevice, Properties properties)
+          throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
     super(captureDevice, properties);
   }
 
@@ -45,7 +57,7 @@ public class AudioFileSinkBin extends SinkBin {
   
   protected void createEncoder(){
     if (captureDeviceProperties.codec != null) {
-      logger.debug("{} encoder set to: {}", captureDevice.getName(), captureDeviceProperties.codec);
+      logger.debug("{} setting encoder to: {}", captureDevice.getName(), captureDeviceProperties.codec);
       encoder = ElementFactory.make(captureDeviceProperties.codec, null);
     }
     else {
@@ -53,15 +65,15 @@ public class AudioFileSinkBin extends SinkBin {
     }
     
     if (captureDeviceProperties.bitrate != null) {
-      logger.debug("{} bitrate set to: {}", captureDevice.getName(), captureDeviceProperties.bitrate);
-      encoder.set("bitrate", captureDeviceProperties.bitrate);
+      logger.debug("{} setting bitrate to: {}", captureDevice.getName(), captureDeviceProperties.bitrate);
+      encoder.set(GStreamerProperties.BITRATE, captureDeviceProperties.bitrate);
     }
   }
   
   private void createMuxer() {
     if (captureDeviceProperties.codec != null) {
-      if (captureDeviceProperties.codec.equalsIgnoreCase("faac"))
-        muxer = ElementFactory.make("mp4mux", null);
+      if (captureDeviceProperties.codec.equalsIgnoreCase(GStreamerElements.FAAC))
+        muxer = ElementFactory.make(GStreamerElements.MP4MUX, null);
       else
         muxer = ElementFactory.make(DEFAULT_MUXER, null);
     }
@@ -70,24 +82,32 @@ public class AudioFileSinkBin extends SinkBin {
     }
     
     if (captureDeviceProperties.container != null) {
-      logger.debug("{} muxing to: {}", captureDevice.getName(), captureDeviceProperties.container);
+      logger.debug("{} setting muxing to: {}", captureDevice.getName(), captureDeviceProperties.container);
       muxer = ElementFactory.make(captureDeviceProperties.container, null);
     }
   }
   
   @Override
-  protected void setElementProperties() throws Exception{
+  protected void setElementProperties() throws IllegalArgumentException,
+          UnableToSetElementPropertyBecauseElementWasNullException {
     super.setElementProperties();
-    if(!captureDevice.getOutputPath().equals("")){
-      filesink.set("location", captureDevice.getOutputPath());
+    setFileSinkProperties();
+  }
+
+  private void setFileSinkProperties() throws UnableToSetElementPropertyBecauseElementWasNullException {
+    if(filesink == null){
+      throw new UnableToSetElementPropertyBecauseElementWasNullException(filesink, GStreamerProperties.LOCATION);
+    }
+    else if(captureDevice.getOutputPath().equals("")){
+      throw new IllegalArgumentException("File location must be set, it cannot be an empty String.");
     }
     else{
-      throw new Exception("File location must be set, it cannot be an empty String.");
+      filesink.set(GStreamerProperties.LOCATION, captureDevice.getOutputPath());
     }
   }
   
   @Override
-  protected void linkElements() throws Exception {
+  protected void linkElements() throws UnableToLinkGStreamerElementsException {
     if (!queue.link(encoder))
       throw new UnableToLinkGStreamerElementsException(captureDevice, queue, encoder);
     else if (!encoder.link(muxer))

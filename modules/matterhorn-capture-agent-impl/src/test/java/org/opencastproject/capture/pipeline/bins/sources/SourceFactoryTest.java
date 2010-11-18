@@ -33,6 +33,7 @@ import org.opencastproject.capture.pipeline.SourceDeviceName;
 import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,7 +171,7 @@ CaptureAgent captureAgentMock;
             "Hauppage Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof HauppaugeSrcBin);
+    Assert.assertTrue(srcBin instanceof HauppaugePVR350VideoSrcBin);
     checkCorrectnessOfVideoSource(srcBin);
   }
   
@@ -183,7 +184,7 @@ CaptureAgent captureAgentMock;
             "Hauppage Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof HauppaugeSrcBin);
+    Assert.assertTrue(srcBin instanceof HauppaugePVR350VideoSrcBin);
     checkCorrectnessOfVideoSource(srcBin);
   }
   
@@ -196,7 +197,7 @@ CaptureAgent captureAgentMock;
             "Bluecherry Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof BlueCherrySrcBin);
+    Assert.assertTrue(srcBin instanceof BlueCherryBT878SrcBin);
     checkCorrectnessOfVideoSource(srcBin);
   }
   
@@ -209,14 +210,19 @@ CaptureAgent captureAgentMock;
             "Bluecherry Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
     SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
     // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof BlueCherrySrcBin);
+    Assert.assertTrue(srcBin instanceof BlueCherryBT878SrcBin);
     checkCorrectnessOfVideoSource(srcBin);
   }
 
 
   private void checkCorrectnessOfVideoSource(SrcBin srcBin) {
     // Check to make sure the sink exists and is not null.
-    Assert.assertTrue(srcBin.getSrcPad()!= null);
+    try {
+      Assert.assertTrue(srcBin.getSrcPad()!= null);
+    } catch (UnableToCreateGhostPadsForBinException e) {
+      Assert.fail(e.getMessage());
+      e.printStackTrace();
+    }
     // Check to make sure that this is a video device
     Assert.assertTrue(srcBin.isVideoDevice());
     // Check to make sure that isn't an audio device
@@ -294,7 +300,12 @@ CaptureAgent captureAgentMock;
   
   private void checkCorrectnessOfAudioDevice(SrcBin srcBin) {
     // Check to make sure the sink exists and is not null.
-    Assert.assertTrue(srcBin.getSrcPad()!= null);
+    try {
+      Assert.assertTrue(srcBin.getSrcPad()!= null);
+    } catch (UnableToCreateGhostPadsForBinException e) {
+      Assert.fail(e.getMessage());
+      e.printStackTrace();
+    }
     // Check to make sure that this is an audio device
     Assert.assertTrue(srcBin.isAudioDevice());
     // Check to make sure that isn't a video device

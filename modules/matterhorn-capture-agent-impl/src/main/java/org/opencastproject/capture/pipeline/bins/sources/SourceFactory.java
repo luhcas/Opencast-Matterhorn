@@ -20,12 +20,16 @@ import java.util.Properties;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.pipeline.SourceDeviceName;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
+import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
 public class SourceFactory {
   
   private static SourceFactory factory;
   
-  public static SourceFactory getInstance(){
+  public static synchronized SourceFactory getInstance(){
     if(factory == null){
       factory = new SourceFactory();
     }
@@ -41,15 +45,17 @@ public class SourceFactory {
   }
   
   public SrcBin getSource(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgent)
-          throws Exception {
+          throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException
+          {
     if (captureDevice.getName() == SourceDeviceName.EPIPHAN_VGA2USB)
       return new EpiphanVGA2USBV4LSrcBin(captureDevice, properties, captureAgent);
     else if (captureDevice.getName() == SourceDeviceName.HAUPPAUGE_WINTV)
-      return new HauppaugeSrcBin(captureDevice, properties);
+      return new HauppaugePVR350VideoSrcBin(captureDevice, properties);
     else if (captureDevice.getName() == SourceDeviceName.FILE_DEVICE)
       return new FileSrcBin(captureDevice, properties);
     else if(captureDevice.getName() == SourceDeviceName.BLUECHERRY_PROVIDEO)
-      return new BlueCherrySrcBin(captureDevice, properties);
+      return new BlueCherryBT878SrcBin(captureDevice, properties);
     else if (captureDevice.getName() == SourceDeviceName.ALSASRC)
       return new AlsaSrcBin(captureDevice, properties);
     else if (captureDevice.getName() == SourceDeviceName.PULSESRC)

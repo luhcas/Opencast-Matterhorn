@@ -13,15 +13,9 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.pipeline;
+package org.opencastproject.capture.pipeline.bins;
 
-/**
- * The gstreamer sinks that are currently supported and tested with this code
- */
-public enum SinkDeviceName {
-  AUDIO_CONFIDENCE_MONITORING,
-  VIDEO_CONFIDENCE_MONITORING,
-  XVIMAGE_SINK,
-  AUDIO_FILE_SINK,
-  VIDEO_FILE_SINK
+public class CaptureDeviceNullPointerException extends Exception {
+  private static final long serialVersionUID = -1133462577131207606L;
+
 }

@@ -22,9 +22,14 @@ import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.gstreamer.PadLinkReturn;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
-public class HauppaugeSrcBin extends FileSrcBin {
+public class HauppaugePVR350VideoSrcBin extends FileSrcBin {
   Element filesrc;
   Element mpegpsdemux;
   Element decoder;
@@ -36,34 +41,47 @@ public class HauppaugeSrcBin extends FileSrcBin {
    * 
    * @param captureDevice
    *          The Hauppauge {@code CaptureDevice} to create pipeline around
-   * @param pipeline
-   *          The {@code Pipeline} bin to add it to
-   * @return True, if successful
+   * @param properties
+   *          The confidence monitoring properties. 
+   * @throws UnableToSetElementPropertyBecauseElementWasNullException 
+   * @throws UnableToCreateGhostPadsForBinException 
+   * @throws UnableToLinkGStreamerElementsException 
+   * @throws CaptureDeviceNullPointerException 
    * @throws Exception 
    */
-  public HauppaugeSrcBin(CaptureDevice captureDevice, Properties properties) throws Exception {
+  public HauppaugePVR350VideoSrcBin(CaptureDevice captureDevice, Properties properties)
+          throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
     super(captureDevice, properties);
   }
 
   @Override
   protected void createElements(){
     super.createElements();
-    filesrc = ElementFactory.make("filesrc", null);
-    queue = ElementFactory.make("queue", null);
-    mpegpsdemux = ElementFactory.make("mpegpsdemux", null);
-    mpegvideoparse = ElementFactory.make("mpegvideoparse", null);
-    decoder = ElementFactory.make("mpeg2dec", null);
+    filesrc = ElementFactory.make(GStreamerElements.FILESRC, null);
+    queue = ElementFactory.make(GStreamerElements.QUEUE, null);
+    mpegpsdemux = ElementFactory.make(GStreamerElements.MPEGPSDEMUX, null);
+    mpegvideoparse = ElementFactory.make(GStreamerElements.MPEGVIDEOPARSE, null);
+    decoder = ElementFactory.make(GStreamerElements.MPEG2DEC, null);
   }
   
   @Override
   protected void setElementProperties(){
     super.setElementProperties();
-    filesrc.set("location", captureDevice.getLocation());
+    setFileSrcProperties();
+    setMPEGPSDemuxProperties();
+  }
+
+  private void setFileSrcProperties() {
+    filesrc.set(GStreamerProperties.LOCATION, captureDevice.getLocation());
+  }
+  
+  private void setMPEGPSDemuxProperties() {
     // mpegpsdemux source pad is only available sometimes, therefore we need to add a listener to accept dynamic pads
     mpegpsdemux.connect(new Element.PAD_ADDED() {
       public void padAdded(Element arg0, Pad newPad) {
-        if(newPad.getName().contains("video")){
-          PadLinkReturn padLinkReturn = newPad.link(mpegvideoparse.getStaticPad("sink"));
+        if(newPad.getName().contains(GStreamerProperties.VIDEO)){
+          PadLinkReturn padLinkReturn = newPad.link(mpegvideoparse.getStaticPad(GStreamerProperties.SINK));
           if(padLinkReturn != PadLinkReturn.OK){
             try {
               throw new UnableToLinkGStreamerElementsException(captureDevice, mpegpsdemux, mpegvideoparse);
@@ -84,7 +102,7 @@ public class HauppaugeSrcBin extends FileSrcBin {
 
   @Override
   public Pad getSrcPad() {
-      return fpsfilter.getStaticPad("src");
+      return fpsfilter.getStaticPad(GStreamerProperties.SRC);
   }
 
   @Override

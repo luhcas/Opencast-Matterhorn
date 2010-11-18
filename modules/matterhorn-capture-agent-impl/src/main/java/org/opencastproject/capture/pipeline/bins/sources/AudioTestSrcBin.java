@@ -21,6 +21,10 @@ import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
+import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
 public class AudioTestSrcBin extends AudioSrcBin {
 
@@ -30,9 +34,15 @@ public class AudioTestSrcBin extends AudioSrcBin {
    * installed but still gives that authentic capturing experience. 
    * @param captureDevice - The details for this capture device.
    * @param properties - The confidence monitoring details for this device. 
+   * @throws UnableToSetElementPropertyBecauseElementWasNullException 
+   * @throws UnableToCreateGhostPadsForBinException 
+   * @throws UnableToLinkGStreamerElementsException 
+   * @throws CaptureDeviceNullPointerException 
    * @throws Exception - If anything fails to link, in this case nothing, it throws an exception with the details.
    */
-  public AudioTestSrcBin(CaptureDevice captureDevice, Properties properties) throws Exception {
+  public AudioTestSrcBin(CaptureDevice captureDevice, Properties properties)
+          throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
     super(captureDevice, properties);
   }
 
@@ -48,35 +58,10 @@ public class AudioTestSrcBin extends AudioSrcBin {
     bin.add(audiotestsrc);
   }
 
-  /** No element properties to set, you could set this to a different test 
-   * source if you don't like the white noise. **/
-  @Override
-  protected void setElementProperties() {
-    
-  }
-
   /** The sink for this source is the audiotestsrc itself that will be used to
    * create the ghost pads for this bin. **/
   @Override
   public Pad getSrcPad() {
     return audiotestsrc.getStaticPad("src");
-  }
-
-  /** Since we only have one Element in this Bin we don't need to link anything. **/
-  @Override
-  protected void linkElements() throws Exception {
-    
-  }
-  
-  /** This isn't a video test source so always return false **/
-  @Override
-  public boolean isVideoDevice(){
-    return false;
-  }
-  
-  /** This is an audio test source so return true on being a audio source **/
-  @Override
-  public boolean isAudioDevice(){
-    return true;
   }
 }

@@ -22,14 +22,21 @@ import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
 
 public class DV1394SrcBin extends VideoSrcBin {
-  Element dv1394src;
-  Element demux;
-  Element decoder;
-  Element ffmpegcolorspace;
+  
+  private static final String VIDEO_X_DV = "video/x-dv";
+  private Element dv1394src;
+  private Element demux;
+  private Element decoder;
+  private Element ffmpegcolorspace;
   
   /**
    * Adds a pipeline specifically designed to captured from a DV Camera attached by firewire to the main pipeline
@@ -40,20 +47,25 @@ public class DV1394SrcBin extends VideoSrcBin {
    *          DV Camera attached to firewire {@code CaptureDevice} to create pipeline around
    * @param properties
    *          The {@code Properties} of the confidence monitoring.
-   * @throws Exception - If something doesn't link together correctly we throw an exception. 
+   * @throws UnableToSetElementPropertyBecauseElementWasNullException 
+   * @throws UnableToCreateGhostPadsForBinException 
+   * @throws UnableToLinkGStreamerElementsException 
+   * @throws CaptureDeviceNullPointerException 
    */
-  public DV1394SrcBin(CaptureDevice captureDevice, Properties properties) throws Exception {
+  public DV1394SrcBin(CaptureDevice captureDevice, Properties properties)
+          throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
     super(captureDevice, properties);
   }
   
   @Override
   protected void createElements(){
     super.createElements();
-    dv1394src = ElementFactory.make("dv1394src", null);
+    dv1394src = ElementFactory.make(GStreamerElements.DV1394SRC, null);
     /* set up dv stream decoding */
-    demux = ElementFactory.make("dvdemux", null);
-    decoder   = ElementFactory.make("dvdec", null);
-    ffmpegcolorspace = ElementFactory.make("ffmpegcolorspace", null);
+    demux = ElementFactory.make(GStreamerElements.DVDEMUX, null);
+    decoder   = ElementFactory.make(GStreamerElements.DVDEC, null);
+    ffmpegcolorspace = ElementFactory.make(GStreamerElements.FFMPEGCOLORSPACE, null);
   }
   @Override
   protected void setElementProperties(){
@@ -62,7 +74,8 @@ public class DV1394SrcBin extends VideoSrcBin {
     demux.connect(new Element.PAD_ADDED() {
       public void padAdded(Element element, Pad pad) {
         logger.info("Element: {}, Pad: {}", element.getName(), pad.getName());
-        Element.linkPadsFiltered(demux, "video", decoder, "sink", Caps.fromString("video/x-dv"));
+        Element.linkPadsFiltered(demux, GStreamerProperties.VIDEO, decoder, GStreamerProperties.SINK, 
+                Caps.fromString(VIDEO_X_DV));
       }
     });
   }
@@ -73,13 +86,13 @@ public class DV1394SrcBin extends VideoSrcBin {
     
     demux.connect(new Element.PAD_ADDED() {
       public void padAdded(Element element, Pad pad) {
-        pad.link(decoder.getStaticPad("sink"));
+        pad.link(decoder.getStaticPad(GStreamerProperties.SINK));
       }
     });
   }
   
   @Override
-  protected void linkElements() throws Exception{
+  protected void linkElements() throws UnableToLinkGStreamerElementsException{
     if (!dv1394src.link(queue)) {
       throw new UnableToLinkGStreamerElementsException(captureDevice, dv1394src, queue);
     } 
@@ -99,6 +112,6 @@ public class DV1394SrcBin extends VideoSrcBin {
 
   @Override
   public Pad getSrcPad() {
-    return decoder.getStaticPad("src");
+    return decoder.getStaticPad(GStreamerProperties.SRC);
   }
 }

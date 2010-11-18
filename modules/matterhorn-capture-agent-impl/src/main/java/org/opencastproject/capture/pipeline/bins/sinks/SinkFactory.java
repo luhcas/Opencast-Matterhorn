@@ -19,12 +19,18 @@ import java.util.Properties;
 
 import org.opencastproject.capture.pipeline.SinkDeviceName;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
+import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
+/** Returns the sink corresponding to the SinkDeviceName **/
 public class SinkFactory {
   
   private static SinkFactory factory;
   
-  public static SinkFactory getInstance(){
+  /** Singleton factory **/
+  public static synchronized SinkFactory getInstance(){
     if(factory == null){
       factory = new SinkFactory();
     }
@@ -35,21 +41,18 @@ public class SinkFactory {
     
   }
   
-  public SinkBin parseSinkBin(String bin){
-    return null;
-  }
-  
   public SinkBin getSink(SinkDeviceName sinkDeviceName, CaptureDevice captureDevice, Properties properties)
-          throws Exception {
+          throws NoSinkBinFoundException, UnableToLinkGStreamerElementsException,
+          UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
+          CaptureDeviceNullPointerException {
     if (sinkDeviceName == SinkDeviceName.AUDIO_FILE_SINK)
       return new AudioFileSinkBin(captureDevice, properties);
-    else if(sinkDeviceName == SinkDeviceName.XVIMAGESINK)
+    else if(sinkDeviceName == SinkDeviceName.XVIMAGE_SINK)
       return new XVImageSinkBin(captureDevice, properties);
     else if(sinkDeviceName == SinkDeviceName.VIDEO_FILE_SINK)
       return new VideoFileSinkBin(captureDevice, properties);
     else{
-      Exception e = new Exception("No valid SinkBin found for device " + sinkDeviceName);
-      throw e;
+      throw new NoSinkBinFoundException("No valid SinkBin found for device " + sinkDeviceName);
     }
   }
 }

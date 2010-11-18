@@ -34,6 +34,10 @@ import org.opencastproject.capture.pipeline.SourceDeviceName;
 import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
+import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -324,12 +328,14 @@ public class SinkBinTest {
     return sinkBin;
   }
 
-  private SinkBin createSinkBin(Properties captureDeviceProperties) throws Exception {
+  private SinkBin createSinkBin(Properties captureDeviceProperties) throws UnableToLinkGStreamerElementsException,
+          UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
+          CaptureDeviceNullPointerException {
     SinkBin sinkBin;
     sinkBin = new SinkBin(captureDevice, captureDeviceProperties) {
 
       @Override
-      protected void linkElements() throws Exception {
+      protected void linkElements() throws UnableToLinkGStreamerElementsException {
 
       }
 

@@ -13,15 +13,20 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.pipeline;
+package org.opencastproject.capture.pipeline.bins;
 
-/**
- * The gstreamer sinks that are currently supported and tested with this code
- */
-public enum SinkDeviceName {
-  AUDIO_CONFIDENCE_MONITORING,
-  VIDEO_CONFIDENCE_MONITORING,
-  XVIMAGE_SINK,
-  AUDIO_FILE_SINK,
-  VIDEO_FILE_SINK
+import org.gstreamer.Element;
+
+public class UnableToSetElementPropertyBecauseElementWasNullException extends Exception {
+  String message;
+  
+  private static final long serialVersionUID = -2613833830552791683L;
+  public UnableToSetElementPropertyBecauseElementWasNullException(Element element, String property){
+    message = "Unable to set property " + property + " on element " + element.getName();
+  }
+  
+  @Override
+  public String getMessage(){
+    return message;
+  }
 }

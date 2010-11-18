@@ -21,20 +21,27 @@ import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
 public class VideoTestSrc extends VideoSrcBin {
 
   Element videotestsrc;
   
-  public VideoTestSrc(CaptureDevice captureDevice, Properties properties) throws Exception {
+  public VideoTestSrc(CaptureDevice captureDevice, Properties properties)
+          throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
     super(captureDevice, properties);
   }
   
   @Override
   protected void createElements(){
     super.createElements();
-    videotestsrc = ElementFactory.make("videotestsrc", null);
+    videotestsrc = ElementFactory.make(GStreamerElements.VIDEOTESTSRC, null);
   }
   
   @Override
@@ -43,7 +50,7 @@ public class VideoTestSrc extends VideoSrcBin {
   }
 
   @Override
-  protected void linkElements() throws Exception {
+  protected void linkElements() throws UnableToLinkGStreamerElementsException {
     if (!videotestsrc.link(queue)){
       throw new UnableToLinkGStreamerElementsException(captureDevice, videotestsrc, queue);
     }
@@ -57,6 +64,6 @@ public class VideoTestSrc extends VideoSrcBin {
 
   @Override
   public Pad getSrcPad() {
-    return fpsfilter.getStaticPad("src");
+    return fpsfilter.getStaticPad(GStreamerProperties.SRC);
   }
 }

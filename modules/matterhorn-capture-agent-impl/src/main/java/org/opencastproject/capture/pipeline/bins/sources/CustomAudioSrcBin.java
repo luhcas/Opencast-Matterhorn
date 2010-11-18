@@ -20,22 +20,31 @@ import java.util.Properties;
 import org.gstreamer.Bin;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
+import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
 public class CustomAudioSrcBin extends SrcBin {
 
   private static final boolean LINK_UNUSED_GHOST_PADS = true;
   
-  public CustomAudioSrcBin(CaptureDevice captureDevice, Properties properties) throws Exception {
+  public CustomAudioSrcBin(CaptureDevice captureDevice, Properties properties)
+          throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
     super(captureDevice, properties);
   }
 
   @Override
-  protected Pad getSrcPad() {
-    if(bin.getSinks().size() >= 1){
-      return bin.getSinks().get(0).getStaticPad("src");
-    }
-    else{
-      return null;
+  protected Pad getSrcPad() throws UnableToCreateGhostPadsForBinException {
+    synchronized (bin) {
+      if(bin.getSinks().size() >= 1){
+        return bin.getSinks().get(0).getStaticPad(GStreamerProperties.SRC);
+      }
+      else{
+        throw new UnableToCreateGhostPadsForBinException("Unable to ghost pads for Custom Audio Source");
+      }
     }
   }
 
@@ -43,30 +52,15 @@ public class CustomAudioSrcBin extends SrcBin {
   protected void createElements(){
     bin = Bin.launch(captureDeviceProperties.customSource, LINK_UNUSED_GHOST_PADS);
   }
-  
-  @Override
-  protected void addElementsToBin() {
 
-  }
-
+  /** Need an empty method for createGhostPads because the Bin.launch will create the ghost pads all on its own.**/
   @Override
-  protected void createGhostPads() throws Exception {
+  protected void createGhostPads() throws UnableToCreateGhostPadsForBinException {
     
   }
   
   @Override
-  protected void linkElements() throws Exception {
-
-  }
-
-  @Override
-  protected void setElementProperties() throws Exception {
-
-  }
-
-  @Override
   public boolean isAudioDevice(){
     return true;
   }
-  
 }

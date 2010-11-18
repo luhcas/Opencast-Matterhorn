@@ -22,40 +22,52 @@ import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.gstreamer.PadLinkReturn;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
 public class FileSrcBin extends VideoSrcBin{
   private Element filesrc;  
   private Element decodebin;
-  
-  public FileSrcBin(CaptureDevice captureDevice, Properties properties) throws Exception {
+
+  /**
+   * FileSrcBin handles file sources (both hardware like Hauppauges or regular source files) where we don't know what
+   * kind of codec or container we are getting in. To handle this we use a decodebin to do our decoding and pass it off
+   * to the sinks.
+   * @throws CaptureDeviceNullPointerException 
+   **/
+  public FileSrcBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
+          UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
+          CaptureDeviceNullPointerException {
       super(captureDevice, properties);
     }
     
     @Override
     protected void createElements(){
       super.createElements();
-      filesrc = ElementFactory.make("filesrc", null);
-      queue = ElementFactory.make("queue", null);
-      decodebin = ElementFactory.make("decodebin", null);
+      filesrc = ElementFactory.make(GStreamerElements.FILESRC, null);
+      queue = ElementFactory.make(GStreamerElements.QUEUE, null);
+      decodebin = ElementFactory.make(GStreamerElements.DECODEBIN, null);
     }
     
     @Override
     protected void setElementProperties(){
       super.setElementProperties();
-      filesrc.set("location", captureDevice.getLocation());
-      
-   // decodebin source pad is only available sometimes, therefore we need to add a listener to accept dynamic pads
+      filesrc.set(GStreamerProperties.LOCATION, captureDevice.getLocation());
+      //  decodebin source pad is only available sometimes, therefore we need to add a listener to accept dynamic pads
       decodebin.connect(new Element.PAD_ADDED() {
         public void padAdded(Element arg0, Pad newPad) {
-          if(newPad.getName().contains("video")){
-            PadLinkReturn padLinkReturn = newPad.link(videorate.getStaticPad("sink"));
+          if(newPad.getName().contains(GStreamerProperties.VIDEO)){
+            PadLinkReturn padLinkReturn = newPad.link(videorate.getStaticPad(GStreamerProperties.SINK));
             if(padLinkReturn != PadLinkReturn.OK){
               try {
                 throw new UnableToLinkGStreamerElementsException(captureDevice, decodebin, videorate);
               } catch (UnableToLinkGStreamerElementsException e) {
-              logger.error(e.getMessage() + " because PadLinkReturn was " + padLinkReturn.toString() + " on Pad "
-                      + newPad.getName());
+              logger.error("Unable to link gstreamer element because PadLinkReturn was " + padLinkReturn.toString()
+                      + " on Pad " + newPad.getName() + e);
               }
             }
           }
@@ -70,7 +82,7 @@ public class FileSrcBin extends VideoSrcBin{
 
     @Override
     public Pad getSrcPad() {
-        return fpsfilter.getStaticPad("src");
+        return fpsfilter.getStaticPad(GStreamerProperties.SRC);
     }
 
     @Override

@@ -23,9 +23,22 @@ import org.gstreamer.GhostPad;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.BufferThread;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 import org.opencastproject.capture.pipeline.bins.PartialBin;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
+import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
-
+/** SinkBin is the ancestor for all Sinks and is meant to be inherited. To inherit from SinkBin:
+ * 1. In the same pattern for the rest of the bins make sure you create any additional Elements you need in 
+ *    overridden createElements, set any of the properties for the Elements in overridden setProperties, add all 
+ *    Elements into the Bin with overridden AddElementsToBin and finally link your Elements together with linkElements.
+ *      
+ * 2. Make sure you return the first Element in your Bin in the getSrc method. This will be used to create the ghost
+ *    pads for the bin so that it can be linked to the source.
+ */
 public abstract class SinkBin extends PartialBin{
   public static final String GHOST_PAD_NAME = "SinkBin Ghost Pad";
   protected Element queue;
@@ -34,7 +47,9 @@ public abstract class SinkBin extends PartialBin{
   protected Element filesink;
   
   
-  public SinkBin(CaptureDevice captureDevice, Properties properties) throws Exception{
+  public SinkBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
+          UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
+          CaptureDeviceNullPointerException {
     super(captureDevice, properties);
     addTrace();
   }
@@ -46,55 +61,65 @@ public abstract class SinkBin extends PartialBin{
     createFileSink();
   }
 
- 
-
   /** Creates the queue that prevents us dropping frames **/
   private void createQueue() {
-    queue = ElementFactory.make("queue", captureDevice.getFriendlyName());
+    queue = ElementFactory.make(GStreamerElements.QUEUE, captureDevice.getFriendlyName());
   }
   
-  /** Creates the filesink that will be the product of the capture device **/
+  /** Creates the filesink that will be the output of the capture device **/
   private void createFileSink() {
-    filesink = ElementFactory.make("filesink", null);
+    filesink = ElementFactory.make(GStreamerElements.FILESINK, null);
   }
   
-  /** Sets the particular properties for the elements so that they behave as we expect. 
-   * @throws Exception **/
-  protected void setElementProperties() throws Exception {
+  /** Sets the queue size for the sink so that we don't lose any information. 
+   * @throws UnableToSetElementPropertyBecauseElementWasNullException 
+   * @throws IllegalArgumentException **/
+  protected void setElementProperties() throws IllegalArgumentException,
+          UnableToSetElementPropertyBecauseElementWasNullException {
     setQueueProperties();
   }
   
   /** Sets the size of the queue that acts as a buffer so that we don't lose frames or audio bits. **/ 
   private void setQueueProperties() {
-    if (captureDeviceProperties.bufferCount != null) {
-      logger.debug("{} bufferCount set to {}.", captureDevice.getName(), captureDeviceProperties.bufferCount);
-      queue.set("max-size-buffers", captureDeviceProperties.bufferCount);
-    }
-    if (captureDeviceProperties.bufferBytes != null) {
-      logger.debug("{} bufferBytes set to {}.", captureDevice.getName(), captureDeviceProperties.bufferBytes);
-      queue.set("max-size-bytes", captureDeviceProperties.bufferBytes);
-    }
-    if (captureDeviceProperties.bufferTime != null) {
-      logger.debug("{} bufferTime set to {}.", captureDevice.getName(), captureDeviceProperties.bufferTime);
-      queue.set("max-size-time", captureDeviceProperties.bufferTime);
+      if(queue == null){
+        throw new IllegalArgumentException("Queue cannot be null when we try to set its properties.");
+      }
+    synchronized (queue) {
+      if (captureDeviceProperties.bufferCount != null) {
+        logger.debug("{} bufferCount is being set to {}.", captureDevice.getName(),
+                captureDeviceProperties.bufferCount);
+        queue.set(GStreamerProperties.MAX_SIZE_BUFFERS, captureDeviceProperties.bufferCount);
+      }
+      if (captureDeviceProperties.bufferBytes != null) {
+        logger.debug("{} bufferBytes is being set to {}.", captureDevice.getName(),
+                captureDeviceProperties.bufferBytes);
+        queue.set(GStreamerProperties.MAX_SIZE_BYTES, captureDeviceProperties.bufferBytes);
+      }
+      if (captureDeviceProperties.bufferTime != null) {
+        logger.debug("{} bufferTime is being set to {}.", captureDevice.getName(), captureDeviceProperties.bufferTime);
+        queue.set(GStreamerProperties.MAX_SIZE_TIME, captureDeviceProperties.bufferTime);
+      }
     }
   }
   
+  /** Creates the ghost pad that will connect this SinkBin to the SrcBin. **/
   @Override
-  protected void createGhostPads() throws Exception {
-    Pad ghostPadElement = getSrc().getStaticPad("sink");    
+  protected void createGhostPads() throws UnableToCreateGhostPadsForBinException {
+    Pad ghostPadElement = getSrc().getStaticPad(GStreamerProperties.SINK);    
     if(ghostPadElement!= null && !bin.addPad(new GhostPad(GHOST_PAD_NAME, ghostPadElement))){
-      throw new Exception("Could not create new Ghost Pad with " + this.getSrc());
+      throw new UnableToCreateGhostPadsForBinException("Could not create new Ghost Pad with " + this.getSrc().getName()
+              + " in this SinkBin.");
     }
   }
+  
+  /** Is used by createGhostPads, set to the first Element in your Bin so that we can link your SinkBin to Sources. **/
+  public abstract Element getSrc();
   
   /** If the system is setup to have trace level error tracking we will add a thread to monitor the queue **/
   private void addTrace(){
     if (logger.isTraceEnabled()) {
-      BufferThread t = new BufferThread(queue);
-      t.start();
+      Thread traceThread = new Thread(new BufferThread(queue));
+      traceThread.start();
     }
   }
-  
-  public abstract Element getSrc();
 }

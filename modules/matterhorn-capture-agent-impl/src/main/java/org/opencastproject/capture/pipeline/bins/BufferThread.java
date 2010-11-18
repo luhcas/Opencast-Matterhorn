@@ -26,16 +26,16 @@ import org.slf4j.LoggerFactory;
  * A Quick and dirty logging class.  This will only be created when the logging level is set to TRACE.
  * It's sole purpose is to output the three limits on the buffer for each device
  */
-public class BufferThread extends Thread {
+public class BufferThread implements Runnable {
 
   private static final Logger log = LoggerFactory.getLogger(BufferThread.class);
- 
+  private static final int MILLISECONDS_BETWEEN_CHECKS = 60000;
   Element queue = null;
   boolean run = true;
 
-  public BufferThread(Element e) {
-    log.info("Buffer monitoring thread started for device " + e.getName());
-    queue = e;
+  public BufferThread(Element newQueue) {
+    log.info("Buffer monitoring thread started for device " + newQueue.getName());
+    queue = newQueue;
     
     queue.getBus().connect(new Bus.MESSAGE() {
       @Override
@@ -54,7 +54,8 @@ public class BufferThread extends Thread {
       log.trace(queue.getName() + "," + queue.get("current-level-buffers") + "," + queue.get("current-level-bytes")
               + "," + queue.get("current-level-time"));
       try {
-        Thread.sleep(60000);
+        
+        Thread.sleep(MILLISECONDS_BETWEEN_CHECKS);
       } catch (InterruptedException e) {
         log.trace(queue.getName() + "'s buffer monitor thread caught an InterruptedException but is continuing.");
       }

@@ -21,21 +21,28 @@ import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
 
 public class V4L2SrcBin extends VideoSrcBin{
 
   Element v4l2src;
 
-  public V4L2SrcBin(CaptureDevice captureDevice, Properties properties) throws Exception {
+  public V4L2SrcBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
+          UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
+          CaptureDeviceNullPointerException {
     super(captureDevice, properties);
   }
   
   @Override
   protected void createElements(){
     super.createElements();
-    v4l2src = ElementFactory.make("v4l2src", null);
+    v4l2src = ElementFactory.make(GStreamerElements.V4L2SRC, null);
   }
   
   @Override
@@ -44,22 +51,17 @@ public class V4L2SrcBin extends VideoSrcBin{
   }
 
   @Override
-  protected void linkElements() throws Exception {
-    /** TODO - akm220 - Check to see if this queue negatively effects performance. **/
-    /*
-     * if (!v4l2src.link(queue)) throw new Exception(CaptureDeviceBin.formatBinError(captureDevice, v4l2src, queue));
-     * else if (!queue.link(videorate)) throw new Exception(CaptureDeviceBin.formatBinError(captureDevice, queue,
-     * videorate)); else if (!videorate.link(fpsfilter)) throw new
-     * Exception(CaptureDeviceBin.formatBinError(captureDevice, videorate, fpsfilter));
-     */
-    if (!v4l2src.link(videorate))
+  protected void linkElements() throws UnableToLinkGStreamerElementsException {
+    if (!v4l2src.link(queue))
       throw new UnableToLinkGStreamerElementsException(captureDevice, v4l2src, videorate);
+    else if (!queue.link(videorate))
+      throw new UnableToLinkGStreamerElementsException(captureDevice, videorate, fpsfilter);
     else if (!videorate.link(fpsfilter))
       throw new UnableToLinkGStreamerElementsException(captureDevice, videorate, fpsfilter);
   }
 
   @Override
   public Pad getSrcPad() {
-    return fpsfilter.getStaticPad("src");
+    return fpsfilter.getStaticPad(GStreamerProperties.SRC);
   } 
 }

@@ -20,11 +20,22 @@ import java.util.Properties;
 import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
+import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
 public abstract class AudioSrcBin extends SrcBin{
 
-  /** Super class for all audio sources whether they are test, pulse, alsa or other. **/
-  public AudioSrcBin(CaptureDevice captureDevice, Properties properties) throws Exception {
+  /** Super class for all audio sources whether they are test, pulse, alsa or other. 
+   * @throws UnableToSetElementPropertyBecauseElementWasNullException 
+   * @throws UnableToCreateGhostPadsForBinException 
+   * @throws UnableToLinkGStreamerElementsException 
+   * @throws CaptureDeviceNullPointerException **/
+  public AudioSrcBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
+          UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
+          CaptureDeviceNullPointerException {
     super(captureDevice, properties);
   }
 
@@ -34,24 +45,14 @@ public abstract class AudioSrcBin extends SrcBin{
    **/
   Element audioconvert;
   
-  /** Create all the common elements necessary for audio sources including a queue and an audio converter. **/
+  /** Create all the common elements for audio sources including a queue and an audio converter. **/
   protected void createElements(){
     super.createElements();
-    createQueue();
     createAudioConverter();
-  }
-  
-  private void createQueue() {
-    queue = ElementFactory.make("queue", null);
   }
 
   private void createAudioConverter() {
-    audioconvert = ElementFactory.make("audioconvert", null);
-  }
-  
-  @Override
-  public boolean isVideoDevice(){
-    return false;
+    audioconvert = ElementFactory.make(GStreamerElements.AUDIOCONVERT, null);
   }
   
   @Override

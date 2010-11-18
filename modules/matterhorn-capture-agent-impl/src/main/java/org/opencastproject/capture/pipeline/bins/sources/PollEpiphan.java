@@ -22,6 +22,7 @@ import org.gstreamer.Event;
 import org.gstreamer.Pad;
 import org.gstreamer.State;
 import org.opencastproject.capture.pipeline.PipelineFactory;
+import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 
 /**
  * Thread that will continually poll to check if a VGA signal has been
@@ -29,6 +30,8 @@ import org.opencastproject.capture.pipeline.PipelineFactory;
  *
  */
 class PollEpiphan implements Runnable {
+
+  private static final int DELAY_BETWEEN_POLLS = 1000;
 
   /** Location of the Epiphan device */
   private String location;
@@ -77,7 +80,7 @@ class PollEpiphan implements Runnable {
               }
             });
             
-            src.set("device", location);
+            src.set(GStreamerProperties.DEVICE, location);
             Element identity = pipeline.getElementByName(location + "_v4l_identity");
             pipeline.add(src);
             src.setState(State.PAUSED);
@@ -91,7 +94,7 @@ class PollEpiphan implements Runnable {
           }
         }
         try {
-          enabled.wait(1000);
+          enabled.wait(DELAY_BETWEEN_POLLS);
         } catch (InterruptedException e) {
           PipelineFactory.logger.info("Shutting down Epiphan polling thread.");
           return;

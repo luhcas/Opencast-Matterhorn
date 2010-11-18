@@ -32,22 +32,27 @@ public class FileBin extends PartialBin {
    * @param pipeline
    *          The {@code Pipeline} bin to add it to
    * @return True, if successful
-   * @throws Exception 
+   * @throws UnableToSetElementPropertyBecauseElementWasNullException  
+   * @throws UnableToCreateGhostPadsForBinException 
+   * @throws UnableToLinkGStreamerElementsException 
+   * @throws CaptureDeviceNullPointerException 
    */
-  public FileBin(CaptureDevice captureDevice, Properties properties) throws Exception {
+  public FileBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
+          UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
+          CaptureDeviceNullPointerException {
     super(captureDevice, properties);
   }
   
   @Override
   protected void createElements(){
-    filesrc = ElementFactory.make("filesrc", null);
-    filesink = ElementFactory.make("filesink", null);
+    filesrc = ElementFactory.make(GStreamerElements.FILESRC, null);
+    filesink = ElementFactory.make(GStreamerElements.FILESINK, null);
   }
   
   @Override
   protected void setElementProperties(){
-    filesrc.set("location", captureDevice.getLocation());
-    filesink.set("location", captureDevice.getOutputPath());
+    filesrc.set(GStreamerProperties.LOCATION, captureDevice.getLocation());
+    filesink.set(GStreamerProperties.LOCATION, captureDevice.getOutputPath());
   }
   
   @Override
@@ -56,13 +61,13 @@ public class FileBin extends PartialBin {
   }
   
   @Override
-  protected void linkElements() throws Exception {
+  protected void linkElements() throws UnableToLinkGStreamerElementsException {
     if (!filesrc.link(filesink))
       throw new UnableToLinkGStreamerElementsException(captureDevice, filesrc, filesink);
   }
 
   @Override
-  protected void createGhostPads() throws Exception {
+  protected void createGhostPads() {
     
   }
 }

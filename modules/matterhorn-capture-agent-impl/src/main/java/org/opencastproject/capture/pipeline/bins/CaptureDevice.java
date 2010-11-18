@@ -24,16 +24,16 @@ import org.opencastproject.capture.pipeline.SourceDeviceName;
  */
 public class CaptureDevice {
 
-  /** String representation of absolute path to device file */
+  /** String representation of absolute path to device file e.g. /dev/video0 */
   private String location;
 
   /** Device name */
   private SourceDeviceName sourceDeviceName;
   
-  /** Friendly name defined in properties file */
+  /** Friendly name defined in properties file by user e.g. VGA, Podium etc.*/
   private String friendlyName;
 
-  /** Name of the file to save the stream to */
+  /** Name of the file to save the stream to such as Podium.mpg*/
   private String outputPath;
   
   /** A list of properties set for this device */
