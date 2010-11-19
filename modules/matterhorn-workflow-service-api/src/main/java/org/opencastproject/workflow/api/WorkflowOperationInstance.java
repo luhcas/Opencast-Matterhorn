@@ -65,11 +65,14 @@ public interface WorkflowOperationInstance extends Configurable {
   boolean isFailWorkflowOnException();
   
   /** The timestamp this operation started. If the job was queued, this can be significantly later than the date created. */
-  public Date getDateStarted();
+  Date getDateStarted();
 
   /** The number of milliseconds this operation waited in a service queue */
-  public long getTimeInQueue();
+  long getTimeInQueue();
   
   /** The timestamp this operation completed */
-  public Date getDateCompleted();
+  Date getDateCompleted();
+  
+  /** The position of this workflow operation in the workflow instance */
+  int getPosition();
 }

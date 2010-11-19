@@ -15,6 +15,9 @@
  */
 package org.opencastproject.capture.admin.api;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * A representation of a recording's current state (MH-1475).
  */
@@ -43,4 +46,10 @@ public interface RecordingState {
   public static final String UPLOAD_FINISHED = "upload_finished";
   /** Constant <code>UPLOAD_ERROR="upload_error"</code> */
   public static final String UPLOAD_ERROR = "upload_error";
+
+  /** The collection of all known states. TODO: Remove this when the states are replaced with enums */
+  public static final List<String> KNOWN_STATES = Arrays.asList(new String[] { UNKNOWN, CAPTURING, CAPTURE_FINISHED,
+          CAPTURE_ERROR, MANIFEST, MANIFEST_ERROR, MANIFEST_FINISHED, COMPRESSING, COMPRESSING_ERROR, UPLOADING,
+          UPLOAD_FINISHED, UPLOAD_ERROR });
+
 }

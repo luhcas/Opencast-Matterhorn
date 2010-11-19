@@ -15,9 +15,12 @@
  */
 package org.opencastproject.capture.admin.api;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
- * A representation of the capture client's current state (MH-730).
- * This is not an enum because we wish to preserve inter-version compatibility (eg, a version 2 agent talking to a version 1 core)
+ * A representation of the capture client's current state (MH-730). This is not an enum because we wish to preserve
+ * inter-version compatibility (eg, a version 2 agent talking to a version 1 core)
  */
 public interface AgentState {
   /** Constant <code>IDLE="idle"</code> */
@@ -30,4 +33,8 @@ public interface AgentState {
   public static final String UPLOADING = "uploading";
   /** Constant <code>UNKNOWN="unknown"</code> */
   public static final String UNKNOWN = "unknown";
+
+  /** The collection of all known states.  TODO: Remove this when the states are replaced with enums */
+  public static final List<String> KNOWN_STATES = Arrays.asList(new String[] { IDLE, SHUTTING_DOWN, CAPTURING,
+          UPLOADING, UNKNOWN });
 }

@@ -30,7 +30,10 @@ import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 
@@ -41,6 +44,13 @@ public class MultiPartTest {
 
   /** The http client */
   protected TrustedHttpClient httpClient;
+
+  private static final Logger logger = LoggerFactory.getLogger(MultiPartTest.class);
+
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + MultiPartTest.class.getName());
+  }
 
   @Before
   public void setUp() throws Exception {

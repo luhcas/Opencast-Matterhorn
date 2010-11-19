@@ -34,6 +34,7 @@ import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
@@ -47,12 +48,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -78,8 +82,19 @@ import javax.ws.rs.core.Response.Status;
 public class IngestRestService {
 
   private static final Logger logger = LoggerFactory.getLogger(IngestRestService.class);
+  
+  /** The collection name used for temporarily storing uploaded zip files */
+  private static final String COLLECTION_ID = "ingest-temp";
+
+  /** The http request parameter used to provide the workflow instance id */
+  private static final String WORKFLOW_INSTANCE_ID_PARAM = "workflowInstanceId";
+
+  /** The http request parameter used to provide the workflow definition id */
+  private static final String WORKFLOW_DEFINITION_ID_PARAM = "workflowDefinitionId";
+
   private MediaPackageBuilderFactory factory = null;
   private IngestService ingestService = null;
+  private Workspace workspace = null;
   private DublinCoreCatalogService dublinCoreService;
   protected PersistenceProvider persistenceProvider;
   protected Map<String, Object> persistenceProperties;
@@ -102,6 +117,10 @@ public class IngestRestService {
 
   public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
     this.persistenceProvider = persistenceProvider;
+  }
+  
+  public void setWorkspace(Workspace workspace) {
+    this.workspace = workspace;
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -332,51 +351,67 @@ public class IngestRestService {
 
   @POST
   @Path("addZippedMediaPackage")
-  public Response addZippedMediaPackage(InputStream mp) {
-    logger.debug("addZippedMediaPackage(InputStream) called.");
+  public Response addZippedMediaPackage(@Context HttpServletRequest request) {
+    logger.debug("addZippedMediaPackage(HttpRequest)");
+    FileInputStream zipInputStream = null;
     try {
-      WorkflowInstance workflow = ingestService.addZippedMediaPackage(mp);
-      return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
-    } catch (Exception e) {
-      logger.warn(e.getMessage(), e);
-      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
-    }
-  }
-
-  @POST
-  @Path("addZippedMediaPackage/{wdID}")
-  public Response addZippedMediaPackage(@Context HttpServletRequest request, @PathParam("wdID") String wdID) {
-    logger.debug("addZippedMediaPackage(InputStream, ID) called.");
-    try {
-      Long workflowInstanceId = null;
+      String workflowDefinitionId = null;
+      Long workflowInstanceIdAsLong = null;
+      String zipFileName = null;
+      URI zipFileUri = null;
       Map<String, String> workflowConfig = new HashMap<String, String>();
       if (ServletFileUpload.isMultipartContent(request)) {
         for (FileItemIterator iter = new ServletFileUpload().getItemIterator(request); iter.hasNext();) {
           FileItemStream item = iter.next();
           if (item.isFormField()) {
-            if ("workflowId".equals(item.getName())) {
+            if (WORKFLOW_INSTANCE_ID_PARAM.equals(item.getFieldName())) {
               String workflowIdAsString = IOUtils.toString(item.openStream(), "UTF-8");
               try {
-                workflowInstanceId = Long.parseLong(workflowIdAsString);
+                workflowInstanceIdAsLong = Long.parseLong(workflowIdAsString);
               } catch (NumberFormatException e) {
-                logger.warn("workflowId '{}' is not numeric", workflowIdAsString);
+                logger.warn("{} '{}' is not numeric", WORKFLOW_INSTANCE_ID_PARAM, workflowIdAsString);
               }
+            } else if(WORKFLOW_DEFINITION_ID_PARAM.equals(item.getFieldName())) {
+              workflowDefinitionId = IOUtils.toString(item.openStream(), "UTF-8");
             } else {
-              logger.info("Processing form field: " + item.getFieldName());
+              logger.debug("Processing form field: " + item.getFieldName());
               workflowConfig.put(item.getFieldName(), IOUtils.toString(item.openStream(), "UTF-8"));
             }
           } else {
-            logger.info("Processing file item");
-            WorkflowInstance workflow = ingestService.addZippedMediaPackage(item.openStream(), wdID, workflowConfig,
-                    workflowInstanceId);
-            return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
+            logger.debug("Processing file item");
+            if (zipFileName != null) {
+              logger.warn("Ingest request contained more than one file attachment");
+              return Response.serverError().status(Status.BAD_REQUEST).build();
+            }
+            zipFileName = UUID.randomUUID().toString() + ".zip";
+            InputStream in = item.openStream();
+            try {
+              zipFileUri = workspace.putInCollection(COLLECTION_ID, zipFileName, in);
+            } finally {
+              IOUtils.closeQuietly(in);
+            }
           }
         }
+      } else {
+        zipFileName = UUID.randomUUID().toString() + ".zip";
+        InputStream in = request.getInputStream();
+        try {
+          zipFileUri = workspace.putInCollection(COLLECTION_ID, zipFileName, in);
+        } finally {
+          IOUtils.closeQuietly(in);
+        }
       }
-      return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+      File zipFileFromWorkspace = workspace.get(zipFileUri);
+      zipInputStream = new FileInputStream(zipFileFromWorkspace);
+      WorkflowInstance workflow = ingestService.addZippedMediaPackage(zipInputStream, workflowDefinitionId, workflowConfig,
+              workflowInstanceIdAsLong);
+      return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
+
     } catch (Exception e) {
       logger.warn(e.getMessage(), e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
+    } finally {
+      IOUtils.closeQuietly(zipInputStream);
     }
   }
 

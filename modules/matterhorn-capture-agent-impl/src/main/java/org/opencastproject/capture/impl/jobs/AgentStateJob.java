@@ -83,7 +83,7 @@ public class AgentStateJob implements Job {
    */
   protected void sendAgentState() {
 
-    logger.debug("Sending agent {}'s state", state.getAgentName());
+    logger.debug("Sending agent {}'s state: {}", state.getAgentName(), state.getAgentState());
     
     //Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);

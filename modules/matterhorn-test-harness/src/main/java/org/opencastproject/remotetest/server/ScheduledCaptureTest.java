@@ -34,8 +34,11 @@ import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import java.util.UUID;
@@ -53,6 +56,13 @@ public class ScheduledCaptureTest {
 
   /** The http client */
   protected TrustedHttpClient httpClient;
+
+  private static final Logger logger = LoggerFactory.getLogger(ScheduledCaptureTest.class);
+
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + ScheduledCaptureTest.class.getName());
+  }
 
   @Before
   public void setUp() throws Exception {
@@ -72,13 +82,13 @@ public class ScheduledCaptureTest {
     HttpResponse response = CaptureAdminResources.agents(httpClient);
     assertEquals("Response code (agents):", 200, response.getStatusLine().getStatusCode());
     Document xml = Utils.parseXml(response.getEntity().getContent());
-    assertTrue("Agent included? (agents):", Utils.xPathExists(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']"));
+    assertTrue("Agent included? (agents):", Utils.xpathExists(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']"));
 
     // Agent registered (Capture Admin Agent)
     response = CaptureAdminResources.agent(httpClient, CaptureResources.AGENT);
     assertEquals("Response code (agent):", 200, response.getStatusLine().getStatusCode());
     xml = Utils.parseXml(response.getEntity().getContent());
-    assertTrue("Agent included? (agent):", Utils.xPathExists(xml, "//ns2:agent-state-update[name=\'" + CaptureResources.AGENT + "\']"));
+    assertTrue("Agent included? (agent):", Utils.xpathExists(xml, "//ns2:agent-state-update[name=\'" + CaptureResources.AGENT + "\']"));
 
     // Agent idle (State)
     response = StateResources.getState(httpClient);
@@ -88,7 +98,7 @@ public class ScheduledCaptureTest {
     // Agent idle (Capture Admin Agent)
     response = CaptureAdminResources.agent(httpClient, CaptureResources.AGENT);
     assertEquals("Response code (agent):", 200, response.getStatusLine().getStatusCode());
-    assertEquals("Agent idle? (agent):", "idle", Utils.xPath(xml, "//ns2:agent-state-update[name=\'" + CaptureResources.AGENT + "\']/state", XPathConstants.STRING));
+    assertEquals("Agent idle? (agent):", "idle", Utils.xpath(xml, "//ns2:agent-state-update[name=\'" + CaptureResources.AGENT + "\']/state", XPathConstants.STRING));
 
     // Get initial recording count (Admin Proxy)
     response = AdminResources.countRecordings(httpClient);
@@ -109,27 +119,27 @@ public class ScheduledCaptureTest {
     response = SchedulerResources.getEvents(httpClient);
     assertEquals("Response code (getEvents):", 200, response.getStatusLine().getStatusCode());
     xml = Utils.parseXml(response.getEntity().getContent());
-    assertTrue("Event included? (getEvents):", Utils.xPathExists(xml, "//ns1:SchedulerEvent[id=\'" + id + "\']"));
+    assertTrue("Event included? (getEvents):", Utils.xpathExists(xml, "//ns1:SchedulerEvent[id=\'" + id + "\']"));
 
     // Event included? (Scheduler: upcoming events)
     response = SchedulerResources.getUpcomingEvents(httpClient);
     assertEquals("Response code (getUpcomingEvents):", 200, response.getStatusLine().getStatusCode());
     xml = Utils.parseXml(response.getEntity().getContent());
-    assertTrue("Event included? (getUpcomingEvents):", Utils.xPathExists(xml, "//ns1:SchedulerEvent[id=\'" + id + "\']"));
+    assertTrue("Event included? (getUpcomingEvents):", Utils.xpathExists(xml, "//ns1:SchedulerEvent[id=\'" + id + "\']"));
 
     // Compare event (Scheduler: event)
     response = SchedulerResources.getEvent(httpClient, id);
     assertEquals("Response code (getEvent):", 200, response.getStatusLine().getStatusCode());
     xml = Utils.parseXml(response.getEntity().getContent());
-    assertEquals("Event id (getEvent):", title, Utils.xPath(xml, "//item[@key='title']/value", XPathConstants.STRING));
-    assertEquals("Event title (getEvent):", id, Utils.xPath(xml, "//id", XPathConstants.STRING));
+    assertEquals("Event id (getEvent):", title, Utils.xpath(xml, "//item[@key='title']/value", XPathConstants.STRING));
+    assertEquals("Event title (getEvent):", id, Utils.xpath(xml, "//id", XPathConstants.STRING));
 
     // Compare event DC metadata (Scheduler)
     response = SchedulerResources.getDublinCoreMetadata(httpClient, id);
     assertEquals("Response code (getDublinCoreMetadata):", 200, response.getStatusLine().getStatusCode());
     xml = Utils.parseXml(response.getEntity().getContent());
-    assertEquals("Event id (getDublinCoreMetadata):", title, Utils.xPath(xml, "//dcterms:title", XPathConstants.STRING));
-    assertEquals("Event title (getDublinCoreMetadata):", id, Utils.xPath(xml, "//dcterms:identifier", XPathConstants.STRING));
+    assertEquals("Event id (getDublinCoreMetadata):", title, Utils.xpath(xml, "//dcterms:title", XPathConstants.STRING));
+    assertEquals("Event title (getDublinCoreMetadata):", id, Utils.xpath(xml, "//dcterms:identifier", XPathConstants.STRING));
 
     // Get post-scheduled recording count (Admin Proxy)
     response = AdminResources.countRecordings(httpClient);
@@ -172,7 +182,7 @@ public class ScheduledCaptureTest {
       response = CaptureAdminResources.agents(httpClient);
       assertEquals("Response code (agents):", 200, response.getStatusLine().getStatusCode());
       xml = Utils.parseXml(response.getEntity().getContent());
-      if (Utils.xPath(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']/state", XPathConstants.STRING).equals("capturing")) {
+      if (Utils.xpath(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']/state", XPathConstants.STRING).equals("capturing")) {
         break;
       }
 
@@ -225,7 +235,7 @@ public class ScheduledCaptureTest {
       response = CaptureAdminResources.agents(httpClient);
       assertEquals("Response code (agents):", 200, response.getStatusLine().getStatusCode());
       xml = Utils.parseXml(response.getEntity().getContent());
-      if (Utils.xPath(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']/state", XPathConstants.STRING).equals("idle")) {
+      if (Utils.xpath(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']/state", XPathConstants.STRING).equals("idle")) {
         break;
       }
 
@@ -259,7 +269,7 @@ public class ScheduledCaptureTest {
       response = SearchResources.all(httpClient, title);
       assertEquals("Response code (search all):", 200, response.getStatusLine().getStatusCode());
       xml = Utils.parseXml(response.getEntity().getContent());
-      if (Utils.xPathExists(xml, "//ns2:mediapackage[title=\'" + title + "\']")) {
+      if (Utils.xpathExists(xml, "//ns2:mediapackage[title=\'" + title + "\']")) {
         break;
       }
 

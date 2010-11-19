@@ -32,7 +32,10 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -46,6 +49,13 @@ import javax.xml.xpath.XPathConstants;
  */
 public class DistributionDownloadRestEndpointTest {
   TrustedHttpClient client;
+
+  private static final Logger logger = LoggerFactory.getLogger(DistributionDownloadRestEndpointTest.class);
+
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + DistributionDownloadRestEndpointTest.class.getName());
+  }
 
   @Before
   public void setup() throws Exception {
@@ -74,8 +84,8 @@ public class DistributionDownloadRestEndpointTest {
   @Test
   public void testDistribute() throws Exception {
     Document mp = getSampleMediaPackage();
-    String mpId = (String)Utils.xPath(mp, "/oc:mediapackage/@id", XPathConstants.STRING);
-    String track = Utils.nodeToString((Node)Utils.xPath(mp, "//media/track[@id=\"track-1\"]", XPathConstants.NODE));
+    String mpId = (String)Utils.xpath(mp, "/oc:mediapackage/@id", XPathConstants.STRING);
+    String track = Utils.nodeToString((Node)Utils.xpath(mp, "//media/track[@id=\"track-1\"]", XPathConstants.NODE));
     
     HttpPost post = new HttpPost(BASE_URL + "/distribution/download/rest");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();

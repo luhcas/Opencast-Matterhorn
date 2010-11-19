@@ -121,9 +121,6 @@ public class TrustedHttpClientImpl implements TrustedHttpClient, HttpConnectionM
         responseMap.put(response, httpClient);
         return response;
       } catch (IOException e) {
-        if (response != null) {
-	        responseMap.remove(response);
-        }
         // close the http connection(s)
         httpClient.getConnectionManager().shutdown();
         throw new TrustedHttpClientException(e);

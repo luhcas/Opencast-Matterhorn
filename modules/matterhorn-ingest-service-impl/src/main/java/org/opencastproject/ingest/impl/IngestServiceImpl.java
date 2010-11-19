@@ -41,12 +41,14 @@ import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.osgi.service.component.ComponentContext;
@@ -61,6 +63,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.UUID;
@@ -73,24 +76,60 @@ public class IngestServiceImpl implements IngestService {
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(IngestServiceImpl.class);
 
+  /** The configuration key that defines the default workflow definition */
+  protected static final String WORKFLOW_DEFINITION_DEFAULT = "org.opencastproject.workflow.default.definition";
+
   public static final String JOB_TYPE = "org.opencastproject.ingest";
 
+  /** The workflow service */
   private WorkflowService workflowService;
+
+  /** The workspace */
   private Workspace workspace;
+
+  /** The http client */
   private TrustedHttpClient httpClient;
+
+  /** The series service */
   private SeriesService seriesService;
+
+  /** The dublin core service */
   private DublinCoreCatalogService dublinCoreService;
+
+  /** The opencast service registry */
   private ServiceRegistry serviceRegistry;
+
+  /** The local temp directory to use for unzipping mediapackages */
   private String tempFolder;
 
+  /** The default workflow identifier, if one is configured */
+  protected String defaultWorkflowDefinionId;
+
+  /**
+   * OSGI callback for activating this component
+   * 
+   * @param cc
+   *          the osgi component context
+   */
   protected void activate(ComponentContext cc) {
     logger.info("Ingest Service started.");
     tempFolder = cc.getBundleContext().getProperty("org.opencastproject.storage.dir");
+    defaultWorkflowDefinionId = StringUtils.trimToNull(cc.getBundleContext().getProperty(WORKFLOW_DEFINITION_DEFAULT));
+    if (defaultWorkflowDefinionId == null) {
+      logger.info("No default workflow definition specified. Ingest operations without a specified workflow "
+              + "definition will fail");
+    }
     if (tempFolder == null)
       throw new IllegalStateException("Storage directory must be set (org.opencastproject.storage.dir)");
     tempFolder = PathSupport.concat(tempFolder, "ingest");
   }
 
+  /**
+   * Sets the trusted http client
+   * 
+   * @param httpClient
+   *          the http client
+   */
   public void setHttpClient(TrustedHttpClient httpClient) {
     this.httpClient = httpClient;
   }
@@ -525,8 +564,8 @@ public class IngestServiceImpl implements IngestService {
   @Override
   public WorkflowInstance ingest(MediaPackage mp) throws IngestException {
     try {
-      return workflowService.start(mp);
-    } catch (WorkflowDatabaseException e) {
+      return ingest(mp, null);
+    } catch (NotFoundException e) {
       throw new IngestException(e);
     }
   }
@@ -560,16 +599,30 @@ public class IngestServiceImpl implements IngestService {
    * @see org.opencastproject.ingest.api.IngestService#ingest(org.opencastproject.mediapackage.MediaPackage,
    *      java.lang.String, java.util.Map, java.lang.Long)
    */
-  public WorkflowInstance ingest(MediaPackage mp, String wd, Map<String, String> properties, Long workflowId)
-          throws IngestException, NotFoundException {
+  public WorkflowInstance ingest(MediaPackage mp, String workflowDefinitionID, Map<String, String> properties,
+          Long workflowId) throws IngestException, NotFoundException {
+    // If the workflow definition ID is null, use the default, or throw if there is none
+    if (workflowDefinitionID == null) {
+      if (this.defaultWorkflowDefinionId == null) {
+        throw new IllegalStateException(
+                "Can not ingest a workflow without a workflow definition.  No default definition is specified");
+      } else {
+        workflowDefinitionID = this.defaultWorkflowDefinionId;
+      }
+    }
 
     // Look for the workflow instance (if provided)
     WorkflowInstance workflow = null;
     if (workflowId != null) {
       try {
         workflow = workflowService.getWorkflowById(workflowId.longValue());
-        if (!workflow.getState().equals(WorkflowState.PAUSED)) {
-          logger.warn("The workflow with id '{}' is not in paused state", workflow.getId());
+        if (workflow.getState().equals(WorkflowState.FAILED)) {
+          logger.warn("The workflow with id '{}' is failed, starting a new workflow for this recording",
+                  workflow.getId());
+          workflow = null;
+        } else if (workflow.getState().equals(WorkflowState.SUCCEEDED)) {
+          logger.warn("The workflow with id '{}' already succeeded, starting a new workflow for this recording",
+                  workflow.getId());
           workflow = null;
         }
       } catch (NotFoundException e) {
@@ -581,20 +634,30 @@ public class IngestServiceImpl implements IngestService {
 
     try {
       if (workflow == null) {
-        WorkflowDefinition workflowDef = workflowService.getWorkflowDefinitionById(wd);
+        WorkflowDefinition workflowDef = workflowService.getWorkflowDefinitionById(workflowDefinitionID);
         return workflowService.start(workflowDef, mp, properties);
       } else {
-        WorkflowDefinition workflowDef = workflowService.getWorkflowDefinitionById(wd);
+        WorkflowDefinition workflowDef = workflowService.getWorkflowDefinitionById(workflowDefinitionID);
+
+        // if we are not in the last operation of the preprocessing workflow (due to the capture agent not reporting
+        // on its recording status), we need to advance the workflow.
+        WorkflowOperationInstance currentOperation = workflow.getCurrentOperation();
+        List<WorkflowOperationInstance> preProcessingOperations = workflow.getOperations();
+        while (preProcessingOperations.indexOf(currentOperation) < preProcessingOperations.size() - 1) {
+          logger.debug("Advancing workflow (skipping {})", currentOperation);
+          workflow = workflowService.resume(workflow.getId());
+          currentOperation = workflow.getCurrentOperation();
+        }
 
         // Replace the current mediapackage with the new one
         workflow.setMediaPackage(mp);
         workflow.extend(workflowDef);
         workflowService.update(workflow);
 
-        // Extend the workflow by the operations found in the workflow defintion
+        // Extend the workflow by the operations found in the workflow definition
         workflowService.resume(workflowId.longValue(), properties);
 
-        // Return the updated worflow instance
+        // Return the updated workflow instance
         return workflowService.getWorkflowById(workflowId.longValue());
       }
     } catch (WorkflowDatabaseException e) {

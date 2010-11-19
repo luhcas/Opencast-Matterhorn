@@ -27,7 +27,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -43,6 +46,13 @@ import javax.xml.xpath.XPathFactory;
 public class CaptureAdminRestEndpointTest {
   private TrustedHttpClient httpClient;
   
+  private static final Logger logger = LoggerFactory.getLogger(CaptureAdminRestEndpointTest.class);
+
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + CaptureAdminRestEndpointTest.class.getName());
+  }
+
   @Before
   public void setup() throws Exception {
     httpClient = Main.getClient();

@@ -29,7 +29,10 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +55,13 @@ import javax.xml.xpath.XPathFactory;
  */
 public class EngageModuleTest {
   TrustedHttpClient client;
+
+  private static final Logger logger = LoggerFactory.getLogger(EngageModuleTest.class);
+
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + EngageModuleTest.class.getName());
+  }
 
   @Before
   public void setup() throws Exception {

@@ -343,12 +343,8 @@ public class PipelineFactory {
       return false;
     }
    
-    if(captureDeviceBin != null){
-      pipeline.add(captureDeviceBin.getBin());
-      return true;
-    }
-    
-    return false;
+    pipeline.add(captureDeviceBin.getBin());
+    return true;
   }
 }
 

@@ -29,8 +29,11 @@ import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import javax.xml.xpath.XPathConstants;
@@ -46,6 +49,13 @@ public class UploadTest {
   String mediaPackage;
   String[] catalogKeys;
   TrustedHttpClient client;
+
+  private static final Logger logger = LoggerFactory.getLogger(UploadTest.class);
+
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + UploadTest.class.getName());
+  }
 
   @Before
   public void setUp() throws Exception {
@@ -93,33 +103,33 @@ public class UploadTest {
     assertEquals("Response code (ingest):", 200, response.getStatusLine().getStatusCode());
     mediaPackage = EntityUtils.toString(response.getEntity(), "UTF-8");
     Document xml = Utils.parseXml(IOUtils.toInputStream(mediaPackage, "UTF-8"));
-    String workflowId = (String) Utils.xPath(xml, "//ns3:workflow/@id", XPathConstants.STRING);
-    String mediaPackageId = (String) Utils.xPath(xml, "//mediapackage/@id", XPathConstants.STRING);
+    String workflowId = (String) Utils.xpath(xml, "//ns3:workflow/@id", XPathConstants.STRING);
+    String mediaPackageId = (String) Utils.xpath(xml, "//mediapackage/@id", XPathConstants.STRING);
 
     // Confirm ingest
     response = IngestResources.getWorkflowInstance(client, workflowId);
     assertEquals("Response code (workflow instance):", 200, response.getStatusLine().getStatusCode());
 
     // Compare Track
-    String ingestedTrackUrl = (String) Utils.xPath(xml, "//media/track[@type='presenter/source']/url",
+    String ingestedTrackUrl = (String) Utils.xpath(xml, "//media/track[@type='presenter/source']/url",
             XPathConstants.STRING);
     String ingestedMd5 = Utils.md5(Utils.getUrlAsFile(ingestedTrackUrl));
     String trackMd5 = Utils.md5(Utils.getUrlAsFile(trackUrl));
     assertEquals("Media Track Checksum:", ingestedMd5, trackMd5);
 
     // Compare Catalog
-    String ingestedCatalogUrl = (String) Utils.xPath(xml, "//metadata/catalog[@type='dublincore/episode']/url",
+    String ingestedCatalogUrl = (String) Utils.xpath(xml, "//metadata/catalog[@type='dublincore/episode']/url",
             XPathConstants.STRING);
     Document ingestedCatalog = Utils.getUrlAsDocument(ingestedCatalogUrl);
     Document catalog = Utils.getUrlAsDocument(catalogUrl);
     for (String key : catalogKeys) {
-      assertEquals("Catalog " + key + ":", ((String) Utils.xPath(ingestedCatalog, "//dcterms:" + key,
+      assertEquals("Catalog " + key + ":", ((String) Utils.xpath(ingestedCatalog, "//dcterms:" + key,
               XPathConstants.STRING)).trim(),
-              ((String) Utils.xPath(catalog, "//dcterms:" + key, XPathConstants.STRING)).trim());
+              ((String) Utils.xpath(catalog, "//dcterms:" + key, XPathConstants.STRING)).trim());
     }
 
     // Compare Attachment
-    String ingestedAttachmentUrl = (String) Utils.xPath(xml, "//attachments/attachment[@type='attachment/txt']/url",
+    String ingestedAttachmentUrl = (String) Utils.xpath(xml, "//attachments/attachment[@type='attachment/txt']/url",
             XPathConstants.STRING);
     ingestedMd5 = Utils.md5(Utils.getUrlAsFile(ingestedAttachmentUrl));
     String attachmentMd5 = Utils.md5(Utils.getUrlAsFile(attachmentUrl));
@@ -135,7 +145,7 @@ public class UploadTest {
       response = SearchResources.episode(client, mediaPackageId);
       assertEquals("Response code (episode):", 200, response.getStatusLine().getStatusCode());
       xml = Utils.parseXml(response.getEntity().getContent());
-      if (Utils.xPathExists(xml, "//ns2:result[@id='" + mediaPackageId + "']/ns2:mediapackage").equals(true)) {
+      if (Utils.xpathExists(xml, "//ns2:result[@id='" + mediaPackageId + "']/ns2:mediapackage").equals(true)) {
         break;
       }
 

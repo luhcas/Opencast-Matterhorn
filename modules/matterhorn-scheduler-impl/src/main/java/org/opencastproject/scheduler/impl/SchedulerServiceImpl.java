@@ -48,7 +48,6 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -118,13 +117,6 @@ public class SchedulerServiceImpl implements ManagedService {
   /** The workflow service */
   protected WorkflowService workflowService;
 
-  // FIXME: The calendar caching should be removed, see MH-5823.
-  private long updated = System.currentTimeMillis();
-  private long updatedCalendar = 0;
-  private long updatedAllEvents = 0;
-  private Hashtable<String, String> calendars;
-  private List<Event> cachedEvents;
-
   /**
    * Properties that are updated by ManagedService updated method
    */
@@ -188,43 +180,6 @@ public class SchedulerServiceImpl implements ManagedService {
     } finally {
       IOUtils.closeQuietly(in);
     }
-  }
-
-  /**
-   * Create a custom workflow definition with the scheduled, capturing, and ingesting operations prepended to the
-   * processing operations.
-   * 
-   * @param event
-   *          The scheduled event
-   * @return the workflow definition
-   */
-  protected WorkflowDefinition getWorkflowDefinition(Event event) {
-    // Get a new instance of the preprocessing workflow definition
-    WorkflowDefinition def = getPreProcessingWorkflowDefinition();
-
-    // Get the chosen workflow definition for this event
-    String chosenWorkflowId = event.getMetadataValueByKey(WORKFLOW_DEFINITION_ID_KEY);
-    if(chosenWorkflowId == null) {
-      logger.warn("No workflow definition chosen for scheduled event {}", event);
-      return def;
-    }
-
-    // Load the chosen workflow definition
-    WorkflowDefinition chosenWorkflowDefinition = null;
-    try {
-      chosenWorkflowDefinition = workflowService.getWorkflowDefinitionById(chosenWorkflowId);
-    } catch (Exception e) {
-      logger.warn("Unable to load the workflow definition {}", chosenWorkflowId);
-      return def;
-    }
-
-    // Merge the the chosen definition
-    def.setId(chosenWorkflowDefinition.getId());
-    def.setTitle(chosenWorkflowDefinition.getTitle());
-    def.setDescription(chosenWorkflowDefinition.getDescription());
-    def.getOperations().addAll(chosenWorkflowDefinition.getOperations());
-
-    return def;
   }
 
   public Map<String, Object> getPersistenceProperties() {
@@ -303,8 +258,6 @@ public class SchedulerServiceImpl implements ManagedService {
         em.close();
       }
     }
-
-    updated = System.currentTimeMillis();
     return event;
   }
 
@@ -337,7 +290,7 @@ public class SchedulerServiceImpl implements ManagedService {
     // Add the operations from the chosen workflow
 
     // Start the workflow
-    return workflowService.start(getWorkflowDefinition(event), mediapackage, properties);
+    return workflowService.start(getPreProcessingWorkflowDefinition(), mediapackage, properties);
   }
 
   /**
@@ -376,7 +329,6 @@ public class SchedulerServiceImpl implements ManagedService {
       tx.commit();
     }
     em.close();
-    updated = System.currentTimeMillis();
   }
 
   /**
@@ -417,8 +369,6 @@ public class SchedulerServiceImpl implements ManagedService {
    * @return List of events that match the supplied filter, or all events if no filter is supplied
    */
   public List<Event> getEvents(SchedulerFilter filter) {
-    if (updatedCalendar < updated)
-      calendars = new Hashtable<String, String>(); // reset all calendars, if data has been changed
     if (filter == null) {
       logger.debug("returning all events");
       return getAllEvents();
@@ -427,7 +377,10 @@ public class SchedulerServiceImpl implements ManagedService {
     EntityManager em = emf.createEntityManager();
     CriteriaBuilder builder = emf.getCriteriaBuilder();
     CriteriaQuery<EventImpl> query = builder.createQuery(EventImpl.class);
+    
     Root<EventImpl> rootEvent = query.from(EventImpl.class);
+    query.select(rootEvent);
+
     EntityType<EventImpl> Event_ = rootEvent.getModel();
     Predicate wherePred = builder.conjunction();
 
@@ -510,6 +463,7 @@ public class SchedulerServiceImpl implements ManagedService {
     for (EventImpl event : results) {
       returnList.add((Event) event);
     }
+    
     return returnList;
   }
 
@@ -518,20 +472,13 @@ public class SchedulerServiceImpl implements ManagedService {
    */
   @SuppressWarnings("unchecked")
   public List<Event> getAllEvents() {
-    if (updatedAllEvents > updated && cachedEvents != null) {
-      return cachedEvents;
-    }
     EntityManager em = emf.createEntityManager();
     Query query = em.createNamedQuery("Event.getAll");
-    List<Event> events = null;
     try {
-      events = query.getResultList();
+      return query.getResultList();
     } finally {
       em.close();
     }
-    cachedEvents = events;
-    updatedAllEvents = System.currentTimeMillis();
-    return cachedEvents;
   }
 
   /**
@@ -578,7 +525,6 @@ public class SchedulerServiceImpl implements ManagedService {
       em.getTransaction().commit();
     } finally {
       em.close();
-      updated = System.currentTimeMillis();
     }
   }
 
@@ -626,7 +572,6 @@ public class SchedulerServiceImpl implements ManagedService {
       throw new SchedulerException(ex);
     } finally {
       em.close();
-      updated = System.currentTimeMillis();
     }
   }
 
@@ -690,13 +635,6 @@ public class SchedulerServiceImpl implements ManagedService {
    * @see org.opencastproject.scheduler.api.SchedulerService#getCalendarForCaptureAgent(java.lang.String)
    */
   public String getCalendarForCaptureAgent(String captureAgentID) {
-    if (updatedCalendar > updated && calendars.containsKey(captureAgentID) && calendars.get(captureAgentID) != null) {
-      logger.debug("Using cached calendar for {}", captureAgentID);
-      return calendars.get(captureAgentID);
-    }
-    if (updatedCalendar < updated)
-      calendars = new Hashtable<String, String>(); // reset all calendars, if data has been changed
-
     SchedulerFilter filter = getFilterForCaptureAgent(captureAgentID);
     CalendarGenerator cal = new CalendarGenerator(dcGenerator, caGenerator, seriesService);
     List<Event> events = getEvents(filter);
@@ -704,18 +642,15 @@ public class SchedulerServiceImpl implements ManagedService {
     for (Event event : events) {
       cal.addEvent(event);
     }
-
-    try {
-      cal.getCalendar().validate();
-    } catch (ValidationException e1) {
-      logger.warn("Could not validate Calendar: {}", e1.getMessage());
+    // Only validate calendars with events.  Without any events, the icalendar won't validate
+    if(events.size() > 0) {
+      try {
+        cal.getCalendar().validate();
+      } catch (ValidationException e1) {
+        logger.warn("Could not validate Calendar: {}", e1.getMessage());
+      }
     }
-
-    String result = cal.getCalendar().toString(); // CalendarOutputter performance sucks (jmh)
-
-    updatedCalendar = System.currentTimeMillis();
-    calendars.put(captureAgentID, result);
-    return result;
+    return cal.getCalendar().toString(); // CalendarOutputter performance sucks (jmh)
   }
 
   /**

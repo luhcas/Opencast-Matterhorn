@@ -33,7 +33,10 @@ import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +49,13 @@ import java.util.List;
  */
 public class IngestRestEndpointTest {
   TrustedHttpClient client;
+
+  private static final Logger logger = LoggerFactory.getLogger(IngestRestEndpointTest.class);
+
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + IngestRestEndpointTest.class.getName());
+  }
 
   @Before
   public void setup() throws Exception {

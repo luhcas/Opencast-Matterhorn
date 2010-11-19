@@ -20,12 +20,12 @@ import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.admin.api.CaptureAgentStateService;
 import org.opencastproject.capture.admin.api.Recording;
 import org.opencastproject.capture.admin.api.RecordingState;
+import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowOperationInstance;
-import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 
+import org.apache.commons.lang.StringUtils;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.component.ComponentContext;
@@ -157,12 +157,17 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
   public int setAgentState(String agentName, String state) {
 
     // Checks the state is not null nor empty
-    if (state == null || state.equals("")) {
+    if (StringUtils.isBlank(state)) {
       logger.debug("Unable to set agent state, state is blank or null.");
       return BAD_PARAMETER;
-    } else if (agentName == null || agentName.equals("")) {
+    } else if (StringUtils.isBlank(agentName)) {
       logger.debug("Unable to set agent state, agent name is blank or null.");
       return BAD_PARAMETER;
+    } else if (!AgentState.KNOWN_STATES.contains(state)) {
+      logger.warn("can not set agent to an invalid state: ", state);
+      return BAD_PARAMETER;
+    } else {
+      logger.debug("Agent '{}' state set to '{}'", agentName, state);
     }
 
     Agent req = agents.get(agentName);
@@ -339,12 +344,23 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    *      java.lang.String)
    */
   public boolean setRecordingState(String id, String state) {
-    resumeWorkflow(id, state);
+    if (state == null)
+      throw new IllegalArgumentException("state can not be null");
+    if (!RecordingState.KNOWN_STATES.contains(state)) {
+      logger.warn("can not set recording to an invalid state: ", state);
+      return false;
+    }
     Recording req = recordings.get(id);
     if (req != null) {
-      logger.debug("Setting Recording {} to state {}.", id, state);
-      req.setState(state);
-      return true;
+      if (state.equals(req.getState())) {
+        logger.debug("recording state not changed");
+        return true;
+      } else {
+        logger.debug("Setting Recording {} to state {}.", id, state);
+        req.setState(state);
+        resumeWorkflow(id, state);
+        return true;
+      }
     } else {
       if (id == null || id.equals("")) {
         logger.debug("Unable to set recording state, recording name is blank or null.");
@@ -356,6 +372,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       logger.debug("Creating Recording {} with state {}.", id, state);
       Recording r = new RecordingImpl(id, state);
       recordings.put(id, r);
+      resumeWorkflow(id, state);
       return true;
     }
   }
@@ -370,40 +387,28 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    */
   protected void resumeWorkflow(String recordingId, String state) {
     if (!RecordingState.CAPTURING.equals(state) && !RecordingState.UPLOADING.equals(state)) {
-      // TODO: Update workflows on capture failures too
-      logger.info("Recording state updated to {}.  Not updating an associated workflow.", state);
-      return;
-    }
-    String operation = null;
-    if (RecordingState.CAPTURING.equals(state)) {
-      operation = "schedule";
-    } else {
-      operation = "capture";
-    }
-    WorkflowQuery query = new WorkflowQuery().withCurrentOperation("schedule");
-    WorkflowInstance[] candidates = null;
-    try {
-      candidates = workflowService.getWorkflowInstances(query).getItems();
-    } catch (WorkflowDatabaseException e) {
-      logger.warn("Unable to update workflow for recording {}: {}", recordingId, e);
+      // TODO: Update workflows on capture failures too. See MH-5877
+      logger.debug("Recording state updated to {}.  Not updating an associated workflow.", state);
       return;
     }
     WorkflowInstance workflowToUpdate = null;
-    for (WorkflowInstance wfInstance : candidates) {
-      WorkflowOperationInstance op = wfInstance.getCurrentOperation();
-      if (recordingId.equals(op.getConfiguration("schedule.id"))) {
-        workflowToUpdate = wfInstance;
-        break;
-      }
+    try {
+      workflowToUpdate = workflowService.getWorkflowById(Long.parseLong(recordingId));
+    } catch (NumberFormatException e) {
+      logger.warn("Recording id '{}' is not a long, and is therefore not a valid workflow identifier", recordingId);
+      return;
+    } catch (WorkflowDatabaseException e) {
+      logger.warn("Unable to update workflow for recording {}: {}", recordingId, e);
+      return;
+    } catch (NotFoundException e) {
+      logger.warn("Unable to find a workflow with id='{}'", recordingId);
+      return;
     }
-    if (workflowToUpdate == null) {
-      logger.warn("Unable to find a workflow in operation {} with a recording.id '{}'", operation, recordingId);
-    } else {
-      try {
-        workflowService.resume(workflowToUpdate.getId());
-      } catch (Exception e) {
-        logger.warn("Unable to update workflow {}: {}", workflowToUpdate.getId(), e);
-      }
+    try {
+      workflowService.resume(workflowToUpdate.getId());
+      logger.info("Agent status changed to '{}', resuming workflow '{}'", state, workflowToUpdate.getId());
+    } catch (Exception e) {
+      logger.warn("Unable to update workflow {}: {}", workflowToUpdate.getId(), e);
     }
   }
 

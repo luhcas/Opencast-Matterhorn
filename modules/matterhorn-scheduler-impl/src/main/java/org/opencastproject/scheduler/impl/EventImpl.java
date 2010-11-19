@@ -480,8 +480,7 @@ public class EventImpl implements Event {
   }
   
   public String toString() {
-    //TODO
-    return "";
+    return "Event {" + this.eventId + "}";
   }
   
   /**

@@ -88,19 +88,19 @@ public class Utils {
     return IOUtils.toString(in, "UTF-8");
   }
 
-  public static Object xPath(String document, String path, QName returnType) throws Exception {
-    return xPath(parseXml(IOUtils.toInputStream(document, "UTF-8")), path, returnType);
+  public static Object xpath(String document, String path, QName returnType) throws Exception {
+    return xpath(parseXml(IOUtils.toInputStream(document, "UTF-8")), path, returnType);
   }
   
-  public static Object xPath(Document document, String path, QName returnType) throws XPathExpressionException,
+  public static Object xpath(Document document, String path, QName returnType) throws XPathExpressionException,
           TransformerException {
     XPath xPath = XPathFactory.newInstance().newXPath();
     xPath.setNamespaceContext(new UniversalNamespaceResolver(document));
     return xPath.compile(path).evaluate(document, returnType);
   }
 
-  public static Boolean xPathExists(Document document, String path) throws Exception {
-    return (Boolean) xPath(document, path, XPathConstants.BOOLEAN);
+  public static Boolean xpathExists(Document document, String path) throws Exception {
+    return (Boolean) xpath(document, path, XPathConstants.BOOLEAN);
   }
 
   public static JSONObject parseJson(String doc) throws Exception {

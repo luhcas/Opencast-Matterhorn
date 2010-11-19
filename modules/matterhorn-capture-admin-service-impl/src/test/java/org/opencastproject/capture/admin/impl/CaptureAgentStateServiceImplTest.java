@@ -244,7 +244,7 @@ public class CaptureAgentStateServiceImplTest {
     Assert.assertEquals(0, service.getKnownRecordings().size());
     service.setRecordingState("", AgentState.IDLE);
     Assert.assertEquals(0, service.getKnownRecordings().size());
-    service.setRecordingState("something", null);
+    service.setRecordingState("something", "bad_state");
     Assert.assertEquals(0, service.getKnownRecordings().size());
   }
 

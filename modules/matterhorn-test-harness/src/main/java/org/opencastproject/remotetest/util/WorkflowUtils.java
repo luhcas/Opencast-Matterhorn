@@ -15,15 +15,27 @@
  */
 package org.opencastproject.remotetest.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import static org.opencastproject.remotetest.Main.BASE_URL;
 
 import org.opencastproject.remotetest.Main;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -56,9 +68,10 @@ public final class WorkflowUtils {
   public static boolean isWorkflowInOperation(String workflowId, String operation) throws IllegalStateException,
           Exception {
     HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + workflowId + ".xml");
-    String workflow = EntityUtils.toString(Main.getClient().execute(getWorkflowMethod).getEntity());
-    String currentOperation = (String) Utils.xPath(workflow, "/workflow/operations[/@state='RUNNING']/@id",
-            XPathConstants.STRING);
+    TrustedHttpClient client = Main.getClient();
+    String workflow = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
+    String currentOperation = (String) Utils.xpath(workflow, "//operation[@state='PAUSED']/@id", XPathConstants.STRING);
+    Main.returnClient(client);
     return operation.equalsIgnoreCase(currentOperation);
   }
 
@@ -75,8 +88,10 @@ public final class WorkflowUtils {
    */
   public static boolean isWorkflowInState(String workflowId, String state) throws IllegalStateException, Exception {
     HttpGet getWorkflowMethod = new HttpGet(BASE_URL + "/workflow/rest/instance/" + workflowId + ".xml");
-    String workflow = EntityUtils.toString(Main.getClient().execute(getWorkflowMethod).getEntity());
-    String currentState = (String) Utils.xPath(workflow, "/workflow/@state", XPathConstants.STRING);
+    TrustedHttpClient client = Main.getClient();
+    String workflow = EntityUtils.toString(client.execute(getWorkflowMethod).getEntity());
+    String currentState = (String) Utils.xpath(workflow, "/ns2:workflow/@state", XPathConstants.STRING);
+    Main.returnClient(client);
     return state.equalsIgnoreCase(currentState);
   }
 
@@ -116,4 +131,33 @@ public final class WorkflowUtils {
             .getAttribute("state");
   }
 
+  /**
+   * Registers a new workflow definition
+   * 
+   * @param workflowDefinition
+   *          the new workflow definition
+   * @return the id of the workflow definition
+   */
+  public static String registerWorkflowDefinition(String workflowDefinition) throws Exception {
+    HttpPut put = new HttpPut(BASE_URL + "/workflow/rest/definition");
+    List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+    params.add(new BasicNameValuePair("workflowDefinition", workflowDefinition));
+    put.setEntity(new UrlEncodedFormEntity(params));
+    TrustedHttpClient client = Main.getClient();
+    HttpResponse response = client.execute(put);
+    assertEquals(HttpStatus.SC_CREATED, response.getStatusLine().getStatusCode());
+    String id = (String) Utils.xpath(workflowDefinition, "/definition/id",
+            XPathConstants.STRING);
+    assertNotNull(id);
+    Main.returnClient(client);
+    return id;
+  }
+
+  public static void unregisterWorkflowDefinition(String workflowDefinitionId) throws Exception {
+    HttpDelete delete = new HttpDelete(BASE_URL + "/workflow/rest/definition/" + workflowDefinitionId);
+    TrustedHttpClient client = Main.getClient();
+    HttpResponse response = client.execute(delete);
+    Main.returnClient(client);
+    assertEquals(HttpStatus.SC_NO_CONTENT, response.getStatusLine().getStatusCode());
+  }
 }

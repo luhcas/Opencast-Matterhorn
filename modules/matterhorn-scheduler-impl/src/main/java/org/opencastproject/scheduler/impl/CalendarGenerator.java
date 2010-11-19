@@ -51,6 +51,7 @@ import net.fortuna.ical4j.model.property.RelatedTo;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -129,16 +130,16 @@ public class CalendarGenerator {
       event.getProperties().add(new Uid(Long.toString(e.getEventId())));
       
       // TODO Organizer should be URI (email-address?) created fake address
-      if (!e.getCreator().equalsIgnoreCase("null")) {
+      if (StringUtils.isNotEmpty(e.getCreator())) {
         event.getProperties().add(new Organizer(pl ,e.getCreator().replace(" ", "_")+"@matterhorn.opencast"));
       }
-      if (!e.getDescription().equalsIgnoreCase("null")) {
+      if (StringUtils.isNotEmpty(e.getDescription())) {
         event.getProperties().add(new Description(e.getDescription()));
       }
-      if (e.containsKey("location") && !e.getMetadataValueByKey("location").equalsIgnoreCase("null")) {
+      if (e.containsKey("location") && StringUtils.isNotEmpty(e.getMetadataValueByKey("location"))) {
         event.getProperties().add(new Location(e.getMetadataValueByKey("location")));
       }
-      if (!e.getSeries().equalsIgnoreCase("null")) {
+      if (StringUtils.isNotEmpty(e.getSeries())) {
         seriesID = e.getSeries();
         event.getProperties().add(new RelatedTo(seriesID));
       }

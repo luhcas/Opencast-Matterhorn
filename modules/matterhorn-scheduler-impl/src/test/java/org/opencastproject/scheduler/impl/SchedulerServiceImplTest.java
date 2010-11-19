@@ -376,7 +376,6 @@ public class SchedulerServiceImplTest {
   public void testMetadataExport() throws Exception {
     service.addEvent(event);
     String dc = service.getDublinCoreMetadata(event.getEventId());
-    System.out.println("DC-String: " + dc);
     Assert.assertNotNull(dc);
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     DocumentBuilder builder;

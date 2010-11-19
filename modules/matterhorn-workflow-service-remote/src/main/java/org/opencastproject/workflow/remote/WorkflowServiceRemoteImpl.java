@@ -22,19 +22,21 @@ import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
-import org.opencastproject.workflow.api.WorkflowStatistics;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
+import org.opencastproject.workflow.api.WorkflowStatistics;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpParams;
@@ -265,36 +267,6 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.mediapackage.MediaPackage,
-   *      java.util.Map)
-   */
-  @Override
-  public WorkflowInstance start(MediaPackage mediaPackage, Map<String, String> properties)
-          throws WorkflowDatabaseException {
-    try {
-      return start(null, mediaPackage, null, properties);
-    } catch (NotFoundException e) {
-      throw new IllegalStateException("A null parent workflow id should never result in a not found exception ", e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.mediapackage.MediaPackage)
-   */
-  @Override
-  public WorkflowInstance start(MediaPackage mediaPackage) throws WorkflowDatabaseException {
-    try {
-      return start(null, mediaPackage, null, null);
-    } catch (NotFoundException e) {
-      throw new IllegalStateException("A null parent workflow id should never result in a not found exception ", e);
-    }
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
    * @see org.opencastproject.workflow.api.WorkflowService#countWorkflowInstances()
    */
   @Override
@@ -491,6 +463,48 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
       } catch (Exception e) {
         throw new IllegalStateException("Unable to parse workflow definitions");
       }
+    }
+  }
+  
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.workflow.api.WorkflowService#registerWorkflowDefinition(org.opencastproject.workflow.api.WorkflowDefinition)
+   */
+  @Override
+  public void registerWorkflowDefinition(WorkflowDefinition workflow) throws WorkflowDatabaseException {
+    String xml;
+    try {
+      xml = WorkflowBuilder.getInstance().toXml(workflow);
+    } catch (Exception e) {
+      throw new IllegalStateException("unable to serialize workflow definition to xml");
+    }
+    HttpPut put = new HttpPut("/definition");
+    List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+    params.add(new BasicNameValuePair("workflowDefinition", xml));
+    try {
+      put.setEntity(new UrlEncodedFormEntity(params));
+    } catch (UnsupportedEncodingException e) {
+      throw new IllegalStateException("Unable to assemble a remote workflow service request", e);
+    }
+    HttpResponse response = getResponse(put, HttpStatus.SC_NO_CONTENT);
+    if (response == null) {
+      throw new WorkflowDatabaseException("Unexpected HTTP response code");
+    } // otherwise, our work is done
+  }
+  
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.workflow.api.WorkflowService#unregisterWorkflowDefinition(java.lang.String)
+   */
+  @Override
+  public void unregisterWorkflowDefinition(String workflowDefinitionId) throws NotFoundException,
+          WorkflowDatabaseException {
+    HttpDelete delete = new HttpDelete("/definition/" + workflowDefinitionId);
+    HttpResponse response = getResponse(delete, HttpStatus.SC_NO_CONTENT);
+    if(response == null) {
+      throw new WorkflowDatabaseException("Unable to delete workflow definition '" + workflowDefinitionId + "'");
     }
   }
 

@@ -28,13 +28,23 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Posts a zip file to the ingest service
  */
 public class IngestZipTest {
   TrustedHttpClient client;
+
+  private static final Logger logger = LoggerFactory.getLogger(IngestZipTest.class);
+
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + IngestZipTest.class.getName());
+  }
 
   @Before
   public void setup() throws Exception {

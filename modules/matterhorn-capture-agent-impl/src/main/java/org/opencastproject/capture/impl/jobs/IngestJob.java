@@ -49,14 +49,14 @@ public class IngestJob implements StatefulJob {
     // Obtains the CaptureAgentImpl from the context
     CaptureAgentImpl ca = (CaptureAgentImpl)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_AGENT);
 
-    logger.info("Proceeding to try ingestion");
-    // Tries ingestion
+    logger.info("Proceeding to try ingest");
+    // Tries ingest
     int result = ca.ingest(recordingID);
     
     if (result != 200) {
-      logger.error("Ingestion failed with a value of {}", result);
+      logger.error("Ingest failed with a value of {}", result);
     } else { 
-      logger.info("Ingestion finished");
+      logger.info("Ingest finished");
 
       //Remove this job from the system
       JobDetail mine = ctx.getJobDetail();

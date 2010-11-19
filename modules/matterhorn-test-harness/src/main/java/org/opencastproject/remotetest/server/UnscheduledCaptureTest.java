@@ -32,8 +32,11 @@ import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONObject;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import javax.xml.xpath.XPathConstants;
@@ -47,6 +50,13 @@ public class UnscheduledCaptureTest {
 
   /** The http client */
   protected TrustedHttpClient httpClient;
+
+  private static final Logger logger = LoggerFactory.getLogger(UnscheduledCaptureTest.class);
+
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + UnscheduledCaptureTest.class.getName());
+  }
 
   @Before
   public void setUp() throws Exception {
@@ -66,13 +76,13 @@ public class UnscheduledCaptureTest {
     HttpResponse response = CaptureAdminResources.agents(httpClient);
     assertEquals("Response code (agents):", 200, response.getStatusLine().getStatusCode());
     Document xml = Utils.parseXml(response.getEntity().getContent());
-    assertTrue("Agent included? (agents):", Utils.xPathExists(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']"));
+    assertTrue("Agent included? (agents):", Utils.xpathExists(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']"));
 
     // Agent Registered (Capture Admin Agent)
     response = CaptureAdminResources.agent(httpClient, CaptureResources.AGENT);
     assertEquals("Response code (agent):", 200, response.getStatusLine().getStatusCode());
     xml = Utils.parseXml(response.getEntity().getContent());
-    assertTrue("Agent included? (agent):", Utils.xPathExists(xml, "//ns2:agent-state-update[name=\'" + CaptureResources.AGENT + "\']"));
+    assertTrue("Agent included? (agent):", Utils.xpathExists(xml, "//ns2:agent-state-update[name=\'" + CaptureResources.AGENT + "\']"));
 
     // Agent idle (State)
     response = StateResources.getState(httpClient);
@@ -122,7 +132,7 @@ public class UnscheduledCaptureTest {
       response = CaptureAdminResources.agents(httpClient);
       assertEquals("Response code (agents):", 200, response.getStatusLine().getStatusCode());
       xml = Utils.parseXml(response.getEntity().getContent());
-      if (Utils.xPath(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']/state", XPathConstants.STRING).equals("capturing")) {
+      if (Utils.xpath(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']/state", XPathConstants.STRING).equals("capturing")) {
         break;
       }
 
@@ -177,7 +187,7 @@ public class UnscheduledCaptureTest {
       response = CaptureAdminResources.agents(httpClient);
       assertEquals("Response code (agents):", 200, response.getStatusLine().getStatusCode());
       xml = Utils.parseXml(response.getEntity().getContent());
-      if (Utils.xPath(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']/state", XPathConstants.STRING).equals("idle")) {
+      if (Utils.xpath(xml, "//ns1:agent-state-update[name=\'" + CaptureResources.AGENT + "\']/state", XPathConstants.STRING).equals("idle")) {
         break;
       }
 

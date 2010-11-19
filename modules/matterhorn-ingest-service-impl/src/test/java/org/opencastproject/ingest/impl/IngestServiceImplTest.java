@@ -63,7 +63,6 @@ public class IngestServiceImplTest {
   @SuppressWarnings({ "unchecked", "rawtypes" })
   @Before
   public void setup() throws Exception {
-
     urlTrack = IngestServiceImplTest.class.getResource("/av.mov").toURI();
     urlTrack1 = IngestServiceImplTest.class.getResource("/vonly.mov").toURI();
     urlTrack2 = IngestServiceImplTest.class.getResource("/aonly.mov").toURI();
@@ -119,11 +118,11 @@ public class IngestServiceImplTest {
     EasyMock.expect(workflowInstance.getId()).andReturn(workflowInstanceID);
 
     workflowService = EasyMock.createNiceMock(WorkflowService.class);
-    EasyMock.expect(workflowService.start((MediaPackage) EasyMock.anyObject(), (Map) EasyMock.anyObject())).andReturn(
+    EasyMock.expect(workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject(), (Map) EasyMock.anyObject())).andReturn(
             workflowInstance);
     EasyMock.expect(workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject(), (Map) EasyMock.anyObject())).andReturn(
             workflowInstance);
-    EasyMock.expect(workflowService.start((MediaPackage) EasyMock.anyObject())).andReturn(workflowInstance);
+    EasyMock.expect(workflowService.start((WorkflowDefinition) EasyMock.anyObject(), (MediaPackage) EasyMock.anyObject())).andReturn(workflowInstance);
 
     EasyMock.replay(workspace);
     EasyMock.replay(workflowInstance);
@@ -160,6 +159,7 @@ public class IngestServiceImplTest {
     service.setWorkspace(workspace);
     service.setWorkflowService(workflowService);
     service.setServiceRegistry(serviceRegistry);
+    service.defaultWorkflowDefinionId = "sample";
   }
 
 

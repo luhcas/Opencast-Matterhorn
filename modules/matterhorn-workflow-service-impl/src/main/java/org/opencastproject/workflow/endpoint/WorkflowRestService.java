@@ -53,6 +53,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,9 +62,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -77,23 +81,43 @@ import javax.ws.rs.core.Response.Status;
  */
 @Path("/")
 public class WorkflowRestService {
+  /** The default number of results returned */
   private static final int DEFAULT_LIMIT = 20;
+
+  /** The maximum number of results returned */
   private static final int MAX_LIMIT = 100;
+
+  /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(WorkflowRestService.class);
 
+  /** The documentation for this rest endpoint */
   protected String docs = null;
+
+  /** The default server URL */
   protected String serverUrl = UrlSupport.DEFAULT_BASE_URL;
 
+  /** The default service URL */
+  protected String serviceUrl = serverUrl + "/workflow/rest";
+
+  /** The workflow service instance */
   private WorkflowService service;
 
+  /**
+   * Sets the workflow service
+   * 
+   * @param service
+   *          the workflow service instance
+   */
   public void setService(WorkflowService service) {
     this.service = service;
   }
 
-  public void unsetService(WorkflowService service) {
-    this.service = null;
-  }
-
+  /**
+   * OSGI callback for component activation
+   * 
+   * @param cc
+   *          the OSGI declarative services component context
+   */
   public void activate(ComponentContext cc) {
     // Get the configured server URL
     if (cc == null) {
@@ -106,12 +130,17 @@ public class WorkflowRestService {
       } else {
         serverUrl = ccServerUrl;
       }
-      String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
-      docs = generateDocs(serviceUrl);
+      serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
+      docs = generateDocs();
     }
   }
 
-  protected String generateDocs(String serviceUrl) {
+  /**
+   * Generates the REST documentation for this service.
+   * 
+   * @return the REST documentation
+   */
+  protected String generateDocs() {
     DocRestData data = new DocRestData("Workflow", "Workflow Service", serviceUrl, new String[] { "$Rev$" });
 
     // abstract
@@ -125,6 +154,17 @@ public class WorkflowRestService {
     defsEndpoint.addPathParam(new Param("format", Type.STRING, "xml", "The format of the results: xml or json"));
     defsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, defsEndpoint);
+
+    // Workflow Definition by id
+    RestEndpoint defEndpoint = new RestEndpoint("defs", RestEndpoint.Method.GET, "/definition/{id}.{format}",
+            "List all available workflow definitions");
+    defEndpoint.addFormat(new Format("xml", null, null));
+    defEndpoint.addFormat(new Format("json", null, null));
+    defEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Valid request, results returned"));
+    defEndpoint.addPathParam(new Param("id", Type.STRING, "full", "The workflow definition identifier"));
+    defEndpoint.addPathParam(new Param("format", Type.STRING, "xml", "The format of the results: xml or json"));
+    defEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, defEndpoint);
 
     // Workflow Instances
     RestEndpoint instancesEndpoint = new RestEndpoint("instances", RestEndpoint.Method.GET, "/instances.{format}",
@@ -159,14 +199,14 @@ public class WorkflowRestService {
 
     // Workflow statistics
     RestEndpoint statisticsEndpoint = new RestEndpoint("stats", RestEndpoint.Method.GET, "/statistics.{format}",
-    "Get workflow instance statistics");
+            "Get workflow instance statistics");
     statisticsEndpoint.addFormat(new Format("xml", null, null));
     statisticsEndpoint.addFormat(new Format("json", null, null));
     statisticsEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Valid request, results returned"));
     statisticsEndpoint.addPathParam(new Param("format", Type.STRING, "xml", "The format of the results: xml or json"));
     statisticsEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, statisticsEndpoint);
-    
+
     // Operation Handlers
     RestEndpoint handlersEndpoint = new RestEndpoint("handlers", RestEndpoint.Method.GET, "/handlers.json",
             "List all registered workflow operation handlers (implementations)");
@@ -231,8 +271,7 @@ public class WorkflowRestService {
     // Resume a Workflow Instance
     RestEndpoint resumeAndReplaceEndpoint = new RestEndpoint("replaceAndresume", RestEndpoint.Method.POST,
             "/replaceAndresume", "Resume a suspended workflow instance, replacing the mediapackage");
-    resumeAndReplaceEndpoint.addStatus(org.opencastproject.util.doc.Status
-            .OK("the resumed workflow"));
+    resumeAndReplaceEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("the resumed workflow"));
     resumeAndReplaceEndpoint.addStatus(org.opencastproject.util.doc.Status
             .NOT_FOUND("A workflow instance with this ID was not found"));
     resumeAndReplaceEndpoint.addRequiredParam(new Param("id", Type.STRING, null, "The ID of the workflow instance"));
@@ -324,8 +363,7 @@ public class WorkflowRestService {
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("/count")
-  public Response getCount(
-          @QueryParam("state") WorkflowInstance.WorkflowState state,
+  public Response getCount(@QueryParam("state") WorkflowInstance.WorkflowState state,
           @QueryParam("operation") String operation) {
     try {
       Long count = service.countWorkflowInstances(state, operation);
@@ -370,6 +408,26 @@ public class WorkflowRestService {
     } else {
       return Response.ok(WorkflowBuilder.getInstance().toXml(list)).header("Content-Type", MediaType.TEXT_XML).build();
     }
+  }
+
+  @GET
+  @Produces(MediaType.APPLICATION_JSON)
+  @Path("definition/{id}.json")
+  public Response getWorkflowDefinitionAsJson(@PathParam("id") String workflowDefinitionId) throws Exception {
+    WorkflowDefinition def = null;
+    try {
+      def = service.getWorkflowDefinitionById(workflowDefinitionId);
+      return Response.ok(def).build();
+    } catch (NotFoundException e) {
+      return Response.status(Status.NOT_FOUND).build();
+    }
+  }
+
+  @GET
+  @Produces(MediaType.TEXT_XML)
+  @Path("definition/{id}.xml")
+  public Response getWorkflowDefinitionAsXml(@PathParam("id") String workflowDefinitionId) throws Exception {
+    return getWorkflowDefinitionAsJson(workflowDefinitionId);
   }
 
   /**
@@ -488,16 +546,15 @@ public class WorkflowRestService {
           @FormParam("properties") LocalHashMap localMap) {
     Map<String, String> properties = localMap.getMap();
     Long parentIdAsLong = null;
-    if(parentWorkflowId != null) {
+    if (parentWorkflowId != null) {
       try {
         parentIdAsLong = Long.parseLong(parentWorkflowId);
-      } catch(NumberFormatException e) {
+      } catch (NumberFormatException e) {
         throw new WebApplicationException(e);
       }
     }
     try {
-      return (WorkflowInstanceImpl) service.start(workflowDefinition, mp, parentIdAsLong,
-              properties);
+      return (WorkflowInstanceImpl) service.start(workflowDefinition, mp, parentIdAsLong, properties);
     } catch (WorkflowDatabaseException e) {
       throw new WebApplicationException(e);
     } catch (NotFoundException e) {
@@ -608,6 +665,45 @@ public class WorkflowRestService {
       jsonArray.add(jsonHandler);
     }
     return Response.ok(jsonArray.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
+  }
+
+  @PUT
+  @Path("/definition")
+  public Response registerWorkflowDefinition(@FormParam("workflowDefinition") WorkflowDefinitionImpl workflowDefinition) {
+    if (workflowDefinition == null) {
+      return Response.status(Status.BAD_REQUEST).build();
+    }
+    try {
+      service.getWorkflowDefinitionById(workflowDefinition.getId());
+      return Response.status(Status.PRECONDITION_FAILED).build(); // the workflow definition should be unregistered
+    } catch (NotFoundException notFoundException) {
+      try {
+        service.registerWorkflowDefinition(workflowDefinition);
+        return Response
+                .created(
+                        new URI(UrlSupport.concat(new String[] { serverUrl, "definition",
+                                workflowDefinition.getId() + ".xml" }))).build();
+      } catch (WorkflowDatabaseException e) {
+        return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+      } catch (URISyntaxException e) {
+        throw new IllegalStateException("Unable to generate a URI for workflow definitions", e);
+      }
+    } catch (WorkflowDatabaseException e) {
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+  
+  @DELETE
+  @Path("/definition/{id}")
+  public Response unregisterWorkflowDefinition(@PathParam("id") String workflowDefinitionId) {
+    try {
+      service.unregisterWorkflowDefinition(workflowDefinitionId);
+       return Response.status(Status.NO_CONTENT).build();
+    } catch (NotFoundException e) {
+      return Response.status(Status.NOT_FOUND).build();
+    } catch (WorkflowDatabaseException e) {
+      return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   @SuppressWarnings("unchecked")

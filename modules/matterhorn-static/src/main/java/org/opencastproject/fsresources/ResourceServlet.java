@@ -62,10 +62,7 @@ public class ResourceServlet extends HttpServlet {
     }
 
     File rootDir = new File(root);
-    if (rootDir == null) {
-      logger.error("Unable to create servlet for {} because root directory is null!", serverAlias);
-      return;
-    } else if (!rootDir.exists()) {
+    if (!rootDir.exists()) {
       if (!rootDir.mkdirs()) {
         logger.error("Unable to create directories for {}!", rootDir.getAbsolutePath());
         return;

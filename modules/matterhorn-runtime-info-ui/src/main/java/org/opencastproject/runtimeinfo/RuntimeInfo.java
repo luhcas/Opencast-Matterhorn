@@ -121,7 +121,7 @@ public class RuntimeInfo {
               HttpResponse response = httpClient.execute(post);
               logger.debug("Received pingback response: {}", response);
             } catch (Exception e) {
-              logger.warn("Unable to post feedback: {}", e);
+              logger.info("Unable to send system configuration to opencastproject.org: {}", e.getMessage());
             } finally {
               httpClient.getConnectionManager().shutdown();
             }

@@ -36,6 +36,28 @@ public interface WorkflowService {
   final String JOB_TYPE = "org.opencastproject.workflow";
 
   /**
+   * Registers a new workflow definition. If a workflow definition with the same identifier is already registered, it
+   * will be replaced.
+   * 
+   * @param workflow
+   *          the new workflow definition
+   * @throws WorkflowDatabaseException
+   *           if there is a problem registering the workflow definition
+   */
+  public void registerWorkflowDefinition(WorkflowDefinition workflow) throws WorkflowDatabaseException;
+
+  /**
+   * Removes the workflow definition with this identifier.
+   * 
+   * @throws NotFoundException
+   *           if there is no workflow registered with this identifier
+   * @throws WorkflowDatabaseException
+   *           if there is a problem unregistering the workflow definition
+   */
+  public void unregisterWorkflowDefinition(String workflowDefinitionId) throws NotFoundException,
+          WorkflowDatabaseException;
+
+  /**
    * Returns the {@link WorkflowDefinition} identified by <code>name</code> or <code>null</code> if no such definition
    * was found.
    * 
@@ -121,33 +143,6 @@ public interface WorkflowService {
    */
   WorkflowInstance start(WorkflowDefinition workflowDefinition, MediaPackage mediaPackage)
           throws WorkflowDatabaseException;
-
-  /**
-   * Creates a new workflow instance using the default workflow definition (which can be configured through the use of a
-   * {@link WorkflowSelectionStrategy}), and starts the workflow. The supplied properties are applied to the workflow
-   * instance immediately.
-   * 
-   * @param mediaPackage
-   *          the mediapackage to process
-   * @param properties
-   *          any properties to apply to the workflow definition
-   * @return The new workflow instance
-   * @throws WorkflowDatabaseException
-   *           if there is a problem storing the workflow instance in persistence
-   */
-  WorkflowInstance start(MediaPackage mediaPackage, Map<String, String> properties) throws WorkflowDatabaseException;
-
-  /**
-   * Creates a new workflow instance using the default workflow definition (which can be configured through the use of a
-   * {@link WorkflowSelectionStrategy}), and starts the workflow.
-   * 
-   * @param mediaPackage
-   *          the mediapackage to process
-   * @return The new workflow instance
-   * @throws WorkflowDatabaseException
-   *           if there is a problem storing the workflow instance in persistence
-   */
-  WorkflowInstance start(MediaPackage mediaPackage) throws WorkflowDatabaseException;
 
   /**
    * Gets the total number of workflows that have been created to date.

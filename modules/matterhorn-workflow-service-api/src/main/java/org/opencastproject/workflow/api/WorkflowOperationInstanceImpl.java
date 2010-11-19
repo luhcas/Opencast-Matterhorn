@@ -39,6 +39,28 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlAccessorType(XmlAccessType.NONE)
 public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance {
 
+  static class DateAdapter extends XmlAdapter<Long, Date> {
+    /**
+     * {@inheritDoc}
+     * 
+     * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
+     */
+    @Override
+    public Long marshal(Date v) throws Exception {
+      return v == null ? null : v.getTime();
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
+     */
+    @Override
+    public Date unmarshal(Long v) throws Exception {
+      return v == null ? null : new Date(v);
+    }
+  }
+
   @XmlAttribute(name = "id")
   protected String id;
 
@@ -58,22 +80,25 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   @XmlElement(name = "hold-action-title")
   protected String holdActionTitle;
 
-  @XmlAttribute(name="fail-on-error")
+  @XmlAttribute(name = "fail-on-error")
   protected boolean failWorkflowOnException;
 
-  @XmlAttribute(name="exception-handler-workflow")
+  @XmlAttribute(name = "exception-handler-workflow")
   protected String exceptionHandlingWorkflow;
 
   @XmlJavaTypeAdapter(WorkflowOperationInstanceImpl.DateAdapter.class)
-  @XmlElement(name="started")
+  @XmlElement(name = "started")
   protected Date dateStarted;
 
   @XmlJavaTypeAdapter(WorkflowOperationInstanceImpl.DateAdapter.class)
-  @XmlElement(name="completed")
+  @XmlElement(name = "completed")
   protected Date dateCompleted;
 
-  @XmlElement(name="time-in-queue")
+  @XmlElement(name = "time-in-queue")
   protected Long timeInQueue;
+
+  /** The position of this operation in the workflow instance */
+  protected int position;
 
   /**
    * No-arg constructor needed for JAXB serialization
@@ -127,6 +152,7 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getState()
    */
   @Override
@@ -136,11 +162,11 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
 
   public void setState(OperationState state) {
     Date now = new Date();
-    if(OperationState.RUNNING.equals(state)) {
+    if (OperationState.RUNNING.equals(state)) {
       this.dateStarted = now;
-    } else if(OperationState.FAILED.equals(state)) {
+    } else if (OperationState.FAILED.equals(state)) {
       this.dateCompleted = now;
-    } else if(OperationState.SUCCEEDED.equals(state)) {
+    } else if (OperationState.SUCCEEDED.equals(state)) {
       this.dateCompleted = now;
     }
     this.state = state;
@@ -256,15 +282,17 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getExceptionHandlingWorkflow()
    */
   @Override
   public String getExceptionHandlingWorkflow() {
     return exceptionHandlingWorkflow;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationInstance#isFailWorkflowOnException()
    */
   @Override
@@ -273,14 +301,16 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   }
 
   /**
-   * @param failWorkflowOnException the failWorkflowOnException to set
+   * @param failWorkflowOnException
+   *          the failWorkflowOnException to set
    */
   public void setFailWorkflowOnException(boolean failWorkflowOnException) {
     this.failWorkflowOnException = failWorkflowOnException;
   }
 
   /**
-   * @param exceptionHandlingWorkflow the exceptionHandlingWorkflow to set
+   * @param exceptionHandlingWorkflow
+   *          the exceptionHandlingWorkflow to set
    */
   public void setExceptionHandlingWorkflow(String exceptionHandlingWorkflow) {
     this.exceptionHandlingWorkflow = exceptionHandlingWorkflow;
@@ -294,7 +324,8 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   }
 
   /**
-   * @param dateStarted the dateStarted to set
+   * @param dateStarted
+   *          the dateStarted to set
    */
   public void setDateStarted(Date dateStarted) {
     this.dateStarted = dateStarted;
@@ -308,14 +339,16 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   }
 
   /**
-   * @param dateCompleted the dateCompleted to set
+   * @param dateCompleted
+   *          the dateCompleted to set
    */
   public void setDateCompleted(Date dateCompleted) {
     this.dateCompleted = dateCompleted;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getTimeInQueue()
    */
   @Override
@@ -324,28 +357,66 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   }
 
   /**
-   * @param timeInQueue the timeInQueue to set
+   * @param timeInQueue
+   *          the timeInQueue to set
    */
   public void setTimeInQueue(long timeInQueue) {
     this.timeInQueue = timeInQueue;
   }
 
-  static class DateAdapter extends XmlAdapter<Long, Date> {
-    /**
-     * {@inheritDoc}
-     * @see javax.xml.bind.annotation.adapters.XmlAdapter#marshal(java.lang.Object)
-     */
-    @Override
-    public Long marshal(Date v) throws Exception {
-      return v == null ? null : v.getTime();
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#getPosition()
+   */
+  @Override
+  public int getPosition() {
+    return position;
+  }
+
+  /**
+   * Sets the position of this operation in the workflow instance.
+   * 
+   * @param position
+   *          the position
+   */
+  void setPosition(int position) {
+    this.position = position;
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return position;
+  }
+  
+  /**
+   * {@inheritDoc}
+   *
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object o) {
+    if(this == o) return true;
+    if(o instanceof WorkflowOperationInstance) {
+      WorkflowOperationInstance other = (WorkflowOperationInstance)o;
+      return other.getId().equals(this.getId()) && other.getPosition() == this.position;
+    } else {
+      return false;
     }
-    /**
-     * {@inheritDoc}
-     * @see javax.xml.bind.annotation.adapters.XmlAdapter#unmarshal(java.lang.Object)
-     */
-    @Override
-    public Date unmarshal(Long v) throws Exception {
-      return v == null ? null : new Date(v);
-    }
+  }
+  
+  /**
+   * {@inheritDoc}
+   *
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    return "WorkflowOperation {" + id + "}";
   }
 }

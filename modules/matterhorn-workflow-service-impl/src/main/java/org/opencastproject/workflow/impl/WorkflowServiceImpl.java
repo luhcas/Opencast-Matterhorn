@@ -41,7 +41,6 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.api.WorkflowOperationResultImpl;
 import org.opencastproject.workflow.api.WorkflowQuery;
-import org.opencastproject.workflow.api.WorkflowSelectionStrategy;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowStatistics;
@@ -82,9 +81,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceImpl.class);
-
-  /** The configuration key that defines the default workflow definition */
-  protected static final String WORKFLOW_DEFINITION_DEFAULT = "org.opencastproject.workflow.default.definition";
 
   /** The number of threads to start with in the workflow instance thread pool */
   protected static final int DEFAULT_THREADS = 1;
@@ -300,9 +296,15 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       }
       String catchWorkflow = op.getExceptionHandlingWorkflow();
       if (catchWorkflow != null) {
-        WorkflowDefinition catchWorkflowDefinition = getWorkflowDefinitionById(catchWorkflow);
-        if (catchWorkflowDefinition == null) {
+        WorkflowDefinition catchWorkflowDefinition;
+        try {
+          catchWorkflowDefinition = getWorkflowDefinitionById(catchWorkflow);
+        } catch (NotFoundException e) {
           logger.info("{} is not runnable due to missing catch workflow {} on operation {}", new Object[] {
+                  workflowDefinition, catchWorkflow, op });
+          return false;
+        } catch (WorkflowDatabaseException e) {
+          logger.info("{} is not runnable because we can not load the catch workflow {} on operation {}", new Object[] {
                   workflowDefinition, catchWorkflow, op });
           return false;
         }
@@ -542,8 +544,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    *          the workflow definition id
    * @return the workflow
    */
-  public WorkflowDefinition getWorkflowDefinitionById(String id) {
-    return workflowDefinitions.get(id);
+  public WorkflowDefinition getWorkflowDefinitionById(String id) throws NotFoundException, WorkflowDatabaseException {
+    WorkflowDefinition def = workflowDefinitions.get(id);
+    if (def == null)
+      throw new NotFoundException("Workflow definition '" + id + "' not found");
+    return def;
   }
 
   /**
@@ -567,7 +572,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     } catch (ServiceRegistryException e) {
       throw new WorkflowDatabaseException("Unable to update job status ", e);
     }
-    
+
     return instance;
   }
 
@@ -714,15 +719,17 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
         int currentOperationPosition = workflow.getOperations().indexOf(currentOperation);
         List<WorkflowOperationInstance> operations = new ArrayList<WorkflowOperationInstance>();
         operations.addAll(workflow.getOperations().subList(0, currentOperationPosition + 1));
-        WorkflowDefinition errorDef = getWorkflowDefinitionById(errorDefId);
-        if (errorDef == null) {
-          throw new IllegalStateException("Unable to run error workflow " + errorDefId);
+
+        WorkflowDefinition errorDef = null;
+        try {
+          errorDef = getWorkflowDefinitionById(errorDefId);
+        } catch (NotFoundException notFoundException) {
+          throw new IllegalStateException("Unable to find the error workflow definition '" + errorDefId + "'");
         }
         for (WorkflowOperationDefinition def : errorDef.getOperations()) {
           operations.add(new WorkflowOperationInstanceImpl(def));
         }
-        workflow.getOperations().clear();
-        workflow.getOperations().addAll(operations);
+        workflow.setOperations(operations);
       }
 
       // Update the job status
@@ -766,7 +773,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
           throws WorkflowDatabaseException {
     if (result == null) {
       // Just continue using the workflow's current mediapackage, but log a warning
-      logger.warn("Handling a null operation result for workflow {}", workflow);
+      logger.warn("Handling a null operation result for workflow {}", workflow.getId());
       result = new WorkflowOperationResultImpl(workflow.getMediaPackage(), null, Action.CONTINUE, 0);
     } else {
       // Update the workflow's mediapackage if a new one was produced in this operation
@@ -893,67 +900,6 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       throw new IllegalArgumentException("mediapackage must not be null");
     Map<String, String> properties = new HashMap<String, String>();
     return start(workflowDefinition, mediaPackage, properties);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.mediapackage.MediaPackage,
-   *      java.util.Map)
-   */
-  @Override
-  public WorkflowInstance start(MediaPackage mediaPackage, Map<String, String> properties)
-          throws WorkflowDatabaseException {
-    if (mediaPackage == null)
-      throw new IllegalArgumentException("mediapackage must not be null");
-    WorkflowDefinition def = getWorkflowDefinition(mediaPackage, properties);
-    return start(def, mediaPackage, properties);
-  }
-
-  /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.workflow.api.WorkflowService#start(org.opencastproject.mediapackage.MediaPackage)
-   */
-  @Override
-  public WorkflowInstance start(MediaPackage mediaPackage) throws WorkflowDatabaseException {
-    if (mediaPackage == null)
-      throw new IllegalArgumentException("mediapackage must not be null");
-    Map<String, String> properties = new HashMap<String, String>();
-    WorkflowDefinition def = getWorkflowDefinition(mediaPackage, properties);
-    return start(def, mediaPackage, properties);
-  }
-
-  /**
-   * Gets the workflow definition for a submitted mediapackage and properties.
-   * 
-   * @param mediaPackage
-   * @param properties
-   * @return The workflow definition
-   * @throws IllegalStateException
-   *           if no acceptable workflow definition can be found
-   */
-  protected WorkflowDefinition getWorkflowDefinition(MediaPackage mediaPackage, Map<String, String> properties) {
-    // Get the default workflow, either from a WorkflowSelectionStrategy or from the bundle context
-    WorkflowDefinition def = null;
-    ServiceReference ref = componentContext.getBundleContext().getServiceReference(
-            WorkflowSelectionStrategy.class.getName());
-    if (ref != null) {
-      WorkflowSelectionStrategy strategy = (WorkflowSelectionStrategy) componentContext.getBundleContext().getService(
-              ref);
-      def = strategy.getWorkflowDefinition(mediaPackage, properties);
-    }
-    // Still no definition? Try finding the default workflow definition ID in the bundle context
-    if (def == null) {
-      String defaultId = componentContext.getBundleContext().getProperty(WORKFLOW_DEFINITION_DEFAULT);
-      if (defaultId != null) {
-        def = getWorkflowDefinitionById(defaultId);
-      }
-    }
-    // If there is still no definition defined, we can not continue
-    if (def == null)
-      throw new IllegalStateException("Unable to determine the default workflow definition");
-    return def;
   }
 
   /**

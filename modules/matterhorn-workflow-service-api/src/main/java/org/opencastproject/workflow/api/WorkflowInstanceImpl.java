@@ -18,7 +18,6 @@ package org.opencastproject.workflow.api;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 
-import org.apache.commons.lang.builder.ToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,9 +55,14 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
     this.state = WorkflowState.INSTANTIATED;
     this.mediaPackage = mediaPackage;
     this.operations = new ArrayList<WorkflowOperationInstance>();
-    for(WorkflowOperationDefinition opDef : def.getOperations()) {
-      operations.add(new WorkflowOperationInstanceImpl(opDef));
+    List<WorkflowOperationDefinition> operationDefinitions = def.getOperations();
+    for(int i = 0; i < operationDefinitions.size(); i++) {
+      WorkflowOperationDefinition opDef = operationDefinitions.get(i);
+      WorkflowOperationInstanceImpl opInstance = new WorkflowOperationInstanceImpl(opDef);
+      opInstance.setPosition(i);
+      operations.add(opInstance);
     }
+    this.operationsInitialized = true;
     this.configurations = new TreeSet<WorkflowConfiguration>();
     if(properties != null) {
       for(Entry<String, String> entry : properties.entrySet()) {
@@ -66,6 +70,9 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
       }
     }    
   }
+  
+  /** whether we have initialized the operation positions */
+  protected boolean operationsInitialized = false;
 
   @XmlAttribute()
   private long id;
@@ -196,7 +203,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    */
   public List<WorkflowOperationInstance> getOperations() {
     if(operations == null) operations = new ArrayList<WorkflowOperationInstance>();
-    return operations;
+    return new ArrayList<WorkflowOperationInstance>(operations);
   }
 
   /**
@@ -326,7 +333,7 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
    * @see java.lang.Object#toString()
    */
   public String toString() {
-    return new ToStringBuilder("workflow instance").append(this.id).append(this.template).toString();
+    return "Workflow {" + id + "}";
   }
 
   /**
@@ -382,6 +389,9 @@ public class WorkflowInstanceImpl implements WorkflowInstance {
           break;
         }
         previousState = operation.getState();
+      }
+      for(int i = 0; i < operations.size(); i++) {
+        ((WorkflowOperationInstanceImpl)operations.get(i)).setPosition(i);
       }
     }
     logger.debug("workflow instance initialized with operation={}", currentOperation);

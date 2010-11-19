@@ -37,9 +37,12 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.text.MessageFormat;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -54,30 +57,42 @@ import javax.xml.xpath.XPathConstants;
  */
 public class PreProcessingWorkflowTest {
 
+  private static final Logger logger = LoggerFactory.getLogger(PreProcessingWorkflowTest.class);
+  
   private TrustedHttpClient client;
 
   /** The workflow to append after preprocessing */
-  private static final String WORKFLOW_DEFINITION = "workflow-preprocessing.xml";
+  private static final String WORKFLOW_DEFINITION_PATH = "/workflow-postprocessing.xml";
+
+  /** The postprocessing workflow definition identifier */
+  private static final String WORKFLOW_DEFINITION_ID = "postprocess_integrationtest";
 
   /** Id of the demo capture agent */
   private static final String CAPTURE_AGENT_ID = "demo_capture_agent";
 
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + PreProcessingWorkflowTest.class.getName());
+  }
+  
   @Before
   public void setup() throws Exception {
     client = Main.getClient();
+    WorkflowUtils.registerWorkflowDefinition(getSampleWorkflowDefinition());
   }
 
   @After
   public void teardown() throws Exception {
     Main.returnClient(client);
+    WorkflowUtils.unregisterWorkflowDefinition(WORKFLOW_DEFINITION_ID);
   }
 
   @Test
   public void test() throws Exception {
     String workflowId = null;
     long waiting = 0;
-    long TIMEOUT = 1000L;
-    long GRACE_PERIOD = 10000L;
+    long TIMEOUT = 5000L;
+    long GRACE_PERIOD = 30000L;
 
     // Make sure the demo capture agent is online
     if (!CaptureUtils.isOnline(CAPTURE_AGENT_ID))
@@ -90,7 +105,6 @@ public class PreProcessingWorkflowTest {
     c.roll(Calendar.MINUTE, 1);
     Date end = c.getTime();
 
-    String workflowDefinition = getSampleWorkflowDefinition();
     // TODO: How do we submit the workflow definition?
 
     // Schedule and event and make sure the workflow is in "schedule" operation
@@ -102,73 +116,68 @@ public class PreProcessingWorkflowTest {
     }
 
     // Wait for the capture agent to start the recording and make sure the workflow enters the "capture" operation
-    waiting = 60*1000L + GRACE_PERIOD; // 1 min +
+    waiting = 60 * 1000L + GRACE_PERIOD; // 1 min +
     boolean agentIsCapturing = false;
     boolean inCaptureOperation = false;
-    boolean inCaptureHoldState = false;
     while (waiting > 0) {
-      agentIsCapturing |= CaptureUtils.isCapturing(CAPTURE_AGENT_ID);
-      inCaptureOperation |= WorkflowUtils.isWorkflowInOperation(workflowId, "capture");
-      inCaptureHoldState |= WorkflowUtils.isWorkflowInState(workflowId, "PAUSED");
-      if (agentIsCapturing && inCaptureOperation && inCaptureHoldState)
-        break;
+      if (CaptureUtils.recordingExists(workflowId)) {
+        agentIsCapturing |= CaptureUtils.isInState(workflowId, "capturing");
+        inCaptureOperation |= WorkflowUtils.isWorkflowInOperation(workflowId, "capture");
+        if (agentIsCapturing && inCaptureOperation)
+          break;
+      }
       waiting -= TIMEOUT;
       Thread.sleep(TIMEOUT);
     }
-    
+
     // Are we already past the grace period?
     if (waiting <= 0) {
       if (!agentIsCapturing)
         fail("Agent '" + CAPTURE_AGENT_ID + "' did not start recording '" + workflowId + "'");
       else if (!inCaptureOperation)
         fail("Workflow '" + workflowId + "' never entered the 'capture' hold state");
-      else if (!inCaptureHoldState)
-        fail("Workflow '" + workflowId + "' never went on hold");
     }
 
     // Wait for capture agent to stop capturing
     Thread.sleep(Math.max(end.getTime() - System.currentTimeMillis(), 0));
 
-    // Make sure worfklow advanced to "ingest" operation
-    waiting = 60*1000L + GRACE_PERIOD; // 1 min +
+    // Make sure workflow advanced to "ingest" operation
+    waiting = 60 * 1000L + GRACE_PERIOD; // 1 min +
     boolean agentIsIngesting = false;
     boolean inIngestOperation = false;
-    boolean inIngestHoldState = false;
     while (waiting > 0) {
-      agentIsIngesting |= CaptureUtils.isCapturing(CAPTURE_AGENT_ID);
+      agentIsIngesting |= CaptureUtils.isInState(workflowId, "uploading");
       inIngestOperation |= WorkflowUtils.isWorkflowInOperation(workflowId, "capture");
-      inIngestHoldState |= WorkflowUtils.isWorkflowInState(workflowId, "PAUSED");
-      if (agentIsIngesting && inIngestOperation && inIngestHoldState)
+      if (agentIsIngesting && inIngestOperation)
         break;
       waiting -= TIMEOUT;
       Thread.sleep(TIMEOUT);
     }
-    
+
     // Are we already past the grace period?
     if (waiting <= 0) {
       if (!agentIsIngesting)
         fail("Agent '" + CAPTURE_AGENT_ID + "' did not start ingesting '" + workflowId + "'");
       else if (!inIngestOperation)
         fail("Workflow '" + workflowId + "' never entered the 'ingest' hold state");
-      else if (!inIngestHoldState)
-        fail("Workflow '" + workflowId + "' never went on hold");
     }
 
     // Wait for ingest and make sure workflow executes "cleanup", then finishes successfully
-    waiting = 60*1000L + GRACE_PERIOD; // 1 min +
+    waiting = 60 * 1000L + GRACE_PERIOD; // 1 min +
     while (waiting > 0) {
-      if (WorkflowUtils.isWorkflowInState(workflowId, "FINISHED"))
+      if (WorkflowUtils.isWorkflowInState(workflowId, "SUCCEEDED"))
         break;
       waiting -= TIMEOUT;
       Thread.sleep(TIMEOUT);
     }
-    
+
     // Are we already past the grace period?
     if (waiting <= 0) {
       fail("Workflow '" + workflowId + "' did not finish");
     }
 
   }
+
 
   /**
    * Adds a new recording event to the scheduling service and returns the event id.
@@ -188,8 +197,15 @@ public class PreProcessingWorkflowTest {
     long startTime = c.getTimeInMillis();
     c.roll(Calendar.MINUTE, 1);
     long endTime = c.getTimeInMillis();
-    String eventXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><event><contributor>demo contributor</contributor><creator>demo creator</creator><description>demo description</description><device>{0}</device><duration>0</duration><startDate>{1}</startDate><endDate>{2}</endDate><language>en</language><license>creative commons</license><resources>vga, audio</resources><title>demo title</title><additionalMetadata><metadata id=\"0\"><key>location</key><value>demo location</value></metadata><metadata id=\"0\"><key>abstract</key><value>demo abstract</value></metadata></additionalMetadata></event>";
-    eventXml = MessageFormat.format(eventXml, CAPTURE_AGENT_ID, startTime, endTime);
+    String eventXml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><event>"
+            + "<contributor>demo contributor</contributor><creator>demo creator</creator>"
+            + "<startDate>{start}</startDate><endDate>{stop}</endDate><device>{device}</device>"
+            + "<language>en</language><license>creative commons</license><resources>vga, audio</resources>"
+            + "<title>demo title</title><additionalMetadata><metadata id=\"0\"><key>location</key>"
+            + "<value>demo location</value></metadata><metadata id=\"0\"><key>org.opencastproject.workflow.definition</key>"
+            + "<value>" + WORKFLOW_DEFINITION_ID + "</value></metadata></additionalMetadata></event>";
+    eventXml = eventXml.replace("{device}", CAPTURE_AGENT_ID).replace("{start}", Long.toString(startTime))
+            .replace("{stop}", Long.toString(endTime));
 
     // Prepare the request
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
@@ -201,13 +217,19 @@ public class PreProcessingWorkflowTest {
     assertEquals(HttpStatus.SC_CREATED, response.getStatusLine().getStatusCode());
     String responseBody = StringUtils.trimToNull(EntityUtils.toString(response.getEntity()));
     assertNotNull(responseBody);
-    String eventId = StringUtils.trimToNull((String) Utils.xPath(responseBody, "/event/@id", XPathConstants.STRING));
+    String eventId = StringUtils.trimToNull((String) Utils.xpath(responseBody, "/event/@id", XPathConstants.STRING));
     assertNotNull("No event id found", eventId);
     return eventId;
   }
 
   private String getSampleWorkflowDefinition() throws Exception {
-    return IOUtils.toString(getClass().getClassLoader().getResourceAsStream(WORKFLOW_DEFINITION), "UTF-8");
+    InputStream in = null;
+    try {
+      in = PreProcessingWorkflowTest.class.getResourceAsStream(WORKFLOW_DEFINITION_PATH);
+      return IOUtils.toString(in, "UTF-8");
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
   }
 
 }

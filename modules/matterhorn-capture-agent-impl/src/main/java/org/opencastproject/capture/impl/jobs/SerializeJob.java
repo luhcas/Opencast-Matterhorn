@@ -85,7 +85,7 @@ public class SerializeJob implements Job {
 
     String postfix = ctx.getMergedJobDataMap().getString(JobParameters.JOB_POSTFIX);
 
-    // Schedules Ingestion
+    // Schedules Ingest
     JobDetail job = new JobDetail("IngestJob-" + postfix, JobParameters.CAPTURE_RELATED_TYPE, IngestJob.class);
     CronTrigger trigger;
     try {

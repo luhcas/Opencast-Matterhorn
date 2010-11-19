@@ -29,7 +29,10 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import java.io.InputStream;
@@ -46,6 +49,13 @@ public class ServiceRegistryRestEndpointTest {
 
   String remoteHost = null;
   TrustedHttpClient client;
+
+  private static final Logger logger = LoggerFactory.getLogger(ServiceRegistryRestEndpointTest.class);
+
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + ServiceRegistryRestEndpointTest.class.getName());
+  }
 
   @Before
   public void setup() throws Exception {
@@ -71,9 +81,9 @@ public class ServiceRegistryRestEndpointTest {
     try {
       in = response.getEntity().getContent();
       doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
-      String typeFromResponse = (String) Utils.xPath(doc, "//type", XPathConstants.STRING);
+      String typeFromResponse = (String) Utils.xpath(doc, "//type", XPathConstants.STRING);
       Assert.assertEquals("org.opencastproject.composer", typeFromResponse);
-      String hostFromResponse = (String) Utils.xPath(doc, "//host", XPathConstants.STRING);
+      String hostFromResponse = (String) Utils.xpath(doc, "//host", XPathConstants.STRING);
       Assert.assertEquals(BASE_URL, hostFromResponse);
     } finally {
       IOUtils.closeQuietly(in);
@@ -91,7 +101,7 @@ public class ServiceRegistryRestEndpointTest {
     try {
       in = response.getEntity().getContent();
       doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
-      int serviceCount = ((Number) Utils.xPath(doc, "count(//service)", XPathConstants.NUMBER)).intValue();
+      int serviceCount = ((Number) Utils.xpath(doc, "count(//service)", XPathConstants.NUMBER)).intValue();
       Assert.assertTrue(serviceCount > 0);
     } finally {
       IOUtils.closeQuietly(in);
@@ -104,7 +114,7 @@ public class ServiceRegistryRestEndpointTest {
     try {
       in = response.getEntity().getContent();
       doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
-      int serviceCount = ((Number) Utils.xPath(doc, "count(//service)", XPathConstants.NUMBER)).intValue();
+      int serviceCount = ((Number) Utils.xpath(doc, "count(//service)", XPathConstants.NUMBER)).intValue();
       Assert.assertEquals(1, serviceCount);
     } finally {
       IOUtils.closeQuietly(in);
@@ -117,7 +127,7 @@ public class ServiceRegistryRestEndpointTest {
     try {
       in = response.getEntity().getContent();
       doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
-      int serviceCount = ((Number) Utils.xPath(doc, "count(//service)", XPathConstants.NUMBER)).intValue();
+      int serviceCount = ((Number) Utils.xpath(doc, "count(//service)", XPathConstants.NUMBER)).intValue();
       Assert.assertTrue(serviceCount > 0);
     } finally {
       IOUtils.closeQuietly(in);

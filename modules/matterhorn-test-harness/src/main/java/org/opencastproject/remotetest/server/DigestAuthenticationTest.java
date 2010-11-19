@@ -34,13 +34,22 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DigestAuthenticationTest {
-  
+  private static final Logger logger = LoggerFactory.getLogger(DigestAuthenticationTest.class);
+
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + DigestAuthenticationTest.class.getName());
+  }
+
   @Test
   public void testDigestAuthenticatedGet() throws Exception {
     UsernamePasswordCredentials creds = new UsernamePasswordCredentials("matterhorn_system_account", "CHANGE_ME");

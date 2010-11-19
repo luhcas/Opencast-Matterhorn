@@ -23,6 +23,7 @@ import org.opencastproject.remotetest.server.EngageModuleTest;
 import org.opencastproject.remotetest.server.IngestRestEndpointTest;
 import org.opencastproject.remotetest.server.IngestZipTest;
 import org.opencastproject.remotetest.server.MultiPartTest;
+import org.opencastproject.remotetest.server.PreProcessingWorkflowTest;
 import org.opencastproject.remotetest.server.ScheduledCaptureTest;
 import org.opencastproject.remotetest.server.UnscheduledCaptureTest;
 import org.opencastproject.remotetest.server.UploadTest;
@@ -51,7 +52,8 @@ import org.junit.runners.Suite.SuiteClasses;
   MultiPartTest.class,
   ScheduledCaptureTest.class,
   UnscheduledCaptureTest.class,
-  UploadTest.class
+  UploadTest.class,
+  PreProcessingWorkflowTest.class
 })
 public class ServerTests {
 }

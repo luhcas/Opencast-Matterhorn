@@ -97,7 +97,7 @@ public class SchedulerRestService {
       serverUrl = UrlSupport.DEFAULT_BASE_URL;
     } else {
       String ccServerUrl = cc.getBundleContext().getProperty("org.opencastproject.server.url");
-      logger.info("configured server url is {}", ccServerUrl);
+      logger.debug("configured server url is {}", ccServerUrl);
       if (ccServerUrl == null) {
         serverUrl = UrlSupport.DEFAULT_BASE_URL;
       } else {
@@ -760,7 +760,7 @@ public class SchedulerRestService {
     try {
 
       String result = builder.marshallEvent((EventImpl) e);
-      logger.info("Event: " + result);
+      logger.debug("Event: " + result);
       return result;
     } catch (Exception e1) {
       logger.warn("Could not marshall example event: {}", e1.getMessage());

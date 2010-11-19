@@ -132,7 +132,9 @@ public class AppendWorkflowOperationHandler extends AbstractResumableWorkflowOpe
           logger.debug("Adding workflow operation '{}' to '{}'", operationDefinition.getId(), workflowInstance.getId());
           operations.add(operation);
         }
-        workflowInstance.getOperations().addAll(operations);
+        List<WorkflowOperationInstance> currentOperations = workflowInstance.getOperations();
+        currentOperations.addAll(operations);
+        workflowInstance.setOperations(currentOperations);
         return true;
       }
     } catch (WorkflowDatabaseException e) {

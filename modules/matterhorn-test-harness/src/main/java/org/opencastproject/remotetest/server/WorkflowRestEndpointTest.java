@@ -33,7 +33,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -50,6 +53,13 @@ import javax.xml.xpath.XPathFactory;
  */
 public class WorkflowRestEndpointTest {
   TrustedHttpClient client;
+
+  private static final Logger logger = LoggerFactory.getLogger(WorkflowRestEndpointTest.class);
+
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + WorkflowRestEndpointTest.class.getName());
+  }
 
   @Before
   public void setup() throws Exception {

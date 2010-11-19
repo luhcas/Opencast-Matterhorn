@@ -40,7 +40,7 @@ public class CleanCaptureJob implements Job {
 
   private static final Logger logger = LoggerFactory.getLogger(CleanCaptureJob.class);
 
-  /** File signifying ingestion of media has been completed */
+  /** File signifying ingest of media has been completed */
   public static final String CAPTURE_INGESTED = "captured.ingested";
 
   /** The length of one day represented in milliseconds */
@@ -117,7 +117,7 @@ public class CleanCaptureJob implements Job {
       
       // If the capture.ingested file does not exist we cannot delete the data
       if (!theRec.getState().equals(RecordingState.UPLOAD_FINISHED)) {
-        logger.info("Skipped cleaning for {}. Ingestion has not been completed.", theRec.getID());
+        logger.info("Skipped cleaning for {}. Ingest has not been completed.", theRec.getID());
         continue;
       }
 
@@ -139,7 +139,7 @@ public class CleanCaptureJob implements Job {
         }
       }
 
-      // Clean up capture if its age of ingestion is higher than max archival days property
+      // Clean up capture if its age of ingest is higher than max archival days property
       if (checkArchivalDays) {
         long age = theRec.getLastCheckinTime();
         long currentTime = System.currentTimeMillis();

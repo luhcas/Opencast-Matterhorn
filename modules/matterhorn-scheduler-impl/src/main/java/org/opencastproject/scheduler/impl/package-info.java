@@ -18,7 +18,7 @@
  * How the metadata will be mapped on the exported formats (Dublin Pore and properties for the capture agent) can be defined in  
  * the two properties files under src/main/resources/config. 
  * 
- * There is the possibility to define other ingestion endpoints that the capture agent might use. This is defined in the 
+ * There is the possibility to define other ingest endpoints that the capture agent might use. This is defined in the 
  * felix confing with the key "capture.ingest.enpoint.url". If this is missing, the value will be constructed from the 
  * "org.opencastproject.server.url" that is in the felix-config too.  
  */

@@ -28,7 +28,10 @@ import org.json.simple.JSONValue;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,6 +41,13 @@ public class AdminProxyRestEndpointTest {
   TrustedHttpClient client;
 
   public static String ADMIN_BASE_URL = BASE_URL + "/admin/rest";
+
+  private static final Logger logger = LoggerFactory.getLogger(AdminProxyRestEndpointTest.class);
+
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + AdminProxyRestEndpointTest.class.getName());
+  }
 
   @Before
   public void setup() throws Exception {

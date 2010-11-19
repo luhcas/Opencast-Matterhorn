@@ -59,7 +59,8 @@ public final class CaptureUtils {
    * @return <code>true</code> if the agent is capturing
    * @throws IllegalStateException
    *           if the agent is not online
-   *           @throws Exception if the response can't be parsed
+   * @throws Exception
+   *           if the response can't be parsed
    */
   public static boolean isCapturing(String captureAgentId) throws IllegalStateException, Exception {
     HttpGet request = new HttpGet(BASE_URL + "/capture-admin/rest/agents/" + captureAgentId);
@@ -67,7 +68,25 @@ public final class CaptureUtils {
     if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
       throw new IllegalStateException("Capture agent '" + captureAgentId + "' is unexpectedly offline");
     String responseBody = EntityUtils.toString(response.getEntity());
-    return "capturing".equalsIgnoreCase((String)Utils.xPath(responseBody, "/state", XPathConstants.STRING));
+    return "capturing".equalsIgnoreCase((String) Utils.xpath(responseBody, "/state", XPathConstants.STRING));
+  }
+
+  public static boolean recordingExists(String recordingId) throws Exception {
+    HttpGet request = new HttpGet(BASE_URL + "/capture-admin/rest/recordings/" + recordingId);
+    TrustedHttpClient client = Main.getClient();
+    HttpResponse response = client.execute(request);
+    return HttpStatus.SC_OK == response.getStatusLine().getStatusCode();
+  }
+
+  public static boolean isInState(String recordingId, String state) throws Exception {
+    HttpGet request = new HttpGet(BASE_URL + "/capture-admin/rest/recordings/" + recordingId);
+    TrustedHttpClient client = Main.getClient();
+    HttpResponse response = client.execute(request);
+    if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
+      throw new IllegalStateException("Recording '" + recordingId + "' not found");
+    String responseBody = EntityUtils.toString(response.getEntity());
+    Main.returnClient(client);
+    return state.equalsIgnoreCase((String) Utils.xpath(responseBody, "//state", XPathConstants.STRING));
   }
 
 }

@@ -57,11 +57,20 @@ public interface WorkflowInstance extends Configurable {
   Long getParentId();
 
   /**
-   * Returns the {@link WorkflowOperationInstance}s that make up this workflow.
+   * Returns a copy of the {@link WorkflowOperationInstance}s that make up this workflow.  In order to modify the
+   * operations, call setOperations.
    * 
    * @return the workflow operations
    */
   public List<WorkflowOperationInstance> getOperations();
+
+  /**
+   * Sets the list of workflow operations
+   * 
+   * @param operations
+   *          the new list of operations
+   */
+  public void setOperations(List<WorkflowOperationInstance> operations);
 
   /**
    * Returns the {@link WorkflowOperationInstance} that is currently either in {@link WorkflowState#RUNNING} or

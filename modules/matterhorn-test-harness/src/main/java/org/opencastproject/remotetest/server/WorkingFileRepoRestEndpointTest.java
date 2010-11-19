@@ -33,7 +33,10 @@ import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.Arrays;
@@ -44,6 +47,13 @@ import java.util.Arrays;
 public class WorkingFileRepoRestEndpointTest {
 
   TrustedHttpClient client;
+
+  private static final Logger logger = LoggerFactory.getLogger(WorkingFileRepoRestEndpointTest.class);
+
+  @BeforeClass
+  public static void setupClass() throws Exception {
+    logger.info("Running " + WorkingFileRepoRestEndpointTest.class.getName());
+  }
 
   @Before
   public void setup() throws Exception {
