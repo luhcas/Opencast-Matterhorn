@@ -24,6 +24,7 @@ import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
@@ -42,17 +43,20 @@ public class BlueCherryBT878SrcBin extends V4L2SrcBin{
    * @throws UnableToCreateGhostPadsForBinException 
    * @throws UnableToLinkGStreamerElementsException 
    * @throws CaptureDeviceNullPointerException 
+   * @throws UnableToCreateElementException 
    * @throws Exception - When something in the bin doesn't link together correctly.
    */
   public BlueCherryBT878SrcBin(CaptureDevice captureDevice, Properties properties)
           throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
-          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
+          UnableToCreateElementException {
     super(captureDevice, properties);
   }
 
-  /** Create the v4l2src Element **/
+  /** Create the v4l2src Element 
+   * @throws UnableToCreateElementException **/
   @Override
-  protected void createElements(){
+  protected void createElements() throws UnableToCreateElementException{
     super.createElements();
     v4l2src = ElementFactory.make(GStreamerElements.V4L2SRC, null);
   }

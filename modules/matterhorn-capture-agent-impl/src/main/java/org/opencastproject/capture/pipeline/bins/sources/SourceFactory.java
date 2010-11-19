@@ -21,6 +21,7 @@ import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.pipeline.SourceDeviceName;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
@@ -46,7 +47,8 @@ public class SourceFactory {
   
   public SrcBin getSource(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgent)
           throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
-          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
+          UnableToCreateElementException
           {
     if (captureDevice.getName() == SourceDeviceName.EPIPHAN_VGA2USB)
       return new EpiphanVGA2USBV4LSrcBin(captureDevice, properties, captureAgent);

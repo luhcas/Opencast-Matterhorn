@@ -24,6 +24,7 @@ import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
@@ -35,7 +36,8 @@ public class PulseAudioSrcBin extends AudioSrcBin {
   
   public PulseAudioSrcBin(CaptureDevice captureDevice, Properties properties)
           throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
-          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
+          UnableToCreateElementException {
     super(captureDevice, properties);
   }
 

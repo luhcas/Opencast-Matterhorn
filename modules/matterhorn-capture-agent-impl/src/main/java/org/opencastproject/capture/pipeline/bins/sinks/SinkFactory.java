@@ -20,6 +20,7 @@ import java.util.Properties;
 import org.opencastproject.capture.pipeline.SinkDeviceName;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
@@ -44,7 +45,7 @@ public class SinkFactory {
   public SinkBin getSink(SinkDeviceName sinkDeviceName, CaptureDevice captureDevice, Properties properties)
           throws NoSinkBinFoundException, UnableToLinkGStreamerElementsException,
           UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
-          CaptureDeviceNullPointerException {
+          CaptureDeviceNullPointerException, UnableToCreateElementException {
     if (sinkDeviceName == SinkDeviceName.AUDIO_FILE_SINK)
       return new AudioFileSinkBin(captureDevice, properties);
     else if(sinkDeviceName == SinkDeviceName.XVIMAGE_SINK)

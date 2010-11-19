@@ -33,6 +33,11 @@ import org.opencastproject.capture.pipeline.SourceDeviceName;
 import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
+import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,37 +97,62 @@ public class SinkFactoryTest {
       return;
     if (!gstreamerInstalled)
       return;
-    SinkBin sinkBin = getSink(SinkDeviceName.XVIMAGE_SINK);
-    Assert.assertTrue(sinkBin instanceof XVImageSinkBin);
-    Assert.assertTrue(sinkBin.getSrc() != null);
+    try {
+      SinkBin sinkBin = getSink(SinkDeviceName.XVIMAGE_SINK);
+      Assert.assertTrue(sinkBin instanceof XVImageSinkBin);
+      Assert.assertTrue(sinkBin.getSrc() != null);
+    } catch (UnableToCreateElementException e) {
+      logger.error("Unable to create an XV Image Sink in SinkFactoryTest", e);
+    }
   }
 
   @Test
   public void testVideoFileSink() {
     if (!gstreamerInstalled)
       return;
-    SinkBin sinkBin = getSink(SinkDeviceName.VIDEO_FILE_SINK);
-    Assert.assertTrue(sinkBin instanceof VideoFileSinkBin);
-    Assert.assertTrue(sinkBin.getSrc() != null);
+    try {
+      SinkBin sinkBin = getSink(SinkDeviceName.VIDEO_FILE_SINK);
+      Assert.assertTrue(sinkBin instanceof VideoFileSinkBin);
+      Assert.assertTrue(sinkBin.getSrc() != null);
+    } catch (UnableToCreateElementException e) {
+      logger.error("Unable to create an Video File Sink in SinkFactoryTest", e);
+    }
+   
   }
 
   @Test
   public void testAudioFileSink() {
     if (!gstreamerInstalled)
       return;
-    SinkBin sinkBin = getSink(SinkDeviceName.AUDIO_FILE_SINK);
-    Assert.assertTrue(sinkBin instanceof AudioFileSinkBin);
-    Assert.assertTrue(sinkBin.getSrc() != null);
+    try {
+      SinkBin sinkBin = getSink(SinkDeviceName.AUDIO_FILE_SINK);
+      Assert.assertTrue(sinkBin instanceof AudioFileSinkBin);
+      Assert.assertTrue(sinkBin.getSrc() != null);
+    } catch (UnableToCreateElementException e) {
+      logger.error("Unable to create an Audio File Sink in SinkFactoryTest", e);
+    }
   }
 
-  private SinkBin getSink(SinkDeviceName sinkDeviceName) {
+  private SinkBin getSink(SinkDeviceName sinkDeviceName) throws UnableToCreateElementException {
     SinkBin sinkBin = null;
     try {
       sinkBin = SinkFactory.getInstance().getSink(sinkDeviceName, captureDevice, properties);
-    } catch (Exception e) {
-      e.printStackTrace();
+    } catch (NoSinkBinFoundException e) {
+      logger.error("Error Creating the Sink ", e);
       Assert.fail(e.getMessage());
-    }
+    } catch (UnableToLinkGStreamerElementsException e) {
+      logger.error("Error Creating the Sink ", e);
+      Assert.fail(e.getMessage());
+    } catch (UnableToCreateGhostPadsForBinException e) {
+      logger.error("Error Creating the Sink ", e);
+      Assert.fail(e.getMessage());
+    } catch (UnableToSetElementPropertyBecauseElementWasNullException e) {
+      logger.error("Error Creating the Sink ", e);
+      Assert.fail(e.getMessage());
+    } catch (CaptureDeviceNullPointerException e) {
+      logger.error("Error Creating the Sink ", e);
+      Assert.fail(e.getMessage());
+    } 
     return sinkBin;
   }
 }

@@ -21,8 +21,10 @@ import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
@@ -42,15 +44,17 @@ public class VideoFileSinkBin extends SinkBin {
    * (default=ffenc_mpeg2video) and muxer(default=mpegpsmux). This class is not intended to be inherited.
    * @throws UnableToSetElementPropertyBecauseElementWasNullException 
    * @throws CaptureDeviceNullPointerException 
+   * @throws UnableToCreateElementException 
    */
   public VideoFileSinkBin(CaptureDevice captureDevice, Properties properties)
           throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
-          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
+          UnableToCreateElementException {
     super(captureDevice, properties);
   }
   
   @Override
-  protected void createElements(){
+  protected void createElements() throws UnableToCreateElementException{
     super.createElements();
     createEncoder();
     createMuxer();
@@ -61,17 +65,20 @@ public class VideoFileSinkBin extends SinkBin {
     bin.addMany(queue, encoder, muxer, filesink); 
   }
   
-  protected void createEncoder(){
+  protected void createEncoder() throws UnableToCreateElementException{
     if (captureDeviceProperties.codec != null) {
       logger.debug("{} setting encoder to: {}", captureDevice.getName(), captureDeviceProperties.codec);
-      encoder = ElementFactory.make(captureDeviceProperties.codec, null);
+      encoder = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+              captureDeviceProperties.codec, null);
     }
     else {
-      encoder = ElementFactory.make(DEFAULT_ENCODER, null);
+      logger.debug("{} setting encoder to: {}", captureDevice.getName(), DEFAULT_ENCODER);
+      encoder = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), DEFAULT_ENCODER,
+              null);
     }
   }
   
-  private void createMuxer() {
+  private void createMuxer() throws UnableToCreateElementException {
     // Must set H.264 encoding to use constant quantizer or else it will not start
     // Pass 0 is CBR (default), Pass 4 is constant quantizer, Pass 5 is constant quality
     if (captureDeviceProperties.codec != null
@@ -82,10 +89,12 @@ public class VideoFileSinkBin extends SinkBin {
     }
     if (captureDeviceProperties.container != null) {
       logger.debug("{} setting muxing to: {}", captureDevice.getName(), captureDeviceProperties.container);
-      muxer = ElementFactory.make(captureDeviceProperties.container, null);
+      muxer = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+              captureDeviceProperties.container, null);
     }
     else {
-      muxer = ElementFactory.make(DEFAULT_MUXER, null);
+      logger.debug("{} setting muxing to: {}", captureDevice.getName(), DEFAULT_MUXER);
+      muxer = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), DEFAULT_MUXER, null);
     }
   }
   

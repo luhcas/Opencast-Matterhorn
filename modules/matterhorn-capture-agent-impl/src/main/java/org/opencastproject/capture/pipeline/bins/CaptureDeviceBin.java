@@ -48,7 +48,7 @@ public class CaptureDeviceBin {
   public CaptureDeviceBin(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgent)
           throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
           UnableToSetElementPropertyBecauseElementWasNullException, NoSinkBinFoundException,
-          CaptureDeviceNullPointerException {
+          CaptureDeviceNullPointerException, UnableToCreateElementException {
     this.captureDevice = captureDevice;
     if(captureDevice.getName() == SourceDeviceName.FILE){
       addFileBin(captureDevice, properties);
@@ -70,7 +70,8 @@ public class CaptureDeviceBin {
 
   private void addFileBin(CaptureDevice captureDevice, Properties properties)
           throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
-          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
+          UnableToCreateElementException {
     FileBin fileBin = new FileBin(captureDevice, properties);
     bin.add(fileBin.getBin());
   }
@@ -78,7 +79,7 @@ public class CaptureDeviceBin {
   private void addSinkBins(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgentMock)
           throws NoSinkBinFoundException, UnableToLinkGStreamerElementsException,
           UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
-          CaptureDeviceNullPointerException {
+          CaptureDeviceNullPointerException, UnableToCreateElementException {
     SinkBin fileSinkBin;
     fileSinkBin = createFileSinkBin(captureDevice, properties);
     sinkBins.add(fileSinkBin);
@@ -86,7 +87,8 @@ public class CaptureDeviceBin {
 
   private SinkBin createFileSinkBin(CaptureDevice captureDevice, Properties properties) throws NoSinkBinFoundException,
           UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
-          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
+          UnableToCreateElementException {
     SinkBin sinkBin;
     if(srcBin.isVideoDevice()){
       sinkBin = SinkFactory.getInstance().getSink(SinkDeviceName.VIDEO_FILE_SINK, captureDevice, properties);
@@ -100,7 +102,8 @@ public class CaptureDeviceBin {
 
   private void setupXVImageSink(Properties properties) throws NoSinkBinFoundException,
           UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
-          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
+          UnableToCreateElementException {
     if (USE_XV_IMAGE_SINK) {
       if (srcBin.isVideoDevice()) {
         SinkBin xvImageSinkBin = SinkFactory.getInstance().getSink(SinkDeviceName.XVIMAGE_SINK, captureDevice,
@@ -112,7 +115,8 @@ public class CaptureDeviceBin {
   
   private void addSrcBin(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgentMock)
           throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
-          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
+          UnableToCreateElementException {
       srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
   }
   

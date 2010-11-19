@@ -32,6 +32,8 @@ import org.opencastproject.capture.pipeline.SourceDeviceName;
 import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,8 +72,18 @@ public class AudioFileSinkBinTest {
   public void setup() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
-    Element encoder = ElementFactory.make(AudioFileSinkBin.DEFAULT_ENCODER, null);
-    bitrateDefault = encoder.getPropertyDefaultValue("bitrate").toString();
+    try {
+      @SuppressWarnings("unused")
+      Element defaultMuxer = GStreamerElementFactory.getInstance().createElement("Setup for AudioFileSinkBinTest",
+              AudioFileSinkBin.DEFAULT_MUXER, null);
+      Element defaultEncoder = GStreamerElementFactory.getInstance().createElement("Setup for AudioFileSinkBinTest",
+              AudioFileSinkBin.DEFAULT_ENCODER, null);
+      bitrateDefault = defaultEncoder.getPropertyDefaultValue("bitrate").toString();
+    } catch (UnableToCreateElementException e) {
+      logger.warn("It appears that you have GStreamer installed but not all of the packages that we require.", e);
+      gstreamerInstalled = false;
+      return;
+    }
   }
 
   @After
@@ -199,7 +211,9 @@ public class AudioFileSinkBinTest {
     AudioFileSinkBin audioFileSinkBin = null;
     try {
       audioFileSinkBin = createAudioFileSinkBin(captureDeviceProperties);
-    } catch (Exception e) {
+    } catch (UnableToCreateElementException e) {
+      Assert.assertTrue(true);
+    }catch (Exception e) {
       e.printStackTrace();
       Assert.fail();
     }

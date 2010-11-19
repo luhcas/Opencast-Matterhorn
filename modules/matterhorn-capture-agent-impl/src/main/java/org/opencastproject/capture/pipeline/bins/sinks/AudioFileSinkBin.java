@@ -21,8 +21,10 @@ import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
@@ -39,12 +41,13 @@ public class AudioFileSinkBin extends SinkBin {
   
   public AudioFileSinkBin(CaptureDevice captureDevice, Properties properties)
           throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
-          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
+          UnableToCreateElementException {
     super(captureDevice, properties);
   }
 
   @Override
-  protected void createElements(){
+  protected void createElements() throws UnableToCreateElementException{
     super.createElements();
     createEncoder();
     createMuxer();
@@ -55,21 +58,19 @@ public class AudioFileSinkBin extends SinkBin {
     bin.addMany(queue, encoder, muxer, filesink); 
   }
   
-  protected void createEncoder(){
+  protected void createEncoder() throws UnableToCreateElementException{
     if (captureDeviceProperties.codec != null) {
       logger.debug("{} setting encoder to: {}", captureDevice.getName(), captureDeviceProperties.codec);
-      encoder = ElementFactory.make(captureDeviceProperties.codec, null);
+      encoder = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+              captureDeviceProperties.codec, null);
     }
     else {
-      encoder = ElementFactory.make(DEFAULT_ENCODER, null);
-    }
-    
-    if (captureDeviceProperties.bitrate != null) {
-      logger.debug("{} setting bitrate to: {}", captureDevice.getName(), captureDeviceProperties.bitrate);
-      encoder.set(GStreamerProperties.BITRATE, captureDeviceProperties.bitrate);
-    }
+      logger.debug("{} setting encoder to: {}", captureDevice.getName(), DEFAULT_ENCODER);
+      encoder = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), DEFAULT_ENCODER,
+              null);
+    }   
   }
-  
+
   private void createMuxer() {
     if (captureDeviceProperties.codec != null) {
       if (captureDeviceProperties.codec.equalsIgnoreCase(GStreamerElements.FAAC))
@@ -91,7 +92,15 @@ public class AudioFileSinkBin extends SinkBin {
   protected void setElementProperties() throws IllegalArgumentException,
           UnableToSetElementPropertyBecauseElementWasNullException {
     super.setElementProperties();
+    setEncoderProperties();
     setFileSinkProperties();
+  }
+
+  private void setEncoderProperties() {
+    if (captureDeviceProperties.bitrate != null) {
+      logger.debug("{} setting bitrate to: {}", captureDevice.getName(), captureDeviceProperties.bitrate);
+      encoder.set(GStreamerProperties.BITRATE, captureDeviceProperties.bitrate);
+    }
   }
 
   private void setFileSinkProperties() throws UnableToSetElementPropertyBecauseElementWasNullException {

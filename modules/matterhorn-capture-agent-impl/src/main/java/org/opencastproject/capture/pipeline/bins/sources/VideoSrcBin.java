@@ -22,8 +22,10 @@ import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
@@ -37,7 +39,7 @@ public abstract class VideoSrcBin extends SrcBin {
   
   public VideoSrcBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
           UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
-          CaptureDeviceNullPointerException {
+          CaptureDeviceNullPointerException, UnableToCreateElementException {
     super(captureDevice, properties);
   }
   
@@ -47,19 +49,21 @@ public abstract class VideoSrcBin extends SrcBin {
    * change. 
    */
   @Override
-  protected void createElements() {
+  protected void createElements() throws UnableToCreateElementException {
     super.createElements();
     createVideoRate();
     createFramerateCaps();
   }
  
   /* Creates a videorate GST Element that adjusts the timestamps in case of a FPS change in the output file.*/
-  private void createVideoRate() {
-    videorate = ElementFactory.make(GStreamerElements.VIDEORATE, null);
+  private void createVideoRate() throws UnableToCreateElementException {
+    videorate = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.VIDEORATE, null);
   }
   
-  private void createFramerateCaps() {
-    fpsfilter = ElementFactory.make(GStreamerElements.CAPSFILTER, null);
+  private void createFramerateCaps() throws UnableToCreateElementException {
+    fpsfilter = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.CAPSFILTER, null);
   }
   
   @Override

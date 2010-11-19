@@ -27,6 +27,7 @@ import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerExcepti
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 import org.opencastproject.capture.pipeline.bins.PartialBin;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
@@ -49,14 +50,15 @@ public abstract class SinkBin extends PartialBin{
   
   public SinkBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
           UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
-          CaptureDeviceNullPointerException {
+          CaptureDeviceNullPointerException, UnableToCreateElementException {
     super(captureDevice, properties);
     addTrace();
   }
   
   /** Creates all the elements necessary for the Bin. In this case just the suffix. Hopefully the descendants
-   * of this class will define further elements that they will use to capture. **/
-  protected void createElements() {
+   * of this class will define further elements that they will use to capture. 
+   * @throws UnableToCreateElementException **/
+  protected void createElements() throws UnableToCreateElementException {
     createQueue();
     createFileSink();
   }

@@ -22,6 +22,7 @@ import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
@@ -40,16 +41,18 @@ public class AlsaSrcBin extends AudioSrcBin {
    * @throws UnableToCreateGhostPadsForBinException 
    * @throws UnableToLinkGStreamerElementsException 
    * @throws CaptureDeviceNullPointerException 
+   * @throws UnableToCreateElementException 
    */
   public AlsaSrcBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
           UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
-          CaptureDeviceNullPointerException {
+          CaptureDeviceNullPointerException, UnableToCreateElementException {
     super(captureDevice, properties);
   }
   
-  /** Create all the elements required for an ALSA source **/
+  /** Create all the elements required for an ALSA source 
+   * @throws UnableToCreateElementException **/
   @Override
-  protected void createElements(){
+  protected void createElements() throws UnableToCreateElementException{
     super.createElements();
     createAlsasrc();
   }

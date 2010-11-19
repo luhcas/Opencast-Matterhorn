@@ -22,6 +22,7 @@ import java.net.URISyntaxException;
 import java.util.Properties;
 
 import org.gstreamer.Gst;
+import org.gstreamer.GstException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,6 +34,8 @@ import org.opencastproject.capture.pipeline.SourceDeviceName;
 import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
@@ -101,120 +104,248 @@ CaptureAgent captureAgentMock;
   public void testVideoTestSrc() throws Exception{
     if (!gstreamerInstalled)
       return;
-    // Setup properties for an videotestsrc card.
-    captureDevice = BinTestHelpers.createCaptureDevice(null, SourceDeviceName.VIDEOTESTSRC, "Video Test Source", 
-            "/tmp/testpipe/test.mpeg", captureDeviceProperties);
-    SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
-    // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof VideoTestSrc);
-    checkCorrectnessOfVideoSource(srcBin);
+    try {
+      // Setup properties for an videotestsrc card.
+      captureDevice = BinTestHelpers.createCaptureDevice(null, SourceDeviceName.VIDEOTESTSRC, "Video Test Source", 
+              "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
+      // Make sure we got the right object back
+      Assert.assertTrue(srcBin instanceof VideoTestSrc);
+      checkCorrectnessOfVideoSource(srcBin);
+    } catch (UnableToCreateElementException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    }
   }
   
   @Test 
   public void testExistingEpiphanSource() throws Exception{
     if (!gstreamerInstalled)
       return;
-    // Setup properties for an epiphan card.
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.EPIPHAN_VGA2USB, 
-            "Epiphan VGA 2 USB", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
-    SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
-    // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof EpiphanVGA2USBV4LSrcBin);
-    checkCorrectnessOfVideoSource(srcBin);
+    try {
+      // Setup properties for an epiphan card.
+      captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.EPIPHAN_VGA2USB,
+              "Epiphan VGA 2 USB", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
+      // Make sure we got the right object back
+      Assert.assertTrue(srcBin instanceof EpiphanVGA2USBV4LSrcBin);
+      checkCorrectnessOfVideoSource(srcBin);
+    } catch (UnableToCreateElementException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    }
   }
   
   @Test
   public void testMissingEpiphanSource() throws Exception{
     if (!gstreamerInstalled)
       return;
-    // Setup properties for an epiphan card.
-    captureDevice = BinTestHelpers.createCaptureDevice("/woot/video0", SourceDeviceName.EPIPHAN_VGA2USB, 
-            "Epiphan VGA 2 USB", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
-    SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
-    // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof EpiphanVGA2USBV4LSrcBin);
-    checkCorrectnessOfVideoSource(srcBin);
+    try {
+      // Setup properties for an epiphan card.
+      captureDevice = BinTestHelpers.createCaptureDevice("/woot/video0", SourceDeviceName.EPIPHAN_VGA2USB,
+              "Epiphan VGA 2 USB", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
+      // Make sure we got the right object back
+      Assert.assertTrue(srcBin instanceof EpiphanVGA2USBV4LSrcBin);
+      checkCorrectnessOfVideoSource(srcBin);
+    } catch (UnableToCreateElementException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    }
   }
   
   @Test 
   public void testExistingV4LSource() throws Exception{
     if (!gstreamerInstalled)
       return;
-    // Setup properties for an v4lsource
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.V4LSRC, "V4L Source",
-            "/tmp/testpipe/test.mpeg", captureDeviceProperties);
-    SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
-    // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof V4LSrcBin);
-    checkCorrectnessOfVideoSource(srcBin);
+    try {
+      // Setup properties for an v4lsource
+      captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.V4LSRC, "V4L Source",
+              "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
+      // Make sure we got the right object back
+      Assert.assertTrue(srcBin instanceof V4LSrcBin);
+      checkCorrectnessOfVideoSource(srcBin);
+    } catch (UnableToCreateElementException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    }
   }
   
   @Test
   public void testMissingV4LSource() throws Exception{
     if (!gstreamerInstalled)
       return;
-    // Setup properties for an v4lsource
-    captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.V4LSRC, "V4L Source", 
-            "/tmp/testpipe/test.mpeg", captureDeviceProperties);
-    SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
-    // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof V4LSrcBin);
-    checkCorrectnessOfVideoSource(srcBin);
+    try {
+      // Setup properties for an v4lsource
+      captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.V4LSRC, "V4L Source", 
+              "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
+      // Make sure we got the right object back
+      Assert.assertTrue(srcBin instanceof V4LSrcBin);
+      checkCorrectnessOfVideoSource(srcBin);
+    } catch (UnableToCreateElementException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    }
   }
   
   @Test
   public void testExistingHauppaugeSource() throws Exception{
     if (!gstreamerInstalled)
       return;
-    // Setup properties for an hauppage source.
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.HAUPPAUGE_WINTV, 
-            "Hauppage Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
-    SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
-    // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof HauppaugePVR350VideoSrcBin);
-    checkCorrectnessOfVideoSource(srcBin);
+    try {
+      // Setup properties for an hauppage source.
+      captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.HAUPPAUGE_WINTV, 
+              "Hauppage Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
+      // Make sure we got the right object back
+      Assert.assertTrue(srcBin instanceof HauppaugePVR350VideoSrcBin);
+      checkCorrectnessOfVideoSource(srcBin);
+    } catch (UnableToCreateElementException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    }
   }
   
   @Test
   public void testMissingHauppaugeSource() throws Exception{
     if (!gstreamerInstalled)
       return;
-    // Setup properties for an hauppage source.
-    captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.HAUPPAUGE_WINTV, 
-            "Hauppage Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
-    SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
-    // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof HauppaugePVR350VideoSrcBin);
-    checkCorrectnessOfVideoSource(srcBin);
+    try {
+      // Setup properties for an hauppage source.
+      captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.HAUPPAUGE_WINTV, 
+              "Hauppage Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
+      // Make sure we got the right object back
+      Assert.assertTrue(srcBin instanceof HauppaugePVR350VideoSrcBin);
+      checkCorrectnessOfVideoSource(srcBin);
+    } catch (UnableToCreateElementException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    }
   }
   
   @Test
   public void testExistingBlueCherrySource() throws Exception{
     if (!gstreamerInstalled)
       return;
-    // Setup properties for an bluecherry card.
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.BLUECHERRY_PROVIDEO, 
-            "Bluecherry Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
-    SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
-    // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof BlueCherryBT878SrcBin);
-    checkCorrectnessOfVideoSource(srcBin);
+    try {
+      // Setup properties for an bluecherry card.
+      captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.BLUECHERRY_PROVIDEO, 
+              "Bluecherry Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
+      // Make sure we got the right object back
+      Assert.assertTrue(srcBin instanceof BlueCherryBT878SrcBin);
+      checkCorrectnessOfVideoSource(srcBin);
+    } catch (UnableToCreateElementException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    }
   }
   
   @Test
   public void testMissingBlueCherrySource() throws Exception{
     if (!gstreamerInstalled)
       return;
-    // Setup properties for an bluecherry card.
-    captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.BLUECHERRY_PROVIDEO, 
-            "Bluecherry Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
-    SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
-    // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof BlueCherryBT878SrcBin);
-    checkCorrectnessOfVideoSource(srcBin);
+    try {
+      // Setup properties for an bluecherry card.
+      captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.BLUECHERRY_PROVIDEO, 
+              "Bluecherry Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
+      // Make sure we got the right object back
+      Assert.assertTrue(srcBin instanceof BlueCherryBT878SrcBin);
+      checkCorrectnessOfVideoSource(srcBin);
+    } catch (UnableToCreateElementException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    }
   }
 
 
+  
+  
+  @Test
+  public void testExistingAlsaSource() throws Exception{
+    if (!gstreamerInstalled)
+      return;
+    try {
+      // Setup properties for an alsa source
+      captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.ALSASRC, "Alsa Source", 
+              "/tmp/testpipe/test.mp2", captureDeviceProperties);
+      SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
+      // Make sure we got the right object back
+      Assert.assertTrue(srcBin instanceof AlsaSrcBin);
+      // Check the actual correctness of the object
+      checkCorrectnessOfAudioDevice(srcBin);
+    } catch (UnableToCreateElementException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    }
+  }
+  
+  @Test
+  public void testMissingAlsaSource() throws Exception{
+    if (!gstreamerInstalled)
+      return;
+    try {
+      // Setup properties for an alsa source
+      captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.ALSASRC, "Alsa Source",
+              "/tmp/testpipe/test.mp2", captureDeviceProperties);
+      SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
+      // Make sure we got the right object back
+      Assert.assertTrue(srcBin instanceof AlsaSrcBin);
+      // Check the actual correctness of the object
+      checkCorrectnessOfAudioDevice(srcBin);
+    } catch (UnableToCreateElementException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    }
+  }
+
+  
+  @Test
+  public void testExistingV4L2CustomVideoSource() throws Exception{
+    if (!gstreamerInstalled)
+      return;
+    try {
+      captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties("v4l2src device=" + 
+              BinTestHelpers.V4L2_LOCATION, null, null, null, null, null, null, null, null);
+      captureDevice = BinTestHelpers.createCaptureDevice("/dev/video1", SourceDeviceName.CUSTOM_VIDEO_SRC, 
+              "Custom Video Bin Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
+      SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
+      // Make sure we got the right object back
+      Assert.assertTrue(srcBin instanceof CustomVideoSrcBin);
+      // Check the actual correctness of the object
+    } catch (GstException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    }
+  }
+
+  @Test
+  public void testExistingPulseCustomAudioSource() throws Exception{
+    if (!gstreamerInstalled)
+      return;
+    try {
+      captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties("pulsesrc", null, null, null, null, null, 
+              null, null, null);
+      captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.CUSTOM_AUDIO_SRC, 
+              "Custom Audio Bin Source", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+      SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
+      // Make sure we got the right object back
+      Assert.assertTrue(srcBin instanceof CustomAudioSrcBin);
+      // Check the actual correctness of the object
+    } catch (GstException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    }
+  }
+  
+  @Test
+  public void testFileSrcBin() throws Exception{
+    
+    if (!gstreamerInstalled)
+      return;
+    try {
+      captureDevice = BinTestHelpers.createCaptureDevice(BinTestHelpers.HAUPPAGE_LOCATION,
+              SourceDeviceName.FILE_DEVICE, "File Device Source", "/tmp/testpipe/test.mp2", captureDeviceProperties);
+      SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
+      // Make sure we got the right object back
+      Assert.assertTrue(srcBin instanceof FileSrcBin);
+      // Check the actual correctness of the object
+    } catch (UnableToCreateElementException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    }
+  }
+  
   private void checkCorrectnessOfVideoSource(SrcBin srcBin) {
     // Check to make sure the sink exists and is not null.
     try {
@@ -227,75 +358,6 @@ CaptureAgent captureAgentMock;
     Assert.assertTrue(srcBin.isVideoDevice());
     // Check to make sure that isn't an audio device
     Assert.assertTrue(!srcBin.isAudioDevice());
-  }
-  
-  @Test
-  public void testExistingAlsaSource() throws Exception{
-    if (!gstreamerInstalled)
-      return;
-    // Setup properties for an alsa source
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.ALSASRC, "Alsa Source", 
-            "/tmp/testpipe/test.mp2", captureDeviceProperties);
-    SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
-    // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof AlsaSrcBin);
-    // Check the actual correctness of the object
-    checkCorrectnessOfAudioDevice(srcBin);
-  }
-  
-  @Test
-  public void testMissingAlsaSource() throws Exception{
-    if (!gstreamerInstalled)
-      return;
-    // Setup properties for an alsa source
-    captureDevice = BinTestHelpers.createCaptureDevice("/woot!/video0", SourceDeviceName.ALSASRC, "Alsa Source",
-            "/tmp/testpipe/test.mp2", captureDeviceProperties);
-    SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
-    // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof AlsaSrcBin);
-    // Check the actual correctness of the object
-    checkCorrectnessOfAudioDevice(srcBin);
-  }
-
-  
-  @Test
-  public void testExistingV4L2CustomVideoSource() throws Exception{
-    if (!gstreamerInstalled)
-      return;
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties("v4l2src device=" + 
-            BinTestHelpers.V4L2_LOCATION, null, null, null, null, null, null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video1", SourceDeviceName.CUSTOM_VIDEO_SRC, 
-            "Custom Video Bin Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
-    SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
-    // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof CustomVideoSrcBin);
-    // Check the actual correctness of the object
-  }
-
-  @Test
-  public void testExistingPulseCustomAudioSource() throws Exception{
-    if (!gstreamerInstalled)
-      return;
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties("pulsesrc", null, null, null, null, null, 
-            null, null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", SourceDeviceName.CUSTOM_AUDIO_SRC, 
-            "Custom Audio Bin Source", "/tmp/testpipe/test.mp2", captureDeviceProperties);
-    SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
-    // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof CustomAudioSrcBin);
-    // Check the actual correctness of the object
-  }
-  
-  @Test
-  public void testFileSrcBin() throws Exception{
-    if (!gstreamerInstalled)
-      return;
-    captureDevice = BinTestHelpers.createCaptureDevice(BinTestHelpers.HAUPPAGE_LOCATION, SourceDeviceName.FILE_DEVICE, 
-            "File Device Source", "/tmp/testpipe/test.mp2", captureDeviceProperties);
-    SrcBin srcBin = SourceFactory.getInstance().getSource(captureDevice, properties, captureAgentMock);
-    // Make sure we got the right object back
-    Assert.assertTrue(srcBin instanceof FileSrcBin);
-    // Check the actual correctness of the object
   }
   
   private void checkCorrectnessOfAudioDevice(SrcBin srcBin) {

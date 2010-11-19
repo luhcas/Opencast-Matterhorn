@@ -38,6 +38,7 @@ import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
@@ -74,11 +75,13 @@ public class EpiphanVGA2USBV4LSrcBin extends V4LSrcBin {
    * @throws UnableToCreateGhostPadsForBinException 
    * @throws UnableToLinkGStreamerElementsException 
    * @throws CaptureDeviceNullPointerException 
+   * @throws UnableToCreateElementException 
    * @throws Exception - If our elements fail to link together we will throw an exception.
    */
   public EpiphanVGA2USBV4LSrcBin(CaptureDevice captureDevice, Properties properties, CaptureAgent captureAgent)
           throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
-          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
+          UnableToCreateElementException {
     super(captureDevice, properties);
     this.captureAgent = captureAgent;
     setEventProbe();
@@ -106,8 +109,9 @@ public class EpiphanVGA2USBV4LSrcBin extends V4LSrcBin {
     v4lIdentitySinkPad.addEventProbe(new EpiphanVGA2USBV4LEventProbe(captureAgent, captureDevice, bin));
   }
 
-  /** Create all of the Elements that we will need to use for our Epiphan source **/
-  protected void createElements(){
+  /** Create all of the Elements that we will need to use for our Epiphan source 
+   * @throws UnableToCreateElementException **/
+  protected void createElements() throws UnableToCreateElementException{
     super.createElements();
     // The source for the epiphan card
     /**

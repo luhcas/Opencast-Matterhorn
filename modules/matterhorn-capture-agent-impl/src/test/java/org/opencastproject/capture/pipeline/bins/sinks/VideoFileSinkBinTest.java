@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Properties;
 
+import org.gstreamer.Element;
 import org.gstreamer.Gst;
 import org.junit.After;
 import org.junit.Assert;
@@ -29,6 +30,8 @@ import org.opencastproject.capture.pipeline.SourceDeviceName;
 import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +61,19 @@ public class VideoFileSinkBinTest {
   public void setup() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
+    
+    try {
+      @SuppressWarnings("unused")
+      Element defaultMuxer = GStreamerElementFactory.getInstance().createElement("Setup for VideoFileSinkBinTest",
+              VideoFileSinkBin.DEFAULT_MUXER, null);
+      @SuppressWarnings("unused")
+      Element defaultEncoder = GStreamerElementFactory.getInstance().createElement("Setup for VideoFileSinkBinTest",
+              VideoFileSinkBin.DEFAULT_ENCODER, null);
+    } catch (UnableToCreateElementException e) {
+      logger.warn("It appears that you have GStreamer installed but not all of the packages that we require.", e);
+      gstreamerInstalled = false;
+      return;
+    }
   }
 
   @After

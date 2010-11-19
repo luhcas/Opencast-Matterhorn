@@ -25,6 +25,7 @@ import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
@@ -51,15 +52,17 @@ public class DV1394SrcBin extends VideoSrcBin {
    * @throws UnableToCreateGhostPadsForBinException 
    * @throws UnableToLinkGStreamerElementsException 
    * @throws CaptureDeviceNullPointerException 
+   * @throws UnableToCreateElementException 
    */
   public DV1394SrcBin(CaptureDevice captureDevice, Properties properties)
           throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
-          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException {
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
+          UnableToCreateElementException {
     super(captureDevice, properties);
   }
   
   @Override
-  protected void createElements(){
+  protected void createElements() throws UnableToCreateElementException{
     super.createElements();
     dv1394src = ElementFactory.make(GStreamerElements.DV1394SRC, null);
     /* set up dv stream decoding */

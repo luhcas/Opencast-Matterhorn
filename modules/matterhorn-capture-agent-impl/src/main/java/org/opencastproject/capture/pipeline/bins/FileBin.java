@@ -36,10 +36,11 @@ public class FileBin extends PartialBin {
    * @throws UnableToCreateGhostPadsForBinException 
    * @throws UnableToLinkGStreamerElementsException 
    * @throws CaptureDeviceNullPointerException 
+   * @throws UnableToCreateElementException 
    */
   public FileBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
           UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
-          CaptureDeviceNullPointerException {
+          CaptureDeviceNullPointerException, UnableToCreateElementException {
     super(captureDevice, properties);
   }
   

@@ -21,7 +21,9 @@ import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
@@ -32,10 +34,11 @@ public abstract class AudioSrcBin extends SrcBin{
    * @throws UnableToSetElementPropertyBecauseElementWasNullException 
    * @throws UnableToCreateGhostPadsForBinException 
    * @throws UnableToLinkGStreamerElementsException 
-   * @throws CaptureDeviceNullPointerException **/
+   * @throws CaptureDeviceNullPointerException 
+   * @throws UnableToCreateElementException **/
   public AudioSrcBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
           UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
-          CaptureDeviceNullPointerException {
+          CaptureDeviceNullPointerException, UnableToCreateElementException {
     super(captureDevice, properties);
   }
 
@@ -45,14 +48,16 @@ public abstract class AudioSrcBin extends SrcBin{
    **/
   Element audioconvert;
   
-  /** Create all the common elements for audio sources including a queue and an audio converter. **/
-  protected void createElements(){
+  /** Create all the common elements for audio sources including a queue and an audio converter. 
+   * @throws UnableToCreateElementException **/
+  protected void createElements() throws UnableToCreateElementException{
     super.createElements();
     createAudioConverter();
   }
 
-  private void createAudioConverter() {
-    audioconvert = ElementFactory.make(GStreamerElements.AUDIOCONVERT, null);
+  private void createAudioConverter() throws UnableToCreateElementException {
+    audioconvert = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.AUDIOCONVERT, null);
   }
   
   @Override

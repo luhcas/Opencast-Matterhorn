@@ -26,6 +26,7 @@ import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerExcepti
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 import org.opencastproject.capture.pipeline.bins.PartialBin;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
@@ -56,16 +57,18 @@ public abstract class SrcBin extends PartialBin{
    * @throws UnableToCreateGhostPadsForBinException
    * @throws UnableToLinkGStreamerElementsException
    * @throws CaptureDeviceNullPointerException 
+   * @throws UnableToCreateElementException 
    */
   public SrcBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
           UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
-          CaptureDeviceNullPointerException {
+          CaptureDeviceNullPointerException, UnableToCreateElementException {
    super(captureDevice, properties);
   }
 
-  /** Create all elements necessary by all capture devices, in this case a queue. **/
+  /** Create all elements necessary by all capture devices, in this case a queue. 
+   * @throws UnableToCreateElementException **/
   @Override
-  protected void createElements(){
+  protected void createElements() throws UnableToCreateElementException{
     queue = ElementFactory.make(GStreamerElements.QUEUE, null);
   }
   

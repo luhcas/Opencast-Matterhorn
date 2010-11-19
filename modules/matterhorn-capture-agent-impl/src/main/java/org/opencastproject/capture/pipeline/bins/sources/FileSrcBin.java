@@ -25,6 +25,7 @@ import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
@@ -38,15 +39,16 @@ public class FileSrcBin extends VideoSrcBin{
    * kind of codec or container we are getting in. To handle this we use a decodebin to do our decoding and pass it off
    * to the sinks.
    * @throws CaptureDeviceNullPointerException 
+   * @throws UnableToCreateElementException 
    **/
   public FileSrcBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
           UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
-          CaptureDeviceNullPointerException {
+          CaptureDeviceNullPointerException, UnableToCreateElementException {
       super(captureDevice, properties);
     }
     
     @Override
-    protected void createElements(){
+    protected void createElements() throws UnableToCreateElementException{
       super.createElements();
       filesrc = ElementFactory.make(GStreamerElements.FILESRC, null);
       queue = ElementFactory.make(GStreamerElements.QUEUE, null);

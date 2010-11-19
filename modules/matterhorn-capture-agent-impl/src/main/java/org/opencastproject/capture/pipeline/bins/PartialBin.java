@@ -18,13 +18,12 @@ package org.opencastproject.capture.pipeline.bins;
 import java.util.Properties;
 
 import org.gstreamer.Bin;
-import org.opencastproject.capture.pipeline.PipelineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class PartialBin {
   protected Bin bin = new Bin();
-  protected static final Logger logger = LoggerFactory.getLogger(PipelineFactory.class);
+  protected static final Logger logger = LoggerFactory.getLogger(PartialBin.class);
   protected CaptureDevice captureDevice;
   protected Properties properties;
   protected CaptureDeviceProperties captureDeviceProperties;
@@ -32,7 +31,7 @@ public abstract class PartialBin {
   
   public PartialBin(CaptureDevice captureDevice, Properties properties) throws UnableToLinkGStreamerElementsException,
           UnableToCreateGhostPadsForBinException, UnableToSetElementPropertyBecauseElementWasNullException,
-          CaptureDeviceNullPointerException {
+          CaptureDeviceNullPointerException, UnableToCreateElementException {
     if(captureDevice != null){
       this.captureDevice = captureDevice;
     }
@@ -56,7 +55,7 @@ public abstract class PartialBin {
     confidenceMonitoringProperties = new ConfidenceMonitoringProperties(captureDevice, properties);
   }
   
-  protected void createElements(){
+  protected void createElements() throws UnableToCreateElementException{
     
   }
   
