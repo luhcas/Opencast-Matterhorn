@@ -18,11 +18,11 @@ package org.opencastproject.capture.pipeline.bins.sources;
 import java.util.Properties;
 
 import org.gstreamer.Element;
-import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.gstreamer.PadLinkReturn;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
@@ -50,9 +50,12 @@ public class FileSrcBin extends VideoSrcBin{
     @Override
     protected void createElements() throws UnableToCreateElementException{
       super.createElements();
-      filesrc = ElementFactory.make(GStreamerElements.FILESRC, null);
-      queue = ElementFactory.make(GStreamerElements.QUEUE, null);
-      decodebin = ElementFactory.make(GStreamerElements.DECODEBIN, null);
+      filesrc = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+              GStreamerElements.FILESRC, null);
+      queue = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+              GStreamerElements.QUEUE, null);
+      decodebin = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+              GStreamerElements.DECODEBIN, null);
     }
     
     @Override

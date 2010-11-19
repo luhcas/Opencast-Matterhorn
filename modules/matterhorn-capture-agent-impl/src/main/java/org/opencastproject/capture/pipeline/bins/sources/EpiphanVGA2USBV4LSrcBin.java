@@ -36,6 +36,7 @@ import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
@@ -118,19 +119,26 @@ public class EpiphanVGA2USBV4LSrcBin extends V4LSrcBin {
      * TODO - Get rid of all static names that will cause us all sorts of grief if we ever have more than one kicking
      * around
      **/
-    v4lsrc = ElementFactory.make(GStreamerElements.V4LSRC, "v4lsrc_" + captureDevice.getLocation() + "_" + v4lsrcIndex);
+    v4lsrc = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.V4LSRC, "v4lsrc_" + captureDevice.getLocation() + "_" + v4lsrcIndex);
     // An identity to stick between the epiphan card and the rest of the pipeline so that we can detect a disconnect.
-    v4lIdentity = ElementFactory.make(GStreamerElements.IDENTITY, captureDevice.getLocation() + "_v4l_identity");
+    v4lIdentity = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.IDENTITY, captureDevice.getLocation() + "_v4l_identity");
     // The pad through which to catch the disconnection
     v4lIdentitySinkPad = v4lIdentity.getStaticPad(GStreamerProperties.SINK);
     // Elements that enable VGA signal hotswapping
-    videotestsrc = ElementFactory.make(GStreamerElements.VIDEOTESTSRC, null);
+    videotestsrc = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.VIDEOTESTSRC, null);
     resolutionCapsfilter = setupResolutionFilter();
-    staticIdentity = ElementFactory.make(GStreamerElements.IDENTITY, captureDevice.getLocation() + "_static_identity");
+    staticIdentity = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.IDENTITY, captureDevice.getLocation() + "_static_identity");
     // The input-selector which allows us to choose which source we want to capture from
-    selector = ElementFactory.make(GStreamerElements.INPUT_SELECTOR, captureDevice.getLocation() + "_selector");
-    segment = ElementFactory.make(GStreamerElements.IDENTITY, captureDevice.getLocation() + "_identity-segment");
-    ffmpegcolorspace = ElementFactory.make(GStreamerElements.FFMPEGCOLORSPACE, null);
+    selector = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.INPUT_SELECTOR, captureDevice.getLocation() + "_selector");
+    segment = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.IDENTITY, captureDevice.getLocation() + "_identity-segment");
+    ffmpegcolorspace = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.FFMPEGCOLORSPACE, null);
   }
   
   /** Set the element properties for our Epiphan source **/

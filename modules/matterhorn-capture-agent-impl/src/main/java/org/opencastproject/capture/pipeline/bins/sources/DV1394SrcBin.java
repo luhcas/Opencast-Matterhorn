@@ -19,10 +19,10 @@ import java.util.Properties;
 
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
-import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
@@ -64,11 +64,15 @@ public class DV1394SrcBin extends VideoSrcBin {
   @Override
   protected void createElements() throws UnableToCreateElementException{
     super.createElements();
-    dv1394src = ElementFactory.make(GStreamerElements.DV1394SRC, null);
+    dv1394src = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.DV1394SRC, null);
     /* set up dv stream decoding */
-    demux = ElementFactory.make(GStreamerElements.DVDEMUX, null);
-    decoder   = ElementFactory.make(GStreamerElements.DVDEC, null);
-    ffmpegcolorspace = ElementFactory.make(GStreamerElements.FFMPEGCOLORSPACE, null);
+    demux = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.DVDEMUX, null);
+    decoder = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.DVDEC, null);
+    ffmpegcolorspace = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.FFMPEGCOLORSPACE, null);
   }
   @Override
   protected void setElementProperties(){

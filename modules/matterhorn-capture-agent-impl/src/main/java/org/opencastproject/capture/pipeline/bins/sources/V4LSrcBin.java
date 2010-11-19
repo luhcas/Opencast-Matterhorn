@@ -18,10 +18,10 @@ package org.opencastproject.capture.pipeline.bins.sources;
 import java.util.Properties;
 
 import org.gstreamer.Element;
-import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
@@ -43,7 +43,8 @@ public class V4LSrcBin extends VideoSrcBin {
   @Override
   protected void createElements() throws UnableToCreateElementException{
     super.createElements();
-    v4lsrc = ElementFactory.make(GStreamerElements.V4LSRC, null);
+    v4lsrc = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.V4LSRC, null);
   }
   
   @Override

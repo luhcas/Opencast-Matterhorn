@@ -21,6 +21,7 @@ import org.gstreamer.Element;
 import org.gstreamer.ElementFactory;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
@@ -39,7 +40,8 @@ public class XVImageSinkBin extends SinkBin {
   @Override
   protected void createElements() throws UnableToCreateElementException {
     super.createElements();
-    xvimagesink = ElementFactory.make("xvimagesink", null);
+    xvimagesink = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), "xvimagesink",
+            null);
   }
   
   @Override

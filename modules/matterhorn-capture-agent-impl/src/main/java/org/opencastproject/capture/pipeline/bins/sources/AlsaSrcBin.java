@@ -16,11 +16,12 @@
 package org.opencastproject.capture.pipeline.bins.sources;
 
 import java.util.Properties;
+
 import org.gstreamer.Element;
-import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
@@ -57,8 +58,8 @@ public class AlsaSrcBin extends AudioSrcBin {
     createAlsasrc();
   }
 
-  private void createAlsasrc() {
-    alsasrc = ElementFactory.make("alsasrc", null);
+  private void createAlsasrc() throws UnableToCreateElementException {
+    alsasrc = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), "alsasrc", null);
   }
   
   /** Set the correct properties for the ALSA source 

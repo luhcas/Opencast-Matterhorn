@@ -18,11 +18,11 @@ package org.opencastproject.capture.pipeline.bins.sources;
 import java.util.Properties;
 
 import org.gstreamer.Element;
-import org.gstreamer.ElementFactory;
 import org.gstreamer.GhostPad;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 import org.opencastproject.capture.pipeline.bins.PartialBin;
@@ -69,7 +69,8 @@ public abstract class SrcBin extends PartialBin{
    * @throws UnableToCreateElementException **/
   @Override
   protected void createElements() throws UnableToCreateElementException{
-    queue = ElementFactory.make(GStreamerElements.QUEUE, null);
+    queue = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.QUEUE, null);
   }
   
   /** Create the Ghost Pads necessary to link the source to the tee in the @code{CaptureDeviceBin}. **/

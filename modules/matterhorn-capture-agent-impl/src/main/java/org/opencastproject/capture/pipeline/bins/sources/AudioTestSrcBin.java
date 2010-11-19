@@ -18,10 +18,10 @@ package org.opencastproject.capture.pipeline.bins.sources;
 import java.util.Properties;
 
 import org.gstreamer.Element;
-import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
@@ -49,10 +49,12 @@ public class AudioTestSrcBin extends AudioSrcBin {
     super(captureDevice, properties);
   }
 
-  /** Create an audiotestsrc Element (see gst-inspect for details) **/
+  /** Create an audiotestsrc Element (see gst-inspect for details) 
+   * @throws UnableToCreateElementException **/
   @Override
-  protected void createElements(){
-    audiotestsrc = ElementFactory.make("audiotestsrc", null);
+  protected void createElements() throws UnableToCreateElementException{
+    audiotestsrc = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), "audiotestsrc",
+            null);
   }
   
   /** Add the audiotestsrc to the bin we will return as a source. **/

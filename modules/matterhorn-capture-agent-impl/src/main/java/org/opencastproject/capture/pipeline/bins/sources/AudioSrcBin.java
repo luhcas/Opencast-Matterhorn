@@ -18,7 +18,6 @@ package org.opencastproject.capture.pipeline.bins.sources;
 import java.util.Properties;
 
 import org.gstreamer.Element;
-import org.gstreamer.ElementFactory;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
 import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;

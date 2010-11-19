@@ -18,10 +18,10 @@ package org.opencastproject.capture.pipeline.bins.sources;
 import java.util.Properties;
 
 import org.gstreamer.Element;
-import org.gstreamer.ElementFactory;
 import org.gstreamer.Pad;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
 import org.opencastproject.capture.pipeline.bins.GStreamerElements;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
@@ -58,7 +58,8 @@ public class BlueCherryBT878SrcBin extends V4L2SrcBin{
   @Override
   protected void createElements() throws UnableToCreateElementException{
     super.createElements();
-    v4l2src = ElementFactory.make(GStreamerElements.V4L2SRC, null);
+    v4l2src = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(),
+            GStreamerElements.V4L2SRC, null);
   }
   
   /** Add the v4l2src, queue, videorate corrector and fpsfilter to the source bin. **/
