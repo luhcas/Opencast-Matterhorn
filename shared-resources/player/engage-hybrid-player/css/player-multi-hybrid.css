@@ -24,10 +24,19 @@ table
 {
   border-spacing:           0;
 }
+a, a:hover, a:link, a:visited, a:active, a:focus {
+color: #A42424;
+size: 1.3em;
+text-decoration: none;
+}
+a:hover {
+text-decoration: underline;
+}
 #oc_title-bar
 {
   min-width:                760px;
   margin:             5px 10%;
+  border-bottom: 1px #A42424 solid;
 
 }
 
@@ -44,13 +53,9 @@ table
 
 #oc_title-bar-gallery-link
 {
-  margin: 5px;
-  padding: 5px;
-  border-left: 1px solid black;
-  border-right: 1px solid black;
+  margin: 20px 5px 5px;
+  padding: 15px 5px 5px;
   float: right;
-  height: 30px;
-  font-weight: normal;
 }
 
 #oc_title-bar-gallery-link #oc_gallery
@@ -63,16 +68,24 @@ table
   float: right;
   height: 30px;
   white-space: nowrap;
-  margin: 5px;
+  margin: 25px 5px 5px;
   padding: 3px 5px;
 }
 
 .oc_search-Field
 {
-  border:                   1px solid #000000;
-  background:               url("../icons/magnifier.png") no-repeat scroll 2px 0.4em #FFF;
+  border:                   1px solid #A82E2E;
+  background:               transparent;
   color:                    #000000;
-  padding:                  0.4em 5px 0.4em 20px;
+  height: 20px;
+}
+#oc_searchField {
+vertical-align: middle;
+color: #BEBEBE;
+padding: 0 22px 0 2px;
+}
+#oc_searchField:focus {
+color: #000;
 }
 #oc_lecturer-search-field
 {
@@ -96,7 +109,8 @@ table
 #oc_video-view ul li { padding: 2px 5px; float: right; }
 #oc_video-view ul input { vertical-align: middle; }
 
-.oc_popuplayer { position: absolute; left: 0; top: -100px; font-weight: bold!important;}
+.oc_popuplayer { position: absolute; font-weight: bold!important;}
+.oc_popuplayer:focus { outline: none;}
 .oc_popuplayer-list { list-style:none outside none; padding: 0}
 .oc_popuplayer-list li { padding: 5px 0; }
 
@@ -106,7 +120,12 @@ table
 
 #oc_btn-search
 {
-  width:                    70px;
+  background:                #A72123 url("../img/oc_icons_2.png") no-repeat -242px -35px;
+  margin-left: -20px;
+  vertical-align: middle;
+  height: 20px;
+  width: 27px;
+  padding: 0;
 }
 
 .clear
@@ -114,13 +133,16 @@ table
   clear:                    both;
 }
 
-#oc_body, #oc_ui_tabs
+#oc_body, #oc_ui_tabs, #oc_player-head
 {
   min-width:                756px;
   margin-left:              10%;
   margin-right:             10%;
   padding:                  5px;
   position:                 relative;
+}
+#oc_body {
+  margin-bottom: 30px;
 }
 
 #oc_ui_tabs
@@ -137,7 +159,8 @@ table
 
 #oc_video-player-controls
 {
-  height:                   40px;
+  height:                   42px;
+  background:               url("../img/player_controll_bg.png") repeat-x 0 0 #000;
 /*
   width:                    100%;
 */
@@ -192,7 +215,6 @@ table
 
 .oc_edit-time-error
 {
-  width:                    64px !important;
   background-color:         #ff0000;
   color:                    #ffffff;
 }
@@ -233,8 +255,8 @@ table
 
 #oc_player_video-dropdown
 {
+  background:               #000;
   position:                 absolute;
-  background-color:         black;
   z-index:                  10000;
   visibility:               hidden;
   padding-bottom:           5px;
@@ -329,9 +351,10 @@ table
 
 #oc_video-size-controls
 {
-  margin-top:               7px;
+  padding-top:              7px;
   float:                    right;
-  width:                    17.33%;
+  width:                    70px;
+  height:                   33px;
 }
 
 .oc_tabs
@@ -815,9 +838,6 @@ option:hover
 }
 
 .segments {
-  border-color:             #000000;
-  border-style:             solid;
-  border-width:             1px;
   width:                    100%;
   position:                 relative;
 }

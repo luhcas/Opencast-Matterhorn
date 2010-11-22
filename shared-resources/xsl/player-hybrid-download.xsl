@@ -23,7 +23,7 @@
                     <xsl:when test="ns2:search-results/result/segments/segment">
                       <xsl:for-each select="ns2:search-results/result/segments/segment">
                         <xsl:if test="(../../mediapackage/@duration) &gt; ./@time">
-                          <td class="segment-holder" style="width: 15px;">
+                          <td class="segment-holder ui-widget ui-widget-content" style="width: 15px;">
                             <xsl:attribute name="id">segment<xsl:value-of select="position()"/></xsl:attribute>
                             <xsl:attribute name="onmouseover">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()"/>')</xsl:attribute>
                             <xsl:attribute name="onmouseout">Opencast.Watch.hoverOutSegment('segment<xsl:value-of select="position()"/>')</xsl:attribute>
@@ -40,7 +40,7 @@
                   </xsl:choose>
                 </tr>
               </table>
-              
+
       </div>
 
 
@@ -121,7 +121,7 @@
           </xsl:if>
         </xsl:if>
       </xsl:if>
-       
+
       <xsl:if test="@type='presenter/delivery'">
         <xsl:if test="./mimetype='video/x-flv'">
           <xsl:if test="substring(url, 1, 4)='rtmp'">

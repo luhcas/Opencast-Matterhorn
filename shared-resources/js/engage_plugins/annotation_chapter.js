@@ -57,6 +57,7 @@ Opencast.Annotation_Chapter = (function(){
             hideAnnotation_Chapter();
             annotationChapterDisplayed = false;
         }
+        return true;
     }
 
     /**

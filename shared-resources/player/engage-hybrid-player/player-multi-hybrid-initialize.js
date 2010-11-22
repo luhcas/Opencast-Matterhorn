@@ -456,60 +456,15 @@ Opencast.Initialize = (function ()
                 $("#oc_lecturer-search-field").attr('value', '');
                 clickLecturerSearchField = true;
             }
+            if($("#oc_ui_tabs").tabs('option', 'selected') != 2) {
+              $("#oc_ui_tabs").tabs('select', 2);
+            }
         });
 
 
-        // Handler for .mouseover()
-        $('#oc_btn-skip-backward').mouseover(function ()
-        {
-            this.className = 'oc_btn-skip-backward-over';
-        });
-        $('#oc_btn-rewind').mouseover(function ()
-        {
-            this.className = 'oc_btn-rewind-over';
-        });
-        $('#oc_btn-play-pause').mouseover(function ()
-        {
-            Opencast.Player.PlayPauseMouseOver();
-        });
-        $('#oc_btn-fast-forward').mouseover(function ()
-        {
-            this.className = 'oc_btn-fast-forward-over';
-        });
-        $('#oc_btn-skip-forward').mouseover(function ()
-        {
-            this.className = 'oc_btn-skip-forward-over';
-        });
-
-        // Handler for .mouseout()
-        $('#oc_btn-skip-backward').mouseout(function ()
-        {
-            this.className = 'oc_btn-skip-backward';
-        });
-        $('#oc_btn-rewind').mouseout(function ()
-        {
-            this.className = 'oc_btn-rewind';
-        });
-        $('#oc_btn-play-pause').mouseout(function ()
-        {
-            Opencast.Player.PlayPauseMouseOut();
-        });
-        $('#oc_btn-fast-forward').mouseout(function ()
-        {
-            this.className = 'oc_btn-fast-forward';
-        });
-        $('#oc_btn-skip-forward').mouseout(function ()
-        {
-            this.className = 'oc_btn-skip-forward';
-        });
-        // Handler for .mousedown()
-        $('#oc_btn-skip-backward').mousedown(function ()
-        {
-            this.className = 'oc_btn-skip-backward-clicked';
-        });
+        
         $('#oc_btn-rewind').mousedown(function ()
         {
-            this.className = 'oc_btn-rewind-clicked';
             if (!locked)
             {
                 locked = true;
@@ -527,7 +482,6 @@ Opencast.Initialize = (function ()
         });
         $('#oc_btn-fast-forward').mousedown(function ()
         {
-            this.className = 'oc_btn-fast-forward-clicked';
             if (!locked)
             {
                 locked = true;
@@ -538,19 +492,8 @@ Opencast.Initialize = (function ()
                 Opencast.Player.doFastForward();
             }
         });
-        $('#oc_btn-skip-forward').mousedown(function ()
-        {
-            this.className = 'oc_btn-skip-forward-clicked';
-        });
-
-        // Handler for .mouseup()
-        $('#oc_btn-skip-backward').mouseup(function ()
-        {
-            this.className = 'oc_btn-skip-backward-over';
-        });
         $('#oc_btn-rewind').mouseup(function ()
         {
-            this.className = 'oc_btn-rewind-over';
             Opencast.Player.stopRewind();
         });
 
@@ -560,14 +503,8 @@ Opencast.Initialize = (function ()
         });
         $('#oc_btn-fast-forward').mouseup(function ()
         {
-            this.className = 'oc_btn-fast-forward-over';
             Opencast.Player.stopFastForward();
         });
-        $('#oc_btn-skip-forward').mouseup(function ()
-        {
-            this.className = 'oc_btn-skip-forward-over';
-        });
-
         // Handler onBlur
         $('#oc_edit-time').blur(function ()
         {
@@ -597,12 +534,10 @@ Opencast.Initialize = (function ()
 
             if (event.keyCode === 13 || event.keyCode === 32)
             {
-                this.className = 'oc_btn-rewind-clicked';
                 Opencast.Player.doRewind();
             }
             else if (event.keyCode === 9)
             {
-                this.className = 'oc_btn-rewind-over';
                 Opencast.Player.stopRewind();
             }
         });
@@ -611,12 +546,10 @@ Opencast.Initialize = (function ()
         {
             if (event.keyCode === 13 || event.keyCode === 32)
             {
-                this.className = 'oc_btn-fast-forward-clicked';
                 Opencast.Player.doFastForward();
             }
             else if (event.keyCode === 9)
             {
-                this.className = 'oc_btn-fast-forward-over';
                 Opencast.Player.stopFastForward();
             }
         });
@@ -638,7 +571,6 @@ Opencast.Initialize = (function ()
         {
             if (event.keyCode === 13 || event.keyCode === 32)
             {
-                this.className = 'oc_btn-rewind-over';
                 Opencast.Player.stopRewind();
             }
         });
@@ -646,7 +578,6 @@ Opencast.Initialize = (function ()
         {
             if (event.keyCode === 13 || event.keyCode === 32)
             {
-                this.className = 'oc_btn-fast-forward-over';
                 Opencast.Player.stopFastForward();
             }
         });
@@ -1095,6 +1026,9 @@ Opencast.Initialize = (function ()
     	{
     	    Opencast.Player.embedIFrame(embedWidhtFive, embedHeightFive);
     	});
+      $('.oc_embed-icon').click(function() {
+        $('#oc_embed-textarea').select();
+        });
 
     	var embedCustomMinHeight = Math.round(MINWIDTH / getMaxFormat()) + OTHERDIVHEIGHT;
 

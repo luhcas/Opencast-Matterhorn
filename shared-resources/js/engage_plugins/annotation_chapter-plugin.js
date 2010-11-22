@@ -13,7 +13,7 @@ Opencast.Annotation_ChapterPlugin = (function(){
      *  template: trimmpath render template
      */
     var element; //place to render the data in the html
-    var template = "<table id=\"annotation_holder\" cellspacing=\"0\" cellpadding=\"0\" style=\"opacity: 0.65;\" class=\"segments\"><tbody><tr>{for a in annotations.annotation}<td onclick=\"Opencast.Watch.seekSegment(${a.inpoint})\" alt=\"Slide 1 of 2\" onmouseout=\"Opencast.Watch.hoverOutDescription('segment-${a.annotationId}','${a.value}')\" onmouseover=\"Opencast.Watch.hoverDescription('segment-${a.annotationId}','${a.value}')\" id=\"segment-${a.annotationId}\" style=\"width: ${(a.length*100/duration)}%;\" class=\"segment-holder-over\"></td>{/for}</tr></tbody></table>";
+    var template = "<table id=\"annotation_holder\" cellspacing=\"0\" cellpadding=\"0\" style=\"opacity: 0.65;\" class=\"segments\"><tbody><tr>{for a in annotations.annotation}<td onclick=\"Opencast.Watch.seekSegment(${a.inpoint})\" alt=\"Slide 1 of 2\" onmouseout=\"Opencast.Watch.hoverOutDescription('segment-${a.annotationId}','${a.value}')\" onmouseover=\"Opencast.Watch.hoverDescription('segment-${a.annotationId}','${a.value}')\" id=\"segment-${a.annotationId}\" style=\"width: ${(a.length*100/duration)}%;\" class=\"segment-holder-over ui-widget ui-widget-content\"></td>{/for}</tr></tbody></table>";
     var annotation_chapterData;
     var processedTemplateData;
 
