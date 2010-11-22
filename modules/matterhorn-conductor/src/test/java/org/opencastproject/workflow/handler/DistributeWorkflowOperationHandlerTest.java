@@ -66,10 +66,10 @@ public class DistributeWorkflowOperationHandlerTest {
     // Mock up a job
     Job job = EasyMock.createNiceMock(Job.class);
     EasyMock.expect(job.getStatus()).andReturn(Job.Status.FINISHED).anyTimes();
-    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) track2.clone());
-    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) catalog1.clone());
-    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) catalog2.clone());
-    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) attachment1.clone());
+    EasyMock.expect(job.getPayload()).andReturn(track2.getAsXml());
+    EasyMock.expect(job.getPayload()).andReturn(catalog1.getAsXml());
+    EasyMock.expect(job.getPayload()).andReturn(catalog2.getAsXml());
+    EasyMock.expect(job.getPayload()).andReturn(attachment1.getAsXml());
     EasyMock.replay(job);
 
     service = EasyMock.createNiceMock(DistributionService.class);
@@ -100,9 +100,9 @@ public class DistributeWorkflowOperationHandlerTest {
     // Mock up a job
     Job job = EasyMock.createNiceMock(Job.class);
     EasyMock.expect(job.getStatus()).andReturn(Job.Status.FINISHED).anyTimes();
-    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) catalog1.clone());
-    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) catalog2.clone());
-    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) attachment1.clone());
+    EasyMock.expect(job.getPayload()).andReturn(catalog1.getAsXml());
+    EasyMock.expect(job.getPayload()).andReturn(catalog2.getAsXml());
+    EasyMock.expect(job.getPayload()).andReturn(attachment1.getAsXml());
     EasyMock.replay(job);
 
     service = EasyMock.createNiceMock(DistributionService.class);
@@ -131,9 +131,9 @@ public class DistributeWorkflowOperationHandlerTest {
     // Mock up a job
     Job job = EasyMock.createNiceMock(Job.class);
     EasyMock.expect(job.getStatus()).andReturn(Job.Status.FINISHED).anyTimes();
-    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) catalog1.clone());
-    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) catalog2.clone());
-    EasyMock.expect(job.getElement()).andReturn((MediaPackageElement) attachment1.clone());
+    EasyMock.expect(job.getPayload()).andReturn(catalog1.getAsXml());
+    EasyMock.expect(job.getPayload()).andReturn(catalog2.getAsXml());
+    EasyMock.expect(job.getPayload()).andReturn(attachment1.getAsXml());
     EasyMock.replay(job);
 
     service = EasyMock.createNiceMock(DistributionService.class);

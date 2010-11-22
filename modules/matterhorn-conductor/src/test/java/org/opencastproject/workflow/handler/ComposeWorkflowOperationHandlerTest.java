@@ -97,7 +97,7 @@ public class ComposeWorkflowOperationHandlerTest {
 
     // set up mock receipt
     receipt = EasyMock.createNiceMock(Job.class);
-    EasyMock.expect(receipt.getElement()).andReturn(encodedTracks[0]);
+    EasyMock.expect(receipt.getPayload()).andReturn(encodedTracks[0].getAsXml());
     EasyMock.expect(receipt.getStatus()).andReturn(Job.Status.FINISHED);
     EasyMock.expect(receipt.getDateCreated()).andReturn(new Date());
     EasyMock.expect(receipt.getDateStarted()).andReturn(new Date());
@@ -145,7 +145,7 @@ public class ComposeWorkflowOperationHandlerTest {
 
     // set up mock receipt
     receipt = EasyMock.createNiceMock(Job.class);
-    EasyMock.expect(receipt.getElement()).andReturn(encodedTracks[0]);
+    EasyMock.expect(receipt.getPayload()).andReturn(encodedTracks[0].getAsXml());
     EasyMock.replay(receipt);
 
     // set up mock composer service

@@ -19,9 +19,12 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.Writer;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -33,10 +36,7 @@ public class JobParser {
 
   static {
     StringBuilder sb = new StringBuilder();
-    sb.append("org.opencastproject.mediapackage");
-    sb.append(":org.opencastproject.mediapackage.attachment");
-    sb.append(":org.opencastproject.mediapackage.track");
-    sb.append(":org.opencastproject.job.api");
+    sb.append("org.opencastproject.job.api");
     try {
       jaxbContext = JAXBContext.newInstance(sb.toString(), JobParser.class.getClassLoader());
     } catch (JAXBException e) {
@@ -75,6 +75,13 @@ public class JobParser {
     } finally {
       IOUtils.closeQuietly(in);
     }
+  }
+  
+  public static String toXml(Job job) throws Exception {
+    Marshaller marshaller = jaxbContext.createMarshaller();
+    Writer writer = new StringWriter();
+    marshaller.marshal(job, writer);
+    return writer.toString();
   }
 
 }

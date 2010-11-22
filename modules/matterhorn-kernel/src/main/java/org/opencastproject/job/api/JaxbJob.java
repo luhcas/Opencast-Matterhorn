@@ -15,27 +15,32 @@
  */
 package org.opencastproject.job.api;
 
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
-import org.opencastproject.mediapackage.Attachment;
-import org.opencastproject.mediapackage.Catalog;
-import org.opencastproject.mediapackage.DefaultMediaPackageSerializerImpl;
-import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
-import org.opencastproject.mediapackage.Track;
-
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Date;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * A long running, asynchronously executed job.
@@ -59,7 +64,7 @@ public class JaxbJob implements Job {
     this.dateCompleted = job.getDateCompleted();
     this.dateCreated = job.getDateCreated();
     this.dateStarted = job.getDateStarted();
-    this.element = job.getElement();
+    this.payload = job.getPayload();
     this.host = job.getHost();
     this.id = job.getId();
     this.jobType = job.getJobType();
@@ -99,8 +104,8 @@ public class JaxbJob implements Job {
   /** The run time is denormalized in the database to enable cross-platform date arithmetic in JPA queries */
   protected Long runTime = 0L;
 
-  /** The element produced by this job, or null if it has not yet been generated (or was not due to an exception) */
-  protected MediaPackageElement element;
+  /** The output produced by this job, or null if it has not yet been generated (or was not due to an exception) */
+  protected String payload;
 
   /**
    * {@inheritDoc}
@@ -275,79 +280,43 @@ public class JaxbJob implements Job {
 
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.Job#getElement()
+   *
+   * @see org.opencastproject.job.api.Job#getPayload()
    */
   @Override
-  public MediaPackageElement getElement() {
-    return element;
+  public String getPayload() {
+    return payload;
   }
-
+  
   /**
    * {@inheritDoc}
-   * 
-   * @see org.opencastproject.job.api.Job#setElement(org.opencastproject.mediapackage.MediaPackageElement)
+   *
+   * @see org.opencastproject.job.api.Job#setPayload(java.lang.String)
    */
   @Override
-  public void setElement(MediaPackageElement element) {
-    this.element = element;
+  public void setPayload(String payload) {
+    this.payload = payload;
+  }
+  
+  @XmlAnyElement(lax=true)
+  public Element getPayloadAsDom() throws IOException, ParserConfigurationException, SAXException {
+    if(payload == null) return null;
+    final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    final DocumentBuilder builder = factory.newDocumentBuilder();
+    final Document doc = builder.parse(IOUtils.toInputStream(payload, "UTF-8"));
+    return doc.getDocumentElement();
+  }
+  
+  public void setPayloadAsDom(Element element) throws TransformerFactoryConfigurationError, TransformerException {
+    if(element == null) return;
+    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+    StreamResult result = new StreamResult(new StringWriter());
+    DOMSource source = new DOMSource(element);
+    transformer.transform(source, result);
+    payload = result.getWriter().toString();
   }
 
-  @XmlElement(name = "track")
-  public Track getTrack() {
-    if (element != null && element instanceof Track) {
-      return (Track) element;
-    } else {
-      return null;
-    }
-  }
-
-  public void setTrack(Track track) {
-    this.element = track;
-  }
-
-  @XmlElement(name = "attachment")
-  public Attachment getAttachment() {
-    if (element != null && element instanceof Attachment) {
-      return (Attachment) element;
-    } else {
-      return null;
-    }
-  }
-
-  public void setAttachment(Attachment attachment) {
-    this.element = attachment;
-  }
-
-  @XmlElement(name = "catalog")
-  public Catalog getCatalog() {
-    if (element != null && element instanceof Catalog) {
-      return (Catalog) element;
-    } else {
-      return null;
-    }
-  }
-
-  public void setCatalog(Catalog catalog) {
-    this.element = catalog;
-  }
-
-  public String getElementAsXml() throws Exception {
-    if (element == null)
-      return null;
-    return ((AbstractMediaPackageElement) element).getAsXml();
-  }
-
-  public void setElementAsXml(String xml) throws Exception {
-    if (xml == null) {
-      element = null;
-    } else {
-      DocumentBuilder docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-      Document doc = docBuilder.parse(IOUtils.toInputStream(xml, "UTF-8"));
-      element = MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
-              .elementFromManifest(doc.getDocumentElement(), new DefaultMediaPackageSerializerImpl());
-    }
-  }
   
   /**
    * {@inheritDoc}

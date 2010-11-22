@@ -236,7 +236,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
               throw new MediaInspectionException("Unable to extract video metadata from " + file, e);
             }
 
-            job.setElement(track);
+            job.setPayload(track.getAsXml());
             job.setStatus(Status.FINISHED);
             updateJob(job);
             return track;
@@ -437,7 +437,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
               throw new MediaInspectionException("Unable to extract video metadata from " + file, e);
             }
 
-            job.setElement(track);
+            job.setPayload(track.getAsXml());
             job.setStatus(Status.FINISHED);
             updateJob(job);
 
@@ -572,7 +572,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
             }
           }
 
-          job.setElement(element);
+          job.setPayload(element.getAsXml());
           job.setStatus(Status.FINISHED);
           updateJob(job);
           logger.info("Successfully inspected element {}", element);

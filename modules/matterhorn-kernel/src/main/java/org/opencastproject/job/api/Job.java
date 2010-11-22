@@ -15,8 +15,6 @@
  */
 package org.opencastproject.job.api;
 
-import org.opencastproject.mediapackage.MediaPackageElement;
-
 import java.util.Date;
 
 /**
@@ -57,14 +55,14 @@ public interface Job {
   Date getDateCompleted();
 
   /**
-   * Gets the mediapackage element that was produced by this job, or null if none was produced, or if it has yet to be
+   * Gets the serialized output that was produced by this job, or null if nothing was produced, or if it has yet to be
    * produced.
    * 
-   * @return the mediapackage element
+   * @return the output of the job
    */
-  MediaPackageElement getElement();
+  String getPayload();
 
-  /** Sets the mediapackage element produced by this job. */
-  void setElement(MediaPackageElement element);
+  /** Sets the payload produced by this job. */
+  void setPayload(String payload);
 
 }

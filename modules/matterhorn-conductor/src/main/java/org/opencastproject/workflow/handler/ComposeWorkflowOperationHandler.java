@@ -20,8 +20,10 @@ import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.composer.api.EncodingProfile.MediaType;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.NotFoundException;
@@ -134,7 +136,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
    *           if the workspace doesn't contain the requested file
    */
   private WorkflowOperationResult encode(MediaPackage src, WorkflowOperationInstance operation) throws EncoderException,
-          IOException, NotFoundException, WorkflowOperationException {
+          IOException, NotFoundException, MediaPackageException, WorkflowOperationException {
     MediaPackage mediaPackage = (MediaPackage) src.clone();
     // Read the configuration properties
     String sourceFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
@@ -191,14 +193,14 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
       logger.info("Encoding track {} using encoding profile '{}'", t, profile);
 
       // Start encoding and wait for the result
-      final Job receipt = composerService.encode(t, profile.getIdentifier(), true);
-      if (receipt == null || receipt.getStatus().equals(Job.Status.FAILED)) {
+      final Job job = composerService.encode(t, profile.getIdentifier(), true);
+      if (job == null || job.getStatus().equals(Job.Status.FAILED)) {
         throw new WorkflowOperationException("Encoding failed");
       }
-      Track composedTrack = (Track) receipt.getElement();
+      Track composedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
 
       // add this receipt's queue time to the total
-      long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
+      long timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
       totalTimeInQueue+=timeInQueue;
 
       updateTrackMetadata(composedTrack, operation, profile);

@@ -18,9 +18,11 @@ package org.opencastproject.workflow.handler;
 import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.UnsupportedElementException;
@@ -75,13 +77,14 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
   /** The local workspace */
   private Workspace workspace;
-  
+
   public void setDublincoreService(DublinCoreCatalogService dcService) {
     this.dcService = dcService;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
    */
   @Override
@@ -112,33 +115,38 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance)
-          throws WorkflowOperationException {
-    MediaPackage mediaPackage = (MediaPackage)workflowInstance.getMediaPackage().clone();
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    MediaPackage mediaPackage = (MediaPackage) workflowInstance.getMediaPackage().clone();
     // Inspect the tracks
     long totalTimeInQueue = 0;
     for (Track track : mediaPackage.getTracks()) {
-      
+
       logger.info("Inspecting track '{}' of {}", track.getIdentifier(), mediaPackage);
 
-      Job receipt;
+      Job inspectJob;
       try {
-        receipt = inspectionService.enrich(track, false, true);
+        inspectJob = inspectionService.enrich(track, false, true);
       } catch (MediaInspectionException e) {
         throw new WorkflowOperationException(e);
       }
 
       // add this receipt's queue time to the total
-      long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
-      totalTimeInQueue+=timeInQueue;
+      long timeInQueue = inspectJob.getDateStarted().getTime() - inspectJob.getDateCreated().getTime();
+      totalTimeInQueue += timeInQueue;
 
-      Track inspectedTrack = (Track)receipt.getElement();
+      Track inspectedTrack;
+      try {
+        inspectedTrack = (Track) AbstractMediaPackageElement.getFromXml(inspectJob.getPayload());
+      } catch (MediaPackageException e1) {
+        throw new WorkflowOperationException("Unable to parse track from job " + inspectJob.getId());
+      }
       if (inspectedTrack == null)
         throw new WorkflowOperationException("Track " + track + " could not be inspected");
-      
+
       // Replace the original track with the inspected one
       try {
         mediaPackage.remove(track);
@@ -154,37 +162,38 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
       logger.warn("Unable to update dublin core data: {}", e.getMessage(), e);
       throw new WorkflowOperationException(e.getMessage());
     }
-    
+
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
   }
 
   /**
    * Updates those dublin core fields that can be gathered from the technical metadata.
    * 
-   * @param mediaPackage 
-   *            the media package
+   * @param mediaPackage
+   *          the media package
    */
   protected void updateDublinCore(MediaPackage mediaPackage) throws Exception {
     // Complete episode dublin core catalog (if available)
-    Catalog dcCatalogs[] = mediaPackage.getCatalogs(MediaPackageElements.EPISODE, MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
+    Catalog dcCatalogs[] = mediaPackage.getCatalogs(MediaPackageElements.EPISODE,
+            MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
     if (dcCatalogs.length > 0) {
       DublinCoreCatalog dublinCore = loadDublinCoreCatalog(dcCatalogs[0]);
       Date today = new Date();
-      
+
       // Extent
       if (!dublinCore.hasValue(DublinCore.PROPERTY_EXTENT)) {
         DublinCoreValue extent = EncodingSchemeUtils.encodeDuration(mediaPackage.getDuration());
         dublinCore.set(DublinCore.PROPERTY_EXTENT, extent);
         logger.debug("Setting dc:extent to '{}'", extent.getValue());
       }
-      
+
       // Date created
       if (!dublinCore.hasValue(DublinCore.PROPERTY_CREATED)) {
         DublinCoreValue date = EncodingSchemeUtils.encodeDate(today, Precision.Day);
         dublinCore.set(DublinCore.PROPERTY_CREATED, date);
         logger.debug("Setting dc:date to '{}'", date.getValue());
       }
-      
+
       // Serialize changed dublin core
       InputStream in = dcService.serialize(dublinCore);
       String mpId = mediaPackage.getIdentifier().toString();
@@ -193,12 +202,15 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
       dcCatalogs[0].setURI(workspace.getURI(mpId, elementId));
     }
   }
-  
+
   /**
    * Loads a dublin core catalog from a mediapackage's catalog reference
-   * @param catalog the mediapackage's reference to this catalog
+   * 
+   * @param catalog
+   *          the mediapackage's reference to this catalog
    * @return the dublin core
-   * @throws IOException if there is a problem loading or parsing the dublin core object
+   * @throws IOException
+   *           if there is a problem loading or parsing the dublin core object
    */
   protected DublinCoreCatalog loadDublinCoreCatalog(Catalog catalog) throws IOException {
     InputStream in = null;

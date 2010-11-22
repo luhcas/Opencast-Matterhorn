@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.job.api.Job;
+import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
@@ -122,12 +123,12 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
     Catalog mpeg7Catalog = null;
     long timeInQueue = 0;
     try {
-      Job receipt = videosegmenter.segment(track, true);
-      if (receipt.getStatus().equals(Job.Status.FAILED)) {
+      Job job = videosegmenter.segment(track, true);
+      if (job.getStatus().equals(Job.Status.FAILED)) {
         throw new WorkflowOperationException("Videosegmentation on " + track + " failed");
       }
-      timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
-      mpeg7Catalog = (Catalog) receipt.getElement();
+      timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
+      mpeg7Catalog = (Catalog) AbstractMediaPackageElement.getFromXml(job.getPayload());
       mediaPackage.add(mpeg7Catalog);
       mpeg7Catalog.setURI(workspace.moveTo(mpeg7Catalog.getURI(), mediaPackage.getIdentifier().toString(), mpeg7Catalog
               .getIdentifier(), "segments.xml"));

@@ -19,10 +19,12 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
@@ -405,7 +407,7 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, Managed
             throw new VideoSegmenterException("Unable to delete the mjpeg from the workspace", e);
           }
 
-          job.setElement(mpeg7Catalog);
+          job.setPayload(mpeg7Catalog.getAsXml());
           job.setStatus(Status.FINISHED);
           updateJob(job);
 
@@ -685,7 +687,7 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, Managed
    * @throws IllegalStateException
    *           if the track is not connected to a media package and is not in the correct format
    */
-  protected Track prepare(Track track) throws EncoderException {
+  protected Track prepare(Track track) throws EncoderException, MediaPackageException {
     if (MJPEG_MIMETYPE.equals(track.getMimeType()))
       return track;
 
@@ -707,7 +709,7 @@ public class VideoSegmenterServiceImpl implements VideoSegmenterService, Managed
     // Looks like we need to do the work ourselves
     logger.info("Requesting {} version of track {}", MJPEG_MIMETYPE, track);
     final Job receipt = composer.encode(track, MJPEG_ENCODING_PROFILE, true);
-    Track composedTrack = (Track) receipt.getElement();
+    Track composedTrack = (Track) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
     composedTrack.setReference(original);
     composedTrack.setMimeType(MJPEG_MIMETYPE);
     composedTrack.addTag("segmentation");

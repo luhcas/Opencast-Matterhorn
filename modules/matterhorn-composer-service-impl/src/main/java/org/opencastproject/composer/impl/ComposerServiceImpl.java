@@ -44,6 +44,7 @@ import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
+import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackageElementBuilder;
@@ -307,10 +308,10 @@ public class ComposerServiceImpl implements ComposerService {
           }
           if (inspectionJob.getStatus() == Job.Status.FAILED)
             throw new EncoderException("Media inspection of " + returnURL + " failed");
-          Track inspectedTrack = (Track) inspectionJob.getElement();
+          Track inspectedTrack = (Track) AbstractMediaPackageElement.getFromXml(inspectionJob.getPayload());
           inspectedTrack.setIdentifier(targetTrackId);
 
-          job.setElement(inspectedTrack);
+          job.setPayload(inspectedTrack.getAsXml());
           job.setStatus(Status.FINISHED);
           updateJob(job);
 
@@ -501,10 +502,10 @@ public class ComposerServiceImpl implements ComposerService {
           }
           if (inspectionJob.getStatus() == Job.Status.FAILED)
             throw new EncoderException("Media inspection of " + returnURL + " failed");
-          Track inspectedTrack = (Track) inspectionJob.getElement();
+          Track inspectedTrack = (Track) AbstractMediaPackageElement.getFromXml(inspectionJob.getPayload());
           inspectedTrack.setIdentifier(targetTrackId);
 
-          job.setElement(inspectedTrack);
+          job.setPayload(inspectedTrack.getAsXml());
           job.setStatus(Status.FINISHED);
           updateJob(job);
 
@@ -681,7 +682,7 @@ public class ComposerServiceImpl implements ComposerService {
           MediaPackageElementBuilder builder = MediaPackageElementBuilderFactory.newInstance().newElementBuilder();
           Attachment attachment = (Attachment) builder.elementFromURI(returnURL, Attachment.TYPE, null);
 
-          job.setElement(attachment);
+          job.setPayload(attachment.getAsXml());
           job.setStatus(Status.FINISHED);
           updateJob(job);
 
@@ -861,10 +862,10 @@ public class ComposerServiceImpl implements ComposerService {
           }
           if (inspectionReceipt.getStatus() == Job.Status.FAILED)
             throw new EmbedderException("Media inspection failed");
-          Track inspectedTrack = (Track) inspectionReceipt.getElement();
+          Track inspectedTrack = (Track) AbstractMediaPackageElement.getFromXml(inspectionReceipt.getPayload());
           inspectedTrack.setIdentifier(targetTrackId);
 
-          job.setElement(inspectedTrack);
+          job.setPayload(inspectedTrack.getAsXml());
           job.setStatus(Status.FINISHED);
           updateEmbedderJob(job);
 

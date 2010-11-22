@@ -307,7 +307,7 @@ public class ITunesUDistributionService implements DistributionService {
                         .elementFromURI(newTrackUri, element.getElementType(), element.getFlavor());
                 newElement.setIdentifier(element.getIdentifier() + "-dist");
 
-                job.setElement(newElement);
+                job.setPayload(newElement.getAsXml());
                 job.setStatus(Status.FINISHED);
                 updateJob(job);
 

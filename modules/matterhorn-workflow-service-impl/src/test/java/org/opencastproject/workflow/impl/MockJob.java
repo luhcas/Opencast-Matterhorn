@@ -16,7 +16,6 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.job.api.Job;
-import org.opencastproject.mediapackage.MediaPackageElement;
 
 import java.util.Date;
 
@@ -30,12 +29,8 @@ public class MockJob implements Job {
   }
 
   long id;
-  MediaPackageElement element;
   Status status;
-
-  public MediaPackageElement getElement() {
-    return element;
-  }
+  String payload;
 
   public String getHost() {
     return null;
@@ -51,10 +46,6 @@ public class MockJob implements Job {
 
   public String getJobType() {
     return "workflow-test";
-  }
-
-  public void setElement(MediaPackageElement element) {
-    this.element = element;
   }
 
   public void setHost(String host) {
@@ -85,5 +76,12 @@ public class MockJob implements Job {
   public Date getDateStarted() {
     return null;
   }
-
+  
+  public String getPayload() {
+    return payload;
+  }
+  
+  public void setPayload(String payload) {
+    this.payload = payload;
+  }
 }

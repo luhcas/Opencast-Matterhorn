@@ -20,9 +20,11 @@ import org.opencastproject.caption.api.CaptionService;
 import org.opencastproject.caption.api.UnsupportedCaptionFormatException;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
@@ -159,17 +161,17 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
     // perform embedding
     long totalTimeInQueue = 0;
     for (Track t : qtTracks) {
-      Job receipt = composerService.captions(t, convertedCaptions, true);
-      if (receipt == null || receipt.getStatus().equals(Job.Status.FAILED)) {
+      Job job = composerService.captions(t, convertedCaptions, true);
+      if (job == null || job.getStatus().equals(Job.Status.FAILED)) {
         throw new WorkflowOperationException("Embedding failed");
       }
-      Track processedTrack = (Track) receipt.getElement();
+      Track processedTrack = (Track) AbstractMediaPackageElement.getFromXml(job.getPayload());
       if (targetMediaFlavor != null) {
         processedTrack.setFlavor(MediaPackageElementFlavor.parseFlavor(targetMediaFlavor));
       }
 
       // add this receipt's queue time to the total
-      long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
+      long timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
       totalTimeInQueue+=timeInQueue;
       
       // add to media package
@@ -226,7 +228,7 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
    */
   private Catalog[] convertCaptions(MediaPackage mediaPackage, MediaPackageElementFlavor flavor, String outputFormat)
           throws UnsupportedCaptionFormatException, CaptionConverterException, WorkflowOperationException,
-          NotFoundException, IOException {
+          NotFoundException, MediaPackageException, IOException {
 
     // get all matching catalogs
     Catalog[] captions = mediaPackage.getCatalogs(flavor);
@@ -246,11 +248,11 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
       }
       for (String language : languages) {
         if (!captionLanguages.contains(language)) {
-          Job receipt = captionService.convert(caption, flavor.getSubtype(), outputFormat, language, true);
-          if (receipt == null || receipt.getStatus().equals(Job.Status.FAILED)) {
+          Job job = captionService.convert(caption, flavor.getSubtype(), outputFormat, language, true);
+          if (job == null || job.getStatus().equals(Job.Status.FAILED)) {
             throw new WorkflowOperationException("Caption converting failed.");
           }
-          Catalog convertedCaption = (Catalog) receipt.getElement();
+          Catalog convertedCaption = (Catalog) AbstractMediaPackageElement.getFromXml(job.getPayload());
           // add to media package
           mediaPackage.addDerived(convertedCaption, caption);
           String fileName = getFileNameFromElements(caption, convertedCaption);

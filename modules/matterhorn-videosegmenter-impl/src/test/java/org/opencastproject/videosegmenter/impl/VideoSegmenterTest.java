@@ -21,8 +21,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.opencastproject.job.api.Job;
+import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Catalog;
-import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.track.TrackImpl;
 import org.opencastproject.mediapackage.track.VideoStreamImpl;
@@ -35,7 +35,6 @@ import org.opencastproject.metadata.mpeg7.Segment;
 import org.opencastproject.metadata.mpeg7.TemporalDecomposition;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.MimeTypes;
-import org.opencastproject.videosegmenter.impl.VideoSegmenterServiceImpl;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
@@ -152,7 +151,7 @@ public class VideoSegmenterTest {
   @Test
   public void testAnalyze() throws Exception {
     Job receipt = vsegmenter.segment(track, true);
-    Catalog catalog = (Catalog) receipt.getElement();
+    Catalog catalog = (Catalog) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
 
     Mpeg7Catalog mpeg7 = new Mpeg7CatalogImpl(catalog.getURI().toURL().openStream());
 
@@ -188,12 +187,8 @@ public class VideoSegmenterTest {
   }
 
   class JobStub implements Job {
-    MediaPackageElement element;
+    String payload;
     Status status;
-
-    public MediaPackageElement getElement() {
-      return element;
-    }
 
     public String getHost() {
       return null;
@@ -209,10 +204,6 @@ public class VideoSegmenterTest {
 
     public String getJobType() {
       return "analysis-test";
-    }
-
-    public void setElement(MediaPackageElement element) {
-      this.element = element;
     }
 
     public void setHost(String host) {
@@ -242,6 +233,14 @@ public class VideoSegmenterTest {
 
     public Date getDateStarted() {
       return null;
+    }
+    
+    public String getPayload() {
+      return payload;
+    }
+    
+    public void setPayload(String payload) {
+      this.payload = payload;
     }
   }
 

@@ -19,12 +19,14 @@ import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.composer.api.EncodingProfile;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
@@ -174,7 +176,8 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
    * @throws NotFoundException
    */
   private WorkflowOperationResult createPreviews(final MediaPackage mediaPackage, WorkflowOperationInstance operation)
-          throws EncoderException, InterruptedException, ExecutionException, NotFoundException, IOException {
+          throws EncoderException, InterruptedException, ExecutionException, NotFoundException, MediaPackageException,
+          IOException {
     long totalTimeInQueue = 0;
 
     // Read the configuration properties
@@ -275,7 +278,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
             long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
             totalTimeInQueue += timeInQueue;
 
-            Attachment composedImage = (Attachment) receipt.getElement();
+            Attachment composedImage = (Attachment) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
             if (composedImage == null)
               throw new IllegalStateException("Unable to compose image");
 

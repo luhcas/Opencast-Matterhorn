@@ -264,7 +264,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   private void update(JobJpaImpl fromDb, JaxbJob job) {
     Date now = new Date();
     Status status = job.getStatus();
-    fromDb.setElement(job.getElement());
+    fromDb.setPayload(job.getPayload());
     fromDb.setStatus(job.getStatus());
     if (Status.QUEUED.equals(status)) {
       job.setDateCreated(now);

@@ -113,15 +113,13 @@
             <Bundle-Activator>org.opencastproject.serviceregistry.impl.webconsole.Activator</Bundle-Activator>
             <Private-Package>org.opencastproject.serviceregistry.impl.webconsole, ui</Private-Package>
             <Import-Package>
-              org.opencastproject.mediapackage;version=${project.version},
-              org.opencastproject.mediapackage.attachment;version=${project.version},
-              org.opencastproject.mediapackage.track;version=${project.version},
+              org.opencastproject.job.api;version=${project.version},
               *;resolution:=optional
             </Import-Package>
             <Export-Package>
+              org.opencastproject.serviceregistry.command;version=${project.version},
               org.opencastproject.serviceregistry.impl;version=${project.version},
-              org.opencastproject.serviceregistry.impl.endpoint;version=${project.version},
-              org.opencastproject.serviceregistry.command;version=${project.version}
+              org.opencastproject.serviceregistry.impl.endpoint;version=${project.version}
             </Export-Package>
             <Embed-Dependency>json-simple;inline=true</Embed-Dependency>
             <Service-Component>

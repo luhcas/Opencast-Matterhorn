@@ -16,6 +16,7 @@
 package org.opencastproject.serviceregistry.impl;
 
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.JobParser;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
@@ -25,6 +26,7 @@ import org.opencastproject.util.UrlSupport;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.persistence.jpa.PersistenceProvider;
 import org.junit.After;
 import org.junit.Assert;
@@ -89,13 +91,13 @@ public class JobTest {
   public void testGetReceipt() throws Exception {
     JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1);
 
-    Job receiptFromDb = serviceRegistry.getJob(job.getId());
-    Assert.assertEquals(Status.QUEUED, receiptFromDb.getStatus());
+    Job jobFromDb = serviceRegistry.getJob(job.getId());
+    Assert.assertEquals(Status.QUEUED, jobFromDb.getStatus());
 
     Track t = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
             new URI("file://test.mov"), Track.TYPE, MediaPackageElements.PRESENTATION_SOURCE);
     t.setIdentifier("track-1");
-    job.setElement(t);
+    job.setPayload(t.getAsXml());
 
     // Simulate starting the job
     job.setStatus(Status.RUNNING);
@@ -105,8 +107,8 @@ public class JobTest {
     job.setStatus(Status.FINISHED);
     serviceRegistry.updateJob(job);
 
-    receiptFromDb = serviceRegistry.getJob(job.getId());
-    Assert.assertEquals(job.getElement().getIdentifier(), receiptFromDb.getElement().getIdentifier());
+    jobFromDb = serviceRegistry.getJob(job.getId());
+    Assert.assertEquals(job.getPayload(), jobFromDb.getPayload());
   }
 
   @Test
@@ -258,6 +260,18 @@ public class JobTest {
     serviceRegistry.unRegisterService(receiptType, url);
     hosts = serviceRegistry.getServiceRegistrationsByLoad("type1");
     Assert.assertEquals(0, hosts.size());
+  }
+  
+  @Test
+  public void testMarshalling() throws Exception {
+    final String payload = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<random xmlns:ns2=\"http://mediapackage.opencastproject.org\" xmlns:ns3=\"http://job.opencastproject.org/\">something</random>";
+    JobJpaImpl job = new JobJpaImpl();
+    job.setPayload(payload);
+    
+    String marshalledJob = JobParser.toXml(job);
+    Job unmarshalledJob = JobParser.parseJob(marshalledJob);
+    
+    Assert.assertEquals("xml from unmarshalled job should remain unchanged", StringUtils.trim(payload), StringUtils.trim(unmarshalledJob.getPayload()));
   }
 
 }

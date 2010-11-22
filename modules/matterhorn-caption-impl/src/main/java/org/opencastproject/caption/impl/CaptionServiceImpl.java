@@ -203,7 +203,7 @@ public class CaptionServiceImpl implements CaptionService {
           catalog.setMimeType(new MimeType(mimetype[0], mimetype[1]));
           catalog.addTag("lang:" + language);
 
-          job.setElement(catalog);
+          job.setPayload(catalog.getAsXml());
           job.setStatus(Status.FINISHED);
           updateJob(job);
 

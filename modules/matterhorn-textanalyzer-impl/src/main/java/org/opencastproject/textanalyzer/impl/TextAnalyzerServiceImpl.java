@@ -195,7 +195,7 @@ public class TextAnalyzerServiceImpl implements TextAnalyzerService {
                   .newElement(Catalog.TYPE, MediaPackageElements.TEXTS);
           catalog.setURI(uri);
 
-          job.setElement(catalog);
+          job.setPayload(catalog.getAsXml());
           job.setStatus(Status.FINISHED);
           updateJob(job);
 

@@ -18,9 +18,11 @@ package org.opencastproject.workflow.handler;
 import org.opencastproject.distribution.api.DistributionException;
 import org.opencastproject.distribution.api.DistributionService;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -125,7 +127,13 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
           if(job == null || ! Job.Status.FINISHED.equals(job.getStatus())) {
             throw new WorkflowOperationException("Distribution job " + job + " did not complete successfully");
           }
-          MediaPackageElement newElement = job.getElement();
+          
+          MediaPackageElement newElement = null;
+          try {
+            newElement = AbstractMediaPackageElement.getFromXml(job.getPayload());
+          } catch(MediaPackageException e) {
+            throw new WorkflowOperationException(e);
+          }
           // If the job finished successfully, but returned no new element, the channel simply doesn't support this
           // kind of element.  So we just keep on looping.
           if(newElement == null) {

@@ -180,7 +180,7 @@ public class DownloadDistributionService implements DistributionService {
           }
           distributedElement.setIdentifier(null);
 
-          job.setElement(distributedElement);
+          job.setPayload(distributedElement.getAsXml());
           job.setStatus(Status.FINISHED);
           updateJob(job);
 

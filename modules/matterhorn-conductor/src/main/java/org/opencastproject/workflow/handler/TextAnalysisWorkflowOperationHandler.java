@@ -18,6 +18,7 @@ package org.opencastproject.workflow.handler;
 import org.opencastproject.composer.api.ComposerService;
 import org.opencastproject.composer.api.EncoderException;
 import org.opencastproject.job.api.Job;
+import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.Attachment;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
@@ -26,6 +27,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
@@ -216,7 +218,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
    */
   protected WorkflowOperationResult extractVideoText(final MediaPackage mediaPackage,
           WorkflowOperationInstance operation) throws EncoderException, InterruptedException, ExecutionException,
-          IOException, NotFoundException, TextAnalyzerException {
+          IOException, NotFoundException, MediaPackageException, TextAnalyzerException {
     long totalTimeInQueue = 0;
 
     List<String> sourceTagSet = asList(operation.getConfiguration("source-tags"));
@@ -288,7 +290,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
           long durationSeconds = segmentDuration.getDurationInMilliseconds() / 1000;
           Job imageReceipt = composer.image(sourceTrack, IMAGE_EXTRACTION_PROFILE, startTimeSeconds
                   + durationSeconds - stabilityThreshold + 1, true);
-          image = (Attachment) imageReceipt.getElement();
+          image = (Attachment) AbstractMediaPackageElement.getFromXml(imageReceipt.getPayload());
           long timeInComposerQueue = imageReceipt.getDateStarted().getTime() - imageReceipt.getDateCreated().getTime();
           totalTimeInQueue += timeInComposerQueue;
         } catch (EncoderException e) {
@@ -303,7 +305,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         long timeInQueue = receipt.getDateStarted().getTime() - receipt.getDateCreated().getTime();
         totalTimeInQueue += timeInQueue;
 
-        Catalog catalog = (Catalog) receipt.getElement();
+        Catalog catalog = (Catalog) AbstractMediaPackageElement.getFromXml(receipt.getPayload());
         workspace.delete(image.getURI());
         if (catalog == null) {
           logger.warn("Text analysis did not return a valid mpeg7 for segment {}", segment);

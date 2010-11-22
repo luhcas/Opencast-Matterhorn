@@ -16,15 +16,16 @@
 package org.opencastproject.serviceregistry.impl;
 
 import org.opencastproject.job.api.JaxbJob;
-import org.opencastproject.mediapackage.AbstractMediaPackageElement;
-import org.opencastproject.mediapackage.Attachment;
-import org.opencastproject.mediapackage.Catalog;
-import org.opencastproject.mediapackage.MediaPackageElement;
-import org.opencastproject.mediapackage.Track;
 
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.Date;
 
 import javax.persistence.Access;
@@ -44,10 +45,21 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * A long running, asynchronously executed job. This concrete implementations adds JPA annotations to {@link JaxbJob}.
@@ -65,7 +77,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "job", namespace = "http://job.opencastproject.org/")
 @XmlRootElement(name = "job", namespace = "http://job.opencastproject.org/")
 public class JobJpaImpl extends JaxbJob {
-  
+
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(JobJpaImpl.class);
 
@@ -91,7 +103,7 @@ public class JobJpaImpl extends JaxbJob {
   public JobJpaImpl(Status status, ServiceRegistrationJpaImpl serviceRegistration) {
     this(serviceRegistration);
     setStatus(status);
-    if(Status.RUNNING.equals(status)) {
+    if (Status.RUNNING.equals(status)) {
       setDateStarted(getDateCreated());
     }
   }
@@ -206,61 +218,23 @@ public class JobJpaImpl extends JaxbJob {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.Job#getElement()
+   * @see org.opencastproject.job.api.JaxbJob#getPayload()
    */
-  @Transient
+  @Lob
+  @Column(name = "PAYLOAD")
   @Override
-  public MediaPackageElement getElement() {
-    return element;
+  public String getPayload() {
+    return super.getPayload();
   }
 
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.job.api.Job#setElement(org.opencastproject.mediapackage.MediaPackageElement)
+   * @see org.opencastproject.job.api.JaxbJob#setPayload(java.lang.String)
    */
-  @Transient
   @Override
-  public void setElement(MediaPackageElement element) {
-    this.element = element;
-  }
-
-  @Transient
-  @XmlElement(name = "track")
-  public Track getTrack() {
-    if (element != null && element instanceof Track) {
-      return (Track) element;
-    } else {
-      return null;
-    }
-  }
-
-  @Transient
-  @XmlElement(name = "attachment")
-  public Attachment getAttachment() {
-    if (element != null && element instanceof Attachment) {
-      return (Attachment) element;
-    } else {
-      return null;
-    }
-  }
-
-  @Transient
-  @XmlElement(name = "catalog")
-  public Catalog getCatalog() {
-    if (element != null && element instanceof Catalog) {
-      return (Catalog) element;
-    } else {
-      return null;
-    }
-  }
-
-  @Lob
-  @Column(name = "ELEMENT_XML")
-  public String getElementAsXml() throws Exception {
-    if (element == null)
-      return null;
-    return ((AbstractMediaPackageElement) element).getAsXml();
+  public void setPayload(String payload) {
+    super.setPayload(payload);
   }
 
   /**
@@ -279,9 +253,32 @@ public class JobJpaImpl extends JaxbJob {
     this.serviceRegistration = serviceRegistration;
   }
 
+  @Transient
+  @XmlAnyElement(lax=true)
+  public Element getPayloadAsDom() throws IOException, ParserConfigurationException, SAXException {
+    if(payload == null) return null;
+    final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    final DocumentBuilder builder = factory.newDocumentBuilder();
+    final Document doc = builder.parse(IOUtils.toInputStream(payload, "UTF-8"));
+    return doc.getDocumentElement();
+  }
+
+  public void setPayloadAsDom(Element element) throws TransformerFactoryConfigurationError, TransformerException {
+    if(element == null) return;
+    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+    StreamResult result = new StreamResult(new StringWriter());
+    DOMSource source = new DOMSource(element);
+    transformer.transform(source, result);
+    payload = result.getWriter().toString();
+  }
+
   @PostLoad
   public void postLoad() {
-    if(serviceRegistration == null) {
+    if(payload != null) {
+      payload.getBytes(); // force the clob to load
+    }
+    if (serviceRegistration == null) {
       logger.warn("service registration is null");
     } else {
       super.host = serviceRegistration.getHost();
