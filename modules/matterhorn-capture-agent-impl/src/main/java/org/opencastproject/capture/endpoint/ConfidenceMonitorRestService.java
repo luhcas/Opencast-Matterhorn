@@ -15,22 +15,25 @@
  */
 package org.opencastproject.capture.endpoint;
 
-import java.io.StringWriter;
 import org.opencastproject.capture.api.ConfidenceMonitor;
 import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
-import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
+import org.opencastproject.util.doc.Param.Type;
 
 import org.json.simple.JSONObject;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
+import java.io.StringWriter;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -49,9 +52,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 
 @Path("/")
@@ -74,6 +74,7 @@ public class ConfidenceMonitorRestService {
     docs = generateDocs(serviceUrl);
   }
 
+  //CHECKSTYLE:OFF
   protected String generateDocs(String serviceUrl) {
     DocRestData data = new DocRestData("ConfidenceMonitor", "Confidence Monitor", serviceUrl, null);
     
@@ -110,6 +111,7 @@ public class ConfidenceMonitorRestService {
     
     return DocUtil.generate(data);
   }
+  //CHECKSTYLE:ON
   
   /**
    * OSGI activate method. Will be called on service activation.
@@ -133,13 +135,19 @@ public class ConfidenceMonitorRestService {
   public void unsetService(ConfidenceMonitor service) {
     this.service = null;
   }
-  
+
+  /**
+   * Gets the most recent frame from the monitoring service
+   * @param device The name of the device from which you want a frame
+   * @return The image as a image/jpeg
+   */
   @GET
   @Produces("image/jpeg")
   @Path("{name}")
   public Response grabFrame(@PathParam("name") String device) {
     if (service == null) {
-      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity("Confidence monitor unavailable, please wait...").build();
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
+              .entity("Confidence monitor unavailable, please wait...").build();
     }
 
     CacheControl cc = new CacheControl();
@@ -147,17 +155,23 @@ public class ConfidenceMonitorRestService {
     try {
       return Response.ok(service.grabFrame(device)).cacheControl(cc).build();
     } catch (Exception ex) {
-      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity("Can not get frame from resource").build();
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR)
+              .entity("Can not get frame from resource").build();
     }
   }
-  
+
+  /**
+   * Gets a list of available devices from the monitoring service
+   * @return The list of devices in XML format
+   */
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("devices")
   public Response getDevices() {
 
     if (service == null) {
-      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity("Confidence monitor unavailable, please wait...").build();
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
+              .entity("Confidence monitor unavailable, please wait...").build();
     }
 
     List<String> names = service.getFriendlyNames();

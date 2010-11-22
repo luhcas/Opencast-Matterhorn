@@ -16,8 +16,8 @@
 package org.opencastproject.capture.impl.jobs;
 
 /**
- * Defines contants used in many of the jobs. If you have a constant you need to add, this is the class it should live
- * in.
+ * Defines contants used in many of the jobs.
+ * If you have a constant you need to add, this is the class it should live in.
  */
 public interface JobParameters {
   /** Constant used to define the key for the pointer to the state service. */
@@ -42,19 +42,18 @@ public interface JobParameters {
   String TRUSTED_CLIENT = "trusted_client";
 
   /**
-   * Constant used to define the scheduler which should be used to schedule post-capture jobs in the appropriate
-   * classes.
+   * Constant used to define the scheduler which should be used to schedule post-capture jobs.
    */
   String JOB_SCHEDULER = "job_scheduler";
 
-  /** Constant used to define the postfix applied to all job names */
+  /** Constant used to define the postfix applied to all job names. */
   String JOB_POSTFIX = "job_postfix";
 
   /** Constant defining the job type for capture jobs. */
   String CAPTURE_TYPE = "captures";
 
   /** Constant defining the job type for capture related jobs (stop, manifest, serialize, ingest) */
-  String CAPTURE_RELATED_TYPE = "capture_related";
+  String SUPPORT_TYPE = "capture_related";
 
   /** Constant defining the job type for recurring jobs. */
   String RECURRING_TYPE = "recurring";

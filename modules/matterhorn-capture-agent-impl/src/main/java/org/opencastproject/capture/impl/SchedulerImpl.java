@@ -64,6 +64,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -88,18 +89,16 @@ import java.util.UUID;
  * Scheduler implementation class. This class is responsible for retrieving iCal and then scheduling captures from the
  * resulting calendaring data. It expects the calendaring data in RFC 2445 form, and makes use of the following fields:
  * VEVENT UID DTSTART DTEND DURATION SUMMARY ATTACHMENT
+ * @see {@link http://www.ietf.org/rfc/rfc2445.txt}
  */
 public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler, ManagedService {
 
   /** Log facility */
-  static final Logger log = LoggerFactory.getLogger(SchedulerImpl.class);
+  private static final Logger log = LoggerFactory.getLogger(SchedulerImpl.class);
 
-  static final Dur ZERO_DURATION = new Dur(0, 0, 0, 0);
+  protected static final Dur ZERO_DURATION = new Dur(0, 0, 0, 0);
 
-  static final Dur ONE_MINUTE_DURATION = new Dur(0, 0, 1, 0);
-
-  /** Simple Date Format used for start and end times of events to capture. **/
-  private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+  protected static final Dur ONE_MINUTE_DURATION = new Dur(0, 0, 1, 0);
 
   /** The name of the job that polls the remote calendar for new captures. **/
   private static final String calendarPollingJobName = "calendarPolling";
@@ -186,8 +185,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   public void updated(Dictionary properties) throws ConfigurationException {
     log.debug("Scheduler updated.");
     try {
-      localCalendarCacheURL = new File(configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL)).toURI()
-              .toURL();
+      localCalendarCacheURL = new File(
+              configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL)).toURI().toURL();
     } catch (NullPointerException e) {
       log.warn("Invalid location specified for {} unable to cache scheduling data.",
               CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL);
@@ -302,8 +301,10 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       remoteCalendarURL = new URL(remoteBase);
 
       // Times are in minutes in the config file
-      calendarPollTime = Long.parseLong(configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL));
+      calendarPollTime = Long.parseLong(
+                configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL));
       calendarPollTime = calendarPollTime * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
+
       if (calendarPollTime >= (1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS)) {
         // Setup the polling
         JobDetail job = new JobDetail("calendarUpdate", JobParameters.RECURRING_TYPE, PollCalendarJob.class);
@@ -317,13 +318,14 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           start = new Date(System.currentTimeMillis() + calendarPollTime);
         }
 
-        //We are hardcoding the update to fire at least 10 seconds away from a possible capture start to  prevent a race
-        //condition between firing a capture and updating the internal calendar.  The problem lies in the non-deterministic
-        //order of execution when the calendar update fires:  We first dump the existing schedule then reschedule with the
-        //new data, so if somehow we have a capture which should start within that fraction of a second it would be lost.
-        //Changing the update time to 10 seconds off of the full minute mark prevents the issue without resorting to keeping
-        //two schedulers around (which doesn't work very well, tried it) or having weird logic around either the start capture
-        //or poll calendar jobs to delay one or the other if there will be a conflict.
+        //We are hardcoding the update to fire at least 10 seconds away from a possible capture start to  prevent a
+        //race condition between firing a capture and updating the internal calendar.  The problem lies in the non-
+        //deterministic order of execution when the calendar update fires:  We first dump the existing schedule then
+        //reschedule with the new data, so if somehow we have a capture which should start within that fraction of a
+        //second it would be lost.  Changing the update time to 10 seconds off of the full minute mark prevents the
+        //issue without resorting to keeping two schedulers around (which doesn't work very well, tried it) or having
+        //weird logic around either the start capture or poll calendar jobs to delay one or the other if there will
+        //be a conflict.
         //If we're within the first 10 seconds push an extra 10 seconds onto the time
         if (start.getSeconds() < 10) {
           start.setTime(start.getTime() + (10 * CaptureParameters.MILLISECONDS));
@@ -335,7 +337,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
         // Create a new trigger Name Group name Start End # of times to repeat Repeat interval
         SimpleTrigger trigger = new SimpleTrigger(calendarPollingJobName, JobParameters.RECURRING_TYPE, start,
-                null, SimpleTrigger.REPEAT_INDEFINITELY, calendarPollTime);
+                                                  null, SimpleTrigger.REPEAT_INDEFINITELY, calendarPollTime);
 
         trigger.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
 
@@ -349,16 +351,16 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       }
     } catch (StringIndexOutOfBoundsException e) {
       log.warn("Unable to build valid scheduling data endpoint from key {}: {}.  Value must end in a / character.",
-              CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, configService
-                      .getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL));
+              CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL,
+              configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL));
     } catch (MalformedURLException e) {
       log.warn("Invalid location specified for {} unable to retrieve new scheduling data: {}.",
-              CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, configService
-                      .getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL));
+              CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL,
+              configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL));
     } catch (NumberFormatException e) {
       log.warn("Invalid polling interval for {} unable to retrieve new scheduling data: {}.",
-              CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, configService
-                      .getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL));
+              CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL,
+              configService.getItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL));
     } catch (SchedulerException e) {
       log.warn("Scheduler exception when attempting to start polling tasks: {}", e);
     }
@@ -439,69 +441,13 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           scheduler.deleteJob(name, JobParameters.CAPTURE_TYPE);
         }
       } catch (SchedulerException e) {
-        log.error("Unable to remove previously scheduled jobs: {}.", e.getMessage());
+        log.error("Unable to remove previously scheduled jobs: {}.", e);
       }
 
       //Schedule the new ones
       setCaptureSchedule(scheduler, calendar);
     }
-/*
-    // If the scheduler exists and the scheduling data is new
-    if (scheduler != null && calendar != null) {
-      log.debug("Populating new scheduler with new scheduling data.");
-      // Generate a new scheduler
-      Scheduler sched = generateNewScheduler(schedProps, false);
-      setCaptureSchedule(sched, calendar);
 
-      // Shut down the old scheduler, swap in the new one
-      synchronized (scheduler) {
-        if (isSchedulerEnabled()) {
-          this.startScheduler(sched);
-        }
-
-        log.debug("1");
-        try {
-          //Copy over the capture related triggers
-          for (String name : scheduler.getJobNames(JobParameters.CAPTURE_RELATED_TYPE)) {
-            JobDetail d = scheduler.getJobDetail(name, JobParameters.CAPTURE_RELATED_TYPE);
-            log.debug("2");
-            for (Trigger t : scheduler.getTriggersOfJob(name, JobParameters.CAPTURE_RELATED_TYPE)) {
-              log.debug("Rescheduling job {} on new scheduler.", d.getName());
-              t.getJobDataMap().put(JobParameters.SCHEDULER, sched);
-              sched.scheduleJob(d, t);
-            }
-            log.debug("3");
-            scheduler.deleteJob(d.getName(), JobParameters.CAPTURE_RELATED_TYPE);
-            log.debug("4");
-          }
-        } catch (SchedulerException e) {
-          log.error("Unable to copy capture related jobs, this is very bad!  Message: {}.", e.getMessage());
-        }
-        log.debug("5");
-
-        Scheduler old = scheduler;
-        log.debug("6");
-        scheduler = sched;
-        log.debug("7");
-        this.shutdown(old);
-        log.debug("Done");
-      }
-    // If the scheduler does not exist create it
-    } else if (scheduler == null) {
-      log.debug("Creating new scheduler with new scheduling data.");
-      // Generate a new scheduler
-      scheduler = generateNewScheduler(schedProps, true);
-      // If the schedule data isn't null, schedule it
-      if (calendar != null) {
-        setCaptureSchedule(scheduler, calendar);
-      }
-      startScheduler();
-    } else {
-      log.debug("Updating polling settings.");
-      setupPolling(scheduler, false);
-    }
-    log.debug("wtf?");
-*/
     logSchedules(scheduler);
   }
 
@@ -599,11 +545,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           JobDetail job = scheduler.getJobDetail(jobname, JobParameters.CAPTURE_TYPE);
           Trigger[] triggers = scheduler.getTriggersOfJob(jobname, JobParameters.CAPTURE_TYPE);
           for (Trigger t : triggers) {
-            events.add(new ScheduledEventImpl(job.getName(), t.getFireTimeAfter(new Date()).getTime(), (Long) job
-                    .getJobDataMap().get(CaptureParameters.RECORDING_DURATION)));
+            events.add(new ScheduledEventImpl(job.getName(), t.getFireTimeAfter(new Date()).getTime(),
+                       (Long) job.getJobDataMap().get(CaptureParameters.RECORDING_DURATION)));
           }
         } catch (SchedulerException e) {
-          log.warn("Scheduler exception while generating capture schedule: {}.", e.getMessage());
+          log.warn("Scheduler exception while generating capture schedule: {}.", e);
         }
       }
     }
@@ -625,7 +571,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           }
         }
 
-        jobnames = sched.getJobNames(JobParameters.CAPTURE_RELATED_TYPE);
+        jobnames = sched.getJobNames(JobParameters.SUPPORT_TYPE);
         log.debug("Currently scheduled jobs for capture related schedule: {}", jobnames.length);
         if (log.isTraceEnabled()) {
           for (String name : jobnames) {
@@ -650,8 +596,26 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         }
       }
     } catch (SchedulerException e) {
-      log.debug("SchedulerException in logSchedules(): {}.", e.getMessage());
+      log.debug("SchedulerException in logSchedules(): {}.", e);
     }
+  }
+
+  /**
+   * Gets the maximum duration for a capture as a {@code Dur} object.
+   * If the capture length is not set correctly in the capture parameters then
+   * this method will default to {@code DEFAULT_MAX_CAPTURE_LENGTH}
+   * @return The maximum duration of a capture.
+   */
+  public Dur getMaxDuration() {
+    // Get the maximum duration from the config service
+    long length = CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH * CaptureParameters.MILLISECONDS;
+    try {
+      length = Integer.parseInt(configService.getItem(CaptureParameters.CAPTURE_MAX_LENGTH))
+              * CaptureParameters.MILLISECONDS;
+    } catch (NumberFormatException ex) {
+      log.error("NumberFormatException:  Unable to set maximum duration because value set incorrectly");
+    }
+    return new Dur(new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis() + length));    
   }
 
   /**
@@ -669,14 +633,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
     try {
       Dur maxDuration = null;
-      // Get the maximum duration from the config service
-      try {
-        long length = Integer.parseInt(configService.getItem(CaptureParameters.CAPTURE_MAX_LENGTH))
-                * CaptureParameters.MILLISECONDS;
-        maxDuration = new Dur(new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis() + length));
-      } catch (NumberFormatException ex) {
-        log.error("NumberFormatException:  Unable to set maximum duration because value set incorrectly");
-      }
+
 
       Map<Long, String> scheduledEventStarts = new Hashtable<Long, String>();
       Map<String, Date> scheduledEventEnds = new Hashtable<String, Date>();
@@ -686,56 +643,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       VEvent[] startAry = list.toArray(new VEvent[list.size()]);
 
       for (int i = 0; i < startAry.length; i++) {
-        VEvent event = startAry[i];
-
-        // Get the ID, or generate one
-        String uid = null;
-        if (event.getUid() != null) {
-          uid = event.getUid().getValue();
-        } else {
-          log.info("Event has no UID field, autogenerating name...");
-          uid = "UnknownUID-" + event.hashCode();
-        }
-
-        // Get the start time
-        Date start = null;
-        if (event.getStartDate() != null) {
-          start = event.getStartDate().getDate();
-        } else {
-          log.warn("Event {} has no start time, unable to schedule!", uid);
+        Event event = new Event(startAry[i], captureAgent, this);
+        if (!event.isValidEvent()) {
           continue;
-        }
-
-        // Get the end time
-        Date end = null;
-        if (event.getEndDate() != null) {
-          end = event.getEndDate().getDate();
-        } else {
-          log.debug("Event {} has no end time specified but may have a duration, checking...", uid);
-        }
-
-        // Determine the duration
-        Duration duration = event.getDuration();
-        if (duration == null) {
-          if (end != null) {
-            log.debug("Event {} has start and end, calculating duration.", uid);
-            duration = new Duration(start, end);
-          } else {
-            log.warn("Event {} has no duration and no end time, using max duration.", uid);
-            end = new Date(start.getTime() + getMaxScheduledCaptureLength());
-            duration = new Duration(start, end);
-          }
-        } else if (end == null) {
-          log.debug("Event {} has start and duration, calculating end time.", uid);
-          // In this case we have a start and a duration, so calculate the stop end value
-          end = duration.getDuration().getTime(start);
-        } else {
-          if (new Duration(start, end).getDuration().compareTo(duration.getDuration()) != 0) {
-            log.error(
-                    "Invalid ical data, both an end time and a duration were specified for event {} and do not match.",
-                    uid);
-            continue;
-          }
         }
 
         boolean skipOnError = Boolean.valueOf(configService
@@ -752,11 +662,12 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         }
         long bufferTime = bufferMinutes * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
 
+        //If there could be an event scheduled before this one
         if (i > 0 && startAry[i - 1] != null && scheduledEventEnds.size() > 0) {
           int j = i - 1;
           String otherUID = null;
-          // Search through the list of captures which could possibly have been scheduled checking to see which one is
-          // closest to us
+          // Search through the list of captures which could possibly have been scheduled
+          // checking to see which one is closest to us
           while (j > 0) {
             otherUID = startAry[j].getUid().getValue();
             if (scheduledEventEnds.containsKey(otherUID)) {
@@ -767,205 +678,125 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           // If we found something
           if (otherUID != null) {
             Date lastEndDate = scheduledEventEnds.get(otherUID);
-            if (start.before(lastEndDate)) {
+            if (event.getStart().before(lastEndDate)) {
               if (skipOnError) {
-                log.warn("Start time for event {} is before end time of event {}!  Skipping...", uid, otherUID);
+                log.warn("Start time for event {} is before end time of event {}!  Skipping...",
+                          event.getUID(), otherUID);
                 continue;
               } else {
-                log
-                        .warn("Start time for event {} is before end time of event {}!  Shortening to fit...", uid,
-                                otherUID);
-                start = new Date(lastEndDate.getTime() + bufferTime);
-                duration = new Duration(start, end);
+                log.warn("Start time for event {} is before end time of event {}!  Shortening to fit...",
+                          event.getUID(), otherUID);
+                event.setStart(new Date(lastEndDate.getTime() + bufferTime));
               }
-            } else if (ONE_MINUTE_DURATION.compareTo(new Dur(lastEndDate, start)) >= 0) {
+            } else if (ONE_MINUTE_DURATION.compareTo(new Dur(lastEndDate, event.getStart())) >= 0) {
               if (skipOnError) {
-                log.warn("Start time for event {} is within one minute of event {}!  Skipping...", uid, otherUID);
+                log.warn("Start time for event {} is within one minute of event {}!  Skipping...",
+                          event.getUID(), otherUID);
                 continue;
               } else {
-                log.warn("Start time for event {} is within one minute of event {}!  Shortening to fit...", uid,
-                        otherUID);
-                start = new Date(lastEndDate.getTime() + bufferTime);
-                duration = new Duration(start, end);
+                log.warn("Start time for event {} is within one minute of event {}!  Shortening to fit...",
+                          event.getUID(), otherUID);
+                event.setStart(new Date(lastEndDate.getTime() + bufferTime));
               }
             }
           }
         }
 
-        // Sanity checks on the duration
-        if (duration.getDuration().isNegative()) {
-          log.warn("Event {} has a negative duration, skipping.", uid);
+        if (!event.isValidEvent()) {
           continue;
-        } else if (captureIsHappeningNow(start, end)) {
-          if (captureAgentIsIdle()) {
-            // Try to handle a capture we have just missed.
-            log
-                    .warn(
-                            "Event {} is scheduled for a time that has already passed, but we should be capturing so start capture.",
-                            uid);
-            uid = uid + "-" + sdf.format(new Date());
-            start = new Date(System.currentTimeMillis() + (1 * CaptureParameters.MILLISECONDS));
-            duration = setNewUIDStartAndDuration(event, uid, start, end, duration);
-            // Sanity check on the duration
-            if (duration.getDuration().isNegative()) {
-              log.warn("Event {} has a negative duration, skipping.", uid);
-              continue;
-            }
-          }
-        } else if (end.before(new Date())) {
-          log.debug("Event {} is scheduled for a time that has already passed, skipping.", uid);
-          continue;
-        } else if (duration.getDuration().compareTo(new Dur(0, 0, 0, 0)) == 0) {
-          log.warn("Event {} has a duration of 0, skipping.", uid);
-          continue;
-        } else if (duration.getDuration().compareTo(ONE_MINUTE_DURATION) < 0) {
-          log.warn("Event {} has a duration of less than one minute, skipping.", uid);
-          continue;
-        } else if (duration.getDuration().compareTo(maxDuration) > 0) {
-          log.warn("Event {} set to longer than maximum allowed capture duration, cutting off capture at {} seconds.",
-                  uid, CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH);
-          duration.setDuration(maxDuration);
-          end = duration.getDuration().getTime(start);
         }
 
         // Get the cron expression and make sure it doesn't conflict with any existing captures
         // Note that this means the order in which the scheduled events appear in the source iCal makes a functional
         // difference!
-        String conflict = scheduledEventStarts.get(start.getTime());
+        String conflict = scheduledEventStarts.get(event.getStart().getTime());
         if (conflict != null) {
           // This case should have disappeared with MH-1253, but I'm leaving it here anyway just in case
-          log.warn("Unable to schedule event {} because its starting time coinsides with event {}!", uid, conflict);
+          log.warn("Unable to schedule event {} because its starting time coinsides with event {}!",
+                    event.getUID(), conflict);
           continue;
         }
 
-        CronExpression startCronExpression = getCronString(start);
-        // Create the trigger
-        CronTrigger trig = new CronTrigger();
-        trig.setCronExpression(startCronExpression);
-        trig.setName(startCronExpression.toString());
-        trig.setGroup(JobParameters.CAPTURE_TYPE);
-        trig.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
-
-        JobDetail job = new JobDetail(uid, JobParameters.CAPTURE_TYPE, StartCaptureJob.class);
-        // Setup the basic job properties
-        Properties props = new Properties();
-        props.put(CaptureParameters.RECORDING_ID, uid);
-        props.put(JobParameters.JOB_POSTFIX, uid);
-        String endCronString = getCronString(end).toString();
-        props.put(CaptureParameters.RECORDING_END, endCronString);
-
-        job.getJobDataMap().put(CaptureParameters.RECORDING_DURATION, end.getTime() - start.getTime());
-
-        setupEvent(event, props, job);
-        job.getJobDataMap().put(JobParameters.SCHEDULER, sched);
-        try {
-          sched.scheduleJob(job, trig);
-        } catch (SchedulerException e) {
-          if (start.after(new Date())) {
-            log.error("Invalid scheduling data: {}.", e.getMessage());
-          }
-        }
-        scheduledEventStarts.put(start.getTime(), uid);
-        scheduledEventEnds.put(uid, end);
+        PropertyList attachments = event.getProperties(Property.ATTACH);
+        scheduleEvent(sched, event, attachments);
+        scheduledEventStarts.put(event.getStart().getTime(), event.getUID());
+        scheduledEventEnds.put(event.getUID(), event.getEnd());
       }
     } catch (NullPointerException e) {
-      log.error("Invalid calendar data, one of the start or end times is incorrect: {}.", e.getMessage());
+      log.error("Invalid calendar data, one of the start or end times is incorrect: {}.", e);
     } catch (ParseException e) {
-      log.error("Parsing error: {}.", e.getMessage());
+      log.error("Parsing error: {}.", e);
     } catch (org.opencastproject.util.ConfigurationException e) {
-      log.error("Configuration exception: {}.", e.getMessage());
+      log.error("Configuration exception: {}.", e);
     } catch (MediaPackageException e) {
-      log.error("MediaPackageException exception: {}.", e.getMessage());
+      log.error("MediaPackageException exception: {}.", e);
     } catch (MalformedURLException e) {
-      log.error("MalformedURLException: {}.", e.getMessage());
+      log.error("MalformedURLException: {}.", e);
     }
   }
 
-  private Duration setNewUIDStartAndDuration(VEvent event, String uid, Date start, Date end, Duration duration)
-          throws ParseException {
-    for (Object property : event.getProperties()) {
-      if (property instanceof Property) {
-        Property newProperty = (Property) property;
-        if (newProperty.getName().equals(Property.UID)) {
-          try {
-            newProperty.setValue(uid);
-          } catch (IOException e) {
-            log
-                    .error(
-                            "Event {} was unable to set a new uid while trying to set it's new value to distinguish it from a possible previous capture.",
-                            uid);
-          } catch (URISyntaxException e) {
-            log
-                    .error(
-                            "Event {} was unable to set a new uid while trying to set it's new value to distinguish it from a possible previous capture.",
-                            uid);
-          }
-        } else if (newProperty.getName().equals(Property.DTSTART)) {
-          try {
-            newProperty.setValue(sdf.format(start));
-          } catch (IOException e) {
-            log
-                    .error(
-                            "Event {} was unable to set a new start time {} while trying to set it's new value to start it right away.",
-                            uid, start);
-          } catch (URISyntaxException e) {
-            log
-                    .error(
-                            "Event {} was unable to set a new start time {} while trying to set it's new value to start it right away.",
-                            uid, start);
-          }
-        }
+  /**
+   * Schedules an event in the internal scheduler
+   * @param sched The scheduler to use
+   * @param event The {@code Event} to schedule
+   * @param attachments The list of attachments for the VEvent
+   * @throws ParseException
+   * @throws org.opencastproject.util.ConfigurationException
+   * @throws MalformedURLException
+   * @throws MediaPackageException
+   */
+  private void scheduleEvent(Scheduler sched, Event event, PropertyList attachments)
+      throws ParseException, org.opencastproject.util.ConfigurationException,
+             MalformedURLException, MediaPackageException {
+    CronExpression startCronExpression = getCronString(event.getStart());
+    // Create the trigger
+    CronTrigger trig = new CronTrigger();
+    trig.setCronExpression(startCronExpression);
+    trig.setName(startCronExpression.toString());
+    trig.setGroup(JobParameters.CAPTURE_TYPE);
+    trig.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
 
-        else if (newProperty.getName().equals(Property.DURATION)) {
-          try {
-            duration = new Duration(start, end);
-            newProperty.setValue(duration.getValue());
-          } catch (IOException e) {
-            log
-                    .error(
-                            "Event {} was unable to set a new duration {} while trying to set it's new value to start it right away.",
-                            uid, duration);
-          } catch (URISyntaxException e) {
-            log
-                    .error(
-                            "Event {} was unable to set a new duration {} while trying to set it's new value to start it right away.",
-                            uid, duration);
-          }
-        }
+    JobDetail job = new JobDetail(event.getUID(), JobParameters.CAPTURE_TYPE, StartCaptureJob.class);
+    // Setup the basic job properties
+    Properties props = new Properties();
+    props.put(CaptureParameters.RECORDING_ID, event.getUID());
+    props.put(JobParameters.JOB_POSTFIX, event.getUID());
+    String endCronString = getCronString(event.getEnd()).toString();
+    props.put(CaptureParameters.RECORDING_END, endCronString);
+
+    job.getJobDataMap().put(CaptureParameters.RECORDING_DURATION,
+                            event.getEnd().getTime() - event.getStart().getTime());
+
+    setupEvent(attachments, props, job);
+    job.getJobDataMap().put(JobParameters.SCHEDULER, sched);
+    try {
+      sched.scheduleJob(job, trig);
+    } catch (SchedulerException e) {
+      if (event.getStart().after(new Date())) {
+        log.error("Invalid scheduling data: {}.", e);
       }
-    }
-    return duration;
-  }
-
-  private boolean captureIsHappeningNow(Date start, Date end) {
-    return start.before(new Date()) && end.after(new Date());
-  }
-
-  private boolean captureAgentIsIdle() {
-    return captureAgent == null || captureAgent != null && captureAgent.getAgentState() == null
-            || captureAgent.getAgentState() != null && captureAgent.getAgentState().equals(AgentState.IDLE);
+    }    
   }
 
   /**
    * A helper function to wrap the configuration of an event. This function writes the attached files to disk and
    * generates the initial {@code Mediapackage}.
    * 
-   * @param event
-   *          The {@code VEvent} of the capture. This contains all of the attachments and such needed to setup the
-   *          directory structure.
+   * @param attachments
+   *          The {@code PropertyList} of the capture.
+   *          This contains all of the attachments and such needed to setup the directory structure.
    * @param props
    *          The system {@code Properties} for the job. This can be overridden by the properties attached to the event.
    * @param job
    *          The {@code JobDetail} instance itself. This is what everything gets attached to so that Quartz can run
    *          properly.
-   * @return True if the setup worked, false if there was an error.
    * @throws org.opencastproject.util.ConfigurationException
    * @throws MediaPackageException
    * @throws MalformedURLException
    * @throws ParseException
    */
   @SuppressWarnings("unchecked")
-  private void setupEvent(VEvent event, Properties props, JobDetail job)
+  private void setupEvent(PropertyList attachments, Properties props, JobDetail job)
           throws org.opencastproject.util.ConfigurationException, MediaPackageException, MalformedURLException,
           ParseException {
     MediaPackage pack = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
@@ -983,7 +814,6 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       }
     }
 
-    PropertyList attachments = event.getProperties(Property.ATTACH);
     ListIterator<Property> iter = (ListIterator<Property>) attachments.listIterator();
     // For each attachment
     while (iter.hasNext()) {
@@ -1086,7 +916,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * 
    * @return The maximum length in milliseconds.
    */
-  public long getMaxScheduledCaptureLength() {
+  public static long getMaxScheduledCaptureLength() {
     return CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH * CaptureParameters.MILLISECONDS;
   }
 
@@ -1100,9 +930,11 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @return True if the job was scheduled, false otherwise.
    */
   public boolean scheduleUnscheduledStopCapture(String recordingID, Date stop) {
-    SimpleTrigger trig = new SimpleTrigger("StopCaptureTrigger-" + recordingID, JobParameters.CAPTURE_RELATED_TYPE, stop);
+    SimpleTrigger trig = new SimpleTrigger(StopCaptureJob.TRIGGER_PREFIX + recordingID, JobParameters.SUPPORT_TYPE,
+                                           stop);
     trig.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
-    JobDetail job = new JobDetail("StopCapture-" + recordingID, JobParameters.CAPTURE_RELATED_TYPE, StopCaptureJob.class);
+    JobDetail job = new JobDetail(StopCaptureJob.JOB_PREFIX + recordingID, JobParameters.SUPPORT_TYPE,
+                                  StopCaptureJob.class);
 
     job.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captureAgent);
     job.getJobDataMap().put(JobParameters.JOB_POSTFIX, recordingID);
@@ -1141,12 +973,12 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    */
   public boolean scheduleSerializationAndIngest(String recordingID) {
     try {
-      String[] jobs = scheduler.getJobNames(JobParameters.CAPTURE_RELATED_TYPE);
+      String[] jobs = scheduler.getJobNames(JobParameters.SUPPORT_TYPE);
       for (String jobname : jobs) {
         if (jobname.equals("StopCapture-" + recordingID)) {
-          scheduler.deleteJob(jobname, JobParameters.CAPTURE_RELATED_TYPE);
+          scheduler.deleteJob(jobname, JobParameters.SUPPORT_TYPE);
         } else if (jobname.equals("SerializeJob-" + recordingID)) {
-          scheduler.deleteJob(jobname, JobParameters.CAPTURE_RELATED_TYPE);
+          scheduler.deleteJob(jobname, JobParameters.SUPPORT_TYPE);
         }
       }
     } catch (SchedulerException e) {
@@ -1154,11 +986,12 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     }
 
     // Create job and trigger
-    JobDetail job = new JobDetail("SerializeJob-" + recordingID, JobParameters.CAPTURE_RELATED_TYPE, SerializeJob.class);
+    JobDetail job = new JobDetail(SerializeJob.JOB_PREFIX + recordingID, JobParameters.SUPPORT_TYPE,
+                                  SerializeJob.class);
 
     // Setup the trigger. The serialization job will automatically refire if it fails, so we don't need to worry about
     // it
-    SimpleTrigger trigger = new SimpleTrigger("SerializeJobTrigger-" + recordingID, JobParameters.CAPTURE_RELATED_TYPE,
+    SimpleTrigger trigger = new SimpleTrigger(SerializeJob.TRIGGER_PREFIX + recordingID, JobParameters.SUPPORT_TYPE,
             new Date());
     trigger.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
 
@@ -1185,13 +1018,13 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @return True if the job was scheduled correctly, false otherwise.
    */
   public boolean scheduleIngest(String recordingID) {
-    JobDetail job = new JobDetail("IngestJob-" + recordingID, JobParameters.CAPTURE_RELATED_TYPE, IngestJob.class);
+    JobDetail job = new JobDetail(IngestJob.JOB_PREFIX + recordingID, JobParameters.SUPPORT_TYPE, IngestJob.class);
     CronTrigger trigger;
 
     try {
       trigger = new CronTrigger();
-      trigger.setGroup(JobParameters.CAPTURE_RELATED_TYPE);
-      trigger.setName("IngestJobTrigger-" + recordingID);
+      trigger.setGroup(JobParameters.SUPPORT_TYPE);
+      trigger.setName(IngestJob.TRIGGER_PREFIX + recordingID);
       trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
 
       // TODO: Make this configurable. Or at least slow it down a bit - hitting things every 20 seconds it too fast.
@@ -1205,10 +1038,10 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       scheduler.scheduleJob(job, trigger);
 
     } catch (ParseException e) {
-      log.error("Invalid argument for CronTrigger: {}", e.getMessage());
+      log.error("Invalid argument for CronTrigger: {}", e);
       return false;
     } catch (SchedulerException e) {
-      log.error("Couldn't schedule task: {}", e.getMessage());
+      log.error("Couldn't schedule task: {}", e);
       return false;
     }
     return true;
@@ -1340,7 +1173,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
         }
       }
     } catch (SchedulerException e) {
-      log.error("Unable to disable polling scheduler: {}.", e.getMessage());
+      log.error("Unable to disable polling scheduler: {}.", e);
     }
   }
 
@@ -1396,7 +1229,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       try {
         return sched.getTrigger(calendarPollingJobName, JobParameters.RECURRING_TYPE) != null;
       } catch (SchedulerException e) {
-        log.warn("Scheduler exception: {}.", e.getMessage());
+        log.warn("Scheduler exception: {}.", e);
         return false;
       }
     }
@@ -1430,7 +1263,213 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
 
 }
 
-class VEventStartTimeComparator implements Comparator<VEvent> {
+class Event {
+  private static final Logger log = LoggerFactory.getLogger(Event.class); 
+  private String uid;
+  private Date start;
+  private Date end;
+  private Duration duration;
+  private CaptureAgent captureAgent;
+  private SchedulerImpl scheduler;
+  private boolean isValid = true;
+  private VEvent sourceEvent = null;
+
+  /** Simple Date Format used for start and end times of events to capture. **/
+  private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+
+
+  public Event(VEvent event, CaptureAgent agent, SchedulerImpl sched) {
+
+    captureAgent = agent;
+    scheduler = sched;
+
+    sourceEvent = event;
+    if (event == null) {
+      log.error("Unable to create Event object around null VEvent.");
+      isValid = false;
+      return;
+    }
+
+    // Get the ID, or generate one
+    uid = null;
+    if (event.getUid() != null) {
+      uid = event.getUid().getValue();
+    } else {
+      log.info("Event has no UID field, autogenerating name...");
+      uid = "UnknownUID-" + event.hashCode();
+    }
+
+    // Get the start time
+    start = null;
+    if (event.getStartDate() != null) {
+      start = event.getStartDate().getDate();
+    } else {
+      log.warn("Event {} has no start time, unable to schedule!", uid);
+      isValid = false;
+      return;
+    }
+
+    // Get the end time
+    end = null;
+    if (event.getEndDate() != null) {
+      end = event.getEndDate().getDate();
+    } else {
+      log.debug("Event {} has no end time specified but may have a duration, checking...", uid);
+    }
+
+    // Determine the duration
+    duration = event.getDuration();
+    if (duration == null) {
+      if (end != null) {
+        log.debug("Event {} has start and end, calculating duration.", uid);
+        duration = new Duration(start, end);
+      } else {
+        log.warn("Event {} has no duration and no end time, using max duration.", uid);
+        end = new Date(start.getTime() + SchedulerImpl.getMaxScheduledCaptureLength());
+        duration = new Duration(start, end);
+      }
+    } else if (end == null) {
+      log.debug("Event {} has start and duration, calculating end time.", uid);
+      // In this case we have a start and a duration, so calculate the stop end value
+      end = duration.getDuration().getTime(start);
+    } else {
+      if (new Duration(start, end).getDuration().compareTo(duration.getDuration()) != 0) {
+        log.error("Invalid ical data, an end and a duration were specified for event {} but do not match.", uid);
+        isValid = false;
+        return;
+      }
+    }
+
+    doSanityChecks();
+  }
+
+  public PropertyList getProperties(String type) {
+    return sourceEvent.getProperties(type);
+  }
+
+  public void setUID(String newUID) {
+    uid = newUID;
+  }
+
+  public String getUID() {
+    return uid;
+  }
+
+  public void setStart(Date newStart) {
+    if (newStart == null) {
+      log.error("Unable to set start date to null");
+      return;
+    }
+    start = newStart;
+    updateDuration();
+    doSanityChecks();
+  }
+
+  public Date getStart() {
+    return start;
+  }
+
+  public void setEnd(Date newEnd) {
+    if (newEnd == null) {
+      log.error("Unable to set end date to null");
+      return;
+    }
+    end = newEnd;
+    updateDuration();
+    doSanityChecks();
+  }
+
+  public Date getEnd() {
+    return end;
+  }
+
+  private void updateDuration() {
+    duration = new Duration(new Dur(start, end));
+  }
+
+  public Dur getDuration() {
+    return duration.getDuration();
+  }
+
+  /**
+   * Checks to see if a capture should be happening now.
+   * @param start The start time of the event
+   * @param end The end time of the event
+   * @return True if the current time is between start and end, false otherwise
+   */
+  private boolean captureIsHappeningNow(Date start, Date end) {
+    return start.before(new Date()) && end.after(new Date());
+  }
+
+  /**
+   * Checks to see if the capture agent is current capturing.
+   * @return True if the agent exists, and its state is not idle
+   */
+  private boolean captureAgentIsCapturing() {
+    return captureAgent != null && captureAgent.getAgentState() != null
+            && !captureAgent.getAgentState().equals(AgentState.IDLE);
+  }
+
+  /**
+   * Runs sanity checks on the the start and duration of this event.
+   * This method may change the start and/or duration values if they are invalid.
+   * Note that if the sanity checks fail then isValidEvent() will also return false;
+   * @return True if the sanity checks pass, false otherwise
+   */
+  private boolean doSanityChecks() {
+    // Sanity checks on the duration
+    if (this.getDuration().isNegative()) {
+      log.warn("Event {} has a negative duration, skipping.", this.getUID());
+      isValid = false;
+      return false;
+    } else if (captureIsHappeningNow(this.getStart(), this.getEnd())) {
+      if (!captureAgentIsCapturing()) {
+        // Try to handle a capture we have just missed.
+        log.warn("Event {} is scheduled for a time that has already passed," +
+                 " but should be capturing.  Starting capture.", this.getUID());
+        this.setUID(this.getUID() + "-" + sdf.format(new Date()));
+        this.setStart(new Date(System.currentTimeMillis() + (1 * CaptureParameters.MILLISECONDS)));
+        // Sanity check on the duration
+        if (this.getDuration().isNegative()) {
+          log.warn("Event {} has a negative duration, skipping.", uid);
+          isValid = false;
+          return false;
+        }
+      }
+    } else if (this.getEnd().before(new Date())) {
+      log.debug("Event {} is scheduled for a time that has already passed, skipping.", this.getUID());
+      isValid = false;
+      return false;
+    } else if (this.getDuration().compareTo(new Dur(0, 0, 0, 0)) == 0) {
+      log.warn("Event {} has a duration of 0, skipping.", this.getUID());
+      isValid = false;
+      return false;
+    } else if (this.getDuration().compareTo(SchedulerImpl.ONE_MINUTE_DURATION) < 0) {
+      log.warn("Event {} has a duration of less than one minute, skipping.", this.getUID());
+      isValid = false;
+      return false;
+    } else if (this.getDuration().compareTo(scheduler.getMaxDuration()) > 0) {
+      log.warn("Event {} set to longer than maximum allowed capture duration, cutting off capture at {} seconds.",
+              this.getUID(), CaptureAgentImpl.DEFAULT_MAX_CAPTURE_LENGTH);
+      duration.setDuration(scheduler.getMaxDuration());
+      end = duration.getDuration().getTime(start);
+    }
+    isValid = true;
+    return true;
+  }
+
+  /**
+   * Returns true if this event is valid (ie, scheduleable)
+   * @return True if the event can be scheduled, false otherwise.
+   */
+  public boolean isValidEvent() {
+    return isValid;
+  }
+}
+
+class VEventStartTimeComparator implements Comparator<VEvent>, Serializable {
+
+  private static final long serialVersionUID = 4590767229806913896L;
 
   @Override
   public int compare(VEvent o1, VEvent o2) {

@@ -41,26 +41,25 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Class for retrieving, storing and accessing both local and centralised 
- * configuration files for the CaptureAgent. Uses java.util.Properties to store
- * configuration file which can read/write INI style config files.
+ * Class for retrieving, storing and accessing both local and centralised configuration files for the CaptureAgent. Uses
+ * java.util.Properties to store configuration file which can read/write INI style config files.
  * 
  * FIXME: Is this class thread safe (answer: currently, no)? Does it need to be? (jt)
  */
 public class ConfigurationManager implements ManagedService {
-  
+
   /** slf4j logging */
-  static final Logger logger = 
-    LoggerFactory.getLogger(ConfigurationManager.class);
-  
+  static final Logger logger = LoggerFactory.getLogger(ConfigurationManager.class);
+
   /** Hashtable that represents config file in memory */
   XProperties properties = new XProperties();
-  
+
   /** should point to a centralised config file */
-  URL url; 
-  
-  /** Timer that will every at a specified interval to retrieve the centralised
-   * configuration file from a server */
+  URL url;
+
+  /**
+   * Timer that will every at a specified interval to retrieve the centralised configuration file from a server
+   */
   Timer timer;
 
   public void activate(ComponentContext ctx) {
@@ -75,7 +74,7 @@ public class ConfigurationManager implements ManagedService {
     }
     properties.setBundleContext(null);
   }
-  
+
   @SuppressWarnings("unchecked")
   @Override
   public void updated(Dictionary props) throws ConfigurationException {
@@ -85,8 +84,8 @@ public class ConfigurationManager implements ManagedService {
     }
     logger.debug("Merging new properties into in-memory structure.");
 
-    //Filter out all of the non-string objects from the incoming dictionary
-    //If we don't do this then serialization of the RecordingImpl in CaptureAgentImpl doesn't work
+    // Filter out all of the non-string objects from the incoming dictionary
+    // If we don't do this then serialization of the RecordingImpl in CaptureAgentImpl doesn't work
     Enumeration<Object> keys = props.keys();
     while (keys.hasMoreElements()) {
       Object key = keys.nextElement();
@@ -110,14 +109,14 @@ public class ConfigurationManager implements ManagedService {
 
     createCoreDirectories();
 
-    //Grab the remote config file, dump it to disk and then merge it into the current config
+    // Grab the remote config file, dump it to disk and then merge it into the current config
     Properties server = retrieveConfigFromServer();
     if (server != null) {
       writeConfigFileToDisk();
       merge(server, true);
     }
-    
-    //Shut down the old timer if it exists
+
+    // Shut down the old timer if it exists
     if (timer != null) {
       timer.cancel();
     }
@@ -133,7 +132,7 @@ public class ConfigurationManager implements ManagedService {
           logger.info("Polling time has been set to less than 1 second, polling disabled.");
           return;
         }
-        delay =  delay * 1000L;
+        delay = delay * 1000L;
 
         timer = new Timer();
         timer.schedule(new UpdateConfig(), delay, delay);
@@ -142,7 +141,7 @@ public class ConfigurationManager implements ManagedService {
       }
     }
   }
-  
+
   /**
    * Creates the core Opencast directories.
    */
@@ -153,8 +152,12 @@ public class ConfigurationManager implements ManagedService {
 
   /**
    * Creates a file or directory.
-   * @param key    The key to set in this configuration manager.  Key is set equal to name.
-   * @param fallback The directory structure that should be created under java.io.tmpdir should the key not be found in the configuration data.
+   * 
+   * @param key
+   *          The key to set in this configuration manager. Key is set equal to name.
+   * @param fallback
+   *          The directory structure that should be created under java.io.tmpdir should the key not be found in the
+   *          configuration data.
    */
   protected void createFileObj(String key, String fallback) {
     if (this.getItem(key) == null) {
@@ -166,36 +169,39 @@ public class ConfigurationManager implements ManagedService {
 
     File target = null;
     try {
-      target = new File (this.getItem(key));
+      target = new File(this.getItem(key));
       FileUtils.forceMkdir(target);
       if (!target.exists()) {
         throw new RuntimeException("Unable to create directory " + target + ".");
       }
       this.setItem(key, target.toString());
     } catch (IOException e) {
-      logger.error("Unable to create directory: {}, because {} happened.", target, e.getMessage());
+      logger.error("Unable to create directory: {}, because {} happened.", target, e);
     } catch (NullPointerException e) {
       logger.error("No value found for key {}.", key);
     }
   }
-  
+
   /**
    * Retrieve property for configuration.
-   * @param key the key to retrieve from the property list.
+   * 
+   * @param key
+   *          the key to retrieve from the property list.
    * @return the value corresponding to the key.
    */
   public String getItem(String key) {
     if (key == null) {
       return null;
-    }
-    else {
+    } else {
       return properties.getProperty(key);
     }
   }
 
   /**
    * Returns the value of an expanded variable
-   * @param variable The name of the variable (ie, java.io.tmpdir, or M2_REPO)
+   * 
+   * @param variable
+   *          The name of the variable (ie, java.io.tmpdir, or M2_REPO)
    * @return The value of that variable, or null if the variable is not found
    */
   public String getVariable(String variable) {
@@ -203,23 +209,27 @@ public class ConfigurationManager implements ManagedService {
   }
 
   /**
-   * Retrieve property for configuration.  The return value for this function do *not* have its variable(s) expanded. 
-   * @param key the key to retrieve from the property list.
+   * Retrieve property for configuration. The return value for this function do *not* have its variable(s) expanded.
+   * 
+   * @param key
+   *          the key to retrieve from the property list.
    * @return the value corresponding to the key.
    */
   public String getUninterpretedItem(String key) {
     if (key == null) {
       return null;
-    }
-    else {
+    } else {
       return properties.getUninterpretedProperty(key);
-    }    
+    }
   }
-  
+
   /**
    * Add a key, value pair to the property list.
-   * @param key the key to be placed in the properties list.
-   * @param value the corresponding value.
+   * 
+   * @param key
+   *          the key to be placed in the properties list.
+   * @param value
+   *          the corresponding value.
    */
   public void setItem(String key, String value) {
     if (key == null) {
@@ -233,10 +243,10 @@ public class ConfigurationManager implements ManagedService {
       properties.remove(key);
     }
   }
-  
+
   /**
-   * Read a remote properties file and load it into memory.
-   * The URL it attempts to read from is defined by CaptureParameters.CAPTURE_CONFIG_ENDPOINT_URL
+   * Read a remote properties file and load it into memory. The URL it attempts to read from is defined by
+   * CaptureParameters.CAPTURE_CONFIG_ENDPOINT_URL
    * 
    * @return The properties (if any) fetched from the server
    * @see org.opencastproject.capture.api.CaptureParameters#CAPTURE_CONFIG_REMOTE_ENDPOINT_URL
@@ -246,8 +256,9 @@ public class ConfigurationManager implements ManagedService {
       return null;
     }
 
-    // TODO: This URL might be protected.  In this case, the proper headers (e.g. X509) would need to be in place.
-    // This isn't something that needs to be fixed today, but it needs to be addressed project-wide at some point (soon!). (jt)
+    // TODO: This URL might be protected. In this case, the proper headers (e.g. X509) would need to be in place.
+    // This isn't something that needs to be fixed today, but it needs to be addressed project-wide at some point
+    // (soon!). (jt)
     Properties p = new Properties();
     InputStream is = null;
     try {
@@ -255,7 +266,7 @@ public class ConfigurationManager implements ManagedService {
       is = urlc.getInputStream();
       p.load(is);
     } catch (Exception e) {
-      logger.warn("Could not get config file from server: {}.", e.getMessage());
+      logger.warn("Could not get config file from server: {}.", e);
     } finally {
       IOUtils.closeQuietly(is);
     }
@@ -273,51 +284,58 @@ public class ConfigurationManager implements ManagedService {
     FileOutputStream fout = null;
     try {
       if (!cachedConfig.isFile()) {
-        cachedConfig.getParentFile().mkdirs();
-        cachedConfig.createNewFile();
+        if (cachedConfig.getParentFile().mkdirs()) {
+          if (!cachedConfig.createNewFile()) {
+            logger.warn("Unable to create the cached config file: " + cachedConfig.getAbsolutePath());
+          }
+        } else {
+          logger.warn("Unable to create the directory: " + cachedConfig.getParentFile().getAbsolutePath());
+        }
       }
       fout = new FileOutputStream(cachedConfig);
       properties.store(fout, "Autogenerated config file, do not edit.");
     } catch (Exception e) {
-      logger.warn("Could not write config file to disk: {}.", e.getMessage());
+      logger.warn("Could not write config file to disk: {}.", e);
     } finally {
       IOUtils.closeQuietly(fout);
     }
   }
-  
+
   /**
    * Returns a Dictionary of all the properties associated with this configuration manager.
+   * 
    * @return the key/value pair mapping.
    */
   public XProperties getAllProperties() {
     return (XProperties) properties.clone();
   }
-  
-  /** 
+
+  /**
    * Filters the capabilities (mappings between friendly names and recording devices) from this agent's properties
+   * 
    * @return A Properties object containing the capabilities --friendly names as keys and device locations as values
    */
   public Properties getCapabilities() {
     Properties capabilities = new Properties();
-    
+
     String names = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_NAMES);
     if (names == null) {
       logger.error("Null friendly name list.  Capabilities filtering aborted.");
       return null;
     }
-    //Get the names and setup a hash map of them
+    // Get the names and setup a hash map of them
     String[] friendlyNames = names.split(",");
     HashMap<String, Integer> propertyCounts = new HashMap<String, Integer>();
     for (String name : friendlyNames) {
       propertyCounts.put(name, 0);
     }
 
-    //For each key
+    // For each key
     for (String key : properties.stringPropertyNames()) {
-      //For each device
+      // For each device
       for (String name : friendlyNames) {
         String check = CaptureParameters.CAPTURE_DEVICE_PREFIX + name;
-        //If the key looks like a device prefix + the name, copy it
+        // If the key looks like a device prefix + the name, copy it
         if (key.contains(check)) {
           String property = properties.getProperty(key);
           if (property == null) {
@@ -325,14 +343,15 @@ public class ConfigurationManager implements ManagedService {
             return null;
           }
           capabilities.setProperty(key, property);
-          propertyCounts.put(name, propertyCounts.get(name)+1);
+          propertyCounts.put(name, propertyCounts.get(name) + 1);
         }
       }
     }
 
-    //Check to make sure the counts are all correct, otherwise return null/error
+    // Check to make sure the counts are all correct, otherwise return null/error
     for (String name : friendlyNames) {
-      //TODO:  This is a stupid check, how else can we do this?  They might have three properties, but none of the required ones...
+      // TODO: This is a stupid check, how else can we do this? They might have three properties, but none of the
+      // required ones...
       if (propertyCounts.get(name) < 3) {
         logger.error("Invalid configuration data for device {}, agent capabilities are null!", name);
         return null;
@@ -341,13 +360,15 @@ public class ConfigurationManager implements ManagedService {
 
     return capabilities;
   }
-  
+
   /**
-   * Merges the given Properties with the ConfigurationManager's properties. Will
-   * not overwrite the ConfigurationManager if specified.
+   * Merges the given Properties with the ConfigurationManager's properties. Will not overwrite the ConfigurationManager
+   * if specified.
    * 
-   * @param p Properties object to be merged with ConfigurationManager.
-   * @param overwrite true if this should overwrite the ConfigurationManager's properties, false if not.
+   * @param p
+   *          Properties object to be merged with ConfigurationManager.
+   * @param overwrite
+   *          true if this should overwrite the ConfigurationManager's properties, false if not.
    * @return the merged properties.
    */
   public XProperties merge(Properties p, boolean overwrite) {
@@ -358,7 +379,7 @@ public class ConfigurationManager implements ManagedService {
     // overwrite the current properties in the ConfigurationManager
     if (overwrite) {
       for (String key : p.stringPropertyNames()) {
-        properties.setProperty( key, p.getProperty(key));
+        properties.setProperty(key, p.getProperty(key));
       }
       return getAllProperties();
     }
@@ -378,10 +399,10 @@ public class ConfigurationManager implements ManagedService {
     }
 
   }
-  
+
   /**
-   * Used in a timer that will fire every specified time interval to attempt to
-   * get a new version of the capture configuration from a centralised server.
+   * Used in a timer that will fire every specified time interval to attempt to get a new version of the capture
+   * configuration from a centralised server.
    */
   class UpdateConfig extends TimerTask {
 

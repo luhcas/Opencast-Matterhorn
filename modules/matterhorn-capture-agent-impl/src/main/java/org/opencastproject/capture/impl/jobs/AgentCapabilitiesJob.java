@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 
 /**
  * This class is responsible for pushing the agent's state to the remote state service.
@@ -41,10 +42,6 @@ public class AgentCapabilitiesJob implements Job {
 
   private static final Logger logger = LoggerFactory.getLogger(AgentStateJob.class);
 
-  private ConfigurationManager config = null;
-  private CaptureAgent agent = null;
-  private TrustedHttpClient client = null;
-
   /**
    * Pushes the agent's capabilities to the remote state service.
    * {@inheritDoc}
@@ -52,14 +49,15 @@ public class AgentCapabilitiesJob implements Job {
    * @throws JobExecutionException
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-    config = (ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE);
-    agent = (CaptureAgent) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE);
-    client = (TrustedHttpClient) ctx.getMergedJobDataMap().get(JobParameters.TRUSTED_CLIENT);
+    ConfigurationManager config = (ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE);
+    CaptureAgent agent = (CaptureAgent) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE);
+    TrustedHttpClient client = (TrustedHttpClient) ctx.getMergedJobDataMap().get(JobParameters.TRUSTED_CLIENT);
 
     //Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
     if (url == null) {
-      logger.warn("URL for {} is invalid, unable to push capabilities to remote server.", CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
+      logger.warn("URL for {} is invalid, unable to push capabilities to remote server.",
+                  CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
       return;
     }
     try {
@@ -91,11 +89,11 @@ public class AgentCapabilitiesJob implements Job {
     }
     try {
       resp = client.execute(remoteServer);
-      if (resp.getStatusLine().getStatusCode() != 200) {
+      if (resp.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
         logger.info("Capabilities push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
       }
     } catch (TrustedHttpClientException e) {
-      logger.warn("Unable to post capabilities to {}, message reads: {}.", url, e.getMessage());
+      logger.warn("Unable to post capabilities to {}, message reads: {}.", url, e);
     } finally {
       if (resp != null) {
         client.close(resp);

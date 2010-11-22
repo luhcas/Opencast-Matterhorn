@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,7 @@ public class AgentStateJob implements Job {
    * @throws JobExecutionException
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
+    logger.error("GDLGDL:  Execute!");
     setConfigManager((ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE));
     setStateService((StateService) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE));
     setTrustedClient((TrustedHttpClient) ctx.getMergedJobDataMap().get(JobParameters.TRUSTED_CLIENT));
@@ -88,7 +90,8 @@ public class AgentStateJob implements Job {
     //Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
     if (url == null) {
-      logger.warn("URL for {} is invalid, unable to push state to remote server.", CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
+      logger.warn("URL for {} is invalid, unable to push state to remote server.",
+                  CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL);
       return;
     }
     try {
@@ -119,7 +122,8 @@ public class AgentStateJob implements Job {
     //Figure out where we're sending the data
     String url = config.getItem(CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL);
     if (url == null) {
-      logger.warn("URL for {} is invalid, unable to push recording state to remote server.", CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL);
+      logger.warn("URL for {} is invalid, unable to push recording state to remote server.",
+                  CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL);
       return;
     }
     try {
@@ -143,7 +147,8 @@ public class AgentStateJob implements Job {
   }
 
   /**
-   * Utility method to POST data to a URL.  This method encodes the data in UTF-8 as post data, rather than multipart MIME.
+   * Utility method to POST data to a URL.
+   * This method encodes the data in UTF-8 as post data, rather than multipart MIME.
    * @param formParams The data to send.
    * @param url The URL to send the data to.
    */
@@ -163,11 +168,11 @@ public class AgentStateJob implements Job {
       }
 
       resp = client.execute(remoteServer);
-      if (resp.getStatusLine().getStatusCode() != 200) {
+      if (resp.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
         logger.info("State push to {} failed with code {}.", url, resp.getStatusLine().getStatusCode());
       }
     } catch (TrustedHttpClientException e) {
-      logger.warn("Unable to communicate with server at {}, message reads: {}.", url, e.getMessage());
+      logger.warn("Unable to communicate with server at {}, message reads: {}.", url, e);
     }
     finally {
       if (resp != null) {

@@ -38,6 +38,10 @@ import java.text.ParseException;
  *
  */
 public class SerializeJob implements Job {
+
+  public static final String JOB_PREFIX = "SerializeJob-";
+  public static final String TRIGGER_PREFIX = "SerializeJobTrigger-";
+
   private static final Logger logger = LoggerFactory.getLogger(SerializeJob.class);
 
   /**
@@ -65,10 +69,10 @@ public class SerializeJob implements Job {
     try {
       manifestCreated = ca.createManifest(recordingID);
     } catch (NoSuchAlgorithmException e1) {
-      logger.error("Unable to create manifest, NoSuchAlgorithmException was thrown: {}.", e1.getMessage());
+      logger.error("Unable to create manifest, NoSuchAlgorithmException was thrown: {}.", e1);
       throw new JobExecutionException("Unable to create manifest, NoSuchAlgorithmException was thrown.");
     } catch (IOException e1) {
-      logger.error("Unable to create manifest, IOException was thrown: {}.", e1.getMessage());
+      logger.error("Unable to create manifest, IOException was thrown: {}.", e1);
       throw new JobExecutionException("Unable to create manifest, IOException was thrown.");
     }
 
@@ -86,12 +90,12 @@ public class SerializeJob implements Job {
     String postfix = ctx.getMergedJobDataMap().getString(JobParameters.JOB_POSTFIX);
 
     // Schedules Ingest
-    JobDetail job = new JobDetail("IngestJob-" + postfix, JobParameters.CAPTURE_RELATED_TYPE, IngestJob.class);
+    JobDetail job = new JobDetail(IngestJob.JOB_PREFIX + postfix, JobParameters.SUPPORT_TYPE, IngestJob.class);
     CronTrigger trigger;
     try {
       trigger = new CronTrigger();
-      trigger.setGroup(JobParameters.CAPTURE_RELATED_TYPE);
-      trigger.setName("IngestJobTrigger-" + postfix);
+      trigger.setGroup(JobParameters.SUPPORT_TYPE);
+      trigger.setName(IngestJob.TRIGGER_PREFIX + postfix);
       trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
 
       //TODO:  Make this configurable.  Or at least slow it down a bit - hitting things every 20 seconds it too fast.
@@ -116,10 +120,10 @@ public class SerializeJob implements Job {
       }
 
     } catch (ParseException e) {
-      logger.error("Invalid argument for CronTrigger: {}", e.getMessage());
+      logger.error("Invalid argument for CronTrigger: {}", e);
       e.printStackTrace();
     } catch (SchedulerException e) {
-      logger.error("Couldn't schedule task: {}", e.getMessage());
+      logger.error("Couldn't schedule task: {}", e);
       e.printStackTrace();
     }   
 

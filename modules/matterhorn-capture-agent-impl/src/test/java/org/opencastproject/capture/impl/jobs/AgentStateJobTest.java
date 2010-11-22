@@ -55,7 +55,11 @@ public class AgentStateJobTest {
     EasyMock.expectLastCall().anyTimes();
 
     Map<String, AgentRecording> recordingMap = new HashMap<String, AgentRecording>();
-    recordingMap.put("test", new RecordingImpl(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew(), new XProperties()));
+    recordingMap.put("test",
+            new RecordingImpl(
+                    MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew(), new XProperties()
+                    )
+            );
     EasyMock.expect(state.getKnownRecordings()).andReturn(recordingMap);
     EasyMock.expectLastCall().anyTimes();
 

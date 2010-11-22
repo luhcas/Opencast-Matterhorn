@@ -34,6 +34,9 @@ import java.util.Date;
  * The class responsible for stopping a capture.
  */
 public class StopCaptureJob implements Job {
+
+  public static final String JOB_PREFIX = "StopCapture-";
+  public static final String TRIGGER_PREFIX = "StopCaptureTrigger-";
   
   private static final Logger logger = LoggerFactory.getLogger(StopCaptureJob.class);
   
@@ -57,15 +60,17 @@ public class StopCaptureJob implements Job {
       // Extract the recording ID
       String recordingID = ctx.getMergedJobDataMap().getString(CaptureParameters.RECORDING_ID);
 
-      //This needs to specify which job to stop - otherwise we could end up stopping something else if the expected job failed earlier.
+      //This needs to specify which job to stop
+      //otherwise we could end up stopping something else if the expected job failed earlier.
       ca.stopCapture(recordingID, false);
 
       String postfix = ctx.getMergedJobDataMap().getString(JobParameters.JOB_POSTFIX);
       // Create job and trigger
-      JobDetail job = new JobDetail("SerializeJob-" + postfix, JobParameters.CAPTURE_RELATED_TYPE, SerializeJob.class);
+      JobDetail job = new JobDetail(SerializeJob.JOB_PREFIX + postfix, JobParameters.SUPPORT_TYPE, SerializeJob.class);
 
-      //Setup the trigger.  The serialization job will automatically refire if it fails, so we don't need to worry about it
-      SimpleTrigger trigger = new SimpleTrigger("SerializeJobTrigger-" + postfix, JobParameters.CAPTURE_RELATED_TYPE, new Date());
+      //Setup the trigger.  The serialization job will automatically refire if it fails
+      SimpleTrigger trigger = new SimpleTrigger(SerializeJob.TRIGGER_PREFIX + postfix, JobParameters.SUPPORT_TYPE);
+      trigger.setStartTime(new Date());
       trigger.setMisfireInstruction(SimpleTrigger.MISFIRE_INSTRUCTION_FIRE_NOW);
 
       trigger.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
@@ -90,10 +95,10 @@ public class StopCaptureJob implements Job {
       }
 
     } catch (SchedulerException e) {
-      logger.error("Couldn't schedule task: {}", e.getMessage());
+      logger.error("Couldn't schedule task: {}", e);
       e.printStackTrace();
     } catch (Exception e) {
-      logger.error("Unexpected exception: {}", e.getMessage());
+      logger.error("Unexpected exception: {}", e);
       e.printStackTrace();
     }
   }

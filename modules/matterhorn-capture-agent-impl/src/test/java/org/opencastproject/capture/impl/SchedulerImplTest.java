@@ -20,6 +20,7 @@ import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.ScheduledEvent;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -147,11 +148,11 @@ public class SchedulerImplTest {
     offset += 6 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
     // Event with a longer-than-max capture time
     times[1] = formatDate(d, offset);
-    offset += schedulerImpl.getMaxScheduledCaptureLength() + 2 * CaptureParameters.MINUTES
+    offset += SchedulerImpl.getMaxScheduledCaptureLength() + 2 * CaptureParameters.MINUTES
             * CaptureParameters.MILLISECONDS;
     // Event with a longer-than-max capture time
     times[2] = formatDate(d, offset);
-    offset += schedulerImpl.getMaxScheduledCaptureLength() + 2 * CaptureParameters.MINUTES
+    offset += SchedulerImpl.getMaxScheduledCaptureLength() + 2 * CaptureParameters.MINUTES
             * CaptureParameters.MILLISECONDS;
     // Another 5 minute event
     times[3] = formatDate(d, offset);
@@ -196,12 +197,21 @@ public class SchedulerImplTest {
     return times;
   }
 
-  private String readFile(URL target) throws IOException {
+  private String readFile(URL target) {
     StringBuilder sb = new StringBuilder();
-    DataInputStream in = new DataInputStream(target.openStream());
-    int c = 0;
-    while ((c = in.read()) != -1) {
-      sb.append((char) c);
+    DataInputStream in = null;
+    try {
+      in = new DataInputStream(target.openStream());
+      int c = 0;
+      while ((c = in.read()) != -1) {
+        sb.append((char) c);
+      }
+    } catch (IOException e) {
+      System.out.println("IOException reading file " + target);
+    } finally {
+      if (in != null) {
+        IOUtils.closeQuietly(in);
+      }
     }
     return sb.toString();
   }
@@ -262,7 +272,7 @@ public class SchedulerImplTest {
     schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("c3a1c747-5501-44ff-b57a-67a4854a39b0", schedule[0]);
-    testfile.delete();
+    FileUtils.deleteQuietly(testfile);
   }
 
   @Test
@@ -276,7 +286,7 @@ public class SchedulerImplTest {
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("c3a1c747-5501-44ff-b57a-67a4854a39b0", schedule[0]);
-    testfile.delete();
+    FileUtils.deleteQuietly(testfile);
   }
 
   @Test
@@ -307,7 +317,7 @@ public class SchedulerImplTest {
     }
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
-    testfile.delete();
+    FileUtils.deleteQuietly(testfile);
   }
 
   @Test
@@ -321,7 +331,7 @@ public class SchedulerImplTest {
     schedulerImpl.updated(schedulerProperties);
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
-    testfile.delete();
+    FileUtils.deleteQuietly(testfile);
   }
 
   @Test
@@ -345,7 +355,7 @@ public class SchedulerImplTest {
     }
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
-    testfile.delete();
+    FileUtils.deleteQuietly(testfile);
   }
 
   @Test
@@ -361,7 +371,7 @@ public class SchedulerImplTest {
     schedulerImpl.updated(schedulerProperties);
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
-    testfile.delete();
+    FileUtils.deleteQuietly(testfile);
   }
 
   @Test
@@ -384,7 +394,7 @@ public class SchedulerImplTest {
     }
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(0, schedule.length);
-    testfile.delete();
+    FileUtils.deleteQuietly(testfile);
   }
 
   @Test
@@ -399,7 +409,7 @@ public class SchedulerImplTest {
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals(times[0], schedule[0]);
-    testfile.delete();
+    FileUtils.deleteQuietly(testfile);
   }
 
   @Test
@@ -505,7 +515,7 @@ public class SchedulerImplTest {
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("one", schedule[0]);
-    testfile.delete();
+    FileUtils.deleteQuietly(testfile);
   }
 
   @Test
@@ -519,7 +529,7 @@ public class SchedulerImplTest {
     String[] schedule = schedulerImpl.getCaptureSchedule();
     Assert.assertEquals(1, schedule.length);
     Assert.assertEquals("one", schedule[0]);
-    testfile.delete();
+    FileUtils.deleteQuietly(testfile);
   }
 
   @Test
@@ -538,7 +548,7 @@ public class SchedulerImplTest {
     Assert.assertEquals("No-attachments", schedule[2]);
     Assert.assertEquals("No-end-but-duration", schedule[3]);
     Assert.assertEquals("No-end-no-duration", schedule[4]);
-    testfile.delete();
+    FileUtils.deleteQuietly(testfile);
   }
 
   @Test
@@ -554,7 +564,7 @@ public class SchedulerImplTest {
     Assert.assertEquals("Scheduled-Event-1", schedule[0]);
     Assert.assertEquals("Started-at-end-of-Scheduled-Event-1-and-should-shorten", schedule[1]);
     Assert.assertEquals("Too-close-to-other-capture", schedule[2]);
-    testfile.delete();
+    FileUtils.deleteQuietly(testfile);
   }
 
   @Test
@@ -647,8 +657,6 @@ public class SchedulerImplTest {
     // Create a calendar event a second after the time we expect.
     after = new Date(after.getTime() + (CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS * offset) + 3000);
     Date time = new Date(scheduleEvent.getStartTime());
-    System.out.println(before + ":" + time + ":" + after);
-    System.out.println(before.before(time) + ":" + after.after(time));
     Assert.assertTrue("getSchedule() returned " + new Date(scheduleEvent.getStartTime()).toString()
             + " as a start time for the event when it should have been " + offset
             + " minutes after right now and 1 second after " + before, before.before(time));

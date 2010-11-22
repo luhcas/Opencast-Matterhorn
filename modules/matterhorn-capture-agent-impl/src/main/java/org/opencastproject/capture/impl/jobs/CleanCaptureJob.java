@@ -126,7 +126,8 @@ public class CleanCaptureJob implements Job {
         long freeSpace = recDir.getFreeSpace();
         if (freeSpace < minDiskSpace) {
           underMinSpace = true;
-          logger.info("Removing capture {} archives in {}. Under minimum free disk space.", theRec.getID(), recDir.getAbsolutePath());
+          logger.info("Removing capture {} archives in {}. Under minimum free disk space.",
+                      theRec.getID(), recDir.getAbsolutePath());
           FileSupport.delete(recDir, true);
           if (service != null) {
             service.removeCompletedRecording(theRec.getID());
@@ -144,7 +145,8 @@ public class CleanCaptureJob implements Job {
         long age = theRec.getLastCheckinTime();
         long currentTime = System.currentTimeMillis();
         if (currentTime - age > maxArchivalDays * DAY_LENGTH_MILLIS) {
-          logger.info("Removing capture {} archives at {}.\nExceeded the maximum archival days.", theRec.getID(), recDir.getAbsolutePath());
+          logger.info("Removing capture {} archives at {}.\nExceeded the maximum archival days.",
+                      theRec.getID(), recDir.getAbsolutePath());
           FileSupport.delete(recDir, true);
           if (service != null) {
             service.removeCompletedRecording(theRec.getID());
@@ -152,7 +154,8 @@ public class CleanCaptureJob implements Job {
           continue;
         }
         else {
-          logger.debug("Recording {} has NOT yet exceeded the maximum archival days. Keeping {}", theRec.getID(), recDir.getAbsolutePath());
+          logger.debug("Recording {} has NOT yet exceeded the maximum archival days. Keeping {}",
+                       theRec.getID(), recDir.getAbsolutePath());
         }
       }
       logger.debug("Recording {} ({}) not deleted.", theRec.getID(), recDir.getAbsolutePath());

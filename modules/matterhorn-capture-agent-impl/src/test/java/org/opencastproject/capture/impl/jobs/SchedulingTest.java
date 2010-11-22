@@ -46,11 +46,11 @@ import java.util.Properties;
  */
 public class SchedulingTest {
   private static final Logger logger = LoggerFactory.getLogger(SchedulingTest.class);
-  private static Scheduler sched;
-  private static final CaptureAgentImpl captAg = new CaptureAgentImpl();
-  private static Properties props = null;;
+  private Scheduler sched;
+  private final CaptureAgentImpl captAg = new CaptureAgentImpl();
+  private Properties props = null;;
   private final File outDir = new File(this.getClass().getResource("/.").getFile(), "capture_tmp");
-  private static MediaPackage mp;
+  private MediaPackage mp;
 
   @Before
   public void init() throws ConfigurationException, MediaPackageException {
@@ -110,10 +110,10 @@ public class SchedulingTest {
       sched.scheduleJob(job, trigger);
       Thread.sleep(60000);
     } catch (SchedulerException e) {
-      logger.error("Couldn't schedule task: {}", e.getMessage());
+      logger.error("Couldn't schedule task: {}", e);
       e.printStackTrace();
     } catch (InterruptedException e) {
-      logger.error("Interrupted Exception: {}", e.getMessage());
+      logger.error("Interrupted Exception: {}", e);
       e.printStackTrace();
     }
   }

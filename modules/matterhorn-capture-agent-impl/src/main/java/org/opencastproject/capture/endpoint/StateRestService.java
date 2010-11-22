@@ -35,6 +35,7 @@ import java.util.Map.Entry;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -77,6 +78,11 @@ public class StateRestService {
     this.service = null;
   }
 
+  /**
+   * Gets the state of the agent from the state service
+   * @return String The state of the of the agent.  Will be defined in AgentState
+   * @see org.opencastproject.capture.admin.api.AgentState
+   */
   @GET
   @Produces(MediaType.TEXT_PLAIN)
   @Path("state")
@@ -88,13 +94,18 @@ public class StateRestService {
     }
   }
 
+  /**
+   * Gets the list of recording that the capture agent knows about.
+   * @return Response The method outputs the list to the response's output stream
+   */
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("recordings")
-  public Response getRecordings() {
+  public LinkedList<RecordingStateUpdate> getRecordings() {
     if (service == null) {
-      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
-              .entity("State Service is unavailable, please wait...").build();
+      Response r = Response.status(Response.Status.SERVICE_UNAVAILABLE)
+                    .entity("State Service is unavailable, please wait...").build();
+      throw new WebApplicationException(r);
     }
 
     LinkedList<RecordingStateUpdate> update = new LinkedList<RecordingStateUpdate>();
@@ -103,9 +114,14 @@ public class StateRestService {
     for (Entry<String, AgentRecording> e : data.entrySet()) {
       update.add(new RecordingStateUpdate(e.getValue()));
     }
-    return Response.ok(update).build();
+
+    return update;
   }
 
+  /**
+   * Gets the documentation for the service.
+   * @return Response The method outputs the list to the response's output stream 
+   */
   @GET
   @Produces(MediaType.TEXT_HTML)
   @Path("docs")
@@ -116,8 +132,11 @@ public class StateRestService {
   protected String docs;
   private String[] notes = {
           "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
-          "If the service is down or not working it will return a status 503, this means the the underlying service is not working and is either restarting or has failed",
-          "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated. In other words, there is a bug! You should file an error report with your server logs from the time when the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
+          "If the service is down or not working it will return a status 503, this means the the underlying service" +
+          " is not working and is either restarting or has failed",
+          "A status code 500 means a general failure has occurred which is not recoverable and was not anticipated." +
+          " In other words, there is a bug! You should file an error report with your server logs from the time when" +
+          " the error occurred: <a href=\"https://issues.opencastproject.org\">Opencast Issue Tracker</a>", };
 
   private String generateDocs(String serviceUrl) {
     DocRestData data = new DocRestData("stateservice", "State Service", serviceUrl, notes);

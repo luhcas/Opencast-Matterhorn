@@ -64,14 +64,14 @@ public class CleanCaptureJobTest {
   public void setUp() throws URISyntaxException, IOException {
     // Define particular instances for the CleanCaptureJob required arguments
     props = new XProperties();
-    props.setProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, new File(System.getProperty("java.io.tmpdir"), "clean-capture-test").getCanonicalPath());
+    props.setProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL,
+            new File(System.getProperty("java.io.tmpdir"), "clean-capture-test").getCanonicalPath());
     theJob = new CleanCaptureJob();
     theRecordings = new Vector<AgentRecording>();
 
-    baseDir = new File(getClass().getClassLoader().getResource(".").toURI().getPath(), "cleanTest");
-    baseDir.mkdir();
-    if (!baseDir.exists()) {
-      Assert.fail();
+    baseDir = new File(props.getProperty(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL), "cleanTest");
+    if (!baseDir.mkdirs()) {
+      Assert.fail("Unable to create required directory: " + baseDir.getCanonicalPath());
     }
 
     for (String state : states) {
@@ -80,7 +80,8 @@ public class CleanCaptureJobTest {
         rec.setState(state);
         theRecordings.add(rec);
 
-        // This is to avoid a race condition when generating unscheduled recordings --two may get the same ID if the system creates them in the same millisecond
+        // This is to avoid a race condition when generating unscheduled recordings
+        // Two recordings may get the same ID if the system creates them in the same millisecond
         // However, this causing an InterruptedException is acceptable, so no exception is passed over if it happens
         Thread.sleep(1);
       } catch (InterruptedException e) {
@@ -139,7 +140,8 @@ public class CleanCaptureJobTest {
   }
 
   /**
-   * The minimum free space in disk is a lot and the maximum archival time is "infinity". All recordings have been ingested
+   * The minimum free space in disk is a lot and the maximum archival time is "infinity".
+   * All recordings have been ingested
    */
   @Test
   public void diskLotsArchivalLotsAllIngested() {
@@ -160,7 +162,8 @@ public class CleanCaptureJobTest {
   }
 
   /**
-   * The minimum free space in disk is a lot and the maximum archival time is "infinity". There is non-ingested recordings
+   * The minimum free space in disk is a lot and the maximum archival time is "infinity".
+   * There are non-ingested recordings
    */
   @Test
   public void diskLotsArchivalLots() {

@@ -26,10 +26,15 @@ import org.quartz.StatefulJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.HttpURLConnection;
+
 /**
  * The class to create the manifest, then attempt to ingest the media to the remote server.
  */
 public class IngestJob implements StatefulJob {
+
+  public static final String JOB_PREFIX = "IngestJob-";
+  public static final String TRIGGER_PREFIX = "IngestJobTrigger-";
 
   private static final Logger logger = LoggerFactory.getLogger(IngestJob.class);
   
@@ -53,7 +58,7 @@ public class IngestJob implements StatefulJob {
     // Tries ingest
     int result = ca.ingest(recordingID);
     
-    if (result != 200) {
+    if (result != HttpURLConnection.HTTP_OK) {
       logger.error("Ingest failed with a value of {}", result);
     } else { 
       logger.info("Ingest finished");

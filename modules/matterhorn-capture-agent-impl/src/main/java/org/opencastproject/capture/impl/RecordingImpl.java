@@ -15,18 +15,6 @@
  */
 package org.opencastproject.capture.impl;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Properties;
-import java.util.TimeZone;
-
-import org.apache.commons.io.FileUtils;
 import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.capture.api.AgentRecording;
 import org.opencastproject.capture.api.CaptureParameters;
@@ -39,9 +27,22 @@ import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.mediapackage.identifier.IdImpl;
 import org.opencastproject.util.ConfigurationException;
 import org.opencastproject.util.XProperties;
+
+import org.apache.commons.io.FileUtils;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Properties;
+import java.util.TimeZone;
 
 /**
  * This class is a container for the properties relating a certain recording -- 
@@ -67,7 +68,8 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * The time at which the recording last checked in with this service.
-   * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in). 
+   * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than
+   *  a relative timestamp (ie, it's been 3000 ms since it last checked in). 
    */
   protected Long lastHeardFrom; 
 
@@ -130,7 +132,9 @@ public class RecordingImpl implements AgentRecording, Serializable {
     if (!metadataFile.exists()) {
       FileWriter out = new FileWriter(metadataFile);
       out.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
-      out.write("<dublincore xmlns=\"http://www.opencastproject.org/xsd/1.0/dublincore/\" xmlns:dcterms=\"http://purl.org/dc/terms/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">");
+      out.write("<dublincore xmlns=\"http://www.opencastproject.org/xsd/1.0/dublincore/\"" +
+          " xmlns:dcterms=\"http://purl.org/dc/terms/\"" +
+          " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">");
       out.write("<dcterms:created xsi:type=\"dcterms:W3CDTF\">" + formatDate(new Date()) + "</dcterms:created>");
       out.write("<dcterms:identifier>" + id + "</dcterms:identifier>");
       out.write("<dcterms:title>" + id + "</dcterms:title>");
@@ -144,7 +148,8 @@ public class RecordingImpl implements AgentRecording, Serializable {
 
   /**
    * Determines the root URL and ID from the recording's properties
-   * //TODO:  What if the properties object contains a character in the recording id or root url fields that is invalid for the filesystem? 
+   * //TODO:  What if the properties object contains a character in the recording id
+   *  or root url fields that is invalid for the filesystem? 
    * @throws URISyntaxException 
    * @throws IOException 
    */
@@ -299,7 +304,8 @@ public class RecordingImpl implements AgentRecording, Serializable {
   }
 
   /**
-   * Overrides the default serialization behaviour.  This method writes the mediapackage to the mediapackage.xml file in the base directory of this capture 
+   * Overrides the default serialization behaviour.
+   * This method writes the mediapackage to the mediapackage.xml file in the base directory of this capture
    * @param out The ObjectOutputStream for the serialization
    * @throws IOException
    */
@@ -308,12 +314,13 @@ public class RecordingImpl implements AgentRecording, Serializable {
     try {
       mPkg.toXml(out, true);
     } catch (MediaPackageException e) {
-      logger.error("Unable to write mediapackage to disk!  Error was: {}.", e.getMessage());
+      logger.error("Unable to write mediapackage to disk!  Error was: {}.", e);
     }
   }
 
   /**
-   * Overrides the default serialization behaviour.  This method reads the mediapackage from the mediapackage.xml file in the base directory of this capture 
+   * Overrides the default serialization behaviour.
+   * This method reads the mediapackage from the mediapackage.xml file in the base directory of this capture 
    * @param in The ObjectInputStream for the serialization
    * @throws IOException
    * @throws ClassNotFoundException
@@ -323,7 +330,7 @@ public class RecordingImpl implements AgentRecording, Serializable {
     try {
       mPkg = MediaPackageImpl.valueOf(in);
     } catch (MediaPackageException e) {
-      logger.error("Unable to read mediapackage from disk!  Error was: {}.", e.getMessage());
+      logger.error("Unable to read mediapackage from disk!  Error was: {}.", e);
     }
   }
 }

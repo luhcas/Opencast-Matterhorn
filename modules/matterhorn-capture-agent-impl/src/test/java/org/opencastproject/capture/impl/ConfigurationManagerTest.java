@@ -71,7 +71,8 @@ public class ConfigurationManagerTest {
     }
     p.load(is);
     IOUtils.closeQuietly(is);
-    p.put("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
+    p.put("org.opencastproject.storage.dir",
+            new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
 
     configManager.updated(p);    
     configManager.updated(null);
@@ -140,7 +141,8 @@ public class ConfigurationManagerTest {
     sourceProps.load(is);
     IOUtils.closeQuietly(is);
 
-    configManager.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
+    configManager.setItem("org.opencastproject.storage.dir",
+            new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
     configManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
     configManager.updated(sourceProps);
 
@@ -162,24 +164,31 @@ public class ConfigurationManagerTest {
     sourceProps.load(is);
     IOUtils.closeQuietly(is);
 
-    configManager.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
+    configManager.setItem("org.opencastproject.storage.dir",
+            new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
     configManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
     configManager.setItem("M2_REPO", getClass().getClassLoader().getResource("m2_repo").toURI().getPath());
     configManager.updated(sourceProps);
     
     Properties caps = configManager.getCapabilities();
     Assert.assertNotNull(caps);
-    assertCaps(caps, "MOCK_SCREEN", "M2_REPO", "org/opencastproject/samples/screen/1.0/screen-1.0.mpg", "screen_out.mpg", "presentation/source");
-    assertCaps(caps, "MOCK_PRESENTER", "M2_REPO", "org/opencastproject/samples/camera/1.0/camera-1.0.mpg", "camera_out.mpg", "presentation/source");
-    assertCaps(caps, "MOCK_MICROPHONE", "M2_REPO", "org/opencastproject/samples/audio/1.0/audio-1.0.mp3", "audio_out.mp3", "presentation/source");
+    assertCaps(caps, "MOCK_SCREEN", "M2_REPO",
+            "org/opencastproject/samples/screen/1.0/screen-1.0.mpg", "screen_out.mpg", "presentation/source");
+    assertCaps(caps, "MOCK_PRESENTER", "M2_REPO",
+            "org/opencastproject/samples/camera/1.0/camera-1.0.mpg", "camera_out.mpg", "presentation/source");
+    assertCaps(caps, "MOCK_MICROPHONE", "M2_REPO",
+            "org/opencastproject/samples/audio/1.0/audio-1.0.mp3", "audio_out.mp3", "presentation/source");
   }
 
   private void assertCaps(Properties caps, String name, String baseVar, String relPath, String dest, String flavour) {
-    Assert.assertEquals("${"+baseVar+"}"+ "/" + relPath, configManager.getUninterpretedItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE));
-    Assert.assertTrue(new File(configManager.getItem(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE)).exists());
-    Assert.assertEquals(configManager.getVariable(baseVar) + "/" + relPath, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_SOURCE));
-    Assert.assertEquals(dest, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_DEST));
-    Assert.assertEquals(flavour, caps.get(CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_FLAVOR));
+    String devBase = CaptureParameters.CAPTURE_DEVICE_PREFIX + name;
+    String devSource = devBase + CaptureParameters.CAPTURE_DEVICE_SOURCE;
+    Assert.assertEquals("${"+baseVar+"}"+ "/" + relPath,
+            configManager.getUninterpretedItem(devSource));
+    Assert.assertTrue(new File(configManager.getItem(devSource)).exists());
+    Assert.assertEquals(configManager.getVariable(baseVar) + "/" + relPath, caps.get(devSource));
+    Assert.assertEquals(dest, caps.get(devBase + CaptureParameters.CAPTURE_DEVICE_DEST));
+    Assert.assertEquals(flavour, caps.get(devBase + CaptureParameters.CAPTURE_DEVICE_FLAVOR));
   }
 
   @Test
@@ -196,7 +205,8 @@ public class ConfigurationManagerTest {
     sourceProps.remove("capture.device.MOCK_PRESENTER.outputfile");
     configManager.setItem("capture.device.MOCK_PRESENTER.src", null);
     configManager.setItem("capture.device.MOCK_PRESENTER.outputfile", null);
-    configManager.setItem("org.opencastproject.storage.dir", new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
+    configManager.setItem("org.opencastproject.storage.dir",
+            new File(System.getProperty("java.io.tmpdir"), "configman-test").getAbsolutePath());
     configManager.setItem("org.opencastproject.server.url", "http://localhost:8080");
     configManager.updated(sourceProps);
 
@@ -218,7 +228,8 @@ public class ConfigurationManagerTest {
     sourceProps.put("org.opencastproject.storage.dir", "${java.io.tmpdir}/configman-test");
     sourceProps.put("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());
     sourceProps.put("org.opencastproject.server.url", "http://localhost:8080");
-    File tempfile = File.createTempFile("temp", "file", new File(sourceProps.getProperty("org.opencastproject.storage.dir")));
+    File tempfile = File.createTempFile("temp", "file",
+            new File(sourceProps.getProperty("org.opencastproject.storage.dir")));
 
     configManager.updated(sourceProps);
     configManager.writeConfigFileToDisk();
@@ -237,7 +248,8 @@ public class ConfigurationManagerTest {
       for (Object e : sourceProps.keySet()) {
         String key = (String) e;
         if (testProps.getProperty(key) != null && !testProps.getProperty(key).equals(sourceProps.getProperty(key))) {
-          System.out.println("testProps differs: " + key + " => " + sourceProps.getProperty(key) + " != " + testProps.getProperty(key));
+          System.out.println("testProps differs: " + key + " => "
+                  + sourceProps.getProperty(key) + " != " + testProps.getProperty(key));
         } else if (testProps.getProperty(key) == null) {
           System.out.println("testProps missing: " + key);
         }

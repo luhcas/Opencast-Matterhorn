@@ -29,7 +29,6 @@ import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.ParseException;
 import java.util.Properties;
 
 /**
@@ -60,11 +59,11 @@ public class StartCaptureJob implements Job {
     mediaPackage = (MediaPackage)ctx.getMergedJobDataMap().get(JobParameters.MEDIA_PACKAGE);
     // The capture Properties
     properties = (Properties)ctx.getMergedJobDataMap().get(JobParameters.CAPTURE_PROPS);
-    // The scheduler to use.  We do not use ctx.getScheduler() because this job's scheduler might be gone (see SchedulerImpl)
+    // The scheduler to use.
     sched = (Scheduler)ctx.getMergedJobDataMap().get(JobParameters.SCHEDULER);
 
     if (captureAgentImpl == null) {
-      logger.error("No capture agent provided! Capture Interrupted");
+      logger.error("No capture agent provided. Capture Interrupted");
       return;
     }
 
@@ -76,17 +75,19 @@ public class StartCaptureJob implements Job {
 
     String postfix = properties.getProperty(JobParameters.JOB_POSTFIX);
     if (postfix == null) {
-      logger.error("Key {} not found in job properties, cannot continue!", JobParameters.JOB_POSTFIX);
+      logger.error("Key {} not found in job properties, cannot continue.", JobParameters.JOB_POSTFIX);
       return;
     }
     
     try {
 
-      // Get the stopCaptureJob scheduling ready in case something happens, so we don't need to stop the capture afterwards
+      //Find the recording end time
       String time2Stop = properties.getProperty(CaptureParameters.RECORDING_END);
 
-      JobDetail job = new JobDetail("StopCapture-" + postfix, JobParameters.CAPTURE_RELATED_TYPE, StopCaptureJob.class);
-      CronTrigger trigger = new CronTrigger("StopCaptureTrigger-" + postfix, JobParameters.CAPTURE_RELATED_TYPE, time2Stop);
+      JobDetail job = new JobDetail(StopCaptureJob.JOB_PREFIX + postfix, StopCaptureJob.class);
+      job.setGroup(JobParameters.SUPPORT_TYPE);
+      CronTrigger trigger = new CronTrigger(StopCaptureJob.TRIGGER_PREFIX + postfix, time2Stop);
+      trigger.setGroup(JobParameters.SUPPORT_TYPE);
       trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
 
       trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captureAgentImpl);
@@ -119,13 +120,10 @@ public class StartCaptureJob implements Job {
       }
       
     } catch (SchedulerException e) {
-      logger.error("Couldn't schedule task: {}", e.getMessage());
-      //e.printStackTrace();
-    } catch (ParseException e) {
-      logger.error("Invalid time for stopping capture: {}. Aborting.\n{}", properties.get(CaptureParameters.RECORDING_END), e.getMessage());
+      logger.error("Couldn't schedule task: {}", e);
       //e.printStackTrace();
     } catch (Exception e) {
-      logger.error("Unexpected exception: {}\nJob may have not been executed", e.getMessage());
+      logger.error("Unexpected exception: {}\nJob may have not been executed", e);
       e.printStackTrace();
     }
   }

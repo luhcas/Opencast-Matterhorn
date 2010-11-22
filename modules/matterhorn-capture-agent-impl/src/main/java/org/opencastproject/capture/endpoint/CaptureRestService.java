@@ -68,6 +68,8 @@ public class CaptureRestService {
     docs = generateDocs(serviceUrl);
   }
 
+  // CHECKSTYLE:OFF
+  //Checkstyle disable because it's a pain with these doc generation functions 
   protected String generateDocs(String serviceUrl) {
     DocRestData data = new DocRestData("CaptureAgent", "Capture Agent", serviceUrl, null);
     // // startCapture signatures
@@ -162,6 +164,7 @@ public class CaptureRestService {
 
     return DocUtil.generate(data);
   }
+  // CHECKSTYLE:ON
 
   /**
    * Set {@link org.opencastproject.capture.api.CaptureAgent} service.
@@ -188,8 +191,8 @@ public class CaptureRestService {
   @Path("startCapture")
   public Response startCapture() {
     if (service == null) {
-      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity(
-              "Capture Agent is unavailable, please wait...").build();
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
+              .entity("Capture Agent is unavailable, please wait...").build();
     }
 
     String out;
@@ -198,12 +201,12 @@ public class CaptureRestService {
       if (out != null) {
         return Response.ok("Start Capture OK. OUT: " + out).build();
       } else {
-        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-                "There was a problem starting your capture, please check the logs.").build();
+        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("There was a problem starting your capture, please check the logs.").build();
       }
     } catch (Exception e) {
-      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-              "Exception while trying to start capture: " + e.getMessage() + ".").build();
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR)
+              .entity("Exception while trying to start capture: " + e.getMessage() + ".").build();
     }
   }
 
@@ -211,17 +214,18 @@ public class CaptureRestService {
   @Produces(MediaType.TEXT_PLAIN)
   @Path("startCapture")
   public Response startCapture(@FormParam("config") String config) {
-    logger.debug("Capture configuration received: " + config);
+    logger.debug("Capture configuration received:");
+    logger.debug("{}.", config);
     if (service == null) {
-      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity(
-              "Capture Agent is unavailable, please wait...").build();
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
+              .entity("Capture Agent is unavailable, please wait...").build();
     }
 
     Properties configuration = new Properties();
     try {
       configuration.load(new StringReader(config));
     } catch (IOException e1) {
-      logger.warn("Unable to parse configuration string into valid capture config.  Continuing with default settings.");
+      logger.warn("Unable to parse configuration string into valid capture config. Continuing with default settings.");
     }
 
     String out;
@@ -230,11 +234,11 @@ public class CaptureRestService {
       if (out != null)
         return Response.ok("Started capture " + out).build();
       else
-        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-                "There was a problem starting your capture, please check the logs.").build();
+        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("There was a problem starting your capture, please check the logs.").build();
     } catch (Exception e) {
-      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-              "Exception while trying to start capture: " + e.getMessage() + ".").build();
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR)
+              .entity("Exception while trying to start capture: " + e.getMessage() + ".").build();
     }
   }
 
@@ -250,8 +254,8 @@ public class CaptureRestService {
   @Path("stopCapture")
   public Response stopCapture() {
     if (service == null) {
-      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity(
-              "Capture Agent is unavailable, please wait...").build();
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
+              .entity("Capture Agent is unavailable, please wait...").build();
     }
 
     boolean out;
@@ -260,11 +264,11 @@ public class CaptureRestService {
       if (out)
         return Response.ok("Stop Capture OK. OUT: " + out).build();
       else
-        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-                "There was a problem stopping your capture, please check the logs.").build();
+        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("There was a problem stopping your capture, please check the logs.").build();
     } catch (Exception e) {
-      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-              "Exception while trying to stop capture: " + e.getMessage() + ".").build();
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR)
+              .entity("Exception while trying to stop capture: " + e.getMessage() + ".").build();
     }
   }
 
@@ -273,8 +277,8 @@ public class CaptureRestService {
   @Path("stopCapture")
   public Response stopCapture(@FormParam("recordingID") String recordingID) {
     if (service == null) {
-      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity(
-              "Capture Agent is unavailable, please wait...").build();
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
+              .entity("Capture Agent is unavailable, please wait...").build();
     }
 
     boolean out;
@@ -283,11 +287,11 @@ public class CaptureRestService {
       if (out)
         return Response.ok("Stopped Capture").build();
       else
-        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-                "There was a problem stopping your capture, please check the logs.").build();
+        return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity("There was a problem stopping your capture, please check the logs.").build();
     } catch (Exception e) {
-      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-              "Exception while trying to stop capture: " + e.getMessage() + ".").build();
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR)
+              .entity("Exception while trying to stop capture: " + e.getMessage() + ".").build();
     }
   }
 
@@ -296,15 +300,15 @@ public class CaptureRestService {
   @Path("configuration")
   public Response getConfiguration() {
     if (service == null) {
-      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).entity(
-              "Capture Agent is unavailable, please wait...").build();
+      return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE)
+              .entity("Capture Agent is unavailable, please wait...").build();
     }
 
     try {
       return Response.ok(service.getDefaultAgentPropertiesAsString()).build();
     } catch (Exception e) {
-      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR).entity(
-              "Exception while trying to obtain metadata: " + e.getMessage() + ".").build();
+      return Response.serverError().status(Response.Status.INTERNAL_SERVER_ERROR)
+              .entity("Exception while trying to obtain metadata: " + e.getMessage() + ".").build();
     }
   }
 

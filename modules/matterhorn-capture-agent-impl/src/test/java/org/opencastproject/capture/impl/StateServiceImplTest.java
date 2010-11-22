@@ -50,7 +50,8 @@ public class StateServiceImplTest {
     
     cfg = new ConfigurationManager();
     Assert.assertNotNull(cfg);
-    cfg.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, new File(System.getProperty("java.io.tmpdir"), "capture-state-test").getAbsolutePath());
+    cfg.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL,
+            new File(System.getProperty("java.io.tmpdir"), "capture-state-test").getAbsolutePath());
     cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL, "1");
     cfg.setItem(CaptureParameters.AGENT_STATE_REMOTE_ENDPOINT_URL, "http://localhost");
     service.setConfigService(cfg);

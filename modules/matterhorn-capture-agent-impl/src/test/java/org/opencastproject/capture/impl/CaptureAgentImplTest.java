@@ -44,15 +44,15 @@ import java.util.Properties;
 public class CaptureAgentImplTest {
   
   /** The single instance of CaptureAgentImpl needed */
-  private static CaptureAgentImpl agent = null;
+  private CaptureAgentImpl agent = null;
 
   /** The configuration manager for these tests */
-  private static ConfigurationManager config = null;
+  private ConfigurationManager config = null;
 
-  private static SchedulerImpl sched = null;
+  private SchedulerImpl sched = null;
   
   /** Properties specifically designed for unit testing */
-  private static Properties properties = null;
+  private Properties properties = null;
   
   /** Define a recording ID for the test */
   private static final String recordingID = "UnitTest1";
@@ -256,7 +256,8 @@ public class CaptureAgentImplTest {
     config.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, null);
     agent.loadRecordingsFromDisk();
     Assert.assertEquals(0, agent.getKnownRecordings().size());
-    config.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, getClass().getClassLoader().getResource("config/capture.properties").getFile());
+    config.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL,
+            getClass().getClassLoader().getResource("config/capture.properties").getFile());
     agent.loadRecordingsFromDisk();
     Assert.assertEquals(0, agent.getKnownRecordings().size());
     config.setItem(CaptureParameters.CAPTURE_FILESYSTEM_CAPTURE_CACHE_URL, backup);
