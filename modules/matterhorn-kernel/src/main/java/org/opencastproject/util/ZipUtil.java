@@ -17,6 +17,7 @@ package org.opencastproject.util;
 
 import de.schlichtherle.io.ArchiveDetector;
 import de.schlichtherle.io.ArchiveException;
+import de.schlichtherle.io.ArchiveWarningException;
 import de.schlichtherle.io.DefaultArchiveDetector;
 import de.schlichtherle.io.File;
 import de.schlichtherle.io.archive.zip.ZipDriver;
@@ -64,6 +65,8 @@ public class ZipUtil {
   private static void umount(File zipFile) throws IOException {
     try {
       File.umount(zipFile);
+    } catch (ArchiveWarningException awe) {
+      logger.warn("Ignoring ArchiveWarningException while umounting: " + awe.getMessage());
     } catch (ArchiveException ae) {
       logger.error("Unable to umount zip file: {}", zipFile.getCanonicalPath());
       throw new IOException("Unable to umount zip file: " + zipFile.getCanonicalPath(), ae);
@@ -218,7 +221,7 @@ public class ZipUtil {
 
     try {
       if (f.isArchive() && f.isDirectory()) {
-        if (destination.exists()) {	
+        if (destination.exists()) {
           if (! destination.isDirectory()) {
             logger.error("Destination file must be a directory");
             throw new IllegalArgumentException("Destination file must be a directory");
