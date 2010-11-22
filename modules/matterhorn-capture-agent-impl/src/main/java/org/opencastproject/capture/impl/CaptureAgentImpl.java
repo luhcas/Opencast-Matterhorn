@@ -46,19 +46,15 @@ import org.opencastproject.security.api.TrustedHttpClientException;
 import org.opencastproject.util.Checksum;
 import org.opencastproject.util.ChecksumType;
 import org.opencastproject.util.MimeType;
-import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.XProperties;
 import org.opencastproject.util.ZipUtil;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.http.message.BasicNameValuePair;
 import org.gstreamer.Bus;
 import org.gstreamer.GstObject;
 import org.gstreamer.Pipeline;
@@ -89,7 +85,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -841,8 +836,12 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
 
     try {
-      entities.addPart("workflowDefinitionId", new StringBody(workflowDefinitionId, Charset.forName("UTF-8")));
-      entities.addPart("workflowInstanceId", new StringBody(workflowInstance, Charset.forName("UTF-8")));
+      if(workflowDefinitionId != null) {
+        entities.addPart("workflowDefinitionId", new StringBody(workflowDefinitionId, Charset.forName("UTF-8")));
+      }
+      if(workflowInstance != null) {
+        entities.addPart("workflowInstanceId", new StringBody(workflowInstance, Charset.forName("UTF-8")));
+      }
       entities.addPart(fileDesc.getName(), new InputStreamBody(new FileInputStream(fileDesc), fileDesc.getName()));
     } catch (FileNotFoundException ex) {
       logger.error("Could not find zipped mediapackage " + fileDesc.getAbsolutePath());
@@ -1055,53 +1054,10 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
         }
         pendingRecordings.put(recordingID, rec);
       }
-      sendStateToServer(recordingID, state);
     } else if (recordingID == null) {
       logger.info("Unable to create recording because recordingID parameter was null!");
     } else if (state == null) {
       logger.info("Unable to create recording because state parameter was null!");
-    }
-  }
-
-  /**
-   * Try to send the recording state to the server. The capture agent may be offline while recording states change, so
-   * if we can not contact the server, just return.
-   * 
-   * @param recordingId
-   *          the recording id
-   * @param state
-   *          the state of the recording
-   */
-  protected void sendStateToServer(String recordingId, String state) {
-    String url = configService.getItem(CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL);
-    if (url == null) {
-      logger.warn("URL for {} is invalid, unable to push recording state to remote server.",
-              CaptureParameters.RECORDING_STATE_REMOTE_ENDPOINT_URL);
-      return;
-    }
-    url = UrlSupport.concat(url, recordingId);
-    HttpPost post = new HttpPost(url);
-    List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>(1);
-    params.add(new BasicNameValuePair("state", state));
-    try {
-      post.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-    } catch (UnsupportedEncodingException e) {
-      logger.warn("Unable to encode form parameters to UTF-8: {}", e);
-      return;
-    }
-    HttpResponse response = null;
-    try {
-      logger.debug("Updating the capture admin service: recording '{}' = state '{}'", recordingId, state);
-      response = client.execute(post);
-      if(HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
-        logger.debug("Successfully updated capture admin service: recording '{}' = state '{}'", recordingId, state);
-      } else {
-        logger.debug("Sending the recording state to the capture admin service failed: {}", response.getStatusLine());
-      }
-    } catch (TrustedHttpClientException e) {
-      logger.info("Unable to set the recording state on the server, {}", e);
-    } finally {
-      client.close(response);
     }
   }
 

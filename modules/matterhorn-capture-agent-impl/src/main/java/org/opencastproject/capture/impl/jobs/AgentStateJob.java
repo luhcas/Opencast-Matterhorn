@@ -135,12 +135,8 @@ public class AgentStateJob implements Job {
     Map<String, AgentRecording> recordings = state.getKnownRecordings();
     for (Entry<String, AgentRecording> e : recordings.entrySet()) {
       List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-
-      formParams.add(new BasicNameValuePair("id", e.getKey()));
       formParams.add(new BasicNameValuePair("state", e.getValue().getState()));
-
       logger.debug("Sending recording {}'s state: {}.", e.getKey(), e.getValue().getState());
-
       String myURL = url + e.getKey();
       send(formParams, myURL);
     }
