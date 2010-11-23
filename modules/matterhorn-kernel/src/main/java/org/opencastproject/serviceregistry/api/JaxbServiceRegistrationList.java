@@ -38,7 +38,11 @@ public class JaxbServiceRegistrationList {
   protected List<JaxbServiceRegistration> registrations = new ArrayList<JaxbServiceRegistration>();
 
   public JaxbServiceRegistrationList() {}
-  
+
+  public JaxbServiceRegistrationList(JaxbServiceRegistration registration) {
+    this.registrations.add(registration);
+  }
+
   public JaxbServiceRegistrationList(Collection<JaxbServiceRegistration> registrations) {
     for(JaxbServiceRegistration stat : registrations) this.registrations.add((JaxbServiceRegistration)stat);
   }
