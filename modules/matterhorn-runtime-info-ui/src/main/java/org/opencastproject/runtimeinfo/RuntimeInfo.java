@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.Servlet;
 import javax.ws.rs.GET;
@@ -126,7 +127,8 @@ public class RuntimeInfo {
               httpClient.getConnectionManager().shutdown();
             }
           }
-        }, (1000 * 60), (1000 * 60 * 60)); // wait 60 seconds to send first message, and once an hour thereafter
+        }, TimeUnit.MINUTES.toMillis(1), TimeUnit.HOURS.toMillis(1));
+        // wait one minute to send first message, and send once an hour thereafter
       } catch (URISyntaxException e1) {
         logger.warn("Can not ping back to '{}'", pingbackUrl);
       }
