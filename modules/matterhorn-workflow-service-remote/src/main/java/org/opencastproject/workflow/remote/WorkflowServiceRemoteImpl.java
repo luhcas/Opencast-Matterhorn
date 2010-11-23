@@ -118,8 +118,11 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
     if (query.getState() != null) {
       queryStringParams.add(new BasicNameValuePair("state", query.getState().toString()));
     }
-    if (query.getState() != null) {
-      queryStringParams.add(new BasicNameValuePair("series", query.getSeries()));
+    if (query.getSeriesId() != null) {
+      queryStringParams.add(new BasicNameValuePair("seriesId", query.getSeriesId()));
+    }
+    if (query.getSeriesTitle() != null) {
+      queryStringParams.add(new BasicNameValuePair("seriesTitle", query.getSeriesTitle()));
     }
     if (query.getMediaPackage() != null) {
       queryStringParams.add(new BasicNameValuePair("mp", query.getMediaPackage()));

@@ -176,7 +176,8 @@ public class WorkflowRestService {
     instancesEndpoint.addOptionalParam(new Param("state", Type.STRING, "succeeded", "Filter results by state"));
     instancesEndpoint.addOptionalParam(new Param("q", Type.STRING, "climate",
             "Filter results by string in metadata catalog"));
-    instancesEndpoint.addOptionalParam(new Param("series", Type.STRING, null, "Filter results by series ID"));
+    instancesEndpoint.addOptionalParam(new Param("seriesId", Type.STRING, null, "Filter results by series ID"));
+    instancesEndpoint.addOptionalParam(new Param("seriesTitle", Type.STRING, null, "Filter results by series title"));
     instancesEndpoint.addOptionalParam(new Param("mp", Type.STRING, null, "Filter results by media package ID"));
     instancesEndpoint.addOptionalParam(new Param("op", Type.STRING, "inspect", "Filter results by current operation"));
     instancesEndpoint.addOptionalParam(new Param("count", Type.STRING, "20", "Results per page (max 100)"));
@@ -481,9 +482,9 @@ public class WorkflowRestService {
   @Produces(MediaType.TEXT_XML)
   @Path("instances.xml")
   public Response getWorkflowsAsXml(@QueryParam("state") String state, @QueryParam("q") String text,
-          @QueryParam("series") String seriesId, @QueryParam("mp") String mediapackageId,
-          @QueryParam("op") String currentOperation, @QueryParam("startPage") int startPage,
-          @QueryParam("count") int count) throws Exception {
+          @QueryParam("seriesId") String seriesId, @QueryParam("seriesTitle") String seriesTitle,
+          @QueryParam("mp") String mediapackageId, @QueryParam("op") String currentOperation,
+          @QueryParam("startPage") int startPage, @QueryParam("count") int count) throws Exception {
     // CHECKSTYLE:ON
     if (count < 1 || count > MAX_LIMIT)
       count = DEFAULT_LIMIT;
@@ -495,7 +496,9 @@ public class WorkflowRestService {
     if (text != null)
       q.withText(text);
     if (seriesId != null)
-      q.withSeries(seriesId);
+      q.withSeriesId(seriesId);
+    if (seriesTitle != null)
+      q.withSeriesTitle(seriesTitle);
     if (mediapackageId != null)
       q.withMediaPackage(mediapackageId);
     if (currentOperation != null)
@@ -509,11 +512,11 @@ public class WorkflowRestService {
   @Produces(MediaType.APPLICATION_JSON)
   @Path("instances.json")
   public Response getWorkflowsAsJson(@QueryParam("state") String state, @QueryParam("q") String text,
-          @QueryParam("series") String seriesId, @QueryParam("mp") String mediapackageId,
-          @QueryParam("op") String currentOperation, @QueryParam("startPage") int startPage,
-          @QueryParam("count") int count) throws Exception {
+          @QueryParam("seriesId") String seriesId, @QueryParam("seriesTitle") String seriesTitle,
+          @QueryParam("mp") String mediapackageId, @QueryParam("op") String currentOperation,
+          @QueryParam("startPage") int startPage, @QueryParam("count") int count) throws Exception {
     // CHECKSTYLE:ON
-    return getWorkflowsAsXml(state, text, seriesId, mediapackageId, currentOperation, startPage, count);
+    return getWorkflowsAsXml(state, text, seriesId, seriesTitle, mediapackageId, currentOperation, startPage, count);
   }
 
   @GET
@@ -692,13 +695,13 @@ public class WorkflowRestService {
       return Response.status(Status.INTERNAL_SERVER_ERROR).build();
     }
   }
-  
+
   @DELETE
   @Path("/definition/{id}")
   public Response unregisterWorkflowDefinition(@PathParam("id") String workflowDefinitionId) {
     try {
       service.unregisterWorkflowDefinition(workflowDefinitionId);
-       return Response.status(Status.NO_CONTENT).build();
+      return Response.status(Status.NO_CONTENT).build();
     } catch (NotFoundException e) {
       return Response.status(Status.NOT_FOUND).build();
     } catch (WorkflowDatabaseException e) {

@@ -25,6 +25,7 @@ public class WorkflowQuery {
   protected long startPage;
   protected String text;
   protected WorkflowState state;
+  protected String seriesTitle;
   protected String seriesId;
   protected String mediaPackageId;
   protected String currentOperation;
@@ -56,8 +57,14 @@ public class WorkflowQuery {
     return this;
   }
 
+  /** Limit results to workflow instances with a specific series title */
+  public WorkflowQuery withSeriesTitle(String seriesTitle) {
+    this.seriesTitle = seriesTitle;
+    return this;
+  }
+
   /** Limit results to workflow instances for a specific series */
-  public WorkflowQuery withSeries(String seriesId) {
+  public WorkflowQuery withSeriesId(String seriesId) {
     this.seriesId = seriesId;
     return this;
   }
@@ -98,8 +105,12 @@ public class WorkflowQuery {
     return mediaPackageId;
   }
 
-  public String getSeries() {
+  public String getSeriesId() {
     return seriesId;
+  }
+  
+  public String getSeriesTitle() {
+    return seriesTitle;
   }
 
 }

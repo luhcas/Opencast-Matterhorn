@@ -70,7 +70,8 @@
     <field name="xml" type="text" indexed="false" stored="true" multiValued="false" />
     <field name="mp" type="text" indexed="true" stored="false" multiValued="false" />
     <field name="state" type="text" indexed="true" stored="false" multiValued="false" />
-    <field name="series" type="text" indexed="true" stored="false" multiValued="false" />
+    <field name="seriesid" type="text" indexed="true" stored="false" multiValued="false" />
+    <field name="seriestitle" type="text" indexed="true" stored="false" multiValued="false" />
     <field name="operation" type="text" indexed="true" stored="false" multiValued="false" />
     <field name="title" type="text" indexed="true" stored="false" multiValued="false" />
     <field name="license" type="text" indexed="true" stored="false" multiValued="false" />
@@ -88,7 +89,8 @@
   <copyField source="id" dest="fulltext" />
   <copyField source="mp" dest="fulltext" />
   <copyField source="state" dest="fulltext" />
-  <copyField source="series" dest="fulltext" />
+  <copyField source="seriesid" dest="fulltext" />
+  <copyField source="seriestitle" dest="fulltext" />
   <copyField source="operation" dest="fulltext" />
   <copyField source="title" dest="fulltext" />
   <copyField source="license" dest="fulltext" />

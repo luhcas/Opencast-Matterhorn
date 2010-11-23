@@ -85,8 +85,11 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
   /** The key in solr documents representing the workflow's current operation */
   protected static final String OPERATION_KEY = "operation";
 
-  /** The key in solr documents representing the workflow's series */
-  protected static final String SERIES_KEY = "series";
+  /** The key in solr documents representing the workflow's series identifier */
+  protected static final String SERIES_ID_KEY = "seriesid";
+
+  /** The key in solr documents representing the workflow's series title */
+  protected static final String SERIES_TITLE_KEY = "seriestitle";
 
   /** The key in solr documents representing the workflow's ID */
   protected static final String ID_KEY = "id";
@@ -301,7 +304,10 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
     MediaPackage mp = instance.getMediaPackage();
     doc.addField(MEDIAPACKAGE_KEY, mp.getIdentifier().toString());
     if (mp.getSeries() != null) {
-      doc.addField(SERIES_KEY, mp.getSeries());
+      doc.addField(SERIES_ID_KEY, mp.getSeries());
+    }
+    if (mp.getSeriesTitle() != null) {
+      doc.addField(SERIES_TITLE_KEY, mp.getSeriesTitle());
     }
     if (mp.getTitle() != null) {
       doc.addField(TITLE_KEY, mp.getTitle());
@@ -446,8 +452,11 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
     if (StringUtils.isNotBlank(query.getMediaPackage())) {
       append(sb, MEDIAPACKAGE_KEY, query.getMediaPackage());
     }
-    if (StringUtils.isNotBlank(query.getSeries())) {
-      append(sb, SERIES_KEY, query.getSeries());
+    if (StringUtils.isNotBlank(query.getSeriesId())) {
+      append(sb, SERIES_ID_KEY, query.getSeriesId());
+    }
+    if (StringUtils.isNotBlank(query.getSeriesTitle())) {
+      append(sb, SERIES_TITLE_KEY, query.getSeriesTitle());
     }
     if (StringUtils.isNotBlank(query.getCurrentOperation())) {
       append(sb, OPERATION_KEY, query.getCurrentOperation());
