@@ -263,7 +263,19 @@ public class JobTest {
   }
   
   @Test
-  public void testMarshalling() throws Exception {
+  public void testMarshallingWithJsonPayload() throws Exception {
+    final String payload = "{'foo' : 'bar'}";
+    JobJpaImpl job = new JobJpaImpl();
+    job.setPayload(payload);
+    
+    String marshalledJob = JobParser.toXml(job);
+    Job unmarshalledJob = JobParser.parseJob(marshalledJob);
+    
+    Assert.assertEquals("json from unmarshalled job should remain unchanged", StringUtils.trim(payload), StringUtils.trim(unmarshalledJob.getPayload()));
+  }
+  
+  @Test
+  public void testMarshallingWithXmlPayload() throws Exception {
     final String payload = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<random xmlns:ns2=\"http://mediapackage.opencastproject.org\" xmlns:ns3=\"http://job.opencastproject.org/\">something</random>";
     JobJpaImpl job = new JobJpaImpl();
     job.setPayload(payload);
