@@ -26,6 +26,8 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBinTest;
+import org.opencastproject.capture.pipeline.bins.consumers.VideoMonitoring;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

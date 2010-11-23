@@ -19,13 +19,16 @@ import org.opencastproject.capture.api.CaptureAgent;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceBin;
+import org.opencastproject.capture.pipeline.bins.consumers.AudioMonitoring;
+import org.opencastproject.capture.pipeline.bins.consumers.VideoMonitoring;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
+
 import net.luniks.linux.jv4linfo.JV4LInfo;
 import net.luniks.linux.jv4linfo.JV4LInfoException;
 import net.luniks.linux.jv4linfo.V4LInfo;
 
 import org.gstreamer.Gst;
 import org.gstreamer.Pipeline;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,7 +149,7 @@ public class PipelineFactory {
           String name) throws InvalidDeviceNameException, UnableToCreateSampleOutputFileException,
           UnrecognizedDeviceException, CannotFindSourceFileOrDeviceException {
     name = name.trim();
-    SourceDeviceName devName;
+    ProducerType devName;
   
     // Get properties from the configuration
     String srcProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX  + name + CaptureParameters.CAPTURE_DEVICE_SOURCE;
@@ -191,7 +194,7 @@ public class PipelineFactory {
     }
     
     if(type != null){
-      devName = SourceDeviceName.valueOf(type);
+      devName = ProducerType.valueOf(type);
       logger.debug("Device {} has been confirmed to be type {}", name, devName.toString());
     }
     else{
@@ -199,7 +202,7 @@ public class PipelineFactory {
       if (new File(srcLoc).isFile()) {
         // Non-V4L file. If it exists, assume it is ingestable
         // TODO: Fix security risk. Any file on CaptureAgent filesytem could be ingested
-        devName = SourceDeviceName.FILE;
+        devName = ProducerType.FILE;
         logger.debug("Device {} is a File device.", name);
       } else {
         devName = determineSourceFromJ4VLInfo(srcLoc);
@@ -213,23 +216,23 @@ public class PipelineFactory {
     return name;
   }
 
-  private static SourceDeviceName determineSourceFromJ4VLInfo(String srcLoc) throws UnrecognizedDeviceException{
+  private static ProducerType determineSourceFromJ4VLInfo(String srcLoc) throws UnrecognizedDeviceException{
     // ALSA source
     if (srcLoc.contains("hw:")){
-      return SourceDeviceName.ALSASRC;
+      return ProducerType.ALSASRC;
     } else if (srcLoc.equals("dv1394")) {
-      return SourceDeviceName.DV_1394;
+      return ProducerType.DV_1394;
     } else { // V4L devices
       // Attempt to determine what the device is using the JV4LInfo library 
       try {
         V4LInfo v4linfo = JV4LInfo.getV4LInfo(srcLoc);
         String deviceString = v4linfo.toString();
         if (deviceString.contains("Epiphan VGA2USB"))
-          return SourceDeviceName.EPIPHAN_VGA2USB;
+          return ProducerType.EPIPHAN_VGA2USB;
         else if (deviceString.contains("Hauppauge") || deviceString.contains("WinTV"))
-          return SourceDeviceName.HAUPPAUGE_WINTV;
+          return ProducerType.HAUPPAUGE_WINTV;
         else if (deviceString.contains("BT878"))
-          return SourceDeviceName.BLUECHERRY_PROVIDEO;
+          return ProducerType.BLUECHERRY_PROVIDEO;
         else {
           throw new UnrecognizedDeviceException("Do not recognized device: " + srcLoc);
           
@@ -238,7 +241,7 @@ public class PipelineFactory {
         // The v4l device caused an exception
         if (e.getMessage().equalsIgnoreCase("No medium found")) {
           logger.warn("No VGA signal detected. Trying to start capture regardless...");
-          return SourceDeviceName.EPIPHAN_VGA2USB;
+          return ProducerType.EPIPHAN_VGA2USB;
         } else {
           throw new UnrecognizedDeviceException("Unexpected jv4linfo exception: " + e.getMessage() + " for " + srcLoc);
         }
@@ -265,7 +268,7 @@ public class PipelineFactory {
     
     if (confidence) {
       for (CaptureDevice c : devices) {
-        if (c.getName() == SourceDeviceName.ALSASRC)
+        if (c.getName() == ProducerType.ALSASRC)
           AudioMonitoring.getConfidencePipeline(pipeline, c, properties);
         else
           VideoMonitoring.getConfidencePipeline(pipeline, c, properties);
@@ -281,7 +284,7 @@ public class PipelineFactory {
   }
 
   //TODO:  Document me!
-  public static CaptureDevice createCaptureDevice(String srcLoc, SourceDeviceName devName, String name, 
+  public static CaptureDevice createCaptureDevice(String srcLoc, ProducerType devName, String name, 
           String outputLoc) {
     CaptureDevice capdev = new CaptureDevice(srcLoc, devName, name, outputLoc);
     String codecProperty = CaptureParameters.CAPTURE_DEVICE_PREFIX + name + CaptureParameters.CAPTURE_DEVICE_CODEC;

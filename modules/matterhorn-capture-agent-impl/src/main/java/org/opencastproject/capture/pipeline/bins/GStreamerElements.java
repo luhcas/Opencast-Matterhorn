@@ -15,42 +15,47 @@
  */
 package org.opencastproject.capture.pipeline.bins;
 
+/** List of constant types for GStreamer Elements. **/
 public interface GStreamerElements {
   /** Source Module: gstreamer **/
   String CAPSFILTER = "capsfilter";
   String FILESINK = "filesink";
   String FILESRC = "filesrc";
+  String IDENTITY = "identity";
   String QUEUE = "queue";
   String TEE = "tee";
-  String IDENTITY = "identity";
   
   /** Source Module: gst-plugins-base **/
   String AUDIOCONVERT = "audioconvert";
-  String FFMPEGCOLORSPACE = "ffmpegcolorspace";
+  String AUDIOTESTSRC = "audiotestsrc";
   String DECODEBIN = "decodebin";
+  String FFMPEGCOLORSPACE = "ffmpegcolorspace";
   String V4LSRC = "v4lsrc";
   String VIDEORATE = "videorate";
   String VIDEOTESTSRC = "videotestsrc";
+  // Available only in Linux
+  String ALSASRC = "alsasrc";
+  String XVIMAGESINK = "xvimagesink";
   
   /** Source Module: gst-plugins-good **/
-  String V4L2SRC = "v4l2src";
   String DV1394SRC = "dv1394src";
-  String DVDEMUX = "dvdemux";
   String DVDEC = "dvdec";
+  String DVDEMUX = "dvdemux";
   String PULSESRC = "pulsesrc";
+  String V4L2SRC = "v4l2src";
   
   /** Source Module: gst-plugins-bad **/
   String FAAC = "faac";
-  String MPEGPSMUX = "mpegpsmux";
+  String INPUT_SELECTOR = "input-selector";
   String MP4MUX = "mp4mux";
   String MPEGPSDEMUX = "mpegpsdemux";
+  String MPEGPSMUX = "mpegpsmux";
   String MPEGVIDEOPARSE = "mpegvideoparse";
-  String INPUT_SELECTOR = "input-selector";
   
   /** Source Module: gst-plugins-ugly **/
+  String MPEG2DEC = "mpeg2dec";
   String TWOLAME = "twolame";
   String X264ENC = "x264enc";
-  String MPEG2DEC = "mpeg2dec";
   
   /** Source Module: gst-ffmpeg **/
   String FFENC_MPEG2VIDEO= "ffenc_mpeg2video";

@@ -22,10 +22,6 @@ import org.gstreamer.MessageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * A Quick and dirty logging class.  This will only be created when the logging level is set to TRACE.
- * It's sole purpose is to output the three limits on the buffer for each device
- */
 public class BufferThread implements Runnable {
 
   private static final Logger log = LoggerFactory.getLogger(BufferThread.class);
@@ -33,6 +29,11 @@ public class BufferThread implements Runnable {
   Element queue = null;
   boolean run = true;
 
+  /**
+   * A Quick and dirty logging class.  This will only be created when the logging level is set to TRACE.
+   * It's sole purpose is to output the three limits on the buffer for each device
+   * @param newQueue The GStreamer Element queue that we will be logging. 
+   */
   public BufferThread(Element newQueue) {
     log.info("Buffer monitoring thread started for device " + newQueue.getName());
     queue = newQueue;
@@ -49,12 +50,12 @@ public class BufferThread implements Runnable {
 
   }
 
+  /** Checks the buffer, bytes and time on the queue at every tick. **/
   public void run() {
     while (run) {
       log.trace(queue.getName() + "," + queue.get("current-level-buffers") + "," + queue.get("current-level-bytes")
               + "," + queue.get("current-level-time"));
       try {
-        
         Thread.sleep(MILLISECONDS_BETWEEN_CHECKS);
       } catch (InterruptedException e) {
         log.trace(queue.getName() + "'s buffer monitor thread caught an InterruptedException but is continuing.");

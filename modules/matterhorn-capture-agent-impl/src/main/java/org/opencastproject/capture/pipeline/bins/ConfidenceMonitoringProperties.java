@@ -15,17 +15,18 @@
  */
 package org.opencastproject.capture.pipeline.bins;
 
+import org.opencastproject.capture.api.CaptureParameters;
+
 import java.io.File;
 import java.util.Properties;
 
-import org.opencastproject.capture.api.CaptureParameters;
-
 public class ConfidenceMonitoringProperties {
-  public String imageloc;
-  public String device;
-  public int interval;
-  public int monitoringLength;
+  private String imageloc;
+  private String device;
+  private int interval;
+  private int monitoringLength;
   
+  /** Used to store the confidence monitoring properties. **/
   public ConfidenceMonitoringProperties(CaptureDevice captureDevice, Properties properties){
     if(properties != null){
       imageloc = properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION);
@@ -36,4 +37,21 @@ public class ConfidenceMonitoringProperties {
               "60"));
     }
   }
+  
+  public String getImageloc() {
+    return imageloc;
+  }
+
+  public String getDevice() {
+    return device;
+  }
+
+  public int getInterval() {
+    return interval;
+  }
+
+  public int getMonitoringLength() {
+    return monitoringLength;
+  }
+
 }

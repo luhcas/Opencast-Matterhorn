@@ -15,22 +15,31 @@
  */
 package org.opencastproject.capture.pipeline.bins;
 
-import java.util.Properties;
-
 import org.opencastproject.capture.api.CaptureParameters;
 
+import java.util.Properties;
+
 public class CaptureDeviceProperties {
-  public String customSource;
-  public String codec;
-  public String container;
-  public String bitrate;
-  public String framerate;
-  public String bufferCount;
-  public String bufferBytes;
-  public String bufferTime;
-  public boolean confidence;
-  
-  public CaptureDeviceProperties(CaptureDevice captureDevice, Properties properties){
+  private String customSource;
+  private String codec;
+  private String container;
+  private String bitrate;
+  private String framerate;
+  private String bufferCount;
+  private String bufferBytes;
+  private String bufferTime;
+  private boolean confidence;
+
+  /**
+   * A data class that processes the captureDevice and properties taken in by each Consumer and Producer and gathers the
+   * salient properties.
+   * 
+   * @param captureDevice
+   *          Details about the captureDevice such as location, codec, container, etc.
+   * @param properties
+   *          Confidence monitoring properties.
+   **/
+  public CaptureDeviceProperties(CaptureDevice captureDevice, Properties properties) {
     customSource = captureDevice.properties.getProperty("customSource");
     codec = captureDevice.properties.getProperty("codec");
     container = captureDevice.properties.getProperty("container");
@@ -39,11 +48,82 @@ public class CaptureDeviceProperties {
     bufferCount = captureDevice.properties.getProperty("bufferCount");
     bufferBytes = captureDevice.properties.getProperty("bufferBytes");
     bufferTime = captureDevice.properties.getProperty("bufferTime");
-    if(properties != null && properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE) != null){
+    if (properties != null && properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE) != null) {
       confidence = Boolean.valueOf(properties.getProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE));
-    }
-    else{
+    } else {
       confidence = false;
     }
+  }
+
+  public String getCustomSource() {
+    return customSource;
+  }
+
+  public void setCustomSource(String customSource) {
+    this.customSource = customSource;
+  }
+
+  public String getCodec() {
+    return codec;
+  }
+
+  public void setCodec(String codec) {
+    this.codec = codec;
+  }
+
+  public String getContainer() {
+    return container;
+  }
+
+  public void setContainer(String container) {
+    this.container = container;
+  }
+
+  public String getBitrate() {
+    return bitrate;
+  }
+
+  public void setBitrate(String bitrate) {
+    this.bitrate = bitrate;
+  }
+
+  public String getFramerate() {
+    return framerate;
+  }
+
+  public void setFramerate(String framerate) {
+    this.framerate = framerate;
+  }
+
+  public String getBufferCount() {
+    return bufferCount;
+  }
+
+  public void setBufferCount(String bufferCount) {
+    this.bufferCount = bufferCount;
+  }
+
+  public String getBufferBytes() {
+    return bufferBytes;
+  }
+
+  public void setBufferBytes(String bufferBytes) {
+    this.bufferBytes = bufferBytes;
+  }
+
+  public String getBufferTime() {
+    return bufferTime;
+  }
+
+  public void setBufferTime(String bufferTime) {
+    this.bufferTime = bufferTime;
+  }
+
+  public boolean isConfidence() {
+    return confidence;
+  }
+
+  public void setConfidence(boolean confidence) {
+    this.confidence = confidence;
   }
 }

@@ -15,9 +15,9 @@
  */
 package org.opencastproject.capture.pipeline.bins;
 
-import java.util.Properties;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
 
-import org.opencastproject.capture.pipeline.SourceDeviceName;
+import java.util.Properties;
 
 /**
  * Simple representation of the location, friendly name, capture type and output file of a capture device.
@@ -28,7 +28,7 @@ public class CaptureDevice {
   private String location;
 
   /** Device name */
-  private SourceDeviceName sourceDeviceName;
+  private ProducerType sourceDeviceName;
   
   /** Friendly name defined in properties file by user e.g. VGA, Podium etc.*/
   private String friendlyName;
@@ -51,7 +51,7 @@ public class CaptureDevice {
    * @param outputPath
    *          The output path
    */
-  public CaptureDevice(String location, SourceDeviceName sourceDeviceName, String friendlyName, String outputPath) {
+  public CaptureDevice(String location, ProducerType sourceDeviceName, String friendlyName, String outputPath) {
     this.location = location;
     this.sourceDeviceName = sourceDeviceName;
     this.outputPath = outputPath;
@@ -61,7 +61,7 @@ public class CaptureDevice {
 
   }
 
-  public SourceDeviceName getName() {
+  public ProducerType getName() {
     return sourceDeviceName;
   }
 

@@ -19,6 +19,7 @@ import junit.framework.Assert;
 
 import org.junit.Test;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
+import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
 
 /**
  * Simple test the constructor and get methods for this basic class that 
@@ -28,7 +29,7 @@ public class CaptureDeviceTest {
   
   @Test
   public void testCaptureDevice() {
-    SourceDeviceName device = SourceDeviceName.FILE;
+    ProducerType device = ProducerType.FILE;
     String source = "source";
     String dest = "destination";
     String fname = "TEST";

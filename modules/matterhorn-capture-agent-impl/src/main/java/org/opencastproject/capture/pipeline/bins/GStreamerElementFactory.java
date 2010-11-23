@@ -23,19 +23,32 @@ import org.slf4j.LoggerFactory;
 public class GStreamerElementFactory {
   private static GStreamerElementFactory factory;
   protected static final Logger logger = LoggerFactory.getLogger(GStreamerElementFactory.class);
-  
-  /** Singleton factory **/
-  public static synchronized GStreamerElementFactory getInstance(){
-    if(factory == null){
+
+  /** Singleton factory pattern **/
+  public static synchronized GStreamerElementFactory getInstance() {
+    if (factory == null) {
       factory = new GStreamerElementFactory();
     }
     return factory;
   }
-  
-  private GStreamerElementFactory(){
-    
+
+  /** Private so that we can control how many factories there are. **/
+  private GStreamerElementFactory() {
+
   }
-  
+
+  /**
+   * Creates a GStreamer Element
+   * 
+   * @param captureDeviceName
+   *          Used to create a useful error message for the Exception.
+   * @param elementType
+   *          Specifies the GStreamer Element type to create.
+   * @param elementFriendlyName
+   *          Optional friendly name for the Element.
+   * @throws UnableToCreateElementException
+   *           Thrown if the Element cannot be created because the Element doesn't exist on this machine.
+   * **/
   public Element createElement(String captureDeviceName, String elementType, String elementFriendlyName)
           throws UnableToCreateElementException {
     try {
