@@ -164,13 +164,13 @@ public class CaptureAgentImplTest {
     Assert.assertEquals(RecordingState.CAPTURE_FINISHED, agent.loadRecording(
             new File(agent.getKnownRecordings().get(id).getBaseDir(), id + ".recording")).getState());
 
-    Thread.sleep(1000);
+    Thread.sleep(2000);
 
     // test creation of the manifest file
     File manifestFile = new File(outputdir.getAbsolutePath(), CaptureParameters.MANIFEST_NAME);
     Assert.assertTrue(manifestFile.exists());
 
-    Thread.sleep(1000);
+    Thread.sleep(2000);
 
     // test zipping media
     File zippedMedia = new File(outputdir.getAbsolutePath(), CaptureParameters.ZIP_NAME);
@@ -190,7 +190,7 @@ public class CaptureAgentImplTest {
     Assert.assertEquals(state, agent.getRecordingState(id).getState());
     agent.serializeRecording(id);
     try {
-      Thread.sleep(1000);
+      Thread.sleep(2000);
     } catch (InterruptedException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -209,7 +209,7 @@ public class CaptureAgentImplTest {
     Assert.assertEquals(0, agent.getKnownRecordings().size());
     String id = agent.startCapture(properties);
     Assert.assertEquals(1, agent.getKnownRecordings().size());
-    Thread.sleep(1000);
+    Thread.sleep(2000);
     agent.deactivate();
     agent = null;
 

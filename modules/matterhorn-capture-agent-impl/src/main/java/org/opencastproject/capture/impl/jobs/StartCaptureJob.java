@@ -89,7 +89,7 @@ public class StartCaptureJob implements Job {
       CronTrigger trigger = new CronTrigger(StopCaptureJob.TRIGGER_PREFIX + postfix, time2Stop);
       trigger.setGroup(JobParameters.SUPPORT_TYPE);
       trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
-
+      trigger.setCronExpression(time2Stop);
       trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, captureAgentImpl);
       trigger.getJobDataMap().put(JobParameters.JOB_POSTFIX, postfix);
       trigger.getJobDataMap().put(JobParameters.SCHEDULER, sched);
