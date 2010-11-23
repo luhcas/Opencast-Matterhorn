@@ -6,8 +6,6 @@ package org.opencast.engage.videodisplay.control.util
 	import flash.external.ExternalInterface;
 	import flash.utils.Timer;
 
-	import mx.controls.Alert;
-
 	import org.opencast.engage.videodisplay.control.event.DisplayCaptionEvent;
 	import org.opencast.engage.videodisplay.model.VideodisplayModel;
 	import org.opencast.engage.videodisplay.state.DefaultPlayerState;
@@ -16,6 +14,7 @@ package org.opencast.engage.videodisplay.control.util
 	import org.opencast.engage.videodisplay.state.PlayerState;
 	import org.opencast.engage.videodisplay.state.SoundState;
 	import org.opencast.engage.videodisplay.state.VideoState;
+	import org.osmf.elements.ParallelElement;
 	import org.osmf.events.AudioEvent;
 	import org.osmf.events.BufferEvent;
 	import org.osmf.events.LoadEvent;
@@ -30,6 +29,8 @@ package org.opencast.engage.videodisplay.control.util
 	import org.osmf.media.MediaPlayer;
 	import org.osmf.metadata.MetadataWatcher;
 	import org.swizframework.Swiz;
+
+	import mx.controls.Alert;
 
 	/**
 	 *   OpencastMediaPlayer
@@ -78,6 +79,9 @@ package org.opencast.engage.videodisplay.control.util
 
 		private var firstStart : Boolean = false;
 
+		private var parallelElement:ParallelElement;
+
+		private var oProxyElementTwo:OProxyElement;
 
 		/**
 		 * Constructor
@@ -89,6 +93,8 @@ package org.opencast.engage.videodisplay.control.util
 			Swiz.autowire( this );
 
 			videoState = value;
+
+			parallelElement = new ParallelElement();
 
 			// initialize the timeCode
 			_time = new TimeCode();
@@ -155,7 +161,7 @@ package org.opencast.engage.videodisplay.control.util
 
 			}
 			// Reset the current time in html
-			//  ExternalInterface.call( ExternalFunction.SETCURRENTTIME, '00:00:00' );
+			ExternalInterface.call( ExternalFunction.SETCURRENTTIME, '00:00:00' );
 		}
 
 		/**
@@ -282,6 +288,51 @@ package org.opencast.engage.videodisplay.control.util
 			}
 		}
 
+
+		/*
+		   Using OSMFs ParalellElement to sync videos
+		 */
+		public function setMediaElement(mediaElement1:MediaElement, mediaElement2:MediaElement) :void
+		{
+			// If there's no explicit layout metadata, center the content. 
+			model.layoutMetadataOne = mediaElement1.getMetadata( LayoutMetadata.LAYOUT_NAMESPACE ) as LayoutMetadata;
+
+			if( model.layoutMetadataOne == null )
+			{
+				model.layoutMetadataOne = new LayoutMetadata();
+				model.layoutMetadataOne.scaleMode = ScaleMode.LETTERBOX;
+				model.layoutMetadataOne.percentHeight = 100;
+				model.layoutMetadataOne.percentWidth = 100;
+				model.layoutMetadataOne.horizontalAlign = HorizontalAlign.RIGHT;
+				model.layoutMetadataOne.verticalAlign = VerticalAlign.BOTTOM;
+				mediaElement1.addMetadata( LayoutMetadata.LAYOUT_NAMESPACE, model.layoutMetadataOne );
+			}
+
+			model.layoutMetadataTwo = mediaElement2.getMetadata( LayoutMetadata.LAYOUT_NAMESPACE ) as LayoutMetadata;
+
+			if( model.layoutMetadataTwo == null )
+			{
+				model.layoutMetadataTwo = new LayoutMetadata();
+				model.layoutMetadataTwo.scaleMode = ScaleMode.LETTERBOX;
+				model.layoutMetadataTwo.percentHeight = 100;
+				model.layoutMetadataTwo.percentWidth = 100;
+				model.layoutMetadataTwo.horizontalAlign = HorizontalAlign.LEFT;
+				model.layoutMetadataTwo.verticalAlign = VerticalAlign.BOTTOM;
+				mediaElement2.addMetadata( LayoutMetadata.LAYOUT_NAMESPACE, model.layoutMetadataTwo );
+			}
+
+			// use this proxy Elemt to add a audio trait to a video elemet - audio trait: mute
+			oProxyElementTwo=new OProxyElement(mediaElement2);
+			parallelElement.addChild(mediaElement1);
+			parallelElement.addChild(oProxyElementTwo);
+
+			model.mediaContainerOne.addMediaElement(mediaElement1);
+			model.mediaContainerTwo.addMediaElement(oProxyElementTwo);
+			mediaPlayerOne.media = parallelElement;
+
+			ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, 100 );
+		}
+
 		/**
 		 * setDefaultPlayer
 		 * Set the default media player.
@@ -331,31 +382,10 @@ package org.opencast.engage.videodisplay.control.util
 				else if( videoState == VideoState.MULTI )
 				{
 					mediaPlayerOne.play();
-					mediaPlayerTwo.play();
+					//mediaPlayerTwo.play();
 
 					if( model.playerSeekBool == true )
 					{
-						if( model.currentSeekPosition >= model.durationPlayerTwo )
-						{
-							mediaPlayerTwo.seek( model.durationPlayerTwo - 1 );
-							mediaPlayerTwo.seek( model.durationPlayerTwo + 1 );
-						}
-						else
-						{
-							mediaPlayerTwo.seek( model.currentSeekPosition + 1 );
-							mediaPlayerTwo.seek( model.currentSeekPosition - 1 );
-						}
-
-						if( model.currentSeekPosition >= model.durationPlayerOne )
-						{
-							mediaPlayerOne.seek( model.durationPlayerOne - 1 );
-							mediaPlayerOne.seek( model.durationPlayerOne + 1 );
-						}
-						else
-						{
-							mediaPlayerOne.seek( model.currentSeekPosition + 1 );
-							mediaPlayerOne.seek( model.currentSeekPosition - 1 );
-						}
 						model.playerSeekBool = false;
 					}
 					else
@@ -363,7 +393,7 @@ package org.opencast.engage.videodisplay.control.util
 						try
 						{
 							mediaPlayerOne.seek( model.currentPlayhead );
-							mediaPlayerTwo.seek( model.currentPlayhead );
+								//mediaPlayerTwo.seek( model.currentPlayhead );
 						}
 						catch( error : Error )
 						{
@@ -395,8 +425,8 @@ package org.opencast.engage.videodisplay.control.util
 						model.startPlay = true;
 						mediaPlayerOne.play();
 						mediaPlayerOne.seek( model.startSeek );
-						mediaPlayerTwo.play();
-						mediaPlayerTwo.seek( model.startSeek );
+							//mediaPlayerTwo.play();
+							//mediaPlayerTwo.seek( model.startSeek );
 					}
 					catch( error : Error )
 					{
@@ -464,13 +494,14 @@ package org.opencast.engage.videodisplay.control.util
 				model.mediaPlayer.setVolume( 1 );
 			}
 
-			if( model.statePlayerOne == PlayerState.READY && model.statePlayerTwo == PlayerState.READY )
+			//if( model.statePlayerOne == PlayerState.READY && model.statePlayerTwo == PlayerState.READY )
+			if( model.statePlayerOne == PlayerState.READY)
 			{
 				model.startPlay = true;
 				mediaPlayerOne.play();
-				mediaPlayerTwo.play();
+				//mediaPlayerTwo.play();
 				mediaPlayerOne.pause();
-				mediaPlayerTwo.pause();
+				//mediaPlayerTwo.pause();
 				model.mediaPlayer.setVolume( 1 );
 			}
 		}
@@ -496,10 +527,10 @@ package org.opencast.engage.videodisplay.control.util
 					playing = mediaPlayerOne.playing;
 				}
 
-				if( maxDurationPlayer == DefaultPlayerState.PLAYERTWO )
-				{
-					playing = mediaPlayerTwo.playing;
-				}
+				/*if( maxDurationPlayer == DefaultPlayerState.PLAYERTWO )
+				   {
+				   playing = mediaPlayerTwo.playing;
+				 }*/
 			}
 			return playing;
 		}
@@ -518,7 +549,7 @@ package org.opencast.engage.videodisplay.control.util
 			else if( videoState == VideoState.MULTI )
 			{
 				mediaPlayerOne.pause();
-				mediaPlayerTwo.pause();
+					//mediaPlayerTwo.pause();
 			}
 
 			model.loader = false;
@@ -559,7 +590,8 @@ package org.opencast.engage.videodisplay.control.util
 
 				if( model.mediaTypeOne == model.RTMP || model.mediaTypeTwo == model.RTMP )
 				{
-					if( model.playerSeekBool == false && mediaPlayerOne.paused || mediaPlayerTwo.paused )
+					//if( model.playerSeekBool == false && mediaPlayerOne.paused || mediaPlayerTwo.paused )
+					if( model.playerSeekBool == false && mediaPlayerOne.paused )
 					{
 						model.playerSeekBool = true;
 					}
@@ -582,10 +614,10 @@ package org.opencast.engage.videodisplay.control.util
 					mediaPlayerOne.seek( valueOne );
 				}
 
-				if( mediaPlayerTwo.canSeekTo( valueTwo ) == true )
-				{
-					mediaPlayerTwo.seek( valueTwo );
-				}
+				/*if( mediaPlayerTwo.canSeekTo( valueTwo ) == true )
+				   {
+				   mediaPlayerTwo.seek( valueTwo );
+				 }*/
 			}
 		}
 
@@ -607,9 +639,10 @@ package org.opencast.engage.videodisplay.control.util
 			else if( videoState == VideoState.MULTI )
 			{
 				seekingOne = mediaPlayerOne.seeking;
-				seekingTwo = mediaPlayerTwo.seeking;
+				//seekingTwo = mediaPlayerTwo.seeking;
 
-				if( seekingOne == true || seekingTwo == true )
+				//if( seekingOne == true || seekingTwo == true )
+				if( seekingOne == true )
 				{
 					seeking = true;
 				}
@@ -638,10 +671,10 @@ package org.opencast.engage.videodisplay.control.util
 				{
 					mediaPlayerOne.muted = muted;
 				}
-				else if( defaultPlayer == DefaultPlayerState.PLAYERTWO )
-				{
-					mediaPlayerTwo.muted = muted;
-				}
+				/*else if( defaultPlayer == DefaultPlayerState.PLAYERTWO )
+				   {
+				   mediaPlayerTwo.muted = muted;
+				 }*/
 			}
 		}
 
@@ -664,10 +697,10 @@ package org.opencast.engage.videodisplay.control.util
 				{
 					muted = mediaPlayerOne.muted;
 				}
-				else if( defaultPlayer == DefaultPlayerState.PLAYERTWO )
-				{
-					muted = mediaPlayerTwo.muted;
-				}
+				/*else if( defaultPlayer == DefaultPlayerState.PLAYERTWO )
+				   {
+				   muted = mediaPlayerTwo.muted;
+				 }*/
 			}
 
 			return muted;
@@ -690,10 +723,10 @@ package org.opencast.engage.videodisplay.control.util
 				{
 					mediaPlayerOne.volume = value;
 				}
-				else if( defaultPlayer == DefaultPlayerState.PLAYERTWO )
-				{
-					mediaPlayerTwo.volume = value;
-				}
+				/*else if( defaultPlayer == DefaultPlayerState.PLAYERTWO )
+				   {
+				   mediaPlayerTwo.volume = value;
+				 }*/
 			}
 		}
 
@@ -716,10 +749,10 @@ package org.opencast.engage.videodisplay.control.util
 				{
 					volume = mediaPlayerOne.volume;
 				}
-				else if( defaultPlayer == DefaultPlayerState.PLAYERTWO )
-				{
-					volume = mediaPlayerTwo.volume;
-				}
+				/*else if( defaultPlayer == DefaultPlayerState.PLAYERTWO )
+				   {
+				   volume = mediaPlayerTwo.volume;
+				 }*/
 			}
 
 			return volume;
@@ -1066,7 +1099,8 @@ package org.opencast.engage.videodisplay.control.util
 
 			if( model.startPlay == true )
 			{
-				if( event.state == PlayerState.READY && mediaPlayerTwo.state == PlayerState.READY )
+				//if( event.state == PlayerState.READY && mediaPlayerTwo.state == PlayerState.READY )
+				if( event.state == PlayerState.READY)
 				{
 					model.currentPlayerState = PlayerState.PAUSED;
 					ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, PlayerState.PLAYING );
@@ -1259,17 +1293,19 @@ package org.opencast.engage.videodisplay.control.util
 						model.currentPlayhead = model.currentPlayheadPlayerOne;
 					}
 
-					if( mediaPlayerOne.playing && mediaPlayerTwo.playing )
+					//if( mediaPlayerOne.playing && mediaPlayerTwo.playing )
+					if( mediaPlayerOne.playing)
 					{
-						var timeDifference : Number = model.currentPlayheadPlayerOne - model.currentPlayheadPlayerTwo;
+						/*	var timeDifference : Number = model.currentPlayheadPlayerOne - model.currentPlayheadPlayerTwo;
 
-						if( timeDifference < -1 || timeDifference > 1 )
-						{
-							if( mediaPlayerTwo.canSeekTo( model.currentPlayheadPlayerOne ) == true )
-							{
-								mediaPlayerTwo.seek( model.currentPlayheadPlayerOne );
-							}
-						}
+						   if( timeDifference < -1 || timeDifference > 1 )
+						   {
+						   if( mediaPlayerTwo.canSeekTo( model.currentPlayheadPlayerOne ) == true )
+						   {
+						   mediaPlayerTwo.seek( model.currentPlayheadPlayerOne );
+						   }
+						   }
+						 */
 					}
 				}
 
@@ -1467,27 +1503,28 @@ package org.opencast.engage.videodisplay.control.util
 				}
 				else
 				{
-					ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, mediaPlayerTwo.volume * 100 );
-					model.playerVolume = mediaPlayerTwo.volume;
+					//ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, mediaPlayerTwo.volume * 100 );
+					//ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, mediaPlayerTwo.volume * 100 );
+					//model.playerVolume = mediaPlayerTwo.volume;
+					/*
+					   if( mediaPlayerTwo.volume > 0.50 )
+					   {
+					   ExternalInterface.call( ExternalFunction.HIGHSOUND, '' );
+					   model.soundState = SoundState.VOLUMEMAX;
+					   }
 
-					if( mediaPlayerTwo.volume > 0.50 )
-					{
-						ExternalInterface.call( ExternalFunction.HIGHSOUND, '' );
-						model.soundState = SoundState.VOLUMEMAX;
-					}
+					   if( mediaPlayerTwo.volume <= 0.50 )
+					   {
+					   ExternalInterface.call( ExternalFunction.LOWSOUND, '' );
+					   model.soundState = SoundState.VOLUMEMED;
+					   }
 
-					if( mediaPlayerTwo.volume <= 0.50 )
-					{
-						ExternalInterface.call( ExternalFunction.LOWSOUND, '' );
-						model.soundState = SoundState.VOLUMEMED;
-					}
-
-					if( mediaPlayerTwo.volume == 0 )
-					{
-						ExternalInterface.call( ExternalFunction.NONESOUND, '' );
-						model.soundState = SoundState.VOLUMEMIN;
-					}
-
+					   if( mediaPlayerTwo.volume == 0 )
+					   {
+					   ExternalInterface.call( ExternalFunction.NONESOUND, '' );
+					   model.soundState = SoundState.VOLUMEMIN;
+					   }
+					 */
 					if( model.ccButtonBoolean == false )
 					{
 						model.ccBoolean = false;
@@ -1505,38 +1542,40 @@ package org.opencast.engage.videodisplay.control.util
 		 */
 		private function playerTwoVolumeChange( event : AudioEvent ) : void
 		{
-			if( defaultPlayer == DefaultPlayerState.PLAYERTWO )
-			{
-				if( mediaPlayerTwo.muted == true )
-				{
-					mediaPlayerTwo.muted = false;
-				}
+		/*
+		   if( defaultPlayer == DefaultPlayerState.PLAYERTWO )
+		   {
+		   if( mediaPlayerTwo.muted == true )
+		   {
+		   mediaPlayerTwo.muted = false;
+		   }
 
-				if( mediaPlayerTwo.volume > 0.50 )
-				{
-					ExternalInterface.call( ExternalFunction.HIGHSOUND, '' );
-					model.soundState = SoundState.VOLUMEMAX;
-				}
+		   if( mediaPlayerTwo.volume > 0.50 )
+		   {
+		   ExternalInterface.call( ExternalFunction.HIGHSOUND, '' );
+		   model.soundState = SoundState.VOLUMEMAX;
+		   }
 
-				if( mediaPlayerTwo.volume <= 0.50 )
-				{
-					ExternalInterface.call( ExternalFunction.LOWSOUND, '' );
-					model.soundState = SoundState.VOLUMEMED;
-				}
+		   if( mediaPlayerTwo.volume <= 0.50 )
+		   {
+		   ExternalInterface.call( ExternalFunction.LOWSOUND, '' );
+		   model.soundState = SoundState.VOLUMEMED;
+		   }
 
-				if( mediaPlayerTwo.volume == 0 )
-				{
-					ExternalInterface.call( ExternalFunction.NONESOUND, '' );
-					model.soundState = SoundState.VOLUMEMIN;
-				}
+		   if( mediaPlayerTwo.volume == 0 )
+		   {
+		   ExternalInterface.call( ExternalFunction.NONESOUND, '' );
+		   model.soundState = SoundState.VOLUMEMIN;
+		   }
 
-				if( model.ccButtonBoolean == false && model.ccBoolean == true )
-				{
-					model.ccBoolean = false;
-					ExternalInterface.call( ExternalFunction.SETCCICONOFF, '' );
-					model.soundState = SoundState.VOLUMEMUTE;
-				}
-			}
+		   if( model.ccButtonBoolean == false && model.ccBoolean == true )
+		   {
+		   model.ccBoolean = false;
+		   ExternalInterface.call( ExternalFunction.SETCCICONOFF, '' );
+		   model.soundState = SoundState.VOLUMEMUTE;
+		   }
+		   }
+		 */
 		}
 
 		/**
@@ -1569,10 +1608,10 @@ package org.opencast.engage.videodisplay.control.util
 						lastNewPositionString = newPositionString;
 					}
 
-					if( !mediaPlayerTwo.seeking )
-					{
-						ExternalInterface.call( ExternalFunction.SETPLAYHEAD, model.currentPlayheadPlayerTwo );
-					}
+					/*if( !mediaPlayerTwo.seeking )
+					   {
+					   ExternalInterface.call( ExternalFunction.SETPLAYHEAD, model.currentPlayheadPlayerTwo );
+					 }*/
 
 					if( model.captionsURL != null )
 					{
@@ -1584,7 +1623,8 @@ package org.opencast.engage.videodisplay.control.util
 						model.currentPlayhead = model.currentPlayheadPlayerTwo;
 					}
 
-					if( mediaPlayerOne.playing && mediaPlayerTwo.playing )
+					//if( mediaPlayerOne.playing && mediaPlayerTwo.playing )
+					if( mediaPlayerOne.playing)
 					{
 						var timeDifference : Number = model.currentPlayheadPlayerTwo - model.currentPlayheadPlayerOne;
 

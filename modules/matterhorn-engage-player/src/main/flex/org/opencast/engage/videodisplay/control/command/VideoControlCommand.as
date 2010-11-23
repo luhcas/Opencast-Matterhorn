@@ -15,244 +15,246 @@
  */
 package org.opencast.engage.videodisplay.control.command
 {
-    import bridge.ExternalFunction;
+	import bridge.ExternalFunction;
 
-    import flash.external.ExternalInterface;
+	import flash.external.ExternalInterface;
 
-    import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
-    import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
-    import org.opencast.engage.videodisplay.model.VideodisplayModel;
-    import org.opencast.engage.videodisplay.state.PlayerState;
-    import org.opencast.engage.videodisplay.state.VideoState;
-    import org.swizframework.Swiz;
+	import org.opencast.engage.videodisplay.control.event.ClosedCaptionsEvent;
+	import org.opencast.engage.videodisplay.control.event.VideoControlEvent;
+	import org.opencast.engage.videodisplay.model.VideodisplayModel;
+	import org.opencast.engage.videodisplay.state.PlayerState;
+	import org.opencast.engage.videodisplay.state.VideoState;
+	import org.swizframework.Swiz;
+	import mx.controls.Alert;
 
-    /**
-     *   VideoControlCommand
-     */
-    public class VideoControlCommand
-    {
+	/**
+	 *   VideoControlCommand
+	 */
+	public class VideoControlCommand
+	{
 
-        [Autowire]
-        public var model : VideodisplayModel;
+		[Autowire]
+		public var model : VideodisplayModel;
 
-        /**
-         * Constructor
-         */
-        public function VideoControlCommand()
-        {
-            Swiz.autowire( this );
-        }
+		/**
+		 * Constructor
+		 */
+		public function VideoControlCommand()
+		{
+			Swiz.autowire( this );
+		}
 
-        /**
-         * execute
-         * When the learner press a button, or use the keyboard shurtcuts.
-         * @eventType VideoControlEvent event
-         * */
-        public function execute( event : VideoControlEvent ) : void
-        {
-            var currentPlayPauseState : String;
-            var percent : int = 100;
-            var skipVolume : Number = 0.1;
-            var playState : Boolean = false;
+		/**
+		 * execute
+		 * When the learner press a button, or use the keyboard shurtcuts.
+		 * @eventType VideoControlEvent event
+		 * */
+		public function execute( event : VideoControlEvent ) : void
+		{
+			var currentPlayPauseState : String;
+			var percent : int = 100;
+			var skipVolume : Number = 0.1;
+			var playState : Boolean = false;
 
-            switch( event.videoControlType )
-            {
-                case VideoControlEvent.PLAY:
+			switch( event.videoControlType )
+			{
+				case VideoControlEvent.PLAY:
 
-                    model.mediaPlayer.play();
+					model.mediaPlayer.play();
 
-                    model.currentPlayerState = PlayerState.PLAYING;
-                    currentPlayPauseState = PlayerState.PAUSED;
-                    ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
+					model.currentPlayerState = PlayerState.PLAYING;
+					currentPlayPauseState = PlayerState.PAUSED;
+					ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
 
-                    if( model.videoState == VideoState.COVER )
-                    {
-                        model.videoState = model.mediaPlayer.getVideoState();
-                    }
-                    break;
+					if( model.videoState == VideoState.COVER )
+					{
+						model.videoState = model.mediaPlayer.getVideoState();
+					}
+					break;
 
-                case VideoControlEvent.PAUSE:
+				case VideoControlEvent.PAUSE:
 
-                    if( model.mediaPlayer.playing() )
-                    {
-                        model.mediaPlayer.pause();
-                    }
-                    model.currentPlayerState = PlayerState.PAUSED;
-                    currentPlayPauseState = PlayerState.PLAYING;
-                    ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
-                    break;
+					if( model.mediaPlayer.playing() )
+					{
+						model.mediaPlayer.pause();
+					}
+					model.currentPlayerState = PlayerState.PAUSED;
+					currentPlayPauseState = PlayerState.PLAYING;
+					ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
+					break;
 
-                case VideoControlEvent.STOP:
+				case VideoControlEvent.STOP:
 
-                    if( model.mediaPlayer.playing() )
-                    {
-                        model.mediaPlayer.pause();
-                        model.mediaPlayer.seek( 0 );
-                        model.currentPlayerState = PlayerState.PAUSED;
-                        currentPlayPauseState = PlayerState.PLAYING;
-                        ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
-                    }
-                    else
-                    {
-                        model.mediaPlayer.seek( 0 );
-                    }
-                    break;
+					if( model.mediaPlayer.playing() )
+					{
+						model.mediaPlayer.pause();
+						model.mediaPlayer.seek( 0 );
+						model.currentPlayerState = PlayerState.PAUSED;
+						currentPlayPauseState = PlayerState.PLAYING;
+						ExternalInterface.call( ExternalFunction.SETPLAYPAUSESTATE, currentPlayPauseState );
+					}
+					else
+					{
+						model.mediaPlayer.seek( 0 );
+					}
+					break;
 
-                case VideoControlEvent.SKIPBACKWARD:
+				case VideoControlEvent.SKIPBACKWARD:
 
-                    break;
+					break;
 
-                case VideoControlEvent.REWIND:
+				case VideoControlEvent.REWIND:
 
-                    if( model.startPlay == true )
-                    {
-                        if( model.currentSeekPosition - model.rewindTime > 0 )
-                        {
-                            model.mediaPlayer.seek( model.currentSeekPosition - model.rewindTime );
-                        }
-                        else
-                        {
-                            model.mediaPlayer.seek( 0 );
-                        }
-                    }
-                    if( model.rewindTime < ( model.currentDuration * 0.1 )  )
-                    {
-                    	model.rewindTime = model.rewindTime + model.rewindTime;
-                    }
-                    break;
+					if( model.startPlay == true )
+					{
+						if( model.currentSeekPosition - model.rewindTime > 0 )
+						{
+							model.mediaPlayer.seek( model.currentSeekPosition - model.rewindTime );
+						}
+						else
+						{
+							model.mediaPlayer.seek( 0 );
+						}
+					}
+					if( model.rewindTime < ( model.currentDuration * 0.1 )  )
+					{
+						model.rewindTime = model.rewindTime + model.rewindTime;
+					}
+					break;
 
-                case VideoControlEvent.FASTFORWARD:
+				case VideoControlEvent.FASTFORWARD:
 
-                    if( model.startPlay == true )
-                    {
-                        var newPlayhead : Number = model.currentSeekPosition + model.fastForwardTime;
+					if( model.startPlay == true )
+					{
+						var newPlayhead : Number = model.currentSeekPosition + model.fastForwardTime;
 
 
-                        if( newPlayhead > model.currentDuration )
-                        {
-                            model.mediaPlayer.seek( model.currentDuration );
-                        }
-                        else
-                        {
-                            model.mediaPlayer.seek( newPlayhead );
-                        }
-                    }
-                    if( model.fastForwardTime < ( model.currentDuration * 0.1 ) )
-                    {
-                    	model.fastForwardTime = model.fastForwardTime + model.fastForwardTime;
-                    }
-                    break;
+						if( newPlayhead > model.currentDuration )
+						{
+							model.mediaPlayer.seek( model.currentDuration );
+						}
+						else
+						{
+							model.mediaPlayer.seek( newPlayhead );
+						}
+					}
+					if( model.fastForwardTime < ( model.currentDuration * 0.1 ) )
+					{
+						model.fastForwardTime = model.fastForwardTime + model.fastForwardTime;
+					}
+					break;
 
-                case VideoControlEvent.SKIPFORWARD:
-                    break;
+				case VideoControlEvent.SKIPFORWARD:
+					break;
 
-                case VideoControlEvent.MUTE:
+				case VideoControlEvent.MUTE:
 
-                    if( model.mediaPlayer.getMuted() )
-                    {
-                        model.mediaPlayer.setMuted( false );
-                    }
-                    else
-                    {
-                        model.mediaPlayer.setMuted( true );
-                    }
-                    break;
+					if( model.mediaPlayer.getMuted() )
+					{
+						model.mediaPlayer.setMuted( false );
+					}
+					else
+					{
+						model.mediaPlayer.setMuted( true );
+					}
+					break;
 
-                case VideoControlEvent.VOLUMEUP:
+				case VideoControlEvent.VOLUMEUP:
 
-                    if( model.mediaPlayer.getVolume() != 1 )
-                    {
-                        model.mediaPlayer.setVolume( model.mediaPlayer.getVolume() + skipVolume );
-                    }
-                    ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round( model.mediaPlayer.getVolume() * percent ) );
-                    break;
+					if( model.mediaPlayer.getVolume() != 1 )
+					{
+						model.mediaPlayer.setVolume( model.mediaPlayer.getVolume() + skipVolume );
+					}
+					ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round( model.mediaPlayer.getVolume() * percent ) );
+					break;
 
-                case VideoControlEvent.VOLUMEDOWN:
+				case VideoControlEvent.VOLUMEDOWN:
 
-                    if( model.mediaPlayer.getVolume() != 0 )
-                    {
-                        model.mediaPlayer.setVolume( model.mediaPlayer.getVolume() - skipVolume );
+					if( model.mediaPlayer.getVolume() != 0 )
+					{
+						model.mediaPlayer.setVolume( model.mediaPlayer.getVolume() - skipVolume );
 
-                        if( model.mediaPlayer.getVolume() < 0 )
-                        {
-                            model.mediaPlayer.setVolume( 0 );
-                        }
-                    }
-                    ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round( model.mediaPlayer.getVolume() * percent ) );
-                    break;
+						if( model.mediaPlayer.getVolume() < 0 )
+						{
+							model.mediaPlayer.setVolume( 0 );
+						}
+					}
+					ExternalInterface.call( ExternalFunction.SETVOLUMESLIDER, Math.round( model.mediaPlayer.getVolume() * percent ) );
+					break;
 
-                case VideoControlEvent.SEEKZERO:
-                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 0 );
-                    break;
+				case VideoControlEvent.SEEKZERO:
+					model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 0 );
+					break;
 
-                case VideoControlEvent.SEEKONE:
-                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 1 );
-                    break;
+				case VideoControlEvent.SEEKONE:
+					model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 1 );
+					break;
 
-                case VideoControlEvent.SEEKTWO:
+				case VideoControlEvent.SEEKTWO:
 
-                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 2 );
-                    break;
+					model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 2 );
+					break;
 
-                case VideoControlEvent.SEEKTHREE:
+				case VideoControlEvent.SEEKTHREE:
 
-                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 3 );
-                    break;
+					model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 3 );
+					break;
 
-                case VideoControlEvent.SEEKFOUR:
-                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 4 );
-                    break;
+				case VideoControlEvent.SEEKFOUR:
+					model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 4 );
+					break;
 
-                case VideoControlEvent.SEEKFIVE:
+				case VideoControlEvent.SEEKFIVE:
 
-                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 5 );
-                    break;
+					model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 5 );
+					break;
 
-                case VideoControlEvent.SEEKSIX:
-                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 6 );
-                    break;
+				case VideoControlEvent.SEEKSIX:
+					model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 6 );
+					break;
 
-                case VideoControlEvent.SEEKSEVEN:
+				case VideoControlEvent.SEEKSEVEN:
 
-                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 7 );
-                    break;
+					model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 7 );
+					break;
 
-                case VideoControlEvent.SEEKEIGHT:
+				case VideoControlEvent.SEEKEIGHT:
 
-                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 8 );
-                    break;
+					model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 8 );
+					break;
 
-                case VideoControlEvent.SEEKNINE:
-                    model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 9 );
-                    break;
+				case VideoControlEvent.SEEKNINE:
+					model.mediaPlayer.seek( ( model.currentDuration / 10 ) * 9 );
+					break;
 
-                case VideoControlEvent.CLOSEDCAPTIONS:
+				case VideoControlEvent.CLOSEDCAPTIONS:
 
-                    if( model.ccBoolean )
-                    {
-                        Swiz.dispatchEvent( new ClosedCaptionsEvent( false ) );
-                        model.ccButtonBool = false;
-                    }
-                    else
-                    {
-                        Swiz.dispatchEvent( new ClosedCaptionsEvent( true ) );
-                        model.ccButtonBool = true;
-                    }
+					if( model.ccBoolean )
+					{
+						Swiz.dispatchEvent( new ClosedCaptionsEvent( false ) );
+						model.ccButtonBool = false;
+					}
+					else
+					{
+						Swiz.dispatchEvent( new ClosedCaptionsEvent( true ) );
+						model.ccButtonBool = true;
+					}
 
-                    break;
+					break;
 
-                case VideoControlEvent.HEARTIMEINFO:
-                    Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.PAUSE ) );
-                    ExternalInterface.call( ExternalFunction.CURRENTTIME, model.timeCode.getTC( model.currentPlayhead ) );
-                    break;
+				case VideoControlEvent.HEARTIMEINFO:
+					Swiz.dispatchEvent( new VideoControlEvent( VideoControlEvent.PAUSE ) );
+					ExternalInterface.call( ExternalFunction.CURRENTTIME, model.timeCode.getTC( model.currentPlayhead ) );
+					break;
 
-                case VideoControlEvent.SHORTCUTS:
-                    ExternalInterface.call( ExternalFunction.TOGGLESHORTCUTS );
-                    break;
+				case VideoControlEvent.SHORTCUTS:
+					ExternalInterface.call( ExternalFunction.TOGGLESHORTCUTS );
+					break;
 
-                default:
-                    break;
-            }
-        }
-    }
+				default:
+					break;
+			}
+		}
+	}
 }
+
