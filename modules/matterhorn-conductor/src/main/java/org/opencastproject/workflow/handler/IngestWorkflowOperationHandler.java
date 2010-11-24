@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 
 import org.osgi.service.component.ComponentContext;
 
@@ -24,7 +24,7 @@ import org.osgi.service.component.ComponentContext;
  * <p>
  * The operation registers a ui that displays the ingest status.
  */
-public class IngestWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
+public class IngestWorkflowOperationHandler extends ResumableWorkflowOperationHandlerBase {
 
   /** Path to the hold state ui */
   public static final String UI_RESOURCE_PATH = "/ui/operation/ingest/index.html";
@@ -32,7 +32,7 @@ public class IngestWorkflowOperationHandler extends AbstractResumableWorkflowOpe
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler#activate(org.osgi.service.component.ComponentContext)
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase#activate(org.osgi.service.component.ComponentContext)
    */
   @Override
   public void activate(ComponentContext componentContext) {

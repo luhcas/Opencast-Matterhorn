@@ -24,6 +24,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 @XmlJavaTypeAdapter(WorkflowDefinitionImpl.Adapter.class)
 public interface WorkflowDefinition {
+
   /**
    * The variable in a workflow definition that is to be replaced by the reason for an operation's failure.
    */
@@ -84,4 +85,46 @@ public interface WorkflowDefinition {
    * @return Whether this is a published workflow definition
    */
   boolean isPublished();
+
+  /**
+   * Appends the operation to the workflow definition.
+   * 
+   * @param operation
+   *          the operation
+   */
+  void add(WorkflowOperationDefinition operation);
+
+  /**
+   * Inserts the operation at the given position into the workflow definition.
+   * 
+   * @param operation
+   *          the operation
+   * @param position
+   *          the position to add the workflow operation to
+   * @throws IndexOutOfBoundsException
+   *           if <code>position</code> is larger than the number of operations + 1
+   */
+  void add(WorkflowOperationDefinition operation, int position);
+
+  /**
+   * Returns the operation at the given position.
+   * 
+   * @param position
+   *          the operation's position
+   * @throws IndexOutOfBoundsException
+   *           if <code>position</code> is larger than the number of operations
+   */
+  WorkflowOperationDefinition get(int position);
+
+  /**
+   * Removes the workflow operation at the indicated position and returns it.
+   * 
+   * @param position
+   *          the operation's position
+   * @return the removed workflow operation
+   * @throws IndexOutOfBoundsException
+   *           if <code>position</code> is larger than the number of operations
+   */
+  WorkflowOperationDefinition remove(int position) throws IndexOutOfBoundsException;
+
 }

@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 
 import org.osgi.service.component.ComponentContext;
 
@@ -26,7 +26,7 @@ import org.osgi.service.component.ComponentContext;
  * The operation registers a ui that displays information on the capture status, the recording device as well as other
  * related information.
  */
-public class CaptureWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
+public class CaptureWorkflowOperationHandler extends ResumableWorkflowOperationHandlerBase {
 
   /** Configuration key for the capture agent */
   public static final String OPT_CAPTURE_AGENT = "capture.agent";
@@ -40,7 +40,7 @@ public class CaptureWorkflowOperationHandler extends AbstractResumableWorkflowOp
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler#activate(org.osgi.service.component.ComponentContext)
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase#activate(org.osgi.service.component.ComponentContext)
    */
   @Override
   public void activate(ComponentContext componentContext) {

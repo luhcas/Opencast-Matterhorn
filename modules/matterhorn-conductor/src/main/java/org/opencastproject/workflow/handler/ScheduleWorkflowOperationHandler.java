@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workflow.handler;
 
-import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 
 import org.osgi.service.component.ComponentContext;
 
@@ -26,7 +26,7 @@ import org.osgi.service.component.ComponentContext;
  * The operation registers a ui that displays information on the capture status, the recording device as well as other
  * related information.
  */
-public class ScheduleWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
+public class ScheduleWorkflowOperationHandler extends ResumableWorkflowOperationHandlerBase {
 
   /** Configuration key for the start date and time */
   public static final String OPT_SCHEDULE_START = "schedule.start";
@@ -44,7 +44,7 @@ public class ScheduleWorkflowOperationHandler extends AbstractResumableWorkflowO
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler#activate(org.osgi.service.component.ComponentContext)
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase#activate(org.osgi.service.component.ComponentContext)
    */
   @Override
   public void activate(ComponentContext componentContext) {

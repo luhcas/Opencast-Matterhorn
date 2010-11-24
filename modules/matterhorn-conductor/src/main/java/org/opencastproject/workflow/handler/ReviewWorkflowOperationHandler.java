@@ -16,7 +16,7 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -33,7 +33,7 @@ import java.util.TreeMap;
 /**
  * Simple implementation that hold for upload of a captions file.
  */
-public class ReviewWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
+public class ReviewWorkflowOperationHandler extends ResumableWorkflowOperationHandlerBase {
   
   private static final Logger logger = LoggerFactory.getLogger(ReviewWorkflowOperationHandler.class);
 

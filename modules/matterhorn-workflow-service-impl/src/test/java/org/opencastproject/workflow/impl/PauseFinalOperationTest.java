@@ -20,7 +20,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -148,7 +148,7 @@ public class PauseFinalOperationTest {
     Assert.assertEquals(WorkflowState.SUCCEEDED, service.getWorkflowById(workflow.getId()).getState());
   }
 
-  class OpHandler extends AbstractResumableWorkflowOperationHandler {
+  class OpHandler extends ResumableWorkflowOperationHandlerBase {
     MediaPackage mp;
     boolean startCalled = false;
     boolean resumeCalled = false;

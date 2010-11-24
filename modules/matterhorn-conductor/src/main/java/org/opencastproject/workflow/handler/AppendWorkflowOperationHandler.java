@@ -16,7 +16,7 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.util.NotFoundException;
-import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -47,7 +47,7 @@ import java.util.Map;
  * <p>
  * If not, the operation handler will enter a hold state and ask the user which workflow to use.
  */
-public class AppendWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
+public class AppendWorkflowOperationHandler extends ResumableWorkflowOperationHandlerBase {
 
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(AppendWorkflowOperationHandler.class);
@@ -64,7 +64,7 @@ public class AppendWorkflowOperationHandler extends AbstractResumableWorkflowOpe
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler#activate(org.osgi.service.component.ComponentContext)
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase#activate(org.osgi.service.component.ComponentContext)
    */
   @Override
   public void activate(ComponentContext componentContext) {
@@ -80,7 +80,7 @@ public class AppendWorkflowOperationHandler extends AbstractResumableWorkflowOpe
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
@@ -95,7 +95,7 @@ public class AppendWorkflowOperationHandler extends AbstractResumableWorkflowOpe
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance,
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase#resume(org.opencastproject.workflow.api.WorkflowInstance,
    *      java.util.Map)
    */
   @Override

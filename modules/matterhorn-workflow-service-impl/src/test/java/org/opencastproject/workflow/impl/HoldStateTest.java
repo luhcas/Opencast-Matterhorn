@@ -20,8 +20,8 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -193,7 +193,7 @@ public class HoldStateTest {
     Assert.assertEquals(WorkflowState.SUCCEEDED, service.getWorkflowById(workflow.getId()).getState());
   }
 
-  class HoldingWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
+  class HoldingWorkflowOperationHandler extends ResumableWorkflowOperationHandlerBase {
 
     /** Whether to return pause or continue when {@link #resume(WorkflowInstance)} is called */
     boolean pauseOnResume;

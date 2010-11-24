@@ -18,7 +18,7 @@ package org.opencastproject.workflow.handler;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
-import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -37,7 +37,7 @@ import java.util.TreeMap;
 /**
  * Workflow operation that waits for a caption file to be uploaded.
  */
-public class CaptionUploadWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
+public class CaptionUploadWorkflowOperationHandler extends ResumableWorkflowOperationHandlerBase {
 
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(CaptionUploadWorkflowOperationHandler.class);
@@ -80,7 +80,7 @@ public class CaptionUploadWorkflowOperationHandler extends AbstractResumableWork
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {

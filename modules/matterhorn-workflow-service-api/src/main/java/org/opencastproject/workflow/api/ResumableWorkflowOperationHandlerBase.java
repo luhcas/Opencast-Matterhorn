@@ -36,7 +36,7 @@ import javax.servlet.Servlet;
  * resuming an operation, returning a {@link WorkflowOperationResult} with the current mediapackage and
  * {@link Action#CONTINUE}.
  */
-public abstract class AbstractResumableWorkflowOperationHandler extends AbstractWorkflowOperationHandler implements
+public class ResumableWorkflowOperationHandlerBase extends AbstractWorkflowOperationHandler implements
         ResumableWorkflowOperationHandler {
 
   /** OSGi component context, obtained during component activation */

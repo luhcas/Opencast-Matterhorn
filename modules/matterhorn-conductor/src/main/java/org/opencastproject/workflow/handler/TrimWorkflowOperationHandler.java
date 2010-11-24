@@ -21,7 +21,7 @@ import org.opencastproject.mediapackage.AbstractMediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
@@ -42,7 +42,7 @@ import java.util.TreeMap;
 /**
  * Simple implementation that holds for user-entered trim points.
  */
-public class TrimWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
+public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHandlerBase {
 
   private static final Logger logger = LoggerFactory.getLogger(TrimWorkflowOperationHandler.class);
 

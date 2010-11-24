@@ -22,8 +22,8 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
-import org.opencastproject.workflow.api.AbstractResumableWorkflowOperationHandler;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
+import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -164,7 +164,7 @@ public class CountWorkflowsTest {
   /**
    * Test implementation for a workflow operation handler that will do nothing and not hold.
    */
-  class HoldingWorkflowOperationHandler extends AbstractResumableWorkflowOperationHandler {
+  class HoldingWorkflowOperationHandler extends ResumableWorkflowOperationHandlerBase {
 
     public SortedMap<String, String> getConfigurationOptions() {
       return new TreeMap<String, String>();
