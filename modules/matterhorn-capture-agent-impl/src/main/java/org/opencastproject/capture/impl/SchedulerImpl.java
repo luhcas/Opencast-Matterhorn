@@ -632,9 +632,6 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
     log.debug("setCaptureSchedule(sched, newCal)");
 
     try {
-      Dur maxDuration = null;
-
-
       Map<Long, String> scheduledEventStarts = new Hashtable<Long, String>();
       Map<String, Date> scheduledEventEnds = new Hashtable<String, Date>();
       // Sort the events into chronological starting order
@@ -669,8 +666,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
           // Search through the list of captures which could possibly have been scheduled
           // checking to see which one is closest to us
           while (j > 0) {
-            otherUID = startAry[j].getUid().getValue();
-            if (scheduledEventEnds.containsKey(otherUID)) {
+            String testUID = startAry[j].getUid().getValue();
+            if (scheduledEventEnds.containsKey(testUID)) {
+              otherUID = testUID;
               break;
             }
             j--;

@@ -1351,7 +1351,12 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
           }
         }
       } else {
-        StdSchedulerFactory scheduleFactory = new StdSchedulerFactory(schedulerProps);
+        StdSchedulerFactory scheduleFactory = null;
+        if (schedulerProps.size() > 0) {
+          scheduleFactory = new StdSchedulerFactory(schedulerProps);
+        } else {
+          scheduleFactory = new StdSchedulerFactory();
+        }
 
         // Create and start the scheduler
         agentScheduler = scheduleFactory.getScheduler();
@@ -1375,6 +1380,14 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     createScheduler(schedulerProps, "recordingLoad", JobParameters.OTHER_TYPE);
     if (agentScheduler == null) {
       return;
+    } else {
+      //Clear out any existing jobs just for fun.
+      try {
+        agentScheduler.deleteJob("recordingLoad", JobParameters.OTHER_TYPE);
+      } catch (SchedulerException e) {
+        //We probably don't care about this at all, but hey let's log it anyway
+        logger.debug("Exception attempting to delete recording load job before scheduling a new one.", e);
+      }
     }
 
     JobDetail loadJob = new JobDetail("recordingLoad", JobParameters.OTHER_TYPE, LoadRecordingsJob.class);

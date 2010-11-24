@@ -34,7 +34,8 @@ public class RecordingImpl implements Recording {
 
   /**
    * The time at which the recording last checked in with this service.
-   * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in). 
+   * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than
+   *  a relative timestamp (ie, it's been 3000 ms since it last checked in). 
    */
   public Long lastHeardFrom;
 

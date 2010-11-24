@@ -254,7 +254,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       updateAgentInDatabase(req);
     } else {
       // If the agent doesn't exists, but the name is not null nor empty, create a new one.
-      if (agentName == null || agentName.equals("")) {
+      if (StringUtils.isBlank(agentName)) {
         logger.debug("Unable to set agent state, agent name is blank or null.");
         return BAD_PARAMETER;
       }
@@ -342,18 +342,19 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    * 
    * @see org.opencastproject.capture.admin.api.CaptureAgentStateService#setRecordingState(java.lang.String,
    *      java.lang.String)
+   * @throws IllegalArgumentException
    */
   public boolean setRecordingState(String id, String state) {
     if (state == null)
       throw new IllegalArgumentException("state can not be null");
     if (!RecordingState.KNOWN_STATES.contains(state)) {
-      logger.warn("can not set recording to an invalid state: ", state);
+      logger.warn("Invalid recording state: {}.", state);
       return false;
     }
     Recording req = recordings.get(id);
     if (req != null) {
       if (state.equals(req.getState())) {
-        logger.debug("recording state not changed");
+        logger.debug("Recording state not changed");
         return true;
       } else {
         logger.debug("Setting Recording {} to state {}.", id, state);
@@ -362,10 +363,10 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
         return true;
       }
     } else {
-      if (id == null || id.equals("")) {
+      if (StringUtils.isBlank(id)) {
         logger.debug("Unable to set recording state, recording name is blank or null.");
         return false;
-      } else if (state == null || state.equals("")) {
+      } else if (StringUtils.isBlank(state)) {
         logger.debug("Unable to set recording state, recording state is blank or null.");
         return false;
       }
@@ -395,7 +396,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     try {
       workflowToUpdate = workflowService.getWorkflowById(Long.parseLong(recordingId));
     } catch (NumberFormatException e) {
-      logger.warn("Recording id '{}' is not a long, and is therefore not a valid workflow identifier", recordingId);
+      logger.warn("Recording id '{}' is not a long, and is therefore not a valid workflow identifier", recordingId, e);
       return;
     } catch (WorkflowDatabaseException e) {
       logger.warn("Unable to update workflow for recording {}: {}", recordingId, e);

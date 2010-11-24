@@ -108,8 +108,10 @@ public class CaptureAgentStateRestService {
   @POST
   //@Produces(MediaType.TEXT_XML)
   @Path("agents/{name}")
-  //Todo: Capture agent may send an optional FormParam containing it's configured address. If this exists don't use request.getRemoteHost() for the URL
-  public Response setAgentState(@Context HttpServletRequest request, @FormParam("address") String address, @PathParam("name") String agentName, @FormParam("state") String state) {
+  //Todo: Capture agent may send an optional FormParam containing it's configured address.
+  //If this exists don't use request.getRemoteHost() for the URL
+  public Response setAgentState(@Context HttpServletRequest request, @FormParam("address") String address,
+                                @PathParam("name") String agentName, @FormParam("state") String state) {
     if (service == null) {
       return Response.serverError().status(Response.Status.SERVICE_UNAVAILABLE).build();
     }
@@ -181,7 +183,8 @@ public class CaptureAgentStateRestService {
         while (propKeys.hasNext()) {
           String key = propKeys.next();
           String[] parts = key.split("\\.");
-          if ((parts[1].equalsIgnoreCase("device")) && (!parts[2].equalsIgnoreCase("timezone"))) {  // FIXME not nice the whole thing here
+          if ((parts[1].equalsIgnoreCase("device")) && (!parts[2].equalsIgnoreCase("timezone"))) {
+            // FIXME not nice the whole thing here
             devices.add(parts[2]);
           }
         }
@@ -329,6 +332,7 @@ public class CaptureAgentStateRestService {
     return docs;
   }
 
+  // Checkstyle:OFF
   protected String docs;
   private String[] notes = {
           "All paths above are relative to the REST endpoint base (something like http://your.server/files)",
@@ -463,6 +467,8 @@ public class CaptureAgentStateRestService {
 
     return DocUtil.generate(data);
   }
+
+  // Checkstyle:ON
 
   public CaptureAgentStateRestService() {}
 }

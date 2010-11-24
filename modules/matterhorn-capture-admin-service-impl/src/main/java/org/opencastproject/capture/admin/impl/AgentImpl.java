@@ -57,7 +57,8 @@ public class AgentImpl implements Agent {
 
   /**
    * The time at which the agent last checked in with this service.
-   * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than a relative timestamp (ie, it's been 3000 ms since it last checked in). 
+   * Note that this is an absolute timestamp (ie, milliseconds since 1970) rather than
+   *  a relative timestamp (ie, it's been 3000 ms since it last checked in). 
    */
   @Column(name = "LAST_HEARD_FROM", nullable = false)
   protected Long lastHeardFrom;
