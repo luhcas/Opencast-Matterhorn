@@ -45,6 +45,7 @@ import org.opencastproject.workflow.impl.WorkflowServiceImpl;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.osgi.service.component.ComponentContext;
@@ -86,6 +87,9 @@ public class WorkflowRestService {
 
   /** The maximum number of results returned */
   private static final int MAX_LIMIT = 100;
+
+  /** The constant used to negate a querystring parameter. This is only supported on some parameters. */
+  public static final String NEGATE_PREFIX = "-";
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(WorkflowRestService.class);
@@ -173,13 +177,15 @@ public class WorkflowRestService {
     instancesEndpoint.addFormat(new Format("json", null, null));
     instancesEndpoint.addStatus(org.opencastproject.util.doc.Status.OK("Valid request, results returned"));
     instancesEndpoint.addPathParam(new Param("format", Type.STRING, "xml", "The format of the results: xml or json"));
-    instancesEndpoint.addOptionalParam(new Param("state", Type.STRING, "succeeded", "Filter results by state"));
+    instancesEndpoint.addOptionalParam(new Param("state", Type.STRING, "succeeded", "Filter results by state. "
+            + "To include any state *other than* this one, prefix the state with a '-'"));
     instancesEndpoint.addOptionalParam(new Param("q", Type.STRING, "climate",
             "Filter results by string in metadata catalog"));
     instancesEndpoint.addOptionalParam(new Param("seriesId", Type.STRING, null, "Filter results by series ID"));
     instancesEndpoint.addOptionalParam(new Param("seriesTitle", Type.STRING, null, "Filter results by series title"));
     instancesEndpoint.addOptionalParam(new Param("mp", Type.STRING, null, "Filter results by media package ID"));
-    instancesEndpoint.addOptionalParam(new Param("op", Type.STRING, "inspect", "Filter results by current operation"));
+    instancesEndpoint.addOptionalParam(new Param("op", Type.STRING, "inspect", "Filter results by current operation. "
+            + "To include any operation *other than* this operation, prefix the operation with a '-'"));
     instancesEndpoint.addOptionalParam(new Param("count", Type.STRING, "20", "Results per page (max 100)"));
     instancesEndpoint.addOptionalParam(new Param("startPage", Type.STRING, "0", "Page offset"));
     instancesEndpoint.setTestForm(RestTestForm.auto());
@@ -486,23 +492,41 @@ public class WorkflowRestService {
           @QueryParam("mp") String mediapackageId, @QueryParam("op") String currentOperation,
           @QueryParam("startPage") int startPage, @QueryParam("count") int count) throws Exception {
     // CHECKSTYLE:ON
-    if (count < 1 || count > MAX_LIMIT)
+    if (count < 1 || count > MAX_LIMIT) {
       count = DEFAULT_LIMIT;
+    }
+    if (startPage < 0) {
+      startPage = 0;
+    }
     WorkflowQuery q = new WorkflowQuery();
     q.withCount(count);
     q.withStartPage(startPage);
-    if (state != null)
-      q.withState(WorkflowState.valueOf(state.toUpperCase()));
-    if (text != null)
+    if (StringUtils.isNotEmpty(state)) {
+      if (state.startsWith(NEGATE_PREFIX)) {
+        q.withState(WorkflowState.valueOf(state.substring(1).toUpperCase()));
+      } else {
+        q.withState(WorkflowState.valueOf(state.toUpperCase()));
+      }
+    }
+    if (text != null) {
       q.withText(text);
-    if (seriesId != null)
+    }
+    if (seriesId != null) {
       q.withSeriesId(seriesId);
-    if (seriesTitle != null)
+    }
+    if (seriesTitle != null) {
       q.withSeriesTitle(seriesTitle);
-    if (mediapackageId != null)
+    }
+    if (mediapackageId != null) {
       q.withMediaPackage(mediapackageId);
-    if (currentOperation != null)
-      q.withCurrentOperation(currentOperation);
+    }
+    if (currentOperation != null) {
+      if (currentOperation.startsWith(NEGATE_PREFIX)) {
+        q.withoutCurrentOperation(currentOperation.substring(1));
+      } else {
+        q.withCurrentOperation(currentOperation);
+      }
+    }
     WorkflowSet set = service.getWorkflowInstances(q);
     return Response.ok(set).build();
   }

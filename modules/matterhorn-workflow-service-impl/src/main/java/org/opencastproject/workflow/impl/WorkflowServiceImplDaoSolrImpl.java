@@ -421,8 +421,28 @@ public class WorkflowServiceImplDaoSolrImpl implements WorkflowServiceImplDao {
    * @return the appended {@link StringBuilder}
    */
   private StringBuilder append(StringBuilder sb, String key, String value) {
+    return append(sb, key, value, false);
+  }
+
+  /**
+   * Appends query parameters to a solr query
+   * 
+   * @param sb
+   *          The {@link StringBuilder} containing the query
+   * @param key
+   *          the key for this search parameter
+   * @param value
+   *          the value for this search parameter
+   * @param negate
+   *          whether this parameter should be negated in the solr query
+   * @return the appended {@link StringBuilder}
+   */
+  private StringBuilder append(StringBuilder sb, String key, String value, boolean negate) {
     if (sb.length() > 0) {
       sb.append(" AND ");
+    }
+    if (negate) {
+      sb.append("-");
     }
     sb.append(key);
     sb.append(":");
@@ -455,10 +475,10 @@ public class WorkflowServiceImplDaoSolrImpl implements WorkflowServiceImplDao {
       append(sb, SERIES_TITLE_KEY, query.getSeriesTitle());
     }
     if (StringUtils.isNotBlank(query.getCurrentOperation())) {
-      append(sb, OPERATION_KEY, query.getCurrentOperation());
+      append(sb, OPERATION_KEY, query.getCurrentOperation(), query.isNegateCurrentOperation());
     }
     if (query.getState() != null) {
-      append(sb, STATE_KEY, query.getState().toString());
+      append(sb, STATE_KEY, query.getState().toString(), query.isNegateState());
     }
     if (StringUtils.isNotBlank(query.getText())) {
       append(sb, FULLTEXT_KEY, query.getText());
@@ -512,7 +532,7 @@ public class WorkflowServiceImplDaoSolrImpl implements WorkflowServiceImplDao {
       solrServer.commit();
 
       // FIXME: jobs can not be deleted.
-    
+
     } catch (SolrServerException e) {
       throw new WorkflowDatabaseException(e);
     } catch (IOException e) {

@@ -23,12 +23,17 @@ import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 public class WorkflowQuery {
   protected long count;
   protected long startPage;
+
   protected String text;
-  protected WorkflowState state;
   protected String seriesTitle;
   protected String seriesId;
   protected String mediaPackageId;
+
+  protected boolean negateCurrentOperation;
   protected String currentOperation;
+
+  protected boolean negateState;
+  protected WorkflowState state;
 
   public WorkflowQuery() {
   }
@@ -51,9 +56,31 @@ public class WorkflowQuery {
     return this;
   }
 
-  /** Limit results to workflow instances in a specific state */
+  /**
+   * Limit results to workflow instances in a specific state. This method overrides and will be overridden by future
+   * calls to {@link #withoutState(String)}
+   * 
+   * @param state
+   *          the workflow state
+   * @return this query
+   */
   public WorkflowQuery withState(WorkflowState state) {
     this.state = state;
+    this.negateState = false;
+    return this;
+  }
+
+  /**
+   * Limit results to workflow instances not in a specific state. This method overrides and will be overridden by future
+   * calls to {@link #withState(String)}
+   * 
+   * @param state
+   *          the workflow state
+   * @return this query
+   */
+  public WorkflowQuery withoutState(WorkflowState state) {
+    this.state = state;
+    this.negateState = true;
     return this;
   }
 
@@ -75,9 +102,31 @@ public class WorkflowQuery {
     return this;
   }
 
-  /** Limit results to workflow instances that are currently handling the specified operation */
+  /**
+   * Limit results to workflow instances that are currently handling the specified operation. This method overrides and
+   * will be overridden by future calls to {@link #withoutCurrentOperation(String)}
+   * 
+   * @param currentOperation
+   *          the current operation
+   * @return this query
+   */
   public WorkflowQuery withCurrentOperation(String currentOperation) {
     this.currentOperation = currentOperation;
+    negateCurrentOperation = false;
+    return this;
+  }
+
+  /**
+   * Limit results to workflow instances to those that are not currently in the specified operation. This method
+   * overrides and will be overridden by future calls to {@link #withCurrentOperation(String)}
+   * 
+   * @param currentOperation
+   *          the current operation
+   * @return this query
+   */
+  public WorkflowQuery withoutCurrentOperation(String currentOperation) {
+    this.currentOperation = currentOperation;
+    negateCurrentOperation = true;
     return this;
   }
 
@@ -96,9 +145,17 @@ public class WorkflowQuery {
   public WorkflowState getState() {
     return state;
   }
+  
+  public boolean isNegateState() {
+    return negateState;
+  }
 
   public String getCurrentOperation() {
     return currentOperation;
+  }
+  
+  public boolean isNegateCurrentOperation() {
+    return negateCurrentOperation;
   }
 
   public String getMediaPackage() {
@@ -108,7 +165,7 @@ public class WorkflowQuery {
   public String getSeriesId() {
     return seriesId;
   }
-  
+
   public String getSeriesTitle() {
     return seriesTitle;
   }
