@@ -340,6 +340,8 @@ CaptureAgent captureAgentMock;
       // Check the actual correctness of the object
     } catch (UnableToCreateElementException e) {
       logger.error("testVideoTestSrc in SourceFactoryTest", e);
+    } catch(IllegalArgumentException e) {
+      logger.error("testVideoTestSrc in SourceFactoryTest", e);
     }
   }
   
