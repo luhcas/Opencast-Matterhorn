@@ -32,7 +32,9 @@ public class CaptureDeviceProperties {
 
   /**
    * A data class that processes the captureDevice and properties taken in by each Consumer and Producer and gathers the
-   * salient properties.
+   * salient properties. These properties are all settings for the GStreamer properties and are intended to be passed
+   * through as is. Certain codecs for example have different ranges for bitrate and so it is important to check the
+   * GStreamer docs for possible values.
    * 
    * @param captureDevice
    *          Details about the captureDevice such as location, codec, container, etc.

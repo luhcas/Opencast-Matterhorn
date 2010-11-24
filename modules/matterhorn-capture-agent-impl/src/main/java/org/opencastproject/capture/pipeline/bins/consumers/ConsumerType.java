@@ -20,8 +20,6 @@ package org.opencastproject.capture.pipeline.bins.consumers;
  * and are an abstraction for GStreamer Sinks.
  */
 public enum ConsumerType {
-  AUDIO_CONFIDENCE_MONITORING, // Currently Unsupported. 
-  VIDEO_CONFIDENCE_MONITORING, // Currently Unsupported. 
   XVIMAGE_SINK, // Only available on Linux. Shows Producer data in real time. 
   AUDIO_FILE_SINK, // Places audio data into a file. 
   VIDEO_FILE_SINK // Places video data into a file. 

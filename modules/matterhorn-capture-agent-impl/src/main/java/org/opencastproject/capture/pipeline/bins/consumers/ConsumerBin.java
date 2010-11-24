@@ -139,10 +139,10 @@ public abstract class ConsumerBin extends PartialBin{
    *           If the queue is null because this function is called before createElements this exception is thrown.
    **/ 
   private void setQueueProperties() throws UnableToSetElementPropertyBecauseElementWasNullException {
+    if (queue == null) {
+      throw new UnableToSetElementPropertyBecauseElementWasNullException(queue, "all properties.");
+    }
     synchronized (queue) {
-      if (queue == null) {
-        throw new UnableToSetElementPropertyBecauseElementWasNullException(queue, "all properties.");
-      }
       if (captureDeviceProperties.getBufferCount() != null) {
         logger.debug("{} bufferCount is being set to {}.", captureDevice.getName(), captureDeviceProperties
                 .getBufferCount());

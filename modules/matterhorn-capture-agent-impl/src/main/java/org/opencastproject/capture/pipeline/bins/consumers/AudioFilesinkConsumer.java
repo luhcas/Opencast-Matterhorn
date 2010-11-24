@@ -74,7 +74,7 @@ public class AudioFilesinkConsumer extends ConsumerBin {
    *           If the current machine doesn't have the required module to support the codec or container specified this
    *           Exception is throw. If no codec or container is specified that means your system needs to specify one
    *           that is compatible with the GStreamer Modules you have installed. If you don't wish to enable bad or ugly
-   *           plugins please specify a codec in the capture agent propertie's file.
+   *           plugins please specify a codec in the capture agent's properties file.
    **/
   @Override
   protected synchronized void createElements() throws UnableToCreateElementException{
