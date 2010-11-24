@@ -434,19 +434,66 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
   /**
    * {@inheritDoc}
+   *
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getJobs(java.lang.String, org.opencastproject.job.api.Job.Status)
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<Job> getJobs(String type, Status status) throws ServiceRegistryException {
+    Query query = null;
+    EntityManager em = null;
+    try {
+      em = emf.createEntityManager();
+      if(type == null && status == null) {
+        query = em.createNamedQuery("Job.all");
+      } else if(type == null) {
+        query = em.createNamedQuery("Job.status");
+        query.setParameter("status", status);
+      } else if(status == null) {
+        query = em.createNamedQuery("Job.type");
+        query.setParameter("serviceType", type);
+      } else {
+        query = em.createNamedQuery("Job");
+        query.setParameter("status", status);
+        query.setParameter("serviceType", type);
+      }
+      return query.getResultList();
+    } catch(Exception e) {
+      throw new ServiceRegistryException(e);
+    } finally {
+      em.close();
+    }
+  }
+
+  /**
+   * {@inheritDoc}
    * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#count(java.lang.String,
    *      org.opencastproject.job.api.Job.Status)
    */
   @Override
-  public long count(String type, Status status) {
-    EntityManager em = emf.createEntityManager();
+  public long count(String type, Status status) throws ServiceRegistryException {
+    Query query = null;
+    EntityManager em = null;
     try {
-      Query query = em.createNamedQuery("Job.count");
-      query.setParameter("status", status);
-      query.setParameter("serviceType", type);
+      em = emf.createEntityManager();
+      if(type == null && status == null) {
+        query = em.createNamedQuery("Job.count.all");
+      } else if(type == null) {
+        query = em.createNamedQuery("Job.count.status");
+        query.setParameter("status", status);
+      } else if(status == null) {
+        query = em.createNamedQuery("Job.count.type");
+        query.setParameter("serviceType", type);
+      } else {
+        query = em.createNamedQuery("Job.count");
+        query.setParameter("status", status);
+        query.setParameter("serviceType", type);
+      }
       Number countResult = (Number) query.getSingleResult();
       return countResult.longValue();
+    } catch(Exception e) {
+      throw new ServiceRegistryException(e);
     } finally {
       em.close();
     }
@@ -459,7 +506,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    *      org.opencastproject.job.api.Job.Status, java.lang.String)
    */
   @Override
-  public long count(String type, Status status, String host) {
+  public long count(String type, Status status, String host) throws ServiceRegistryException {
     EntityManager em = emf.createEntityManager();
     try {
       Query query = em.createNamedQuery("Job.countByHost");
@@ -468,6 +515,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       query.setParameter("host", host);
       Number countResult = (Number) query.getSingleResult();
       return countResult.longValue();
+    } catch(Exception e) {
+      throw new ServiceRegistryException(e);
     } finally {
       em.close();
     }
@@ -479,7 +528,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceStatistics()
    */
   @Override
-  public List<ServiceStatistics> getServiceStatistics() {
+  public List<ServiceStatistics> getServiceStatistics() throws ServiceRegistryException {
     EntityManager em = emf.createEntityManager();
     try {
       Query query = em.createNamedQuery("ServiceRegistration.statistics");
@@ -527,6 +576,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         }
       });
       return stats;
+    } catch(Exception e) {
+      throw new ServiceRegistryException(e);
     } finally {
       em.close();
     }
@@ -538,7 +589,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrationsByLoad(java.lang.String)
    */
   @Override
-  public List<ServiceRegistration> getServiceRegistrationsByLoad(String serviceType) {
+  public List<ServiceRegistration> getServiceRegistrationsByLoad(String serviceType) throws ServiceRegistryException {
     List<ServiceRegistration> registrations = new ArrayList<ServiceRegistration>();
     List<ServiceStatistics> stats = getServiceStatistics();
     Collections.sort(stats, new Comparator<ServiceStatistics>() {

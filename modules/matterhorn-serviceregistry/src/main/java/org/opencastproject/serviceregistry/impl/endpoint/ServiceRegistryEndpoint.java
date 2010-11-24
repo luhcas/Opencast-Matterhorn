@@ -18,22 +18,8 @@ package org.opencastproject.serviceregistry.impl.endpoint;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import java.net.URI;
-
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
 import org.opencastproject.job.api.JaxbJob;
+import org.opencastproject.job.api.JaxbJobList;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobParser;
 import org.opencastproject.rest.RestPublisher;
@@ -53,7 +39,24 @@ import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
+
 import org.osgi.service.component.ComponentContext;
+
+import java.net.URI;
+import java.util.List;
+
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 /**
  * Displays hosts and the service IDs they provide.
@@ -268,6 +271,19 @@ public class ServiceRegistryEndpoint {
   }
 
   @GET
+  @Path("/jobs.xml")
+  @Produces(MediaType.TEXT_XML)
+  public JaxbJobList getJobsAsXml(@QueryParam("serviceType") String serviceType, @QueryParam("status") Job.Status status) {
+    try {
+      List<Job> jobs = serviceRegistry.getJobs(serviceType, status);
+      return new JaxbJobList(jobs);
+    } catch(ServiceRegistryException e) {
+      throw new WebApplicationException(e);
+    }
+    
+  }
+
+  @GET
   @Path("/count")
   @Produces(MediaType.TEXT_PLAIN)
   public long count(@QueryParam("serviceType") String serviceType, @QueryParam("status") Job.Status status,
@@ -369,6 +385,21 @@ public class ServiceRegistryEndpoint {
             .OK("The number of jobs matching the request criteria has been returned in the http body."));
     countEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, countEndpoint);
+
+    // get jobs
+    RestEndpoint getJobsEndpoint = new RestEndpoint("getJobs", RestEndpoint.Method.GET, "/jobs.{format}",
+            "Fetch jobs based on query parameters.");
+    getJobsEndpoint.addPathParam(new Param("format", Type.STRING, "xml", null));
+    getJobsEndpoint.addOptionalParam(new Param("serviceType", Type.STRING, "org.opencastproject.[type]",
+            "The service identifier"));
+    getJobsEndpoint.addOptionalParam(new Param("status", Type.STRING, "FINISHED",
+            "The job status: QUEUED, RUNNING, FINISHED, or FAILED"));
+    getJobsEndpoint.addFormat(new Format("xml", null, null));
+    getJobsEndpoint.addFormat(new Format("json", null, null));
+    getJobsEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .OK("The jobs matching the request criteria are returned in the http body."));
+    getJobsEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.READ, getJobsEndpoint);
 
     // create a job
     RestEndpoint createJobEndpoint = new RestEndpoint("create", RestEndpoint.Method.POST, "/job",

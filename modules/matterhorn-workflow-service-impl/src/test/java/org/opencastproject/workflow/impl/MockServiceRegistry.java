@@ -16,6 +16,7 @@
 package org.opencastproject.workflow.impl;
 
 import org.opencastproject.job.api.Job;
+import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.serviceregistry.api.ServiceRegistration;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
@@ -23,9 +24,11 @@ import org.opencastproject.serviceregistry.api.ServiceStatistics;
 import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * An in-memory mock service registry.
@@ -35,7 +38,7 @@ public class MockServiceRegistry implements ServiceRegistry {
 
   @Override
   public long count(String serviceType, Job.Status status) throws ServiceRegistryException {
-    throw new UnsupportedOperationException();
+    return map.size();
   }
 
   @Override
@@ -121,5 +124,19 @@ public class MockServiceRegistry implements ServiceRegistry {
   @Override
   public void updateJob(Job job) throws NotFoundException, ServiceRegistryException, ServiceUnavailableException {
     map.put(job.getId(), job);
+  }
+
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getJobs(java.lang.String, org.opencastproject.job.api.Job.Status)
+   */
+  @Override
+  public List<Job> getJobs(String serviceType, Status status) throws ServiceRegistryException {
+    List<Job> list = new ArrayList<Job>();
+    for(Entry<Long, Job> entry : map.entrySet()) {
+      list.add(entry.getValue());
+    }
+    return list;
   }
 }

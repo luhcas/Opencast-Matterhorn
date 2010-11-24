@@ -141,6 +141,19 @@ public interface ServiceRegistry {
   Job getJob(long id) throws NotFoundException, ServiceRegistryException;
 
   /**
+   * Gets the list of jobs that match the specified parameters.
+   * 
+   * @param serviceType
+   *          The jobs run by this type of service.  If null, jobs from all hosts will be returned.
+   * @param status
+   *          The status of the jobs.  If null, jobs in all status will be returned.
+   * @return the jobs matching these criteria
+   * @throws ServiceRegistryException
+   *           if there is a problem accessing the service registry
+   */
+  List<Job> getJobs(String serviceType, Status status) throws ServiceRegistryException;
+
+  /**
    * Finds the service registrations for this kind of job, ordered by load (lightest to heaviest).
    * 
    * @param serviceType
@@ -205,12 +218,12 @@ public interface ServiceRegistry {
   List<ServiceStatistics> getServiceStatistics() throws ServiceRegistryException;
 
   /**
-   * Count the number of receipts of this type in this {@link Status} across all hosts
+   * Count the number of receipts of this type in this {@link Status} across all hosts.
    * 
    * @param serviceType
-   *          The jobs run by this type of service
+   *          The jobs run by this type of service. If null, the returned count will refer to all types of jobs.
    * @param status
-   *          The status of the receipts
+   *          The status of the receipts. If null, the returned count will refer to jobs in any status.
    * @return the number of jobs
    * @throws ServiceRegistryException
    *           if there is a problem accessing the service registry

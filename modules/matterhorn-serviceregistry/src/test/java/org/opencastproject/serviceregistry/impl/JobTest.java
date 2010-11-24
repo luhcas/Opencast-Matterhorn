@@ -88,7 +88,7 @@ public class JobTest {
   }
 
   @Test
-  public void testGetReceipt() throws Exception {
+  public void testGetJob() throws Exception {
     JobJpaImpl job = (JobJpaImpl) serviceRegistry.createJob(JOB_TYPE_1);
 
     Job jobFromDb = serviceRegistry.getJob(job.getId());
@@ -112,10 +112,26 @@ public class JobTest {
   }
 
   @Test
-  public void testGetReceipts() throws Exception {
+  public void testGetJobs() throws Exception {
     long id = serviceRegistry.createJob(JOB_TYPE_1).getId();
     long queuedJobs = serviceRegistry.count(JOB_TYPE_1, Status.QUEUED);
     Assert.assertEquals(1, queuedJobs);
+
+    // Search using both the job type and status
+    List<Job> jobs = serviceRegistry.getJobs(JOB_TYPE_1, Status.QUEUED);
+    Assert.assertEquals(1, jobs.size());
+    
+    // Search using just the job type
+    jobs = serviceRegistry.getJobs(JOB_TYPE_1, null);
+    Assert.assertEquals(1, jobs.size());
+
+    // Search using just the status
+    jobs = serviceRegistry.getJobs(null, Status.QUEUED);
+    Assert.assertEquals(1, jobs.size());
+    
+    // Search using nulls (return everything)
+    jobs = serviceRegistry.getJobs(null, null);
+    Assert.assertEquals(1, jobs.size());
 
     Job receipt = serviceRegistry.getJob(id);
     receipt.setStatus(Status.RUNNING);

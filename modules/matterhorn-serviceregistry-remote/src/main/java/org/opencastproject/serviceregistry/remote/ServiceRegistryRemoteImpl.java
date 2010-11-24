@@ -17,6 +17,7 @@ package org.opencastproject.serviceregistry.remote;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
+import org.opencastproject.job.api.JaxbJobList;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
 import org.opencastproject.job.api.JobParser;
@@ -265,7 +266,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
 
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, boolean)
    */
   @Override
@@ -299,6 +300,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
     }
     throw new ServiceRegistryException("Unable to create a job of type '" + type);
   }
+
   /**
    * {@inheritDoc}
    * 
@@ -365,6 +367,40 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
       client.close(response);
     }
     throw new ServiceRegistryException("Unable to retrieve job " + id);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getJobs(java.lang.String,
+   *      org.opencastproject.job.api.Job.Status)
+   */
+  @Override
+  public List<Job> getJobs(String serviceType, Status status) throws ServiceRegistryException {
+    String servicePath = new QueryStringBuilder("jobs.xml").add("serviceType", serviceType)
+            .add("status", status.toString()).toString();
+    String url = UrlSupport.concat(serviceURL, servicePath);
+    HttpGet get = new HttpGet(url);
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(get);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_OK) {
+        JaxbJobList jaxbJobList = JobParser.parseJobList(response.getEntity().getContent());
+        List<Job> jobs = new ArrayList<Job>(jaxbJobList.getJobs().size());
+        for(Job job : jaxbJobList.getJobs()) {
+          jobs.add(job);
+        }
+        return jobs;
+      } else {
+        throw new ServiceRegistryException("Unable to retrieve jobs via http:" + response.getStatusLine());
+      }
+    } catch (IOException e) {
+      throw new ServiceRegistryException("Unable to get jobs", e);
+    } finally {
+      client.close(response);
+    }
   }
 
   /**

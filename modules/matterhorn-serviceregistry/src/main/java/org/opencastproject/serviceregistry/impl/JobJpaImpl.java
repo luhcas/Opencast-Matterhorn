@@ -51,11 +51,24 @@ import javax.xml.bind.annotation.XmlType;
 @Access(AccessType.PROPERTY)
 @Table(name = "JOB")
 @NamedQueries({
+        // Job queries
+        @NamedQuery(name = "Job", query = "SELECT j FROM Job j "
+                + "where j.status = :status and j.serviceRegistration.serviceType = :serviceType"),
+        @NamedQuery(name = "Job.type", query = "SELECT j FROM Job j "
+                + "where j.serviceRegistration.serviceType = :serviceType"),
+        @NamedQuery(name = "Job.status", query = "SELECT j FROM Job j " + "where j.status = :status "),
+        @NamedQuery(name = "Job.all", query = "SELECT j FROM Job j"),
+        // Job count queries
         @NamedQuery(name = "Job.count", query = "SELECT COUNT(j) FROM Job j "
                 + "where j.status = :status and j.serviceRegistration.serviceType = :serviceType"),
+        @NamedQuery(name = "Job.count.type", query = "SELECT COUNT(j) FROM Job j "
+                + "where j.serviceRegistration.serviceType = :serviceType"),
+        @NamedQuery(name = "Job.count.status", query = "SELECT COUNT(j) FROM Job j " + "where j.status = :status "),
+        @NamedQuery(name = "Job.count.all", query = "SELECT COUNT(j) FROM Job j"),
         @NamedQuery(name = "Job.countByHost", query = "SELECT COUNT(j) FROM Job j "
                 + "where j.status = :status and j.serviceRegistration.serviceType = :serviceType and "
-                + "j.serviceRegistration.host = :host") })
+                + "j.serviceRegistration.host = :host") }
+)
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlType(name = "job", namespace = "http://job.opencastproject.org/")
 @XmlRootElement(name = "job", namespace = "http://job.opencastproject.org/")

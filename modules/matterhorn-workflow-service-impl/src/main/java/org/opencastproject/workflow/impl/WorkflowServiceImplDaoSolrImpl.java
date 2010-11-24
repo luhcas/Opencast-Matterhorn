@@ -15,22 +15,24 @@
  */
 package org.opencastproject.workflow.impl;
 
+import org.opencastproject.job.api.Job;
 import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.solr.SolrServerFactory;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
+import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowSetImpl;
 import org.opencastproject.workflow.api.WorkflowStatistics;
-import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowStatistics.WorkflowDefinitionReport;
 import org.opencastproject.workflow.api.WorkflowStatistics.WorkflowDefinitionReport.OperationReport;
-import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -44,25 +46,24 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
+import org.osgi.framework.ServiceException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 
 /**
  * Provides data access to the workflow service through file storage in the workspace, indexed via solr.
  */
-public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
+public class WorkflowServiceImplDaoSolrImpl implements WorkflowServiceImplDao {
   /** The logger */
-  private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceImplDaoFileImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceImplDaoSolrImpl.class);
 
   /** Configuration key for a remote solr server */
   public static final String CONFIG_SOLR_URL = "org.opencastproject.workflow.solr.url";
@@ -78,9 +79,6 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
 
   /** The URL to connect to a remote solr server */
   protected URL solrServerUrl = null;
-
-  /** The collection in the working file repository to store workflow xml files */
-  protected static final String COLLECTION_ID = "workflows";
 
   /** The key in solr documents representing the workflow's current operation */
   protected static final String OPERATION_KEY = "operation";
@@ -124,12 +122,17 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
   /** The key in solr documents representing the full text index */
   private static final String FULLTEXT_KEY = "fulltext";
 
-  /** The workspace used to store the workflow xml files. These files are the "source of authority" for workflow data */
-  protected Workspace workspace;
+  /** The service registry, managing jobs */
+  private ServiceRegistry serviceRegistry = null;
 
-  /** Sets the workspace */
-  public void setWorkspace(Workspace workspace) {
-    this.workspace = workspace;
+  /**
+   * Callback for the OSGi environment to register with the <code>ServiceRegistry</code>.
+   * 
+   * @param registry
+   *          the service registry
+   */
+  protected void setServiceRegistry(ServiceRegistry registry) {
+    this.serviceRegistry = registry;
   }
 
   public void activate(ComponentContext cc) {
@@ -171,41 +174,34 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
       }
     }
 
-    // If the solr is empty, add all of the workflows found in the COLLECTION_ID collection
-    long instances = 0;
+    // If the solr is empty, add all of the existing workflows
+    long instancesInSolr = 0;
     try {
-      instances = countWorkflowInstances(null, null);
+      instancesInSolr = countWorkflowInstances(null, null);
     } catch (WorkflowDatabaseException e) {
       throw new IllegalStateException(e);
     }
-    if (instances == 0) {
+    if (instancesInSolr == 0) {
       // this may be a new index, so get all of the existing workflows and index them
       WorkflowBuilder builder = WorkflowBuilder.getInstance();
-      URI[] uris = null;
+
+      long instancesInServiceRegistry;
       try {
-        uris = workspace.getCollectionContents(COLLECTION_ID);
-      } catch (IOException e) {
-        throw new IllegalStateException("Error accessing workspace collection '" + COLLECTION_ID + "'", e);
-      }
-      if (uris.length > 0) {
-        logger.info("The workflow search index is empty.  Populating it now with {} workflows.", uris.length);
-      }
-      for (URI uri : uris) {
-        InputStream in = null;
-        try {
-          File file = workspace.get(uri);
-          in = new FileInputStream(file);
-          WorkflowInstance instance = builder.parseWorkflowInstance(in);
-          index(instance);
-        } catch (Exception e) {
-          logger.warn("unable to parse workflow instance", e);
-          throw new IllegalStateException(e);
-        } finally {
-          IOUtils.closeQuietly(in);
+        instancesInServiceRegistry = serviceRegistry.count(WorkflowService.JOB_TYPE, null);
+        if (instancesInServiceRegistry > 0) {
+          logger.info("The workflow search index is empty.  Populating it now with {} workflows.",
+                  instancesInServiceRegistry);
         }
-      }
-      if (uris.length > 0) {
-        logger.info("Finished populating the workflow search index with {} workflows.", uris.length);
+        for (Job job : serviceRegistry.getJobs(null, null)) {
+          WorkflowInstance instance = builder.parseWorkflowInstance(job.getPayload());
+          index(instance);
+        }
+        if (instancesInServiceRegistry > 0) {
+          logger.info("Finished populating the workflow search index with {} workflows.", instancesInServiceRegistry);
+        }
+      } catch (Exception e) {
+        logger.warn("Unable to index workflow instances: {}", e);
+        throw new ServiceException(e.getMessage());
       }
     }
   }
@@ -267,7 +263,7 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
     InputStream in = null;
     FileOutputStream fos = null;
     try {
-      in = WorkflowServiceImplDaoFileImpl.class.getResourceAsStream(classpath);
+      in = WorkflowServiceImplDaoSolrImpl.class.getResourceAsStream(classpath);
       File file = new File(dir, FilenameUtils.getName(classpath));
       logger.debug("copying " + classpath + " to " + file);
       fos = new FileOutputStream(file);
@@ -349,20 +345,20 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
     // Consider the workflow state
     if (state != null) {
       query.append(STATE_KEY).append(":").append(state.toString());
-    } 
-    
+    }
+
     // Consider the current operation
     if (StringUtils.isNotBlank(operation)) {
       if (query.length() > 0)
         query.append(" AND ");
       query.append(OPERATION_KEY).append(":").append(operation);
     }
-    
+
     // We want all available workflows
     if (query.length() == 0) {
       query.append("*:*");
     }
-    
+
     try {
       QueryResponse response = solrServer.query(new SolrQuery(query.toString()));
       return response.getResults().getNumFound();
@@ -370,9 +366,10 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
       throw new WorkflowDatabaseException(e);
     }
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.impl.WorkflowServiceImplDao#getStatistics()
    */
   @Override
@@ -413,17 +410,16 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
   }
 
   /**
-   * Gets the URI for a workflow instance stored in the workspace.
+   * Appends query parameters to a solr query
    * 
-   * @param workflowId
-   *          The workflow identifier
-   * @return the URI to the workflow. Note that there may not be a file at this URI. If so, calling
-   *         {@link Workspace#get(URI)} will throw a {@link NotFoundException}
+   * @param sb
+   *          The {@link StringBuilder} containing the query
+   * @param key
+   *          the key for this search parameter
+   * @param value
+   *          the value for this search parameter
+   * @return the appended {@link StringBuilder}
    */
-  private URI getWorkflowFileUri(long workflowId) {
-    return workspace.getCollectionURI(COLLECTION_ID, getFilename(workflowId));
-  }
-
   private StringBuilder append(StringBuilder sb, String key, String value) {
     if (sb.length() > 0) {
       sb.append(" AND ");
@@ -514,8 +510,9 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
     try {
       solrServer.deleteById(Long.toString(id));
       solrServer.commit();
-      URI uri = getWorkflowFileUri(id);
-      workspace.delete(uri);
+
+      // FIXME: jobs can not be deleted.
+    
     } catch (SolrServerException e) {
       throw new WorkflowDatabaseException(e);
     } catch (IOException e) {
@@ -537,21 +534,13 @@ public class WorkflowServiceImplDaoFileImpl implements WorkflowServiceImplDao {
       throw new WorkflowDatabaseException(e);
     }
     try {
-      workspace.putInCollection(COLLECTION_ID, getFilename(instance.getId()), IOUtils.toInputStream(xml, "UTF-8"));
+      Job job = serviceRegistry.getJob(instance.getId());
+      job.setPayload(xml);
+      serviceRegistry.updateJob(job);
       index(instance);
-    } catch (IOException e) {
+    } catch (Exception e) {
       throw new WorkflowDatabaseException(e);
     }
-  }
-
-  /**
-   * Generates a filename based on the workflow ID
-   * 
-   * @param workflowId
-   * @return
-   */
-  private String getFilename(long workflowId) {
-    return workflowId + ".xml";
   }
 
 }

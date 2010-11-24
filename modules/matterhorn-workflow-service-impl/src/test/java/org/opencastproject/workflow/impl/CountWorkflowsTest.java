@@ -32,13 +32,11 @@ import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
-import org.opencastproject.workspace.api.Workspace;
 
 import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,7 +44,6 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -62,9 +59,9 @@ public class CountWorkflowsTest {
   private WorkflowServiceImpl service = null;
   private WorkflowDefinition def = null;
   private MediaPackage mp = null;
-  private WorkflowServiceImplDaoFileImpl dao = null;
-  private Workspace workspace = null;
+  private WorkflowServiceImplDaoSolrImpl dao = null;
   private HoldingWorkflowOperationHandler holdingOperationHandler;
+  private ServiceRegistry serviceRegistry = null;
 
   @Before
   public void setup() throws Exception {
@@ -96,14 +93,11 @@ public class CountWorkflowsTest {
       }
     };
 
-    ServiceRegistry serviceRegistry = new MockServiceRegistry();
+    serviceRegistry = new MockServiceRegistry();
     service.setServiceRegistry(serviceRegistry);
 
-    workspace = EasyMock.createNiceMock(Workspace.class);
-    EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);
-    EasyMock.replay(workspace);
-    dao = new WorkflowServiceImplDaoFileImpl();
-    dao.setWorkspace(workspace);
+    dao = new WorkflowServiceImplDaoSolrImpl();
+    dao.setServiceRegistry(serviceRegistry);
     dao.solrRoot = storageRoot + File.separator + "solr";
     dao.activate();
     service.setDao(dao);

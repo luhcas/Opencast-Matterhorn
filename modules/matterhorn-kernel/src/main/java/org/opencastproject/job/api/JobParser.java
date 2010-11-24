@@ -62,7 +62,7 @@ public class JobParser {
    *          The serialized data
    * @param format
    *          the serialization format
-   * @return The receipt
+   * @return The job
    */
   public static Job parseJob(InputStream in) throws IOException {
     Unmarshaller unmarshaller;
@@ -82,6 +82,36 @@ public class JobParser {
     Writer writer = new StringWriter();
     marshaller.marshal(job, writer);
     return writer.toString();
+  }
+
+  /**
+   * Parses an xml string representing a {@link JaxbJobList}
+   * 
+   * @param serializedForm
+   *          The serialized data
+   * @return The job list
+   */
+  public static JaxbJobList parseJobList(String serializedForm) throws IOException {
+    return parseJobList(IOUtils.toInputStream(serializedForm, "UTF-8"));
+  }
+
+  /**
+   * Parses a stream representing a {@link JaxbJobList}
+   * 
+   * @param content the serialized data
+   * @return the job list
+   */
+  public static JaxbJobList parseJobList(InputStream in) throws IOException {
+    Unmarshaller unmarshaller;
+    try {
+      unmarshaller = jaxbContext.createUnmarshaller();
+      return unmarshaller.unmarshal(DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in), JaxbJobList.class)
+      .getValue();
+    } catch (Exception e) {
+      throw new IOException(e);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
   }
 
 }
