@@ -621,6 +621,9 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     if (sb.length() > 0) {
       sb.append(" AND ");
     }
+    // If we include only negatives inside parentheses, lucene won't return any results.  So we need to add "*:*".
+    // See http://mail-archives.apache.org/mod_mbox/lucene-solr-user/201011.mbox/%3CAANLkTinTJLo7Y-W2kt+yxAcESf98p8DD7z7mrs4CpNo-@mail.gmail.com%3E
+    boolean positiveTerm = false;
     if (queryTerms.size() > 1) {
       sb.append("(");
     }
@@ -633,7 +636,9 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
           sb.append(" AND ");
         }
       }
-      if (!term.isInclude()) {
+      if (term.isInclude()) {
+        positiveTerm = true;
+      } else {
         sb.append("-");
       }
       sb.append(key);
@@ -641,6 +646,9 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
       sb.append(ClientUtils.escapeQueryChars(term.getValue()));
     }
     if (queryTerms.size() > 1) {
+      if(!positiveTerm) {
+        sb.append(" AND *:*");
+      }
       sb.append(")");
     }
     return sb;

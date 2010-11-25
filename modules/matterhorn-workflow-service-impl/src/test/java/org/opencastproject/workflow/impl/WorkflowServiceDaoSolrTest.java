@@ -72,7 +72,7 @@ public class WorkflowServiceDaoSolrTest {
     WorkflowQuery q = new WorkflowQuery().withSeriesId("series1").withoutState(WorkflowState.RUNNING)
             .withoutState(WorkflowState.PAUSED);
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "seriesid:series1 AND (-state:RUNNING AND -state:PAUSED)";
+    String expected = "seriesid:series1 AND (-state:RUNNING AND -state:PAUSED AND *:*)";
     assertEquals(expected, solrQuery);
   }
 
