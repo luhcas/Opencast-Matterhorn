@@ -67,7 +67,7 @@ public class WorkflowServiceImplTest {
   private MediaPackage mediapackage2 = null;
   private SucceedingWorkflowOperationHandler succeedingOperationHandler = null;
   private WorkflowOperationHandler failingOperationHandler = null;
-  private WorkflowServiceImplDaoSolrImpl dao = null;
+  private WorkflowServiceDaoSolrImpl dao = null;
   private Set<HandlerRegistration> handlerRegistrations = null;
   private Workspace workspace = null;
 
@@ -104,7 +104,7 @@ public class WorkflowServiceImplTest {
     ServiceRegistry serviceRegistry = new MockServiceRegistry();
     service.setServiceRegistry(serviceRegistry);
 
-    dao = new WorkflowServiceImplDaoSolrImpl();
+    dao = new WorkflowServiceDaoSolrImpl();
     dao.setServiceRegistry(serviceRegistry);
     dao.solrRoot = storageRoot + File.separator + "solr." + System.currentTimeMillis();
     dao.activate();

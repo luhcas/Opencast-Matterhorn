@@ -57,7 +57,7 @@ public class PauseFinalOperationTest {
   private WorkflowDefinition def = null;
   private WorkflowInstance workflow = null;
   private MediaPackage mp = null;
-  private WorkflowServiceImplDaoSolrImpl dao = null;
+  private WorkflowServiceDaoSolrImpl dao = null;
   private Workspace workspace = null;
   private OpHandler handler = null;
 
@@ -96,7 +96,7 @@ public class PauseFinalOperationTest {
     workspace = EasyMock.createNiceMock(Workspace.class);
     EasyMock.expect(workspace.getCollectionContents((String) EasyMock.anyObject())).andReturn(new URI[0]);
     EasyMock.replay(workspace);
-    dao = new WorkflowServiceImplDaoSolrImpl();
+    dao = new WorkflowServiceDaoSolrImpl();
     dao.setServiceRegistry(serviceRegistry);
     dao.solrRoot = storageRoot + File.separator + "solr";
     dao.activate();

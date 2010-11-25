@@ -58,7 +58,7 @@ public class HoldStateTest {
   private WorkflowDefinition def = null;
   private WorkflowInstance workflow = null;
   private MediaPackage mp = null;
-  private WorkflowServiceImplDaoSolrImpl dao = null;
+  private WorkflowServiceDaoSolrImpl dao = null;
   private HoldingWorkflowOperationHandler holdingOperationHandler;
 
   @Before
@@ -94,7 +94,7 @@ public class HoldStateTest {
     ServiceRegistry serviceRegistry = new MockServiceRegistry();
     service.setServiceRegistry(serviceRegistry);
 
-    dao = new WorkflowServiceImplDaoSolrImpl();
+    dao = new WorkflowServiceDaoSolrImpl();
     dao.solrRoot = storageRoot + File.separator + "solr";
     dao.setServiceRegistry(serviceRegistry);
     dao.activate();

@@ -41,6 +41,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
@@ -61,9 +63,10 @@ import java.net.URL;
 /**
  * Provides data access to the workflow service through file storage in the workspace, indexed via solr.
  */
-public class WorkflowServiceImplDaoSolrImpl implements WorkflowServiceImplDao {
+public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
+  
   /** The logger */
-  private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceImplDaoSolrImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceDaoSolrImpl.class);
 
   /** Configuration key for a remote solr server */
   public static final String CONFIG_SOLR_URL = "org.opencastproject.workflow.solr.url";
@@ -82,6 +85,9 @@ public class WorkflowServiceImplDaoSolrImpl implements WorkflowServiceImplDao {
 
   /** The key in solr documents representing the workflow's current operation */
   protected static final String OPERATION_KEY = "operation";
+
+  /** The key in solr documents representing the workflow definition id */
+  protected static final String TEMPLATE_KEY = "templateid";
 
   /** The key in solr documents representing the workflow's series identifier */
   protected static final String SERIES_ID_KEY = "seriesid";
@@ -263,7 +269,7 @@ public class WorkflowServiceImplDaoSolrImpl implements WorkflowServiceImplDao {
     InputStream in = null;
     FileOutputStream fos = null;
     try {
-      in = WorkflowServiceImplDaoSolrImpl.class.getResourceAsStream(classpath);
+      in = WorkflowServiceDaoSolrImpl.class.getResourceAsStream(classpath);
       File file = new File(dir, FilenameUtils.getName(classpath));
       logger.debug("copying " + classpath + " to " + file);
       fos = new FileOutputStream(file);
@@ -289,6 +295,7 @@ public class WorkflowServiceImplDaoSolrImpl implements WorkflowServiceImplDao {
   protected SolrInputDocument createDocument(WorkflowInstance instance) throws Exception {
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ID_KEY, instance.getId());
+    doc.addField(TEMPLATE_KEY, instance.getTemplate());
     doc.addField(STATE_KEY, instance.getState().toString());
 
     String xml = WorkflowBuilder.getInstance().toXml(instance);
@@ -374,14 +381,150 @@ public class WorkflowServiceImplDaoSolrImpl implements WorkflowServiceImplDao {
    */
   @Override
   public WorkflowStatistics getStatistics() throws WorkflowDatabaseException {
-    // TODO: Implement loading of statistics data
+    
+    long total = 0;
+    long paused = 0;
+    long failed = 0;
+    long failing = 0;
+    long instantiated = 0;
+    long running = 0;
+    long stopped = 0;
+    long succeeded = 0;
+
     WorkflowStatistics stats = new WorkflowStatistics();
-    WorkflowDefinitionReport defReport = new WorkflowDefinitionReport();
-    defReport.setId("def1");
-    OperationReport opReport = new OperationReport();
-    opReport.setId("operation1");
-    defReport.getOperations().add(opReport);
-    stats.getDefinitions().add(defReport);
+
+    // Get all definitions and then query for the numbers and the current operation per definition
+    try {
+      SolrQuery solrQuery = new SolrQuery("*:*");
+      solrQuery.addFacetField(TEMPLATE_KEY);
+      solrQuery.addFacetField(OPERATION_KEY);
+      solrQuery.setFacetMinCount(0);
+      solrQuery.setFacet(true);
+      QueryResponse response = solrServer.query(solrQuery);
+      
+      FacetField templateFacet = response.getFacetField(TEMPLATE_KEY);
+      FacetField operationFacet = response.getFacetField(OPERATION_KEY);
+
+      // For every template and every operation
+      if (templateFacet != null && templateFacet.getValues() != null) {
+
+        for (Count template : templateFacet.getValues()) {
+
+          WorkflowDefinitionReport templateReport = new WorkflowDefinitionReport();
+          templateReport.setId(template.getName());
+  
+          long templateTotal = 0;
+          long templatePaused = 0;
+          long templateFailed = 0;
+          long templateFailing = 0;
+          long templateInstantiated = 0;
+          long templateRunning = 0;
+          long templateStopped = 0;
+          long templateSucceeded = 0;
+  
+          if (operationFacet != null && operationFacet.getValues() != null) {
+
+            for (Count operation : operationFacet.getValues()) {
+  
+              OperationReport operationReport = new OperationReport();
+              operationReport.setId(operation.getName());
+    
+              solrQuery = new SolrQuery("*:*");
+              solrQuery.addFacetField(STATE_KEY);
+              solrQuery.addFacetQuery(STATE_KEY + ":" + WorkflowState.FAILED);
+              solrQuery.addFacetQuery(STATE_KEY + ":" + WorkflowState.FAILING);
+              solrQuery.addFacetQuery(STATE_KEY + ":" + WorkflowState.INSTANTIATED);
+              solrQuery.addFacetQuery(STATE_KEY + ":" + WorkflowState.PAUSED);
+              solrQuery.addFacetQuery(STATE_KEY + ":" + WorkflowState.RUNNING);
+              solrQuery.addFacetQuery(STATE_KEY + ":" + WorkflowState.STOPPED);
+              solrQuery.addFacetQuery(STATE_KEY + ":" + WorkflowState.SUCCEEDED);
+              solrQuery.addFilterQuery(TEMPLATE_KEY + ":" + template.getName());
+              solrQuery.addFilterQuery(OPERATION_KEY + ":" + operation.getName());
+              solrQuery.setFacetMinCount(0);
+              solrQuery.setFacet(true);
+      
+              response = solrServer.query(solrQuery);
+    
+              // Add the states
+              FacetField stateFacet = response.getFacetField(STATE_KEY);
+              for (Count stateValue : stateFacet.getValues()) {
+                WorkflowState state = WorkflowState.valueOf(stateValue.getName());
+                templateTotal += stateValue.getCount();
+                total += stateValue.getCount();
+                switch (state) {
+                  case FAILED:
+                    operationReport.setFailed(stateValue.getCount());
+                    templateFailed += stateValue.getCount();
+                    failed += stateValue.getCount();
+                    break;
+                  case FAILING:
+                    operationReport.setFailing(stateValue.getCount());
+                    templateFailing += stateValue.getCount();
+                    failing += stateValue.getCount();
+                    break;
+                  case INSTANTIATED:
+                    operationReport.setInstantiated(stateValue.getCount());
+                    templateInstantiated += stateValue.getCount();
+                    instantiated += stateValue.getCount();
+                    break;
+                  case PAUSED:
+                    operationReport.setPaused(stateValue.getCount());
+                    templatePaused += stateValue.getCount();
+                    paused += stateValue.getCount();
+                    break;
+                  case RUNNING:
+                    operationReport.setRunning(stateValue.getCount());
+                    templateRunning += stateValue.getCount();
+                    running += stateValue.getCount();
+                    break;
+                  case STOPPED:
+                    operationReport.setStopped(stateValue.getCount());
+                    templateStopped += stateValue.getCount();
+                    stopped += stateValue.getCount();
+                    break;
+                  case SUCCEEDED:
+                    operationReport.setFinished(stateValue.getCount());
+                    templateSucceeded += stateValue.getCount();
+                    succeeded += stateValue.getCount();
+                    break;
+                  default:
+                    throw new IllegalStateException("State '" + state + "' is not handled");
+                }
+              }
+              
+              templateReport.getOperations().add(operationReport);
+            }
+          }
+  
+          // Update the template statistics
+          templateReport.setTotal(templateTotal);
+          templateReport.setFailed(templateFailed);
+          templateReport.setFailing(templateFailing);
+          templateReport.setInstantiated(templateInstantiated);
+          templateReport.setPaused(templatePaused);
+          templateReport.setRunning(templateRunning);
+          templateReport.setStopped(templateStopped);
+          templateReport.setFinished(templateSucceeded);
+          
+          // Add the definition report to the statistics
+          stats.getDefinitions().add(templateReport);
+          
+        }
+
+      }
+    } catch (SolrServerException e) {
+      throw new WorkflowDatabaseException(e);
+    }
+
+    stats.setTotal(total);
+    stats.setFailed(failed);
+    stats.setFailing(failing);
+    stats.setInstantiated(instantiated);
+    stats.setPaused(paused);
+    stats.setRunning(running);
+    stats.setStopped(stopped);
+    stats.setFinished(succeeded);
+    
     return stats;
   }
 
@@ -532,7 +675,7 @@ public class WorkflowServiceImplDaoSolrImpl implements WorkflowServiceImplDao {
       solrServer.commit();
 
       // FIXME: jobs can not be deleted.
-
+    
     } catch (SolrServerException e) {
       throw new WorkflowDatabaseException(e);
     } catch (IOException e) {

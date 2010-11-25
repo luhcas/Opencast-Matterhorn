@@ -131,13 +131,18 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
    * A tuple of a workflow operation handler and the name of the operation it handles
    */
   public static class HandlerRegistration {
+
+    private WorkflowOperationHandler handler;
+    private String operationName;
+
     public HandlerRegistration(String operationName, WorkflowOperationHandler handler) {
+      if (operationName == null)
+        throw new IllegalArgumentException("Operation name cannot be null");
+      if (handler == null)
+        throw new IllegalArgumentException("Handler cannot be null");
       this.operationName = operationName;
       this.handler = handler;
     }
-
-    WorkflowOperationHandler handler;
-    String operationName;
 
     public WorkflowOperationHandler getHandler() {
       return handler;
@@ -152,8 +157,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + ((handler == null) ? 0 : handler.hashCode());
-      result = prime * result + ((operationName == null) ? 0 : operationName.hashCode());
+      result = prime * result + handler.hashCode();
+      result = prime * result + operationName.hashCode();
       return result;
     }
 
@@ -171,15 +176,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       if (getClass() != obj.getClass())
         return false;
       HandlerRegistration other = (HandlerRegistration) obj;
-      if (handler == null) {
-        if (other.handler != null)
-          return false;
-      } else if (!handler.equals(other.handler))
+      if (!handler.equals(other.handler))
         return false;
-      if (operationName == null) {
-        if (other.operationName != null)
-          return false;
-      } else if (!operationName.equals(other.operationName))
+      if (!operationName.equals(other.operationName))
         return false;
       return true;
     }

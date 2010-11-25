@@ -162,6 +162,32 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
   /**
    * {@inheritDoc}
    * 
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return id != null ? id.hashCode() : super.hashCode();
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof WorkflowOperationHandler) {
+      if (id != null)
+        return id.equals(((WorkflowOperationHandler) obj).getId());
+      else
+        return this == obj;
+    }
+    return false;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see java.lang.Object#toString()
    */
   @Override

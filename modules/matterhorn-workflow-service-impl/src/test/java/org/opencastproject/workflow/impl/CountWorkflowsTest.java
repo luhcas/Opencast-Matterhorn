@@ -59,7 +59,7 @@ public class CountWorkflowsTest {
   private WorkflowServiceImpl service = null;
   private WorkflowDefinition def = null;
   private MediaPackage mp = null;
-  private WorkflowServiceImplDaoSolrImpl dao = null;
+  private WorkflowServiceDaoSolrImpl dao = null;
   private HoldingWorkflowOperationHandler holdingOperationHandler;
   private ServiceRegistry serviceRegistry = null;
 
@@ -96,7 +96,7 @@ public class CountWorkflowsTest {
     serviceRegistry = new MockServiceRegistry();
     service.setServiceRegistry(serviceRegistry);
 
-    dao = new WorkflowServiceImplDaoSolrImpl();
+    dao = new WorkflowServiceDaoSolrImpl();
     dao.setServiceRegistry(serviceRegistry);
     dao.solrRoot = storageRoot + File.separator + "solr";
     dao.activate();
