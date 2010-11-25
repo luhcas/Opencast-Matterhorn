@@ -17,8 +17,11 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * A fluent API for issuing WorkflowInstance queries.
+ * A fluent API for issuing WorkflowInstance queries. This object is thread unsafe.
  */
 public class WorkflowQuery {
   protected long count;
@@ -29,11 +32,15 @@ public class WorkflowQuery {
   protected String seriesId;
   protected String mediaPackageId;
 
-  protected boolean negateCurrentOperation;
-  protected String currentOperation;
+  /**
+   * The list of current operation terms that have been added to this query.
+   */
+  protected List<QueryTerm> currentOperationTerms = new ArrayList<QueryTerm>();
 
-  protected boolean negateState;
-  protected WorkflowState state;
+  /**
+   * The list of state terms that have been added to this query.
+   */
+  protected List<QueryTerm> stateTerms = new ArrayList<QueryTerm>();
 
   public WorkflowQuery() {
   }
@@ -65,8 +72,7 @@ public class WorkflowQuery {
    * @return this query
    */
   public WorkflowQuery withState(WorkflowState state) {
-    this.state = state;
-    this.negateState = false;
+    stateTerms.add(new QueryTerm(state.toString(), true));
     return this;
   }
 
@@ -79,8 +85,7 @@ public class WorkflowQuery {
    * @return this query
    */
   public WorkflowQuery withoutState(WorkflowState state) {
-    this.state = state;
-    this.negateState = true;
+    stateTerms.add(new QueryTerm(state.toString(), false));
     return this;
   }
 
@@ -111,8 +116,7 @@ public class WorkflowQuery {
    * @return this query
    */
   public WorkflowQuery withCurrentOperation(String currentOperation) {
-    this.currentOperation = currentOperation;
-    negateCurrentOperation = false;
+    currentOperationTerms.add(new QueryTerm(currentOperation, true));
     return this;
   }
 
@@ -125,8 +129,7 @@ public class WorkflowQuery {
    * @return this query
    */
   public WorkflowQuery withoutCurrentOperation(String currentOperation) {
-    this.currentOperation = currentOperation;
-    negateCurrentOperation = true;
+    currentOperationTerms.add(new QueryTerm(currentOperation, false));
     return this;
   }
 
@@ -142,20 +145,12 @@ public class WorkflowQuery {
     return text;
   }
 
-  public WorkflowState getState() {
-    return state;
-  }
-  
-  public boolean isNegateState() {
-    return negateState;
+  public List<QueryTerm> getStates() {
+    return stateTerms;
   }
 
-  public String getCurrentOperation() {
-    return currentOperation;
-  }
-  
-  public boolean isNegateCurrentOperation() {
-    return negateCurrentOperation;
+  public List<QueryTerm> getCurrentOperations() {
+    return currentOperationTerms;
   }
 
   public String getMediaPackage() {
@@ -170,4 +165,31 @@ public class WorkflowQuery {
     return seriesTitle;
   }
 
+  /**
+   * A tuple of a query value and whether this search term should be included or excluded from the search results.
+   */
+  public static class QueryTerm {
+    private String value = null;
+    private boolean include = false;
+
+    /** Constructs a new query term */
+    public QueryTerm(String value, boolean include) {
+      this.value = value;
+      this.include = include;
+    }
+
+    /**
+     * @return the value
+     */
+    public String getValue() {
+      return value;
+    }
+
+    /**
+     * @return whether this query term is to be excluded
+     */
+    public boolean isInclude() {
+      return include;
+    }
+  }
 }

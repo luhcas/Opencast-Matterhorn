@@ -45,7 +45,6 @@ import org.opencastproject.workflow.impl.WorkflowServiceImpl;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.osgi.service.component.ComponentContext;
@@ -487,9 +486,9 @@ public class WorkflowRestService {
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("instances.xml")
-  public Response getWorkflowsAsXml(@QueryParam("state") String state, @QueryParam("q") String text,
+  public Response getWorkflowsAsXml(@QueryParam("state") List<String> states, @QueryParam("q") String text,
           @QueryParam("seriesId") String seriesId, @QueryParam("seriesTitle") String seriesTitle,
-          @QueryParam("mp") String mediapackageId, @QueryParam("op") String currentOperation,
+          @QueryParam("mp") String mediapackageId, @QueryParam("op") List<String> currentOperations,
           @QueryParam("startPage") int startPage, @QueryParam("count") int count) throws Exception {
     // CHECKSTYLE:ON
     if (count < 1 || count > MAX_LIMIT) {
@@ -501,11 +500,13 @@ public class WorkflowRestService {
     WorkflowQuery q = new WorkflowQuery();
     q.withCount(count);
     q.withStartPage(startPage);
-    if (StringUtils.isNotEmpty(state)) {
-      if (state.startsWith(NEGATE_PREFIX)) {
-        q.withState(WorkflowState.valueOf(state.substring(1).toUpperCase()));
-      } else {
-        q.withState(WorkflowState.valueOf(state.toUpperCase()));
+    if (states != null && states.size() > 0) {
+      for(String state : states) {
+        if (state.startsWith(NEGATE_PREFIX)) {
+          q.withoutState(WorkflowState.valueOf(state.substring(1).toUpperCase()));
+        } else {
+          q.withState(WorkflowState.valueOf(state.toUpperCase()));
+        }
       }
     }
     if (text != null) {
@@ -520,11 +521,13 @@ public class WorkflowRestService {
     if (mediapackageId != null) {
       q.withMediaPackage(mediapackageId);
     }
-    if (currentOperation != null) {
-      if (currentOperation.startsWith(NEGATE_PREFIX)) {
-        q.withoutCurrentOperation(currentOperation.substring(1));
-      } else {
-        q.withCurrentOperation(currentOperation);
+    if (currentOperations != null && currentOperations.size() > 0) {
+      for(String op : currentOperations) {
+        if (op.startsWith(NEGATE_PREFIX)) {
+          q.withoutCurrentOperation(op.substring(1));
+        } else {
+          q.withCurrentOperation(op);
+        }
       }
     }
     WorkflowSet set = service.getWorkflowInstances(q);
@@ -535,12 +538,12 @@ public class WorkflowRestService {
   @GET
   @Produces(MediaType.APPLICATION_JSON)
   @Path("instances.json")
-  public Response getWorkflowsAsJson(@QueryParam("state") String state, @QueryParam("q") String text,
+  public Response getWorkflowsAsJson(@QueryParam("state") List<String> states, @QueryParam("q") String text,
           @QueryParam("seriesId") String seriesId, @QueryParam("seriesTitle") String seriesTitle,
-          @QueryParam("mp") String mediapackageId, @QueryParam("op") String currentOperation,
+          @QueryParam("mp") String mediapackageId, @QueryParam("op") List<String> currentOperations,
           @QueryParam("startPage") int startPage, @QueryParam("count") int count) throws Exception {
     // CHECKSTYLE:ON
-    return getWorkflowsAsXml(state, text, seriesId, seriesTitle, mediapackageId, currentOperation, startPage, count);
+    return getWorkflowsAsXml(states, text, seriesId, seriesTitle, mediapackageId, currentOperations, startPage, count);
   }
 
   @GET

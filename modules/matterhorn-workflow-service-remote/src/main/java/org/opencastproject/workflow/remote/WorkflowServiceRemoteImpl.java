@@ -24,6 +24,7 @@ import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowQuery;
+import org.opencastproject.workflow.api.WorkflowQuery.QueryTerm;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowStatistics;
@@ -115,8 +116,17 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
     if (query.getText() != null) {
       queryStringParams.add(new BasicNameValuePair("q", query.getText()));
     }
-    if (query.getState() != null) {
-      queryStringParams.add(new BasicNameValuePair("state", query.getState().toString()));
+    if (query.getStates() != null) {
+      for(QueryTerm stateQueryTerm : query.getStates()) {
+        String key = stateQueryTerm.isInclude() ? "state" : "-state";
+        queryStringParams.add(new BasicNameValuePair(key, stateQueryTerm.getValue()));
+      }
+    }
+    if (query.getCurrentOperations() != null) {
+      for(QueryTerm opQueryTerm : query.getCurrentOperations()) {
+        String key = opQueryTerm.isInclude() ? "op" : "-op";
+        queryStringParams.add(new BasicNameValuePair(key, opQueryTerm.getValue()));
+      }
     }
     if (query.getSeriesId() != null) {
       queryStringParams.add(new BasicNameValuePair("seriesId", query.getSeriesId()));
@@ -126,9 +136,6 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
     }
     if (query.getMediaPackage() != null) {
       queryStringParams.add(new BasicNameValuePair("mp", query.getMediaPackage()));
-    }
-    if (query.getCurrentOperation() != null) {
-      queryStringParams.add(new BasicNameValuePair("op", query.getCurrentOperation()));
     }
     if (query.getStartPage() > 0) {
       queryStringParams.add(new BasicNameValuePair("startPage", Long.toString(query.getStartPage())));

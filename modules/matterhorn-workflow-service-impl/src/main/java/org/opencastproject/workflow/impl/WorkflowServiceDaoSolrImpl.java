@@ -27,6 +27,7 @@ import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
+import org.opencastproject.workflow.api.WorkflowQuery.QueryTerm;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowSetImpl;
@@ -59,12 +60,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Provides data access to the workflow service through file storage in the workspace, indexed via solr.
  */
 public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
-  
+
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceDaoSolrImpl.class);
 
@@ -381,7 +384,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
    */
   @Override
   public WorkflowStatistics getStatistics() throws WorkflowDatabaseException {
-    
+
     long total = 0;
     long paused = 0;
     long failed = 0;
@@ -401,7 +404,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
       solrQuery.setFacetMinCount(0);
       solrQuery.setFacet(true);
       QueryResponse response = solrServer.query(solrQuery);
-      
+
       FacetField templateFacet = response.getFacetField(TEMPLATE_KEY);
       FacetField operationFacet = response.getFacetField(OPERATION_KEY);
 
@@ -412,7 +415,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
 
           WorkflowDefinitionReport templateReport = new WorkflowDefinitionReport();
           templateReport.setId(template.getName());
-  
+
           long templateTotal = 0;
           long templatePaused = 0;
           long templateFailed = 0;
@@ -421,14 +424,14 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
           long templateRunning = 0;
           long templateStopped = 0;
           long templateSucceeded = 0;
-  
+
           if (operationFacet != null && operationFacet.getValues() != null) {
 
             for (Count operation : operationFacet.getValues()) {
-  
+
               OperationReport operationReport = new OperationReport();
               operationReport.setId(operation.getName());
-    
+
               solrQuery = new SolrQuery("*:*");
               solrQuery.addFacetField(STATE_KEY);
               solrQuery.addFacetQuery(STATE_KEY + ":" + WorkflowState.FAILED);
@@ -442,9 +445,9 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
               solrQuery.addFilterQuery(OPERATION_KEY + ":" + operation.getName());
               solrQuery.setFacetMinCount(0);
               solrQuery.setFacet(true);
-      
+
               response = solrServer.query(solrQuery);
-    
+
               // Add the states
               FacetField stateFacet = response.getFacetField(STATE_KEY);
               for (Count stateValue : stateFacet.getValues()) {
@@ -452,50 +455,50 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
                 templateTotal += stateValue.getCount();
                 total += stateValue.getCount();
                 switch (state) {
-                  case FAILED:
-                    operationReport.setFailed(stateValue.getCount());
-                    templateFailed += stateValue.getCount();
-                    failed += stateValue.getCount();
-                    break;
-                  case FAILING:
-                    operationReport.setFailing(stateValue.getCount());
-                    templateFailing += stateValue.getCount();
-                    failing += stateValue.getCount();
-                    break;
-                  case INSTANTIATED:
-                    operationReport.setInstantiated(stateValue.getCount());
-                    templateInstantiated += stateValue.getCount();
-                    instantiated += stateValue.getCount();
-                    break;
-                  case PAUSED:
-                    operationReport.setPaused(stateValue.getCount());
-                    templatePaused += stateValue.getCount();
-                    paused += stateValue.getCount();
-                    break;
-                  case RUNNING:
-                    operationReport.setRunning(stateValue.getCount());
-                    templateRunning += stateValue.getCount();
-                    running += stateValue.getCount();
-                    break;
-                  case STOPPED:
-                    operationReport.setStopped(stateValue.getCount());
-                    templateStopped += stateValue.getCount();
-                    stopped += stateValue.getCount();
-                    break;
-                  case SUCCEEDED:
-                    operationReport.setFinished(stateValue.getCount());
-                    templateSucceeded += stateValue.getCount();
-                    succeeded += stateValue.getCount();
-                    break;
-                  default:
-                    throw new IllegalStateException("State '" + state + "' is not handled");
+                case FAILED:
+                  operationReport.setFailed(stateValue.getCount());
+                  templateFailed += stateValue.getCount();
+                  failed += stateValue.getCount();
+                  break;
+                case FAILING:
+                  operationReport.setFailing(stateValue.getCount());
+                  templateFailing += stateValue.getCount();
+                  failing += stateValue.getCount();
+                  break;
+                case INSTANTIATED:
+                  operationReport.setInstantiated(stateValue.getCount());
+                  templateInstantiated += stateValue.getCount();
+                  instantiated += stateValue.getCount();
+                  break;
+                case PAUSED:
+                  operationReport.setPaused(stateValue.getCount());
+                  templatePaused += stateValue.getCount();
+                  paused += stateValue.getCount();
+                  break;
+                case RUNNING:
+                  operationReport.setRunning(stateValue.getCount());
+                  templateRunning += stateValue.getCount();
+                  running += stateValue.getCount();
+                  break;
+                case STOPPED:
+                  operationReport.setStopped(stateValue.getCount());
+                  templateStopped += stateValue.getCount();
+                  stopped += stateValue.getCount();
+                  break;
+                case SUCCEEDED:
+                  operationReport.setFinished(stateValue.getCount());
+                  templateSucceeded += stateValue.getCount();
+                  succeeded += stateValue.getCount();
+                  break;
+                default:
+                  throw new IllegalStateException("State '" + state + "' is not handled");
                 }
               }
-              
+
               templateReport.getOperations().add(operationReport);
             }
           }
-  
+
           // Update the template statistics
           templateReport.setTotal(templateTotal);
           templateReport.setFailed(templateFailed);
@@ -505,10 +508,10 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
           templateReport.setRunning(templateRunning);
           templateReport.setStopped(templateStopped);
           templateReport.setFinished(templateSucceeded);
-          
+
           // Add the definition report to the statistics
           stats.getDefinitions().add(templateReport);
-          
+
         }
 
       }
@@ -524,7 +527,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     stats.setRunning(running);
     stats.setStopped(stopped);
     stats.setFinished(succeeded);
-    
+
     return stats;
   }
 
@@ -564,11 +567,44 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
    * @return the appended {@link StringBuilder}
    */
   private StringBuilder append(StringBuilder sb, String key, String value) {
-    return append(sb, key, value, false);
+    if (StringUtils.isBlank(key) || StringUtils.isBlank(value)) {
+      return sb;
+    }
+    if (sb.length() > 0) {
+      sb.append(" AND ");
+    }
+    sb.append(key);
+    sb.append(":");
+    sb.append(ClientUtils.escapeQueryChars(value));
+    return sb;
   }
 
   /**
-   * Appends query parameters to a solr query
+   * Builds a solr search query from a {@link WorkflowQuery}.
+   * 
+   * @param query
+   *          the workflow query
+   * @return the solr query string
+   */
+  protected String buildSolrQueryString(WorkflowQuery query) {
+    StringBuilder sb = new StringBuilder();
+    append(sb, MEDIAPACKAGE_KEY, query.getMediaPackage());
+    append(sb, SERIES_ID_KEY, query.getSeriesId());
+    append(sb, SERIES_TITLE_KEY, query.getSeriesTitle());
+    append(sb, FULLTEXT_KEY, query.getText());
+    appendMap(sb, OPERATION_KEY, query.getCurrentOperations());
+    appendMap(sb, STATE_KEY, query.getStates());
+
+    // If we're looking for anything, set the query to a wildcard search
+    if (sb.length() == 0) {
+      sb.append("*:*");
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * Appends query parameters from a {@link Map} to a solr query. The map
    * 
    * @param sb
    *          The {@link StringBuilder} containing the query
@@ -576,20 +612,37 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
    *          the key for this search parameter
    * @param value
    *          the value for this search parameter
-   * @param negate
-   *          whether this parameter should be negated in the solr query
    * @return the appended {@link StringBuilder}
    */
-  private StringBuilder append(StringBuilder sb, String key, String value, boolean negate) {
+  protected StringBuilder appendMap(StringBuilder sb, String key, List<QueryTerm> queryTerms) {
+    if (queryTerms == null || queryTerms.isEmpty()) {
+      return sb;
+    }
     if (sb.length() > 0) {
       sb.append(" AND ");
     }
-    if (negate) {
-      sb.append("-");
+    if (queryTerms.size() > 1) {
+      sb.append("(");
     }
-    sb.append(key);
-    sb.append(":");
-    sb.append(ClientUtils.escapeQueryChars(value));
+    for (int i = 0; i < queryTerms.size(); i++) {
+      QueryTerm term = queryTerms.get(i);
+      if (i > 0) {
+        if (term.isInclude()) {
+          sb.append(" OR ");
+        } else {
+          sb.append(" AND ");
+        }
+      }
+      if (!term.isInclude()) {
+        sb.append("-");
+      }
+      sb.append(key);
+      sb.append(":");
+      sb.append(ClientUtils.escapeQueryChars(term.getValue()));
+    }
+    if (queryTerms.size() > 1) {
+      sb.append(")");
+    }
     return sb;
   }
 
@@ -607,32 +660,8 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     solrQuery.setRows(count);
     solrQuery.setStart(startPage * count);
 
-    StringBuilder sb = new StringBuilder();
-    if (StringUtils.isNotBlank(query.getMediaPackage())) {
-      append(sb, MEDIAPACKAGE_KEY, query.getMediaPackage());
-    }
-    if (StringUtils.isNotBlank(query.getSeriesId())) {
-      append(sb, SERIES_ID_KEY, query.getSeriesId());
-    }
-    if (StringUtils.isNotBlank(query.getSeriesTitle())) {
-      append(sb, SERIES_TITLE_KEY, query.getSeriesTitle());
-    }
-    if (StringUtils.isNotBlank(query.getCurrentOperation())) {
-      append(sb, OPERATION_KEY, query.getCurrentOperation(), query.isNegateCurrentOperation());
-    }
-    if (query.getState() != null) {
-      append(sb, STATE_KEY, query.getState().toString(), query.isNegateState());
-    }
-    if (StringUtils.isNotBlank(query.getText())) {
-      append(sb, FULLTEXT_KEY, query.getText());
-    }
-
-    // If we're looking for anything, set the query to a wildcard search
-    if (sb.length() == 0) {
-      sb.append("*:*");
-    }
-
-    solrQuery.setQuery(sb.toString());
+    String solrQueryString = buildSolrQueryString(query);
+    solrQuery.setQuery(solrQueryString);
     long totalHits;
     long time = System.currentTimeMillis();
     WorkflowSetImpl set = null;
@@ -675,7 +704,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
       solrServer.commit();
 
       // FIXME: jobs can not be deleted.
-    
+
     } catch (SolrServerException e) {
       throw new WorkflowDatabaseException(e);
     } catch (IOException e) {

@@ -54,6 +54,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Test cases for the implementation at {@link WorkflowStatistics}.
@@ -138,6 +140,9 @@ public class WorkflowStatisticsTest {
     dao.activate();
     workflowService.setDao(dao);
     workflowService.activate(null);
+    
+    // Ensure the workflow service has an unbounded thread pool for testing
+    workflowService.executorService = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
     // Crate a media package
     InputStream is = null;
