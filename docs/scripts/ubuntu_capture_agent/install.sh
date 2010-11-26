@@ -88,9 +88,10 @@ acpid"
 
 # Packages that require the user approval to be installed (Please note the quotation mark at the end!!!)
 # There should be one package per line, but several packages may be included if they need to be treated 'as a block'
-export BAD_PKG_LIST="gstreamer0.10-plugins-bad gstreamer0.10-plugins-bad-multiverse"
+# Those lines ending with a "+" will be interpreted as required by the system. If the user choose not to install them, the installation will exit.
+export BAD_PKG_LIST="gstreamer0.10-plugins-bad gstreamer0.10-plugins-bad-multiverse +"
 # Reasons why each of the "bad" packages should be installed (one per line, in the same order as the bad packages)
-export BAD_PKG_REASON="These packages provide support for h264 and mpeg2"
+export BAD_PKG_REASON="Provide support for h264 and mpeg2 codecs, which are patent-encumbered. Temporarily required for a basic system"
 
 # This is a backup file to preserve the list of installed packages in case something fails and the script is re-launched
 # The name should start with a '.' so that it is a hidden file and it is not erased with the rest of the files when a new execution starts

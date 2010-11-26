@@ -85,16 +85,40 @@ reason=( $BAD_PKG_REASON )
 unset IFS
 
 for (( i = 0; i < ${#bad[@]}; i++ )); do
-    unset install
+    unset install required
+
+    # Check the line ends with a '+', meaning these packages are required for the system
+    if [[ "$(echo ${bad[$i]} | grep " +$")" ]]; then
+	required=true
+	# Strip out the trailing " +"
+	bad[$i]="${bad[$i]%% +}"
+    fi
+
     # Check if the packages are installed before asking the user
     for item in $(echo "${bad[$i]}" | cut -d ' ' -f 1-); do
         if [[ -z "$(dpkg -l | grep "$item")" ]]; then
-            install="$install$item "
+            install="$install $item "
         fi
     done
 
     if [[ "$install" ]]; then
-        yesno -d no -? "${reason[$i]}" -h "? for details" "Do you wish to install ${install}?" ok
+	if [[ "$required" ]]; then
+	    unset ok confirm
+	    while [[ ! "$ok" ]]; do
+		yesno -d yes -? "${reason[$i]}" -h "? for details" "Do you wish to install the required package(s): ${install}?" ok
+		if [[ ! "$ok" ]]; then
+		    echo "These packages are essential for the system to work. This script will abort if they are not installed"
+		    yesno -d no "Are you sure you DON'T want to install $install?" confirm
+		    if [[ "$confirm" ]]; then
+			echo "Aborting installation..."
+			exit 1
+		    fi
+		fi
+	    done
+	else
+            yesno -d no -? "${reason[$i]}" -h "? for details" "Do you wish to install ${install}?" ok
+	fi
+	
         if [[ "$ok" ]]; then
             pkgs[${#pkgs[@]}]="$install"
         fi
