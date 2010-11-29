@@ -527,6 +527,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     WorkflowOperationInstance operation = wfi.getCurrentOperation();
     if (operation == null)
       operation = wfi.next();
+
     WorkflowOperationHandler operationHandler = selectOperationHandler(operation);
     // If there is no handler for the operation, mark this workflow as failed
     if (operationHandler == null) {

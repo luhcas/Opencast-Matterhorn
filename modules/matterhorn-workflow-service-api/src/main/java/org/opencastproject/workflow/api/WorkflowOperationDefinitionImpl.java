@@ -45,6 +45,12 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
   @XmlAttribute(name="fail-on-error")
   protected boolean failWorkflowOnException;
 
+  @XmlAttribute(name="if")
+  protected String executeCondition;
+
+  @XmlAttribute(name="unless")
+  protected String skipCondition;
+
   @XmlAttribute(name="exception-handler-workflow")
   protected String exceptionHandlingWorkflow;
 
@@ -82,6 +88,22 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
   }
   public void setDescription(String description) {
     this.description = description;
+  }
+  
+  public void setExecutionCondition(String condition) {
+    this.executeCondition = condition;
+  }
+  
+  public String getExecutionCondition() {
+    return executeCondition;
+  }
+
+  public void setSkipCondition(String condition) {
+    this.skipCondition = condition;
+  }
+
+  public String getSkipCondition() {
+    return skipCondition;
   }
 
   /**

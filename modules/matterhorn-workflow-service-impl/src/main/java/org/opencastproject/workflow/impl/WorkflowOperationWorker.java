@@ -25,6 +25,7 @@ import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,12 +96,11 @@ final class WorkflowOperationWorker implements Runnable {
       case INSTANTIATED:
         result = start();
         break;
-      case RUNNING:
-        result = start();
-        break;
       case PAUSED:
         result = resume();
         break;
+      default:
+        throw new IllegalStateException("Workflow operation '" + operation + "' is in unexpected state '" + operation.getState() + "'");
       }
       if (result == null || Action.CONTINUE.equals(result.getAction()))
         handler.destroy(workflow);
@@ -129,6 +129,21 @@ final class WorkflowOperationWorker implements Runnable {
    */
   public WorkflowOperationResult start() throws WorkflowOperationException, WorkflowDatabaseException {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
+    
+    // Do we need to execute the operation?
+    String executeCondition = operation.getExecutionCondition();
+    String skipCondition = operation.getSkipCondition();
+
+    if (StringUtils.isNotBlank(executeCondition) && !"true".equalsIgnoreCase(executeCondition)) {
+      operation.setState(OperationState.SKIPPED);
+      service.update(workflow);
+      return null;
+    } else if (StringUtils.isNotBlank(skipCondition) && "true".equalsIgnoreCase(skipCondition)) {
+      operation.setState(OperationState.SKIPPED);
+      service.update(workflow);
+      return null;
+    }
+
     operation.setState(OperationState.RUNNING);
     service.update(workflow);
     try {

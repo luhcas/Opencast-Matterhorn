@@ -25,36 +25,41 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 @XmlJavaTypeAdapter(WorkflowOperationInstanceImpl.Adapter.class)
 public interface WorkflowOperationInstance extends Configurable {
-  public enum OperationState { INSTANTIATED, RUNNING, PAUSED, SUCCEEDED, FAILED }
+  public enum OperationState {
+    INSTANTIATED, RUNNING, PAUSED, SUCCEEDED, FAILED, SKIPPED
+  }
 
   String getId();
-  
+
   String getDescription();
 
   /**
    * The state of this operation.
    */
   OperationState getState();
-  
+
   /**
    * Sets the state of this operation
-   * @param state the state to set
+   * 
+   * @param state
+   *          the state to set
    */
   void setState(OperationState state);
-  
+
   /**
    * Gets the URL for the hold state.
+   * 
    * @return the URL of the hold state, if any, for this operation
    */
   URL getHoldStateUserInterfaceUrl();
 
-  /** Returns the title for the link to this operations hold state UI,
-   *  a default String if no title is set.
-   *
+  /**
+   * Returns the title for the link to this operations hold state UI, a default String if no title is set.
+   * 
    * @return title to be displayed
    */
   String getHoldActionTitle();
-  
+
   /** The workflow to run if an exception is thrown while this operation is running. */
   String getExceptionHandlingWorkflow();
 
@@ -63,16 +68,47 @@ public interface WorkflowOperationInstance extends Configurable {
    * when exceptions are thrown during an operation.
    */
   boolean isFailWorkflowOnException();
-  
-  /** The timestamp this operation started. If the job was queued, this can be significantly later than the date created. */
+
+  /**
+   * The timestamp this operation started. If the job was queued, this can be significantly later than the date created.
+   */
   Date getDateStarted();
 
   /** The number of milliseconds this operation waited in a service queue */
   long getTimeInQueue();
-  
+
   /** The timestamp this operation completed */
   Date getDateCompleted();
-  
+
   /** The position of this workflow operation in the workflow instance */
   int getPosition();
+
+  /**
+   * Returns either <code>null</code> or <code>true</code> to have the operation executed. Any other value is
+   * interpreted as <code>false</code> and will skip the operation.
+   * <p>
+   * Usually, this will be a variable name such as <code>${foo}</code>, which will be replaced with its acutal value
+   * once the workflow is executed.
+   * <p>
+   * If both <code>getExecuteCondition()</code> and <code>getSkipCondition</code> return a non-null value, the execute
+   * condition takes precedence.
+   * 
+   * @return the excecution condition.
+   */
+  String getExecutionCondition();
+
+  /**
+   * Returns either <code>null</code> or <code>true</code> to have the operation skipped. Any other value is interpreted
+   * as <code>false</code> and will execute the operation.
+   * <p>
+   * Usually, this will be a variable name such as <code>${foo}</code>, which will be replaced with its actual value
+   * once the workflow is executed.
+   * <p>
+   * If both <code>getExecuteCondition()</code> and <code>getSkipCondition</code> return a non-null value, the execute
+   * condition takes precedence.
+   * 
+   * @return the excecution condition.
+   */
+  String getSkipCondition();
+
 }

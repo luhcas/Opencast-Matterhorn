@@ -22,9 +22,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 @XmlJavaTypeAdapter(WorkflowOperationDefinitionImpl.Adapter.class)
 public interface WorkflowOperationDefinition extends Configurable {
-  
+
   String getId();
-  
+
   String getDescription();
 
   /** The workflow to run if an exception is thrown while this operation is running. */
@@ -35,4 +35,33 @@ public interface WorkflowOperationDefinition extends Configurable {
    * when exceptions are thrown during an operation.
    */
   boolean isFailWorkflowOnException();
+
+  /**
+   * Returns either <code>null</code> or <code>true</code> to have the operation executed. Any other value is
+   * interpreted as <code>false</code> and will skip the operation.
+   * <p>
+   * Usually, this will be a variable name such as <code>${foo}</code>, which will be replaced with its acutal value
+   * once the workflow is executed.
+   * <p>
+   * If both <code>getExecuteCondition()</code> and <code>getSkipCondition</code> return a non-null value, the execute
+   * condition takes precedence.
+   * 
+   * @return the excecution condition.
+   */
+  String getExecutionCondition();
+
+  /**
+   * Returns either <code>null</code> or <code>true</code> to have the operation skipped. Any other value is interpreted
+   * as <code>false</code> and will execute the operation.
+   * <p>
+   * Usually, this will be a variable name such as <code>${foo}</code>, which will be replaced with its actual value
+   * once the workflow is executed.
+   * <p>
+   * If both <code>getExecuteCondition()</code> and <code>getSkipCondition</code> return a non-null value, the execute
+   * condition takes precedence.
+   * 
+   * @return the excecution condition.
+   */
+  String getSkipCondition();
+
 }
