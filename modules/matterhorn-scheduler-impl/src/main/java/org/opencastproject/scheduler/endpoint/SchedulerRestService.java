@@ -34,6 +34,10 @@ import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 
+
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -294,6 +298,43 @@ public class SchedulerRestService {
         return Response.status(Status.NOT_FOUND).build();
       } catch(Exception e) {
         logger.warn("Unable to update event with id '{}': {}", eventId, e);
+        return Response.serverError().build();
+      }
+    } else {
+      return Response.status(Status.BAD_REQUEST).build();
+    }
+  }
+  
+  /**
+   * Updates a list of existing event in the database. The event-id has to be stored in the database already.
+   * 
+   * @param e
+   *          The SchedulerEvent that should be updated
+   * @param eventIdList
+   *        A JSON array of event ids.
+   * @return true if the event was found and could be updated.
+   */
+  @SuppressWarnings("unchecked")
+  @POST
+  @Path("")
+  public Response updateEvent(@FormParam("event") EventImpl event, @FormParam("idList") String idList) {
+    JSONParser parser = new JSONParser();
+    JSONArray ids = new JSONArray();
+    try{
+      ids = (JSONArray)parser.parse(idList);
+    } catch (ParseException e) { 
+    logger.warn("Unable to parse json id list: {}", e);
+      return Response.status(Status.BAD_REQUEST).build();
+    }
+    if (!ids.isEmpty() && event != null) {
+      try {
+        if (service.updateEvents(ids, event)) {
+          return Response.noContent().type("").build(); // remove content-type, no message-body.
+        } else {
+          return Response.status(Status.NOT_FOUND).build();
+        }
+      } catch (Exception e) {
+        logger.warn("Unable to update event with id '{}': {}", ids, e);
         return Response.serverError().build();
       }
     } else {
@@ -752,8 +793,8 @@ public class SchedulerRestService {
     e.setResources("vga, audio");
     e.setTitle("demo title");
     LinkedList<Metadata> metadata = new LinkedList<Metadata>();
-    metadata.add(new MetadataImpl("location", "demo location"));
-    metadata.add(new MetadataImpl("abstract", "demo abstract"));
+    metadata.add(new MetadataImpl(e, "location", "demo location"));
+    metadata.add(new MetadataImpl(e, "abstract", "demo abstract"));
     e.setMetadataList(metadata);
 
     SchedulerBuilder builder = SchedulerBuilder.getInstance();

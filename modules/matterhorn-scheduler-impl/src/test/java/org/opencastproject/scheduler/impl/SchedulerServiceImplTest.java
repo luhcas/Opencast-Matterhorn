@@ -196,8 +196,8 @@ public class SchedulerServiceImplTest {
     event.setResources("vga");
     event.setSeriesId(seriesID);
     event.setDescription("a test description");
-    event.addMetadata((Metadata) new MetadataImpl("location", "testlocation"));
-    event.addMetadata((Metadata) new MetadataImpl("channelId", "unittest"));
+    event.addMetadata((Metadata) new MetadataImpl(event, "location", "testlocation"));
+    event.addMetadata((Metadata) new MetadataImpl(event, "channelId", "unittest"));
   }
 
   @After
@@ -232,7 +232,7 @@ public class SchedulerServiceImplTest {
     Event eventModified = service.getEvent(eventLoaded.getEventId());
     logger.info("State of the loaded event {}.", eventModified);
 
-    eventModified.getMetadataList().add((Metadata) new MetadataImpl("stupid.unused.key", "no matter what"));
+    eventModified.getMetadataList().add((Metadata) new MetadataImpl(eventModified, "stupid.unused.key", "no matter what"));
     for (int i = 0; i < eventModified.getMetadataList().size(); i++) {
       if (eventModified.getMetadataList().get(i).getKey().equals("creator")
               || eventModified.getMetadataList().get(i).getKey().equals("seriesId"))

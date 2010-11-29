@@ -124,9 +124,7 @@ public class EventImpl implements Event {
   // table?
   @XmlElementWrapper(name = "additionalMetadata")
   @XmlElement(name = "metadata")
-  @OneToMany(fetch = FetchType.EAGER, targetEntity = MetadataImpl.class, cascade = CascadeType.ALL)
-  @JoinTable(name = "SCHED_EVENT_METADATA", joinColumns = { @JoinColumn(name = "EVENT_ID") },
-             inverseJoinColumns = { @JoinColumn(name = "METADATA_ID") })
+  @OneToMany(fetch = FetchType.EAGER, targetEntity = MetadataImpl.class, cascade = CascadeType.ALL, mappedBy = "event")
   protected List<MetadataImpl> additionalMetadata = new LinkedList<MetadataImpl>();
   
   public EventImpl() {}
@@ -446,20 +444,30 @@ public class EventImpl implements Event {
    * @see org.opencastproject.scheduler.api.Event#update()
    */
   public void update(Event e) {
-    this.setEventId(e.getEventId());
+    if(e.getEventId() != null){
+      this.setEventId(e.getEventId());
+    }
     this.setCreator(e.getCreator());
     this.setContributor(e.getContributor());
     this.setDescription(e.getDescription());
-    this.setDevice(e.getDevice());
-    this.setDuration(e.getDuration());
-    this.setEndDate(e.getEndDate());
+    if(e.getDevice() != null){
+      this.setDevice(e.getDevice());
+    }
+    if(e.getDuration() != null){
+      this.setDuration(e.getDuration());
+    }
+    if(e.getEndDate() != null){
+      this.setEndDate(e.getEndDate());
+    }
     this.setLanguage(e.getLanguage());
     this.setLicense(e.getLicense());
     this.setRecurrence(e.getRecurrence());
     this.setRecurrencePattern(e.getRecurrencePattern());
     this.setResources(e.getResources());
     this.setSeries(e.getSeries());
-    this.setStartDate(e.getStartDate());
+    if(e.getStartDate() != null) {
+      this.setStartDate(e.getStartDate());
+    }
     this.setSubject(e.getSubject());
     this.setTitle(e.getTitle());
     // eliminate removed keys

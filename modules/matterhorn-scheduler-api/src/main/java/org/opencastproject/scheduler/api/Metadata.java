@@ -16,17 +16,9 @@
 package org.opencastproject.scheduler.api;
 
 public interface Metadata {
+  public void setEvent(Event event);
   
-  /**
-   * @return This metadata's id.
-   */
-  public long getId();
-  
-  /**
-   * @param id
-   */
-  public void setId(long id);
-  
+  public Event getEvent();
   /**
    * @return This metadata's key
    */

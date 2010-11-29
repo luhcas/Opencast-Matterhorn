@@ -20,8 +20,10 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.IncompleteDataException;
+import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.api.SchedulerException;
 import org.opencastproject.scheduler.api.SchedulerFilter;
+import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowBuilder;
@@ -40,6 +42,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.IllegalArgumentException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -70,7 +73,7 @@ import javax.persistence.spi.PersistenceProvider;
  * An implementation of the Scheduler service based on JPA. This version knows about series too.
  * 
  */
-public class SchedulerServiceImpl implements ManagedService {
+public class SchedulerServiceImpl implements SchedulerService, ManagedService {
 
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImpl.class);
@@ -170,7 +173,7 @@ public class SchedulerServiceImpl implements ManagedService {
     }
   }
   
-  protected WorkflowDefinition getPreProcessingWorkflowDefinition() throws IllegalStateException {
+  public WorkflowDefinition getPreProcessingWorkflowDefinition() throws IllegalStateException {
     InputStream in = null;
     try {
       in = getClass().getResourceAsStream("/scheduler-workflow-definition.xml");
@@ -239,7 +242,11 @@ public class SchedulerServiceImpl implements ManagedService {
     } catch (MediaPackageException mediaPackageException) {
       throw new SchedulerException(mediaPackageException);
     }
-
+    
+    for(Metadata m : event.getMetadataList()){
+    	m.setEvent(event);
+    }
+    
     try {
       event.setEventId(workflow.getId());
       em = emf.createEntityManager();
@@ -272,7 +279,7 @@ public class SchedulerServiceImpl implements ManagedService {
    * @throws MediaPackageException
    *           if the mediapackage can not be created
    */
-  protected WorkflowInstance startWorkflowInstance(Event event) throws WorkflowDatabaseException, MediaPackageException {
+  public WorkflowInstance startWorkflowInstance(Event event) throws WorkflowDatabaseException, MediaPackageException {
     // Build a mediapackage using the event metadata
     MediaPackage mediapackage = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     mediapackage.setTitle(event.getTitle());
@@ -303,7 +310,7 @@ public class SchedulerServiceImpl implements ManagedService {
    * @throws WorkflowDatabaseException
    *           if the workflow can not be stopped
    */
-  protected void stopWorkflowInstance(Event event) throws NotFoundException {
+  public void stopWorkflowInstance(Event event) throws NotFoundException {
     try {
       workflowService.stop(event.getEventId());
     } catch (WorkflowDatabaseException e) {
@@ -554,7 +561,7 @@ public class SchedulerServiceImpl implements ManagedService {
    * @throws NotFoundException
    *           if this event hasn't previously been saved
    */
-  protected void updateEvent(Event e, boolean updateWorkflow) throws NotFoundException, SchedulerException {
+  public void updateEvent(Event e, boolean updateWorkflow) throws NotFoundException, SchedulerException {
     EntityManager em = null;
     EntityTransaction tx = null;
     Event storedEvent = getEvent(e.getEventId());
@@ -575,7 +582,7 @@ public class SchedulerServiceImpl implements ManagedService {
     }
   }
 
-  protected void updateWorkflow(Event event) throws NotFoundException, WorkflowDatabaseException, SchedulerException {
+  public void updateWorkflow(Event event) throws NotFoundException, WorkflowDatabaseException, SchedulerException {
     WorkflowInstance workflow = workflowService.getWorkflowById(event.getEventId());
     WorkflowOperationInstance scheduleOperation = workflow.getCurrentOperation();
 
@@ -606,6 +613,41 @@ public class SchedulerServiceImpl implements ManagedService {
     workflowService.update(workflow);
   }
 
+  /**
+   * Updates each event with an id in the list with the passed event.
+   * @param eventIdList
+   *        List of event ids.
+   * @param e
+   *        Event containing metadata to be updated.
+   */
+  public boolean updateEvents(List<Long> eventIdList, Event e) throws NotFoundException, SchedulerException {
+    EntityManager em = emf.createEntityManager();
+    em.getTransaction().begin();
+    try{
+      for(Long eventId : eventIdList) {
+        e.setEventId(eventId);
+        Event storedEvent = getEvent(e.getEventId());
+        logger.debug("Found stored event. {} -", storedEvent);
+        if (storedEvent == null){
+          em.getTransaction().rollback();
+          em.close();
+          return false; // nothing found to update
+        }
+        storedEvent.update(e);
+        em.merge(storedEvent);
+        em.getTransaction().commit();
+        updateWorkflow(storedEvent);
+      }
+    } catch( Exception ex) {
+      logger.warn("Unable to update events: {}", ex);
+      em.getTransaction().rollback();
+      throw new SchedulerException(ex);
+    } finally {
+      em.close();
+    }
+    return true;
+  }
+  
   /**
    * @param e
    * @return A list of events that conflict with the start, or end dates of provided event.
@@ -714,7 +756,7 @@ public class SchedulerServiceImpl implements ManagedService {
    *          The ID as provided by the capture agent
    * @return the Filter for this capture Agent.
    */
-  protected SchedulerFilter getFilterForCaptureAgent(String captureAgentID) {
+  public SchedulerFilter getFilterForCaptureAgent(String captureAgentID) {
     SchedulerFilter filter = new SchedulerFilter();
     filter.withDeviceFilter(captureAgentID).withOrder("startDate").withStart(new Date(System.currentTimeMillis()));
     return filter;

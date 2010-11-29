@@ -23,12 +23,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
+import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
 
@@ -37,13 +40,14 @@ import org.opencastproject.scheduler.endpoint.SchedulerBuilder;
 @Access(AccessType.FIELD)
 @XmlType(name="Metadata")
 public class MetadataImpl implements Metadata {
+
+  @Id
+  @ManyToOne
+  @JoinColumn(name = "EVENT_ID")
+  @XmlTransient
+  protected EventImpl event;
   
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
-  @Column(name = "METADATA_ID", length=36)
-  @XmlTransient
-  protected long id;
-  
   @Column(name="MD_KEY")
   protected String key;
   @Column(name="MD_VAL")
@@ -53,20 +57,23 @@ public class MetadataImpl implements Metadata {
     super();
   }
   
-  public MetadataImpl (String key, String value) {
-    this.key = key;
-    this.value = value;
+  public MetadataImpl (Event event, String key, String value) {
+    if(event != null) {
+      setEvent(event);
+    }
+    setKey(key);
+    setValue(value);
   }
   
-  @Override
-  @XmlAttribute
-  public long getId() {
-    return id;
+  @XmlTransient
+  public void setEvent(Event event) {
+    this.event = (EventImpl) event;
   }
-  @Override
-  public void setId(long id) {
-    this.id = id;
+  
+  public Event getEvent() {
+    return this.event;
   }
+  
   @Override
   public String getKey() {
     return key;
@@ -86,7 +93,7 @@ public class MetadataImpl implements Metadata {
   
   @Override
   public String toString () {
-    return "("+id+") "+key+":"+value;
+    return key+":"+value;
   }
   
   @Override
