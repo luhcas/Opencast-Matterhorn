@@ -56,7 +56,6 @@ public class CaptionUploadWorkflowOperationHandler extends ResumableWorkflowOper
 
   static {
     CONFIG_OPTIONS = new TreeMap<String, String>();
-    CONFIG_OPTIONS.put(REQUIRED_PROPERTY, "The configuration key that must be set to true for this operation to run.");
     CONFIG_OPTIONS.put(FLAVOR_PROPERTY, "The configuration key that identifies the required caption flavor.");
   }
 
@@ -85,8 +84,7 @@ public class CaptionUploadWorkflowOperationHandler extends ResumableWorkflowOper
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     MediaPackageElementFlavor flavor = getFlavor(workflowInstance.getCurrentOperation());
-    if ("true".equalsIgnoreCase(workflowInstance.getCurrentOperation().getConfiguration(REQUIRED_PROPERTY))
-            && !hasCaptions(workflowInstance.getMediaPackage(), flavor))
+    if (!hasCaptions(workflowInstance.getMediaPackage(), flavor))
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
     else
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);

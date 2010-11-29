@@ -100,7 +100,8 @@ final class WorkflowOperationWorker implements Runnable {
         result = resume();
         break;
       default:
-        throw new IllegalStateException("Workflow operation '" + operation + "' is in unexpected state '" + operation.getState() + "'");
+        throw new IllegalStateException("Workflow operation '" + operation + "' is in unexpected state '"
+                + operation.getState() + "'");
       }
       if (result == null || Action.CONTINUE.equals(result.getAction()))
         handler.destroy(workflow);
@@ -129,7 +130,7 @@ final class WorkflowOperationWorker implements Runnable {
    */
   public WorkflowOperationResult start() throws WorkflowOperationException, WorkflowDatabaseException {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
-    
+
     // Do we need to execute the operation?
     String executeCondition = operation.getExecutionCondition();
     String skipCondition = operation.getSkipCondition();
@@ -142,17 +143,26 @@ final class WorkflowOperationWorker implements Runnable {
       operation.setState(OperationState.SKIPPED);
       service.update(workflow);
       return null;
+    } else {
+      operation.setState(OperationState.RUNNING);
     }
 
-    operation.setState(OperationState.RUNNING);
     service.update(workflow);
     try {
-      WorkflowOperationResult result = handler.start(workflow);
+      WorkflowOperationResult result = null;
+      if (OperationState.SKIPPED.equals(operation.getState()))
+        result = handler.skip(workflow);
+      else
+        result = handler.start(workflow);
+
       if (result != null && Action.PAUSE.equals(result.getAction())) {
         operation.setState(OperationState.PAUSED);
+      } else if (result != null && Action.SKIP.equals(result.getAction())) {
+        operation.setState(OperationState.SKIPPED);
       } else {
         operation.setState(OperationState.SUCCEEDED);
       }
+
       return result;
     } catch (Exception e) {
       operation.setState(OperationState.FAILED);

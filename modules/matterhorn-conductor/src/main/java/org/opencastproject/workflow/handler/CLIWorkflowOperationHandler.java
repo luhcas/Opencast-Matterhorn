@@ -215,23 +215,34 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
   }
 
   /**
-   * Returns a list of strings broken on whitespace characters except where those
-   * whitespace characters are escaped or quoted.
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#skip(org.opencastproject.workflow.api.WorkflowInstance)
+   */
+  @Override
+  public WorkflowOperationResult skip(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.SKIP);
+  }
+
+  /**
+   * Returns a list of strings broken on whitespace characters except where those whitespace characters are escaped or
+   * quoted.
+   * 
    * @return list of individual arguments
    */
   ArrayList<String> splitParameters(String input) {
-    
+
     // this list stores the parsed input
     ArrayList<String> parsedInput = new ArrayList<String>();
-   
+
     try {
       int index = 0; // the current index in parsedInput
       parsedInput.add(index, "");
-     
+
       // Parsing by character
       for (int i = 0; i < input.length(); i++) {
         char c = input.charAt(i); // get the next char
-       
+
         // if it is whitespace we break into a new index, unless the current
         // index is actually empty (i.e., multiple spaces in a row
         if ((c == ' ' || c == '\t') && parsedInput.get(index).length() > 0) {
@@ -239,7 +250,7 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
           parsedInput.add(index, "");
           continue;
         }
-       
+
         // if the character is a double or single quote, and not the escape char
         // we append the character to the string located at the current index
         // in parsedInput
@@ -273,8 +284,7 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
                 parsedInput.add(index, token);
               }
             } while (c != '"');
-          }
-          else if (c == '\'') {
+          } else if (c == '\'') {
             if (parsedInput.get(index).length() > 0) {
               index++;
               parsedInput.add(index, "");
@@ -294,7 +304,7 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
     } catch (Exception e) {
       e.printStackTrace();
     }
-   
+
     return parsedInput;
   }
 
@@ -351,7 +361,7 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
 
       XPath xpath = XPathFactory.newInstance().newXPath();
 
-//      SimpleNamespaceContext namespace = new SimpleNamespaceContext();
+      // SimpleNamespaceContext namespace = new SimpleNamespaceContext();
       // xpath.setNamespaceContext( new MediaPackageNamespace() );
       // InputSource inputSource = new InputSource( new StringReader(mp.toXml( )) );
       NodeList nodes = (NodeList) xpath.evaluate(xpathExpression, xmldoc, XPathConstants.NODESET);

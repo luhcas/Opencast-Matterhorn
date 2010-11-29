@@ -73,8 +73,6 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
     CONFIG_OPTIONS.put(TARGET_FLAVOR_SUBTYPE_PROPERTY,
             "The flavor subtype of the target track.  If this is set to \"trimmed\", "
                     + "a source track of \"presenter/work\" would become \"presenter/trimmed\"");
-    CONFIG_OPTIONS.put(REQUIRED_PROPERTY, "The configuration key that must be set to true for "
-            + "this operation to run.");
   }
 
   /**
@@ -101,31 +99,36 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
    */
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    if (!"true".equalsIgnoreCase(workflowInstance.getCurrentOperation().getConfiguration(REQUIRED_PROPERTY))) {
-      // If we do not hold for trim, we still need to put tracks in the mediapackage with the right flavor
-      MediaPackage mediaPackage = workflowInstance.getMediaPackage();
-      WorkflowOperationInstance currentOperation = workflowInstance.getCurrentOperation();
-      String configuredSourceFlavor = currentOperation.getConfiguration(SOURCE_FLAVOR_PROPERTY);
-      String configuredTargetFlavorSubtype = currentOperation.getConfiguration(TARGET_FLAVOR_SUBTYPE_PROPERTY);
-      MediaPackageElementFlavor matchingFlavor = MediaPackageElementFlavor.parseFlavor(configuredSourceFlavor);
-      for (Track t : workflowInstance.getMediaPackage().getTracks()) {
-        MediaPackageElementFlavor trackFlavor = t.getFlavor();
-        if (trackFlavor != null && trackFlavor.matches(matchingFlavor)) {
-          Track clonedTrack = (Track) t.clone();
-          clonedTrack.setIdentifier(null);
-          clonedTrack.setURI(t.getURI()); // use the same URI as the original
-          clonedTrack.setFlavor(new MediaPackageElementFlavor(trackFlavor.getType(), configuredTargetFlavorSubtype));
-          mediaPackage.addDerived(clonedTrack, t);
-        }
-      }
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
-    }
-
     logger.info("Holding for review / trim...");
 
     return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
   }
 
+  /**
+   * {@inheritDoc}
+   * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#skip(org.opencastproject.workflow.api.WorkflowInstance)
+   */
+  @Override
+  public WorkflowOperationResult skip(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    // If we do not hold for trim, we still need to put tracks in the mediapackage with the right flavor
+    MediaPackage mediaPackage = workflowInstance.getMediaPackage();
+    WorkflowOperationInstance currentOperation = workflowInstance.getCurrentOperation();
+    String configuredSourceFlavor = currentOperation.getConfiguration(SOURCE_FLAVOR_PROPERTY);
+    String configuredTargetFlavorSubtype = currentOperation.getConfiguration(TARGET_FLAVOR_SUBTYPE_PROPERTY);
+    MediaPackageElementFlavor matchingFlavor = MediaPackageElementFlavor.parseFlavor(configuredSourceFlavor);
+    for (Track t : workflowInstance.getMediaPackage().getTracks()) {
+      MediaPackageElementFlavor trackFlavor = t.getFlavor();
+      if (trackFlavor != null && trackFlavor.matches(matchingFlavor)) {
+        Track clonedTrack = (Track) t.clone();
+        clonedTrack.setIdentifier(null);
+        clonedTrack.setURI(t.getURI()); // use the same URI as the original
+        clonedTrack.setFlavor(new MediaPackageElementFlavor(trackFlavor.getType(), configuredTargetFlavorSubtype));
+        mediaPackage.addDerived(clonedTrack, t);
+      }
+    }
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.SKIP);
+  }
+  
   /**
    * {@inheritDoc}
    * 

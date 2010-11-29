@@ -122,6 +122,7 @@
 
     <operation
       id="compose"
+      if="${trimHold}"
       fail-on-error="true"
       exception-handler-workflow="error"
       description="Encoding presenter (camera) video for preview">
@@ -131,8 +132,10 @@
         <configuration key="encoding-profile">flash-preview.http</configuration>
       </configurations>
     </operation>
+
     <operation
       id="compose"
+      if="${trimHold}"
       fail-on-error="true"
       exception-handler-workflow="error"
       description="Encoding presentation (screen) for preview">
@@ -178,6 +181,7 @@
    
     <operation
       id="trim"
+      if="${trimHold}"
       fail-on-error="true"
       exception-handler-workflow="error"
       description="Waiting for user to review / trim recording">
@@ -185,7 +189,6 @@
         <configuration key="source-flavor">*/work</configuration>
         <configuration key="target-flavor-subtype">trimmed</configuration>
         <configuration key="encoding-profile">trim.work</configuration>
-        <configuration key="required-property">${trimHold}</configuration>
       </configurations>
     </operation>  
 
@@ -193,12 +196,12 @@
  
     <operation
       id="caption"
+      if="${captionHold}"
       fail-on-error="true"
       exception-handler-workflow="error"
       description="Waiting for user to upload captions">
       <configurations>
         <configuration key="caption-flavor">caption/dfxp</configuration>
-        <configuration key="required-property">${captionHold}</configuration>
       </configurations>
     </operation>
 

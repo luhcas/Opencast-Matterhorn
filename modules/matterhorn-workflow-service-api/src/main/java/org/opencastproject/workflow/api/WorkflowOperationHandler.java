@@ -21,15 +21,17 @@ import java.util.SortedMap;
  * Handler for workflow operations.
  */
 public interface WorkflowOperationHandler {
-  
+
   /**
    * The identifier used to map a workflow operation to its handler
+   * 
    * @return This handler's identifier
    */
   String getId();
-  
+
   /**
    * Returns a description of what this handler does.
+   * 
    * @return The handler's description
    */
   String getDescription();
@@ -40,25 +42,44 @@ public interface WorkflowOperationHandler {
    * @return The configuration keys and their meaning
    */
   SortedMap<String, String> getConfigurationOptions();
-  
+
   /**
-   * Runs the workflow operation on this {@link WorkflowInstance}.  If the execution fails for some reason, this must
-   * throw a {@link WorkflowOperationException} in order to handle the problem gracefully.  Runtime exceptions will
-   * cause the entire workflow instance to fail.
+   * Runs the workflow operation on this {@link WorkflowInstance}. If the execution fails for some reason, this must
+   * throw a {@link WorkflowOperationException} in order to handle the problem gracefully. Runtime exceptions will cause
+   * the entire workflow instance to fail.
    * 
-   * @param workflowInstance the workflow instance
-   * @return the {@link WorkflowOperationResult} containing a potentially modified MediaPackage and whether to
-   * put the workflow instance into a wait state.
+   * @param workflowInstance
+   *          the workflow instance
+   * @return the {@link WorkflowOperationResult} containing a potentially modified MediaPackage and whether to put the
+   *         workflow instance into a wait state.
    * 
-   * @throws WorkflowOperationException If the workflow operation fails to execute properly, and the default error
-   * handling should be invoked.
+   * @throws WorkflowOperationException
+   *           If the workflow operation fails to execute properly, and the default error handling should be invoked.
    */
-  WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException;  
-  
+  WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException;
+
+  /**
+   * Skips the workflow operation on this {@link WorkflowInstance}. If the execution fails for some reason, this must
+   * throw a {@link WorkflowOperationException} in order to handle the problem gracefully. Runtime exceptions will cause
+   * the entire workflow instance to fail.
+   * 
+   * @param workflowInstance
+   *          the workflow instance
+   * @return the {@link WorkflowOperationResult} containing a potentially modified MediaPackage and whether to put the
+   *         workflow instance into a wait state.
+   * 
+   * @throws WorkflowOperationException
+   *           If the workflow operation fails to execute properly, and the default error handling should be invoked.
+   */
+  WorkflowOperationResult skip(WorkflowInstance workflowInstance) throws WorkflowOperationException;
+
   /**
    * Clean up after a workflow operation finishes
-   * @param workflowInstance The workflow instance
-   * @throws WorkflowOperationException If the workflow operation fails to clean up properly.
+   * 
+   * @param workflowInstance
+   *          The workflow instance
+   * @throws WorkflowOperationException
+   *           If the workflow operation fails to clean up properly.
    */
   void destroy(WorkflowInstance workflowInstance) throws WorkflowOperationException;
 }

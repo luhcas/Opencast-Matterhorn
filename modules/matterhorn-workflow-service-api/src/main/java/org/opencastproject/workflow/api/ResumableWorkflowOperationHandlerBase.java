@@ -51,10 +51,7 @@ public class ResumableWorkflowOperationHandlerBase extends AbstractWorkflowOpera
   /** Title of this hold state */
   protected String holdActionTitle = null;
 
-  private static final String DEFAULT_TITLE = "Action"; // TODO maybe there's a better default action title?
-
-  /** Name of the configuration option that determines whether this operation is run at all */
-  protected static final String REQUIRED_PROPERTY = "required-property";
+  private static final String DEFAULT_TITLE = "Action";
 
   /**
    * {@inheritDoc}

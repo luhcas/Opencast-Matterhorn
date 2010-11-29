@@ -65,6 +65,16 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
   /**
    * {@inheritDoc}
    * 
+   * @see org.opencastproject.workflow.api.WorkflowOperationHandler#skip(org.opencastproject.workflow.api.WorkflowInstance)
+   */
+  @Override
+  public WorkflowOperationResult skip(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.SKIP);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#destroy(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override

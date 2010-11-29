@@ -23,7 +23,7 @@ import java.util.Map;
  * The result of a workflow operation.
  */
 public interface WorkflowOperationResult {
-  public enum Action { CONTINUE, PAUSE }
+  public enum Action { CONTINUE, PAUSE, SKIP }
 
   /**
    * @return The media package that results from the execution of a workflow operation.
