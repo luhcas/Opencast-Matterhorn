@@ -228,6 +228,7 @@ ocRecordings.displayRecordings = function(state) {
   var recordingsUrl = '';
   if(state == 'bulkaction'){
     recordingsUrl = 'rest/recordings/upcoming.json';
+    window.clearInterval(ocRecordings.tableInterval);
   } else {
     recordingsUrl = 'rest/recordings/' + state + '.json';
   }
@@ -235,9 +236,12 @@ ocRecordings.displayRecordings = function(state) {
   if((state === 'upcoming' || state === 'bulkaction') && ocRecordings.filter !== '' && ocRecordings.filterField !== '') {
     recordingsUrl += '&filter=' + ocRecordings.filter + '&' + ocRecordings.filterField + '=true';
   }
-  if(ocRecordings.tableTemplate == null) {
+  if(ocRecordings.tableTemplate == null || ocRecordings.currentState != state) {
     ocUtils.getTemplate(state, function(template) {
       ocRecordings.tableTemplate = template;
+      if(state != 'bulkaction'){
+        ocRecordings.initTableRefresh($('#refreshInterval').val());
+      }
       ocRecordings.displayRecordings(state);
     });
     ocRecordings.currentState = state;
@@ -416,20 +420,128 @@ ocRecordings.resetBulkActionPanel = function() {
   $('#bulkActionPanel').hide();
   $('#bulkActionSelect').val('select');
   $('#bulkActionSelect').change();
+  ocRecordings.bulkEditComponents = [];
 }
 
 ocRecordings.bulkActionHandler = function(action) {
-  if(action === 'edit'){
-    $('#bulkEditPanel').show();
-    $('#bulkDeletePanel').hide();
-    $('#cancelBulkAction').hide();
-  } else if (action === 'delete') {
-    $('#bulkEditPanel').hide();
-    $('#bulkDeletePanel').show();
-    $('#cancelBulkAction').hide();
-  } else if (action === 'select') {
+  if (action === 'select') {
     $('#bulkEditPanel').hide();
     $('#bulkDeletePanel').hide();
     $('#cancelBulkAction').show();
+  } else {
+    if(action === 'edit'){
+      $('#bulkEditPanel').show();
+      $('#bulkDeletePanel').hide();
+      $('#cancelBulkAction').hide();
+      ocRecordings.registerBulkEditComponents();
+    } else if (action === 'delete') {
+      $('#bulkEditPanel').hide();
+      $('#bulkDeletePanel').show();
+      $('#cancelBulkAction').hide();
+    }
   }
+}
+
+ocRecordings.selectAll = function(checked) {
+  if(ocRecordings.currentState != 'bulkaction'){
+    return;
+  }
+  if(checked){
+    $.each($('.selectRecording'), function(i,v){
+      v.checked = true;
+    });
+  } else {
+    $.each($('.selectRecording'), function(i,v){
+      v.checked = false;
+    });
+  }
+}
+
+ocRecordings.applyBulkEdit = function() {
+  var manager = new ocAdmin.Manager('event', '', ocRecordings.bulkEditComponents);
+  var event = manager.serialize();
+  var eventIdList = [];
+  $.each($('.selectRecording'), function(i,v){
+    eventIdList.push(v.value);
+  });
+  $.post('/scheduler/rest/', 
+    {event: event, eventList: '[' + eventIdList.toString() + ']'},
+    ocRecordings.bulkEditComplete);
+}
+
+ocRecordings.bulkEditComplete = function() {
+  ocRecordings.cancelBulkAction();
+}
+
+ocRecordings.registerBulkEditComponents = function() {
+  ocRecordings.bulkEditComponents.title = new ocAdmin.Component(['title'], {label: 'titleLabel'});
+  ocRecordings.bulkEditComponents.creator = new ocAdmin.Component(['creator'], {label: 'creatorLabel'});
+  ocRecordings.bulkEditComponents.contributor = new ocAdmin.Component(['contributor'], {label: 'contributorLabel'});
+  ocRecordings.bulkEditComponents.seriesId = new ocAdmin.Component(['series', 'seriesSelect'],
+    { label: 'seriesLabel', errorField: 'missingSeries', nodeKey: ['seriesId', 'series']},
+    { getValue: function(){ 
+        if(this.fields.series){
+          this.value = this.fields.series.val();
+        }
+        return this.value;
+      },
+      setValue: function(value){
+        this.fields.series.val(value.id);
+        this.fields.seriesSelect.val(value.label)
+      },
+      asString: function(){
+        if(this.fields.seriesSelect){
+          return this.fields.seriesSelect.val();
+        }
+        return this.getValue() + '';
+      },
+      validate: function(){
+        if(this.fields.seriesSelect.val() !== '' && this.fields.series.val() === ''){ //have text and no idea
+          return this.createSeriesFromSearchText();
+        }
+        return true; //nothing, or we have an id.
+      },
+      toNode: function(parent){
+        if(parent){
+          doc = parent.ownerDocument;
+        }else{
+          doc = document;
+        }
+        if(this.getValue() != "" && this.asString() != ""){ //only add series if we have both id and name.
+          seriesId = doc.createElement(this.nodeKey[0]);
+          seriesId.appendChild(doc.createTextNode(this.getValue()));
+          seriesName = doc.createElement(this.nodeKey[1]);
+          seriesName.appendChild(doc.createTextNode(this.asString()));
+          if(parent && parent.nodeType){
+            parent.appendChild(seriesId);
+            parent.appendChild(seriesName);
+          }else{
+            ocUtils.log('Unable to append node to document. ', parent, seriesId, seriesName);
+          }
+        }
+      },
+      createSeriesFromSearchText: function(){
+        var series, seriesComponent, seriesId;
+        var creationSucceeded = false;
+        if(this.fields.seriesSelect !== ''){
+          series = '<series><metadataList><metadata><key>title</key><value>' + this.fields.seriesSelect.val() + '</value></metadata></metadataList></series>';
+          seriesComponent = this;
+          $.ajax({
+            async: false,
+            type: 'PUT',
+            url: SERIES_URL + '/',
+            data: { series: series },
+            dataType: 'json',
+            success: function(data){
+              creationSucceeded = true;
+              seriesComponent.fields.series.val(data.series['@id']);
+            }
+          });
+        }
+        return creationSucceeded;
+      }
+    });
+  ocRecordings.bulkEditComponents.subject = new ocAdmin.Component(['subject'], {label: 'subjectLabel'});
+  ocRecordings.bulkEditComponents.language = new ocAdmin.Component(['language'], {label: 'languageLabel'});
+  ocRecordings.bulkEditComponents.description = new ocAdmin.Component(['description'], {label: 'descriptionLabel'});
 }

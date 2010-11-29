@@ -16,6 +16,7 @@
     <script type="text/javascript" src="jquery/plugins/jquery.tablesorter.min.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
     <script type="text/javascript" src="js/version.js"></script>
+    <script type="text/javascript" src="js/oc.admin.js"></script>
     <script type="text/javascript" src="js/oc.pager.js"></script>
     <script type="text/javascript" src="js/oc.utils.js"></script>
     <script type="text/javascript" src="js/oc.recordings.js"></script>
@@ -137,15 +138,9 @@
               <form action="">
                 <ul class="oc-ui-form-list">
                   <li>
-                    <label class="scheduler-label" for="title" id="titleLabel"><span class="scheduler-required-text">* </span><span id="i18n_title_label">Title</span>:</label>
+                    <label for="title" id="titleLabel"><span id="i18n_title_label">Title</span>:</label>
                     <input type="text" id="title" name="title" class="oc-ui-form-field" />
                     <span class="ui-icon ui-icon-help" id="help_title" title="Click for help"></span>
-                  </li>
-                  <li id="titleNote" class="ui-helper-hidden">
-                    <label class="scheduler-label">&nbsp;</label>
-                    <span class="scheduler-instruction-text">
-                      Titles of individual recordings will be appended by sequential numbers starting with 1
-                    </span>
                   </li>
                   <li id="seriesContainer">
                     <label for="seriesSelect" id="seriesLabel"><span id="i18n_series_label">Series</span>:</label>
@@ -197,6 +192,9 @@
           </div>
           <div class="ui-widget ui-widget-content ui-corner-all layout-centered">
             <ul class="oc-ui-form-list">
+              <li>
+                Changes will be made in <span id="numChangedFields">0</span> field(s) for all <span id="numSelectedRecordings">0</span> selected recoding(s).
+              </li>
               <li>
                 <label>&nbsp;</label>
                 <button type="button" class="recordings-cancel-bulk-action">

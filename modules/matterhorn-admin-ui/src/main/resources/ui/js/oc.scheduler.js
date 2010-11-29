@@ -615,7 +615,7 @@ ocScheduler.RegisterComponents = function(){
             dataType: 'json',
             success: function(data){
               creationSucceeded = true;
-              seriesComponent.fields.series.val(data.series.@id);
+              seriesComponent.fields.series.val(data.series['@id']);
             }
           });
         }

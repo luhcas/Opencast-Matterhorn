@@ -75,7 +75,7 @@ ocSeries.Internationalize = function(){
 }
 
 ocSeries.loadSeries = function(data) {
-  $("#id").val(data.series.@id);
+  $("#id").val(data.series['@id']);
   ocSeries.components['description'].setValue(data.series.description);
   for(m in data.series.additionalMetadata.metadata){
     var metadata = data.series.additionalMetadata.metadata[m];
