@@ -33,6 +33,8 @@ public interface GStreamerElements {
   String V4LSRC = "v4lsrc";
   String VIDEORATE = "videorate";
   String VIDEOTESTSRC = "videotestsrc";
+  String APPSRC = "appsrc";
+  String APPSINK = "appsink";
   // Available only in Linux
   String ALSASRC = "alsasrc";
   String XVIMAGESINK = "xvimagesink";
@@ -59,4 +61,5 @@ public interface GStreamerElements {
   
   /** Source Module: gst-ffmpeg **/
   String FFENC_MPEG2VIDEO= "ffenc_mpeg2video";
+  String FFVIDEOSCALE = "ffvideoscale";
 }

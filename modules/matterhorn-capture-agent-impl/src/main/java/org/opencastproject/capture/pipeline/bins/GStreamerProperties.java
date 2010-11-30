@@ -53,4 +53,13 @@ public interface GStreamerProperties {
  String PATTERN = "pattern";
  String WIDTH = "width";
  String HEIGHT = "height";
+
+
+ /** Other Properties **/
+ String DO_TIMESTAP = "do-timestamp";
+ String BLOCK = "block";
+ String SINGLE_SEGMENT = "single-segment";
+ String EMIT_SIGNALS = "emit-signals";
+ String DROP = "drop";
+ String MAX_BUFFERS = "max-buffers";
 }
