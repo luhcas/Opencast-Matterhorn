@@ -15,21 +15,11 @@
  */
 package org.opencastproject.scheduler.api;
 
-import java.text.ParseException;
-
 import java.util.List;
-import java.util.Map;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.spi.PersistenceProvider;
-
-import org.opencastproject.mediapackage.MediaPackageException;
-import org.opencastproject.scheduler.api.IncompleteDataException;
 import org.opencastproject.scheduler.api.SchedulerException;
 import org.opencastproject.util.NotFoundException;
-import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
-import org.opencastproject.workflow.api.WorkflowInstance;
 
 public interface SchedulerService{
 
@@ -53,13 +43,6 @@ public interface SchedulerService{
   
   public WorkflowDefinition getPreProcessingWorkflowDefinition() throws IllegalStateException;
   
-  public Map<String, Object> getPersistenceProperties();
-
-  public void setPersistenceProperties(Map<String, Object> persistenceProperties);
-
-  public void setPersistenceProvider(PersistenceProvider persistenceProvider);
-
-  public PersistenceProvider getPersistenceProvider();
 
   /**
    * Persist an event
@@ -70,31 +53,6 @@ public interface SchedulerService{
    * @return The event that has been persisted
    */
   public Event addEvent(Event event) throws SchedulerException;
-
-  /**
-   * Starts a workflow to track this scheduled event.
-   * 
-   * @param event
-   *          the scheduled event
-   * @return the workflow instance
-   * @throws WorkflowDatabaseException
-   *           if the workflow can not be created
-   * @throws MediaPackageException
-   *           if the mediapackage can not be created
-   */
-  public WorkflowInstance startWorkflowInstance(Event event) throws WorkflowDatabaseException, MediaPackageException;
-
-  /**
-   * Removes the workflow associated with a scheduled event that is being removed.
-   * 
-   * @param event
-   *          the scheduled event
-   * @throws NotFoundException
-   *           if the workflow associated with this scheduled event can not be found
-   * @throws WorkflowDatabaseException
-   *           if the workflow can not be stopped
-   */
-  public void stopWorkflowInstance(Event event) throws NotFoundException;
 
   /**
    * Persist a recurring event
@@ -143,9 +101,10 @@ public interface SchedulerService{
   public List<Event> getUpcomingEvents(List<Event> list);
 
   /**
-   * {@inheritDoc}
-   * 
-   * @see org.opencastproject.scheduler.impl.SchedulerServiceImpl#removeEvent(java.lang.String)
+   * @param Long
+   *        the eventId of the event to be removed.
+   * @throws NotFoundException
+   *        If the eventId cannot be found.
    */
   public void removeEvent(Long eventID) throws NotFoundException;
 
@@ -175,8 +134,6 @@ public interface SchedulerService{
    */
   public void updateEvent(Event e, boolean updateWorkflow) throws NotFoundException, SchedulerException;
 
-  public void updateWorkflow(Event event) throws NotFoundException, WorkflowDatabaseException, SchedulerException;
-
   /**
    * Updates each event with an id in the list with the passed event.
    * @param eventIdList
@@ -191,11 +148,30 @@ public interface SchedulerService{
    * @return A list of events that conflict with the start, or end dates of provided event.
    */
   public List<Event> findConflictingEvents(Event e);
+  
+  /**
+   * 
+   * @param captureAgentID
+   *        The name of the capture agent
+   * @return An iCalendar containing all of the events for the specified capture agent.
+   */
 
   public String getCalendarForCaptureAgent(String captureAgentID);
 
+  /**
+   * 
+   * @param eventID
+   * @return The DublinCore metadata document of an event
+   * @throws NotFoundException
+   */
   public String getDublinCoreMetadata(Long eventID) throws NotFoundException;
 
+  /**
+   * 
+   * @param eventID
+   * @return
+   * @throws NotFoundException
+   */
   public String getCaptureAgentMetadata(Long eventID) throws NotFoundException;
 
   /**
