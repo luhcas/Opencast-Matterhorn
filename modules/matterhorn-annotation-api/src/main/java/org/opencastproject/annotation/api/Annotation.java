@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.usertracking.api;
+package org.opencastproject.annotation.api;
 
 import java.util.Date;
 
@@ -24,9 +24,9 @@ import java.util.Date;
  */
 public interface Annotation {
 
-  int getAnnotationId();
+  Long getAnnotationId();
 
-  void setAnnotationId(int annotationId);
+  void setAnnotationId(Long annotationId);
 
   String getMediapackageId();
 
@@ -50,9 +50,9 @@ public interface Annotation {
   
   int getLength();
 
-  String getKey();
+  String getType();
 
-  void setKey(String key);
+  void setType(String type);
 
   String getValue();
 

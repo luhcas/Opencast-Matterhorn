@@ -15,18 +15,43 @@
  */
 package org.opencastproject.usertracking.api;
 
+import java.util.Date;
+
+
 /**
- * A List of {@link Annotation}s
- * 
+ * A class that represents a user action.  The type of action (e.g. play_media) is defined by {@link #getType()}.
  */
-public interface AnnotationList {
+public interface UserAction {
+
+  Long getId();
+
+  void setId(Long id);
+
+  String getMediapackageId();
+
+  void setMediapackageId(String mediapackageId);
+
+  String getUserId();
+
+  void setUserId(String userId);
+
+  String getSessionId();
+
+  void setSessionId(String sessionId);
+
+  int getInpoint();
+
+  void setInpoint(int inpoint);
+
+  int getOutpoint();
+
+  void setOutpoint(int outpoint);
   
-  void setTotal(int total);
-  
-  void setLimit(int limit);
-  
-  void setOffset(int offset);
-  
-  void add(Annotation annotation);
-  
+  int getLength();
+
+  String getType();
+
+  void setType(String type);
+
+  Date getCreated();
 }

@@ -138,6 +138,8 @@
         <module>modules/matterhorn-engage-ui</module>
         <module>modules/matterhorn-usertracking-service-api</module>
         <module>modules/matterhorn-usertracking-service-impl</module>
+        <module>modules/matterhorn-annotation-api</module>
+        <module>modules/matterhorn-annotation-impl</module>
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-metadata-api</module>
         <module>modules/matterhorn-mpeg7</module>

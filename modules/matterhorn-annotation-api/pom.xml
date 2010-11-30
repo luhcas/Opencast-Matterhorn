@@ -1,9 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>matterhorn-usertracking-api</artifactId>
-  <name>matterhorn-usertracking-api</name>
+  <groupId>org.opencastproject</groupId>
+  <artifactId>matterhorn-annotation-api</artifactId>
   <packaging>bundle</packaging>
+  <name>matterhorn-annotation-api</name>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -14,7 +15,7 @@
     <matterhorn.basedir>${project.basedir}/../..</matterhorn.basedir>
     <checkstyle.skip>false</checkstyle.skip>
   </properties>
-  <dependencies>
+    <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
       <artifactId>matterhorn-kernel</artifactId>
@@ -31,7 +32,9 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.usertracking.api;version=${project.version} </Export-Package>
+            <Export-Package>
+              org.opencastproject.annotation.api;version=${project.version}
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

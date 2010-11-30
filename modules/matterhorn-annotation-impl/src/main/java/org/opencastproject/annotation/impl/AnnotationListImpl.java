@@ -13,7 +13,10 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.usertracking.endpoint;
+package org.opencastproject.annotation.impl;
+
+import org.opencastproject.annotation.api.Annotation;
+import org.opencastproject.annotation.api.AnnotationList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,14 +28,11 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.opencastproject.usertracking.api.Annotation;
-import org.opencastproject.usertracking.api.AnnotationList;
-
 /**
  * A {@link List} of {@link AnnotationList}s
  */
-@XmlType(name = "annotations", namespace = "http://usertracking.opencastproject.org/")
-@XmlRootElement(name = "annotations", namespace = "http://usertracking.opencastproject.org/")
+@XmlType(name = "annotations", namespace = "http://annotation.opencastproject.org/")
+@XmlRootElement(name = "annotations", namespace = "http://annotation.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class AnnotationListImpl implements AnnotationList {
 
@@ -69,5 +69,25 @@ public class AnnotationListImpl implements AnnotationList {
 
   public void setOffset(int offset) {
     this.offset = offset;
+  }
+
+  @Override
+  public int getTotal() {
+    return total;
+  }
+
+  @Override
+  public int getLimit() {
+    return limit;
+  }
+
+  @Override
+  public int getOffset() {
+    return offset;
+  }
+
+  @Override
+  public List<Annotation> getAnnotations() {
+    return new ArrayList<Annotation>(annotations);
   }
 }

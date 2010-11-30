@@ -23,7 +23,7 @@ Opencast.Annotation_Chapter = (function(){
      * @description Show Annotation_Chapter
      */
     function showAnnotation_Chapter(){
-		//$.getJSON('../../usertracking/rest/annotations.json?key=chapter', function(data) {
+		//$.getJSON('../../annotation/rest/annotations.json?type=chapter', function(data) {
         /*
          * Load some testing demodata
          */

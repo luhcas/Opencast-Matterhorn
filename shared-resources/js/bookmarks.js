@@ -131,10 +131,10 @@ Opencast.Bookmarks = ( function() {
     
     
     $.ajax({
-      type: 'GET',
+      type: 'PUT',
       contentType: 'text/xml',
-      url: "../../usertracking/rest/add",
-      data: "id=" + mediaPackageId + "&session=" + sessionId + "&in=" + curPosition + "&out=" + curPosition + "&key=BOOKMARK&value=" + value,
+      url: "../../annotation/rest/",
+      data: "id=" + mediaPackageId + "&session=" + sessionId + "&in=" + curPosition + "&out=" + curPosition + "&type=BOOKMARK&value=" + value,
       dataType: 'xml',
       success: function (xml){
         // The BOOKMARK has been saved

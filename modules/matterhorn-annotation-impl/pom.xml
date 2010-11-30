@@ -1,9 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>matterhorn-usertracking-impl</artifactId>
-  <name>matterhorn-usertracking-impl</name>
+  <groupId>org.opencastproject</groupId>
+  <artifactId>matterhorn-annotation-impl</artifactId>
   <packaging>bundle</packaging>
+  <name>matterhorn-annotation-impl</name>
   <parent>
     <groupId>org.opencastproject</groupId>
     <artifactId>base</artifactId>
@@ -17,12 +18,7 @@
   <dependencies>
     <dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-usertracking-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-search-service-api</artifactId>
+      <artifactId>matterhorn-annotation-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -31,8 +27,8 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -43,8 +39,20 @@
       <artifactId>org.osgi.compendium</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.servicemix.specs</groupId>
+      <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>javax.ws.rs</groupId>
+      <artifactId>jsr311-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>javax.persistence</artifactId>
     </dependency>
 
     <!-- Testing -->
@@ -94,7 +102,6 @@
       <artifactId>org.eclipse.persistence.antlr</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
   <build>
     <plugins>
@@ -106,25 +113,17 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Export-Package> org.opencastproject.usertracking.*;version=${project.version} </Export-Package>
             <Import-Package>
-              org.opencastproject.http;version=${project.version},
-              org.opencastproject.metadata.dublincore;version=${project.version},
+              org.opencastproject.annotation.api;version=${project.version},
               *;resolution:=optional
-      			</Import-Package>
-            <Private-Package>
-              net.fortuna.ical4j.*
-            </Private-Package>
-            <Embed-Dependency>
-              ical4j;inline=true
-            </Embed-Dependency>
-            <Service-Component>
-              OSGI-INF/usertracking-service.xml,
-              OSGI-INF/usertracking-service-rest.xml
-            </Service-Component>
+            </Import-Package>
             <JPA-PersistenceUnits>
-              org.opencastproject.usertracking
+              org.opencastproject.annotation
             </JPA-PersistenceUnits>
+            <Service-Component>
+              OSGI-INF/annotation-service.xml,
+              OSGI-INF/annotation-service-rest.xml
+            </Service-Component>
           </instructions>
         </configuration>
       </plugin>

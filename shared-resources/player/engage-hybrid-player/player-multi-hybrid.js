@@ -1525,9 +1525,8 @@ Opencast.Player = (function () {
         $.ajax(
         {
             type: 'GET',
-            contentType: 'text/xml',
-            url: "../../usertracking/rest/add",
-            data: "id=" + mediaPackageId + "&in=" + inPosition + "&out=" + outPosition + "&key=FOOTPRINT",
+            url: "../../usertracking/rest/?_method=PUT",
+            data: "id=" + mediaPackageId + "&in=" + inPosition + "&out=" + outPosition + "&type=FOOTPRINT",
             dataType: 'xml',
             success: function (xml) {
                 // Do nothing, the FOOTPRINT has been saved
