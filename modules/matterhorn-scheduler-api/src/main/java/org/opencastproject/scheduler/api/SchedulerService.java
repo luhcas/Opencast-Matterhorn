@@ -141,7 +141,7 @@ public interface SchedulerService{
    * @param e
    *        Event containing metadata to be updated.
    */
-  public boolean updateEvents(List<Long> eventIdList, Event e) throws NotFoundException, SchedulerException;
+  public void updateEvents(List<Long> eventIdList, Event e) throws NotFoundException, SchedulerException;
   
   /**
    * @param e

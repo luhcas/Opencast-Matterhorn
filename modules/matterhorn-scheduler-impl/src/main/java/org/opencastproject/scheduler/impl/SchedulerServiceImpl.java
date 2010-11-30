@@ -624,7 +624,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    * @param e
    *        Event containing metadata to be updated.
    */
-  public boolean updateEvents(List<Long> eventIdList, Event e) throws NotFoundException, SchedulerException {
+  public void updateEvents(List<Long> eventIdList, Event e) throws NotFoundException, SchedulerException {
     EntityManager em = emf.createEntityManager();
     em.getTransaction().begin();
     try{
@@ -635,7 +635,6 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
         if (storedEvent == null){
           em.getTransaction().rollback();
           em.close();
-          return false; // nothing found to update
         }
         storedEvent.update(e);
         em.merge(storedEvent);
@@ -649,7 +648,6 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     } finally {
       em.close();
     }
-    return true;
   }
   
   /**
