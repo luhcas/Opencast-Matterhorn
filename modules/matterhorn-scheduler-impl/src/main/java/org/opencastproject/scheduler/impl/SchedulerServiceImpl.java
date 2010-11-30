@@ -55,7 +55,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
@@ -244,7 +243,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     }
     
     for(Metadata m : event.getMetadataList()){
-    	m.setEvent(event);
+      m.setEvent(event);
     }
     
     try {

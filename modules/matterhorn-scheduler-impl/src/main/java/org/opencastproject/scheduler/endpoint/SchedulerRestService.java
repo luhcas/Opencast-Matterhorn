@@ -328,11 +328,10 @@ public class SchedulerRestService {
     }
     if (!ids.isEmpty() && event != null) {
       try {
-        if (service.updateEvents(ids, event)) {
-          return Response.noContent().type("").build(); // remove content-type, no message-body.
-        } else {
-          return Response.status(Status.NOT_FOUND).build();
-        }
+        service.updateEvents(ids, event);
+        return Response.noContent().type("").build(); // remove content-type, no message-body.
+      } catch (NotFoundException nFEx) {
+        return Response.status(Status.NOT_FOUND).build();
       } catch (Exception e) {
         logger.warn("Unable to update event with id '{}': {}", ids, e);
         return Response.serverError().build();
