@@ -200,12 +200,10 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
         if (instancesInServiceRegistry > 0) {
           logger.info("The workflow search index is empty.  Populating it now with {} workflows.",
                   instancesInServiceRegistry);
-        }
-        for (Job job : serviceRegistry.getJobs(null, null)) {
-          WorkflowInstance instance = builder.parseWorkflowInstance(job.getPayload());
-          index(instance);
-        }
-        if (instancesInServiceRegistry > 0) {
+          for (Job job : serviceRegistry.getJobs(WorkflowService.JOB_TYPE, null)) {
+            WorkflowInstance instance = builder.parseWorkflowInstance(job.getPayload());
+            index(instance);
+          }
           logger.info("Finished populating the workflow search index with {} workflows.", instancesInServiceRegistry);
         }
       } catch (Exception e) {

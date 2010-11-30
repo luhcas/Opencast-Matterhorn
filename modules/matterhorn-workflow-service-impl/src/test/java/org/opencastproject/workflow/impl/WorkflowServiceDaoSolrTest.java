@@ -17,12 +17,27 @@ package org.opencastproject.workflow.impl;
 
 import static org.junit.Assert.assertEquals;
 
+import org.opencastproject.job.api.JaxbJob;
+import org.opencastproject.job.api.Job;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.serviceregistry.api.ServiceRegistry;
+import org.opencastproject.util.PathSupport;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowQuery;
+import org.opencastproject.workflow.api.WorkflowService;
 
+import org.apache.commons.io.FileUtils;
+import org.easymock.classextension.EasyMock;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Test cases for the implementation at {@link WorkflowServiceDaoSolrImpl}.
@@ -33,11 +48,32 @@ public class WorkflowServiceDaoSolrTest {
 
   @Before
   public void setup() throws Exception {
+    // Create a job with a workflow as its payload
+    List<Job> jobs = new ArrayList<Job>();
+    JaxbJob job = new JaxbJob();
+    WorkflowInstanceImpl workflow = new WorkflowInstanceImpl();
+    workflow.setId(123);
+    workflow.setState(WorkflowState.INSTANTIATED);
+    workflow.setMediaPackage(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
+    job.setPayload(WorkflowBuilder.getInstance().toXml(workflow));
+    jobs.add(job);
+
+    // Mock up the service registry to return the job
+    ServiceRegistry serviceRegistry = EasyMock.createNiceMock(ServiceRegistry.class);
+    EasyMock.expect(serviceRegistry.count(WorkflowService.JOB_TYPE, null)).andReturn(new Long(1));
+    EasyMock.expect(serviceRegistry.getJobs(WorkflowService.JOB_TYPE, null)).andReturn(jobs);
+    EasyMock.replay(serviceRegistry);
+    
+    // Now create the dao
     dao = new WorkflowServiceDaoSolrImpl();
+    dao.solrRoot = PathSupport.concat("target", "solr");
+    dao.setServiceRegistry(serviceRegistry);
+    dao.activate();
   }
 
   @After
   public void teardown() throws Exception {
+    FileUtils.deleteDirectory(new File(dao.solrRoot));
     dao = null;
   }
 
@@ -74,6 +110,12 @@ public class WorkflowServiceDaoSolrTest {
     String solrQuery = dao.buildSolrQueryString(q);
     String expected = "seriesid:series1 AND (-state:RUNNING AND -state:PAUSED AND *:*)";
     assertEquals(expected, solrQuery);
+  }
+  
+  @Test
+  public void testPopulateSolr() throws Exception {
+    // this method uses the solr index, so if the workflow is 
+    Assert.assertNotNull(dao.getWorkflowById(123));
   }
 
 }
