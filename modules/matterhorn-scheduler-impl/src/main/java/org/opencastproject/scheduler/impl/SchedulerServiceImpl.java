@@ -259,7 +259,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
       if (tx != null) {
         tx.rollback();
       }
-      throw new SchedulerException("Unable to add event", ex);
+      throw new SchedulerException("Unable to add event: {}", ex);
     } finally {
       if (em != null) {
         em.close();
@@ -323,19 +323,23 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    * 
    * @param RecurringEvent
    *          e
+   * @throws SchedulerException
+   *         if a workflow
    * @return The recurring event that has been persisted
    */
-  public void addRecurringEvent(Event recurrence) throws ParseException, IncompleteDataException, EntityExistsException {
+  public void addRecurringEvent(Event recurrence) throws SchedulerException {
     EntityManager em = emf.createEntityManager();
-    List<Event> events = recurrence.createEventsFromRecurrence();
-    for (Event e : events) {
-      logger.debug("Adding recurring event {}", e.getEventId());
-      EntityTransaction tx = em.getTransaction();
-      tx.begin();
-      em.persist((EventImpl) e);
-      tx.commit();
+    
+    try {
+      for (Event e : recurrence.createEventsFromRecurrence()) {
+        logger.debug("Adding recurring event {}", e.getEventId());
+        addEvent(e);
+      }
+    } catch (ParseException pEx) {
+      throw new SchedulerException("Unable to parse recurrence rule: {}", pEx);
+    } catch (IncompleteDataException iDEx) {
+      throw new SchedulerException("Recurring event is missing data: {}", iDEx);
     }
-    em.close();
   }
 
   /**
@@ -748,7 +752,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
   public Event getNewEvent() {
     return new EventImpl();
   }
-
+  
   /**
    * resolves the appropriate Filter for the Capture Agent
    * 

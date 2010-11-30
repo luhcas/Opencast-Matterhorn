@@ -103,7 +103,7 @@ public interface SchedulerService{
    *          e
    * @return The recurring event that has been persisted
    */
-  public void addRecurringEvent(Event recurrence) throws ParseException, IncompleteDataException, EntityExistsException;
+  public void addRecurringEvent(Event recurrence) throws SchedulerException;
 
   /**
    * Gets an event by its identifier

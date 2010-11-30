@@ -156,20 +156,4 @@ public class DublinCoreGenerator {
     return null;
   }
 
-  /**
-   * Checks if the provided key is a valid Dublin Core XML tag
-   * @param key The key that should be checked
-   * @return true if the key is valid
-   */
-  private boolean validDcKey (String key) {
-    String [] validKeys = new String [] {"bibliographicCitation", "license", "conformsTo", "valid", "isFormatOf", "source", "coverage", "tableOfContents", "dateCopyrighted",
-                           "isVersionOf", "isReferencedBy", "accrualPolicy", "date", "publisher", "creator", "accessRights", "subject", "temporal", "accrualMethod", 
-                           "hasPart", "medium", "abstract", "title", "audience", "spatial", "dateSubmitted", "relation", "format", "hasFormat", "references", "accrualPeriodicity", 
-                           "created", "educationLevel", "rightsHolder", "language", "identifier", "isReplacedBy", "rights", "mediator", "hasVersion", "isPartOf", 
-                           "type", "provenance", "dateAccepted", "alternative", "instructionalMethod","available", "isRequiredBy", "requires", "modified",
-                           "replaces", "contributor", "description", "any","issued"};
-    List<String> vk = Arrays.asList(validKeys);
-    return vk.contains(key);
-  }  
-
 }
