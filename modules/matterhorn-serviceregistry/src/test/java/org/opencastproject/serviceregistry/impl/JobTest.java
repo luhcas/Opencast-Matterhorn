@@ -70,6 +70,10 @@ public class JobTest {
     serviceRegistry.setPersistenceProperties(props);
     serviceRegistry.activate(null);
 
+    // register the hosts
+    serviceRegistry.registerHost(LOCALHOST, 1);
+    serviceRegistry.registerHost(HOST_2, 1);
+    
     // register some service instances
     regType1Host1 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_1, LOCALHOST, PATH);
     regType1Host2 = (ServiceRegistrationJpaImpl) serviceRegistry.registerService(JOB_TYPE_1, HOST_2, PATH);
@@ -218,6 +222,8 @@ public class JobTest {
   @Test
   public void testHandlerRegistration() throws Exception {
     String url = "http://type1handler:8080";
+    serviceRegistry.registerHost(url, 1);
+    
     String receiptType = "type1";
     // we should start with no handlers
     List<ServiceRegistration> hosts = serviceRegistry.getServiceRegistrationsByLoad(receiptType);
@@ -225,29 +231,31 @@ public class JobTest {
 
     // register a handler
     serviceRegistry.registerService(receiptType, url, PATH);
-    hosts = serviceRegistry.getServiceRegistrationsByLoad("type1");
+    hosts = serviceRegistry.getServiceRegistrationsByLoad(receiptType);
     Assert.assertEquals(1, hosts.size());
-    Assert.assertEquals("http://type1handler:8080", hosts.get(0).getHost());
+    Assert.assertEquals(url, hosts.get(0).getHost());
 
     // set the handler to be in maintenance mode
-    serviceRegistry.setMaintenanceStatus(receiptType, url, true);
-    hosts = serviceRegistry.getServiceRegistrationsByLoad("type1");
+    serviceRegistry.setMaintenanceStatus(url, true);
+    hosts = serviceRegistry.getServiceRegistrationsByLoad(receiptType);
     Assert.assertEquals(0, hosts.size());
 
     // set it back to normal mode
-    serviceRegistry.setMaintenanceStatus(receiptType, url, false);
-    hosts = serviceRegistry.getServiceRegistrationsByLoad("type1");
+    serviceRegistry.setMaintenanceStatus(url, false);
+    hosts = serviceRegistry.getServiceRegistrationsByLoad(receiptType);
     Assert.assertEquals(1, hosts.size());
 
     // unregister
     serviceRegistry.unRegisterService(receiptType, url);
-    hosts = serviceRegistry.getServiceRegistrationsByLoad("type1");
+    hosts = serviceRegistry.getServiceRegistrationsByLoad(receiptType);
     Assert.assertEquals(0, hosts.size());
   }
 
   @Test
   public void testDuplicateHandlerRegistrations() throws Exception {
     String url = "http://type1handler:8080";
+    serviceRegistry.registerHost(url, 1);
+
     String receiptType = "type1";
     // we should start with no handlers
     List<ServiceRegistration> hosts = serviceRegistry.getServiceRegistrationsByLoad(receiptType);
@@ -257,20 +265,20 @@ public class JobTest {
     serviceRegistry.registerService(receiptType, url, PATH);
     hosts = serviceRegistry.getServiceRegistrationsByLoad("type1");
     Assert.assertEquals(1, hosts.size());
-    Assert.assertEquals("http://type1handler:8080", hosts.get(0).getHost());
+    Assert.assertEquals(url, hosts.get(0).getHost());
 
-    // set the handler to be in maintenance mode
-    serviceRegistry.setMaintenanceStatus(receiptType, url, true);
+    // set the host to be in maintenance mode
+    serviceRegistry.setMaintenanceStatus(url, true);
     hosts = serviceRegistry.getServiceRegistrationsByLoad("type1");
     Assert.assertEquals(0, hosts.size());
 
-    // re-register. this should not unset the maintenance mode and should not throw an exception
-    ServiceRegistration reg = serviceRegistry.registerService(receiptType, url, PATH);
-    Assert.assertTrue(reg.isInMaintenanceMode());
+    // re-register the host. this should not unset the maintenance mode and should not throw an exception
+    serviceRegistry.unregisterHost(url);
+    serviceRegistry.registerHost(url, 1);
+    serviceRegistry.registerService(receiptType, url, PATH);
     
     // zero because it's still in maintenance mode
     Assert.assertEquals(0, serviceRegistry.getServiceRegistrationsByLoad(receiptType).size());
-
 
     // unregister
     serviceRegistry.unRegisterService(receiptType, url);

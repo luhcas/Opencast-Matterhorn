@@ -22,6 +22,7 @@ import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceStatistics;
 import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
+import org.opencastproject.serviceregistry.api.SystemLoad;
 import org.opencastproject.util.NotFoundException;
 
 import java.util.ArrayList;
@@ -34,11 +35,11 @@ import java.util.Map.Entry;
  * An in-memory mock service registry.
  */
 public class MockServiceRegistry implements ServiceRegistry {
-  Map<Long, Job> map = new HashMap<Long, Job>();
+  Map<Long, Job> jobMap = new HashMap<Long, Job>();
 
   @Override
   public long count(String serviceType, Job.Status status) throws ServiceRegistryException {
-    return map.size();
+    return jobMap.size();
   }
 
   @Override
@@ -48,7 +49,7 @@ public class MockServiceRegistry implements ServiceRegistry {
 
   @Override
   public Job getJob(long id) throws NotFoundException, ServiceRegistryException {
-    Job j = map.get(id);
+    Job j = jobMap.get(id);
     if (j == null)
       throw new NotFoundException();
     return j;
@@ -57,7 +58,7 @@ public class MockServiceRegistry implements ServiceRegistry {
   @Override
   public Job createJob(String type) throws ServiceUnavailableException, ServiceRegistryException {
     Job j = new MockJob();
-    map.put(j.getId(), j);
+    jobMap.put(j.getId(), j);
     return j;
   }
 
@@ -111,7 +112,7 @@ public class MockServiceRegistry implements ServiceRegistry {
   }
 
   @Override
-  public void setMaintenanceStatus(String serviceType, String host, boolean maintenance)
+  public void setMaintenanceStatus(String host, boolean maintenance)
           throws ServiceUnavailableException, ServiceRegistryException {
     throw new UnsupportedOperationException();
   }
@@ -123,7 +124,7 @@ public class MockServiceRegistry implements ServiceRegistry {
 
   @Override
   public void updateJob(Job job) throws NotFoundException, ServiceRegistryException, ServiceUnavailableException {
-    map.put(job.getId(), job);
+    jobMap.put(job.getId(), job);
   }
 
   /**
@@ -134,9 +135,22 @@ public class MockServiceRegistry implements ServiceRegistry {
   @Override
   public List<Job> getJobs(String serviceType, Status status) throws ServiceRegistryException {
     List<Job> list = new ArrayList<Job>();
-    for(Entry<Long, Job> entry : map.entrySet()) {
+    for(Entry<Long, Job> entry : jobMap.entrySet()) {
       list.add(entry.getValue());
     }
     return list;
+  }
+
+  @Override
+  public void registerHost(String host, int maxConcurrentJobs) throws ServiceRegistryException {
+  }
+
+  @Override
+  public void unregisterHost(String host) throws ServiceRegistryException {
+  }
+
+  @Override
+  public SystemLoad getLoad() throws ServiceRegistryException {
+    throw new UnsupportedOperationException();
   }
 }

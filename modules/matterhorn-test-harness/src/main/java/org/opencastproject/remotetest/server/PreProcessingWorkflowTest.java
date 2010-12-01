@@ -95,8 +95,10 @@ public class PreProcessingWorkflowTest {
     long GRACE_PERIOD = 30000L;
 
     // Make sure the demo capture agent is online
-    if (!CaptureUtils.isOnline(CAPTURE_AGENT_ID))
-      fail("Demo capture agent with id " + CAPTURE_AGENT_ID + " is not online");
+    if (!CaptureUtils.isOnline(CAPTURE_AGENT_ID)) {
+      logger.warn("Demo capture agent with id " + CAPTURE_AGENT_ID + " is not online, skipping this test");
+      return;
+    }
 
     // Specify start end end time for capture
     Calendar c = Calendar.getInstance();

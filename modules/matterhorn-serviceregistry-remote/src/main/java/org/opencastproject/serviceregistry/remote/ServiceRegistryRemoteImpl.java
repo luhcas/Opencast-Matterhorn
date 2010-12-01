@@ -30,6 +30,7 @@ import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceStatistics;
 import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
+import org.opencastproject.serviceregistry.api.SystemLoad;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.QueryStringBuilder;
 import org.opencastproject.util.UrlSupport;
@@ -136,7 +137,74 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
           throws ServiceRegistryException {
     return registerService(serviceType, host, path, false);
   }
+  
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#registerHost(java.lang.String, int)
+   */
+  @Override
+  public void registerHost(String host, int maxConcurrentJobs) throws ServiceRegistryException {
+    String servicePath = "registerhost";
+    HttpPost post = new HttpPost(UrlSupport.concat(serviceURL, servicePath));
+    try {
+      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+      params.add(new BasicNameValuePair("host", host));
+      params.add(new BasicNameValuePair("maxJobs", Integer.toString(maxConcurrentJobs)));
+      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+      post.setEntity(entity);
+    } catch (UnsupportedEncodingException e) {
+      throw new ServiceRegistryException("Can not url encode post parameters", e);
+    }
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(post);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_NO_CONTENT) {
+        logger.info("Registered '" + host + "'.");
+      }
+    } catch (Exception e) {
+      throw new ServiceRegistryException("Unable to register '" + host + "'", e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to register '" + host + "'. HTTP status=" + responseStatusCode);
+  }
 
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#unregisterHost(java.lang.String)
+   */
+  @Override
+  public void unregisterHost(String host) throws ServiceRegistryException {
+    String servicePath = "unregisterhost";
+    HttpPost post = new HttpPost(UrlSupport.concat(serviceURL, servicePath));
+    try {
+      List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+      params.add(new BasicNameValuePair("host", host));
+      UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
+      post.setEntity(entity);
+    } catch (UnsupportedEncodingException e) {
+      throw new ServiceRegistryException("Can not url encode post parameters", e);
+    }
+    HttpResponse response = null;
+    int responseStatusCode;
+    try {
+      response = client.execute(post);
+      responseStatusCode = response.getStatusLine().getStatusCode();
+      if (responseStatusCode == HttpStatus.SC_NO_CONTENT) {
+        logger.info("Unregistered '" + host + "'.");
+      }
+    } catch (Exception e) {
+      throw new ServiceRegistryException("Unable to unregister '" + host + "'", e);
+    } finally {
+      client.close(response);
+    }
+    throw new ServiceRegistryException("Unable to unregister '" + host + "'. HTTP status=" + responseStatusCode);
+  }
+  
   /**
    * {@inheritDoc}
    * 
@@ -217,17 +285,15 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#setMaintenanceStatus(java.lang.String,
-   *      java.lang.String, boolean)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#setMaintenanceStatus(java.lang.String, boolean)
    */
   @Override
-  public void setMaintenanceStatus(String serviceType, String host, boolean maintenance) throws IllegalStateException,
+  public void setMaintenanceStatus(String host, boolean maintenance) throws IllegalStateException,
           ServiceRegistryException {
     String servicePath = "maintenance";
     HttpPost post = new HttpPost(UrlSupport.concat(serviceURL, servicePath));
     try {
       List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-      params.add(new BasicNameValuePair("serviceType", serviceType));
       params.add(new BasicNameValuePair("host", host));
       params.add(new BasicNameValuePair("maintenance", Boolean.toString(maintenance)));
       UrlEncodedFormEntity entity = new UrlEncodedFormEntity(params);
@@ -241,16 +307,16 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
       response = client.execute(post);
       responseStatusCode = response.getStatusLine().getStatusCode();
       if (responseStatusCode == HttpStatus.SC_NO_CONTENT) {
-        logger.info("Set maintenance mode on '" + serviceType + "' host '" + host + "' to '" + maintenance + "'.");
+        logger.info("Set maintenance mode on '" + host + "' to '" + maintenance + "'.");
         return;
       }
     } catch (Exception e) {
-      throw new ServiceRegistryException("Unable to set maintenance mode on " + serviceType + " host " + host + " to '"
+      throw new ServiceRegistryException("Unable to set maintenance mode on "+ host + " to '"
               + maintenance + "'", e);
     } finally {
       client.close(response);
     }
-    throw new ServiceRegistryException("Unable to set maintenace mode on '" + serviceType + "' host '" + host
+    throw new ServiceRegistryException("Unable to set maintenace mode on '" + host
             + "' to '" + maintenance + "'. HTTP status=" + responseStatusCode);
   }
 
@@ -389,7 +455,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
       if (responseStatusCode == HttpStatus.SC_OK) {
         JaxbJobList jaxbJobList = JobParser.parseJobList(response.getEntity().getContent());
         List<Job> jobs = new ArrayList<Job>(jaxbJobList.getJobs().size());
-        for(Job job : jaxbJobList.getJobs()) {
+        for (Job job : jaxbJobList.getJobs()) {
           jobs.add(job);
         }
         return jobs;
@@ -610,16 +676,16 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
   }
 
   /**
-   * Gets a serialized representation of a {@link Job}
-   * 
-   * @param job
-   *          The job to marshall
-   * @return the serialized job
+   * {@inheritDoc}
+   *
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getLoad()
    */
-  public InputStream serialize(Job job) throws IOException {
-    return IOUtils.toInputStream(serializeToString(job), "UTF-8");
+  @Override
+  public SystemLoad getLoad() throws ServiceRegistryException {
+    // TODO Auto-generated method stub
+    return null;
   }
-
+  
   /**
    * Gets an xml representation of a {@link Job}
    * 

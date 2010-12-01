@@ -142,11 +142,31 @@ public class ServiceRegistryEndpoint {
   }
 
   @POST
-  @Path("/maintenance")
-  public Response maintenance(@FormParam("serviceType") String serviceType, @FormParam("host") String host,
-          @FormParam("maintenance") boolean maintenance) {
+  @Path("/registerhost")
+  public void register(@FormParam("host") String host, @FormParam("maxJobs") int maxJobs) {
     try {
-      serviceRegistry.setMaintenanceStatus(serviceType, host, maintenance);
+      serviceRegistry.registerHost(host, maxJobs);
+    } catch (ServiceRegistryException e) {
+      throw new WebApplicationException(e);
+    }
+  }
+
+  @POST
+  @Path("/unregisterhost")
+  public Response unregister(@FormParam("host") String host) {
+    try {
+      serviceRegistry.unregisterHost(host);
+      return Response.status(Status.NO_CONTENT).build();
+    } catch (ServiceRegistryException e) {
+      throw new WebApplicationException(e);
+    }
+  }
+
+  @POST
+  @Path("/maintenance")
+  public Response maintenance(@FormParam("host") String host, @FormParam("maintenance") boolean maintenance) {
+    try {
+      serviceRegistry.setMaintenanceStatus(host, maintenance);
       return Response.status(Status.NO_CONTENT).build();
     } catch (Exception e) {
       throw new WebApplicationException(e);
@@ -181,7 +201,8 @@ public class ServiceRegistryEndpoint {
   @GET
   @Path("/services.xml")
   @Produces(MediaType.TEXT_XML)
-  public JaxbServiceRegistrationList getRegistrationsAsXml(@QueryParam("serviceType") String serviceType, @QueryParam("host") String host) {
+  public JaxbServiceRegistrationList getRegistrationsAsXml(@QueryParam("serviceType") String serviceType,
+          @QueryParam("host") String host) {
     JaxbServiceRegistrationList registrations = new JaxbServiceRegistrationList();
     try {
       if (isNotBlank(serviceType) && isNotBlank(host)) {
@@ -217,7 +238,8 @@ public class ServiceRegistryEndpoint {
   @GET
   @Path("/services.json")
   @Produces(MediaType.APPLICATION_JSON)
-  public JaxbServiceRegistrationList getRegistrationsAsJson(@QueryParam("serviceType") String serviceType, @QueryParam("host") String host) {
+  public JaxbServiceRegistrationList getRegistrationsAsJson(@QueryParam("serviceType") String serviceType,
+          @QueryParam("host") String host) {
     return getRegistrationsAsXml(serviceType, host);
   }
 
@@ -277,10 +299,10 @@ public class ServiceRegistryEndpoint {
     try {
       List<Job> jobs = serviceRegistry.getJobs(serviceType, status);
       return new JaxbJobList(jobs);
-    } catch(ServiceRegistryException e) {
+    } catch (ServiceRegistryException e) {
       throw new WebApplicationException(e);
     }
-    
+
   }
 
   @GET

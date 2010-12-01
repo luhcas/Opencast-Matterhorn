@@ -43,8 +43,11 @@ import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceStatistics;
 import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
+import org.opencastproject.serviceregistry.api.SystemLoad;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UrlSupport;
+
+import org.apache.commons.lang.StringUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -60,6 +63,9 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
   private static final Logger logger = LoggerFactory.getLogger(ServiceRegistryJpaImpl.class);
 
+  /** Configuration key for the maximum load */
+  protected static final String OPT_MAXLOAD = "org.opencastproject.server.maxload";
+  
   /**
    * A static list of statuses that influence how load balancing is calculated
    */
@@ -102,10 +108,13 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
   protected RestServiceTracker tracker = null;
 
+  /** The maximum number of parallel jobs */
+  protected int maxJobs = 1;
+
   public void activate(ComponentContext cc) {
     logger.debug("activate");
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.serviceregistry", persistenceProperties);
-    if (cc == null || cc.getBundleContext().getProperty("org.opencastproject.server.url") == null) {
+    if (cc == null || StringUtils.isBlank(cc.getBundleContext().getProperty("org.opencastproject.server.url"))) {
       hostName = UrlSupport.DEFAULT_BASE_URL;
     } else {
       hostName = cc.getBundleContext().getProperty("org.opencastproject.server.url");
@@ -119,12 +128,32 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         throw new IllegalStateException(e);
       }
     }
+    try {
+      if (cc == null || StringUtils.isBlank(cc.getBundleContext().getProperty(OPT_MAXLOAD))) {
+        maxJobs = Runtime.getRuntime().availableProcessors();
+      } else {
+        try {
+          maxJobs = Integer.parseInt(cc.getBundleContext().getProperty(OPT_MAXLOAD));
+        } catch (NumberFormatException e) {
+          maxJobs = Runtime.getRuntime().availableProcessors();
+          logger.warn("Configuration key '{}' is not an integer. Falling back to the number of cores ({})", OPT_MAXLOAD, maxJobs);
+        }
+      }
+      registerHost(hostName, maxJobs);
+    } catch (ServiceRegistryException e) {
+      throw new IllegalStateException("Unable to register host " + hostName + " in the service registry", e);
+    }
   }
 
   public void deactivate() {
     logger.debug("deactivate");
     if (tracker != null) {
       tracker.close();
+    }
+    try {
+      unregisterHost(hostName);
+    } catch (ServiceRegistryException e) {
+      throw new IllegalStateException("Unable to unregister host " + hostName + " from the service registry", e);
     }
     if (emf != null) {
       emf.close();
@@ -144,7 +173,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   /**
    * Creates a job on a remote host.
    */
-  public Job createJob(String type, String host, boolean start) throws ServiceUnavailableException, ServiceRegistryException {
+  public Job createJob(String type, String host, boolean start) throws ServiceUnavailableException,
+          ServiceRegistryException {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
@@ -155,7 +185,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
                 + "'");
       }
       Status status = start ? Status.RUNNING : Status.QUEUED;
-      JobJpaImpl job = new JobJpaImpl(status, serviceRegistration);;
+      JobJpaImpl job = new JobJpaImpl(status, serviceRegistration);
+      ;
       serviceRegistration.jobs.add(job);
       em.persist(job);
       tx.commit();
@@ -170,14 +201,14 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#createJob(java.lang.String, boolean)
    */
   @Override
   public Job createJob(String type, boolean start) throws ServiceUnavailableException, ServiceRegistryException {
     return createJob(type, this.hostName, start);
   }
-  
+
   /**
    * Creates a job for a specific service registration.
    * 
@@ -295,11 +326,86 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   /**
    * {@inheritDoc}
    * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#registerHost(java.lang.String, int)
+   */
+  @Override
+  public void registerHost(String host, int maxJobs) throws ServiceRegistryException {
+    EntityManager em = null;
+    EntityTransaction tx = null;
+    try {
+      em = emf.createEntityManager();
+      tx = em.getTransaction();
+      tx.begin();
+      // Find the existing registrations for this host and if it exists, update it
+      HostRegistration existingHostRegistration = em.find(HostRegistration.class, host);
+      if (existingHostRegistration == null) {
+        em.persist(new HostRegistration(host, maxJobs, true, false));
+      } else {
+        existingHostRegistration.setMaxJobs(maxJobs);
+        existingHostRegistration.setOnline(true);
+        em.merge(existingHostRegistration);
+      }
+      logger.info("Registering {} with a maximum load of {}", host, maxJobs);
+      tx.commit();
+    } catch (Exception e) {
+      if (tx.isActive())
+        tx.rollback();
+      throw new ServiceRegistryException(e);
+    } finally {
+      if (em != null && em.isOpen()) {
+        em.close();
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#unregisterHost(java.lang.String)
+   */
+  @Override
+  public void unregisterHost(String host) throws ServiceRegistryException {
+    EntityManager em = null;
+    EntityTransaction tx = null;
+    try {
+      em = emf.createEntityManager();
+      tx = em.getTransaction();
+      tx.begin();
+      HostRegistration existingHostRegistration = em.find(HostRegistration.class, host);
+      if (existingHostRegistration == null) {
+        throw new ServiceRegistryException("Host '" + host
+                + "' is not currently registered, so it can not be unregistered");
+      } else {
+        existingHostRegistration.setOnline(false);
+        for (ServiceRegistration serviceRegistration : getServiceRegistrationsByHost(host)) {
+          ((ServiceRegistrationJpaImpl) serviceRegistration).setOnline(false);
+          logger.info("Unregistering service '{}' on host {}", serviceRegistration.getServiceType(), host);
+          em.merge(serviceRegistration);
+        }
+        em.merge(existingHostRegistration);
+      }
+      logger.info("Unregistering {}", host, maxJobs);
+      tx.commit();
+    } catch (Exception e) {
+      if (tx.isActive())
+        tx.rollback();
+      throw new ServiceRegistryException(e);
+    } finally {
+      if (em != null && em.isOpen()) {
+        em.close();
+      }
+    }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#registerService(java.lang.String, java.lang.String,
    *      java.lang.String)
    */
   @Override
-  public ServiceRegistration registerService(String serviceType, String baseUrl, String path) throws ServiceRegistryException {
+  public ServiceRegistration registerService(String serviceType, String baseUrl, String path)
+          throws ServiceRegistryException {
     return setOnlineStatus(serviceType, baseUrl, path, true, false);
   }
 
@@ -310,7 +416,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    *      java.lang.String, boolean)
    */
   @Override
-  public ServiceRegistration registerService(String serviceType, String baseUrl, String path, boolean jobProducer) throws ServiceRegistryException {
+  public ServiceRegistration registerService(String serviceType, String baseUrl, String path, boolean jobProducer)
+          throws ServiceRegistryException {
     return setOnlineStatus(serviceType, baseUrl, path, true, jobProducer);
   }
 
@@ -347,6 +454,11 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
+      HostRegistration hostRegistration = em.find(HostRegistration.class, baseUrl);
+      if (hostRegistration == null) {
+        throw new IllegalStateException(
+                "A service registration can not be updated when it has no associated host registration");
+      }
       ServiceRegistrationJpaImpl registration = getServiceRegistration(em, serviceType, baseUrl);
       if (registration == null) {
         if (isBlank(path)) {
@@ -354,9 +466,9 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
           throw new IllegalArgumentException("path must not be blank when registering new services");
         }
         if (jobProducer == null) { // if we are not provided a value, consider it to be false
-          registration = new ServiceRegistrationJpaImpl(serviceType, baseUrl, path, false);
+          registration = new ServiceRegistrationJpaImpl(hostRegistration, serviceType, path, false);
         } else {
-          registration = new ServiceRegistrationJpaImpl(serviceType, baseUrl, path, jobProducer);
+          registration = new ServiceRegistrationJpaImpl(hostRegistration, serviceType, path, jobProducer);
         }
         em.persist(registration);
       } else {
@@ -390,21 +502,19 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   /**
    * {@inheritDoc}
    * 
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#setMaintenanceStatus(java.lang.String,
-   *      java.lang.String, boolean)
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#setMaintenanceStatus(java.lang.String, boolean)
    */
   @Override
-  public void setMaintenanceStatus(String serviceType, String baseUrl, boolean maintenance)
-          throws IllegalStateException {
+  public void setMaintenanceStatus(String baseUrl, boolean maintenance) throws IllegalStateException {
     EntityManager em = emf.createEntityManager();
     EntityTransaction tx = em.getTransaction();
     try {
       tx.begin();
-      ServiceRegistrationJpaImpl reg = getServiceRegistration(em, serviceType, baseUrl);
+      HostRegistration reg = em.find(HostRegistration.class, baseUrl);
       if (reg == null) {
-        throw new IllegalStateException("Can not set maintenance mode on a service that has not been registered");
+        throw new IllegalArgumentException("Can not set maintenance mode on a host that has not been registered");
       }
-      reg.setInMaintenanceMode(maintenance);
+      reg.setMaintenanceMode(maintenance);
       em.merge(reg);
       tx.commit();
     } catch (RollbackException e) {
@@ -434,8 +544,9 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
   /**
    * {@inheritDoc}
-   *
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getJobs(java.lang.String, org.opencastproject.job.api.Job.Status)
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getJobs(java.lang.String,
+   *      org.opencastproject.job.api.Job.Status)
    */
   @SuppressWarnings("unchecked")
   @Override
@@ -444,12 +555,12 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     EntityManager em = null;
     try {
       em = emf.createEntityManager();
-      if(type == null && status == null) {
+      if (type == null && status == null) {
         query = em.createNamedQuery("Job.all");
-      } else if(type == null) {
+      } else if (type == null) {
         query = em.createNamedQuery("Job.status");
         query.setParameter("status", status);
-      } else if(status == null) {
+      } else if (status == null) {
         query = em.createNamedQuery("Job.type");
         query.setParameter("serviceType", type);
       } else {
@@ -458,7 +569,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         query.setParameter("serviceType", type);
       }
       return query.getResultList();
-    } catch(Exception e) {
+    } catch (Exception e) {
       throw new ServiceRegistryException(e);
     } finally {
       em.close();
@@ -477,12 +588,12 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
     EntityManager em = null;
     try {
       em = emf.createEntityManager();
-      if(type == null && status == null) {
+      if (type == null && status == null) {
         query = em.createNamedQuery("Job.count.all");
-      } else if(type == null) {
+      } else if (type == null) {
         query = em.createNamedQuery("Job.count.status");
         query.setParameter("status", status);
-      } else if(status == null) {
+      } else if (status == null) {
         query = em.createNamedQuery("Job.count.type");
         query.setParameter("serviceType", type);
       } else {
@@ -492,7 +603,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       }
       Number countResult = (Number) query.getSingleResult();
       return countResult.longValue();
-    } catch(Exception e) {
+    } catch (Exception e) {
       throw new ServiceRegistryException(e);
     } finally {
       em.close();
@@ -515,7 +626,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       query.setParameter("host", host);
       Number countResult = (Number) query.getSingleResult();
       return countResult.longValue();
-    } catch(Exception e) {
+    } catch (Exception e) {
       throw new ServiceRegistryException(e);
     } finally {
       em.close();
@@ -576,7 +687,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         }
       });
       return stats;
-    } catch(Exception e) {
+    } catch (Exception e) {
       throw new ServiceRegistryException(e);
     } finally {
       em.close();
@@ -611,7 +722,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrationsByType(java.lang.String)
    */
   @SuppressWarnings("unchecked")
@@ -619,15 +730,16 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   public List<ServiceRegistration> getServiceRegistrationsByType(String serviceType) throws ServiceRegistryException {
     EntityManager em = emf.createEntityManager();
     try {
-      return em.createNamedQuery("ServiceRegistration.getByType").setParameter("serviceType", serviceType).getResultList();
+      return em.createNamedQuery("ServiceRegistration.getByType").setParameter("serviceType", serviceType)
+              .getResultList();
     } finally {
       em.close();
     }
   }
-  
+
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getServiceRegistrationsByHost(java.lang.String)
    */
   @SuppressWarnings("unchecked")
@@ -640,7 +752,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       em.close();
     }
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -694,5 +806,16 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       }
       super.removedService(reference, service);
     }
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getLoad()
+   */
+  @Override
+  public SystemLoad getLoad() throws ServiceRegistryException {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

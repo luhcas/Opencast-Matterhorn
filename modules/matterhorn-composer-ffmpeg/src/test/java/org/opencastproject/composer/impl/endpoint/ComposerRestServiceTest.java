@@ -25,8 +25,6 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilder;
 import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
-import org.opencastproject.serviceregistry.impl.JobJpaImpl;
-import org.opencastproject.serviceregistry.impl.ServiceRegistrationJpaImpl;
 
 import org.easymock.EasyMock;
 import org.junit.Assert;
@@ -44,7 +42,7 @@ import javax.ws.rs.core.Response.Status;
  */
 public class ComposerRestServiceTest {
 
-  Job job;
+  JaxbJob job;
   EncodingProfileImpl profile;
   EncodingProfileList profileList;
   Track audioTrack;
@@ -64,9 +62,9 @@ public class ComposerRestServiceTest {
 
     profileId = "profile1";
     
-    // FIXME: Remove the test scoped dependency on matterhorn-serviceregistry and replace this code with mocks
-    job = new JobJpaImpl(Job.Status.QUEUED, new ServiceRegistrationJpaImpl(
-            ComposerService.JOB_TYPE, "encoding_farm_server_456", "/composer/rest"));
+    job = new JaxbJob();
+    job.setStatus(Job.Status.QUEUED);
+    job.setJobType(ComposerService.JOB_TYPE);
     profile = new EncodingProfileImpl();
     profile.setIdentifier(profileId);
     List<EncodingProfileImpl> list = new ArrayList<EncodingProfileImpl>();

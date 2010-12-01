@@ -27,6 +27,28 @@ import org.opencastproject.util.NotFoundException;
 public interface ServiceRegistry {
 
   /**
+   * Registers a host as a provider of Matterhorn services.
+   * 
+   * @param host
+   *          The base URL for this server
+   * @param maxConcurrentJobs
+   *          the maximum number of concurrent jobs this server can execute
+   * @throws ServiceRegistryException
+   *           if communication with the service registry fails
+   */
+  void registerHost(String host, int maxConcurrentJobs) throws ServiceRegistryException;
+
+  /**
+   * Removes a Matterhorn server from service.
+   * 
+   * @param host
+   *          The base URL for this server
+   * @throws ServiceRegistryException
+   *           if communication with the service registry fails
+   */
+  void unregisterHost(String host) throws ServiceRegistryException;
+
+  /**
    * Registers a host to handle a specific type of job
    * 
    * @param serviceType
@@ -74,8 +96,6 @@ public interface ServiceRegistry {
   /**
    * Sets a registered host's maintenance status
    * 
-   * @param serviceType
-   *          The service type
    * @param host
    *          The base URL where the service that can handle this service type can be found
    * @param maintenance
@@ -85,7 +105,7 @@ public interface ServiceRegistry {
    * @throws ServiceRegistryException
    *           if communication with the service registry fails
    */
-  void setMaintenanceStatus(String serviceType, String host, boolean maintenance) throws ServiceUnavailableException,
+  void setMaintenanceStatus(String host, boolean maintenance) throws ServiceUnavailableException,
           ServiceRegistryException;
 
   /**
@@ -144,9 +164,9 @@ public interface ServiceRegistry {
    * Gets the list of jobs that match the specified parameters.
    * 
    * @param serviceType
-   *          The jobs run by this type of service.  If null, jobs from all hosts will be returned.
+   *          The jobs run by this type of service. If null, jobs from all hosts will be returned.
    * @param status
-   *          The status of the jobs.  If null, jobs in all status will be returned.
+   *          The status of the jobs. If null, jobs in all status will be returned.
    * @return the jobs matching these criteria
    * @throws ServiceRegistryException
    *           if there is a problem accessing the service registry
@@ -245,4 +265,13 @@ public interface ServiceRegistry {
    */
   long count(String serviceType, Status status, String host) throws ServiceRegistryException;
 
+  /**
+   * Get the load factors for each registered node.
+   * 
+   * @return the load values
+   * 
+   * @throws ServiceRegistryException
+   *           if there is a problem accessing the service registry
+   */
+  SystemLoad getLoad() throws ServiceRegistryException;
 }

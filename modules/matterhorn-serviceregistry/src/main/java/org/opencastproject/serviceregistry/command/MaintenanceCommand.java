@@ -25,22 +25,22 @@ import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
  * 
  */
 public class MaintenanceCommand {
-  protected ServiceRegistry jobManager;
+  protected ServiceRegistry serviceRegistry;
 
   public void setRemoteServiceManager(ServiceRegistry remoteServiceManager) {
-    this.jobManager = remoteServiceManager;
+    this.serviceRegistry = remoteServiceManager;
   }
 
-  public String set(String jobType, String baseUrl, boolean maintenanceMode) {
+  public String set(String baseUrl, boolean maintenanceMode) {
     try {
-      jobManager.setMaintenanceStatus(jobType, baseUrl, maintenanceMode);
+      serviceRegistry.setMaintenanceStatus(baseUrl, maintenanceMode);
       if (maintenanceMode) {
-        return jobType + "@" + baseUrl + " is now in maintenance mode\n";
+        return baseUrl + " is now in maintenance mode\n";
       } else {
-        return jobType + "@" + baseUrl + " has returned to service\n";
+        return baseUrl + " has returned to service\n";
       }
     } catch (ServiceUnavailableException e) {
-      return jobType + "@" + baseUrl + " is not registered, so its maintenance mode can not be set\n";
+      return baseUrl + " is not registered, so its maintenance mode can not be set\n";
     } catch (ServiceRegistryException e) {
       return "Error setting maintenance mode: " + e.getMessage() + "\n";
     }
@@ -49,7 +49,7 @@ public class MaintenanceCommand {
   public String list() {
     try {
       StringBuilder sb = new StringBuilder();
-      for (ServiceRegistration reg : jobManager.getServiceRegistrations()) {
+      for (ServiceRegistration reg : serviceRegistry.getServiceRegistrations()) {
         sb.append(reg.getServiceType());
         sb.append("@");
         sb.append(reg.getHost());

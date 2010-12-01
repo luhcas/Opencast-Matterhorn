@@ -15,6 +15,11 @@
  */
 package org.opencastproject.serviceregistry.impl;
 
+import org.opencastproject.serviceregistry.api.JaxbServiceRegistration;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Set;
 
 import javax.persistence.Access;
@@ -24,17 +29,18 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.PostLoad;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-
-import org.opencastproject.serviceregistry.api.JaxbServiceRegistration;
 
 /**
  * A record of a service that creates and manages receipts.
@@ -59,25 +65,35 @@ import org.opencastproject.serviceregistry.api.JaxbServiceRegistration;
                 + "where rh.serviceType=:serviceType") })
 public class ServiceRegistrationJpaImpl extends JaxbServiceRegistration {
 
+  /** The logger */
+  private static final Logger logger = LoggerFactory.getLogger(ServiceRegistrationJpaImpl.class);
+
+  /** The set of jobs associated with this service registration */
   protected Set<JobJpaImpl> jobs;
 
+  /** The host that provides this service */
+  protected HostRegistration hostRegistration;
+
   /**
-   * Creates a new service registration which is online and not in maintenance mode.
+   * Creates a new service registration which is online
    */
   public ServiceRegistrationJpaImpl() {
     super();
   }
 
   /**
-   * Creates a new service registration which is online and not in maintenance mode.
+   * Creates a new service registration which is online
    * 
-   * @param host
-   *          the host
-   * @param serviceId
-   *          the job type
+   * @param hostRegistration
+   *          the host registration
+   * @param serviceType
+   *          the type of job this service handles
+   * @param path
+   *          the URL path on this host to the service endpoint
    */
-  public ServiceRegistrationJpaImpl(String serviceType, String host, String path) {
-    super(serviceType, host, path);
+  public ServiceRegistrationJpaImpl(HostRegistration hostRegistration, String serviceType, String path) {
+    super(serviceType, hostRegistration.getBaseUrl(), path);
+    this.hostRegistration = hostRegistration;
   }
 
   /**
@@ -89,8 +105,10 @@ public class ServiceRegistrationJpaImpl extends JaxbServiceRegistration {
    *          the job type
    * @param jobProducer
    */
-  public ServiceRegistrationJpaImpl(String serviceType, String host, String path, boolean jobProducer) {
-    super(serviceType, host, path, jobProducer);
+  public ServiceRegistrationJpaImpl(HostRegistration hostRegistration, String serviceType, String path,
+          boolean jobProducer) {
+    super(serviceType, hostRegistration.getBaseUrl(), path, jobProducer);
+    this.hostRegistration = hostRegistration;
   }
 
   @Id
@@ -123,13 +141,6 @@ public class ServiceRegistrationJpaImpl extends JaxbServiceRegistration {
     return super.isOnline();
   }
 
-  @Column(name = "MAINTENANCE", nullable = false)
-  @XmlElement(name = "maintenance")
-  @Override
-  public boolean isInMaintenanceMode() {
-    return super.isInMaintenanceMode();
-  }
-
   @Column(name = "JOB_PRODUCER", nullable = false)
   @XmlElement(name = "jobproducer")
   @Override
@@ -147,4 +158,44 @@ public class ServiceRegistrationJpaImpl extends JaxbServiceRegistration {
   public void setJobs(Set<JobJpaImpl> jobs) {
     this.jobs = jobs;
   }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistration#isInMaintenanceMode()
+   */
+  @Transient
+  @Override
+  public boolean isInMaintenanceMode() {
+    return super.maintenanceMode;
+  }
+
+  /**
+   * Gets the associated {@link HostRegistration}
+   * 
+   * @return the host registration
+   */
+  @ManyToOne
+  public HostRegistration getHostRegistration() {
+    return hostRegistration;
+  }
+
+  /**
+   * @param hostRegistration
+   *          the hostRegistration to set
+   */
+  public void setHostRegistration(HostRegistration hostRegistration) {
+    this.hostRegistration = hostRegistration;
+  }
+
+  @PostLoad
+  public void postLoad() {
+    if (hostRegistration == null) {
+      logger.warn("host registration is null");
+    } else {
+      super.host = hostRegistration.getBaseUrl();
+      super.maintenanceMode = hostRegistration.isMaintenanceMode();
+    }
+  }
+
 }
