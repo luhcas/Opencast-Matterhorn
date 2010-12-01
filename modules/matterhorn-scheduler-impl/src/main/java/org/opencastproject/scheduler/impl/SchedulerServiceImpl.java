@@ -20,7 +20,6 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.scheduler.api.Event;
 import org.opencastproject.scheduler.api.IncompleteDataException;
-import org.opencastproject.scheduler.api.Metadata;
 import org.opencastproject.scheduler.api.SchedulerException;
 import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.SchedulerService;
@@ -242,10 +241,6 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
       throw new SchedulerException(mediaPackageException);
     }
     
-    for(Metadata m : event.getMetadataList()){
-      m.setEvent(event);
-    }
-    
     try {
       event.setEventId(workflow.getId());
       em = emf.createEntityManager();
@@ -327,8 +322,6 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
    * @return The recurring event that has been persisted
    */
   public void addRecurringEvent(Event recurrence) throws SchedulerException {
-    EntityManager em = emf.createEntityManager();
-    
     try {
       for (Event e : recurrence.createEventsFromRecurrence()) {
         logger.debug("Adding recurring event {}", e.getEventId());

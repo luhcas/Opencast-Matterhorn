@@ -31,10 +31,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity(name = "SeriesMetadataImpl")
@@ -60,6 +62,7 @@ public class SeriesMetadataImpl implements SeriesMetadata {
   @Id
   @ManyToOne
   @JoinColumn(name = "SERIES_ID")
+  @XmlTransient
   protected SeriesImpl series;
 
   /**
@@ -229,4 +232,7 @@ public class SeriesMetadataImpl implements SeriesMetadata {
     return SeriesBuilder.getInstance().parseSeriesMetadataImpl(xmlString);
   }
 
+  public void afterUnmarshal(Unmarshaller u, Object parent) {
+    this.series = (SeriesImpl) parent;
+  }
 }

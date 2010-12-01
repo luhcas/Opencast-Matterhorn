@@ -74,11 +74,7 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
   @Override
   public void addSeries(Series s) {
     if (s == null) throw new IllegalArgumentException("Can not add a null series");
-    List<SeriesMetadata> metadataList = s.getMetadata();
-    for(SeriesMetadata item : metadataList){
-      item.setSeries(s);
-    }
-    s.setMetadata(metadataList);
+    s.setMetadata(s.getMetadata());
     EntityManager em = emf.createEntityManager();
     try {
       EntityTransaction tx = em.getTransaction();
@@ -246,7 +242,6 @@ public class SeriesServiceImpl implements SeriesService, ManagedService {
 
   @SuppressWarnings("unchecked")
   @Override
-  //TODO: Is this a security risk??
   public List<Series> searchSeries(String pattern) throws NotFoundException {
     EntityManager em = emf.createEntityManager();
     List<SeriesMetadataImpl> found = null;

@@ -89,21 +89,7 @@ public class SeriesImpl implements Series {
    * Default constructor without any import.
    */
   public SeriesImpl() {}
-
-  public SeriesImpl(String seriesXml) {
-    SeriesImpl series = null;
-    try {
-      series = SeriesImpl.valueOf(seriesXml);
-    } catch (Exception e) {
-      throw new IllegalArgumentException("Invalid xml provided.  Unable to build a series object.");
-    }
-    if(series.getSeriesId() != null) {
-      setSeriesId(series.getSeriesId());
-    }
-    setMetadata(series.getMetadata());
-    setDescription(series.getDescription());
-  }
-
+  
   /**
    * {@inheritDoc}
    * 

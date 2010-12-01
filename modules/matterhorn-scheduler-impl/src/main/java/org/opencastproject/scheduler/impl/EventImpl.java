@@ -127,16 +127,6 @@ public class EventImpl implements Event {
   
   public EventImpl() {}
   
-  public EventImpl(String xml) {
-    try {
-      EventImpl e = EventImpl.valueOf(xml);
-      this.setEventId(e.getEventId());
-      initializeFromEvent(e);
-    } catch (Exception e) {
-      logger.warn("Could not parse Event XML {}", xml);
-    }
-  }
-  
   private static final Logger logger = LoggerFactory.getLogger(Event.class);
   
   /**
@@ -578,10 +568,8 @@ public class EventImpl implements Event {
     this.setTitle(e.getTitle());
     List<Metadata> metadata = new LinkedList<Metadata>();
     for(Metadata m : e.getMetadataList()){
-      MetadataImpl md = new MetadataImpl();
-      md.setKey(m.getKey());
-      md.setValue(m.getValue());
-      metadata.add(md);
+      m.setEvent(this);
+      metadata.add(m);
     }
     this.setMetadataList(metadata);
   }

@@ -24,6 +24,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
@@ -126,5 +127,9 @@ public class MetadataImpl implements Metadata {
     public Metadata unmarshal(MetadataImpl v) throws Exception {
       return v;
     }
+  }
+  
+  public void afterUnmarshal(Unmarshaller u, Object parent) {
+    this.event = (EventImpl)parent;
   }
 }
