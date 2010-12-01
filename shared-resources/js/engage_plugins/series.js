@@ -11,6 +11,7 @@ Opencast.Series = ( function () {
     var mediaPackageId;
     var series_id;
     var series_visible = false;
+var position_set = false;
 
     /**
      * @memberOf Opencast.Series
@@ -76,11 +77,15 @@ Opencast.Series = ( function () {
                 //add as a plugin
                 Opencast.Series_Plugin.addAsPlugin($('#oc_series'), data['search-results']);
                 //set position of div and make it visible
-                $( "#oc_series" ).position({
-                  of: $( "#oc_see-more-button" ),
-                  my: "left top",
-                  at: "left bottom"
-                }); 
+                if(!position_set)
+                {
+                  $( "#oc_series" ).position({
+                    of: $( "#oc_see-more-button" ),
+                    my: "left top",
+                    at: "left bottom"
+                  });
+                  position_set = true;
+                }
                 $('#oc_series').show();
                 $('#oc_series').attr({'aria-hidden': 'false', 'tabindex': '0' });
                 series_visible = true;

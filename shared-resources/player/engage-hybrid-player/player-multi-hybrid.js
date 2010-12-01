@@ -78,6 +78,7 @@ Opencast.Player = (function () {
     mouseOverBool          = false,
     captionsBool           = false,
     dragging               = false,
+    position_set           = false,
     htmlBool               = true,
     duration               = 0,
     browserWidth           = 0,
@@ -772,14 +773,18 @@ Opencast.Player = (function () {
 
     function showShare()
     {
+     if(!position_set)
+     {
        $( "#oc_share-layer" ).position({
         of: $( "#oc_share-button" ),
         my: "center top",
         at: "center bottom"
       });
+      }
       $('#oc_share-layer').show();
       $('#oc_share-layer').attr({'aria-hidden': 'false', 'tabindex': '0', });
       shareDisplayed = true;
+      position_set = true;
     }
 
     function hideShare(e)
