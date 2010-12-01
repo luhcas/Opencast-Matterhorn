@@ -44,6 +44,8 @@
     <script type="text/javascript" src="js/engage_plugins/annotation_chapter.js"></script>
     <script type="text/javascript" src="js/engage_plugins/description-plugin.js"></script>
     <script type="text/javascript" src="js/engage_plugins/description.js"></script>
+    <script type="text/javascript" src="js/engage_plugins/series-plugin.js"></script>
+    <script type="text/javascript" src="js/engage_plugins/series.js"></script>
     <script type="text/javascript" src="js/search.js"></script>
     <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-initialize.js"></script>
     <script type="text/javascript" src="js/watch.js"></script>
@@ -106,6 +108,8 @@
         $('#oc_shortcut-button').click(function(e) {Opencast.Player.doToggleShortcuts(e, 'oc_shortcut-button');});
         $('#oc_embed').dialog({ autoOpen: false, width: 800});
         $('#oc_btn-embed').click(function() {Opencast.Player.doToggleEmbed();});
+        $('#oc_series').hide();
+        $('#oc_see-more-button').click(function(e) {Opencast.Series.doToggleSeriesDropdown()});
       });
     </script>
   </head>
@@ -146,6 +150,11 @@
   </div><!-- END #oc_title-bar -->
     <div id="oc_player-head">
       <h2 id="oc_title"  tabindex="60"></h2>
+      <div id="oc_player-head-see-more" class="ui-helper-hidden">
+        <a href="javascript:" id="oc_see-more-button" title="click to see more of this series" role="button" aria-pressed="false">
+            <div>See More</div>
+        </a>
+      </div>
       <div id="oc_player-head-right">
         <a href="javascript:" id="oc_shortcut-button" title="click to show shortcuts" role="button" aria-pressed="false"  tabindex="70"><div>Shortcuts</div></a>
         <a href="javascript:" id="oc_share-button" title="click to show share options" role="button" aria-pressed="false"  tabindex="80"><div>Share</div></a>
@@ -296,6 +305,9 @@
      <div class="clear"></div>
         <label for="oc_embed-textarea">Choose your embed size. Copy the text and paste it in your html page.</label>
         <textarea id="oc_embed-textarea" class="oc_embed-textarea" rows="2" cols="1"></textarea>
+    </div>
+    <!-- Series dialog -->
+    <div id="oc_series" class="ui-widget ui-widget-content ui-corner-all oc_popuplayer ui-state-hover" title="see more of this series" tabindex="-1" role="dialog" aria-hidden="true">
     </div>
   </body>
 </html>
