@@ -59,6 +59,35 @@ input
   }
 
 
+#oc_player-head-see-more {
+  list-style: none outside none;
+}
+#oc_player-head-see-more a {
+  float: left;
+  background: url("../img/oc_icons_2.png") no-repeat -185px -125px transparent;
+  padding-left: 25px;
+  line-height: 20px;
+  margin: 5px 10px;
+}
+#oc_player-head-see-more a div {
+  background-color: white;
+  border: none;
+}
+#oc_player-head-see-more #oc_see-more-button {
+  background-position: -185px -125px;
+}
+#oc_player-head-see-more #oc_see-more-button:hover, #oc_player-head-see-more #oc_see-more-button:focus  {
+  background-position: -185px -155px;
+}
+
+#oc_series a {
+  text-decoration: underline;
+}
+#oc_series a:hover {
+  text-decoration: none; 
+}
+
+
 #oc_video-controls input
 {
   margin-left:              2px;

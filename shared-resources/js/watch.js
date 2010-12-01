@@ -44,7 +44,7 @@ Opencast.Watch = (function(){
             sd.setSeconds(parseInt(timeDate.substring(17, 19), 10));
 
             Opencast.Analytics.setMediaPackageId(mediaPackageId);
-
+            Opencast.Series.setMediaPackageId(mediaPackageId);
             Opencast.Description.setMediaPackageId(mediaPackageId);
 
             var dcExtent = parseInt($('#dc-extent').html());
