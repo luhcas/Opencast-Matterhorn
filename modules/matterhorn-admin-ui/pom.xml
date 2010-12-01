@@ -17,74 +17,31 @@
     <checkstyle.skip>false</checkstyle.skip>
   </properties>
   <dependencies>
-    <dependency>
+<dependency>
       <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-scheduler-api</artifactId>
+      <artifactId>matterhorn-kernel</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-series-service-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-workflow-service-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-capture-admin-service-api</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.servicemix.specs</groupId>
-      <artifactId>org.apache.servicemix.specs.jaxb-api-2.1</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <scope>test</scope>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-      <version>1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opencastproject</groupId>
-      <artifactId>matterhorn-kernel</artifactId>
-        <version>${project.version}</version>
-      <type>bundle</type>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>com.google.code.js-test-driver</groupId>
@@ -97,12 +54,6 @@
       <artifactId>coverage</artifactId>
       <version>1.2.1</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>org.opencastproject</groupId>
-    	<artifactId>matterhorn-scheduler-impl</artifactId>
-    	<version>${project.version}</version>
-    	<scope>compile</scope>
     </dependency>
   </dependencies>
   <build>
@@ -298,11 +249,9 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Import-Package>org.opencastproject.http;version=${project.version}, *</Import-Package>
-            <Export-Package> org.opencastproject.adminui.*;version=${project.version} </Export-Package>
-            <Private-Package>org.json.*, ui.*, uitests.*</Private-Package>
+            <Import-Package>org.opencastproject.http;version=${project.version}, *;resolution:=optional</Import-Package>
+            <Private-Package>ui.*, uitests.*</Private-Package>
             <Service-Component>
-              OSGI-INF/adminui-service-rest.xml,
               OSGI-INF/opencast-admin-ui.xml
             </Service-Component>
           </instructions>
@@ -310,7 +259,7 @@
       </plugin>
     </plugins>
   </build>
-   <reporting>
+  <reporting>
 		<plugins>
 			<plugin>
 				<groupId>gr.abiss.mvn.plugins</groupId>
