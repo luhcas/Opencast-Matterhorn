@@ -32,6 +32,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 import javax.persistence.RollbackException;
 import javax.persistence.spi.PersistenceProvider;
+import javax.servlet.Servlet;
 
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
@@ -65,7 +66,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
   /** Configuration key for the maximum load */
   protected static final String OPT_MAXLOAD = "org.opencastproject.server.maxload";
-  
+
   /**
    * A static list of statuses that influence how load balancing is calculated
    */
@@ -136,7 +137,8 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
           maxJobs = Integer.parseInt(cc.getBundleContext().getProperty(OPT_MAXLOAD));
         } catch (NumberFormatException e) {
           maxJobs = Runtime.getRuntime().availableProcessors();
-          logger.warn("Configuration key '{}' is not an integer. Falling back to the number of cores ({})", OPT_MAXLOAD, maxJobs);
+          logger.warn("Configuration key '{}' is not an integer. Falling back to the number of cores ({})",
+                  OPT_MAXLOAD, maxJobs);
         }
       }
       registerHost(hostName, maxJobs);
@@ -777,10 +779,33 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    * service on the network to handle new jobs.
    */
   class RestServiceTracker extends ServiceTracker {
+    protected static final String filter = "(&(objectClass=javax.servlet.Servlet)("
+            + RestPublisher.SERVICE_PATH_PROPERTY + "=*))";
+    
+    protected BundleContext bundleContext = null;
 
     RestServiceTracker(BundleContext bundleContext) throws InvalidSyntaxException {
-      super(bundleContext, bundleContext.createFilter("(&(objectClass=javax.servlet.Servlet)("
-              + RestPublisher.SERVICE_PATH_PROPERTY + "=*))"), null);
+      super(bundleContext, bundleContext.createFilter(filter), null);
+      this.bundleContext = bundleContext;
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @see org.osgi.util.tracker.ServiceTracker#open()
+     */
+    @Override
+    public void open() {
+      super.open();
+      try {
+        ServiceReference[] references = bundleContext.getAllServiceReferences(Servlet.class.getName(), filter);
+        if (references != null) {
+          for (ServiceReference ref : references) {
+            addingService(ref);
+          }
+        }
+      } catch (InvalidSyntaxException e) {
+        throw new IllegalStateException("The tracker filter '" + filter + "' has syntax errors", e);
+      }
     }
 
     @Override
