@@ -77,7 +77,6 @@
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Import-Package>
-              org.opencastproject.distribution.remote;version=${project.version},
               *;resolution:=optional
             </Import-Package>
             <Service-Component>
