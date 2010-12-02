@@ -21,6 +21,7 @@ import org.gstreamer.Pad;
 import org.gstreamer.elements.AppSink;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 
 /**
@@ -29,6 +30,7 @@ import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 public class EpiphanSubDeviceBinTest extends EpiphanTest {
 
   @Test
+  @Ignore
   public void subDeviceBinTest() throws Exception {
     if (!gstreamerInstalled)
       return;
@@ -40,6 +42,7 @@ public class EpiphanSubDeviceBinTest extends EpiphanTest {
   }
 
   @Test
+  @Ignore
   public void subDeviceBinCreateElementsTest() throws Exception {
     if (!gstreamerInstalled)
       return;
@@ -57,6 +60,7 @@ public class EpiphanSubDeviceBinTest extends EpiphanTest {
   }
 
   @Test
+  @Ignore
   public void subDeviceBinSetElementPropertiesTest() throws Exception {
     if (!gstreamerInstalled)
       return;
@@ -75,6 +79,7 @@ public class EpiphanSubDeviceBinTest extends EpiphanTest {
   }
 
   @Test
+  @Ignore
   public void subDeviceBinBinLinkElementsTest() throws Exception {
     if (!gstreamerInstalled)
       return;
@@ -103,6 +108,7 @@ public class EpiphanSubDeviceBinTest extends EpiphanTest {
   }
 
   @Test
+  @Ignore
   public void subDeviceBinBinRemoveElementsTest() throws Exception {
     if (!gstreamerInstalled)
       return;

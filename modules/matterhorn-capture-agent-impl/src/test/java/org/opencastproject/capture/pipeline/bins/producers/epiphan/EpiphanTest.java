@@ -25,6 +25,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Assert;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
@@ -32,6 +33,7 @@ import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
 import org.opencastproject.util.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
 
 /**
  * Abstract class for Epiphan producer bins testing.
@@ -40,6 +42,8 @@ import org.slf4j.LoggerFactory;
 public abstract class EpiphanTest {
 
   private static final Logger logger = LoggerFactory.getLogger(EpiphanTest.class);
+  
+  private static ArrayList<String> devices;
 
   /** True to run the tests */
   protected static boolean gstreamerInstalled = true;
@@ -72,6 +76,19 @@ public abstract class EpiphanTest {
     if (!gstreamerInstalled)
       return;
 
+    devices = new ArrayList<String>();
+    
+    if (System.getProperty("testEpiphan") != null) {
+      String epiphanDevice = System.getProperty("testEpiphan");
+      if (new File(epiphanDevice).exists()) {
+        devices.add(epiphanDevice);
+        logger.info("Testing Epiphan card at: " + epiphanDevice);
+      } else {
+        logger.error("File does not exist: " + epiphanDevice);
+        Assert.fail();
+      }
+    }    
+        
     captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, null, null, null, null, null, null,
             null, null);
     captureDevice = BinTestHelpers.createCaptureDevice(epiphanLocation, ProducerType.EPIPHAN_VGA2USB,
