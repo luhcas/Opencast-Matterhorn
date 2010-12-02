@@ -83,10 +83,10 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   @XmlAttribute(name = "fail-on-error")
   protected boolean failWorkflowOnException;
 
-  @XmlAttribute(name="if")
+  @XmlAttribute(name = "if")
   protected String executeCondition;
 
-  @XmlAttribute(name="unless")
+  @XmlAttribute(name = "unless")
   protected String skipCondition;
 
   @XmlAttribute(name = "exception-handler-workflow")
@@ -114,6 +114,9 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
 
   /**
    * Builds a new workflow operation instance based on another workflow operation.
+   * 
+   * @param def
+   *          the workflow definition
    */
   public WorkflowOperationInstanceImpl(WorkflowOperationDefinition def) {
     setId(def.getId());
@@ -151,7 +154,7 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   public void setExecutionCondition(String condition) {
     this.executeCondition = condition;
   }
-  
+
   public String getExecutionCondition() {
     return executeCondition;
   }
@@ -410,33 +413,34 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
 
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see java.lang.Object#hashCode()
    */
   @Override
   public int hashCode() {
     return position;
   }
-  
+
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
   public boolean equals(Object o) {
-    if(this == o) return true;
-    if(o instanceof WorkflowOperationInstance) {
-      WorkflowOperationInstance other = (WorkflowOperationInstance)o;
+    if (this == o)
+      return true;
+    if (o instanceof WorkflowOperationInstance) {
+      WorkflowOperationInstance other = (WorkflowOperationInstance) o;
       return other.getId().equals(this.getId()) && other.getPosition() == this.position;
     } else {
       return false;
     }
   }
-  
+
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see java.lang.Object#toString()
    */
   @Override
