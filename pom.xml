@@ -87,11 +87,13 @@
       <modules>
         <module>modules/matterhorn-db</module>
         <module>modules/matterhorn-distribution-service-api</module>
-        <module>modules/matterhorn-distribution-service-common</module>
         <module>modules/matterhorn-distribution-service-download</module>
-        <module>modules/matterhorn-distribution-service-itunesu</module>
         <module>modules/matterhorn-distribution-service-streaming</module>
+<!--
+        <module>modules/matterhorn-distribution-service-common</module>
+        <module>modules/matterhorn-distribution-service-itunesu</module>
         <module>modules/matterhorn-distribution-service-youtube</module>
+-->
         <module>modules/matterhorn-dublincore</module>
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-metadata-api</module>
@@ -113,9 +115,12 @@
         <module>modules/matterhorn-db</module>
         <module>modules/matterhorn-distribution-service-api</module>
         <module>modules/matterhorn-distribution-service-download-remote</module>
-        <module>modules/matterhorn-distribution-service-itunesu-remote</module>
         <module>modules/matterhorn-distribution-service-streaming-remote</module>
+
+<!--
+        <module>modules/matterhorn-distribution-service-itunesu-remote</module>
         <module>modules/matterhorn-distribution-service-youtube-remote</module>
+-->
         <module>modules/matterhorn-dublincore</module>
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-metadata-api</module>
@@ -163,9 +168,13 @@
         <module>modules/matterhorn-db</module>
         <module>modules/matterhorn-distribution-service-api</module>
         <module>modules/matterhorn-distribution-service-download-remote</module>
-        <module>modules/matterhorn-distribution-service-itunesu-remote</module>
         <module>modules/matterhorn-distribution-service-streaming-remote</module>
+
+<!--
+        <module>modules/matterhorn-distribution-service-itunesu-remote</module>
         <module>modules/matterhorn-distribution-service-youtube-remote</module>
+-->
+
         <module>modules/matterhorn-dublincore</module>
         <module>modules/matterhorn-kernel</module>
         <module>modules/matterhorn-metadata-api</module>
