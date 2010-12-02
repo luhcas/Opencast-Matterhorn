@@ -17,23 +17,6 @@ package org.opencastproject.serviceregistry.impl;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.persistence.RollbackException;
-import javax.persistence.spi.PersistenceProvider;
-import javax.servlet.Servlet;
-
 import org.opencastproject.job.api.JaxbJob;
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.Job.Status;
@@ -56,6 +39,22 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
+import javax.persistence.Query;
+import javax.persistence.RollbackException;
+import javax.persistence.spi.PersistenceProvider;
 
 /**
  * JPA implementation of the {@link ServiceRegistry}
@@ -114,21 +113,18 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
   public void activate(ComponentContext cc) {
     logger.debug("activate");
+
+    // Set up persistence
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.serviceregistry", persistenceProperties);
+    
+    // Find this host's url
     if (cc == null || StringUtils.isBlank(cc.getBundleContext().getProperty("org.opencastproject.server.url"))) {
       hostName = UrlSupport.DEFAULT_BASE_URL;
     } else {
       hostName = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     }
-    if (cc != null) {
-      try {
-        tracker = new RestServiceTracker(cc.getBundleContext());
-        tracker.open();
-      } catch (InvalidSyntaxException e) {
-        logger.error("Invlid filter syntax: {}", e);
-        throw new IllegalStateException(e);
-      }
-    }
+    
+    // Register this host
     try {
       if (cc == null || StringUtils.isBlank(cc.getBundleContext().getProperty(OPT_MAXLOAD))) {
         maxJobs = Runtime.getRuntime().availableProcessors();
@@ -144,6 +140,17 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       registerHost(hostName, maxJobs);
     } catch (ServiceRegistryException e) {
       throw new IllegalStateException("Unable to register host " + hostName + " in the service registry", e);
+    }
+
+    // Track any services from this host that need to be added to the service registry
+    if (cc != null) {
+      try {
+        tracker = new RestServiceTracker(cc.getBundleContext());
+        tracker.open(true);
+      } catch (InvalidSyntaxException e) {
+        logger.error("Invlid filter syntax: {}", e);
+        throw new IllegalStateException(e);
+      }
     }
   }
 
@@ -779,35 +786,36 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
    * service on the network to handle new jobs.
    */
   class RestServiceTracker extends ServiceTracker {
-    protected static final String filter = "(&(objectClass=javax.servlet.Servlet)("
+    protected static final String FILTER = "(&(objectClass=javax.servlet.Servlet)("
             + RestPublisher.SERVICE_PATH_PROPERTY + "=*))";
     
     protected BundleContext bundleContext = null;
 
     RestServiceTracker(BundleContext bundleContext) throws InvalidSyntaxException {
-      super(bundleContext, bundleContext.createFilter(filter), null);
+      super(bundleContext, bundleContext.createFilter(FILTER), null);
       this.bundleContext = bundleContext;
     }
     
     /**
      * {@inheritDoc}
-     * @see org.osgi.util.tracker.ServiceTracker#open()
+     *
+     * @see org.osgi.util.tracker.ServiceTracker#open(boolean)
      */
     @Override
-    public void open() {
-      super.open();
+    public void open(boolean trackAllServices) {
+      super.open(trackAllServices);
       try {
-        ServiceReference[] references = bundleContext.getAllServiceReferences(Servlet.class.getName(), filter);
+        ServiceReference[] references = bundleContext.getAllServiceReferences(null, FILTER);
         if (references != null) {
           for (ServiceReference ref : references) {
             addingService(ref);
           }
         }
       } catch (InvalidSyntaxException e) {
-        throw new IllegalStateException("The tracker filter '" + filter + "' has syntax errors", e);
+        throw new IllegalStateException("The tracker filter '" + FILTER + "' has syntax errors", e);
       }
     }
-
+    
     @Override
     public Object addingService(ServiceReference reference) {
       String serviceType = (String) reference.getProperty(RestPublisher.SERVICE_TYPE_PROPERTY);
