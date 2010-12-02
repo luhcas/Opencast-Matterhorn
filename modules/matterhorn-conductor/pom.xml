@@ -135,9 +135,7 @@
               OSGI-INF/operations/cleanup.xml,
               OSGI-INF/operations/compose.xml,
               OSGI-INF/operations/distribute-download.xml,
-              OSGI-INF/operations/distribute-itunesu.xml,
               OSGI-INF/operations/distribute-streaming.xml,
-              OSGI-INF/operations/distribute-youtube.xml,
               OSGI-INF/operations/download-dvd.xml,
               OSGI-INF/operations/embed.xml,
               OSGI-INF/operations/error-handler.xml,
@@ -151,6 +149,10 @@
               OSGI-INF/operations/segmentpreviews.xml,
               OSGI-INF/operations/trim.xml,
               OSGI-INF/operations/zip.xml
+              <!--
+              OSGI-INF/operations/distribute-itunesu.xml,
+              OSGI-INF/operations/distribute-youtube.xml,
+              -->
             </Service-Component>
           </instructions>
         </configuration>
