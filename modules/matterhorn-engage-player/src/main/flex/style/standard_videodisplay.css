@@ -92,30 +92,58 @@ Button.PlayBig
 {
    font-size: 0; 
   
-  upSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_big_up');
-  overSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_big_up');
-  downSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_big_down');
-  disabledSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_big_up');
-  selectedUpSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_big_up'); 
-  selectedOverSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_big_up');
-  selectedDownSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_big_up');
-  selectedDisabledSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_play_big_up');  
+  upSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_play');
+  overSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_play_hover');
+  downSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_play_hover');
+  disabledSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_play');
+  selectedUpSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_play'); 
+  selectedOverSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_play_hover');
+  selectedDownSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_play');
+  selectedDisabledSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_play');  
 }
 
 Button.PauseBig
 {
    font-size: 0; 
   
-  upSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_pause_big_up');
-  overSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_pause_big_up');
-  downSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_pause_big_down');
-  disabledSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_pause_big_up');
-  selectedUpSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_pause_big_up'); 
-  selectedOverSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_pause_big_up');
-  selectedDownSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_pause_big_up');
-  selectedDisabledSkin: Embed(source='Buttons_Full_Screen.swf', symbol='btn_pause_big_up');  
+  upSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_pause');
+  overSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_pause_hover');
+  downSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_pause_hover');
+  disabledSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_pause');
+  selectedUpSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_pause'); 
+  selectedOverSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_pause_hover');
+  selectedDownSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_pause');
+  selectedDisabledSkin: Embed(source='Buttons_Main_Large.swf', symbol='btn_pause');  
+}
+/*
+Button.PlayBig
+{
+   font-size: 0; 
+  
+  upSkin: Embed(source='MainIcons.swf', symbol='play_big_default');
+  overSkin: Embed(source='MainIcons.swf', symbol='play_big_default');
+  downSkin: Embed(source='MainIcons.swf', symbol='play_big_hover');
+  disabledSkin: Embed(source='MainIcons.swf', symbol='play_big_default');
+  selectedUpSkin: Embed(source='MainIcons.swf', symbol='play_big_default'); 
+  selectedOverSkin: Embed(source='MainIcons.swf', symbol='play_big_default');
+  selectedDownSkin: Embed(source='MainIcons.swf', symbol='play_big_default');
+  selectedDisabledSkin: Embed(source='MainIcons.swf', symbol='play_big_default');  
 }
 
+Button.PauseBig
+{
+   font-size: 0; 
+  
+  upSkin: Embed(source='MainIcons.swf', symbol='pause_big_default');
+  overSkin: Embed(source='MainIcons.swf', symbol='pause_big_default');
+  downSkin: Embed(source='MainIcons.swf', symbol='pause_big_hover');
+  disabledSkin: Embed(source='MainIcons.swf', symbol='pause_big_default');
+  selectedUpSkin: Embed(source='MainIcons.swf', symbol='pause_big_default'); 
+  selectedOverSkin: Embed(source='MainIcons.swf', symbol='pause_big_default');
+  selectedDownSkin: Embed(source='MainIcons.swf', symbol='pause_big_default');
+  selectedDisabledSkin: Embed(source='MainIcons.swf', symbol='pause_big_default');  
+}
+*/
 Button.FastForward
 {
    font-size: 0; 
