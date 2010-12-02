@@ -20,7 +20,7 @@ import org.opencastproject.capture.api.CaptureParameters;
 import java.util.Properties;
 
 public class CaptureDeviceProperties {
-  private String customSource;
+  private String customProducer;
   private String codec;
   private String container;
   private String bitrate;
@@ -42,7 +42,7 @@ public class CaptureDeviceProperties {
    *          Confidence monitoring properties.
    **/
   public CaptureDeviceProperties(CaptureDevice captureDevice, Properties properties) {
-    customSource = captureDevice.properties.getProperty("customSource");
+    customProducer = captureDevice.properties.getProperty("customProducer");
     codec = captureDevice.properties.getProperty("codec");
     container = captureDevice.properties.getProperty("container");
     bitrate = captureDevice.properties.getProperty("bitrate");
@@ -57,12 +57,12 @@ public class CaptureDeviceProperties {
     }
   }
 
-  public String getCustomSource() {
-    return customSource;
+  public String getCustomProducer() {
+    return customProducer;
   }
 
   public void setCustomSource(String customSource) {
-    this.customSource = customSource;
+    this.customProducer = customSource;
   }
 
   public String getCodec() {

@@ -166,6 +166,9 @@ public interface CaptureParameters {
   /** Property specifying the flavor of the device */
   static final String CAPTURE_DEVICE_FLAVOR = ".flavor";
   
+  /** Property specifying the GStreamer like syntax for a Custom Producer either Video or Audio**/
+  static final String CAPTURE_DEVICE_CUSTOM_PRODUCER = ".customProducer";
+  
   /** Property specifying the name of the file to output */
   static final String CAPTURE_DEVICE_DEST = ".outputfile";
   

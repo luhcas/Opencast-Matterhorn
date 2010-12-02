@@ -46,13 +46,13 @@ public class BinTestHelpers {
   
 
   
-  public static Properties createCaptureDeviceProperties(String customSource, String codec, String bitrate, 
+  public static Properties createCaptureDeviceProperties(String customProducer, String codec, String bitrate, 
           String quantizer, String container, String bufferCount, String bufferBytes, String bufferTime, 
           String framerate){
     Properties properties = new Properties();
    
-    if (customSource != null)
-      properties.setProperty("customSource", customSource);
+    if (customProducer != null)
+      properties.setProperty("customProducer", customProducer);
     if (codec != null)
       properties.setProperty("codec", codec);
     if (bitrate != null)

@@ -214,7 +214,7 @@ public class WorkflowStatisticsTest {
       }
     }
     
-    Thread.sleep(1000);
+    Thread.sleep(2000);
     
     // TODO: Add failed, failing, stopped etc. workflows as well 
 

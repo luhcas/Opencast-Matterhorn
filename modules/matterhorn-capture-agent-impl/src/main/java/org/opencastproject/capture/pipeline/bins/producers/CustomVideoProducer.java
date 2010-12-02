@@ -71,7 +71,7 @@ public class CustomVideoProducer extends ProducerBin {
    **/
   @Override
   protected void createElements(){
-    bin = Bin.launch(captureDeviceProperties.getCustomSource(), LINK_UNUSED_GHOST_PADS);
+    bin = Bin.launch(captureDeviceProperties.getCustomProducer(), LINK_UNUSED_GHOST_PADS);
   }
   
  /** Need an empty method for createGhostPads because the Bin.launch will create the ghost pads all on its own.**/
