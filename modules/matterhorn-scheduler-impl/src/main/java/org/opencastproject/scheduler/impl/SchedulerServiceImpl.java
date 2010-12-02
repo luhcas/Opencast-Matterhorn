@@ -627,6 +627,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
         if (storedEvent == null){
           em.getTransaction().rollback();
           em.close();
+          throw new NotFoundException("Couldn't find event" + eventId.toString());
         }
         storedEvent.update(e);
         em.merge(storedEvent);
