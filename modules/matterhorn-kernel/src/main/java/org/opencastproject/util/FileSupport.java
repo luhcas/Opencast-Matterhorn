@@ -472,7 +472,8 @@ public class FileSupport {
         // dest + " do not have the same length");
       }
     } catch (Exception e) {
-      throw new RuntimeException("Error creating a link from " + sourceLocation + " to " + targetLocation + ": " + error, e);
+      logger.debug("Unable to create a link from " + sourceLocation + " to " + targetLocation + ": " + error.toString());
+      return false;
     } finally {
       IoSupport.closeQuietly(stdout);
       IoSupport.closeQuietly(stderr);
