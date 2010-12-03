@@ -110,8 +110,6 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
-            <Bundle-Activator>org.opencastproject.serviceregistry.impl.webconsole.Activator</Bundle-Activator>
-            <Private-Package>org.opencastproject.serviceregistry.impl.webconsole, ui</Private-Package>
             <Import-Package>
               org.opencastproject.job.api;version=${project.version},
               *;resolution:=optional
