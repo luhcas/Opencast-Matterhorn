@@ -78,12 +78,6 @@ case "$1" in
     fi
 
 
-# copy away the gogo shell files otherwise matterhorn can not run in background
-    mkdir -p $FELIX/backup
-    for item in $(ls $FELIX/bundle/org.apache.felix.gogo.* 2> /dev/null); do
-       mv -f $item $FELIX/backup/
-    done
-
 # Make sure matterhorn bundles are reloaded
     if [ -d "$FELIX_CACHE" ]; then
       echo "Removing cached matterhorn bundles from $FELIX_CACHE"
