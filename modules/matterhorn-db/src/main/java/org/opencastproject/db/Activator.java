@@ -21,8 +21,12 @@ import com.mchange.v2.c3p0.DataSources;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
@@ -35,6 +39,9 @@ import javax.sql.DataSource;
  */
 public class Activator implements BundleActivator {
 
+  /** The logging facility */
+  private static final Logger logger = LoggerFactory.getLogger(Activator.class);
+  
   /**
    * The persistence properties service registration
    */
@@ -71,7 +78,18 @@ public class Activator implements BundleActivator {
     pooledDataSource.setJdbcUrl(jdbcUrl);
     pooledDataSource.setUser(jdbcUser);
     pooledDataSource.setPassword(jdbcPass);
-    datasourceRegistration = bundleContext.registerService(DataSource.class.getName(), pooledDataSource, null);
+    
+    Connection connection = null;
+    try {
+      connection = pooledDataSource.getConnection();
+      datasourceRegistration = bundleContext.registerService(DataSource.class.getName(), pooledDataSource, null);
+    } catch (SQLException e) {
+      logger.error("Connection attempt to {} failed", jdbcUrl);
+      throw e;
+    } finally {
+      if (connection != null)
+        connection.close();
+    }
 
     // Register the persistence properties
     Dictionary props = new Hashtable();

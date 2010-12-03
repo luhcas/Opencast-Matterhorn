@@ -17,6 +17,10 @@
   </properties>
   <dependencies>
     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
@@ -71,7 +75,9 @@
           <instructions>
             <Bundle-SymbolicName> ${project.artifactId} </Bundle-SymbolicName>
             <Bundle-Activator>org.opencastproject.db.Activator</Bundle-Activator>
-            <Import-Package>*;resolution:=optional</Import-Package>
+            <Import-Package>
+                *;resolution:=optional
+             </Import-Package>
              <Embed-Dependency>
               c3p0;inline=true,
               h2;inline=true,
