@@ -772,8 +772,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
   void handleOperationResult(WorkflowInstance workflow, WorkflowOperationResult result)
           throws WorkflowDatabaseException {
     if (result == null) {
+      WorkflowOperationInstance operation = workflow.getCurrentOperation();
       // Just continue using the workflow's current mediapackage, but log a warning
-      logger.warn("Handling a null operation result for workflow {}", workflow.getId());
+      logger.warn("Handling a null operation result for workflow {} in operation {}", workflow.getId(), operation.getId());
       result = new WorkflowOperationResultImpl(workflow.getMediaPackage(), null, Action.CONTINUE, 0);
     } else {
       // Update the workflow's mediapackage if a new one was produced in this operation
@@ -820,7 +821,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
     // If the workflow was paused while the operation was still working, accept the updated mediapackage
     // and properties, but do not continue on.
-    if (result.getAction().equals(Action.CONTINUE) && WorkflowState.PAUSED.equals(dbState)) {
+    Action action = result.getAction();
+    if ((Action.CONTINUE.equals(action) || Action.SKIP.equals(action)) && WorkflowState.PAUSED.equals(dbState)) {
       workflow.setState(WorkflowState.PAUSED);
       workflow = updateConfiguration(workflow, result.getProperties());
       dao.update(workflow);
@@ -841,7 +843,7 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
     WorkflowOperationInstance nextOperation = workflow.next(); // Be careful... this increments the current operation
     if (nextOperation == null) {
-      if (Action.CONTINUE.equals(result.getAction())) {
+      if (Action.CONTINUE.equals(action) || Action.SKIP.equals(action)) {
         workflow.setState(WorkflowState.SUCCEEDED);
         for (WorkflowOperationInstance op : workflow.getOperations()) {
           if (op.getState().equals(WorkflowOperationInstance.OperationState.FAILED)) {
@@ -873,13 +875,13 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       }
       dao.update(workflow);
     } else {
-      if (Action.CONTINUE.equals(result.getAction())) {
+      if (Action.CONTINUE.equals(action) || Action.SKIP.equals(action)) {
         workflow.setState(WorkflowState.RUNNING);
       } else {
         workflow.setState(WorkflowState.PAUSED);
       }
       dao.update(workflow);
-      if (Action.CONTINUE.equals(result.getAction())) {
+      if (Action.CONTINUE.equals(action) || Action.SKIP.equals(action)) {
         this.run(workflow);
       }
     }

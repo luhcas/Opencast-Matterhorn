@@ -103,7 +103,7 @@ final class WorkflowOperationWorker implements Runnable {
         throw new IllegalStateException("Workflow operation '" + operation + "' is in unexpected state '"
                 + operation.getState() + "'");
       }
-      if (result == null || Action.CONTINUE.equals(result.getAction()))
+      if (result == null || Action.CONTINUE.equals(result.getAction()) || Action.SKIP.equals(result.getAction()))
         handler.destroy(workflow);
       service.handleOperationResult(workflow, result);
     } catch (Exception e) {
@@ -137,12 +137,8 @@ final class WorkflowOperationWorker implements Runnable {
 
     if (StringUtils.isNotBlank(executeCondition) && !"true".equalsIgnoreCase(executeCondition)) {
       operation.setState(OperationState.SKIPPED);
-      service.update(workflow);
-      return null;
     } else if (StringUtils.isNotBlank(skipCondition) && "true".equalsIgnoreCase(skipCondition)) {
       operation.setState(OperationState.SKIPPED);
-      service.update(workflow);
-      return null;
     } else {
       operation.setState(OperationState.RUNNING);
     }
