@@ -5,7 +5,7 @@ source  "${HOME3P}/utilx"
 #
 install_rpms() {
   name=`echo "$1" | awk '{sub("-[0-9.]+.*",""); print $0}'`
-  name_ver=`echo "$1" | awk '{sub("\\\.(i386|noarch)\\\.rpm$",""); print $0}'`
+  name_ver=`echo "$1" | awk '{sub("\\\.(i386|x86_64|noarch)\\\.rpm$",""); print $0}'`
   case `os` in
     CentOS | RHEL )
       installed=`rpm -q "$name"`
@@ -48,25 +48,101 @@ install_prog() {
   case `os` in
     CentOS | RHEL )
       case "$1" in
+        wget ) # wget is missing, get it with java wget
+          case `arch` in
+            i386 )
+              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              rpms="wget-1.11.4-2.el5_4.1.i386.rpm"
+              ;;
+            x86_64 )
+              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              rpms="wget-1.11.4-2.el5_4.1.x86_64.rpm"
+              ;;
+          esac
+          #
+          if [ ! -s "$rpms" ]; then
+            copypkg "$rpms"
+            if [ $? -ne 0 ]; then
+              if [ ! -s ../wget.class ]; then
+                javac -d .. ../wget.java
+                [ $? -ne 0 ] && return 1
+              fi
+              java ../wget "$URL/$rpms" > "$rpms"
+              [ $? -ne 0 ] && return 1
+            fi
+          fi
+          ;;
         xz )
-          URL=http://mirror.centos.org/centos/5/os/i386/CentOS
-          rpms="xz-4.999.9-0.3.beta.20091007git.el5.i386.rpm xz-libs-4.999.9-0.3.beta.20091007git.el5.i386.rpm"
+          case `arch` in
+            i386 )
+              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              rpms="xz-4.999.9-0.3.beta.20091007git.el5.i386.rpm xz-libs-4.999.9-0.3.beta.20091007git.el5.i386.rpm"
+              ;;
+            x86_64 )
+              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              rpms="xz-4.999.9-0.3.beta.20091007git.el5.x86_64.rpm xz-libs-4.999.9-0.3.beta.20091007git.el5.x86_64.rpm"
+              ;;
+          esac
           ;;
         git ) 
-          URL=http://packages.sw.be/git
-          rpms="git-1.7.3-1.el5.rf.i386.rpm perl-Git-1.7.3-1.el5.rf.i386.rpm"
+          case `arch` in
+            i386 )
+              URL=http://packages.sw.be/git
+              rpms="git-1.7.3-1.el5.rf.i386.rpm perl-Git-1.7.3-1.el5.rf.i386.rpm"
+              ;;
+            x86_64 )
+              URL=http://packages.sw.be/git
+              rpms="git-1.7.3-1.el5.rf.x86_64.rpm perl-Git-1.7.3-1.el5.rf.x86_64.rpm"
+              ;;
+          esac
           ;;
         jam ) 
-          URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/i386
-          rpms=jam-2.5-4.el5.i386.rpm
+          case `arch` in
+            i386 )
+              URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/i386
+              rpms=jam-2.5-4.el5.i386.rpm
+              ;;
+            x86_64 )
+              URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/x86_64
+              rpms=jam-2.5-4.el5.x86_64.rpm
+              ;;
+          esac
           ;;
         yasm ) 
-          URL=http://packages.sw.be/yasm
-          rpms=yasm-1.0.1-1.el5.rf.i386.rpm
+          case `arch` in
+            i386 )
+              URL=http://packages.sw.be/yasm
+              rpms=yasm-1.0.1-1.el5.rf.i386.rpm
+              ;;
+            x86_64 )
+              URL=http://packages.sw.be/yasm
+              rpms=yasm-1.0.1-1.el5.rf.x86_64.rpm
+              ;;
+          esac
           ;;
-        gsl )
-          URL=http://mirror.centos.org/centos/5/os/i386/CentOS
-          rpms="gsl-1.13-3.el5.i386.rpm gsl-devel-1.13-3.el5.i386.rpm"
+        ImageMagick )
+          case `arch` in
+            i386 )
+              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              rpms="ImageMagick-6.2.8.0-4.el5_1.1.i386.rpm"
+              ;;
+            x86_64 )
+              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              rpms="ImageMagick-6.2.8.0-4.el5_1.1.x86_64.rpm"
+              ;;
+          esac
+          ;;
+        gsl-devel )
+          case `arch` in
+            i386 )
+              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              rpms="gsl-1.13-3.el5.i386.rpm gsl-devel-1.13-3.el5.i386.rpm"
+              ;;
+            x86_64 )
+              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              rpms="gsl-1.13-3.el5.x86_64.rpm gsl-devel-1.13-3.el5.x86_64.rpm"
+              ;;
+          esac
           ;;
         * )
           echo "Don't know how to install $1 on `os`" 1>&2
@@ -74,11 +150,14 @@ install_prog() {
           ;;
       esac
       for rpm in $rpms; do
-        if [ ! -f "$rpm" ]; then
+        if [ ! -s "$rpm" ]; then
           copypkg "$rpm"
           if [ $? -ne 0 ]; then
             wget -4O "$rpm" "$URL/$rpm"
-            [ $? -ne 0 ] && return 1
+            if [ $? -ne 0 ]; then
+              rm -f "$rpm"
+              return 1
+            fi
           fi
         fi
       done
@@ -90,7 +169,8 @@ install_prog() {
         xz ) prog=xz-utils ;;
         yacc ) prog="flex bison" ;;
         git ) prog=git-core ;;
-        gsl ) prog=libgsl0-dev ;;
+        ImageMagick ) prog=imagemagick ;;
+        gsl-devel ) prog=libgsl0-dev ;;
         * ) prog="$1" ;;
       esac
       sudox apt-get -y install $prog
@@ -101,12 +181,51 @@ install_prog() {
     openSUSE )
       ;;
     MacOS )
+      case "$1" in
+        * ) prog="$1" ;;
+      esac
+      sudox port install $prog
+      [ $? -ne 0 ] && return 1
       ;;
     * )
       echo "Don't know how to install $1 on `os`" 1>&2
       return 1
       ;;
   esac
+  return 0
+}
+#
+install_macports() {
+  cd "$HOME3P"
+  [ $? -ne 0 ] && return 1
+  mkdir -p packages
+  [ $? -ne 0 ] && return 1
+  cd packages
+  [ $? -ne 0 ] && return 1
+  #
+  URL=http://distfiles.macports.org/MacPorts
+  dmg=MacPorts-1.9.2-10.6-SnowLeopard.dmg
+  if [ ! -s "$dmg" ]; then
+    copypkg "$dmg"
+    if [ $? -ne 0 ]; then
+      if [ ! -s ../wget.class ]; then
+        javac -d .. ../wget.java
+        [ $? -ne 0 ] && return 1
+      fi
+      java ../wget "$URL/$dmg" > "$dmg"
+      [ $? -ne 0 ] && return 1
+    fi
+  fi
+  #
+  sudox hdiutil attach "$dmg"
+  [ $? -ne 0 ] && return 1
+  # mounted to /Volumes/MacPorts-1.9.2
+  sudox installer -pkg /Volumes/MacPorts-1.9.2/MacPorts-1.9.2.pkg -target /
+  [ $? -ne 0 ] && return 1
+  sudox hdiutil detach /Volumes/MacPorts-1.9.2
+  [ $? -ne 0 ] && return 1
+# sudox port -v selfupdate
+# [ $? -ne 0 ] && return 1
   return 0
 }
 #
@@ -134,6 +253,7 @@ preinstall_scons() {
 check_prereq() {
   case `os` in
     CentOS | RHEL )
+      chkprog wget  || install_prog wget  || return 1
       chkprog xz    || install_prog xz    || return 1
       chkprog git   || install_prog git   || return 1
       # These are needed for Windows compile
@@ -142,10 +262,14 @@ check_prereq() {
       chkprog scons || preinstall_scons   || return 1
       #fix_scons || return 1
       #
-      # gsl devel is needed by ocropus
-      chkprog gsl-config || install_prog gsl   || return 1
+      # convert (part of ImageMagick) is needed by ocropus_libs/iulib
+      chkprog convert || install_prog ImageMagick  || return 1
+      #
+      # gsl-devel is needed by ocropus
+      chkprog gsl-config || install_prog gsl-devel || return 1
       ;;
     Ubuntu )
+      chkprog wget  || install_prog wget  || return 1
       chkprog alien || install_prog alien || return 1
       chkprog g++   || install_prog g++   || return 1
       chkprog yacc  || install_prog yacc  || return 1
@@ -157,20 +281,29 @@ check_prereq() {
       chkprog scons || preinstall_scons   || return 1
       #fix_scons || return 1
       #
-      # gsl devel is needed by ocropus
-      chkprog gsl-config || install_prog gsl   || return 1
+      # convert (part of ImageMagick) is needed by ocropus_libs/iulib
+      chkprog convert || install_prog ImageMagick  || return 1
+      #
+      # gsl-devel is needed by ocropus
+      chkprog gsl-config || install_prog gsl-devel || return 1
       ;;
     Debian )
       ;;
     openSUSE )
       ;;
     MacOS )
+      chkprog port  || install_macports   || return 1
+      sudox port -v selfupdate
+      [ $? -ne 0 -a $? -ne 25 ] && return 1
+      #
+      chkprog wget  || install_prog wget  || return 1
+      #
       # convert (part of ImageMagick) is needed by ocropus_libs/iulib
-      chkprog convert || install ImageMagick || return 1
-      if [ ! -x /usr/bin/convert ]; then
-        ln -fs /opt/local/bin/convert /usr/bin/convert
-        [ $? -ne 0 ] && return 1
-      fi
+      #chkprog convert || install_prog ImageMagick  || return 1
+      #if [ ! -x /usr/bin/convert ]; then
+      #  sudox ln -fs /opt/local/bin/convert /usr/bin/convert
+      #  [ $? -ne 0 ] && return 1
+      #fi
       ;;
     * )
       echo "Don't know how to check prerequisites on `os`" 1>&2
@@ -190,28 +323,50 @@ install_mingw32() {
   #
   case `os` in
     CentOS | RHEL | Ubuntu )
-      URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/i386
-      rpms="mingw32-gcc-4.3.2-12.el5.i386.rpm mingw32-binutils-2.19-3.el5.i386.rpm mingw32-cpp-4.3.2-12.el5.i386.rpm mingw32-filesystem-56-1.el5.noarch.rpm mingw32-runtime-3.15.1-10.el5.noarch.rpm mingw32-w32api-3.12-8.el5.noarch.rpm rpmlint-0.91-1.el5.noarch.rpm"
+      case `arch` in
+        i386 )
+          URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/i386
+          rpms="mingw32-gcc-4.3.2-12.el5.i386.rpm mingw32-binutils-2.19-3.el5.i386.rpm mingw32-cpp-4.3.2-12.el5.i386.rpm mingw32-filesystem-56-1.el5.noarch.rpm mingw32-runtime-3.15.1-10.el5.noarch.rpm mingw32-w32api-3.12-8.el5.noarch.rpm rpmlint-0.91-1.el5.noarch.rpm"
+          ;;
+        x86_64 )
+          URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/x86_64
+          rpms="mingw32-gcc-4.3.2-12.el5.x86_64.rpm mingw32-binutils-2.19-3.el5.x86_64.rpm mingw32-cpp-4.3.2-12.el5.x86_64.rpm mingw32-filesystem-56-1.el5.noarch.rpm mingw32-runtime-3.15.1-10.el5.noarch.rpm mingw32-w32api-3.12-8.el5.noarch.rpm rpmlint-0.91-1.el5.noarch.rpm"
+          ;;
+      esac
       for rpm in $rpms; do
-        if [ ! -f "$rpm" ]; then
+        if [ ! -s "$rpm" ]; then
           copypkg "$rpm"
           if [ $? -ne 0 ]; then
             wget -4O "$rpm" "$URL/$rpm"
-            [ $? -ne 0 ] && return 1
+            if [ $? -ne 0 ]; then
+              rm -f "$rpm"
+              return 1
+            fi
           fi
         fi
       done
       install_rpms $rpms
       [ $? -ne 0 ] && return 1
       #
-      URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/i386
-      rpms=mingw32-gcc-c++-4.3.2-12.el5.i386.rpm
+      case `arch` in
+        i386 )
+          URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/i386
+          rpms=mingw32-gcc-c++-4.3.2-12.el5.i386.rpm
+          ;;
+        x86_64 )
+          URL=ftp://mirror.switch.ch/pool/1/mirror/epel/5/x86_64
+          rpms=mingw32-gcc-c++-4.3.2-12.el5.x86_64.rpm
+          ;;
+      esac
       for rpm in $rpms; do
-        if [ ! -f "$rpm" ]; then
+        if [ ! -s "$rpm" ]; then
           copypkg "$rpm"
           if [ $? -ne 0 ]; then
             wget -4O "$rpm" "$URL/$rpm"
-            [ $? -ne 0 ] && return 1
+            if [ $? -ne 0 ]; then
+              rm -f "$rpm"
+              return 1
+            fi
           fi
         fi
       done
@@ -220,14 +375,17 @@ install_mingw32() {
       #
       URL=http://downloads.sourceforge.net/project/mingw/MinGW/BaseSystem/RuntimeLibrary/Win32-API/w32api-3.15
       pkg=w32api-3.15-1-mingw32-dev.tar.lzma
-      if [ ! -f "$pkg" -a ! -f "${pkg%.lzma}" ]; then
+      if [ ! -s "$pkg" -a ! -s "${pkg%.lzma}" ]; then
         copypkg "$pkg"
         if [ $? -ne 0 ]; then
           wget -4O "$pkg" "$URL/$pkg"
-          [ $? -ne 0 ] && return 1
+          if [ $? -ne 0 ]; then
+            rm -f "$pkg"
+            return 1
+          fi
         fi
       fi
-      if [ ! -f "${pkg%.lzma}" ]; then
+      if [ ! -s "${pkg%.lzma}" ]; then
         xz -d "$pkg"
         [ $? -ne 0 ] && return 1
       fi
@@ -261,16 +419,22 @@ fix_libs() {
   # Install patchelf 0.5
   #
   if [ ! "`patchelf --version 2>/dev/null`" = "patchelf 0.5" ]; then
-    URL=http://hydra.nixos.org/build/114505/download/3
-    pkg=patchelf-0.5.tar.gz
-    if [ ! -f "$pkg" ]; then
+    #original, but now defunct
+    #URL=http://hydra.nixos.org/build/114505/download/3
+    #pkg=patchelf-0.5.tar.gz
+    URL=http://www.mirrorservice.org/sites/www.ibiblio.org/gentoo/distfiles
+    pkg=patchelf-0.5.tar.bz2
+    if [ ! -s "$pkg" ]; then
       copypkg "$pkg"
       if [ $? -ne 0 ]; then
         wget -4O "$pkg" "$URL/$pkg"
-        [ $? -ne 0 ] && return 1
+        if [ $? -ne 0 ]; then
+          rm -f "$pkg"
+          return 1
+        fi
       fi
     fi
-    zcat "$pkg" | tar -xv
+    bzcat "$pkg" | tar -xv
     [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
     cd patchelf-0.5
     [ $? -ne 0 ] && return 1
@@ -291,6 +455,7 @@ EOF
         [ $? -ne 0 ] && return 1
         if [ -s /etc/ld.so.conf.d/local.conf ]; then
           echo "File /etc/ld.so.conf.d/local.conf already exists"
+          rm -f local.conf
           return 1
         fi
         sudox cp local.conf /etc/ld.so.conf.d
@@ -303,28 +468,47 @@ EOF
       ;;
     Ubuntu )
       if [ ! -d /usr/libx ]; then
-        URL=ftp://mirror.switch.ch/pool/3/mirror/centos/5.5/os/i386/CentOS
-        rpm=gmp-4.1.4-10.el5.i386.rpm
-        if [ ! -f "$rpm" ]; then
+        case `arch` in
+          i386 )
+            URL=ftp://mirror.switch.ch/pool/3/mirror/centos/5.5/os/i386/CentOS
+            rpm=gmp-4.1.4-10.el5.i386.rpm
+            ;;
+          x86_64 )
+            URL=ftp://mirror.switch.ch/pool/3/mirror/centos/5.5/os/x86_64/CentOS
+            rpm=gmp-4.1.4-10.el5.x86_64.rpm
+            ;;
+        esac
+        if [ ! -s "$rpm" ]; then
           copypkg "$rpm"
           if [ $? -ne 0 ]; then
             wget -4O "$rpm" "$URL/$rpm"
-            [ $? -ne 0 ] && return 1
+            if [ $? -ne 0 ]; then
+              rm -f "$rpm"
+              return 1
+            fi
           fi
         fi
         rpm2cpio "$rpm" | cpio -i -dmuv
         [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
-        sudox mv usr/lib /usr/libx
-        [ $? -ne 0 ] && return 1
+        case `arch` in
+          i386 )
+            sudox mv usr/lib /usr/libx
+            [ $? -ne 0 ] && return 1
+            ;;
+          x86_64 )
+            sudox mv usr/lib64 /usr/libx
+            [ $? -ne 0 ] && return 1
+            ;;
+        esac
         rm -fr usr
         [ $? -ne 0 ] && return 1
         cd /usr/libexec/gcc/i686-pc-mingw32/4.3.2
         [ $? -ne 0 ] && return 1
-        if [ -f cc1 ]; then
+        if [ -s cc1 ]; then
           sudox patchelf --set-rpath /usr/libx:/usr/lib:/lib cc1
           [ $? -ne 0 ] && return 1
         fi
-        if [ -f cc1plus ]; then
+        if [ -s cc1plus ]; then
           sudox patchelf --set-rpath /usr/libx:/usr/lib:/lib cc1plus
           [ $? -ne 0 ] && return 1
         fi
@@ -333,10 +517,18 @@ EOF
       # Check & set /usr/local/lib in LD_LIBRARY_PATH
       grep '/usr/local/lib' /etc/ld.so.conf.d/* >/dev/null
       if [ $? -ne 0 ]; then
-        [ -s /etc/ld.so.conf.d/local.conf ] && return 1
-        sudox cat > /etc/ld.so.conf.d/local.conf << EOF
+        cat > local.conf << EOF
 /usr/local/lib
 EOF
+        [ $? -ne 0 ] && return 1
+        if [ -s /etc/ld.so.conf.d/local.conf ]; then
+          echo "File /etc/ld.so.conf.d/local.conf already exists"
+          rm -f local.conf
+          return 1
+        fi
+        sudox cp local.conf /etc/ld.so.conf.d
+        [ $? -ne 0 ] && return 1
+        rm -f local.conf
         [ $? -ne 0 ] && return 1
       fi
       sudox /sbin/ldconfig

@@ -10,7 +10,7 @@ LESS=-feMX
 chkprog $PAGER || PAGER=more
 #
 # These programs are absolutely necessary!
-chkprog wget  || exit 1
+chkprog java  || exit 1
 chkprog zcat  || exit 1
 chkprog bzcat || exit 1
 chkprog unzip || exit 1
@@ -25,7 +25,7 @@ while [ true ]; do
   echo "  1) download sources"
   echo "  2) compile for Linux"
   echo "  3) cross-compile for Windows"
-  echo "  3z) create packages for Windows"
+  echo "  3z) create final packages for Windows"
   echo "  4) compile for Mac"
   echo "  a) do all for current platform"
   echo "  l) view log of last action"
@@ -38,10 +38,13 @@ while [ true ]; do
   ERRTXT="..."
   case "$ACT" in
     0 ) chksudo
-        LOGFILE=`mktemp /tmp/${0##*/}-prereq.log.XXXXX`
-        time ./check-prereq 2>&1 | tee $LOGFILE
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
-        else ERRTXT=" (success)..."; ACT=1; fi
+        if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else
+          LOGFILE=`mktemp /tmp/${0##*/}-prereq.log.XXXXX`
+          time ./check-prereq 2>&1 | tee $LOGFILE
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+          else ERRTXT=" (success)..."; ACT=1; fi
+        fi
         ;;
     1 ) LOGFILE=`mktemp /tmp/${0##*/}-download.log.XXXXX`
         time ./download-sources 2>&1 | tee $LOGFILE
@@ -49,42 +52,60 @@ while [ true ]; do
         else ERRTXT=" (success)..."; ACT=2; fi
         ;;
     2 ) chksudo
-        LOGFILE=`mktemp /tmp/${0##*/}-linux.log.XXXXX`
-        time ./linux-compile 2>&1 | tee $LOGFILE
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
-        else ERRTXT=" (success)..."; ACT=3; fi
+        if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else
+          LOGFILE=`mktemp /tmp/${0##*/}-linux.log.XXXXX`
+          time ./linux-compile 2>&1 | tee $LOGFILE
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+          else ERRTXT=" (success)..."; ACT=3; fi
+        fi
         ;;
     3 ) chksudo
-        LOGFILE=`mktemp /tmp/${0##*/}-win32.log.XXXXX`
-        time ./win32-compile 2>&1 | tee $LOGFILE
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
-        else ERRTXT=" (success)..."; ACT=3z; fi
+        if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else
+          LOGFILE=`mktemp /tmp/${0##*/}-win32.log.XXXXX`
+          time ./win32-compile 2>&1 | tee $LOGFILE
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+          else ERRTXT=" (success)..."; ACT=3z; fi
+        fi
         ;;
     3z) cd "$HOME3P"
         if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
         else
-          LOGFILE=`mktemp /tmp/${0##*/}-zip.log.XXXXX`
-          rm -f 3rd_party_windows.zip
-          zip -r 3rd_party_windows.zip usr 2>&1 | tee $LOGFILE
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+          LIST=`find usr -type f -name '*.exe' 2>/dev/null`
+          if [ -z "$LIST" ]; then
+            echo "No precompiled Windows tools found - do the compilation first!"
+            ACT=3
           else
-            cp ffmpeg/_ffmpeg.zip . | tee -a $LOGFILE
+            LOGFILE=`mktemp /tmp/${0##*/}-zip.log.XXXXX`
+            rm -f 3rd_party_windows.zip
+            zip -r 3rd_party_windows.zip usr 2>&1 | tee $LOGFILE
             if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
-            else ERRTXT=" (success)..."; ACT=q; fi
+            else
+              cp ffmpeg/_ffmpeg.zip . | tee -a $LOGFILE
+              if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+              else ERRTXT=" (success)..."; ACT=q; fi
+            fi
           fi
         fi
         ;;
     4 ) chksudo
-        LOGFILE=`mktemp /tmp/${0##*/}-mac.log.XXXXX`
-        time ./mac-compile 2>&1 | tee $LOGFILE
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
-        else ERRTXT=" (success)..."; ACT=q; fi
+        if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else
+          LOGFILE=`mktemp /tmp/${0##*/}-mac.log.XXXXX`
+          time ./mac-compile 2>&1 | tee $LOGFILE
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+          else ERRTXT=" (success)..."; ACT=q; fi
+        fi
         ;;
     a ) chksudo
-        LOGFILE=`mktemp /tmp/${0##*/}-all.log.XXXXX`
-        time ./do-all 2>&1 | tee $LOGFILE
-        if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
-        else ERRTXT=" (success)..."; ACT=q; fi
+        if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else
+          LOGFILE=`mktemp /tmp/${0##*/}-all.log.XXXXX`
+          time ./do-all 2>&1 | tee $LOGFILE
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+          else ERRTXT=" (success)..."; ACT=q; fi
+        fi
         ;;
     l ) $PAGER $LOGFILE
         ACT=l

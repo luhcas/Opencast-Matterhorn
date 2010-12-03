@@ -1,5 +1,8 @@
 # HOME3P must already be defined
-export LOCAL_PREFIX=/usr/local
+case `uname` in
+  Linux )  export LOCAL_PREFIX=/usr/local ;;
+  Darwin ) export LOCAL_PREFIX=/opt/local ;;
+esac
 export MINGW32=i686-pc-mingw32
 export MINGW32_PREFIX=/usr/i686-pc-mingw32/sys-root/mingw
 export CFLAGS=""
@@ -18,8 +21,28 @@ echox() {
   echo $ECHO
 }
 #
+# arch
+#  i386, x86_64, Unknown
+#
+arch() {
+  set +x
+  case `uname -m` in
+    i386 | i486 | i586 | i686 )
+      echo i386
+      ;;
+    x86_64 | x64 )
+      echo x86_64
+      ;;
+    * )
+      echo Unknown
+      ;;
+  esac
+  set -x
+  return 0
+}
+#
 # os
-#  CentOS, RHEL, Ubuntu, Debian, openSUSE, MacOS
+#  CentOS, RHEL, Ubuntu, Debian, openSUSE, MacOS, Unknown
 #
 os() {
   set +x
@@ -67,6 +90,13 @@ chksudo() {
   elif [ -z "$SUDOPWD" ]; then
     USER=`id -un`
     SUDOPWD=`getpwd "[sudo] password for $USER: "`
+    sudo -S -p "" id << EOF
+$SUDOPWD
+EOF
+    if [ $? -ne 0 ]; then
+      SUDOPWD=""
+      return 1
+    fi
   fi
   return 0
 }
@@ -175,7 +205,10 @@ download() {
             copypkg "$pkg"
             if [ $? -ne 0 ]; then
               wget -4O "$pkg" "$url"
-              [ $? -ne 0 ] && return 1
+              if [ $? -ne 0 ]; then
+                rm -f "$pkg"
+                return 1
+              fi
             fi
           fi
           sha=`getcfg SHA${ii}:`

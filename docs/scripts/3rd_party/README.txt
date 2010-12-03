@@ -4,7 +4,7 @@ Compiling & installing 3rd party tools for Linux, Windows and Mac
 To compile new versions of 3rd party libraries/tools, scripts
 on this and underlying subdirectories must be executed.
 
-This can be done on two ways:
+This can be done in two ways:
 
 1. interactively
 
@@ -44,6 +44,29 @@ Scripts will execute privileged commands either:
   without asking for password.
 - ask for sudo password whenever sudo command is encountered and
   again after sudo timeout is passed (typically after 5 minutes)
+
+
+Operating Systems & environment
+===============================
+
+The compilation of 3rd party tools described here has been tested on
+the following newly installed operating systems:
+
+- 32-bit Linux
+  CentOS 5.5, Red Hat Enterprise Linux Server 5.5, Ubuntu 10.04.x
+
+- 64-bit Linux
+  CentOS 5.5, Red Hat Enterprise Linux Server 5.5, Ubuntu 10.04.x
+
+All necessary prerequisites are downloaded and installed
+automatically, except for the following utilities, which should
+already be installed on the system:
+
+- java
+- zcat
+- bzcat
+- unzip
+- zip
 
 
 Description of interactive run
@@ -138,7 +161,7 @@ specific areas) and post-patching installed tool (if needed).
 When all is successful, a file .done-win32 is created so specific
 subdirectory can be skipped next time.
 
-3z) create packages for Windows
+3z) create final packages for Windows
 
 During the cross-compilation for Windows compiled tools are
 copied into the $HOME3P/usr/local/... tree. After the cross-compilation
@@ -204,6 +227,25 @@ q) quit
 Quits the top level script.
 
 
+Helper shell functions (utilx)
+==============================
+
+All shell functions and global environment variables used in above
+mentioned scripts are defined in file $HOME3P/utilx.
+
+The following global variables are defined in utilx:
+export LOCAL_PREFIX=/usr/local
+export MINGW32=i686-pc-mingw32
+export MINGW32_PREFIX=/usr/i686-pc-mingw32/sys-root/mingw
+export CFLAGS=""
+unset CDPATH
+
+The following is a list of shell functions from utilx:
+echox(), os(), chkprog(), chksudo(), getpwd(), getans(), getcfg(),
+shasumx(), copypkg(), download(), cleanup(), compile(), sudox(), 
+copypc(), fix_scons().
+
+
 Windows installation of precompiled 3rd party tools
 ===================================================
 
@@ -235,23 +277,32 @@ This will create the directory .ffmpeg/..., which is a default location
 of ffmpeg preset files in ffmpeg.
 
 
-Helper shell functions (utilx)
-==============================
+Windows installation of gstreamer
+=================================
 
-All shell functions and global environment variables used in above
-mentioned scripts are defined in file $HOME3P/utilx.
+Gstreamer on Windows can be installed manually, following the steps
+outlined here:
 
-The following global variables are defined in utilx:
-export LOCAL_PREFIX=/usr/local
-export MINGW32=i686-pc-mingw32
-export MINGW32_PREFIX=/usr/i686-pc-mingw32/sys-root/mingw
-export CFLAGS=""
-unset CDPATH
+- download precompiled version of gstreamer from one of the following
+  locations:
 
-The following is a list of shell functions from utilx:
-echox(), os(), chkprog(), chksudo(), getpwd(), getans(), getcfg(),
-shasumx(), copypkg(), download(), cleanup(), compile(), sudox(), 
-copypc(), fix_scons().
+GPL version:
+  http://ossbuild.googlecode.com/files/GStreamer-WinBuilds-GPL-x86.msi
+LGPL version:
+  http://ossbuild.googlecode.com/files/GStreamer-WinBuilds-LGPL-x86.msi
+
+- extract files from msi:
+
+  mkdir gpl
+  for /f "tokens=*" %%P in ('cd') do set PWD=%%P
+  msiexec /a GStreamer-WinBuilds-GPL-x86.msi /qb TARGETDIR="%PWD%\gpl"
+
+- copy files from extraction sub-directories to destination:
+
+  xcopy gpl\PFiles\bin   \usr\local\bin   /s /i
+  xcopy gpl\PFiles\lib   \usr\local\lib   /s /i
+  xcopy gpl\PFiles\etc   \usr\local\etc   /s /i
+  xcopy gpl\PFiles\share \usr\local\share /s /i
 
 
 Picture of 3rd party tools dependencies
