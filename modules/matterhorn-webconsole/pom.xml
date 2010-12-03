@@ -41,6 +41,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.webconsole</artifactId>
+      <version>3.1.6</version>
     </dependency>
     <dependency>
       <groupId>org.json</groupId>
@@ -64,7 +65,7 @@
               org.apache.felix.webconsole;inline=true
             </Embed-Dependency>
             <Export-Package>
-                org.apache.felix.webconsole;version=3.0.0,
+                org.apache.felix.webconsole;version=3.1.6,
                 org.opencastproject.webconsole;version=${project.version}
             </Export-Package>
             <Private-Package>
