@@ -18,6 +18,7 @@ package org.opencastproject.remotetest.server;
 import static org.opencastproject.remotetest.Main.BASE_URL;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.util.SampleUtils;
 import org.opencastproject.remotetest.util.TrustedHttpClient;
 import org.opencastproject.remotetest.util.Utils;
 
@@ -26,10 +27,15 @@ import junit.framework.Assert;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +43,8 @@ import org.w3c.dom.Document;
 
 import java.io.InputStream;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathConstants;
@@ -132,6 +140,31 @@ public class ServiceRegistryRestEndpointTest {
     } finally {
       IOUtils.closeQuietly(in);
     }
+  }
+  
+  /**
+   * TODO: Finish this after coming up with a good strategy on how to propagate maintenance mode from the service
+   * implementation (serviceRegistry.createJob()) to the rest endpoint.
+   */
+  @Test @Ignore
+  public void testNodeMaintenance() throws Exception {
+
+    // Start an encoding job via the rest endpoint
+    HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/encode");
+    List<NameValuePair> formParams = new ArrayList<NameValuePair>();
+    formParams.add(new BasicNameValuePair("sourceTrack", SampleUtils.generateVideoTrack(BASE_URL)));
+    formParams.add(new BasicNameValuePair("profileId", "flash.http"));
+    postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
+
+    // Grab the job from the response
+    HttpResponse postResponse = client.execute(postEncode);
+    Assert.assertEquals(200, postResponse.getStatusLine().getStatusCode());
+
+    
+    // Try to start another job, make sure we don't succeed
+    postResponse = client.execute(postEncode);
+    Assert.assertEquals(404, postResponse.getStatusLine().getStatusCode());
+
   }
 
 }

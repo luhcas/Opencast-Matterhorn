@@ -18,6 +18,7 @@ package org.opencastproject.remotetest.server;
 import static org.opencastproject.remotetest.Main.BASE_URL;
 
 import org.opencastproject.remotetest.Main;
+import org.opencastproject.remotetest.util.SampleUtils;
 import org.opencastproject.remotetest.util.TrustedHttpClient;
 
 import junit.framework.Assert;
@@ -75,7 +76,7 @@ public class ComposerRestEndpointTest {
     // Start an encoding job via the rest endpoint
     HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/encode");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-    formParams.add(new BasicNameValuePair("sourceTrack", generateVideoTrack(BASE_URL)));
+    formParams.add(new BasicNameValuePair("sourceTrack", SampleUtils.generateVideoTrack(BASE_URL)));
     formParams.add(new BasicNameValuePair("profileId", "flash.http"));
     postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
 
@@ -102,7 +103,7 @@ public class ComposerRestEndpointTest {
   public void testImageExtraction() throws Exception {
     HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/image");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-    formParams.add(new BasicNameValuePair("sourceTrack", generateVideoTrack(BASE_URL)));
+    formParams.add(new BasicNameValuePair("sourceTrack", SampleUtils.generateVideoTrack(BASE_URL)));
     formParams.add(new BasicNameValuePair("time", "1"));
     formParams.add(new BasicNameValuePair("profileId", "feed-cover.http"));
     postEncode.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
@@ -118,7 +119,7 @@ public class ComposerRestEndpointTest {
   public void testTrimming() throws Exception {
     HttpPost postEncode = new HttpPost(BASE_URL + "/composer/rest/trim");
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-    formParams.add(new BasicNameValuePair("sourceTrack", generateVideoTrack(BASE_URL)));
+    formParams.add(new BasicNameValuePair("sourceTrack", SampleUtils.generateVideoTrack(BASE_URL)));
     formParams.add(new BasicNameValuePair("start", "2000"));
     formParams.add(new BasicNameValuePair("duration", "5000"));
     formParams.add(new BasicNameValuePair("profileId", "trim.work"));
@@ -193,17 +194,6 @@ public class ComposerRestEndpointTest {
     String status = ((Element) XPathFactory.newInstance().newXPath().compile("/*").evaluate(doc, XPathConstants.NODE))
             .getAttribute("status");
     return status;
-  }
-
-  protected String generateVideoTrack(String serverUrl) {
-    return "<track id=\"track-1\" type=\"presentation/source\">\n" + "  <mimetype>video/quicktime</mimetype>\n"
-            + "  <url>" + serverUrl + "/workflow/samples/camera.mpg</url>\n"
-            + "  <checksum type=\"md5\">43b7d843b02c4a429b2f547a4f230d31</checksum>\n"
-            + "  <duration>14546</duration>\n" + "  <video>\n"
-            + "    <device type=\"UFG03\" version=\"30112007\" vendor=\"Unigraf\" />\n"
-            + "    <encoder type=\"H.264\" version=\"7.4\" vendor=\"Apple Inc\" />\n"
-            + "    <resolution>640x480</resolution>\n" + "    <scanType type=\"progressive\" />\n"
-            + "    <bitrate>540520</bitrate>\n" + "    <frameRate>2</frameRate>\n" + "  </video>\n" + "</track>";
   }
 
 }
