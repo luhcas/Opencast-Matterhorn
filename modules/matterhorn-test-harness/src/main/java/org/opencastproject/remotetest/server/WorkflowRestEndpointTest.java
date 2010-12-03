@@ -97,7 +97,7 @@ public class WorkflowRestEndpointTest {
     JSONObject json = (JSONObject) JSONValue.parse(jsonResponse);
     if(json == null) Assert.fail("JSON response should not be null, but is " + jsonResponse);
     JSONObject workflowAsJson = (JSONObject)json.get("workflow");
-    Assert.assertEquals(id, workflowAsJson.get("@id"));
+    Assert.assertEquals(id, workflowAsJson.get("id"));
     
     // Ensure that the workflow finishes successfully
     int attempts = 0;

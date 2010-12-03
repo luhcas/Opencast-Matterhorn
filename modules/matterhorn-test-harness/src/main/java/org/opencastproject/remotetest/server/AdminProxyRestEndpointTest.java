@@ -104,7 +104,7 @@ public class AdminProxyRestEndpointTest {
     out.put("FAILING", Long.valueOf(0L));
     for (Iterator<JSONObject> i = ((JSONArray)in.get("workflow")).iterator(); i.hasNext();) {
       JSONObject instance = i.next();
-      String state = ((String) instance.get("@state")).toUpperCase();
+      String state = ((String) instance.get("state")).toUpperCase();
       out.put(state, out.get(state)+1);
     }
     return out;
