@@ -69,6 +69,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Implements WorkflowService with in-memory data structures to hold WorkflowOperations and WorkflowInstances.
@@ -490,7 +491,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     } else {
       for (Entry<String, String> prop : properties.entrySet()) {
         String key = "\\$\\{" + prop.getKey() + "\\}";
-        source = source.replaceAll(key, prop.getValue());
+        try {
+          source = source.replaceAll(key, prop.getValue());
+        } catch (PatternSyntaxException e) {
+          logger.warn("Unable to handle variable with key '{}'", prop.getKey());
+        }
       }
       return source;
     }
