@@ -281,6 +281,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     mediapackage.setLicense(event.getLicense());
     mediapackage.setSeries(event.getSeriesId());
     mediapackage.setSeriesTitle(event.getSeries());
+    mediapackage.setDate(event.getStartDate());
 
     // Build a properties set for this event
     Map<String, String> properties = new HashMap<String, String>();
