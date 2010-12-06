@@ -46,6 +46,29 @@ Recordings = new (function() {
       var params = [];
       //params.push('count=' + Recordings.Configuration.pageSize);
       //params.push('startPage=' + Recordings.Configuration.page);
+      var state = Recordings.Configuration.state;
+      if (state == 'upcoming') {
+        params.push('state=paused');
+        params.push('op=scheduled');
+      }
+      else if (state == 'capturing') {
+        params.push('state=running');
+        params.push('op=capture');
+      }
+      else if (state == 'processing') {
+        params.push('state=running');
+        params.push('op=-scheduled,-capture');
+      }
+      else if (state == 'finished') {
+        params.push('state=succeeded');
+        params.push('op=-scheduled,-capture');
+      }
+      else if (state == 'hold') {
+      // FIXME filter what here?
+      }
+      else if (state == 'failed') {
+        params.push('state=failed');
+      }
       params.push('jsonp=Recordings.render');
       var url = WORKFLOW_LIST_URL + '?' + params.join('&');
       $('<script></script>').attr('src', url).appendTo('head');
@@ -62,7 +85,13 @@ Recordings = new (function() {
         creators : [],
         start : '',
         end : '',
-        operation : {state:'', heading : '', details : '', time: false, properties : false},
+        operation : {
+          state:'',
+          heading : '',
+          details : '',
+          time: false,
+          properties : false
+        },
         error : false,
         actions : []
       };
@@ -161,6 +190,24 @@ Recordings = new (function() {
     $.template( 'operation', $('#operationTemplate').val() );
     $.template( 'errormessage', $('#errorTemplate').val() );
 
+    // upload/schedule button
+    $('#uploadButton').button({
+      icons:{
+        primary:'ui-icon-circle-plus'
+      }
+    })
+    .click( function() {
+      window.location.href = '../../admin/upload.html';
+    });
+    $('#scheduleButton').button({
+      icons:{
+        primary:'ui-icon-circle-plus'
+      }
+    })
+    .click( function() {
+      window.location.href = '../../admin/scheduler.html';
+    });
+
     // recordings state selectors
     $( '#state-' +  Recordings.Configuration.state).attr('checked', true);
     $( '.state-filter-container' ).buttonset();
@@ -171,7 +218,9 @@ Recordings = new (function() {
 
     // search box
     this.searchbox = $( '#searchBox' ).searchbox({
-      search : function(text) {alert(text)}
+      search : function(text) {
+        alert(text)
+      }
     });
 
     // recordings table
