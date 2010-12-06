@@ -32,7 +32,7 @@
 				xmlns:business="org.opencast.engage.videodisplay.business.*"
 				frameRate="30">
 
-	<mx:Style source="style/standard_videodisplay.css"/>
+	<mx:Style source="style/Videodisplay.css"/>
 
 	<mx:Script>
 		<![CDATA[
@@ -198,4 +198,5 @@
 	<view:ErrorView id="bx_error"
 					visible="false"
 					includeInLayout="false"/>
+
 </mx:Application>

@@ -267,9 +267,8 @@
 		<mx:HBox width="100%"
 				 horizontalAlign="right">
 
-			<mx:Button width="30"
-					   height="30"
-					   styleName="Fullscreen"
+			<mx:Button 
+					   styleName="btnfullscreen"
 					   visible="{!model.fullscreenMode}"
 					   includeInLayout="{!model.fullscreenMode}"
 					   click="{ fullscreen() }"
