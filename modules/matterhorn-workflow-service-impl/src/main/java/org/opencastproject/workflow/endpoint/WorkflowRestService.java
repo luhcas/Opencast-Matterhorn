@@ -46,6 +46,7 @@ import org.opencastproject.workflow.impl.WorkflowServiceImpl;
 import org.opencastproject.workflow.impl.WorkflowServiceImpl.HandlerRegistration;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.osgi.service.component.ComponentContext;
@@ -517,6 +518,8 @@ public class WorkflowRestService {
     q.withStartPage(startPage);
     if (states != null && states.size() > 0) {
       for (String state : states) {
+        if (StringUtils.isBlank(state))
+          continue;
         if (state.startsWith(NEGATE_PREFIX)) {
           q.withoutState(WorkflowState.valueOf(state.substring(1).toUpperCase()));
         } else {
@@ -539,6 +542,8 @@ public class WorkflowRestService {
 
     if (currentOperations != null && currentOperations.size() > 0) {
       for (String op : currentOperations) {
+        if (StringUtils.isBlank(op))
+          continue;
         if (op.startsWith(NEGATE_PREFIX)) {
           q.withoutCurrentOperation(op.substring(1));
         } else {
