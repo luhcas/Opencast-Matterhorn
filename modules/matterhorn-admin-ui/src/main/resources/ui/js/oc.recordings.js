@@ -1,547 +1,240 @@
-/**
- *  Copyright 2009 The Regents of the University of California
- *  Licensed under the Educational Community License, Version 2.0
- *  (the 'License'); you may not use this file except in compliance
- *  with the License. You may obtain a copy of the License at
- *
- *  http://www.osedu.org/licenses/ECL-2.0
- *
- *  Unless required by applicable law or agreed to in writing,
- *  software distributed under the License is distributed on an 'AS IS'
- *  BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
- *  or implied. See the License for the specific language governing
- *  permissions and limitations under the License.
- *
- */
 
-var ocRecordings = ocRecordings || {};
+Recordings = new (function() {
 
-ocRecordings.statsInterval = null;
-ocRecordings.updateRequested = false;
-ocRecordings.currentState = 'upcoming';
-ocRecordings.sortBy = 'startDate';
-ocRecordings.sortOrder = 'Ascending';
-ocRecordings.lastCount = null;
-ocRecordings.tableInterval = null;
-ocRecordings.changedMediaPackage = null;
-ocRecordings.configuration = null;
-ocRecordings.tableTemplate = null;
-ocRecordings.filter = '';
-ocRecordings.filterFields = '';
+  var WORKFLOW_LIST_URL = '../workflow/rest/instances.json';
+  var WORKFLOW_INSTANCE_URL = '';
+  var WORKFLOW_STATISTICS_URL = '';
 
+  // components
+  this.searchbox = null;
+  this.pager = null;
 
-/** Initialize the Recordings page.
- *  Register event handlers.
- *  Set up parser for the date/time field so that tablesorter can sort this col to.
- *  Init periodical update of recording statistics.
- *  Display the recordings specified by the URL param show or upcoming recordings otherwise.
- */
-ocRecordings.init = function() {
-  //Do internationalization of text
-  jQuery.i18n.properties({
-    name:'recordings',
-    path:'i18n/'
-  });
-  ocUtils.internationalize(i18n, 'i18n');
-  
-  // get config
-  $.getJSON('/info/rest/components.json', function(data) {
-    ocRecordings.configuration = data;
-    $('#engagelink').attr('href', data.engage + '/engage/ui');
-  });
+  var refreshing = false;
 
-  // get 'me'
-  $.getJSON('/info/rest/me.json', function(data) {
-    ocRecordings.me = data;
-    $('#logout').append(' "' + data.username + '"');
-  });
+  this.data = null;
 
-  // Event: clicked somewhere
-  //  $('body').click( function() {
-  //    $('#holdActionPanelContainer').fadeOut('fast');
-  //  });
-  
-  $('#buttonSchedule').button({
-    icons:{
-      primary:'ui-icon-circle-plus'
-    }
-  });
-  $('#buttonUpload').button({
-    icons:{
-      primary:'ui-icon-circle-plus'
-    }
-  });
+  this.Configuration = new (function() {
 
-  /* Event: Scheduler button clicked */
-  $('#buttonSchedule').click( function() {
-    window.location.href = '../../admin/scheduler.html';
-  });
+    // default configuartion
+    this.state = 'all';
+    this.pageSize = 10;
+    this.page = 1;
+    this.refresh = 5000;
 
-  /* Event: Upload button clicked */
-  $('#buttonUpload').click( function() {
-    window.location.href = '../../admin/upload.html';
-  });
-
-  /* Event: Recording State selector clicked */
-  $('.recordings-category').click( function() {
-    ocRecordings.resetBulkActionPanel();
-    var state = $(this).attr('state');
-    if(!$(this).hasClass('recordings-category-active')){
-      $('.recordings-category').removeClass('recordings-category-active');
-      $(this).addClass('recordings-category-active');
-    }
-    ocRecordings.currentState = state;
-    ocRecordings.initTableRefresh($('#refreshInterval').val());
-    ocUtils.getTemplate(state, function(template) {
-      ocRecordings.tableTemplate = template;
-      ocRecordings.displayRecordings(state);
-    });
-    return false;
-  });
-
-  $('#refreshEnabled').click( function() {
-    if ($(this).is(':checked')) {
-      $('#refreshInterval').removeAttr('disabled');
-      $('.refresh-text').removeClass('refresh-text-disabled').addClass('refresh-text-enabled');
-      ocRecordings.initTableRefresh($('#refreshInterval').val());
-    } else {
-      $('#refreshInterval').attr('disabled','true');
-      $('.refresh-text').removeClass('refresh-text-enabled').addClass('refresh-text-disabled');
-      window.clearInterval(ocRecordings.tableInterval);
-    }
-  });
-
-  $('#refreshInterval').change(function() {
-    ocRecordings.initTableRefresh($(this).val());
-  });
-  
-  // Bulk Action Event Handlers
-
-  $('.oc-ui-collapsible-widget .ui-widget-header').click(
-    function() {
-      $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-e');
-      $(this).children('.ui-icon').toggleClass('ui-icon-triangle-1-s');
-      $(this).next().toggle();
-      return false;
-    });
-    
-  $('#bulkActionSelect').change(function(){
-    ocRecordings.bulkActionHandler($(this).val());
-  });
-  
-  $('.recordings-cancel-bulk-action').click(ocRecordings.cancelBulkAction);
-
-  var sort = ocUtils.getURLParam('sortBy');
-  if (sort == '') {
-    sort='StartDate';
-  }
-  ocRecordings.sortBy = sort;
-
-  var order = ocUtils.getURLParam('sortOrder');
-  if (order == '') {
-    order='Descending';
-  }
-  ocRecordings.sortOrder = order;
-
-  var psize = ocUtils.getURLParam('pageSize');
-  if (psize == '') {
-    psize = 10;
-  }
-  ocPager.pageSize = psize;
-  ocPager.init();
-  
-  if(ocUtils.getURLParam('state') !== ''){
-    ocRecordings.currentState = ocUtils.getURLParam('state');
-  }
-
-  $('.recordings-category[state=' + ocRecordings.currentState + ']').addClass('recordings-category-active');
-  ocRecordings.displayRecordingStats();
-
-  if (ocRecordings.currentState == 'finished') {
-    $('#infoBox').css('display', 'block');
-    $('#'+ ocRecordings.currentState +'TableInfoBox').css('display','block');
-  }
-
-  // init update interval for recording stats
-  ocRecordings.statsInterval = window.setInterval('ocRecordings.displayRecordingStats();', 3000 );
-  if (ocRecordings.currentState == 'all' || ocRecordings.currentState == 'capturing' || ocRecordings.currentState == 'processing') {
-    $('#refreshControlsContainer').css('display','block');
-    if ($('#refreshEnabled').is(':visible') && $('#refreshEnabled').is(':checked')) {
-      $('.refresh-text').removeClass('refresh-text-disabled').addClass('refresh-text-enabled');
-      ocRecordings.initTableRefresh($('#refreshInterval').val());
-    }
-  } else {
-    $('#refreshControlsContainer').css('display','none');
-  }
-}
-
-/** (re-)initialize reloading of recordings table
- *
- */
-ocRecordings.initTableRefresh = function(time) {
-  if (ocRecordings.tableInterval != null) {
-    window.clearInterval(ocRecordings.tableInterval);
-  }
-  ocRecordings.tableInterval = window.setInterval('ocRecordings.displayRecordings("' + ocRecordings.currentState + '");', time*1000);
-}
-
-/** get and display recording statistics. If the number of recordings in the
- * currently displayed state changes, the table is updated via displayRecordings().
- */
-ocRecordings.displayRecordingStats = function() {
-  if (!ocRecordings.updateRequested) {
-    ocRecordings.updateRequested = true;
-    $.ajax({
-      url: 'rest/countRecordings',
-      type: 'GET',
-      cache: false,
-      success: function(data) {
-        ocRecordings.updateRequested = false;
-        for (key in data) {
-          if (ocRecordings.currentState == key) {
-            if (ocRecordings.lastCount !== data[key]) {
-              ocRecordings.lastCount = data[key];
-              ocPager.update(ocPager.pageSize, ocPager.currentPageIdx);
-              ocRecordings.displayRecordings(ocRecordings.currentState);
-            } else {
-              ocRecordings.lastCount = data[key];
-            }
-          }
-          var elm = $('#' + key + 'Count');
-          if (elm) {
-            elm.text('(' + data[key] + ')');
+    // parse url parameters
+    try {
+      var p = document.location.href.split('?', 2)[1] || false;
+      if (p !== false) {
+        p = p.split('&');
+        for (i in p) {
+          var param = p[i].split('=');
+          if (this[param[0]]) {
+            this[param[0]] = unescape(param[1]);
           }
         }
       }
-    });
-  }
-}
-
-/** Request a list of recordings in a certain state and render the response as a table.
- *  While we are waiting for a response, a little animation is displayed.
- */
-ocRecordings.displayRecordings = function(state) {
-  var page = ocPager.currentPageIdx;
-  var psize = ocPager.pageSize;
-  var sort = ocRecordings.sortBy;
-  var order = ocRecordings.sortOrder;
-  var recordingsUrl = '';
-  if(state == 'bulkaction'){
-    recordingsUrl = 'rest/recordings/upcoming.json';
-    window.clearInterval(ocRecordings.tableInterval);
-  } else {
-    recordingsUrl = 'rest/recordings/' + state + '.json';
-  }
-  recordingsUrl += '?ps=' + psize + '&pn=' + page + '&sb=' + sort + '&so=' + order;
-  if((state === 'upcoming' || state === 'bulkaction') && ocRecordings.filter !== '' && ocRecordings.filterField !== '') {
-    recordingsUrl += '&filter=' + ocRecordings.filter + '&' + ocRecordings.filterField + '=true';
-  }
-  if(ocRecordings.tableTemplate == null || ocRecordings.currentState != state) {
-    ocUtils.getTemplate(state, function(template) {
-      ocRecordings.tableTemplate = template;
-      if(state != 'bulkaction'){
-        ocRecordings.initTableRefresh($('#refreshInterval').val());
-      }
-      ocRecordings.displayRecordings(state);
-    });
-    ocRecordings.currentState = state;
-    return;
-  }
-  $.ajax({
-    url : recordingsUrl,
-    type : 'get',
-    dataType : 'json',
-    error : function(xhr) {
-      ocUtils.log('Error: Could not get Recordings');   // TODO more detailed debug info
-    },
-    success : function(data) {
-      var container = document.getElementById('recordingsTableContainer');
-      container.innerHTML = ocRecordings.tableTemplate.process(data);
+    } catch (e) {
+      alert('Unable to parse url parameters:\n' + e.toString());
     }
-  });
-}
 
-/** Displays Hold Operation UI
- * @param URL of the hold action UI
- * @param wfId Id of the hold operations workflow
- * @param callerElm HTML element that invoked the UI (so that information from the recordings table row can be gathered
- */
-ocRecordings.displayHoldActionPanel = function(URL, wfId, callerElm) {
-  $('#holdActionPanelContainer iframe').attr('src', URL);
-  $('#holdWorkflowId').val(wfId);
-  var parentRow = $(callerElm).parent().parent();
-  $('#holdStateHeadRowTitle').html($($(parentRow).children().get(0)).html());
-  $('#holdStateHeadRowPresenter').html($($(parentRow).children().get(1)).html());
-  $('#holdStateHeadRowSeries').html($($(parentRow).children().get(2)).html());
-  $('#holdStateHeadRowDate').html($($(parentRow).children().get(3)).html());
-  $('#holdStateHeadRowStatus').html($($(parentRow).children().get(4)).html());
-  $('#holdActionPanelContainer').toggle();
-  $('#recordingsTableContainer').hide();
-  $('#categorySelectorContainer').parent().hide();
-  $('#oc_recordingmenu').hide();
-  $('.pagingNavContainer').hide();
-  $('#refreshControlsContainer').hide();
-}
+    return this;
+  })();
 
-/** Adjusts the height of the panel holding the Hold Operation UI
- *
- */
-ocRecordings.adjustHoldActionPanelHeight = function() {
-  var height = $('#holdActionPanelIframe').contents().find('html').height();
-  $('#holdActionPanelIframe').height(height+10);
-//alert('Hold action panel height: ' + height);
-}
-
-/** Calls workflow endpoint to end hold operation and continue the workflow
- *
- */
-ocRecordings.continueWorkflow = function(postData) {
-  // data must include workflow id
-  var data = {
-    id : $('#holdWorkflowId').val()
-  };
-
-  // add updated MP to data, if hold operation changed the MP
-  if (ocRecordings.changedMediaPackage != null) {
-    data['mediapackage'] = ocRecordings.changedMediaPackage;
-    ocRecordings.changedMediaPackage = null;
+  function refresh() {
+    if (!refreshing) {
+      refreshing = true;
+      var params = [];
+      //params.push('count=' + Recordings.Configuration.pageSize);
+      //params.push('startPage=' + Recordings.Configuration.page);
+      params.push('jsonp=Recordings.render');
+      var url = WORKFLOW_LIST_URL + '?' + params.join('&');
+      $('<script></script>').attr('src', url).appendTo('head');
+    }
   }
 
-  // add properties for workflow resum if provided by hold operation
-  if (postData) {
-    data.properties = {};
-    $.each(postData, function(key, value) {
-      if(key != 'id') {
-        data.properties += key + '=' + value + '\n';
-      }
-    });
-  }
-  
-  $.ajax({
-    type       : 'POST',
-    url        : '../workflow/rest/replaceAndresume/',
-    data       : data,
-    error      : function(XHR,status,e){
-      if (XHR.status == '204') {
-        $('#holdActionPanelContainer').toggle();
-        $('#recordingsTableContainer').toggle();
-        $('#oc_recordingmenu').toggle();
-        $('.pagingNavContainer').toggle();
-        $('#refreshControlsContainer').toggle();
-        location.reload();
+  function makeRenderData(data) {
+    var tdata = {
+      recording:[]
+    };
+    for (i in data.workflows.workflow) {
+      var rec = {       // TODO create prototype so we can write : new Rec() or sth. here
+        title: '',
+        creators : [],
+        start : '',
+        end : '',
+        operation : {state:'', heading : '', details : '', time: false, properties : false},
+        error : false,
+        actions : []
+      };
+      var wf = data.workflows.workflow[i];
+
+      // Title
+      rec.title = wf.mediapackage.title;
+
+      // Creator(s)
+      if (wf.mediapackage.creators)
+        rec.creators.push(wf.mediapackage.creators.creator);    // TODO update when there can be more than one
+
+      // Start Time
+      if (wf.mediapackage.start) {
+        var t = wf.mediapackage.start.split('T');
+        rec.start = t[1] + ' ' + t[0];
       } else {
-        alert('Could not resume Workflow: ' + status);
+      // if current operation = scheduled with state paused --> get time from operation configuration
       }
-    },
-    success    : function(data) {
-      $('#holdActionPanelContainer').toggle();
-      $('#recordingsTableContainer').toggle();
-      $('#oc_recordingmenu').toggle();
-      $('.pagingNavContainer').toggle();
-      $('#refreshControlsContainer').toggle();
-      location.reload();
+
+      // Status
+      // current operation : search first operation that
+      for (var j in wf.operations.operation) {
+        if (wf.operations.operation[j].state == wf.state) {
+          var op = wf.operations.operation[j];
+          rec.operation.state = op.state;
+          rec.operation.heading = op.id;
+          rec.operation.details = op.description;
+          if (op.configurations) {
+            rec.operation.properties = [];
+            for (var k in op.configurations.configuration) {
+              var c = op.configurations.configuration[k];
+              rec.operation.properties.push({
+                key : c.key,
+                value : c.$
+              });
+            }
+          }
+          break;
+        }
+      }
+
+      // Actions
+
+      tdata.recording.push(rec);
     }
-  });
-}
+    return tdata;
+  }
 
-/** Show the recording editor
- *
- */
-ocRecordings.retryRecording = function(workflowId) {
-  location.href = 'upload.html?retry=' + workflowId;
-}
-
-ocRecordings.removeRecording = function(workflowId) {
-  $.ajax({
-    url        : '../workflow/rest/stop',
-    data       : {
-      id: workflowId
-    },
-    type       : 'POST',
-    error      : function(XHR,status,e){
-      alert('Could not remove Workflow ' + workflowId);
-    },
-    success    : function(data) {
-      ocRecordings.loadRecordingsXML();
-    }
-  });
-}
-
-ocRecordings.removeScheduledRecording = function(eventId, title) {
-  if(confirm('Are you sure you wish to delete ' + title + '?')){
-    $.ajax({
-      url        : '/scheduler/rest/' + eventId,
-      type       : 'DELETE',
-      error      : function(XHR,status,e){
-        alert('Could not remove Scheduler Event ' + workflowId);
-      },
-      success    : function(data) {
-        ocRecordings.displayRecordings(ocRecordings.currentState);
+  this.render = function(data) {
+    $('#tableContainer').empty();
+    $.tmpl( "table-all", makeRenderData(data) ).appendTo( "#tableContainer" );
+    $('#recordingsTable th')
+    .mouseenter( function() {
+      $(this).addClass('ui-state-hover');
+    })
+    .mouseleave( function() {
+      $(this).removeClass('ui-state-hover');
+    })
+    .click( function() {
+      var sortDesc = $(this).find('.sort-icon').hasClass('ui-icon-circle-triangle-s');
+      $( "#recordingsTable th .sort-icon" )
+      .removeClass('ui-icon-circle-triangle-s')
+      .removeClass('ui-icon-circle-triangle-n')
+      .addClass('ui-icon-triangle-2-n-s');
+      if (sortDesc) {
+        $(this).find('.sort-icon').addClass('ui-icon-circle-triangle-n');
+      } else {
+        $(this).find('.sort-icon').addClass('ui-icon-circle-triangle-s');
       }
     });
+    $('.status-column-cell').click(function() {
+      $(this).find('.fold-icon')
+      .toggleClass('ui-icon-triangle-1-e')
+      .toggleClass('ui-icon-triangle-1-s');
+      $(this).find('.status-column-operation-details').toggle('fast');
+    })
   }
-}
 
-ocRecordings.formatRecordingDates = function(startTime, endTime) {
-  var startDate = new Date();
-  startDate.setTime(startTime);
-  var endDate = new Date();
-  endDate.setTime(endTime);
-  var out = startDate.getFullYear() + '-' +
-  ocUtils.padString(startDate.getMonth()+1, '0', 2) + '-' +
-  ocUtils.padString(startDate.getDate(), '0', 2) + ' ' +
-  startDate.getHours() + ':' + ocUtils.padString(startDate.getMinutes(), '0', 2) + ' - ' +
-  endDate.getHours() + ':' + ocUtils.padString(endDate.getMinutes(), '0', 2);
-  return out;
-}
-
-ocRecordings.filterRecordings = function(state) {
-  if(!state){
-    state = ocRecordings.currentState;
-  }
-  ocRecordings.filter = $('#filter').val();
-  ocRecordings.filterField = $('#filterField').val();
-  ocRecordings.displayRecordings(state);
-}
-
-ocRecordings.displayBulkAction = function(filter) {
-  $('#bulkEditPanel').hide();
-  $('#bulkDeletePanel').hide();
-  ocRecordings.filterRecordings('bulkaction');
-  $('#bulkActionPanel').show();
-}
-
-ocRecordings.cancelBulkAction = function() {
-  ocRecordings.resetBulkActionPanel();
-  ocRecordings.filterRecordings('upcoming');
-}
-
-ocRecordings.resetBulkActionPanel = function() {
-  $('#bulkActionPanel').hide();
-  $('#bulkActionSelect').val('select');
-  $('#bulkActionSelect').change();
-  ocRecordings.bulkEditComponents = [];
-}
-
-ocRecordings.bulkActionHandler = function(action) {
-  if (action === 'select') {
-    $('#bulkEditPanel').hide();
-    $('#bulkDeletePanel').hide();
-    $('#cancelBulkAction').show();
-  } else {
-    if(action === 'edit'){
-      $('#bulkEditPanel').show();
-      $('#bulkDeletePanel').hide();
-      $('#cancelBulkAction').hide();
-      ocRecordings.registerBulkEditComponents();
-    } else if (action === 'delete') {
-      $('#bulkEditPanel').hide();
-      $('#bulkDeletePanel').show();
-      $('#cancelBulkAction').hide();
+  this.reload = function() {
+    var url = document.location.href.split('?', 2)[0];
+    var pa = [];
+    for (p in this.Configuration) {
+      pa.push(p + '=' + escape(this.Configuration[p]));
     }
+    url += '?' + pa.join('&');
+    document.location.href = url;
   }
-}
 
-ocRecordings.selectAll = function(checked) {
-  if(ocRecordings.currentState != 'bulkaction'){
-    return;
-  }
-  if(checked){
-    $.each($('.selectRecording'), function(i,v){
-      v.checked = true;
+  /** $(document).ready()
+   *
+   */
+  this.init = function() {
+
+    $.template( 'table-all', $('#tableTemplate').val() );
+    $.template( 'operation', $('#operationTemplate').val() );
+    $.template( 'errormessage', $('#errorTemplate').val() );
+
+    // recordings state selectors
+    $( '#state-' +  Recordings.Configuration.state).attr('checked', true);
+    $( '.state-filter-container' ).buttonset();
+    $( '.state-filter-container input' ).click( function() {
+      Recordings.Configuration.state = $(this).val();
+      Recordings.reload();
+    })
+
+    // search box
+    this.searchbox = $( '#searchBox' ).searchbox({
+      search : function(text) {alert(text)}
     });
-  } else {
-    $.each($('.selectRecording'), function(i,v){
-      v.checked = false;
+
+    // recordings table
+
+    // pager
+    this.pager = $( '#pagerBottom' ).spinner({
+      decIcon : 'ui-icon-circle-triangle-w',
+      incIcon : 'ui-icon-circle-triangle-e'
     });
-  }
-}
 
-ocRecordings.applyBulkEdit = function() {
-  var manager = new ocAdmin.Manager('event', '', ocRecordings.bulkEditComponents);
-  var event = manager.serialize();
-  var eventIdList = [];
-  $.each($('.selectRecording'), function(i,v){
-    eventIdList.push(v.value);
-  });
-  $.post('/scheduler/rest/', 
-    {event: event, eventList: '[' + eventIdList.toString() + ']'},
-    ocRecordings.bulkEditComplete);
-}
-
-ocRecordings.bulkEditComplete = function() {
-  ocRecordings.cancelBulkAction();
-}
-
-ocRecordings.registerBulkEditComponents = function() {
-  ocRecordings.bulkEditComponents.title = new ocAdmin.Component(['title'], {label: 'titleLabel'});
-  ocRecordings.bulkEditComponents.creator = new ocAdmin.Component(['creator'], {label: 'creatorLabel'});
-  ocRecordings.bulkEditComponents.contributor = new ocAdmin.Component(['contributor'], {label: 'contributorLabel'});
-  ocRecordings.bulkEditComponents.seriesId = new ocAdmin.Component(['series', 'seriesSelect'],
-    { label: 'seriesLabel', errorField: 'missingSeries', nodeKey: ['seriesId', 'series']},
-    { getValue: function(){ 
-        if(this.fields.series){
-          this.value = this.fields.series.val();
-        }
-        return this.value;
-      },
-      setValue: function(value){
-        this.fields.series.val(value.id);
-        this.fields.seriesSelect.val(value.label)
-      },
-      asString: function(){
-        if(this.fields.seriesSelect){
-          return this.fields.seriesSelect.val();
-        }
-        return this.getValue() + '';
-      },
-      validate: function(){
-        if(this.fields.seriesSelect.val() !== '' && this.fields.series.val() === ''){ //have text and no idea
-          return this.createSeriesFromSearchText();
-        }
-        return true; //nothing, or we have an id.
-      },
-      toNode: function(parent){
-        if(parent){
-          doc = parent.ownerDocument;
-        }else{
-          doc = document;
-        }
-        if(this.getValue() != "" && this.asString() != ""){ //only add series if we have both id and name.
-          seriesId = doc.createElement(this.nodeKey[0]);
-          seriesId.appendChild(doc.createTextNode(this.getValue()));
-          seriesName = doc.createElement(this.nodeKey[1]);
-          seriesName.appendChild(doc.createTextNode(this.asString()));
-          if(parent && parent.nodeType){
-            parent.appendChild(seriesId);
-            parent.appendChild(seriesName);
-          }else{
-            ocUtils.log('Unable to append node to document. ', parent, seriesId, seriesName);
+    // button to open the config dialog
+    $( '#configButton' ).button()
+    .click( function() {
+      $('#configDialog').dialog({
+        title : 'Configure View',
+        resizable: false,
+        buttons : {
+          Ok : function() {
+            // TODO save settings
+            $(this).dialog('close');
           }
         }
-      },
-      createSeriesFromSearchText: function(){
-        var series, seriesComponent, seriesId;
-        var creationSucceeded = false;
-        if(this.fields.seriesSelect !== ''){
-          series = '<series><metadataList><metadata><key>title</key><value>' + this.fields.seriesSelect.val() + '</value></metadata></metadataList></series>';
-          seriesComponent = this;
-          $.ajax({
-            async: false,
-            type: 'PUT',
-            url: SERIES_URL + '/',
-            data: { series: series },
-            dataType: 'json',
-            success: function(data){
-              creationSucceeded = true;
-              seriesComponent.fields.series.val(data.series['@id']);
-            }
-          });
-        }
-        return creationSucceeded;
-      }
+      });
     });
-  ocRecordings.bulkEditComponents.subject = new ocAdmin.Component(['subject'], {label: 'subjectLabel'});
-  ocRecordings.bulkEditComponents.language = new ocAdmin.Component(['language'], {label: 'languageLabel'});
-  ocRecordings.bulkEditComponents.description = new ocAdmin.Component(['description'], {label: 'descriptionLabel'});
-}
+
+    // set up config dialog
+    $('#pageSize').spinner();
+    $('#autoUpdate').button();
+    $('#updateInterval').spinner();
+
+    refresh();
+
+  };
+  $(document).ready(this.init);
+
+  return this;
+})();
+
+RenderUtils = new (function() {
+
+  this.makeList = function(a) {
+    try {
+      return a.join(', ');
+    } catch(e) {
+      return '';
+    }
+  }
+
+  this.getCurrentOperation = function(wf) {
+    var current = null;
+    for (i in wf.operations.operation) {
+      var op = wf.operations.operation[i];
+
+    }
+  }
+
+  this.makeActions = function(actions) {
+    return '';
+  }
+
+  this.getTime = function(timestamp) {
+    var d = new Date();
+    d.setTime(timestamp);
+    return d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+  }
+})();

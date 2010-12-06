@@ -1,0 +1,288 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+  <head>
+    <!-- PAGE TITLE -->
+    <title id="i18n_window_title">Recordings</title>
+    <!-- META -->
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="css/oc.layout.css" />
+    <link rel="stylesheet" type="text/css" href="css/themes/oc.default.css" />
+    <link rel="stylesheet" type="text/css" href="css/pages/oc.recordings.css" />
+    <link rel="stylesheet" type="text/css" href="css/tablesorter.css" />
+    <!-- SCRIPTS -->
+    <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="jquery/jquery-ui-1.8.5.custom.min.js"></script>
+    <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="jquery/plugins/jquery.i18n.properties-min.js"></script>
+    <script type="text/javascript" src="js/oc.admin.js"></script>
+    <script type="text/javascript" src="js/oc.pager.js"></script>
+    <script type="text/javascript" src="js/oc.utils.js"></script>
+    <script type="text/javascript" src="js/oc.recordings.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function(){ocRecordings.init();});
+    </script>
+    <!-- NO SCRIPT -->
+    <noscript>
+      <center>
+        <div style="border:1px solid red;width:530px;margin:20px;">
+          <div style="text-align: left;background:red; color:white;padding-top:2px;padding-bottom:2px;">
+            <div class="icon icon-error" style="margin-left:5px;margin-right:5px;">&nbsp;</div>
+            JavaScript is disabled
+          </div>
+          <div style="padding:10px;">
+            JavaScript is turned off in your web browser, so this site won't work properly! <br />
+            <strong>
+              Please turn JavaScript on to use this site, then refresh the page.
+            </strong>
+          </div>
+        </div>
+      </center>
+    </noscript>
+  </head>
+  <body>
+    <div class="layout-page-container">
+      <!-- VERSION AND LOGOUT BAR -->
+      <div class="layout-page-header oc-ui-version-bar">
+        <div id="currentVersion" class="layout-inline"></div>
+        <div class="layout-inline layout-float-right"><a id="logout" href="/j_spring_security_logout">Log out</a></div>
+      </div>
+      <!-- BANNER -->
+      <div class="layout-page-header">
+        <div class="oc-ui-banner layout-inline">
+          <div onclick="document.location='recordings.html'" class="oc-ui-cursor">
+            <img src="img/MatterhornLogo.png" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" class="layout-inline" />
+            <h1 id="i18n_logo_title" class="layout-inline layout-valign-top">Admin Tools</h1>
+          </div>
+        </div>
+        <div class="layout-page-banner layout-inline layout-float-right">
+          <a href="http://www.opencastproject.org">
+            <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project" />
+          </a>
+        </div>
+      </div>
+      <!-- PAGE TABS -->
+      <div class="layout-page-header">
+        <ul class="layout-page-tabs oc-ui-page-tabs">
+          <li class="oc-ui-page-tab oc-ui-page-tab-active oc-ui-cursor ui-corner-top" id="i18n_tab_recording" onclick="document.location='recordings.html'">Recordings</li>
+          <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_series" onclick="document.location='series_list.html'">Series</li>
+          <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_agent" onclick="document.location='agents_status.html'">Capture Agents</li>
+        </ul>
+      </div>
+      <!-- RECORDING AND BUTTON BAR -->
+      <div class="layout-page-header">
+        <!-- recording state selector -->
+        <div class="layout-inline">
+          <ul class="recordings-categories">
+            <li class="recordings-category recordings-first-item oc-ui-cursor" state="all">
+              <span id="i18n_view_all">All</span> <span id="allCount"></span>
+            </li>
+            <li class="recordings-category oc-ui-cursor" state="upcoming">
+              <span id="i18n_view_upcoming">Upcoming</span> <span id="upcomingCount"></span>
+            </li>
+            <li class="recordings-category oc-ui-cursor" state="capturing">
+              <span id="i18n_view_capturing">Capturing</span> <span id="capturingCount"></span>
+            </li>
+            <li class="recordings-category oc-ui-cursor" state="processing">
+              <span id="i18n_view_processing">Processing</span> <span id="processingCount"></span>
+            </li>
+            <li class="recordings-category oc-ui-cursor" state="finished">
+              <span id="i18n_view_finished">Finished</span> <span id="finishedCount"></span>
+            </li>
+            <li class="recordings-category-spacer">
+              &nbsp;
+            </li>
+            <li class="recordings-category recordings-first-item oc-ui-cursor" state="hold">
+              <span id="i18n_view_onhold">On Hold</span> <span id="holdCount">()</span>
+            </li>
+            <li class="recordings-category oc-ui-cursor" state="failed">
+              <span id="i18n_view_failed">Failed</span> <span id="failedCount">()</span>
+            </li>
+          </ul>
+        </div>
+        <!-- Add/Schedule Buttons -->
+        <div class="layout-float-right recordings-button-container">
+          <!-- USE JQUERY UI BUTTON MAKER -->
+          <button type="button" id="buttonSchedule">
+            <span id="i18n_button_schedule">Schedule Recordings</span>
+          </button>
+          <button type="button" id="buttonUpload">
+            <span id="i18n_button_upload">Upload Recording</span>
+          </button>
+        </div>
+      </div>
+      <div class="layout-page-header">
+        <!-- info boxes shown above the table when upcoming or finished filter is selected -->
+        <div id="finishedTableInfoBox" class="layout-centered ui-state-highlight recordings-info-box">
+          <span class="ui-icon ui-icon-info layout-inline"></span>
+          Go to the <a id="engagelink">Matterhorn Media Module</a> to see any Recordings which have gone through "Encode, Analyze, and Distribute" processing.
+        </div>
+      </div>
+      <!-- BULK ACTION PANEL -->
+      <div class="layout-page-header recordings-bulk-action ui-corner-all layout-centered" id="bulkActionPanel">
+        <div class="ui-widget layout-centered">
+          <select id="bulkActionSelect">
+            <option value="select">- Select Action -</option>
+            <option value="edit">Edit Metadata</option>
+            <option value="delete">Delete Recordings</option>
+          </select>
+          <button type="button" class="recordings-cancel-bulk-action" id="cancelBulkAction">
+            <span id="i18n_button_cancel_bulk_action">Cancel Bulk Action</span>
+          </button>
+        </div>
+        <div id="bulkEditPanel">
+          <!-- Common Information -->
+          <div class="ui-widget layout-centered">
+            <div class="ui-widget-content ui-corner-all">
+              <form action="">
+                <ul class="oc-ui-form-list">
+                  <li>
+                    <label for="title" id="titleLabel"><span id="i18n_title_label">Title</span>:</label>
+                    <input type="text" id="title" name="title" class="oc-ui-form-field" />
+                    <span class="ui-icon ui-icon-help" id="help_title" title="Click for help"></span>
+                  </li>
+                  <li id="seriesContainer">
+                    <label for="seriesSelect" id="seriesLabel"><span id="i18n_series_label">Series</span>:</label>
+                    <input type="text" class="oc-ui-form-field ui-autocomplete-input" name="seriesSelect" id="seriesSelect" />
+                    <input type="hidden" id="series" />
+                    <span class="ui-icon ui-icon-help"  id="help_series" title="Click for help"></span>
+                  </li>
+                  <li>
+                    <label for="creator" id="creatorLabel"><span id="i18n_presenter_label">Presenter</span>:</label>
+                    <input type="text" class="oc-ui-form-field" name="creator" id="creator" />
+                    <span class="ui-icon ui-icon-help"  id="help_presenter" title="Click for help"></span>
+                  </li>
+                </ul>
+              </form>
+            </div>
+          </div>
+          <!-- Optional Information -->
+          <div class="ui-widget oc-ui-collapsible-widget layout-centered">
+            <div class="ui-widget-header ui-corner-top oc-ui-cursor">
+              <span class="ui-icon ui-icon-triangle-1-e"></span>
+              <span id="i18n_additional">Aditional Description</span>
+            </div>
+            <div class="ui-widget-content ui-corner-bottom">
+              <form action="">
+                <ul class="oc-ui-form-list">
+                  <li>
+                    <label for="contributor" id="contributorLabel"><span id="i18n_dept_label">Department</span>:</label>
+                    <input type="text" class="oc-ui-form-field" name="contributor" id="contributor">
+                    <span class="ui-icon ui-icon-help"  id="help_contributor" title="Click for help"></span>
+                  </li>
+                  <li>
+                    <label for="subject" id="subjectLabel"><span id="i18n_sub_label">Subject</span>:</label>
+                    <input type="text" class="oc-ui-form-field" name="subject" id="subject">
+                    <span class="ui-icon ui-icon-help"  id="help_subject" title="Click for help"></span>
+                  </li>
+                  <li>
+                    <label for="language" id="languageLabel"><span id="i18n_lang_label">Language</span>:</label>
+                    <input type="text" class="oc-ui-form-field" name="language" id="language">
+                    <span class="ui-icon ui-icon-help"  id="help_language" title="Click for help"></span>
+                  </li>
+                  <li>
+                    <label for="description" id="descriptionLabel"><span id="i18n_desc_label">Description</span>:</label>
+                    <textarea name="description" id="description" class="oc-ui-form-field" rows="5" cols="10"></textarea>
+                    <span class="ui-icon ui-icon-help"  id="help_description" title="Click for help"></span>
+                  </li>
+                </ul>
+              </form>
+            </div>
+          </div>
+          <div class="ui-widget ui-widget-content ui-corner-all layout-centered">
+            <ul class="oc-ui-form-list">
+              <li>
+                Changes will be made in <span id="numChangedFields">0</span> field(s) for all <span id="numSelectedRecordings">0</span> selected recoding(s).
+              </li>
+              <li>
+                <label>&nbsp;</label>
+                <button type="button" class="recordings-cancel-bulk-action">
+                  <span id="i18n_button_cancel_bulk_action">Apply Changes</span>
+                </button>
+                <button type="button" class="recordings-cancel-bulk-action">
+                  <span id="i18n_button_cancel_bulk_action">Cancel Bulk Action</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div id="bulkDeletePanel">
+          <button type="button" class="recordings-cancel-bulk-action">
+            <span id="i18n_button_cancel_bulk_action">Cancel Bulk Action</span>
+          </button>
+        </div>
+      </div>
+      <!-- FILTERING -->
+      <div class="layout-page-header">
+        <label for="filter">Filter to show only recordings containing: </label><input type="text" id="filter" />
+        in
+        <select id="filterField">
+          <option value="title">Title</option>
+          <option value="creator">Presenter</option>
+          <option value="series">Series</option>
+        </select>
+      </div>
+      <!-- RECORDINGS TABLE -->
+      <div class="layout-page-content">
+        <div id="recordingsTableContainer" />
+      </div>
+      <div id="holdActionPanelContainer" class="recordings-hold-state-frame">
+        <h2>
+          <span id="holdStateHeadRowTitle" >&nbsp;</span>
+          <span id="holdStateHeadRowPresenter">&nbsp;</span>
+          <span id="holdStateHeadRowSeries">&nbsp;</span>
+          <span id="holdStateHeadRow-date"></span>
+        </h2>
+        <div id="holdIframe-container">
+          <iframe id="holdActionPanelIframe" src="">
+          </iframe>
+          <div id="holdActionPanel-submit" style="display:none;">
+              <span>
+                  <input type="hidden" id="holdWorkflowId" value="">
+              </span>
+          </div>
+        </div>
+      </div>
+
+      <div id="refreshControlsContainer" class="layout-float-left">
+        <input type="checkbox" id="refreshEnabled" checked="checked">
+        <span class="refresh-text">Update table every&nbsp;</span>
+        <select id="refreshInterval">
+          <option value="5">5</option>
+          <option value="7">7</option>
+          <option value="10">10</option>
+        </select>
+        <span class="refresh-text">&nbsp;seconds.</span>
+      </div>
+
+      <!-- paging navigation -->
+      <div class="paging-nav-container layout-float-right">
+        <span>
+          Show
+          <select class="paging-nav-pagesize-selector">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+          Recordings per page
+        </span>
+        &nbsp;&nbsp;
+        <span>
+          Go to page
+          <input type="text" class="paging-nav-goto" style="width:50px;">
+        </span>
+        &nbsp;&nbsp;
+        <a href="#" class="paging-nav-go-previous">&lt; Previous</a>
+        <span class="paging-nav-mocklink">&lt; Previous</span>
+        <span>
+          Page
+          <span class="paging-nav-current">1</span>
+          of
+          <span class="paging-nav-total">1</span>
+        </span>
+        <a href="#" class="paging-nav-go-next">Next &gt;</a>
+        <span class="paging-nav-mocklink">Next &gt;</span>
+      </div>
+    </div>
+  </body>
+</html>
