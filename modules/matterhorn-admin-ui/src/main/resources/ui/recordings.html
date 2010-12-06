@@ -136,32 +136,40 @@
     </tr>
   </thead>
   <tbody>
-    {{each recording}}
-    <tr valign="top">
-      <td>
-        ${title}
-      </td>
-      <td>
-        ${RenderUtils.makeList(creators)}
-      </td>
-      <td>
-        ${series}
-      </td>
-      <td>
-        ${start}
-      </td>
-      <td class="status-column-cell">
-        {{if error}}
-          {{tmpl(error) 'errormessage'}}
-        {{else}}
-          {{tmpl(operation) 'operation'}}
-        {{/if}}
-      </td>
-      <td>
-        ${RenderUtils.makeActions(actions)}
-      </td>
-    </tr>
-    {{/each}}
+    {{if recording.length > 0}}
+      {{each recording}}
+      <tr valign="top">
+        <td>
+          ${title}
+        </td>
+        <td>
+          ${RenderUtils.makeList(creators)}
+        </td>
+        <td>
+          ${series}
+        </td>
+        <td>
+          ${start}
+        </td>
+        <td class="status-column-cell">
+          {{if error}}
+            {{tmpl(error) 'errormessage'}}
+          {{else}}
+            {{tmpl(operation) 'operation'}}
+          {{/if}}
+        </td>
+        <td>
+          ${RenderUtils.makeActions(actions)}
+        </td>
+      </tr>
+      {{/each}}
+    {{else}}
+      <tr>
+        <td colspan="6" align="center">
+          No Recordings found
+        </td>
+      </tr>
+    {{/if}}
   </tbody>
 </table>
       </textarea>
@@ -200,6 +208,10 @@
     ${details}
   </div>
 </div>
+      </textarea>
+
+      <textarea id="noResultsTemplate">
+
       </textarea>
 
     </div>

@@ -49,7 +49,7 @@ Recordings = new (function() {
       var state = Recordings.Configuration.state;
       if (state == 'upcoming') {
         params.push('state=paused');
-        params.push('op=scheduled');
+        params.push('op=schedule');
       }
       else if (state == 'capturing') {
         params.push('state=running');
@@ -57,14 +57,18 @@ Recordings = new (function() {
       }
       else if (state == 'processing') {
         params.push('state=running');
-        params.push('op=-scheduled,-capture');
+        params.push('op=-schedule');
+        params.push('op=-capture');
       }
       else if (state == 'finished') {
         params.push('state=succeeded');
-        params.push('op=-scheduled,-capture');
+        params.push('op=-schedule');
+        params.push('op=-capture');
       }
       else if (state == 'hold') {
-      // FIXME filter what here?
+        params.push('state=paused');
+        params.push('op=-schedule');
+        params.push('op=-capture');
       }
       else if (state == 'failed') {
         params.push('state=failed');
@@ -75,68 +79,75 @@ Recordings = new (function() {
     }
   }
 
+  function makeRecording(wf) {
+    var rec = {       // TODO create prototype so we can write : new Rec() or sth. here
+      title: '',
+      creators : [],
+      start : '',
+      end : '',
+      operation : {
+        state:'',
+        heading : '',
+        details : '',
+        time: false,
+        properties : false
+      },
+      error : false,
+      actions : []
+    };
+
+    // Title
+    rec.title = wf.mediapackage.title;
+
+    // Creator(s)
+    if (wf.mediapackage.creators)
+      rec.creators = wf.mediapackage.creators.creator;    // TODO update when there can be more than one
+
+    // Start Time
+    if (wf.mediapackage.start) {
+      var t = wf.mediapackage.start.split('T');
+      rec.start = t[1] + ' ' + t[0];
+    }
+
+    // Status
+    // current operation : search first operation with state that matches workflow state
+    for (var j in wf.operations.operation) {
+      if (wf.operations.operation[j].state == wf.state) {
+        var op = wf.operations.operation[j];
+        rec.operation.state = op.state;
+        rec.operation.heading = op.id;
+        rec.operation.details = op.description;
+        if (op.configurations) {
+          rec.operation.properties = [];
+          for (var k in op.configurations.configuration) {
+            var c = op.configurations.configuration[k];
+            rec.operation.properties.push({
+              key : c.key,
+              value : c.$
+            });
+          }
+        }
+        break;
+      }
+    }
+
+    // Actions
+
+    return rec;
+  }
+
   function makeRenderData(data) {
     var tdata = {
       recording:[]
     };
-    for (i in data.workflows.workflow) {
-      var rec = {       // TODO create prototype so we can write : new Rec() or sth. here
-        title: '',
-        creators : [],
-        start : '',
-        end : '',
-        operation : {
-          state:'',
-          heading : '',
-          details : '',
-          time: false,
-          properties : false
-        },
-        error : false,
-        actions : []
-      };
-      var wf = data.workflows.workflow[i];
-
-      // Title
-      rec.title = wf.mediapackage.title;
-
-      // Creator(s)
-      if (wf.mediapackage.creators)
-        rec.creators.push(wf.mediapackage.creators.creator);    // TODO update when there can be more than one
-
-      // Start Time
-      if (wf.mediapackage.start) {
-        var t = wf.mediapackage.start.split('T');
-        rec.start = t[1] + ' ' + t[0];
-      } else {
-      // if current operation = scheduled with state paused --> get time from operation configuration
-      }
-
-      // Status
-      // current operation : search first operation that
-      for (var j in wf.operations.operation) {
-        if (wf.operations.operation[j].state == wf.state) {
-          var op = wf.operations.operation[j];
-          rec.operation.state = op.state;
-          rec.operation.heading = op.id;
-          rec.operation.details = op.description;
-          if (op.configurations) {
-            rec.operation.properties = [];
-            for (var k in op.configurations.configuration) {
-              var c = op.configurations.configuration[k];
-              rec.operation.properties.push({
-                key : c.key,
-                value : c.$
-              });
-            }
-          }
-          break;
+    if (data.workflows.workflow) {
+      if (data.workflows.workflow instanceof Array) {
+        for (i in data.workflows.workflow) {
+          tdata.recording.push(makeRecording(data.workflows.workflow[i]));
         }
+      } else {
+        tdata.recording.push(makeRecording(data.workflows.workflow));
       }
-
-      // Actions
-
-      tdata.recording.push(rec);
     }
     return tdata;
   }
@@ -251,6 +262,9 @@ Recordings = new (function() {
     $('#autoUpdate').button();
     $('#updateInterval').spinner();
 
+    // set up statistics update
+
+
     refresh();
 
   };
@@ -259,6 +273,10 @@ Recordings = new (function() {
   return this;
 })();
 
+
+
+
+// Useful stuff
 RenderUtils = new (function() {
 
   this.makeList = function(a) {
