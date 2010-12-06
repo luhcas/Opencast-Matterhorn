@@ -21,6 +21,7 @@ import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.solr.SolrServerFactory;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
+import org.opencastproject.util.SolrUtils;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -60,6 +61,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -585,6 +587,34 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
   }
 
   /**
+   * Appends query parameters to a solr query
+   * 
+   * @param sb
+   *          The {@link StringBuilder} containing the query
+   * @param key
+   *          the key for this search parameter
+   * @param value
+   *          the value for this search parameter
+   * @return the appended {@link StringBuilder}
+   */
+  private StringBuilder append(StringBuilder sb, String key, Date startDate, Date endDate) {
+    if (StringUtils.isBlank(key) || (startDate == null && endDate == null)) {
+      return sb;
+    }
+    if (sb.length() > 0) {
+      sb.append(" AND ");
+    }
+    if (startDate == null)
+      startDate = new Date(0);
+    if (endDate == null)
+      endDate = new Date(Long.MAX_VALUE);
+    sb.append(key);
+    sb.append(":");
+    sb.append(SolrUtils.serializeDateRange(startDate, endDate));
+    return sb;
+  }
+
+  /**
    * Builds a solr search query from a {@link WorkflowQuery}.
    * 
    * @param query
@@ -593,11 +623,12 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
    */
   protected String buildSolrQueryString(WorkflowQuery query) {
     StringBuilder sb = new StringBuilder();
-    append(sb, MEDIAPACKAGE_KEY, query.getMediaPackage());
+    append(sb, MEDIAPACKAGE_KEY, query.getMediaPackageId());
     append(sb, SERIES_ID_KEY, query.getSeriesId());
     append(sb, SERIES_TITLE_KEY, query.getSeriesTitle());
     append(sb, FULLTEXT_KEY, query.getText());
     append(sb, WORKFLOW_DEFINITION_KEY, query.getWorkflowDefinitionId());
+    append(sb, CREATED_KEY, query.getFromDate(), query.getToDate());
     append(sb, CREATOR_KEY, query.getCreator());
     append(sb, CONTRIBUTOR_KEY, query.getContributor());
     append(sb, LANGUAGE_KEY, query.getLanguage());

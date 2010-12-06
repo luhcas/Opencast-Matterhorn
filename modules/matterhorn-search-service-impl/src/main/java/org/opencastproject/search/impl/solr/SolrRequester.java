@@ -27,6 +27,7 @@ import org.opencastproject.search.api.SearchResultImpl;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
 import org.opencastproject.search.api.SearchResultItemImpl;
 import org.opencastproject.search.impl.SearchQueryImpl;
+import org.opencastproject.util.SolrUtils;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;

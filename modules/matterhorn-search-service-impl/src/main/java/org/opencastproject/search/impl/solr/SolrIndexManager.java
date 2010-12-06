@@ -47,6 +47,7 @@ import org.opencastproject.metadata.mpeg7.VideoSegment;
 import org.opencastproject.metadata.mpeg7.VideoText;
 import org.opencastproject.search.api.SearchResultItem.SearchResultItemType;
 import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.SolrUtils;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.IOUtils;

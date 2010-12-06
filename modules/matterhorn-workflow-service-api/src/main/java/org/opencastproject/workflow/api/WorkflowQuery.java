@@ -17,7 +17,10 @@ package org.opencastproject.workflow.api;
 
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,12 +29,13 @@ import java.util.List;
 public class WorkflowQuery {
   protected long count;
   protected long startPage;
-
   protected String text;
   protected String seriesTitle;
   protected String seriesId;
   protected String mediaPackageId;
   protected String workflowDefinitionId;
+  protected Date fromDate;
+  protected Date toDate;
   protected String creator;
   protected String contributor;
   protected String language;
@@ -66,7 +70,8 @@ public class WorkflowQuery {
 
   /** Limit results to workflow instances matching a free text search */
   public WorkflowQuery withText(String text) {
-    this.text = text;
+    if (StringUtils.isNotBlank(text))
+      this.text = text;
     return this;
   }
 
@@ -79,7 +84,8 @@ public class WorkflowQuery {
    * @return this query
    */
   public WorkflowQuery withState(WorkflowState state) {
-    stateTerms.add(new QueryTerm(state.toString(), true));
+    if (state != null)
+      stateTerms.add(new QueryTerm(state.toString(), true));
     return this;
   }
 
@@ -92,25 +98,44 @@ public class WorkflowQuery {
    * @return this query
    */
   public WorkflowQuery withoutState(WorkflowState state) {
-    stateTerms.add(new QueryTerm(state.toString(), false));
+    if (state != null)
+      stateTerms.add(new QueryTerm(state.toString(), false));
     return this;
   }
 
-  /** Limit results to workflow instances with a specific series title */
+  /**
+   * Limit results to workflow instances with a specific series title
+   * 
+   * @param seriesTitle
+   *          the series title
+   */
   public WorkflowQuery withSeriesTitle(String seriesTitle) {
-    this.seriesTitle = seriesTitle;
+    if (StringUtils.isNotBlank(seriesTitle))
+      this.seriesTitle = seriesTitle;
     return this;
   }
 
-  /** Limit results to workflow instances for a specific series */
+  /**
+   * Limit results to workflow instances for a specific series
+   * 
+   * @param seriesId
+   *          the series identifier
+   */
   public WorkflowQuery withSeriesId(String seriesId) {
-    this.seriesId = seriesId;
+    if (StringUtils.isNotBlank(seriesId))
+      this.seriesId = seriesId;
     return this;
   }
 
-  /** Limit results to workflow instances for a specific media package */
+  /**
+   * Limit results to workflow instances for a specific media package
+   * 
+   * @param mediaPackageId
+   *          the media package identifier
+   */
   public WorkflowQuery withMediaPackage(String mediaPackageId) {
-    this.mediaPackageId = mediaPackageId;
+    if (StringUtils.isNotBlank(mediaPackageId))
+      this.mediaPackageId = mediaPackageId;
     return this;
   }
 
@@ -123,7 +148,8 @@ public class WorkflowQuery {
    * @return this query
    */
   public WorkflowQuery withCurrentOperation(String currentOperation) {
-    currentOperationTerms.add(new QueryTerm(currentOperation, true));
+    if (StringUtils.isNotBlank(currentOperation))
+      currentOperationTerms.add(new QueryTerm(currentOperation, true));
     return this;
   }
 
@@ -136,7 +162,8 @@ public class WorkflowQuery {
    * @return this query
    */
   public WorkflowQuery withoutCurrentOperation(String currentOperation) {
-    currentOperationTerms.add(new QueryTerm(currentOperation, false));
+    if (StringUtils.isNotBlank(currentOperation))
+      currentOperationTerms.add(new QueryTerm(currentOperation, false));
     return this;
   }
 
@@ -147,7 +174,30 @@ public class WorkflowQuery {
    *          the workflow identifier
    */
   public WorkflowQuery withWorkflowDefintion(String workflowDefinitionId) {
-    this.workflowDefinitionId = workflowDefinitionId;
+    if (StringUtils.isNotBlank(workflowDefinitionId))
+      this.workflowDefinitionId = workflowDefinitionId;
+    return this;
+  }
+
+  /**
+   * Limit the results to workflow instances with a creation date starting with <code>fromDate</code>.
+   * 
+   * @param fromDate
+   *          the starting date
+   */
+  public WorkflowQuery withFromDate(Date fromDate) {
+    this.fromDate = fromDate;
+    return this;
+  }
+
+  /**
+   * Limit the results to workflow instances with a creation date no later than <code>fromDate</code>.
+   * 
+   * @param toDate
+   *          the ending date
+   */
+  public WorkflowQuery withToDate(Date toDate) {
+    this.toDate = toDate;
     return this;
   }
 
@@ -158,7 +208,8 @@ public class WorkflowQuery {
    *          the mediapackage creator
    */
   public WorkflowQuery withCreator(String creator) {
-    this.creator = creator;
+    if (StringUtils.isNotBlank(creator))
+      this.creator = creator;
     return this;
   }
 
@@ -169,7 +220,8 @@ public class WorkflowQuery {
    *          the mediapackage contributor
    */
   public WorkflowQuery withContributor(String contributor) {
-    this.contributor = contributor;
+    if (StringUtils.isNotBlank(contributor))
+      this.contributor = contributor;
     return this;
   }
 
@@ -180,7 +232,8 @@ public class WorkflowQuery {
    *          the mediapackage language
    */
   public WorkflowQuery withLanguage(String language) {
-    this.language = language;
+    if (StringUtils.isNotBlank(language))
+      this.language = language;
     return this;
   }
 
@@ -191,7 +244,8 @@ public class WorkflowQuery {
    *          the mediapackage license
    */
   public WorkflowQuery withLicense(String license) {
-    this.license = license;
+    if (StringUtils.isNotBlank(license))
+      this.license = license;
     return this;
   }
 
@@ -202,7 +256,8 @@ public class WorkflowQuery {
    *          the mediapackage title
    */
   public WorkflowQuery withTitle(String title) {
-    this.title = title;
+    if (StringUtils.isNotBlank(title))
+      this.title = title;
     return this;
   }
 
@@ -213,107 +268,177 @@ public class WorkflowQuery {
    *          the mediapackage subject
    */
   public WorkflowQuery withSubject(String subject) {
-    this.subject = subject;
+    if (StringUtils.isNotBlank(subject))
+      this.subject = subject;
     return this;
   }
 
+  /**
+   * Returns the number of result items to return.
+   * 
+   * @return the number of result items
+   */
   public long getCount() {
     return count;
   }
 
+  /**
+   * Returns the number of the first page within the full result set.
+   * 
+   * @return the first page
+   */
   public long getStartPage() {
     return startPage;
   }
 
+  /**
+   * Returns the text that workflow instances need to match by any metadata field (fulltext).
+   * 
+   * @return the text
+   */
   public String getText() {
     return text;
   }
 
+  /**
+   * Returns the list of states that workflow instances need to match.
+   * 
+   * @return the states
+   */
   public List<QueryTerm> getStates() {
     return stateTerms;
   }
 
+  /**
+   * Returns the list of current operations that workflow instances need to match.
+   * 
+   * @return the current operations
+   */
   public List<QueryTerm> getCurrentOperations() {
     return currentOperationTerms;
   }
 
-  public String getMediaPackage() {
-    return mediaPackageId;
-  }
-
+  /**
+   * Returns the media package series identifier that workflow instances need to match.
+   * 
+   * @return the media package series identifier
+   */
   public String getSeriesId() {
     return seriesId;
   }
 
+  /**
+   * Returns the media package title that workflow instances need to match.
+   * 
+   * @return the media package title
+   */
   public String getSeriesTitle() {
     return seriesTitle;
   }
 
   /**
-   * @return the mediaPackageId
+   * Returns the media package identifier that workflow instances need to match.
+   * 
+   * @return the media package identifier
    */
   public String getMediaPackageId() {
     return mediaPackageId;
   }
 
   /**
-   * @return the workflowDefinitionId
+   * Returns the workflow defintions that workflow instances need to match.
+   * 
+   * @return the workflow definition identifier
    */
   public String getWorkflowDefinitionId() {
     return workflowDefinitionId;
   }
 
   /**
-   * @return the creator
+   * Returns the selection start date for workflow instances.
+   * 
+   * @return the start date
+   */
+  public Date getFromDate() {
+    return fromDate;
+  }
+
+  /**
+   * Returns the selection end date for workflow instances.
+   * 
+   * @return the end date
+   */
+  public Date getToDate() {
+    return toDate;
+  }
+
+  /**
+   * Returns the media package creator that workflow instances need to match.
+   * 
+   * @return the media package creator
    */
   public String getCreator() {
     return creator;
   }
 
   /**
-   * @return the contributor
+   * Returns the media package contributor that workflow instances need to match.
+   * 
+   * @return the media package contributor
    */
   public String getContributor() {
     return contributor;
   }
 
   /**
-   * @return the language
+   * Returns the media package language that workflow instances need to match.
+   * 
+   * @return the media package language
    */
   public String getLanguage() {
     return language;
   }
 
   /**
-   * @return the license
+   * Returns the media package license that workflow instances need to match.
+   * 
+   * @return the media package license
    */
   public String getLicense() {
     return license;
   }
 
   /**
-   * @return the title
+   * Returns the media package title that workflow instances need to match.
+   * 
+   * @return the media package title
    */
   public String getTitle() {
     return title;
   }
 
   /**
-   * @return the subject
+   * Returns the media package subject that workflow instances need to match.
+   * 
+   * @return the media package subject
    */
   public String getSubject() {
     return subject;
   }
 
   /**
-   * @return the currentOperationTerms
+   * Returns the search terms for operations. A term can either mean to include or exclude the specified operation.
+   * 
+   * @return the operation search terms
    */
   public List<QueryTerm> getCurrentOperationTerms() {
     return currentOperationTerms;
   }
 
   /**
-   * @return the stateTerms
+   * Returns the search terms for workflow states. A term can either mean to include or exclude the specified state.
+   * 
+   * @return the state search terms
    */
   public List<QueryTerm> getStateTerms() {
     return stateTerms;
@@ -323,6 +448,7 @@ public class WorkflowQuery {
    * A tuple of a query value and whether this search term should be included or excluded from the search results.
    */
   public static class QueryTerm {
+    
     private String value = null;
     private boolean include = false;
 

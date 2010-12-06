@@ -19,6 +19,7 @@ import org.opencastproject.mediapackage.MediaPackageImpl;
 import org.opencastproject.rest.RestPublisher;
 import org.opencastproject.util.DocUtil;
 import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.SolrUtils;
 import org.opencastproject.util.UrlSupport;
 import org.opencastproject.util.doc.DocRestData;
 import org.opencastproject.util.doc.Format;
@@ -180,11 +181,20 @@ public class WorkflowRestService {
             + "To include any state *other than* this one, prefix the state with a '-'"));
     instancesEndpoint.addOptionalParam(new Param("q", Type.STRING, "climate",
             "Filter results by string in metadata catalog"));
+    instancesEndpoint.addOptionalParam(new Param("workflowDefinitionId", Type.STRING, null, "Filter results by workflow definition identifier"));
     instancesEndpoint.addOptionalParam(new Param("seriesId", Type.STRING, null, "Filter results by series ID"));
     instancesEndpoint.addOptionalParam(new Param("seriesTitle", Type.STRING, null, "Filter results by series title"));
     instancesEndpoint.addOptionalParam(new Param("mp", Type.STRING, null, "Filter results by media package ID"));
     instancesEndpoint.addOptionalParam(new Param("op", Type.STRING, "inspect", "Filter results by current operation. "
             + "To include any operation *other than* this operation, prefix the operation with a '-'"));
+    instancesEndpoint.addOptionalParam(new Param("title", Type.STRING, null, "Filter results by title"));
+    instancesEndpoint.addOptionalParam(new Param("creator", Type.STRING, null, "Filter results by creator"));
+    instancesEndpoint.addOptionalParam(new Param("contributor", Type.STRING, null, "Filter results by contributor"));
+    instancesEndpoint.addOptionalParam(new Param("language", Type.STRING, null, "Filter results by language"));
+    instancesEndpoint.addOptionalParam(new Param("license", Type.STRING, null, "Filter results by license"));
+    instancesEndpoint.addOptionalParam(new Param("subject", Type.STRING, null, "Filter results by subject"));
+    instancesEndpoint.addOptionalParam(new Param("fromDate", Type.STRING, null, "Filter results by start date (yyyy-MM-dd'T'HH:mm:ss'Z')"));
+    instancesEndpoint.addOptionalParam(new Param("toDate", Type.STRING, null, "Filter results by end date (yyyy-MM-dd'T'HH:mm:ss'Z')"));
     instancesEndpoint.addOptionalParam(new Param("count", Type.STRING, "20", "Results per page (max 100)"));
     instancesEndpoint.addOptionalParam(new Param("startPage", Type.STRING, "0", "Page offset"));
     instancesEndpoint.setTestForm(RestTestForm.auto());
@@ -488,8 +498,13 @@ public class WorkflowRestService {
   @Path("instances.xml")
   public Response getWorkflowsAsXml(@QueryParam("state") List<String> states, @QueryParam("q") String text,
           @QueryParam("seriesId") String seriesId, @QueryParam("seriesTitle") String seriesTitle,
-          @QueryParam("mp") String mediapackageId, @QueryParam("op") List<String> currentOperations,
-          @QueryParam("startPage") int startPage, @QueryParam("count") int count) throws Exception {
+          @QueryParam("creator") String creator, @QueryParam("contributor") String contributor,
+          @QueryParam("fromdate") String fromDate, @QueryParam("todate") String toDate,
+          @QueryParam("language") String language, @QueryParam("license") String license,
+          @QueryParam("title") String title, @QueryParam("subject") String subject,
+          @QueryParam("workflowdefinition") String workflowDefinitionId, @QueryParam("mp") String mediapackageId,
+          @QueryParam("op") List<String> currentOperations, @QueryParam("startPage") int startPage,
+          @QueryParam("count") int count) throws Exception {
     // CHECKSTYLE:ON
     if (count < 1 || count > MAX_LIMIT) {
       count = DEFAULT_LIMIT;
@@ -501,7 +516,7 @@ public class WorkflowRestService {
     q.withCount(count);
     q.withStartPage(startPage);
     if (states != null && states.size() > 0) {
-      for(String state : states) {
+      for (String state : states) {
         if (state.startsWith(NEGATE_PREFIX)) {
           q.withoutState(WorkflowState.valueOf(state.substring(1).toUpperCase()));
         } else {
@@ -509,20 +524,21 @@ public class WorkflowRestService {
         }
       }
     }
-    if (text != null) {
-      q.withText(text);
-    }
-    if (seriesId != null) {
-      q.withSeriesId(seriesId);
-    }
-    if (seriesTitle != null) {
-      q.withSeriesTitle(seriesTitle);
-    }
-    if (mediapackageId != null) {
-      q.withMediaPackage(mediapackageId);
-    }
+
+    q.withText(text);
+    q.withSeriesId(seriesId);
+    q.withSeriesTitle(seriesTitle);
+    q.withMediaPackage(mediapackageId);
+    q.withCreator(creator);
+    q.withContributor(contributor);
+    q.withFromDate(SolrUtils.parseDate(fromDate));
+    q.withToDate(SolrUtils.parseDate(toDate));
+    q.withLanguage(language);
+    q.withLicense(license);
+    q.withTitle(title);
+
     if (currentOperations != null && currentOperations.size() > 0) {
-      for(String op : currentOperations) {
+      for (String op : currentOperations) {
         if (op.startsWith(NEGATE_PREFIX)) {
           q.withoutCurrentOperation(op.substring(1));
         } else {
@@ -540,10 +556,16 @@ public class WorkflowRestService {
   @Path("instances.json")
   public Response getWorkflowsAsJson(@QueryParam("state") List<String> states, @QueryParam("q") String text,
           @QueryParam("seriesId") String seriesId, @QueryParam("seriesTitle") String seriesTitle,
-          @QueryParam("mp") String mediapackageId, @QueryParam("op") List<String> currentOperations,
-          @QueryParam("startPage") int startPage, @QueryParam("count") int count) throws Exception {
+          @QueryParam("creator") String creator, @QueryParam("contributor") String contributor,
+          @QueryParam("fromdate") String fromDate, @QueryParam("todate") String toDate,
+          @QueryParam("language") String language, @QueryParam("license") String license,
+          @QueryParam("title") String title, @QueryParam("subject") String subject,
+          @QueryParam("workflowdefinitionId") String workflowDefinitionId, @QueryParam("mp") String mediapackageId,
+          @QueryParam("op") List<String> currentOperations, @QueryParam("startPage") int startPage,
+          @QueryParam("count") int count) throws Exception {
     // CHECKSTYLE:ON
-    return getWorkflowsAsXml(states, text, seriesId, seriesTitle, mediapackageId, currentOperations, startPage, count);
+    return getWorkflowsAsXml(states, text, seriesId, seriesTitle, creator, contributor, fromDate, toDate, language,
+            license, title, subject, workflowDefinitionId, mediapackageId, currentOperations, startPage, count);
   }
 
   @GET

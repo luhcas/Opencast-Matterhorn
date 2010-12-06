@@ -18,6 +18,7 @@ package org.opencastproject.workflow.remote;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.serviceregistry.api.RemoteBase;
 import org.opencastproject.util.NotFoundException;
+import org.opencastproject.util.SolrUtils;
 import org.opencastproject.workflow.api.WorkflowBuilder;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
@@ -134,8 +135,35 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
     if (query.getSeriesTitle() != null) {
       queryStringParams.add(new BasicNameValuePair("seriesTitle", query.getSeriesTitle()));
     }
-    if (query.getMediaPackage() != null) {
-      queryStringParams.add(new BasicNameValuePair("mp", query.getMediaPackage()));
+    if (query.getMediaPackageId() != null) {
+      queryStringParams.add(new BasicNameValuePair("mp", query.getMediaPackageId()));
+    }
+    if (query.getWorkflowDefinitionId() != null) {
+      queryStringParams.add(new BasicNameValuePair("workflowDefinitionId", query.getLicense()));
+    }
+    if (query.getFromDate() != null) {
+      queryStringParams.add(new BasicNameValuePair("fromdate", SolrUtils.serializeDate(query.getFromDate())));
+    }
+    if (query.getToDate() != null) {
+      queryStringParams.add(new BasicNameValuePair("todate", SolrUtils.serializeDate(query.getToDate())));
+    }
+    if (query.getCreator() != null) {
+      queryStringParams.add(new BasicNameValuePair("creator", query.getCreator()));
+    }
+    if (query.getContributor() != null) {
+      queryStringParams.add(new BasicNameValuePair("contributor", query.getContributor()));
+    }
+    if (query.getLanguage() != null) {
+      queryStringParams.add(new BasicNameValuePair("language", query.getLanguage()));
+    }
+    if (query.getLicense() != null) {
+      queryStringParams.add(new BasicNameValuePair("license", query.getLicense()));
+    }
+    if (query.getTitle() != null) {
+      queryStringParams.add(new BasicNameValuePair("title", query.getTitle()));
+    }
+    if (query.getSubject() != null) {
+      queryStringParams.add(new BasicNameValuePair("subject", query.getSubject()));
     }
     if (query.getStartPage() > 0) {
       queryStringParams.add(new BasicNameValuePair("startPage", Long.toString(query.getStartPage())));
