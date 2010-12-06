@@ -79,6 +79,7 @@
     <field name="language" type="text" indexed="true" stored="false" multiValued="false" />
     <field name="contributor" type="text" indexed="true" stored="false" multiValued="true" />
     <field name="creator" type="text" indexed="true" stored="false" multiValued="true" />
+    <field name="created" type="date" indexed="true" stored="false"/>
     <field name="subject" type="text" indexed="true" stored="false" multiValued="true" />
     <field name="fulltext" type="text" indexed="true" stored="false" multiValued="true" />
   </fields>
@@ -97,5 +98,7 @@
   <copyField source="license" dest="fulltext" />
   <copyField source="language" dest="fulltext" />
   <copyField source="contributor" dest="fulltext" />
+  <copyField source="creator" dest="fulltext" />
+  <copyField source="created" dest="fulltext" />
   <copyField source="subject" dest="fulltext" />
 </schema>

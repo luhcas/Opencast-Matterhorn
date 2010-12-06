@@ -90,7 +90,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
   protected static final String OPERATION_KEY = "operation";
 
   /** The key in solr documents representing the workflow definition id */
-  protected static final String TEMPLATE_KEY = "templateid";
+  protected static final String WORKFLOW_DEFINITION_KEY = "templateid";
 
   /** The key in solr documents representing the workflow's series identifier */
   protected static final String SERIES_ID_KEY = "seriesid";
@@ -124,6 +124,9 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
 
   /** The key in solr documents representing the workflow's mediapackage creators */
   private static final String CREATOR_KEY = "creator";
+
+  /** The key in solr documents representing the workflow's mediapackage creation date */
+  private static final String CREATED_KEY = "created";
 
   /** The key in solr documents representing the workflow's mediapackage subjects */
   private static final String SUBJECT_KEY = "subject";
@@ -296,7 +299,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
   protected SolrInputDocument createDocument(WorkflowInstance instance) throws Exception {
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ID_KEY, instance.getId());
-    doc.addField(TEMPLATE_KEY, instance.getTemplate());
+    doc.addField(WORKFLOW_DEFINITION_KEY, instance.getTemplate());
     doc.addField(STATE_KEY, instance.getState().toString());
 
     String xml = WorkflowBuilder.getInstance().toXml(instance);
@@ -305,6 +308,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     WorkflowOperationInstance op = instance.getCurrentOperation();
     if (op != null)
       doc.addField(OPERATION_KEY, op.getId());
+    
     MediaPackage mp = instance.getMediaPackage();
     doc.addField(MEDIAPACKAGE_KEY, mp.getIdentifier().toString());
     if (mp.getSeries() != null) {
@@ -312,6 +316,9 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     }
     if (mp.getSeriesTitle() != null) {
       doc.addField(SERIES_TITLE_KEY, mp.getSeriesTitle());
+    }
+    if (mp.getDate() != null) {
+      doc.addField(CREATED_KEY, mp.getDate());
     }
     if (mp.getTitle() != null) {
       doc.addField(TITLE_KEY, mp.getTitle());
@@ -397,13 +404,13 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     // Get all definitions and then query for the numbers and the current operation per definition
     try {
       SolrQuery solrQuery = new SolrQuery("*:*");
-      solrQuery.addFacetField(TEMPLATE_KEY);
+      solrQuery.addFacetField(WORKFLOW_DEFINITION_KEY);
       solrQuery.addFacetField(OPERATION_KEY);
       solrQuery.setFacetMinCount(0);
       solrQuery.setFacet(true);
       QueryResponse response = solrServer.query(solrQuery);
 
-      FacetField templateFacet = response.getFacetField(TEMPLATE_KEY);
+      FacetField templateFacet = response.getFacetField(WORKFLOW_DEFINITION_KEY);
       FacetField operationFacet = response.getFacetField(OPERATION_KEY);
 
       // For every template and every operation
@@ -439,7 +446,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
               solrQuery.addFacetQuery(STATE_KEY + ":" + WorkflowState.RUNNING);
               solrQuery.addFacetQuery(STATE_KEY + ":" + WorkflowState.STOPPED);
               solrQuery.addFacetQuery(STATE_KEY + ":" + WorkflowState.SUCCEEDED);
-              solrQuery.addFilterQuery(TEMPLATE_KEY + ":" + template.getName());
+              solrQuery.addFilterQuery(WORKFLOW_DEFINITION_KEY + ":" + template.getName());
               solrQuery.addFilterQuery(OPERATION_KEY + ":" + operation.getName());
               solrQuery.setFacetMinCount(0);
               solrQuery.setFacet(true);
@@ -590,6 +597,13 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     append(sb, SERIES_ID_KEY, query.getSeriesId());
     append(sb, SERIES_TITLE_KEY, query.getSeriesTitle());
     append(sb, FULLTEXT_KEY, query.getText());
+    append(sb, WORKFLOW_DEFINITION_KEY, query.getWorkflowDefinitionId());
+    append(sb, CREATOR_KEY, query.getCreator());
+    append(sb, CONTRIBUTOR_KEY, query.getContributor());
+    append(sb, LANGUAGE_KEY, query.getLanguage());
+    append(sb, LICENSE_KEY, query.getLicense());
+    append(sb, TITLE_KEY, query.getTitle());
+    append(sb, SUBJECT_KEY, query.getSubject());
     appendMap(sb, OPERATION_KEY, query.getCurrentOperations());
     appendMap(sb, STATE_KEY, query.getStates());
 

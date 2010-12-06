@@ -31,6 +31,13 @@ public class WorkflowQuery {
   protected String seriesTitle;
   protected String seriesId;
   protected String mediaPackageId;
+  protected String workflowDefinitionId;
+  protected String creator;
+  protected String contributor;
+  protected String language;
+  protected String license;
+  protected String title;
+  protected String subject;
 
   /**
    * The list of current operation terms that have been added to this query.
@@ -133,6 +140,83 @@ public class WorkflowQuery {
     return this;
   }
 
+  /**
+   * Limit results to workflow instances with a specific workflow definition.
+   * 
+   * @param workflowDefinitionId
+   *          the workflow identifier
+   */
+  public WorkflowQuery withWorkflowDefintion(String workflowDefinitionId) {
+    this.workflowDefinitionId = workflowDefinitionId;
+    return this;
+  }
+
+  /**
+   * Limit results to workflow instances with a specific mediapackage creator.
+   * 
+   * @param creator
+   *          the mediapackage creator
+   */
+  public WorkflowQuery withCreator(String creator) {
+    this.creator = creator;
+    return this;
+  }
+
+  /**
+   * Limit results to workflow instances with a specific mediapackage contributor.
+   * 
+   * @param contributor
+   *          the mediapackage contributor
+   */
+  public WorkflowQuery withContributor(String contributor) {
+    this.contributor = contributor;
+    return this;
+  }
+
+  /**
+   * Limit results to workflow instances with a specific mediapackage language.
+   * 
+   * @param language
+   *          the mediapackage language
+   */
+  public WorkflowQuery withLanguage(String language) {
+    this.language = language;
+    return this;
+  }
+
+  /**
+   * Limit results to workflow instances with a specific mediapackage license.
+   * 
+   * @param license
+   *          the mediapackage license
+   */
+  public WorkflowQuery withLicense(String license) {
+    this.license = license;
+    return this;
+  }
+
+  /**
+   * Limit results to workflow instances with a specific mediapackage title.
+   * 
+   * @param title
+   *          the mediapackage title
+   */
+  public WorkflowQuery withTitle(String title) {
+    this.title = title;
+    return this;
+  }
+
+  /**
+   * Limit results to workflow instances with a specific mediapackage subject.
+   * 
+   * @param subject
+   *          the mediapackage subject
+   */
+  public WorkflowQuery withSubject(String subject) {
+    this.subject = subject;
+    return this;
+  }
+
   public long getCount() {
     return count;
   }
@@ -166,6 +250,76 @@ public class WorkflowQuery {
   }
 
   /**
+   * @return the mediaPackageId
+   */
+  public String getMediaPackageId() {
+    return mediaPackageId;
+  }
+
+  /**
+   * @return the workflowDefinitionId
+   */
+  public String getWorkflowDefinitionId() {
+    return workflowDefinitionId;
+  }
+
+  /**
+   * @return the creator
+   */
+  public String getCreator() {
+    return creator;
+  }
+
+  /**
+   * @return the contributor
+   */
+  public String getContributor() {
+    return contributor;
+  }
+
+  /**
+   * @return the language
+   */
+  public String getLanguage() {
+    return language;
+  }
+
+  /**
+   * @return the license
+   */
+  public String getLicense() {
+    return license;
+  }
+
+  /**
+   * @return the title
+   */
+  public String getTitle() {
+    return title;
+  }
+
+  /**
+   * @return the subject
+   */
+  public String getSubject() {
+    return subject;
+  }
+
+  /**
+   * @return the currentOperationTerms
+   */
+  public List<QueryTerm> getCurrentOperationTerms() {
+    return currentOperationTerms;
+  }
+
+  /**
+   * @return the stateTerms
+   */
+  public List<QueryTerm> getStateTerms() {
+    return stateTerms;
+  }
+
+  /**
    * A tuple of a query value and whether this search term should be included or excluded from the search results.
    */
   public static class QueryTerm {
@@ -192,4 +346,5 @@ public class WorkflowQuery {
       return include;
     }
   }
+
 }
