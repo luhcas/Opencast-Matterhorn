@@ -57,8 +57,7 @@ public class SearchServiceRemoteImpl extends RemoteBase implements SearchService
    */
   @Override
   public void add(MediaPackage mediaPackage) throws SearchException {
-    String urlSuffix = UrlSupport.concat(new String[] { "/search", "rest", "add" });
-    HttpPost post = new HttpPost(urlSuffix);
+    HttpPost post = new HttpPost("/add");
     try {
       List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
       params.add(new BasicNameValuePair("mediapackage", mediaPackage.toXml()));
