@@ -19,7 +19,7 @@ and follow the steps in menu (starting with 0).
 Define some required variables and start the script:
 
 export HOME3P=<3rd_party_dir>
-export SUNDOWN=<sudo_password>  # if needed
+export SUDOPWD=<sudo_password>  # if needed
 ./do-all
 
 At the end of compilation (approx. 45 minutes) you'll have 3rd
