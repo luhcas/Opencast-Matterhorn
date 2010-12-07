@@ -79,7 +79,7 @@ public class StreamingDistributionServiceRemoteImpl extends RemoteBase implement
     }
 
     List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-    params.add(new BasicNameValuePair("mediaPackageId", mediaPackageId));
+    params.add(new BasicNameValuePair("mediapackageId", mediaPackageId));
     params.add(new BasicNameValuePair("element", elementXml));
     HttpPost post = new HttpPost();
     HttpResponse response = null;
