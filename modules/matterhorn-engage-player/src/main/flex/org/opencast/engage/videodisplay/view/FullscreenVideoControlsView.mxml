@@ -26,7 +26,7 @@
 		 width = "70%"
 		 height = "100%"
 		 backgroundColor = "0x000000"
-		 backgroundAlpha = "0.0"
+		 backgroundAlpha = "1.0"
 		 rollOver = "{this.NavigationVisible = true}"
 		 rollOut = "{this.NavigationVisible = false}"
 		 mouseOver = "{this.NavigationVisible = true}"
@@ -309,7 +309,6 @@
 			   width = "750"
 			   height = "80"
 			   horizontalCenter="0"
-			   styleName="canvasBackground"
 			   visible = "{this.NavigationVisible}"
 			   hideEffect = "{fadeOut}"
 			   showEffect = "{fadeIn}"
@@ -434,14 +433,14 @@
 						   width = "{model.progressFullscreen}"
 						   backgroundColor = "#dfe938c"
 						   toolTip = "Progress"
-						   top = "6"
-						   left = "7"/>
+						   top = "3"
+						   left = "6"/>
 
 				<mx:Canvas>
 
 					<mx:HSlider 
 								id = "hs_seek"
-								width = "590"
+								width = "587"
 								maximum = "{ model.currentDuration }"
 								value = "{ model.currentPlayhead }"
 								change = "{ onSeek() }"

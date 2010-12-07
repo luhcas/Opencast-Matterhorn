@@ -137,7 +137,3 @@ Button.ccdisabled
 {
     borderSkin: Embed(source='Buttons_Full_Screen.swf', symbol='bg_volume_controls');
 }
-.canvasBackground
-{
-	skin: Embed(source='Buttons_Main_Large.swf', symbol='fullscreen_background');
-}
