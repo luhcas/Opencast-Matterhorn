@@ -132,6 +132,15 @@
               org.opencastproject.search.impl.*;version=${project.version},
               org.opencastproject.search.endpoint;version=${project.version}
             </Export-Package>
+            <Private-Package>
+              com.sun.syndication.feed,
+              com.sun.syndication.feed.impl,
+              com.sun.syndication.feed.synd,
+              com.sun.syndication.feed.synd.impl,
+              com.sun.syndication.feed.module,
+              com.sun.syndication.feed.module.impl,
+              com.sun.syndication.feed.module.itunes
+            </Private-Package>
             <Embed-Dependency>
               rome;inline=true,
               itunes;inline=true

@@ -70,6 +70,31 @@ public class FeedServlet extends HttpServlet {
    */
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
+    try {
+      Thread.currentThread().setContextClassLoader(FeedServlet.class.getClassLoader());
+      doGetWithBundleClassloader(request, response);
+    } finally {
+      Thread.currentThread().setContextClassLoader(originalContextClassLoader);
+    }
+  }
+
+  /**
+   * Handles HTTP GET requests after the context classloader has been set.
+   * 
+   * See https://issues.apache.org/jira/browse/SMX4-510 for details
+   * 
+   * @param request
+   *          the http request
+   * @param response
+   *          the http response
+   * @throws ServletException
+   *           if there is a problem handling the http exchange
+   * @throws IOException
+   *           if there is an exception reading or writing from / to the request and response streams
+   */
+  protected void doGetWithBundleClassloader(HttpServletRequest request, HttpServletResponse response)
+          throws ServletException, IOException {
 
     FeedInfo feedInfo = null;
 
@@ -154,11 +179,12 @@ public class FeedServlet extends HttpServlet {
       query[i] = pathElements[i + 2];
     return new FeedInfo(type, version, query);
   }
-  
+
   /**
    * Sets the http service.
    * 
-   * @param httpService the http service
+   * @param httpService
+   *          the http service
    */
   public void setHttpService(HttpService httpService) {
     try {
@@ -171,11 +197,12 @@ public class FeedServlet extends HttpServlet {
       e.printStackTrace();
     }
   }
-  
+
   /**
    * Adds the feed generator to the list of generators.
    * 
-   * @param generator the generator
+   * @param generator
+   *          the generator
    */
   public void addFeedGenerator(FeedGenerator generator) {
     logger.info("Registering '{}' feed", generator.getIdentifier());
@@ -185,7 +212,8 @@ public class FeedServlet extends HttpServlet {
   /**
    * Removes the generator from the list of feed generators.
    * 
-   * @param generator the feed generator
+   * @param generator
+   *          the feed generator
    */
   public void removeFeedGenerator(FeedGenerator generator) {
     logger.info("Removing '{}' feed", generator.getIdentifier());
