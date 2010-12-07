@@ -11,7 +11,7 @@
                         <a class="itemtitle">
                             <xsl:attribute name="href">watch.html?id=<xsl:value-of
                                 select="mediapackage/@id" /></xsl:attribute>
-                                <img class="thumb">
+                                <img class="thumb" alt="">
                                     <xsl:for-each select="mediapackage/attachments/attachment">
                                         <xsl:choose>
                                             <xsl:when test="@type='presenter/search+preview'">
