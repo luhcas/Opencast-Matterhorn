@@ -80,9 +80,19 @@ Button.skipbackward
 {
 	skin: Embed(skinClass="Button_skipbackward_skin");
 }
+
+Button.skipbackwarddisabled
+{
+	skin: Embed(skinClass="Button_skipbackwarddisabled_skin");
+}
+
 Button.skipforward
 {
 	skin: Embed(skinClass="Button_skipforward_skin");
+}
+Button.skipforwarddisabled
+{
+	skin: Embed(skinClass="Button_skipforwarddisabled_skin");
 }
 Button.cc
 {

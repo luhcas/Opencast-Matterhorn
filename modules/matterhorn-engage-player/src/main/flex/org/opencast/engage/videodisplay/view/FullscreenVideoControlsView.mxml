@@ -366,13 +366,18 @@
 
 					<mx:Button 
 							   id = "btn_skipBackward"
-							   toolTip = "Jump To The Previous Slide"
-							   styleName = "{ model.slideLength != 0 ? 'skipbackward' : 'disable' }"
+							   toolTip = "{ model.slideLength != 0 ? 'Jump To The Previous Slide' : ''}"
+							   useHandCursor="{ model.slideLength != 0 ? true : false }"
+							   buttonMode="{ model.slideLength != 0 ? true : false }"
+							   enabled="{ model.slideLength != 0 ? true : false }"
+							   styleName = "{ model.slideLength != 0 ? 'skipbackward' : 'skipbackwarddisabled' }"
 							   click = "{ExternalInterface.call( ExternalFunction.SKIPBACKWARD, '' )}"/>
 					<mx:Spacer width="3" />
 					<mx:Button 
 							   id = "btn_rewind"
 							   toolTip = "Jump Back"
+							   useHandCursor="true"
+							   buttonMode="true"
 							   styleName = "backward"
 							   mouseDown = "{ jumpBack() }"
 							   mouseUp = "{ rewindTimer.stop(); model.rewindTime = 10; }"/>
@@ -380,31 +385,41 @@
 					<mx:Button 
 							   id = "btn_playpause"
 							   toolTip = "{ model.currentPlayerState == PlayerState.PAUSED ? 'Play' : 'Pause' }"
+							   useHandCursor="true"
+							   buttonMode="true"
 							   styleName = "{ model.currentPlayerState == PlayerState.PAUSED ? 'play' : 'pause' }"
 							   click = "{ ExternalInterface.call( ExternalFunction.PLAYPAUSE, '' ) }"/>
 					<mx:Spacer width="3" />
 					<mx:Button 
 							   id = "btn_fastforward"
 							   toolTip = "Jump Forward"
+							   useHandCursor="true"
+							   buttonMode="true"
 							   styleName = "forward"
 							   mouseDown = "{ jumpForward() }"
 							   mouseUp = "{ fastForwardTimer.stop(); model.fastForwardTime = 10 }"/>
 					<mx:Spacer width="3" />
 					<mx:Button 
 							   id = "btn_skipforward"
-							   toolTip = "Jump To The Next Slide"
-							   styleName = "{ model.slideLength != 0 ? 'skipforward' : 'disable' }"
+							   toolTip = "{ model.slideLength != 0 ? 'Jump To The Next Slide' : ''}"
+							   useHandCursor="{ model.slideLength != 0 ? true : false }"
+							   buttonMode="{ model.slideLength != 0 ? true : false }"
+							   enabled="{ model.slideLength != 0 ? true : false }"
+							   styleName = "{ model.slideLength != 0 ? 'skipforward' : 'skipforwarddisabled' }"
 							   click = "{ExternalInterface.call( ExternalFunction.SKIPFORWARD, '' )}"/>
 					<mx:Spacer width="3" />
 
 					<mx:Button 
-
+							   useHandCursor="true"
+							   buttonMode="true"
 							   id = "btn_volume"
 							   toolTip = "{ model.soundState == SoundState.VOLUMEMAX ? 'Volume Maximum' : model.soundState == SoundState.VOLUMEMED ? 'Volume Medium' : model.soundState == SoundState.VOLUMEMIN ? 'Volume Minimum' : model.soundState == SoundState.VOLUMEMUTE ? 'Volume Mute' : ''}"
 							   styleName = "{ model.soundState}"
 							   click = "{ toggleMute() }"/>
 
 					<mx:HSlider 
+								useHandCursor="true"
+								buttonMode="true"
 								id = "hs_volume"
 								width = "58"
 								maximum = "1"
@@ -414,13 +429,17 @@
 								dataTipFormatFunction = "volumeDataTipFunc"/>
 					<mx:Button 
 							   width="48"
-							   toolTip = "{ model.captionsURL == '' ? 'No Closed Captons' : model.ccBoolean == true ? 'Closed Captons On' : 'Closed Captons Off' }"
+							   useHandCursor="{ model.captionsURL == '' ? false : true }"
+							   buttonMode="{ model.captionsURL == '' ? false : true }"
+							   toolTip = "{ model.captionsURL == '' ? 'No Closed Captions' : model.ccBoolean == true ? 'Closed Captions On' : 'Closed Captions Off' }"
 							   styleName = "{ model.captionsURL == '' ? 'ccdisabled' : model.ccButtonBoolean == true ? 'cc' :  mute == true ? 'cc' :  'ccOn' }"
 							   click = "{ Swiz.dispatchEvent( new ClosedCaptionsEvent() ) }"
 							   enabled = "{  model.captionsURL == '' ? false : true }"/>
 
 					<mx:Button 
-							   toolTip = "Back To The Player"
+							   useHandCursor="true"
+							   buttonMode="true"
+							   toolTip = "Close Fullscrenn"
 							   styleName = "fullscreen"
 							   click = "{ normalscreen() }"/>
 				</mx:HBox>
