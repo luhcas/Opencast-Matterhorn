@@ -29,10 +29,6 @@ install_rpms() {
       ;;
     MacOS )
       ;;
-    * )
-      echo "Don't know how to install $1 on `os`" 1>&2
-      return 1
-      ;;
   esac
   return 0
 }
@@ -144,8 +140,20 @@ install_prog() {
               ;;
           esac
           ;;
+        perl-dbi )
+          case `arch` in
+            i386 )
+              URL=http://mirror.centos.org/centos/5/os/i386/CentOS
+              rpms="perl-DBI-1.52-2.el5.i386.rpm"
+              ;;
+            x86_64 )
+              URL=http://mirror.centos.org/centos/5/os/x86_64/CentOS
+              rpms="perl-DBI-1.52-2.el5.x86_64.rpm"
+              ;;
+          esac
+          ;;
         * )
-          echo "Don't know how to install $1 on `os`" 1>&2
+          echo "Don't know how to install $1 on `os`"
           return 1
           ;;
       esac
@@ -171,6 +179,7 @@ install_prog() {
         git ) prog=git-core ;;
         ImageMagick ) prog=imagemagick ;;
         gsl-devel ) prog=libgsl0-dev ;;
+        perl-dbi ) prog=libdbi-perl ;;
         * ) prog="$1" ;;
       esac
       sudox apt-get -y install $prog
@@ -186,10 +195,6 @@ install_prog() {
       esac
       sudox port install $prog
       [ $? -ne 0 ] && return 1
-      ;;
-    * )
-      echo "Don't know how to install $1 on `os`" 1>&2
-      return 1
       ;;
   esac
   return 0
@@ -225,7 +230,7 @@ install_macports() {
   sudox hdiutil detach /Volumes/MacPorts-1.9.2
   [ $? -ne 0 ] && return 1
 # sudox port -v selfupdate
-# [ $? -ne 0 ] && return 1
+# [ $? -ne 0 -a $? -ne 25 ] && return 1
   return 0
 }
 #
@@ -241,10 +246,6 @@ preinstall_scons() {
       [ $? -ne 0 ] && return 1
       ;;
     MacOS )
-      ;;
-    * )
-      echo "Don't know how to preinstall scons on `os`" 1>&2
-      return 1
       ;;
   esac
   return 0
@@ -267,6 +268,9 @@ check_prereq() {
       #
       # gsl-devel is needed by ocropus
       chkprog gsl-config || install_prog gsl-devel || return 1
+      #
+      # this was reported as missing
+      chkprog dbiprof || install_prog perl-dbi || return 1
       ;;
     Ubuntu )
       chkprog wget  || install_prog wget  || return 1
@@ -286,6 +290,9 @@ check_prereq() {
       #
       # gsl-devel is needed by ocropus
       chkprog gsl-config || install_prog gsl-devel || return 1
+      #
+      # this was reported as missing
+      chkprog dbiprof || install_prog perl-dbi || return 1
       ;;
     Debian )
       ;;
@@ -304,10 +311,6 @@ check_prereq() {
       #  sudox ln -fs /opt/local/bin/convert /usr/bin/convert
       #  [ $? -ne 0 ] && return 1
       #fi
-      ;;
-    * )
-      echo "Don't know how to check prerequisites on `os`" 1>&2
-      return 1
       ;;
   esac
   return 0
@@ -400,10 +403,6 @@ install_mingw32() {
       ;;
     MacOS )
       ;;
-    * )
-      echo "Don't know how to install mingw32 on `os`" 1>&2
-      return 1
-      ;;
   esac
   return 0
 }
@@ -416,33 +415,40 @@ fix_libs() {
   cd packages
   [ $? -ne 0 ] && return 1
   #
-  # Install patchelf 0.5
-  #
-  if [ ! "`patchelf --version 2>/dev/null`" = "patchelf 0.5" ]; then
-    #original, but now defunct
-    #URL=http://hydra.nixos.org/build/114505/download/3
-    #pkg=patchelf-0.5.tar.gz
-    URL=http://www.mirrorservice.org/sites/www.ibiblio.org/gentoo/distfiles
-    pkg=patchelf-0.5.tar.bz2
-    if [ ! -s "$pkg" ]; then
-      copypkg "$pkg"
-      if [ $? -ne 0 ]; then
-        wget -4O "$pkg" "$URL/$pkg"
-        if [ $? -ne 0 ]; then
-          rm -f "$pkg"
-          return 1
+  case `os` in
+    CentOS | RHEL | Ubuntu | Debian | openSUSE )
+      #
+      # Install patchelf 0.5
+      #
+      if [ ! "`patchelf --version 2>/dev/null`" = "patchelf 0.5" ]; then
+        #original, but now defunct
+        #URL=http://hydra.nixos.org/build/114505/download/3
+        #pkg=patchelf-0.5.tar.gz
+        URL=http://www.mirrorservice.org/sites/www.ibiblio.org/gentoo/distfiles
+        pkg=patchelf-0.5.tar.bz2
+        if [ ! -s "$pkg" ]; then
+          copypkg "$pkg"
+          if [ $? -ne 0 ]; then
+            wget -4O "$pkg" "$URL/$pkg"
+            if [ $? -ne 0 ]; then
+              rm -f "$pkg"
+              return 1
+            fi
+          fi
         fi
+        bzip2 -dc "$pkg" | tar -xv
+        [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
+        cd patchelf-0.5
+        [ $? -ne 0 ] && return 1
+        ./configure
+        [ $? -ne 0 ] && return 1
+        sudox make install
+        [ $? -ne 0 ] && return 1
       fi
-    fi
-    bzcat "$pkg" | tar -xv
-    [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
-    cd patchelf-0.5
-    [ $? -ne 0 ] && return 1
-    ./configure
-    [ $? -ne 0 ] && return 1
-    sudox make install
-    [ $? -ne 0 ] && return 1
-  fi
+      ;;
+    MacOS )
+      ;;
+  esac
   #
   case `os` in
     CentOS | RHEL )
@@ -540,13 +546,27 @@ EOF
       ;;
     MacOS )
       ;;
-    * )
-      echo "Don't know how to fix libraries on `os`" 1>&2
-      return 1
-      ;;
   esac
   return 0
 }
+#
+case `os` in
+  CentOS | RHEL | Ubuntu | Debian | openSUSE | MacOS )
+    ;;
+  * )
+    echo "Unsupported operating system: `os`"
+    return 1
+    ;;
+esac
+#
+case `arch` in
+  i386 | x86_64 )
+    ;;
+  * )
+    echo "Unsupported architecture: `arch`"
+    return 1
+    ;;
+esac
 #
 check_prereq    || exit 1
 install_mingw32 || exit 1

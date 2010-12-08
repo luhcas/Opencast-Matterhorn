@@ -14,13 +14,13 @@ dir=`getcfg DIR:`
 #
 rm -fr "$dir" "${dir}-linux"
 [ $? -ne 0 ] && exit 1
-zcat "$pkg1" | tar -xv
+gzip -dc "$pkg1" | tar -xv
 [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
 mv "$dir" "${dir}-linux"
 [ $? -ne 0 ] && exit 1
 cd "${dir}-linux"
 [ $? -ne 0 ] && exit 1
-zcat "../$pkg2" | tar -xv
+gzip -dc "../$pkg2" | tar -xv
 [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
 #
 cp ../svutil.cpp viewer

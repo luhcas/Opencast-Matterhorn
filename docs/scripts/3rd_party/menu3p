@@ -11,8 +11,8 @@ chkprog $PAGER || PAGER=more
 #
 # These programs are absolutely necessary!
 chkprog java  || exit 1
-chkprog zcat  || exit 1
-chkprog bzcat || exit 1
+chkprog gzip  || exit 1
+chkprog bzip2 || exit 1
 chkprog unzip || exit 1
 chkprog zip   || exit 1
 #
@@ -37,7 +37,8 @@ while [ true ]; do
   ACT=`getans "Select action [$ACT]: "`
   ERRTXT="..."
   case "$ACT" in
-    0 ) chksudo
+    0 ) # check & install prerequisites
+        chksudo
         if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
         else
           LOGFILE=`mktemp /tmp/${0##*/}-prereq.log.XXXXX`
@@ -46,12 +47,20 @@ while [ true ]; do
           else ERRTXT=" (success)..."; ACT=1; fi
         fi
         ;;
-    1 ) LOGFILE=`mktemp /tmp/${0##*/}-download.log.XXXXX`
+    1 ) # download sources
+        LOGFILE=`mktemp /tmp/${0##*/}-download.log.XXXXX`
         time ./download-sources 2>&1 | tee $LOGFILE
         if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
-        else ERRTXT=" (success)..."; ACT=2; fi
+        else
+          ERRTXT=" (success)..."
+          case `os` in
+            CentOS | RHEL | Ubuntu | Debian | openSUSE ) ACT=2 ;;
+            MacOS ) ACT=4 ;;
+          esac
+        fi
         ;;
-    2 ) chksudo
+    2 ) # compile for Linux
+        chksudo
         if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
         else
           LOGFILE=`mktemp /tmp/${0##*/}-linux.log.XXXXX`
@@ -60,7 +69,8 @@ while [ true ]; do
           else ERRTXT=" (success)..."; ACT=3; fi
         fi
         ;;
-    3 ) chksudo
+    3 ) # cross-compile for Windows
+        chksudo
         if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
         else
           LOGFILE=`mktemp /tmp/${0##*/}-win32.log.XXXXX`
@@ -69,7 +79,8 @@ while [ true ]; do
           else ERRTXT=" (success)..."; ACT=3z; fi
         fi
         ;;
-    3z) cd "$HOME3P"
+    3z) # create final packages for Windows
+        cd "$HOME3P"
         if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
         else
           LIST=`find usr -type f -name '*.exe' 2>/dev/null`
@@ -89,7 +100,8 @@ while [ true ]; do
           fi
         fi
         ;;
-    4 ) chksudo
+    4 ) # compile for Mac
+        chksudo
         if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
         else
           LOGFILE=`mktemp /tmp/${0##*/}-mac.log.XXXXX`
@@ -98,7 +110,8 @@ while [ true ]; do
           else ERRTXT=" (success)..."; ACT=q; fi
         fi
         ;;
-    a ) chksudo
+    a ) # do all for current platform
+        chksudo
         if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
         else
           LOGFILE=`mktemp /tmp/${0##*/}-all.log.XXXXX`
@@ -107,28 +120,33 @@ while [ true ]; do
           else ERRTXT=" (success)..."; ACT=q; fi
         fi
         ;;
-    l ) $PAGER $LOGFILE
+    l ) # view log of last action
+        $PAGER $LOGFILE
         ACT=l
         ;;
-    r ) find . -name '.done-*' -exec rm -f {} \;
+    r ) # reset intermediate marks
+        find . -name '.done-*' -exec rm -f {} \;
         echo "All intermediate marks removed"
         ACT=1
         ;;
-    c ) LOGFILE=`mktemp /tmp/${0##*/}-clean.log.XXXXX`
+    c ) # clean up build directories
+        LOGFILE=`mktemp /tmp/${0##*/}-clean.log.XXXXX`
         time ./clean-up 2>&1 | tee $LOGFILE
         if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
         else ERRTXT=" (success)..."; ACT=1; fi
         ;;
-    ca) LOGFILE=`mktemp /tmp/${0##*/}-clean-all.log.XXXXX`
+    ca) # clean up all (including downloads)
+        LOGFILE=`mktemp /tmp/${0##*/}-clean-all.log.XXXXX`
         time ./clean-up all 2>&1 | tee $LOGFILE
         if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
         else ERRTXT=" (success)..."; ACT=1; fi
         ;;
-    xyzzy ) # See http://en.wikipedia.org/wiki/xyzzy
+    xyzzy ) # see http://en.wikipedia.org/wiki/xyzzy
         echo "Nothing happens"
         ACT=1
         ;;
-    q ) exit 0
+    q ) # quit
+        exit 0
         ;;
     * ) echo "Unknown action: $ACT"
         ACT=1

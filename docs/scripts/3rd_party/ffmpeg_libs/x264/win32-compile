@@ -15,7 +15,7 @@ pcp=`getcfg PCP:`
 #
 rm -fr "$dir" "${dir}-win32"
 [ $? -ne 0 ] && exit 1
-bzcat "$pkg" | tar -xv
+bzip2 -dc "$pkg" | tar -xv
 [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
 mv "$dir" "${dir}-win32"
 [ $? -ne 0 ] && exit 1

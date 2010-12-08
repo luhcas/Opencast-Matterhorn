@@ -17,16 +17,16 @@ pcp2=`getcfg PCP2:`
 #
 rm -fr "$dir" "${dir}-win32"
 [ $? -ne 0 ] && exit 1
-zcat "$pkg1" | tar -xv
+gzip -dc "$pkg1" | tar -xv
 [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
 mv "$dir" "${dir}-win32"
 [ $? -ne 0 ] && exit 1
 cd "${dir}-win32"
 [ $? -ne 0 ] && exit 1
-zcat "../$pkg2" | tar -xv
+gzip -dc "../$pkg2" | tar -xv
 [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
 #
-zcat ../tesseract-2.04m.tar.gz | tar -xv
+gzip -dc ../tesseract-2.04m.tar.gz | tar -xv
 [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
 cp ../configure .
 [ $? -ne 0 ] && exit 1
