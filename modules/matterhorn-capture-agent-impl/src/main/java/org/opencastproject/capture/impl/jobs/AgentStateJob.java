@@ -59,7 +59,6 @@ public class AgentStateJob implements Job {
    * @throws JobExecutionException
    */
   public void execute(JobExecutionContext ctx) throws JobExecutionException {
-    logger.debug("GDLGDL:  Execute!");
     setConfigManager((ConfigurationManager) ctx.getMergedJobDataMap().get(JobParameters.CONFIG_SERVICE));
     setStateService((StateService) ctx.getMergedJobDataMap().get(JobParameters.STATE_SERVICE));
     setTrustedClient((TrustedHttpClient) ctx.getMergedJobDataMap().get(JobParameters.TRUSTED_CLIENT));

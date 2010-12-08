@@ -30,7 +30,9 @@ public interface CaptureParameters {
   static final long MINUTES = 60 * SECONDS;
   /** The number of seconds in an hour */
   static final long HOURS = 60 * MINUTES;
-
+  /** The default time to poll the server for calendar information **/
+  static final long DEFAULT_STATE_PUSH_TIME = 10;
+  
   /** Matterhorn Core URL */
   static final String CAPTURE_CORE_URL = "org.opencastproject.capture.core.url";
 
@@ -123,9 +125,15 @@ public interface CaptureParameters {
   /** The URL to send the capture data to during ingest */
   static final String INGEST_ENDPOINT_URL = "capture.ingest.endpoint.url";
 
-  /** The retry interval for attempting ingest */
+  /** Number of attempts the capture agent will attempt to ingest before waiting on the next attempt. **/
+  static final String INGEST_RETRY_LIMIT = "capture.ingest.retry.limit";
+  
+  /** The length of time to wait between trying to retry to ingest. **/
   static final String INGEST_RETRY_INTERVAL = "capture.ingest.retry.interval";
-
+  
+  /** The length of time to wait until trying to ingest again after failing the number of times in INGEST_RETRY_LIMIT. **/
+  static final String INGEST_PAUSE_TIME = "capture.ingest.pause.time";
+    
   /** The key for the workflow definition, if any, in the capture properties attached to the iCal event */
   static final String INGEST_WORKFLOW_DEFINITION = "org.opencastproject.workflow.definition";
 

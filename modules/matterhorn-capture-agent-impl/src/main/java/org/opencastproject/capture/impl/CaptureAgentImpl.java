@@ -188,6 +188,15 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   }
 
   /**
+   * Returns the configuration service form which this capture agent should draw its configuration data.
+   * 
+   * @return The configuration service.
+   */
+  public ConfigurationManager getConfigService() {
+    return configService;
+  }
+  
+  /**
    * Sets the scheduler service which this service uses to schedule stops for unscheduled captures.
    * 
    * @param s
@@ -1420,34 +1429,42 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     }
 
     // Setup the agent state push jobs
+    long statePushTime;
     try {
-      long statePushTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL))
-                         * CaptureParameters.MILLISECONDS;
+      statePushTime = Long.parseLong(configService.getItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL))
+              * CaptureParameters.MILLISECONDS;
+    } catch (NumberFormatException e) {
+      logger.warn("Invalid time specified in the \"" + CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL
+              + "\" value is \"" + configService.getItem(CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL)
+              + "\" and the config service is \"" + configService.toString()
+              + "\". Will be using the default polling time of " + CaptureParameters.DEFAULT_STATE_PUSH_TIME);
+      // Set the state push time to a default.
+      statePushTime = CaptureParameters.DEFAULT_STATE_PUSH_TIME;
+    }
+    // Setup the push job
+    JobDetail stateJob = new JobDetail("agentStateUpdate", JobParameters.RECURRING_TYPE, AgentStateJob.class);
 
-      // Setup the push job
-      JobDetail stateJob = new JobDetail("agentStateUpdate", JobParameters.RECURRING_TYPE, AgentStateJob.class);
+    stateJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
+    stateJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
+    stateJob.getJobDataMap().put(JobParameters.TRUSTED_CLIENT, client);
+    stateJob.getJobDataMap().put("org.opencastproject.server.url",
+            configService.getItem("org.opencastproject.server.url"));
 
-      stateJob.getJobDataMap().put(JobParameters.STATE_SERVICE, this);
-      stateJob.getJobDataMap().put(JobParameters.CONFIG_SERVICE, configService);
-      stateJob.getJobDataMap().put(JobParameters.TRUSTED_CLIENT, client);
-      stateJob.getJobDataMap().put("org.opencastproject.server.url",
-                                   configService.getItem("org.opencastproject.server.url"));
+    // Create a new trigger Name Group name
+    SimpleTrigger stateTrigger = new SimpleTrigger("state_push", JobParameters.RECURRING_TYPE);
+    stateTrigger.setStartTime(new Date()); // Start immediately
+    stateTrigger.setEndTime(null); // Never end
+    stateTrigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
 
-      //Create a new trigger                          Name              Group name 
-      SimpleTrigger stateTrigger = new SimpleTrigger("state_push", JobParameters.RECURRING_TYPE);
-      stateTrigger.setStartTime(new Date());  //Start immediately
-      stateTrigger.setEndTime(null);          //Never end
-      stateTrigger.setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
-      stateTrigger.setRepeatInterval(statePushTime);
+    stateTrigger.setRepeatInterval(statePushTime);
 
+    try {
       // Schedule the update
       agentScheduler.scheduleJob(stateJob, stateTrigger);
-    } catch (NumberFormatException e) {
-      logger.error("Invalid time specified in the {} value, unable to push state to remote server!",
-                   CaptureParameters.AGENT_STATE_REMOTE_POLLING_INTERVAL);
     } catch (SchedulerException e) {
       logger.error("SchedulerException in StateServiceImpl while trying to schedule state push jobs: {}.", e);
     }
+   
 
     //Setup the agent capabilities push jobs
     try {

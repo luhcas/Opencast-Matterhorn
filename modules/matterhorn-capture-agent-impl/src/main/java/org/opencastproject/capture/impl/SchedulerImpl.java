@@ -22,6 +22,8 @@ import org.opencastproject.capture.api.ScheduledEvent;
 import org.opencastproject.capture.api.ScheduledEventImpl;
 import org.opencastproject.capture.impl.jobs.CleanCaptureJob;
 import org.opencastproject.capture.impl.jobs.IngestJob;
+import org.opencastproject.capture.impl.jobs.JobCreator;
+import org.opencastproject.capture.impl.jobs.JobDetailTriggerPair;
 import org.opencastproject.capture.impl.jobs.JobParameters;
 import org.opencastproject.capture.impl.jobs.PollCalendarJob;
 import org.opencastproject.capture.impl.jobs.SerializeJob;
@@ -1016,25 +1018,23 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * @return True if the job was scheduled correctly, false otherwise.
    */
   public boolean scheduleIngest(String recordingID) {
-    JobDetail job = new JobDetail(IngestJob.JOB_PREFIX + recordingID, JobParameters.SUPPORT_TYPE, IngestJob.class);
-    CronTrigger trigger;
-
     try {
-      trigger = new CronTrigger();
-      trigger.setGroup(JobParameters.SUPPORT_TYPE);
-      trigger.setName(IngestJob.TRIGGER_PREFIX + recordingID);
-      trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
-
-      // TODO: Make this configurable. Or at least slow it down a bit - hitting things every 20 seconds it too fast.
-      trigger.setCronExpression("0/20 * * * * ?");
-      trigger.getJobDataMap().put(JobParameters.CAPTURE_AGENT, this.captureAgent);
-      trigger.getJobDataMap().put(CaptureParameters.RECORDING_ID, recordingID);
-      trigger.getJobDataMap().put(JobParameters.JOB_POSTFIX, recordingID);
-      trigger.getJobDataMap().put(JobParameters.SCHEDULER, this.scheduler);
-
-      // Schedule the job
-      scheduler.scheduleJob(job, trigger);
-
+      long retryInterval;
+      try{
+        retryInterval = Long.parseLong(this.configService.getItem(CaptureParameters.INGEST_RETRY_INTERVAL));
+      }catch(NullPointerException e){
+        log.warn(CaptureParameters.INGEST_RETRY_INTERVAL + " was null so the default "
+                + IngestJob.DEFAULT_RETRY_INTERVAL + " will be used.", e);
+        retryInterval = IngestJob.DEFAULT_RETRY_INTERVAL;
+      }catch(NumberFormatException e){
+        log.warn(CaptureParameters.INGEST_RETRY_INTERVAL + " was an invalid number " 
+                + this.configService.getItem(CaptureParameters.INGEST_RETRY_INTERVAL) 
+                + "so the default " + IngestJob.DEFAULT_RETRY_INTERVAL + " will be used.", e);
+        retryInterval = IngestJob.DEFAULT_RETRY_INTERVAL;
+      }
+      JobDetailTriggerPair jobAndTrigger = JobCreator.createInjestJob(retryInterval, recordingID, recordingID,
+              this.captureAgent, this.scheduler, this.configService);
+      scheduler.scheduleJob(jobAndTrigger.getJob(), jobAndTrigger.getTrigger());
     } catch (ParseException e) {
       log.error("Invalid argument for CronTrigger: {}", e);
       return false;
