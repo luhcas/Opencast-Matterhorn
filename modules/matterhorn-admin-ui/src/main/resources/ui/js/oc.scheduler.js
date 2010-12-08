@@ -605,7 +605,7 @@ ocScheduler.RegisterComponents = function(){
         var series, seriesComponent, seriesId;
         var creationSucceeded = false;
         if(this.fields.seriesSelect !== ''){
-          series = '<series><metadataList><metadata><key>title</key><value>' + this.fields.seriesSelect.val() + '</value></metadata></metadataList></series>';
+          series = '<series><additionalMetadata><metadata><key>title</key><value>' + this.fields.seriesSelect.val() + '</value></metadata></additionalMetadata></series>';
           seriesComponent = this;
           $.ajax({
             async: false,
@@ -615,7 +615,7 @@ ocScheduler.RegisterComponents = function(){
             dataType: 'json',
             success: function(data){
               creationSucceeded = true;
-              seriesComponent.fields.series.val(data.series['@id']);
+              seriesComponent.fields.series.val(data.series.id);
             }
           });
         }

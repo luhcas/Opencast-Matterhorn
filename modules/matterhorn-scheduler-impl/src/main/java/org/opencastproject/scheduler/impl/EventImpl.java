@@ -368,7 +368,11 @@ public class EventImpl implements Event {
    * @see org.opencastproject.scheduler.api.Event#setMetadata()
    */
   public void setMetadataList(List<Metadata> metadata) {
+    if(!additionalMetadata.isEmpty()) {
+      additionalMetadata.clear();
+    }
     for(Metadata m : metadata){
+      m.setEvent(this);
       this.additionalMetadata.add((MetadataImpl)m);
     }
   }
@@ -533,6 +537,7 @@ public class EventImpl implements Event {
    * @see org.opencastproject.scheduler.api.Event#addMetadata()
    */
   public void addMetadata(Metadata m){
+    m.setEvent(this);
     this.additionalMetadata.add((MetadataImpl)m);
   }
   
@@ -566,12 +571,7 @@ public class EventImpl implements Event {
     this.setStartDate(e.getStartDate());
     this.setSubject(e.getSubject());
     this.setTitle(e.getTitle());
-    List<Metadata> metadata = new LinkedList<Metadata>();
-    for(Metadata m : e.getMetadataList()){
-      m.setEvent(this);
-      metadata.add(m);
-    }
-    this.setMetadataList(metadata);
+    this.setMetadataList(e.getMetadataList());
   }
   
   public List<Event> createEventsFromRecurrence() throws ParseException, IncompleteDataException {
@@ -617,6 +617,7 @@ public class EventImpl implements Event {
       }
       Event event = new EventImpl();
       event.initializeFromEvent((Event)this);
+      event.setSeriesId(this.getSeriesId());
       event.setTitle(getTitle() + " " + i);
       event.setStartDate(d);
       event.setEndDate(new Date(d.getTime() + getDuration()));

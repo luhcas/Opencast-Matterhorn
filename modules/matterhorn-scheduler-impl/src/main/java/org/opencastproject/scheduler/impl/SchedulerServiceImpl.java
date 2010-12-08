@@ -73,6 +73,7 @@ import javax.persistence.spi.PersistenceProvider;
  */
 public class SchedulerServiceImpl implements SchedulerService, ManagedService {
 
+  
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(SchedulerServiceImpl.class);
 
@@ -243,6 +244,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     
     try {
       event.setEventId(workflow.getId());
+      event.setMetadataList(event.getMetadataList());
       em = emf.createEntityManager();
       tx = em.getTransaction();
       event = (EventImpl) event;

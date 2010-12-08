@@ -29,16 +29,21 @@ ocSeriesList.buildSeriesView = function(data) {
       data.seriesList.series = [data.seriesList.series]
     }
     $.each(data.seriesList.series, function(i,series){
-      var s = ocSeriesList.views.seriesView[series['@id']] = {};
-      s.id = series['@id'];
-      for(var j=0; j < series.additionalMetadata.metadata.length; j++){
-        var metadata = series.additionalMetadata.metadata[j];
-        if(metadata.key === 'title'){
-          s.title = metadata.value;
-        } else if(metadata.key === 'creator') {
-          s.creator = metadata.value;
-        } else if(metadata.key  === 'contributor') {
-          s.contributor = metadata.value;
+      var s = ocSeriesList.views.seriesView[series.id] = {};
+      s.id = series.id;
+      if(typeof series.additionalMetadata === 'object') {
+        if(!$.isArray(series.additionalMetadata.metadata)){
+          series.additionalMetadata.metadata = [series.additionalMetadata.metadata];
+        }
+        for(var j=0; j < series.additionalMetadata.metadata.length; j++){
+          var metadata = series.additionalMetadata.metadata[j];
+          if(metadata.key === 'title'){
+            s.title = metadata.value;
+          } else if(metadata.key === 'creator') {
+            s.creator = metadata.value;
+          } else if(metadata.key  === 'contributor') {
+            s.contributor = metadata.value;
+          }
         }
       }
     });
