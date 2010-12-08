@@ -168,30 +168,50 @@ input
 
 .oc_btn-volume-high
 {
-  background:               url("../img/oc_icons_2.png") no-repeat -30px -184px transparent;
+  background:               url("../img/oc_icons_2.png") no-repeat -30px -193px transparent;
   width:                    35px;
   height:                   30px;
+}
+
+.oc_btn-volume-high:hover, .oc_btn-volume-high:focus 
+{
+  background-position: -30px -234px;
 }
 
 .oc_btn-volume-mute
 {
-  background:               url("../img/oc_icons_2.png") no-repeat 0 -184px transparent;
+  background:               url("../img/oc_icons_2.png") no-repeat 0 -193px transparent;
   width:                    35px;
   height:                   30px;
+}
+
+.oc_btn-volume-mute:hover, .oc_btn-volume-mute:focus 
+{
+  background-position: 0px -234px;
 }
 
 .oc_btn-volume-low
 {
-  background:               url("../img/oc_icons_2.png") no-repeat -98px -184px transparent;
+  background:               url("../img/oc_icons_2.png") no-repeat -98px -193px transparent;
   width:                    35px;
   height:                   30px;
 }
 
+.oc_btn-volume-low:hover, .oc_btn-volume-low:focus 
+{
+  background-position: -98px -234px;
+}
+
 .oc_btn-volume-none
 {
-  background:               url("../img/oc_icons_2.png") no-repeat -68px -184px transparent;
+  background:               url("../img/oc_icons_2.png") no-repeat -68px -193px transparent;
   width:                    35px;
   height:                   30px;
+}
+
+.oc_btn-volume-none:hover, .oc_btn-volume-none:focus 
+{
+  background-position: -68px -234px;
 }
 
 #oc_btn-dropdown
