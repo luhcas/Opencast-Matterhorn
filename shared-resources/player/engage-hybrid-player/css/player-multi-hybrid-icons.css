@@ -169,6 +169,8 @@ input
 .oc_btn-volume-high
 {
   background:               url("../img/oc_icons_2.png") no-repeat -30px -193px transparent;
+  cursor:                   pointer;
+  cursor:                   hand;
   width:                    35px;
   height:                   30px;
 }
@@ -181,6 +183,8 @@ input
 .oc_btn-volume-mute
 {
   background:               url("../img/oc_icons_2.png") no-repeat 0 -193px transparent;
+  cursor:                   pointer;
+  cursor:                   hand;
   width:                    35px;
   height:                   30px;
 }
@@ -193,6 +197,8 @@ input
 .oc_btn-volume-low
 {
   background:               url("../img/oc_icons_2.png") no-repeat -98px -193px transparent;
+  cursor:                   pointer;
+  cursor:                   hand;
   width:                    35px;
   height:                   30px;
 }
@@ -205,6 +211,8 @@ input
 .oc_btn-volume-none
 {
   background:               url("../img/oc_icons_2.png") no-repeat -68px -193px transparent;
+  cursor:                   pointer;
+  cursor:                   hand;
   width:                    35px;
   height:                   30px;
 }
