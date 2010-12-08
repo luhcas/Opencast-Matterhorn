@@ -73,6 +73,7 @@ public class WorkflowServiceDaoSolrTest {
 
   @After
   public void teardown() throws Exception {
+    dao.deactivate();
     FileUtils.deleteDirectory(new File(dao.solrRoot));
     dao = null;
   }
