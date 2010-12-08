@@ -750,7 +750,7 @@ public class SchedulerImplTest {
     captureAgentImpl.setConfigService(configurationManager);
     captureAgentImpl.activate(null);
     setupThreeCaptureCalendar(-10, -1, 10);
-    Thread.sleep(6000);
+    Thread.sleep(10000);
     Assert.assertEquals(AgentState.CAPTURING, captureAgentImpl.getAgentState());
   }
 }
