@@ -20,10 +20,10 @@ MATTERHORN=${MATTERHORN_HOME:-/opt/matterhorn}
 #eg:  /opt/matterhorn/felix, or $MATTERHORN/felix
 FELIX=${FELIX_HOME:-$MATTERHORN/felix}
 #eg:  /opt/matterhorn/capture-agent, or $MATTERHORN/capture-agent
-CA=$CA_DIR
+CA=${CA_DIR:-$MATTERHORN/capture-agent}
 #eg:  Commonly opencast or matterhorn.  Can also be your normal user if you are testing.
 MATTERHORN_USER=$USER
-M2_REPOSITORY=${M2_REPO:-/home/$MATTERHORN_USER}
+M2_REPOSITORY=${M2_REPO:-/home/$MATTERHORN_USER/.m2/repository}
 #Enable this if this machine is a CA.  This will enable capture device autoconfiguration.
 IS_CA=false
 
