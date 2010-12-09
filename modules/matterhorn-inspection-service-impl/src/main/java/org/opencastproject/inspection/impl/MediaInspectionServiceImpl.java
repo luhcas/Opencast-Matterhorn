@@ -15,21 +15,6 @@
  */
 package org.opencastproject.inspection.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
 import org.opencastproject.inspection.api.MediaInspectionException;
 import org.opencastproject.inspection.api.MediaInspectionService;
 import org.opencastproject.inspection.impl.api.AudioStreamMetadata;
@@ -59,29 +44,46 @@ import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.UnknownFileTypeException;
 import org.opencastproject.workspace.api.Workspace;
-import org.osgi.service.component.ComponentContext;
+
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
+import org.osgi.service.cm.ConfigurationException;
+import org.osgi.service.cm.ManagedService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Inspects media via the 3rd party MediaInfo tool by default, and can be configured to use other media analyzers.
  */
-public class MediaInspectionServiceImpl implements MediaInspectionService {
+public class MediaInspectionServiceImpl implements MediaInspectionService, ManagedService {
 
   private static final Logger logger = LoggerFactory.getLogger(MediaInspectionServiceImpl.class);
 
-  // FIXME move this to media info analyzer service
-  public static final String CONFIG_ANALYZER_MEDIAINFOPATH = "inspection.analyzer.mediainfopath";
-
   /** The configuration key for setting the number of worker threads */
-  public static final String CONFIG_THREADS = "org.opencastproject.mediainspection.threads";
+  public static final String CONFIG_THREADS = "concurrent.jobs";
 
   /** The default worker thread pool size to use if no configuration is specified */
   public static final int DEFAULT_THREADS = 1;
 
+  /** The default path to the mediainfo binary */
+  public static final String DEFAULT_PATH = "/usr/local/bin/mediainfo";
+
   protected Workspace workspace;
   protected ServiceRegistry serviceRegistry;
-  protected ExecutorService executor = null;
+  protected ThreadPoolExecutor executor = null;
   protected Map<String, Object> analyzerConfig = new ConcurrentHashMap<String, Object>();
 
   public void setWorkspace(Workspace workspace) {
@@ -89,32 +91,43 @@ public class MediaInspectionServiceImpl implements MediaInspectionService {
     this.workspace = workspace;
   }
 
-  public void setRemoteServiceManager(ServiceRegistry jobManager) {
+  public void setServiceRegistry(ServiceRegistry jobManager) {
     this.serviceRegistry = jobManager;
   }
 
-  public void activate(ComponentContext cc) {
-    if (cc != null) {
-      if (cc.getBundleContext().getProperty(CONFIG_ANALYZER_MEDIAINFOPATH) != null) {
-        // use binary path from CONFIG
-        String path = cc.getBundleContext().getProperty(CONFIG_ANALYZER_MEDIAINFOPATH);
-        analyzerConfig.put(MediaInfoAnalyzer.CONFIG_MEDIAINFO_BINARY, path);
-        logger.info("CONFIG " + CONFIG_ANALYZER_MEDIAINFOPATH + ": " + path);
-      }
+  public void activate() {
+    executor = (ThreadPoolExecutor)Executors.newFixedThreadPool(DEFAULT_THREADS);
+    analyzerConfig.put(MediaInfoAnalyzer.MEDIAINFO_BINARY_CONFIG, DEFAULT_PATH);
+  }
 
-      // Set the number of concurrent threads
-      int threads = DEFAULT_THREADS;
-      String threadsConfig = StringUtils.trimToNull(cc.getBundleContext().getProperty(CONFIG_THREADS));
-      if (threadsConfig != null) {
-        try {
-          threads = Integer.parseInt(threadsConfig);
-        } catch (NumberFormatException e) {
-          logger.warn("Caption converter threads configuration is malformed: '{}'", threadsConfig);
-        }
+  /**
+   * {@inheritDoc}
+   *
+   * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
+   */
+  @Override
+  @SuppressWarnings("rawtypes")
+  public void updated(Dictionary properties) throws ConfigurationException {
+    if(properties == null) return;
+    String path = StringUtils.trimToNull((String)properties.get(MediaInfoAnalyzer.MEDIAINFO_BINARY_CONFIG)); 
+    if(path != null) {
+      analyzerConfig.put(MediaInfoAnalyzer.MEDIAINFO_BINARY_CONFIG, path);
+      logger.info("Setting the path to mediainfo to " + path);
+    }
+
+    // Set the number of concurrent threads
+    String threadsConfig = StringUtils.trimToNull((String)properties.get(CONFIG_THREADS));
+    if (threadsConfig != null) {
+      try {
+        int threads = Integer.parseInt(threadsConfig);
+        logger.info("Setting the maximum number of concurrent jobs to " + threads);
+        executor.setMaximumPoolSize(threads);
+      } catch (NumberFormatException e) {
+        logger.warn("Caption converter threads configuration is malformed: '{}'", threadsConfig);
       }
-      executor = Executors.newFixedThreadPool(threads);
     }
   }
+
 
   /**
    * {@inheritDoc}

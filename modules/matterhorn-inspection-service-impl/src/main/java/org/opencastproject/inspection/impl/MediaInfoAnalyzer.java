@@ -53,7 +53,7 @@ import java.util.regex.Pattern;
  */
 public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
 
-  public static final String CONFIG_MEDIAINFO_BINARY = "org.opencastproject.inspection.mediainfopath";
+  public static final String MEDIAINFO_BINARY_CONFIG = "mediainfopath";
   public static final String MEDIAINFO_BINARY_DEFAULT = "mediainfo";
 
   private static final Logger logger = LoggerFactory.getLogger(MediaInfoAnalyzer.class);
@@ -125,10 +125,10 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
    */
   public void setConfig(Map<String, Object> config) {
     if (config != null) {
-      if (config.containsKey(CONFIG_MEDIAINFO_BINARY)) {
-        String binary = (String) config.get(CONFIG_MEDIAINFO_BINARY);
+      if (config.containsKey(MEDIAINFO_BINARY_CONFIG)) {
+        String binary = (String) config.get(MEDIAINFO_BINARY_CONFIG);
         setBinary(binary);
-        logger.info("MediaInfoAnalyzer config binary: " + binary);
+        logger.debug("MediaInfoAnalyzer config binary: " + binary);
       }
     }
   }

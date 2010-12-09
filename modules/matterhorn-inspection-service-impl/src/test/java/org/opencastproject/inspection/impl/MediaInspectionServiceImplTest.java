@@ -40,6 +40,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.Date;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class MediaInspectionServiceImplTest {
   
@@ -93,8 +94,8 @@ public class MediaInspectionServiceImplTest {
     ServiceRegistry rs = EasyMock.createNiceMock(ServiceRegistry.class);
     EasyMock.expect(rs.createJob(MediaInspectionService.JOB_TYPE)).andReturn(new JobStub()).anyTimes();
     EasyMock.replay(rs);
-    service.setRemoteServiceManager(rs);
-    service.executor = Executors.newFixedThreadPool(1);
+    service.setServiceRegistry(rs);
+    service.executor = (ThreadPoolExecutor)Executors.newFixedThreadPool(1);
   }
 
   @Test

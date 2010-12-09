@@ -6,11 +6,12 @@
     class="org.opencastproject.inspection.impl.MediaInspectionServiceImpl" />
   <property name="service.description" value="Media Inspection Service" />
   <service>
+    <provide interface="org.osgi.service.cm.ManagedService" />
     <provide interface="org.opencastproject.inspection.api.MediaInspectionService" />
   </service>
   <reference name="workspace"
     interface="org.opencastproject.workspace.api.Workspace" cardinality="1..1"
     policy="static" bind="setWorkspace" />
-  <reference name="remoteServiceManager"
-    interface="org.opencastproject.serviceregistry.api.ServiceRegistry" cardinality="1..1" policy="static" bind="setRemoteServiceManager" />
+  <reference name="serviceRegistry"
+    interface="org.opencastproject.serviceregistry.api.ServiceRegistry" cardinality="1..1" policy="static" bind="setServiceRegistry" />
 </scr:component>
