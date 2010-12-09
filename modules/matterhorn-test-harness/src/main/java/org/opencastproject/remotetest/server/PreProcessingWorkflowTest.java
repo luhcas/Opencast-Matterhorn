@@ -102,7 +102,7 @@ public class PreProcessingWorkflowTest {
 
     // Specify start end end time for capture
     Calendar c = Calendar.getInstance();
-    c.roll(Calendar.MINUTE, 1);
+    c.roll(Calendar.MINUTE, 2);
     Date start = c.getTime();
     c.roll(Calendar.MINUTE, 1);
     Date end = c.getTime();
@@ -118,7 +118,7 @@ public class PreProcessingWorkflowTest {
     }
 
     // Wait for the capture agent to start the recording and make sure the workflow enters the "capture" operation
-    waiting = 60 * 1000L + GRACE_PERIOD; // 1 min +
+    waiting = 120 * 1000L + GRACE_PERIOD; // 2 min +
     boolean agentIsCapturing = false;
     boolean inCaptureOperation = false;
     while (waiting > 0) {
@@ -147,35 +147,45 @@ public class PreProcessingWorkflowTest {
     waiting = 60 * 1000L + GRACE_PERIOD; // 1 min +
     boolean agentIsIngesting = false;
     boolean inIngestOperation = false;
+    boolean workflowSucceeded = false;
     while (waiting > 0) {
       agentIsIngesting |= CaptureUtils.isInState(workflowId, "uploading");
       inIngestOperation |= WorkflowUtils.isWorkflowInOperation(workflowId, "capture");
       if (agentIsIngesting && inIngestOperation)
         break;
+      // we may have missed the ingest step, since it happens so quickly.  if the workflow has already succeeded, we're done
+      if(WorkflowUtils.isWorkflowInState(workflowId, "SUCCEEDED")) {
+        workflowSucceeded = true;
+        System.out.println("Workflow " + workflowId + " succeeded before we could catch it in the ingesting state");
+        break;
+      }
       waiting -= TIMEOUT;
       Thread.sleep(TIMEOUT);
     }
 
     // Are we already past the grace period?
     if (waiting <= 0) {
-      if (!agentIsIngesting)
+      if (!agentIsIngesting && !workflowSucceeded)
         fail("Agent '" + CAPTURE_AGENT_ID + "' did not start ingesting '" + workflowId + "'");
-      else if (!inIngestOperation)
+      else if (!inIngestOperation && !workflowSucceeded)
         fail("Workflow '" + workflowId + "' never entered the 'ingest' hold state");
     }
 
     // Wait for ingest and make sure workflow executes "cleanup", then finishes successfully
-    waiting = 60 * 1000L + GRACE_PERIOD; // 1 min +
-    while (waiting > 0) {
-      if (WorkflowUtils.isWorkflowInState(workflowId, "SUCCEEDED"))
-        break;
-      waiting -= TIMEOUT;
-      Thread.sleep(TIMEOUT);
+    if(!workflowSucceeded) {
+      waiting = 60 * 1000L + GRACE_PERIOD; // 1 min +
+      while (waiting > 0) {
+        if (WorkflowUtils.isWorkflowInState(workflowId, "SUCCEEDED")) {
+          workflowSucceeded = true;
+          break;
+        }
+        waiting -= TIMEOUT;
+        Thread.sleep(TIMEOUT);
+      }
     }
 
-    // Are we already past the grace period?
-    if (waiting <= 0) {
-      fail("Workflow '" + workflowId + "' did not finish");
+    if (!workflowSucceeded) {
+      fail("Workflow '" + workflowId + "' did not succeed");
     }
 
   }
