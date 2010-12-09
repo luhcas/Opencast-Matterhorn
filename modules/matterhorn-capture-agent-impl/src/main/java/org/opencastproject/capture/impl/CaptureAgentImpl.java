@@ -1187,14 +1187,15 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * 
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
-  public void updated(@SuppressWarnings("rawtypes") Dictionary properties) throws ConfigurationException {
+  @SuppressWarnings("unchecked")
+  @Override
+  public void updated(Dictionary properties) throws ConfigurationException {
     if (properties == null) {
       throw new ConfigurationException("null", "Null configuration in updated!");
     }
 
     // Update the agent's properties from the parameter
     Properties props = new Properties();
-    @SuppressWarnings("unchecked")
     Enumeration<String> keys = properties.keys();
     while (keys.hasMoreElements()) {
       String key = keys.nextElement();
@@ -1439,7 +1440,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
               + "\" and the config service is \"" + configService.toString()
               + "\". Will be using the default polling time of " + CaptureParameters.DEFAULT_STATE_PUSH_TIME);
       // Set the state push time to a default.
-      statePushTime = CaptureParameters.DEFAULT_STATE_PUSH_TIME;
+      statePushTime = CaptureParameters.DEFAULT_STATE_PUSH_TIME * CaptureParameters.MILLISECONDS;
     }
     // Setup the push job
     JobDetail stateJob = new JobDetail("agentStateUpdate", JobParameters.RECURRING_TYPE, AgentStateJob.class);
