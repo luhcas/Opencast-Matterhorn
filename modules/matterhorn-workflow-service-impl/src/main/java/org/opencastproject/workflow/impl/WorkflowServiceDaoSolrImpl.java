@@ -310,7 +310,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     WorkflowOperationInstance op = instance.getCurrentOperation();
     if (op != null)
       doc.addField(OPERATION_KEY, op.getId());
-    
+
     MediaPackage mp = instance.getMediaPackage();
     doc.addField(MEDIAPACKAGE_KEY, mp.getIdentifier().toString());
     if (mp.getSeries() != null) {
@@ -642,6 +642,48 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     if (sb.length() == 0) {
       sb.append("*:*");
     }
+    // TITLE, SERIES_TITLE, SERIES_ID, MEDIA_PACKAGE_ID, WORKFLOW_DEFINITION_ID, CREATOR, CONTRIBUTOR, LANGUAGE,
+    // LICENSE, SUBJECT
+
+    if (query.getSort() != null) {
+      sb.append(" sort=");
+      switch (query.getSort()) {
+      case TITLE:
+        sb.append(TITLE_KEY);
+        break;
+      case CONTRIBUTOR:
+        sb.append(CONTRIBUTOR_KEY);
+        break;
+      case CREATOR:
+        sb.append(CREATOR_KEY);
+        break;
+      case LANGUAGE:
+        sb.append(LANGUAGE_KEY);
+        break;
+      case LICENSE:
+        sb.append(LICENSE_KEY);
+        break;
+      case MEDIA_PACKAGE_ID:
+        sb.append(MEDIAPACKAGE_KEY);
+        break;
+      case SERIES_ID:
+        sb.append(SERIES_ID_KEY);
+        break;
+      case SERIES_TITLE:
+        sb.append(SERIES_TITLE_KEY);
+        break;
+      case SUBJECT:
+        sb.append(SUBJECT_KEY);
+        break;
+      case WORKFLOW_DEFINITION_ID:
+        sb.append(WORKFLOW_DEFINITION_KEY);
+        break;
+      default:
+        sb.append(CREATED_KEY);
+        break;
+      }
+      sb.append(query.isSortAscending() ? " ASC" : " DESC");
+    }
 
     return sb.toString();
   }
@@ -664,12 +706,11 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     if (sb.length() > 0) {
       sb.append(" AND ");
     }
-    // If we include only negatives inside parentheses, lucene won't return any results.  So we need to add "*:*".
-    // See http://mail-archives.apache.org/mod_mbox/lucene-solr-user/201011.mbox/%3CAANLkTinTJLo7Y-W2kt+yxAcESf98p8DD7z7mrs4CpNo-@mail.gmail.com%3E
+    // If we include only negatives inside parentheses, lucene won't return any results. So we need to add "*:*".
+    // See
+    // http://mail-archives.apache.org/mod_mbox/lucene-solr-user/201011.mbox/%3CAANLkTinTJLo7Y-W2kt+yxAcESf98p8DD7z7mrs4CpNo-@mail.gmail.com%3E
     boolean positiveTerm = false;
-    if (queryTerms.size() > 1) {
-      sb.append("(");
-    }
+    sb.append("(");
     for (int i = 0; i < queryTerms.size(); i++) {
       QueryTerm term = queryTerms.get(i);
       if (i > 0) {
@@ -688,12 +729,10 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
       sb.append(":");
       sb.append(ClientUtils.escapeQueryChars(term.getValue()));
     }
-    if (queryTerms.size() > 1) {
-      if(!positiveTerm) {
-        sb.append(" AND *:*");
-      }
-      sb.append(")");
+    if (!positiveTerm) {
+      sb.append(" AND *:*");
     }
+    sb.append(")");
     return sb;
   }
 
@@ -722,13 +761,13 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
       time = System.currentTimeMillis() - time;
       totalHits = items.getNumFound();
 
-      // Iterate through the results
       set = new WorkflowSetImpl();
       set.setPageSize(count);
       set.setTotalCount(totalHits);
       set.setStartPage(query.getStartPage());
       set.setSearchTime(time);
 
+      // Iterate through the results
       for (SolrDocument doc : items) {
         String xml = (String) doc.get(XML_KEY);
         try {

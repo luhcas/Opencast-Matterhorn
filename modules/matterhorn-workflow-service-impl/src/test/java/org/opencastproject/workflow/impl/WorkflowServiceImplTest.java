@@ -378,6 +378,39 @@ public class WorkflowServiceImplTest {
   }
 
   @Test
+  public void testGetWorkflowSort() throws Exception {
+    String contributor1 = "foo";
+    String contributor2 = "bar";
+    String contributor3 = "baz";
+    
+    // Ensure that the database doesn't have any workflow instances
+    Assert.assertEquals(0, service.countWorkflowInstances());
+
+    // set contributors (a multivalued field)
+    mediapackage1.addContributor(contributor1);
+    mediapackage1.addContributor(contributor2);
+    mediapackage2.addContributor(contributor2);
+    mediapackage2.addContributor(contributor3);
+
+    // run the workflows
+    WorkflowInstance instance1 = startAndWait(workingDefinition, mediapackage1, WorkflowState.SUCCEEDED);
+    WorkflowInstance instance2 = startAndWait(workingDefinition, mediapackage2, WorkflowState.SUCCEEDED);
+
+    WorkflowSet workflowsWithContributor1 = service.getWorkflowInstances(new WorkflowQuery().withContributor(contributor1));
+    WorkflowSet workflowsWithContributor2 = service.getWorkflowInstances(new WorkflowQuery().withContributor(contributor2));
+    WorkflowSet workflowsWithContributor3 = service.getWorkflowInstances(new WorkflowQuery().withContributor(contributor3));
+
+    Assert.assertEquals(1, workflowsWithContributor1.getTotalCount());
+    Assert.assertEquals(2, workflowsWithContributor2.getTotalCount());
+    Assert.assertEquals(1, workflowsWithContributor3.getTotalCount());
+
+    // cleanup the database
+    service.removeFromDatabase(instance1.getId());
+    service.removeFromDatabase(instance2.getId());
+    Assert.assertEquals(0, service.countWorkflowInstances());
+  }
+
+  @Test
   public void testNegativeWorkflowQuery() throws Exception {
     // Ensure that the database doesn't have any workflow instances
     Assert.assertEquals(0, service.countWorkflowInstances());

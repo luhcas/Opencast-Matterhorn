@@ -42,6 +42,12 @@ public class WorkflowQuery {
   protected String license;
   protected String title;
   protected String subject;
+  protected Sort sort = Sort.DATE_CREATED;
+  protected boolean sortAscending = true;
+
+  public enum Sort {
+    DATE_CREATED, TITLE, SERIES_TITLE, SERIES_ID, MEDIA_PACKAGE_ID, WORKFLOW_DEFINITION_ID, CREATOR, CONTRIBUTOR, LANGUAGE, LICENSE, SUBJECT
+  }
 
   /**
    * The list of current operation terms that have been added to this query.
@@ -185,7 +191,7 @@ public class WorkflowQuery {
    * @param fromDate
    *          the starting date
    */
-  public WorkflowQuery withFromDate(Date fromDate) {
+  public WorkflowQuery withDateAfter(Date fromDate) {
     this.fromDate = fromDate;
     return this;
   }
@@ -196,7 +202,7 @@ public class WorkflowQuery {
    * @param toDate
    *          the ending date
    */
-  public WorkflowQuery withToDate(Date toDate) {
+  public WorkflowQuery withDateBefore(Date toDate) {
     this.toDate = toDate;
     return this;
   }
@@ -273,6 +279,48 @@ public class WorkflowQuery {
     return this;
   }
 
+  /**
+   * Sort the results by the specified field in ascending order.
+   * 
+   * @param sort
+   *          the sort field
+   */
+  public WorkflowQuery withSort(Sort sort) {
+    return withSort(sort, true);
+  }
+
+  /**
+   * Sort the results by the specified field, either ascending or descending.
+   * 
+   * @param sort
+   *          the sort field
+   * @param ascending
+   *          whether to sort ascending (true) or descending (false)
+   */
+  public WorkflowQuery withSort(Sort sort, boolean ascending) {
+    this.sort = sort;
+    this.sortAscending = ascending;
+    return this;
+  }
+
+  /**
+   * Return the field to use in sorting the results of the query.
+   * 
+   * @return the sort field
+   */
+  public Sort getSort() {
+    return sort;
+  }
+
+  /**
+   * Return whether to sort the results in ascending order.
+   * 
+   * @return whether the search results should be sorted in ascending order
+   */
+  public boolean isSortAscending() {
+    return sortAscending;
+  }
+  
   /**
    * Returns the number of result items to return.
    * 
@@ -448,7 +496,7 @@ public class WorkflowQuery {
    * A tuple of a query value and whether this search term should be included or excluded from the search results.
    */
   public static class QueryTerm {
-    
+
     private String value = null;
     private boolean include = false;
 

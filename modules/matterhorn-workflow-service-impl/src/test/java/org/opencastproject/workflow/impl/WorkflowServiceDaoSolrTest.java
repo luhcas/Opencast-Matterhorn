@@ -85,7 +85,7 @@ public class WorkflowServiceDaoSolrTest {
   public void testBuildSimpleQuery() throws Exception {
     WorkflowQuery q = new WorkflowQuery().withMediaPackage("123").withSeriesId("series1");
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "mp:123 AND seriesid:series1";
+    String expected = "mp:123 AND seriesid:series1 sort=created ASC";
     assertEquals(expected, solrQuery);
   }
 
@@ -97,7 +97,7 @@ public class WorkflowServiceDaoSolrTest {
     WorkflowQuery q = new WorkflowQuery().withSeriesId("series1").withState(WorkflowState.RUNNING)
             .withState(WorkflowState.PAUSED);
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "seriesid:series1 AND (state:RUNNING OR state:PAUSED)";
+    String expected = "seriesid:series1 AND (state:RUNNING OR state:PAUSED) sort=created ASC";
     assertEquals(expected, solrQuery);
   }
 
@@ -105,14 +105,25 @@ public class WorkflowServiceDaoSolrTest {
    * Tests whether the query is built using AND rather than OR when supplying multiple excluded states
    */
   @Test
-  public void testBuildNegativeStateQuery() throws Exception {
+  public void testBuildNegativeStatesQuery() throws Exception {
     WorkflowQuery q = new WorkflowQuery().withSeriesId("series1").withoutState(WorkflowState.RUNNING)
             .withoutState(WorkflowState.PAUSED);
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "seriesid:series1 AND (-state:RUNNING AND -state:PAUSED AND *:*)";
+    String expected = "seriesid:series1 AND (-state:RUNNING AND -state:PAUSED AND *:*) sort=created ASC";
     assertEquals(expected, solrQuery);
   }
-  
+
+  /**
+   * Tests whether the query is built using *:* when supplying a single excluded state
+   */
+  @Test
+  public void testBuildNegativeStateQuery() throws Exception {
+    WorkflowQuery q = new WorkflowQuery().withSeriesId("series1").withoutState(WorkflowState.RUNNING);
+    String solrQuery = dao.buildSolrQueryString(q);
+    String expected = "seriesid:series1 AND (-state:RUNNING AND *:*) sort=created ASC";
+    assertEquals(expected, solrQuery);
+  }
+
   @Test
   public void testPopulateSolr() throws Exception {
     // this method uses the solr index, so if the workflow is 

@@ -118,13 +118,13 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
       queryStringParams.add(new BasicNameValuePair("q", query.getText()));
     }
     if (query.getStates() != null) {
-      for(QueryTerm stateQueryTerm : query.getStates()) {
+      for (QueryTerm stateQueryTerm : query.getStates()) {
         String key = stateQueryTerm.isInclude() ? "state" : "-state";
         queryStringParams.add(new BasicNameValuePair(key, stateQueryTerm.getValue()));
       }
     }
     if (query.getCurrentOperations() != null) {
-      for(QueryTerm opQueryTerm : query.getCurrentOperations()) {
+      for (QueryTerm opQueryTerm : query.getCurrentOperations()) {
         String key = opQueryTerm.isInclude() ? "op" : "-op";
         queryStringParams.add(new BasicNameValuePair(key, opQueryTerm.getValue()));
       }
@@ -165,6 +165,13 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
     if (query.getSubject() != null) {
       queryStringParams.add(new BasicNameValuePair("subject", query.getSubject()));
     }
+    if (query.getSort() != null) {
+      String sort = query.getSort().toString();
+      if (!query.isSortAscending()) {
+        sort += "_DESC";
+      }
+      queryStringParams.add(new BasicNameValuePair("sort", sort));
+    }
     if (query.getStartPage() > 0) {
       queryStringParams.add(new BasicNameValuePair("startPage", Long.toString(query.getStartPage())));
     }
@@ -189,9 +196,10 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
     }
 
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowService#getStatistics()
    */
   @Override
@@ -372,7 +380,7 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
       logger.info("Workflow '{}' stopped", workflowInstanceId);
       try {
         return WorkflowBuilder.getInstance().parseWorkflowInstance(response.getEntity().getContent());
-      } catch(Exception e) {
+      } catch (Exception e) {
         throw new WorkflowDatabaseException(e);
       } finally {
         closeConnection(response);
@@ -404,7 +412,7 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
       logger.info("Workflow '{}' suspended", workflowInstanceId);
       try {
         return WorkflowBuilder.getInstance().parseWorkflowInstance(response.getEntity().getContent());
-      } catch(Exception e) {
+      } catch (Exception e) {
         throw new WorkflowDatabaseException(e);
       } finally {
         closeConnection(response);
@@ -448,7 +456,7 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
       logger.info("Workflow '{}' resumed", workflowInstanceId);
       try {
         return WorkflowBuilder.getInstance().parseWorkflowInstance(response.getEntity().getContent());
-      } catch(Exception e) {
+      } catch (Exception e) {
         throw new WorkflowDatabaseException(e);
       } finally {
         closeConnection(response);
@@ -503,10 +511,10 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
       }
     }
   }
-  
+
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.workflow.api.WorkflowService#registerWorkflowDefinition(org.opencastproject.workflow.api.WorkflowDefinition)
    */
   @Override
@@ -530,10 +538,10 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
       throw new WorkflowDatabaseException("Unexpected HTTP response code");
     } // otherwise, our work is done
   }
-  
+
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.opencastproject.workflow.api.WorkflowService#unregisterWorkflowDefinition(java.lang.String)
    */
   @Override
@@ -541,7 +549,7 @@ public class WorkflowServiceRemoteImpl extends RemoteBase implements WorkflowSer
           WorkflowDatabaseException {
     HttpDelete delete = new HttpDelete("/definition/" + workflowDefinitionId);
     HttpResponse response = getResponse(delete, HttpStatus.SC_NO_CONTENT);
-    if(response == null) {
+    if (response == null) {
       throw new WorkflowDatabaseException("Unable to delete workflow definition '" + workflowDefinitionId + "'");
     }
   }

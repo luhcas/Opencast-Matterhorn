@@ -39,6 +39,7 @@ import org.opencastproject.workflow.api.WorkflowOperationDefinition;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
+import org.opencastproject.workflow.api.WorkflowQuery.Sort;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowStatistics;
@@ -92,6 +93,9 @@ public class WorkflowRestService {
   /** The constant used to negate a querystring parameter. This is only supported on some parameters. */
   public static final String NEGATE_PREFIX = "-";
 
+  /** The constant used to switch the direction of the sorting querystring parameter. */
+  public static final String DESCENDING_SUFFIX = "_DESC";
+  
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(WorkflowRestService.class);
 
@@ -182,7 +186,8 @@ public class WorkflowRestService {
             + "To include any state *other than* this one, prefix the state with a '-'"));
     instancesEndpoint.addOptionalParam(new Param("q", Type.STRING, "climate",
             "Filter results by string in metadata catalog"));
-    instancesEndpoint.addOptionalParam(new Param("workflowDefinitionId", Type.STRING, null, "Filter results by workflow definition identifier"));
+    instancesEndpoint.addOptionalParam(new Param("workflowDefinitionId", Type.STRING, null,
+            "Filter results by workflow definition identifier"));
     instancesEndpoint.addOptionalParam(new Param("seriesId", Type.STRING, null, "Filter results by series ID"));
     instancesEndpoint.addOptionalParam(new Param("seriesTitle", Type.STRING, null, "Filter results by series title"));
     instancesEndpoint.addOptionalParam(new Param("mp", Type.STRING, null, "Filter results by media package ID"));
@@ -194,10 +199,15 @@ public class WorkflowRestService {
     instancesEndpoint.addOptionalParam(new Param("language", Type.STRING, null, "Filter results by language"));
     instancesEndpoint.addOptionalParam(new Param("license", Type.STRING, null, "Filter results by license"));
     instancesEndpoint.addOptionalParam(new Param("subject", Type.STRING, null, "Filter results by subject"));
-    instancesEndpoint.addOptionalParam(new Param("fromDate", Type.STRING, null, "Filter results by start date (yyyy-MM-dd'T'HH:mm:ss'Z')"));
-    instancesEndpoint.addOptionalParam(new Param("toDate", Type.STRING, null, "Filter results by end date (yyyy-MM-dd'T'HH:mm:ss'Z')"));
+    instancesEndpoint.addOptionalParam(new Param("fromDate", Type.STRING, null,
+            "Filter results by start date (yyyy-MM-dd'T'HH:mm:ss'Z')"));
+    instancesEndpoint.addOptionalParam(new Param("toDate", Type.STRING, null,
+            "Filter results by end date (yyyy-MM-dd'T'HH:mm:ss'Z')"));
     instancesEndpoint.addOptionalParam(new Param("count", Type.STRING, "20", "Results per page (max 100)"));
     instancesEndpoint.addOptionalParam(new Param("startPage", Type.STRING, "0", "Page offset"));
+    instancesEndpoint.addOptionalParam(new Param("sort", Type.STRING, "DATE_CREATED", "The sort order.  May include any " +
+    		"of the following: DATE_CREATED, TITLE, SERIES_TITLE, SERIES_ID, MEDIA_PACKAGE_ID, WORKFLOW_DEFINITION_ID, CREATOR, " +
+    		"CONTRIBUTOR, LANGUAGE, LICENSE, SUBJECT.  Add '_DESC' to reverse the sort order (e.g. TITLE_DESC)."));
     instancesEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, instancesEndpoint);
 
@@ -504,8 +514,8 @@ public class WorkflowRestService {
           @QueryParam("language") String language, @QueryParam("license") String license,
           @QueryParam("title") String title, @QueryParam("subject") String subject,
           @QueryParam("workflowdefinition") String workflowDefinitionId, @QueryParam("mp") String mediapackageId,
-          @QueryParam("op") List<String> currentOperations, @QueryParam("startPage") int startPage,
-          @QueryParam("count") int count) throws Exception {
+          @QueryParam("op") List<String> currentOperations, @QueryParam("sort") String sort,
+          @QueryParam("startPage") int startPage, @QueryParam("count") int count) throws Exception {
     // CHECKSTYLE:ON
     if (count < 1 || count > MAX_LIMIT) {
       count = DEFAULT_LIMIT;
@@ -534,8 +544,8 @@ public class WorkflowRestService {
     q.withMediaPackage(mediapackageId);
     q.withCreator(creator);
     q.withContributor(contributor);
-    q.withFromDate(SolrUtils.parseDate(fromDate));
-    q.withToDate(SolrUtils.parseDate(toDate));
+    q.withDateAfter(SolrUtils.parseDate(fromDate));
+    q.withDateBefore(SolrUtils.parseDate(toDate));
     q.withLanguage(language);
     q.withLicense(license);
     q.withTitle(title);
@@ -548,6 +558,27 @@ public class WorkflowRestService {
           q.withoutCurrentOperation(op.substring(1));
         } else {
           q.withCurrentOperation(op);
+        }
+      }
+    }
+    
+    if(StringUtils.isNotBlank(sort)) {
+      // Parse the sort field and direction
+      Sort sortField = null;
+      if(sort.endsWith(DESCENDING_SUFFIX)) {
+        String enumKey = sort.substring(0, sort.length()-DESCENDING_SUFFIX.length()).toUpperCase();
+        try {
+          sortField = Sort.valueOf(enumKey);
+          q.withSort(sortField, false);
+        } catch(IllegalArgumentException e) {
+          logger.warn("No sort enum matches '{}'", enumKey);
+        }
+      } else {
+        try {
+          sortField = Sort.valueOf(sort);
+          q.withSort(sortField);
+        } catch(IllegalArgumentException e) {
+          logger.warn("No sort enum matches '{}'",sort);
         }
       }
     }
@@ -565,12 +596,12 @@ public class WorkflowRestService {
           @QueryParam("fromdate") String fromDate, @QueryParam("todate") String toDate,
           @QueryParam("language") String language, @QueryParam("license") String license,
           @QueryParam("title") String title, @QueryParam("subject") String subject,
-          @QueryParam("workflowdefinitionId") String workflowDefinitionId, @QueryParam("mp") String mediapackageId,
-          @QueryParam("op") List<String> currentOperations, @QueryParam("startPage") int startPage,
-          @QueryParam("count") int count) throws Exception {
+          @QueryParam("workflowdefinition") String workflowDefinitionId, @QueryParam("mp") String mediapackageId,
+          @QueryParam("op") List<String> currentOperations, @QueryParam("sort") String sort,
+          @QueryParam("startPage") int startPage, @QueryParam("count") int count) throws Exception {
     // CHECKSTYLE:ON
     return getWorkflowsAsXml(states, text, seriesId, seriesTitle, creator, contributor, fromDate, toDate, language,
-            license, title, subject, workflowDefinitionId, mediapackageId, currentOperations, startPage, count);
+            license, title, subject, workflowDefinitionId, mediapackageId, currentOperations, sort, startPage, count);
   }
 
   @GET
