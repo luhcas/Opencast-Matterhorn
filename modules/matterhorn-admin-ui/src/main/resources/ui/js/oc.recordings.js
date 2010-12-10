@@ -1,3 +1,4 @@
+var ocRecordings = ocRecordings || {};
 
 Recordings = new (function() {
 
@@ -81,6 +82,7 @@ Recordings = new (function() {
 
   function makeRecording(wf) {
     var rec = {       // TODO create prototype so we can write : new Rec() or sth. here
+      id: '',
       title: '',
       creators : [],
       start : '',
@@ -95,7 +97,9 @@ Recordings = new (function() {
       error : false,
       actions : []
     };
-
+    // Id
+    rec.id = wf.id;
+    
     // Title
     rec.title = wf.mediapackage.title;
 
@@ -131,7 +135,13 @@ Recordings = new (function() {
       }
     }
 
+    ocUtils.log('Workflow operation', wf.template);
     // Actions
+    if(wf.template === 'scheduling') {
+      rec.actions = ['view', 'edit', 'delete'];
+    }else{
+      rec.actions = ['view', 'delete'];
+    }
 
     return rec;
   }
@@ -268,6 +278,25 @@ Recordings = new (function() {
     refresh();
 
   };
+  
+  this.removeRecording = function(id, title) { //TODO Delete the scheduled event too. Don't just stop the workflow.
+    if(confirm('Are you sure you wish to delete ' + title + '?')){
+      $.ajax({
+        url        : '../workflow/rest/stop',
+        data       : {
+          id: id
+        },
+        type       : 'POST',
+        error      : function(XHR,status,e){
+          alert('Could not remove Workflow ' + title);
+        },
+        success    : function(data) {
+          Recordings.reload();
+        }
+      });
+    }
+  }
+  
   $(document).ready(this.init);
 
   return this;
@@ -295,8 +324,20 @@ RenderUtils = new (function() {
     }
   }
 
-  this.makeActions = function(actions) {
-    return '';
+  this.makeActions = function(id, title, actions) {
+    links = [];
+    for(i in actions){
+      ocUtils.log(actions[i]);
+      if(actions[i] === 'view') {
+        links.push('<a href="view.html?id=' + id + '">View</a>');
+      } else if(actions[i] === 'edit') {
+        links.push('<a href="scheduler.html?eventId=' + id + '&edit=true">Edit</a>');
+      } else if(actions[i] === 'delete') {
+        links.push('<a href="javascript:Recordings.removeRecording(\'' + id + '\',\'' + title + '\')">Delete</a>');
+      }
+    }
+    ocUtils.log(links.join('<br />\n'));
+    return links.join('<br />\n');
   }
 
   this.getTime = function(timestamp) {
