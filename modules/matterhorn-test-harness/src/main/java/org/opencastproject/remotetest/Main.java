@@ -29,17 +29,28 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.xerces.xni.Augmentations;
+import org.apache.xerces.xni.QName;
+import org.apache.xerces.xni.XMLAttributes;
+import org.apache.xerces.xni.XNIException;
+import org.apache.xerces.xni.parser.XMLDocumentFilter;
+import org.apache.xerces.xni.parser.XMLInputSource;
+import org.cyberneko.html.HTMLConfiguration;
+import org.cyberneko.html.filters.DefaultFilter;
+import org.cyberneko.html.filters.Identity;
+import org.cyberneko.html.filters.Writer;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.openqa.selenium.server.SeleniumServer;
+import org.xml.sax.SAXException;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URISyntaxException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -49,6 +60,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Runs all of the remote tests
@@ -203,14 +216,21 @@ public class Main {
         continue;
       }
       File outFile = new File(temp, filename);
+      boolean suite = false;
+      if ("suite.html".equals(filename)) {
+        suite = true;
+        testSuite = outFile;
+      }
+
+      // Copy the selenium test, prepending the login steps
       InputStream is = url.openStream();
       OutputStream os = new FileOutputStream(outFile);
+      if (!suite) {
+        is = addLogin(is);
+      }
       IOUtils.copy(is, os);
       IOUtils.closeQuietly(is);
       IOUtils.closeQuietly(os);
-      if ("suite.html".equals(filename)) {
-        testSuite = outFile;
-      }
     }
 
     File target = new File("target");
@@ -226,8 +246,68 @@ public class Main {
     seleniumServer.stop();
     System.out.println("Finished selenese tests for the '" + browser + "'.  Results are available at " + report);
 
-    // TODO: interpret whether there are problems in the test report
+    // Clean up
     FileUtils.forceDelete(temp);
+  }
+
+  /** The html to insert into the selenium test */
+  protected static String getLoginHtml() {
+    return "<tr><td>open</td><td>/login.html</td><td></td></tr>"
+          + "<tr><td>type</td><td>j_username</td><td>" + Main.USERNAME + "</td></tr>"
+          + "<tr><td>type</td><td>j_password</td><td>" + Main.PASSWORD + "</td></tr>"
+          + "<tr><td>clickAndWait</td><td>submit</td><td></td></tr>";
+  }
+  
+  /** SAX parser for adding the Matterhorn login steps to a selenium test */
+  static class LoginHtmlHandler extends DefaultFilter {
+
+    /** The html parser configuration */
+    HTMLConfiguration config = null;
+
+    /**
+     * Constructs the sax parser that injects login html to a selenium test
+     * 
+     * @param config
+     *          the html cofiguration
+     */
+    public LoginHtmlHandler(HTMLConfiguration config) {
+      this.config = config;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @see org.cyberneko.html.filters.DefaultFilter#startElement(org.apache.xerces.xni.QName, org.apache.xerces.xni.XMLAttributes, org.apache.xerces.xni.Augmentations)
+     */
+    @Override
+    public void startElement(QName element, XMLAttributes attributes, Augmentations augs) throws XNIException {
+      super.startElement(element, attributes, augs);
+      if("tbody".equalsIgnoreCase(element.rawname)) {
+        String loginHtml = getLoginHtml();
+        XMLInputSource source = new XMLInputSource(null, loginHtml, null, new StringReader(loginHtml), "UTF-8");
+        config.pushInputSource(source);
+      }
+    }
+  }
+
+  /**
+   * Adds the login steps to a selenium test
+   * 
+   * @param the
+   *          input stream containing the test
+   * @return the input stream containing the test augmented with the login instructions
+   * @throws ParserConfigurationException
+   * @throws SAXException
+   */
+  private static InputStream addLogin(InputStream is) throws Exception {
+    HTMLConfiguration parser = new HTMLConfiguration();
+    parser.setFeature("http://cyberneko.org/html/features/augmentations", true);
+    StringWriter stringWriter = new StringWriter();
+    Writer writer = new Writer(stringWriter, "UTF-8");
+    XMLDocumentFilter[] filters = { new LoginHtmlHandler(parser), new Identity(), writer };
+    parser.setProperty("http://cyberneko.org/html/properties/filters", filters);
+    parser.parse(new XMLInputSource(null, null, null, is, null));
+    return IOUtils.toInputStream(stringWriter.toString());
   }
 
   /**
@@ -237,8 +317,7 @@ public class Main {
    * @param path
    *          Should end with "/", but not start with one.
    * @return URLs for each item
-   * @throws URISyntaxException
-   * @throws IOException
+   * @throws Exception
    */
   private static URL[] getResourceListing(String path) throws Exception {
     URL dirURL = Main.class.getClassLoader().getResource(path);
