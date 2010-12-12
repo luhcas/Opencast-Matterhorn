@@ -43,6 +43,8 @@ import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.openqa.selenium.server.SeleniumServer;
+import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
 import org.xml.sax.SAXException;
 
 import java.io.File;
@@ -51,20 +53,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.ParserConfigurationException;
 
 /**
- * Runs all of the remote tests
+ * Runs JUnit and/or Selenium test suites against a Matterhorn server and/or capture agent.
  */
 public class Main {
 
@@ -203,35 +201,39 @@ public class Main {
    *           if the selenese tests fail to run
    */
   private static void runSeleneseTests(String browser) throws Exception {
-    // Copy the test suite and its associated files to the temp directory
+    // Build the test suite and copy it, along with its associated files, to the temp directory
     String time = Long.toString(System.currentTimeMillis());
     File temp = new File(System.getProperty("java.io.tmpdir"), "selenium" + time);
     FileUtils.forceMkdir(temp);
-    URL[] urls = getResourceListing("selenium/");
-    File testSuite = null;
-    for (int i = 0; i < urls.length; i++) {
-      URL url = urls[i];
-      String filename = FilenameUtils.getName(url.toString());
-      if (filename == null || filename.equals("")) {
-        continue;
-      }
+    List<String> testNames = new ArrayList<String>();
+    String[] relativePaths = getResourceListing("selenium");
+    for (int i = 0; i < relativePaths.length; i++) {
+      String relativePath = relativePaths[i];
+      String filename = FilenameUtils.getName(relativePath.toString());
       File outFile = new File(temp, filename);
-      boolean suite = false;
-      if ("suite.html".equals(filename)) {
-        suite = true;
-        testSuite = outFile;
-      }
-
       // Copy the selenium test, prepending the login steps
-      InputStream is = url.openStream();
+      InputStream is = addLogin(Main.class.getResource("/" + relativePath).openStream());
       OutputStream os = new FileOutputStream(outFile);
-      if (!suite) {
-        is = addLogin(is);
-      }
       IOUtils.copy(is, os);
       IOUtils.closeQuietly(is);
       IOUtils.closeQuietly(os);
+      testNames.add(filename);
     }
+
+    // Construct the test suite from the files we've copied
+    File testSuite = new File(temp, "suite.html");
+    StringBuilder suiteHtml = new StringBuilder();
+    suiteHtml.append("<html><head><title>Matterhorn Selenium Integration Test Suite</title>");
+    suiteHtml.append("</head><body><table><tr><td><b>Suite Of Tests</b></td></tr>");
+    for (String testName : testNames) {
+      suiteHtml.append("<tr><td><a href=\"./");
+      suiteHtml.append(testName);
+      suiteHtml.append("\">");
+      suiteHtml.append(testName);
+      suiteHtml.append("</a></td></tr>");
+    }
+    suiteHtml.append("</table></body></html>");
+    FileUtils.writeStringToFile(testSuite, suiteHtml.toString());
 
     File target = new File("target");
     if (!target.isDirectory()) {
@@ -244,25 +246,23 @@ public class Main {
     SeleniumServer seleniumServer = new NonExitingSeleniumServer(testSuite, report, browser);
     seleniumServer.boot();
     seleniumServer.stop();
-    System.out.println("Finished selenese tests for the '" + browser + "'.  Results are available at " + report);
+    System.out.println("Finished selenese tests for '" + browser + "'.  Results are available at " + report);
 
     // Clean up
-    FileUtils.forceDelete(temp);
+    // FileUtils.forceDelete(temp);
   }
 
-  /** The html to insert into the selenium test */
-  protected static String getLoginHtml() {
-    return "<tr><td>open</td><td>/login.html</td><td></td></tr>"
-          + "<tr><td>type</td><td>j_username</td><td>" + Main.USERNAME + "</td></tr>"
-          + "<tr><td>type</td><td>j_password</td><td>" + Main.PASSWORD + "</td></tr>"
-          + "<tr><td>clickAndWait</td><td>submit</td><td></td></tr>";
-  }
-  
   /** SAX parser for adding the Matterhorn login steps to a selenium test */
-  static class LoginHtmlHandler extends DefaultFilter {
+  static class LoginLogoutHtmlHandler extends DefaultFilter {
 
     /** The html parser configuration */
     HTMLConfiguration config = null;
+
+    /** Whether the login element has been added */
+    boolean loginAdded = false;
+
+    /** Whether the logout element has been added */
+    boolean logoutAdded = false;
 
     /**
      * Constructs the sax parser that injects login html to a selenium test
@@ -270,22 +270,50 @@ public class Main {
      * @param config
      *          the html cofiguration
      */
-    public LoginHtmlHandler(HTMLConfiguration config) {
+    public LoginLogoutHtmlHandler(HTMLConfiguration config) {
       this.config = config;
+    }
+
+    /** The html to insert into the selenium test */
+    protected static final String getLoginHtml() {
+      return "<tr><td>open</td><td>/login.html</td><td></td></tr><tr><td>type</td><td>j_username</td><td>"
+              + Main.USERNAME + "</td></tr>" + "<tr><td>type</td><td>j_password</td><td>" + Main.PASSWORD
+              + "</td></tr>" + "<tr><td>clickAndWait</td><td>submit</td><td></td></tr>";
     }
 
     /**
      * {@inheritDoc}
-     *
-     * @see org.cyberneko.html.filters.DefaultFilter#startElement(org.apache.xerces.xni.QName, org.apache.xerces.xni.XMLAttributes, org.apache.xerces.xni.Augmentations)
+     * 
+     * @see org.cyberneko.html.filters.DefaultFilter#startElement(org.apache.xerces.xni.QName,
+     *      org.apache.xerces.xni.XMLAttributes, org.apache.xerces.xni.Augmentations)
      */
     @Override
     public void startElement(QName element, XMLAttributes attributes, Augmentations augs) throws XNIException {
       super.startElement(element, attributes, augs);
-      if("tbody".equalsIgnoreCase(element.rawname)) {
+      if ("tbody".equalsIgnoreCase(element.rawname) && !loginAdded) {
         String loginHtml = getLoginHtml();
-        XMLInputSource source = new XMLInputSource(null, loginHtml, null, new StringReader(loginHtml), "UTF-8");
+        XMLInputSource source = new XMLInputSource("loginHtml", "loginHtml", null, new StringReader(loginHtml), "UTF-8");
         config.pushInputSource(source);
+        loginAdded = true;
+      }
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @see org.cyberneko.html.filters.DefaultFilter#endElement(org.apache.xerces.xni.QName,
+     *      org.apache.xerces.xni.Augmentations)
+     */
+    @Override
+    public void endElement(QName element, Augmentations augs) throws XNIException {
+      if ("tbody".equalsIgnoreCase(element.rawname) && !logoutAdded) {
+        String logoutHtml = "<tr><td>open</td><td>/j_spring_security_logout</td><td></td></tr></tbody>";
+        XMLInputSource source = new XMLInputSource("logoutHtml", "logoutHtml", null, new StringReader(logoutHtml),
+                "UTF-8");
+        config.pushInputSource(source);
+        logoutAdded = true;
+      } else {
+        super.endElement(element, augs);
       }
     }
   }
@@ -304,40 +332,23 @@ public class Main {
     parser.setFeature("http://cyberneko.org/html/features/augmentations", true);
     StringWriter stringWriter = new StringWriter();
     Writer writer = new Writer(stringWriter, "UTF-8");
-    XMLDocumentFilter[] filters = { new LoginHtmlHandler(parser), new Identity(), writer };
+    XMLDocumentFilter[] filters = { new LoginLogoutHtmlHandler(parser), new Identity(), writer };
     parser.setProperty("http://cyberneko.org/html/properties/filters", filters);
     parser.parse(new XMLInputSource(null, null, null, is, null));
+    is.close();
     return IOUtils.toInputStream(stringWriter.toString());
   }
 
   /**
-   * List directory contents for a resource folder. Not recursive. This is basically a brute-force implementation. Works
-   * for regular files and also JARs.
+   * List directory contents for a resource folder.
    * 
    * @param path
-   *          Should end with "/", but not start with one.
+   *          The classpath to scan for resources
    * @return URLs for each item
    * @throws Exception
    */
-  private static URL[] getResourceListing(String path) throws Exception {
-    URL dirURL = Main.class.getClassLoader().getResource(path);
-
-    String jarPath = dirURL.getPath().substring(5, dirURL.getPath().indexOf("!")); // strip out only the JAR file
-    JarFile jar = new JarFile(URLDecoder.decode(jarPath, "UTF-8"));
-    Enumeration<JarEntry> entries = jar.entries(); // gives ALL entries in jar
-    Set<URL> result = new HashSet<URL>(); // avoid duplicates in case it is a subdirectory
-    while (entries.hasMoreElements()) {
-      String name = entries.nextElement().getName();
-      if (name.startsWith(path)) { // filter according to the path
-        String entry = name.substring(path.length());
-        int checkSubdir = entry.indexOf("/");
-        if (checkSubdir >= 0) {
-          // if it is a subdirectory, we just return the directory name
-          entry = entry.substring(0, checkSubdir);
-        }
-        result.add(new URL(dirURL.toString() + entry));
-      }
-    }
-    return result.toArray(new URL[result.size()]);
+  private static String[] getResourceListing(final String path) throws Exception {
+    Reflections r = new Reflections(path, new ResourcesScanner());
+    return r.getResources(Pattern.compile(".*\\.html")).toArray(new String[0]);
   }
 }

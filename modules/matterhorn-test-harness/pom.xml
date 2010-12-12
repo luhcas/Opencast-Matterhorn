@@ -19,6 +19,21 @@
       <version>4.7</version>
     </dependency>
     <dependency>
+      <groupId>com.google.collections</groupId>
+      <artifactId>google-collections</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>0.9.5-RC2</version>
+    </dependency>
+    <dependency>
+      <groupId>dom4j</groupId>
+      <artifactId>dom4j</artifactId>
+      <version>1.6.1</version>
+    </dependency>
+    <dependency>
       <groupId>org.seleniumhq.selenium.client-drivers</groupId>
       <artifactId>selenium-java-client-driver</artifactId>
       <version>1.0.2</version>
@@ -52,6 +67,14 @@
           <groupId>org.hamcrest</groupId>
           <artifactId>hamcrest-all</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-ie-driver</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>mx4j</groupId>
+          <artifactId>mx4j-tools</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -59,13 +82,8 @@
       <artifactId>contiperf</artifactId>
       <version>1.04</version>
     </dependency>
-<!--
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient-osgi</artifactId>
-      <version>4.0.1</version>
-    </dependency>
--->
+    <!-- <dependency> <groupId>org.apache.httpcomponents</groupId> <artifactId>httpclient-osgi</artifactId> <version>4.0.1</version> 
+      </dependency> -->
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
