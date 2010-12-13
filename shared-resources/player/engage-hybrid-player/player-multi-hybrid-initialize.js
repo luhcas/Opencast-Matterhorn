@@ -456,12 +456,10 @@ Opencast.Initialize = (function ()
                 $("#oc_lecturer-search-field").attr('value', '');
                 clickLecturerSearchField = true;
             }
-            if($("#oc_ui_tabs").tabs('option', 'selected') != 2) {
-              $("#oc_ui_tabs").tabs('select', 2);
-            }
+            // Deselect any selected Tab
+            $('#oc_ui_tabs').tabs('selected' , -1);
+            $(".ui-tabs-selected").removeClass("ui-state-active").removeClass("ui-tabs-selected");
         });
-
-
         
         $('#oc_btn-rewind').mousedown(function ()
         {

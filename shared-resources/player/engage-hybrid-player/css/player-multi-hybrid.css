@@ -72,6 +72,13 @@ text-decoration: underline;
   padding: 3px 5px;
 }
 
+#oc_search-lect
+{
+  float: left;
+  margin: 25px 5px 5px;
+  padding: 3px 5px;
+}
+
 .oc_search-Field
 {
   border:                   1px solid #A82E2E;
@@ -116,11 +123,19 @@ color: #000;
 
 #oc_caption-link { height: 30px; padding: 10px; border-left: 1px solid #000; border-right: 1px solid #000; text-decoration: none; }
 
-
-
 #oc_btn-search
 {
-  background:                #A72123 url("../img/oc_icons_2.png") no-repeat -242px -35px;
+  background: #A72123 url("../img/oc_icons_2.png") no-repeat -242px -35px;
+  margin-left: -20px;
+  vertical-align: middle;
+  height: 20px;
+  width: 27px;
+  padding: 0;
+}
+
+#oc_btn-lecturer-search
+{
+  background: #A72123 url("../img/oc_icons_2.png") no-repeat -242px -35px;
   margin-left: -20px;
   vertical-align: middle;
   height: 20px;

@@ -12,8 +12,6 @@
         </span>
       </div>
 
-
-
       <div style="height: 25px">
               <span id="analytics" class="analytics" style="display: none;">Loading..</span>
               <span id="annotation" class="annotation" style="display: none;">Annotation..</span>
@@ -43,37 +41,6 @@
 
       </div>
 
-
-
-
-    </div>
-    <div id="oc-segments">
-      <div id="slider">
-        <img class="scrollButtons left" src="img/leftarrow.png" alt="Scroll to previous slides"/>
-        <div style="overflow: hidden;" class="scroll">
-          <div class="scrollContainer">
-            <xsl:for-each select="ns2:search-results/result/segments/segment">
-              <div style="float: left; position: relative;" class="panel">
-                <xsl:attribute name="id">panel_<xsl:value-of select="position()"/></xsl:attribute>
-                <div class="inside">
-                  <xsl:attribute name="onmouseover">Opencast.Watch.hoverSegment('segment<xsl:value-of select="position()"/>')</xsl:attribute>
-                  <xsl:attribute name="onmouseout">Opencast.Watch.hoverOutSegment('segment<xsl:value-of select="position()"/>')</xsl:attribute>
-                  <a>
-                    <xsl:attribute name="href">javascript:Opencast.Watch.seekSegment(<xsl:value-of select="floor(./@time div 1000)"/>)</xsl:attribute>
-                    <img width="111">
-                      <xsl:attribute name="src">
-                        <xsl:value-of select="./previews/preview"/>
-                      </xsl:attribute>
-                      <xsl:attribute name="alt">Slide <xsl:value-of select="position()"/> of <xsl:value-of select="last()"/></xsl:attribute>
-                    </img>
-                  </a>
-                </div>
-              </div>
-            </xsl:for-each>
-          </div>
-        </div>
-        <img class="scrollButtons right" src="img/rightarrow.png" alt="Scroll to subsequent slides"/>
-      </div>
     </div>
     <xsl:for-each select="ns2:search-results/result/mediapackage/media/track">
       <xsl:if test="@type='presenter/delivery'">

@@ -419,35 +419,7 @@ Opencast.Player = (function () {
         document.body.appendChild(newAlert);
     }
 
-    /**
-        @memberOf Opencast.Player
-        @description Show the slides
-     */
-    function showSlides()
-    {
-        $("#oc_btn-slides").attr({
-            title: SLIDESHIDE
-        });
-        $("#oc_btn-slides").html(SLIDESHIDE);
-        // Sets slider container width after panels are displayed
-        setTimeout('Opencast.segments.sizeSliderContainer();', 500);
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Hide the slides
-     */
-    function hideSlides()
-    {
-        $("#oc_btn-slides").attr({
-            title: SLIDES
-        });
-        $("#oc_btn-slides").html(SLIDES);
-        $("#oc_btn-slides").attr('aria-pressed', 'false');
-    }
-
-    /**
-        @memberOf Opencast.Player
+    /*
         @description Show the notes
      */
     function showNotes()
@@ -472,34 +444,6 @@ Opencast.Player = (function () {
         });
         $("#oc_btn-notes").html(NOTES);
         $("#oc_btn-notes").attr('aria-pressed', 'false');
-    }
-
-
-
-    /**
-        @memberOf Opencast.Player
-        @description Show the slide text
-     */
-    function showSlideText()
-    {
-        $("#oc_btn-slidetext").attr({
-            title: SLIDETEXTHIDE
-        });
-        $("#oc_btn-slidetext").html(SLIDETEXTHIDE);
-        $("#oc_btn-slidetext").attr('aria-pressed', 'true');
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Hide the slide text
-     */
-    function hideSlideText()
-    {
-        $("#oc_btn-slidetext").attr({
-            title: SLIDETEXT
-        });
-        $("#oc_btn-slidetext").html(SLIDETEXT);
-        $("#oc_btn-slidetext").attr('aria-pressed', 'false');
     }
 
     /**
@@ -613,31 +557,6 @@ Opencast.Player = (function () {
         $("#oc_btn-description").attr("aria-pressed", "false");
     }
 
-    /**
-        @memberOf Opencast.Player
-        @description Toggle the slides
-     */
-    function doToggleSlides()
-    {
-        if ($("#oc_btn-slides").attr("title") === SLIDES)
-        {
-            showSlides();
-            hideDescription();
-            hideSlideText();
-            setShowSections(true);
-        }
-        else
-        {
-            hideSlides();
-            setShowSections(false);
-        }
-        // Opencast.Initialize.doResize();
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Toggle the slides
-     */
     function doToggleNotes()
     {
         if ($("#oc_btn-notes").attr("title") === NOTES)
@@ -651,27 +570,6 @@ Opencast.Player = (function () {
             hideNotes();
             setShowSections(false);
         }
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Toggle the Slide Text
-     */
-    function doToggleSlideText()
-    {
-        if ($("#oc_btn-slidetext").attr("title") === SLIDETEXT)
-        {
-            showSlideText();
-            hideSlides();
-            hideDescription();
-            setShowSections(true);
-        }
-        else
-        {
-            hideSlideText();
-            setShowSections(false);
-        }
-        // Opencast.Initialize.doResize();
     }
 
     /**
@@ -726,27 +624,6 @@ Opencast.Player = (function () {
         else
         {
             hideBookmarks();
-            setShowSections(false);
-        }
-        // Opencast.Initialize.doResize();
-    }
-
-    /**
-        @memberOf Opencast.Player
-        @description Toggle the description
-     */
-    function doToggleDescription()
-    {
-        if ($("#oc_btn-description").attr("title") === DESCRIPTION)
-        {
-            showDescription();
-            hideSlides();
-            hideSlideText();
-            setShowSections(true);
-        }
-        else
-        {
-            hideDescription();
             setShowSections(false);
         }
         // Opencast.Initialize.doResize();
@@ -864,9 +741,6 @@ Opencast.Player = (function () {
       shortcutDialogDisplayed = false;
     }
 
-
-
-
     /**
         @memberOf Opencast.Player
         @description Set the embed Player.
@@ -880,13 +754,9 @@ Opencast.Player = (function () {
         $('#oc_embed-costum-width-textinput').val(width);
         $('#oc_embed-costum-height-textinput').val(height);
 
-
         iFrameText = '<iframe src="' + embedUrl + '" style="border:0px #FFFFFF none;" name="Opencast Matterhorn - Media Player" scrolling="no" frameborder="1" marginheight="0px" marginwidth="0px" width="' + width + '" height="' + height + '"></iframe>';
         $('#oc_embed-textarea').val(iFrameText);
     }
-
-
-
 
     /**
      *
@@ -975,7 +845,6 @@ Opencast.Player = (function () {
         }
         Videodisplay.stopRewind();
     }
-
 
 
     /**
@@ -1651,9 +1520,6 @@ Opencast.Player = (function () {
             $('#oc_video-size-dropdown-div').css("display", 'none');
             $('#oc_video-size-dropdown-div').css("margin-left", '-22px');
 
-
-
-
             setDisplayMode(displayMode);
             setCurrentVideoSize(VIDEOSIZESINGLE);
         }
@@ -1693,13 +1559,10 @@ Opencast.Player = (function () {
         getDuration : getDuration,
         setDragging : setDragging,
         getCaptionsBool : getCaptionsBool,
-        doToggleSlides : doToggleSlides,
         doToggleNotes : doToggleNotes,
-        doToggleSlideText : doToggleSlideText,
         doToggleTranscript : doToggleTranscript,
         doToggleEmbed : doToggleEmbed,
         doToggleBookmarks : doToggleBookmarks,
-        doToggleDescription : doToggleDescription,
         doToggleShare : doToggleShare,
         doToggleTimeLayer : doToggleTimeLayer,
         doToggleShortcuts : doToggleShortcuts,
