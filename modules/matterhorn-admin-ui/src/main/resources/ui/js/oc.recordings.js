@@ -8,6 +8,13 @@ Recordings = new (function() {
 
   var STATISTICS_DELAY = 3000;     // time interval for statistics update
 
+  var SORT_FIELDS = {
+    'Title' : 'TITLE',
+    'Presenter' : 'CREATOR',
+    'Series' : 'SERIES_TITLE',
+    'Date' : 'DATE_CREATED'
+  }
+
   // components
   this.searchbox = null;
   this.pager = null;
@@ -28,6 +35,8 @@ Recordings = new (function() {
     this.pageSize = 10;
     this.page = 1;
     this.refresh = 5000;
+    this.sortField = null;
+    this.sortOrder = null;
 
     // parse url parameters
     try {
@@ -36,7 +45,7 @@ Recordings = new (function() {
         p = p.split('&');
         for (i in p) {
           var param = p[i].split('=');
-          if (this[param[0]]) {
+          if (this[param[0]] !== undefined) {
             this[param[0]] = unescape(param[1]);
           }
         }
@@ -56,6 +65,7 @@ Recordings = new (function() {
       var params = [];
       //params.push('count=' + Recordings.Configuration.pageSize);
       //params.push('startPage=' + Recordings.Configuration.page);
+      // 'state' to display
       var state = Recordings.Configuration.state;
       if (state == 'upcoming') {
         params.push('state=paused');
@@ -83,6 +93,14 @@ Recordings = new (function() {
       }
       else if (state == 'failed') {
         params.push('state=failed');
+      }
+      // sorting if specified
+      if (Recordings.Configuration.sortField != null) {
+        var sort = SORT_FIELDS[Recordings.Configuration.sortField];
+        if (Recordings.Configuration.sortOrder == 'DESC') {
+          sort += "_DESC";
+        }
+        params.push('sort=' + sort);
       }
       params.push('jsonp=?');
       var url = WORKFLOW_LIST_URL + '?' + params.join('&');
@@ -217,7 +235,7 @@ Recordings = new (function() {
     }
 
     // Status
-    // current operation : search first operation with state that matches workflow state
+    // current operation : search last operation with state that matches workflow state
     for (var j in wf.operations.operation) {
       if (wf.operations.operation[j].state == wf.state) {
         var op = wf.operations.operation[j];
@@ -234,7 +252,6 @@ Recordings = new (function() {
             });
           }
         }
-        break;
       }
     }
 
@@ -276,7 +293,7 @@ Recordings = new (function() {
     $.tmpl( "table-all", makeRenderData(data) ).appendTo( "#tableContainer" );
 
     // When table is ready, attach event handlers to its children
-    $('#recordingsTable th')
+    $('#recordingsTable thead .sortable')
     .mouseenter( function() {
       $(this).addClass('ui-state-hover');
     })
@@ -285,16 +302,31 @@ Recordings = new (function() {
     })
     .click( function() {
       var sortDesc = $(this).find('.sort-icon').hasClass('ui-icon-circle-triangle-s');
+      var sortField = ($(this).attr('id')).substr(4);
       $( "#recordingsTable th .sort-icon" )
       .removeClass('ui-icon-circle-triangle-s')
       .removeClass('ui-icon-circle-triangle-n')
       .addClass('ui-icon-triangle-2-n-s');
       if (sortDesc) {
-        $(this).find('.sort-icon').addClass('ui-icon-circle-triangle-n');
+        Recordings.Configuration.sortField = sortField;
+        Recordings.Configuration.sortOrder = 'ASC';
+        Recordings.reload();
       } else {
-        $(this).find('.sort-icon').addClass('ui-icon-circle-triangle-s');
+        Recordings.Configuration.sortField = sortField;
+        Recordings.Configuration.sortOrder = 'DESC';
+        Recordings.reload();
       }
     });
+    // if results are sorted, display icon indicating sort order in respective table header cell
+    if (Recordings.Configuration.sortField != null) {
+      var th = $('#sort' + Recordings.Configuration.sortField);
+      $(th).find('.sort-icon').removeClass('ui-icon-triangle-2-n-s');
+      if (Recordings.Configuration.sortOrder == 'ASC') {
+        $(th).find('.sort-icon').addClass('ui-icon-circle-triangle-n');
+      } else if (Recordings.Configuration.sortOrder == 'DESC') {
+        $(th).find('.sort-icon').addClass('ui-icon-circle-triangle-s');
+      }
+    }
     $('.status-column-cell').click(function() {
       $(this).find('.fold-icon')
       .toggleClass('ui-icon-triangle-1-e')
@@ -309,7 +341,9 @@ Recordings = new (function() {
     var url = document.location.href.split('?', 2)[0];
     var pa = [];
     for (p in this.Configuration) {
-      pa.push(p + '=' + escape(this.Configuration[p]));
+      if (this.Configuration[p] != null) {
+        pa.push(p + '=' + escape(this.Configuration[p]));
+      }
     }
     url += '?' + pa.join('&');
     document.location.href = url;
