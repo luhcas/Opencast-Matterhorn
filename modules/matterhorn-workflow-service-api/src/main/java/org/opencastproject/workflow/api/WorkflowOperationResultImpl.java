@@ -27,13 +27,18 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
   protected Action action;
 
   protected long timeInQueue;
-  
+
   protected boolean wait;
+
+  protected boolean isContinuable;
+
+  protected boolean isAbortable;
 
   /**
    * No arg constructor needed by JAXB
    */
-  public WorkflowOperationResultImpl() {}
+  public WorkflowOperationResultImpl() {
+  }
 
   /**
    * Constructs a new WorkflowOperationResultImpl from a mediapackage and an action.
@@ -41,19 +46,23 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
    * @param resultingMediaPackage
    * @param action
    */
-  public WorkflowOperationResultImpl(MediaPackage resultingMediaPackage, Map<String, String> properties, Action action, long timeInQueue) {
+  public WorkflowOperationResultImpl(MediaPackage resultingMediaPackage, Map<String, String> properties, Action action,
+          long timeInQueue) {
     this.resultingMediaPackage = resultingMediaPackage;
     this.properties = properties;
     this.timeInQueue = timeInQueue;
-    if(action == null) {
+    this.isAbortable = true;
+    this.isContinuable = true;
+    if (action == null) {
       throw new IllegalArgumentException("action must not be null.");
     } else {
       this.action = action;
     }
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationResult#getMediaPackage()
    */
   public MediaPackage getMediaPackage() {
@@ -62,6 +71,7 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
 
   /**
    * Sets the resulting media package.
+   * 
    * @param mediaPackage
    */
   public void setMediaPackage(MediaPackage mediaPackage) {
@@ -71,6 +81,7 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
   /**
    * 
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationResult#getAction()
    */
   public Action getAction() {
@@ -79,15 +90,18 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
 
   /**
    * Sets the action that the workflow service should take on the workflow instance
+   * 
    * @param action
    */
   public void setAction(Action action) {
-    if(action == null) throw new IllegalArgumentException("action must not be null.");
+    if (action == null)
+      throw new IllegalArgumentException("action must not be null.");
     this.action = action;
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationResult#getProperties()
    */
   @Override
@@ -97,10 +111,50 @@ public class WorkflowOperationResultImpl implements WorkflowOperationResult {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationResult#getTimeInQueue()
    */
   @Override
   public long getTimeInQueue() {
     return timeInQueue;
   }
+
+  /**
+   * Specifies whether the operation should be abortable by the user.
+   * 
+   * @param isAbortable
+   */
+  public void setAllowsAbort(boolean isAbortable) {
+    this.isAbortable = isAbortable;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowOperationResult#allowsAbort()
+   */
+  @Override
+  public boolean allowsAbort() {
+    return isAbortable;
+  }
+
+  /**
+   * Specifies whether the operation should be continuable by the user.
+   * 
+   * @param isContinuable
+   */
+  public void setAllowsContinue(boolean isContinuable) {
+    this.isContinuable = isContinuable;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowOperationResult#allowsContinue()
+   */
+  @Override
+  public boolean allowsContinue() {
+    return isContinuable;
+  }
+
 }

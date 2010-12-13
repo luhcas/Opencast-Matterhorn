@@ -797,6 +797,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       if (!(handler instanceof ResumableWorkflowOperationHandler)) {
         throw new IllegalStateException("Operation " + currentOperation.getId() + " is not resumable");
       }
+
+      // Set abortable and continuable to default values
+      currentOperation.setContinuable(result.allowsContinue());
+      currentOperation.setAbortable(result.allowsAbort());
+
       ResumableWorkflowOperationHandler resumableHandler = (ResumableWorkflowOperationHandler) handler;
       try {
         URL url = resumableHandler.getHoldStateUserInterfaceURL(workflow);

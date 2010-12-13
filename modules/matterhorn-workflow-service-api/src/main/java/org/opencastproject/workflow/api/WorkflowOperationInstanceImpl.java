@@ -92,6 +92,12 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   @XmlAttribute(name = "exception-handler-workflow")
   protected String exceptionHandlingWorkflow;
 
+  @XmlAttribute(name = "abortable")
+  protected Boolean abortable;
+
+  @XmlAttribute(name = "continuable")
+  protected Boolean continuable;
+
   @XmlJavaTypeAdapter(WorkflowOperationInstanceImpl.DateAdapter.class)
   @XmlElement(name = "started")
   protected Date dateStarted;
@@ -447,4 +453,44 @@ public class WorkflowOperationInstanceImpl implements WorkflowOperationInstance 
   public String toString() {
     return "WorkflowOperation {" + id + "}";
   }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#isAbortable()
+   */
+  public Boolean isAbortable() {
+    return abortable;
+  }
+
+  /**
+   * Defines whether this operation instance should be abortable from a hold state.
+   * 
+   * @param abortable
+   *          <code>true</code> to allow the user to cancel the operation
+   */
+  public void setAbortable(Boolean abortable) {
+    this.abortable = abortable;
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.WorkflowOperationInstance#isContinuable()
+   */
+  public Boolean isContinuable() {
+    return continuable;
+  }
+
+  /**
+   * Defines whether this operation instance should be continuable from a hold state or whether it is resumed
+   * automatically.
+   * 
+   * @param continuable
+   *          <code>true</code> to allow the user to resume the operation
+   */
+  public void setContinuable(Boolean continuable) {
+    this.continuable = continuable;
+  }
+
 }

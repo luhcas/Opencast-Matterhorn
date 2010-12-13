@@ -15,6 +15,8 @@
  */
 package org.opencastproject.workflow.api;
 
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
+
 import java.net.URL;
 import java.util.Date;
 
@@ -110,5 +112,22 @@ public interface WorkflowOperationInstance extends Configurable {
    * @return the excecution condition.
    */
   String getSkipCondition();
+
+  /**
+   * Returns <code>true</code> if this operation can be continued by the user from an optional hold state. A return
+   * value of <code>null</code> indicates that this operation instance does not have a hold state.
+   * 
+   * @return <code>true</code> if this operation instance is continuable
+   */
+  Boolean isContinuable();
+
+  /**
+   * Returns <code>true</code> if this operation can be aborted by the user from an optional hold state. If a resumable
+   * operation is aborted from its hold state, the workflow is put into {@link WorkflowState#STOPPED}. A return value of
+   * <code>null</code> indicates that this operation instance does not have a hold state.
+   * 
+   * @return <code>true</code> if this operation instance is abortable
+   */
+  Boolean isAbortable();
 
 }

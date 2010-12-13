@@ -16,8 +16,15 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
+import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowOperationException;
+import org.opencastproject.workflow.api.WorkflowOperationResult;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.osgi.service.component.ComponentContext;
+
+import java.util.Map;
 
 /**
  * Workflow operation handler that signifies a workflow that is currently in recording state and is waiting for the
@@ -55,6 +62,19 @@ public class CaptureWorkflowOperationHandler extends ResumableWorkflowOperationH
 
     // Add the ui piece that displays the capture information
     registerHoldStateUserInterface(UI_RESOURCE_PATH);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase#start(org.opencastproject.workflow.api.WorkflowInstance)
+   */
+  @Override
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
+    WorkflowOperationResult result = WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
+    result.setAllowsContinue(true);
+    result.setAllowsAbort(true);
+    return result;
   }
 
 }
