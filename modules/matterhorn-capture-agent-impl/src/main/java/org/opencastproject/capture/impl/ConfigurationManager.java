@@ -36,6 +36,7 @@ import java.net.URLConnection;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -61,6 +62,19 @@ public class ConfigurationManager implements ManagedService {
    * Timer that will every at a specified interval to retrieve the centralised configuration file from a server
    */
   Timer timer;
+
+  private boolean initialized = false;
+
+  /**
+   * Used to store the listeners that need to be updated when a change is made to the properties of this
+   * ConfigurationManager.
+   **/
+  private LinkedList<ConfigurationManagerListener> listeners = new LinkedList<ConfigurationManagerListener>();
+
+  /** If this ConfigurationManager has had its properties updated this will be initialised. **/
+  public boolean isInitialized() {
+    return initialized;
+  }
 
   public void activate(ComponentContext ctx) {
     if (ctx != null) {
@@ -139,6 +153,14 @@ public class ConfigurationManager implements ManagedService {
       } catch (NumberFormatException e) {
         logger.warn("Invalid polling time for parameter {}.", CaptureParameters.CAPTURE_CONFIG_REMOTE_POLLING_INTERVAL);
       }
+    }
+
+    synchronized (listeners) {
+      for (ConfigurationManagerListener observer : listeners) {
+        observer.refresh();
+      }
+      // Set initialized to true so that every listener registered after this point will be updated immediately.
+      initialized = true;
     }
   }
 
@@ -401,6 +423,20 @@ public class ConfigurationManager implements ManagedService {
   }
 
   /**
+   * Registers a ConfigurationManagerListener with this ConfigurationManager so that when the properties are updated,
+   * each listener will be updated automatically.
+   * 
+   * @param ConfigurationManagerListener
+   *          A new listener to update when the configuration properties are updated.
+   **/
+  public void registerListener(ConfigurationManagerListener listener) {
+    listeners.add(listener);
+    if(isInitialized()){
+      listener.refresh();
+    }
+  }
+
+  /**
    * Used in a timer that will fire every specified time interval to attempt to get a new version of the capture
    * configuration from a centralised server.
    */
@@ -415,4 +451,5 @@ public class ConfigurationManager implements ManagedService {
       }
     }
   }
+
 }

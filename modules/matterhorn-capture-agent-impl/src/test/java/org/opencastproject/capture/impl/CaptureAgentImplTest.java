@@ -88,11 +88,9 @@ public class CaptureAgentImplTest {
     p.put(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_POLLING_INTERVAL, -1);
     p.put("M2_REPO", getClass().getClassLoader().getResource("m2_repo").getFile());
     config.updated(p);
-
     sched = new SchedulerImpl();
-    sched.setConfigService(config);
     sched.updated(loadProperties("config/scheduler.properties"));
-    
+    sched.setConfigService(config);
     // creates agent, initially idle
     agent = new CaptureAgentImpl();
     agent.setConfigService(config);
@@ -220,7 +218,9 @@ public class CaptureAgentImplTest {
     sched.stopScheduler();
     agent.activate(null);
     Assert.assertEquals(0, agent.getKnownRecordings().size());
-    agent.createRecordingLoadTask(loadProperties("config/scheduler.properties"), 1);
+    agent.updated(loadProperties("config/scheduler.properties"));
+    agent.refresh();
+    agent.createRecordingLoadTask(1);
     System.out.println("Waiting 5 seconds to make sure the scheduler has time to load...");
     Thread.sleep(5000);
     Assert.assertEquals(1, agent.getKnownRecordings().size());

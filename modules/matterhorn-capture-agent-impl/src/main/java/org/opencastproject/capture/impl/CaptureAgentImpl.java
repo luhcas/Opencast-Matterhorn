@@ -116,7 +116,10 @@ import javax.xml.transform.stream.StreamResult;
  * Implementation of the Capture Agent: using gstreamer, generates several Pipelines to store several tracks from a
  * certain recording.
  */
-public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceMonitor, ManagedService {
+public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceMonitor, ManagedService,
+        ConfigurationManagerListener {
+
+  private static final int RECORDING_LOAD_TASK_DELAY = 60;
 
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
 
@@ -185,6 +188,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
   public void setConfigService(ConfigurationManager cfg) {
     configService = cfg;
     agentName = configService.getItem(CaptureParameters.AGENT_NAME);
+    configService.registerListener(this);
   }
 
   /**
@@ -1193,7 +1197,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     if (properties == null) {
       throw new ConfigurationException("null", "Null configuration in updated!");
     }
-
+    
     // Update the agent's properties from the parameter
     Properties props = new Properties();
     Enumeration<String> keys = properties.keys();
@@ -1201,12 +1205,25 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
       String key = keys.nextElement();
       props.put(key, properties.get(key));
     }
-    // Recreate the agent state push tasks
-    createPushTask(props);
-    // Setup the task to load the recordings from disk once everything has started (let's be safe and use 60 seconds)
-    createRecordingLoadTask(props, 60);
+    // Create Agent state push task.  
+    createScheduler(props, "agentStateUpdate", JobParameters.RECURRING_TYPE);
+    // Create recording load task. 
+    createScheduler(props, "recordingLoad", JobParameters.OTHER_TYPE);
   }
 
+  /**
+   * When the ConfigurationManager is updated refresh is called as a part of the observer pattern of
+   * ConfigurationManagerObserver
+   **/
+  @Override
+  public void refresh() {
+    // Recreate the agent state push tasks
+    createPushTask();
+    // Setup the task to load the recordings from disk once everything has started (let's be safe and use 60
+    // seconds)
+    createRecordingLoadTask(RECORDING_LOAD_TASK_DELAY);
+  }
+  
   /**
    * Callback from the OSGi container once this service is started. This is where we register our shell commands.
    * 
@@ -1386,8 +1403,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @param delay
    *          The delay before firing the job, in seconds
    */
-  void createRecordingLoadTask(Properties schedulerProps, long delay) {
-    createScheduler(schedulerProps, "recordingLoad", JobParameters.OTHER_TYPE);
+  void createRecordingLoadTask(long delay) {
     if (agentScheduler == null) {
       return;
     } else {
@@ -1423,8 +1439,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
    * @param schedulerProps
    *          The properties for the Quartz scheduler
    */
-  private void createPushTask(Properties schedulerProps) {
-    createScheduler(schedulerProps, "agentStateUpdate", JobParameters.RECURRING_TYPE);
+  private void createPushTask() {
     if (agentScheduler == null) {
       return;
     }

@@ -16,6 +16,10 @@
 package org.opencastproject.capture.impl;
 
 
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.util.XProperties;
 
@@ -264,5 +268,25 @@ public class ConfigurationManagerTest {
 
       Assert.fail();
     }
+  }
+  
+  @Test
+  public void configurationManagerNotifiesListenersCorrectly() throws ConfigurationException{
+    ConfigurationManager configurationManager = new ConfigurationManager();
+    // Setup a listener to be registered before the configuration manager update. 
+    ConfigurationManagerListener registersBefore = createMock(ConfigurationManagerListener.class);
+    registersBefore.refresh();
+    replay(registersBefore);
+    // Setup a listener to be registered after the configuration manager update. 
+    ConfigurationManagerListener registersAfter = createMock(ConfigurationManagerListener.class);
+    registersAfter.refresh();
+    replay(registersAfter);
+    configurationManager.registerListener(registersBefore);
+    configurationManager.updated(new XProperties());
+    // A listener registered before an update should be refreshed as soon as the ConfigurationManager is updated. 
+    verify(registersBefore);
+    configurationManager.registerListener(registersAfter);
+    // A listener registered after the update should be refreshed as soon as it is registered.
+    verify(registersAfter);
   }
 }
