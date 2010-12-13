@@ -8,14 +8,15 @@
 
     <link rel="shortcut icon" href="img/favicon.ico">
 
+
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.6.custom.css">
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-orange-custom.css">
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/player-multi-hybrid.css" />
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/player-multi-hybrid-icons.css" />
     <link rel="stylesheet" type="text/css" href="css/shared.css" />
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/opencast-reset.css" />
     <link rel="stylesheet" type="text/css" href="jquery/plugins/jwysiwyg/jquery.wysiwyg.css"  />
     <link rel="stylesheet" type="text/css" href="css/oc.segments.css">
-    <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.6.custom.css">
-    <link rel="stylesheet" type="text/css" href="css/jquery-ui-orange-custom.css">
     <style type="text/css">
       	.scroll {height: 100px; overflow: scroll;}
       	#oc_slidetext-left tr:hover {
@@ -76,52 +77,9 @@
 
         if(parseQueryString(window.location.search.substring(1)).embed) {
           $('#oc_title-bar').hide();
-          $('#oc_embed').hide();
           $('#oc_btn-embed').hide();
           $('#oc_slidetext').addClass('scroll');
         }
-        /* initalise embed buttons */
-        $( "#oc_embed-icon-one, #oc_embed-icon-two, #oc_embed-icon-three, #oc_embed-icon-four, #oc_embed-icon-five", "#oc_embed-left" ).button();
-        /* initalise search button */
-        $( "#oc_btn-search", "#oc_search" ).button();
-        /* initalise share button
-        $( "#oc_share-button, #oc_shortcut-button", "#oc_player-head-right" ).button(); */
-        /* initalise share button */
-        $( "#oc_btn-cc", "#oc_video-time" ).button();
-
-        /* initalise closed tabs */
-        $("#oc_ui_tabs").tabs({ selected: -1});
-        $("#oc_ui_tabs").tabs( "option", "collapsible", true );
-        /* handle select event for each tab */
-        $("#oc_ui_tabs").tabs({
-            select: function(event, ui)
-            {
-              switch(ui.index)
-              {
-                case 0: Opencast.Description.doToggleDescription(); break;
-                case 1: Opencast.segments.doToggleSlides(); break;
-                case 2: Opencast.segments_text.doToggleSegmentsText(); break;
-                case 3: Opencast.search.showSearch(); break;
-              }
-            }
-        });
-        // Set the Search-Tab to the right Side
-        $("#oc_ui_tabs .ui-tabs-nav li").last().css('float', 'right');
-        //bind click functions
-        $('#oc_time-chooser-layer').hide();
-        $('#oc_share-layer').hide();
-        $('#oc_share-button').click(function(e) { Opencast.Player.doToggleShare(e); });
-        $('#oc_btn-email').click(function() { Opencast.Player.doToggleShare(); });
-        $('#oc_time-chooser').click(function() { Opencast.Player.doToggleTimeLayer(); });
-        $('#oc_checkbox-statistics').click(function() { Opencast.Analytics.doToggleAnalytics();});
-        $('#oc_checkbox-annotations').click(function() { Opencast.Annotation_Chapter.doToggleAnnotation_Chapter();});
-        //bind click events to show dialog
-        $('#oc_shortcuts').dialog({ autoOpen: false, width: 600});
-        $('#oc_shortcut-button').click(function(e) {Opencast.Player.doToggleShortcuts(e, 'oc_shortcut-button');});
-        $('#oc_embed').dialog({ autoOpen: false, width: 800});
-        $('#oc_btn-embed').click(function() {Opencast.Player.doToggleEmbed();});
-        $('#oc_series').hide();
-        $('#oc_see-more-button').click(function(e) {Opencast.Series.doToggleSeriesDropdown()});
       });
     </script>
   </head>
@@ -244,7 +202,7 @@
 
   <div id="oc_ui_tabs">
       <div id="oc_tabs" class="oc_tabs-input">
-        <ul>
+        <ul id="oc_tabs-head">
           <li><a href="#oc_description" id="oc_btn-description" class="oc_btn-tabs handcursor" title="Description" aria-role="button">Description</a></li>
           <li><a href="#oc_slides" id="oc_btn-slides" class="oc_btn-tabs handcursor" title="Segments" aria-role="button">Segments</a></li>
           <li><a href="#oc_slidetext" id="oc_btn-slidetext" class="oc_btn-tabs handcursor" title="Segment Text" aria-role="button">Segment Text</a></li>
@@ -302,20 +260,20 @@
         <div id="oc_client_shortcuts"></div>
   </div>
   <!-- #share-button-layer dialog -->
-  <div id="oc_share-layer" class="ui-widget ui-widget-content ui-corner-all oc_popuplayer ui-state-hover" title="share this Video" tabindex="-1" role="dialog" aria-hidden="true">
+  <div id="oc_share-layer" class="ui-widget ui-widget-content ui-corner-all oc_popuplayer ui-helper-hidden" title="share this Video" tabindex="-1" role="dialog" aria-hidden="true">
     <ul id="oc_share-list" class="oc_popuplayer-list">
       <li><a href="javascript: " id="oc_btn-embed" class="handcursor" title="Embed" role="button">Embed</a></li>
       <li><a href="javascript: " id="oc_btn-email" class="handcursor" title="Email" role="button">Email</a></li>
-      <li class="ui-helper-hidden-accessible"><a href="javascript: " id="oc_btn-leave-hare" onclick="Opencast.Player.doToggleShare();" class="handcursor" title="Leave share dialog" role="button">Leave share dialog</a></li>
     </ul>
+    <button id="oc_btn-leave-session-time" class="oc_btn-close">Leave embed dialog</button>
   </div>
   <!-- #time-chooser-layer dialog -->
-  <div id="oc_time-chooser-layer" class="ui-widget ui-widget-content ui-corner-all oc_popuplayer ui-state-hover ui-helper-hidden" title="change player time/ session time" tabindex="-1" role="dialog" aria-hidden="true" >
+  <div id="oc_time-chooser-layer" class="ui-widget ui-widget-content ui-corner-all oc_popuplayer ui-helper-hidden" title="change player time/ session time" tabindex="-1" role="dialog" aria-hidden="true" >
     <ul id="oc_time-chooser-list" class="oc_popuplayer-list">
       <li><a href="javascript: " id="oc_btn-player-time" onclick="Opencast.Player.doToggleTimeLayer();" class="handcursor" title="View player time" role="button">View player time</a></li>
       <li><a href="javascript: " id="oc_btn-session-time" onclick="Opencast.Player.doToggleTimeLayer();" class="handcursor" title="View session time" role="button">View session time</a></li>
-      <li class="ui-helper-hidden-accessible"><a href="javascript: " id="oc_btn-leave-session-time" onclick="Opencast.Player.doToggleTimeLayer();" class="handcursor" title="Leave time dialog" role="button">Leave time dialog</a></li>
     </ul>
+    <button id="oc_btn-leave-session-time" class="oc_btn-close">Leave time dialog</button>
   </div>
   <!-- Embed Dialog -->
   <div id="oc_embed" title="Embed">
@@ -328,10 +286,10 @@
      </div>
    <div id="oc_embed-right">
       <div id="oc_embed-custom-title">Custom Size:</div>
-      <input id="oc_costum-width" type="text" value="width:" disabled></input>
+      <label for="oc_embed-costum-width-textinput" class="handcursor">width:</label>
       <input id="oc_embed-costum-width-textinput" maxlength="4" type="text" name="Costum width min 300px" alt="Costum width min 300px" title="Costum width min 300px" value=""></input>
       <div class="clear"></div>
-      <input id="oc_costum-height" type="text" value="height:" disabled></input>
+      <label for="oc_embed-costum-height-textinput" class="handcursor">height:</label>
       <input id="oc_embed-costum-height-textinput" maxlength="4" type="text" name="" alt="" title="" value=""></input>
       <a href="javascript: " id="oc_btn-leave-session-time" onclick="$('#oc_embed').dialog('close');" class="handcursor ui-helper-hidden-accessible" title="Leave embed dialog" role="button">Leave embed dialog</a>
     </div>
