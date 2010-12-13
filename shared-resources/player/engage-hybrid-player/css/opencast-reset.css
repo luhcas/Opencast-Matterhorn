@@ -41,7 +41,6 @@ h1 {
 h2 {
     /*16px via YUI Fonts CSS foundation*/
     font-size:123.1%; 
-    color: #2D8F8B;
 }
 h3 {
     /*14px via YUI Fonts CSS foundation*/
@@ -117,12 +116,12 @@ input {
 
 div input:focus
 {
-	outline: 2px solid #FA6E23;
+	outline: none;
 }
 
 span:focus
 {
-	outline: 2px solid #FA6E23;
+	outline: none;
 }
 
 

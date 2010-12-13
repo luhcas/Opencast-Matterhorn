@@ -32,6 +32,8 @@ text-decoration: none;
 a:hover {
 text-decoration: underline;
 }
+
+
 #oc_title-bar
 {
   min-width:                760px;
@@ -158,11 +160,12 @@ color: #000;
 }
 #oc_body {
   margin-bottom: 30px;
+  padding: 0;
 }
 
 #oc_ui_tabs
 {
-  margin-top: 5px;
+  margin-top: 45px;
   margin-bottom: 5px;
 }
 
@@ -212,6 +215,7 @@ color: #000;
   border:                   1px solid #000;
   color:                    #FFF;
   padding:                  5px;
+  text-align:               center;
 }
 
 .oc_current-time-hide
@@ -226,6 +230,7 @@ color: #000;
   border:                   1px solid #000;
   color:                    #000;
   padding:                  5px;
+  text-align:               center;
 }
 
 .oc_edit-time-error
@@ -372,11 +377,12 @@ color: #000;
   height:                   33px;
 }
 
-.oc_tabs
+#oc_tabs-head
 {
-  float:                    left;
+  margin-top: -42px;
+  border: none;
+  background: transparent;
 }
-
 #oc_tabs-search
 {
   float:                    right;
@@ -869,6 +875,13 @@ option:hover
   margin-left:              10px;
   width:                    25%;
 }
+#oc_embed-right label
+{
+  display: block;
+  width: 50px;
+  float: left;
+
+}
 #oc_costum-width
 {
   flaot:                    left;
@@ -908,7 +921,6 @@ option:hover
 
 #oc_embed-custom-title
 {
-  text-align:               center;
   margin-bottom:            4px;
 }
 

@@ -460,7 +460,7 @@ Opencast.Initialize = (function ()
             $('#oc_ui_tabs').tabs('selected' , -1);
             $(".ui-tabs-selected").removeClass("ui-state-active").removeClass("ui-tabs-selected");
         });
-        
+
         $('#oc_btn-rewind').mousedown(function ()
         {
             if (!locked)
@@ -616,6 +616,54 @@ Opencast.Initialize = (function ()
             }
         	$('#oc_embed-costum-height-textinput').css('background-color','#ffffff');
         });
+
+        /* initalise embed buttons */
+        $( "#oc_embed-icon-one, #oc_embed-icon-two, #oc_embed-icon-three, #oc_embed-icon-four, #oc_embed-icon-five", "#oc_embed-left" ).button();
+        /* initalise search button */
+        $( "#oc_btn-search", "#oc_search" ).button();
+        /* initalise share button
+        $( "#oc_share-button, #oc_shortcut-button", "#oc_player-head-right" ).button(); */
+        /* initalise share button */
+        $( "#oc_btn-cc", "#oc_video-time" ).button();
+
+        $('#oc_btn-leave-share, #oc_btn-leave-session-time').button({
+          icons: { primary: 'ui-icon-close'},
+          text: false
+          });
+        $('#oc_btn-leave-share, #oc_btn-leave-session-time').click(function() {
+          Opencast.Player.doToggleShare();
+        });
+
+
+        /* initalise closed tabs */
+        $("#oc_ui_tabs").tabs({ selected: -1});
+        $("#oc_ui_tabs").tabs( "option", "collapsible", true );
+        /* handle select event for each tab */
+        $("#oc_ui_tabs").tabs({
+            select: function(event, ui)
+            {
+              switch(ui.index)
+              {
+                case 0: Opencast.Description.doToggleDescription(); break;
+                case 1: Opencast.Player.doToggleSlides(); break;
+                case 2: Opencast.Player.doToggleSlideText(); break;
+              }
+            }
+        });
+        $("#oc_ui_tabs .ui-tabs-nav li").last().css('float', 'right');
+        //bind click functions
+        $('#oc_share-button').click(function(e) { Opencast.Player.doToggleShare(e); });
+        $('#oc_btn-email').click(function() { Opencast.Player.doToggleShare(); });
+        $('#oc_time-chooser').click(function() { Opencast.Player.doToggleTimeLayer(); });
+        $('#oc_checkbox-statistics').click(function() { Opencast.Analytics.doToggleAnalytics();});
+        $('#oc_checkbox-annotations').click(function() { Opencast.Annotation_Chapter.doToggleAnnotation_Chapter();});
+        //bind click events to show dialog
+        $('#oc_shortcuts').dialog({ autoOpen: false, width: 600});
+        $('#oc_shortcut-button').click(function(e) {Opencast.Player.doToggleShortcuts(e, 'oc_shortcut-button');});
+        $('#oc_embed').dialog({ autoOpen: false, width: 800});
+        $('#oc_btn-embed').click(function() {Opencast.Player.doToggleEmbed();});
+        $('#oc_series').hide();
+        $('#oc_see-more-button').click(function(e) {Opencast.Series.doToggleSeriesDropdown()});
 
 
         onPlayerReadyListener();
@@ -1026,6 +1074,7 @@ Opencast.Initialize = (function ()
     	});
       $('.oc_embed-icon').click(function() {
         $('#oc_embed-textarea').select();
+        $(this).removeClass('ui-state-focus');
         });
 
     	var embedCustomMinHeight = Math.round(MINWIDTH / getMaxFormat()) + OTHERDIVHEIGHT;
