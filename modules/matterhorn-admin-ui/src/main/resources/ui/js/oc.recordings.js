@@ -2,18 +2,25 @@ var ocRecordings = ocRecordings || {};
 
 Recordings = new (function() {
 
-  var WORKFLOW_LIST_URL = '../workflow/rest/instances.json';
-  var WORKFLOW_INSTANCE_URL = '';
-  var WORKFLOW_STATISTICS_URL = '';
+  var WORKFLOW_LIST_URL = '../workflow/rest/instances.json';          // URL of workflow instances list endpoint
+  var WORKFLOW_INSTANCE_URL = '';                                     // URL of workflow instance endpoint
+  var WORKFLOW_STATISTICS_URL = '../workflow/rest/statistics.json';   // URL of workflow instances statistics endpoint
+
+  var STATISTICS_DELAY = 3000;     // time interval for statistics update
 
   // components
   this.searchbox = null;
   this.pager = null;
 
-  var refreshing = false;
+  this.data = null;     // currently displayed recording data
+  this.statistics = null;
 
-  this.data = null;
+  var refreshing = false;      // indicates if JSONP requesting recording data is in progress
+  this.refreshingStats = false; // indicates if JSONP requesting statistics data is in progress
 
+  /** Executed when directly when script is loaded: parses url parameters and
+   *  returns the configuration object.
+   */
   this.Configuration = new (function() {
 
     // default configuartion
@@ -41,6 +48,8 @@ Recordings = new (function() {
     return this;
   })();
 
+  /** Initiate new JSONP call to workflow instances list endpoint
+   */
   function refresh() {
     if (!refreshing) {
       refreshing = true;
@@ -50,6 +59,7 @@ Recordings = new (function() {
       var state = Recordings.Configuration.state;
       if (state == 'upcoming') {
         params.push('state=paused');
+        params.push('state=running');
         params.push('op=schedule');
       }
       else if (state == 'capturing') {
@@ -74,14 +84,107 @@ Recordings = new (function() {
       else if (state == 'failed') {
         params.push('state=failed');
       }
-      params.push('jsonp=Recordings.render');
+      params.push('jsonp=?');
       var url = WORKFLOW_LIST_URL + '?' + params.join('&');
-      $('<script></script>').attr('src', url).appendTo('head');
+      $.ajax(
+      {
+        url: url,
+        dataType: 'jsonp',
+        jsonp: 'jsonp',
+        success: function (data)
+        {
+          Recordings.render(data);
+        }
+      });
     }
   }
 
+  function refreshStatistics() {
+    if (!Recordings.refreshingStats) {
+      Recordings.refreshingStats = true;
+      $.ajax(
+      {
+        url: WORKFLOW_STATISTICS_URL,
+        dataType: 'jsonp',
+        jsonp: 'jsonp',
+        success: Recordings.updateStatistics
+      });
+    }
+  }
+
+  /** JSPON callback for statistics data requests. Translate numbers delivered
+   *   by the statistics endpoint:
+   *
+   *  - upcoming : definition=scheduling, state=running + state=paused + state=instantiated
+   *  - capturing: definition=capturing, state=running
+   *  - processing: definition:all other than scheduling,capture, state=running
+   *  - finished: definition:all other than scheduling,capture, state=succeeded
+   *  - on hold: definition:all other than scheduling,capture, state=paused
+   *  - failed: from summary -> failed  (assuming that scheduling goes into
+   *      FAILED when recording was not started, capture goes into FAILED when
+   *      the capture error occured etc.)
+   *  - all: sum of the above
+   */
+  this.updateStatistics = function(data) {
+    Recordings.refreshingStats = false;
+    var stats = {
+      all: 0,
+      upcoming:0,
+      capturing:0,
+      processing:0,
+      finished:0,
+      hold:0,
+      failed:0
+    };
+
+    if (data.statistics.definitions.definition !== undefined) {
+      if ($.isArray(data.statistics.definitions.definition)) {
+        $.each(data.statistics.definitions.definition, function(index, definition) {
+          addStatistics(definition, stats)
+        });
+      } else {
+        addStatistics(data.statistics.definitions.definition, stats);
+      }
+    }
+    
+    stats.all = stats.upcoming + stats.capturing + stats.processing + stats.finished + stats.failed + stats.hold;
+    if (Recordings.statistics != null
+      && Recordings.statistics[Recordings.Configuration.state] != stats[Recordings.Configuration.state]) {
+      refresh();
+    }
+    Recordings.statistics = stats;
+    displayStatistics();
+  }
+
+  /** Called by updateStatistics to add the numbers form one definition statistic
+   *  to the statistics summary
+   */
+  function addStatistics(definition, stats) {
+    if (definition.id == 'scheduling') {
+      stats.upcoming = parseInt(definition.running) + parseInt(definition.paused) + parseInt(definition.instantiated);
+    } else if (definition.id == 'capture') {
+      stats.capturing = parseInt(definition.running);
+    } else {
+      stats.processing += parseInt(definition.running);
+      stats.finished += parseInt(definition.finished);
+      stats.hold += parseInt(definition.paused);
+      stats.failed += parseInt(definition.failed) + parseInt(definition.failing);
+    }
+  }
+
+  function displayStatistics() {
+    $.each(Recordings.statistics, function(key, value) {
+      $('#stats-' + key).text(' (' + value + ')');
+    });
+  }
+
+  /** Make an object representing a row in the recording table from a workflow
+   *  instance object delivered by the workflow endpoint
+   *
+   *  TODO make this a constructor
+   */
   function makeRecording(wf) {
-    var rec = {       // TODO create prototype so we can write : new Rec() or sth. here
+    var rec = {       // TODO create prototype so we can write : new Rec()
       id: '',
       title: '',
       creators : [],
@@ -146,13 +249,16 @@ Recordings = new (function() {
     return rec;
   }
 
+  /** Prepare data delivered by workflow instances list endpoint for template
+   *  rendering.
+   */
   function makeRenderData(data) {
     var tdata = {
       recording:[]
     };
     if (data.workflows.workflow) {
       if (data.workflows.workflow instanceof Array) {
-        for (i in data.workflows.workflow) {
+        for (var i in data.workflows.workflow) {
           tdata.recording.push(makeRecording(data.workflows.workflow[i]));
         }
       } else {
@@ -162,9 +268,14 @@ Recordings = new (function() {
     return tdata;
   }
 
+  /** JSONP callback for calls to the workflow instances list endpoint.
+   */
   this.render = function(data) {
+    refreshing = false;
     $('#tableContainer').empty();
     $.tmpl( "table-all", makeRenderData(data) ).appendTo( "#tableContainer" );
+
+    // When table is ready, attach event handlers to its children
     $('#recordingsTable th')
     .mouseenter( function() {
       $(this).addClass('ui-state-hover');
@@ -192,6 +303,8 @@ Recordings = new (function() {
     })
   }
 
+  /** Make the page reload with the currently set configuration
+   */
   this.reload = function() {
     var url = document.location.href.split('?', 2)[0];
     var pa = [];
@@ -268,14 +381,16 @@ Recordings = new (function() {
     });
 
     // set up config dialog
+    // FIXME doesn work really good (components look strange, size of dialog doesn't fit content
     $('#pageSize').spinner();
     $('#autoUpdate').button();
     $('#updateInterval').spinner();
 
     // set up statistics update
+    refreshStatistics();
+    window.setInterval(refreshStatistics, STATISTICS_DELAY);
 
-
-    refresh();
+    refresh();    // load and render data for currently set configuration
 
   };
   
@@ -302,10 +417,7 @@ Recordings = new (function() {
   return this;
 })();
 
-
-
-
-// Useful stuff
+// Useful stuff that is called from JSONP callbacks / within table templates
 RenderUtils = new (function() {
 
   this.makeList = function(a) {
