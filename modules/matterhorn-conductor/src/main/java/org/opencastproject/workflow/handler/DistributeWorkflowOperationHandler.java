@@ -68,19 +68,23 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
 
   static {
     CONFIG_OPTIONS = new TreeMap<String, String>();
-    CONFIG_OPTIONS.put("source-tags","Distribute any mediapackage elements with one of these (whitespace separated) tags");
-    CONFIG_OPTIONS.put("target-tags","Apple these (whitespace separated) tags to any mediapackage elements produced as a result of distribution");
+    CONFIG_OPTIONS.put("source-tags",
+            "Distribute any mediapackage elements with one of these (whitespace separated) tags");
+    CONFIG_OPTIONS
+            .put("target-tags",
+                    "Apple these (whitespace separated) tags to any mediapackage elements produced as a result of distribution");
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
    */
   @Override
   public SortedMap<String, String> getConfigurationOptions() {
     return CONFIG_OPTIONS;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -104,7 +108,8 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
       // Look for elements matching any tag
       Set<String> elementIds = new HashSet<String>();
       for (String tag : asList(sourceTags)) {
-        if(StringUtils.trimToNull(tag) == null) continue;
+        if (StringUtils.trimToNull(tag) == null)
+          continue;
         MediaPackageElement[] elts = mediaPackage.getElementsByTag(tag);
         for (MediaPackageElement e : elts) {
           if (elementIds.add(e.getIdentifier())) {
@@ -114,29 +119,36 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
       }
 
       // Also distribute all of the metadata catalogs
-      for(Catalog c : mediaPackage.getCatalogs()) elementIds.add(c.getIdentifier());
-      
+      for (Catalog c : mediaPackage.getCatalogs())
+        elementIds.add(c.getIdentifier());
+
       // Finally, push the elements to the distribution channel
       List<String> targetTagList = asList(targetTags);
-      
+
       try {
-        for(String elementId : elementIds) {
+        for (String elementId : elementIds) {
           MediaPackageElement element = mediaPackage.getElementById(elementId);
-          if(element == null) throw new WorkflowOperationException("Unable to find element " + elementId);
+          if (element == null)
+            throw new WorkflowOperationException("Unable to find element " + elementId);
           Job job = distributionService.distribute(mediaPackage.getIdentifier().compact(), element, true);
-          if(job == null || ! Job.Status.FINISHED.equals(job.getStatus())) {
+          if (job == null || !Job.Status.FINISHED.equals(job.getStatus())) {
             throw new WorkflowOperationException("Distribution job " + job + " did not complete successfully");
           }
           
+          // If there is no payload, then the item has not been distributed.
+          if (job.getPayload() == null) {
+            continue;
+          }
+
           MediaPackageElement newElement = null;
           try {
             newElement = AbstractMediaPackageElement.getFromXml(job.getPayload());
-          } catch(MediaPackageException e) {
+          } catch (MediaPackageException e) {
             throw new WorkflowOperationException(e);
           }
           // If the job finished successfully, but returned no new element, the channel simply doesn't support this
-          // kind of element.  So we just keep on looping.
-          if(newElement == null) {
+          // kind of element. So we just keep on looping.
+          if (newElement == null) {
             continue;
           }
           newElement.setIdentifier(null);
@@ -152,15 +164,16 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
             }
           }
 
-          for(String tag : targetTagList) {
-            if(StringUtils.trimToNull(tag) == null) continue;
+          for (String tag : targetTagList) {
+            if (StringUtils.trimToNull(tag) == null)
+              continue;
             newElement.addTag(tag);
           }
         }
-      } catch(DistributionException e) {
+      } catch (DistributionException e) {
         throw new WorkflowOperationException(e);
       }
-      
+
       logger.debug("Distribute operation completed");
     } catch (RuntimeException e) {
       throw new WorkflowOperationException(e);

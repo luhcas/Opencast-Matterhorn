@@ -100,9 +100,9 @@ public class DistributeWorkflowOperationHandlerTest {
     // Mock up a job
     Job job = EasyMock.createNiceMock(Job.class);
     EasyMock.expect(job.getStatus()).andReturn(Job.Status.FINISHED).anyTimes();
-    EasyMock.expect(job.getPayload()).andReturn(catalog1.getAsXml());
-    EasyMock.expect(job.getPayload()).andReturn(catalog2.getAsXml());
-    EasyMock.expect(job.getPayload()).andReturn(attachment1.getAsXml());
+    EasyMock.expect(job.getPayload()).andReturn(catalog1.getAsXml()).times(2);
+    EasyMock.expect(job.getPayload()).andReturn(catalog2.getAsXml()).times(2);
+    EasyMock.expect(job.getPayload()).andReturn(attachment1.getAsXml()).times(2);
     EasyMock.replay(job);
 
     service = EasyMock.createNiceMock(DistributionService.class);
@@ -131,9 +131,9 @@ public class DistributeWorkflowOperationHandlerTest {
     // Mock up a job
     Job job = EasyMock.createNiceMock(Job.class);
     EasyMock.expect(job.getStatus()).andReturn(Job.Status.FINISHED).anyTimes();
-    EasyMock.expect(job.getPayload()).andReturn(catalog1.getAsXml());
-    EasyMock.expect(job.getPayload()).andReturn(catalog2.getAsXml());
-    EasyMock.expect(job.getPayload()).andReturn(attachment1.getAsXml());
+    EasyMock.expect(job.getPayload()).andReturn(catalog1.getAsXml()).times(2);
+    EasyMock.expect(job.getPayload()).andReturn(catalog2.getAsXml()).times(2);
+    EasyMock.expect(job.getPayload()).andReturn(attachment1.getAsXml()).times(2);
     EasyMock.replay(job);
 
     service = EasyMock.createNiceMock(DistributionService.class);
