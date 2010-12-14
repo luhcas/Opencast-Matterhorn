@@ -1,11 +1,8 @@
 /*global $, Opencast*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
-
 var Opencast = Opencast || {
 };
-
 var staticBool_hide = true;
-
 /**
  * @namespace the global Opencast namespace segments_text
  */
@@ -17,17 +14,13 @@ Opencast.segments_text = (function ()
      */
     function initialize()
     {
-        $('#oc_slidetext-left').html('');
-        $('#oc_slidetext-right').html('');
-        $('#oc-segments-text').html('');
+        // Do nothing in here
     }
-
     /**
      *  variables
      */
     var mediaPackageId, SEGMENTS_TEXT = "Segment Text",
         SEGMENTS_TEXT_HIDE = "Hide Segment Text";
-
     /**
      * Returns the Input Time in Milliseconds -- TODO: put it in a utils-class
      * @param data Data in the Format ab:cd:ef
@@ -36,7 +29,6 @@ Opencast.segments_text = (function ()
     function getTimeInMilliseconds(data)
     {
         var values = data.split(':');
-
         // If the Format is correct
         if (values.length == 3)
         {
@@ -64,21 +56,24 @@ Opencast.segments_text = (function ()
             return 0;
         }
     }
-    
+
     function showSegmentsText(searchValue)
     {
         // Hide other Tabs
         Opencast.Description.hideDescription();
         Opencast.segments.hideSegments();
         Opencast.search.hideSearch();
-
         $('#oc_btn-slidetext').attr(
         {
             title: SEGMENTS_TEXT_HIDE
         });
         $('#oc_btn-slidetext').html(SEGMENTS_TEXT_HIDE);
         $("#oc_btn-slidetext").attr('aria-pressed', 'true');
-
+        // Show a loading Image
+        $('#oc_slidetext').show();
+        $('#segments_text-loading').show();
+        $('#oc-segments_text').hide();
+        $('.oc-segments-preview').css('display', 'block');
         // Request JSONP data
         $.ajax(
         {
@@ -90,12 +85,10 @@ Opencast.segments_text = (function ()
             {
                 // get rid of every '@' in the JSON data
                 // data = $.parseJSON(JSON.stringify(data).replace(/@/g, ''));
-
                 data['search-results'].result.segments.currentTime = getTimeInMilliseconds(Opencast.Player.getCurrentTime());
-                
                 // Set Duration until this Segment ends
                 var completeDuration = 0;
-                $.each(data['search-results'].result.segments.segment, function(i, value)
+                $.each(data['search-results'].result.segments.segment, function (i, value)
                 {
                     // Set a Duration until the Beginning of this Segment
                     data['search-results'].result.segments.segment[i].durationExcludingSegment = completeDuration;
@@ -103,13 +96,18 @@ Opencast.segments_text = (function ()
                     // Set a Duration until the End of this Segment
                     data['search-results'].result.segments.segment[i].durationIncludingSegment = completeDuration;
                 });
-
                 // Create Trimpath Template
-                Opencast.segments_text_Plugin.addAsPlugin($('div#oc_slidetext-left'), data['search-results'].result.segments);
-
+                Opencast.segments_text_Plugin.addAsPlugin($('#oc-segments_text'), data['search-results'].result.segments);
                 // Make visible
                 $('#oc_slidetext').show();
+                $('#segments_text-loading').hide();
+                $('#oc-segments_text').show();
                 $('.oc-segments-preview').css('display', 'block');
+            },
+            error: function (xhr, ajaxOptions, thrownError)
+            {
+                $('#oc-segments_text').html('No Segment Text available');
+                $('#oc-segments_text').hide();            
             }
         });
     }
@@ -138,7 +136,6 @@ Opencast.segments_text = (function ()
             hideSegmentsText();
         }
     }
-
     /**
      * @memberOf Opencast.segments_text
      * @description Set the mediaPackageId
@@ -148,7 +145,6 @@ Opencast.segments_text = (function ()
     {
         mediaPackageId = id;
     }
-
     return {
         initialize: initialize,
         showSegmentsText: showSegmentsText,

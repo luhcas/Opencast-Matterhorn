@@ -1,9 +1,7 @@
 /*global $, Opencast*/
 /*jslint browser: true, white: true, undef: true, nomen: true, eqeqeq: true, plusplus: true, bitwise: true, newcap: true, immed: true, onevar: false */
-
 var Opencast = Opencast || {
 };
-
 /**
  * @namespace the global Opencast namespace segments
  */
@@ -13,7 +11,6 @@ Opencast.segments = (function ()
         currentSlide = 0,
         nextSlide = 0,
         slideLength = 0;
-
     var segmentPreviews;
 
     function getSegmentPreview(segmentId)
@@ -40,30 +37,23 @@ Opencast.segments = (function ()
     {
         slideLength = length;
     }
-
     /**
      * @memberOf Opencast.segments
      * @description Initializes the segments view
      */
     function initialize()
     {
-
         totalPanels = $(".scrollContainer").children().size();
-
         var $panels = $('#slider .scrollContainer > div');
         var $container = $('#slider .scrollContainer');
-
         if ($panels !== undefined)
         {
-
             $panels.css(
             {
                 'float': 'left',
                 'position': 'relative'
             });
-
             $("#slider").data("currentlyMoving", false);
-
             if ($panels[0] !== undefined)
             {
                 $container.css('width', ($panels[0].offsetWidth * $panels.length)).css('left', "0px");
@@ -85,10 +75,8 @@ Opencast.segments = (function ()
                         disabled: [1, 2]
                     });
                 }
-
             }
             var scroll = $('#slider .scroll').css('overflow', 'hidden');
-
             //when the left/right arrows are clicked
             $(".right").click(function ()
             {
@@ -99,7 +87,6 @@ Opencast.segments = (function ()
                 change(false);
             });
         }
-
         var segmentTimes = new Array();
         var seconds;
         $('.segments-time').each(function (i)
@@ -107,7 +94,6 @@ Opencast.segments = (function ()
             seconds = $(this).html();
             segmentTimes[i] = seconds;
         });
-
         segmentPreviews = new Array();
         var url;
         $('.oc-segments-preview').each(function (i)
@@ -115,13 +101,9 @@ Opencast.segments = (function ()
             url = $(this).html();
             segmentPreviews[i] = url;
         });
-
         // set the slide length
         setSlideLength(segmentTimes.length);
-
-
         $('#oc_video-player-controls').css('display', 'block');
-
         // Hide Slide Tab, if there are no slides
         if (segmentTimes.length === 0)
         {
@@ -129,13 +111,11 @@ Opencast.segments = (function ()
             $(".oc_btn-skip-backward").hide();
             $(".oc_btn-skip-forward").hide();
         }
-
         // set the center of the controls
         var margin = $('#oc_video-controls').width();
         var controlswith = 0;
         var playerWidth = $('#oc_video-player-controls').width();
-
-        /*
+/*
         if (Opencast.segments.getSlideLength() === 0)
         {
             controlswith = 58;
@@ -152,7 +132,6 @@ Opencast.segments = (function ()
         // set the controls visible
         $('#oc_video-player-controls').css('visibility', 'visible');
         */
-
         // player size
         if (playerWidth < 460 && playerWidth >= 380)
         {
@@ -171,35 +150,25 @@ Opencast.segments = (function ()
         {
             $(".oc_btn-skip-backward").css('display', 'none');
             $(".oc_btn-skip-forward").css('display', 'none');
-
             $(".oc_btn-rewind").css('display', 'none');
             $(".oc_btn-fast-forward").css('display', 'none');
-
             $("#oc_video-cc").css('display', 'none');
             $("#oc_video-cc").css('width', '0%');
-
             $('#simpleEdit').css('font-size', '0.8em');
             $('#simpleEdit').css('margin-left', '1px');
-
             $('#oc_current-time').css('width', '45px');
             $('#oc_edit-time').css('width', '45px');
             $('#oc_duration').css('width', '45px');
             $('#oc_edit-time-error').css('width', '45px');
-
             $('#oc_sound').css('width', '27%');
-
             $('#oc_video-controls').css('width', '8%');
-
             $('#oc_video-time').css('width', '48%');
-
             $('.oc_slider-volume-Rail').css('width', '45px');
-
             controlswith = 16;
             margin = $('#oc_video-controls').width();
             margin = ((margin - controlswith) / 2) - 8;
             $("#oc_btn-play-pause").css("margin-left", margin + "px");
         }
-
         $(document).everyTime(500, function (index)
         {
             var currentPosition = parseInt(Opencast.Player.getCurrentPosition());
@@ -207,7 +176,6 @@ Opencast.segments = (function ()
             var cur = 0;
             var ibefore = 0;
             var lastIndex;
-
             // last segment
             if (segmentTimes[segmentTimes.length - 1] <= currentPosition)
             {
@@ -223,13 +191,10 @@ Opencast.segments = (function ()
                 for (i in segmentTimes)
                 {
                     cur = segmentTimes[i];
-
                     if (last <= currentPosition && currentPosition < cur)
                     {
-
                         if (last <= currentPosition && currentPosition < parseInt(last) + 3) lastIndex = 2;
                         else lastIndex = 1;
-
                         ibefore = Math.max(parseInt(i) - lastIndex, 0);
                         beforeSlide = segmentTimes[ibefore];
                         currentSlide = last;
@@ -241,7 +206,6 @@ Opencast.segments = (function ()
             }
         }, 0);
     }
-
     /**
      * @memberOf Opencast.segments
      * @description Sets scrollContainer width
@@ -255,7 +219,6 @@ Opencast.segments = (function ()
             $container.css('width', ($panels[0].offsetWidth * $panels.length)).css('left', "0px");
         }
     }
-
     /**
      * @memberOf Opencast.segments
      * @description Function initializes segments view
@@ -267,20 +230,17 @@ Opencast.segments = (function ()
         var scrollContainerWidth = parseFloat($(".scrollContainer").css("width"), 10);
         var sliderWidth = parseFloat($(".scroll").css("width"), 10);
         var dif = sliderWidth - scrollContainerWidth;
-
         //if not at the first or last panel
         if ((!direction && (leftValue >= 0)) || (direction && (leftValue <= dif)))
         {
             return false;
         }
-
         //if not currently moving
         if (($("#slider").data("currentlyMoving") == false))
         {
             $("#slider").data("currentlyMoving", true);
             var maxMove = (scrollContainerWidth + leftValue) - sliderWidth;
             var movement = direction ? leftValue - Math.min(sliderWidth, maxMove) : leftValue + Math.min(sliderWidth, leftValue * (-1));
-
             $(".scrollContainer").stop().animate(
             {
                 "left": movement
@@ -290,7 +250,6 @@ Opencast.segments = (function ()
             });
         }
     }
-
     /**
      *  variables
      */
@@ -303,14 +262,19 @@ Opencast.segments = (function ()
         Opencast.Description.hideDescription();
         Opencast.segments_text.hideSegmentsText();
         Opencast.search.hideSearch();
-        
         $('#oc_btn-slides').attr(
         {
             title: SEGMENTS_HIDE
         });
         $('#oc_btn-slides').html(SEGMENTS_HIDE);
         $("#oc_btn-slides").attr('aria-pressed', 'true');
-
+        // Will be overwritten if the Template is ready
+        $('#scrollcontainer').html('<img src="img/loading.gif" />');
+        // Show a loading Image
+        $('#oc_slides').show();
+        $('#oc_slides').css('display', 'block');
+        $('#segments-loading').show();
+        $('#slider').hide();
         // Request JSONP data
         $.ajax(
         {
@@ -322,15 +286,20 @@ Opencast.segments = (function ()
             {
                 // get rid of every '@' in the JSON data
                 // data = $.parseJSON(JSON.stringify(data).replace(/@/g, ''));
-
                 // Create Trimpath Template
-                Opencast.segments_Plugin.addAsPlugin($('div#scrollcontainer'), data['search-results'].result.segments);
-
-                // Make visible
-                $('div#oc_slides').css('display', 'block');
-
+                Opencast.segments_Plugin.addAsPlugin($('#scrollcontainer'), data['search-results'].result.segments);
+                // Show a loading Image
+                $('#oc_slides').show();
+                $('#oc_slides').css('display', 'block');
+                $('#segments-loading').hide();
+                $('#slider').show();
                 // Sets slider container width after panels are displayed
                 Opencast.segments.sizeSliderContainer();
+            },
+            error: function (xhr, ajaxOptions, thrownError)
+            {
+                $('#scrollcontainer').html('No Slides available');
+                $('#scrollcontainer').hide();            
             }
         });
     }
@@ -360,7 +329,6 @@ Opencast.segments = (function ()
             hideSegments();
         }
     }
-
     /**
      * @memberOf Opencast.segments
      * @description Set the mediaPackageId
@@ -370,7 +338,6 @@ Opencast.segments = (function ()
     {
         mediaPackageId = id;
     }
-
     return {
         getSegmentPreview: getSegmentPreview,
         getSecondsBeforeSlide: getSecondsBeforeSlide,

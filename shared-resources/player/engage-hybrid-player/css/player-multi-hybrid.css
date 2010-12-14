@@ -74,11 +74,9 @@ text-decoration: underline;
   padding: 3px 5px;
 }
 
-#oc_search-lect
+#oc_search-segment
 {
-  float: left;
-  margin: 25px 5px 5px;
-  padding: 3px 5px;
+  padding: 1em 1.4em;
 }
 
 .oc_search-Field
@@ -580,17 +578,6 @@ option:hover
   width:                    95%;
   overflow:                 auto;
   margin-top:               5px;
-}
-
-.oc_slidetext-left
-{
-  float:                    left;
-  width:                    75%;
-}
-
-.oc_slidetext-right
-{
-  float:                    right
 }
 
 .oc_DisplayNone
