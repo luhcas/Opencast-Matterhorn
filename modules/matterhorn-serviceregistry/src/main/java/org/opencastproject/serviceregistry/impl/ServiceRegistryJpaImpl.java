@@ -116,14 +116,14 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
 
     // Set up persistence
     emf = persistenceProvider.createEntityManagerFactory("org.opencastproject.serviceregistry", persistenceProperties);
-    
+
     // Find this host's url
     if (cc == null || StringUtils.isBlank(cc.getBundleContext().getProperty("org.opencastproject.server.url"))) {
       hostName = UrlSupport.DEFAULT_BASE_URL;
     } else {
       hostName = cc.getBundleContext().getProperty("org.opencastproject.server.url");
     }
-    
+
     // Register this host
     try {
       if (cc == null || StringUtils.isBlank(cc.getBundleContext().getProperty(OPT_MAXLOAD))) {
@@ -192,6 +192,10 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
       if (serviceRegistration == null) {
         throw new ServiceUnavailableException("No service registration exists for type '" + type + "' on host '" + host
                 + "'");
+      }
+      if (serviceRegistration.getHostRegistration().isMaintenanceMode()) {
+        throw new ServiceUnavailableException(serviceRegistration.getHost()
+                + " is currently in maintenance mode.  Jobs may not be created on this host.");
       }
       Status status = start ? Status.RUNNING : Status.QUEUED;
       JobJpaImpl job = new JobJpaImpl(status, serviceRegistration);
@@ -788,17 +792,17 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
   class RestServiceTracker extends ServiceTracker {
     protected static final String FILTER = "(&(objectClass=javax.servlet.Servlet)("
             + RestPublisher.SERVICE_PATH_PROPERTY + "=*))";
-    
+
     protected BundleContext bundleContext = null;
 
     RestServiceTracker(BundleContext bundleContext) throws InvalidSyntaxException {
       super(bundleContext, bundleContext.createFilter(FILTER), null);
       this.bundleContext = bundleContext;
     }
-    
+
     /**
      * {@inheritDoc}
-     *
+     * 
      * @see org.osgi.util.tracker.ServiceTracker#open(boolean)
      */
     @Override
@@ -815,7 +819,7 @@ public class ServiceRegistryJpaImpl implements ServiceRegistry {
         throw new IllegalStateException("The tracker filter '" + FILTER + "' has syntax errors", e);
       }
     }
-    
+
     @Override
     public Object addingService(ServiceReference reference) {
       String serviceType = (String) reference.getProperty(RestPublisher.SERVICE_TYPE_PROPERTY);

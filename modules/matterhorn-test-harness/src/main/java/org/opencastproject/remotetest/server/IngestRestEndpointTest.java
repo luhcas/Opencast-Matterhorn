@@ -20,7 +20,6 @@ import static org.opencastproject.remotetest.Main.BASE_URL;
 import org.opencastproject.remotetest.Main;
 import org.opencastproject.remotetest.util.TrustedHttpClient;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -39,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,7 +87,6 @@ public class IngestRestEndpointTest {
           throws ClientProtocolException, IOException {
     HttpPost post = new HttpPost(BASE_URL + method);
     List<NameValuePair> formParams = new ArrayList<NameValuePair>();
-    formParams = new ArrayList<NameValuePair>();
     if(mediaFile != null) {
       URL url = getClass().getClassLoader().getResource(mediaFile);
       formParams.add(new BasicNameValuePair("url", url.toString()));
@@ -100,14 +97,8 @@ public class IngestRestEndpointTest {
     formParams.add(new BasicNameValuePair("mediaPackage", mediaPackage));
     post.setEntity(new UrlEncodedFormEntity(formParams, "UTF-8"));
     HttpResponse response = client.execute(post);
-    HttpEntity entity = response.getEntity();
-    String mp = "";
-    if (entity != null) {
-      InputStream instream = entity.getContent();
-      mp = IOUtils.toString(instream, "UTF-8");
-      // System.out.println(mp);
-    }
+    
     Assert.assertEquals(200, response.getStatusLine().getStatusCode());
-    return mp;
+    return EntityUtils.toString(response.getEntity());
   }
 }

@@ -164,7 +164,7 @@ public class ServiceRegistryEndpoint {
 
   @POST
   @Path("/maintenance")
-  public Response maintenance(@FormParam("host") String host, @FormParam("maintenance") boolean maintenance) {
+  public Response setMaintenanceMode(@FormParam("host") String host, @FormParam("maintenance") boolean maintenance) {
     try {
       serviceRegistry.setMaintenanceStatus(host, maintenance);
       return Response.status(Status.NO_CONTENT).build();
@@ -393,6 +393,17 @@ public class ServiceRegistryEndpoint {
             .NO_CONTENT("The service registration was removed."));
     unRegisterEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.WRITE, unRegisterEndpoint);
+
+    // Set maintenance mode
+    RestEndpoint maintenanceEndpoint = new RestEndpoint("maintenance", RestEndpoint.Method.POST, "/maintenance",
+            "Sets the maintenance status for a host in the cluster.");
+    maintenanceEndpoint.addRequiredParam(new Param("host", Type.STRING, serverUrl, "The host"));
+    maintenanceEndpoint.addRequiredParam(new Param("maintenance", Type.STRING, Boolean.TRUE.toString(),
+            "The maintenance status"));
+    maintenanceEndpoint.addStatus(org.opencastproject.util.doc.Status
+            .NO_CONTENT("The host's maintenance status was set"));
+    maintenanceEndpoint.setTestForm(RestTestForm.auto());
+    data.addEndpoint(RestEndpoint.Type.WRITE, maintenanceEndpoint);
 
     // count jobs
     RestEndpoint countEndpoint = new RestEndpoint("count", RestEndpoint.Method.GET, "/count",
