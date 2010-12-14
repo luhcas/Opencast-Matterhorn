@@ -30,6 +30,8 @@ rm -fr .hg*
 #[ $? -ne 0 ] && exit 1
 #cp ../io_jpeg.cc imgio
 #[ $? -ne 0 ] && exit 1
+cp ../test-pbmpng.cc imgio/tests
+[ $? -ne 0 ] && exit 1
 cp ../SConstruct.linux SConstruct
 [ $? -ne 0 ] && exit 1
 #

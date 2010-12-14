@@ -172,15 +172,26 @@ direct installation on Windows (see later on).
 4) compile for Mac
    (scripts mac-compile)
 
-Not implemented yet, but will have the same functionality as compile
+Not completed yet, but will have the same functionality as compile
 for Linux.
+
+5) compile for Mac with MacPorts
+   (scripts ports-compile)
+
+Script ports-compile either calls scripts with the same name
+or does the specific compilation and/or installation in /opt/local/...
+
+Where port from MacPorts exists, it's installed from MacPorts,
+otherwise it's compiled the same way as on Linux (see above).
+When all is successful, a file .done-ports is created so specific
+subdirectory can be skipped next time.
 
 a) do all for current platform
    (script do-all)
 
 This script, which can be used also for batch run, calls all actions
 for current platform in sequence: 0, 1, 2, 3 and 3z for Linux and
-0, 1 and 4 for Mac.
+0, 1 and 5 for Mac.
 
 At the end of compilation (approx. 45 minutes) you'll have 3rd
 party tools installed in /usr/local/bin on Linux or /opt/local/bin

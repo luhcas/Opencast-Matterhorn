@@ -38,7 +38,7 @@ import glob,os,sys,string,re
 opts = Variables('custom.py')
 opts.Add('opt', 'Compiler flags for optimization/debugging', "-g -O3")
 opts.Add('warn', 'Compiler flags for warnings', "-Wall -D__warn_unused_result__=__far__")
-opts.Add('prefix', 'The installation root for iulib', "/usr/local")
+opts.Add('prefix', 'The installation root for iulib', "/opt/local")
 
 ### globals
 env = Environment(options=opts, CXXFLAGS="${opt} ${warn}")
@@ -51,8 +51,8 @@ if re.search(r'-O[234]',env["opt"]):
 if not re.search(r'-O[234]',env["opt"]):
     print "compiling for development (slower but safer)"
 
-env.Append(CPPPATH="/usr/local/include");
-env.Append(LIBPATH="/usr/local/lib");
+env.Append(CPPPATH="/opt/local/include");
+env.Append(LIBPATH="/opt/local/lib");
 env.Append(LIBS=["tiff","jpeg","z"]);
 
 ### FIXME these libraries should be optional, and compilation should

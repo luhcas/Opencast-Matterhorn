@@ -32,6 +32,8 @@ cp ../narray.h colib
 [ $? -ne 0 ] && exit 1
 cp ../io_jpeg.cc imgio
 [ $? -ne 0 ] && exit 1
+cp ../test-pbmpng.cc imgio/tests
+[ $? -ne 0 ] && exit 1
 cp ../SConstruct.mingw SConstruct
 [ $? -ne 0 ] && exit 1
 #

@@ -1,9 +1,10 @@
 # HOME3P must already be defined
 case `uname` in
   Linux )  export LOCAL_PREFIX=/usr/local ;;
-# Darwin ) export LOCAL_PREFIX=/opt/local ;; # if compiling with MacPorts
-  Darwin ) export LOCAL_PREFIX=/usr/local ;;
+  Darwin ) export LOCAL_PREFIX=/opt/local ;; # if compiling with MacPorts
+# Darwin ) export LOCAL_PREFIX=/usr/local ;;
 esac
+export MACPORTS_SVN=http://svn.macports.org/repository/macports/trunk/dports
 export MINGW32=i686-pc-mingw32
 export MINGW32_PREFIX=/usr/i686-pc-mingw32/sys-root/mingw
 export CFLAGS=""
@@ -91,7 +92,7 @@ chksudo() {
   elif [ -z "$SUDOPWD" ]; then
     USER=`id -un`
     SUDOPWD=`getpwd "[sudo] password for $USER: "`
-    sudo -S -p "" id << EOF
+    sudo -S -p "" id << EOF > /dev/null
 $SUDOPWD
 EOF
     if [ $? -ne 0 ]; then
@@ -289,6 +290,7 @@ compile() {
     Linux-linux ) ;;
     Linux-win32 ) ;;
     MacOS-mac ) ;;
+    MacOS-ports ) ;;
     * )
       echo "Don't know how to compile $1 for \"$2\" on $OS"
       set -x

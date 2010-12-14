@@ -25,7 +25,8 @@ OLDCD=`pwd`
 #
 cd ZenLib/Project/GNU/Library
 [ $? -ne 0 ] && exit 1
-./configure
+./configure \
+--prefix=${LOCAL_PREFIX}
 [ $? -ne 0 ] && exit 1
 make
 [ $? -ne 0 ] && exit 1
@@ -34,7 +35,8 @@ cd "$OLDCD"
 #
 cd MediaInfoLib/Project/GNU/Library
 [ $? -ne 0 ] && exit 1
-./configure
+./configure \
+--prefix=${LOCAL_PREFIX}
 [ $? -ne 0 ] && exit 1
 make
 [ $? -ne 0 ] && exit 1
@@ -44,7 +46,8 @@ cd "$OLDCD"
 cd MediaInfo/Project/GNU/CLI
 [ $? -ne 0 ] && exit 1
 ./configure \
---enable-staticlibs
+--enable-staticlibs \
+--prefix=${LOCAL_PREFIX}
 [ $? -ne 0 ] && exit 1
 make
 [ $? -ne 0 ] && exit 1

@@ -6,30 +6,27 @@ set -x
 source "${HOME3P}/utilx"
 [ $? -ne 0 ] && exit 1
 #
-[ -f .done-mac ] && exit 0
-pkg=`getcfg PKG:`
-dir=`getcfg DIR:`
-[ -z "$dir" -o "$dir" = "/" ] && exit 1
+[ -f .done-ports ] && exit 0
 #
-rm -fr "$dir" "${dir}-mac"
+OLDCD=`pwd`
 [ $? -ne 0 ] && exit 1
-bzip2 -dc "$pkg" | tar -xv
-[ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
-mv "$dir" "${dir}-mac"
+cd /Users/Shared
 [ $? -ne 0 ] && exit 1
-cd "${dir}-mac"
+mkdir -p dports/textproc/tesseract
 [ $? -ne 0 ] && exit 1
-#
-patch -p0 < ../mp4v2r355.patch
+cd dports/textproc
 [ $? -ne 0 ] && exit 1
-./configure \
---prefix=${LOCAL_PREFIX}
+# http://trac.macports.org/log/trunk/dports/textproc/tesseract
+# revision 54783 is tesseract 2.04
+svn co --revision 54783 ${MACPORTS_SVN}/textproc/tesseract
 [ $? -ne 0 ] && exit 1
-make
+portindex -f /Users/Shared/dports
 [ $? -ne 0 ] && exit 1
-sudox make install
+cd "$OLDCD"
 [ $? -ne 0 ] && exit 1
 #
-touch ../.done-mac
+sudox port install tesseract @2.04 || exit 1
+#
+touch .done-ports
 [ $? -ne 0 ] && exit 1
 exit 0

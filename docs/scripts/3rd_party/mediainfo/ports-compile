@@ -6,35 +6,56 @@ set -x
 source "${HOME3P}/utilx"
 [ $? -ne 0 ] && exit 1
 #
-[ -f .done-mac ] && exit 0
+[ -f .done-ports ] && exit 0
 pkg=`getcfg PKG:`
 dir=`getcfg DIR:`
 [ -z "$dir" -o "$dir" = "/" ] && exit 1
 #
 rm -fr "$dir" "${dir}-mac"
 [ $? -ne 0 ] && exit 1
-gzip -dc "$pkg" | tar -xv
+bzip2 -dc "$pkg" | tar -xv
 [ ${PIPESTATUS[0]} -ne 0 -o ${PIPESTATUS[1]} -ne 0 ] && exit 1
 mv "$dir" "${dir}-mac"
 [ $? -ne 0 ] && exit 1
 cd "${dir}-mac"
 [ $? -ne 0 ] && exit 1
 #
-cp ../qt_sbtl_embedder.cc src
-[ $? -ne 0 ] && exit 1
-cp ../qt_sbtl_embedder.h src
+OLDCD=`pwd`
 [ $? -ne 0 ] && exit 1
 #
+cd ZenLib/Project/GNU/Library
+[ $? -ne 0 ] && exit 1
 ./configure \
---prefix=${LOCAL_PREFIX} \
-CPPFLAGS=-I${LOCAL_PREFIX}/include \
-LDFLAGS=-L${LOCAL_PREFIX}/lib
+--prefix=${LOCAL_PREFIX}
+[ $? -ne 0 ] && exit 1
+make
+[ $? -ne 0 ] && exit 1
+cd "$OLDCD"
+[ $? -ne 0 ] && exit 1
+#
+cd MediaInfoLib/Project/GNU/Library
+[ $? -ne 0 ] && exit 1
+./configure \
+--prefix=${LOCAL_PREFIX}
+[ $? -ne 0 ] && exit 1
+make
+[ $? -ne 0 ] && exit 1
+cd "$OLDCD"
+[ $? -ne 0 ] && exit 1
+#
+cd MediaInfo/Project/GNU/CLI
+[ $? -ne 0 ] && exit 1
+./configure \
+--enable-staticlibs \
+--prefix=${LOCAL_PREFIX}
 [ $? -ne 0 ] && exit 1
 make
 [ $? -ne 0 ] && exit 1
 sudox make install
 [ $? -ne 0 ] && exit 1
+cd "$OLDCD"
+[ $? -ne 0 ] && exit 1
 #
-touch ../.done-mac
+touch ../.done-ports
 [ $? -ne 0 ] && exit 1
 exit 0

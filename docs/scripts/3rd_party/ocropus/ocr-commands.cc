@@ -63,7 +63,11 @@ namespace ocropus {
     param_float maxheight("max_line_height",300,"maximum line height");
     param_float maxaspect("max_line_aspect",0.5,"maximum line aspect ratio");
 
+#if defined(__MACOS__) || defined(__MACOSX__) || defined(__MACH__)
+#define DEFAULT_DATA_DIR "/opt/local/share/ocropus/models/"
+#else
 #define DEFAULT_DATA_DIR "/usr/local/share/ocropus/models/"
+#endif
 
     param_string cmodel("cmodel",DEFAULT_DATA_DIR "default.model","character model used for recognition");
     param_string lmodel("lmodel",DEFAULT_DATA_DIR "default.fst","language model used for recognition");

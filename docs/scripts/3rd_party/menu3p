@@ -27,6 +27,7 @@ while [ true ]; do
   echo "  3) cross-compile for Windows"
   echo "  3z) create final packages for Windows"
   echo "  4) compile for Mac"
+  echo "  5) compile for Mac with MacPorts"
   echo "  a) do all for current platform"
   echo "  l) view log of last action"
   echo "  r) reset intermediate marks"
@@ -55,7 +56,7 @@ while [ true ]; do
           ERRTXT=" (success)..."
           case `os` in
             CentOS | RHEL | Ubuntu | Debian | openSUSE ) ACT=2 ;;
-            MacOS ) ACT=4 ;;
+            MacOS ) ACT=5 ;;
           esac
         fi
         ;;
@@ -106,6 +107,16 @@ while [ true ]; do
         else
           LOGFILE=`mktemp /tmp/${0##*/}-mac.log.XXXXX`
           time ./mac-compile 2>&1 | tee $LOGFILE
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+          else ERRTXT=" (success)..."; ACT=q; fi
+        fi
+        ;;
+    5 ) # compile for Mac with MacPorts
+        chksudo
+        if [ $? -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
+        else
+          LOGFILE=`mktemp /tmp/${0##*/}-ports.log.XXXXX`
+          time ./ports-compile 2>&1 | tee $LOGFILE
           if [ ${PIPESTATUS[0]} -ne 0 ]; then ERRTXT=" (FAILED)..."; ACT=l
           else ERRTXT=" (success)..."; ACT=q; fi
         fi

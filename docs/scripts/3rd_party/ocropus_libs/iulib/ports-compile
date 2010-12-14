@@ -6,7 +6,7 @@ set -x
 source "${HOME3P}/utilx"
 [ $? -ne 0 ] && exit 1
 #
-[ -f .done-mac ] && exit 0
+[ -f .done-ports ] && exit 0
 pkg=`getcfg PKG:`
 dir=`getcfg DIR:`
 [ -z "$dir" -o "$dir" = "/" ] && exit 1
@@ -32,7 +32,7 @@ rm -fr .hg*
 #[ $? -ne 0 ] && exit 1
 cp ../test-pbmpng.cc imgio/tests
 [ $? -ne 0 ] && exit 1
-cp ../SConstruct.mac SConstruct
+cp ../SConstruct.ports SConstruct
 [ $? -ne 0 ] && exit 1
 #
 #  make all = scons
@@ -51,6 +51,6 @@ scons --debug=findlibs
 sudox scons install
 [ $? -ne 0 ] && exit 1
 #
-touch ../.done-mac
+touch ../.done-ports
 [ $? -ne 0 ] && exit 1
 exit 0

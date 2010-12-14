@@ -59,11 +59,11 @@ install_prog() {
           if [ ! -s "$rpms" ]; then
             copypkg "$rpms"
             if [ $? -ne 0 ]; then
-              if [ ! -s ../wget.class ]; then
-                javac -d .. ../wget.java
+              if [ ! -s wget.class ]; then
+                javac -d . ../wget.java
                 [ $? -ne 0 ] && return 1
               fi
-              java ../wget "$URL/$rpms" > "$rpms"
+              java wget "$URL/$rpms" > "$rpms"
               [ $? -ne 0 ] && return 1
             fi
           fi
@@ -213,11 +213,11 @@ install_macports() {
   if [ ! -s "$dmg" ]; then
     copypkg "$dmg"
     if [ $? -ne 0 ]; then
-      if [ ! -s ../wget.class ]; then
-        javac -d .. ../wget.java
+      if [ ! -s wget.class ]; then
+        javac -d . ../wget.java
         [ $? -ne 0 ] && return 1
       fi
-      java ../wget "$URL/$dmg" > "$dmg"
+      java wget "$URL/$dmg" > "$dmg"
       [ $? -ne 0 ] && return 1
     fi
   fi
@@ -225,9 +225,61 @@ install_macports() {
   sudox hdiutil attach "$dmg"
   [ $? -ne 0 ] && return 1
   # mounted to /Volumes/MacPorts-1.9.2
-  sudox installer -pkg /Volumes/MacPorts-1.9.2/MacPorts-1.9.2.pkg -target /
+  sudox installer -pkg "/Volumes/MacPorts-1.9.2/MacPorts-1.9.2.pkg" -target /
   [ $? -ne 0 ] && return 1
-  sudox hdiutil detach /Volumes/MacPorts-1.9.2
+  # installed to /opt/local/bin/port
+  sudox hdiutil detach "/Volumes/MacPorts-1.9.2"
+  [ $? -ne 0 ] && return 1
+# sudox port -v selfupdate
+# [ $? -ne 0 -a $? -ne 25 ] && return 1
+  return 0
+}
+#
+install_git() {
+  cd "$HOME3P"
+  [ $? -ne 0 ] && return 1
+  mkdir -p packages
+  [ $? -ne 0 ] && return 1
+  cd packages
+  [ $? -ne 0 ] && return 1
+  #
+  URL=http://git-osx-installer.googlecode.com/files
+  dmg=git-1.6.5.1-UNIVERSALbinary-leopard.dmg
+  if [ ! -s "$dmg" ]; then
+    copypkg "$dmg"
+    if [ $? -ne 0 ]; then
+      if [ ! -s wget.class ]; then
+        javac -d . ../wget.java
+        [ $? -ne 0 ] && return 1
+      fi
+      java wget "$URL/$dmg" > "$dmg"
+      [ $? -ne 0 ] && return 1
+    fi
+  fi
+  #
+  sudox hdiutil attach "$dmg"
+  [ $? -ne 0 ] && return 1
+  # mounted to /Volumes/Git 1.6.5.1 UNIVERSAL binary Leopard
+  sudox installer -pkg "/Volumes/Git 1.6.5.1 UNIVERSAL binary Leopard/git-1.6.5.1-UNIVERSALbinary-leopard.pkg" -target /
+  [ $? -ne 0 ] && return 1
+  # installed to /usr/local/git/bin/git
+  sudox mkdir -p /usr/local/bin
+  [ $? -ne 0 ] && return 1
+  sudox ln -fs /usr/local/git/bin/git /usr/local/bin/git
+  [ $? -ne 0 ] && return 1
+  sudox ln -fs /usr/local/git/bin/git-cvsserver /usr/local/bin/git-cvsserver
+  [ $? -ne 0 ] && return 1
+  sudox ln -fs /usr/local/git/bin/git-receive-pack /usr/local/bin/git-receive-pack
+  [ $? -ne 0 ] && return 1
+  sudox ln -fs /usr/local/git/bin/git-shell /usr/local/bin/git-shell
+  [ $? -ne 0 ] && return 1
+  sudox ln -fs /usr/local/git/bin/git-upload-archive /usr/local/bin/git-upload-archive
+  [ $? -ne 0 ] && return 1
+  sudox ln -fs /usr/local/git/bin/git-upload-pack /usr/local/bin/git-upload-pack
+  [ $? -ne 0 ] && return 1
+  sudox ln -fs /usr/local/git/bin/gitk /usr/local/bin/gitk
+  [ $? -ne 0 ] && return 1
+  sudox hdiutil detach "/Volumes/Git 1.6.5.1 UNIVERSAL binary Leopard"
   [ $? -ne 0 ] && return 1
 # sudox port -v selfupdate
 # [ $? -ne 0 -a $? -ne 25 ] && return 1
@@ -264,7 +316,7 @@ check_prereq() {
       #fix_scons || return 1
       #
       # convert (part of ImageMagick) is needed by ocropus_libs/iulib
-      chkprog convert || install_prog ImageMagick  || return 1
+      #chkprog convert || install_prog ImageMagick  || return 1
       #
       # gsl-devel is needed by ocropus
       chkprog gsl-config || install_prog gsl-devel || return 1
@@ -286,7 +338,7 @@ check_prereq() {
       #fix_scons || return 1
       #
       # convert (part of ImageMagick) is needed by ocropus_libs/iulib
-      chkprog convert || install_prog ImageMagick  || return 1
+      #chkprog convert || install_prog ImageMagick  || return 1
       #
       # gsl-devel is needed by ocropus
       chkprog gsl-config || install_prog gsl-devel || return 1
@@ -300,10 +352,23 @@ check_prereq() {
       ;;
     MacOS )
       chkprog port  || install_macports   || return 1
+      #
+      LOGFILE=`mktemp /tmp/${0##*/}-patch.log.XXXXX`
+      sudox patch -N /opt/local/etc/macports/sources.conf "${HOME3P}/sources.conf.patch" 2>&1 | tee $LOGFILE
+      if [ ${PIPESTATUS[0]} -ne 0 ]; then
+        grep "Reversed .* patch detected!" $LOGFILE >/dev/null
+        [ $? -ne 0 ] && return 1
+      fi
+      mkdir -p /Users/Shared/dports
+      [ $? -ne 0 ] && return 1
+      portindex -f /Users/Shared/dports
+      [ $? -ne 0 ] && return 1
+      #
       sudox port -v selfupdate
       [ $? -ne 0 -a $? -ne 25 ] && return 1
       #
       chkprog wget  || install_prog wget  || return 1
+      chkprog git   || install_git        || return 1
       #
       # convert (part of ImageMagick) is needed by ocropus_libs/iulib
       #chkprog convert || install_prog ImageMagick  || return 1

@@ -6,7 +6,7 @@ set -x
 source "${HOME3P}/utilx"
 [ $? -ne 0 ] && exit 1
 #
-[ -f .done-mac ] && exit 0
+[ -f .done-ports ] && exit 0
 pkg=`getcfg PKG:`
 dir=`getcfg DIR:`
 [ -z "$dir" -o "$dir" = "/" ] && exit 1
@@ -28,7 +28,7 @@ rm -f ocropus/.hg*
 [ $? -ne 0 ] && exit 1
 rmdir ocropus
 [ $? -ne 0 ] && exit 1
-cp ../SConstruct.mac SConstruct
+cp ../SConstruct.ports SConstruct
 [ $? -ne 0 ] && exit 1
 cp ../xml-entities.cc ocr-utils
 [ $? -ne 0 ] && exit 1
@@ -42,6 +42,14 @@ cp ../ocr-commands.cc ocr-commands
 [ $? -ne 0 ] && exit 1
 cp ../ocropus.h include
 [ $? -ne 0 ] && exit 1
+#
+LOGFILE=`mktemp /tmp/${0##*/}-patch.log.XXXXX`
+sudox patch -N ${LOCAL_PREFIX}/include/SDL/SDL_main.h ../SDL_main.patch 2>&1 | tee $LOGFILE
+if [ ${PIPESTATUS[0]} -ne 0 ]; then
+  grep "Reversed .* patch detected!" $LOGFILE >/dev/null
+  [ $? -ne 0 ] && exit 1
+fi
+#
 scons
 [ $? -ne 0 ] && exit 1
 sudox scons install
@@ -58,6 +66,6 @@ gcc -pipe -O2 -s -Wall ../ocrocmd-1.0-unix.c -o ocrocmd
 sudox cp ocrocmd ${LOCAL_PREFIX}/bin
 [ $? -ne 0 ] && exit 1
 #
-touch ../.done-mac
+touch ../.done-ports
 [ $? -ne 0 ] && exit 1
 exit 0

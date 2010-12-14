@@ -1,0 +1,18 @@
+#!/bin/bash
+echo "------------------------------------------------------------------------"
+echo `cd "${0%/*}" 2>/dev/null; echo $PWD/${0##*/}`
+echo "------------------------------------------------------------------------"
+set -x
+source "${HOME3P}/utilx"
+[ $? -ne 0 ] && exit 1
+#
+compile base_libs    ports || exit 1
+compile ffmpeg_libs  ports || exit 1
+compile ffmpeg       ports || exit 1
+compile mediainfo    ports || exit 1
+compile tesseract    ports || exit 1
+compile ocropus_libs ports || exit 1
+compile ocropus      ports || exit 1
+compile qtembedder   ports || exit 1
+#
+exit 0
