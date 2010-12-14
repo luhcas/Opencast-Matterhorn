@@ -18,6 +18,9 @@ package org.opencastproject.remotetest;
 import org.opencastproject.remotetest.ui.NonExitingSeleniumServer;
 import org.opencastproject.remotetest.ui.SeleniumTestSuite;
 import org.opencastproject.remotetest.util.TrustedHttpClient;
+import org.opencastproject.remotetest.util.WorkflowUtils;
+
+import junit.framework.Assert;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -29,6 +32,10 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.util.EntityUtils;
 import org.apache.xerces.xni.Augmentations;
 import org.apache.xerces.xni.QName;
 import org.apache.xerces.xni.XMLAttributes;
@@ -73,6 +80,9 @@ public class Main {
   public static final String FIREFOX = "*firefox";
   public static final String SAFARI = "*safari";
   public static final String CHROME = "*googlechrome";
+
+  /** Whether the selenium data has been loaded */
+  private static boolean SELENESE_DATA_LOADED = false;
 
   public static final TrustedHttpClient getClient() {
     return new TrustedHttpClient(USERNAME, PASSWORD);
@@ -193,7 +203,36 @@ public class Main {
       System.exit(1);
     }
   }
-
+  
+  private static void loadSeleneseData() throws Exception {
+    System.out.println("Loading sample data for selenium HTML tests");
+    // get the zipped mediapackage from the classpath
+    byte[] bytesToPost = IOUtils.toByteArray(Main.class.getResourceAsStream("/ingest.zip"));
+    
+    // post it to the ingest service
+    HttpPost post = new HttpPost(BASE_URL + "/ingest/rest/addZippedMediaPackage");
+    post.setEntity(new ByteArrayEntity(bytesToPost));
+    TrustedHttpClient client = getClient();
+    HttpResponse response = client.execute(post);
+    Assert.assertEquals(200, response.getStatusLine().getStatusCode());    
+    String workflowXml = EntityUtils.toString(response.getEntity());
+    
+    // Poll the workflow service to ensure this recording processes successfully
+    String workflowId = WorkflowUtils.getWorkflowInstanceId(workflowXml);
+    while(true) {
+      if(WorkflowUtils.isWorkflowInState(workflowId, "SUCCEEDED")) {
+        SELENESE_DATA_LOADED = true;
+        break;
+      }
+      if(WorkflowUtils.isWorkflowInState(workflowId, "FAILED")) {
+        Assert.fail("Unable to load sample data for selenese tests.");
+      }
+      Thread.sleep(5000);
+      System.out.println("Waiting for sample data to process");
+    }
+    returnClient(client);
+  }
+  
   /**
    * Runs the selenese test suite in src/main/resources/selenium/suite.html
    * 
@@ -201,6 +240,9 @@ public class Main {
    *           if the selenese tests fail to run
    */
   private static void runSeleneseTests(String browser) throws Exception {
+    if(!SELENESE_DATA_LOADED) {
+      loadSeleneseData();
+    }
     // Build the test suite and copy it, along with its associated files, to the temp directory
     String time = Long.toString(System.currentTimeMillis());
     File temp = new File(System.getProperty("java.io.tmpdir"), "selenium" + time);
