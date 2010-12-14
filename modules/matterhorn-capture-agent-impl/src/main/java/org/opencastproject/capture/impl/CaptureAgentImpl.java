@@ -117,15 +117,15 @@ import javax.xml.transform.stream.StreamResult;
  * certain recording.
  */
 public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceMonitor, ManagedService,
-        ConfigurationManagerListener {
-
-  private static final int RECORDING_LOAD_TASK_DELAY = 60;
-
+        ConfigurationManagerListener {  
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImpl.class);
 
   /** The default maximum length to capture, measured in seconds. */
   public static final long DEFAULT_MAX_CAPTURE_LENGTH = 8 * CaptureParameters.HOURS;
 
+  /** The amount of time between the recording load task running, measured in seconds**/
+  private static final int RECORDING_LOAD_TASK_DELAY = 60;
+  
   /**
    * The number of nanoseconds in a second. This is a borrowed constant from gStreamer and is used in the pipeline
    * initialisation routines

@@ -271,7 +271,7 @@ public class ConfigurationManagerTest {
   }
   
   @Test
-  public void configurationManagerNotifiesListenersCorrectly() throws ConfigurationException{
+  public void configurationManagerNotifiesListenersCorrectly() throws ConfigurationException, InterruptedException{
     ConfigurationManager configurationManager = new ConfigurationManager();
     // Setup a listener to be registered before the configuration manager update. 
     ConfigurationManagerListener registersBefore = createMock(ConfigurationManagerListener.class);
@@ -283,10 +283,12 @@ public class ConfigurationManagerTest {
     replay(registersAfter);
     configurationManager.registerListener(registersBefore);
     configurationManager.updated(new XProperties());
+    Thread.sleep(100);
     // A listener registered before an update should be refreshed as soon as the ConfigurationManager is updated. 
     verify(registersBefore);
     configurationManager.registerListener(registersAfter);
     // A listener registered after the update should be refreshed as soon as it is registered.
+    Thread.sleep(100);
     verify(registersAfter);
   }
 }

@@ -63,6 +63,7 @@ public class ConfigurationManager implements ManagedService {
    */
   Timer timer;
 
+  /** Is set to true when the Config Manager has been updated by felix populating its properties. **/
   private boolean initialized = false;
 
   /**
@@ -154,16 +155,43 @@ public class ConfigurationManager implements ManagedService {
         logger.warn("Invalid polling time for parameter {}.", CaptureParameters.CAPTURE_CONFIG_REMOTE_POLLING_INTERVAL);
       }
     }
-
+    
+    /**
+     * This synchronized is required! If a new listener were to add itself to the list of observers such that it missed
+     * getting called in the refreshes and initialization was still false, refresh would not be automatically called
+     * when it registers. This would result in refresh never being called for that listener. 
+     **/ 
     synchronized (listeners) {
-      for (ConfigurationManagerListener observer : listeners) {
-        observer.refresh();
+      for (ConfigurationManagerListener listener : listeners) {
+        RefreshRunner refreshRunner = new RefreshRunner(listener);
+        Thread thread = new Thread(refreshRunner);
+        thread.start();
+        //listener.refresh();
       }
       // Set initialized to true so that every listener registered after this point will be updated immediately.
       initialized = true;
     }
   }
-
+  
+  /**
+   * A thread to run the refresh for each ConfigurationManagerListener. This will ensure that the listeners don't get
+   * blocked waiting for another one to finish executing.
+   **/
+  class RefreshRunner implements Runnable{
+    /** The listener to call refresh on. **/
+    private ConfigurationManagerListener listener = null; 
+    public RefreshRunner(ConfigurationManagerListener listener){
+      this.listener = listener;
+    }
+    
+    @Override
+    public void run() {
+      if(listener != null){
+        listener.refresh();
+      }
+    }
+  }
+  
   /**
    * Creates the core Opencast directories.
    */

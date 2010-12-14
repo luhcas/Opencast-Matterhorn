@@ -55,37 +55,7 @@ public class SchedulerImplTest {
   Properties schedulerProperties = null;
   CaptureAgentImpl captureAgentImpl = null;
   SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
-  Waiter waiter = null;
-  /** Interface to implement to check if the correct state has been obtained for the Waiter **/
-  interface CheckState {
-    boolean check();
-  }
-
-  /** A class that waits until a condition is met or a timeout occurs. **/
-  class Waiter {
-    private int sleepTime = 100;
-    private int maxSleepTime = 15000;
-    private int sleepAccumulator = 0;
-    boolean done = false;
-
-    /**
-     * Sleeps for a while, checks to see if a condition is made. Once it is the sleep wait ends.
-     * 
-     * @param CheckState
-     *          The function check will be used to check to see if the correct state has been obtained.
-     **/
-    public void sleepWait(CheckState checkState) throws InterruptedException {
-      sleepAccumulator = 0;
-      while (!done && sleepAccumulator < maxSleepTime) {
-        Thread.sleep(sleepTime);
-        sleepAccumulator += sleepTime;
-        done = checkState.check();
-      }
-      if (sleepAccumulator >= maxSleepTime) {
-        Assert.fail("Test Timed Out");
-      }
-    }
-  }
+  WaitForState waiter = null;
 
   @Before
   public void setup() {
@@ -153,7 +123,7 @@ public class SchedulerImplTest {
   }
 
   private void setupWaiter() {
-    waiter = new Waiter();
+    waiter = new WaitForState();
   }
   
   @AfterClass

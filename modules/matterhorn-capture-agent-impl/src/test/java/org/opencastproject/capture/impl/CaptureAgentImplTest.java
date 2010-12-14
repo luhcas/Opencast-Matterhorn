@@ -63,6 +63,9 @@ public class CaptureAgentImplTest {
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(CaptureAgentImplTest.class);
 
+  /** Waits for a particular state to occur or times out waiting. **/
+  private WaitForState waiter;
+  
   @BeforeClass
   public static void testGst() {
     try {
@@ -104,6 +107,7 @@ public class CaptureAgentImplTest {
     properties = new Properties();
     properties.setProperty(CaptureParameters.RECORDING_ID, recordingID);
     properties.setProperty(CaptureParameters.RECORDING_END, "something");
+    waiter = new WaitForState();
   }
 
   @After
@@ -222,7 +226,17 @@ public class CaptureAgentImplTest {
     agent.refresh();
     agent.createRecordingLoadTask(1);
     System.out.println("Waiting 5 seconds to make sure the scheduler has time to load...");
-    Thread.sleep(5000);
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        if(agent != null && agent.getKnownRecordings() != null){
+          return agent.getKnownRecordings().size() == 1;
+        }
+        else{
+          return false;
+        }
+      }
+    });
     Assert.assertEquals(1, agent.getKnownRecordings().size());
     Assert.assertEquals(id, agent.getKnownRecordings().get(id).getID());
   }
