@@ -134,6 +134,8 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
   /** The trusted HttpClient used to talk to the core */
   TrustedHttpClient trustedClient = null;
 
+  private boolean updated = false;
+  
   /**
    * Set the current ConfigurationManager and register this class as a listener for property updates.
    * 
@@ -142,7 +144,9 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    **/
   public void setConfigService(ConfigurationManager svc) {
     configService = svc;
-    configService.registerListener(this);
+    if(updated){
+      configService.registerListener(this);
+    }
   }
 
   /** Remove the reference to the ConfigurationManager service. **/
@@ -214,6 +218,13 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
       String key = keys.nextElement();
       schedProps.put(key, properties.get(key));
     }
+
+    // If the configuration service has been set and we are just updating we should register ourselves. 
+    if(configService != null){
+      configService.registerListener(this);
+    }
+    // We have updated
+    updated = true;
   }
 
   /**

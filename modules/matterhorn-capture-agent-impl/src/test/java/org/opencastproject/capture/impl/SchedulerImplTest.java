@@ -15,6 +15,10 @@
  */
 package org.opencastproject.capture.impl;
 
+import static org.easymock.classextension.EasyMock.createMock;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.classextension.EasyMock.verify;
+
 import org.opencastproject.capture.admin.api.AgentState;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.api.ScheduledEvent;
@@ -40,6 +44,8 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 
@@ -49,6 +55,37 @@ public class SchedulerImplTest {
   Properties schedulerProperties = null;
   CaptureAgentImpl captureAgentImpl = null;
   SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
+  Waiter waiter = null;
+  /** Interface to implement to check if the correct state has been obtained for the Waiter **/
+  interface CheckState {
+    boolean check();
+  }
+
+  /** A class that waits until a condition is met or a timeout occurs. **/
+  class Waiter {
+    private int sleepTime = 100;
+    private int maxSleepTime = 15000;
+    private int sleepAccumulator = 0;
+    boolean done = false;
+
+    /**
+     * Sleeps for a while, checks to see if a condition is made. Once it is the sleep wait ends.
+     * 
+     * @param CheckState
+     *          The function check will be used to check to see if the correct state has been obtained.
+     **/
+    public void sleepWait(CheckState checkState) throws InterruptedException {
+      sleepAccumulator = 0;
+      while (!done && sleepAccumulator < maxSleepTime) {
+        Thread.sleep(sleepTime);
+        sleepAccumulator += sleepTime;
+        done = checkState.check();
+      }
+      if (sleepAccumulator >= maxSleepTime) {
+        Assert.fail("Test Timed Out");
+      }
+    }
+  }
 
   @Before
   public void setup() {
@@ -57,9 +94,10 @@ public class SchedulerImplTest {
     setupCaptureAgentImpl();
     setupSchedulerProperties();
     setupSchedulerImpl();
+    setupWaiter();
     Assert.assertNull(schedulerImpl.getCaptureSchedule());
   }
-
+  
   private Properties setupCaptureProperties() {
     InputStream inputStream = getClass().getClassLoader().getResourceAsStream("config/capture.properties");
     if (inputStream == null) {
@@ -114,6 +152,10 @@ public class SchedulerImplTest {
     schedulerImpl.setCaptureAgent(captureAgentImpl);
   }
 
+  private void setupWaiter() {
+    waiter = new Waiter();
+  }
+  
   @AfterClass
   public static void afterClass() {
     FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir"), "capture-sched-test"));
@@ -125,6 +167,7 @@ public class SchedulerImplTest {
     schedulerImpl = null;
     configurationManager = null;
     schedulerProperties = null;
+    waiter = null;
   }
 
   private String formatDate(Date d, long offset) {
@@ -190,8 +233,7 @@ public class SchedulerImplTest {
     offset += 1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS;
     // Start time #3, event will be too short
     times[6] = formatDate(d, offset);
-    offset += (1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS - 1 /* second */* 
-            CaptureParameters.MILLISECONDS);
+    offset += (1 * CaptureParameters.MINUTES * CaptureParameters.MILLISECONDS - 1 /* second */* CaptureParameters.MILLISECONDS);
     // End time # 5
     times[7] = formatDate(d, offset);
     return times;
@@ -652,7 +694,8 @@ public class SchedulerImplTest {
     Assert.assertFalse(schedulerImpl.isCalendarPollingEnabled());
   }
 
-  @Test@Ignore
+  @Test
+  @Ignore
   public void scheduleRendersCaptureTimesCorrectly() throws IOException, ConfigurationException, InterruptedException {
     Calendar start = Calendar.getInstance();
     int firstMinuteOffset = 20;
@@ -775,7 +818,68 @@ public class SchedulerImplTest {
     captureAgentImpl.setConfigService(configurationManager);
     captureAgentImpl.activate(null);
     setupThreeCaptureCalendar(-10, -1, 10);
-    Thread.sleep(10000);
+    waiter.sleepWait(new CheckState() {
+      @Override
+      public boolean check() {
+        return captureAgentImpl.getAgentState().equals(AgentState.CAPTURING);
+      }
+    });
     Assert.assertEquals(AgentState.CAPTURING, captureAgentImpl.getAgentState());
+  }
+
+  @Test
+  public void callingRefreshBeforeUpdateDoesntCauseNullPointerException() throws IOException, ConfigurationException,
+          InterruptedException {
+    String[] times = createThreeCaptures(-20, 5, 20);
+    File testfile = setupCaptureAgentTestCalendar("calendars/ThreeCaptures.ics", times);
+    configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
+    configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
+    Dictionary<String, String> dictionary = new Hashtable<String, String>();
+    dictionary.put(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
+    configurationManager.updated(dictionary);
+    schedulerImpl.setConfigService(configurationManager);
+    schedulerImpl.updated(schedulerProperties);
+    captureAgentImpl.setConfigService(configurationManager);
+    schedulerImpl.setConfigService(configurationManager);
+  }
+
+  @Test
+  public void schedulerRegistersItselfAsConfigurationManagerListenerIfItIsUpdatedLater() throws IOException,
+          ConfigurationException, InterruptedException {
+    String[] times = createThreeCaptures(-20, 5, 20);
+    File testfile = setupCaptureAgentTestCalendar("calendars/ThreeCaptures.ics", times);
+    configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
+    configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
+    // Create a mock ConfigurationManager to make sure that it is refreshed.
+    ConfigurationManager mockConfigurationManager = createMock(ConfigurationManager.class);
+    mockConfigurationManager.registerListener(schedulerImpl);
+    replay(mockConfigurationManager);
+    // First setting the configuration service.
+    schedulerImpl.setConfigService(mockConfigurationManager);
+    // Then updating the configuration service.
+    Dictionary<String, String> dictionary = new Hashtable<String, String>();
+    dictionary.put(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
+    schedulerImpl.updated(dictionary);
+    verify(mockConfigurationManager);
+  }
+
+  @Test
+  public void schedulerRegistersItselfAsConfigurationManagerListenerIfItIsUpdatedFirst() throws IOException,
+          ConfigurationException, InterruptedException {
+    String[] times = createThreeCaptures(-20, 5, 20);
+    File testfile = setupCaptureAgentTestCalendar("calendars/ThreeCaptures.ics", times);
+    configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_REMOTE_ENDPOINT_URL, null);
+    configurationManager.setItem(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
+    // Create a mock ConfigurationManager to make sure that it is refreshed.
+    ConfigurationManager mockConfigurationManager = createMock(ConfigurationManager.class);
+    mockConfigurationManager.registerListener(schedulerImpl);
+    replay(mockConfigurationManager);
+    // First updating the scheduler impl
+    Dictionary<String, String> dictionary = new Hashtable<String, String>();
+    dictionary.put(CaptureParameters.CAPTURE_SCHEDULE_CACHE_URL, testfile.getAbsolutePath());
+    schedulerImpl.updated(dictionary);
+    // Then setting the configuration service.
+    schedulerImpl.setConfigService(mockConfigurationManager);
+    verify(mockConfigurationManager);
   }
 }
