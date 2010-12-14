@@ -44,8 +44,6 @@ public class StaticResource extends HttpServlet {
   String classpath;
   String alias;
   String welcomeFile;
-  String testClasspath;
-  String testSuite;
   URL defaultUrl;
 
   BundleContext bundleContext;
@@ -58,7 +56,7 @@ public class StaticResource extends HttpServlet {
   }
 
   /**
-   * Constructs a static resource without tests.
+   * Constructs a static resources.
    * 
    * @param bundleContext
    *          the bundle context of this servlet
@@ -70,32 +68,9 @@ public class StaticResource extends HttpServlet {
    *          the default welcome file
    */
   public StaticResource(BundleContext bundleContext, String classpath, String alias, String welcomeFile) {
-    this(bundleContext, classpath, alias, welcomeFile, null, null);
-  }
-
-  /**
-   * Constructs a static resource servlet with a test suite.
-   * 
-   * @param bundleContext
-   *          the bundle context of this servlet
-   * @param classpath
-   *          the classpath to the static resources
-   * @param alias
-   *          the URL alias
-   * @param welcomeFile
-   *          the default welcome file
-   * @param testClasspath
-   *          the classpath to the test resources
-   * @param testSuite
-   *          the file that aggregates all UI unit tests into a suite
-   */
-  public StaticResource(BundleContext bundleContext, String classpath, String alias, String welcomeFile,
-          String testClasspath, String testSuite) {
     this.classpath = classpath;
     this.alias = alias;
     this.welcomeFile = welcomeFile;
-    this.testClasspath = testClasspath;
-    this.testSuite = testSuite;
     this.bundleContext = bundleContext;
     String serverUrl = bundleContext.getProperty("org.opencastproject.server.url");
     try {
@@ -124,13 +99,8 @@ public class StaticResource extends HttpServlet {
       alias = (String) componentContext.getProperties().get("alias");
     if (classpath == null)
       classpath = (String) componentContext.getProperties().get("classpath");
-    if (testSuite == null)
-      testSuite = (String) componentContext.getProperties().get("test.suite");
-    if (testClasspath == null)
-      testClasspath = (String) componentContext.getProperties().get("test.classpath");
-    logger.info("registering classpath:{} at {} with welcome file {} {}, test suite: {} from classpath {}",
-            new Object[] { classpath, alias, welcomeFile, welcomeFileSpecified ? "" : "(via default)", testSuite,
-                    testClasspath });
+    logger.info("registering classpath:{} at {} with welcome file {} {}", new Object[] { classpath, alias, welcomeFile,
+            welcomeFileSpecified ? "" : "(via default)" });
     String serverUrl = componentContext.getBundleContext().getProperty("org.opencastproject.server.url");
     try {
       defaultUrl = new URL(serverUrl + alias);
@@ -153,9 +123,7 @@ public class StaticResource extends HttpServlet {
     String pathInfo = req.getPathInfo();
     String servletPath = req.getServletPath();
     String path = pathInfo == null ? servletPath : servletPath + pathInfo;
-    Boolean testMode = "true".equalsIgnoreCase(bundleContext.getProperty("testMode"));
-    logger.debug("handling path {}, pathInfo={}, servletPath={}, testMode={}", new Object[] { path, pathInfo,
-            servletPath, testMode });
+    logger.debug("handling path {}, pathInfo={}, servletPath={}", new Object[] { path, pathInfo, servletPath });
 
     // If the URL points to a "directory", redirect to the welcome file
     if ("/".equals(path) || alias.equals(path) || (alias + "/").equals(path)) {
@@ -188,22 +156,6 @@ public class StaticResource extends HttpServlet {
 
     // Try to load the resource from the regular resources section
     URL url = bundleContext.getBundle().getResource(classpathToResource);
-
-    // No luck? Maybe it's part of the test class path?
-    if (url == null && testMode && testClasspath != null) {
-      if (pathInfo == null) {
-        if (!servletPath.equals(alias)) {
-          classpathToResource = testClasspath + servletPath;
-        } else {
-          classpathToResource = testClasspath + "/" + testSuite;
-        }
-      } else {
-        classpathToResource = testClasspath + pathInfo;
-      }
-      if (!classpathToResource.startsWith("/"))
-        classpathToResource = "/" + classpathToResource;
-      url = bundleContext.getBundle().getResource(classpathToResource);
-    }
 
     if (url == null) {
       resp.sendError(404);

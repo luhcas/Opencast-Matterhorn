@@ -7,7 +7,6 @@
   <property name="contextId" value="opencast.httpcontext" />
   <property name="classpath" value="/ui" />
   <property name="welcome.file" value="welcome.html" />
-  <property name="test.classpath" value="/uitests" />
   <service>
     <provide interface="javax.servlet.Servlet" />
   </service>

@@ -70,7 +70,6 @@ public class RuntimeInfo {
   private String serverUrl;
   private String engageBaseUrl;
   private String adminBaseUrl;
-  private boolean testMode;
   private String docs;
   private Timer pingbackTimer = null;
 
@@ -96,7 +95,6 @@ public class RuntimeInfo {
     if (engageBaseUrl == null)
       engageBaseUrl = serverUrl;
     this.serverUrl = bundleContext.getProperty("org.opencastproject.server.url");
-    this.testMode = "true".equalsIgnoreCase(bundleContext.getProperty("testMode"));
     
     String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
     docs = generateDocs(serviceUrl);
@@ -247,15 +245,10 @@ public class RuntimeInfo {
       String alias = (String) ref.getProperty("alias");
       String welcomeFile = (String) ref.getProperty("welcome.file");
       String welcomePath = "/".equals(alias) ? alias + welcomeFile : alias + "/" + welcomeFile;
-      String testSuite = (String) ref.getProperty("test.suite");
       JSONObject endpoint = new JSONObject();
       endpoint.put("description", description);
       endpoint.put("version", version);
       endpoint.put("welcomepage", serverUrl + welcomePath);
-      if (testSuite != null && testMode) {
-        String testSuitePath = "/".equals(alias) ? alias + testSuite : alias + "/" + testSuite;
-        endpoint.put("testsuite", serverUrl + testSuitePath);
-      }
       json.add(endpoint);
     }
     return json;
