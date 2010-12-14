@@ -78,9 +78,6 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
   /** The default worker thread pool size to use if no configuration is specified */
   public static final int DEFAULT_THREADS = 1;
 
-  /** The default path to the mediainfo binary */
-  public static final String DEFAULT_PATH = "/usr/local/bin/mediainfo";
-
   protected Workspace workspace;
   protected ServiceRegistry serviceRegistry;
   protected ThreadPoolExecutor executor = null;
@@ -97,7 +94,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
 
   public void activate() {
     executor = (ThreadPoolExecutor)Executors.newFixedThreadPool(DEFAULT_THREADS);
-    analyzerConfig.put(MediaInfoAnalyzer.MEDIAINFO_BINARY_CONFIG, DEFAULT_PATH);
+    analyzerConfig.put(MediaInfoAnalyzer.MEDIAINFO_BINARY_CONFIG, MediaInfoAnalyzer.MEDIAINFO_BINARY_DEFAULT);
   }
 
   /**
