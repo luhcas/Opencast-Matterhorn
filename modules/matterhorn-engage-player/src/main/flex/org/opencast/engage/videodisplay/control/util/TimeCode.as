@@ -16,81 +16,83 @@
 package org.opencast.engage.videodisplay.control.util
 {
 
-    /**
-     *   TimeCode
-     */
-    public class TimeCode
-    {
+	/**
+	 *   TimeCode
+	 */
+	public class TimeCode
+	{
 
-        /**
-         * Constructor
-         */
-        public function TimeCode()
-        {
-            _showHours = true;
-        }
+		/**
+		 * Constructor
+		 */
+		public function TimeCode()
+		{
+			_showHours=true;
+		}
 
-        private var _showHours : Boolean;
+		private var _showHours:Boolean;
 
-        /**
-         * getTC
-         * Get the time, like HH:MM:SS.
-         * @param Number seconds
-         * @return String result
-         * */
-        public function getTC( seconds : Number ) : String
-        {
-            if( typeof( seconds ) != "number" )
-            {
-                return "00:";
-            }
-            var result : String = "";
-            var myTime : Date = new Date( 2007, 0, 1, 0, 0, seconds );
+		/**
+		 * getTC
+		 * Get the time, like HH:MM:SS.
+		 * @param Number seconds
+		 * @return String result
+		 * */
+		public function getTC(seconds:Number):String
+		{
+			if (typeof(seconds) != "number")
+			{
+				return "00:";
+			}
+			var result:String="";
+			var myTime:Date=new Date(2007, 0, 1, 0, 0, seconds);
 
-            // hours
-            if( _showHours )
-            {
-                if( myTime.getHours() < 10 )
-                {
-                    result = "0" + myTime.getHours() + ":";
-                }
-                else
-                {
-                    result = myTime.getHours() + ":";
-                }
-            }
+			// hours
+			if (_showHours)
+			{
+				if (myTime.getHours() < 10)
+				{
+					result="0" + myTime.getHours() + ":";
+				}
+				else
+				{
+					result=myTime.getHours() + ":";
+				}
+			}
 
-            // minutes
-            if( myTime.getMinutes() < 10 )
-            {
-                result += "0" + myTime.getMinutes() + ":";
-            }
-            else
-            {
-                result += myTime.getMinutes() + ":";
-            }
+			// minutes
+			if (myTime.getMinutes() < 10)
+			{
+				result+="0" + myTime.getMinutes() + ":";
+			}
+			else
+			{
+				result+=myTime.getMinutes() + ":";
+			}
 
-            // seconds
-            if( myTime.getSeconds() < 10 )
-            {
-                result += "0" + myTime.getSeconds();
-            }
-            else
-            {
-                result += myTime.getSeconds();
-            }
+			// seconds
+			if (myTime.getSeconds() < 10)
+			{
+				result+="0" + myTime.getSeconds();
+			}
+			else
+			{
+				result+=myTime.getSeconds();
+			}
 
-            return result;
-        }
+			return result;
+		}
 
-        /**
-         * showHours
-         * Set the _showHours Boolean
-         * @param Boolean show
-         */
-        public function showHours( show : Boolean ) : void
-        {
-            _showHours = show;
-        }
-    }
+		/**
+		 * showHours
+		 * Set the _showHours Boolean
+		 * @param Boolean show
+		 */
+		public function showHours(show:Boolean):void
+		{
+			_showHours=show;
+		}
+	}
 }
+
+
