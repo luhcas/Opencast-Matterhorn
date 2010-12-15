@@ -52,7 +52,7 @@
         $('#filename-container').text(ocUploadListener.filename);
         var uploadFrame = document.getElementById("filechooser-ajax");
         var mp = uploadFrame.contentWindow.document.getElementById("mp").value;
-        parent.ocRecordings.changedMediaPackage = mp;
+        parent.ocRecordings.Hold.changedMediaPackage = mp;
         //alert(mp);
       }
       ocUploadListener.uploadFailed = function() {
