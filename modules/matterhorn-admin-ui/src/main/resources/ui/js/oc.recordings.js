@@ -13,6 +13,8 @@ ocRecordings = new (function() {
     'Date' : 'DATE_CREATED'
   }
 
+  this.totalRecordings = 0;
+
   // components
   this.searchbox = null;
   this.pager = null;
@@ -37,7 +39,7 @@ ocRecordings = new (function() {
     // default configuartion
     this.state = 'all';
     this.pageSize = 10;
-    this.page = 1;
+    this.page = 0;
     this.refresh = 5000;
     this.sortField = null;
     this.sortOrder = null;
@@ -106,6 +108,9 @@ ocRecordings = new (function() {
         }
         params.push('sort=' + sort);
       }
+      // paging
+      params.push('count=' + ocRecordings.Configuration.pageSize);
+      params.push('startPage=' + ocRecordings.Configuration.page);
       params.push('jsonp=?');
       var url = WORKFLOW_LIST_URL + '?' + params.join('&');
       $.ajax(
@@ -294,6 +299,7 @@ ocRecordings = new (function() {
       recording:[]
     };
     if (data.workflows.workflow) {
+      ocRecordings.totalRecordings = data.workflows.totalCount;
       if (data.workflows.workflow instanceof Array) {
         for (var i in data.workflows.workflow) {
           tdata.recording.push(makeRecording(data.workflows.workflow[i]));
@@ -312,6 +318,9 @@ ocRecordings = new (function() {
     this.data = data;
     $('#tableContainer').empty();
     $.tmpl( "table-all", makeRenderData(data) ).appendTo( "#tableContainer" );
+    
+    var page = parseInt(ocRecordings.Configuration.page) + 1;
+    $('#pageList').text( page + " of " + Math.ceil(ocRecordings.totalRecordings / ocRecordings.Configuration.pageSize));
 
     // When table is ready, attach event handlers to its children
     $('#ocRecordingsTable thead .sortable')
@@ -324,7 +333,7 @@ ocRecordings = new (function() {
     .click( function() {
       var sortDesc = $(this).find('.sort-icon').hasClass('ui-icon-circle-triangle-s');
       var sortField = ($(this).attr('id')).substr(4);
-      $( "#ocRecordingsTable th .sort-icon" )
+      $( '#ocRecordingsTable th .sort-icon' )
       .removeClass('ui-icon-circle-triangle-s')
       .removeClass('ui-icon-circle-triangle-n')
       .addClass('ui-icon-triangle-2-n-s');
@@ -512,9 +521,16 @@ ocRecordings = new (function() {
       decIcon : 'ui-icon-circle-triangle-w',
       incIcon : 'ui-icon-circle-triangle-e'
     });
+    
+    $('#pageSize').val(ocRecordings.Configuration.pageSize);
+    
+    $('#pageSize').change(function(){ 
+      ocRecordings.Configuration.pageSize = $(this).val();
+      ocRecordings.reload();
+    });
 
     // button to open the config dialog
-    $( '#configButton' ).button()
+    /*$( '#configButton' ).button()
     .click( function() {
       $('#configDialog').dialog({
         title : 'Configure View',
@@ -527,12 +543,12 @@ ocRecordings = new (function() {
         }
       });
     });
-
+    */
     // set up config dialog
     // FIXME doesn work really good (components look strange, size of dialog doesn't fit content
-    $('#pageSize').spinner();
-    $('#autoUpdate').button();
-    $('#updateInterval').spinner();
+    //$('#pageSize').spinner({min:1});
+    //$('#autoUpdate').button();
+    //$('#updateInterval').spinner({min:1});
 
     // set up statistics update
     refreshStatistics();
@@ -558,6 +574,26 @@ ocRecordings = new (function() {
         }
       });
     }
+  }
+  //TEMPORARY (quick'n'dirty) PAGING
+  this.nextPage = function() {
+    numPages = Math.floor(this.totalRecordings / ocRecordings.Configuration.pageSize);
+    if( ocRecordings.Configuration.page < numPages ) {
+      ocRecordings.Configuration.page++;
+    }
+    ocRecordings.reload();
+  }
+  
+  this.previousPage = function() {
+    if(ocRecordings.Configuration.page > 0) {
+      ocRecordings.Configuration.page--;
+    }
+    ocRecordings.reload();
+  }
+  
+  this.lastPage = function() {
+    ocRecordings.Configuration.page = Math.floor(this.totalRecordings / ocRecordings.Configuration.pageSize);
+    ocRecordings.reload();
   }
   
   $(document).ready(this.init);

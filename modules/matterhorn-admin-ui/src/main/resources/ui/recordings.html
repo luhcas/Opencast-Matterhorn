@@ -196,11 +196,29 @@
 
       <!-- div id="controlsFoot" class="ui-widget-header ui-corner-bottom ui-helper-clearfix" -->
       <div id="controlsFoot" class="ui-helper-clearfix">
-        <div id="configButton">Configure View</div>
-        <div id="pagerBottom"></div>
+        <!--<div id="configButton">Configure View</div>-->
+        <div class="layout-float-left">
+          Show
+          <select id="pageSize">
+            <option>5</option>
+            <option selected="selected">10</option>
+            <option>20</option>
+            <option>50</option>
+          </select>
+          Recordings per page.
+        </div>
+        <div class="layout-float-right">
+          <!--<label for="page">Goto page: </label><input type="text" id="page" value="1" />-->
+          <div id="pageWidget" class="layout-inline">
+            <a href="javascript:ocRecordings.Configuration.page=0;ocRecordings.reload();">&lt;&lt;first</a>
+            <a href="javascript:ocRecordings.previousPage();" id="previousPage">&lt;previous</a>
+            <div id="pageList" class="layout-inline"></div>
+            <a href="javascript:ocRecordings.nextPage();" id="nextPage">next&gt;</a>
+            <a href="javascript:ocRecordings.lastPage();" id="lastPage">last&gt;&gt;</a>
+          </div>
+        </div>
       </div>
-
-      <!-- config dialog -->
+      <!-- config dialog
       <div id="configDialog" style="display:none;">
         <div class="configRow ui-helper-clearfix">
           <span>Number of items displayed per page</span>
@@ -215,7 +233,7 @@
           <div id="updateInterval"></div>
         </div>
       </div>
-
+      -->
     </div>
 
     <!-- HoldAction panel -->
