@@ -42,6 +42,8 @@
       .operation-property-key {font-weight: bold;margin-top:2px;}
       .configRow span {float: left;}
       .configRow div {float: right;}
+      #holdActionStage {margin:20px; padding:0 0 20px;}
+      #holdActionUI {border:none; width:100%;}
     </style>
     <script type="text/javascript">
 
@@ -216,6 +218,12 @@
 
     </div>
 
+    <!-- HoldAction panel -->
+    <div id="holdActionStage" style="display:none">
+      <input type="hidden" id="holdWorkflowId" value="">
+      <iframe id="holdActionUI"></iframe>
+    </div>
+
     <div id="templates" style="display:none;">
       <textarea id="tableTemplate">
 <table id="recordingsTable" class="ui-widget" cellspacing="0" width="100%">
@@ -259,6 +267,9 @@
         </td>
         <td>
           {{html RenderUtils.makeActions(id, title, actions)}}
+          {{if holdAction}}
+          <br><a href="javascript:ocRecordings.displayHoldUI(${id});" title="${holdAction.description}">${holdAction.title}</a>
+          {{/if}}
         </td>
       </tr>
       {{/each}}

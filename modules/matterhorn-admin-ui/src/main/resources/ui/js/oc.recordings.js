@@ -1,4 +1,4 @@
-Recordings = new (function() {
+ocRecordings = new (function() {
 
   var WORKFLOW_LIST_URL = '../workflow/rest/instances.json';          // URL of workflow instances list endpoint
   var WORKFLOW_INSTANCE_URL = '';                                     // URL of workflow instance endpoint
@@ -23,6 +23,12 @@ Recordings = new (function() {
   var refreshing = false;      // indicates if JSONP requesting recording data is in progress
   this.refreshingStats = false; // indicates if JSONP requesting statistics data is in progress
 
+  // object that holds the workflow and the operation object for the hold state UI currently displayed
+  this.Hold = {
+    workflow : null,
+    operation : null,
+    changedMediaPackage : null
+  }
   /** Executed when directly when script is loaded: parses url parameters and
    *  returns the configuration object.
    */
@@ -61,10 +67,10 @@ Recordings = new (function() {
     if (!refreshing) {
       refreshing = true;
       var params = [];
-      //params.push('count=' + Recordings.Configuration.pageSize);
-      //params.push('startPage=' + Recordings.Configuration.page);
+      //params.push('count=' + ocRecordings.Configuration.pageSize);
+      //params.push('startPage=' + ocRecordings.Configuration.page);
       // 'state' to display
-      var state = Recordings.Configuration.state;
+      var state = ocRecordings.Configuration.state;
       if (state == 'upcoming') {
         params.push('state=paused');
         params.push('state=running');
@@ -93,9 +99,9 @@ Recordings = new (function() {
         params.push('state=failed');
       }
       // sorting if specified
-      if (Recordings.Configuration.sortField != null) {
-        var sort = SORT_FIELDS[Recordings.Configuration.sortField];
-        if (Recordings.Configuration.sortOrder == 'DESC') {
+      if (ocRecordings.Configuration.sortField != null) {
+        var sort = SORT_FIELDS[ocRecordings.Configuration.sortField];
+        if (ocRecordings.Configuration.sortOrder == 'DESC') {
           sort += "_DESC";
         }
         params.push('sort=' + sort);
@@ -109,21 +115,21 @@ Recordings = new (function() {
         jsonp: 'jsonp',
         success: function (data)
         {
-          Recordings.render(data);
+          ocRecordings.render(data);
         }
       });
     }
   }
 
   function refreshStatistics() {
-    if (!Recordings.refreshingStats) {
-      Recordings.refreshingStats = true;
+    if (!ocRecordings.refreshingStats) {
+      ocRecordings.refreshingStats = true;
       $.ajax(
       {
         url: WORKFLOW_STATISTICS_URL,
         dataType: 'jsonp',
         jsonp: 'jsonp',
-        success: Recordings.updateStatistics
+        success: ocRecordings.updateStatistics
       });
     }
   }
@@ -142,7 +148,7 @@ Recordings = new (function() {
    *  - all: sum of the above
    */
   this.updateStatistics = function(data) {
-    Recordings.refreshingStats = false;
+    ocRecordings.refreshingStats = false;
     var stats = {
       all: 0,
       upcoming:0,
@@ -164,11 +170,11 @@ Recordings = new (function() {
     }
     
     stats.all = stats.upcoming + stats.capturing + stats.processing + stats.finished + stats.failed + stats.hold;
-    if (Recordings.statistics != null
-      && Recordings.statistics[Recordings.Configuration.state] != stats[Recordings.Configuration.state]) {
+    if (ocRecordings.statistics != null
+      && ocRecordings.statistics[ocRecordings.Configuration.state] != stats[ocRecordings.Configuration.state]) {
       refresh();
     }
-    Recordings.statistics = stats;
+    ocRecordings.statistics = stats;
     displayStatistics();
   }
 
@@ -189,7 +195,7 @@ Recordings = new (function() {
   }
 
   function displayStatistics() {
-    $.each(Recordings.statistics, function(key, value) {
+    $.each(ocRecordings.statistics, function(key, value) {
       $('#stats-' + key).text(' (' + value + ')');
     });
   }
@@ -200,7 +206,7 @@ Recordings = new (function() {
    *  TODO make this a constructor
    */
   function makeRecording(wf) {
-    var rec = {       // TODO create prototype so we can write : new Rec()
+    var rec = {      
       id: '',
       title: '',
       creators : [],
@@ -239,27 +245,35 @@ Recordings = new (function() {
 
     // Status
     // current operation : search last operation with state that matches workflow state
-    if(!$.isArray(wf.operations.operation)) {
-    //If there is a single operation, then operation is an object, otherwise it's an array
-      wf.operations = [wf.operations];
-    }
+    var op = null;
     for (var j in wf.operations.operation) {
       if (wf.operations.operation[j].state == wf.state) {
-        var op = wf.operations.operation[j];
-        rec.operation.state = op.state;
-        rec.operation.heading = op.id;
-        rec.operation.details = op.description;
-        if (op.configurations) {
-          rec.operation.properties = [];
-          for (var k in op.configurations.configuration) {
-            var c = op.configurations.configuration[k];
-            rec.operation.properties.push({
-              key : c.key,
-              value : c.$
-            });
-          }
+        op = wf.operations.operation[j];
+      }
+    }
+    if (op !== null) {
+      rec.operation.state = op.state;
+      rec.operation.heading = op.id;
+      rec.operation.details = op.description;
+      if (op.configurations) {
+        rec.operation.properties = [];
+        for (var k in op.configurations.configuration) {
+          var c = op.configurations.configuration[k];
+          rec.operation.properties.push({
+            key : c.key,
+            value : c.$
+          });
         }
       }
+      // care for hold state UI
+      if (op.holdurl !== undefined && op.state == 'PAUSED') {
+        rec.holdAction = {
+          title : op['hold-action-title'],
+          description :  op.description
+        }
+      }
+    } else {
+      ocUtils.log('Warning: current operation for workflow could not be found!');
     }
 
     // Actions
@@ -295,11 +309,12 @@ Recordings = new (function() {
    */
   this.render = function(data) {
     refreshing = false;
+    this.data = data;
     $('#tableContainer').empty();
     $.tmpl( "table-all", makeRenderData(data) ).appendTo( "#tableContainer" );
 
     // When table is ready, attach event handlers to its children
-    $('#recordingsTable thead .sortable')
+    $('#ocRecordingsTable thead .sortable')
     .mouseenter( function() {
       $(this).addClass('ui-state-hover');
     })
@@ -309,27 +324,27 @@ Recordings = new (function() {
     .click( function() {
       var sortDesc = $(this).find('.sort-icon').hasClass('ui-icon-circle-triangle-s');
       var sortField = ($(this).attr('id')).substr(4);
-      $( "#recordingsTable th .sort-icon" )
+      $( "#ocRecordingsTable th .sort-icon" )
       .removeClass('ui-icon-circle-triangle-s')
       .removeClass('ui-icon-circle-triangle-n')
       .addClass('ui-icon-triangle-2-n-s');
       if (sortDesc) {
-        Recordings.Configuration.sortField = sortField;
-        Recordings.Configuration.sortOrder = 'ASC';
-        Recordings.reload();
+        ocRecordings.Configuration.sortField = sortField;
+        ocRecordings.Configuration.sortOrder = 'ASC';
+        ocRecordings.reload();
       } else {
-        Recordings.Configuration.sortField = sortField;
-        Recordings.Configuration.sortOrder = 'DESC';
-        Recordings.reload();
+        ocRecordings.Configuration.sortField = sortField;
+        ocRecordings.Configuration.sortOrder = 'DESC';
+        ocRecordings.reload();
       }
     });
     // if results are sorted, display icon indicating sort order in respective table header cell
-    if (Recordings.Configuration.sortField != null) {
-      var th = $('#sort' + Recordings.Configuration.sortField);
+    if (ocRecordings.Configuration.sortField != null) {
+      var th = $('#sort' + ocRecordings.Configuration.sortField);
       $(th).find('.sort-icon').removeClass('ui-icon-triangle-2-n-s');
-      if (Recordings.Configuration.sortOrder == 'ASC') {
+      if (ocRecordings.Configuration.sortOrder == 'ASC') {
         $(th).find('.sort-icon').addClass('ui-icon-circle-triangle-n');
-      } else if (Recordings.Configuration.sortOrder == 'DESC') {
+      } else if (ocRecordings.Configuration.sortOrder == 'DESC') {
         $(th).find('.sort-icon').addClass('ui-icon-circle-triangle-s');
       }
     }
@@ -355,9 +370,102 @@ Recordings = new (function() {
     document.location.href = url;
   }
 
-  /** $(document).ready()
-   *
+  /** Returns the workflow with the specified id from the currently loaded 
+   *  workflow data or false if workflow with given Id was not found.
    */
+  this.getWorkflow = function(wfId) {
+    var out = false;
+    $.each(ocUtils.ensureArray(this.data.workflows.workflow), function(index, workflow) {
+      if (workflow.id == wfId) {
+        out = workflow;
+      }
+    });
+    return out;
+  }
+
+  this.findCurrentOperation = function(workflow) {
+    var out = false;
+    $.each(ocUtils.ensureArray(workflow.operations.operation), function(index, operation) {
+      if (operation.state == workflow.state) {
+        out = operation;
+      }
+    });
+    return out;
+  }
+
+  this.displayHoldUI = function(wfId) {
+    var workflow = ocRecordings.getWorkflow(wfId);
+    if (workflow) {
+      var operation = ocRecordings.findCurrentOperation(workflow);
+      if (operation !== false && operation.holdurl !== undefined) {
+        this.Hold.workflow = workflow;
+        this.Hold.operation = operation;
+        $('#holdWorkflowId').val(wfId);     // provide Id of hold actions workflow as value of html element (for backwards compatibility)
+        $('#holdActionUI').attr('src', operation.holdurl);
+        $('#stage').hide();
+        $('#holdActionStage').show();
+      } else {
+        ocUtils.log('Warning: could not display hold action UI: hold operation not found (id=' + wfId + ')');
+      }
+    } else {
+      ocUtils.log('Warning: could not display hold action UI: workflow not found (id=' + wfId + ')');
+    }
+  }
+
+  this.adjustHoldActionPanelHeight = function() {
+    var height = $('#holdActionUI').contents().find('html').height();
+    $('#holdActionUI').height(height+10);
+  }
+
+  this.continueWorkflow = function(postData) {
+    // data must include workflow id
+    var data = {
+      id : ocRecordings.Hold.workflow.id
+    };
+
+    // add properties for workflow resum if provided by hold operation
+    if (postData !== undefined) {
+      data.properties = {};
+      $.each(postData, function(key, value) {
+        if(key != 'id') {
+          data.properties += key + '=' + value + '\n';
+          ocUtils.log(key + '=' + value);
+        }
+      });
+    }
+    // add updated MP to data, if hold operation changed the MP
+    if (ocRecordings.Hold.changedMediaPackage != null) {
+      data['mediapackage'] = ocRecordings.Hold.changedMediaPackage;
+      ocUtils.log(data['mediapackage']);
+      ocRecordings.Hold.changedMediaPackage = null;
+    }
+
+    $.ajax({
+      type       : 'POST',
+      url        : '../workflow/rest/replaceAndresume/',
+      data       : data,
+      error      : function(XHR,status,e){
+        if (XHR.status == '204') {
+          ocRecordings.reload();
+        } else {
+          alert('Could not resume Workflow: ' + status);
+        }
+      },
+      success    : function(data) {
+        ocRecordings.reload();
+      }
+    });
+  }
+
+  this.hideHoldActionUI = function() {
+    ocRecordings.Hold = {workflow:null,operation:null,changedMediaPackage:null};
+    $('#holdActionStage').hide();
+    $('#stage').show();
+  }
+
+  /** $(document).ready()
+ *
+ */
   this.init = function() {
 
     $.template( 'table-all', $('#tableTemplate').val() );
@@ -382,12 +490,12 @@ Recordings = new (function() {
       window.location.href = '../../admin/scheduler.html';
     });
 
-    // recordings state selectors
-    $( '#state-' +  Recordings.Configuration.state).attr('checked', true);
+    // ocRecordings state selectors
+    $( '#state-' +  ocRecordings.Configuration.state).attr('checked', true);
     $( '.state-filter-container' ).buttonset();
     $( '.state-filter-container input' ).click( function() {
-      Recordings.Configuration.state = $(this).val();
-      Recordings.reload();
+      ocRecordings.Configuration.state = $(this).val();
+      ocRecordings.reload();
     })
 
     // search box
@@ -397,7 +505,7 @@ Recordings = new (function() {
       }
     });
 
-    // recordings table
+    // ocRecordings table
 
     // pager
     this.pager = $( '#pagerBottom' ).spinner({
@@ -446,7 +554,7 @@ Recordings = new (function() {
           alert('Could not remove Workflow ' + title);
         },
         success    : function(data) {
-          Recordings.reload();
+          ocRecordings.reload();
         }
       });
     }
@@ -484,7 +592,7 @@ RenderUtils = new (function() {
       } else if(actions[i] === 'edit') {
         links.push('<a href="scheduler.html?eventId=' + id + '&edit=true">Edit</a>');
       } else if(actions[i] === 'delete') {
-        links.push('<a href="javascript:Recordings.removeRecording(\'' + id + '\',\'' + title + '\')">Delete</a>');
+        links.push('<a href="javascript:ocRecordings.removeRecording(\'' + id + '\',\'' + title + '\')">Delete</a>');
       }
     }
     return links.join(' \n');

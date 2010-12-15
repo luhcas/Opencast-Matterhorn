@@ -125,3 +125,16 @@ ocUtils.getTemplate = function(name, callback) {
     }
   });
 }
+
+/** If obj is an array just returns obj else returns Array with obj as content.
+ *  If obj === undefined returns empty Array.
+ *
+ */
+ocUtils.ensureArray = function(obj) {
+  if (obj === undefined) return [];
+  if ($.isArray(obj)) {
+    return obj;
+  } else {
+    return [obj];
+  }
+}
