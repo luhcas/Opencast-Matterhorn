@@ -102,6 +102,7 @@ package org.opencast.engage.videodisplay.control.util
 			// initialize the media player
 			if (videoState == VideoState.SINGLE)
 			{
+
 				mediaPlayerSingle=new MediaPlayer();
 				mediaPlayerSingle.autoRewind=true;
 				mediaPlayerSingle.autoPlay=false;
@@ -121,6 +122,7 @@ package org.opencast.engage.videodisplay.control.util
 			}
 			else if (videoState == VideoState.MULTI)
 			{
+
 				mediaPlayerOne=new MediaPlayer();
 				mediaPlayerOne.autoRewind=true;
 				mediaPlayerOne.autoPlay=false;
@@ -1364,19 +1366,9 @@ package org.opencast.engage.videodisplay.control.util
 			{
 				model.bytesLoadedOne=event.bytes;
 				model.progressMediaOne=Math.floor(event.bytes / model.bytesTotalOne * 100);
-
-				if (model.progressMediaOne <= model.progressMediaTwo)
-				{
-					ExternalInterface.call(ExternalFunction.SETPROGRESS, model.progressMediaOne);
-					model.progressBar.setProgress(model.progressMediaOne, 100);
-					model.progress=model.progressMediaOne;
-				}
-				else
-				{
-					ExternalInterface.call(ExternalFunction.SETPROGRESS, model.progressMediaTwo);
-					model.progressBar.setProgress(model.progressMediaTwo, 100);
-					model.progress=model.progressMediaTwo;
-				}
+				ExternalInterface.call(ExternalFunction.SETPROGRESS, model.progressMediaOne);
+				model.progressBar.setProgress(model.progressMediaOne, 100);
+				model.progress=model.progressMediaOne;
 				model.progressFullscreen=model.fullscreenProgressWidth * (model.progress / 100);
 			}
 		}
