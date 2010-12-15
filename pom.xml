@@ -354,10 +354,10 @@
             <id>copy-to-felix</id>
             <phase>install</phase>
             <configuration>
-              <tasks if="deployTo">
+              <target if="deployTo">
                 <copy file="${project.build.directory}/${project.build.finalName}.jar" todir="${deployTo}"
                   failonerror="false" />
-              </tasks>
+              </target>
             </configuration>
             <goals>
               <goal>run</goal>
@@ -387,20 +387,11 @@
         <configuration>
           <useFile>false</useFile>
           <encoding>UTF-8</encoding>
-          <systemProperties>
-            <property>
-              <name>M2_REPO</name>
-              <value>${settings.localRepository}</value>
-            </property>
-            <property>
-              <name>file.encoding</name>
-              <value>UTF-8</value>
-            </property>
-            <property>
-              <name>java.awt.headless</name>
-              <value>true</value>
-            </property>
-          </systemProperties>
+          <systemPropertyVariables>
+            <M2_REPO>${settings.localRepository}</M2_REPO>
+            <file.encoding>UTF-8</file.encoding>
+            <java.awt.headless>true</java.awt.headless>
+          </systemPropertyVariables>
         </configuration>
       </plugin>
       <!-- Ensure that the source code matches the Matterhorn style rules -->
@@ -411,7 +402,7 @@
           <skip>${checkstyle.skip}</skip>
           <configLocation>${matterhorn.basedir}/docs/checkstyle/matterhorn-checkstyle.xml</configLocation>
           <headerLocation>${matterhorn.basedir}/docs/checkstyle/matterhorn-header.txt</headerLocation>
-          <consoleOutput>true</consoleOutput>
+          <consoleOutput>false</consoleOutput>
           <logViolationsToConsole>true</logViolationsToConsole>
           <excludes>**/package-info.java</excludes>
           <failOnViolation>false</failOnViolation>
