@@ -1,5 +1,3 @@
-var ocRecordings = ocRecordings || {};
-
 Recordings = new (function() {
 
   var WORKFLOW_LIST_URL = '../workflow/rest/instances.json';          // URL of workflow instances list endpoint
@@ -223,10 +221,15 @@ Recordings = new (function() {
     
     // Title
     rec.title = wf.mediapackage.title;
+    
+    // Series id and title
+    rec.series = wf.mediapackage.series;
+    rec.seriesTitle = wf.mediapackage.seriestitle;
 
     // Creator(s)
-    if (wf.mediapackage.creators)
-      rec.creators = wf.mediapackage.creators.creator;    // TODO update when there can be more than one
+    if (wf.mediapackage.creators) { // TODO update when there can be more than one
+      rec.creators = wf.mediapackage.creators.creator;
+    } 
 
     // Start Time
     if (wf.mediapackage.start) {
@@ -236,6 +239,10 @@ Recordings = new (function() {
 
     // Status
     // current operation : search last operation with state that matches workflow state
+    if(!$.isArray(wf.operations.operation)) {
+    //If there is a single operation, then operation is an object, otherwise it's an array
+      wf.operations = [wf.operations];
+    }
     for (var j in wf.operations.operation) {
       if (wf.operations.operation[j].state == wf.state) {
         var op = wf.operations.operation[j];
@@ -255,9 +262,8 @@ Recordings = new (function() {
       }
     }
 
-    ocUtils.log('Workflow operation', wf.template);
     // Actions
-    if(wf.template === 'scheduling') {
+    if(rec.operation.heading === 'schedule') {
       rec.actions = ['view', 'edit', 'delete'];
     }else{
       rec.actions = ['view', 'delete'];
@@ -473,7 +479,6 @@ RenderUtils = new (function() {
   this.makeActions = function(id, title, actions) {
     links = [];
     for(i in actions){
-      ocUtils.log(actions[i]);
       if(actions[i] === 'view') {
         links.push('<a href="view.html?id=' + id + '">View</a>');
       } else if(actions[i] === 'edit') {
@@ -482,8 +487,7 @@ RenderUtils = new (function() {
         links.push('<a href="javascript:Recordings.removeRecording(\'' + id + '\',\'' + title + '\')">Delete</a>');
       }
     }
-    ocUtils.log(links.join('<br />\n'));
-    return links.join('<br />\n');
+    return links.join(' \n');
   }
 
   this.getTime = function(timestamp) {
