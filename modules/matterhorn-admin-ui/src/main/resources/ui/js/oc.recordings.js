@@ -434,7 +434,7 @@ ocRecordings = new (function() {
 
     // add properties for workflow resum if provided by hold operation
     if (postData !== undefined) {
-      data.properties = {};
+      data.properties = "";
       $.each(postData, function(key, value) {
         if(key != 'id') {
           data.properties += key + '=' + value + '\n';
