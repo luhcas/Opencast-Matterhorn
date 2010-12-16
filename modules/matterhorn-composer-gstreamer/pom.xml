@@ -75,6 +75,16 @@
       <artifactId>cxf-bundle-jaxrs</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.googlecode.gstreamer-java</groupId>
+      <artifactId>gstreamer-java</artifactId>
+      <version>1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+      <version>3.2.4</version>
+    </dependency>
+    <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.fileinstall</artifactId>
       <exclusions>
@@ -127,10 +137,21 @@
               org.opencastproject.mediapackage;version=${project.version},
               *;resolution:=optional
             </Import-Package>
-            <Private-Package> org.apache.xmlrpc.* </Private-Package>
-            <Export-Package>org.opencastproject.composer.impl.*;version=${project.version}</Export-Package>
-            <Embed-Dependency>xmlrpc-client;inline=true</Embed-Dependency>
+            <Private-Package> 
+              org.apache.xmlrpc.*,
+              org.gstreamer.*
+            </Private-Package>
+            <Export-Package>org.opencastproject.composer.gstreamer.*;version=${project.version}</Export-Package>
+            <Embed-Dependency>
+              xmlrpc-client;inline=true, 
+              gstreamer-java;inline=true,
+              jna;inline=true
+            </Embed-Dependency>
             <Service-Component>
+              OSGI-INF/gscomposer-service-rest.xml,
+              OSGI-INF/gscomposer-service.xml,
+              OSGI-INF/gsencoderengine.xml,
+              OSGI-INF/gsprofile-scanner.xml
             </Service-Component>
           </instructions>
         </configuration>
