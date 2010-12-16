@@ -578,12 +578,11 @@ Opencast.Initialize = (function ()
                 $('#oc_embed-costum-height-textinput').attr('value', getCustomHeight());
             }
             $('#oc_embed-costum-height-textinput').css('background-color', '#ffffff');
-        }); /* initalise embed buttons */
-        $("#oc_embed-icon-one, #oc_embed-icon-two, #oc_embed-icon-three, #oc_embed-icon-four, #oc_embed-icon-five", "#oc_embed-left").button(); /* initalise search button */
+        }); 
+        /* initalise embed buttons */
+        $("#oc_embed-icon-one, #oc_embed-icon-two, #oc_embed-icon-three, #oc_embed-icon-four, #oc_embed-icon-five", "#oc_embed-left").button(); 
+        /* initalise search button */
         $("#oc_btn-search", "#oc_search").button();
-/* initalise share button
-        $( "#oc_share-button, #oc_shortcut-button", "#oc_player-head-right" ).button(); */
-        /* initalise share button */
         $("#oc_btn-cc", "#oc_video-time").button();
         $('#oc_btn-leave-share, #oc_btn-leave-session-time').button(
         {
@@ -668,6 +667,8 @@ Opencast.Initialize = (function ()
         {
             Opencast.Series.doToggleSeriesDropdown()
         });
+        
+        $('#oc_video-player-controls').hide();
         onPlayerReadyListener();
     });
 /*

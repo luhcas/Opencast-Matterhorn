@@ -79,9 +79,7 @@ table
 #oc_video-player-controls
 {
   height:                   30px;
-  width:                    100%;
   background-position:      0 0px;
-  visibility:               hidden;
   background-image:         url("../img/oc_icons.png");
 }
 
@@ -118,7 +116,7 @@ table
   font-size:                0.8em;
   color:                    #FFFFFF;
   margin-top:               7px;
-  width:                    37%;
+  width:                    33.33%;
 }
 
 #simpleEdit 
@@ -170,8 +168,8 @@ table
 #oc_video-controls
 {
   float:                    left;
-  width:                    26%;
-  text-align:               right;
+  width:                    33.33%;
+  text-align:               center;
   margin-top:               4px;
 }
 
@@ -201,7 +199,7 @@ table
   z-index:                  10000;
   visibility:               hidden;
   padding-bottom:           5px;
-  width:                    48px;
+  width:                    60px;
 }
 
 #oc_volume-dropdown

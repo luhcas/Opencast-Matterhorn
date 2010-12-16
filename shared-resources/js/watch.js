@@ -239,7 +239,7 @@ Opencast.Watch = (function ()
             });
 
             // set the controls visible
-            $('#oc_video-player-controls').css('visibility', 'visible');
+            $('#oc_video-player-controls').show();
         });
     }
 

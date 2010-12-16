@@ -7,42 +7,36 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
     <link rel="shortcut icon" href="img/favicon.ico"> 
-
+    
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.6.custom.css">
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-orange-custom.css">
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/embed-hybrid-player.css" />
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/embed-hybrid-player-icons.css" />
     <link rel="stylesheet" type="text/css" href="css/shared.css" />
     <link rel="stylesheet" type="text/css" href="engage-hybrid-player/css/opencast-reset.css" />
     <link rel="stylesheet" type="text/css" href="jquery/plugins/jwysiwyg/jquery.wysiwyg.css"  />
     <link rel="stylesheet" type="text/css" href="css/oc.segments.css">
-     <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.6.custom.css">
-    <link rel="stylesheet" type="text/css" href="css/jquery-ui-orange-custom.css">
 
     <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.xslt.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.hotkeys-0.7.9.js"></script>
-    <script type="text/javascript" src="engage-hybrid-player/bridge/lib/FABridge.js"></script>
-    <script type="text/javascript" src="engage-hybrid-player/bridge/Videodisplay.js"></script>
     <script type="text/javascript" src="jquery/plugins/jARIA.js"></script>
     <script type="text/javascript" src="jquery/jquery-ui-1.8.1.custom.min.js"></script>
-    <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-scubber.js"></script>
-    <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid.js"></script> 
-    <script type="text/javascript" src="engage-hybrid-player/aria/js/ariaSlider.js"></script>     
     <script type="text/javascript" src="jquery/plugins/jwysiwyg/jquery.wysiwyg.js"></script>
     <script type="text/javascript" src="jquery/plugins/jquery.client.js"></script>
     <script type="text/javascript" src="js/engage-ui.js"></script>
     <script type="text/javascript" src="js/version.js"></script>
     <script type="text/javascript" src="js/jquery.timers-1.2.js"></script>
-    <script type="text/javascript" src="engage-hybrid-player/embed-hybrid-initialize.js"></script>
-    <script type="text/javascript" src="js/engage_plugins/segments.js"></script>
-    <script type="text/javascript" src="js/search.js"></script>
     <script type="text/javascript" src="js/embed.js"></script>
-     <script type="text/javascript">
-     $(document).ready(function(){
-        //bind click functions
-        $('#oc_time-chooser').click(function() { Opencast.Player.doToggleTimeLayer(); });
-      });
-    </script>
-    
+    <script type="text/javascript" src="engage-hybrid-player/embed-hybrid-initialize.js"></script>   
+    <script type="text/javascript" src="engage-hybrid-player/bridge/lib/FABridge.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/bridge/Videodisplay.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid-scubber.js"></script>
+    <script type="text/javascript" src="engage-hybrid-player/player-multi-hybrid.js"></script> 
+    <script type="text/javascript" src="engage-hybrid-player/aria/js/ariaSlider.js"></script>
+    <script type="text/javascript" src="js/engage_plugins/segments.js"></script>
+    <script type="text/javascript" src="js/engage_plugins/search.js"></script>
+
   </head>
 
   <body>
@@ -75,7 +69,7 @@
    
     </div>
     
-    <div id="oc_video-player-controls" style="display: none;"> 
+    <div id="oc_video-player-controls"> 
       
       <div id="oc_video-time">
         <div id="simpleEdit">    
@@ -83,7 +77,9 @@
           <input id="oc_edit-time" class="oc_edit-time-hide" type="text" maxlength="8" size="8" name="Edit Current Time HH:MM:SS" title="Edit Current Time HH:MM:SS" value="00:00:00"></input> 
           of
           <span id="oc_duration" class="oc_duration" name="Duration" title="Duration" tabIndex="0">00:00:00</span>
+<!--
           <input id="oc_time-chooser" type="image" name="Choose Time" src="img/space.png" title="Choose Time" alt="Choose Time" role="button" aria-disabled="false" aria-pressed="false"/>
+-->
           <span id="oc_video-cc">
             <input id="oc_btn-cc" class="oc_btn-cc-off" type="submit" name="Closed Caption Off: Control + Alt + C" alt="Closed Caption Off: Control + Alt + C" title="Closed Caption Off: Control + Alt + C" value=""></input>
           </span>
@@ -129,11 +125,13 @@
     <div id="data"></div>
     </div>
     <div id="segment-tooltip" class="segment-tooltip" style="display: none;"></div>
-    <div id="oc_time-chooser-layer" class="ui-widget ui-widget-content ui-corner-all oc_popuplayer" title="Shortcuts">
+    <!-- #time-chooser-layer dialog -->
+    <div id="oc_time-chooser-layer" class="ui-widget ui-widget-content ui-corner-all oc_popuplayer ui-helper-hidden" title="change player time/ session time" tabindex="-1" role="dialog" aria-hidden="true" >
       <ul id="oc_time-chooser-list" class="oc_popuplayer-list">
-        <li><a href="javascript: " id="oc_btn-embed" onclick="Opencast.Player.doToggleTimeLayer();" class="handcursor" title="Embed">View player time</a></li>
-        <li><a href="javascript: " id="oc_btn-email" onclick="Opencast.Player.doToggleTimeLayer();" class="handcursor" title="Email">View session time</a></li>
+        <li><a href="javascript: " id="oc_btn-player-time" onclick="Opencast.Player.doToggleTimeLayer();" class="handcursor" title="View player time" role="button">View player time</a></li>
+        <li><a href="javascript: " id="oc_btn-session-time" onclick="Opencast.Player.doToggleTimeLayer();" class="handcursor" title="View session time" role="button">View session time</a></li>
       </ul>
+      <button id="oc_btn-leave-session-time" class="oc_btn-close">Leave time dialog</button>
     </div>
 
   </body>

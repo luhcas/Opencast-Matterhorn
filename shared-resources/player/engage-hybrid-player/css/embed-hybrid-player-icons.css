@@ -26,7 +26,6 @@ input
 
 #oc_video-controls input
 {
-  float:                    left;
   margin-left:              2px;
   margin-right:             2px;
 }
@@ -257,19 +256,27 @@ input:hover
 
 #oc_btn-dropdown
 {
-  width:                    40px;
   height:					19px;
   margin-right:             5px;
 }
 
-.oc_btn-singleDisplay
+.oc_btn-singleDisplay-presenter
 {
-  background:               transparent url("../img/oc_icons.png");
-  background-position:      -190px -330px;
-  width:                    48px;
-  height:					19px;
+  background:               url("../img/oc_icons_2.png") no-repeat -240px -305px transparent;
+  width:                   60px;
+  height:                 19px;
+  margin-top: 5px;
 
 }
+.oc_btn-singleDisplay-presentation
+{
+  background:               url("../img/oc_icons_2.png") no-repeat -300px -305px transparent;
+  width:                   60px;
+  height:					19px;
+  margin-top: 5px;
+
+}
+#oc_video-size-controls .oc_btn-singleDisplay-presentation, #oc_video-size-controls .oc_btn-singleDisplay-presenter { margin: 0px; } 
 
 .oc_btn-bigLeftDisplay
 {
@@ -382,3 +389,5 @@ input:hover
 
   
 }
+
+.oc_btn-close { position: absolute; top: -5px; right: -5px; padding: 0px; width: 20px!important; height: 20px!important;}

@@ -1509,10 +1509,12 @@ Opencast.Player = (function () {
         }
         else if (displayMode === SINGLEPLAYER)
         {
-            content = '<span id="oc_video-size-dropdown-div">';
+            //~ content = '<span id="oc_video-size-dropdown-div">';
+            content = '<input id="oc_btn-singleDisplay" class="oc_btn-singleDisplay-presenter" type="image" src="img/space.png" name="show_presenter_video" alt="Show presenter video" title="Show presenter video" value="<![CDATA[ ]]>" onclick="Opencast.Player.videoSizeControlMultiOnlyLeftDisplay();"' 
+            content = content + '<input id="oc_btn-singleDisplay" class="oc_btn-singleDisplay-presentation" type="image" src="img/space.png" name="show_presentation_only " alt="Show presentation only " title="Show presentation only " onclick="Opencast.Player.videoSizeControlMultiOnlyRightDisplay();" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer();" />';
             //content = content + '<input id="oc_btn-singleDisplay" class="oc_btn-singleDisplay" type="submit" name="Show presenter video " alt="Show presenter video " title="Show presenter video " value="" onclick="Opencast.Player.videoSizeControlSingleDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
             //content = content + '<input id="oc_btn-audioDisplay" class="oc_btn-audioDisplay" type="submit" name="Audio" alt="Audio" title="Audio" value="" onclick="Opencast.Player.videoSizeControlAudioDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
-            content = content + '</span>';
+            //~ content = content + '</span>';
             $('#oc_player_video-dropdown').append(content);
             $("#oc_btn-dropdown").attr("className", "oc_btn-singleDisplay");
             $("#oc_btn-dropdown").css("display", 'none');
@@ -1525,10 +1527,11 @@ Opencast.Player = (function () {
         }
         else if (displayMode === SINGLEPLAYERWITHSLIDES)
         {
-            content = content + '<input style="margin-top:5px; id="oc_btn-singleDisplay" class="oc_btn-singleDisplay" type="submit" name="Show presenter video" alt="Show presenter video" title="Show presenter video" value="" onclick="Opencast.Player.videoSizeControlSinglePlayerWithSlides()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input><br/>';
+            content = '<input id="oc_btn-singleDisplay" class="oc_btn-singleDisplay-presenter" type="image" src="img/space.png" name="show_presenter_video" alt="Show presenter video" title="Show presenter video" value="<![CDATA[ ]]>" onclick="Opencast.Player.videoSizeControlMultiOnlyLeftDisplay();"' 
+            content = content + '<input id="oc_btn-singleDisplay" class="oc_btn-singleDisplay-presentation" type="image" src="img/space.png" name="show_presentation_only " alt="Show presentation only " title="Show presentation only " onclick="Opencast.Player.videoSizeControlMultiOnlyRightDisplay();" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer();" />';
             //content = content + '<input style="margin-top:5px; id="oc_btn-singleDisplay" class="oc_btn-singleDisplay" type="submit" name="Show presentation only " alt="Show presentation only" title="Show presentation only" value="" onclick="Opencast.Player.videoSizeControlMultiOnlyRightDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input><br/>';
             //content = content + '<input id="oc_btn-audioDisplay" class="oc_btn-audioDisplay" type="submit" name="Audio" alt="Audio" title="Audio" value="" onclick="Opencast.Player.videoSizeControlAudioDisplay()" onfocus="Opencast.Initialize.dropdownVideo_open();" onblur="Opencast.Initialize.dropdown_timer()"></input>';
-            $('#oc_player_video-dropdown').append(content);
+            $('#oc_player_video-dropdown').html(content);
             $("#oc_btn-dropdown").attr("className", "oc_btn-singleDisplay");
             $("#oc_btn-dropdown").css("display", 'block');
             setDisplayMode(displayMode);

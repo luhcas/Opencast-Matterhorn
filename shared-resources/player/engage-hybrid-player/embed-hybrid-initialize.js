@@ -211,7 +211,7 @@ Opencast.Initialize = (function ()
     		 
     		 
     		 $('#oc_image').hide();
-    		 $('#oc_video-player-controls').show();
+    		 $('#oc_video-player-controls, #oc_draggable-embed, #oc_segments-embed').show();
     		 start = true;
          $('#oc_controlbar-embed').hide();
     	}
@@ -638,6 +638,18 @@ Opencast.Initialize = (function ()
                 Opencast.Player.stopFastForward();
             }
         });
+        //hide player controll
+        $('#oc_video-player-controls, #oc_draggable-embed, #oc_segments-embed').hide();
+        //initalize close button
+        $('#oc_btn-leave-session-time').button(
+        {
+            icons: {
+                primary: 'ui-icon-close'
+            },
+            text: false
+        });
+        //bind click functions
+        $('#oc_time-chooser,  #oc_btn-leave-session-time').click(function() { Opencast.Player.doToggleTimeLayer(); });
         
         onPlayerReadyListener();
         
