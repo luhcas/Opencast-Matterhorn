@@ -166,7 +166,6 @@ public class ConfigurationManager implements ManagedService {
         RefreshRunner refreshRunner = new RefreshRunner(listener);
         Thread thread = new Thread(refreshRunner);
         thread.start();
-        //listener.refresh();
       }
       // Set initialized to true so that every listener registered after this point will be updated immediately.
       initialized = true;
@@ -188,6 +187,7 @@ public class ConfigurationManager implements ManagedService {
     public void run() {
       if(listener != null){
         listener.refresh();
+        logger.info("ConfigurationManager has refreshed " + listener);
       }
     }
   }

@@ -1209,6 +1209,8 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     createScheduler(props, "agentStateUpdate", JobParameters.RECURRING_TYPE);
     // Create recording load task. 
     createScheduler(props, "recordingLoad", JobParameters.OTHER_TYPE);
+    
+    logger.info("CaptureAgentImpl has successfully updated its quartz configuration.");
   }
 
   /**
@@ -1222,6 +1224,7 @@ public class CaptureAgentImpl implements CaptureAgent, StateService, ConfidenceM
     // Setup the task to load the recordings from disk once everything has started (let's be safe and use 60
     // seconds)
     createRecordingLoadTask(RECORDING_LOAD_TASK_DELAY);
+    logger.info("CaptureAgentImpl has successfully updated its properties from ConfigurationManager");
   }
   
   /**
