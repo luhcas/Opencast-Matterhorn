@@ -21,6 +21,7 @@ import org.opencastproject.mediapackage.identifier.Id;
 import org.opencastproject.util.DateTimeSupport;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -32,7 +33,9 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,6 +72,12 @@ public final class MediaPackageImpl implements MediaPackage {
 
   /** the logging facility provided by log4j */
   private final static Logger logger = LoggerFactory.getLogger(MediaPackageImpl.class.getName());
+
+  /**
+   * The prefix indicating that a tag should be excluded from a search for elements using
+   * {@link #getElementsByTags(Collection)}
+   */
+  public static final String NEGATE_TAG_PREFIX = "-";
 
   /** Context for serializing and deserializing */
   static JAXBContext context;
@@ -256,6 +265,95 @@ public final class MediaPackageImpl implements MediaPackage {
       }
     }
     return result.toArray(new MediaPackageElement[result.size()]);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackage#getElementsByTags(java.util.Collection)
+   */
+  @Override
+  public MediaPackageElement[] getElementsByTags(Collection<String> tags) {
+    if (tags == null || tags.isEmpty())
+      return getElements();
+    Set<String> keep = new HashSet<String>();
+    Set<String> lose = new HashSet<String>();
+    for (String tag : tags) {
+      if (StringUtils.isBlank(tag))
+        continue;
+      if (tag.startsWith(NEGATE_TAG_PREFIX)) {
+        lose.add(tag.substring(NEGATE_TAG_PREFIX.length()));
+      } else {
+        keep.add(tag);
+      }
+    }
+    List<MediaPackageElement> result = new ArrayList<MediaPackageElement>();
+    for (MediaPackageElement element : manifest.getEntries()) {
+      boolean add = false;
+      for (String elementTag : element.getTags()) {
+        if (lose.contains(elementTag)) {
+          add = false;
+          break;
+        } else if (keep.contains(elementTag)) {
+          add = true;
+        }
+      }
+      if (add) {
+        result.add(element);
+      }
+    }
+    return result.toArray(new MediaPackageElement[result.size()]);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackage#getAttachmentsByTags(java.util.Collection)
+   */
+  @Override
+  public Attachment[] getAttachmentsByTags(Collection<String> tags) {
+    MediaPackageElement[] matchingElements = getElementsByTags(tags);
+    List<Attachment> attachments = new ArrayList<Attachment>();
+    for (MediaPackageElement element : matchingElements) {
+      if (Attachment.TYPE.equals(element.getElementType())) {
+        attachments.add((Attachment) element);
+      }
+    }
+    return attachments.toArray(new Attachment[0]);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackage#getCatalogsByTags(java.util.Collection)
+   */
+  @Override
+  public Catalog[] getCatalogsByTags(Collection<String> tags) {
+    MediaPackageElement[] matchingElements = getElementsByTags(tags);
+    List<Catalog> catalogs = new ArrayList<Catalog>();
+    for (MediaPackageElement element : matchingElements) {
+      if (Catalog.TYPE.equals(element.getElementType())) {
+        catalogs.add((Catalog) element);
+      }
+    }
+    return catalogs.toArray(new Catalog[0]);
+  }
+
+  /**
+   * {@inheritDoc}
+   * 
+   * @see org.opencastproject.mediapackage.MediaPackage#getTracksByTags(java.util.Collection)
+   */
+  @Override
+  public Track[] getTracksByTags(Collection<String> tags) {
+    MediaPackageElement[] matchingElements = getElementsByTags(tags);
+    List<Track> tracks = new ArrayList<Track>();
+    for (MediaPackageElement element : matchingElements) {
+      if (Track.TYPE.equals(element.getElementType())) {
+        tracks.add((Track) element);
+      }
+    }
+    return tracks.toArray(new Track[0]);
   }
 
   /**

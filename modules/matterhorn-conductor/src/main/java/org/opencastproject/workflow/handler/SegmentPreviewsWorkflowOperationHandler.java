@@ -196,28 +196,18 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
 
     List<String> sourceTagSet = asList(sourceTags);
 
-    // Select the tracks based on the flavors
-    Set<Track> videoTracks = new HashSet<Track>();
-    for (Track track : mediaPackage.getTracks()) {
+    // Select the tracks based on the tags and flavors
+    Set<Track> videoTrackSet = new HashSet<Track>();
+    for(Track track : mediaPackage.getTracksByTags(sourceTagSet)) {
       if (sourceVideoFlavor == null
               || (track.getFlavor() != null && sourceVideoFlavor.equals(track.getFlavor().toString()))) {
         if (!track.hasVideo())
           continue;
-        if (sourceTags == null) {
-          videoTracks.add(track);
-          continue;
-        } else {
-          for (String tag : track.getTags()) {
-            if (sourceTagSet.contains(tag)) {
-              videoTracks.add(track);
-              continue;
-            }
-          }
-        }
+        videoTrackSet.add(track);
       }
     }
 
-    if (videoTracks.size() == 0) {
+    if (videoTrackSet.size() == 0) {
       logger.debug("Mediapackage {} has no suitable tracks to extract images based on tags {} and flavor {}",
               new Object[] { mediaPackage, sourceTags, sourceVideoFlavor });
       return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
@@ -227,7 +217,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
       List<String> referenceTagSet = asList(referenceTags);
 
       // Determine the reference master
-      for (Track t : videoTracks) {
+      for (Track t : videoTrackSet) {
 
         // Try to load the segments catalog
         MediaPackageReference trackReference = new MediaPackageReferenceImpl(t);

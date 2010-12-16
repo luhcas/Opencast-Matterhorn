@@ -22,6 +22,7 @@ import org.w3c.dom.Document;
 
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -66,7 +67,7 @@ public interface MediaPackage extends Cloneable {
   void removeCreator(String creator);
 
   /**
-   * Returns the names of the institutions or people who created this mediapackage 
+   * Returns the names of the institutions or people who created this mediapackage
    * 
    * @return the creators of this mediapackage
    */
@@ -200,6 +201,18 @@ public interface MediaPackage extends Cloneable {
   MediaPackageElement[] getElementsByTag(String tag);
 
   /**
+   * Returns the elements that are tagged with any of the given tags or an empty array if no such elements are found. If
+   * any of the tags in the <code>tags</code> collection start with a '-' character, any elements matching the tag will
+   * be excluded from the returned MediaPackageElement[]. If <code>tags</code> is empty or null, all elements are
+   * returned.
+   * 
+   * @param tags
+   *          the tags
+   * @return the elements
+   */
+  MediaPackageElement[] getElementsByTags(Collection<String> tags);
+
+  /**
    * Returns all elements of this media package with the given flavor.
    * 
    * @return the media package elements
@@ -230,6 +243,17 @@ public interface MediaPackage extends Cloneable {
    * @return the tracks
    */
   Track[] getTracksByTag(String tag);
+
+  /**
+   * Returns the tracks that are tagged with any of the given tags or an empty array if no such elements are found. If
+   * any of the tags in the <code>tags</code> collection start with a '-' character, any elements matching the tag will
+   * be excluded from the returned Track[]. If <code>tags</code> is empty or null, all tracks are returned.
+   * 
+   * @param tags
+   *          the tags
+   * @return the tracks
+   */
+  Track[] getTracksByTags(Collection<String> tags);
 
   /**
    * Returns the tracks that are part of this media package and match the given flavor as defined in {@link Track}.
@@ -308,6 +332,18 @@ public interface MediaPackage extends Cloneable {
   Attachment[] getAttachmentsByTag(String tag);
 
   /**
+   * Returns the attachments that are tagged with any of the given tags or an empty array if no such attachments are
+   * found. If any of the tags in the <code>tags</code> collection start with a '-' character, any elements matching the
+   * tag will be excluded from the returned Attachment[]. If <code>tags</code> is empty or null, all attachments are
+   * returned.
+   * 
+   * @param tags
+   *          the tags
+   * @return the attachments
+   */
+  Attachment[] getAttachmentsByTags(Collection<String> tags);
+
+  /**
    * Returns the attachments that are part of this media package and match the specified flavor.
    * 
    * @param flavor
@@ -381,6 +417,17 @@ public interface MediaPackage extends Cloneable {
    * @return the catalogs
    */
   Catalog[] getCatalogsByTag(String tag);
+
+  /**
+   * Returns the catalogs that are tagged with any of the given tags or an empty array if no such elements are found. If
+   * any of the tags in the <code>tags</code> collection start with a '-' character, any elements matching the tag will
+   * be excluded from the returned Catalog[]. If <code>tags</code> is empty or null, all catalogs are returned.
+   * 
+   * @param tags
+   *          the tags
+   * @return the catalogs
+   */
+  Catalog[] getCatalogsByTags(Collection<String> tags);
 
   /**
    * Returns the catalogs associated with this media package that matches the specified flavor.

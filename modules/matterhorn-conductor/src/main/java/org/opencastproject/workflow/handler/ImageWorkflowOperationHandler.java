@@ -156,10 +156,10 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
 
     // Select the tracks based on source flavors and tags
     Set<Track> videoTracks = new HashSet<Track>();
-    for (Track track : mediaPackage.getTracks()) {
+    for (Track track : mediaPackage.getTracksByTags(sourceTagSet)) {
       if (sourceVideoFlavor == null
               || (track.getFlavor() != null && sourceVideoFlavor.equals(track.getFlavor().toString()))) {
-        if (track.hasVideo() && track.containsTag(sourceTagSet)) {
+        if (track.hasVideo()) {
           videoTracks.add(track);
         }
       }

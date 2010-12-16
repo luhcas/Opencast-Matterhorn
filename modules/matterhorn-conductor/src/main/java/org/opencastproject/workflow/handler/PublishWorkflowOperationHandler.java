@@ -33,10 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -80,15 +78,8 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
   protected MediaPackage getMediaPackageForSearchIndex(MediaPackage current, List<String> tags) throws MediaPackageException {
     MediaPackage mp = (MediaPackage)current.clone();
 
-    Set<MediaPackageElement> keep = new HashSet<MediaPackageElement>();
-
-    // Check which tags have been configured
-    for (String tag : tags) {
-      keep.addAll(Arrays.asList(mp.getTracksByTag(tag)));
-      keep.addAll(Arrays.asList(mp.getAttachmentsByTag(tag)));
-      keep.addAll(Arrays.asList(mp.getCatalogsByTag(tag)));
-    }
-
+    List<MediaPackageElement> keep = Arrays.asList(current.getElementsByTags(tags));
+    
     // Mark everything that is set for removal
     List<MediaPackageElement> removals = new ArrayList<MediaPackageElement>();
     for (MediaPackageElement element : mp.getElements()) {
@@ -109,7 +100,7 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
         Map<String, String> referenceProperties = reference.getProperties();
         MediaPackageElement referencedElement = mp.getElementByReference(reference);
         
-        // if we are distributing the referenced element, everything is fine. Otherwhise...
+        // if we are distributing the referenced element, everything is fine. Otherwise...
         if (referencedElement != null && removals.contains(referencedElement)) {
 
           // Follow the references until we find a flavor

@@ -60,4 +60,28 @@ public class IdImpl implements Id {
   public String toString() {
     return id;
   }
+  
+  /**
+   * {@inheritDoc}
+   *
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object o) {
+    if(o instanceof IdImpl) {
+      IdImpl other = (IdImpl)o;
+      return id != null && other.id != null && id.equals(other.id);
+    }
+    return false;
+  }
+  
+  /**
+   * {@inheritDoc}
+   *
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return id.hashCode();
+  }
 }

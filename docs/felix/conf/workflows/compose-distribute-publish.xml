@@ -408,9 +408,21 @@
       id="distribute-download"
       fail-on-error="true"
       exception-handler-workflow="error"
-      description="Distributing media to the local distribution channel">
+      description="Distributing to progressive downloads">
       <configurations>
-        <configuration key="source-tags">engage,atom,rss</configuration>
+        <configuration key="source-tags">engage,atom,rss,-publish</configuration>
+        <configuration key="target-tags">publish</configuration>
+      </configurations>
+    </operation>
+
+    <operation
+      id="distribute-streaming"
+      fail-on-error="true"
+      if="${org.opencastproject.streaming.url}"
+      exception-handler-workflow="error"
+      description="Distributing to streaming server">
+      <configurations>
+        <configuration key="source-tags">engage,-publish</configuration>
         <configuration key="target-tags">publish</configuration>
       </configurations>
     </operation>

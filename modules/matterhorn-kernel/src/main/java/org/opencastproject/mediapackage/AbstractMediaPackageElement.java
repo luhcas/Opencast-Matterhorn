@@ -456,7 +456,7 @@ public abstract class AbstractMediaPackageElement implements MediaPackageElement
     if (!(obj instanceof MediaPackageElement))
       return false;
     MediaPackageElement e = (MediaPackageElement) obj;
-    if (mediaPackage != null && !mediaPackage.equals(e.getMediaPackage()))
+    if (mediaPackage != null && e.getMediaPackage() != null && !mediaPackage.equals(e.getMediaPackage()))
       return false;
     if (id != null && !id.equals(e.getIdentifier()))
       return false;

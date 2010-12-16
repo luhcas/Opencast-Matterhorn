@@ -21,8 +21,8 @@ import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
-import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationInstance.OperationState;
+import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.apache.commons.lang.StringUtils;
@@ -103,8 +103,11 @@ final class WorkflowOperationWorker implements Runnable {
         throw new IllegalStateException("Workflow operation '" + operation + "' is in unexpected state '"
                 + operation.getState() + "'");
       }
-      if (result == null || Action.CONTINUE.equals(result.getAction()) || Action.SKIP.equals(result.getAction()))
-        handler.destroy(workflow);
+      if (result == null || Action.CONTINUE.equals(result.getAction()) || Action.SKIP.equals(result.getAction())) {
+        if (handler != null) {
+          handler.destroy(workflow);
+        }
+      }
       service.handleOperationResult(workflow, result);
     } catch (Exception e) {
       logger.error("Workflow operation '{}' failed with error: {}", new Object[] { handler, e.getMessage(), e });
@@ -132,25 +135,34 @@ final class WorkflowOperationWorker implements Runnable {
     WorkflowOperationInstance operation = workflow.getCurrentOperation();
 
     // Do we need to execute the operation?
-    String executeCondition = operation.getExecutionCondition();
-    String skipCondition = operation.getSkipCondition();
+    String executeCondition = operation.getExecutionCondition(); // if
+    String skipCondition = operation.getSkipCondition(); // unless
 
-    if (StringUtils.isNotBlank(executeCondition) && !"true".equalsIgnoreCase(executeCondition)) {
+    if (StringUtils.isNotBlank(executeCondition)
+            && WorkflowServiceImpl.PROPERTY_PATTERN.matcher(executeCondition).matches()) {
       operation.setState(OperationState.SKIPPED);
-    } else if (StringUtils.isNotBlank(skipCondition) && "true".equalsIgnoreCase(skipCondition)) {
+    } else if (StringUtils.isNotBlank(skipCondition)
+            && !WorkflowServiceImpl.PROPERTY_PATTERN.matcher(skipCondition).matches()) {
       operation.setState(OperationState.SKIPPED);
     } else {
       operation.setState(OperationState.RUNNING);
     }
-
     service.update(workflow);
     try {
       WorkflowOperationResult result = null;
-      if (OperationState.SKIPPED.equals(operation.getState()))
-        result = handler.skip(workflow);
-      else
+      if (OperationState.SKIPPED.equals(operation.getState())) {
+        // Allow for null handlers when we are skipping an operation
+        if (handler != null) {
+          result = handler.skip(workflow);
+        }
+      } else {
+        if (handler == null) {
+          // If there is no handler for the operation, yet we are supposed to run it, we must fail
+          logger.warn("No handler available to execute operation '{}'", operation.getId());
+          throw new IllegalStateException("Unable to find a workflow handler for '" + operation.getId() + "'");
+        }
         result = handler.start(workflow);
-
+      }
       if (result != null && Action.PAUSE.equals(result.getAction())) {
         operation.setState(OperationState.PAUSED);
       } else if (result != null && Action.SKIP.equals(result.getAction())) {
@@ -158,7 +170,6 @@ final class WorkflowOperationWorker implements Runnable {
       } else {
         operation.setState(OperationState.SUCCEEDED);
       }
-
       return result;
     } catch (Exception e) {
       operation.setState(OperationState.FAILED);

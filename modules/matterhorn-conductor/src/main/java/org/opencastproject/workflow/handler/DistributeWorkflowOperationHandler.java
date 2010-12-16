@@ -69,10 +69,11 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
   static {
     CONFIG_OPTIONS = new TreeMap<String, String>();
     CONFIG_OPTIONS.put("source-tags",
-            "Distribute any mediapackage elements with one of these (whitespace separated) tags");
+            "Distribute any mediapackage elements with one of these (comma separated) tags.  If a source-tag " +
+            "starts with a '-', mediapackage elements with this tag will be excluded from distribution.");
     CONFIG_OPTIONS
             .put("target-tags",
-                    "Apple these (whitespace separated) tags to any mediapackage elements produced as a result of distribution");
+                    "Apple these (comma separated) tags to any mediapackage elements produced as a result of distribution");
   }
 
   /**
@@ -105,16 +106,12 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
         return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
       }
 
-      // Look for elements matching any tag
+      // Look for elements matching the tag
       Set<String> elementIds = new HashSet<String>();
-      for (String tag : asList(sourceTags)) {
-        if (StringUtils.trimToNull(tag) == null)
-          continue;
-        MediaPackageElement[] elts = mediaPackage.getElementsByTag(tag);
-        for (MediaPackageElement e : elts) {
-          if (elementIds.add(e.getIdentifier())) {
-            logger.info("Distributing '{}' to the local repository", e.getIdentifier(), mediaPackage);
-          }
+      MediaPackageElement[] elts = mediaPackage.getElementsByTags(asList(sourceTags));
+      for (MediaPackageElement e : elts) {
+        if (elementIds.add(e.getIdentifier())) {
+          logger.info("Distributing '{}' to the local repository", e.getIdentifier(), mediaPackage);
         }
       }
 

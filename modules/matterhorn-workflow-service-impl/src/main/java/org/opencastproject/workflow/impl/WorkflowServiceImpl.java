@@ -46,6 +46,7 @@ import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowStatistics;
 
 import org.apache.commons.codec.EncoderException;
+import org.apache.commons.lang.StringUtils;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
@@ -69,7 +70,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.regex.PatternSyntaxException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Implements WorkflowService with in-memory data structures to hold WorkflowOperations and WorkflowInstances.
@@ -88,6 +90,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /** The configuration key that defines the number of threads to use in the workflow instance thread pool */
   protected static final String WORKFLOW_THREADS_CONFIGURATION = "org.opencastproject.concurrent.jobs";
+
+  /** The pattern used by workfow operation configuration keys **/
+  public static final Pattern PROPERTY_PATTERN = Pattern.compile("\\$\\{.+?\\}");
 
   /** TODO: Remove references to the component context once felix scr 1.2 becomes available */
   protected ComponentContext componentContext = null;
@@ -484,21 +489,43 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     }
   }
 
-  // TODO: this could be far more efficient, consider using e.g. velocity or freemarker
+  /**
+   * Replaces all occurrances of <code>${.*+}</code> with the property in the provided map, or if not available in the
+   * map, from the bundle context properties, if available.
+   * 
+   * @param source
+   *          The source string
+   * @param properties
+   *          The map of properties to replace
+   * @return The resulting string
+   */
   protected String replaceVariables(String source, Map<String, String> properties) {
-    if (properties == null) {
+    Matcher matcher = PROPERTY_PATTERN.matcher(source);
+    StringBuilder result = new StringBuilder();
+    int cursor = 0;
+    boolean matchFound = matcher.find();
+    if (!matchFound)
       return source;
-    } else {
-      for (Entry<String, String> prop : properties.entrySet()) {
-        String key = "\\$\\{" + prop.getKey() + "\\}";
-        try {
-          source = source.replaceAll(key, prop.getValue());
-        } catch (PatternSyntaxException e) {
-          logger.warn("Unable to handle variable with key '{}'", prop.getKey());
-        }
+    while (matchFound) {
+      int matchStart = matcher.start();
+      int matchEnd = matcher.end();
+      result.append(source.substring(cursor, matchStart)); // add the content before the match
+      String key = source.substring(matchStart + 2, matchEnd - 1);
+      String systemProperty = componentContext == null ? null : componentContext.getBundleContext().getProperty(key);
+      String providedProperty = properties.get(key);
+      if (StringUtils.isNotBlank(providedProperty)) {
+        result.append(providedProperty);
+      } else if (StringUtils.isNotBlank(systemProperty)) {
+        result.append(systemProperty);
+      } else {
+        result.append(source.substring(matchStart, matchEnd)); // retain the original matched value
       }
-      return source;
+      cursor = matchEnd;
+      matchFound = matcher.find();
+      if (!matchFound)
+        result.append(source.substring(matchEnd, source.length()));
     }
+    return result.toString();
   }
 
   /**
@@ -530,15 +557,10 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   protected void run(final WorkflowInstance wfi, final Map<String, String> properties) {
     WorkflowOperationInstance operation = wfi.getCurrentOperation();
-    if (operation == null)
+    if (operation == null) {
       operation = wfi.next();
-
-    WorkflowOperationHandler operationHandler = selectOperationHandler(operation);
-    // If there is no handler for the operation, mark this workflow as failed
-    if (operationHandler == null) {
-      logger.warn("No handler available to execute operation '{}'", operation.getId());
-      throw new IllegalStateException("Unable to find a workflow handler for '" + operation.getId() + "'");
     }
+    WorkflowOperationHandler operationHandler = selectOperationHandler(operation);
     executorService.execute(new WorkflowOperationWorker(operationHandler, wfi, properties, this));
   }
 
@@ -779,7 +801,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     if (result == null) {
       WorkflowOperationInstance operation = workflow.getCurrentOperation();
       // Just continue using the workflow's current mediapackage, but log a warning
-      logger.warn("Handling a null operation result for workflow {} in operation {}", workflow.getId(), operation.getId());
+      logger.warn("Handling a null operation result for workflow {} in operation {}", workflow.getId(),
+              operation.getId());
       result = new WorkflowOperationResultImpl(workflow.getMediaPackage(), null, Action.CONTINUE, 0);
     } else {
       // Update the workflow's mediapackage if a new one was produced in this operation

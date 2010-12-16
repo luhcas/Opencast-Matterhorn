@@ -406,7 +406,12 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
     String sourceFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
     List<String> sourceTagSet = asList(operation.getConfiguration("source-tags"));
 
-    for (Catalog mediaPackageCatalog : mediaPackage.getCatalogs(MediaPackageElements.SEGMENTS)) {
+    Catalog[] catalogsWithTags = mediaPackage.getCatalogsByTags(sourceTagSet);
+    
+    for (Catalog mediaPackageCatalog : catalogsWithTags) {
+      if(!MediaPackageElements.SEGMENTS.equals(mediaPackageCatalog.getFlavor())) {
+        continue;
+      }
       if (sourceFlavor != null) {
         if (mediaPackageCatalog.getReference() == null)
           continue;

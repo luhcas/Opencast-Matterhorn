@@ -64,7 +64,7 @@ public class WorkflowOperationSkippingTest {
   private WorkflowServiceDaoSolrImpl dao = null;
   private Set<HandlerRegistration> handlerRegistrations = null;
   private Workspace workspace = null;
- 
+
   @Before
   public void setup() throws Exception {
     // always start with a fresh solr root directory
@@ -148,7 +148,7 @@ public class WorkflowOperationSkippingTest {
     // See if the skip operation has been skipped (skip value != "true")
     WorkflowInstance instance2FromDb = service.getWorkflowById(instance2.getId());
     assertNotNull(instance2FromDb);
-    assertEquals(OperationState.SKIPPED, instance2FromDb.getOperations().get(0).getState());
+    assertEquals(OperationState.SUCCEEDED, instance2FromDb.getOperations().get(0).getState());
 
     // See if the skip operation has been skipped (skip property is undefined)
     WorkflowInstance instance3FromDb = service.getWorkflowById(instance3.getId());
@@ -176,7 +176,7 @@ public class WorkflowOperationSkippingTest {
     // See if the skip operation has been skipped (skip value != "true")
     WorkflowInstance instance2FromDb = service.getWorkflowById(instance2.getId());
     assertNotNull(instance2FromDb);
-    assertEquals(OperationState.SUCCEEDED, instance2FromDb.getOperations().get(1).getState());
+    assertEquals(OperationState.SKIPPED, instance2FromDb.getOperations().get(1).getState());
 
     // See if the skip operation has been skipped (skip property is undefined)
     WorkflowInstance instance3FromDb = service.getWorkflowById(instance3.getId());
@@ -184,8 +184,8 @@ public class WorkflowOperationSkippingTest {
     assertEquals(OperationState.SUCCEEDED, instance3FromDb.getOperations().get(1).getState());
   }
 
-  protected WorkflowInstance startAndWait(WorkflowDefinition definition, MediaPackage mp, Map<String, String> properties, WorkflowState stateToWaitFor)
-          throws Exception {
+  protected WorkflowInstance startAndWait(WorkflowDefinition definition, MediaPackage mp,
+          Map<String, String> properties, WorkflowState stateToWaitFor) throws Exception {
     WorkflowInstance instance = service.start(definition, mp, properties);
     while (!service.getWorkflowById(instance.getId()).getState().equals(stateToWaitFor)) {
       System.out.println("Waiting for workflow to complete...");
