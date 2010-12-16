@@ -50,27 +50,27 @@ cd /d %TEMP_DIR%
 echo.
 echo Downloading Mingw required libraries
 echo.
-wget http://downloads.sourceforge.net/project/mingw/GNU%%20Binutils/binutils-2.20.1/binutils-2.20.1-2-mingw32-bin.tar.gz
+wget "http://switch.dl.sourceforge.net/project/mingw/MinGW/BaseSystem/GNU-Binutils/binutils-2.20.1/binutils-2.20.1-2-mingw32-bin.tar.gz"
 if errorlevel 1 (
 	cd ..
 	goto EXCEPTION
 )
-wget http://downloads.sourceforge.net/project/mingw/GCC%%20Version%%204/Current%%20Release_%%20gcc-4.4.0/gcc-full-4.4.0-mingw32-bin-2.tar.lzma
+wget "http://switch.dl.sourceforge.net/project/mingw/MinGW/BaseSystem/GCC/Version4/Previous Release gcc-4.4.0/gcc-full-4.4.0-mingw32-bin-2.tar.lzma"
 if errorlevel 1 (
 	cd ..
 	goto EXCEPTION
 )
-wget http://downloads.sourceforge.net/project/mingw/MinGW%%20Runtime/mingwrt-3.18/mingwrt-3.18-mingw32-dll.tar.gz
+wget "http://switch.dl.sourceforge.net/project/mingw/MinGW/BaseSystem/RuntimeLibrary/MinGW-RT/mingwrt-3.18/mingwrt-3.18-mingw32-dll.tar.gz"
 if errorlevel 1 (
 	cd ..
 	goto EXCEPTION
 )
-wget http://downloads.sourceforge.net/project/mingw/MinGW%%20Runtime/mingwrt-3.18/mingwrt-3.18-mingw32-dev.tar.gz
+wget "http://switch.dl.sourceforge.net/project/mingw/MinGW/BaseSystem/RuntimeLibrary/MinGW-RT/mingwrt-3.18/mingwrt-3.18-mingw32-dev.tar.gz"
 if errorlevel 1 (
 	cd ..
 	goto EXCEPTION
 )
-wget http://downloads.sourceforge.net/project/mingw/MinGW%%20API%%20for%%20MS-Windows/w32api-3.14/w32api-3.14-mingw32-dev.tar.gz
+wget "http://switch.dl.sourceforge.net/project/mingw/MinGW/BaseSystem/RuntimeLibrary/Win32-API/w32api-3.14/w32api-3.14-mingw32-dev.tar.gz"
 if errorlevel 1 (
 	cd ..
 	goto EXCEPTION
@@ -79,17 +79,17 @@ if errorlevel 1 (
 echo.
 echo Downloading MSys and required libraries
 echo.
-wget http://prdownloads.sourceforge.net/mingw/coreutils-5.97-MSYS-1.0.11-snapshot.tar.bz2
+wget "http://switch.dl.sourceforge.net/project/mingw/MSYS/BaseSystem/msys-core/_obsolete/coreutils-5.97-MSYS-1.0.11-2/coreutils-5.97-MSYS-1.0.11-snapshot.tar.bz2"
 if errorlevel 1 (
 	cd ..
 	goto EXCEPTION
 )
-wget http://prdownloads.sourceforge.net/mingw/MSYS-1.0.11.exe
+wget "http://switch.dl.sourceforge.net/project/mingw/MSYS/BaseSystem/msys-core/msys-1.0.11/MSYS-1.0.11.exe"
 if errorlevel 1 (
 	cd ..
 	goto EXCEPTION
 )
-wget http://prdownloads.sourceforge.net/mingw/msysDTK-1.0.1.exe
+wget "http://switch.dl.sourceforge.net/project/mingw/MSYS/Supplementary Tools/msysDTK-1.0.1/msysDTK-1.0.1.exe"
 if errorlevel 1 (
 	cd ..
 	goto EXCEPTION
@@ -108,6 +108,11 @@ start /wait "Msys installation" MSYS-1.0.11.exe
 rem Looking for msys location
 for /f "tokens=6*" %%i in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\MSYS-1.0_is1" /v "Inno Setup: App Path"') do (
 	set MSYS_DIR=%%i
+)
+if "%MSYS_DIR%" == "" (
+	for /f "tokens=6*" %%i in ('reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\MSYS-1.0_is1" /v "Inno Setup: App Path"') do (
+		set MSYS_DIR=%%i
+	)
 )
 
 mkdir %MSYS_DIR%\mingw
