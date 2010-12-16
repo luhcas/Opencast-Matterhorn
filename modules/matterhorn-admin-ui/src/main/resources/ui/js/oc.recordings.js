@@ -238,9 +238,18 @@ ocRecordings = new (function() {
     rec.seriesTitle = wf.mediapackage.seriestitle;
 
     // Creator(s)
-    if (wf.mediapackage.creators) { // TODO update when there can be more than one
-      rec.creators = wf.mediapackage.creators.creator;
-    } 
+    if (wf.mediapackage.creators !== undefined) {
+      rec.creators = ocUtils.ensureArray(wf.mediapackage.creators.creator).join(', ');
+    }
+
+    // Series
+    if (wf.mediapackage.metadata.catalog !== undefined) {
+      // och, have to lookup series title here, not in data :(
+    }
+
+
+
+    var seriesUrl = "http://localhost:8080/admin/series.html?seriesId=101&edit=true";
 
     // Start Time
     if (wf.mediapackage.start) {
@@ -250,6 +259,7 @@ ocRecordings = new (function() {
 
     // Status
     // current operation : search last operation with state that matches workflow state
+    // FIXME replace with findCurrentOperation() ?
     var op = null;
     for (var j in wf.operations.operation) {
       if (wf.operations.operation[j].state == wf.state) {
