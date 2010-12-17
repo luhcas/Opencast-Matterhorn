@@ -42,7 +42,8 @@ public class CaptureDeviceProperties {
    *          Confidence monitoring properties.
    **/
   public CaptureDeviceProperties(CaptureDevice captureDevice, Properties properties) {
-    customProducer = captureDevice.properties.getProperty("customProducer");
+    customProducer = properties.getProperty(CaptureParameters.CAPTURE_DEVICE_PREFIX + captureDevice.getFriendlyName()
+            + CaptureParameters.CAPTURE_DEVICE_CUSTOM_PRODUCER);
     codec = captureDevice.properties.getProperty("codec");
     container = captureDevice.properties.getProperty("container");
     bitrate = captureDevice.properties.getProperty("bitrate");
