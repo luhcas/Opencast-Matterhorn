@@ -85,7 +85,7 @@ public class WorkflowServiceDaoSolrTest {
   public void testBuildSimpleQuery() throws Exception {
     WorkflowQuery q = new WorkflowQuery().withMediaPackage("123").withSeriesId("series1");
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "mp:123 AND seriesid:series1 sort=created ASC";
+    String expected = "mp:123 AND seriesid:series1";
     assertEquals(expected, solrQuery);
   }
 
@@ -97,7 +97,7 @@ public class WorkflowServiceDaoSolrTest {
     WorkflowQuery q = new WorkflowQuery().withSeriesId("series1").withState(WorkflowState.RUNNING)
             .withState(WorkflowState.PAUSED);
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "seriesid:series1 AND (state:RUNNING OR state:PAUSED) sort=created ASC";
+    String expected = "seriesid:series1 AND (state:RUNNING OR state:PAUSED)";
     assertEquals(expected, solrQuery);
   }
 
@@ -109,7 +109,7 @@ public class WorkflowServiceDaoSolrTest {
     WorkflowQuery q = new WorkflowQuery().withSeriesId("series1").withoutState(WorkflowState.RUNNING)
             .withoutState(WorkflowState.PAUSED);
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "seriesid:series1 AND (-state:RUNNING AND -state:PAUSED AND *:*) sort=created ASC";
+    String expected = "seriesid:series1 AND (-state:RUNNING AND -state:PAUSED AND *:*)";
     assertEquals(expected, solrQuery);
   }
 
@@ -120,7 +120,7 @@ public class WorkflowServiceDaoSolrTest {
   public void testBuildNegativeStateQuery() throws Exception {
     WorkflowQuery q = new WorkflowQuery().withSeriesId("series1").withoutState(WorkflowState.RUNNING);
     String solrQuery = dao.buildSolrQueryString(q);
-    String expected = "seriesid:series1 AND (-state:RUNNING AND *:*) sort=created ASC";
+    String expected = "seriesid:series1 AND (-state:RUNNING AND *:*)";
     assertEquals(expected, solrQuery);
   }
 

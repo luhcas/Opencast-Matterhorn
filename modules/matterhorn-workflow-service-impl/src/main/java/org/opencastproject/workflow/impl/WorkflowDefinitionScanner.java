@@ -89,6 +89,6 @@ public class WorkflowDefinitionScanner implements ArtifactInstaller {
    * @see org.apache.felix.fileinstall.ArtifactListener#canHandle(java.io.File)
    */
   public boolean canHandle(File artifact) {
-    return artifact.getParentFile().getName().equals("workflows") && artifact.getName().endsWith(".xml");
+    return "workflows".equals(artifact.getParentFile().getName()) && artifact.getName().endsWith(".xml");
   }
 }

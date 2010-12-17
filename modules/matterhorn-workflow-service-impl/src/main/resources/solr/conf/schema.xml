@@ -77,11 +77,26 @@
     <field name="title" type="text" indexed="true" stored="false" multiValued="false" />
     <field name="license" type="text" indexed="true" stored="false" multiValued="false" />
     <field name="language" type="text" indexed="true" stored="false" multiValued="false" />
-    <field name="contributor" type="text" indexed="true" stored="false" multiValued="true" />
-    <field name="creator" type="text" indexed="true" stored="false" multiValued="true" />
+    <field name="contributor" type="text" indexed="true" stored="false" multiValued="false" />
+    <field name="creator" type="text" indexed="true" stored="false" multiValued="false" />
     <field name="created" type="date" indexed="true" stored="false"/>
     <field name="subject" type="text" indexed="true" stored="false" multiValued="true" />
     <field name="fulltext" type="text" indexed="true" stored="false" multiValued="true" />
+    
+    <!-- Fields used for sorting (can't be multivalued or tokenized (i. e. must not have an analyzer) -->
+    
+    <field name="created_sort" type="string" indexed="true" stored="false" multiValued="false" />
+    <field name="title_sort" type="string" indexed="true" stored="false" multiValued="false" />
+    <field name="seriestitle_sort" type="string" indexed="true" stored="false" multiValued="false" />
+    <field name="seriesid_sort" type="string" indexed="true" stored="false" multiValued="false" />
+    <field name="mp_sort" type="string" indexed="true" stored="false" multiValued="false" />
+    <field name="templateid_sort" type="string" indexed="true" stored="false" multiValued="false" />
+    <field name="creator_sort" type="string" indexed="true" stored="false" multiValued="false" />
+    <field name="contributor_sort" type="string" indexed="true" stored="false" multiValued="false" />
+    <field name="language_sort" type="string" indexed="true" stored="false" multiValued="false" />
+    <field name="license_sort" type="string" indexed="true" stored="false" multiValued="false" />
+    <field name="subject_sort" type="string" indexed="true" stored="false" multiValued="false" />
+
   </fields>
 
   <uniqueKey>id</uniqueKey>
@@ -101,4 +116,19 @@
   <copyField source="creator" dest="fulltext" />
   <copyField source="created" dest="fulltext" />
   <copyField source="subject" dest="fulltext" />
+  
+  <!-- Copy regular fields into sort fields -->
+
+  <copyField source="created" dest="created_sort" />
+  <copyField source="title" dest="title_sort" />
+  <copyField source="seriestitle" dest="seriestitle_sort" />
+  <copyField source="seriesid" dest="seriesid_sort" />
+  <copyField source="mp" dest="mp_sort" />
+  <copyField source="templateid" dest="templateid_sort" />
+  <copyField source="creator" dest="creator_sort" />
+  <copyField source="contributor" dest="contributor_sort" />
+  <copyField source="language" dest="language_sort" />
+  <copyField source="license" dest="license_sort" />
+  <copyField source="subject" dest="subject_sort" />
+
 </schema>

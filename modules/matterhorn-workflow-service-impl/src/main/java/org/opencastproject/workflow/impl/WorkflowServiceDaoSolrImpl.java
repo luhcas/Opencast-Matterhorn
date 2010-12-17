@@ -29,6 +29,7 @@ import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowQuery.QueryTerm;
+import org.opencastproject.workflow.api.WorkflowQuery.Sort;
 import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowSetImpl;
@@ -41,6 +42,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
@@ -63,7 +65,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Provides data access to the workflow service through file storage in the workspace, indexed via solr.
@@ -298,6 +299,14 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     }
   }
 
+  /**
+   * Adds the workflow instance to the search index.
+   * 
+   * @param instance
+   *          the instance
+   * @return the solr input document
+   * @throws Exception
+   */
   protected SolrInputDocument createDocument(WorkflowInstance instance) throws Exception {
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ID_KEY, instance.getId());
@@ -332,19 +341,31 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
       doc.addField(LANGUAGE_KEY, mp.getLanguage());
     }
     if (mp.getContributors() != null && mp.getContributors().length > 0) {
+      StringBuffer buf = new StringBuffer();
       for (String contributor : mp.getContributors()) {
-        doc.addField(CONTRIBUTOR_KEY, contributor);
+        if (buf.length() > 0)
+          buf.append("; ");
+        buf.append(contributor);
       }
+      doc.addField(CONTRIBUTOR_KEY, buf.toString());
     }
     if (mp.getCreators() != null && mp.getCreators().length > 0) {
+      StringBuffer buf = new StringBuffer();
       for (String creator : mp.getCreators()) {
-        doc.addField(CREATOR_KEY, creator);
+        if (buf.length() > 0)
+          buf.append("; ");
+        buf.append(creator);
       }
+      doc.addField(CREATOR_KEY, buf.toString());
     }
     if (mp.getSubjects() != null && mp.getSubjects().length > 0) {
+      StringBuffer buf = new StringBuffer();
       for (String subject : mp.getSubjects()) {
-        doc.addField(SUBJECT_KEY, subject);
+        if (buf.length() > 0)
+          buf.append("; ");
+        buf.append(subject);
       }
+      doc.addField(SUBJECT_KEY, buf.toString());
     }
     return doc;
   }
@@ -642,54 +663,48 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     if (sb.length() == 0) {
       sb.append("*:*");
     }
-    // TITLE, SERIES_TITLE, SERIES_ID, MEDIA_PACKAGE_ID, WORKFLOW_DEFINITION_ID, CREATOR, CONTRIBUTOR, LANGUAGE,
-    // LICENSE, SUBJECT
-
-    if (query.getSort() != null) {
-      sb.append(" sort=");
-      switch (query.getSort()) {
-      case TITLE:
-        sb.append(TITLE_KEY);
-        break;
-      case CONTRIBUTOR:
-        sb.append(CONTRIBUTOR_KEY);
-        break;
-      case CREATOR:
-        sb.append(CREATOR_KEY);
-        break;
-      case LANGUAGE:
-        sb.append(LANGUAGE_KEY);
-        break;
-      case LICENSE:
-        sb.append(LICENSE_KEY);
-        break;
-      case MEDIA_PACKAGE_ID:
-        sb.append(MEDIAPACKAGE_KEY);
-        break;
-      case SERIES_ID:
-        sb.append(SERIES_ID_KEY);
-        break;
-      case SERIES_TITLE:
-        sb.append(SERIES_TITLE_KEY);
-        break;
-      case SUBJECT:
-        sb.append(SUBJECT_KEY);
-        break;
-      case WORKFLOW_DEFINITION_ID:
-        sb.append(WORKFLOW_DEFINITION_KEY);
-        break;
-      default:
-        sb.append(CREATED_KEY);
-        break;
-      }
-      sb.append(query.isSortAscending() ? " ASC" : " DESC");
-    }
 
     return sb.toString();
   }
 
   /**
-   * Appends query parameters from a {@link Map} to a solr query. The map
+   * Returns the search index' field name that corresponds to the sort field.
+   * 
+   * @param sort
+   *          the sort field
+   * @return the field name in the search index
+   */
+  protected String getSortField(Sort sort) {
+    switch (sort) {
+    case TITLE:
+      return TITLE_KEY;
+    case CONTRIBUTOR:
+      return CONTRIBUTOR_KEY;
+    case DATE_CREATED:
+      return CREATED_KEY;
+    case CREATOR:
+      return CREATOR_KEY;
+    case LANGUAGE:
+      return LANGUAGE_KEY;
+    case LICENSE:
+      return LICENSE_KEY;
+    case MEDIA_PACKAGE_ID:
+      return MEDIAPACKAGE_KEY;
+    case SERIES_ID:
+      return SERIES_ID_KEY;
+    case SERIES_TITLE:
+      return SERIES_TITLE_KEY;
+    case SUBJECT:
+      return SUBJECT_KEY;
+    case WORKFLOW_DEFINITION_ID:
+      return WORKFLOW_DEFINITION_KEY;
+    default:
+      throw new IllegalArgumentException("No mapping found between sort field and index");
+    }
+  }
+
+  /**
+   * Appends query parameters from a {@link java.util.Map} to a solr query. The map
    * 
    * @param sb
    *          The {@link StringBuilder} containing the query
@@ -752,6 +767,14 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
 
     String solrQueryString = buildSolrQueryString(query);
     solrQuery.setQuery(solrQueryString);
+    
+    if (query.getSort() != null) {
+      ORDER order = query.isSortAscending() ? ORDER.asc : ORDER.desc;
+      solrQuery.addSortField(getSortField(query.getSort()) + "_sort", order);
+      solrQuery.addSortField(getSortField(query.getSort()) + "_sort", order);
+    }
+    solrQuery.addSortField(getSortField(Sort.DATE_CREATED) + "_sort", ORDER.asc);
+
     long totalHits;
     long time = System.currentTimeMillis();
     WorkflowSetImpl set = null;

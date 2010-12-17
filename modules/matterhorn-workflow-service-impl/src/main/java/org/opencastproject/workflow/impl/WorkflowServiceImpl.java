@@ -45,7 +45,6 @@ import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowStatistics;
 
-import org.apache.commons.codec.EncoderException;
 import org.apache.commons.lang.StringUtils;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -985,11 +984,11 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
 
   /**
    * Updates the job in the service registry. The exceptions that are possibly been thrown are wrapped in a
-   * {@link EncoderException}.
+   * {@link WorkflowDatabaseException}.
    * 
    * @param job
    *          the job to update
-   * @throws EncoderException
+   * @throws WorkflowDatabaseException
    *           the exception that is being thrown
    */
   private void updateJob(Job job) throws WorkflowDatabaseException {
