@@ -39,8 +39,12 @@ public class DateTimeSupport {
    */
   public static long fromUTC(String s) throws IllegalStateException,
       ParseException {
-    if (s == null)
+    if (s == null) {
       throw new IllegalArgumentException("UTC date string is null");
+    }
+    if (s.endsWith("Z")) {
+      s = s.substring(0, s.length() - 1); //cut off the Z
+    }
     String[] parts = s.split("T");
     if (parts.length != 2)
       throw new IllegalArgumentException("UTC date string is malformed");
@@ -79,6 +83,7 @@ public class DateTimeSupport {
     SimpleDateFormat tf = new SimpleDateFormat("HH:mm:ss");
     tf.setTimeZone(TimeZone.getTimeZone("UTC"));
     utc.append(tf.format(d));
+    utc.append("Z");
 
     return utc.toString();
   }

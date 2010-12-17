@@ -85,6 +85,18 @@ ocUtils.makeLocaleDateString = function(timestamp) {
   return date.toLocaleString();
 }
 
+ocUtils.fromUTCDateString = function(UTCDate) {
+  var date = new Date(0);
+  if(UTCDate[UTCDate.length - 1] === "Z") {
+    var dateTime = UTCDate.slice(0,-1).split("T");
+    var ymd = dateTime[0].split("-");
+    var hms = dateTime[1].split(":");
+    date.setUTCFullYear(ymd[0], ymd[1], ymd[2]);
+    date.setUTCHours(hms[0], hms[1], hms[2]);
+  }
+  return date;
+}
+
 ocUtils.padString = function(str, pad, padlen){
   if(typeof str !== 'string'){ 
     str = str.toString();

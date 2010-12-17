@@ -259,8 +259,7 @@ ocRecordings = new (function() {
 
     // Start Time
     if (wf.mediapackage.start) {
-      var t = wf.mediapackage.start.split('T');
-      rec.start = t[1] + ' ' + t[0];
+      rec.start = ocUtils.fromUTCDateString(wf.mediapackage.start);
     }
 
     // Status
@@ -562,6 +561,20 @@ ocRecordings = new (function() {
       ocRecordings.Configuration.pageSize = $(this).val();
       ocRecordings.reload();
     });
+    
+    $('#page').val(parseInt(ocRecordings.Configuration.page) + 1);
+    
+    $('#page').blur(function(){
+      ocRecordings.gotoPage($(this).val() - 1);
+    });
+    
+    $('#page').keypress(function(event) {
+      if(event.keyCode == '13') {
+        event.preventDefault();
+        ocRecordings.gotoPage($(this).val() - 1);
+      }
+    });
+    
 
     // button to open the config dialog
     /*$( '#configButton' ).button()
@@ -628,6 +641,18 @@ ocRecordings = new (function() {
   this.lastPage = function() {
     ocRecordings.Configuration.page = Math.floor(this.totalRecordings / ocRecordings.Configuration.pageSize);
     ocRecordings.reload();
+  }
+  
+  this.gotoPage = function(page) {
+    if(page > (ocRecordings.totalRecordings / ocRecordings.Configuration.pageSize)) {
+      ocRecordings.lastPage();
+    } else {
+      if( page < 0) {
+        page = 0;
+      }
+      ocRecordings.Configuration.page = page;
+      ocRecordings.reload();
+    }
   }
   
   $(document).ready(this.init);
