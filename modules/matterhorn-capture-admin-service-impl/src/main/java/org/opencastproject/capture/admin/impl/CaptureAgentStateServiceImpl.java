@@ -23,7 +23,9 @@ import org.opencastproject.capture.admin.api.RecordingState;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
+import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowService;
+import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
 
 import org.apache.commons.lang.StringUtils;
 import org.osgi.service.cm.ConfigurationException;
@@ -359,7 +361,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       } else {
         logger.debug("Setting Recording {} to state {}.", id, state);
         req.setState(state);
-        resumeWorkflow(id, state);
+        updateWorkflow(id, state);
         return true;
       }
     } else {
@@ -373,7 +375,7 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       logger.debug("Creating Recording {} with state {}.", id, state);
       Recording r = new RecordingImpl(id, state);
       recordings.put(id, r);
-      resumeWorkflow(id, state);
+      updateWorkflow(id, state);
       return true;
     }
   }
@@ -386,12 +388,12 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
    * @param state
    *          the new state for this recording
    */
-  protected void resumeWorkflow(String recordingId, String state) {
-    if (!RecordingState.CAPTURING.equals(state) && !RecordingState.UPLOADING.equals(state)) {
-      // TODO: Update workflows on capture failures too. See MH-5877
+  protected void updateWorkflow(String recordingId, String state) {
+    if (!RecordingState.CAPTURING.equals(state) && !RecordingState.UPLOADING.equals(state) && !state.endsWith("_error")) {
       logger.debug("Recording state updated to {}.  Not updating an associated workflow.", state);
       return;
     }
+
     WorkflowInstance workflowToUpdate = null;
     try {
       workflowToUpdate = workflowService.getWorkflowById(Long.parseLong(recordingId));
@@ -406,8 +408,15 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
       return;
     }
     try {
-      workflowService.resume(workflowToUpdate.getId());
-      logger.info("Agent status changed to '{}', resuming workflow '{}'", state, workflowToUpdate.getId());
+      if (state.endsWith("_error")) {
+        workflowToUpdate.getCurrentOperation().setState(WorkflowOperationInstance.OperationState.FAILED);
+        workflowToUpdate.setState(WorkflowState.FAILED);
+        workflowService.update(workflowToUpdate);
+        logger.info("Recording status changed to '{}', failing workflow '{}'", state, workflowToUpdate.getId());
+      } else {
+        workflowService.resume(workflowToUpdate.getId());
+        logger.info("Recording status changed to '{}', resuming workflow '{}'", state, workflowToUpdate.getId());
+      }
     } catch (Exception e) {
       logger.warn("Unable to update workflow {}: {}", workflowToUpdate.getId(), e);
     }

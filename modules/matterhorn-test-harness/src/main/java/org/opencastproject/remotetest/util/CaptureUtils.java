@@ -21,8 +21,14 @@ import org.opencastproject.remotetest.Main;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.xpath.XPathConstants;
 
@@ -87,6 +93,18 @@ public final class CaptureUtils {
     String responseBody = EntityUtils.toString(response.getEntity());
     Main.returnClient(client);
     return state.equalsIgnoreCase((String) Utils.xpath(responseBody, "//state", XPathConstants.STRING));
+  }
+
+  public static void setState(String recordingId, String state) throws Exception {
+    HttpPost request = new HttpPost(BASE_URL + "/capture-admin/rest/recordings/" + recordingId);
+    List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+    params.add(new BasicNameValuePair("state", state));
+    request.setEntity(new UrlEncodedFormEntity(params));
+    TrustedHttpClient client = Main.getClient();
+    HttpResponse response = client.execute(request);
+    if (HttpStatus.SC_OK != response.getStatusLine().getStatusCode())
+      throw new IllegalStateException("Recording '" + recordingId + "' not found");
+    Main.returnClient(client);
   }
 
 }
