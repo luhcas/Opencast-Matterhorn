@@ -392,11 +392,13 @@
         // Format 'Trim To'
         var trimToData = $('#outPoint').val();
         trimToData = ((trimToData == '') || (trimToData == null)) ? videoDurationData : trimToData;
-        
+       	
         // If Input < Output
         if(trimFromData < trimToData) {
+        	var newduration = getTimeInMilliseconds(trimToData) - getTimeInMilliseconds(trimFromData);
             postData['trimin'] = getTimeInMilliseconds(trimFromData);
-            postData['trimout'] = getTimeInMilliseconds(trimToData);
+            //postData['trimout'] = getTimeInMilliseconds(trimToData);
+            postData['newduration'] = newduration;
             parent.ocRecordings.continueWorkflow(postData);
         } else {
             $('div#errorMessage').html("The In-Point must not be bigger than the Out-Point");

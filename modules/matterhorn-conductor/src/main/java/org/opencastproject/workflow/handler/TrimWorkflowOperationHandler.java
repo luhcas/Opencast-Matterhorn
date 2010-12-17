@@ -150,7 +150,8 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
       if (trackFlavor != null && matchingFlavor.matches(trackFlavor)) {
         String profileId = currentOperation.getConfiguration(ENCODING_PROFILE_PROPERTY);
         long start = Long.parseLong(properties.get("trimin"));
-        long duration = Long.parseLong(properties.get("trimout"));
+        long duration = Long.parseLong(properties.get("newduration"));
+        
         Track trimmedTrack = null;
         try {
           // Trim the track
