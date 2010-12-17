@@ -76,7 +76,7 @@ CaptureAgent captureAgentMock;
       return;
     
     captureAgentMock = createMock(CaptureAgent.class);
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, null, null, null, null, null, null, 
+    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null, null, null, null, 
             null, null);
     captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.EPIPHAN_VGA2USB, 
             "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties); 
@@ -297,7 +297,7 @@ CaptureAgent captureAgentMock;
     if (!gstreamerInstalled)
       return;
     try {
-      captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties("v4l2src device=" + 
+      captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, "v4l2src device=" + 
               BinTestHelpers.V4L2_LOCATION, null, null, null, null, null, null, null, null);
       captureDevice = BinTestHelpers.createCaptureDevice("/dev/video1", ProducerType.CUSTOM_VIDEO_SRC, 
               "Custom Video Bin Source", "/tmp/testpipe/test.mpeg", captureDeviceProperties);
@@ -315,7 +315,7 @@ CaptureAgent captureAgentMock;
     if (!gstreamerInstalled)
       return;
     try {
-      captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties("pulsesrc", null, null, null, null, null, 
+      captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, "pulsesrc", null, null, null, null, null, 
               null, null, null);
       captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.CUSTOM_AUDIO_SRC, 
               "Custom Audio Bin Source", "/tmp/testpipe/test.mp2", captureDeviceProperties);

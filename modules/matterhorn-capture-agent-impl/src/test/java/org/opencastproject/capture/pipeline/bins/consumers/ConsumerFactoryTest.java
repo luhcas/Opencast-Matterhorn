@@ -75,7 +75,7 @@ public class ConsumerFactoryTest {
 
     captureAgentMock = createMock(CaptureAgent.class);
 
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, null, null, null, null,
+    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null, null,
             null, null, null, null);
     captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.EPIPHAN_VGA2USB,
             "Friendly Name", "/tmp/testpipe/test.mp2", captureDeviceProperties);

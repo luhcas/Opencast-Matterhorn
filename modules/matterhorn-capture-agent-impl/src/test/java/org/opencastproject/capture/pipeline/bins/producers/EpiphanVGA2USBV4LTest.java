@@ -85,7 +85,7 @@ public abstract class EpiphanVGA2USBV4LTest {
       }
     }    
         
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, 
+    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, 
             null, null, null, null, null, null, null, null);
     captureDevice = BinTestHelpers.createCaptureDevice(epiphanLocation,
             ProducerType.EPIPHAN_VGA2USB,

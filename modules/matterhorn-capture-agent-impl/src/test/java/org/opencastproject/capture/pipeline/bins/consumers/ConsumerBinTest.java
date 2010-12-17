@@ -104,7 +104,7 @@ public class ConsumerBinTest {
 
   /** Salient queue properties to test are bufferCount, bufferBytes and bufferTime. **/
   private Properties createQueueProperties(String bufferCount, String bufferBytes, String bufferTime) {
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, null, null, null, null,
+    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null, null,
             bufferCount, bufferBytes, bufferTime, null);
     return captureDeviceProperties;
   }

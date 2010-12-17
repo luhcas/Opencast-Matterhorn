@@ -68,7 +68,9 @@ public class CustomAudioProducerTest {
   /** Salient encoder properties are codec and bitrate **/
   /** Salient muxer properties are codec and container **/
   private Properties createProperties(String customProducer){
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(customProducer, null, null, null,
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.CUSTOM_AUDIO_SRC,
+            "Friendly Name", "/tmp/testpipe/test.mp2", null);
+    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, customProducer, null, null, null,
             null, null, null, null, null);
     return captureDeviceProperties;
   }

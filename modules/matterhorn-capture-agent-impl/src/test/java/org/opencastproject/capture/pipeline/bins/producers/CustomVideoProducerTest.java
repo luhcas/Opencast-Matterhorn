@@ -69,6 +69,8 @@ public class CustomVideoProducerTest {
   public void setup() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
+    captureDevice = BinTestHelpers.createCaptureDevice("/dev/video0", ProducerType.VIDEOTESTSRC, "Friendly Name",
+            "/tmp/testpipe/test.mp2", null);
   }
 
   @After
@@ -81,7 +83,7 @@ public class CustomVideoProducerTest {
   /** Salient encoder properties are codec and bitrate **/
   /** Salient muxer properties are codec and container **/
   private Properties createProperties(String customSource) {
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(customSource, null, null, null,
+    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, customSource, null, null, null,
             null, null, null, null, null);
     return captureDeviceProperties;
   }

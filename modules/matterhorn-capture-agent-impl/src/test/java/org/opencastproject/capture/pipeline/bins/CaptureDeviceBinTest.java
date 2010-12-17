@@ -93,7 +93,7 @@ public class CaptureDeviceBinTest {
     properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE, "false");
     properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION, "/tmp/testpipe/confidence");
 
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, null, null, null, null, null, null,
+    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null, null, null, null,
             null, null);
   }
 
@@ -238,7 +238,7 @@ public class CaptureDeviceBinTest {
   public void testHauppageSrcContainerChange() {
     if (!gstreamerInstalled)
       return;
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, "ffenc_mpeg2video", null, null,
+    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, "ffenc_mpeg2video", null, null,
             "mpegtsmux", null, null, null, null);
     runDeviceTest(BinTestHelpers.HAUPPAGE_LOCATION, ProducerType.HAUPPAUGE_WINTV, "Hauppage Source", tempDirectory
             + "/hauppageSrc.mpg");
@@ -248,7 +248,7 @@ public class CaptureDeviceBinTest {
   public void testFileSrc() {
     if (!gstreamerInstalled)
       return;
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, null, null, null, null, null, null,
+    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, null, null, null, null, null, null,
             null, null);
     runDeviceTest(BinTestHelpers.HAUPPAGE_LOCATION, ProducerType.HAUPPAUGE_WINTV, "Hauppage Source", tempDirectory
             + "/fileSrc.mpg");

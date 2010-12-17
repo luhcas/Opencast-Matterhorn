@@ -97,7 +97,7 @@ public class AudioFilesinkConsumerTest {
   /** Salient encoder properties are codec and bitrate **/
   /** Salient muxer properties are codec and container **/
   private Properties createProperties(String codec, String bitrate, String container) {
-    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, codec, bitrate, null,
+    Properties captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, codec, bitrate, null,
             container, null, null, null, null);
     return captureDeviceProperties;
   }
