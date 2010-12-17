@@ -339,7 +339,7 @@ ocRecordings = new (function() {
     $('#pageList').text( page + " of " + Math.ceil(ocRecordings.totalRecordings / ocRecordings.Configuration.pageSize));
 
     // When table is ready, attach event handlers to its children
-    $('#ocRecordingsTable thead .sortable')
+    $('.sortable')
     .mouseenter( function() {
       $(this).addClass('ui-state-hover');
     })
