@@ -31,6 +31,7 @@ ocRecordings = new (function() {
     operation : null,
     changedMediaPackage : null
   }
+
   /** Executed when directly when script is loaded: parses url parameters and
    *  returns the configuration object.
    */
@@ -43,6 +44,8 @@ ocRecordings = new (function() {
     this.refresh = 5000;
     this.sortField = null;
     this.sortOrder = null;
+    this.filterField = null;
+    this.filterText = '';
 
     // parse url parameters
     try {
@@ -73,6 +76,7 @@ ocRecordings = new (function() {
       //params.push('startPage=' + ocRecordings.Configuration.page);
       // 'state' to display
       var state = ocRecordings.Configuration.state;
+      params.push('state=-stopped');
       if (state == 'upcoming') {
         params.push('state=paused');
         params.push('state=running');
@@ -107,6 +111,10 @@ ocRecordings = new (function() {
           sort += "_DESC";
         }
         params.push('sort=' + sort);
+      }
+      // filtering if specified
+      if (ocRecordings.Configuration.filterText != '') {
+        params.push(ocRecordings.Configuration.filterField + '=' + ocRecordings.Configuration.filterText);
       }
       // paging
       params.push('count=' + ocRecordings.Configuration.pageSize);
@@ -244,10 +252,8 @@ ocRecordings = new (function() {
 
     // Series
     if (wf.mediapackage.metadata.catalog !== undefined) {
-      // och, have to lookup series title here, not in data :(
+      // Populating MediaPackage with Series DC metadata not working in WorkflowServiceImpl (bug filed)
     }
-
-
 
     var seriesUrl = "http://localhost:8080/admin/series.html?seriesId=101&edit=true";
 
@@ -513,15 +519,33 @@ ocRecordings = new (function() {
     $( '#state-' +  ocRecordings.Configuration.state).attr('checked', true);
     $( '.state-filter-container' ).buttonset();
     $( '.state-filter-container input' ).click( function() {
+      ocRecordings.Configuration.filterText = '';
+      ocRecordings.Configuration.filterField = null;
       ocRecordings.Configuration.state = $(this).val();
       ocRecordings.reload();
     })
 
     // search box
     this.searchbox = $( '#searchBox' ).searchbox({
-      search : function(text) {
-        alert(text)
-      }
+      search : function(text, field) {
+        if (text.trim() != '') {
+          ocRecordings.Configuration.filterField = field;
+          ocRecordings.Configuration.filterText = text;
+        }
+        ocRecordings.reload();
+      },
+      clear : function() {
+        ocRecordings.Configuration.filterField = null;
+        ocRecordings.Configuration.filterText = '';
+        ocRecordings.reload();
+      },
+      searchText : ocRecordings.Configuration.filterText,
+      options : {
+        title : 'Title',
+        creator : 'Presenter',
+        seriestitle : 'Course/Series'
+      },
+      selectedOption : ocRecordings.Configuration.filterField
     });
 
     // ocRecordings table
