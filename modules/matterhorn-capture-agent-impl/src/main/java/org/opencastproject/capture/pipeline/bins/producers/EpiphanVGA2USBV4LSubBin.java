@@ -13,39 +13,39 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.pipeline.bins.producers.epiphan;
+package org.opencastproject.capture.pipeline.bins.producers;
 
 import org.gstreamer.State;
 import org.gstreamer.elements.AppSink;
 
 /**
- * EpiphanSubBin Interface.
+ * Interface of sub bins to use in {@link EpiphanVGA2USBV4LProducer}.
  */
-interface EpiphanSubBin {
+interface EpiphanVGA2USBV4LSubBin {
 
   /**
    * Returns AppSink Element to get buffer from.
    * @return
    */
-  public AppSink getSink();
+  AppSink getSink();
 
   /**
-   * Start pipeline.
-   * @param time time to check, if pipeline is playing, -1 skip checks.
-   * @return true, if pipeline is playing.
+   * Start bin.
+   * @param time time to check, if bin is starting, -1 skip checks.
+   * @return true, if the bin started.
    */
-  public boolean start(long time);
+  boolean start(long time);
 
   /**
-   * Stop pipeline.
+   * Stop bin.
    */
-  public void stop();
+  void stop();
 
   /**
-   * Set pipeline to specified State.
+   * Set bin to specified State.
    * @param state state to set.
    * @param time time to check state, -1 skip checks.
-   * @return true, if pipeline is in specified state.
+   * @return true, if bin is in specified state.
    */
-  public boolean setState(State state, long time);
+  boolean setState(State state, long time);
 }

@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.pipeline.bins.producers.epiphan;
+package org.opencastproject.capture.pipeline.bins.producers;
 
 import java.util.List;
 import org.gstreamer.Caps;
@@ -32,12 +32,12 @@ import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 
 
 /**
- * Test class for {@Link org.opencastproject.capture.pipeline.bins.producers.epiphan.EpiphanProducer}.
+ * Test class for {@Link org.opencastproject.capture.pipeline.bins.producers.epiphan.EpiphanVGA2USBV4LProducer}.
  */
-public class EpiphanProducerTest extends EpiphanTest {
+public class EpiphanVGA2USBV4LProducerTest extends EpiphanVGA2USBV4LTest {
 
   /** Logging facility */
-  private static final Logger logger = LoggerFactory.getLogger(EpiphanProducerTest.class);
+  private static final Logger logger = LoggerFactory.getLogger(EpiphanVGA2USBV4LProducerTest.class);
   
   @Test
   @Ignore
@@ -46,7 +46,7 @@ public class EpiphanProducerTest extends EpiphanTest {
       return;
 
     try {
-      EpiphanProducer epiphanBin = new EpiphanProducer(captureDevice, properties);
+      EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
       Assert.assertNotNull(epiphanBin.getBin());
       Assert.assertNotNull(epiphanBin.deviceBin);
       Assert.assertNotNull(epiphanBin.subBin);
@@ -57,12 +57,13 @@ public class EpiphanProducerTest extends EpiphanTest {
   }
 
   @Test
+  @Ignore
   public void epiphanProducerFailTest() {
     if (!gstreamerInstalled)
       return;
 
     try {
-      EpiphanProducer epiphanBin = new EpiphanProducer(null, properties);
+      EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(null, properties);
       Assert.fail();
     } catch (Exception ex) {}
   }
@@ -74,7 +75,7 @@ public class EpiphanProducerTest extends EpiphanTest {
       return;
     
     try {
-      EpiphanProducer epiphanBin = new EpiphanProducer(captureDevice, properties);
+      EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
       Assert.assertNotNull(epiphanBin.src);
       Assert.assertTrue(epiphanBin.src instanceof AppSrc);
       Assert.assertNotNull(epiphanBin.identity);
@@ -91,7 +92,7 @@ public class EpiphanProducerTest extends EpiphanTest {
     if (!gstreamerInstalled)
       return;
     try {
-      EpiphanProducer epiphanBin = new EpiphanProducer(captureDevice, properties);
+      EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
       Assert.assertEquals(epiphanBin.src.get(GStreamerProperties.IS_LIVE), true);
       Assert.assertEquals(epiphanBin.src.get(GStreamerProperties.DO_TIMESTAP), true);
       Assert.assertEquals(epiphanBin.src.get(GStreamerProperties.BLOCK), true);
@@ -108,7 +109,7 @@ public class EpiphanProducerTest extends EpiphanTest {
     if (!gstreamerInstalled)
       return;
     try {
-      EpiphanProducer epiphanBin = new EpiphanProducer(captureDevice, properties);
+      EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
       List<Element> elements = epiphanBin.getBin().getElements();
       Assert.assertTrue(elements.size() == 4);
     } catch (UnableToCreateElementException e) {
@@ -122,7 +123,7 @@ public class EpiphanProducerTest extends EpiphanTest {
     if (!gstreamerInstalled)
       return;
     try {
-      EpiphanProducer epiphanBin = new EpiphanProducer(captureDevice, properties);
+      EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
       
       // AppSrc -> identity
       Pad pad = epiphanBin.src.getSrcPads().get(0);
@@ -153,7 +154,7 @@ public class EpiphanProducerTest extends EpiphanTest {
     if (!gstreamerInstalled)
       return;
     try {
-      EpiphanProducer epiphanBin = new EpiphanProducer(captureDevice, properties);
+      EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
   
       Assert.assertNotNull(epiphanBin.getSrcPad());
       Assert.assertTrue(epiphanBin.getSrcPad() instanceof Pad);
@@ -168,7 +169,7 @@ public class EpiphanProducerTest extends EpiphanTest {
     if (!gstreamerInstalled)
       return;
     try {
-      EpiphanProducer epiphanBin = new EpiphanProducer(captureDevice, properties);
+      EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
       String caps = epiphanBin.getCaps();
       Assert.assertNotNull(caps);
       Assert.assertFalse(caps.isEmpty());
@@ -187,7 +188,7 @@ public class EpiphanProducerTest extends EpiphanTest {
     if (!gstreamerInstalled)
       return;
     try {
-      EpiphanProducer epiphanBin = new EpiphanProducer(captureDevice, properties);
+      EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
   
       // start Bin
       epiphanBin.getBin().setState(State.PLAYING);
@@ -198,7 +199,7 @@ public class EpiphanProducerTest extends EpiphanTest {
   //    state = epiphanBin.deviceBin.pipeline.getState();
   //    Assert.assertEquals(state, State.PLAYING);
   
-      state = ((EpiphanSubAbstractBin)epiphanBin.subBin).pipeline.getState();
+      state = ((EpiphanVGA2USBV4LSubAbstractBin)epiphanBin.subBin).bin.getState();
       Assert.assertEquals(state, State.PLAYING);
   
       // stop Bin
@@ -210,7 +211,7 @@ public class EpiphanProducerTest extends EpiphanTest {
   //    state = epiphanBin.deviceBin.pipeline.getState();
   //    Assert.assertEquals(state, State.NULL);
       
-      state = ((EpiphanSubAbstractBin)epiphanBin.subBin).pipeline.getState();
+      state = ((EpiphanVGA2USBV4LSubAbstractBin)epiphanBin.subBin).bin.getState();
       Assert.assertEquals(state, State.NULL);
     } catch (UnableToCreateElementException e) {
       logger.error("testVideoTestSrc in SourceFactoryTest", e);

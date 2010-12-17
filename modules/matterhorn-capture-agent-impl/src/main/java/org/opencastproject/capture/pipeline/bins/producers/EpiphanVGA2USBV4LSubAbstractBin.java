@@ -13,40 +13,39 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.pipeline.bins.producers.epiphan;
+package org.opencastproject.capture.pipeline.bins.producers;
 
-import org.gstreamer.Pipeline;
+import org.gstreamer.Bin;
 import org.gstreamer.State;
-import org.gstreamer.elements.AppSink;
 import org.opencastproject.capture.impl.CaptureAgentImpl;
 
 /**
- * EpiphanAbstractBin implements ApiphanSubBin interface.
- * Create a empty Pipeline and implement state change methods.
+ * Abstract implementation of {@link EpiphanVGA2USBV4LSubBin}.
+ * Creates a empty Bin and implements sub bin state change methods.
  */
-public abstract class EpiphanSubAbstractBin implements EpiphanSubBin {
+public abstract class EpiphanVGA2USBV4LSubAbstractBin implements EpiphanVGA2USBV4LSubBin {
 
-  /** Pipeline */
-  Pipeline pipeline;
+  /** Bin where to store Elements. */
+  Bin bin;
 
   /**
-   * Constructor. Creates a ampty pipeline.
-   * @param pipelineName pipeline name.
+   * Constructor. Creates a empty sub bin.
    */
-  public EpiphanSubAbstractBin(String pipelineName) {
-    pipeline = new Pipeline(pipelineName);
+  public EpiphanVGA2USBV4LSubAbstractBin() {
+    bin = new Bin();
+  }
+
+  /**
+   * Constructor. Creates a named empty sub bin.
+   * @param binName sub bin name
+   */
+  public EpiphanVGA2USBV4LSubAbstractBin(String binName) {
+    bin = new Bin(binName);
   }
 
   /**
    * @inheritDocs
-   * @see EpiphanSubBin#getSink() 
-   */
-  @Override
-  public abstract AppSink getSink();
-
-  /**
-   * @inheritDocs
-   * @see EpiphanSubBin#start(long)
+   * @see EpiphanVGA2USBV4LSubBin#start(long)
    */
   @Override
   public boolean start(long time) {
@@ -55,7 +54,7 @@ public abstract class EpiphanSubAbstractBin implements EpiphanSubBin {
 
   /**
    * @inheritDocs
-   * @see EpiphanSubBin#stop()
+   * @see EpiphanVGA2USBV4LSubBin#stop()
    */
   @Override
   public void stop() {
@@ -64,15 +63,15 @@ public abstract class EpiphanSubAbstractBin implements EpiphanSubBin {
 
   /**
    * @inheritDocs
-   * @see EpiphanSubBin#setState(State, long)
+   * @see EpiphanVGA2USBV4LSubBin#setState(State, long)
    */
   @Override
   public boolean setState(State state, long time) {
-    pipeline.setState(state);
+    bin.setState(state);
     if (time < 0) {
       return true;
     } else {
-      return pipeline.getState(time * CaptureAgentImpl.GST_SECOND) == state;
+      return bin.getState(time * CaptureAgentImpl.GST_SECOND) == state;
     }
   }
 }

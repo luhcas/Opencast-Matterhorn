@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.pipeline.bins.producers.epiphan;
+package org.opencastproject.capture.pipeline.bins.producers;
 
 import java.util.List;
 import org.gstreamer.Element;
@@ -25,9 +25,9 @@ import org.junit.Ignore;
 import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 
 /**
- * Test class for {@Link org.opencastproject.capture.pipeline.bins.producers.epiphan.EpiphanSubDeviceBin}.
+ * Test class for {@Link org.opencastproject.capture.pipeline.bins.producers.epiphan.EpiphanVGA2USBV4LSubDeviceBin}.
  */
-public class EpiphanSubDeviceBinTest extends EpiphanTest {
+public class EpiphanVGA2USBV4LSubDeviceBinTest extends EpiphanVGA2USBV4LTest {
 
   @Test
   @Ignore
@@ -35,9 +35,9 @@ public class EpiphanSubDeviceBinTest extends EpiphanTest {
     if (!gstreamerInstalled)
       return;
 
-    EpiphanProducer epiphanBin = new EpiphanProducer(captureDevice, properties);
+    EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
     Assert.assertNotNull(epiphanBin.deviceBin);
-    Assert.assertTrue(epiphanBin.deviceBin instanceof EpiphanSubDeviceBin);
+    Assert.assertTrue(epiphanBin.deviceBin instanceof EpiphanVGA2USBV4LSubDeviceBin);
     Assert.assertEquals(epiphanBin.getCaps(), epiphanBin.deviceBin.getCaps());
   }
 
@@ -47,7 +47,7 @@ public class EpiphanSubDeviceBinTest extends EpiphanTest {
     if (!gstreamerInstalled)
       return;
 
-    EpiphanProducer epiphanBin = new EpiphanProducer(captureDevice, properties);
+    EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
     Assert.assertNotNull(epiphanBin.deviceBin.src);
     Assert.assertNotNull(epiphanBin.deviceBin.colorspace);
     Assert.assertNotNull(epiphanBin.deviceBin.videoscale);
@@ -55,7 +55,7 @@ public class EpiphanSubDeviceBinTest extends EpiphanTest {
     Assert.assertNotNull(epiphanBin.deviceBin.sink);
     Assert.assertTrue(epiphanBin.deviceBin.sink instanceof AppSink);
 
-    List<Element> elements = epiphanBin.deviceBin.pipeline.getElements();
+    List<Element> elements = epiphanBin.deviceBin.bin.getElements();
     Assert.assertTrue(elements.size() == 5);
   }
 
@@ -65,7 +65,7 @@ public class EpiphanSubDeviceBinTest extends EpiphanTest {
     if (!gstreamerInstalled)
       return;
 
-    EpiphanProducer epiphanBin = new EpiphanProducer(captureDevice, properties);
+    EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
     Assert.assertEquals(epiphanBin.deviceBin.src.get(GStreamerProperties.DEVICE), epiphanLocation);
     Assert.assertEquals(epiphanBin.deviceBin.src.get(GStreamerProperties.DO_TIMESTAP), false);
     Assert.assertEquals(epiphanBin.deviceBin.sink.get(GStreamerProperties.EMIT_SIGNALS), false);
@@ -84,7 +84,7 @@ public class EpiphanSubDeviceBinTest extends EpiphanTest {
     if (!gstreamerInstalled)
       return;
 
-    EpiphanProducer epiphanBin = new EpiphanProducer(captureDevice, properties);
+    EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
 
     // src -> colorspace
     Pad pad = epiphanBin.deviceBin.src.getSrcPads().get(0);
@@ -113,9 +113,9 @@ public class EpiphanSubDeviceBinTest extends EpiphanTest {
     if (!gstreamerInstalled)
       return;
 
-    EpiphanProducer epiphanBin = new EpiphanProducer(captureDevice, properties);
+    EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
     epiphanBin.deviceBin.removeElements();
-    List<Element> elements = epiphanBin.deviceBin.pipeline.getElements();
+    List<Element> elements = epiphanBin.deviceBin.bin.getElements();
     Assert.assertTrue(elements.isEmpty());
   }
 }

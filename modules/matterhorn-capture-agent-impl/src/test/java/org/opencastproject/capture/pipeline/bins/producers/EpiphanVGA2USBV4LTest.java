@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.pipeline.bins.producers.epiphan;
+package org.opencastproject.capture.pipeline.bins.producers;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,17 +39,15 @@ import java.util.ArrayList;
  * Abstract class for Epiphan producer bins testing.
  * (De)Initialize a JUnit test environment.
  */
-public abstract class EpiphanTest {
+public abstract class EpiphanVGA2USBV4LTest {
 
-  private static final Logger logger = LoggerFactory.getLogger(EpiphanTest.class);
-  
-  private static ArrayList<String> devices;
+  private static final Logger logger = LoggerFactory.getLogger(EpiphanVGA2USBV4LTest.class);
 
   /** True to run the tests */
   protected static boolean gstreamerInstalled = true;
 
   /** Location of Epiphan VGA2USB device */
-  protected final static String epiphanLocation = "/dev/video1";
+  protected static String epiphanLocation = "/dev/video1";
 
   /** Properties specifically designed for unit testing */
   protected Properties properties;
@@ -75,13 +73,11 @@ public abstract class EpiphanTest {
   public void setup() throws ConfigurationException, IOException, URISyntaxException {
     if (!gstreamerInstalled)
       return;
-
-    devices = new ArrayList<String>();
     
     if (System.getProperty("testEpiphan") != null) {
       String epiphanDevice = System.getProperty("testEpiphan");
       if (new File(epiphanDevice).exists()) {
-        devices.add(epiphanDevice);
+        epiphanLocation = epiphanDevice;
         logger.info("Testing Epiphan card at: " + epiphanDevice);
       } else {
         logger.error("File does not exist: " + epiphanDevice);
@@ -89,18 +85,20 @@ public abstract class EpiphanTest {
       }
     }    
         
-    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, null, null, null, null, null, null,
-            null, null);
-    captureDevice = BinTestHelpers.createCaptureDevice(epiphanLocation, ProducerType.EPIPHAN_VGA2USB,
-              "Epiphan VGA 2 USB", System.getProperty("java.io.tmpdir")+"/test.mpeg", captureDeviceProperties);
+    captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(null, 
+            null, null, null, null, null, null, null, null);
+    captureDevice = BinTestHelpers.createCaptureDevice(epiphanLocation,
+            ProducerType.EPIPHAN_VGA2USB,
+            "Epiphan VGA 2 USB", 
+            new File(System.getProperty("java.io.tmpdir"), "testpipe/test.mpg").getAbsolutePath(),
+            captureDeviceProperties);
 
     // setup testing properties
     properties = new Properties();
     properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION,
-            System.getProperty("java.io.tmpdir")+"/confidence");
+            new File(System.getProperty("java.io.tmpdir"), "testpipe/confidence").getAbsolutePath());
     properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE, "false");
-    properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION,
-            System.getProperty("java.io.tmpdir")+"/confidence");
+    properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG, "false");
   }
 
   @After

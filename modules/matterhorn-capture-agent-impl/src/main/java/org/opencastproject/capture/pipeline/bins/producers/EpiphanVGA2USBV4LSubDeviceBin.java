@@ -13,7 +13,7 @@
  *  permissions and limitations under the License.
  *
  */
-package org.opencastproject.capture.pipeline.bins.producers.epiphan;
+package org.opencastproject.capture.pipeline.bins.producers;
 
 import org.gstreamer.Bus.EOS;
 import org.gstreamer.Caps;
@@ -30,35 +30,41 @@ import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 
 /**
- * EpiphanSubDeviceBin extends EpiphanSubAbstractBin.
- * Represent a SubBin of a Epiphan VGA2USB device.
+ * Epiphan VGA2USB device sub bin to use in {@link EpiphanVGA2USBV4LProducer}.
+ * Creates a bin with v4lsrc Element to grab signal from Epiphan device,
+ * videoscale Element to rescale video frame if needed
+ * (by replugging the cable with another resolution as captured file)
+ * and AppSink Element to connect with {@link EpiphanVGA2USBV4LProducer}.
  */
-public class EpiphanSubDeviceBin extends EpiphanSubAbstractBin {
+public class EpiphanVGA2USBV4LSubDeviceBin extends EpiphanVGA2USBV4LSubAbstractBin {
 
   /** CaptureDevice */
   CaptureDevice captureDevice;
   /** Caps */
   String caps = null;
 
-  /** Pipeline elements */
+  /** Elements */
   Element src, colorspace, videoscale, capsfilter;
   /** AppSink, the last element. */
   AppSink sink;
 
-  /** True if no VGA signal. Will be set automaticly, do not set it manually! */
+  /** True if no VGA signal detected. Will be set automaticly, do not set it manually! */
   static boolean broken = false;
 
   /**
-   * Constructor. Creates Epiphan VGA2USB Device sub-pipeline.
+   * Constructor. Creates Epiphan VGA2USB device sub bin.
    * @param captureDevice CaptureDevice
    * @param caps Caps
    * @trows UnableToCreateElementException
+   *        If the required GStreamer Modules are not installed to create
+   *        all of the Elements this Exception will be thrown.
    * @throws UnableToLinkGStreamerElementsException
+   *        If our elements fail to link together we will throw an exception.
    */
-  public EpiphanSubDeviceBin(CaptureDevice captureDevice, String caps) 
+  public EpiphanVGA2USBV4LSubDeviceBin(CaptureDevice captureDevice, String caps)
           throws UnableToCreateElementException, UnableToLinkGStreamerElementsException {
-    
-    super("epiphan_pipeline");
+
+    super(captureDevice.getFriendlyName()+"_SubDeviceBin");
     this.captureDevice = captureDevice;
     this.caps = caps;
     
@@ -67,7 +73,7 @@ public class EpiphanSubDeviceBin extends EpiphanSubAbstractBin {
     setElementProperties();
     linkElements();
     setEOSListener();
-    pipeline.debugToDotFile(Pipeline.DEBUG_GRAPH_SHOW_ALL, pipeline.getName(), false);
+    bin.debugToDotFile(Pipeline.DEBUG_GRAPH_SHOW_ALL, bin.getName(), false);
   }
 
   /**
@@ -90,21 +96,33 @@ public class EpiphanSubDeviceBin extends EpiphanSubAbstractBin {
   }
 
   /**
-   * Creates pipeline elements and add these to bin.
+   * Create elements and add these to bin.
    * @throws UnableToCreateElementException
+   *           If any of the Elements fail to be created because the GStreamer module
+   *           for the Element isn't present then this Exception will be thrown.
    */
   protected void createElements() throws UnableToCreateElementException {
-    src = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), GStreamerElements.V4LSRC, captureDevice.getLocation());
-    colorspace = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), GStreamerElements.FFMPEGCOLORSPACE, "ffmpegcolorspace");
-    videoscale = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), GStreamerElements.FFVIDEOSCALE, "ffvideoscale");
-    capsfilter = GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), GStreamerElements.CAPSFILTER, "v4l_caps");
-    sink = (AppSink) GStreamerElementFactory.getInstance().createElement(captureDevice.getFriendlyName(), GStreamerElements.APPSINK, "epiphan_appsink");
+    src = GStreamerElementFactory.getInstance().createElement(
+            captureDevice.getFriendlyName(), GStreamerElements.V4LSRC,
+            captureDevice.getLocation()+"_v4lsrc");
+    colorspace = GStreamerElementFactory.getInstance().createElement(
+            captureDevice.getFriendlyName(), GStreamerElements.FFMPEGCOLORSPACE,
+            captureDevice.getLocation()+"_ffmpegcolorspace");
+    videoscale = GStreamerElementFactory.getInstance().createElement(
+            captureDevice.getFriendlyName(), GStreamerElements.FFVIDEOSCALE,
+            captureDevice.getLocation()+"_ffvideoscale");
+    capsfilter = GStreamerElementFactory.getInstance().createElement(
+            captureDevice.getFriendlyName(), GStreamerElements.CAPSFILTER,
+            captureDevice.getLocation()+"_v4l_caps");
+    sink = (AppSink) GStreamerElementFactory.getInstance().createElement(
+            captureDevice.getFriendlyName(), GStreamerElements.APPSINK,
+            captureDevice.getLocation()+"_appsink");
     
-    pipeline.addMany(src, colorspace, videoscale, capsfilter, sink);
+    bin.addMany(src, colorspace, videoscale, capsfilter, sink);
   }
 
   /**
-   * Set pipeline element properties.
+   * Set element properties.
    */
   protected void setElementProperties() {
     src.set(GStreamerProperties.DEVICE, captureDevice.getLocation());
@@ -119,8 +137,9 @@ public class EpiphanSubDeviceBin extends EpiphanSubAbstractBin {
   }
 
   /**
-   * Link pipeline elements.
+   * Link elements together.
    * @throws UnableToLinkGStreamerElementsException
+   *        If Elements can not be linked together.
    */
   protected void linkElements() throws UnableToLinkGStreamerElementsException {
 
@@ -143,16 +162,16 @@ public class EpiphanSubDeviceBin extends EpiphanSubAbstractBin {
   }
 
   /**
-   * Remove all elements from pipeline.
+   * Remove all elements from bin.
    */
   protected void removeElements() {
-    pipeline.removeMany(src, colorspace, videoscale, capsfilter, sink);
+    bin.removeMany(src, colorspace, videoscale, capsfilter, sink);
   }
 
   /**
-   * Start pipeline and manage vga signal broken state.
-   * @param time time to check, if pipeline is playing, -1 skip checks.
-   * @return true, if pipeline is playing.
+   * Start bin and manage vga-signal-broken state.
+   * @param time time to check, if bin is started, -1 skip checks.
+   * @return true, if bin is started.
    */
   @Override
   public boolean start(long time) {
@@ -175,15 +194,15 @@ public class EpiphanSubDeviceBin extends EpiphanSubAbstractBin {
   }
 
   /**
-   * Set pipeline EOS Listener to shut down pipeline and set broken state.
+   * Set Bus EOS Listener to stop bin and set broken state.
    */
   protected void setEOSListener() {
-    pipeline.getBus().connect(new EOS() {
+    sink.getBus().connect(new EOS() {
 
       @Override
       public void endOfStream(GstObject source) {
         broken = true;
-        pipeline.setState(State.NULL);
+        bin.setState(State.NULL);
       }
     });
   }

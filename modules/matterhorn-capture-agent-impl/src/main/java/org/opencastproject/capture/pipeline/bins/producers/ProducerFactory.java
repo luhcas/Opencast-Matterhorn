@@ -24,7 +24,6 @@ import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsEx
 import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 
 import java.util.Properties;
-import org.opencastproject.capture.pipeline.bins.producers.epiphan.EpiphanProducer;
 
 public class ProducerFactory {
   /** The actual singleton factory **/
@@ -72,8 +71,7 @@ public class ProducerFactory {
           UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
           UnableToCreateElementException, NoProducerFoundException {
     if (captureDevice.getName() == ProducerType.EPIPHAN_VGA2USB)
-      //return new EpiphanVGA2USBV4LProducer(captureDevice, properties, captureAgent);
-      return new EpiphanProducer(captureDevice, properties);
+      return new EpiphanVGA2USBV4LProducer(captureDevice, properties);
     else if (captureDevice.getName() == ProducerType.HAUPPAUGE_WINTV)
       return new HauppaugePVR350VideoProducer(captureDevice, properties);
     else if (captureDevice.getName() == ProducerType.FILE_DEVICE)
