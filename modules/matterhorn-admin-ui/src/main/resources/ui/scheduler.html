@@ -50,9 +50,9 @@
       <!-- BANNER -->
       <div class="layout-page-header">
         <div class="oc-ui-banner layout-inline">
-          <div onclick="document.location='/welcome.html'" class="oc-ui-cursor">
-            <img src="img/MatterhornLogo.png" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" class="layout-inline" />
-            <h1 id="i18n_logo_title" class="layout-inline layout-valign-top">Admin Tools</h1>
+          <div class="oc-ui-cursor">
+            <img src="img/MatterhornLogo.png" onclick="document.location='../welcome.html'" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" class="layout-inline" />
+            <h1 id="i18n_logo_title" onclick="document.location='recordings.html'" class="layout-inline layout-valign-top">Admin Tools</h1>
           </div>
         </div>
         <div class="layout-page-banner layout-inline layout-float-right">
@@ -141,7 +141,7 @@
             </li>
           </ul>
         </div>
-        
+
         <!-- Common Scheduling Information -->
         <div class="layout-centered ui-widget">
           <div class="ui-widget-content ui-corner-all">
@@ -186,17 +186,17 @@
                 <li class="additionalMeta">
                   <label class="scheduler-label" for="contributor" id="contributorLabel"><span id="i18n_dept_label"></span>:</label>
                   <input type="text" class="oc-ui-form-field" name="contributor" id="contributor">
-                  <span class="ui-icon ui-icon-help"  id="help_contributor" title="Click for help"></span>
+                    <span class="ui-icon ui-icon-help"  id="help_contributor" title="Click for help"></span>
                 </li>
                 <li class="additionalMeta">
                   <label class="scheduler-label" for="subject" id="subjectLabel"><span id="i18n_sub_label"></span>:</label>
                   <input type="text" class="oc-ui-form-field" name="subject" id="subject">
-                  <span class="ui-icon ui-icon-help"  id="help_subject" title="Click for help"></span>
+                    <span class="ui-icon ui-icon-help"  id="help_subject" title="Click for help"></span>
                 </li>
                 <li class="additionalMeta">
                   <label class="scheduler-label" for="language" id="languageLabel"><span id="i18n_lang_label"></span>:</label>
                   <input type="text" class="oc-ui-form-field" name="language" id="language">
-                  <span class="ui-icon ui-icon-help"  id="help_language" title="Click for help"></span>
+                    <span class="ui-icon ui-icon-help"  id="help_language" title="Click for help"></span>
                 </li>
                 <li class="additionalMeta">
                   <label class="scheduler-label" for="description" id="descriptionLabel"><span id="i18n_desc_label"></span>:</label>
@@ -225,7 +225,7 @@
                 <li>
                   <label class="scheduler-label" id="startDateLabel"><span class="scheduler-required-text">* </span><span id="i18n_startdate_label"></span>:</label>
                   <input type="text" size="10" name="startDate" id="startDate">
-                  <span class="ui-icon ui-icon-help" id="help_startdate" title="Click for help"></span>
+                    <span class="ui-icon ui-icon-help" id="help_startdate" title="Click for help"></span>
                 </li>
               </ul>
               <ul class="oc-ui-form-list">
@@ -431,12 +431,12 @@
                     <li>
                       <label class="scheduler-label" id="recurStartLabel"><span class="scheduler-required-text">* </span><span id="i18n_recurstart_label">Start Date</span>:</label>
                       <input type="text" size="10" name="recurStart" id="recurStart" style="margin-right:5px;">
-                      <span class="ui-icon ui-icon-help" id="help_recurstart" title="Click for help"></span>
+                        <span class="ui-icon ui-icon-help" id="help_recurstart" title="Click for help"></span>
                     </li>
                     <li>
                       <label class="scheduler-label" for="recurEnd" id="recurEndLabel"><span class="scheduler-required-text">* </span><span id="i18n_recurend_label">End Date</span>:</label>
                       <input type="text" size="10" name="recurEnd" id="recurEnd" style="margin-right:5px;">
-                      <span class="ui-icon ui-icon-help" id="help_recurend" title="Click for help"></span>
+                        <span class="ui-icon ui-icon-help" id="help_recurend" title="Click for help"></span>
                     </li>
                   </ul>
                 </fieldset>
@@ -605,25 +605,25 @@
         </div>
 
         <div class="layout-centered ui-widget">
-            <div class="ui-widget-content ui-corner-all">
-              <form action="">
-                <ul class="oc-ui-form-list">
-                  <li>
-                    <label class="scheduler-label">&nbsp;</label>
-                    <input type="button" value="Schedule" id="submitButton" class="mouseover-pointer control-button" />
-                    <input type="button" value="Cancel" id="cancelButton" class="mouseover-pointer control-button" />
-                    <input type="hidden" id="eventId" />
-                    <input type="hidden" id="recurrenceId" />
-                    <input type="hidden" id="recurrencePosition" />
-                    <input type="hidden" id="agentTimeZone" />
-                  </li>
-                  <li>
-                    <label class="scheduler-label">&nbsp;</label>
-                    <span class="scheduler-required-text">*</span><span id="i18n_required">Required</span>
-                  </li>
-                </ul>
-              </form>
-            </div>
+          <div class="ui-widget-content ui-corner-all">
+            <form action="">
+              <ul class="oc-ui-form-list">
+                <li>
+                  <label class="scheduler-label">&nbsp;</label>
+                  <input type="button" value="Schedule" id="submitButton" class="mouseover-pointer control-button" />
+                  <input type="button" value="Cancel" id="cancelButton" class="mouseover-pointer control-button" />
+                  <input type="hidden" id="eventId" />
+                  <input type="hidden" id="recurrenceId" />
+                  <input type="hidden" id="recurrencePosition" />
+                  <input type="hidden" id="agentTimeZone" />
+                </li>
+                <li>
+                  <label class="scheduler-label">&nbsp;</label>
+                  <span class="scheduler-required-text">*</span><span id="i18n_required">Required</span>
+                </li>
+              </ul>
+            </form>
+          </div>
         </div>
         <div class="layout-centered ui-widget" id="submissionSuccess" style="display: none;">
           <div class="notification-header">
@@ -729,16 +729,16 @@
       <!-- template for the popup help box -->
       <div id="helpBox" class="helpbox" style="display:none;">
         <img src="img/icons/lightbulb.png" alt="help">
-        <div id="helpTitle" style="display:inline;font-weight:bold; margin-left:10px;"></div>
-        <div id="helpText" style="padding-left:7px; padding-right:7px; white-space:normal;"></div>
+          <div id="helpTitle" style="display:inline;font-weight:bold; margin-left:10px;"></div>
+          <div id="helpText" style="padding-left:7px; padding-right:7px; white-space:normal;"></div>
       </div>
       <!-- template for the input notification box -->
       <div id="inputhelpBox" class="warnbox" style="display:none;">
         <img src="img/icons/exclamation.png" alt="help">
-        <div id="inputhelpTitle" style="display:inline;font-weight:bold; margin-left:10px;"></div>
-        <div id="inputhelpText" style="padding-left:7px; padding-right:7px; white-space:normal;"></div>
+          <div id="inputhelpTitle" style="display:inline;font-weight:bold; margin-left:10px;"></div>
+          <div id="inputhelpText" style="padding-left:7px; padding-right:7px; white-space:normal;"></div>
       </div>
-      
+
     </div>
   </body>
 </html>

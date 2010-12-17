@@ -60,17 +60,17 @@
 
     <!-- fl-centered doesn't work in winXP-IE8 -->
     <div class="fl-container-flex fl-centered fl-fix fl-theme-coal">
-  <div id="header">
-         <div id="logotitle">
-            <a href="recordings.html">
-            <img src="img/MatterhornLogo.png" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" align="left">
-            <h1>Admin Tools</h1>
-      </a>
-    </div>
+      <div id="header">
+        <div id="logotitle">
+          <!-- a href="recordings.html" -->
+            <img src="img/MatterhornLogo.png" onclick="document.location='../welcome.html'" alt="Matterhorn Home Page" title="Matterhorn Home Page" style="cursor:pointer;" width="104" height="72" align="left">
+            <h1 onclick="document.location='recordings.html'" style="cursor:pointer;">Admin Tools</h1>
+          <!--/a -->
+        </div>
         <div id="oclogo">
-        <a href="http://www.opencastproject.org">
-        <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project">        </a>    </div>
-  </div>
+          <a href="http://www.opencastproject.org">
+            <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project">        </a>    </div>
+      </div>
       <ul class="fl-tabs fl-tabs-left">
         <li class=""><a href="recordings.old.html">Recordings</a></li>
         <li><a href="series_list.html" id="i18n_tab_series">Series</a></li>
