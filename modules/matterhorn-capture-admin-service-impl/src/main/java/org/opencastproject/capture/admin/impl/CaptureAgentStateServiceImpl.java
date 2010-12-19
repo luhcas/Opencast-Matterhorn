@@ -357,6 +357,8 @@ public class CaptureAgentStateServiceImpl implements CaptureAgentStateService, M
     if (req != null) {
       if (state.equals(req.getState())) {
         logger.debug("Recording state not changed");
+        //Reset the state anyway so that the last-heard-from time is correct...
+        req.setState(state);
         return true;
       } else {
         logger.debug("Setting Recording {} to state {}.", id, state);
