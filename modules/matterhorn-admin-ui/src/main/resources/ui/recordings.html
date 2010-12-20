@@ -34,6 +34,7 @@
       #recordingsTable tr:hover {cursor: pointer; background-color: silver;}
       .state-col-item .operation-state {font-weight: bold;}
       .state-col-item .operation-description {font-weight:normal;}
+      .error-item .operation-state {color:red;}
       .configRow span {float: left;}
       .configRow div {float: right;}
       #holdActionStage {margin:20px; padding:0 0 20px;}
@@ -46,7 +47,6 @@
   <body>
     <!-- VERSION AND LOGOUT BAR -->
     <div class="layout-page-header oc-ui-version-bar ui-helper-clearfix">
-      <div id="currentVersion" class="layout-inline"></div>
       <div class="layout-inline layout-float-right"><a id="logout" href="/j_spring_security_logout">Log out</a></div>
     </div>
     <!-- BANNER -->
@@ -274,8 +274,8 @@
           ${start}
         </td>
         <td class="status-column-cell">
-          {{if error}}
-            {{tmpl(error) 'errormessage'}}
+          {{if operation.error}}
+            {{tmpl(operation) 'errormessage'}}
           {{else}}
             {{tmpl(operation) 'operation'}}
           {{/if}}
@@ -309,13 +309,13 @@
 
 <!-- TEMPLATE FOR AN ERROR ITEM IN THE STATUS COLUMN -->
       <textarea id="errorTemplate">
-<div>
-  <div class="status-column-error-heading">
-  <span class="fold-icon ui-icon ui-icon-triangle-1-e"></span>
-  <span class="error-message">${message}</span>
+<div class="state-col-item error-item foldable" title="${details} (${state})">
+  <div class="fold-header">
+  <span class="operation-state">${state}:</span>
+  <span class="operation-description">${details}</span>
   </div>
-  <div class="status-column-error-details" style="display:none;">
-    ${details}
+  <div class="fold-body" style="display:none; border-top:1px solid silver;">
+    <span class="error-message">${error}</span>
   </div>
 </div>
       </textarea>

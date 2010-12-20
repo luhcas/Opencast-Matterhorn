@@ -244,10 +244,10 @@ ocRecordings = new (function() {
         state:'',
         heading : '',
         details : '',
+        error : false,
         time: false,
         properties : false
       },
-      error : false,
       actions : [],
       holdAction : false
     };
@@ -266,27 +266,18 @@ ocRecordings = new (function() {
       rec.creators = ocUtils.ensureArray(wf.mediapackage.creators.creator).join(', ');
     }
 
-    // Series
-    if (wf.mediapackage.metadata.catalog !== undefined) {
-    // Populating MediaPackage with Series DC metadata not working in WorkflowServiceImpl (bug filed)
-    }
-
-    var seriesUrl = "http://localhost:8080/admin/series.html?seriesId=101&edit=true";
-
     // Start Time
     if (wf.mediapackage.start) {
       rec.start = ocUtils.fromUTCDateString(wf.mediapackage.start);
     }
 
-    // Status
-    // current operation : search last operation with state that matches workflow state
-    // FIXME replace with findCurrentOperation() ?
-    var op = null;
-    for (var j in wf.operations.operation) {
-      if (wf.operations.operation[j].state == wf.state) {
-        op = wf.operations.operation[j];
-      }
+    // error
+    if (wf.errors !== undefined) {
+      rec.operation.error = ocUtils.ensureArray(wf.errors.error).join(', ');
     }
+
+    // Status
+    var op = ocRecordings.findCurrentOperation(wf);
     if (op !== null) {
       rec.operation.state = op.state;
       rec.operation.heading = op.id;
@@ -313,8 +304,18 @@ ocRecordings = new (function() {
       ocUtils.log('Warning: current operation for workflow could not be found!');
     }
 
+    // set state so it fits Recordings UI terminology
+    if (rec.operation.state == 'RUNNING') {
+      if (rec.operation.heading == 'capture') {
+        rec.operation.state = 'CAPTURING';
+      } else {
+        rec.operation.state = 'PROCESSING';
+      }
+    }
+
     // Actions
     if(rec.operation.heading === 'schedule') {
+      rec.state = 'UPCOMING';
       rec.actions = ['view', 'edit', 'delete'];
     }else{
       rec.actions = ['view', 'delete'];
@@ -389,12 +390,17 @@ ocRecordings = new (function() {
         $(th).find('.sort-icon').addClass('ui-icon-circle-triangle-s');
       }
     }
-    $('.status-column-cell').click(function() {
-      $(this).find('.fold-icon')
-      .toggleClass('ui-icon-triangle-1-e')
-      .toggleClass('ui-icon-triangle-1-s');
-      $(this).find('.status-column-operation-details').toggle('fast');
-    })
+    // care for items in the table that can be unfolded
+    //$('#recordingsTable .foldable').
+    $('#recordingsTable .foldable').each( function() {
+      $('<span></span>').addClass('fold-icon ui-icon ui-icon-triangle-1-e').css('float','left').prependTo($(this).find('.fold-header'));
+      $(this).click( function() {
+        $(this).find('.fold-icon')
+        .toggleClass('ui-icon-triangle-1-e')
+        .toggleClass('ui-icon-triangle-1-s');
+        $(this).find('.fold-body').toggle('fast');
+      });
+    });
   }
 
   /** Make the page reload with the currently set configuration
