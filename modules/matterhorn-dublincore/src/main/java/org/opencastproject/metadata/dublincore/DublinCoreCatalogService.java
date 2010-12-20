@@ -18,6 +18,7 @@ package org.opencastproject.metadata.dublincore;
 import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
+import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.MediaPackageMetadata;
 import org.opencastproject.mediapackage.MediapackageMetadataImpl;
 import org.opencastproject.metadata.api.CatalogService;
@@ -34,6 +35,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.transform.Transformer;
@@ -56,8 +59,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
     this.workspace = workspace;
   }
   
-  @SuppressWarnings("unchecked")
-  public void activate(Map properties) {
+  public void activate(@SuppressWarnings("rawtypes") Map properties) {
     logger.debug("activate()");
     if(properties != null) {
       String priorityString = (String)properties.get(PRIORITY_KEY);
@@ -111,7 +113,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
       } finally {
         IOUtils.closeQuietly(in);
       }
-      if (catalog.getReference() == null) { // episode catalogs do not contain a reference
+      if (MediaPackageElements.EPISODE.equals(catalog.getFlavor())) {
         // Title
         metadata.setTitle(dc.getFirst(DublinCore.PROPERTY_TITLE));
 
@@ -126,24 +128,30 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
 
         // Creator
         if (dc.hasValue(DublinCore.PROPERTY_CREATOR)) {
+          List<String> creators = new ArrayList<String>();
           for (DublinCoreValue creator : dc.get(DublinCore.PROPERTY_CREATOR)) {
-            mp.addCreator(creator.getValue());
+            creators.add(creator.getValue());
           }
+          metadata.setCreators(creators.toArray(new String[creators.size()]));
         }
 
         // Contributor
         if (dc.hasValue(DublinCore.PROPERTY_CONTRIBUTOR)) {
+          List<String> contributors = new ArrayList<String>();
           for (DublinCoreValue contributor : dc
                   .get(DublinCore.PROPERTY_CONTRIBUTOR)) {
-            mp.addContributor(contributor.getValue());
+            contributors.add(contributor.getValue());
           }
+          metadata.setContributors(contributors.toArray(new String[contributors.size()]));
         }
 
         // Subject
         if (dc.hasValue(DublinCore.PROPERTY_SUBJECT)) {
+          List<String> subjects = new ArrayList<String>();
           for (DublinCoreValue subject : dc.get(DublinCore.PROPERTY_SUBJECT)) {
-            mp.addSubject(subject.getValue());
+            subjects.add(subject.getValue());
           }
+          metadata.setSubjects(subjects.toArray(new String[subjects.size()]));
         }
 
         // License
@@ -151,11 +159,12 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
 
         // Language
         metadata.setLanguage(dc.getFirst(DublinCore.PROPERTY_LANGUAGE));
-
-        break;
-      } else { // series catalogs always contain a reference 
-        // Series Title
+      } else if(MediaPackageElements.SERIES.equals(catalog.getFlavor())) { 
+        // Series Title and Identifier
         metadata.setSeriesTitle(dc.getFirst(DublinCore.PROPERTY_TITLE));
+        metadata.setSeriesIdentifier(dc.getFirst(DublinCore.PROPERTY_IDENTIFIER));
+      } else {
+        logger.warn("Unexpected dublin core catalog flavor found, ignoring '" + catalog.getFlavor() + "'");
       }
     }
     return metadata;

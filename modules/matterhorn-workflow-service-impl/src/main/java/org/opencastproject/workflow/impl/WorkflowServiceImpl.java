@@ -45,7 +45,8 @@ import org.opencastproject.workflow.api.WorkflowService;
 import org.opencastproject.workflow.api.WorkflowSet;
 import org.opencastproject.workflow.api.WorkflowStatistics;
 
-import org.apache.commons.lang.StringUtils;
+import static org.apache.commons.lang.StringUtils.isBlank;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationException;
@@ -512,9 +513,9 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
       String key = source.substring(matchStart + 2, matchEnd - 1);
       String systemProperty = componentContext == null ? null : componentContext.getBundleContext().getProperty(key);
       String providedProperty = properties.get(key);
-      if (StringUtils.isNotBlank(providedProperty)) {
+      if (isNotBlank(providedProperty)) {
         result.append(providedProperty);
-      } else if (StringUtils.isNotBlank(systemProperty)) {
+      } else if (isNotBlank(systemProperty)) {
         result.append(systemProperty);
       } else {
         result.append(source.substring(matchStart, matchEnd)); // retain the original matched value
@@ -950,23 +951,29 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     for (MediaPackageMetadataService metadataService : metadataServices) {
       MediaPackageMetadata metadata = metadataService.getMetadata(mp);
       if (metadata != null) {
-        if (mp.getDate().getTime() == 0) {
+        if (mp.getDate().getTime() == 0 && metadata.getDate() != null) {
           mp.setDate(metadata.getDate());
         }
-        if (mp.getLanguage() == null || mp.getLanguage().isEmpty()) {
+        if (isBlank(mp.getLanguage()) && isNotBlank(metadata.getLanguage())) {
           mp.setLanguage(metadata.getLanguage());
         }
-        if (mp.getLicense() == null || mp.getLicense().isEmpty()) {
+        if (isBlank(mp.getLicense()) && isNotBlank(metadata.getLicense())) {
           mp.setLicense(metadata.getLicense());
         }
-        if (mp.getSeries() == null || mp.getSeries().isEmpty()) {
+        if (isBlank(mp.getSeries()) && isNotBlank(metadata.getSeriesIdentifier())) {
           mp.setSeries(metadata.getSeriesIdentifier());
         }
-        if (mp.getSeriesTitle() == null || mp.getSeriesTitle().isEmpty()) {
+        if (isBlank(mp.getSeriesTitle()) && isNotBlank(metadata.getSeriesTitle())) {
           mp.setSeriesTitle(metadata.getSeriesTitle());
         }
-        if (mp.getTitle() == null || mp.getTitle().isEmpty()) {
+        if (isBlank(mp.getTitle()) && isNotBlank(metadata.getTitle())) {
           mp.setTitle(metadata.getTitle());
+        }
+        if (isBlank(mp.getSeries()) && isNotBlank(metadata.getSeriesIdentifier())) {
+          mp.setSeries(metadata.getSeriesIdentifier());
+        }
+        if (isBlank(mp.getSeriesTitle()) && isNotBlank(metadata.getSeriesIdentifier())) {
+          mp.setSeries(metadata.getSeriesIdentifier());
         }
       }
     }

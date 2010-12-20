@@ -33,13 +33,20 @@ import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_PUBLIS
 import static org.opencastproject.metadata.dublincore.DublinCore.PROPERTY_TITLE;
 import static org.opencastproject.metadata.dublincore.DublinCoreCatalogImpl.PROPERTY_PROMOTED;
 
+import org.opencastproject.mediapackage.Catalog;
 import org.opencastproject.mediapackage.EName;
+import org.opencastproject.mediapackage.MediaPackage;
+import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
+import org.opencastproject.mediapackage.MediaPackageElements;
+import org.opencastproject.mediapackage.MediaPackageMetadata;
 import org.opencastproject.mediapackage.NamespaceBindingException;
 import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.UnknownFileTypeException;
+import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +55,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
@@ -77,7 +85,9 @@ public class DublinCoreTest {
   /** Temp files for test catalogs */
   private File dcTempFile1 = null;
   private File dcTempFile2 = null;
- 
+
+  private DublinCoreCatalogService service = null;
+
   /**
    * @throws java.lang.Exception
    */
@@ -86,6 +96,11 @@ public class DublinCoreTest {
     catalogFile = new File(this.getClass().getResource(catalogName).toURI());
     if (!catalogFile.exists() || !catalogFile.canRead())
       throw new Exception("Unable to access test catalog");
+    Workspace workspace = EasyMock.createNiceMock(Workspace.class);
+    EasyMock.expect(workspace.get((URI) EasyMock.anyObject())).andReturn(catalogFile).anyTimes();
+    EasyMock.replay(workspace);
+    service = new DublinCoreCatalogService();
+    service.setWorkspace(workspace);
   }
 
   /**
@@ -98,8 +113,7 @@ public class DublinCoreTest {
   }
 
   /**
-   * Test method for
-   * {@link org.opencastproject.mediapackage.dublincore.DublinCoreCatalogImpl#fromFile(java.io.File)} .
+   * Test method for {@link org.opencastproject.mediapackage.dublincore.DublinCoreCatalogImpl#fromFile(java.io.File)} .
    */
   @Test
   public void testFromFile() throws Exception {
@@ -198,7 +212,7 @@ public class DublinCoreTest {
       FileInputStream in = new FileInputStream(catalogFile);
       DublinCoreCatalog dcSample = new DublinCoreCatalogImpl(in);
       IOUtils.closeQuietly(in);
-      
+
       // Create a new catalog and fill it with a few fields
       dcTempFile2 = new File(FileSupport.getTempDirectory(), Long.toString(System.currentTimeMillis()));
       DublinCoreCatalog dcNew = new DublinCoreCatalogImpl();
@@ -361,6 +375,27 @@ public class DublinCoreTest {
     assertEquals(2, dc.get(PROPERTY_CREATOR, LANGUAGE_UNDEFINED).size());
     assertEquals(3, dc.get(PROPERTY_CREATOR).size());
     assertEquals("Klaus", dc.get(PROPERTY_CREATOR, LANGUAGE_UNDEFINED).get(0));
+  }
+
+  @Test
+  public void testMediaPackageMetadataExtraction() throws Exception {
+    // Load the DC catalog
+    FileInputStream in = null;
+    DublinCoreCatalog catalog = null;
+    try {
+      in = new FileInputStream(catalogFile);
+      catalog = service.load(in);
+    } finally {
+      IOUtils.closeQuietly(in);
+    }
+
+    // Create a mediapackage containing the DC catalog
+    MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
+    mp.add(catalogFile.toURI(), Catalog.TYPE, MediaPackageElements.EPISODE);
+    MediaPackageMetadata metadata = service.getMetadata(mp);
+
+    assertEquals("Mediapackage metadata title not extracted from DC properly",
+            catalog.getFirst(DublinCore.PROPERTY_TITLE), metadata.getTitle());
   }
 
 }
