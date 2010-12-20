@@ -24,8 +24,6 @@ import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.osgi.service.component.ComponentContext;
 
-import java.util.Map;
-
 /**
  * Workflow operation handler that signifies a workflow that is currently in recording state and is waiting for the
  * capture process to finish.
@@ -72,8 +70,8 @@ public class CaptureWorkflowOperationHandler extends ResumableWorkflowOperationH
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     WorkflowOperationResult result = WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
-    result.setAllowsContinue(true);
-    result.setAllowsAbort(true);
+    result.setAllowsContinue(false);
+    result.setAllowsAbort(false);
     return result;
   }
 

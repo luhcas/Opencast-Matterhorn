@@ -58,8 +58,8 @@ public class IngestWorkflowOperationHandler extends ResumableWorkflowOperationHa
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     WorkflowOperationResult result = WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
-    result.setAllowsContinue(true);
-    result.setAllowsAbort(true);
+    result.setAllowsContinue(false);
+    result.setAllowsAbort(false);
     return result;
   }
 
