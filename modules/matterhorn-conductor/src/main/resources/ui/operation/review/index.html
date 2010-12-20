@@ -47,7 +47,7 @@
                     }
                   }
                 });
-                parent.Recordings.adjustHoldActionPanelHeight();
+                parent.ocRecordings.adjustHoldActionPanelHeight();
               }
             });
             // get neccessary data to call the preview player
@@ -102,6 +102,13 @@
           }
         });
       });
+
+    function cancel()
+    {
+      var videodisplay = $('#player-container')[0].contentWindow.Videodisplay;
+      videodisplay.pause();
+      parent.ocRecordings.hideHoldActionUI();
+    }
     </script>
   </head>
   <body>
@@ -145,8 +152,8 @@
     <div id="actions">
          <!-- control buttons -->
          <button  id="edit-link" type="button" style="margin-right: 16px;">Edit before continuing</button>
-         <button title="Move on to next steps in processing this recording" style="margin-right: 16px; width: 160px;" onclick="parent.Recordings.continueWorkflow();" id="continueBtn" type="button">Continue processing</button>
-         <button onclick="$('#holdActionPanel-container',top.document).toggle();$('#recordings-table-container',top.document).toggle();$('#oc_recordingmenu' ,top.document).toggle();$('.paging-nav-container',top.document).toggle();$('#refresh-controls-container',top.document).toggle();$('#category-selector-container',top.document).parent().toggle();" title="Cancel" style="margin-right: 16px;" type="button">Cancel</button>
+         <button title="Move on to next steps in processing this recording" style="margin-right: 16px; width: 160px;" onclick="parent.ocRecordings.continueWorkflow();" id="continueBtn" type="button">Continue processing</button>
+         <button onclick="cancel();" title="Cancel" style="margin-right: 16px;" type="button">Cancel</button>
      </div>
   </body>
 </html>

@@ -149,6 +149,7 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
       MediaPackageElementFlavor trackFlavor = t.getFlavor();
       if (trackFlavor != null && matchingFlavor.matches(trackFlavor)) {
         String profileId = currentOperation.getConfiguration(ENCODING_PROFILE_PROPERTY);
+        logger.info("TRIM ---> " + properties.get("trimin") + " " + properties.get("trimout"));
         long start = Long.parseLong(properties.get("trimin"));
         long duration = Long.parseLong(properties.get("newduration"));
         

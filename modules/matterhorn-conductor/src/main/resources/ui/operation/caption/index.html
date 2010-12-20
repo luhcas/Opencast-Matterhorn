@@ -189,7 +189,7 @@
     </div>
     <div id="actions" style="padding-top:26px;padding-left:40px;">
         <button type="button" id="continueBtn" onclick="parent.ocRecordings.continueWorkflow();" style="margin-right:16px;width:160px;" title="Move on to next steps in processing this recording">Continue processing</button>
-        <button type="button" "style="margin-right:16px;" title="Cancel" onclick="$('#holdActionPanel-container',top.document).toggle();$('#recordings-table-container',top.document).toggle();$('#oc_recordingmenu' ,top.document).toggle();$('.paging-nav-container',top.document).toggle();$('#refresh-controls-container',top.document).toggle();$('#category-selector-container',top.document).parent().toggle();">Cancel</button>
+        <button type="button" style="margin-right:16px;" title="Cancel" onclick="parent.ocRecordings.hideHoldActionUI();">Cancel</button>
     </div>
     <!-- <a href="javascript: return false;" id="edit-link">Edit before continuing</a> -->
 
