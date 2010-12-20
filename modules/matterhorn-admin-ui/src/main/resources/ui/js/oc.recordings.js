@@ -248,7 +248,8 @@ ocRecordings = new (function() {
         properties : false
       },
       error : false,
-      actions : []
+      actions : [],
+      holdAction : false
     };
     // Id
     rec.id = wf.id;
@@ -302,6 +303,7 @@ ocRecordings = new (function() {
       }
       // care for hold state UI
       if (op.holdurl !== undefined && op.state == 'PAUSED') {
+        rec.operation.state = 'ON HOLD';
         rec.holdAction = {
           title : op['hold-action-title'],
           description :  op.description

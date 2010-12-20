@@ -32,16 +32,8 @@
       #recordingsTable th .sort-icon {float:right;}
       #recordingsTable tr {border-bottom: 1px solid silver;}
       #recordingsTable tr:hover {cursor: pointer; background-color: silver;}
-      .status-column-error-heading {}
-      .status-column-error-heading .fold-icon {float:left;}
-      .status-column-error-heading .error-message {float:left;font-weight:bold;color:red;padding-top:2px;}
-      .status-column-error-details {clear:both;padding-left:16px;}
-      .status-column-operation-heading {}
-      .status-column-operation-heading .fold-icon {float:left}
-      .status-column-operation-heading .operation-heading-text {float:left;font-weight:bold;padding-top:2px;}
-      .status-column-operation-details {clear:both;padding-left:16px;padding-right:16px; font-size:90%;}
-      .operation-property-container {display:block; border-top: 1px solid silver;}
-      .operation-property-key {font-weight: bold;margin-top:2px;}
+      .state-col-item .operation-state {font-weight: bold;}
+      .state-col-item .operation-description {font-weight:normal;}
       .configRow span {float: left;}
       .configRow div {float: right;}
       #holdActionStage {margin:20px; padding:0 0 20px;}
@@ -244,7 +236,10 @@
       <iframe id="holdActionUI"></iframe>
     </div>
 
+<!-- TEMPLATES -->
     <div id="templates" style="display:none;">
+
+<!-- RECORDINGS TABLE TEMPLATE -->
       <textarea id="tableTemplate">
 <table id="recordingsTable" class="ui-widget" cellspacing="0" width="100%">
   <thead>
@@ -304,30 +299,15 @@
 </table>
       </textarea>
 
+<!-- TEMPLATES FOR AN ITEM IN THE STATUS COLUMN -->
       <textarea id="operationTemplate">
-<div>
-  <div class="status-column-operation-heading">
-  <span class="fold-icon ui-icon ui-icon-triangle-1-e"></span>
-  <span class="operation-heading-text">${heading} (${state})</span>
-  </div>
-  <div class="status-column-operation-details" style="display:none;">
-    ${details}
-    {{if time}}
-      (${time})
-    {{/if}}
-    {{if properties}}
-      <div class="operation-property-container">
-      {{each properties}}
-        <span class="operation-property-key">${key} = </span>
-        <span class="operation-property-value">${value}</span>
-        <br>
-      {{/each}}
-      </div>
-    {{/if}}
-  </div>
+<div class="state-col-item" title="${details} (${state})">
+  <span class="operation-state">${state}:</span>
+  <span class="operation-description">${details}</span>
 </div>
       </textarea>
 
+<!-- TEMPLATE FOR AN ERROR ITEM IN THE STATUS COLUMN -->
       <textarea id="errorTemplate">
 <div>
   <div class="status-column-error-heading">
@@ -339,6 +319,7 @@
   </div>
 </div>
       </textarea>
+
 
       <textarea id="noResultsTemplate">
 
