@@ -15,21 +15,16 @@
 
     _version : 'searchbox v0.1',
 
-    /*    _css :
-    '.ui-searchbox {padding:5px;position:relative;} \n' +
-    '.ui-searchbox .searchbox-search-icon {float:left;margin-right:5px;position:absolute;top:50%;margin-top:-8px;cursor:pointer;} \n' +
-    '.ui-searchbox .searchbox-text-container {float:left;margin-right:5px;position:absolute;top:50%;margin-top:-8px;} \n' +
-    '.ui-searchbox select {float:right;}' + 
-    '.ui-searchbox .searchbox-text-container .searchbox-clear-icon {float:right;top:50%;margin-top:-8px;cursor:pointer;} \n' +
-    '.ui-searchbox .searchbox-text-container .searchbox-text-input {float:left;border:none;padding-left:7px;}',
-*/
     _css :
     '.ui-searchbox {padding:5px;} \n' +
     '.ui-searchbox .searchbox-search-icon {float:left;cursor:pointer;margin-right:3px;} \n' +
     '.ui-searchbox .searchbox-text-container {float:left;} \n' +
     '.ui-searchbox select {float:right;}' +
     '.ui-searchbox .searchbox-text-container .searchbox-clear-icon {float:right;} \n' +
-    '.ui-searchbox .searchbox-text-container .searchbox-text-input {float:left;border:none;}',
+    '.ui-searchbox .searchbox-text-container .searchbox-text-input {float:left;border:none;}' +
+    '.ui-searchbox select optgroup option {padding-left:0px;}' +
+    '.ui-searchbox select .nosep {border:none;}' +
+    '.ui-searchbox select .withsep {border-top:1px solid black;}',    // TODO make separator style configurable
 
     _markup :
     '<span class="searchbox-search-icon ui-icon"></span>' +
@@ -86,14 +81,24 @@
       // options dropdown
       if (this.options.options != null) {
         var dropdown = $('<select></select>');
-        var selected = this.options.selectedOption
-        $.each(this.options.options, function(key, val) {
-          var opt = $('<option></option>').attr('value', key).text(val);
-          if (selected != null && key == selected) {
-            opt.attr('selected', 'selected');
-          }
-          opt.appendTo(dropdown);
-        });
+        var selected = this.options.selectedOption;
+
+        // care for options that are grouped
+        if ($.isArray(this.options.options)) {
+          $.each(this.options.options, function(index, options) {
+            var optgroup = $('<optgroup></optgroup>');
+            if (index == 0) {
+              optgroup.addClass('nosep');
+            } else {
+              optgroup.addClass('withsep');
+            }
+            self._appendOptions(optgroup, options, selected);
+            dropdown.append(optgroup);
+          });
+        } else {
+          self._appendOptions(dropdown, this.options.options);
+        }
+
         this.element.append(dropdown);
       }
 
@@ -146,6 +151,16 @@
         .text(this._css)
         .appendTo('head');
       }
+    },
+
+    _appendOptions: function(elm, options, selected_val) {
+      $.each(options, function(key, val) {
+        var option = $('<option></option>').text(val).val(key);
+        if (selected_val !== undefined && selected_val == key) {
+          option.attr('selected', 'selected');
+        }
+        elm.append(option);
+      });
     }
 
   });

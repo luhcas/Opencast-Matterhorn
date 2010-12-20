@@ -13,6 +13,21 @@ ocRecordings = new (function() {
     'Date' : 'DATE_CREATED'
   }
 
+  var FILTER_FIELDS = [
+  {
+    q : 'Any fields',
+    title : 'Title',
+    creator : 'Presenter',
+    seriestitle : 'Course/Series'
+  },
+  {
+    contributor : 'Contributor',
+    language : 'Language',
+    license : 'License',
+    subject : 'Subject'
+  }
+  ]
+
   this.totalRecordings = 0;
 
   // components
@@ -252,7 +267,7 @@ ocRecordings = new (function() {
 
     // Series
     if (wf.mediapackage.metadata.catalog !== undefined) {
-      // Populating MediaPackage with Series DC metadata not working in WorkflowServiceImpl (bug filed)
+    // Populating MediaPackage with Series DC metadata not working in WorkflowServiceImpl (bug filed)
     }
 
     var seriesUrl = "http://localhost:8080/admin/series.html?seriesId=101&edit=true";
@@ -482,7 +497,11 @@ ocRecordings = new (function() {
   }
 
   this.hideHoldActionUI = function() {
-    ocRecordings.Hold = {workflow:null,operation:null,changedMediaPackage:null};
+    ocRecordings.Hold = {
+      workflow:null,
+      operation:null,
+      changedMediaPackage:null
+    };
     $('#holdActionStage').hide();
     $('#stage').show();
   }
@@ -539,11 +558,7 @@ ocRecordings = new (function() {
         ocRecordings.reload();
       },
       searchText : ocRecordings.Configuration.filterText,
-      options : {
-        title : 'Title',
-        creator : 'Presenter',
-        seriestitle : 'Course/Series'
-      },
+      options : FILTER_FIELDS,
       selectedOption : ocRecordings.Configuration.filterField
     });
 
