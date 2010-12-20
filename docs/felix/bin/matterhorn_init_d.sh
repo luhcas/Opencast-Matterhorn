@@ -90,7 +90,7 @@ case "$1" in
 
 # starting felix
 
-    su -c "cd $FELIX && java -Dgosh.args='--noshutdown -c noop=true' $DEBUG_OPTS $GRAPHICS_OPTS $MAVEN_ARG $FELIX_FILEINSTALL_OPTS $PAX_CONFMAN_OPTS $PAX_LOGGING_OPTS $UTIL_LOGGING_OPTS $CXF_OPTS -jar $FELIX/bin/felix.jar $FELIX_CACHE &" $MATTERHORN_USER > /dev/null 2> /dev/null
+    su -c "cd $FELIX && java -Dgosh.args='--noshutdown -c noop=true' $DEBUG_OPTS $GRAPHICS_OPTS $MAVEN_ARG $JAVA_OPTS $FELIX_FILEINSTALL_OPTS $PAX_CONFMAN_OPTS $PAX_LOGGING_OPTS $UTIL_LOGGING_OPTS $CXF_OPTS -jar $FELIX/bin/felix.jar $FELIX_CACHE &" $MATTERHORN_USER > /dev/null 2> /dev/null
     echo "done." 
     ;;    
   stop)
