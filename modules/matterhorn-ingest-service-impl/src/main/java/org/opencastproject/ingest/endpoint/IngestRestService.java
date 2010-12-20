@@ -648,7 +648,7 @@ public class IngestRestService {
    */
   @POST
   @Produces(MediaType.TEXT_XML)
-  @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+  @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addDCCatalog")
   public Response addDCCatalog(@FormParam("mediaPackage") String mp, @FormParam("dublinCore") String dc,
           @FormParam("flavor") String flavor) {
