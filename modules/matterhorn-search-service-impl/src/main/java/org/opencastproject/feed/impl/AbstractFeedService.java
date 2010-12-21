@@ -20,6 +20,7 @@ import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.search.api.SearchResult;
 import org.opencastproject.search.api.SearchService;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +63,9 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
   /** Property key for the feed uri */
   public static final String PROP_URI = "feed.uri";
 
+  /** Property key for the number of feed entries */
+  public static final String PROP_SIZE = "feed.size";
+
   /** Property key for the feed selector pattern */
   public static final String PROP_SELECTOR = "feed.selector";
 
@@ -97,7 +101,7 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
 
   /** Property key for the feed atom media element flavor */
   public static final String PROP_ATOMTAGS = "feed.atomtags";
-
+  
   /** The selector used to match urls */
   protected String selector = null;
 
@@ -171,6 +175,16 @@ public abstract class AbstractFeedService extends AbstractFeedGenerator {
   @Override
   public void initialize(Properties properties) {
     uri = (String) properties.get(PROP_URI);
+    String sizeAsString = (String)properties.get(PROP_SIZE);
+    try {
+      if(StringUtils.isNotBlank(sizeAsString)) {
+        size = Integer.parseInt(sizeAsString);
+        if (size == 0)
+          size = Integer.MAX_VALUE;
+      }
+    } catch(NumberFormatException e) {
+      logger.warn("Unable to set the size of the feed to {}", sizeAsString);
+    }
     selector = (String) properties.get(PROP_SELECTOR);
     name = (String) properties.get(PROP_NAME);
     description = (String) properties.get(PROP_DESCRIPTION);

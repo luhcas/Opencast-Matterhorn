@@ -86,7 +86,6 @@ public class FeedRegistrationScanner implements ArtifactInstaller {
    * {@inheritDoc}
    * @see org.apache.felix.fileinstall.ArtifactInstaller#install(java.io.File)
    */
-  @SuppressWarnings("unchecked")
   @Override
   public void install(File artifact) throws Exception {
     logger.info("Installing a feed from {}", artifact.getAbsolutePath());
@@ -100,7 +99,7 @@ public class FeedRegistrationScanner implements ArtifactInstaller {
     }
     // Always include the server URL obtained from the bundle context
     props.put("org.opencastproject.server.url", bundleContext.getProperty("org.opencastproject.server.url"));
-    Class clazz = getClass().getClassLoader().loadClass(props.getProperty(FEED_CLASS));
+    Class<?> clazz = getClass().getClassLoader().loadClass(props.getProperty(FEED_CLASS));
     FeedGenerator generator = (FeedGenerator)clazz.newInstance();
     generator.setSearchService(searchService);
     generator.initialize(props);

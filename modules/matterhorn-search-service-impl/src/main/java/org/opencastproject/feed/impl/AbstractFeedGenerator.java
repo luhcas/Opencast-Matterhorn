@@ -50,7 +50,7 @@ import java.util.Set;
 public abstract class AbstractFeedGenerator implements FeedGenerator {
 
   /** A default value for limit */
-  protected static final int DEFAULT_LIMIT = 10;
+  protected static final int DEFAULT_LIMIT = 100;
 
   /** Unlimited */
   protected static final int NO_LIMIT = Integer.MAX_VALUE;
@@ -90,6 +90,9 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
 
   /** the feed uri */
   protected String uri = null;
+
+  /** the feed size */
+  protected int size = DEFAULT_LIMIT;
 
   /** The feed name */
   protected String name = null;
@@ -295,7 +298,7 @@ public abstract class AbstractFeedGenerator implements FeedGenerator {
 
     // Have the concrete implementation load the feed data
     try {
-      result = loadFeedData(type, query, DEFAULT_LIMIT, DEFAULT_OFFSET);
+      result = loadFeedData(type, query, size, DEFAULT_OFFSET);
     } catch (Exception e) {
       logger.error("Cannot retrieve solr result for feed '" + type.toString() + "' with query '" + query + "'.");
       return null;
