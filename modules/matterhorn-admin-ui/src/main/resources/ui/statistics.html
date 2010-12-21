@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <link rel="stylesheet" type="text/css" href="css/oc.layout.css" />
+    <link rel="stylesheet" type="text/css" href="css/themes/oc.default.css" />
+    <link rel="stylesheet" type="text/css" href="css/pages/oc.statistics.css" />
+    <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.8.6.custom.css">
+
+    <script type="text/javascript" src="jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="jquery/jquery-ui-1.8.6.custom.min.js"></script>
+    <script type="text/javascript" src="trimpath/trimpath-template-1.0.38.js"></script>
+    <script type="text/javascript" src="js/jquery.ui.spinner.js"></script>
+    <script type="text/javascript" src="js/oc.utils.js"></script>
+    <script type="text/javascript" src="js/oc.statistics.js"></script>
+    <style type="text/css">
+      /*html {overflow-y:scroll;}*/
+      #stage {font-family:"Arial","Helvetica","Verdana","sans-serif"; font-size:10px; margin:20px; min-height:100%; padding:0 0 20px;}
+      #controlsTop {padding: 10px 5px 5px 5px;}
+      .state-filter-container {float:left;margin-right:30px;}
+      #controlsFoot {padding: 5px 5px 10px 5px;}
+      #configButton {float:left;}
+      #pagerBottom {float:right;}
+      #tableContainer {padding: 0px 5px 0px 5px;}
+      #statsTable th {margin-left:0px; margin-right: 0px;}
+      #statsTable th .{float:right;}
+      #statsTable tr {border-bottom: 1px solid silver;}
+      #statsTable tr:hover {cursor: pointer; background-color: silver;}
+      .status-column-error-heading {}
+      .status-column-error-heading .fold-icon {float:left;}
+      .status-column-error-heading .error-message {float:left;font-weight:bold;color:red;padding-top:2px;}
+      .status-column-error-details {clear:both;padding-left:16px;}
+      .status-column-operation-heading {}
+      .status-column-operation-heading .fold-icon {float:left}
+      .status-column-operation-heading .operation-heading-text {float:left;font-weight:bold;padding-top:2px;}
+      .status-column-operation-details {clear:both;padding-left:16px;padding-right:16px; font-size:90%;}
+      .operation-property-container {display:block; border-top: 1px solid silver;}
+      .operation-property-key {font-weight: bold;margin-top:2px;}
+      .configRow span {float: left;}
+      .configRow div {float: right;}
+    </style>
+    <script type="text/javascript">
+
+    </script>
+  </head>
+  <body>
+    <!-- VERSION AND LOGOUT BAR -->
+    <div class="layout-page-header oc-ui-version-bar ui-helper-clearfix">
+      <div id="currentVersion" class="layout-inline"></div>
+      <div class="layout-inline layout-float-right"><a id="logout" href="/j_spring_security_logout">Log out</a></div>
+    </div>
+    <!-- BANNER -->
+    <div class="layout-page-header">
+      <div class="oc-ui-banner layout-inline">
+        <div onclick="document.location='statistics.html'" class="oc-ui-cursor">
+          <img src="img/MatterhornLogo.png" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" class="layout-inline" />
+          <h1 id="i18n_logo_title" class="layout-inline layout-valign-top">Admin Tools</h1>
+        </div>
+      </div>
+      <div class="layout-page-banner layout-inline layout-float-right">
+        <a href="http://www.opencastproject.org">
+          <img src="img/OpencastLogo.png" width="143" height="38" alt="Opencast Community Project" title="Opencast Community Project" />
+        </a>
+      </div>
+    </div>
+    <!-- PAGE TABS -->
+    <div class="layout-page-header">
+      <ul class="layout-page-tabs oc-ui-page-tabs">
+        <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_recording" onclick="document.location='recordings.html'">Recordings</li>
+        <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_series" onclick="document.location='series_list.html'">Series</li>
+        <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_agent" onclick="document.location='agents_status.html'">Capture Agents</li>
+        <li class="oc-ui-page-tab oc-ui-page-tab-active oc-ui-cursor ui-corner-top" id="i18n_tab_statistics" onclick="document.location='statistics.html'">Statistics</li>
+      </ul>
+    </div>
+    <div id="stage" class="ui-widget">
+      <!-- div id="controlsTop" class="ui-widget-header ui-corner-top ui-helper-clearfix" -->
+      <div id="controlsTop" class="ui-helper-clearfix">
+        <div class="state-filter-container">
+          <input type="radio" name="stateSelect" value="servers" id="stats-servers" /><label for="stats-servers">Servers</label>
+          <input type="radio" name="stateSelect" value="services" id="stats-services" /><label for="stats-services">Services</label>
+        </div>
+      </div>
+      <div id="tableContainer" class="ui-widget ui-helper-clearfix"></div>
+    </div>
+
+    <div id="templates" style="display:none;">
+
+      <textarea id="serversTemplate">
+{for server in serversView}
+<h2>${server.host}</h2>
+<div>Online: {if server.online}<b>true</b>{else}<b>false</b>{/if}</div>
+<div>Maintenance: {if server.maintenance}<b>true</b>{else}<b>false</b>{/if}</div>
+<table id="statsTable" class="ui-widget" cellspacing="0" width="100%">
+  <thead>
+    <tr>
+      <th id="sortService" width="40%" class="ui-state-default">Service<span></span></th>
+      <th id="sortJobsRunning" width="15%" class="ui-state-default">Jobs Running<span></span></th>
+      <th id="sortJobsQueued" width="15%" class="ui-state-default">Jobs Queued<span></span></th>
+      <th id="sortMeanRunTime" width="15%" class="ui-state-default">Mean Run Time<span></span></th>
+      <th id="sortMeanQueueTime" width="15%" class="ui-state-default">Mean Queue Time<span></span></th>
+    </tr>
+  </thead>
+  <tbody>
+    {for service in server.services}
+      <tr valign="top">
+        <td>
+          ${labels[service.id]}
+        </td>
+        <td>
+          ${service.running}
+        </td>
+        <td>
+          ${service.queued}
+        </td>
+        <td>
+          ${service.meanRunTime}
+        </td>
+        <td>
+          ${service.meanQueueTime}
+        </td>
+      </tr>
+	{/for}
+  </tbody>
+</table>
+{/for}
+      </textarea>
+      
+            <textarea id="servicesTemplate">
+{for service in servicesView}
+<h2>{if labels[service.id]}${labels[service.id]}{else}${service.id}{/if}</h2>
+<table id="statsTable" class="ui-widget" cellspacing="0" width="100%">
+  <thead>
+    <tr>
+      <th id="sortService" width="30%" class="ui-state-default">Host<span></span></th>
+      <th id="sortOnline" width="10%" class="ui-state-default">Online<span></span></th>
+      <th id="sortMaintenanceMode" width="10%" class="ui-state-default">Maintenance<span></span></th>
+      <th id="sortJobsRunning" width="10%" class="ui-state-default">Jobs Running<span></span></th>
+      <th id="sortJobsQueued" width="10%" class="ui-state-default">Jobs Queued<span></span></th>
+      <th id="sortMeanRunTime" width="10%" class="ui-state-default">Mean Run Time<span></span></th>
+      <th id="sortMeanQueueTime" width="10%" class="ui-state-default">Mean Queue Time<span></span></th>
+      <th width="10%" class="ui-state-default">Action<span></span></th>
+    </tr>
+  </thead>
+  <tbody>
+    {for server in service.servers}
+      <tr valign="top">
+        <td>
+          ${server.host}
+        </td>
+        <td>
+          {if service.online}<b>X</b>{/if}
+        </td>
+        <td>
+          {if service.maintenance}<b>X</b>{/if}
+        </td>
+        <td>
+          ${server.running}
+        </td>
+        <td>
+          ${server.queued}
+        </td>
+        <td>
+          ${server.meanRunTime}
+        </td>
+        <td>
+          ${server.meanQueueTime}
+        </td>
+        <td>
+          <a href="#">Maintenance</a>
+        </td>
+      </tr>
+	{/for}
+  </tbody>
+</table>
+{/for}
+      </textarea>
+
+      <textarea id="noResultsTemplate">
+
+      </textarea>
+
+    </div>
+  </body>
+</html>

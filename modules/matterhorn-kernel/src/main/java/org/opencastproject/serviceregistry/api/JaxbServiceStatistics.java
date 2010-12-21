@@ -43,7 +43,7 @@ public class JaxbServiceStatistics implements ServiceStatistics {
   protected long meanQueueTime;
 
   /** The number of currently running jobs **/
-  @XmlAttribute(name = "runnning")
+  @XmlAttribute(name = "running")
   protected int runningJobs;
 
   /** The number of currently queued jobs **/

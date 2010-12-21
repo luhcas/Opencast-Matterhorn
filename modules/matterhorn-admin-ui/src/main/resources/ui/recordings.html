@@ -21,20 +21,25 @@
       #stage {font-family:"Arial","Helvetica","Verdana","sans-serif"; font-size:10px; margin:20px; min-height:100%; padding:0 0 20px;}
       #controlsTop {padding: 10px 5px 5px 5px;}
       .state-filter-container {float:left;margin-right:30px;}
-      #searchBox {width:300px;float:right;}
+      #searchBox {width:240px;float:right;}
       #controlsFoot {padding: 5px 5px 10px 5px;}
       #configButton {float:left;}
       #pagerBottom {float:right;}
-      #addButtonsContainer {width:100%;}
-      #addButtonsContainer button {float:right;}
       #tableContainer {padding: 0px 5px 0px 5px;}
       #recordingsTable th {margin-left:0px; margin-right: 0px;}
       #recordingsTable th .sort-icon {float:right;}
       #recordingsTable tr {border-bottom: 1px solid silver;}
       #recordingsTable tr:hover {cursor: pointer; background-color: silver;}
-      .state-col-item .operation-state {font-weight: bold;}
-      .state-col-item .operation-description {font-weight:normal;}
-      .error-item .operation-state {color:red;}
+      .status-column-error-heading {}
+      .status-column-error-heading .fold-icon {float:left;}
+      .status-column-error-heading .error-message {float:left;font-weight:bold;color:red;padding-top:2px;}
+      .status-column-error-details {clear:both;padding-left:16px;}
+      .status-column-operation-heading {}
+      .status-column-operation-heading .fold-icon {float:left}
+      .status-column-operation-heading .operation-heading-text {float:left;font-weight:bold;padding-top:2px;}
+      .status-column-operation-details {clear:both;padding-left:16px;padding-right:16px; font-size:90%;}
+      .operation-property-container {display:block; border-top: 1px solid silver;}
+      .operation-property-key {font-weight: bold;margin-top:2px;}
       .configRow span {float: left;}
       .configRow div {float: right;}
       #holdActionStage {margin:20px; padding:0 0 20px;}
@@ -47,14 +52,15 @@
   <body>
     <!-- VERSION AND LOGOUT BAR -->
     <div class="layout-page-header oc-ui-version-bar ui-helper-clearfix">
+      <div id="currentVersion" class="layout-inline"></div>
       <div class="layout-inline layout-float-right"><a id="logout" href="/j_spring_security_logout">Log out</a></div>
     </div>
     <!-- BANNER -->
     <div class="layout-page-header">
       <div class="oc-ui-banner layout-inline">
-        <div class="oc-ui-cursor">
-          <img src="img/MatterhornLogo.png" onclick="document.location='../welcome.html'" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" class="layout-inline" />
-          <h1 id="i18n_logo_title" onclick="document.location='recordings.html'" class="layout-inline layout-valign-top">Admin Tools</h1>
+        <div onclick="document.location='recordings.html'" class="oc-ui-cursor">
+          <img src="img/MatterhornLogo.png" alt="Matterhorn Home Page" title="Matterhorn Home Page" width="104" height="72" class="layout-inline" />
+          <h1 id="i18n_logo_title" class="layout-inline layout-valign-top">Admin Tools</h1>
         </div>
       </div>
       <div class="layout-page-banner layout-inline layout-float-right">
@@ -69,6 +75,7 @@
         <li class="oc-ui-page-tab oc-ui-page-tab-active oc-ui-cursor ui-corner-top" id="i18n_tab_recording" onclick="document.location='recordings.html'">Recordings</li>
         <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_series" onclick="document.location='series_list.html'">Series</li>
         <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_agent" onclick="document.location='agents_status.html'">Capture Agents</li>
+        <li class="oc-ui-page-tab oc-ui-cursor ui-corner-top" id="i18n_tab_statistics" onclick="document.location='statistics.html'">Statistics</li>
       </ul>
     </div>
     <!-- BULK ACTION PANEL -->
@@ -166,7 +173,7 @@
       </div>
     </div>
     <div id="stage" class="ui-widget">
-      <div id="addButtonsContainer" class="ui-helper-clearfix">
+      <div>
         <button id="uploadButton" type="button">Upload Recording</button>
         <button id="scheduleButton" type="button">Schedule Recording</button>
       </div>
@@ -202,7 +209,7 @@
           Recordings per page.
         </div>
         <div class="layout-float-right">
-          <label for="page">Goto page: </label><input type="text" id="page" value="1" />
+          <!--<label for="page">Goto page: </label><input type="text" id="page" value="1" />-->
           <div id="pageWidget" class="layout-inline">
             <a href="javascript:ocRecordings.Configuration.page=0;ocRecordings.reload();">&lt;&lt;first</a>
             <a href="javascript:ocRecordings.previousPage();" id="previousPage">&lt;previous</a>
@@ -236,10 +243,7 @@
       <iframe id="holdActionUI"></iframe>
     </div>
 
-<!-- TEMPLATES -->
     <div id="templates" style="display:none;">
-
-<!-- RECORDINGS TABLE TEMPLATE -->
       <textarea id="tableTemplate">
 <table id="recordingsTable" class="ui-widget" cellspacing="0" width="100%">
   <thead>
@@ -274,8 +278,8 @@
           ${start}
         </td>
         <td class="status-column-cell">
-          {{if operation.error}}
-            {{tmpl(operation) 'errormessage'}}
+          {{if error}}
+            {{tmpl(error) 'errormessage'}}
           {{else}}
             {{tmpl(operation) 'operation'}}
           {{/if}}
@@ -299,27 +303,41 @@
 </table>
       </textarea>
 
-<!-- TEMPLATES FOR AN ITEM IN THE STATUS COLUMN -->
       <textarea id="operationTemplate">
-<div class="state-col-item" title="${details} (${state})">
-  <span class="operation-state">${state}:</span>
-  <span class="operation-description">${details}</span>
+<div>
+  <div class="status-column-operation-heading">
+  <span class="fold-icon ui-icon ui-icon-triangle-1-e"></span>
+  <span class="operation-heading-text">${heading} (${state})</span>
+  </div>
+  <div class="status-column-operation-details" style="display:none;">
+    ${details}
+    {{if time}}
+      (${time})
+    {{/if}}
+    {{if properties}}
+      <div class="operation-property-container">
+      {{each properties}}
+        <span class="operation-property-key">${key} = </span>
+        <span class="operation-property-value">${value}</span>
+        <br>
+      {{/each}}
+      </div>
+    {{/if}}
+  </div>
 </div>
       </textarea>
 
-<!-- TEMPLATE FOR AN ERROR ITEM IN THE STATUS COLUMN -->
       <textarea id="errorTemplate">
-<div class="state-col-item error-item foldable" title="${details} (${state})">
-  <div class="fold-header">
-  <span class="operation-state">${state}:</span>
-  <span class="operation-description">${details}</span>
+<div>
+  <div class="status-column-error-heading">
+  <span class="fold-icon ui-icon ui-icon-triangle-1-e"></span>
+  <span class="error-message">${message}</span>
   </div>
-  <div class="fold-body" style="display:none; border-top:1px solid silver;">
-    <span class="error-message">${error}</span>
+  <div class="status-column-error-details" style="display:none;">
+    ${details}
   </div>
 </div>
       </textarea>
-
 
       <textarea id="noResultsTemplate">
 
