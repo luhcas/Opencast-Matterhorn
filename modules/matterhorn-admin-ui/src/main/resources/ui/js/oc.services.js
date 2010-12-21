@@ -44,10 +44,10 @@ Opencast.Services.buildServersView = function(data) {
     singleService.path = reg.path;
     singleService.online = reg.online;
     singleService.maintenance = reg.maintenance;
-    singleService.running = serviceInstance.@running;
-    singleService.meanRunTime = serviceInstance.@meanruntime;
-    singleService.queued = serviceInstance.@queued;
-    singleService.meanQueueTime = serviceInstance.@meanqueuetime;
+    singleService.running = serviceInstance.running;
+    singleService.meanRunTime = serviceInstance.meanruntime;
+    singleService.queued = serviceInstance.queued;
+    singleService.meanQueueTime = serviceInstance.meanqueuetime;
   });
 }
 
@@ -74,10 +74,10 @@ Opencast.Services.buildServicesView = function(data) {
     var singleService = {};
     service.servers.push(singleService);
     singleService.host = reg.host;
-    singleService.running = serviceInstance.@running;
-    singleService.meanRunTime = serviceInstance.@meanruntime;
-    singleService.queued = serviceInstance.@queued;
-    singleService.meanQueueTime = serviceInstance.@meanqueuetime;
+    singleService.running = serviceInstance.running;
+    singleService.meanRunTime = serviceInstance.meanruntime;
+    singleService.queued = serviceInstance.queued;
+    singleService.meanQueueTime = serviceInstance.meanqueuetime;
   });
 }
 
