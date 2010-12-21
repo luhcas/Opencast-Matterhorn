@@ -15,6 +15,7 @@
  */
 package org.opencastproject.capture.pipeline.bins.producers;
 
+import java.io.File;
 import org.gstreamer.Caps;
 import org.gstreamer.Element;
 import org.gstreamer.Pipeline;
@@ -27,39 +28,47 @@ import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
 import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
 
 /**
- * Videotestsrc sub bin to use in {@link EpiphanVGA2USBV4LProducer}.
- * Creates a bin with videotestsrc Element to grab signal from
- * and AppSink Element to connect with {@link EpiphanVGA2USBV4LProducer}.
+ * Png-sub-bin to use in {@link EpiphanVGA2USBV4LProducer}.
+ * Creates a bin witch convert a png image to video stream.
+ * AppSink is the last Element where data can grabed from.
  */
-public class EpiphanVGA2USBV4LSubTestSrcBin extends EpiphanVGA2USBV4LSubAbstractBin {
-  
+public class EpiphanVGA2USBV4LSubPngBin extends EpiphanVGA2USBV4LSubAbstractBin {
+
   /** CaptureDevice */
   CaptureDevice captureDevice;
+
+  /** Fallback image path (png) */
+  String imagePath = null;
 
   /** Caps */
   String caps = null;
 
-  /** Elements */
-  Element src, capsFilter;
-  /** AppSink, the last element */
+  /** Bin elements */
+  Element src, pngdec, colorspace, scale, caps_filter;
+  /** AppSink, the last element. */
   AppSink sink = null;
 
   /**
-   * Constructor. Creates a videotestsrc sub bin.
+   * Constructor. Creates a image sub-bin.
    * @param captureDevice CaptureDevice
    * @param caps Caps
+   * @param imagePath path to png file
    * @throws UnableToCreateElementException
    *        If the required GStreamer Modules are not installed to create
-   *        all of the Elements this Exception will be thrown.
+   *        all of the Elements or image path is not exist, this Exception will be thrown.
    * @throws UnableToLinkGStreamerElementsException
    *        If our elements fail to link together we will throw an exception.
    */
-  public EpiphanVGA2USBV4LSubTestSrcBin(CaptureDevice captureDevice, String caps)
+  public EpiphanVGA2USBV4LSubPngBin(CaptureDevice captureDevice, String caps, String imagePath)
           throws UnableToCreateElementException, UnableToLinkGStreamerElementsException {
 
     this.captureDevice = captureDevice;
     this.caps = caps;
-    
+
+    this.imagePath = imagePath;
+    if (imagePath == null || !new File(imagePath).isFile())
+      throw new UnableToCreateElementException(captureDevice.getFriendlyName(), GStreamerElements.MULTIFILESRC);
+
     createElements();
     setElementProperties();
     linkElements();
@@ -73,24 +82,29 @@ public class EpiphanVGA2USBV4LSubTestSrcBin extends EpiphanVGA2USBV4LSubAbstract
    *           If any of the Elements fail to be created because the GStreamer module
    *           for the Element isn't present then this Exception will be thrown.
    */
-  protected void createElements() throws UnableToCreateElementException {
+  private void createElements() throws UnableToCreateElementException {
     src = GStreamerElementFactory.getInstance().createElement(
-            captureDevice.getFriendlyName(), GStreamerElements.VIDEOTESTSRC, null);
-    capsFilter = GStreamerElementFactory.getInstance().createElement(
+            captureDevice.getFriendlyName(), GStreamerElements.MULTIFILESRC, null);
+    pngdec = GStreamerElementFactory.getInstance().createElement(
+            captureDevice.getFriendlyName(), GStreamerElements.PNGDEC, null);
+    colorspace = GStreamerElementFactory.getInstance().createElement(
+            captureDevice.getFriendlyName(), GStreamerElements.FFMPEGCOLORSPACE, null);
+    scale = GStreamerElementFactory.getInstance().createElement(
+            captureDevice.getFriendlyName(), GStreamerElements.FFVIDEOSCALE, null);
+    caps_filter = GStreamerElementFactory.getInstance().createElement(
             captureDevice.getFriendlyName(), GStreamerElements.CAPSFILTER, null);
     sink = (AppSink) GStreamerElementFactory.getInstance().createElement(
             captureDevice.getFriendlyName(), GStreamerElements.APPSINK, null);
-    bin.addMany(src, capsFilter, sink);
+    bin.addMany(src, pngdec, colorspace, scale, caps_filter, sink);
   }
 
   /**
    * Set bin element properties.
    */
-  protected void setElementProperties() {
-    src.set(GStreamerProperties.PATTERN, "0");
-    src.set(GStreamerProperties.IS_LIVE, "true");
-    src.set(GStreamerProperties.DO_TIMESTAP, "false");
-    capsFilter.setCaps(Caps.fromString(caps));
+  private void setElementProperties() {
+    src.set(GStreamerProperties.LOCATION, imagePath);
+    src.setCaps(Caps.fromString("image/png, framerate=(fraction)25/1"));
+    caps_filter.setCaps(Caps.fromString(caps));
     sink.set(GStreamerProperties.EMIT_SIGNALS, "false");
     sink.set(GStreamerProperties.DROP, "true");
     sink.set(GStreamerProperties.MAX_BUFFERS, "1");
@@ -102,15 +116,26 @@ public class EpiphanVGA2USBV4LSubTestSrcBin extends EpiphanVGA2USBV4LSubAbstract
    * @throws UnableToLinkGStreamerElementsException
    *        If Elements can not be linked together.
    */
-  protected void linkElements() throws UnableToLinkGStreamerElementsException {
-    if (!src.link(capsFilter)) {
+  private void linkElements() throws UnableToLinkGStreamerElementsException {
+    if (!src.link(pngdec)) {
       removeElements();
-      throw new UnableToLinkGStreamerElementsException(captureDevice, src, capsFilter);
+      throw new UnableToLinkGStreamerElementsException(captureDevice, src, pngdec);
     }
-    
-    if (!capsFilter.link(sink)) {
+    if (!pngdec.link(colorspace)) {
       removeElements();
-      throw new UnableToLinkGStreamerElementsException(captureDevice, capsFilter, sink);
+      throw new UnableToLinkGStreamerElementsException(captureDevice, pngdec, colorspace);
+    }
+    if (!colorspace.link(scale)) {
+      removeElements();
+      throw new UnableToLinkGStreamerElementsException(captureDevice, colorspace, scale);
+    }
+    if (!scale.link(caps_filter)) {
+      removeElements();
+      throw new UnableToLinkGStreamerElementsException(captureDevice, scale, caps_filter);
+    }
+    if (!caps_filter.link(sink)) {
+      removeElements();
+      throw new UnableToLinkGStreamerElementsException(captureDevice, caps_filter, sink);
     }
   }
 
@@ -118,7 +143,7 @@ public class EpiphanVGA2USBV4LSubTestSrcBin extends EpiphanVGA2USBV4LSubAbstract
    * Remove all elements from bin.
    */
   protected void removeElements() {
-    bin.removeMany(src, capsFilter, sink);
+    bin.removeMany(src, pngdec, colorspace, scale, caps_filter, sink);
   }
 
   /**

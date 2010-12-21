@@ -25,7 +25,7 @@ interface EpiphanVGA2USBV4LSubBin {
 
   /**
    * Returns AppSink Element to get buffer from.
-   * @return
+   * @return AppSink, the last Element in a bin.
    */
   AppSink getSink();
 

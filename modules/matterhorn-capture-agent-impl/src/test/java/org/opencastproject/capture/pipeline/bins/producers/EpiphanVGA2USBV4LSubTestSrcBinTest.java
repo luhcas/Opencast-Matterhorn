@@ -30,33 +30,22 @@ import org.opencastproject.capture.pipeline.bins.GStreamerProperties;
 public class EpiphanVGA2USBV4LSubTestSrcBinTest extends EpiphanVGA2USBV4LTest {
 
   @Test
-  @Ignore
   public void subTestSrcBinTest() throws Exception {
-
-    if (!gstreamerInstalled)
+    if (!readyTestEnvironment())
       return;
 
-    EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
-
-    if (!(epiphanBin.subBin instanceof EpiphanVGA2USBV4LSubTestSrcBin))
-      return;
-    
+    EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, properties);
     Assert.assertNotNull(epiphanBin.subBin);
     Assert.assertTrue(epiphanBin.subBin instanceof EpiphanVGA2USBV4LSubTestSrcBin);
     Assert.assertEquals(epiphanBin.getCaps(), ((EpiphanVGA2USBV4LSubTestSrcBin)epiphanBin.subBin).caps);
   }
 
   @Test
-  @Ignore
   public void subTestSrcBinCreateElementsTest() throws Exception {
-    if (!gstreamerInstalled)
+    if (!readyTestEnvironment())
       return;
 
-    EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
-
-    if (!(epiphanBin.subBin instanceof EpiphanVGA2USBV4LSubTestSrcBin))
-      return;
-    
+    EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, properties);
     EpiphanVGA2USBV4LSubTestSrcBin subBin = (EpiphanVGA2USBV4LSubTestSrcBin) epiphanBin.subBin;
     Assert.assertNotNull(subBin.src);
     Assert.assertNotNull(subBin.capsFilter);
@@ -68,16 +57,11 @@ public class EpiphanVGA2USBV4LSubTestSrcBinTest extends EpiphanVGA2USBV4LTest {
   }
 
   @Test
-  @Ignore
   public void subTestSrcBinSetElementPropertiesTest() throws Exception {
-    if (!gstreamerInstalled)
+    if (!readyTestEnvironment())
       return;
 
-    EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
-
-    if (!(epiphanBin.subBin instanceof EpiphanVGA2USBV4LSubTestSrcBin))
-      return;
-    
+    EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, properties);
     EpiphanVGA2USBV4LSubTestSrcBin subBin = (EpiphanVGA2USBV4LSubTestSrcBin) epiphanBin.subBin;
     Assert.assertEquals(subBin.src.get(GStreamerProperties.PATTERN), 0);
     Assert.assertEquals(subBin.src.get(GStreamerProperties.IS_LIVE), true);
@@ -92,16 +76,11 @@ public class EpiphanVGA2USBV4LSubTestSrcBinTest extends EpiphanVGA2USBV4LTest {
   }
 
   @Test
-  @Ignore
   public void subTestSrcBinBinLinkElementsTest() throws Exception {
-    if (!gstreamerInstalled)
+    if (!readyTestEnvironment())
       return;
 
-    EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
-
-    if (!(epiphanBin.subBin instanceof EpiphanVGA2USBV4LSubTestSrcBin))
-      return;
-    
+    EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, properties);
     EpiphanVGA2USBV4LSubTestSrcBin subBin = (EpiphanVGA2USBV4LSubTestSrcBin) epiphanBin.subBin;
 
     // src -> caps_filter
@@ -116,16 +95,11 @@ public class EpiphanVGA2USBV4LSubTestSrcBinTest extends EpiphanVGA2USBV4LTest {
   }
 
   @Test
-  @Ignore
   public void subTestSrcBinBinRemoveElementsTest() throws Exception {
-    if (!gstreamerInstalled)
+    if (!readyTestEnvironment())
       return;
 
-    EpiphanVGA2USBV4LProducer epiphanBin = new EpiphanVGA2USBV4LProducer(captureDevice, properties);
-
-    if (!(epiphanBin.subBin instanceof EpiphanVGA2USBV4LSubTestSrcBin))
-      return;
-
+    EpiphanVGA2USBV4LProducer epiphanBin = getEpiphanVGA2USBV4LProducer(captureDevice, properties);
     EpiphanVGA2USBV4LSubTestSrcBin subBin = (EpiphanVGA2USBV4LSubTestSrcBin) epiphanBin.subBin;
     subBin.removeElements();
 

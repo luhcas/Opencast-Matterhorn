@@ -22,18 +22,19 @@ import java.util.Properties;
 import org.apache.commons.io.FileUtils;
 import org.gstreamer.Gst;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Assert;
 import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.pipeline.bins.BinTestHelpers;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
-import org.opencastproject.capture.pipeline.bins.producers.ProducerType;
+import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateElementException;
+import org.opencastproject.capture.pipeline.bins.UnableToCreateGhostPadsForBinException;
+import org.opencastproject.capture.pipeline.bins.UnableToLinkGStreamerElementsException;
+import org.opencastproject.capture.pipeline.bins.UnableToSetElementPropertyBecauseElementWasNullException;
 import org.opencastproject.util.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.ArrayList;
 
 /**
  * Abstract class for Epiphan producer bins testing.
@@ -47,12 +48,12 @@ public abstract class EpiphanVGA2USBV4LTest {
   protected static boolean gstreamerInstalled = true;
 
   /** Location of Epiphan VGA2USB device */
-  protected static String epiphanLocation = "/dev/video1";
+  protected static String epiphanLocation = null;
 
   /** Properties specifically designed for unit testing */
   protected Properties properties;
 
-  /** Capture Device created for unit testing */
+  /** Capture Device for unit testing */
   protected CaptureDevice captureDevice;
 
   /** Capture Device Properties created for unit testing **/
@@ -75,28 +76,35 @@ public abstract class EpiphanVGA2USBV4LTest {
       return;
     
     if (System.getProperty("testEpiphan") != null) {
-      String epiphanDevice = System.getProperty("testEpiphan");
-      if (new File(epiphanDevice).exists()) {
-        epiphanLocation = epiphanDevice;
-        logger.info("Testing Epiphan card at: " + epiphanDevice);
+      String epiphanDeviceLocation = System.getProperty("testEpiphan");
+      if (new File(epiphanDeviceLocation).exists()) {
+        epiphanLocation = epiphanDeviceLocation;
+        logger.info("Testing Epiphan card at: " + epiphanDeviceLocation);
       } else {
-        logger.error("File does not exist: " + epiphanDevice);
-        Assert.fail();
+        logger.error("File does not exist: " + epiphanDeviceLocation);
+        return;
       }
-    }    
-        
+    } else {
+      logger.error("'testEpiphan' property does not set! Make sure this property is set to Epiphan VGA2USB location.");
+      return;
+    }
+
+    File tmpDir = new File(System.getProperty("java.io.tmpdir"), "testpipe");
+    if (!tmpDir.exists())
+      tmpDir.mkdir();
+    
     captureDeviceProperties = BinTestHelpers.createCaptureDeviceProperties(captureDevice, null, 
             null, null, null, null, null, null, null, null);
     captureDevice = BinTestHelpers.createCaptureDevice(epiphanLocation,
             ProducerType.EPIPHAN_VGA2USB,
             "Epiphan VGA 2 USB", 
-            new File(System.getProperty("java.io.tmpdir"), "testpipe/test.mpg").getAbsolutePath(),
+            new File(tmpDir, "test.mpg").getAbsolutePath(),
             captureDeviceProperties);
 
     // setup testing properties
     properties = new Properties();
     properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_VIDEO_LOCATION,
-            new File(System.getProperty("java.io.tmpdir"), "testpipe/confidence").getAbsolutePath());
+            new File(tmpDir, "confidence").getAbsolutePath());
     properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_ENABLE, "false");
     properties.setProperty(CaptureParameters.CAPTURE_CONFIDENCE_DEBUG, "false");
   }
@@ -111,11 +119,38 @@ public abstract class EpiphanVGA2USBV4LTest {
     FileUtils.deleteQuietly(new File(System.getProperty("java.io.tmpdir"), "testpipe"));
   }
 
-  @AfterClass
-  public static void deinitGst() {
-    if (!gstreamerInstalled)
-      return;
+  /**
+   * Returns true, if gstreamer installed and epiphan device location is set
+   * @return true, if tests can be started
+   */
+  protected boolean readyTestEnvironment() {
+    return gstreamerInstalled && epiphanLocation != null;
+  }
 
-    Gst.deinit();
+  /**
+   * Creates EpiphanVGA2USBV4LProducer.
+   *
+   * @param captureDevice CaptureDevice for testing Epiphan VGA2USB device
+   * @param properties Properties for unit testing
+   * @return EpiphanVGA2USBV4LProducer if captureDevice not null and properties are set
+   *
+   * @throws UnableToLinkGStreamerElementsException
+   * @throws UnableToCreateGhostPadsForBinException
+   * @throws UnableToSetElementPropertyBecauseElementWasNullException
+   * @throws CaptureDeviceNullPointerException
+   * @throws UnableToCreateElementException
+   * @throws NoProducerFoundException
+   */
+  protected static EpiphanVGA2USBV4LProducer getEpiphanVGA2USBV4LProducer(CaptureDevice captureDevice, Properties properties)
+          throws UnableToLinkGStreamerElementsException, UnableToCreateGhostPadsForBinException,
+          UnableToSetElementPropertyBecauseElementWasNullException, CaptureDeviceNullPointerException,
+          UnableToCreateElementException, NoProducerFoundException {
+
+    ProducerBin epiphanBin = ProducerFactory.getInstance().getProducer(captureDevice, properties, null);
+    if (epiphanBin instanceof EpiphanVGA2USBV4LProducer)
+      return (EpiphanVGA2USBV4LProducer) epiphanBin;
+    else {
+      throw new NoProducerFoundException("Created ProducerBin is not a EpiphanVGA2USBV4LProducer");
+    }
   }
 }

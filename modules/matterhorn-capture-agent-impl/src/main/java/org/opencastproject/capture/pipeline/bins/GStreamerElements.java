@@ -43,6 +43,8 @@ public interface GStreamerElements {
   String DV1394SRC = "dv1394src";
   String DVDEC = "dvdec";
   String DVDEMUX = "dvdemux";
+  String MULTIFILESRC = "multifilesrc";
+  String PNGDEC = "pngdec";
   String PULSESRC = "pulsesrc";
   String V4L2SRC = "v4l2src";
   

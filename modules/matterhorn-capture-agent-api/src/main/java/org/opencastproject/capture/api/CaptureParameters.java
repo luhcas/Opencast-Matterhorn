@@ -137,6 +137,9 @@ public interface CaptureParameters {
   /** The key for the workflow definition, if any, in the capture properties attached to the iCal event */
   static final String INGEST_WORKFLOW_DEFINITION = "org.opencastproject.workflow.definition";
 
+  /** The path to png file to show, while recording hardware is unplugged (e.g. Epiphan devices). */
+  static final String FALLBACK_PNG = "capture.fallback.png";
+
   /**
    * Settings which control the capture hardware and outputs
    */

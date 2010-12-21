@@ -16,6 +16,7 @@
 package org.opencastproject.capture.pipeline.bins.producers;
 
 import com.sun.jna.Pointer;
+import java.io.File;
 import java.util.Properties;
 import net.luniks.linux.jv4linfo.JV4LInfo;
 import net.luniks.linux.jv4linfo.JV4LInfoException;
@@ -31,6 +32,7 @@ import org.gstreamer.State;
 import org.gstreamer.elements.AppSink;
 import org.gstreamer.elements.AppSrc;
 import org.gstreamer.elements.AppSrc.NEED_DATA;
+import org.opencastproject.capture.api.CaptureParameters;
 import org.opencastproject.capture.pipeline.bins.CaptureDevice;
 import org.opencastproject.capture.pipeline.bins.CaptureDeviceNullPointerException;
 import org.opencastproject.capture.pipeline.bins.GStreamerElementFactory;
@@ -113,8 +115,23 @@ public class EpiphanVGA2USBV4LProducer extends V4LProducer {
 
     // creates Epiphan sub bin
     deviceBin = new EpiphanVGA2USBV4LSubDeviceBin(captureDevice, getCaps());
-    // creates secondary sub bin
-    subBin = new EpiphanVGA2USBV4LSubTestSrcBin(captureDevice, getCaps());
+
+    // get fallback property (if property set, image will be shown when loosing vga signal)
+    String fallbackPng = properties.getProperty(CaptureParameters.FALLBACK_PNG);
+    if (fallbackPng != null) {
+      if (!new File(fallbackPng).isFile()) {
+        logger.warn("'"+CaptureParameters.FALLBACK_PNG+"' does not reference a png file ("+fallbackPng+"). "
+                + "VideoTestSrc will be shown by loosing VGA signal!");
+        fallbackPng = null;
+      }
+    }
+
+    // create secondary sub bin
+    if (fallbackPng != null) {
+      subBin = new EpiphanVGA2USBV4LSubPngBin(captureDevice, getCaps(), fallbackPng);
+    } else {
+      subBin = new EpiphanVGA2USBV4LSubTestSrcBin(captureDevice, getCaps());
+    }
     // link AppSrc to sub bin AppSinks
     linkAppSrcToSink();
     // propagate state changes to sub bins

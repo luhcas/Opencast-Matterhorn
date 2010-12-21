@@ -78,7 +78,7 @@ public class EpiphanVGA2USBV4LSubDeviceBin extends EpiphanVGA2USBV4LSubAbstractB
 
   /**
    * @inheritDocs
-   * @see EpiphanSubBin#getSink() 
+   * @see EpiphanVGA2USBV4LSubBin#getSink()
    */
   @Override
   public AppSink getSink() {
