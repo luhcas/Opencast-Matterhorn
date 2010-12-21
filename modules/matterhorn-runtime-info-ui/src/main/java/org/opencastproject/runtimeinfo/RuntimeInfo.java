@@ -23,6 +23,7 @@ import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -42,9 +43,13 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.SortedSet;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.Servlet;
@@ -95,7 +100,7 @@ public class RuntimeInfo {
     if (engageBaseUrl == null)
       engageBaseUrl = serverUrl;
     this.serverUrl = bundleContext.getProperty("org.opencastproject.server.url");
-    
+
     String serviceUrl = (String) cc.getProperties().get(RestPublisher.SERVICE_PATH_PROPERTY);
     docs = generateDocs(serviceUrl);
 
@@ -111,7 +116,7 @@ public class RuntimeInfo {
             try {
               HttpPost post = new HttpPost(uri);
               List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-              // TODO: we are currently using drupal to store this information.  Use something less demanding so
+              // TODO: we are currently using drupal to store this information. Use something less demanding so
               // we can simply post the data.
               params.add(new BasicNameValuePair("form_id", "webform_client_form_1834"));
               params.add(new BasicNameValuePair("submitted[data]", getRuntimeInfo()));
@@ -134,7 +139,7 @@ public class RuntimeInfo {
   }
 
   public void deactivate() {
-    if(pingbackTimer != null) {
+    if (pingbackTimer != null) {
       pingbackTimer.cancel();
     }
   }
@@ -214,14 +219,14 @@ public class RuntimeInfo {
     }
     if (serviceRefs == null)
       return json;
-    for (ServiceReference servletRef : serviceRefs) {
+    for (ServiceReference servletRef : sort(serviceRefs)) {
       String version = servletRef.getBundle().getVersion().toString();
       String description = (String) servletRef.getProperty(Constants.SERVICE_DESCRIPTION);
       String servletContextPath = (String) servletRef.getProperty(RestPublisher.SERVICE_PATH_PROPERTY);
       JSONObject endpoint = new JSONObject();
       endpoint.put("description", description);
       endpoint.put("version", version);
-      endpoint.put("docs", serverUrl + servletContextPath + "/docs"); // This is a Matterhorn convention 
+      endpoint.put("docs", serverUrl + servletContextPath + "/docs"); // This is a Matterhorn convention
       endpoint.put("wadl", serverUrl + servletContextPath + "/?_wadl&type=xml"); // This triggers a CXF-specific handler
       json.add(endpoint);
     }
@@ -239,7 +244,7 @@ public class RuntimeInfo {
     }
     if (serviceRefs == null)
       return json;
-    for (ServiceReference ref : serviceRefs) {
+    for (ServiceReference ref : sort(serviceRefs)) {
       String description = (String) ref.getProperty(Constants.SERVICE_DESCRIPTION);
       String version = ref.getBundle().getVersion().toString();
       String alias = (String) ref.getProperty("alias");
@@ -252,6 +257,31 @@ public class RuntimeInfo {
       json.add(endpoint);
     }
     return json;
+  }
+
+  /**
+   * Returns the array of references sorted by their {@link Constants.SERVICE_DESCRIPTION} property.
+   * 
+   * @param references
+   *          the referencens
+   * @return the sorted set of references
+   */
+  protected SortedSet<ServiceReference> sort(ServiceReference[] references) {
+    // Sort the service references
+    SortedSet<ServiceReference> sortedServiceRefs = new TreeSet<ServiceReference>(new Comparator<ServiceReference>() {
+      @Override
+      public int compare(ServiceReference o1, ServiceReference o2) {
+        String o1Description = (String) o1.getProperty(Constants.SERVICE_DESCRIPTION);
+        if (StringUtils.isBlank(o1Description))
+          o1Description = o1.toString();
+        String o2Description = (String) o2.getProperty(Constants.SERVICE_DESCRIPTION);
+        if (StringUtils.isBlank(o2Description))
+          o2Description = o2.toString();
+        return o1Description.compareTo(o2Description);
+      }
+    });
+    sortedServiceRefs.addAll(Arrays.asList(references));
+    return sortedServiceRefs;
   }
 
 }
