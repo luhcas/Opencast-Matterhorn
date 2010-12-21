@@ -7,6 +7,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <!--[if IE]><script type="text/javascript" language="javascript" src="js/excanvas.js"></script><![endif]-->
     <script type="text/javascript" language="javascript" src="jquery/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" language="javascript" src="js/oc.utils.js"></script>
     <script type="text/javascript" language="javascript" src="js/js-class.js"></script>
     <script type="text/javascript" language="javascript" src="js/bluff-min.js"></script>
     <script type="text/javascript" language="javascript">
@@ -46,16 +47,26 @@
         g.draw();
       }
 
-      /* TODO: Replace the hard coded workflow ID */
-      jQuery.ajax({
+      $(document).ready(function() {
+        Opencast.workflowId = ocUtils.getURLParam('id');
+        if (!Opencast.workflowId) {
+          $('<div></div>').text('Could not get Workflow Id').prependTo('body');
+        } else {
+          jQuery.ajax({
             type: 'GET',
-            url: '/workflow/rest/instance/18.json',
+            url: '/workflow/rest/instance/' + Opencast.workflowId + '.json',
             dataType: 'jsonp',
             jsonp: 'jsonp',
+            error: function() {
+              $('<div></div>').text('Workflow (Id=' + Opencast.workflowId + ') not found.').prependTo('body');
+            },
             success: function(workflow) {
               Opencast.renderWorkflowPerformance(workflow);
             }
+          });
+        }
       });
+      
     </script>
   </head>
   <body>

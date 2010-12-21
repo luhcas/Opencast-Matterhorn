@@ -706,7 +706,7 @@ RenderUtils = new (function() {
     links = [];
     for(i in actions){
       if(actions[i] === 'view') {
-        links.push('<a href="view.html?id=' + id + '">View</a>');
+        links.push('<a href="inspect.html?id=' + id + '">View</a>');
       } else if(actions[i] === 'edit') {
         links.push('<a href="scheduler.html?eventId=' + id + '&edit=true">Edit</a>');
       } else if(actions[i] === 'delete') {
