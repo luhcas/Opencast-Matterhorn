@@ -89,7 +89,7 @@
 
       <textarea id="serversTemplate">
 {for server in serversView}
-<h2><img src={if server.online}{if server.maintenance}"img/maintenance.png" title="Maintenance Mode"{else}"img/available.png" title="Online"{/if}{else}"img/offline.png" title="Offline"{/if}/> ${server.host}</h2>
+<h2><img src={if server.online}{if server.maintenance}"img/icons/maintenance.png" title="Maintenance Mode"{else}"img/icons/available.png" title="Online"{/if}{else}"img/icons/offline.png" title="Offline"{/if}/> ${server.host}</h2>
 <table id="statsTable" class="ui-widget" cellspacing="0" width="100%">
   <thead>
     <tr>
