@@ -281,8 +281,7 @@
         <module>modules/matterhorn-capture-agent-impl</module>
         <module>modules/matterhorn-confidence-monitoring-ui</module>
         <module>modules/matterhorn-security-impl</module>
-        <!-- This should be uncommented to take advantage of configuration-free load balancing, especially for ingest -->
-        <!-- <module>modules/matterhorn-serviceregistry-remote</module> -->
+        <module>modules/matterhorn-serviceregistry-remote</module>
         <module>modules/matterhorn-static</module>
         <module>modules/matterhorn-webconsole</module>
       </modules>

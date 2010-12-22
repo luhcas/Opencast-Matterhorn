@@ -203,7 +203,7 @@
               jv4linfo;inline=true,
               gstreamer-java;inline=true,
               jna;inline=true,
-              json_simple;inline=true,
+              json-simple;inline=true,
               ical4j;inline=true,
             </Embed-Dependency>
             <Export-Package>

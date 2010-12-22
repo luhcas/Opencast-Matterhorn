@@ -196,7 +196,7 @@ public class SchedulerImpl implements org.opencastproject.capture.api.Scheduler,
    * 
    * @see org.osgi.service.cm.ManagedService#updated(Dictionary)
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   @Override
   public void updated(Dictionary properties) throws ConfigurationException {
     log.debug("Scheduler updated.");

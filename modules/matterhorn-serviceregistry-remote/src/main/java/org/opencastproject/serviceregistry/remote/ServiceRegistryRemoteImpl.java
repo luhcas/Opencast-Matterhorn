@@ -35,7 +35,6 @@ import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.QueryStringBuilder;
 import org.opencastproject.util.UrlSupport;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -51,7 +50,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -115,7 +113,7 @@ public class ServiceRegistryRemoteImpl implements ServiceRegistry {
    *          the component context
    */
   protected void activate(ComponentContext context) {
-    String serviceURLProperty = StringUtils.trimToNull((String) context.getProperties().get(OPT_SERVICE_REGISTRY_URL));
+    String serviceURLProperty = StringUtils.trimToNull((String) context.getBundleContext().getProperty(OPT_SERVICE_REGISTRY_URL));
     if (serviceURLProperty == null)
       throw new ServiceException("Remote service registry can't find " + OPT_SERVICE_REGISTRY_URL);
     try {
