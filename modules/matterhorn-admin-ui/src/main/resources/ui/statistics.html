@@ -89,9 +89,7 @@
 
       <textarea id="serversTemplate">
 {for server in serversView}
-<h2>${server.host}</h2>
-<div>Online: {if server.online}<b>true</b>{else}<b>false</b>{/if}</div>
-<div>Maintenance: {if server.maintenance}<b>true</b>{else}<b>false</b>{/if}</div>
+<h2><img src={if server.online}{if server.maintenance}"img/maintenance.png" title="Maintenance Mode"{else}"img/available.png" title="Online"{/if}{else}"img/offline.png" title="Offline"{/if}/> ${server.host}</h2>
 <table id="statsTable" class="ui-widget" cellspacing="0" width="100%">
   <thead>
     <tr>
@@ -121,7 +119,7 @@
           ${service.meanQueueTime}
         </td>
       </tr>
-	{/for}
+  {/for}
   </tbody>
 </table>
 {/for}
@@ -171,7 +169,7 @@
           <a href="#">Maintenance</a>
         </td>
       </tr>
-	{/for}
+  {/for}
   </tbody>
 </table>
 {/for}
