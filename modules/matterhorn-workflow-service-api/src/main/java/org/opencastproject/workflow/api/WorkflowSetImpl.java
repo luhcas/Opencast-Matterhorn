@@ -16,9 +16,6 @@
 
 package org.opencastproject.workflow.api;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,46 +30,44 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  * The search result represents a set of result items that has been compiled as a result for a search operation.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="workflows", namespace="http://workflow.opencastproject.org/")
+@XmlRootElement(name = "workflows", namespace = "http://workflow.opencastproject.org/")
 public class WorkflowSetImpl implements WorkflowSet {
 
-  /** Logging facility */
-  static Logger logger = LoggerFactory.getLogger(WorkflowSetImpl.class);
-
   /** A list of search items. */
-  @XmlElement(name="workflow")
+  @XmlElement(name = "workflow")
   private List<WorkflowInstance> resultSet = null;
 
   /** The pagination offset. */
-  @XmlAttribute(name="startPage")
+  @XmlAttribute(name = "startPage")
   private long startPage;
 
   /** The pagination limit. */
-  @XmlAttribute(name="count")
+  @XmlAttribute(name = "count")
   private long pageSize;
 
   /** The search time in milliseconds */
-  @XmlAttribute(name="searchTime")
+  @XmlAttribute(name = "searchTime")
   private long searchTime;
 
   /** The total number of results without paging */
-  @XmlAttribute(name="totalCount")
-  public long totalCount;
-  
+  @XmlAttribute(name = "totalCount")
+  private long totalCount;
 
   /**
    * A no-arg constructor needed by JAXB
    */
-  public WorkflowSetImpl() {}
+  public WorkflowSetImpl() {
+  }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowSet#getItems()
    */
   @Override
   public WorkflowInstance[] getItems() {
-    return resultSet == null || resultSet.size() == 0 ? new WorkflowInstance[0] :
-      resultSet.toArray(new WorkflowInstance[resultSet.size()]);
+    return resultSet == null || resultSet.size() == 0 ? new WorkflowInstance[0] : resultSet
+            .toArray(new WorkflowInstance[resultSet.size()]);
   }
 
   /**
@@ -86,11 +81,12 @@ public class WorkflowSetImpl implements WorkflowSet {
       throw new IllegalArgumentException("Parameter item cannot be null");
     if (resultSet == null)
       resultSet = new ArrayList<WorkflowInstance>();
-    resultSet.add((WorkflowInstanceImpl)item);
+    resultSet.add((WorkflowInstanceImpl) item);
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowSet#size()
    */
   @Override
@@ -100,6 +96,7 @@ public class WorkflowSetImpl implements WorkflowSet {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowSet#getStartPage()
    */
   public long getStartPage() {
@@ -118,6 +115,7 @@ public class WorkflowSetImpl implements WorkflowSet {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowSet#getPageSize()
    */
   @Override
@@ -137,6 +135,7 @@ public class WorkflowSetImpl implements WorkflowSet {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowSet#getSearchTime()
    */
   public long getSearchTime() {
@@ -155,6 +154,7 @@ public class WorkflowSetImpl implements WorkflowSet {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowSet#getTotalCount()
    */
   @Override
@@ -167,8 +167,13 @@ public class WorkflowSetImpl implements WorkflowSet {
   }
 
   static class Adapter extends XmlAdapter<WorkflowSetImpl, WorkflowSet> {
-    public WorkflowSetImpl marshal(WorkflowSet set) throws Exception {return (WorkflowSetImpl)set;}
-    public WorkflowSet unmarshal(WorkflowSetImpl set) throws Exception {return set;}
+    public WorkflowSetImpl marshal(WorkflowSet set) throws Exception {
+      return (WorkflowSetImpl) set;
+    }
+
+    public WorkflowSet unmarshal(WorkflowSetImpl set) throws Exception {
+      return set;
+    }
   }
 
 }

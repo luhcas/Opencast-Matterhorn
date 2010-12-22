@@ -23,7 +23,7 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
 import org.opencastproject.workflow.api.WorkflowQuery;
 import org.opencastproject.workflow.api.WorkflowService;
@@ -55,7 +55,7 @@ public class WorkflowServiceDaoSolrTest {
     workflow.setId(123);
     workflow.setState(WorkflowState.INSTANTIATED);
     workflow.setMediaPackage(MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew());
-    job.setPayload(WorkflowBuilder.getInstance().toXml(workflow));
+    job.setPayload(WorkflowParser.toXml(workflow));
     jobs.add(job);
 
     // Mock up the service registry to return the job
@@ -63,7 +63,7 @@ public class WorkflowServiceDaoSolrTest {
     EasyMock.expect(serviceRegistry.count(WorkflowService.JOB_TYPE, null)).andReturn(new Long(1));
     EasyMock.expect(serviceRegistry.getJobs(WorkflowService.JOB_TYPE, null)).andReturn(jobs);
     EasyMock.replay(serviceRegistry);
-    
+
     // Now create the dao
     dao = new WorkflowServiceDaoSolrImpl();
     dao.solrRoot = PathSupport.concat("target", "solr");
@@ -126,7 +126,7 @@ public class WorkflowServiceDaoSolrTest {
 
   @Test
   public void testPopulateSolr() throws Exception {
-    // this method uses the solr index, so if the workflow is 
+    // this method uses the solr index, so if the workflow is
     Assert.assertNotNull(dao.getWorkflowById(123));
   }
 

@@ -25,7 +25,7 @@ import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
@@ -103,7 +103,7 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
       String targetTags = workflowInstance.getCurrentOperation().getConfiguration("target-tags");
       if (StringUtils.trimToNull(sourceTags) == null) {
         logger.warn("No tags have been specified");
-        return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
+        return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
       }
 
       // Look for elements matching the tag
@@ -175,7 +175,7 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
     } catch (RuntimeException e) {
       throw new WorkflowOperationException(e);
     }
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
+    return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
   }
 
 }

@@ -31,45 +31,50 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * See {@link WorkflowOperationDefinition}
  */
-@XmlType(name="operation-definition", namespace="http://workflow.opencastproject.org/")
-@XmlRootElement(name="operation-definition", namespace="http://workflow.opencastproject.org/")
+@XmlType(name = "operation-definition", namespace = "http://workflow.opencastproject.org/")
+@XmlRootElement(name = "operation-definition", namespace = "http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinition {
 
-  @XmlAttribute(name="id")
+  @XmlAttribute(name = "id")
   protected String id;
 
-  @XmlAttribute(name="description")
+  @XmlAttribute(name = "description")
   protected String description;
 
-  @XmlAttribute(name="fail-on-error")
+  @XmlAttribute(name = "fail-on-error")
   protected boolean failWorkflowOnException;
 
-  @XmlAttribute(name="if")
+  @XmlAttribute(name = "if")
   protected String executeCondition;
 
-  @XmlAttribute(name="unless")
+  @XmlAttribute(name = "unless")
   protected String skipCondition;
 
-  @XmlAttribute(name="exception-handler-workflow")
+  @XmlAttribute(name = "exception-handler-workflow")
   protected String exceptionHandlingWorkflow;
 
-  @XmlElement(name="configuration")
-  @XmlElementWrapper(name="configurations")
+  @XmlElement(name = "configuration")
+  @XmlElementWrapper(name = "configurations")
   protected Set<WorkflowConfiguration> configurations;
-  
+
   /** A no-arg constructor is needed by JAXB */
   public WorkflowOperationDefinitionImpl() {
     this.failWorkflowOnException = true;
   }
-  
+
   /**
-   * @param id The unique name of this operation
-   * @param description The description of what this operation does
-   * @param exceptionHandlingWorkflow The workflow to run when a workflow operation exception is thrown
-   * @param failWorkflowOnException Whether an exception thrown by this operation should fail the entire {@link WorkflowInstance}
+   * @param id
+   *          The unique name of this operation
+   * @param description
+   *          The description of what this operation does
+   * @param exceptionHandlingWorkflow
+   *          The workflow to run when a workflow operation exception is thrown
+   * @param failWorkflowOnException
+   *          Whether an exception thrown by this operation should fail the entire {@link WorkflowInstance}
    */
-  public WorkflowOperationDefinitionImpl(String id, String description, String exceptionHandlingWorkflow, boolean failWorkflowOnException) {
+  public WorkflowOperationDefinitionImpl(String id, String description, String exceptionHandlingWorkflow,
+          boolean failWorkflowOnException) {
     super();
     this.id = id;
     this.description = description;
@@ -80,20 +85,23 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
   public String getId() {
     return id;
   }
+
   public void setId(String id) {
     this.id = id;
   }
+
   public String getDescription() {
     return description;
   }
+
   public void setDescription(String description) {
     this.description = description;
   }
-  
+
   public void setExecutionCondition(String condition) {
     this.executeCondition = condition;
   }
-  
+
   public String getExecutionCondition() {
     return executeCondition;
   }
@@ -108,6 +116,7 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationDefinition#getExceptionHandlingWorkflow()
    */
   public String getExceptionHandlingWorkflow() {
@@ -120,6 +129,7 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationDefinition#isFailWorkflowOnException()
    */
   public boolean isFailWorkflowOnException() {
@@ -134,31 +144,41 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
    * Allows JAXB handling of {@link WorkflowOperationDefinition} interfaces.
    */
   static class Adapter extends XmlAdapter<WorkflowOperationDefinitionImpl, WorkflowOperationDefinition> {
-    public WorkflowOperationDefinitionImpl marshal(WorkflowOperationDefinition op) throws Exception {return (WorkflowOperationDefinitionImpl)op;}
-    public WorkflowOperationDefinition unmarshal(WorkflowOperationDefinitionImpl op) throws Exception {return op;}
+    public WorkflowOperationDefinitionImpl marshal(WorkflowOperationDefinition op) throws Exception {
+      return (WorkflowOperationDefinitionImpl) op;
+    }
+
+    public WorkflowOperationDefinition unmarshal(WorkflowOperationDefinitionImpl op) throws Exception {
+      return op;
+    }
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowInstance#getConfiguration(java.lang.String)
    */
   public String getConfiguration(String key) {
-    if(key == null || configurations == null) return null;
-    for(WorkflowConfiguration config : configurations) {
-      if(config.getKey().equals(key)) return config.getValue();
+    if (key == null || configurations == null)
+      return null;
+    for (WorkflowConfiguration config : configurations) {
+      if (config.getKey().equals(key))
+        return config.getValue();
     }
     return null;
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowInstance#removeConfiguration(java.lang.String)
    */
   public void removeConfiguration(String key) {
-    if(key == null || configurations == null) return;
-    for(Iterator<WorkflowConfiguration> configIter = configurations.iterator(); configIter.hasNext();) {
+    if (key == null || configurations == null)
+      return;
+    for (Iterator<WorkflowConfiguration> configIter = configurations.iterator(); configIter.hasNext();) {
       WorkflowConfiguration config = configIter.next();
-      if(config.getKey().equals(key)) {
+      if (config.getKey().equals(key)) {
         configIter.remove();
         return;
       }
@@ -167,13 +187,15 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowInstance#setConfiguration(java.lang.String, java.lang.String)
    */
   public void setConfiguration(String key, String value) {
-    if(key == null || configurations == null) return;
-    for(WorkflowConfiguration config : configurations) {
-      if(config.getKey().equals(key)) {
-        ((WorkflowConfigurationImpl)config).setValue(value);
+    if (key == null || configurations == null)
+      return;
+    for (WorkflowConfiguration config : configurations) {
+      if (config.getKey().equals(key)) {
+        ((WorkflowConfigurationImpl) config).setValue(value);
         return;
       }
     }
@@ -183,13 +205,14 @@ public class WorkflowOperationDefinitionImpl implements WorkflowOperationDefinit
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationDefinition#getConfigurationKeys()
    */
   @Override
   public Set<String> getConfigurationKeys() {
     Set<String> set = new TreeSet<String>();
-    if(configurations != null) {
-      for(WorkflowConfiguration config : configurations) {
+    if (configurations != null) {
+      for (WorkflowConfiguration config : configurations) {
         set.add(config.getKey());
       }
     }

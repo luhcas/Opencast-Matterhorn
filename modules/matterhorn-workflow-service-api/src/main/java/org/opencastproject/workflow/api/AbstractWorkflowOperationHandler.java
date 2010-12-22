@@ -69,7 +69,7 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
    */
   @Override
   public WorkflowOperationResult skip(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.SKIP);
+    return WorkflowParser.buildWorkflowOperationResult(Action.SKIP);
   }
 
   /**

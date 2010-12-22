@@ -17,7 +17,7 @@ package org.opencastproject.workflow.handler;
 
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -86,10 +86,10 @@ public class AppendWorkflowOperationHandler extends ResumableWorkflowOperationHa
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     String workflowDefinitionId = workflowInstance.getConfiguration(OPT_WORKFLOW);
     if (append(workflowInstance, workflowDefinitionId))
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+      return WorkflowParser.buildWorkflowOperationResult(Action.CONTINUE);
     else
       logger.info("Entering hold state to ask for workflow");
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
+    return WorkflowParser.buildWorkflowOperationResult(Action.PAUSE);
   }
 
   /**
@@ -102,10 +102,10 @@ public class AppendWorkflowOperationHandler extends ResumableWorkflowOperationHa
   public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties) {
     String workflowDefinitionId = workflowInstance.getConfiguration(OPT_WORKFLOW);
     if (append(workflowInstance, workflowDefinitionId))
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+      return WorkflowParser.buildWorkflowOperationResult(Action.CONTINUE);
     else
       logger.info("Entering hold state to ask for workflow");
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
+    return WorkflowParser.buildWorkflowOperationResult(Action.PAUSE);
   }
 
   /**

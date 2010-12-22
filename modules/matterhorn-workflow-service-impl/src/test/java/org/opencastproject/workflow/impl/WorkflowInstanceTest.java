@@ -21,7 +21,7 @@ import org.opencastproject.mediapackage.MediaPackageElementBuilderFactory;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.mediapackage.track.TrackImpl;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -52,7 +52,7 @@ public class WorkflowInstanceTest {
     WorkflowDefinitionImpl def = new WorkflowDefinitionImpl();
     def.setId("123");
     def.setPublished(true);
-    
+
     Map<String, String> props = new HashMap<String, String>();
     props.put("key1", "value1");
     WorkflowInstance instance = new WorkflowInstanceImpl(def, null, null, props);
@@ -62,19 +62,20 @@ public class WorkflowInstanceTest {
     instance = new WorkflowInstanceImpl(def, null, null, null);
     Assert.assertEquals(def.getTitle(), instance.getTitle());
   }
-  
+
   @Test
   public void testMediaPackageSerializationInWorkflowInstance() throws Exception {
     WorkflowInstanceImpl workflow = new WorkflowInstanceImpl();
     MediaPackage src = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
-    Track track = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder().elementFromURI(
-      new URI("http://sample"), Track.TYPE, MediaPackageElements.PRESENTER_SOURCE);
+    Track track = (Track) MediaPackageElementBuilderFactory.newInstance().newElementBuilder()
+            .elementFromURI(new URI("http://sample"), Track.TYPE, MediaPackageElements.PRESENTER_SOURCE);
     src.add(track);
-    MediaPackage deserialized = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().loadFromXml(src.toXml());
+    MediaPackage deserialized = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder()
+            .loadFromXml(src.toXml());
     workflow.setMediaPackage(deserialized);
     Assert.assertEquals(1, workflow.getMediaPackage().getTracks().length);
   }
-  
+
   @Test
   public void testMediaPackageDeserialization() throws Exception {
     WorkflowInstanceImpl workflow = new WorkflowInstanceImpl();
@@ -83,11 +84,11 @@ public class WorkflowInstanceTest {
     workflow.setMediaPackage(src);
     Assert.assertEquals(2, workflow.getMediaPackage().getTracks().length);
   }
-  
+
   @Test
   public void testWorkflowDefinitionDeserialization() throws Exception {
     InputStream in = getClass().getResourceAsStream("/workflow-definition-1.xml");
-    WorkflowDefinition def = WorkflowBuilder.getInstance().parseWorkflowDefinition(in);
+    WorkflowDefinition def = WorkflowParser.parseWorkflowDefinition(in);
     IOUtils.closeQuietly(in);
     Assert.assertEquals("The First Workflow Definition", def.getTitle());
     Assert.assertEquals(2, def.getOperations().size());
@@ -95,7 +96,7 @@ public class WorkflowInstanceTest {
     Assert.assertEquals("Unit testing workflow", def.getDescription());
     Assert.assertTrue(def.isPublished());
   }
-  
+
   @Test
   public void testFlavorMarshalling() throws Exception {
     URI uri = new URI("http://testing");
@@ -107,17 +108,19 @@ public class WorkflowInstanceTest {
 
     WorkflowInstance workflow = new WorkflowInstanceImpl();
     workflow.setMediaPackage(mp);
-    
+
     // Marshall the workflow to xml
-    String xml = WorkflowBuilder.getInstance().toXml(workflow);
+    String xml = WorkflowParser.toXml(workflow);
 
     // Get it back from xml
-    WorkflowInstance instance2 = WorkflowBuilder.getInstance().parseWorkflowInstance(xml);
-    Assert.assertEquals(workflow.getMediaPackage().getTracks()[0].getFlavor(), instance2.getMediaPackage().getTracks()[0].getFlavor());
+    WorkflowInstance instance2 = WorkflowParser.parseWorkflowInstance(xml);
+    Assert.assertEquals(workflow.getMediaPackage().getTracks()[0].getFlavor(),
+            instance2.getMediaPackage().getTracks()[0].getFlavor());
 
     // now without namespaces
     String noNamespaceXml = "<workflow><parent/><mediapackage><media><track type=\"presentation/source\" id=\"track-1\"><url>http://testing</url></track></media></mediapackage></workflow>";
-    WorkflowInstance instance3 = WorkflowBuilder.getInstance().parseWorkflowInstance(noNamespaceXml);
-    Assert.assertEquals(workflow.getMediaPackage().getTracks()[0].getFlavor(), instance3.getMediaPackage().getTracks()[0].getFlavor());
- }
+    WorkflowInstance instance3 = WorkflowParser.parseWorkflowInstance(noNamespaceXml);
+    Assert.assertEquals(workflow.getMediaPackage().getTracks()[0].getFlavor(),
+            instance3.getMediaPackage().getTracks()[0].getFlavor());
+  }
 }

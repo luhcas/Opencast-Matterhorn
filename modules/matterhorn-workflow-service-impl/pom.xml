@@ -145,7 +145,7 @@
               org.json.simple.parser
             </Private-Package>
             <Embed-Dependency>
-              json_simple;inline=true
+              json-simple;inline=true
             </Embed-Dependency>
             <Service-Component>
               OSGI-INF/workflow-definition-scanner.xml,

@@ -320,7 +320,7 @@ public class WorkflowQuery {
   public boolean isSortAscending() {
     return sortAscending;
   }
-  
+
   /**
    * Returns the number of result items to return.
    * 

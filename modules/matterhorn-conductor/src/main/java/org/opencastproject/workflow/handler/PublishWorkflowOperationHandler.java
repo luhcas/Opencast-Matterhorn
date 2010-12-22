@@ -21,7 +21,7 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.MediaPackageReference;
 import org.opencastproject.search.api.SearchService;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
@@ -149,7 +149,7 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
     String tags = workflowInstance.getCurrentOperation().getConfiguration("source-tags");
     if (StringUtils.trimToNull(tags) == null) {
       logger.warn("No source tags have been specified, so nothing will be added to the search index");
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackageFromWorkflow, Action.CONTINUE);
+      return WorkflowParser.buildWorkflowOperationResult(mediaPackageFromWorkflow, Action.CONTINUE);
     }
 
     List<String> tagSet = asList(tags);
@@ -157,13 +157,13 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
     try {
       MediaPackage mediaPackageForSearch = getMediaPackageForSearchIndex(mediaPackageFromWorkflow, tagSet);
       if(mediaPackageForSearch == null) {
-        WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackageForSearch, Action.CONTINUE);
+        WorkflowParser.buildWorkflowOperationResult(mediaPackageForSearch, Action.CONTINUE);
       }
       logger.info("Publishing media package {} to search index", mediaPackageForSearch);
       // adding media package to the search index
       searchService.add(mediaPackageForSearch);
       logger.debug("Publish operation complete");
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackageFromWorkflow, Action.CONTINUE);
+      return WorkflowParser.buildWorkflowOperationResult(mediaPackageFromWorkflow, Action.CONTINUE);
     } catch (Throwable t) {
       throw new WorkflowOperationException(t);
     }

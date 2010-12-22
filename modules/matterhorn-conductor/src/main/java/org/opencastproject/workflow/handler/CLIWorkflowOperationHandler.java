@@ -17,7 +17,7 @@ package org.opencastproject.workflow.handler;
 
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationHandler;
@@ -209,9 +209,9 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
 
     // If there is no resultant mediapackage, pass back the one that was provided to us
     if (resultPackage == null) {
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(srcPackage, Action.CONTINUE);
+      return WorkflowParser.buildWorkflowOperationResult(srcPackage, Action.CONTINUE);
     }
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(resultPackage, Action.CONTINUE);
+    return WorkflowParser.buildWorkflowOperationResult(resultPackage, Action.CONTINUE);
   }
 
   /**
@@ -221,7 +221,7 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
    */
   @Override
   public WorkflowOperationResult skip(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.SKIP);
+    return WorkflowParser.buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.SKIP);
   }
 
   /**

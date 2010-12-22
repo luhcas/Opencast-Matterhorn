@@ -17,7 +17,7 @@ package org.opencastproject.workflow.handler;
 
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
@@ -84,6 +84,6 @@ public class ReviewWorkflowOperationHandler extends ResumableWorkflowOperationHa
       logger.warn("No media with tag '{}' found to preview", tag);
     }
     
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
+    return WorkflowParser.buildWorkflowOperationResult(Action.PAUSE);
   }
 }

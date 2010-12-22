@@ -16,7 +16,7 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
@@ -56,6 +56,6 @@ public class ErrorLoggingOperationHandler extends AbstractWorkflowOperationHandl
    */
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.warn("Workflow instance failed: " + workflowInstance);
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.CONTINUE);
+    return WorkflowParser.buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.CONTINUE);
   }
 }

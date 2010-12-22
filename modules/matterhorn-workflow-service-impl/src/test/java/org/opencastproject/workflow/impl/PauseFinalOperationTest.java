@@ -21,7 +21,7 @@ import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
@@ -104,7 +104,7 @@ public class PauseFinalOperationTest {
     service.activate(null);
 
     is = WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-pause-last.xml");
-    def = WorkflowBuilder.getInstance().parseWorkflowDefinition(is);
+    def = WorkflowParser.parseWorkflowDefinition(is);
     IOUtils.closeQuietly(is);
     service.registerWorkflowDefinition(def);
   }

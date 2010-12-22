@@ -26,8 +26,8 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 /**
  * JAXB annotated implementation of {@link WorkflowConfiguration}
  */
-@XmlType(name="configuration", namespace="http://workflow.opencastproject.org/")
-@XmlRootElement(name="configuration", namespace="http://workflow.opencastproject.org/")
+@XmlType(name = "configuration", namespace = "http://workflow.opencastproject.org/")
+@XmlRootElement(name = "configuration", namespace = "http://workflow.opencastproject.org/")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class WorkflowConfigurationImpl implements WorkflowConfiguration, Comparable<WorkflowConfiguration> {
   @XmlAttribute
@@ -35,27 +35,33 @@ public class WorkflowConfigurationImpl implements WorkflowConfiguration, Compara
   @XmlValue
   protected String value;
 
-  public WorkflowConfigurationImpl() {}
+  public WorkflowConfigurationImpl() {
+  }
+
   public WorkflowConfigurationImpl(String key, String value) {
     this.key = key;
     this.value = value;
   }
-  
+
   public String getKey() {
     return key;
   }
+
   public void setKey(String key) {
     this.key = key;
   }
+
   public String getValue() {
     return value;
   }
+
   public void setValue(String value) {
     this.value = value;
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -68,6 +74,7 @@ public class WorkflowConfigurationImpl implements WorkflowConfiguration, Compara
 
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -89,15 +96,17 @@ public class WorkflowConfigurationImpl implements WorkflowConfiguration, Compara
 
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Object#toString()
    */
   @Override
   public String toString() {
     return "workflow configuration " + this.key + "=" + this.value;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see java.lang.Comparable#compareTo(java.lang.Object)
    */
   @Override
@@ -109,7 +118,12 @@ public class WorkflowConfigurationImpl implements WorkflowConfiguration, Compara
    * Allows JAXB handling of {@link WorkflowConfiguration} interfaces.
    */
   static class Adapter extends XmlAdapter<WorkflowConfigurationImpl, WorkflowConfiguration> {
-    public WorkflowConfigurationImpl marshal(WorkflowConfiguration config) throws Exception {return (WorkflowConfigurationImpl) config;}
-    public WorkflowConfiguration unmarshal(WorkflowConfigurationImpl config) throws Exception {return config;}
+    public WorkflowConfigurationImpl marshal(WorkflowConfiguration config) throws Exception {
+      return (WorkflowConfigurationImpl) config;
+    }
+
+    public WorkflowConfiguration unmarshal(WorkflowConfigurationImpl config) throws Exception {
+      return config;
+    }
   }
 }

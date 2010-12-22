@@ -58,7 +58,7 @@ public interface WorkflowSet {
    * @return The time in ms.
    */
   long getSearchTime();
-  
+
   /**
    * The total number of items without paging.
    * 

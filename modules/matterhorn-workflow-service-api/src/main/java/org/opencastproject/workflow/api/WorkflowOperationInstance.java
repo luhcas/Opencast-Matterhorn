@@ -15,8 +15,6 @@
  */
 package org.opencastproject.workflow.api;
 
-import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
-
 import java.net.URL;
 import java.util.Date;
 

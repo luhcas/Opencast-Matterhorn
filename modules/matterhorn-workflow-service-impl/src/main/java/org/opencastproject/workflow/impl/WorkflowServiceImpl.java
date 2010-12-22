@@ -25,7 +25,7 @@ import org.opencastproject.serviceregistry.api.ServiceRegistryException;
 import org.opencastproject.serviceregistry.api.ServiceUnavailableException;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -480,8 +480,8 @@ public class WorkflowServiceImpl implements WorkflowService, ManagedService {
     if (properties == null)
       return instance;
     try {
-      String xml = replaceVariables(WorkflowBuilder.getInstance().toXml(instance), properties);
-      WorkflowInstanceImpl workflow = (WorkflowInstanceImpl) WorkflowBuilder.getInstance().parseWorkflowInstance(xml);
+      String xml = replaceVariables(WorkflowParser.toXml(instance), properties);
+      WorkflowInstanceImpl workflow = (WorkflowInstanceImpl) WorkflowParser.parseWorkflowInstance(xml);
       workflow.init(); // needed to keep the current operation setting intact
       return workflow;
     } catch (Exception e) {

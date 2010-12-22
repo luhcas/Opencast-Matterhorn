@@ -34,7 +34,7 @@ import org.opencastproject.metadata.dublincore.EncodingSchemeUtils;
 import org.opencastproject.metadata.dublincore.Precision;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
@@ -163,7 +163,7 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
       throw new WorkflowOperationException(e.getMessage());
     }
 
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
+    return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
   }
 
   /**

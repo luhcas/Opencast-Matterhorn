@@ -28,21 +28,22 @@ import javax.xml.bind.annotation.XmlRootElement;
  * A collection of workflow definitions.
  */
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlRootElement(name="definitions", namespace="http://workflow.opencastproject.org/")
+@XmlRootElement(name = "definitions", namespace = "http://workflow.opencastproject.org/")
 public class WorkflowDefinitionSet {
 
-  @XmlElement(name="definition")
-  List<WorkflowDefinition> definitions = null;
+  @XmlElement(name = "definition")
+  protected List<WorkflowDefinition> definitions = null;
 
   public WorkflowDefinitionSet(Collection<WorkflowDefinition> definitions) {
     this.definitions = new ArrayList<WorkflowDefinition>();
-    if(definitions != null) this.definitions.addAll(definitions);
+    if (definitions != null)
+      this.definitions.addAll(definitions);
   }
-  
+
   public WorkflowDefinitionSet() {
     this(null);
   }
-  
+
   public List<WorkflowDefinition> getDefinitions() {
     return definitions;
   }
@@ -50,5 +51,5 @@ public class WorkflowDefinitionSet {
   public void setDefinitions(List<WorkflowDefinition> definitions) {
     this.definitions = definitions;
   }
-  
+
 }

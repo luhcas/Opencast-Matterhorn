@@ -15,7 +15,7 @@
  */
 package org.opencastproject.workflow.impl;
 
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowConfiguration;
 import org.opencastproject.workflow.api.WorkflowConfigurationImpl;
 import org.opencastproject.workflow.api.WorkflowInstanceImpl;
@@ -41,7 +41,7 @@ public class WorkflowConfigurationTest {
     List<WorkflowOperationInstance> ops = new ArrayList<WorkflowOperationInstance>();
     ops.add(op);
     instance.setOperations(ops);
-    String xml = WorkflowBuilder.getInstance().toXml(instance);
+    String xml = WorkflowParser.toXml(instance);
     System.out.println(xml);
     Assert.assertTrue(xml.contains("<configurations><configuration key=\"this\">that</configuration></configurations>"));
   }

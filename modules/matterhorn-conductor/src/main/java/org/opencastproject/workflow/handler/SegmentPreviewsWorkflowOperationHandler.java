@@ -39,7 +39,7 @@ import org.opencastproject.metadata.mpeg7.Video;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -151,7 +151,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
     Catalog[] segmentCatalogs = src.getCatalogs(MediaPackageElements.SEGMENTS);
     if (segmentCatalogs.length == 0) {
       logger.info("Media package {} does not contain segment information", src);
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+      return WorkflowParser.buildWorkflowOperationResult(Action.CONTINUE);
     }
 
     // Create the images
@@ -210,7 +210,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
     if (videoTrackSet.size() == 0) {
       logger.debug("Mediapackage {} has no suitable tracks to extract images based on tags {} and flavor {}",
               new Object[] { mediaPackage, sourceTags, sourceVideoFlavor });
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
+      return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
     } else {
 
       // Determine the tagset for the reference
@@ -303,7 +303,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
       }
     }
 
-    return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
+    return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
   }
 
   /**

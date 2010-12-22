@@ -112,8 +112,8 @@ public class MockServiceRegistry implements ServiceRegistry {
   }
 
   @Override
-  public void setMaintenanceStatus(String host, boolean maintenance)
-          throws ServiceUnavailableException, ServiceRegistryException {
+  public void setMaintenanceStatus(String host, boolean maintenance) throws ServiceUnavailableException,
+          ServiceRegistryException {
     throw new UnsupportedOperationException();
   }
 
@@ -129,13 +129,14 @@ public class MockServiceRegistry implements ServiceRegistry {
 
   /**
    * {@inheritDoc}
-   *
-   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getJobs(java.lang.String, org.opencastproject.job.api.Job.Status)
+   * 
+   * @see org.opencastproject.serviceregistry.api.ServiceRegistry#getJobs(java.lang.String,
+   *      org.opencastproject.job.api.Job.Status)
    */
   @Override
   public List<Job> getJobs(String serviceType, Status status) throws ServiceRegistryException {
     List<Job> list = new ArrayList<Job>();
-    for(Entry<Long, Job> entry : jobMap.entrySet()) {
+    for (Entry<Long, Job> entry : jobMap.entrySet()) {
       list.add(entry.getValue());
     }
     return list;

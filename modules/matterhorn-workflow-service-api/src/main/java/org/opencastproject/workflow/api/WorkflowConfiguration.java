@@ -23,5 +23,6 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlJavaTypeAdapter(WorkflowConfigurationImpl.Adapter.class)
 public interface WorkflowConfiguration {
   String getKey();
+
   String getValue();
 }

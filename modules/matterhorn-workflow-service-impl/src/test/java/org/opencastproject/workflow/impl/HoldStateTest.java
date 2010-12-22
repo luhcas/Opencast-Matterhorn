@@ -22,7 +22,7 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
@@ -102,7 +102,7 @@ public class HoldStateTest {
     service.activate(null);
 
     is = WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-holdstate.xml");
-    def = WorkflowBuilder.getInstance().parseWorkflowDefinition(is);
+    def = WorkflowParser.parseWorkflowDefinition(is);
     IOUtils.closeQuietly(is);
     service.registerWorkflowDefinition(def);
   }
@@ -135,7 +135,7 @@ public class HoldStateTest {
     }
 
     // The variable "testproperty" should have been replaced by "foo", but not "anotherproperty"
-    String xml = WorkflowBuilder.getInstance().toXml(workflow);
+    String xml = WorkflowParser.toXml(workflow);
     Assert.assertTrue(xml.contains("foo"));
     Assert.assertTrue(xml.contains("anotherproperty"));
 
@@ -146,7 +146,7 @@ public class HoldStateTest {
     service.resume(workflow.getId(), resumeProps);
 
     WorkflowInstance fromDb = service.getWorkflowById(workflow.getId());
-    String xmlFromDb = WorkflowBuilder.getInstance().toXml(fromDb);
+    String xmlFromDb = WorkflowParser.toXml(fromDb);
     Assert.assertTrue(!xmlFromDb.contains("anotherproperty"));
     Assert.assertTrue(xmlFromDb.contains("foo"));
     Assert.assertTrue(xmlFromDb.contains("bar"));
@@ -212,15 +212,16 @@ public class HoldStateTest {
     public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
             throws WorkflowOperationException {
       Action action = pauseOnResume ? Action.PAUSE : Action.CONTINUE;
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(action);
+      return WorkflowParser.buildWorkflowOperationResult(action);
     }
   }
 
   class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
     @Override
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+      return WorkflowParser.buildWorkflowOperationResult(Action.CONTINUE);
     }
+
     @Override
     public SortedMap<String, String> getConfigurationOptions() {
       return new TreeMap<String, String>();

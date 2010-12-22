@@ -22,7 +22,6 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
  * Tests property replacement in workflow operation instances
  */
@@ -36,7 +35,7 @@ public class PropertyReplacementTest {
     WorkflowServiceImpl service = new WorkflowServiceImpl();
     String result = service.replaceVariables(source, properties);
     Assert.assertEquals("Variable replacement failed",
-            "<config key=\"foo\">propertyForFoo</config><config key=\"bar\">propertyForBar</config>" +
-            "<config key=\"baz\">${baz}</config>", result);
+            "<config key=\"foo\">propertyForFoo</config><config key=\"bar\">propertyForBar</config>"
+                    + "<config key=\"baz\">${baz}</config>", result);
   }
 }

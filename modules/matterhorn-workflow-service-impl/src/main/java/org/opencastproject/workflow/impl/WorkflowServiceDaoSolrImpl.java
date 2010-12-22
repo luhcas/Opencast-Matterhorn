@@ -22,7 +22,7 @@ import org.opencastproject.solr.SolrServerFactory;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.PathSupport;
 import org.opencastproject.util.SolrUtils;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
@@ -198,8 +198,6 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     }
     if (instancesInSolr == 0) {
       // this may be a new index, so get all of the existing workflows and index them
-      WorkflowBuilder builder = WorkflowBuilder.getInstance();
-
       long instancesInServiceRegistry;
       try {
         instancesInServiceRegistry = serviceRegistry.count(WorkflowService.JOB_TYPE, null);
@@ -207,7 +205,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
           logger.info("The workflow search index is empty.  Populating it now with {} workflows.",
                   instancesInServiceRegistry);
           for (Job job : serviceRegistry.getJobs(WorkflowService.JOB_TYPE, null)) {
-            WorkflowInstance instance = builder.parseWorkflowInstance(job.getPayload());
+            WorkflowInstance instance = WorkflowParser.parseWorkflowInstance(job.getPayload());
             index(instance);
           }
           logger.info("Finished populating the workflow search index with {} workflows.", instancesInServiceRegistry);
@@ -313,7 +311,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
     doc.addField(WORKFLOW_DEFINITION_KEY, instance.getTemplate());
     doc.addField(STATE_KEY, instance.getState().toString());
 
-    String xml = WorkflowBuilder.getInstance().toXml(instance);
+    String xml = WorkflowParser.toXml(instance);
     doc.addField(XML_KEY, xml);
 
     WorkflowOperationInstance op = instance.getCurrentOperation();
@@ -573,7 +571,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
       } else {
         String xml = (String) response.getResults().get(0).get(XML_KEY);
         try {
-          return WorkflowBuilder.getInstance().parseWorkflowInstance(xml);
+          return WorkflowParser.parseWorkflowInstance(xml);
         } catch (Exception e) {
           throw new IllegalStateException("can not parse workflow xml", e);
         }
@@ -767,7 +765,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
 
     String solrQueryString = buildSolrQueryString(query);
     solrQuery.setQuery(solrQueryString);
-    
+
     if (query.getSort() != null) {
       ORDER order = query.isSortAscending() ? ORDER.asc : ORDER.desc;
       solrQuery.addSortField(getSortField(query.getSort()) + "_sort", order);
@@ -794,7 +792,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
       for (SolrDocument doc : items) {
         String xml = (String) doc.get(XML_KEY);
         try {
-          set.addItem(WorkflowBuilder.getInstance().parseWorkflowInstance(xml));
+          set.addItem(WorkflowParser.parseWorkflowInstance(xml));
         } catch (Exception e) {
           throw new IllegalStateException("can not parse workflow xml", e);
         }
@@ -834,7 +832,7 @@ public class WorkflowServiceDaoSolrImpl implements WorkflowServiceImplDao {
   public void update(WorkflowInstance instance) throws WorkflowDatabaseException {
     String xml;
     try {
-      xml = WorkflowBuilder.getInstance().toXml(instance);
+      xml = WorkflowParser.toXml(instance);
     } catch (Exception e) {
       throw new WorkflowDatabaseException(e);
     }

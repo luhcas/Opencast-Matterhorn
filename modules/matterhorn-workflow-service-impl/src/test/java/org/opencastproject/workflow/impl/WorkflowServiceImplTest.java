@@ -22,7 +22,7 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
@@ -114,15 +114,15 @@ public class WorkflowServiceImplTest {
     InputStream is = null;
     try {
       is = WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-1.xml");
-      workingDefinition = WorkflowBuilder.getInstance().parseWorkflowDefinition(is);
+      workingDefinition = WorkflowParser.parseWorkflowDefinition(is);
       IOUtils.closeQuietly(is);
 
       is = WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-2.xml");
-      failingDefinitionWithoutErrorHandler = WorkflowBuilder.getInstance().parseWorkflowDefinition(is);
+      failingDefinitionWithoutErrorHandler = WorkflowParser.parseWorkflowDefinition(is);
       IOUtils.closeQuietly(is);
 
       is = WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-3.xml");
-      failingDefinitionWithErrorHandler = WorkflowBuilder.getInstance().parseWorkflowDefinition(is);
+      failingDefinitionWithErrorHandler = WorkflowParser.parseWorkflowDefinition(is);
       IOUtils.closeQuietly(is);
 
       service.registerWorkflowDefinition(workingDefinition);
@@ -246,7 +246,7 @@ public class WorkflowServiceImplTest {
     String manfred = "Dr. Manfred Frisch";
     mediapackage1.addCreator(manfred);
     mediapackage2.addCreator("Somebody else");
-    
+
     // Ensure that the database doesn't have any workflow instances with media packages with this creator
     Assert.assertEquals(0, service.countWorkflowInstances());
 
@@ -382,7 +382,7 @@ public class WorkflowServiceImplTest {
     String contributor1 = "foo";
     String contributor2 = "bar";
     String contributor3 = "baz";
-    
+
     // Ensure that the database doesn't have any workflow instances
     Assert.assertEquals(0, service.countWorkflowInstances());
 
@@ -396,9 +396,12 @@ public class WorkflowServiceImplTest {
     WorkflowInstance instance1 = startAndWait(workingDefinition, mediapackage1, WorkflowState.SUCCEEDED);
     WorkflowInstance instance2 = startAndWait(workingDefinition, mediapackage2, WorkflowState.SUCCEEDED);
 
-    WorkflowSet workflowsWithContributor1 = service.getWorkflowInstances(new WorkflowQuery().withContributor(contributor1));
-    WorkflowSet workflowsWithContributor2 = service.getWorkflowInstances(new WorkflowQuery().withContributor(contributor2));
-    WorkflowSet workflowsWithContributor3 = service.getWorkflowInstances(new WorkflowQuery().withContributor(contributor3));
+    WorkflowSet workflowsWithContributor1 = service.getWorkflowInstances(new WorkflowQuery()
+            .withContributor(contributor1));
+    WorkflowSet workflowsWithContributor2 = service.getWorkflowInstances(new WorkflowQuery()
+            .withContributor(contributor2));
+    WorkflowSet workflowsWithContributor3 = service.getWorkflowInstances(new WorkflowQuery()
+            .withContributor(contributor3));
 
     Assert.assertEquals(1, workflowsWithContributor1.getTotalCount());
     Assert.assertEquals(2, workflowsWithContributor2.getTotalCount());
@@ -667,8 +670,7 @@ public class WorkflowServiceImplTest {
 
     @Override
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(workflowInstance.getMediaPackage(),
-              Action.CONTINUE);
+      return WorkflowParser.buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.CONTINUE);
     }
   }
 

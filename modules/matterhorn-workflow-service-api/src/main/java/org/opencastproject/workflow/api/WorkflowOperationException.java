@@ -24,8 +24,10 @@ public class WorkflowOperationException extends Exception {
   /**
    * Constructs a new {@link WorkflowOperationException} with a message and a root cause.
    * 
-   * @param message The message describing what went wrong
-   * @param cause The exception that triggered this problem
+   * @param message
+   *          The message describing what went wrong
+   * @param cause
+   *          The exception that triggered this problem
    */
   public WorkflowOperationException(String message, Throwable cause) {
     super(message, cause);
@@ -34,7 +36,8 @@ public class WorkflowOperationException extends Exception {
   /**
    * Constructs a new {@link WorkflowOperationException} with a message, but no root cause.
    * 
-   * @param message The message describing what went wrong
+   * @param message
+   *          The message describing what went wrong
    */
   public WorkflowOperationException(String message) {
     super(message);
@@ -43,7 +46,8 @@ public class WorkflowOperationException extends Exception {
   /**
    * Constructs a new {@link WorkflowOperationException} with a root cause.
    * 
-   * @param cause The exception that caused this problem
+   * @param cause
+   *          The exception that caused this problem
    */
   public WorkflowOperationException(Throwable cause) {
     super(cause);

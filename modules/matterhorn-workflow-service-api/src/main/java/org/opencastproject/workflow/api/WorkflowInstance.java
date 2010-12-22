@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 @XmlJavaTypeAdapter(WorkflowInstanceImpl.Adapter.class)
 public interface WorkflowInstance extends Configurable {
-  public enum WorkflowState {
+  enum WorkflowState {
     INSTANTIATED, RUNNING, STOPPED, PAUSED, SUCCEEDED, FAILED, FAILING
   }
 
@@ -57,12 +57,12 @@ public interface WorkflowInstance extends Configurable {
   Long getParentId();
 
   /**
-   * Returns a copy of the {@link WorkflowOperationInstance}s that make up this workflow.  In order to modify the
+   * Returns a copy of the {@link WorkflowOperationInstance}s that make up this workflow. In order to modify the
    * operations, call setOperations.
    * 
    * @return the workflow operations
    */
-  public List<WorkflowOperationInstance> getOperations();
+  List<WorkflowOperationInstance> getOperations();
 
   /**
    * Sets the list of workflow operations
@@ -70,7 +70,7 @@ public interface WorkflowInstance extends Configurable {
    * @param operations
    *          the new list of operations
    */
-  public void setOperations(List<WorkflowOperationInstance> operations);
+  void setOperations(List<WorkflowOperationInstance> operations);
 
   /**
    * Returns the {@link WorkflowOperationInstance} that is currently either in {@link WorkflowState#RUNNING} or
@@ -78,7 +78,7 @@ public interface WorkflowInstance extends Configurable {
    * 
    * @return the current operation
    */
-  public WorkflowOperationInstance getCurrentOperation();
+  WorkflowOperationInstance getCurrentOperation();
 
   /**
    * The current {@link WorkflowState} of this {@link WorkflowInstance}
@@ -102,7 +102,7 @@ public interface WorkflowInstance extends Configurable {
    * 
    * @return The next operation
    */
-  public WorkflowOperationInstance next();
+  WorkflowOperationInstance next();
 
   /**
    * Whether there is another operation after the current operation. If there is no next operation, this will return

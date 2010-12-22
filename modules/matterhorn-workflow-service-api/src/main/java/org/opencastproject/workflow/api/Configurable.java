@@ -19,7 +19,7 @@ import java.util.Set;
 
 /**
  * A configurable entity.
- *
+ * 
  */
 public interface Configurable {
   /**
@@ -44,10 +44,11 @@ public interface Configurable {
 
   /**
    * Gets the configuration keys that are currently set for this configurable entity.
+   * 
    * @return the configuration keys
    */
   Set<String> getConfigurationKeys();
-  
+
   /**
    * Removes the <code>key</code> configuration.
    * 

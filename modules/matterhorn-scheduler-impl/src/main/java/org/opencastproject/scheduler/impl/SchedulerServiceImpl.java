@@ -25,7 +25,7 @@ import org.opencastproject.scheduler.api.SchedulerFilter;
 import org.opencastproject.scheduler.api.SchedulerService;
 import org.opencastproject.series.api.SeriesService;
 import org.opencastproject.util.NotFoundException;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -176,7 +176,7 @@ public class SchedulerServiceImpl implements SchedulerService, ManagedService {
     InputStream in = null;
     try {
       in = getClass().getResourceAsStream("/scheduler-workflow-definition.xml");
-      return WorkflowBuilder.getInstance().parseWorkflowDefinition(in);
+      return WorkflowParser.parseWorkflowDefinition(in);
     } catch (Exception e) {
       throw new IllegalStateException("Unable to load the preprocessing workflow definition", e);
     } finally {

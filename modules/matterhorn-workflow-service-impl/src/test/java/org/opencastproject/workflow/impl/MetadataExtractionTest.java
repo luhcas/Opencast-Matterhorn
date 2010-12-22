@@ -33,10 +33,10 @@ public class MetadataExtractionTest {
   // mock services and objects
   private MediaPackageMetadataService metadataService;
   private MediaPackageMetadata metadata;
-  
+
   private static final String TITLE = "title";
   private static final String SERIES = "series";
-  
+
   @Before
   public void setup() throws Exception {
     // set up service
@@ -57,7 +57,7 @@ public class MetadataExtractionTest {
   public void testMetadata() throws Exception {
     MediaPackage mp = MediaPackageBuilderFactory.newInstance().newMediaPackageBuilder().createNew();
     Assert.assertNull(mp.getTitle());
-    // now run the mediapackage through the metadata population process.  This works here because the mock always
+    // now run the mediapackage through the metadata population process. This works here because the mock always
     // returns metadata.
     service.populateMediaPackageMetadata(mp);
     Assert.assertEquals(TITLE, mp.getTitle());

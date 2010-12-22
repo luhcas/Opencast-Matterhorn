@@ -23,7 +23,7 @@ import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
 import org.opencastproject.workflow.api.WorkflowInstance;
@@ -140,7 +140,7 @@ public class WorkflowStatisticsTest {
     dao.activate();
     workflowService.setDao(dao);
     workflowService.activate(null);
-    
+
     // Ensure the workflow service has an unbounded thread pool for testing
     workflowService.executorService = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
@@ -193,7 +193,7 @@ public class WorkflowStatisticsTest {
     // Start the workflows and advance them in "random" order. With every definition, an instance is started for every
     // operation that is part of the definition. So we end up with an instance per definition and operation, and there
     // are no two workflows that are in the same operation.
-    
+
     int total = 0;
     int paused = 0;
     int failed = 0;
@@ -202,21 +202,21 @@ public class WorkflowStatisticsTest {
     int running = 0;
     int stopped = 0;
     int succeeded = 0;
-    
+
     for (WorkflowDefinition def : workflowDefinitions) {
       for (int j = 0; j < def.getOperations().size(); j++) {
         WorkflowInstance instance = workflowService.start(def, mediaPackage);
         for (int k = 0; k <= j; k++) {
           instance = workflowService.resume(instance.getId(), null);
         }
-        total ++;
-        paused ++;
+        total++;
+        paused++;
       }
     }
-    
+
     Thread.sleep(3000);
-    
-    // TODO: Add failed, failing, stopped etc. workflows as well 
+
+    // TODO: Add failed, failing, stopped etc. workflows as well
 
     // Get the statistics
     WorkflowStatistics stats = workflowService.getStatistics();
@@ -232,9 +232,9 @@ public class WorkflowStatisticsTest {
     // TODO: Test the operations
     // Make sure they are as expected
     // for (WorkflowDefinitionReport report : stats.getDefinitions()) {
-    //      
+    //
     // }
-    
+
   }
 
   /**
@@ -271,7 +271,7 @@ public class WorkflowStatisticsTest {
     reports.add(def2);
     stats.setDefinitions(reports);
 
-    logger.info(WorkflowBuilder.getInstance().toXml(stats));
+    logger.info(WorkflowParser.toXml(stats));
   }
 
   /**

@@ -25,7 +25,7 @@ import java.util.Date;
 public class MockJob implements Job {
 
   MockJob() {
-    this.id = (long)(Math.random()*Long.MAX_VALUE);
+    this.id = (long) (Math.random() * Long.MAX_VALUE);
   }
 
   long id;
@@ -76,11 +76,11 @@ public class MockJob implements Job {
   public Date getDateStarted() {
     return null;
   }
-  
+
   public String getPayload() {
     return payload;
   }
-  
+
   public void setPayload(String payload) {
     this.payload = payload;
   }

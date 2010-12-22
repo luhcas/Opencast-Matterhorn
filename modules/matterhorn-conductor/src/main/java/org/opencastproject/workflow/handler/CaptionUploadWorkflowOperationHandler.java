@@ -19,7 +19,7 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -85,9 +85,9 @@ public class CaptionUploadWorkflowOperationHandler extends ResumableWorkflowOper
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     MediaPackageElementFlavor flavor = getFlavor(workflowInstance.getCurrentOperation());
     if (!hasCaptions(workflowInstance.getMediaPackage(), flavor))
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
+      return WorkflowParser.buildWorkflowOperationResult(Action.PAUSE);
     else
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+      return WorkflowParser.buildWorkflowOperationResult(Action.CONTINUE);
   }
 
   /**
@@ -101,11 +101,11 @@ public class CaptionUploadWorkflowOperationHandler extends ResumableWorkflowOper
 //    MediaPackageElementFlavor flavor = getFlavor(workflowInstance.getCurrentOperation());
 //    boolean hasCaptions = hasCaptions(workflowInstance.getMediaPackage(), flavor);
 //    if (hasCaptions) {
-//      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+//      return WorkflowBuilder.buildWorkflowOperationResult(Action.CONTINUE);
 //    } else {
 //      // The user should have verified the existence of a caption file in, or if necessary added one to, the mediapackage
 //      logger.info("No DFXP caption file attached, keeping workflow {} in the hold state", workflowInstance);
-//      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.PAUSE);
+//      return WorkflowBuilder.buildWorkflowOperationResult(Action.PAUSE);
 //    }
   }
 

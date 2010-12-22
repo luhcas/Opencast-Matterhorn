@@ -32,7 +32,7 @@ import org.opencastproject.util.doc.Format;
 import org.opencastproject.util.doc.Param;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workspace.api.Workspace;
 
@@ -405,7 +405,7 @@ public class IngestRestService {
       zipInputStream = new FileInputStream(zipFileFromWorkspace);
       WorkflowInstance workflow = ingestService.addZippedMediaPackage(zipInputStream, workflowDefinitionId, workflowConfig,
               workflowInstanceIdAsLong);
-      return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
+      return Response.ok(WorkflowParser.toXml(workflow)).build();
 
     } catch (Exception e) {
       logger.warn(e.getMessage(), e);
@@ -423,7 +423,7 @@ public class IngestRestService {
     try {
       MediaPackage mp = factory.newMediaPackageBuilder().loadFromXml(mpx);
       WorkflowInstance workflow = ingestService.ingest(mp);
-      return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
+      return Response.ok(WorkflowParser.toXml(workflow)).build();
     } catch (Exception e) {
       logger.warn(e.getMessage(), e);
       return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build();
@@ -438,7 +438,7 @@ public class IngestRestService {
    * @Path("ingest/{wdID}") public Response ingest(@FormParam("mediaPackage") String mpx, @PathParam("wdID") String
    * wdID) { logger.debug("ingest(MediaPackage, ID): {}, {}", mpx, wdID); try { MediaPackage mp =
    * builder.loadFromXml(mpx); WorkflowInstance workflow = ingestService.ingest(mp, wdID); return
-   * Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build(); } catch (Exception e) {
+   * Response.ok(WorkflowBuilder.toXml(workflow)).build(); } catch (Exception e) {
    * logger.warn(e.getMessage(), e); return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build(); } }
    */
   @POST
@@ -461,7 +461,7 @@ public class IngestRestService {
       }
       if (mp != null) {
         WorkflowInstance workflow = ingestService.ingest(mp, wdID, wfConfig);
-        return Response.ok(WorkflowBuilder.getInstance().toXml(workflow)).build();
+        return Response.ok(WorkflowParser.toXml(workflow)).build();
       } else {
         return Response.status(Status.BAD_REQUEST).build();
       }

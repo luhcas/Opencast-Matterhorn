@@ -24,7 +24,7 @@ import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
@@ -104,7 +104,7 @@ public class CountWorkflowsTest {
     service.activate(null);
 
     is = WorkflowServiceImplTest.class.getResourceAsStream("/workflow-definition-holdstate.xml");
-    def = WorkflowBuilder.getInstance().parseWorkflowDefinition(is);
+    def = WorkflowParser.parseWorkflowDefinition(is);
     IOUtils.closeQuietly(is);
     service.registerWorkflowDefinition(def);
   }
@@ -179,7 +179,7 @@ public class CountWorkflowsTest {
     @Override
     public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
             throws WorkflowOperationException {
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+      return WorkflowParser.buildWorkflowOperationResult(Action.CONTINUE);
     }
   }
 
@@ -189,8 +189,9 @@ public class CountWorkflowsTest {
   class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
     @Override
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(Action.CONTINUE);
+      return WorkflowParser.buildWorkflowOperationResult(Action.CONTINUE);
     }
+
     @Override
     public SortedMap<String, String> getConfigurationOptions() {
       return new TreeMap<String, String>();

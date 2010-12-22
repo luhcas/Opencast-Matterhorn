@@ -28,7 +28,7 @@ import org.opencastproject.util.doc.Param.Type;
 import org.opencastproject.util.doc.RestEndpoint;
 import org.opencastproject.util.doc.RestTestForm;
 import org.opencastproject.workflow.api.Configurable;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDatabaseException;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowDefinitionImpl;
@@ -95,7 +95,7 @@ public class WorkflowRestService {
 
   /** The constant used to switch the direction of the sorting querystring parameter. */
   public static final String DESCENDING_SUFFIX = "_DESC";
-  
+
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(WorkflowRestService.class);
 
@@ -205,9 +205,14 @@ public class WorkflowRestService {
             "Filter results by end date (yyyy-MM-dd'T'HH:mm:ss'Z')"));
     instancesEndpoint.addOptionalParam(new Param("count", Type.STRING, "20", "Results per page (max 100)"));
     instancesEndpoint.addOptionalParam(new Param("startPage", Type.STRING, "0", "Page offset"));
-    instancesEndpoint.addOptionalParam(new Param("sort", Type.STRING, "DATE_CREATED", "The sort order.  May include any " +
-    		"of the following: DATE_CREATED, TITLE, SERIES_TITLE, SERIES_ID, MEDIA_PACKAGE_ID, WORKFLOW_DEFINITION_ID, CREATOR, " +
-    		"CONTRIBUTOR, LANGUAGE, LICENSE, SUBJECT.  Add '_DESC' to reverse the sort order (e.g. TITLE_DESC)."));
+    instancesEndpoint
+            .addOptionalParam(new Param(
+                    "sort",
+                    Type.STRING,
+                    "DATE_CREATED",
+                    "The sort order.  May include any "
+                            + "of the following: DATE_CREATED, TITLE, SERIES_TITLE, SERIES_ID, MEDIA_PACKAGE_ID, WORKFLOW_DEFINITION_ID, CREATOR, "
+                            + "CONTRIBUTOR, LANGUAGE, LICENSE, SUBJECT.  Add '_DESC' to reverse the sort order (e.g. TITLE_DESC)."));
     instancesEndpoint.setTestForm(RestTestForm.auto());
     data.addEndpoint(RestEndpoint.Type.READ, instancesEndpoint);
 
@@ -433,7 +438,7 @@ public class WorkflowRestService {
       json.put("workflow_definitions", jsonDefs);
       return Response.ok(json.toJSONString()).header("Content-Type", MediaType.APPLICATION_JSON).build();
     } else {
-      return Response.ok(WorkflowBuilder.getInstance().toXml(list)).header("Content-Type", MediaType.TEXT_XML).build();
+      return Response.ok(WorkflowParser.toXml(list)).header("Content-Type", MediaType.TEXT_XML).build();
     }
   }
 
@@ -503,10 +508,13 @@ public class WorkflowRestService {
     return json;
   }
 
-  // CHECKSTYLE:OFF (The number of method parameters is large because we need to handle many potential query parameters)
+  // The number of method parameters is too large for checkstyle's taste, but we need to handle many potential query
+  // parameters. CXF provides a bean approach to accepting many parameters, but it is not part of the JAX-RS spec.
+  // So for now, we disable checkstyle here.
   @GET
   @Produces(MediaType.TEXT_XML)
   @Path("instances.xml")
+  //CHECKSTYLE:OFF
   public Response getWorkflowsAsXml(@QueryParam("state") List<String> states, @QueryParam("q") String text,
           @QueryParam("seriesId") String seriesId, @QueryParam("seriesTitle") String seriesTitle,
           @QueryParam("creator") String creator, @QueryParam("contributor") String contributor,
@@ -516,7 +524,7 @@ public class WorkflowRestService {
           @QueryParam("workflowdefinition") String workflowDefinitionId, @QueryParam("mp") String mediapackageId,
           @QueryParam("op") List<String> currentOperations, @QueryParam("sort") String sort,
           @QueryParam("startPage") int startPage, @QueryParam("count") int count) throws Exception {
-    // CHECKSTYLE:ON
+    //CHECKSTYLE:ON
     if (count < 1 || count > MAX_LIMIT) {
       count = DEFAULT_LIMIT;
     }
@@ -561,24 +569,24 @@ public class WorkflowRestService {
         }
       }
     }
-    
-    if(StringUtils.isNotBlank(sort)) {
+
+    if (StringUtils.isNotBlank(sort)) {
       // Parse the sort field and direction
       Sort sortField = null;
-      if(sort.endsWith(DESCENDING_SUFFIX)) {
-        String enumKey = sort.substring(0, sort.length()-DESCENDING_SUFFIX.length()).toUpperCase();
+      if (sort.endsWith(DESCENDING_SUFFIX)) {
+        String enumKey = sort.substring(0, sort.length() - DESCENDING_SUFFIX.length()).toUpperCase();
         try {
           sortField = Sort.valueOf(enumKey);
           q.withSort(sortField, false);
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
           logger.warn("No sort enum matches '{}'", enumKey);
         }
       } else {
         try {
           sortField = Sort.valueOf(sort);
           q.withSort(sortField);
-        } catch(IllegalArgumentException e) {
-          logger.warn("No sort enum matches '{}'",sort);
+        } catch (IllegalArgumentException e) {
+          logger.warn("No sort enum matches '{}'", sort);
         }
       }
     }

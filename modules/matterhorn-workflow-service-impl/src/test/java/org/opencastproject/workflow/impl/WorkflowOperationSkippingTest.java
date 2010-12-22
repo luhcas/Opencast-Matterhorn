@@ -24,7 +24,7 @@ import org.opencastproject.mediapackage.MediaPackageBuilder;
 import org.opencastproject.mediapackage.MediaPackageBuilderFactory;
 import org.opencastproject.serviceregistry.api.ServiceRegistry;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowBuilder;
+import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowDefinition;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowInstance.WorkflowState;
@@ -106,7 +106,7 @@ public class WorkflowOperationSkippingTest {
     InputStream is = null;
     try {
       is = WorkflowOperationSkippingTest.class.getResourceAsStream("/workflow-definition-skipping.xml");
-      workingDefinition = WorkflowBuilder.getInstance().parseWorkflowDefinition(is);
+      workingDefinition = WorkflowParser.parseWorkflowDefinition(is);
       service.registerWorkflowDefinition(workingDefinition);
       IOUtils.closeQuietly(is);
 
@@ -221,7 +221,7 @@ public class WorkflowOperationSkippingTest {
 
     @Override
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      return WorkflowBuilder.getInstance().buildWorkflowOperationResult(mp, Action.CONTINUE);
+      return WorkflowParser.buildWorkflowOperationResult(mp, Action.CONTINUE);
     }
   }
 

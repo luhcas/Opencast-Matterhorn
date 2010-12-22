@@ -30,10 +30,10 @@ public interface WorkflowService {
    * The service registration property we use to identify which workflow operation a {@link WorkflowOperationHandler}
    * should handle.
    */
-  final String WORKFLOW_OPERATION_PROPERTY = "workflow.operation";
+  String WORKFLOW_OPERATION_PROPERTY = "workflow.operation";
 
   /** Identifier for workflow jobs */
-  final String JOB_TYPE = "org.opencastproject.workflow";
+  String JOB_TYPE = "org.opencastproject.workflow";
 
   /**
    * Registers a new workflow definition. If a workflow definition with the same identifier is already registered, it
@@ -44,7 +44,7 @@ public interface WorkflowService {
    * @throws WorkflowDatabaseException
    *           if there is a problem registering the workflow definition
    */
-  public void registerWorkflowDefinition(WorkflowDefinition workflow) throws WorkflowDatabaseException;
+  void registerWorkflowDefinition(WorkflowDefinition workflow) throws WorkflowDatabaseException;
 
   /**
    * Removes the workflow definition with this identifier.
@@ -54,8 +54,7 @@ public interface WorkflowService {
    * @throws WorkflowDatabaseException
    *           if there is a problem unregistering the workflow definition
    */
-  public void unregisterWorkflowDefinition(String workflowDefinitionId) throws NotFoundException,
-          WorkflowDatabaseException;
+  void unregisterWorkflowDefinition(String workflowDefinitionId) throws NotFoundException, WorkflowDatabaseException;
 
   /**
    * Returns the {@link WorkflowDefinition} identified by <code>name</code> or <code>null</code> if no such definition

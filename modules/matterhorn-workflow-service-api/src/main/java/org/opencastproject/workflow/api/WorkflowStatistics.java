@@ -36,40 +36,40 @@ public class WorkflowStatistics {
 
   /** The total number of workflow instances in the system */
   @XmlAttribute
-  long total = 0;
+  protected long total = 0;
 
   /** The total number of instantiated (not yet running) workflow instances in the system */
   @XmlAttribute
-  long instantiated = 0;
+  protected long instantiated = 0;
 
   /** The total number of running workflow instances in the system */
   @XmlAttribute
-  long running = 0;
+  protected long running = 0;
 
   /** The total number of paused workflow instances in the system */
   @XmlAttribute
-  long paused = 0;
+  protected long paused = 0;
 
   /** The total number of stopped workflow instances in the system */
   @XmlAttribute
-  long stopped = 0;
+  protected long stopped = 0;
 
   /** The total number of finished workflow instances in the system */
   @XmlAttribute
-  long finished = 0;
+  protected long finished = 0;
 
   /** The total number of failing workflow instances in the system */
   @XmlAttribute
-  long failing = 0;
+  protected long failing = 0;
 
   /** The total number of failed workflow instances in the system */
   @XmlAttribute
-  long failed = 0;
+  protected long failed = 0;
 
   /** The workflow definition reports */
   @XmlElementWrapper(name = "definitions")
   @XmlElement(name = "definition")
-  List<WorkflowDefinitionReport> definitions = new ArrayList<WorkflowStatistics.WorkflowDefinitionReport>();
+  protected List<WorkflowDefinitionReport> definitions = new ArrayList<WorkflowStatistics.WorkflowDefinitionReport>();
 
   /**
    * @return the total
