@@ -106,7 +106,7 @@ public class RuntimeInfo {
 
     // Pingback server, if enabled
     String pingbackUrl = bundleContext.getProperty("org.opencastproject.anonymous.feedback.url");
-    if (pingbackUrl != null) {
+    if (StringUtils.isNotBlank(pingbackUrl)) {
       try {
         final URI uri = new URI(pingbackUrl);
         pingbackTimer = new Timer("Anonymous Feedback Service", true);
@@ -130,8 +130,8 @@ public class RuntimeInfo {
               httpClient.getConnectionManager().shutdown();
             }
           }
-        }, TimeUnit.MINUTES.toMillis(1), TimeUnit.HOURS.toMillis(1));
-        // wait one minute to send first message, and send once an hour thereafter
+        }, TimeUnit.MINUTES.toMillis(1), TimeUnit.DAYS.toMillis(7));
+        // wait one minute to send first message, and send once a week thereafter
       } catch (URISyntaxException e1) {
         logger.warn("Can not ping back to '{}'", pingbackUrl);
       }
