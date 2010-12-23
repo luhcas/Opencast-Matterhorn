@@ -401,7 +401,7 @@
           <skip>${checkstyle.skip}</skip>
           <configLocation>${matterhorn.basedir}/docs/checkstyle/matterhorn-checkstyle.xml</configLocation>
           <headerLocation>${matterhorn.basedir}/docs/checkstyle/matterhorn-header.txt</headerLocation>
-          <consoleOutput>false</consoleOutput>
+          <consoleOutput>true</consoleOutput>
           <logViolationsToConsole>true</logViolationsToConsole>
           <excludes>**/package-info.java</excludes>
           <failOnViolation>false</failOnViolation>
