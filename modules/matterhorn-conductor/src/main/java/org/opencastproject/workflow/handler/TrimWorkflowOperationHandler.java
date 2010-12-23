@@ -105,6 +105,7 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.AbstractWorkflowOperationHandler#skip(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
@@ -127,7 +128,7 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
     }
     return createResult(mediaPackage, Action.SKIP);
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -151,7 +152,7 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
         logger.info("TRIM ---> " + properties.get("trimin") + " " + properties.get("trimout"));
         long start = Long.parseLong(properties.get("trimin"));
         long duration = Long.parseLong(properties.get("newduration"));
-        
+
         Track trimmedTrack = null;
         try {
           // Trim the track

@@ -47,7 +47,7 @@ public class DictionaryScanner implements ArtifactInstaller {
    */
   @Override
   public boolean canHandle(File artifact) {
-    return artifact.getParentFile().getName().equals("dictionaries") && artifact.getName().endsWith(".csv");
+    return "dictionaries".equals(artifact.getParentFile().getName()) && artifact.getName().endsWith(".csv");
   }
 
   /**
@@ -80,11 +80,11 @@ public class DictionaryScanner implements ArtifactInstaller {
       Double weight = 1.0 * count / numAllW;
       try {
         dictionaryService.addWord(word, language, count, weight);
-      } catch(Exception e) {
-        logger.warn("Unable to add word '{}' to the {} dictionary: {}", new String[] {word, language, e.getMessage()} );
+      } catch (Exception e) {
+        logger.warn("Unable to add word '{}' to the {} dictionary: {}", new String[] { word, language, e.getMessage() });
       }
     }
-    if(!artifact.delete()) {
+    if (!artifact.delete()) {
       logger.warn("Unable to delete language pack {}", artifact);
     }
     logger.info("Finished loading language pack from {}", artifact);

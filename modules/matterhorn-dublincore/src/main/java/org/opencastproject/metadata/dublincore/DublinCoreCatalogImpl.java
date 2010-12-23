@@ -258,17 +258,17 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
     if (language == null)
       throw new IllegalArgumentException("Language code must not be null");
 
-    return _getFirst(property, language);
+    return getFirstValue(property, language);
   }
 
   public String getFirst(EName property) {
     if (property == null)
       throw new IllegalArgumentException("Property name must not be null");
 
-    return _getFirst(property, LANGUAGE_ANY);
+    return getFirstValue(property, LANGUAGE_ANY);
   }
 
-  private String _getFirst(EName property, String language) {
+  private String getFirstValue(EName property, String language) {
     CatalogEntry entry = null;
     if (LANGUAGE_UNDEFINED.equals(language)) {
       entry = getFirstLocalizedValue(property, null);
@@ -327,16 +327,16 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
       throw new IllegalArgumentException("Property name must not be null");
     if (language == null)
       throw new IllegalArgumentException("Language code must not be null");
-    return _hasMultipleValues(property, language);
+    return hasMultiplePropertyValues(property, language);
   }
 
   public boolean hasMultipleValues(EName property) {
     if (property == null)
       throw new IllegalArgumentException("Property name must not be null");
-    return _hasMultipleValues(property, LANGUAGE_ANY);
+    return hasMultiplePropertyValues(property, LANGUAGE_ANY);
   }
 
-  private boolean _hasMultipleValues(EName property, String language) {
+  private boolean hasMultiplePropertyValues(EName property, String language) {
     if (LANGUAGE_ANY.equals(language)) {
       return getValuesAsList(property).size() > 1;
     } else {
@@ -356,16 +356,16 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
       throw new IllegalArgumentException("Property name must not be null");
     if (language == null)
       throw new IllegalArgumentException("Language code must not be null");
-    return _hasValue(property, language);
+    return hasPropertyValue(property, language);
   }
 
   public boolean hasValue(EName property) {
     if (property == null)
       throw new IllegalArgumentException("Property name must not be null");
-    return _hasValue(property, LANGUAGE_ANY);
+    return hasPropertyValue(property, LANGUAGE_ANY);
   }
 
-  private boolean _hasValue(EName property, final String language) {
+  private boolean hasPropertyValue(EName property, final String language) {
     if (LANGUAGE_ANY.equals(language)) {
       return getValuesAsList(property).size() > 0;
     } else {
@@ -384,23 +384,23 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
     if (language == null || LANGUAGE_ANY.equals(language))
       throw new IllegalArgumentException(
               "Language code may not be null or LANGUAGE_ANY");
-    _set(property, value, language, null);
+    setValue(property, value, language, null);
   }
 
   public void set(EName property, String value) {
     if (property == null)
       throw new IllegalArgumentException("Property name must not be null");
-    _set(property, value, LANGUAGE_UNDEFINED, null);
+    setValue(property, value, LANGUAGE_UNDEFINED, null);
   }
 
   public void set(EName property, DublinCoreValue value) {
     if (property == null)
       throw new IllegalArgumentException("Property name must not be null");
     if (value != null) {
-      _set(property, value.getValue(), value.getLanguage(), value
+      setValue(property, value.getValue(), value.getLanguage(), value
               .getEncodingScheme());
     } else {
-      _remove(property, LANGUAGE_ANY);
+      removeValue(property, LANGUAGE_ANY);
     }
   }
 
@@ -409,20 +409,20 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
       throw new IllegalArgumentException("Property name must not be null");
     if (values == null)
       throw new IllegalArgumentException("Values must not be null");
-    _remove(property, LANGUAGE_ANY);
+    removeValue(property, LANGUAGE_ANY);
     for (DublinCoreValue v : values)
       add(property, v);
   }
 
-  private void _set(EName property, String value, String language,
+  private void setValue(EName property, String value, String language,
           EName encodingScheme) {
     if (value == null) {
       // No value, remove the whole element
-      _remove(property, language);
+      removeValue(property, language);
     } else {
       String lang = !LANGUAGE_UNDEFINED.equals(language) ? language : null;
       removeLocalizedValues(property, lang);
-      _add(property, value, language, encodingScheme);
+      add(property, value, language, encodingScheme);
     }
   }
 
@@ -432,7 +432,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
     if (value == null)
       throw new IllegalArgumentException("Value must not be null");
 
-    _add(property, value, LANGUAGE_UNDEFINED, null);
+    add(property, value, LANGUAGE_UNDEFINED, null);
   }
 
   public void add(EName property, String value, String language) {
@@ -444,7 +444,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
       throw new IllegalArgumentException(
               "Language code may not be null or LANGUAGE_ANY");
 
-    _add(property, value, language, null);
+    add(property, value, language, null);
   }
 
   public void add(EName property, DublinCoreValue value) {
@@ -453,11 +453,11 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
     if (value == null)
       throw new IllegalArgumentException("Value must not be null");
 
-    _add(property, value.getValue(), value.getLanguage(), value
+    add(property, value.getValue(), value.getLanguage(), value
             .getEncodingScheme());
   }
 
-  private void _add(EName property, String value, String language,
+  private void add(EName property, String value, String language,
           EName encodingScheme) {
     if (LANGUAGE_UNDEFINED.equals(language)) {
       if (encodingScheme == null) {
@@ -480,16 +480,16 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
       throw new IllegalArgumentException("Property name must not be null");
     if (language == null)
       throw new IllegalArgumentException("Language code must not be null");
-    _remove(property, language);
+    removeValue(property, language);
   }
 
   public void remove(EName property) {
     if (property == null)
       throw new IllegalArgumentException("Property name must not be null");
-    _remove(property, LANGUAGE_ANY);
+    removeValue(property, LANGUAGE_ANY);
   }
 
-  private void _remove(EName property, String language) {
+  private void removeValue(EName property, String language) {
     if (LANGUAGE_ANY.equals(language)) {
       removeElement(property);
     } else if (LANGUAGE_UNDEFINED.equals(language)) {
@@ -507,7 +507,7 @@ public class DublinCoreCatalogImpl extends XMLCatalogImpl implements DublinCoreC
   @Override
   public Object clone() {
     DublinCoreCatalogImpl clone = new DublinCoreCatalogImpl();
-    clone.data = (Map<EName, List<CatalogEntry>>) ((HashMap) data).clone();
+    clone.data = (Map<EName, List<CatalogEntry>>) ((HashMap<EName, List<CatalogEntry>>) data).clone();
     return clone;
   }
 

@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 /**
  * Utility class to facilitate the work with DCMI encoding schemes.
  */
-public class EncodingSchemeUtils {
+public final class EncodingSchemeUtils {
 
   private static final Map<Precision, String> formats = new HashMap<Precision, String>();
 
@@ -42,6 +42,10 @@ public class EncodingSchemeUtils {
     formats.put(Precision.Minute, "yyyy-MM-dd'T'HH:mm'Z'");
     formats.put(Precision.Second, "yyyy-MM-dd'T'HH:mm:ss'Z'");
     formats.put(Precision.Fraction, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+  }
+
+  /** Disable construction of this utility class */
+  private EncodingSchemeUtils() {
   }
 
   /**
@@ -380,7 +384,7 @@ public class EncodingSchemeUtils {
    * @throws IllegalArgumentException
    *           if the value cannot be parsed
    */
-  private static final Date parseW3CDTF(String value) {
+  private static Date parseW3CDTF(String value) {
     return ISODateTimeFormat.dateTimeParser().parseDateTime(value).toDate();
   }
 

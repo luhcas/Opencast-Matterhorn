@@ -287,8 +287,8 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
         try {
           long startTimeSeconds = segmentTimePoint.getTimeInMilliseconds() / 1000;
           long durationSeconds = segmentDuration.getDurationInMilliseconds() / 1000;
-          Job imageReceipt = composer.image(sourceTrack, IMAGE_EXTRACTION_PROFILE, startTimeSeconds
-                  + durationSeconds - stabilityThreshold + 1, true);
+          Job imageReceipt = composer.image(sourceTrack, IMAGE_EXTRACTION_PROFILE, startTimeSeconds + durationSeconds
+                  - stabilityThreshold + 1, true);
           image = (Attachment) AbstractMediaPackageElement.getFromXml(imageReceipt.getPayload());
           long timeInComposerQueue = imageReceipt.getDateStarted().getTime() - imageReceipt.getDateCreated().getTime();
           totalTimeInQueue += timeInComposerQueue;
@@ -350,8 +350,8 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
       URI workspaceURI = workspace.put(mediaPackage.getIdentifier().toString(), catalog.getIdentifier(), filename, in);
       catalog.setURI(workspaceURI);
 
-      // TODO: Should the text analysis have a reference?  What is the appropriate element?
-      
+      // TODO: Should the text analysis have a reference? What is the appropriate element?
+
       // Add flavor and target tags
       catalog.setFlavor(MediaPackageElements.TEXTS);
       for (String tag : targetTagSet) {
@@ -406,9 +406,9 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
     List<String> sourceTagSet = asList(operation.getConfiguration("source-tags"));
 
     Catalog[] catalogsWithTags = mediaPackage.getCatalogsByTags(sourceTagSet);
-    
+
     for (Catalog mediaPackageCatalog : catalogsWithTags) {
-      if(!MediaPackageElements.SEGMENTS.equals(mediaPackageCatalog.getFlavor())) {
+      if (!MediaPackageElements.SEGMENTS.equals(mediaPackageCatalog.getFlavor())) {
         continue;
       }
       if (sourceFlavor != null) {

@@ -24,8 +24,8 @@ import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workflow.api.WorkflowOperationResultImpl;
-import org.opencastproject.workspace.api.Workspace;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -62,9 +62,6 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(CLIWorkflowOperationHandler.class);
 
-  /** The local workspace */
-  private Workspace workspace = null;
-
   /** The configuration options for this handler */
   private static final SortedMap<String, String> CONFIG_OPTIONS;
 
@@ -72,17 +69,6 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
     CONFIG_OPTIONS = new TreeMap<String, String>();
     CONFIG_OPTIONS.put("exec", "The full path the executable to run");
     CONFIG_OPTIONS.put("params", "Space separated list of command line parameters to pass to the executable')");
-  }
-
-  /**
-   * Callback for declarative services configuration that will introduce us to the local workspace service.
-   * Implementation assumes that the reference is configured as being static.
-   * 
-   * @param workspace
-   *          an instance of the workspace
-   */
-  public void setWorkspace(Workspace workspace) {
-    this.workspace = workspace;
   }
 
   /**
@@ -105,7 +91,7 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
     String params = operation.getConfiguration("params");
 
     // Verify that the executable is not null
-    if ((exec == null) || (exec == "")) {
+    if (StringUtils.isEmpty(exec)) {
       logger.info("Executable parameter from workflow document is either null or empty: " + exec);
       throw new WorkflowOperationException("Invalid exec param: " + exec);
     }
@@ -231,7 +217,9 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
    * @return list of individual arguments
    */
   ArrayList<String> splitParameters(String input) {
-
+    // This code modifies control variables from within loops, which upsets checkstyle.  Consider rewriting this method.
+    // CHECKSTYLE:OFF
+    
     // this list stores the parsed input
     ArrayList<String> parsedInput = new ArrayList<String>();
 
@@ -306,6 +294,7 @@ public class CLIWorkflowOperationHandler implements WorkflowOperationHandler {
     }
 
     return parsedInput;
+    // CHECKSTYLE:ON
   }
 
   /**

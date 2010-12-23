@@ -61,7 +61,7 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
   private Map<String, String> params = new HashMap<String, String>();
 
   /** the logging facility provided by log4j */
-  private final static Logger logger = LoggerFactory.getLogger(AbstractCmdlineEncoderEngine.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(AbstractCmdlineEncoderEngine.class.getName());
 
   /**
    * Creates a new CmdlineEncoderEngine with <code>binary</code> as the workhorse.
@@ -296,10 +296,11 @@ public abstract class AbstractCmdlineEncoderEngine extends AbstractEncoderEngine
     command.add(binary);
     List<String> arguments = buildArgumentList(profile);
     for (String arg : arguments) {
+      String result = arg;
       for (Map.Entry<String, String> e : params.entrySet()) {
-        arg = arg.replace("#{" + e.getKey() + "}", e.getValue());
+        result = result.replace("#{" + e.getKey() + "}", e.getValue());
       }
-      command.add(arg);
+      command.add(result);
     }
     return command;
   }

@@ -147,7 +147,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
    *           if the workspace does not contain the requested element
    */
   // FIXME: Refactor so this method isn't so long and complex
-  //CHECKSTYLE:OFF
+  // CHECKSTYLE:OFF
   private WorkflowOperationResult mux(MediaPackage src, WorkflowOperationInstance operation) throws EncoderException,
           WorkflowOperationException, NotFoundException, MediaPackageException, IOException {
     MediaPackage mediaPackage = (MediaPackage) src.clone();
@@ -157,7 +157,8 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     String targetTrackTags = StringUtils.trimToNull(operation.getConfiguration("target-tags"));
     String targetTrackFlavorName = StringUtils.trimToNull(operation.getConfiguration("target-flavor"));
     String encodingProfileName = StringUtils.trimToNull(operation.getConfiguration("encoding-profile"));
-    boolean promiscuousMuxing = "true".equalsIgnoreCase(StringUtils.trimToEmpty(operation.getConfiguration("promiscuous-audio-muxing")));
+    boolean promiscuousMuxing = "true".equalsIgnoreCase(StringUtils.trimToEmpty(operation
+            .getConfiguration("promiscuous-audio-muxing")));
 
     // Make sure the source flavor is properly set
     if (sourceFlavorName == null)
@@ -306,7 +307,8 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     }
     return createResult(mediaPackage, Action.CONTINUE, timeInQueue);
   }
-  //CHECKSTYLE:ON
+
+  // CHECKSTYLE:ON
 
   /**
    * 
@@ -316,23 +318,23 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
    */
   private Track findAudioTrack(Track videoTrack, MediaPackage mediaPackage) {
     MediaPackageElementFlavor flavor = new MediaPackageElementFlavor("*", videoTrack.getFlavor().getSubtype());
-    
+
     // Try matching subtype first
-    for(Track t : mediaPackage.getTracks(flavor)) {
-      if(t.hasAudio()) {
+    for (Track t : mediaPackage.getTracks(flavor)) {
+      if (t.hasAudio()) {
         logger.info("Promiscuous audio muxing found audio source {} with flavor {}", t, t.getFlavor());
         return t;
       }
     }
-    
+
     // Ok, full promiscuous mode now
-    for(Track t : mediaPackage.getTracks()) {
-      if(t.hasAudio()) {
+    for (Track t : mediaPackage.getTracks()) {
+      if (t.hasAudio()) {
         logger.info("Promiscuous audio muxing resulted in audio source {}", t);
         return t;
       }
     }
-    
+
     return null;
   }
 

@@ -26,13 +26,12 @@ import javax.persistence.Table;
 
 /**
  * Holds information about a file upload.
- *
+ * 
  */
 @Entity
-@Table(name="UPLOAD")
-@NamedQueries( {
-    @NamedQuery(name = "UploadJob.getByID", query = "SELECT o FROM UploadJob o WHERE o.id = :id")  // FIXME @NamedQueries neccessary with only one NamedQuery
-})
+@Table(name = "UPLOAD")
+// FIXME @NamedQueries necessary with only one NamedQuery
+@NamedQueries({ @NamedQuery(name = "UploadJob.getByID", query = "SELECT o FROM UploadJob o WHERE o.id = :id") })
 public class UploadJob {
 
   @Id
@@ -40,7 +39,7 @@ public class UploadJob {
 
   @Column(name = "filename", nullable = false)
   private String filename = "";
-  
+
   @Column(name = "total", nullable = false)
   private long bytesTotal = -1L;
 
@@ -65,7 +64,8 @@ public class UploadJob {
   }
 
   /**
-   * @param filename the filename to set
+   * @param filename
+   *          the filename to set
    */
   public void setFilename(String filename) {
     this.filename = filename;
@@ -79,7 +79,8 @@ public class UploadJob {
   }
 
   /**
-   * @param bytesTotal the bytesTotal to set
+   * @param bytesTotal
+   *          the bytesTotal to set
    */
   public void setBytesTotal(long bytesTotal) {
     this.bytesTotal = bytesTotal;
@@ -93,7 +94,8 @@ public class UploadJob {
   }
 
   /**
-   * @param bytesReceived the bytesReceived to set
+   * @param bytesReceived
+   *          the bytesReceived to set
    */
   public void setBytesReceived(long bytesReceived) {
     this.bytesReceived = bytesReceived;

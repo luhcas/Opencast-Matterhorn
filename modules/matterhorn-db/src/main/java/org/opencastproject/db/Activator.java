@@ -34,31 +34,33 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 /**
- * Registers shared persistence properties as a map.  This allows bundles using JPA to obtain persistence properties
+ * Registers shared persistence properties as a map. This allows bundles using JPA to obtain persistence properties
  * without hard coding values in each bundle.
  */
 public class Activator implements BundleActivator {
 
   /** The logging facility */
   private static final Logger logger = LoggerFactory.getLogger(Activator.class);
-  
+
   /**
    * The persistence properties service registration
    */
-  ServiceRegistration propertiesRegistration = null;
+  protected ServiceRegistration propertiesRegistration = null;
 
   protected String rootDir;
   protected ServiceRegistration datasourceRegistration;
   protected ComboPooledDataSource pooledDataSource;
 
-  public Activator() {}
-  
+  public Activator() {
+  }
+
   public Activator(String rootDir) {
     this.rootDir = rootDir;
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
    */
   @SuppressWarnings("unchecked")
@@ -66,11 +68,13 @@ public class Activator implements BundleActivator {
   public void start(BundleContext bundleContext) throws Exception {
     // Use the configured storage directory
     rootDir = bundleContext.getProperty("org.opencastproject.storage.dir") + File.separator + "db";
-    
+
     // Register the Datasource, defaulting to an embedded H2 database if DB configurations are not specified
     String vendor = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.vendor"), "HSQL");
-    String jdbcDriver = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.jdbc.driver"), "org.h2.Driver");
-    String jdbcUrl = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.jdbc.url"), "jdbc:h2:" + rootDir + ";LOCK_MODE=1;MVCC=TRUE");
+    String jdbcDriver = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.jdbc.driver"),
+            "org.h2.Driver");
+    String jdbcUrl = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.jdbc.url"), "jdbc:h2:"
+            + rootDir + ";LOCK_MODE=1;MVCC=TRUE");
     String jdbcUser = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.jdbc.user"), "sa");
     String jdbcPass = getConfigProperty(bundleContext.getProperty("org.opencastproject.db.jdbc.pass"), "sa");
     pooledDataSource = new ComboPooledDataSource();
@@ -78,7 +82,7 @@ public class Activator implements BundleActivator {
     pooledDataSource.setJdbcUrl(jdbcUrl);
     pooledDataSource.setUser(jdbcUser);
     pooledDataSource.setPassword(jdbcPass);
-    
+
     Connection connection = null;
     try {
       connection = pooledDataSource.getConnection();
@@ -92,11 +96,12 @@ public class Activator implements BundleActivator {
     }
 
     // Register the persistence properties
+    @SuppressWarnings("rawtypes")
     Dictionary props = new Hashtable();
     props.put("type", "persistence");
     props.put("javax.persistence.nonJtaDataSource", pooledDataSource);
     props.put("eclipselink.target-database", vendor);
-    if("true".equalsIgnoreCase(bundleContext.getProperty("org.opencastproject.db.ddl.generation"))) {
+    if ("true".equalsIgnoreCase(bundleContext.getProperty("org.opencastproject.db.ddl.generation"))) {
       props.put("eclipselink.ddl-generation", "create-tables");
       props.put("eclipselink.ddl-generation.output-mode", "database");
     }
@@ -105,18 +110,20 @@ public class Activator implements BundleActivator {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
    */
   @Override
   public void stop(BundleContext context) throws Exception {
-    if(propertiesRegistration != null) propertiesRegistration.unregister();
-    if(datasourceRegistration != null) datasourceRegistration.unregister();
+    if (propertiesRegistration != null)
+      propertiesRegistration.unregister();
+    if (datasourceRegistration != null)
+      datasourceRegistration.unregister();
     DataSources.destroy(pooledDataSource);
   }
 
   private String getConfigProperty(String config, String defaultValue) {
     return config == null ? defaultValue : config;
   }
-
 
 }

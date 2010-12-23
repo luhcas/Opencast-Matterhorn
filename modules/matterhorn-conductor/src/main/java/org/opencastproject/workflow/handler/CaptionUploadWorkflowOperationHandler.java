@@ -91,21 +91,25 @@ public class CaptionUploadWorkflowOperationHandler extends ResumableWorkflowOper
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance, java.util.Map)
+   * 
+   * @see org.opencastproject.workflow.api.ResumableWorkflowOperationHandler#resume(org.opencastproject.workflow.api.WorkflowInstance,
+   *      java.util.Map)
    */
   @Override
-  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties) throws WorkflowOperationException {
+  public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
+          throws WorkflowOperationException {
     return super.resume(workflowInstance, properties);
-// FIXME: enable this logic once the caption upload UI has been implemented
-//    MediaPackageElementFlavor flavor = getFlavor(workflowInstance.getCurrentOperation());
-//    boolean hasCaptions = hasCaptions(workflowInstance.getMediaPackage(), flavor);
-//    if (hasCaptions) {
-//      return WorkflowBuilder.buildWorkflowOperationResult(Action.CONTINUE);
-//    } else {
-//      // The user should have verified the existence of a caption file in, or if necessary added one to, the mediapackage
-//      logger.info("No DFXP caption file attached, keeping workflow {} in the hold state", workflowInstance);
-//      return WorkflowBuilder.buildWorkflowOperationResult(Action.PAUSE);
-//    }
+    // FIXME: enable this logic once the caption upload UI has been implemented
+    // MediaPackageElementFlavor flavor = getFlavor(workflowInstance.getCurrentOperation());
+    // boolean hasCaptions = hasCaptions(workflowInstance.getMediaPackage(), flavor);
+    // if (hasCaptions) {
+    // return WorkflowBuilder.buildWorkflowOperationResult(Action.CONTINUE);
+    // } else {
+    // // The user should have verified the existence of a caption file in, or if necessary added one to, the
+    // mediapackage
+    // logger.info("No DFXP caption file attached, keeping workflow {} in the hold state", workflowInstance);
+    // return WorkflowBuilder.buildWorkflowOperationResult(Action.PAUSE);
+    // }
   }
 
   protected boolean hasCaptions(MediaPackage mp, MediaPackageElementFlavor flavor) {

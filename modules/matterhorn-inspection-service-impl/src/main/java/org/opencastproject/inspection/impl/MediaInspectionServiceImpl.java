@@ -93,27 +93,28 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
   }
 
   public void activate() {
-    executor = (ThreadPoolExecutor)Executors.newFixedThreadPool(DEFAULT_THREADS);
+    executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(DEFAULT_THREADS);
     analyzerConfig.put(MediaInfoAnalyzer.MEDIAINFO_BINARY_CONFIG, MediaInfoAnalyzer.MEDIAINFO_BINARY_DEFAULT);
   }
 
   /**
    * {@inheritDoc}
-   *
+   * 
    * @see org.osgi.service.cm.ManagedService#updated(java.util.Dictionary)
    */
   @Override
   @SuppressWarnings("rawtypes")
   public void updated(Dictionary properties) throws ConfigurationException {
-    if(properties == null) return;
-    String path = StringUtils.trimToNull((String)properties.get(MediaInfoAnalyzer.MEDIAINFO_BINARY_CONFIG)); 
-    if(path != null) {
+    if (properties == null)
+      return;
+    String path = StringUtils.trimToNull((String) properties.get(MediaInfoAnalyzer.MEDIAINFO_BINARY_CONFIG));
+    if (path != null) {
       analyzerConfig.put(MediaInfoAnalyzer.MEDIAINFO_BINARY_CONFIG, path);
       logger.info("Setting the path to mediainfo to " + path);
     }
 
     // Set the number of concurrent threads
-    String threadsConfig = StringUtils.trimToNull((String)properties.get(CONFIG_THREADS));
+    String threadsConfig = StringUtils.trimToNull((String) properties.get(CONFIG_THREADS));
     if (threadsConfig != null) {
       try {
         int threads = Integer.parseInt(threadsConfig);
@@ -124,7 +125,6 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
       }
     }
   }
-
 
   /**
    * {@inheritDoc}
@@ -251,7 +251,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
             updateJob(job);
             return track;
           }
-        } catch(Exception e) {
+        } catch (Exception e) {
           logger.warn("Error inspecting " + uri, e);
           try {
             job.setStatus(Status.FAILED);
@@ -588,7 +588,7 @@ public class MediaInspectionServiceImpl implements MediaInspectionService, Manag
           logger.info("Successfully inspected element {}", element);
 
           return element;
-        } catch(Exception e) {
+        } catch (Exception e) {
           logger.warn("Error enriching element " + element, e);
           try {
             job.setStatus(Status.FAILED);

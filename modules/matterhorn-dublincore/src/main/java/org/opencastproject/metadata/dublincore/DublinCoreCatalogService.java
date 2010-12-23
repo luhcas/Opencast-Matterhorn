@@ -46,7 +46,7 @@ import javax.xml.transform.stream.StreamResult;
 
 /**
  * Parses {@link DublinCoreCatalog}s from serialized DC representations
- *
+ * 
  */
 public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalog>, MediaPackageMetadataService {
   private static final Logger logger = LoggerFactory.getLogger(DublinCoreCatalogService.class);
@@ -54,20 +54,20 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
   protected int priority = 0;
 
   protected Workspace workspace = null;
-  
+
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
-  
+
   public void activate(@SuppressWarnings("rawtypes") Map properties) {
     logger.debug("activate()");
-    if(properties != null) {
-      String priorityString = (String)properties.get(PRIORITY_KEY);
-      if(priorityString != null) {
+    if (properties != null) {
+      String priorityString = (String) properties.get(PRIORITY_KEY);
+      if (priorityString != null) {
         try {
           priority = Integer.parseInt(priorityString);
         } catch (NumberFormatException e) {
-          logger.warn("Unable to set priority to {}", priorityString );
+          logger.warn("Unable to set priority to {}", priorityString);
           throw e;
         }
       }
@@ -76,6 +76,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.api.CatalogService#serialize(org.opencastproject.metadata.api.MetadataCatalog)
    */
   @Override
@@ -93,12 +94,13 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.api.MediaPackageMetadataService#getMetadata(org.opencastproject.mediapackage.MediaPackage)
    */
   @Override
   public MediaPackageMetadata getMetadata(MediaPackage mp) {
     MediapackageMetadataImpl metadata = new MediapackageMetadataImpl();
-    
+
     Catalog[] dcs = mp.getCatalogs(DublinCoreCatalog.ANY_DUBLINCORE);
     for (Catalog catalog : dcs) {
       DublinCoreCatalog dc;
@@ -119,8 +121,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
 
         // Created date
         if (dc.hasValue(DublinCore.PROPERTY_CREATED))
-          metadata.setDate(EncodingSchemeUtils.decodeDate(dc.get(
-                  DublinCore.PROPERTY_CREATED).get(0)));
+          metadata.setDate(EncodingSchemeUtils.decodeDate(dc.get(DublinCore.PROPERTY_CREATED).get(0)));
 
         // Series id
         if (dc.hasValue(DublinCore.PROPERTY_IS_PART_OF))
@@ -138,8 +139,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
         // Contributor
         if (dc.hasValue(DublinCore.PROPERTY_CONTRIBUTOR)) {
           List<String> contributors = new ArrayList<String>();
-          for (DublinCoreValue contributor : dc
-                  .get(DublinCore.PROPERTY_CONTRIBUTOR)) {
+          for (DublinCoreValue contributor : dc.get(DublinCore.PROPERTY_CONTRIBUTOR)) {
             contributors.add(contributor.getValue());
           }
           metadata.setContributors(contributors.toArray(new String[contributors.size()]));
@@ -159,7 +159,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
 
         // Language
         metadata.setLanguage(dc.getFirst(DublinCore.PROPERTY_LANGUAGE));
-      } else if(MediaPackageElements.SERIES.equals(catalog.getFlavor())) { 
+      } else if (MediaPackageElements.SERIES.equals(catalog.getFlavor())) {
         // Series Title and Identifier
         metadata.setSeriesTitle(dc.getFirst(DublinCore.PROPERTY_TITLE));
         metadata.setSeriesIdentifier(dc.getFirst(DublinCore.PROPERTY_IDENTIFIER));
@@ -173,27 +173,32 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
   /**
    * 
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.api.CatalogService#load(java.io.InputStream)
    */
   @Override
   public DublinCoreCatalog load(InputStream in) throws IOException {
-    if(in == null) throw new IllegalArgumentException("Stream must not be null");
+    if (in == null)
+      throw new IllegalArgumentException("Stream must not be null");
     return new DublinCoreCatalogImpl(in);
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.api.CatalogService#accepts(org.opencastproject.mediapackage.Catalog)
    */
   @Override
   public boolean accepts(Catalog catalog) {
-    if(catalog == null) throw new IllegalArgumentException("Catalog must not be null");
+    if (catalog == null)
+      throw new IllegalArgumentException("Catalog must not be null");
     MediaPackageElementFlavor flavor = catalog.getFlavor();
     return flavor != null && (flavor.equals(DublinCoreCatalog.ANY_DUBLINCORE));
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.api.CatalogService#newInstance()
    */
   @Override
@@ -204,6 +209,7 @@ public class DublinCoreCatalogService implements CatalogService<DublinCoreCatalo
   /**
    * 
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.metadata.api.MediaPackageMetadataService#getPriority()
    */
   @Override

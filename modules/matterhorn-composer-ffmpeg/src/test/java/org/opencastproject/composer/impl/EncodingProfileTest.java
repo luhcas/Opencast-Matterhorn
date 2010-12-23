@@ -41,7 +41,7 @@ public class EncodingProfileTest {
 
   /** Map with encoding profiles */
   Map<String, EncodingProfile> profiles = null;
-  
+
   /** Name of the h264 profile */
   String h264ProfileId = "h264.rtsp";
 
@@ -160,7 +160,7 @@ public class EncodingProfileTest {
   public void testGetExtension() {
     EncodingProfile profile = profiles.get(h264ProfileId);
     assertNull(profile.getExtension("test"));
-    
+
     // Test profile with existing extension
     profile = profiles.get(CoverProfileId);
     String commandline = "-i #{in.path} -y -r 1 -t 1 -f image2 -s 160x120 #{out.dir}/#{in.name}#{out.suffix}";
@@ -175,7 +175,7 @@ public class EncodingProfileTest {
     EncodingProfile profile = profiles.get(h264ProfileId);
     profile.isApplicableTo(MediaType.Visual);
     assertEquals(Collections.emptyMap(), profile.getExtensions());
-    
+
     // Test profile with existing extension
     profile = profiles.get(CoverProfileId);
     assertEquals(1, profile.getExtensions().size());
@@ -188,7 +188,7 @@ public class EncodingProfileTest {
   public void testHasExtensions() {
     EncodingProfile profile = profiles.get(h264ProfileId);
     assertFalse(profile.hasExtensions());
-    
+
     // Test profile with existing extension
     profile = profiles.get(CoverProfileId);
     assertTrue(profile.hasExtensions());

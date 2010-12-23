@@ -49,10 +49,10 @@ public class TrimmingTest {
 
   /** Encoding profiles **/
   Map<String, EncodingProfile> profiles;
-  
+
   /** True to run the tests */
   private static boolean ffmpegInstalled = true;
-  
+
   /** Logging facility */
   private static final Logger logger = LoggerFactory.getLogger(TrimmingTest.class);
 
@@ -85,7 +85,7 @@ public class TrimmingTest {
     engine = new FFmpegEncoderEngine();
     workingDirectory = FileSupport.getTempDirectory("trimtest");
     FileUtils.forceMkdir(workingDirectory);
-    
+
     URL url = EncodingProfileTest.class.getResource("/encodingprofiles.properties");
     EncodingProfileScanner mgr = new EncodingProfileScanner();
     profiles = mgr.loadFromProperties(new File(url.toURI()));
@@ -100,7 +100,9 @@ public class TrimmingTest {
   }
 
   /**
-   * Test method for {@link org.opencastproject.composer.impl.ffmpeg.FFmpegEncoderEngine#trim(java.io.File, org.opencastproject.composer.api.EncodingProfile, long, long, java.util.Map)}.
+   * Test method for
+   * {@link org.opencastproject.composer.impl.ffmpeg.FFmpegEncoderEngine#trim(java.io.File, org.opencastproject.composer.api.EncodingProfile, long, long, java.util.Map)}
+   * .
    */
   @Test
   public void testTrim() throws Exception {
@@ -114,10 +116,10 @@ public class TrimmingTest {
     File trimmedMovie = new File(workingDirectory, "slidechanges-trimmed.mov");
 
     // These are weak assertions, but anything else would require either integration with another 3rd party tool
-    // or manual parsing of ffmpeg output.  Instead, we keep this test generic (but weak).
+    // or manual parsing of ffmpeg output. Instead, we keep this test generic (but weak).
     assertTrue(trimmedMovie.exists());
     assertTrue(trimmedMovie.length() < sourceFile.length());
-    
+
     assertEquals("00:00:05", engine.getCommandlineParameters().get(FFmpegEncoderEngine.PROP_TRIMMING_START_TIME));
     assertEquals("00:00:10", engine.getCommandlineParameters().get(FFmpegEncoderEngine.PROP_TRIMMING_DURATION));
 

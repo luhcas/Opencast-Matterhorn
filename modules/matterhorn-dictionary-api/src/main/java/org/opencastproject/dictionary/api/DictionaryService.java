@@ -21,7 +21,7 @@ package org.opencastproject.dictionary.api;
  */
 public interface DictionaryService {
 
-  public static enum DICT_TOKEN {
+  enum DICT_TOKEN {
     NONE, WORD, STOPWORD
   }
 
@@ -34,14 +34,14 @@ public interface DictionaryService {
    *          language for which the word will be added
    * @return for each word a dictionary token is returned in array
    */
-  public DICT_TOKEN[] cleanText(String[] text, String language);
+  DICT_TOKEN[] cleanText(String[] text, String language);
 
   /**
    * Returns an array of all the languages installed
    * 
    * @return all the language codes of installed dictionaries
    */
-  public String[] getLanguages();
+  String[] getLanguages();
   
   /**
    * Returns an array of all the language codes that contain a specified word
@@ -50,7 +50,7 @@ public interface DictionaryService {
    *          word that will be checked in which languages it exists
    * @return all the language codes that contain the specified word
    */
-  public String[] getLanguages(String word);
+  String[] getLanguages(String word);
   
   /**
    * For a given array of strings, get the possible languages for these words.  The most likely languages are sorted
@@ -59,7 +59,7 @@ public interface DictionaryService {
    * @param text Text being analyzed - represented as array of words
    * @return the detected languages, ordered by confidence
    */
-  public String[] detectLanguage(String[] text);
+  String[] detectLanguage(String[] text);
 
   /**
    * Adds a specified word to the dictionary for the specified language
@@ -69,7 +69,7 @@ public interface DictionaryService {
    * @param language
    *          language for which the word will be added
    */
-  public void addWord(String word, String language);
+  void addWord(String word, String language);
 
   /**
    * Adds a specified word to the dictionary for the specified language
@@ -83,7 +83,7 @@ public interface DictionaryService {
    * @param weight
    *          percentage of occurrences of the word being added
    */
-  public void addWord(String word, String language, Integer count, Double weight);
+  void addWord(String word, String language, Integer count, Double weight);
 
   /**
    * Adds a specified word to the dictionary for the specified language
@@ -95,7 +95,7 @@ public interface DictionaryService {
    * @param count
    *          occurrence of the word being added
    */
-  public void addWord(String word, String language, Integer count);
+  void addWord(String word, String language, Integer count);
 
   /**
    * Adds a stop word. Stop words are words that occur frequently or are not wanted for some of the processes.
@@ -105,7 +105,7 @@ public interface DictionaryService {
    * @param language
    *          language in which the stop word is being added
    */
-  public void markStopWord(String word, String language);
+  void markStopWord(String word, String language);
   
   /**
    * Automatically parses dictionary and marks all stop words found
@@ -116,7 +116,7 @@ public interface DictionaryService {
    * @param language
    *          language in which the stop word is being added
    */
-  public void parseStopWords(Double threshold, String language);
+  void parseStopWords(Double threshold, String language);
 
   /**
    * Gets a normalized value of word frequency for a given language
@@ -127,7 +127,7 @@ public interface DictionaryService {
    *          language in which the word is being tested
    * @return percentage of occurrence of the specified word in a language
    */
-  public double getWordWeight(String word, String language);
+  double getWordWeight(String word, String language);
 
   /**
    * Gets a number of times the word appeared in the specified language
@@ -138,7 +138,7 @@ public interface DictionaryService {
    *          language in which the word is being tested
    * @return count of the occurrences of the word in specified language
    */
-  public Long getWordCount(String word, String language);
+  Long getWordCount(String word, String language);
 
   /**
    * Tests weather the word exists in any of the languages
@@ -147,7 +147,7 @@ public interface DictionaryService {
    *          word being tested
    * @return true if word is found in any of the languages, false otherwise
    */
-  public Boolean isWord(String word);
+  Boolean isWord(String word);
 
   /**
    * Tests weather the word exists in the specified language
@@ -158,7 +158,7 @@ public interface DictionaryService {
    *          a language code for the language in which the word is being tested
    * @return true if word is found in the specified language, false otherwise
    */
-  public Boolean isWord(String word, String language);
+  Boolean isWord(String word, String language);
 
   /**
    * Tests weather the word is a stop word in any of the languages
@@ -167,7 +167,7 @@ public interface DictionaryService {
    *          word being tested
    * @return true if word is found to be a stop word in any of the languages, false otherwise
    */
-  public Boolean isStopWord(String word);
+  Boolean isStopWord(String word);
 
   /**
    * Tests weather the word is a stop word in the specified language
@@ -178,7 +178,7 @@ public interface DictionaryService {
    *          a language code for the language in which the word is being tested
    * @return true if word is found to be a stop word in the specified language, false otherwise
    */
-  public Boolean isStopWord(String word, String language);
+  Boolean isStopWord(String word, String language);
 
   /**
    * Removes a dictionary of the specified language
@@ -186,5 +186,5 @@ public interface DictionaryService {
    * @param language
    *          language code for the dictionary to be removed
    */
-  public void clear(String language);
+  void clear(String language);
 }

@@ -51,11 +51,13 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
   static {
     CONFIG_OPTIONS = new TreeMap<String, String>();
-    CONFIG_OPTIONS.put("source-tags", "Publish any mediapackage elements with one of these (whitespace separated) tags");
+    CONFIG_OPTIONS
+            .put("source-tags", "Publish any mediapackage elements with one of these (whitespace separated) tags");
   }
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
    */
   @Override
@@ -64,8 +66,8 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
   }
 
   /**
-   * Callback for declarative services configuration that will introduce us to the search service.
-   * Implementation assumes that the reference is configured as being static.
+   * Callback for declarative services configuration that will introduce us to the search service. Implementation
+   * assumes that the reference is configured as being static.
    * 
    * @param searchService
    *          an instance of the search service
@@ -74,15 +76,16 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
     this.searchService = searchService;
   }
 
-  protected MediaPackage getMediaPackageForSearchIndex(MediaPackage current, List<String> tags) throws MediaPackageException {
-    MediaPackage mp = (MediaPackage)current.clone();
+  protected MediaPackage getMediaPackageForSearchIndex(MediaPackage current, List<String> tags)
+          throws MediaPackageException {
+    MediaPackage mp = (MediaPackage) current.clone();
 
     List<MediaPackageElement> keep = Arrays.asList(current.getElementsByTags(tags));
-    
+
     // Mark everything that is set for removal
     List<MediaPackageElement> removals = new ArrayList<MediaPackageElement>();
     for (MediaPackageElement element : mp.getElements()) {
-      if(!keep.contains(element)) {
+      if (!keep.contains(element)) {
         removals.add(element);
       }
     }
@@ -92,13 +95,13 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
       if (removals.contains(element))
         continue;
-      
+
       // Is the element referencing anything?
       MediaPackageReference reference = element.getReference();
       if (reference != null) {
         Map<String, String> referenceProperties = reference.getProperties();
         MediaPackageElement referencedElement = mp.getElementByReference(reference);
-        
+
         // if we are distributing the referenced element, everything is fine. Otherwise...
         if (referencedElement != null && removals.contains(referencedElement)) {
 
@@ -112,7 +115,7 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
               break;
             reference = parent.getReference();
           }
-          
+
           // Done. Let's cut the path but keep references to the mediapackage itself
           if (reference != null && reference.getType().equals(MediaPackageReference.TYPE_MEDIAPACKAGE))
             element.setReference(reference);
@@ -128,14 +131,14 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
         }
       }
     }
-    
+
     // Remove everything we don't want to add to publish
     for (MediaPackageElement element : removals) {
       mp.remove(element);
     }
     return mp;
   }
-  
+
   /**
    * {@inheritDoc}
    * 
@@ -155,7 +158,7 @@ public class PublishWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
     try {
       MediaPackage mediaPackageForSearch = getMediaPackageForSearchIndex(mediaPackageFromWorkflow, tagSet);
-      if(mediaPackageForSearch == null) {
+      if (mediaPackageForSearch == null) {
         createResult(mediaPackageForSearch, Action.CONTINUE);
       }
       logger.info("Publishing media package {} to search index", mediaPackageForSearch);

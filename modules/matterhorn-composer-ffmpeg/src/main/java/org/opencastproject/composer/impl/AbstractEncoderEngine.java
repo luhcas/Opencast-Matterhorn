@@ -114,7 +114,9 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
 
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.api.EncoderEngine#supportsProfile(java.lang.String, org.opencastproject.composer.api.EncodingProfile.MediaType)
+   * 
+   * @see org.opencastproject.composer.api.EncoderEngine#supportsProfile(java.lang.String,
+   *      org.opencastproject.composer.api.EncodingProfile.MediaType)
    */
   @Override
   public boolean supportsProfile(String profile, MediaType type) {
@@ -137,7 +139,7 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
    * 
    */
   protected File download(Track track) throws IOException {
-    if (track.getURI().getScheme().equals("file"))
+    if ("file".equals(track.getURI().getScheme()))
       return new File(track.getURI().getPath());
 
     // The file does not seem to be inside the local filesystem.
@@ -191,7 +193,7 @@ public abstract class AbstractEncoderEngine implements EncoderEngine {
    * @param cause
    *          the reason of failure
    */
-  protected void fireEncodingFailed(EncoderEngine engine, EncodingProfile profile, Throwable cause, File...sourceFiles) {
+  protected void fireEncodingFailed(EncoderEngine engine, EncodingProfile profile, Throwable cause, File... sourceFiles) {
     for (EncoderListener l : listeners) {
       try {
         l.fileEncodingFailed(engine, profile, cause, sourceFiles);

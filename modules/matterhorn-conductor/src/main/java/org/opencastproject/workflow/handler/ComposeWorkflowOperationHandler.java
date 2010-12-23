@@ -134,8 +134,8 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
    * @throws NotFoundException
    *           if the workspace doesn't contain the requested file
    */
-  private WorkflowOperationResult encode(MediaPackage src, WorkflowOperationInstance operation) throws EncoderException,
-          IOException, NotFoundException, MediaPackageException, WorkflowOperationException {
+  private WorkflowOperationResult encode(MediaPackage src, WorkflowOperationInstance operation)
+          throws EncoderException, IOException, NotFoundException, MediaPackageException, WorkflowOperationException {
     MediaPackage mediaPackage = (MediaPackage) src.clone();
     // Read the configuration properties
     String sourceFlavor = StringUtils.trimToNull(operation.getConfiguration("source-flavor"));
@@ -200,7 +200,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
       // add this receipt's queue time to the total
       long timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
-      totalTimeInQueue+=timeInQueue;
+      totalTimeInQueue += timeInQueue;
 
       updateTrackMetadata(composedTrack, operation, profile);
 

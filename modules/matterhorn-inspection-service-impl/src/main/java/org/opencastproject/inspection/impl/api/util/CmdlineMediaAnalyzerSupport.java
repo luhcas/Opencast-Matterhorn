@@ -49,9 +49,9 @@ public abstract class CmdlineMediaAnalyzerSupport implements MediaAnalyzer {
     if (binary == null) {
       throw new IllegalStateException("Binary is not set");
     }
-    
+
     ProcessExecutor<MediaAnalyzerException> mediaAnalyzer = null;
-    
+
     // Version check (optional)
     String versionCheck = getVersionCheckOptions();
     if (versionCheck != null) {
@@ -64,23 +64,24 @@ public abstract class CmdlineMediaAnalyzerSupport implements MediaAnalyzer {
           ok[0] |= onVersionCheck(line);
           return true;
         }
+
         @Override
         protected void onProcessFinished(int exitCode) throws MediaAnalyzerException {
           onFinished(exitCode);
         }
       };
-      
+
       try {
         mediaAnalyzer.execute();
       } catch (ProcessExcecutorException e) {
         throw new MediaAnalyzerException("Excecuting the version check on " + binary + " failed", e);
       }
-      
+
       if (!ok[0]) {
         throw new MediaAnalyzerException(this.getClass().getSimpleName() + ": Binary does not have the right version");
       }
     }
-    
+
     // Analyze
     mediaAnalyzer = new ProcessExecutor<MediaAnalyzerException>(binary, getAnalysisOptions(media)) {
       @Override
@@ -88,12 +89,13 @@ public abstract class CmdlineMediaAnalyzerSupport implements MediaAnalyzer {
         onAnalysis(line);
         return true;
       }
+
       @Override
       protected void onProcessFinished(int exitCode) throws MediaAnalyzerException {
         onFinished(exitCode);
       }
     };
-    
+
     try {
       mediaAnalyzer.execute();
     } catch (ProcessExcecutorException e) {
@@ -105,11 +107,11 @@ public abstract class CmdlineMediaAnalyzerSupport implements MediaAnalyzer {
   }
 
   /**
-   * Override this method to do any post processing on the gathered metadata.
-   * The default implementation does nothing.
+   * Override this method to do any post processing on the gathered metadata. The default implementation does nothing.
    */
-  protected void postProcess() {}
-  
+  protected void postProcess() {
+  }
+
   protected abstract String getAnalysisOptions(File media);
 
   protected abstract void onAnalysis(String line);

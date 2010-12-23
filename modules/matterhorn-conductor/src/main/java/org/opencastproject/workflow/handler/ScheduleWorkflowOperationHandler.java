@@ -41,8 +41,7 @@ public class ScheduleWorkflowOperationHandler extends ResumableWorkflowOperation
   /** Configuration key for the schedule location */
   public static final String OPT_SCHEDULE_LOCATION = "schedule.location";
 
-
-  /** Path to the hold state ui  */
+  /** Path to the hold state ui */
   public static final String UI_RESOURCE_PATH = "/ui/operation/schedule/index.html";
 
   /**
@@ -56,14 +55,14 @@ public class ScheduleWorkflowOperationHandler extends ResumableWorkflowOperation
 
     // Set the operation's action link title
     setHoldActionTitle("View schedule");
-    
+
     // Register the supported configuration options
     addConfigurationOption(OPT_SCHEDULE_START, "Schedule start date");
     addConfigurationOption(OPT_SCHEDULE_END, "Schedule end date");
     addConfigurationOption(OPT_SCHEDULE_LOCATION, "Recording location");
 
     // Add the ui piece that displays the schedule information
-    registerHoldStateUserInterface(UI_RESOURCE_PATH);  
+    registerHoldStateUserInterface(UI_RESOURCE_PATH);
   }
 
   /**

@@ -42,7 +42,7 @@ import java.util.Properties;
 public class EncodingProfileScanner implements ArtifactInstaller {
 
   /** Prefix for encoding profile property keys **/
-  private static String PROP_PREFIX = "profile.";
+  private static final String PROP_PREFIX = "profile.";
 
   /* Property names */
   private static final String PROP_NAME = ".name";
@@ -146,7 +146,7 @@ public class EncodingProfileScanner implements ArtifactInstaller {
    * @return
    * @throws RuntimeException
    */
-  private EncodingProfile loadProfile(String profile, Properties properties, File artifact) throws RuntimeException {
+  private EncodingProfile loadProfile(String profile, Properties properties, File artifact) throws ConfigurationException {
     String identifier = profile;
     List<String> defaultProperties = new ArrayList<String>(10);
 
@@ -228,7 +228,7 @@ public class EncodingProfileScanner implements ArtifactInstaller {
    */
   @Override
   public boolean canHandle(File artifact) {
-    return artifact.getParentFile().getName().equals("encoding") && artifact.getName().endsWith(".properties");
+    return "encoding".equals(artifact.getParentFile().getName()) && artifact.getName().endsWith(".properties");
   }
 
   /**
@@ -241,7 +241,7 @@ public class EncodingProfileScanner implements ArtifactInstaller {
     logger.info("Registering encoding profiles from {}", artifact);
     try {
       Map<String, EncodingProfile> profileMap = loadFromProperties(artifact);
-      for(Entry<String, EncodingProfile> entry : profileMap.entrySet()) {
+      for (Entry<String, EncodingProfile> entry : profileMap.entrySet()) {
         logger.info("Installed profile {}", entry.getValue().getIdentifier());
         profiles.put(entry.getKey(), entry.getValue());
       }
@@ -276,5 +276,5 @@ public class EncodingProfileScanner implements ArtifactInstaller {
     uninstall(artifact);
     install(artifact);
   }
-  
+
 }

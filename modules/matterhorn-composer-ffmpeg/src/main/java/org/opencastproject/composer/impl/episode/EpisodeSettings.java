@@ -42,7 +42,7 @@ class EpisodeSettings {
   private String path = null;
 
   /** True if this is a settings group */
-  boolean isGroup = false;
+  private boolean isGroup = false;
 
   /**
    * Creates a new settings object from the given string array.

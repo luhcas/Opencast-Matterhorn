@@ -58,7 +58,7 @@ public class AppendWorkflowOperationHandler extends ResumableWorkflowOperationHa
   public static final String UI_RESOURCE_PATH = "/ui/operation/append/index.html";
 
   /** The workflow service instance */
-  WorkflowService workflowService = null;
+  protected WorkflowService workflowService = null;
 
   /**
    * {@inheritDoc}

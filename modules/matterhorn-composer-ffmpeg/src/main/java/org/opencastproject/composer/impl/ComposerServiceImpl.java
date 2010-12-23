@@ -298,7 +298,8 @@ public class ComposerServiceImpl implements ComposerService {
             IOUtils.closeQuietly(in);
           }
           if (encodingOutput != null)
-            encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file repo
+            encodingOutput.delete(); // clean up the encoding output, since the file is now safely stored in the file
+                                     // repo
 
           // Have the encoded track inspected and return the result
           Job inspectionJob = null;
@@ -317,7 +318,7 @@ public class ComposerServiceImpl implements ComposerService {
           updateJob(job);
 
           return null;
-        } catch(Exception e) {
+        } catch (Exception e) {
           logger.warn("Error trimming " + sourceTrack, e);
           try {
             job.setStatus(Status.FAILED);
@@ -511,7 +512,7 @@ public class ComposerServiceImpl implements ComposerService {
           updateJob(job);
 
           return null;
-        } catch(Exception e) {
+        } catch (Exception e) {
           logger.warn("Error encoding " + videoTrack + " and " + audioTrack, e);
           try {
             job.setStatus(Status.FAILED);
@@ -688,7 +689,7 @@ public class ComposerServiceImpl implements ComposerService {
           updateJob(job);
 
           return null;
-        } catch(Exception e) {
+        } catch (Exception e) {
           logger.warn("Error extracting image from " + sourceTrack, e);
           try {
             job.setStatus(Status.FAILED);
@@ -871,7 +872,7 @@ public class ComposerServiceImpl implements ComposerService {
           updateEmbedderJob(job);
 
           return null;
-        } catch(Exception e) {
+        } catch (Exception e) {
           logger.warn("Error embedding captions into " + mediaTrack, e);
           try {
             job.setStatus(Status.FAILED);

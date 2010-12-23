@@ -91,7 +91,7 @@ public class DownloadDVDWorkflowOperationHandler extends ResumableWorkflowOperat
       MediaPackage mp = workflowInstance.getMediaPackage();
       Track[] tracks = mp.getTracks();
       for (int i = 0; i < tracks.length; i++) {
-        if (tracks[i].getFlavor().getSubtype().toUpperCase().equals("DVD")) {
+        if ("DVD".equalsIgnoreCase(tracks[i].getFlavor().getSubtype())) {
           logger.info("Deleting {} from MediaPackage {}", tracks[i].toString(), mp.getIdentifier().toString());
           mp.remove(tracks[i]);
         }

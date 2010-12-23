@@ -129,8 +129,8 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
       timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
       mpeg7Catalog = (Catalog) AbstractMediaPackageElement.getFromXml(job.getPayload());
       mediaPackage.add(mpeg7Catalog);
-      mpeg7Catalog.setURI(workspace.moveTo(mpeg7Catalog.getURI(), mediaPackage.getIdentifier().toString(), mpeg7Catalog
-              .getIdentifier(), "segments.xml"));
+      mpeg7Catalog.setURI(workspace.moveTo(mpeg7Catalog.getURI(), mediaPackage.getIdentifier().toString(),
+              mpeg7Catalog.getIdentifier(), "segments.xml"));
       mpeg7Catalog.setReference(new MediaPackageReferenceImpl(track));
     } catch (Exception e) {
       throw new WorkflowOperationException(e);
@@ -161,5 +161,5 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
-  
+
 }

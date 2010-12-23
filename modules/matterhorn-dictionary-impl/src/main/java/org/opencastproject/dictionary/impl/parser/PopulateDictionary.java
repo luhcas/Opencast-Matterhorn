@@ -17,6 +17,7 @@ package org.opencastproject.dictionary.impl.parser;
 
 import org.opencastproject.dictionary.impl.Word;
 
+import org.apache.commons.lang.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -47,8 +48,18 @@ import javax.xml.parsers.SAXParserFactory;
  * This main class may be run from the commandline, passing the language and directory to find the wikipedia archive as
  * arguments. If these arguments are not passed, the application will request this input on the commandline.
  */
-public class PopulateDictionary {
+public final class PopulateDictionary {
 
+  /** Disallow external construction of this utility class */
+  private PopulateDictionary() {
+  }
+
+  /**
+   * Runs the dictionary population application.
+   * 
+   * @param args
+   * @throws Exception
+   */
   public static void main(String... args) throws Exception {
     String lang;
     String wikiRepo;
@@ -77,12 +88,21 @@ public class PopulateDictionary {
     populate(lang, wikiArticles, 10, 3);
   }
 
+  /**
+   * Gets input from the commandline.
+   * 
+   * @param prompt
+   *          the prompt for the user
+   * @param defaultValue
+   *          the default value if the user enters nothing
+   * @return the user input, or the default
+   */
   protected static String getInput(String prompt, String defaultValue) {
     System.out.print(prompt);
     System.out.print("[" + defaultValue + "] >");
     Scanner scanner = new Scanner(System.in);
     String value = scanner.nextLine();
-    return value == null || value.equals("") ? defaultValue : value;
+    return StringUtils.isEmpty(value) ? defaultValue : value;
   }
 
   public static void populate(String lang, File in, int minWordCount, int minWordLength) {
@@ -157,13 +177,13 @@ public class PopulateDictionary {
     public void endElement(String uri, String localName, String name) throws SAXException {
       // if(docParsed>5000) return;
       // escape elements that are not the title or body of an article
-      if (name != "title" && name != "text") {
+      if (!"title".equals(name) && !"text".equals(name)) {
         content = new StringBuffer();
         return;
       }
 
       // increase counter only on titles
-      if (name == "title") {
+      if ("title".equals(name)) {
         if (docParsed++ % PRINT_DOCUMENT == PRINT_DOCUMENT - 1) {
           System.out.println("Documents parsed: " + docParsed);
           System.out.println("Unique words: " + numW);
@@ -208,7 +228,7 @@ public class PopulateDictionary {
           if (word == null)
             break;
           Integer count = wordCount.get(hash(word));
-          if(count == null) {
+          if (count == null) {
             count = 1;
           }
           bw.write(word);

@@ -68,11 +68,10 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
   static {
     CONFIG_OPTIONS = new TreeMap<String, String>();
     CONFIG_OPTIONS.put("source-tags",
-            "Distribute any mediapackage elements with one of these (comma separated) tags.  If a source-tag " +
-            "starts with a '-', mediapackage elements with this tag will be excluded from distribution.");
-    CONFIG_OPTIONS
-            .put("target-tags",
-                    "Apple these (comma separated) tags to any mediapackage elements produced as a result of distribution");
+            "Distribute any mediapackage elements with one of these (comma separated) tags.  If a source-tag "
+                    + "starts with a '-', mediapackage elements with this tag will be excluded from distribution.");
+    CONFIG_OPTIONS.put("target-tags",
+            "Apple these (comma separated) tags to any mediapackage elements produced as a result of distribution");
   }
 
   /**
@@ -130,7 +129,7 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
           if (job == null || !Job.Status.FINISHED.equals(job.getStatus())) {
             throw new WorkflowOperationException("Distribution job " + job + " did not complete successfully");
           }
-          
+
           // If there is no payload, then the item has not been distributed.
           if (job.getPayload() == null) {
             continue;
@@ -169,10 +168,13 @@ public class DistributeWorkflowOperationHandler extends AbstractWorkflowOperatio
       } catch (DistributionException e) {
         throw new WorkflowOperationException(e);
       }
-
       logger.debug("Distribute operation completed");
-    } catch (RuntimeException e) {
-      throw new WorkflowOperationException(e);
+    } catch (Exception e) {
+      if (e instanceof WorkflowOperationException) {
+        throw (WorkflowOperationException) e;
+      } else {
+        throw new WorkflowOperationException(e);
+      }
     }
     return createResult(mediaPackage, Action.CONTINUE);
   }

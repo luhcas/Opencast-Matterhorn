@@ -42,7 +42,7 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
   public static final String CMD_SUFFIX = "ffmpeg.command";
 
   private static final String CONFIG_FFMPEG_PATH = "org.opencastproject.composer.ffmpegpath";
-  
+
   /** Format for trim times */
   private static final String TIME_FORMAT = "%02d:%02d:%02d";
 
@@ -72,10 +72,12 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
       logger.debug("FFmpegEncoderEngine config binary: {}", path);
     }
   }
-  
+
   /**
    * {@inheritDoc}
-   * @see org.opencastproject.composer.impl.AbstractCmdlineEncoderEngine#trim(java.io.File, org.opencastproject.composer.api.EncodingProfile, long, long, java.util.Map)
+   * 
+   * @see org.opencastproject.composer.impl.AbstractCmdlineEncoderEngine#trim(java.io.File,
+   *      org.opencastproject.composer.api.EncodingProfile, long, long, java.util.Map)
    */
   @Override
   public File trim(File mediaSource, EncodingProfile format, long start, long duration, Map<String, String> properties)
@@ -84,8 +86,10 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
       properties = new HashMap<String, String>();
     start /= 1000;
     duration /= 1000;
-    properties.put(PROP_TRIMMING_START_TIME, String.format(TIME_FORMAT, (long)Math.floor(start/3600), (start%3600)/60, (start%60)));
-    properties.put(PROP_TRIMMING_DURATION, String.format(TIME_FORMAT, (long)Math.floor(duration/3600), (duration%3600)/60, (duration%60)));
+    properties.put(PROP_TRIMMING_START_TIME,
+            String.format(TIME_FORMAT, (long) Math.floor(start / 3600), (start % 3600) / 60, (start % 60)));
+    properties.put(PROP_TRIMMING_DURATION,
+            String.format(TIME_FORMAT, (long) Math.floor(duration / 3600), (duration % 3600) / 60, (duration % 60)));
     return super.trim(mediaSource, format, start, duration, properties);
   }
 
@@ -143,7 +147,7 @@ public class FFmpegEncoderEngine extends AbstractCmdlineEncoderEngine {
   protected void handleEncoderOutput(EncodingProfile format, String message, File... sourceFiles) {
     super.handleEncoderOutput(format, message, sourceFiles);
     message = message.trim();
-    if (message.equals(""))
+    if ("".equals(message))
       return;
 
     // Completely skip these messages

@@ -45,7 +45,7 @@ public class EmbedderEngineTest {
   private String[] languages;
   private File movie;
   private File resultingFile;
-  
+
   // default path to QT subtitle embedder
   private static String defaultBinaryPath = QTSbtlEmbedderEngine.QTEMBEDDER_BINARY_DEFAULT;
 
@@ -54,7 +54,7 @@ public class EmbedderEngineTest {
 
   /** True to run the tests */
   private static boolean qtembedderInstalled = true;
-  
+
   @BeforeClass
   public static void testGst() {
     StreamHelper stdout = null;

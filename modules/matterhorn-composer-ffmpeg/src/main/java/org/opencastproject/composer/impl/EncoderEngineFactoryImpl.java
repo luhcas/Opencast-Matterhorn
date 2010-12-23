@@ -28,13 +28,14 @@ import org.osgi.service.component.ComponentContext;
  */
 public class EncoderEngineFactoryImpl implements EncoderEngineFactory {
   protected ComponentContext cc;
-  
+
   protected void activate(ComponentContext cc) {
     this.cc = cc;
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.composer.api.EncoderEngineFactory#newEncoderEngine(org.opencastproject.composer.api.EncodingProfile)
    */
   @Override

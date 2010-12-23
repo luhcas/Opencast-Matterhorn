@@ -15,8 +15,6 @@
  */
 package org.opencastproject.composer.api;
 
-
-
 import org.apache.commons.io.IOUtils;
 
 import java.io.InputStream;
@@ -32,19 +30,19 @@ import javax.xml.parsers.DocumentBuilderFactory;
 /**
  * Provides a mechanism to transform {@link EncodingProfile}s to and from xml.
  */
-public class EncodingProfileBuilder {
+public final class EncodingProfileBuilder {
 
   /** The singleton instance for this factory */
   private static EncodingProfileBuilder instance = null;
 
   protected JAXBContext jaxbContext = null;
-  
+
   private EncodingProfileBuilder() throws JAXBException {
     StringBuilder sb = new StringBuilder();
     sb.append("org.opencastproject.composer.api");
-    jaxbContext= JAXBContext.newInstance(sb.toString(), EncodingProfileBuilder.class.getClassLoader());
+    jaxbContext = JAXBContext.newInstance(sb.toString(), EncodingProfileBuilder.class.getClassLoader());
   }
-  
+
   /**
    * Returns an instance of the {@link EncodingProfileBuilder}.
    * 
@@ -79,7 +77,7 @@ public class EncodingProfileBuilder {
       IOUtils.closeQuietly(in);
     }
   }
-  
+
   /**
    * Loads an encoding profile from the xml fragement.
    * 
@@ -99,8 +97,6 @@ public class EncodingProfileBuilder {
     }
   }
 
-  
-  
   /**
    * Loads an encoding profile list from the given input stream.
    * 
@@ -119,7 +115,7 @@ public class EncodingProfileBuilder {
       IOUtils.closeQuietly(in);
     }
   }
-  
+
   /**
    * Loads an encoding profile from the xml stream.
    * 
@@ -142,7 +138,8 @@ public class EncodingProfileBuilder {
   /**
    * Serializes a profile to xml.
    * 
-   * @param profile the profile to serialize
+   * @param profile
+   *          the profile to serialize
    * @return the xml fragment
    * @throws Exception
    */
@@ -156,7 +153,8 @@ public class EncodingProfileBuilder {
   /**
    * Serializes a profile list to xml.
    * 
-   * @param profileList the profile list to serialize
+   * @param profileList
+   *          the profile list to serialize
    * @return the xml fragment
    * @throws Exception
    */

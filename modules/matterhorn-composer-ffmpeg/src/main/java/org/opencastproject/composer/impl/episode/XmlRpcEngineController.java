@@ -79,7 +79,7 @@ public class XmlRpcEngineController implements Runnable {
   private long timeout = EpisodeEncoderEngine.DEFAULT_MONITOR_FREQUENCY * 1000L;
 
   /** the logging facility provided by log4j */
-  final static Logger logger = LoggerFactory.getLogger(XmlRpcEngineController.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(XmlRpcEngineController.class.getName());
 
   /**
    * Creates a new monitor for the given engine.
@@ -156,8 +156,8 @@ public class XmlRpcEngineController implements Runnable {
   void submitJob(File track, EncodingProfile format) throws EncoderException {
     List<EpisodeSettings> settings = getSettings(track, format);
     if (settings == null || settings.size() == 0)
-      throw new EncoderException(engine, 
-         "No settings found for profile '" + format.getIdentifier() + "' and track " + track);
+      throw new EncoderException(engine, "No settings found for profile '" + format.getIdentifier() + "' and track "
+              + track);
 
     // Prepare the metadata
     Map<String, String> metadata = new Hashtable<String, String>();
@@ -351,14 +351,12 @@ public class XmlRpcEngineController implements Runnable {
 
             else if (newState.equals(XmlRpcJobState.Queued)) {
               // TODO: Process state change
-              logger.debug("Enqueued encoding of " + track + " to " + encodingProfile
-                      + " " + settings);
+              logger.debug("Enqueued encoding of " + track + " to " + encodingProfile + " " + settings);
             }
 
             else if (newState.equals(XmlRpcJobState.Running)) {
               // TODO: Process state change
-              logger.debug("Started encoding of " + track + " to " + encodingProfile
-                      + " " + settings);
+              logger.debug("Started encoding of " + track + " to " + encodingProfile + " " + settings);
             }
 
             else if (newState.equals(XmlRpcJobState.Finished)) {
@@ -372,8 +370,7 @@ public class XmlRpcEngineController implements Runnable {
               }
 
               // Tell engine
-              logger.debug("Finished encoding of " + track + " to " + encodingProfile
-                      + " " + settings);
+              logger.debug("Finished encoding of " + track + " to " + encodingProfile + " " + settings);
               if (!trackIsProcessed) {
                 engine.fileEncoded(track, encodingProfile);
               }
@@ -391,8 +388,7 @@ public class XmlRpcEngineController implements Runnable {
               }
 
               // Tell engine
-              logger.warn("Encoding of " + track + " to " + encodingProfile + " " + settings
-                      + " was stopped");
+              logger.warn("Encoding of " + track + " to " + encodingProfile + " " + settings + " was stopped");
               if (associatedJobs.size() > 0)
                 logger.warn(associatedJobs.size() + " associated jobs have been canceled");
               engine.fileEncodingFailed(track, encodingProfile, "Canceled");
@@ -411,8 +407,7 @@ public class XmlRpcEngineController implements Runnable {
               }
 
               // Tell engine
-              logger.debug("Encoding of " + track + " to " + encodingProfile + " " + settings
-                      + " failed: " + reason);
+              logger.debug("Encoding of " + track + " to " + encodingProfile + " " + settings + " failed: " + reason);
               if (associatedJobs.size() > 0)
                 logger.trace(associatedJobs.size() + " associated jobs have been canceled");
               engine.fileEncodingFailed(track, encodingProfile, reason.toString());
@@ -430,8 +425,8 @@ public class XmlRpcEngineController implements Runnable {
             if (progress - job.getProgress() >= 10) {
               job.setProgress((progress / 10) * 10);
               engine.fileEncodingProgressed(track, encodingProfile, job.getProgress());
-              logger.trace("Encoding of " + track + " to " + encodingProfile + " progressed to "
-                      + job.getProgress() + "%");
+              logger.trace("Encoding of " + track + " to " + encodingProfile + " progressed to " + job.getProgress()
+                      + "%");
             }
           }
 

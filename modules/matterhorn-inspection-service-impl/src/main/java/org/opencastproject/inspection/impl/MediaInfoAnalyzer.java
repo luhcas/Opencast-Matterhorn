@@ -271,7 +271,7 @@ public class MediaInfoAnalyzer extends CmdlineMediaAnalyzerSupport {
 
   // --------------------------------------------------------------------------------------------
 
-  private static class Setter {
+  private static final class Setter {
 
     private static final String CONVERTER_METHOD_PREFIX = "convert";
 

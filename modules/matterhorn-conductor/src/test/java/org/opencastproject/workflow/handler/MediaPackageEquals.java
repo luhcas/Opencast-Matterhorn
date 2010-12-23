@@ -20,25 +20,28 @@ public class MediaPackageEquals implements IArgumentMatcher {
     }
     MediaPackage actualMP = (MediaPackage) actual;
 
-    // check tracks with the same id exist and flavour is the same 
+    // check tracks with the same id exist and flavour is the same
     if (expected.getTracks().length != actualMP.getTracks().length)
       return false;
     for (Track t : expected.getTracks()) {
-      if(!t.getFlavor().equals(actualMP.getTrack(t.getIdentifier()).getFlavor())) return false;
+      if (!t.getFlavor().equals(actualMP.getTrack(t.getIdentifier()).getFlavor()))
+        return false;
     }
 
     // check catalogs
     if (expected.getCatalogs().length != actualMP.getCatalogs().length)
       return false;
     for (Catalog c : expected.getCatalogs()) {
-      if(!c.getFlavor().equals(actualMP.getCatalog(c.getIdentifier()).getFlavor())) return false;
+      if (!c.getFlavor().equals(actualMP.getCatalog(c.getIdentifier()).getFlavor()))
+        return false;
     }
 
     // check attachments
     if (expected.getAttachments().length != actualMP.getAttachments().length)
       return false;
     for (Attachment a : expected.getAttachments()) {
-      if(!a.getFlavor().equals(actualMP.getAttachment(a.getIdentifier()).getFlavor())) return false;
+      if (!a.getFlavor().equals(actualMP.getAttachment(a.getIdentifier()).getFlavor()))
+        return false;
     }
 
     return true;

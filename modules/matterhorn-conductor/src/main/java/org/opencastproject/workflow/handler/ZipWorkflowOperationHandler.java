@@ -167,7 +167,7 @@ public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandle
     if (flavors == null) {
       flavorsToZip.add(MediaPackageElementFlavor.parseFlavor("*/*"));
     } else {
-      for(String flavor : asList(flavors)) {
+      for (String flavor : asList(flavors)) {
         flavorsToZip.add(MediaPackageElementFlavor.parseFlavor(flavor));
       }
     }
@@ -269,13 +269,13 @@ public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandle
     for (MediaPackageElement element : clone.getElements()) {
       // remove the element if it doesn't match the flavors to zip
       boolean remove = true;
-      for(MediaPackageElementFlavor flavor : flavorsToZip) {
-        if(flavor.matches(element.getFlavor())) {
+      for (MediaPackageElementFlavor flavor : flavorsToZip) {
+        if (flavor.matches(element.getFlavor())) {
           remove = false;
           break;
         }
       }
-      if(remove) {
+      if (remove) {
         clone.remove(element);
         continue;
       }

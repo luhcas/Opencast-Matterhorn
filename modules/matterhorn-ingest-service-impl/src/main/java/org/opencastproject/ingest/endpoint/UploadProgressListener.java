@@ -28,7 +28,7 @@ public class UploadProgressListener implements ProgressListener {
   // ProgressListeners can happen to be called with a high frequency, depending
   // on the ServeletEngine (see fileupload doc). So we save the job object only
   // after every X Kb that have arrived to avoid doing to many persist operations.
-  private final static int SAVE_INTERVAL = 50 * 1024;
+  private static final int SAVE_INTERVAL = 50 * 1024;
 
   private UploadJob job;
   private EntityManagerFactory emf;
@@ -39,9 +39,10 @@ public class UploadProgressListener implements ProgressListener {
     this.emf = emf;
   }
 
-  /** Called by ServeletFileUpload on upload progress. Updates the job object.
-   *  Persists the job object on upload start/complete and after every X Kb that
-   *  have arrived.
+  /**
+   * Called by ServeletFileUpload on upload progress. Updates the job object. Persists the job object on upload
+   * start/complete and after every X Kb that have arrived.
+   * 
    * @param rec
    * @param total
    * @param i
@@ -50,18 +51,15 @@ public class UploadProgressListener implements ProgressListener {
   public void update(long rec, long total, int i) {
     job.setBytesTotal(total);
     job.setBytesReceived(rec);
-    if ( (rec == 0L) ||                           // persist job on upload start
-         (rec - lastSaved >= SAVE_INTERVAL) ||    // after X Kb
-         (rec == total) ) {                       // on upload complete
-      //System.out.println("trying to save Progress object - total: " + job.getBytesTotal() + " rec: " + job.getBytesReceived());
-      /*EntityManager em = emf.createEntityManager();
-      try {
-        em.persist(job);
-      } catch (Exception e) {
-        System.out.println(e.getMessage());
-      } finally {
-        em.close();
-      }*/
+    if ((rec == 0L) || // persist job on upload start
+            (rec - lastSaved >= SAVE_INTERVAL) || // after X Kb
+            (rec == total)) { // on upload complete
+      // System.out.println("trying to save Progress object - total: " + job.getBytesTotal() + " rec: " +
+      // job.getBytesReceived());
+      /*
+       * EntityManager em = emf.createEntityManager(); try { em.persist(job); } catch (Exception e) {
+       * System.out.println(e.getMessage()); } finally { em.close(); }
+       */
       lastSaved = rec;
     }
   }

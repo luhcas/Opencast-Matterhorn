@@ -76,9 +76,11 @@ public class ComposeWorkflowOperationHandlerTest {
     encodedTracks = mpEncode.getTracks();
 
     workspace = EasyMock.createNiceMock(Workspace.class);
-    EasyMock.expect(workspace.moveTo((URI)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject(), (String)EasyMock.anyObject())).andReturn(uriMP);
+    EasyMock.expect(
+            workspace.moveTo((URI) EasyMock.anyObject(), (String) EasyMock.anyObject(), (String) EasyMock.anyObject(),
+                    (String) EasyMock.anyObject())).andReturn(uriMP);
     EasyMock.replay(workspace);
-    
+
     // set up service
     operationHandler = new ComposeWorkflowOperationHandler();
     operationHandler.setWorkspace(workspace);

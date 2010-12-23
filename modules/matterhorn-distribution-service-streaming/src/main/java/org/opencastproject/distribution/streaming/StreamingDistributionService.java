@@ -131,13 +131,13 @@ public class StreamingDistributionService implements DistributionService {
   @Override
   public Job distribute(final String mediaPackageId, final MediaPackageElement element, boolean block)
           throws DistributionException {
-    if(mediaPackageId == null) {
+    if (mediaPackageId == null) {
       throw new DistributionException("Mediapackage ID must be specified");
     }
-    if(element == null) {
+    if (element == null) {
       throw new DistributionException("Mediapackage element must be specified");
     }
-    if(element.getIdentifier() == null) {
+    if (element.getIdentifier() == null) {
       throw new DistributionException("Mediapackage element must have an identifier");
     }
     final Job job;
@@ -287,7 +287,7 @@ public class StreamingDistributionService implements DistributionService {
           logger.info("Finished rectracting media package {}", mediaPackageId);
 
           return null;
-        } catch(Exception e) {
+        } catch (Exception e) {
           logger.warn("Error retracting mediapackage " + mediaPackageId, e);
           try {
             job.setStatus(Status.FAILED);

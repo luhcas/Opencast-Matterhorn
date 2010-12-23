@@ -44,7 +44,7 @@ public class CleanupWorkflowOperationHandler extends AbstractWorkflowOperationHa
   /** The logger */
   private static final Logger logger = LoggerFactory.getLogger(CleanupWorkflowOperationHandler.class);
 
-  /** The element flavors to maintain in the original mediapackage.  All others will be removed */
+  /** The element flavors to maintain in the original mediapackage. All others will be removed */
   public static final String PRESERVE_FLAVOR_PROPERTY = "preserve-flavors";
 
   /** The configuration properties */
@@ -57,15 +57,15 @@ public class CleanupWorkflowOperationHandler extends AbstractWorkflowOperationHa
 
   /** The thread pool */
   protected ExecutorService executorService;
-  
+
   /** The default no-arg constructor builds the configuration options set */
   public CleanupWorkflowOperationHandler() {
     configurationOptions = new TreeMap<String, String>();
     configurationOptions.put(PRESERVE_FLAVOR_PROPERTY,
-            "The configuration key that specifies the flavors to preserve.  If not specified, this operation will not" +
-            "remove any files.");
+            "The configuration key that specifies the flavors to preserve.  If not specified, this operation will not"
+                    + "remove any files.");
   }
-  
+
   /**
    * Sets the workspace to use.
    * 
@@ -93,29 +93,29 @@ public class CleanupWorkflowOperationHandler extends AbstractWorkflowOperationHa
     if (flavors == null) {
       flavorsToPreserve.add(MediaPackageElementFlavor.parseFlavor("*/*"));
     } else {
-      for(String flavor : asList(flavors)) {
+      for (String flavor : asList(flavors)) {
         flavorsToPreserve.add(MediaPackageElementFlavor.parseFlavor(flavor));
       }
     }
 
     String baseUrl = workspace.getBaseUri().toString();
     for (MediaPackageElement element : mediaPackage.getElements()) {
-      if( ! element.getURI().toString().startsWith(baseUrl)) {
+      if (!element.getURI().toString().startsWith(baseUrl)) {
         continue;
       }
       // remove the element if it doesn't match the flavors to preserve
       boolean remove = true;
-      for(MediaPackageElementFlavor flavor : flavorsToPreserve) {
-        if(flavor.matches(element.getFlavor())) {
+      for (MediaPackageElementFlavor flavor : flavorsToPreserve) {
+        if (flavor.matches(element.getFlavor())) {
           remove = false;
           break;
         }
       }
-      if(remove) {
+      if (remove) {
         try {
           workspace.delete(mediaPackage.getIdentifier().toString(), element.getIdentifier());
           mediaPackage.remove(element);
-        } catch(Exception e) {
+        } catch (Exception e) {
           logger.warn("Unable to delete the file for {}", element);
         }
       }

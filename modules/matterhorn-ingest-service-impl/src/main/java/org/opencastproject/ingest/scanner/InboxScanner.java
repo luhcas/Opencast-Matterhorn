@@ -33,7 +33,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Places a file named "inbox*" from any fileinstall watch directory into the inbox collection.  Fileinstall takes care
+ * Places a file named "inbox*" from any fileinstall watch directory into the inbox collection. Fileinstall takes care
  * of installing artifacts only once they are fully copied into the watch directory.
  */
 public class InboxScanner implements ArtifactInstaller {
@@ -42,17 +42,18 @@ public class InboxScanner implements ArtifactInstaller {
 
   /** The workspace */
   protected Workspace workspace = null;
-  
+
   /** The ingest service */
   protected IngestService ingestService;
-  
+
   /** The local thread pool */
   protected ExecutorService executorService;
 
   /**
    * Sets the ingest service
    * 
-   * @param ingestService the ingest service
+   * @param ingestService
+   *          the ingest service
    */
   public void setIngestService(IngestService ingestService) {
     this.ingestService = ingestService;
@@ -70,18 +71,19 @@ public class InboxScanner implements ArtifactInstaller {
 
   protected void activate(ComponentContext cc) {
     int maxThreads = 1;
-    if(cc != null && cc.getBundleContext().getProperty("org.opencastproject.inbox.threads") != null) {
+    if (cc != null && cc.getBundleContext().getProperty("org.opencastproject.inbox.threads") != null) {
       try {
         maxThreads = Integer.parseInt(cc.getBundleContext().getProperty("org.opencastproject.inbox.threads"));
-      } catch(NumberFormatException e) {
+      } catch (NumberFormatException e) {
         logger.warn("Illegal value set for org.opencastproject.inbox.threads. Using default value of 1 inbox ingest at a time.");
       }
     }
     this.executorService = Executors.newFixedThreadPool(maxThreads);
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.apache.felix.fileinstall.ArtifactInstaller#install(java.io.File)
    */
   public void install(File artifact) throws Exception {
@@ -93,27 +95,27 @@ public class InboxScanner implements ArtifactInstaller {
     return new Runnable() {
       public void run() {
         boolean mediaPackageIngestSuccess = false;
-        if("zip".equals(FilenameUtils.getExtension(artifact.getName()))) {
+        if ("zip".equals(FilenameUtils.getExtension(artifact.getName()))) {
           FileInputStream in = null;
           try {
             in = new FileInputStream(artifact);
             finalIngestService.addZippedMediaPackage(in);
             logger.info("Ingested '{}' as a mediapackage", artifact.getAbsolutePath());
             mediaPackageIngestSuccess = true;
-          } catch(Exception e) {
+          } catch (Exception e) {
             logger.warn("Unable to ingest mediapackage '{}', {}", artifact.getAbsolutePath(), e);
           } finally {
             IOUtils.closeQuietly(in);
           }
         }
 
-        if(!mediaPackageIngestSuccess) {
+        if (!mediaPackageIngestSuccess) {
           FileInputStream in = null;
           try {
             in = new FileInputStream(artifact);
             workspace.putInCollection("inbox", artifact.getName(), in);
             logger.info("Ingested '{}' as an inbox file", artifact.getAbsolutePath());
-          } catch(IOException e) {
+          } catch (IOException e) {
             logger.warn("Unable to process inbox file '{}', {}", artifact.getAbsolutePath(), e);
           } finally {
             IOUtils.closeQuietly(in);
@@ -122,15 +124,16 @@ public class InboxScanner implements ArtifactInstaller {
 
         try {
           FileUtils.forceDelete(artifact);
-        } catch(IOException e) {
+        } catch (IOException e) {
           logger.warn("Unable to delete file {}, {}", artifact.getAbsolutePath(), e);
         }
       }
     };
   }
-  
+
   /**
    * {@inheritDoc}
+   * 
    * @see org.apache.felix.fileinstall.ArtifactInstaller#uninstall(java.io.File)
    */
   public void uninstall(File artifact) throws Exception {
@@ -139,6 +142,7 @@ public class InboxScanner implements ArtifactInstaller {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.apache.felix.fileinstall.ArtifactInstaller#update(java.io.File)
    */
   public void update(File artifact) throws Exception {
@@ -147,9 +151,10 @@ public class InboxScanner implements ArtifactInstaller {
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.apache.felix.fileinstall.ArtifactListener#canHandle(java.io.File)
    */
   public boolean canHandle(File artifact) {
-    return artifact.getParentFile().getName().equals("inbox");
+    return "inbox".equals(artifact.getParentFile().getName());
   }
 }

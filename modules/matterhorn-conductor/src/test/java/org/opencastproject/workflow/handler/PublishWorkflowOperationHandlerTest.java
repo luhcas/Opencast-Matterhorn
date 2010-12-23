@@ -78,7 +78,7 @@ public class PublishWorkflowOperationHandlerTest {
     searchService.add(eqMediaPackage(mpSearch));
     EasyMock.replay(searchService);
     operationHandler.setSearchService(searchService);
-    
+
     // Run the media package through the operation handler, ensuring that the flavors are retained
     operationHandler.start(workflowInstance);
   }

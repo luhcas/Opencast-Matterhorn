@@ -197,7 +197,7 @@ public class SegmentPreviewsWorkflowOperationHandler extends AbstractWorkflowOpe
 
     // Select the tracks based on the tags and flavors
     Set<Track> videoTrackSet = new HashSet<Track>();
-    for(Track track : mediaPackage.getTracksByTags(sourceTagSet)) {
+    for (Track track : mediaPackage.getTracksByTags(sourceTagSet)) {
       if (sourceVideoFlavor == null
               || (track.getFlavor() != null && sourceVideoFlavor.equals(track.getFlavor().toString()))) {
         if (!track.hasVideo())

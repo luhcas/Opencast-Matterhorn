@@ -42,6 +42,7 @@ public class ErrorLoggingOperationHandler extends AbstractWorkflowOperationHandl
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
    */
   @Override
@@ -51,6 +52,7 @@ public class ErrorLoggingOperationHandler extends AbstractWorkflowOperationHandl
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {

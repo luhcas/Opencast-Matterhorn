@@ -82,7 +82,7 @@ import javax.ws.rs.core.Response.Status;
 public class IngestRestService {
 
   private static final Logger logger = LoggerFactory.getLogger(IngestRestService.class);
-  
+
   /** The collection name used for temporarily storing uploaded zip files */
   private static final String COLLECTION_ID = "ingest-temp";
 
@@ -118,7 +118,7 @@ public class IngestRestService {
   public void setPersistenceProvider(PersistenceProvider persistenceProvider) {
     this.persistenceProvider = persistenceProvider;
   }
-  
+
   public void setWorkspace(Workspace workspace) {
     this.workspace = workspace;
   }
@@ -298,7 +298,7 @@ public class IngestRestService {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addMediaPackage")
   public Response addMediaPackage(@Context HttpServletRequest request) {
-    return _addMediaPackage(request, null);
+    return addMediaPackage(request, null);
   }
 
   @POST
@@ -306,10 +306,6 @@ public class IngestRestService {
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @Path("addMediaPackage/{wdID}")
   public Response addMediaPackage(@Context HttpServletRequest request, @PathParam("wdID") String wdID) {
-    return _addMediaPackage(request, wdID);
-  }
-
-  private Response _addMediaPackage(HttpServletRequest request, String wdID) {
     MediaPackageElementFlavor flavor = null;
     try {
       MediaPackage mp = ingestService.createMediaPackage();
@@ -319,7 +315,7 @@ public class IngestRestService {
           FileItemStream item = iter.next();
           if (item.isFormField()) {
             String fieldName = item.getFieldName();
-            if (fieldName.equals("flavor")) {
+            if ("flavor".equals(fieldName)) {
               flavor = MediaPackageElementFlavor.parseFlavor(Streams.asString(item.openStream()));
             } else {
               // TODO not all form fields should be treated as dublin core fields
@@ -371,7 +367,7 @@ public class IngestRestService {
               } catch (NumberFormatException e) {
                 logger.warn("{} '{}' is not numeric", WORKFLOW_INSTANCE_ID_PARAM, workflowIdAsString);
               }
-            } else if(WORKFLOW_DEFINITION_ID_PARAM.equals(item.getFieldName())) {
+            } else if (WORKFLOW_DEFINITION_ID_PARAM.equals(item.getFieldName())) {
               workflowDefinitionId = IOUtils.toString(item.openStream(), "UTF-8");
             } else {
               logger.debug("Processing form field: " + item.getFieldName());
@@ -403,8 +399,8 @@ public class IngestRestService {
       }
       File zipFileFromWorkspace = workspace.get(zipFileUri);
       zipInputStream = new FileInputStream(zipFileFromWorkspace);
-      WorkflowInstance workflow = ingestService.addZippedMediaPackage(zipInputStream, workflowDefinitionId, workflowConfig,
-              workflowInstanceIdAsLong);
+      WorkflowInstance workflow = ingestService.addZippedMediaPackage(zipInputStream, workflowDefinitionId,
+              workflowConfig, workflowInstanceIdAsLong);
       return Response.ok(WorkflowParser.toXml(workflow)).build();
 
     } catch (Exception e) {
@@ -438,8 +434,8 @@ public class IngestRestService {
    * @Path("ingest/{wdID}") public Response ingest(@FormParam("mediaPackage") String mpx, @PathParam("wdID") String
    * wdID) { logger.debug("ingest(MediaPackage, ID): {}, {}", mpx, wdID); try { MediaPackage mp =
    * builder.loadFromXml(mpx); WorkflowInstance workflow = ingestService.ingest(mp, wdID); return
-   * Response.ok(WorkflowBuilder.toXml(workflow)).build(); } catch (Exception e) {
-   * logger.warn(e.getMessage(), e); return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build(); } }
+   * Response.ok(WorkflowBuilder.toXml(workflow)).build(); } catch (Exception e) { logger.warn(e.getMessage(), e);
+   * return Response.serverError().status(Status.INTERNAL_SERVER_ERROR).build(); } }
    */
   @POST
   @Produces(MediaType.TEXT_HTML)
@@ -452,7 +448,7 @@ public class IngestRestService {
     try {
       for (Iterator<String> i = params.keySet().iterator(); i.hasNext();) {
         String key = i.next();
-        if (key.toUpperCase().equals("MEDIAPACKAGE")) { // does't feel good to have a 'special case' in the param list
+        if ("MEDIAPACKAGE".equalsIgnoreCase(key)) {
           mp = factory.newMediaPackageBuilder().loadFromXml(((String[]) params.get(key))[0]);
         } else {
           wfConfig.put(key, ((String[]) params.get(key))[0]); // TODO how do we handle multiple values eg. resulting
@@ -471,7 +467,7 @@ public class IngestRestService {
     }
   }
 
-  protected UploadJob createUploadJob() throws RuntimeException {
+  protected UploadJob createUploadJob() {
     /*
      * EntityManager em = emf.createEntityManager(); EntityTransaction tx = em.getTransaction(); try { UploadJob job =
      * new UploadJob(); tx.begin(); em.persist(job); tx.commit(); return job; } catch (RollbackException ex) {
@@ -569,26 +565,26 @@ public class IngestRestService {
         for (FileItemIterator iter = upload.getItemIterator(request); iter.hasNext();) {
           FileItemStream item = iter.next();
           String fieldName = item.getFieldName();
-          if (fieldName.equals("mediaPackage")) {
+          if ("mediaPackage".equalsIgnoreCase(fieldName)) {
             mp = factory.newMediaPackageBuilder().loadFromXml(item.openStream());
           } else if ("flavor".equals(fieldName)) {
             String flavorString = Streams.asString(item.openStream());
             if (flavorString != null) {
               flavor = MediaPackageElementFlavor.parseFlavor(flavorString);
             }
-          } else if (fieldName.equals("elementType")) {
+          } else if ("elementType".equalsIgnoreCase(fieldName)) {
             String typeString = Streams.asString(item.openStream());
             if (typeString != null) {
               elementType = typeString;
             }
-          } else if (fieldName.equals("file")) {
+          } else if ("file".equalsIgnoreCase(fieldName)) {
             fileName = item.getName();
             job.setFilename(fileName);
             if ((mp != null) && (flavor != null) && (fileName != null)) {
               // decide which element type to add
-              if (elementType.toUpperCase().equals("TRACK")) {
+              if ("TRACK".equalsIgnoreCase(elementType)) {
                 mp = ingestService.addTrack(item.openStream(), fileName, flavor, mp);
-              } else if (elementType.toUpperCase().equals("CATALOG")) {
+              } else if ("CATALOG".equalsIgnoreCase(elementType)) {
                 logger.info("Adding Catalog: " + fileName + " - " + flavor);
                 mp = ingestService.addCatalog(item.openStream(), fileName, flavor, mp);
               }

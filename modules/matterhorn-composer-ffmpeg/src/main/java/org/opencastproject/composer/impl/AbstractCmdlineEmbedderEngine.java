@@ -47,7 +47,7 @@ public abstract class AbstractCmdlineEmbedderEngine implements EmbedderEngine {
   private String cmdTemplate = "";
 
   /** the logging facility provided by log4j */
-  private final static Logger logger = LoggerFactory.getLogger(AbstractCmdlineEmbedderEngine.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(AbstractCmdlineEmbedderEngine.class.getName());
 
   /**
    * Creates embedder engine with given binary.
@@ -93,8 +93,9 @@ public abstract class AbstractCmdlineEmbedderEngine implements EmbedderEngine {
 
     // add file properties
     embedderProperties.put("in.media.path", mediaSource.getAbsolutePath());
-    embedderProperties.put("out.media.path", mediaSource.getAbsoluteFile().getParent() + File.separator
-            + UUID.randomUUID() + "-caption." + FilenameUtils.getExtension(mediaSource.getAbsolutePath()));
+    embedderProperties.put("out.media.path",
+            mediaSource.getAbsoluteFile().getParent() + File.separator + UUID.randomUUID() + "-caption."
+                    + FilenameUtils.getExtension(mediaSource.getAbsolutePath()));
 
     for (int i = 0; i < ((captionSources.length > captionLanguages.length) ? captionSources.length
             : captionLanguages.length); i++) {
@@ -168,8 +169,8 @@ public abstract class AbstractCmdlineEmbedderEngine implements EmbedderEngine {
     Pattern pattern = Pattern.compile("#<.+?>");
     Matcher matcher = pattern.matcher(cmdTemplate);
     while (matcher.find()) {
-      String processedArray = buildArrayCommandFromTemplate(cmdTemplate.substring(matcher.start() + 2,
-              matcher.end() - 1), properties);
+      String processedArray = buildArrayCommandFromTemplate(
+              cmdTemplate.substring(matcher.start() + 2, matcher.end() - 1), properties);
       matcher.appendReplacement(buffer, processedArray);
     }
     matcher.appendTail(buffer);
@@ -201,7 +202,7 @@ public abstract class AbstractCmdlineEmbedderEngine implements EmbedderEngine {
     // split and convert to array list
     String[] cmdArray = buffer.toString().split(" ");
     for (String e : cmdArray) {
-      if (!e.equals(""))
+      if (!"".equals(e))
         commandList.add(e);
     }
 
@@ -242,9 +243,8 @@ public abstract class AbstractCmdlineEmbedderEngine implements EmbedderEngine {
         String suffix = e.getKey().substring(arrayParameters.get(0).length());
         String arrayElement = template.replace("#{" + arrayParameters.get(0) + "}", e.getValue());
         for (int i = 1; i < arrayParameters.size() && properties.containsKey(arrayParameters.get(i) + suffix); i++) {
-          arrayElement = arrayElement.replace("#{" + arrayParameters.get(i) + "}", properties.get(arrayParameters
-                  .get(i)
-                  + suffix));
+          arrayElement = arrayElement.replace("#{" + arrayParameters.get(i) + "}",
+                  properties.get(arrayParameters.get(i) + suffix));
         }
         if (!arrayElement.matches("^#\\{.+?\\}$")) {
           buffer.append(arrayElement);
@@ -288,7 +288,7 @@ public abstract class AbstractCmdlineEmbedderEngine implements EmbedderEngine {
    * @param language
    * @return
    */
-  abstract protected String normalizeLanguage(String language);
+  protected abstract String normalizeLanguage(String language);
 
   /**
    * Method to which embedder output is directed.
@@ -298,7 +298,7 @@ public abstract class AbstractCmdlineEmbedderEngine implements EmbedderEngine {
    * @param sourceFiles
    *          source files used in operation
    */
-  abstract protected void handleEmbedderOutput(String output, File... sourceFiles);
+  protected abstract void handleEmbedderOutput(String output, File... sourceFiles);
 
   /**
    * Returns file resulting from embedding.
@@ -307,5 +307,5 @@ public abstract class AbstractCmdlineEmbedderEngine implements EmbedderEngine {
    *          properties used for initiating embedding job
    * @return resulting file
    */
-  abstract protected File getOutputFile(Map<String, String> properties);
+  protected abstract File getOutputFile(Map<String, String> properties);
 }

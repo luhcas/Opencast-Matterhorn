@@ -49,7 +49,7 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
   protected PersistenceProvider persistenceProvider;
 
   /** The properties used to generate an entity manager factory */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   protected Map persistenceProperties;
 
   /** The factory used to generate the entity manager */
@@ -71,7 +71,7 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
    * @param persistenceProperties
    *          the persistenceProperties to set
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   public void setPersistenceProperties(Map persistenceProperties) {
     this.persistenceProperties = persistenceProperties;
   }
@@ -311,7 +311,7 @@ public class DictionaryServiceJpaImpl implements DictionaryService {
   }
 
   class ValueComparator implements Comparator<String> {
-    Map<String, Integer> base;
+    private Map<String, Integer> base;
 
     public ValueComparator(Map<String, Integer> base) {
       this.base = base;

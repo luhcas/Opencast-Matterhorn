@@ -61,7 +61,7 @@ public class ComposerRestServiceTest {
     videoTrack.setIdentifier("video1");
 
     profileId = "profile1";
-    
+
     job = new JaxbJob();
     job.setStatus(Job.Status.QUEUED);
     job.setJobType(ComposerService.JOB_TYPE);

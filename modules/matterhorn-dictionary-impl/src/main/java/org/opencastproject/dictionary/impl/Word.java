@@ -26,9 +26,9 @@ import javax.persistence.Table;
  * A word that exists in a particular language.
  */
 @Entity
-@Table(name="DICTIONARY")
+@Table(name = "DICTIONARY")
 public class Word {
-  
+
   /** The text of the word itself */
   @Id
   @Column
@@ -46,14 +46,15 @@ public class Word {
   /** The number of occurrences of this word divided by the total number of words loaded for this language */
   @Column
   protected double weight;
-  
+
   /** The number of times this word was found while loading the text corpus for a language */
   @Column
   protected long count;
 
   /** The default, no-arg constructor used by JPA to construct a new object before populating its fields */
-  public Word() {}
-  
+  public Word() {
+  }
+
   /** Creates a Word from text and a language */
   public Word(String text, String language) {
     this();
@@ -68,17 +69,17 @@ public class Word {
   }
 
   /** Creates a Word from text, a language, count, and weight */
-  public Word(String text, String language,  long count, double weight) {
+  public Word(String text, String language, long count, double weight) {
     this(text, language, count);
     this.weight = weight;
   }
 
   /** Creates a Word from text, a language, count, weight, and whether this is a stop word */
-  public Word(String text, String language,  long count, double weight, boolean stopWord) {
+  public Word(String text, String language, long count, double weight, boolean stopWord) {
     this(text, language, count, weight);
     this.stopWord = stopWord;
   }
-  
+
   /**
    * @return the text
    */
@@ -87,7 +88,8 @@ public class Word {
   }
 
   /**
-   * @param text the text to set
+   * @param text
+   *          the text to set
    */
   public void setText(String text) {
     this.text = text;
@@ -101,7 +103,8 @@ public class Word {
   }
 
   /**
-   * @param language the language to set
+   * @param language
+   *          the language to set
    */
   public void setLanguage(String language) {
     this.language = language;
@@ -115,7 +118,8 @@ public class Word {
   }
 
   /**
-   * @param stopWord the stopWord to set
+   * @param stopWord
+   *          the stopWord to set
    */
   public void setStopWord(boolean stopWord) {
     this.stopWord = stopWord;
@@ -129,7 +133,8 @@ public class Word {
   }
 
   /**
-   * @param weight the weight to set
+   * @param weight
+   *          the weight to set
    */
   public void setWeight(double weight) {
     this.weight = weight;
@@ -143,21 +148,23 @@ public class Word {
   }
 
   /**
-   * @param count the count to set
+   * @param count
+   *          the count to set
    */
   public void setCount(long count) {
     this.count = count;
   }
 
   /**
-   * Sets the case for a string using a consistent locale.  This method must be called to fix the case of strings when
-   * a dictionary is created, and when the dictionary is queried.
+   * Sets the case for a string using a consistent locale. This method must be called to fix the case of strings when a
+   * dictionary is created, and when the dictionary is queried.
    * 
-   * @param str The raw string
+   * @param str
+   *          The raw string
    * @return The case-fixed string
    */
   public static final String fixCase(String str) {
     return str.toUpperCase(Locale.ENGLISH);
   }
-  
+
 }

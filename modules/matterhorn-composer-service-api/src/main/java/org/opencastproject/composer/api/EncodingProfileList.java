@@ -15,8 +15,6 @@
  */
 package org.opencastproject.composer.api;
 
-import org.opencastproject.composer.api.EncodingProfileImpl;
-
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -29,17 +27,18 @@ import javax.xml.bind.annotation.XmlType;
  * A JAXB annotated collection wrapper for {@link EncodingProfileImpl}s.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name="profiles", namespace="http://composer.opencastproject.org/")
-@XmlRootElement(name="profiles", namespace="http://composer.opencastproject.org/")
+@XmlType(name = "profiles", namespace = "http://composer.opencastproject.org/")
+@XmlRootElement(name = "profiles", namespace = "http://composer.opencastproject.org/")
 public class EncodingProfileList {
 
-  public EncodingProfileList() {}
+  public EncodingProfileList() {
+  }
 
   public EncodingProfileList(List<EncodingProfileImpl> list) {
     this.profiles = list;
   }
-  
-  @XmlElement(name="profile")
+
+  @XmlElement(name = "profile")
   protected List<EncodingProfileImpl> profiles;
 
   public List<EncodingProfileImpl> getProfiles() {
@@ -49,7 +48,7 @@ public class EncodingProfileList {
   public void setProfiles(List<EncodingProfileImpl> profiles) {
     this.profiles = profiles;
   }
-    
+
   @Override
   public int hashCode() {
     final int prime = 31;

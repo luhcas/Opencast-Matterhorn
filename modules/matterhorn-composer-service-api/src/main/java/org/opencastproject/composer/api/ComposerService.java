@@ -26,7 +26,7 @@ import org.opencastproject.mediapackage.Track;
  */
 public interface ComposerService extends JobProducer {
 
-  final String JOB_TYPE = "org.opencastproject.composer";
+  String JOB_TYPE = "org.opencastproject.composer";
 
   /**
    * Encode one track, using that track's audio and video streams.

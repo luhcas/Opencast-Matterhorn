@@ -127,7 +127,6 @@ public class DistributeWorkflowOperationHandlerTest {
     MediaPackageElement catalog2 = (MediaPackageElement) mp.getElementById("catalog-2");
     MediaPackageElement attachment1 = (MediaPackageElement) mp.getElementById("notes");
 
-
     // Mock up a job
     Job job = EasyMock.createNiceMock(Job.class);
     EasyMock.expect(job.getStatus()).andReturn(Job.Status.FINISHED).anyTimes();

@@ -29,7 +29,7 @@ public interface DistributionContextStragety {
    *          The mediapackage id
    * @return The context ID
    */
-  public String getContextId(String mediaPackageId);
+  String getContextId(String mediaPackageId);
 
   /**
    * Gets the name for a context within a distribution channel. This method is called once to create a new tab or
@@ -39,6 +39,6 @@ public interface DistributionContextStragety {
    *          The mediapackage id
    * @return The name of the context (playlist, tab, etc)
    */
-  public String getContextName(String mediaPackageId);
+  String getContextName(String mediaPackageId);
 
 }

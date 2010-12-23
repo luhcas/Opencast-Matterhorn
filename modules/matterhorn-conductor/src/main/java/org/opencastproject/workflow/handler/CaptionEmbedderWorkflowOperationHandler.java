@@ -171,13 +171,13 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
 
       // add this receipt's queue time to the total
       long timeInQueue = job.getDateStarted().getTime() - job.getDateCreated().getTime();
-      totalTimeInQueue+=timeInQueue;
-      
+      totalTimeInQueue += timeInQueue;
+
       // add to media package
       mp.addDerived(processedTrack, t);
       String fileName = getFileNameFromElements(t, processedTrack);
-      processedTrack.setURI(workspace.moveTo(processedTrack.getURI(), mp.getIdentifier().toString(), processedTrack
-              .getIdentifier(), fileName));
+      processedTrack.setURI(workspace.moveTo(processedTrack.getURI(), mp.getIdentifier().toString(),
+              processedTrack.getIdentifier(), fileName));
     }
 
     return createResult(mp, Action.CONTINUE, totalTimeInQueue);

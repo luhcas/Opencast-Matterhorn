@@ -17,18 +17,17 @@ package org.opencastproject.distribution.api;
 
 import org.opencastproject.job.api.Job;
 import org.opencastproject.job.api.JobProducer;
-import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
 
 /**
- * Distributes elements from {@link MediaPackage}s to distribution channels.
+ * Distributes elements from MediaPackages to distribution channels.
  */
 public interface DistributionService extends JobProducer {
 
   /**
    * A prefix used by distribution service implementations to indicate the types of distribution channels they manage.
    */
-  public static final String JOB_TYPE_PREFIX = "org.opencastproject.distribution.";
+  String JOB_TYPE_PREFIX = "org.opencastproject.distribution.";
 
   /**
    * Distribute the elementIds from a media package.

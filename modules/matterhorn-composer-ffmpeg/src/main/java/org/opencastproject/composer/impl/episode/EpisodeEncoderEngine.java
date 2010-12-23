@@ -93,7 +93,7 @@ public final class EpisodeEncoderEngine extends AbstractEncoderEngine {
   private XmlRpcEngineController xmlrpcController = null;
 
   /** the logging facility provided by log4j */
-  static Logger logger = LoggerFactory.getLogger(EpisodeEncoderEngine.class.getName());
+  private static final Logger logger = LoggerFactory.getLogger(EpisodeEncoderEngine.class.getName());
 
   /**
    * Creates a new instance of the episode telestream engine wrapper.

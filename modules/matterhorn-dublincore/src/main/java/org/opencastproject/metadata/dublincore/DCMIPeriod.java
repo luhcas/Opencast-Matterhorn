@@ -39,86 +39,84 @@ public class DCMIPeriod {
     if (start != null && end != null && end.before(start))
       throw new IllegalStateException("The end date is before the start date");
 
-      this.start = start;
-      this.end = end;
+    this.start = start;
+    this.end = end;
   }
 
   /**
    * Create a new period with an optional name. To create an open interval you may set one of the bounbaries null.
    */
   public DCMIPeriod(Date start, Date end, String name) {
-      this(start, end);
+    this(start, end);
 
-      this.name = name;
+    this.name = name;
   }
 
   /**
    * Returns the start date of the period or null, if it has only an upper bound.
    */
   public Date getStart() {
-      return start;
+    return start;
   }
 
   /**
    * Returns the end date of the period or null, if it has only a lower bound.
    */
   public Date getEnd() {
-      return end;
+    return end;
   }
 
   /**
    * Returns the optional name of the period.
-   *
+   * 
    * @return the name of the period or null
    */
   public String getName() {
-      return name;
+    return name;
   }
 
   /**
    * Sets the name of the period.
-   *
-   * @param name the name or null, to delete it
+   * 
+   * @param name
+   *          the name or null, to delete it
    */
   void setName(String name) {
-      this.name = name;
+    this.name = name;
   }
 
   /**
    * Checks if the interval is closed.
    */
   public boolean isClosed() {
-      return start != null && end != null;
+    return start != null && end != null;
   }
 
   /**
    * Checks if the interval has a start boundary.
    */
   public boolean hasStart() {
-      return start != null;
+    return start != null;
   }
 
   /**
    * Checks if the interval has an end boundary.
    */
   public boolean hasEnd() {
-      return end != null;
+    return end != null;
   }
 
   /**
    * Checks if the interval has a name.
    */
   public boolean hasName() {
-      return name != null;
+    return name != null;
   }
 
   @Override
   public String toString() {
-      return "DCMIPeriod{" +
-              "start=" + (start != null ? start : "]") +
-              ", end=" + (end != null ? end : "[") +
-              (name != null ? ", name='" + name + '\'' : "") +
-              '}';
+    return "DCMIPeriod{" + "start=" + (start != null ? start : "]") + ", end=" + (end != null ? end : "[")
+            + (name != null ? ", name='" + name + '\'' : "") + '}';
   }
 
 }

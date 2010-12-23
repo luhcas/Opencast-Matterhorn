@@ -47,7 +47,7 @@ public class CLIWorkflowOperationHandlerTest {
 
   /** True if the environment provides the tools needed for the test suite */
   private static boolean isSane = true;
-  
+
   /** The temp directory */
   private final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
 

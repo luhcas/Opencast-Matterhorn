@@ -33,7 +33,7 @@ import java.util.TreeMap;
  * Simple implementation that hold for upload of a captions file.
  */
 public class ReviewWorkflowOperationHandler extends ResumableWorkflowOperationHandlerBase {
-  
+
   private static final Logger logger = LoggerFactory.getLogger(ReviewWorkflowOperationHandler.class);
 
   /** The configuration options for this handler */
@@ -41,7 +41,7 @@ public class ReviewWorkflowOperationHandler extends ResumableWorkflowOperationHa
 
   /** Path to the hold ui resources */
   private static final String HOLD_UI_PATH = "/ui/operation/review/index.html";
-  
+
   /** Name of the configuration option that provides the tags we are looking for */
   private static final String PREVIEW_TAG_NAME = "source-tag";
 
@@ -52,6 +52,7 @@ public class ReviewWorkflowOperationHandler extends ResumableWorkflowOperationHa
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#getConfigurationOptions()
    */
   @Override
@@ -68,21 +69,22 @@ public class ReviewWorkflowOperationHandler extends ResumableWorkflowOperationHa
 
   /**
    * {@inheritDoc}
+   * 
    * @see org.opencastproject.workflow.api.WorkflowOperationHandler#start(org.opencastproject.workflow.api.WorkflowInstance)
    */
   @Override
-  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {    
+  public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.info("Holding for review...");
-    
+
     // What are we looking for?
     String tag = workflowInstance.getCurrentOperation().getConfiguration(PREVIEW_TAG_NAME);
-    
+
     // Let's see if there is preview media available
     MediaPackage mp = workflowInstance.getMediaPackage();
     if (mp.getTracksByTag(tag).length == 0) {
       logger.warn("No media with tag '{}' found to preview", tag);
     }
-    
+
     return createResult(Action.PAUSE);
   }
 }

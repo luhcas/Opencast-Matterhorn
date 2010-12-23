@@ -173,7 +173,7 @@ public class InspectWorkflowOperationHandler extends AbstractWorkflowOperationHa
    */
   protected void updateDublinCore(MediaPackage mediaPackage) throws Exception {
     // Complete episode dublin core catalog (if available)
-    Catalog dcCatalogs[] = mediaPackage.getCatalogs(MediaPackageElements.EPISODE,
+    Catalog[] dcCatalogs = mediaPackage.getCatalogs(MediaPackageElements.EPISODE,
             MediaPackageReferenceImpl.ANY_MEDIAPACKAGE);
     if (dcCatalogs.length > 0) {
       DublinCoreCatalog dublinCore = loadDublinCoreCatalog(dcCatalogs[0]);
