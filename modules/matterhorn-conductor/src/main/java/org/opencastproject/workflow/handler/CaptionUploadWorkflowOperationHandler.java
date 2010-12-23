@@ -19,7 +19,6 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.MediaPackageElements;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -85,9 +84,9 @@ public class CaptionUploadWorkflowOperationHandler extends ResumableWorkflowOper
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     MediaPackageElementFlavor flavor = getFlavor(workflowInstance.getCurrentOperation());
     if (!hasCaptions(workflowInstance.getMediaPackage(), flavor))
-      return WorkflowParser.buildWorkflowOperationResult(Action.PAUSE);
+      return createResult(Action.PAUSE);
     else
-      return WorkflowParser.buildWorkflowOperationResult(Action.CONTINUE);
+      return createResult(Action.CONTINUE);
   }
 
   /**

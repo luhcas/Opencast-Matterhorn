@@ -137,7 +137,7 @@ public class ResumableWorkflowOperationHandlerBase extends AbstractWorkflowOpera
    */
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    return WorkflowParser.buildWorkflowOperationResult(Action.PAUSE);
+    return createResult(Action.PAUSE);
   }
 
   /**
@@ -149,7 +149,7 @@ public class ResumableWorkflowOperationHandlerBase extends AbstractWorkflowOpera
   @Override
   public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
           throws WorkflowOperationException {
-    return WorkflowParser.buildWorkflowOperationResult(Action.CONTINUE);
+    return createResult(Action.CONTINUE);
   }
 
 }

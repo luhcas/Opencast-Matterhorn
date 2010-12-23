@@ -179,7 +179,7 @@ public class CountWorkflowsTest {
     @Override
     public WorkflowOperationResult resume(WorkflowInstance workflowInstance, Map<String, String> properties)
             throws WorkflowOperationException {
-      return WorkflowParser.buildWorkflowOperationResult(Action.CONTINUE);
+      return createResult(Action.CONTINUE);
     }
   }
 
@@ -189,7 +189,7 @@ public class CountWorkflowsTest {
   class ContinuingWorkflowOperationHandler extends AbstractWorkflowOperationHandler {
     @Override
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      return WorkflowParser.buildWorkflowOperationResult(Action.CONTINUE);
+      return createResult(Action.CONTINUE);
     }
 
     @Override

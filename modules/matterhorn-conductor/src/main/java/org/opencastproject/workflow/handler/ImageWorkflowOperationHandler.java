@@ -28,7 +28,6 @@ import org.opencastproject.mediapackage.Track;
 import org.opencastproject.util.MimeTypes;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -168,7 +167,7 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
     if (videoTracks.size() == 0) {
       logger.debug("Mediapackage {} has no suitable tracks to extract images based on tags {} and flavor {}",
               new Object[] { mediaPackage, sourceTags, sourceVideoFlavor });
-      return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
+      return createResult(mediaPackage, Action.CONTINUE);
     }
 
     long totalTimeInQueue = 0;
@@ -210,7 +209,7 @@ public class ImageWorkflowOperationHandler extends AbstractWorkflowOperationHand
               composedImage.getIdentifier(), fileName));
     }
 
-    return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
+    return createResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
   }
 
 }

@@ -30,7 +30,6 @@ import org.opencastproject.util.FileSupport;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.util.ZipUtil;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -239,7 +238,7 @@ public class ZipWorkflowOperationHandler extends AbstractWorkflowOperationHandle
         throw new WorkflowOperationException(e);
       }
     }
-    return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
+    return createResult(mediaPackage, Action.CONTINUE);
   }
 
   /**

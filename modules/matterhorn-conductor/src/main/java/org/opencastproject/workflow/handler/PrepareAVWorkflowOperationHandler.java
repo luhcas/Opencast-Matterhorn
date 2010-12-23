@@ -26,7 +26,6 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -193,7 +192,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
     switch (tracks.length) {
     case 0:
       logger.info("No audio/video tracks with flavor '{}' found to prepare", sourceFlavor);
-      return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
+      return createResult(mediaPackage, Action.CONTINUE);
     case 1:
       if (!tracks[0].hasAudio() && tracks[0].hasVideo() && promiscuousMuxing) {
         videoTrack = tracks[0];
@@ -305,7 +304,7 @@ public class PrepareAVWorkflowOperationHandler extends AbstractWorkflowOperation
       logger.trace("Tagging composed track with '{}'", tag);
       composedTrack.addTag(tag);
     }
-    return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, timeInQueue);
+    return createResult(mediaPackage, Action.CONTINUE, timeInQueue);
   }
   //CHECKSTYLE:ON
 

@@ -19,7 +19,6 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -121,7 +120,7 @@ public class CleanupWorkflowOperationHandler extends AbstractWorkflowOperationHa
         }
       }
     }
-    return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
+    return createResult(mediaPackage, Action.CONTINUE);
   }
 
   /**

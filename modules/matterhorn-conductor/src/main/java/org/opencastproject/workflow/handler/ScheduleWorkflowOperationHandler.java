@@ -16,7 +16,6 @@
 package org.opencastproject.workflow.handler;
 
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
@@ -74,7 +73,7 @@ public class ScheduleWorkflowOperationHandler extends ResumableWorkflowOperation
    */
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    WorkflowOperationResult result = WorkflowParser.buildWorkflowOperationResult(Action.PAUSE);
+    WorkflowOperationResult result = createResult(Action.PAUSE);
     result.setAllowsContinue(false);
     result.setAllowsAbort(false);
     return result;

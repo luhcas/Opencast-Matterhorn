@@ -50,7 +50,6 @@ import org.opencastproject.textanalyzer.api.TextAnalyzerException;
 import org.opencastproject.textanalyzer.api.TextAnalyzerService;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -195,7 +194,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
     Catalog[] segmentCatalogs = src.getCatalogs(MediaPackageElements.SEGMENTS);
     if (segmentCatalogs.length == 0) {
       logger.info("Media package {} does not contain segment information", src);
-      return WorkflowParser.buildWorkflowOperationResult(Action.CONTINUE);
+      return createResult(Action.CONTINUE);
     }
 
     try {
@@ -231,7 +230,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
     if (catalogs.size() == 0) {
       logger.debug("Mediapackage {} has no suitable mpeg-7 catalogs based on tags {} to to run text analysis",
               mediaPackage, sourceTagSet);
-      return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
+      return createResult(mediaPackage, Action.CONTINUE);
     }
 
     // We need the videosegmenter's stability threshold in order to do proper work. If we can't get it, the default is
@@ -362,7 +361,7 @@ public class TextAnalysisWorkflowOperationHandler extends AbstractWorkflowOperat
     }
 
     logger.debug("Text analysis completed");
-    return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
+    return createResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
   }
 
   /**

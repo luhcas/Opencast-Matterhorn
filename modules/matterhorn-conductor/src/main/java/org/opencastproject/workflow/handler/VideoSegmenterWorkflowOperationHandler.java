@@ -25,7 +25,6 @@ import org.opencastproject.mediapackage.MediaPackageReferenceImpl;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.videosegmenter.api.VideoSegmenterService;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -110,7 +109,7 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
     // Found one?
     if (candidates.size() == 0) {
       logger.info("No matching tracks available for video segmentation in workflow {}", workflowInstance);
-      return WorkflowParser.buildWorkflowOperationResult(Action.CONTINUE);
+      return createResult(Action.CONTINUE);
     }
 
     // More than one left? Let's be pragmatic...
@@ -138,7 +137,7 @@ public class VideoSegmenterWorkflowOperationHandler extends AbstractWorkflowOper
     }
 
     logger.debug("Video segmentation completed");
-    return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, timeInQueue);
+    return createResult(mediaPackage, Action.CONTINUE, timeInQueue);
   }
 
   /**

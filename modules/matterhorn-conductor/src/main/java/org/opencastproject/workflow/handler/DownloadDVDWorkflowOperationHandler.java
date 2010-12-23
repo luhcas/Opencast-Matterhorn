@@ -18,7 +18,6 @@ package org.opencastproject.workflow.handler;
 import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
@@ -75,7 +74,7 @@ public class DownloadDVDWorkflowOperationHandler extends ResumableWorkflowOperat
   @Override
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.info("Holding for download of DVD image...");
-    return WorkflowParser.buildWorkflowOperationResult(Action.PAUSE);
+    return createResult(Action.PAUSE);
   }
 
   /**
@@ -100,6 +99,6 @@ public class DownloadDVDWorkflowOperationHandler extends ResumableWorkflowOperat
     } catch (Exception e) {
       logger.warn("Could not remove dvd encoded track - {}", e.getMessage());
     }
-    return WorkflowParser.buildWorkflowOperationResult(Action.CONTINUE);
+    return createResult(Action.CONTINUE);
   }
 }

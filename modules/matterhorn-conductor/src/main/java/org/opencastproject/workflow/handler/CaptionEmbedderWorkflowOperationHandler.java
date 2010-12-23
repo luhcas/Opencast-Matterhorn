@@ -28,7 +28,6 @@ import org.opencastproject.mediapackage.MediaPackageException;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.util.NotFoundException;
 import org.opencastproject.workflow.api.AbstractWorkflowOperationHandler;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -147,7 +146,7 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
     Track[] qtTracks = getQuickTimeTracks(mp, MediaPackageElementFlavor.parseFlavor(sourceMediaFlavor));
     if (qtTracks.length == 0) {
       logger.info("Skipping embedding: No suitable QuickTime files were found.");
-      return WorkflowParser.buildWorkflowOperationResult(mp, Action.CONTINUE, 0);
+      return createResult(mp, Action.CONTINUE, 0);
     }
 
     // get and convert all matching caption files
@@ -155,7 +154,7 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
             "subrip");
     if (convertedCaptions.length == 0) {
       logger.info("Skipping embedding: No SRT captions were produced after conversion.");
-      return WorkflowParser.buildWorkflowOperationResult(mp, Action.CONTINUE, 0);
+      return createResult(mp, Action.CONTINUE, 0);
     }
 
     // perform embedding
@@ -181,7 +180,7 @@ public class CaptionEmbedderWorkflowOperationHandler extends AbstractWorkflowOpe
               .getIdentifier(), fileName));
     }
 
-    return WorkflowParser.buildWorkflowOperationResult(mp, Action.CONTINUE, totalTimeInQueue);
+    return createResult(mp, Action.CONTINUE, totalTimeInQueue);
   }
 
   /**

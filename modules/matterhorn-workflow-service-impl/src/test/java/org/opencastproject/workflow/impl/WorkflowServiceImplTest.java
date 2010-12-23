@@ -670,7 +670,7 @@ public class WorkflowServiceImplTest {
 
     @Override
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      return WorkflowParser.buildWorkflowOperationResult(workflowInstance.getMediaPackage(), Action.CONTINUE);
+      return createResult(workflowInstance.getMediaPackage(), Action.CONTINUE);
     }
   }
 

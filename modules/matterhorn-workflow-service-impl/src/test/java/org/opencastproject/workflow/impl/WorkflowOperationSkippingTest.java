@@ -221,7 +221,7 @@ public class WorkflowOperationSkippingTest {
 
     @Override
     public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-      return WorkflowParser.buildWorkflowOperationResult(mp, Action.CONTINUE);
+      return createResult(mp, Action.CONTINUE);
     }
   }
 

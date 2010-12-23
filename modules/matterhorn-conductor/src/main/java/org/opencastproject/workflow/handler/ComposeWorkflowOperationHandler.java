@@ -32,6 +32,7 @@ import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
 import org.opencastproject.workflow.api.WorkflowOperationResult;
+import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 import org.opencastproject.workspace.api.Workspace;
 
 import org.apache.commons.lang.StringUtils;
@@ -42,8 +43,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import org.opencastproject.workflow.api.WorkflowParser;
-import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 /**
  * The workflow definition for handling "compose" operations
@@ -164,7 +163,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
     // Did we get the set of tracks that we need?
     if (tracks.length == 0) {
       logger.info("Skipping encoding of media package to '{}': no suitable input tracks found", profile);
-      return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE);
+      return createResult(mediaPackage, Action.CONTINUE);
     }
 
     // Encode all found tracks
@@ -212,7 +211,7 @@ public class ComposeWorkflowOperationHandler extends AbstractWorkflowOperationHa
               composedTrack.getIdentifier(), fileName));
     }
 
-    WorkflowOperationResult result = WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
+    WorkflowOperationResult result = createResult(mediaPackage, Action.CONTINUE, totalTimeInQueue);
     logger.debug("Compose operation completed");
     return result;
   }

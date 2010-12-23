@@ -22,7 +22,6 @@ import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElementFlavor;
 import org.opencastproject.mediapackage.Track;
 import org.opencastproject.workflow.api.ResumableWorkflowOperationHandlerBase;
-import org.opencastproject.workflow.api.WorkflowParser;
 import org.opencastproject.workflow.api.WorkflowInstance;
 import org.opencastproject.workflow.api.WorkflowOperationException;
 import org.opencastproject.workflow.api.WorkflowOperationInstance;
@@ -101,7 +100,7 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
   public WorkflowOperationResult start(WorkflowInstance workflowInstance) throws WorkflowOperationException {
     logger.info("Holding for review / trim...");
 
-    return WorkflowParser.buildWorkflowOperationResult(Action.PAUSE);
+    return createResult(Action.PAUSE);
   }
 
   /**
@@ -126,7 +125,7 @@ public class TrimWorkflowOperationHandler extends ResumableWorkflowOperationHand
         mediaPackage.addDerived(clonedTrack, t);
       }
     }
-    return WorkflowParser.buildWorkflowOperationResult(mediaPackage, Action.SKIP);
+    return createResult(mediaPackage, Action.SKIP);
   }
   
   /**

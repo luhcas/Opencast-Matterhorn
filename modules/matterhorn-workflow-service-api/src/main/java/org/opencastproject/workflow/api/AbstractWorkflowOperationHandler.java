@@ -15,6 +15,7 @@
  */
 package org.opencastproject.workflow.api;
 
+import org.opencastproject.mediapackage.MediaPackage;
 import org.opencastproject.mediapackage.MediaPackageElement;
 import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
@@ -25,6 +26,7 @@ import org.osgi.service.component.ComponentContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -69,7 +71,7 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
    */
   @Override
   public WorkflowOperationResult skip(WorkflowInstance workflowInstance) throws WorkflowOperationException {
-    return WorkflowParser.buildWorkflowOperationResult(Action.SKIP);
+    return createResult(Action.SKIP);
   }
 
   /**
@@ -167,6 +169,85 @@ public abstract class AbstractWorkflowOperationHandler implements WorkflowOperat
   @Override
   public String getDescription() {
     return description;
+  }
+
+  /**
+   * Creates a result for the execution of this workflow operation handler.
+   * 
+   * @param action
+   *          the action to take
+   * @return the result
+   */
+  protected WorkflowOperationResult createResult(Action action) {
+    return createResult(null, null, action, 0);
+  }
+
+  /**
+   * Creates a result for the execution of this workflow operation handler.
+   * <p>
+   * Since there is no way for the workflow service to determine the queuing time (e. g. waiting on services), it needs
+   * to be provided by the handler.
+   * 
+   * @param action
+   *          the action to take
+   * @param timeInQueue
+   *          the amount of time this handle spent waiting for services
+   * @return the result
+   */
+  protected WorkflowOperationResult createResult(Action action, long timeInQueue) {
+    return createResult(null, null, action, timeInQueue);
+  }
+
+  /**
+   * Creates a result for the execution of this workflow operation handler.
+   * 
+   * @param mediaPackage
+   *          the modified mediapackage
+   * @param action
+   *          the action to take
+   * @return the result
+   */
+  protected WorkflowOperationResult createResult(MediaPackage mediaPackage, Action action) {
+    return createResult(mediaPackage, null, action, 0);
+  }
+
+  /**
+   * Creates a result for the execution of this workflow operation handler.
+   * <p>
+   * Since there is no way for the workflow service to determine the queuing time (e. g. waiting on services), it needs
+   * to be provided by the handler.
+   * 
+   * @param mediaPackage
+   *          the modified mediapackage
+   * @param action
+   *          the action to take
+   * @param timeInQueue
+   *          the amount of time this handle spent waiting for services
+   * @return the result
+   */
+  protected WorkflowOperationResult createResult(MediaPackage mediaPackage, Action action, long timeInQueue) {
+    return createResult(mediaPackage, null, action, timeInQueue);
+  }
+
+  /**
+   * Creates a result for the execution of this workflow operation handler.
+   * <p>
+   * Since there is no way for the workflow service to determine the queuing time (e. g. waiting on services), it needs
+   * to be provided by the handler.
+   * 
+   * @param mediaPackage
+   *          the modified mediapackage
+   * @param properties
+   *          the properties to add to the workflow instance
+   * @param action
+   *          the action to take
+   * @param timeInQueue
+   *          the amount of time this handle spent waiting for services
+   * @return the result
+   */
+  protected WorkflowOperationResult createResult(MediaPackage mediaPackage, Map<String, String> properties,
+          Action action, long timeInQueue) {
+    return new WorkflowOperationResultImpl(mediaPackage, properties, action, timeInQueue);
   }
 
   /**

@@ -15,8 +15,6 @@
  */
 package org.opencastproject.workflow.api;
 
-import org.opencastproject.mediapackage.MediaPackage;
-import org.opencastproject.workflow.api.WorkflowOperationResult.Action;
 
 import org.apache.commons.io.IOUtils;
 
@@ -25,7 +23,6 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -215,28 +212,6 @@ public final class WorkflowParser {
     Writer writer = new StringWriter();
     marshaller.marshal(set, writer);
     return writer.toString();
-  }
-
-  public static WorkflowOperationResult buildWorkflowOperationResult(MediaPackage mediaPackage, Action action,
-          long timeInQueue) {
-    return buildWorkflowOperationResult(mediaPackage, null, action, timeInQueue);
-  }
-
-  public static WorkflowOperationResult buildWorkflowOperationResult(MediaPackage mediaPackage, Action action) {
-    return buildWorkflowOperationResult(mediaPackage, null, action, 0);
-  }
-
-  public static WorkflowOperationResult buildWorkflowOperationResult(Action action, long timeInQueue) {
-    return buildWorkflowOperationResult(null, null, action, timeInQueue);
-  }
-
-  public static WorkflowOperationResult buildWorkflowOperationResult(Action action) {
-    return buildWorkflowOperationResult(null, null, action, 0);
-  }
-
-  public static WorkflowOperationResult buildWorkflowOperationResult(MediaPackage mediaPackage,
-          Map<String, String> properties, Action action, long timeInQueue) {
-    return new WorkflowOperationResultImpl(mediaPackage, properties, action, timeInQueue);
   }
 
   public static String toXml(WorkflowStatistics stats) throws Exception {
